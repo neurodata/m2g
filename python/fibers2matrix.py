@@ -2,8 +2,6 @@
 #
 # Script to transform a fiber file into a sparse adjacency matrix.
 #
-# Eric Perlman, eric@cs.jhu.edu, 2/26/2011
-#
 
 #
 # TODO:

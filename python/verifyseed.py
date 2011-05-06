@@ -5,7 +5,6 @@
 #
 # This is a sanity check to see if data files are being read correctly.
 #
-# Eric Perlman, eric@cs.jhu.edu, 3/07/2011
 
 
 import argparse

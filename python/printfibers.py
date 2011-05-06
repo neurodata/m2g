@@ -2,7 +2,6 @@
 #
 # Simple script to show how to read the contents of a MRI Studio files.
 #
-# Eric Perlman, eric@cs.jhu.edu, 2/26/2011
 #
 
 import argparse
