@@ -45,7 +45,7 @@ struct stFiberFileHeader {
   unsigned char enumSliceOrientation; // slice orientation
   unsigned char enumSliceSequencing; // slice sequencing
   char sVersion[8]; // version number
-}; // Get file name using File-Open diaglog
+};
 
 typedef struct RGB_TRIPLE {
   unsigned char r;
@@ -67,8 +67,6 @@ typedef struct Voxel {
   Voxel (int x1, int y1, int z1) : x(x1), y(y1), z(z1) { }
   Voxel () : x(0), y(0), z(0) { }
 } Voxel;
-
-
 
 struct Fiber {
   struct {
@@ -92,12 +90,7 @@ unsigned int makeKey(Voxel v, unsigned int xdim, unsigned int ydim, unsigned int
 }
 
 unsigned long long makeComboKey(unsigned int key1, unsigned int key2) {
-  return (unsigned long long) key1 << 32 | key2;  /* We want keys in both order (symetric) */
-  /*if (key1 < key2) {
-    return (unsigned long long) key1 << 32 | key2;
-  } else {
-    return (unsigned long long) key2 << 32 | key1;
-  }*/
+  return (unsigned long long) key1 << 32 | key2;
 }
 
 
@@ -180,30 +173,11 @@ int main (int argc, char **argv) {
     fiber.xyzFiberCoordinate = new XYZ_TRIPLE[fiber.header.nFiberLength];
     read(ifd, fiber.xyzFiberCoordinate, sizeof(XYZ_TRIPLE) * fiber.header.nFiberLength);
 
-    /* print fibers */
-    /*
-    for (int j=0; j < fiber.header.nFiberLength; j++) {
-      XYZ_TRIPLE xyz = fiber.xyzFiberCoordinate[j];
-      printf("%d %f,%f,%f\n", j, xyz.x, xyz.y, xyz.z);
-      if (j+1 < fiber.header.nFiberLength) {
-         XYZ_TRIPLE xyz2 = fiber.xyzFiberCoordinate[j+1];
-         printf("- %f,%f,%f\n", xyz2.x - xyz.x, xyz2.y - xyz.y, xyz2.z - xyz.z);
-      }
-
-    }*/
 
     /*
      * Find all voxels covered by this fiber
      */
     Voxel *voxels = new Voxel[fiber.header.nFiberLength];
-
-    /*
-    for (int j=0; j < fiber.header.nFiberLength; j++) {
-      XYZ_TRIPLE xyz = fiber.xyzFiberCoordinate[j];
-      if (fmodf(xyz.x, 1.0) == 0.0 && fmodf(xyz.y, 1.0) == 0.0 && fmodf(xyz.z, 1.0) == 0.0) {
-        printf("%d %f,%f,%f\n", j, xyz.x, xyz.y, xyz.z);
-      }
-    }*/
 
     // find the origin
     int initial = -1;
@@ -251,13 +225,7 @@ int main (int argc, char **argv) {
       voxels[j] = v;
     }
 
-    /*for (int j=0; j < fiber.header.nFiberLength; j++) {
-      printf("%d -- %d,%d,%d\n", j, voxels[j].x, voxels[j].y, voxels[j].z);
-    }*/
-
     assert (initial >= 0);
-
-    //printf("Thread %d\n", fn);
 
     bool found_overlap = false;
 
@@ -306,48 +274,6 @@ int main (int argc, char **argv) {
 
         recordedKeys.insert(comboKey);
 
-        /*iter = keys.find(makeComboKey(key1, key2));
-        if (iter != keys.end()) {
-          iter->second++;
-        } else {
-          keys[makeComboKey(key1, key2)] = 1;
-        }*/
-        /*
-        iter = keys.find(makeComboKey(key2, key1));
-        if (iter != keys.end()) {
-          iter->second++;
-        } else {
-          keys[makeComboKey(key2, key1)] = 1;
-        }*/
-
-
-        //keys.insert(makeComboKey(key1, key2));
-        //keys.insert(makeComboKey(key2, key1));
-
-
-
-      /*if (fn == 0 && j == 0) {
-         minx = maxx = xyz.x;
-         miny = maxy = xyz.y;
-         minz = maxz = xyz.z;
-      }
-
-      if (minx > xyz.x) { minx = xyz.x; }
-      if (miny > xyz.y) { miny = xyz.y; }
-      if (minz > xyz.z) { minz = xyz.z; }
-      if (maxx < xyz.x) { maxx = xyz.x; }
-      if (maxy < xyz.y) { maxy = xyz.y; }
-      if (maxz < xyz.z) { maxz = xyz.z; }
-
-      int x = floor(xyz.x);
-      int y = floor(xyz.y);
-      int z = floor(xyz.z); */
-      //printf("%d,%d,%d\n", x,y,z);
-
-      //int off = z*ydim*xdim+y*xdim+x;
-      //smap[off] = i;
-
-      //printf("%d: %f, %f, %f\n", j, fiber.xyzFiberCoordinate[j].x, fiber.xyzFiberCoordinate[j].y, fiber.xyzFiberCoordinate[j].z);
       }
     }
     delete [] fiber.xyzFiberCoordinate;
@@ -384,22 +310,6 @@ int main (int argc, char **argv) {
 
   int nonzerovalues = keys.size() * 2;
   printf("** %d non-zero values\n", nonzerovalues);
-
-  /*int count=0;
-  for (int ii = 0; ii < xdim*ydim*zdim; ii++) { 
-    if (smap[ii] != unused) {
-      count++;
-    }
-  }
-  printf("\n%d regions used.\n", count);
-  */
-
-  /*char smtfname[255];
-  snprintf(smtfname, sizeof(smtfname), "%s.st", ofname);
-  printf("** Opening text sparse matrix output file %s...\n", smtfname);
-  ofd = fopen(smtfname, "w");
-  assert(ofd != NULL);
-  fprintf(ofd, "%d %d %d\n", voxelcount, voxelcount, nonzerovalues);*/
 
   char binarySparseFname[255];
   snprintf(binarySparseFname, sizeof(binarySparseFname), "%s.sb", ofname);
@@ -465,22 +375,14 @@ int main (int argc, char **argv) {
     delete [] rows;
   } 
 
-  /* for (set<unsigned long long>::iterator it = keys.begin(); it!=keys.end(); ++it) {
-
-      //printf("%llX\n", *it);
-  } */
-
-
   fsync(sbfd);
   close(sbfd);
 
   printf("\n");
-  //printf("X: %f-%f, Y: %f-%f, Z: %f-%f\n", minx, maxx, miny, maxy, minz, maxz);
-  //printf("\n** Done.\n");
+  printf("\n** Done.\n");
 
   /* just exit. no need to clean up after ourselves. */
-  /* covermap.clear();
-  keys.clear(); */
+  /* covermap.clear(); keys.clear(); */
 
   return 0;
 }
