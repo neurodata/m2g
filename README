@@ -1,0 +1,6 @@
+This project contains several tools to play with fiber data in
+MRI Studio format [ http://www.mristudio.org/ ].
+
+This code currently little more than a few days' worth of hacking,
+and likely not of much use beyond Hopkins.
+
