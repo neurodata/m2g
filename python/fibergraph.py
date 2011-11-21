@@ -6,7 +6,7 @@
 #
 ################################################################################
 
-from scipy.sparse import dok_matrix, lil_matrix
+from scipy.sparse import dok_matrix, csc_matrix
 from fiber import Fiber
 import zindex
 from cStringIO import StringIO
@@ -50,32 +50,33 @@ class FiberGraph:
   def writeForSciDB ( self, chunkdim, fout ):
     """Write the graph in a SciDB compatible text format"""
 
-    for k,v in self.spedgemat.iteritems():
-      print zindex.MortonXYZ ( k[0] ), zindex.MortonXYZ ( k[1] ), v
-  
-    # first convert to lil
-    self.splilmat = lil_matrix ( self.spedgemat )
-    
+    print "Here"
+    # first convert to csc 
+    spcscmat = csc_matrix ( self.spedgemat )
+
     # iterate over all of the chunks in 
-    for row in self._maxval/chunksize:
-      for col in self.maxval/chunksize:
+    # RBTODO range needs to be +1 if mod = 0
+    for row in range(self._maxval/chunkdim[0]):
+      for col in range(self._maxval/chunkdim[1]):
        outstr = StringIO();
        outstr.write ( '[[' )
-       spchunk = splilmat [ i*chunksize:(i+1)*chunksize-1, j*chunksize:(j+1)*chunksize-1 ]
-       for k,v in spchunk.iteritems():
+       spchunk = spcscmat [ col*chunkdim[0]:(col+1)*chunkdim[0]-1, row*chunkdim[1]:(row+1)*chunkdim[1]-1 ]
+       spchunknz = spchunk.nonzero()
+       for k in range(len(spchunknz[0])):
          outstr.write ( '{' )
-         outstr.write ( k[0] )
+         outstr.write ( str(spchunknz[0][k]) )
          outstr.write ( ','  )
-         outstr.write ( k[1] )
+         outstr.write ( str(spchunknz[1][k]) )
          outstr.write (  '}('  )
-         outstr.write ( v ) 
+         outstr.write ( str(spchunk[spchunknz[0][k], spchunknz[1][k]]) ) 
          outstr.write (  ')'  )
        outstr.write ( ']]' )
        
        # output a chunk if there are elements
-       if ( spchunk.nnz() != 0 ): 
+#       if ( spchunk.nnz!= 0 ): 
          # put this out to the file
-         print outstr
+       if ( len(spchunknz[0]) != 0 ):
+         print outstr.getvalue()
 
 # RBTEST
   def check ( self ):

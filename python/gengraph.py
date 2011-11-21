@@ -25,7 +25,7 @@ def main():
 
     # Create the graph object
     # get dims from reader
-    fbrgraph = FiberGraph ( [100000, 1000000, 100000] )
+    fbrgraph = FiberGraph ( [ 200, 200, 200 ] )
 
     # Print the high-level fiber information
     print(reader)
@@ -43,7 +43,7 @@ def main():
           print ("Processed %d fibers", count )
 
     # output graph to SciDB ingest format
-    fbrgraph.writeForSciDB( [8,8], 'TODO' )
+    fbrgraph.writeForSciDB( [100000,100000], 'TODO' )
 
     del reader
 
