@@ -83,7 +83,7 @@ class FiberGraph:
           outstr.write ( str(spchunknz[1][k]) )
           outstr.write (  '}('  )
           outstr.write ( str(spchunk[spchunknz[0][k], spchunknz[1][k]]) ) 
-          outstr.write (  ')'  )
+          outstr.write (  '),'  )
         outstr.write ( ']]\n' )
        
        # output a chunk if there are elements
