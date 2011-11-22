@@ -157,12 +157,12 @@ class Fiber:
         return self.header.__str__() + "\n" + self.path.__str__()
     
     #
-    #  Return a list of edges in this Fiber.  As tuples by zindex
+    #  Return a list of voxels in this Fiber.  As tuples by zindex
     #
-    def getEdges (self):
+    def getVoxels (self):
       """Return the list of edges in this fiber. As tuples"""
 
-      edges = []
+      voxels = []
 
       # RBTODO factor out zindex into a helper class for the project
 
@@ -172,20 +172,20 @@ class Fiber:
         # on an X face
         if ( fbrpt[0] % 1.0 == 0.0 ):
 #          print "X face ", fbrpt[0], fbrpt[1], fbrpt[2]
-          edges.append (( zindex.XYZMorton ( [ int(fbrpt[0]-self._epsilon), int(fbrpt[1]), int(fbrpt[2]) ] ),
-                         zindex.XYZMorton ( [ int(fbrpt[0]), int(fbrpt[1]), int(fbrpt[2]) ] )))
+          voxels.append ( zindex.XYZMorton ( [ int(fbrpt[0]-self._epsilon), int(fbrpt[1]), int(fbrpt[2]) ] ))
+          voxels.append ( zindex.XYZMorton ( [ int(fbrpt[0]), int(fbrpt[1]), int(fbrpt[2]) ] ))
 
         # on a Y face
         elif ( fbrpt[1] % 1.0 == 0.0 ):
 #          print "Y face ", fbrpt[0], fbrpt[1], fbrpt[2]
-          edges.append (( zindex.XYZMorton ( [ int(fbrpt[0]), int(fbrpt[1]-self._epsilon), int(fbrpt[2]) ] ),
-                         zindex.XYZMorton ( [ int(fbrpt[0]), int(fbrpt[1]), int(fbrpt[2]) ] )))
+          voxels.append ( zindex.XYZMorton ( [ int(fbrpt[0]), int(fbrpt[1]-self._epsilon), int(fbrpt[2]) ] ))
+          voxels.append ( zindex.XYZMorton ( [ int(fbrpt[0]), int(fbrpt[1]), int(fbrpt[2]) ] ))
 
         # on a Z face
         elif ( fbrpt[2] % 1.0 == 0.0 ):
 #          print "Z face ", fbrpt[0], fbrpt[1], fbrpt[2]
-          edges.append ( ( zindex.XYZMorton ( [ int(fbrpt[0]), int(fbrpt[1]), int(fbrpt[2]-self._epsilon) ] ),
-                         zindex.XYZMorton ( [ int(fbrpt[0]), int(fbrpt[1]), int(fbrpt[2]) ] )))
+          voxels.append ( zindex.XYZMorton ( [ int(fbrpt[0]), int(fbrpt[1]), int(fbrpt[2]-self._epsilon) ] ))
+          voxels.append ( zindex.XYZMorton ( [ int(fbrpt[0]), int(fbrpt[1]), int(fbrpt[2]) ] ))
 
         # if in the middle of a voxel no edge
         elif (( fbrpt[0] % 1.0 != 0.0 ) and ( fbrpt[1] % 1.0 != 0.0 ) and ( fbrpt[2] % 1.0 != 0.0 )):
@@ -197,5 +197,18 @@ class Fiber:
           print "Data shouldn't be on corners or edges"
           assert 0
 
-      return edges
+      # eliminate duplicates
+      return set ( voxels )
 
+
+    #
+    #  Return a seed voxel
+    #
+    def getSeed (self):
+      """Return the seed voxel (vertex)""" 
+
+      for fbrpt in self.path: 
+
+        # if in the middle of a voxel no edge
+        if (( fbrpt[0] % 1.0 != 0.0 ) and ( fbrpt[1] % 1.0 != 0.0 ) and ( fbrpt[2] % 1.0 != 0.0 )):
+          return zindex.XYZMorton ( [ int(fbrpt[0]), int(fbrpt[1]), int(fbrpt[2]) ] )		

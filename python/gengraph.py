@@ -27,30 +27,43 @@ def main():
     # get dims from reader
     fbrgraph = FiberGraph ( reader.shape )
 
-    # Open the output file
-    try:
-      fout = open ( result.output, 'w+' )
-    except:
-      print "Could not truncate or create file ", result.output
-      sys.exit(-1)
-
     # Print the high-level fiber information
     print(reader)
 
     count = 0
 
+    # first pass finds the seed locations (vertices)
+    for fiber in reader:
+      count += 1
+      fbrgraph.addVertex ( fiber )
+      if result.count > 0 and count >= result.count:
+        break
+      if count % 1000 == 0:
+        print ("Found vertices of {0} fibers".format(count) )
+
+    count = 0
+
     # iterate over all fibers
     for fiber in reader:
-        count += 1
-        # add the contribution of this fiber to the 
-        fbrgraph.add(fiber)
-        if result.count > 0 and count >= result.count:
-            break
-        if count % 1000 == 0:
-          print ("Processed %d fibers", count )
+      count += 1
+      # add the contribution of this fiber to the 
+      fbrgraph.add(fiber)
+      if result.count > 0 and count >= result.count:
+        break
+      if count % 1000 == 0:
+        print ("Processed {0} fibers".format(count) )
+
+    # Done adding edges
+    fbrgraph.complete()
+
+    # Save a version of this graph to file
+    fbrgraph.saveToMatlab ( result.file, result.output )
+
+    # Load a version of this graph from  
+    fbrgraph.loadFromMatlab ( result.file, result.output )
 
     # output graph to SciDB ingest format
-    fbrgraph.writeForSciDB( [65536,65536], fout )
+#    fbrgraph.writeForSciDB( [65536,65536], fout )
 
     del reader
 
