@@ -32,8 +32,8 @@ class FiberGraph:
     # Need the dimensions to be the same shape for zindex
     xdim = ydim = zdim = max ( xdim, ydim, zdim )
 
-    # largest value is -1 in each dimension
-    self._maxval = zindex.XYZMorton ([xdim-1,ydim-1,zdim-1])
+    # largest value is -1 in each dimension, then plus one because range(10) is 0..9
+    self._maxval = zindex.XYZMorton ([xdim-1,ydim-1,zdim-1]) + 1
 
     # dictionary of keys matrix for one by one insertion
     self.spedgemat = dok_matrix ( (self._maxval, self._maxval), dtype=float )
@@ -70,7 +70,7 @@ class FiberGraph:
     # iterate over all of the chunks in 
     # RBTODO range needs to be +1 if mod = 0
     for row in range(self._maxval/chunkdim[0]):
-      print "Processing row ", row         
+      print "Processing row ", row, row*chunkdim[0]        
       for col in range(self._maxval/chunkdim[1]):
         outstr = StringIO();
         outstr.write ( '[[' )
