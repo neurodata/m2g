@@ -18,7 +18,6 @@ from cStringIO import StringIO
 #
 class FiberGraph:
 
-
   #
   # Constructor: number of nodes in the graph
   #   convert it to a maximum element
@@ -26,11 +25,17 @@ class FiberGraph:
   def __init__(self, matrixdim ):
     
     # Round up to the nearest power of 2
-    xdim = int(math.pow(2,math.floor(math.log(matrixdim[0]+1,2))))
-    ydim = int(math.pow(2,math.floor(math.log(matrixdim[1]+1,2))))
-    zdim = int(math.pow(2,math.floor(math.log(matrixdim[2]+1,2))))
+    xdim = int(math.pow(2,math.ceil(math.log(matrixdim[0],2))))
+    ydim = int(math.pow(2,math.ceil(math.log(matrixdim[1],2))))
+    zdim = int(math.pow(2,math.ceil(math.log(matrixdim[2],2))))
 
-    self._maxval = zindex.XYZMorton ( matrixdim )
+    # Need the dimensions to be the same shape for zindex
+    xdim = ydim = zdim = max ( xdim, ydim, zdim )
+
+    # largest value is -1 in each dimension
+    self._maxval = zindex.XYZMorton ([xdim-1,ydim-1,zdim-1])
+
+    # dictionary of keys matrix for one by one insertion
     self.spedgemat = dok_matrix ( (self._maxval, self._maxval), dtype=float )
 
   #
