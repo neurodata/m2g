@@ -18,14 +18,21 @@ def main():
     parser = argparse.ArgumentParser(description='Read the contents of MRI Studio file and generate a sparse connectivity graph in SciDB.')
     parser.add_argument('--count', action="store", type=int, default=-1)
     parser.add_argument('file', action="store")
-    parser.add_argument('ouput', action="store")
+    parser.add_argument('output', action="store")
 
     result = parser.parse_args()
     reader = FiberReader(result.file)
 
     # Create the graph object
     # get dims from reader
-    fbrgraph = FiberGraph ( [ 200, 200, 200 ] )
+    fbrgraph = FiberGraph ( reader.shape )
+
+    # Open the output file
+    try:
+      fout = open ( result.output, 'w+' )
+    except:
+      print "Could not truncate or create file ", result.output
+      sys.exit(-1)
 
     # Print the high-level fiber information
     print(reader)
@@ -43,7 +50,7 @@ def main():
           print ("Processed %d fibers", count )
 
     # output graph to SciDB ingest format
-    fbrgraph.writeForSciDB( [100000,100000], 'TODO' )
+    fbrgraph.writeForSciDB( [65536,65536], fout )
 
     del reader
 

@@ -9,6 +9,7 @@
 from scipy.sparse import dok_matrix, csc_matrix
 from fiber import Fiber
 import zindex
+import math
 from cStringIO import StringIO
 
 
@@ -17,11 +18,18 @@ from cStringIO import StringIO
 #
 class FiberGraph:
 
+
   #
   # Constructor: number of nodes in the graph
   #   convert it to a maximum element
   #
   def __init__(self, matrixdim ):
+    
+    # Round up to the nearest power of 2
+    xdim = int(math.pow(2,math.floor(math.log(matrixdim[0]+1,2))))
+    ydim = int(math.pow(2,math.floor(math.log(matrixdim[1]+1,2))))
+    zdim = int(math.pow(2,math.floor(math.log(matrixdim[2]+1,2))))
+
     self._maxval = zindex.XYZMorton ( matrixdim )
     self.spedgemat = dok_matrix ( (self._maxval, self._maxval), dtype=float )
 
@@ -50,39 +58,30 @@ class FiberGraph:
   def writeForSciDB ( self, chunkdim, fout ):
     """Write the graph in a SciDB compatible text format"""
 
-    print "Here"
+    print "Convert to CSC matrix"
     # first convert to csc 
     spcscmat = csc_matrix ( self.spedgemat )
 
     # iterate over all of the chunks in 
     # RBTODO range needs to be +1 if mod = 0
     for row in range(self._maxval/chunkdim[0]):
+      print "Processing row ", row         
       for col in range(self._maxval/chunkdim[1]):
-       outstr = StringIO();
-       outstr.write ( '[[' )
-       spchunk = spcscmat [ col*chunkdim[0]:(col+1)*chunkdim[0]-1, row*chunkdim[1]:(row+1)*chunkdim[1]-1 ]
-       spchunknz = spchunk.nonzero()
-       for k in range(len(spchunknz[0])):
-         outstr.write ( '{' )
-         outstr.write ( str(spchunknz[0][k]) )
-         outstr.write ( ','  )
-         outstr.write ( str(spchunknz[1][k]) )
-         outstr.write (  '}('  )
-         outstr.write ( str(spchunk[spchunknz[0][k], spchunknz[1][k]]) ) 
-         outstr.write (  ')'  )
-       outstr.write ( ']]' )
+        outstr = StringIO();
+        outstr.write ( '[[' )
+        spchunk = spcscmat [ col*chunkdim[0]:(col+1)*chunkdim[0]-1, row*chunkdim[1]:(row+1)*chunkdim[1]-1 ]
+        spchunknz = spchunk.nonzero()
+        for k in range(len(spchunknz[0])):
+          outstr.write ( '{' )
+          outstr.write ( str(spchunknz[0][k]) )
+          outstr.write ( ','  )
+          outstr.write ( str(spchunknz[1][k]) )
+          outstr.write (  '}('  )
+          outstr.write ( str(spchunk[spchunknz[0][k], spchunknz[1][k]]) ) 
+          outstr.write (  ')'  )
+        outstr.write ( ']]\n' )
        
        # output a chunk if there are elements
-#       if ( spchunk.nnz!= 0 ): 
-         # put this out to the file
-       if ( len(spchunknz[0]) != 0 ):
-         print outstr.getvalue()
+        if ( len(spchunknz[0]) != 0 ):
+           fout.write ( outstr.getvalue() )
 
-# RBTEST
-  def check ( self ):
-
-    for k,v in self.spedgemat.iteritems():
-      print zindex.MortonXYZ ( k[0] ), zindex.MortonXYZ ( k[1] ), v
-
-
-      
