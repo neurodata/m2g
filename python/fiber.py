@@ -5,18 +5,6 @@ import zindex
 
 import numpy
 
-# RBTODO:  have Eric look at the URGENTS.  Is fiber to voxel mapping broken?
-#
-# TODO:
-#  - URGENT: Fix fiber to voxel mapping
-#  - Look into memory optimizatiosn
-#    - Garbage collection costs?
-#    - Should we use a single instance of a fiber instead of creating new ones?
-#    - Is it benefical to pre-allocate for the longest fiber?
-#  - Support random access
-#  - Support simultaneous access
-#
-
 
 class FiberReader:
     """Class to read data file stored in MRI Studio format.
@@ -144,7 +132,6 @@ class FiberIterator:
 class Fiber:
 
     # just a small value to pull points on faces into next lower cubes
-
     _epsilon = 0.001
 
     def __init__(self, header, path):
@@ -163,8 +150,6 @@ class Fiber:
       """Return the list of edges in this fiber. As tuples"""
 
       voxels = []
-
-      # RBTODO factor out zindex into a helper class for the project
 
       # extract a path of vertices
       for fbrpt in self.path: 
