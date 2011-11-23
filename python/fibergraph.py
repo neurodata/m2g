@@ -73,7 +73,6 @@ class FiberGraph:
     """Add a fibger to the graph"""
     vertex = fiber.getSeed ()
     self.seeds [ vertex ] = True
-    print "Added vertex ", vertex
   
   #
   # Add a fiber to the graph.  
@@ -83,8 +82,6 @@ class FiberGraph:
   def add ( self, fiber ):
     """Add a fiber to the graph"""
 
-    print "Adding a fiber"
-
     # Get the set of voxels in the fiber
     allvoxels = fiber.getVoxels ()
 
@@ -93,18 +90,12 @@ class FiberGraph:
     for i in allvoxels:
       if self.seeds.get( i ):
         voxels.append ( i )  
-        print "Using voxel ", i 
-# RMREMOVE
-      else:
-        print "Ignoring voxel ", i 
 
     for v1,v2 in itertools.combinations((voxels),2): 
       if ( v1 < v2 ):  
         self.spedgemat [ v1, v2 ] += 1.0
-        print "Adding edge ", v1, v2
       else:
         self.spedgemat [ v2, v1 ] += 1.0
-        print "Adding edge ", v2, v1
 
   #
   # Complete the graph.  Get it ready for analysis.
