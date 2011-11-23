@@ -72,6 +72,9 @@ class FiberGraph:
   def addVertex ( self, fiber ):
     """Add a fibger to the graph"""
     vertex = fiber.getSeed ()
+    # RB testing
+    if ( vertex == True ):
+      print "Already added this vertex"
     self.seeds [ vertex ] = True
   
   #
@@ -126,10 +129,6 @@ class FiberGraph:
   #
   def loadFromMatlab ( self, key, filename ):
     """Load the sparse array from disk by file name"""
-
-    if 0 == self.spcscmat.getnnz():
-      print "Call complete after adding all edges"
-      assert 0
 
     print "Reading key ", key, " from file ", filename
 
