@@ -14,12 +14,14 @@ from http://www.enthought.com/.
 *** fiber.py
     Module for reading MRI Studio-format fiber files
 
-*** fibers2matrix.py
-    Read a fiber file and generate a sparse adjacency matrix between voxels.
-
 *** printfibers.py
     Simple script to echo a fiber file out as text
 
-*** verifyseed.py
-    This script will verify that all of the fiber seed locations have
-    been labeled.  This is for sanity checking...
+*** fibgergraph.py
+    Module to represent the graph derived from an MRI studio file
+
+*** gengraph.py
+    Script to generate a graph on a single MRI studio file
+
+*** generate.py
+    Call gengraph.py on directories of MRI studio files
