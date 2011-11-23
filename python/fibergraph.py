@@ -14,6 +14,18 @@ import math
 import itertools
 from cStringIO import StringIO
 
+
+#
+#  This routine uses two different sparse matrix representations.
+#  The calls need to be performed in the following order
+#
+#     Create FiberGraph
+#     Add Edges (on dok format)
+#     Complete -- this converts from dictionary of keys format to Column CSC
+#     Write or SVD (on csc format)
+#
+
+
 #
 #  Sparse matrix representation of a Fiber graph
 #
@@ -61,6 +73,7 @@ class FiberGraph:
     """Add a fibger to the graph"""
     vertex = fiber.getSeed ()
     self.seeds [ vertex ] = True
+    print "Added vertex ", vertex
   
   #
   # Add a fiber to the graph.  
@@ -70,6 +83,8 @@ class FiberGraph:
   def add ( self, fiber ):
     """Add a fiber to the graph"""
 
+    print "Adding a fiber"
+
     # Get the set of voxels in the fiber
     allvoxels = fiber.getVoxels ()
 
@@ -78,12 +93,18 @@ class FiberGraph:
     for i in allvoxels:
       if self.seeds.get( i ):
         voxels.append ( i )  
+        print "Using voxel ", i 
+# RMREMOVE
+      else:
+        print "Ignoring voxel ", i 
 
     for v1,v2 in itertools.combinations((voxels),2): 
       if ( v1 < v2 ):  
         self.spedgemat [ v1, v2 ] += 1.0
+        print "Adding edge ", v1, v2
       else:
         self.spedgemat [ v2, v1 ] += 1.0
+        print "Adding edge ", v2, v1
 
   #
   # Complete the graph.  Get it ready for analysis.
@@ -124,6 +145,8 @@ class FiberGraph:
     # first convert to csc 
     t = loadmat ( filename  )
     self.spcscmat = t[key]
+
+    print self.spcscmat
 
   #
   #  Write the matrix out in a format that SciDB can import.

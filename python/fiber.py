@@ -196,4 +196,5 @@ class Fiber:
 
         # if in the middle of a voxel no edge
         if (( fbrpt[0] % 1.0 != 0.0 ) and ( fbrpt[1] % 1.0 != 0.0 ) and ( fbrpt[2] % 1.0 != 0.0 )):
+          print "Found seeed ", fbrpt, zindex.XYZMorton ( [ int(fbrpt[0]), int(fbrpt[1]), int(fbrpt[2]) ] )
           return zindex.XYZMorton ( [ int(fbrpt[0]), int(fbrpt[1]), int(fbrpt[2]) ] )		
