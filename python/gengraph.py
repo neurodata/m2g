@@ -41,10 +41,6 @@ def genGraph( infname, outfname, numfibers ):
 
   count = 0
 
-# RBCUT this is for proofreading
-
-  numfibers = 10
-
   # iterate over all fibers
   for fiber in reader:
     count += 1
