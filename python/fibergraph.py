@@ -61,8 +61,9 @@ class FiberGraph:
   # Destructor
   #
   def __del__(self):
-    self.spedgemat.clear()
-
+    del self.spedgemat
+    del self.spcscmat
+  
 
   #
   # Add the vertex (seed voxel) from a fiber to the list of vertices
@@ -72,9 +73,6 @@ class FiberGraph:
   def addVertex ( self, fiber ):
     """Add a fibger to the graph"""
     vertex = fiber.getSeed ()
-    # RB testing
-    if ( vertex == True ):
-      print "Already added this vertex"
     self.seeds [ vertex ] = True
   
   #
@@ -106,8 +104,9 @@ class FiberGraph:
   def complete ( self ):
     """Done adding fibers.  Prior to analysis"""
 
+    del self.seeds
     self.spcscmat = csc_matrix ( self.spedgemat )
-    self.spedgemat.clear()
+    del self.spedgemat
 
   #
   #  Write the sparse matrix out in a format that can be reingested.
@@ -137,39 +136,4 @@ class FiberGraph:
     self.spcscmat = t[key]
 
     print self.spcscmat
-
-  #
-  #  Write the matrix out in a format that SciDB can import.
-  #  fout should be an open file handle
-  #  chunkdim specifies the SciDB chunk 
-  #
-  def writeForSciDB ( self, chunkdim, fout ):
-    """Write the graph in a SciDB compatible text format"""
-
-    print "Convert to CSC matrix"
-    # first convert to csc 
-    spcscmat = csc_matrix ( self.spedgemat )
-
-    # iterate over all of the chunks in 
-    # RBTODO range needs to be +1 if mod = 0
-    for row in range(self._maxval/chunkdim[0]):
-      print "Processing row ", row, row*chunkdim[0]        
-      for col in range(self._maxval/chunkdim[1]):
-        outstr = StringIO();
-        outstr.write ( '[[' )
-        spchunk = spcscmat [ col*chunkdim[0]:(col+1)*chunkdim[0]-1, row*chunkdim[1]:(row+1)*chunkdim[1]-1 ]
-        spchunknz = spchunk.nonzero()
-        for k in range(len(spchunknz[0])):
-          outstr.write ( '{' )
-          outstr.write ( str(spchunknz[0][k]) )
-          outstr.write ( ','  )
-          outstr.write ( str(spchunknz[1][k]) )
-          outstr.write (  '}('  )
-          outstr.write ( str(spchunk[spchunknz[0][k], spchunknz[1][k]]) ) 
-          outstr.write (  '),'  )
-        outstr.write ( ']]\n' )
-       
-       # output a chunk if there are elements
-        if ( len(spchunknz[0]) != 0 ):
-           fout.write ( outstr.getvalue() )
 

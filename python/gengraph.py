@@ -15,7 +15,7 @@ from fiber import FiberReader
 #   based on input and output names.
 #   Outputs a matlab file. 
 #
-def genGraph( infname, outfname, numfibers ):
+def genGraph( infname, outfname, numfibers=-1 ):
   """Generate a sparse graph from an MRI studio file and write it as a Matlab file"""
 
   # Create fiber reader
@@ -24,6 +24,8 @@ def genGraph( infname, outfname, numfibers ):
   # Create the graph object
   # get dims from reader
   fbrgraph = FiberGraph ( reader.shape )
+
+  print "Parsing MRI studio file {0}".format ( infname )
 
   # Print the high-level fiber information
   print(reader)
@@ -36,7 +38,7 @@ def genGraph( infname, outfname, numfibers ):
     fbrgraph.addVertex ( fiber )
     if numfibers > 0 and count >= numfibers:
       break
-    if count % 1000 == 0:
+    if count % 10000 == 0:
       print ("Found vertices of {0} fibers".format(count) )
 
   count = 0
@@ -48,23 +50,29 @@ def genGraph( infname, outfname, numfibers ):
     fbrgraph.add(fiber)
     if numfibers > 0 and count >= numfibers:
       break
-    if count % 1000 == 0:
+    if count % 10000 == 0:
       print ("Processed {0} fibers".format(count) )
 
+  print "Deleting the reader"
+
+  del reader
+
+  print "Completing the graph"
   # Done adding edges
   fbrgraph.complete()
 
+  print "Saving matlab file"
   # Save a version of this graph to file
   fbrgraph.saveToMatlab ( "fibergraph", outfname )
 
   # Load a version of this graph from  
-  fbrgraph.loadFromMatlab ( "fibergraph", outfname )
+#  fbrgraph.loadFromMatlab ( "fibergraph", outfname )
 
   # output graph to SciDB ingest format
 #    fbrgraph.writeForSciDB( [65536,65536], fout )
 
-  del reader
-
+  del fbrgraph
+  
   return
 
 
