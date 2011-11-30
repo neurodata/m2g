@@ -6,7 +6,7 @@
 #
 ################################################################################
 
-from scipy.sparse import dok_matrix, csc_matrix
+from scipy.sparse import coo_matrix, csc_matrix
 from scipy.io import loadmat, savemat
 from fiber import Fiber
 import zindex
@@ -50,9 +50,10 @@ class FiberGraph:
 
     # list of seed locations
     self.seeds = {}
+
+    # dictionary of non-zero matrix elements
+    self.spedges = {}
  
-    # dictionary of keys matrix for one by one insertion
-    self.spedgemat = dok_matrix ( (self._maxval, self._maxval), dtype=float )
     # empty CSC matrix
     self.spcscmat = csc_matrix ( (self._maxval, self._maxval), dtype=float )
 
@@ -61,7 +62,7 @@ class FiberGraph:
   # Destructor
   #
   def __del__(self):
-    del self.spedgemat
+    del self.spedges
     del self.spcscmat
   
 
@@ -94,7 +95,7 @@ class FiberGraph:
 
     for v1,v2 in itertools.combinations((voxels),2): 
       if ( v1 < v2 ):  
-        self.spedgemat [ v1, v2 ] += 1.0
+        self.spedgemat [ str(v1)  str(v2) ] += 1.0
       else:
         self.spedgemat [ v2, v1 ] += 1.0
 
