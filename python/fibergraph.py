@@ -50,7 +50,7 @@ class FiberGraph:
 
     # list of seed locations
     self.seeds = {}
- 
+
     # list of list matrix for one by one insertion
     self.spedgemat = lil_matrix ( (self._maxval, self._maxval), dtype=float )
     # empty CSC matrix
