@@ -6,7 +6,7 @@
 #
 ################################################################################
 
-from scipy.sparse import lil_matrix, csc_matrix
+from scipy.sparse import dok_matrix, csc_matrix
 from scipy.io import loadmat, savemat
 from fiber import Fiber
 import zindex
@@ -61,7 +61,9 @@ class FiberGraph:
   # Destructor
   #
   def __del__(self):
-    pass 
+    del self.spedgemat
+    del self.spcscmat
+  
 
   #
   # Add the vertex (seed voxel) from a fiber to the list of vertices
@@ -92,7 +94,7 @@ class FiberGraph:
 
     for v1,v2 in itertools.combinations((voxels),2): 
       if ( v1 < v2 ):  
-        self.spedgemat [ v1, v2 ] += 1.0
+        self.spedgemat [ str(v1)  str(v2) ] += 1.0
       else:
         self.spedgemat [ v2, v1 ] += 1.0
 
