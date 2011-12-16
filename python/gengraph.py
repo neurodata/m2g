@@ -68,9 +68,6 @@ def genGraph( infname, outfname, numfibers=-1 ):
   # Load a version of this graph from  
 #  fbrgraph.loadFromMatlab ( "fibergraph", outfname )
 
-  # output graph to SciDB ingest format
-#    fbrgraph.writeForSciDB( [65536,65536], fout )
-
   del fbrgraph
   
   return
