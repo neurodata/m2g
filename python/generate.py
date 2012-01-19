@@ -14,7 +14,7 @@ from gengraph import genGraph
 #
 def main():
 
-    parser = argparse.ArgumentParser(description='Process a directory containing MRI Studio files and generate a sparse graphs in Matlab format.')
+    parser = argparse.ArgumentParser(description='Process a directory containing MRI Studio files and generate a sparse graph in Matlab format.')
     parser.add_argument('inputdir', action="store")
     parser.add_argument('outputdir', action="store")
 

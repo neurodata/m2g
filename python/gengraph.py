@@ -6,6 +6,7 @@
 
 import argparse
 import sys
+import os
 from fibergraph import FiberGraph
 from fiber import FiberReader
 
@@ -18,12 +19,34 @@ from fiber import FiberReader
 def genGraph( infname, outfname, numfibers=-1 ):
   """Generate a sparse graph from an MRI studio file and write it as a Matlab file"""
 
+  # Assume that there are ROI files in ../roi
+  [ inpathname, inbasename ] = os.path.split ( infname )
+  inbasename = str(inbasename).rpartition ( "_" )[0]
+  roifp = os.path.normpath ( inpathname + '/../roi/' + inbasename )
+  roixmlname = roifp + '_roi.xml'
+  roirawname = roifp + '_roi.raw'
+  print roixmlname
+  print roirawname
+
+  # Get the ROIs
+  # RBTODO make the roifname into a raw and XML file
+  try:
+    roix = roi.ROIXML( roixmlname )
+    rois = roi.ROIData ( roirawname, roix.getShape() )
+  except:
+    print "ROI files not found at: ", roixmlname, roirawname
+    assert 0
+
+  assert 0
+
   # Create fiber reader
   reader = FiberReader( infname )
 
   # Create the graph object
   # get dims from reader
-  fbrgraph = FiberGraph ( reader.shape )
+  #RBTODO for the little graph.  How little is it?
+  #   change the shape
+  fbrgraph = FiberGraph ( reader.shape, rois )
 
   print "Parsing MRI studio file {0}".format ( infname )
 
@@ -81,11 +104,12 @@ def main ():
 
   parser = argparse.ArgumentParser(description='Read the contents of MRI Studio file and generate a sparse connectivity graph in SciDB.')
   parser.add_argument('--count', action="store", type=int, default=-1)
-  parser.add_argument('file', action="store")
+  parser.add_argument('fbrfile', action="store")
+  parser.add_argument('roifile', action="store")
   parser.add_argument('output', action="store")
 
   result = parser.parse_args()
-  genGraph ( result.file, result.output, result.count )
+  genGraph ( result.fbrfile, result.roifile, result.output, result.count )
 
 if __name__ == "__main__":
   main()

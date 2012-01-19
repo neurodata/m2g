@@ -9,6 +9,7 @@
 from scipy.sparse import lil_matrix, csc_matrix
 from scipy.io import loadmat, savemat
 from fiber import Fiber
+import roi
 import zindex
 import math
 import itertools
@@ -35,8 +36,11 @@ class FiberGraph:
   # Constructor: number of nodes in the graph
   #   convert it to a maximum element
   #
-  def __init__(self, matrixdim ):
+  def __init__(self, matrixdim, rois ):
     
+    # Regions of interest
+    self.rois = rois
+
     # Round up to the nearest power of 2
     xdim = int(math.pow(2,math.ceil(math.log(matrixdim[0],2))))
     ydim = int(math.pow(2,math.ceil(math.log(matrixdim[1],2))))
@@ -47,9 +51,6 @@ class FiberGraph:
 
     # largest value is -1 in each dimension, then plus one because range(10) is 0..9
     self._maxval = zindex.XYZMorton ([xdim-1,ydim-1,zdim-1]) + 1
-
-    # list of seed locations
-    self.seeds = {}
 
     # list of list matrix for one by one insertion
     self.spedgemat = lil_matrix ( (self._maxval, self._maxval), dtype=float )
@@ -62,17 +63,6 @@ class FiberGraph:
   #
   def __del__(self):
     pass
-  
-
-  #
-  # Add the vertex (seed voxel) from a fiber to the list of vertices
-  #  These are the locations in the graph that we care about.
-  #   all other spatial locations are not included in graph generation
-  #
-  def addVertex ( self, fiber ):
-    """Add a fibger to the graph"""
-    vertex = fiber.getSeed ()
-    self.seeds [ vertex ] = True
   
   #
   # Add a fiber to the graph.  
@@ -88,8 +78,13 @@ class FiberGraph:
     voxels = []
     # Use only the important voxels
     for i in allvoxels:
-      if self.seeds.get( i ):
-        voxels.append ( i )  
+#  RBTODO this is for the big version.  You haven't tested
+#      if self.rois.get( i ):
+#        voxels.append ( i )  
+#  RBTODO this is for the small graph version
+       roi = self.rois.get ( i )
+       if roi:
+         voxels.append ( roi )
 
     for v1,v2 in itertools.combinations((voxels),2): 
       if ( v1 < v2 ):  
@@ -103,7 +98,6 @@ class FiberGraph:
   def complete ( self ):
     """Done adding fibers.  Prior to analysis"""
 
-    del self.seeds
     self.spcscmat = csc_matrix ( self.spedgemat )
     del self.spedgemat
 
