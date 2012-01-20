@@ -16,6 +16,9 @@ import itertools
 from cStringIO import StringIO
 
 
+# fibgergraph_sm provides the same interfaces as fibergraph but 
+#  makes the 70 x 70 matrix
+
 #
 #  This routine uses two different sparse matrix representations.
 #  The calls need to be performed in the following order
@@ -40,17 +43,9 @@ class FiberGraph:
     
     # Regions of interest
     self.rois = rois
-
-    # Round up to the nearest power of 2
-    xdim = int(math.pow(2,math.ceil(math.log(matrixdim[0],2))))
-    ydim = int(math.pow(2,math.ceil(math.log(matrixdim[1],2))))
-    zdim = int(math.pow(2,math.ceil(math.log(matrixdim[2],2))))
-
-    # Need the dimensions to be the same shape for zindex
-    xdim = ydim = zdim = max ( xdim, ydim, zdim )
-
-    # largest value is -1 in each dimension, then plus one because range(10) is 0..9
-    self._maxval = zindex.XYZMorton ([xdim-1,ydim-1,zdim-1]) + 1
+    
+    # Get the maxval from the number of rois
+    self._maxval = rois.maxval()
 
     # list of list matrix for one by one insertion
     self.spedgemat = lil_matrix ( (self._maxval, self._maxval), dtype=float )
@@ -75,14 +70,15 @@ class FiberGraph:
     # Get the set of voxels in the fiber
     allvoxels = fiber.getVoxels ()
 
-    voxels = []
+    roilist = []
     # Use only the important voxels
     for i in allvoxels:
-       roi = self.rois.get ( zindex.MortonXYZ(i))
+    # this is for the small graph version
+       roi = self.rois.get ( zindex.MortonXYZ(i) )
        if roi:
-         voxels.append ( roi )
+         roilist.append ( roi )
 
-    for v1,v2 in itertools.combinations((voxels),2): 
+    for v1,v2 in itertools.combinations((roilist),2): 
       if ( v1 < v2 ):  
         self.spedgemat [ v1, v2 ] += 1.0
       else:

@@ -7,7 +7,9 @@
 import argparse
 import sys
 import os
-from fibergraph import FiberGraph
+import roi
+#from fibergraph import FiberGraph
+from fibergraph_sm import FiberGraph
 from fiber import FiberReader
 
 
@@ -16,7 +18,7 @@ from fiber import FiberReader
 #   based on input and output names.
 #   Outputs a matlab file. 
 #
-def genGraph( infname, outfname, numfibers=-1 ):
+def genGraph( infname, outfname, numfibers ):
   """Generate a sparse graph from an MRI studio file and write it as a Matlab file"""
 
   # Assume that there are ROI files in ../roi
@@ -25,8 +27,6 @@ def genGraph( infname, outfname, numfibers=-1 ):
   roifp = os.path.normpath ( inpathname + '/../roi/' + inbasename )
   roixmlname = roifp + '_roi.xml'
   roirawname = roifp + '_roi.raw'
-  print roixmlname
-  print roirawname
 
   # Get the ROIs
   # RBTODO make the roifname into a raw and XML file
@@ -37,32 +37,17 @@ def genGraph( infname, outfname, numfibers=-1 ):
     print "ROI files not found at: ", roixmlname, roirawname
     assert 0
 
-  assert 0
-
   # Create fiber reader
   reader = FiberReader( infname )
 
   # Create the graph object
   # get dims from reader
-  #RBTODO for the little graph.  How little is it?
-  #   change the shape
   fbrgraph = FiberGraph ( reader.shape, rois )
 
   print "Parsing MRI studio file {0}".format ( infname )
 
   # Print the high-level fiber information
   print(reader)
-
-  count = 0
-
-  # first pass finds the seed locations (vertices)
-  for fiber in reader:
-    count += 1
-    fbrgraph.addVertex ( fiber )
-    if numfibers > 0 and count >= numfibers:
-      break
-    if count % 10000 == 0:
-      print ("Found vertices of {0} fibers".format(count) )
 
   count = 0
 
@@ -105,11 +90,10 @@ def main ():
   parser = argparse.ArgumentParser(description='Read the contents of MRI Studio file and generate a sparse connectivity graph in SciDB.')
   parser.add_argument('--count', action="store", type=int, default=-1)
   parser.add_argument('fbrfile', action="store")
-  parser.add_argument('roifile', action="store")
   parser.add_argument('output', action="store")
 
   result = parser.parse_args()
-  genGraph ( result.fbrfile, result.roifile, result.output, result.count )
+  genGraph ( result.fbrfile, result.output, result.count )
 
 if __name__ == "__main__":
   main()

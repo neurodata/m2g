@@ -14,6 +14,7 @@ class ROIXML:
 
   def __init__(self,filename):
 
+    print "Filename ", filename
     # Parse the XML document
     self._xmldoc = xml.dom.minidom.parse(filename)
 
@@ -38,6 +39,17 @@ class ROIData:
     self.data = np.fromfile(self._fileobj, dtype='>i4', count=dim[0]*dim[1]*dim[2])
     self.data = np.reshape ( self.data, dim, order='F' )
 
+    print self.data.shape
 
-  
+  # get the maximum value
+  def maxval ( self ):
+    """Returns the maximum ROI value.  Size of the graph."""
+    return 200
+    # RBTODO : get maximimum roi value
+#    return max ( self.data[:,:,:] )
+
+  # get the maximum value
+  def get ( self, index ):
+    """Returns the ROI associated with a voxel"""
+    return self.data [ index[0], index[1], index[2] ]
 
