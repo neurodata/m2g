@@ -14,7 +14,6 @@ class ROIXML:
 
   def __init__(self,filename):
 
-    print "Filename ", filename
     # Parse the XML document
     self._xmldoc = xml.dom.minidom.parse(filename)
 
@@ -38,8 +37,6 @@ class ROIData:
     
     self.data = np.fromfile(self._fileobj, dtype='>i4', count=dim[0]*dim[1]*dim[2])
     self.data = np.reshape ( self.data, dim, order='F' )
-
-    print self.data.shape
 
   # get the maximum value
   def maxval ( self ):
