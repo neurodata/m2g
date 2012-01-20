@@ -1,12 +1,35 @@
-
 import roi
 import matplotlib.pyplot
 
-roix = roi.ROIXML( "/data/MR/roi/M87120962_roi.xml" )
+#
+#  ROISlice
+#
+#  Draw an ROI XY slice using matplotlib.pyplot as a pcolor graph
+#
 
-rois = roi.ROIData ( "/data/MR/roi/M87120962_roi.raw", roix.getShape() ) 
+#
+# main
+#
+def main ():
 
-print rois.data.shape
-matplotlib.pyplot.pcolor ( rois.data[:,:,51] )
+  parser = argparse.ArgumentParser(description='Draw the ROI map of a brain.')
+  parser.add_argument('roixmlfile', action="store")
+  parser.add_argument('roirawfile', action="store")
+  parser.add_argument('slice', action="store")
 
-raw_input("Press Enter to continue...")
+  result = parser.parse_args()
+
+  try:
+    roix = roi.ROIXML( result.roixmlfile )
+    rois = roi.ROIData ( result.roirawfile, roix.getShape() ) 
+  except:
+    # RBTODO give a meaningful error 
+    print "Failed to parse ROI files at: ", result.roixmlfile, result.roixmlfile
+    assert 0
+
+  matplotlib.pyplot.pcolor ( rois.data[:,:,result.slice] )
+
+  raw_input("Press Enter to continue...")
+
+if __name__ == "__main__":
+  main()
