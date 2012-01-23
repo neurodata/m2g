@@ -41,12 +41,15 @@ class ROIData:
   # get the maximum value
   def maxval ( self ):
     """Returns the maximum ROI value.  Size of the graph."""
-    return 200
+    return 70
     # RBTODO : get maximimum roi value
 #    return max ( self.data[:,:,:] )
 
-  # get the maximum value
+  # Use the crazy numbering system
   def get ( self, index ):
     """Returns the ROI associated with a voxel"""
-    return self.data [ index[0], index[1], index[2] ]
+    if ( self.data [ index[0], index[1], index[2] ] > 100 ):
+      return self.data [ index[0], index[1], index[2] ] - 65
+    else:
+      return self.data [ index[0], index[1], index[2] ]
 

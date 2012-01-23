@@ -48,9 +48,9 @@ class FiberGraph:
     self._maxval = rois.maxval()
 
     # list of list matrix for one by one insertion
-    self.spedgemat = lil_matrix ( (self._maxval, self._maxval), dtype=float )
+    self.spedgemat = lil_matrix ( (self._maxval+1, self._maxval+1), dtype=float )
     # empty CSC matrix
-    self.spcscmat = csc_matrix ( (self._maxval, self._maxval), dtype=float )
+    self.spcscmat = csc_matrix ( (self._maxval+1, self._maxval+1), dtype=float )
 
 
   #
@@ -77,6 +77,8 @@ class FiberGraph:
        roi = self.rois.get ( zindex.MortonXYZ(i) )
        if roi:
          roilist.append ( roi )
+
+    roilist = set ( roilist )
 
     for v1,v2 in itertools.combinations((roilist),2): 
       if ( v1 < v2 ):  
