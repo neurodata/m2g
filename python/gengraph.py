@@ -32,7 +32,6 @@ def genGraph( infname, outfname, numfibers ):
   # RBTODO make the roifname into a raw and XML file
   try:
     roix = roi.ROIXML( roixmlname )
-    print "ROI shape", roix.getShape()
     rois = roi.ROIData ( roirawname, roix.getShape() )
   except:
     print "ROI files not found at: ", roixmlname, roirawname

@@ -25,9 +25,9 @@ def XYZMorton ( xyz ):
   morton = 0
   mask = 0x001
 
-  assert ( x <= 0x1FFFFF )
-  assert ( y <= 0x1FFFFF )
-  assert ( z <= 0x1FFFFF )
+#  assert ( x <= 0x1FFFFF )
+#  assert ( y <= 0x1FFFFF )
+#  assert ( z <= 0x1FFFFF )
 
   #21 triads of 3 bits each 
   for  i in range(21):

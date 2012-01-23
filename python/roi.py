@@ -50,6 +50,9 @@ class ROIData:
   # Use the crazy numbering system
   def get ( self, index ):
     """Returns the ROI associated with a voxel"""
+
+    if index[0] > self.data.shape[0] or index[1] > self.data.shape[1] or index[2] > self.data.shape[2]: 
+      return 0
     if ( self.data [ index[0]-1, index[1]-1, index[2]-1 ] > 100 ):
       return self.data [ index[0]-1, index[1]-1, index[2]-1 ] - 65
     else:
