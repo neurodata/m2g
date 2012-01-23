@@ -25,3 +25,6 @@ from http://www.enthought.com/.
 
 *** generate.py
     Call gengraph.py on directories of MRI studio files
+
+*** roislice.py
+    Displays the regions of interest in the brain as 2-d projections

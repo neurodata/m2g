@@ -21,7 +21,7 @@ from cStringIO import StringIO
 #  The calls need to be performed in the following order
 #
 #     Create FiberGraph
-#     Add Edges (on dok format)
+#     Add Edges (lil format)
 #     Complete -- this converts from dictionary of keys format to Column CSC
 #     Write or SVD (on csc format)
 #
