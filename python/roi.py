@@ -34,7 +34,7 @@ class ROIData:
 
     self._filename = filename
     self._fileobj = open(self._filename, mode='rb')
-    
+
     self.data = np.fromfile(self._fileobj, dtype='>i4', count=dim[0]*dim[1]*dim[2])
     self.data = np.reshape ( self.data, dim, order='F' )
 
@@ -48,8 +48,8 @@ class ROIData:
   # Use the crazy numbering system
   def get ( self, index ):
     """Returns the ROI associated with a voxel"""
-    if ( self.data [ index[0], index[1], index[2] ] > 100 ):
-      return self.data [ index[0], index[1], index[2] ] - 65
+    if ( self.data [ index[0]-1, index[1]-1, index[2]-1 ] > 100 ):
+      return self.data [ index[0]-1, index[1]-1, index[2]-1 ] - 65
     else:
-      return self.data [ index[0], index[1], index[2] ]
+      return self.data [ index[0]-1, index[1]-1, index[2]-1 ]
 
