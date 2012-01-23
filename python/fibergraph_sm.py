@@ -122,5 +122,3 @@ class FiberGraph:
     t = loadmat ( filename  )
     self.spcscmat = t[key]
 
-    print self.spcscmat
-
