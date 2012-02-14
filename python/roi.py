@@ -38,23 +38,48 @@ class ROIData:
     self.data = np.fromfile(self._fileobj, dtype='>i4', count=dim[0]*dim[1]*dim[2])
 
     self.data = np.reshape ( self.data, dim, order='F' )
+    print self.data.shape
 
 
-  # get the maximum value
-  def maxval ( self ):
-    """Returns the maximum ROI value.  Size of the graph."""
-    return 70
-    # RBTODO : get maximimum roi value
-#    return max ( self.data[:,:,:] )
+#  degraded: this function is useless.  We must hardcode the ROIs into the code.
+#  # get the maximum value
+#  def maxval ( self ):
+#    """Returns the maximum ROI value.  Size of the graph."""
+#    return 70
+#    # RBTODO : get maximimum roi value
+##    return max ( self.data[:,:,:] )
 
   # Use the crazy numbering system
   def get ( self, index ):
-    """Returns the ROI associated with a voxel"""
+    """Returns the ROI associated with a voxel.
+      Either returns 0 if out of the data space or 
+      returns ROI from 1 to 35 or 101 to 135.
+      Caller must translate so that the weirdness is not
+      hidden inside this function.
+    """
 
-    if index[0] > self.data.shape[0] or index[1] > self.data.shape[1] or index[2] > self.data.shape[2]: 
+    if index[0] >= self.data.shape[0] or \
+       index[1] >= self.data.shape[1] or \
+       index[2] >= self.data.shape[2]: 
       return 0
-    if ( self.data [ index[0]-1, index[1]-1, index[2]-1 ] > 100 ):
-      return self.data [ index[0]-1, index[1]-1, index[2]-1 ] - 65
     else:
-      return self.data [ index[0]-1, index[1]-1, index[2]-1 ]
+      return self.data [ index[0], index[1], index[2] ]
+
+# Use the crazy numbering system
+def translate ( index ):
+  """Turn ROIs from labels into 70 values from 0 to 69.
+     Return 0-34 for 1-35.
+     Return 35-69 for 101-135.
+  """
+  assert index > 0 and ( index <= 35 or index > 100 )
+  if index > 100: 
+    return index - 66
+  else:
+    return index - 1
+
+#   degraded.  Used to translate ROIs here.  Just give back the value.
+#    if ( self.data [ index[0], index[1], index[2] ] > 100 ):
+#      return self.data [ index[0], index[1], index[2] ] - 65
+#    else:
+#      return self.data [ index[0], index[1], index[2] ]
 

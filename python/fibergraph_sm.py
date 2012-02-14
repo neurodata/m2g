@@ -1,15 +1,8 @@
-##############################################################################
-#
-#    Randal C. Burns
-#    Department of Computer Science
-#    Johns Hopkins University
-#
-################################################################################
-
 from scipy.sparse import lil_matrix, csc_matrix
 from scipy.io import loadmat, savemat
 from fiber import Fiber
 import roi
+import mask
 import zindex
 import math
 import itertools
@@ -39,18 +32,22 @@ class FiberGraph:
   # Constructor: number of nodes in the graph
   #   convert it to a maximum element
   #
-  def __init__(self, matrixdim, rois ):
+  def __init__(self, matrixdim, rois, mask ):
     
     # Regions of interest
     self.rois = rois
+
+    # Brainmask
+    self.mask = mask
     
     # Get the maxval from the number of rois
-    self._maxval = rois.maxval()
+#    self._maxval = rois.maxval()
+    self._maxval = 70
 
     # list of list matrix for one by one insertion
-    self.spedgemat = lil_matrix ( (self._maxval+1, self._maxval+1), dtype=float )
+    self.spedgemat = lil_matrix ( (self._maxval, self._maxval), dtype=float )
     # empty CSC matrix
-    self.spcscmat = csc_matrix ( (self._maxval+1, self._maxval+1), dtype=float )
+    self.spcscmat = csc_matrix ( (self._maxval, self._maxval), dtype=float )
 
 
   #
@@ -73,11 +70,20 @@ class FiberGraph:
     roilist = []
     # Use only the important voxels
     for i in allvoxels:
+      
     # this is for the small graph version
-       roi = self.rois.get ( zindex.MortonXYZ(i) )
-       if roi:
-         roilist.append ( roi )
-
+       xyz = zindex.MortonXYZ(i) 
+       roival = self.rois.get(xyz)
+       # if it's an roi and in the brain
+       if roival and self.mask.get (xyz): 
+         roilist.append ( roi.translate( roival ) )
+# RBTODO just for testing,  use previous
+#       if roival: 
+#         if self.mask.get (xyz): 
+#           roilist.append ( roi.translate( roival ) )
+#         else: 
+#           print "Found ROI not in the brain ", xyz
+       
     roilist = set ( roilist )
 
     for v1,v2 in itertools.combinations((roilist),2): 

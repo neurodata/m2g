@@ -147,12 +147,15 @@ class Fiber:
     #  Return a list of voxels in this Fiber.  As tuples by zindex
     #
     def getVoxels (self):
-      """Return the list of edges in this fiber. As tuples"""
+      """Return the list of edges in this fiber. As tuples."""
 
       voxels = []
 
       # extract a path of vertices
       for fbrpt in self.path: 
+        
+        if fbrpt[0] == 0 or fbrpt[1] == 0 or fbrpt[2] == 0:
+          print "Confirmed fbrpt at 0 ", fbrpt
 
         # on an X face
         if ( fbrpt[0] % 1.0 == 0.0 ):
