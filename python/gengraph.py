@@ -31,8 +31,8 @@ def genGraph( infname, outfname, numfibers ):
 
   # Assume that there are mask files in ../mask
   maskfp = os.path.normpath ( inpathname + '/../mask/' + inbasename )
-  maskxmlname = maskfp + '_binmask.xml'
-  maskrawname = maskfp + '_binmask.raw'
+  maskxmlname = maskfp + '_mask.xml'
+  maskrawname = maskfp + '_mask.raw'
 
 
   # Get the ROIs
