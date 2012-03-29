@@ -34,7 +34,7 @@ class FiberGraph:
     self.rois = rois
 
     # Brainmask
-    self.mask = mask
+#    self.mask = mask
 
     # Round up to the nearest power of 2
     xdim = int(math.pow(2,math.ceil(math.log(matrixdim[0],2))))
@@ -78,8 +78,9 @@ class FiberGraph:
       # Use only the important voxels
       roival = self.rois.get(xyz)
       # if it's an roi and in the brain
-      if roival and self.mask.get (xyz): 
-        voxels.append ( roi )
+  #    if roival and self.mask.get (xyz): 
+      if roival:
+        voxels.append ( i )
 
     for v1,v2 in itertools.combinations((voxels),2): 
       if ( v1 < v2 ):  
