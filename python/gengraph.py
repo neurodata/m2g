@@ -8,7 +8,7 @@ import argparse
 import sys
 import os
 import roi
-import mask
+#import mask
 #from fibergraph import FiberGraph
 from fibergraph_sm import FiberGraph
 from fiber import FiberReader
@@ -29,10 +29,10 @@ def genGraph( infname, outfname, numfibers ):
   roixmlname = roifp + '_roi.xml'
   roirawname = roifp + '_roi.raw'
 
-  # Assume that there are mask files in ../mask
-  maskfp = os.path.normpath ( inpathname + '/../mask/' + inbasename )
-  maskxmlname = maskfp + '_mask.xml'
-  maskrawname = maskfp + '_mask.raw'
+#  # Assume that there are mask files in ../mask
+#  maskfp = os.path.normpath ( inpathname + '/../mask/' + inbasename )
+#  maskxmlname = maskfp + '_mask.xml'
+#  maskrawname = maskfp + '_mask.raw'
 
 
   # Get the ROIs
@@ -44,19 +44,20 @@ def genGraph( infname, outfname, numfibers ):
     sys.exit (-1)
 
   # Get the mask
-  try:
-    maskx = mask.MaskXML( maskxmlname )
-    masks = mask.MaskData ( maskrawname, maskx.getShape() )
-  except:
-    print "Mask files not found at: ", maskxmlname, maskrawname
-    sys.exit (-1)
+#  try:
+#    maskx = mask.MaskXML( maskxmlname )
+#    masks = mask.MaskData ( maskrawname, maskx.getShape() )
+#  except:
+#    print "Mask files not found at: ", maskxmlname, maskrawname
+#    sys.exit (-1)
 
   # Create fiber reader
   reader = FiberReader( infname )
 
   # Create the graph object
   # get dims from reader
-  fbrgraph = FiberGraph ( reader.shape, rois, masks )
+#  fbrgraph = FiberGraph ( reader.shape, rois, masks )
+  fbrgraph = FiberGraph ( reader.shape, rois, None )
 
   print "Parsing MRI studio file {0}".format ( infname )
 

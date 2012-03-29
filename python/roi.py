@@ -40,16 +40,6 @@ class ROIData:
     self.data = np.reshape ( self.data, dim, order='F' )
     print self.data.shape
 
-
-#  degraded: this function is useless.  We must hardcode the ROIs into the code.
-#  # get the maximum value
-#  def maxval ( self ):
-#    """Returns the maximum ROI value.  Size of the graph."""
-#    return 70
-#    # RBTODO : get maximimum roi value
-##    return max ( self.data[:,:,:] )
-
-  # Use the crazy numbering system
   def get ( self, index ):
     """Returns the ROI associated with a voxel.
       Either returns 0 if out of the data space or 
@@ -58,6 +48,7 @@ class ROIData:
       hidden inside this function.
     """
 
+# RBTODO experiment with -1 on index
     if index[0] >= self.data.shape[0] or \
        index[1] >= self.data.shape[1] or \
        index[2] >= self.data.shape[2]: 

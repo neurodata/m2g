@@ -38,7 +38,7 @@ class FiberGraph:
     self.rois = rois
 
     # Brainmask
-    self.mask = mask
+#    self.mask = mask
     
     # Get the maxval from the number of rois
 #    self._maxval = rois.maxval()
@@ -75,14 +75,9 @@ class FiberGraph:
        xyz = zindex.MortonXYZ(i) 
        roival = self.rois.get(xyz)
        # if it's an roi and in the brain
-       if roival and self.mask.get (xyz): 
+#       if roival and self.mask.get (xyz): 
+       if roival:
          roilist.append ( roi.translate( roival ) )
-# RBTODO just for testing,  use previous
-#       if roival: 
-#         if self.mask.get (xyz): 
-#           roilist.append ( roi.translate( roival ) )
-#         else: 
-#           print "Found ROI not in the brain ", xyz
        
     roilist = set ( roilist )
 

@@ -36,9 +36,14 @@ class MaskData:
     self._fileobj = open(self._filename, mode='rb')
 
     # file is a list of bytes
-    self.data = np.fromfile(self._fileobj, dtype='f', count=dim[0]*dim[1]*dim[2])
+#    self.data = np.fromfile(self._fileobj, dtype='<f4', count=dim[0]*dim[1]*dim[2])
+    self.data = np.fromfile(self._fileobj, dtype='b', count=dim[0]*dim[1]*dim[2])
+
+    print self.data.shape
 
     self.data = np.reshape ( self.data, dim, order='F' )
+
+    print self.data.shape
 
 
 
