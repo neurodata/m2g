@@ -17,6 +17,7 @@ def main():
     parser = argparse.ArgumentParser(description='Process a directory containing MRI Studio files and generate a sparse graph in Matlab format.')
     parser.add_argument('inputdir', action="store")
     parser.add_argument('outputdir', action="store")
+    parser.add_argument("--pattern", dest='pattern', action="store", default="", help="Process files matching this pattern only.  Matches any file with the specified substring.")
 
     result = parser.parse_args()
 
@@ -38,10 +39,14 @@ def main():
       sys.exit (-1)
 
     for infile in filelist:
-      outfile = os.path.splitext(infile)[0]
-      infp = os.path.normpath ( result.inputdir + '/' + infile )
-      outfp = os.path.normpath ( result.outputdir + '/' + outfile + '.mat' )
-      genGraph ( infp, outfp )
+      if not result.pattern or ( infile.find ( result.pattern ) != -1):
+#        print "Processing file", infile
+        outfile = os.path.splitext(infile)[0]
+        infp = os.path.normpath ( result.inputdir + '/' + infile )
+        outfp = os.path.normpath ( result.outputdir + '/' + outfile + '.mat' )
+        genGraph ( infp, outfp )
+      else:
+#        print "Not processing file", infile
 
     return
 

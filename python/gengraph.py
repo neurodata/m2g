@@ -9,8 +9,8 @@ import sys
 import os
 import roi
 #import mask
-from fibergraph import FiberGraph
-#from fibergraph_sm import FiberGraph
+#from fibergraph import FiberGraph
+from fibergraph_sm import FiberGraph
 from fiber import FiberReader
 
 
