@@ -79,12 +79,9 @@ class FiberGraph:
        if roival:
          roilist.append ( roi.translate( roival ) )
        
-    print "ROI list", roilist
     roilist = set ( roilist )
-    print "ROI set", roilist
 
     for v1,v2 in itertools.combinations((roilist),2): 
-      print v1, v2
       if ( v1 < v2 ):  
         self.spedgemat [ v1, v2 ] += 1.0
       else:

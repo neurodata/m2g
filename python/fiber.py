@@ -131,6 +131,9 @@ class FiberIterator:
 #
 class Fiber:
 
+    # just a small value to pull points on faces into next lower cubes
+    _epsilon = 0.000
+
     def __init__(self, header, path):
         self.header = header
         self.path = path
@@ -152,9 +155,6 @@ class Fiber:
       # extract a path of vertices
       for fbrpt in self.path: 
         
-        if fbrpt[0] == 0 or fbrpt[1] == 0 or fbrpt[2] == 0:
-          print "Confirmed fbrpt at 0 ", fbrpt
-
           voxels.append ( zindex.XYZMorton ( [ int(fbrpt[0]), int(fbrpt[1]), int(fbrpt[2]) ] ))
 
       # eliminate duplicates
