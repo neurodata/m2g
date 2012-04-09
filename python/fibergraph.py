@@ -1,15 +1,8 @@
-##############################################################################
-#
-#    Randal C. Burns
-#    Department of Computer Science
-#    Johns Hopkins University
-#
-################################################################################
-
 from scipy.sparse import lil_matrix, csc_matrix
 from scipy.io import loadmat, savemat
 from fiber import Fiber
 import roi
+import mask
 import zindex
 import math
 import itertools
@@ -26,7 +19,6 @@ from cStringIO import StringIO
 #     Write or SVD (on csc format)
 #
 
-
 #
 #  Sparse matrix representation of a Fiber graph
 #
@@ -36,10 +28,13 @@ class FiberGraph:
   # Constructor: number of nodes in the graph
   #   convert it to a maximum element
   #
-  def __init__(self, matrixdim, rois ):
+  def __init__(self, matrixdim, rois, mask ):
     
     # Regions of interest
     self.rois = rois
+
+    # Brainmask
+#    self.mask = mask
 
     # Round up to the nearest power of 2
     xdim = int(math.pow(2,math.ceil(math.log(matrixdim[0],2))))
@@ -76,11 +71,16 @@ class FiberGraph:
     allvoxels = fiber.getVoxels ()
 
     voxels = []
-    # Use only the important voxels
+
     for i in allvoxels:
-       roi = self.rois.get ( zindex.MortonXYZ(i))
-       if roi:
-         voxels.append ( roi )
+      xyz = zindex.MortonXYZ(i) 
+
+      # Use only the important voxels
+      roival = self.rois.get(xyz)
+      # if it's an roi and in the brain
+  #    if roival and self.mask.get (xyz): 
+      if roival:
+        voxels.append ( i )
 
     for v1,v2 in itertools.combinations((voxels),2): 
       if ( v1 < v2 ):  
@@ -123,6 +123,3 @@ class FiberGraph:
     # first convert to csc 
     t = loadmat ( filename  )
     self.spcscmat = t[key]
-
-    print self.spcscmat
-
