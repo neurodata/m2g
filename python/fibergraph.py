@@ -47,10 +47,18 @@ class FiberGraph:
     # largest value is -1 in each dimension, then plus one because range(10) is 0..9
     self._maxval = zindex.XYZMorton ([xdim-1,ydim-1,zdim-1]) + 1
 
+    # And for the small version of the graph
+    self._smallval = 70
+
     # list of list matrix for one by one insertion
     self.spedgemat = lil_matrix ( (self._maxval, self._maxval), dtype=float )
+    # smallgraph list of list matrix for one by one insertion
+    self.spedgemat_sm = lil_matrix ( (self._smallval, self._smallval), dtype=float )
+
     # empty CSC matrix
     self.spcscmat = csc_matrix ( (self._maxval, self._maxval), dtype=float )
+    # small graph empty CSC matrix
+    self.spcscmat_sm = csc_matrix ( (self._smallval, self._smallval), dtype=float )
 
 
   #
@@ -70,7 +78,10 @@ class FiberGraph:
     # Get the set of voxels in the fiber
     allvoxels = fiber.getVoxels ()
 
+    # Voxels for the big graph
     voxels = []
+    # ROI list for the small graph
+    roilist = []
 
     for i in allvoxels:
       xyz = zindex.MortonXYZ(i) 
@@ -81,12 +92,21 @@ class FiberGraph:
   #    if roival and self.mask.get (xyz): 
       if roival:
         voxels.append ( i )
+        roilist.append ( roi.translate( roival ) )
 
+    # Add edges to the big graph
     for v1,v2 in itertools.combinations((voxels),2): 
       if ( v1 < v2 ):  
         self.spedgemat [ v1, v2 ] += 1.0
       else:
         self.spedgemat [ v2, v1 ] += 1.0
+
+    # Add edges to the small graph
+    for v1,v2 in itertools.combinations((roilist),2): 
+      if ( v1 < v2 ):  
+        self.spedgemat_sm [ v1, v2 ] += 1.0
+      else:
+        self.spedgemat_sm [ v2, v1 ] += 1.0
 
   #
   # Complete the graph.  Get it ready for analysis.
@@ -95,13 +115,14 @@ class FiberGraph:
     """Done adding fibers.  Prior to analysis"""
 
     self.spcscmat = csc_matrix ( self.spedgemat )
+    self.spcscmat_sm = csc_matrix ( self.spedgemat_sm )
     del self.spedgemat
 
   #
   #  Write the sparse matrix out in a format that can be reingested.
   #  fout should be an open file handle
   #
-  def saveToMatlab ( self, key, filename ):
+  def saveToMatlab ( self, key, filename, smallfilename ):
     """Save the sparse array to disk in the specified file name"""
 
     if 0 == self.spcscmat.getnnz():
@@ -110,6 +131,10 @@ class FiberGraph:
 
     print "Saving key ", key, " to file ", filename
     savemat( filename , {key: self.spcscmat})
+
+    smallkey = key + "small"
+    print "Saving key ", smallkey, " to file ", filename
+    savemat( filename , {smallkey: self.spcscmat_sm})
 
   #
   #  Write the sparse matrix out in a format that can be reingested.
