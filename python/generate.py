@@ -40,13 +40,10 @@ def main():
 
     for infile in filelist:
       if not result.pattern or ( infile.find ( result.pattern ) != -1):
-#        print "Processing file", infile
         outfile = os.path.splitext(infile)[0]
         infp = os.path.normpath ( result.inputdir + '/' + infile )
         outfp = os.path.normpath ( result.outputdir + '/' + outfile + '.mat' )
         genGraph ( infp, outfp )
-      else:
-#        print "Not processing file", infile
 
     return
 
