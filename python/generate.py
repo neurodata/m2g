@@ -43,7 +43,7 @@ def main():
         outfile = os.path.splitext(infile)[0]
         infp = os.path.normpath ( result.inputdir + '/' + infile )
         outfp = os.path.normpath ( result.outputdir + '/' + outfile + '.mat' )
-        genGraph ( infp, outfp )
+        genGraph ( infp, outfp, -1 )
 
     return
 
