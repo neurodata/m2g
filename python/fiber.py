@@ -131,9 +131,6 @@ class FiberIterator:
 #
 class Fiber:
 
-    # just a small value to pull points on faces into next lower cubes
-    _epsilon = 0.001
-
     def __init__(self, header, path):
         self.header = header
         self.path = path
@@ -151,32 +148,11 @@ class Fiber:
 
       voxels = []
 
+      #  This is corrected to match the logic of MRCAP
       # extract a path of vertices
       for fbrpt in self.path: 
 
-        # on an X face
-        if ( fbrpt[0] % 1.0 == 0.0 ):
-          voxels.append ( zindex.XYZMorton ( [ int(fbrpt[0]-self._epsilon), int(fbrpt[1]), int(fbrpt[2]) ] ))
           voxels.append ( zindex.XYZMorton ( [ int(fbrpt[0]), int(fbrpt[1]), int(fbrpt[2]) ] ))
-
-        # on a Y face
-        elif ( fbrpt[1] % 1.0 == 0.0 ):
-          voxels.append ( zindex.XYZMorton ( [ int(fbrpt[0]), int(fbrpt[1]-self._epsilon), int(fbrpt[2]) ] ))
-          voxels.append ( zindex.XYZMorton ( [ int(fbrpt[0]), int(fbrpt[1]), int(fbrpt[2]) ] ))
-
-        # on a Z face
-        elif ( fbrpt[2] % 1.0 == 0.0 ):
-          voxels.append ( zindex.XYZMorton ( [ int(fbrpt[0]), int(fbrpt[1]), int(fbrpt[2]-self._epsilon) ] ))
-          voxels.append ( zindex.XYZMorton ( [ int(fbrpt[0]), int(fbrpt[1]), int(fbrpt[2]) ] ))
-
-        # if in the middle of a voxel no edge
-        elif (( fbrpt[0] % 1.0 != 0.0 ) and ( fbrpt[1] % 1.0 != 0.0 ) and ( fbrpt[2] % 1.0 != 0.0 )):
-           pass
-
-        # Data shouldn't be on corners or edges
-        else:
-          print "Data shouldn't be on corners or edges"
-          assert 0
 
       # eliminate duplicates
       return set ( voxels )
