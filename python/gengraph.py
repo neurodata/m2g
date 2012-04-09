@@ -18,7 +18,7 @@ from fiber import FiberReader
 #   based on input and output names.
 #   Outputs a matlab file. 
 #
-def genGraph( infname, outfname, numfibers ):
+def genGraph( infname, outfname, numfibers=0 ):
   """Generate a sparse graph from an MRI studio file and write it as a Matlab file"""
 
   # Assume that there are ROI files in ../roi
