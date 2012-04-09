@@ -122,7 +122,7 @@ class FiberGraph:
   #  Write the sparse matrix out in a format that can be reingested.
   #  fout should be an open file handle
   #
-  def saveToMatlab ( self, key, filename, smallfilename ):
+  def saveToMatlab ( self, key, filename ):
     """Save the sparse array to disk in the specified file name"""
 
     if 0 == self.spcscmat.getnnz():
