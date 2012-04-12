@@ -9,7 +9,7 @@ import sys
 import os
 import roi
 #import mask
-from fibergraph_sm import FiberGraph
+from fibergraph import FiberGraph
 from fiber import FiberReader
 
 
@@ -108,13 +108,6 @@ def main ():
 
   result = parser.parse_args()
   genGraph ( result.fbrfile, result.output, result.count )
-
-  if 1:
-    from fibergraph_sm import FiberGraph
-  else:     
-    from fibergraph import FiberGraph
- 
-
 
 if __name__ == "__main__":
   main()
