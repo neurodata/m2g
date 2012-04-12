@@ -43,9 +43,9 @@ def main():
         outfile = os.path.splitext(infile)[0]
         infp = os.path.normpath ( result.inputdir + '/' + infile )
         outfp = os.path.normpath ( result.outputdir + '/' + outfile + '.mat' )
-        genGraph ( infp, outfp, -1 )
-
-    return
+        genGraph ( infp, outfp )
+      else:
+        pass
 
 if __name__ == "__main__":
       main()
