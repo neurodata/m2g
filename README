@@ -1,6 +1,9 @@
 This project contains several tools to play with fiber data in
 MRI Studio format [ http://www.mristudio.org/ ].
 
-This code currently little more than a few days' worth of hacking,
-and likely not of much use beyond Hopkins.
+The python subdirectory contains the source code that generates
+graphs from dMRI streamlines.  It produces two varieties of output:
+  * smallgraphs: these use brain atlas regions of interest (70) to make 70z70 matrixes
+  * biggraphs: these create connectivities among greymatter voxels.
 
+The c directory contains legacy codes that is useless.
