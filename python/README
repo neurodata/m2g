@@ -1,5 +1,10 @@
 Several utilities, written in python, to manipulate MR fiber data.
 
+Requires;
+  cython
+  scipy
+  numpy
+
 This code now generates small (70x70) graphs that are consistent with 
 the output of the MRCAP pipeline.  It also generates large graphs that
 have 400-600K non-zero entries.
