@@ -38,8 +38,11 @@ Requirements:
 *** roislice.py
     Displays the regions of interest in the brain as 2-d projections
 
-*** zindex.py
+*** zindex.pyx
     The Morton-order space filling curve.  To get the coordinates of a large
     graph identifier call zindex.MortonXYZ ( id ) which returns [ x, y, z ].
-    Randal uses a cython optimized version of this from EM-connectome.
-    This is faster.
+    This is a cython optimized version of the code and needs to be installed
+    into your python distribution by calling 'python setup.py install'
+
+*** setup.py
+    Install the zindex package into your python distribution
