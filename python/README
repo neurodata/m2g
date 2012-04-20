@@ -1,5 +1,16 @@
 Several utilities, written in python, to manipulate MR fiber data.
 
+This code now generates small (70x70) graphs that are consistent with 
+the output of the MRCAP pipeline.  It also generates large graphs that
+have 400-600K non-zero entries.
+
+To generate biggrgaphs versus smallgraphs on must change the import option on
+gengraph.py and choose from
+  from fibergraph import FiberGraph
+  from fibergraph_sm import FiberGraph
+  
+This should be made a command line option.
+
 Requirements:
   - Python packages:
     - numpy
@@ -7,9 +18,6 @@ Requirements:
   - If you want to handle large files...
     - lots of ram (> 8GB)
     - 64-bit python
-   
-We have been using the Enthought Python Distribution (EPD 7.0),
-from http://www.enthought.com/.
 
 *** fiber.py
     Module for reading MRI Studio-format fiber files
@@ -18,6 +26,7 @@ from http://www.enthought.com/.
     Simple script to echo a fiber file out as text
 
 *** fibgergraph.py
+*** fibgergraph_sm.py
     Module to represent the graph derived from an MRI studio file
 
 *** gengraph.py
@@ -28,3 +37,9 @@ from http://www.enthought.com/.
 
 *** roislice.py
     Displays the regions of interest in the brain as 2-d projections
+
+*** zindex.py
+    The Morton-order space filling curve.  To get the coordinates of a large
+    graph identifier call zindex.MortonXYZ ( id ) which returns [ x, y, z ].
+    Randal uses a cython optimized version of this from EM-connectome.
+    This is faster.
