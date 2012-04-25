@@ -1,6 +1,6 @@
 import argparse
 
-#import matplotlib.pyplot
+import matplotlib.pyplot
 import roi
 import sys
 
@@ -28,17 +28,6 @@ def main ():
     print "Failed to parse ROI files at: ", result.roixmlfile, result.roixmlfile
     assert 0
 
-      
-  # Counting the non-zero elements
-  count = 0
-  for z in range(rois.data.shape[2]):
-    for y in range(rois.data.shape[1]):
-      for x in range(rois.data.shape[0]):
-        if rois.data[x,y,z] != 0:
-          count = count + 1
-
-  print count
-  sys.exit(0)
 
   # cut out the specified slice
   if result.dimensions == "xy":
@@ -50,9 +39,8 @@ def main ():
   else:
     print "Choose xy, xz, or yz as dimension or leave blank for xy default"
 
+  matplotlib.pyplot.show()
 
-  # display until key press
-  raw_input("Press Enter to continue...")
 
 if __name__ == "__main__":
   main()
