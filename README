@@ -1,12 +1,10 @@
 This project contains several tools to play with fiber data in
 MRI Studio format [ http://www.mristudio.org/ ].
 
-The python subdirectory contains the source code that generates
+The mrcap subdirectory contains the source code that generates
 graphs from dMRI streamlines.  It produces two varieties of output:
   * smallgraphs: these use brain atlas regions of interest (70) to make 70z70 matrixes
   * biggraphs: these create connectivities among greymatter voxels.
-
-The c directory contains legacy codes that is useless.
 
 The cmapper directory contains simple tools to manipulate 
 connectome mapper outputs.
