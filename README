@@ -7,3 +7,6 @@ graphs from dMRI streamlines.  It produces two varieties of output:
   * biggraphs: these create connectivities among greymatter voxels.
 
 The c directory contains legacy codes that is useless.
+
+The cmapper directory contains simple tools to manipulate 
+connectome mapper outputs.
