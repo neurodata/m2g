@@ -1,0 +1,8 @@
+
+Utilities to manipulate Connectome Mapper outputs
+
+   *** roislice.py: draw a false color plot of a slice of the ROI map of a brain.
+     e.g. python roislice.py ROIv_84.npy 150 -- draws slice 150 in the xy plane (default)
+          python roislice.py --dimensions xz ROIv_84.npy 150 -- draws an xz plane
+
+   *** ROIv_84.npy: sample roi file from connectome mapper
