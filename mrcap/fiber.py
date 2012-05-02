@@ -131,9 +131,6 @@ class FiberIterator:
 #
 class Fiber:
 
-    # just a small value to pull points on faces into next lower cubes
-    _epsilon = 0.000
-
     def __init__(self, header, path):
         self.header = header
         self.path = path
