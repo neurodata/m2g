@@ -43,7 +43,7 @@ def main ():
   else:
     print "Choose xy, xz, or yz as dimension or leave blank for xy default"
 
-  vec_func1 = np.vectorize ( lambda x: 0 if math.isnan(x) else x ) 
+  vec_func1 = np.vectorize ( lambda x: 0.0 if math.isnan(x) else x ) 
   vec_func2 = np.vectorize ( lambda x: int ( math.fabs(x) / result.zero_threshold ) )
   fgraphdata = vec_func1 ( graphdata )
   igraphdata = vec_func2 ( fgraphdata )
