@@ -5,6 +5,8 @@ import zindex
 
 import numpy
 
+import nibabel.trackvis as niv
+
 
 class FiberReader:
     """Class to read data file stored in TrackVis .trk format.
@@ -16,7 +18,7 @@ class FiberReader:
     #    and gets shape information
     #
     def __init__(self, filename):
-       """Load the TrackVis file """
+        """Load the TrackVis file """
         self._filename = filename
 
         self.path, self.fiberHeader = niv.read(filename)
@@ -55,7 +57,8 @@ class FiberReader:
     #  Support the str() function on this object
     #
     def __str__(self):
-        return self.fileHeader.__str__()
+        return self.fiberHeader.__str__()
+
 
     #
     #  Make object iterable
