@@ -21,7 +21,7 @@ class FiberReader:
         """Load the TrackVis file """
         self._filename = filename
 
-        self.path, self.fiberHeader = niv.read(filename)
+        self.tracks, self.fiberHeader = niv.read(filename)
         self.fiberCount = self.fiberHeader['n_count'].ravel()[0]
         
         print "number of fibers ->", self.fiberCount
@@ -44,14 +44,14 @@ class FiberReader:
     #
     def nextFiber(self):
         """Read and return the next fiber (or None at EOF)"""
+
         if self.currentFiber == self.fiberCount:
             return None
 
-        fiberLength = len(self.path[self.currentFiber][0])
-        path = self.path[self.currentFiber][0]
+        fiberLength = len(self.tracks[self.currentFiber][0])
+        track = self.tracks[self.currentFiber][0]
         self.currentFiber += 1
-        # RBTODO new constructor include fiber length
-
+        return Fiber(self.fiberHeader, track, fiberLength)
 
     #
     #  Support the str() function on this object
@@ -71,6 +71,7 @@ class FiberReader:
 #  Iterator class to support FiberReader
 #
 class FiberIterator:
+    """Iterator for TrackVis tracks"""
     def __init__(self, reader):
       self.reader = reader
       self.reader._rewind()
@@ -86,20 +87,22 @@ class FiberIterator:
             raise StopIteration
 
 
+# RBTODO the header doesn't format well.
 
 #
 #  Fiber abstraction
 #
 class Fiber:
+    """A TrackVis track"""
 
-    def __init__(self, header, path, length):
+    def __init__(self, header, track, length):
         self.header = header
-        self.path = path
+        self.track = track
         self.length = int(length)
         return
 
     def __str__(self):
-        return self.header.__str__() + "\n" + self.path.__str__()
+        return self.header.__str__() + "\n" + self.track.__str__()
     
     #
     #  Return a list of voxels in this Fiber.  As tuples by zindex
@@ -110,8 +113,8 @@ class Fiber:
       voxels = []
 
       #  This is corrected to match the logic of MRCAP
-      # extract a path of vertices
-      for fbrpt in self.path: 
+      # extract a track of vertices
+      for fbrpt in self.track: 
         
           voxels.append ( zindex.XYZMorton ( [ int(fbrpt[0]), int(fbrpt[1]), int(fbrpt[2]) ] ))
 

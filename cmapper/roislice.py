@@ -4,6 +4,8 @@ import numpy as np
 import matplotlib.pyplot
 import sys
 
+import niiroi
+
 #
 #  roislice
 #
@@ -13,19 +15,15 @@ import sys
 def main ():
 
   parser = argparse.ArgumentParser(description='Draw the ROI map of a brain.')
-  parser.add_argument('npfile', action="store")
+  parser.add_argument('niigz_file', action="store")
   parser.add_argument('--dimensions', action="store", default="xy", help="xy, xz, or yz")
   parser.add_argument('slice', action="store")
 
   result = parser.parse_args()
 
-  # Read the XML file and then the data
-  try:
-    data = np.load ( result.npfile )
-  except:
-    print "Failed to parse file: ", result.npfile
-    sys.exit(-1)
+  rois = niiroi.ROINifti ( result.niigz_file )
 
+  data = rois.data
 
   # cut out the specified slice
   if result.dimensions == "xy":
