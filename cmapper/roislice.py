@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot
 import sys
 
-import niiroi
+import roi
 
 #
 #  roislice
@@ -21,7 +21,7 @@ def main ():
 
   result = parser.parse_args()
 
-  rois = niiroi.ROINifti ( result.niigz_file )
+  rois = roi.ROINifti ( result.niigz_file )
 
   data = rois.data
 
