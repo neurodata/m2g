@@ -15,8 +15,10 @@ import zindex
 from scipy.io import loadmat, savemat
 from collections import Counter
 from mayavi import mlab
+import itertools as itt
+from matplotlib import pyplot as plt
     
-def load_fibergraph(roi_fn, mat_fn):
+def _load_fibergraph(roi_fn, mat_fn):
     """Load fibergraph from roi_fn and mat_fn"""
     
     roix = roi.ROIXML(roi_fn+'.xml')
@@ -69,7 +71,7 @@ def cc_for_each_brain(fiberDir, roiDir, ccDir, figDir):
     
     for brainFn in brainFiles:
         print "Processing brain "+brainFn
-        fg = load_fibergraph(roiDir+brainFn+roiSfx,fiberDir+brainFn+fiberSfx)
+        fg = _load_fibergraph(roiDir+brainFn+roiSfx,fiberDir+brainFn+fiberSfx)
                                    
         vcc = save_lcc(fg, ccDir+brainFn)
         
@@ -85,7 +87,7 @@ def get_cc_coords(vcc, ncc):
 
     return np.concatenate((coord,vcc[inlcc][np.newaxis].T),axis=1)
     
-def cc_to_coord(vcc,shape):
+def get_3d_cc(vcc,shape):
     """Takes an array vcc and shape which is the shape of the new 3d image and 'colors' the image by connected component
     
     Input
@@ -95,11 +97,36 @@ def cc_to_coord(vcc,shape):
     
     Output
     ======
-    ccz -- array of with shape=shape. colored so that ccz[x,y,z]=vcc[i] where x,y,z is the XYZ coordinates for Morton index i
+    cc3d -- array of with shape=shape. colored so that ccz[x,y,z]=vcc[i] where x,y,z is the XYZ coordinates for Morton index i
     """
-    ccz = np.zeros(shape)
-    [ccz.itemset(tuple(zindex.MortonXYZ(i)), vcc[i]) for i in xrange(len(vcc))]
-    return ccz
+
+    cc3d = np.NaN*np.zeros(shape)
+    allCoord = itt.product(*[xrange(sz) for sz in shape])
+    
+    [cc3d.itemset((xyz), vcc[zindex.XYZMorton(xyz)])
+        for xyz in allCoord if not vcc[zindex.XYZMorton(xyz)]==0];
+    return cc3d
+
+def show_overlay(img3d, cc3d, ncc=10, s=85, xyz = 'xy'):
+    """Shows the connected components overlayed over img3d
+    
+    Input
+    ======
+    img3d -- 3d array
+    cc3d -- 3d array ( preferably of same shape as img3d, use get_3d_cc(...) )
+    ncc -- where to cut off the color scale
+    s -- slice to show
+    xyz -- which projection to use in {'xy','xz','yz'}
+    """
+    if xyz=='xy':
+        plt.imshow(img3d[:,:,s],cmap=plt.cm.gray_r)
+        plt.imshow(cc3d[:,:,s],alpha=.7,cmap=plt.cm.jet,clim=(1,ncc))
+    if xyz=='xz':
+        plt.imshow(img3d[:,s,::-1].T,cmap=plt.cm.gray_r)
+        plt.imshow(cc3d[:,s,::-1].T,alpha=.7,cmap=plt.cm.jet,clim=(1,ncc))
+    if xyz=='yz':
+        plt.imshow(img3d[s,::-1,::-1].T,cmap=plt.cm.gray_r)
+        plt.imshow(cc3d[s,::-1,::-1].T,alpha=.7,cmap=plt.cm.jet,clim=(1,ncc))
     
 def save_figures(coord, fn):
     """Saves 3 images which are 3d color representations of the coordinates in coord
