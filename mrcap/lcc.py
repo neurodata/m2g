@@ -39,7 +39,7 @@ def get_lcc_idx(G):
     
     **NOTE**: All isolated vertices (ie no incident edges) are put in 1 connected components
     """
-    ncc,vertexCC = sp.cs_graph_components(G)
+    ncc,vertexCC = sp.cs_graph_components(G+G.transpose())
         
     cc_size = Counter(vertexCC)
     cc_size = sorted(cc_size.iteritems(), key=lambda cc: cc[1],reverse=True)
@@ -144,9 +144,44 @@ def save_figures(coord, fn):
     mlab.view(0,90)
     mlab.savefig(fn+'_view0,90.png',figure=f,magnification=4)
     mlab.view(90,90)
-    mlab.savefig(fn+'_view90,90.png',figure=f,magnification=4)
+    mlab.savefig(fn+'_view90,90.png',figure=vcf,magnification=4)
     mlab.close(f)
     
+def check_fiber(fiber, fg,vcc):
+    vox = list(fiber.getVoxels());
+    
+    x,y,z = zip(*[zindex.MortonXYZ(v) for v in vox])
+    
+    if np.min(x) >= 64 or np.max(x)<64:
+        return 0
+    
+    if np.min(y) >= 65 or np.max(y)<55:
+        return 0
+    
+    if np.min(z) >= 100 or np.max(z) < 90:
+        return 0
+    
+    c = vcc[vox[0]]
+    for v1 in vox:
+        if fg.rois.get(zindex.MortonXYZ(v1))==0:
+            continue
+        
+        
+        for v2 in vox:
+            if fg.rois.get(zindex.MortonXYZ(v2))==0 or v1 == v2:
+                continue
+            if fg.spcscmat[v1,v2]==0:
+                return 1
+        
+        if vcc[vox]!=c:
+            return 2
+    return 0
+            
+            
+            
+    
+    
+
     
 if __name__=='__main__':
     fiberDir = '/mnt/braingraph1data/MRCAPgraphs/biggraphs/'

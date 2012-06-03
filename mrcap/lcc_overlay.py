@@ -9,15 +9,8 @@ import argparse
 
 import lcc
 import fa
-
-
-if __name__=='__main__':
     
-    parser = argparse.ArgumentParser(description='Show the lcc overlayed on the fa map')
-    parser.add_argument('brainFn', action="store")
-    result = parser.parse_args()
-    
-    bfn = result.brainFn
+def show_figure(bfn):
     faDir = "/mnt/braingraph1data/projects/will/mar12data/fa/"
     ccDir = '/data/biggraphs/connectedcomp/'
     
@@ -29,6 +22,9 @@ if __name__=='__main__':
     
     sl = 100
     xyz = 'xy'
+    
+    
+    fig = figure();
     
     ax = subplot(111)
     subplots_adjust(left=0.25, bottom=0.25)
@@ -80,3 +76,14 @@ if __name__=='__main__':
     radio.on_clicked(xyzproj)
     
     show()
+
+
+
+if __name__=='__main__':
+    
+    parser = argparse.ArgumentParser(description='Show the lcc overlayed on the fa map')
+    parser.add_argument('brainFn', action="store")
+    result = parser.parse_args()
+    
+    bfn = result.brainFn
+    show_figure(bfn)
