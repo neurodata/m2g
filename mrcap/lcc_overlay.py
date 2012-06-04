@@ -17,8 +17,8 @@ def show_figure(bfn):
     fafn =  faDir+bfn+"_fa"
     faXML = fa.FAXML(fafn+'.xml')
     faData = fa.FAData(fafn+'.raw',faXML.getShape())
-    vcc = np.load(ccDir+bfn+'_concomp.npy')
-    cc3d = lcc.get_3d_cc(vcc,faXML.getShape())
+    vcc = lcc.ConnectedComponent(fn=ccDir+bfn+'_concomp.npy')
+    cc3d = vcc.get_3d_cc(faXML.getShape())
     
     sl = 100
     xyz = 'xy'
