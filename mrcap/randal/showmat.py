@@ -19,5 +19,5 @@ graphdata = np.array (graphcsc.todense())
 print graphdata [ 0:4, 0:4 ]
 
 matplotlib.pyplot.pcolor ( graphdata[:,:] )
+matplotlib.pyplot.show ()
 
-raw_input("Press Enter to continue...")
