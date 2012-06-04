@@ -17,6 +17,80 @@ from collections import Counter
 from mayavi import mlab
 import itertools as itt
 from matplotlib import pyplot as plt
+
+class ConnectedComponent(object):
+    vertexCC = None
+    ccsize = None
+    ncc = 0
+    n = 0
+    
+    def __init__(self,G=None, fn=None):
+        if G is not None:
+            self.get_from_fiber_graph(G)
+        elif fn is not None:
+            self.load_from_file(fn)
+            
+    def get_from_fiber_graph(self,G):
+        self.ncc,vertexCC = sp.cs_graph_components(G+G.transpose())
+        
+        self.n = vertexCC.shape[0]
+        
+        noniso = np.nonzero(np.not_equal(vertexCC,-2))[0]
+        
+        cccounter = Counter(vertexCC[noniso])
+        cc_badLabel,_ = zip(*cccounter.most_common())
+        cc_dict = dict(zip(cc_badLabel, np.arange(self.ncc)+1))
+        cc_dict[-2] = 0
+        
+        self.vertexCC = np.array([cc_dict[v] for v in vertexCC])
+        self.ccsize = Counter(vertexCC)
+    
+    def save(self,fn):
+        np.save(fn+'_concomp.npy',sp.lil_matrix(self.vertexCC))
+        
+    def load_from_file(self,fn):
+        self.vertexCC = np.load(fn).item().toarray()
+        self.n = self.vertexCC.shape[1]
+        self.vertexCC = self.vertexCC.reshape(self.n)
+
+    
+    def __getitem__(self,key):
+        if type(key) is int:
+            return self.get_cc(key)
+        elif type(key) is tuple:
+            return self.get_coord_cc(key)
+        
+    def get_cc(self,v):
+        return self.vertexCC[v]
+        
+    def get_coord_cc(self,xyz):
+        return self.get_cc(zindex.XYZMorton(xyz))
+        
+    def get_3d_cc(self,shape):
+        """Takes a shape which is the shape of the new 3d image and 'colors' the image by connected component
+        
+        Input
+        =====
+        shape -- 3-tuple
+        
+        Output
+        ======
+        cc3d -- array of with shape=shape. colored so that ccz[x,y,z]=vcc[i] where x,y,z is the XYZ coordinates for Morton index i
+        """
+    
+        cc3d = np.NaN*np.zeros(shape)
+        allCoord = itt.product(*[xrange(sz) for sz in shape])
+        
+        [cc3d.itemset((xyz), self.vertexCC[zindex.XYZMorton(xyz)])
+            for xyz in allCoord if not self.vertexCC[zindex.XYZMorton(xyz)]==0];
+        return cc3d
+    
+    def get_coords_for_lccs(self, ncc):
+        """Computes coordinates for each voxel in the top ncc connected components"""
+        inlcc = (np.less_equal(self.vertexCC,ncc)*np.greater(self.vertexCC,0)).nonzero()[0]
+        coord = np.array([zindex.MortonXYZ(v) for v in inlcc])
+    
+        return np.concatenate((coord,self.vertexCC[inlcc][np.newaxis].T),axis=1)
     
 def _load_fibergraph(roi_fn, mat_fn):
     """Load fibergraph from roi_fn and mat_fn"""
@@ -29,36 +103,9 @@ def _load_fibergraph(roi_fn, mat_fn):
     
     return fg
     
-    
-    
-def get_lcc_idx(G):
-    """Determines and sorts the connected components of G
-    
-    Each vertex in G is assigned a label corresponding to its connected component.
-    The largest connected component is labelled 0, second largest 1, etc.
-    
-    **NOTE**: All isolated vertices (ie no incident edges) are put in 1 connected components
-    """
-    ncc,vertexCC = sp.cs_graph_components(G+G.transpose())
-        
-    cc_size = Counter(vertexCC)
-    cc_size = sorted(cc_size.iteritems(), key=lambda cc: cc[1],reverse=True)
-    cc_badLabel,_ = zip(*cc_size)
-    cc_dict = dict(zip(cc_badLabel, np.arange(ncc+1)))
-    
-    vertexCC = [cc_dict[vcc] for vcc in vertexCC]
-   
-    return np.array(vertexCC)
-    
-def save_lcc(fg, fn):
-    """Save the largest connected component for this fibergraph in file fn"""
-    vcc = get_lcc_idx(fg.spcscmat)
-    np.save(open(fn+'_concomp.npy','w'),vcc)
-    savemat(fn+'_concomp.mat',{'vertexCC':vcc})
-    return vcc
-    
-def cc_for_each_brain(fiberDir, roiDir, ccDir, figDir):
-    """Go through the directory fiberDir and find the connected components
+
+def cc_for_each_brain(graphDir, roiDir, ccDir, figDir):
+    """Go through the directory graphDir and find the connected components
     
     Saves the all connected component info in ccDir and saves some 3d-pics into figDir
     If figDir is None then it does not save
@@ -67,45 +114,24 @@ def cc_for_each_brain(fiberDir, roiDir, ccDir, figDir):
     fiberSfx = '_fiber.mat'
     roiSfx = '_roi'
     
-    brainFiles = [fn.split('_')[0] for fn in os.listdir(fiberDir)]
+    brainFiles = [fn.split('_')[0] for fn in os.listdir(graphDir)]
     
     for brainFn in brainFiles:
         print "Processing brain "+brainFn
-        fg = _load_fibergraph(roiDir+brainFn+roiSfx,fiberDir+brainFn+fiberSfx)
-                                   
-        vcc = save_lcc(fg, ccDir+brainFn)
+        fg = _load_fibergraph(roiDir+brainFn+roiSfx,graphDir+brainFn+fiberSfx)
+                        
+                        
+        print 'Processing connected components'
+        vcc = ConnectedComponent(fg.spcscmat)
+        vcc.save(ccDir+brainFn)
+        
+        print 'ncc='+repr(vcc.ncc)
         
         if figDir:
-            save_figures(get_cc_coords(vcc,10), figDir+brainFn)
+            save_figures(vcc.get_coords_for_lccs(10), figDir+brainFn)
         
         del fg
-        
-def get_cc_coords(vcc, ncc):
-    """Computes coordinates for each voxel in the top ncc connected components"""
-    inlcc = (np.less_equal(vcc,ncc)*np.greater(vcc,0)).nonzero()[0]
-    coord = np.array([zindex.MortonXYZ(v) for v in inlcc])
-
-    return np.concatenate((coord,vcc[inlcc][np.newaxis].T),axis=1)
     
-def get_3d_cc(vcc,shape):
-    """Takes an array vcc and shape which is the shape of the new 3d image and 'colors' the image by connected component
-    
-    Input
-    =====
-    vcc -- 1d array
-    shape -- 3-tuple
-    
-    Output
-    ======
-    cc3d -- array of with shape=shape. colored so that ccz[x,y,z]=vcc[i] where x,y,z is the XYZ coordinates for Morton index i
-    """
-
-    cc3d = np.NaN*np.zeros(shape)
-    allCoord = itt.product(*[xrange(sz) for sz in shape])
-    
-    [cc3d.itemset((xyz), vcc[zindex.XYZMorton(xyz)])
-        for xyz in allCoord if not vcc[zindex.XYZMorton(xyz)]==0];
-    return cc3d
 
 def show_overlay(img3d, cc3d, ncc=10, s=85, xyz = 'xy'):
     """Shows the connected components overlayed over img3d
@@ -144,49 +170,37 @@ def save_figures(coord, fn):
     mlab.view(0,90)
     mlab.savefig(fn+'_view0,90.png',figure=f,magnification=4)
     mlab.view(90,90)
-    mlab.savefig(fn+'_view90,90.png',figure=vcf,magnification=4)
+    mlab.savefig(fn+'_view90,90.png',figure=f,magnification=4)
     mlab.close(f)
+
+def get_3d_cc(vcc,shape):
+    """Takes an array vcc and shape which is the shape of the new 3d image and 'colors' the image by connected component
     
-def check_fiber(fiber, fg,vcc):
-    vox = list(fiber.getVoxels());
+    For some reason this is 3 times as fast as the same thing in the ConnectedComponet class ?
     
-    x,y,z = zip(*[zindex.MortonXYZ(v) for v in vox])
+    Input
+    =====
+    vcc  1d array
+    shape  3tuple
     
-    if np.min(x) >= 64 or np.max(x)<64:
-        return 0
+    Output
+    ======
+    cc3d  array of with shape=shape. colored so that ccz[x,y,z]=vcc[i] where x,y,z is the XYZ coordinates for Morton index i
+    """
+
+    cc3d = np.NaN*np.zeros(shape)
+    allCoord = itt.product(*[xrange(sz) for sz in shape])
     
-    if np.min(y) >= 65 or np.max(y)<55:
-        return 0
-    
-    if np.min(z) >= 100 or np.max(z) < 90:
-        return 0
-    
-    c = vcc[vox[0]]
-    for v1 in vox:
-        if fg.rois.get(zindex.MortonXYZ(v1))==0:
-            continue
-        
-        
-        for v2 in vox:
-            if fg.rois.get(zindex.MortonXYZ(v2))==0 or v1 == v2:
-                continue
-            if fg.spcscmat[v1,v2]==0:
-                return 1
-        
-        if vcc[vox]!=c:
-            return 2
-    return 0
-            
-            
-            
-    
+    [cc3d.itemset((xyz), vcc[zindex.XYZMorton(xyz)])
+        for xyz in allCoord if not vcc[zindex.XYZMorton(xyz)]==0];
+    return cc3d
     
 
     
 if __name__=='__main__':
-    fiberDir = '/mnt/braingraph1data/MRCAPgraphs/biggraphs/'
-    roiDir = '/mnt/braingraph1data/MR.new/roi/'
+    graphDir = '/mnt/braingraph1data/projects/MRN/graphs/biggraphs/'
+    roiDir = '/mnt/braingraph1data/projects/will/mar12data/roi/'
     ccDir = '/data/biggraphs/connectedcomp/'
     figDir = '/home/dsussman/Dropbox/Figures/DTMRI/lccPics/'
 
-    cc_for_each_brain(fiberDir, roiDir, ccDir, figDir)         
+    cc_for_each_brain(graphDir, roiDir, ccDir, figDir)         
