@@ -17,6 +17,9 @@ from collections import Counter
 from mayavi import mlab
 import itertools as itt
 from matplotlib import pyplot as plt
+import fa
+import mprage
+import argparse
 
 class ConnectedComponent(object):
     vertexCC = None
@@ -45,13 +48,20 @@ class ConnectedComponent(object):
         self.vertexCC = np.array([cc_dict[v] for v in vertexCC])
         self.ccsize = Counter(vertexCC)
     
-    def save(self,fn):
-        np.save(fn+'_concomp.npy',sp.lil_matrix(self.vertexCC))
+    def save(self,fn, suffix=True):
+        if suffix:
+            np.save(fn+'_concomp.npy',sp.lil_matrix(self.vertexCC))
+        else:
+            np.save(fn,sp.lil_matrix(self.vertexCC))
         
     def load_from_file(self,fn):
         self.vertexCC = np.load(fn).item().toarray()
         self.n = self.vertexCC.shape[1]
         self.vertexCC = self.vertexCC.reshape(self.n)
+        
+    def induced_subgraph(self, G, cc=1):
+        incc = np.equal(self.vertexCC,cc).nonzero()[0]
+        return G[:,incc][incc,:]
 
     
     def __getitem__(self,key):
@@ -133,7 +143,17 @@ def cc_for_each_brain(graphDir, roiDir, ccDir, figDir):
         del fg
     
 
-def show_overlay(img3d, cc3d, ncc=10, s=85, xyz = 'xy'):
+def get_slice(img3d, s, xyz):
+    if xyz=='xy':
+        return img3d[:,:,s]
+    if xyz=='xz':
+        return img3d[:,s,::-1].T
+    if xyz=='yz':
+        return img3d[s,::-1,::-1].T
+        
+    print 'Not a valid view'
+
+def show_overlay(img3d, cc3d, ncc=10, s=85, xyz = 'xy',alpha=.8):
     """Shows the connected components overlayed over img3d
     
     Input
@@ -144,15 +164,85 @@ def show_overlay(img3d, cc3d, ncc=10, s=85, xyz = 'xy'):
     s -- slice to show
     xyz -- which projection to use in {'xy','xz','yz'}
     """
-    if xyz=='xy':
-        plt.imshow(img3d[:,:,s],cmap=plt.cm.gray_r)
-        plt.imshow(cc3d[:,:,s],alpha=.7,cmap=plt.cm.jet,clim=(1,ncc))
-    if xyz=='xz':
-        plt.imshow(img3d[:,s,::-1].T,cmap=plt.cm.gray_r)
-        plt.imshow(cc3d[:,s,::-1].T,alpha=.7,cmap=plt.cm.jet,clim=(1,ncc))
-    if xyz=='yz':
-        plt.imshow(img3d[s,::-1,::-1].T,cmap=plt.cm.gray_r)
-        plt.imshow(cc3d[s,::-1,::-1].T,alpha=.7,cmap=plt.cm.jet,clim=(1,ncc))
+    cc = get_slice(cc3d,s,xyz)
+    img = get_slice(img3d,s,xyz)
+    
+    notcc = np.isnan(cc)
+    incc = np.not_equal(notcc,True)
+    
+    img4 = plt.cm.gray(img/np.nanmax(img))
+    if ncc is not np.Inf:
+        cc = plt.cm.jet(cc/float(ncc))
+    else:
+        cc = plt.cm.jet(np.log(cc)/np.log(np.nanmax(cc)))
+        
+    cc[notcc,:]=img4[notcc,:]
+    cc[incc,3] = 1-img[incc]/(2*np.nanmax(img))
+        
+    plt.imshow(cc)
+    
+    #if ncc is not np.Inf:
+    #    plt.imshow(cc,cmap=plt.cm.jet,clim=(1,ncc))
+    #else:
+    #    plt.imshow(np.log(cc),cmap=plt.cm.jet)
+    #plt.imshow(img,alpha=alpha,cmap=plt.cm.gray)
+        
+def save_fa_overlay(faDir, ccDir, figDir, slist, orientationList):
+    brainFiles = [fn.split('_')[0] for fn in os.listdir(ccDir)]
+    f = plt.figure();
+    
+    for bfn in brainFiles:
+        vcc = ConnectedComponent(fn=ccDir+bfn+'_concomp.npy')
+        fax = fa.FAXML(faDir+bfn+'_fa.xml')
+        fas = fa.FAData(faDir+bfn+'_fa.raw',fax.getShape())
+        cc3d = vcc.get_3d_cc(fax.getShape())
+        
+        for view,s,xyz in zip(np.arange(len(slist)),slist,orientationList):
+            show_overlay(fas.data,cc3d,np.Inf,s,xyz,.5)
+            plt.savefig(figDir+bfn+'_ccfaOverlay_view'+repr(view)+'.pdf',)
+            plt.clf()
+            
+    plt.close(f)
+        
+ 
+ 
+def save_overlay(faDir, mprDir, ccDir, figDir, slist, orientationList):
+    brainFiles = [fn.split('_')[0] for fn in os.listdir(ccDir)]
+    f = plt.figure(figsize=(14,9));
+    
+    for bfn in brainFiles:
+        vcc = ConnectedComponent(fn=ccDir+bfn+'_concomp.npy')
+        fax = fa.FAXML(faDir+bfn+'_fa.xml')
+        fas = fa.FAData(faDir+bfn+'_fa.raw',fax.getShape())
+        mpx = mprage.MPRAGEXML(mprDir+'mprage_'+bfn+'_ss_crop.xml')
+        mpd = mprage.MPRAGEData(mprDir+'mprage_'+bfn+'_ss_crop.raw',mpx.getShape())
+        
+        cc3d = vcc.get_3d_cc(fax.getShape())
+        
+        for view,s,xyz in zip(np.arange(len(slist)),slist,orientationList):
+            
+            plt.clf()
+            plt.subplot(221);
+            plt.title('FA Overlay')
+            show_overlay(fas.data,cc3d,np.Inf,s,xyz,.5)
+            
+            plt.subplot(222);
+            plt.title('FA Original; '+bfn+', '+xyz+'-slice '+repr(s))
+            plt.imshow(get_slice(fas.data,s,xyz),cmap=plt.cm.gray)
+            plt.colorbar()
+            
+            plt.subplot(223); plt.title('MPRAGE Overlay')
+            show_overlay(mpd.data,cc3d,np.Inf,s,xyz,.5)
+            
+            plt.subplot(224);
+            plt.title('MPRAGE Original')
+            plt.imshow(get_slice(mpd.data,s,xyz),cmap=plt.cm.gray)
+            plt.colorbar()
+            
+            #plt.tight_layout()
+            plt.savefig(figDir+bfn+'_ccfaOverlay_view'+repr(view)+'.pdf')
+            
+    plt.close(f)       
     
 def save_figures(coord, fn):
     """Saves 3 images which are 3d color representations of the coordinates in coord
@@ -195,6 +285,24 @@ def get_3d_cc(vcc,shape):
         for xyz in allCoord if not vcc[zindex.XYZMorton(xyz)]==0];
     return cc3d
     
+def main ():
+    
+    parser = argparse.ArgumentParser(description='Draw the ROI map of a brain.')
+    parser.add_argument('roixmlfile', action="store")
+    parser.add_argument('roirawfile', action="store")
+    parser.add_argument('fibergraphfile', action="store")
+    parser.add_argument('ccfile', action="store")
+    
+    result = parser.parse_args()
+    
+    roix = roi.ROIXML(result.roixmlfile)
+    rois = roi.ROIData(result.roirawfile, roix.getShape())
+    
+    fg = fibergraph.FiberGraph(roix.getShape(),rois,[])
+    fg.loadFromMatlab('fibergraph', result.fibergraphfile)
+    
+    vcc = ConnectedComponent(G=fg.spcscmat)
+    vcc.save(results.ccfile)
 
     
 if __name__=='__main__':
