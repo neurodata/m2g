@@ -13,6 +13,11 @@ import fa
 def show_figure(bfn):
     faDir = "/mnt/braingraph1data/projects/will/mar12data/fa/"
     ccDir = '/data/biggraphs/connectedcomp/'
+
+    global xyz
+    global sl
+    global sslice
+    
     
     fafn =  faDir+bfn+"_fa"
     faXML = fa.FAXML(fafn+'.xml')
@@ -58,6 +63,7 @@ def show_figure(bfn):
     rax = axes([0.025, 0.5, 0.15, 0.15], axisbg=axcolor)
     radio = RadioButtons(rax, ('xy', 'xz', 'yz'), active=0)
     def xyzproj(newxyz):
+        print newxyz
         global xyz
         global sl
         global sslice
