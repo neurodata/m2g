@@ -160,7 +160,7 @@ Determine lcc on a single big graph a provided my a remote user
 This is for use in the one-click processing pipeline to be found at http://www.openconnecto.me/STUB
 '''
 
-def process_single_brain(gengraph, roiXml, roiRaw, mat_fn, lccOutputFileName, figDir = None): # I assume mat_fn is the fiber .mat file used to generate graph?
+def process_single_brain(roiXml, roiRaw, mat_fn, lccOutputFileName, figDir = None): 
     
     print "Processing single brain... "
     #roix = roiXml
@@ -172,7 +172,7 @@ def process_single_brain(gengraph, roiXml, roiRaw, mat_fn, lccOutputFileName, fi
     print 'Processing connected components'
     vcc = ConnectedComponent(fg.spcscmat) # CC object 
     
-    np.save(lccOutputFileName,sp.lil_matrix(self.vertexCC)) # save as .np
+    np.save(lccOutputFileName,sp.lil_matrix(vcc.vertexCC)) # save as .np
     
     if figDir != None:
         #save_figures(vcc.get_coords_for_lccs(10), figDir+lccOutputFileName) # Save figures
