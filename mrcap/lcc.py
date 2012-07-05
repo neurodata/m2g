@@ -14,11 +14,11 @@ import fibergraph
 import zindex
 from scipy.io import loadmat, savemat
 from collections import Counter
-from mayavi import mlab
+#from mayavi import mlab # DISA - I don't have
 import itertools as itt
 from matplotlib import pyplot as plt
 import fa
-import mprage
+#import mprage # DISA - I don't have
 import argparse
 
 class ConnectedComponent(object):
@@ -101,7 +101,12 @@ class ConnectedComponent(object):
         coord = np.array([zindex.MortonXYZ(v) for v in inlcc])
     
         return np.concatenate((coord,self.vertexCC[inlcc][np.newaxis].T),axis=1)
-    
+ 
+
+
+
+
+   
 def _load_fibergraph(roi_fn, mat_fn):
     """Load fibergraph from roi_fn and mat_fn"""
     
@@ -136,11 +141,46 @@ def cc_for_each_brain(graphDir, roiDir, ccDir, figDir):
         vcc.save(ccDir+brainFn)
         
         print 'ncc='+repr(vcc.ncc)
+       
         
         if figDir:
             save_figures(vcc.get_coords_for_lccs(10), figDir+brainFn)
         
         del fg
+
+
+
+
+
+'''
+Created on June 29, 2012
+@author: dmhembe1
+
+Determine lcc on a single big graph a provided my a remote user
+This is for use in the one-click processing pipeline to be found at http://www.openconnecto.me/STUB
+'''
+
+def process_single_brain(gengraph, roiXml, roiRaw, mat_fn, lccOutputFileName, figDir = None): # I assume mat_fn is the fiber .mat file used to generate graph?
+    
+    print "Processing single brain... "
+    #roix = roiXml
+    roix = roi.ROIXML( roiXml )
+    rois = roi.ROIData(roiRaw, roix.getShape())
+    
+    fg = fibergraph.FiberGraph(roix.getShape(),rois,[])
+    fg.loadFromMatlab('fibergraph', mat_fn) # (key, fileName)
+    print 'Processing connected components'
+    vcc = ConnectedComponent(fg.spcscmat) # CC object 
+    
+    np.save(lccOutputFileName,sp.lil_matrix(self.vertexCC)) # save as .np
+    
+    if figDir != None:
+        #save_figures(vcc.get_coords_for_lccs(10), figDir+lccOutputFileName) # Save figures
+        print 'Saving figures'
+        
+    del fg
+    
+    
     
 
 def get_slice(img3d, s, xyz):
@@ -242,8 +282,9 @@ def save_overlay(faDir, mprDir, ccDir, figDir, slist, orientationList):
             #plt.tight_layout()
             plt.savefig(figDir+bfn+'_ccfaOverlay_view'+repr(view)+'.pdf')
             
-    plt.close(f)       
-    
+    plt.close(f)
+
+'''    
 def save_figures(coord, fn):
     """Saves 3 images which are 3d color representations of the coordinates in coord
     
@@ -262,6 +303,7 @@ def save_figures(coord, fn):
     mlab.view(90,90)
     mlab.savefig(fn+'_view90,90.png',figure=f,magnification=4)
     mlab.close(f)
+'''
 
 def get_3d_cc(vcc,shape):
     """Takes an array vcc and shape which is the shape of the new 3d image and 'colors' the image by connected component
