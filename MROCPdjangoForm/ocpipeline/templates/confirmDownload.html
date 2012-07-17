@@ -1,0 +1,10 @@
+<!DOCTYPE html>
+<html><body>
+   <legend>Congratulations! Your data was sucessfully processed</legend>    
+        <form action="" method="post" enctype="multipart/form-data">     
+            {% csrf_token %}
+                <!--<p>Please add patient's name{{ form }}</p> -->     
+            <input name = "confirmDwnld"  type="submit" value="Obtain processed data" class="button">        
+            <input type="reset" value="Reset" class="button">
+        </form> 
+</body></html>

@@ -1,0 +1,10 @@
+<html><body>
+    <h1>Please upload data derivative files</h1>
+        <form action="" method="post" enctype="multipart/form-data">     
+            {% csrf_token %}
+                <p>{{ form }}</p>      
+            <input name = "Derivatives"  type="submit" value="Submit All & Process" class="button">        
+            <input type="reset" value="Reset" class="button">
+        </form>
+            
+</body></html>
