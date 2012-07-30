@@ -22,7 +22,7 @@ def createDirStruct(userDefProjectDir, uploadDirPath, endingDir, tempDirPath, mo
         if not os.path.exists(userDefProjectDir + folder):
             os.makedirs(userDefProjectDir + folder)
         else:
-            print "\n Folder does exist!"
+            print "Folder does exist!"
     
     ''' Move files to appropriate location '''            
     uploadedFiles = [ os.path.join(uploadDirPath, moveFileNames[0]), os.path.join(uploadDirPath, moveFileNames[1])
@@ -33,7 +33,7 @@ def createDirStruct(userDefProjectDir, uploadDirPath, endingDir, tempDirPath, mo
         if not os.path.exists(os.path.join(endingDir,moveFileNames[i])): # If its already there... leave it alone & use the old one
             move(thefile, endingDir) # Where to save derivatives
         else:
-            print '\n File does exist!'
+            print 'File does exist!'
         i += 1
         
     
