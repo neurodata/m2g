@@ -23,11 +23,10 @@ import mrpaths
 from django.http import HttpResponse
 
 ''' Data Processing imports'''
-#import mrcap.gengraph as gengraph
 from mrcap import gengraph as gengraph
 
-#**import ocpipeline.mrcap.svd as svd
-#**from ocpipeline.mrcap import lcc
+import mrcap.svd as svd
+import mrcap.lcc as lcc
 
 import ocpipeline.filesorter as filesorter
 import ocpipeline.zipper as zipper
@@ -69,6 +68,8 @@ projectName ='' # Initial save location of derivatives
 userDefProjectName = ''
 userDefProjectDir = ''
 zipFileName = ''
+
+progBit = False # This bit will be set if user decides to proceed programmatically
 
 ''' Little welcome message'''
 def default(request):
@@ -128,12 +129,18 @@ def pipelineUpload(request, webargs=None):
     global graphInvariants
     global tempDirPath
     
+    print "Uploading files..."
+    
     ''' Programmatic Version
         webargs should be fully qualified name of track file e.g /data/files/name_fiber.dat
         Assumption is naming convention is name_fiber.dat, name_roi.dat, name_roi.xml, where
         'name' is the same in all cases
     ''' 
     if (webargs):
+	
+	global progBit
+	progBit = True # Set the programmatic marker
+	
         fiber_fn = request.path[15:] # Directory where
         if fiber_fn[-1] == '/': # in case of trailing backslash
             fiber_fn = fiber_fn[:-1]
@@ -171,10 +178,8 @@ def pipelineUpload(request, webargs=None):
         graphs = userDefProjectDir + 'graphs/'
         graphInvariants = userDefProjectDir + 'graphInvariants/'
         createDirStruct.createDirStruct(userDefProjectDir, tempFolder, derivatives, tempDirPath, [fiber_fn, roi_raw_fn, roi_xml_fn]);
-	
-	#import pdb; pdb.set_trace();
-	
-	return HttpResponse(processInputData(request.GET, webargs))
+
+	return HttpResponseRedirect('/processInput') # Redirect after POST
 
     ''' Form '''
     if request.method == 'POST':
@@ -195,7 +200,7 @@ def pipelineUpload(request, webargs=None):
             newdoc.save()
             newdoc2.save()
             newdoc3.save()
-            print '\nSaving all files complete...\n'
+            print '\nSaving all files complete...'
                
             ''' Make appropriate dirs if they dont already exist '''
             dataProds = ['derivatives/', 'rawdata/', 'graphs/', 'graphInvariants/'] # **
@@ -219,7 +224,7 @@ def pipelineUpload(request, webargs=None):
         context_instance=RequestContext(request) # Some failure to input data & returns a key signaling what is requested
     )
 
-def processInputData(request, webargs = None):
+def processInputData(request):
     '''
     Extract File Name
     Determine what file corresponds to what for gengraph
@@ -228,14 +233,15 @@ def processInputData(request, webargs = None):
     global fiber_fn
     global roi_raw_fn
     global derivatives
-    
+    global progBit
+   
     filesInUploadDir = os.listdir(derivatives)
     
     roi_xml_fn, fiber_fn, roi_raw_fn = filesorter.checkFileExtGengraph(filesInUploadDir) # Check & sort files
     
     for fileName in [roi_xml_fn, fiber_fn, roi_raw_fn]:
-        if fileName == "": # Means a file is missing from i/p
-            return render_to_response('pipelineUpload.html', {'form': form}, context_instance=RequestContext(request)) # Missing file for processing Gengraph    
+	if fileName == "": # Means a file is missing from i/p
+	    return render_to_response('pipelineUpload.html', {'form': form}, context_instance=RequestContext(request)) # Missing file for processing Gengraph    
     
     # Fully qualify file names
     roi_xml_fn = derivatives + roi_xml_fn
@@ -249,51 +255,49 @@ def processInputData(request, webargs = None):
     '''Run gengrah SMALL & save output'''
     print("Running Small gengraph....")
     smallGraphOutputFileName = graphs + 'SmallGraph.mat'
-    arguments = 'python ' + processingScriptDirPath + 'gengraph.py ' + fiber_fn + ' ' + smallGraphOutputFileName +' ' + roi_xml_fn + ' ' + roi_raw_fn 
-    #******subprocess.Popen(arguments,shell=True) # spawn subprocess to run gengraph
-    #gengraph.genGraph(fiber_fn, smallGraphOutputFileName, roi_xml_fn ,roi_raw_fn)
+    gengraph.genGraph(fiber_fn, smallGraphOutputFileName, roi_xml_fn ,roi_raw_fn)
     
     ''' Run gengrah BIG & save output '''
     global bigGraphOutputFileName  # Change global name for small graph o/p file name
     print("Running Big gengraph....")
     bigGraphOutputFileName = graphs +  'BigGraph.mat'
-    #**gengraph.genGraph(fiber_fn, bigGraphOutputFileName, roi_xml_fn ,roi_raw_fn, True)
+    gengraph.genGraph(fiber_fn, bigGraphOutputFileName, roi_xml_fn ,roi_raw_fn, True)
     
     ''' Run LCC '''
     global graphInvariants
     lccOutputFileName = graphInvariants + 'LCC.npy'
     
-    figDirPath = graphInvariants + 'figures/'
+    figDirPath = graphInvariants + 'images/'
 
     if not os.path.exists(figDirPath):
-        os.makedirs(figDirPath)
+	os.makedirs(figDirPath)
 
     '''Should be big but we'll do small for now'''
-    #**lcc.process_single_brain(roi_xml_fn, roi_raw_fn, bigGraphOutputFileName, lccOutputFileName)
+    lcc.process_single_brain(roi_xml_fn, roi_raw_fn, bigGraphOutputFileName, lccOutputFileName)
     #**lcc.process_single_brain(roi_xml_fn, roi_raw_fn, smallGraphOutputFileName, lccOutputFileName)
     
     ''' Run Embed - SVD '''
     global embedSVDOutputFileName
     embedSVDOutputFileName = graphInvariants + 'EMBED.npy'
     
-    print("\nRunning SVD....")
+    print("Running SVD....")
     roiBaseName = str(roi_xml_fn[:-4])
-    #**svd.embed_graph(lccOutputFileName, roiBaseName, bigGraphOutputFileName, embedSVDOutputFileName)
+    svd.embed_graph(lccOutputFileName, roiBaseName, bigGraphOutputFileName, embedSVDOutputFileName)
     #**svd.embed_graph(lccOutputFileName, roiBaseName, smallGraphOutputFileName, embedSVDOutputFileName)
     
+    '''
     if (webargs):
-	print "\nProcessInputData has webargs"
-	#return HttpResponseRedirect('confirmDownload/')
-	#return redirect('/zipOutput') # Zipout & allow client to download
-	request.path = u'/zipOutput/'
-	return HttpResponse(zipProcessedData(request))
-	    
+	# There should be a better way to do zip download
+	from webbrowser import open_new_tab
+	open_new_tab(request.META['HTTP_HOST']+'/zipOutput')
+	return render_to_response('welcome.html')
+    '''
+    if (progBit):
+	return HttpResponseRedirect('/zipOutput/')
+
     return HttpResponseRedirect('/confirmDownload/')
 
-
-
-
-def confirmDownload(request, webargs = None):
+def confirmDownload(request):
     if request.method == 'POST': # If form is submitted
         form = OKForm(request.POST)
         if form.is_valid():
@@ -309,11 +313,9 @@ def zipProcessedData(request):
     '''
     Compress data products to single zip for upload
     '''
-    
+    print 'Beginning file compression...'
     global scanId
     global userDefProjectDir
-    
-    #import pdb; pdb.set_trace();
     
     ''' Zip routine '''
     temp = zipper.zipFilesFromFolders(userDefProjectDir, scanId)
@@ -323,6 +325,4 @@ def zipProcessedData(request):
     response['Content-Disposition'] = ('attachment; filename='+ scanId +'.zip')
     response['Content-Length'] = temp.tell()
     temp.seek(0)
-    
     return response
-
