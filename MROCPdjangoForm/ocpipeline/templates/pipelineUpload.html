@@ -1,4 +1,18 @@
-<html><body>
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Upload</title>
+            <style type="text/css"> 
+            body
+            {
+            background-image:url('http://i1061.photobucket.com/albums/t473/dmhembe/MR-connectome/diffSpect.jpg');
+            background-repeat: no-repeat;
+            background-position:top right;
+            }
+            </style>
+    </head>
+    
+<body>
     <h1>Please upload data derivative files</h1>
         <form action="" method="post" enctype="multipart/form-data">     
             {% csrf_token %}
@@ -6,5 +20,17 @@
             <input name = "Derivatives"  type="submit" value="Submit All & Process" class="button">        
             <input type="reset" value="Reset" class="button">
         </form>
-            
-</body></html>
+
+	<p><h2> For programmatic use read below </h2></p>
+
+	<p>To proceed programmatically Append fully qualified name of name of fiber track file to the url root</p> <p> For example: /Users/brain/{directory}/{subdirectory}/{filename_fiber.dat}</p>
+	<p><h2> Required derivative file naming conventions </h2></p>
+	<p>Track files are expected to follow the naming convention filename_fiber.dat. Don't forget the _</p>
+	<p>Roi's are expected to follow the naming convention filename_roi.[raw | xml]</p>
+	<p><h2>*NOTE: filename MUST BE IDENTICAL IN ALL CASES</h2></p>
+	<p>
+
+	<h2> The following directory structure is also required for programmatic use: </h2>
+	<a href="http://s1061.photobucket.com/albums/t473/dmhembe/MR-connectome/?action=view&amp;current=dirStruct.png" target="_blank"><img src="http://i1061.photobucket.com/albums/t473/dmhembe/MR-connectome/dirStruct.png" border="0" alt="Photobucket"></a>
+</body>
+</html>

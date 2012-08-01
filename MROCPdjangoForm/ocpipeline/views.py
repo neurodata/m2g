@@ -6,9 +6,6 @@ import os, sys
 
 from django.shortcuts import render_to_response
 from django.shortcuts import render
-
-#from django.shortcuts import redirect
-
 from django.template import RequestContext
 from django.http import HttpResponseRedirect
 
@@ -40,9 +37,7 @@ from shutil import move, rmtree # For moving files
 '''
 Global Paths
 '''
-
 uploadDirPath = '/data/projects/disa/OCPprojects/' # Global path to files that are uploaded by users
-tempDirPath = uploadDirPath + 'temp/'
 processingScriptDirPath = os.path.abspath(os.path.curdir) + "/ocpipeline/mrcap/" # Global path to location of processing code
 
 '''
@@ -62,31 +57,27 @@ derivatives = ''    # _fiber.dat, _roi.xml, _roi.raw
 rawdata = ''        # none yet
 graphs = ''         # biggraph, smallgraph
 graphInvariants = ''# LCC.npy (largest connected components), EMBED.ny (Single Value Decomposition)
-scanId = ''
 
-projectName ='' # Initial save location of derivatives
-userDefProjectName = ''
-userDefProjectDir = ''
-zipFileName = ''
+userDefProjectDir = '' # To be defined by user
+scanId = '' # To be defined by user
 
 progBit = False # This bit will be set if user decides to proceed programmatically
+    
+
+
 
 ''' Little welcome message'''
 def default(request):
     return render_to_response('welcome.html')
 
 def hello(request, webargs=None):
-    global projectName
     global userDefProjectDir
-    global userDefProjectName
-    global zipFileName
     global scanId
     
     ''' Programmatic''' 
     if (webargs):
         [userDefProjectName, site, subject, session, scanId] = request.path.split('/')[2:7] # This will always be true
     
-        zipFileName = userDefProjectName
         userDefProjectName = uploadDirPath + userDefProjectName + '/' # Fully qualify
         userDefProjectDir =  userDefProjectName + site +'/'+ subject+'/'+ session+'/'+ scanId+'/'
         
@@ -97,7 +88,6 @@ def hello(request, webargs=None):
         form = DataForm(request.POST)
         if form.is_valid():
             userDefProjectName = form.cleaned_data['UserDefprojectName']
-            zipFileName = userDefProjectName
             site = form.cleaned_data['site']
             subject = form.cleaned_data['subject']
             session = form.cleaned_data['session']
@@ -106,7 +96,6 @@ def hello(request, webargs=None):
             userDefProjectName = uploadDirPath + userDefProjectName + '/' # Fully qualify
             
             userDefProjectDir =  userDefProjectName + site +'/'+ subject+'/'+ session+'/'+ scanId+'/'
-            
         return HttpResponseRedirect('/pipelineUpload/') # Redirect after POST
     else:
         form = DataForm() # An unbound form
@@ -115,19 +104,17 @@ def hello(request, webargs=None):
         'form': form,
     })
 
+
 ''' Successful completion of task'''
 def success(request):
     return render_to_response('success.html')   
 
 def pipelineUpload(request, webargs=None):
-    global uploadDirPath
-    global projectName # temp project Name
     global userDefProjectDir
     global derivatives
     global rawdata
     global graphs
     global graphInvariants
-    global tempDirPath
     
     print "Uploading files..."
     
@@ -159,6 +146,8 @@ def pipelineUpload(request, webargs=None):
         for files in [fiber_fn, roi_xml_fn, roi_raw_fn] : # Names of files
             doc = Document() # create a new Document for each file
             with open(files, 'rb') as doc_file: # Open file for reading
+		doc._meta.get_field('docfile').upload_to = userDefProjectDir + 'derivatives/' # route files to correct location
+		#import pdb; pdb.set_trace()
                 doc.docfile.save(files, File(doc_file), save=True) # Save upload files
                 doc.save()
         
@@ -166,10 +155,7 @@ def pipelineUpload(request, webargs=None):
 	fiber_fn = fiber_fn.split('/')[-1] 
 	roi_raw_fn = roi_raw_fn.split('/')[-1]
 	roi_xml_fn = roi_xml_fn.split('/')[-1]
-
-        projectName = doc.getProjectName() # Update the global project name so I can output in matching folder name
-        tempFolder = tempDirPath + projectName # Update upload directory for new project
-            
+	    
         ''' Make appropriate dirs if they dont already exist'''
         dataProds = ['derivatives/', 'rawdata/', 'graphs/', 'graphInvariants/']
         
@@ -177,25 +163,28 @@ def pipelineUpload(request, webargs=None):
         rawdata = userDefProjectDir + 'rawdata/'
         graphs = userDefProjectDir + 'graphs/'
         graphInvariants = userDefProjectDir + 'graphInvariants/'
-        createDirStruct.createDirStruct(userDefProjectDir, tempFolder, derivatives, tempDirPath, [fiber_fn, roi_raw_fn, roi_xml_fn]);
+        createDirStruct.createDirStruct([derivatives, rawdata, graphs, graphInvariants])
 
 	return HttpResponseRedirect('/processInput') # Redirect after POST
 
     ''' Form '''
     if request.method == 'POST':
         form = DocumentForm(request.POST, request.FILES) # instantiating form
-        if form.is_valid():
+        if form.is_valid(): 
             newdoc = Document(docfile = request.FILES['docfile'])
-            newdoc2 = Document(docfile = request.FILES['roi_raw_file'])
+	    newdoc._meta.get_field('docfile').upload_to = userDefProjectDir + 'derivatives/' # route files to correct location
+	    
+	    newdoc2 = Document(docfile = request.FILES['roi_raw_file'])
+	    newdoc2._meta.get_field('docfile').upload_to = userDefProjectDir + 'derivatives/'
+	    
             newdoc3 = Document(docfile = request.FILES['roi_xml_file'])
-            projectName = newdoc.getProjectName() # Update the global project name so I can output in matching folder name
-            tempFolder = tempDirPath + projectName # Update upload directory for new project
+	    newdoc3._meta.get_field('docfile').upload_to = userDefProjectDir + 'derivatives/'
             
             ''' Acquire fileNames '''
             fiber_fn = form.cleaned_data['docfile'].name # get the name of the file input by user
             roi_raw_fn = form.cleaned_data['roi_raw_file'].name
             roi_xml_fn = form.cleaned_data['roi_xml_file'].name
-            
+	    
             ''' Save files to temp location '''
             newdoc.save()
             newdoc2.save()
@@ -210,7 +199,7 @@ def pipelineUpload(request, webargs=None):
             graphs = userDefProjectDir + 'graphs/'
             graphInvariants = userDefProjectDir + 'graphInvariants/'
             
-            createDirStruct.createDirStruct(userDefProjectDir, tempFolder, derivatives, tempDirPath,[fiber_fn, roi_raw_fn, roi_xml_fn]);
+            createDirStruct.createDirStruct([derivatives, rawdata, graphs, graphInvariants])
             
             # Redirect to Processing page
         return HttpResponseRedirect('/processInput')
@@ -255,13 +244,17 @@ def processInputData(request):
     '''Run gengrah SMALL & save output'''
     print("Running Small gengraph....")
     smallGraphOutputFileName = graphs + 'SmallGraph.mat'
+    ''' spawn subprocess to create small since its result is not necessary for processing '''
+    #arguments = 'python ' + '/home/disa/MR-connectome/mrcap/gengraph.py /home/disa' + fiber_fn + ' /home/disa' + smallGraphOutputFileName +' /home/disa' + roi_xml_fn + ' /home/disa' + roi_raw_fn
+    #arguments = 'python ' + '/Users/dmhembere44/MR-connectome/mrcap/gengraph.py /Users/dmhembere44' + fiber_fn + ' /Users/dmhembere44' + smallGraphOutputFileName + ' roixmlname=/Users/dmhembere44' + roi_xml_fn + ' roirawname=/Users/dmhembere44' + roi_raw_fn
+    #subprocess.Popen(arguments,shell=True) 
     gengraph.genGraph(fiber_fn, smallGraphOutputFileName, roi_xml_fn ,roi_raw_fn)
     
     ''' Run gengrah BIG & save output '''
     global bigGraphOutputFileName  # Change global name for small graph o/p file name
-    print("Running Big gengraph....")
+    print("\nRunning Big gengraph....")
     bigGraphOutputFileName = graphs +  'BigGraph.mat'
-    gengraph.genGraph(fiber_fn, bigGraphOutputFileName, roi_xml_fn ,roi_raw_fn, True)
+    #**gengraph.genGraph(fiber_fn, bigGraphOutputFileName, roi_xml_fn ,roi_raw_fn, True)
     
     ''' Run LCC '''
     global graphInvariants
@@ -273,8 +266,8 @@ def processInputData(request):
 	os.makedirs(figDirPath)
 
     '''Should be big but we'll do small for now'''
-    lcc.process_single_brain(roi_xml_fn, roi_raw_fn, bigGraphOutputFileName, lccOutputFileName)
-    #**lcc.process_single_brain(roi_xml_fn, roi_raw_fn, smallGraphOutputFileName, lccOutputFileName)
+    #**lcc.process_single_brain(roi_xml_fn, roi_raw_fn, bigGraphOutputFileName, lccOutputFileName)
+    lcc.process_single_brain(roi_xml_fn, roi_raw_fn, smallGraphOutputFileName, lccOutputFileName)
     
     ''' Run Embed - SVD '''
     global embedSVDOutputFileName
@@ -282,8 +275,8 @@ def processInputData(request):
     
     print("Running SVD....")
     roiBaseName = str(roi_xml_fn[:-4])
-    svd.embed_graph(lccOutputFileName, roiBaseName, bigGraphOutputFileName, embedSVDOutputFileName)
-    #**svd.embed_graph(lccOutputFileName, roiBaseName, smallGraphOutputFileName, embedSVDOutputFileName)
+    #**svd.embed_graph(lccOutputFileName, roiBaseName, bigGraphOutputFileName, embedSVDOutputFileName)
+    svd.embed_graph(lccOutputFileName, roiBaseName, smallGraphOutputFileName, embedSVDOutputFileName)
     
     '''
     if (webargs):
@@ -313,7 +306,7 @@ def zipProcessedData(request):
     '''
     Compress data products to single zip for upload
     '''
-    print 'Beginning file compression...'
+    print '\nBeginning file compression...'
     global scanId
     global userDefProjectDir
     

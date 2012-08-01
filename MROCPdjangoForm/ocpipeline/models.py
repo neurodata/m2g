@@ -7,20 +7,12 @@ from django.contrib import admin
 import os
 from time import strftime, localtime
 
-projectName = ""
-outputDir = 'temp/'
-
-class Document(models.Model): # Try adding attribute class DocumentForm(forms.Form, SaveProject Name)
-    global projectName
-    if projectName == "":
-       projectName = strftime("projectStamp%a%d%b%Y_%H.%M.%S/", localtime())
-        
-    docfile = models.FileField(upload_to= (outputDir + projectName))
-    
-    # Return Location of file    
-    def getProjectName(self):
-        global projectName
-        return projectName
+class Document(models.Model):
+    '''upload_to location dynamically altered in view
+    (This is a little hacky & can be done better using a custom manager)
+    see: https://docs.djangoproject.com/en/dev/ref/models/instances/?from=olddocs
+    '''
+    docfile = models.FileField(upload_to = (' ')) 
     
     def __unicode__(self):
         return self.name
@@ -32,6 +24,7 @@ class Data(models.Model):
     session = models.CharField(max_length=255,)
     scanId = models.CharField(max_length=255)
     
+    
     def __unicode__(self):
         return self.name
     
@@ -40,6 +33,5 @@ class OK(models.Model):
     
     def __unicode__(self):
         return self.name
-    
-    
+        
 admin.site.register(Document)

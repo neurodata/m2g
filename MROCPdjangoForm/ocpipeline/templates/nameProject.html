@@ -1,10 +1,32 @@
 <!DOCTYPE html>
-<html><body>
-   <h2>Welcome to the MR-Connectome One-click pipeline service!</h2>    
-        <form action="" method="post" enctype="multipart/form-data">     
-            {% csrf_token %}
-                <p>{{ form }}</p>      
-            <input name = "Get Info"  type="submit" value="Confirm name & begin project" class="button">        
-            <input type="reset" value="Reset" class="button">
-        </form> 
-</body></html>
+<html>
+    <head>
+        <title>Direct Scan</title>
+            <style type="text/css"> 
+            body
+            {
+            background-image:url('http://i1061.photobucket.com/albums/t473/dmhembe/MR-connectome/diffSpect.jpg');
+            /*background-image:url('http://3.bp.blogspot.com/_nIWiKIscZJY/TJfpJuUv27I/AAAAAAAACtc/TOkgpHtXFH0/s400/Diffusion+spectrum+imaging+of+human+brain.jpeg');*/
+            background-repeat: no-repeat;
+            /*background-attachment:fixed;*/
+            background-position:top right;
+            }
+            </style>
+    </head>
+    
+    <body>
+       <h2>To ensure your data is routed correctly submit the form below</h2>
+       
+            <form action="" method="post" enctype="multipart/form-data">     
+                {% csrf_token %}
+                    <p>{{ form }}</p>      
+                <input name = "Get Info"  type="submit" value="Confirm name & begin project" class="button">        
+                <input type="reset" value="Reset" class="button">
+            </form>
+            
+            <h2>To proceed programmatically follow directions below </h2>
+            <p> Append {ProjectName}/{Site}/{Subject}/{Session}/{ScanID} with only '/' separating every term </p>
+            <p>Use camelCase as opposed to spaces for multiple word statements</p>
+            <p> Exact dupllicates in all terms are not replaced, they are identically named with a numerical suffix</p>
+    </body>
+</html>
