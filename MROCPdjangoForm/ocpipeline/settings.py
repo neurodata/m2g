@@ -56,7 +56,6 @@ MEDIA_ROOT = '/data/projects/disa/OCPprojects/'
 # trailing slash.
 # Examples: "http://media.lawrence.com/media/", "http://example.com/media/"
 MEDIA_URL = '/data/projects/disa/OCPprojects/'
-#MEDIA_URL = '/media/'
 
 # Absolute path to the directory static files should be collected to.
 # Don't put anything in this directory yourself; store your static files
@@ -157,3 +156,14 @@ LOGGING = {
         },
     }
 }
+
+'''       ############################################           '''
+
+from django.conf import settings
+
+# Uploadify root folder path, relative to MEDIA_ROOT
+UPLOADIFY_PATH = settings.UPLOADIFY_PATH = getattr(settings, 'UPLOADIFY_PATH', '%s%s' % (settings.MEDIA_URL, 'js/uploadify/'))
+
+# Upload path that files are sent to
+UPLOADIFY_UPLOAD_PATH = settings.UPLOADIFY_PATH = getattr(settings, 'UPLOADIFY_UPLOAD_PATH', '%s%s' % (settings.STATIC_ROOT, 'uploads/'))
+
