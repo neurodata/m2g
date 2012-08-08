@@ -59,12 +59,14 @@ derivatives = ''    # _fiber.dat, _roi.xml, _roi.raw
 rawdata = ''        # none yet
 graphs = ''         # biggraph, smallgraph
 graphInvariants = ''# LCC.npy (largest connected components), EMBED.ny (Single Value Decomposition)
+images = ''	    # To hold images  
 
 userDefProjectDir = '' # To be defined by user
 scanId = '' # To be defined by user
 
 progBit = False # This bit will be set if user decides to proceed programmatically
 multiProgBit = False # Multiple file option
+multiProjTuple = [] # Tuple to hold names of all scan session Dirs
 
 multiFileDir = '' # directory to hold numerous case files 
 
@@ -74,10 +76,10 @@ def default(request):
 
 def multiUpload(request, webargs):
     global multiFileDir
-    ''' Upload a bunch of files to a single directory & save name of dir in multiFileDir '''
+    '''TODO: Upload a bunch of files to a single directory & save name of dir in multiFileDir '''
     print '\nProcessing directory for multi scan dataset...'
     multiFileDir =  webargs	# '/data/Multi' dir already exists right now    
-    return HttpResponseRedirect('/multiFileProcess/')
+    return HttpResponseRedirect('/multiFileProcess')
 
 def multiFileProcess(request):
     global multiFileDir
@@ -88,6 +90,7 @@ def multiFileProcess(request):
     global rawdata
     global graphs
     global graphInvariants
+    global images
     
     global roi_xml_fn
     global fiber_fn
@@ -113,15 +116,18 @@ def multiFileProcess(request):
 	
 	''' Hard coded now, but should be something we can extract from metadata of track file'''
 	userDefProjectDir = os.path.join(uploadDirPath, 'Multiprojects', 'site', 'subject', 'session', scanId)
+	multiProjTuple.append(userDefProjectDir) # add new scan to project
 	
 	fiber_fn, roi_raw_fn, roi_xml_fn = createDirStruct.createDirStruct(userDefProjectDir, [fiber_fn, roi_raw_fn, roi_xml_fn])
-	derivatives, rawdata,  graphs, graphInvariants = defDataDirs(userDefProjectDir)	
+	derivatives, rawdata,  graphs, graphInvariants, images = defDataDirs(userDefProjectDir)	
 	
 	processInputData(request) # run files through data analysis & return to here
-	zipProcessedData(request) # zipfiles
-	open_new_tab(request.META['HTTP_HOST']+'/zipOutput') # single scan download
 	
-    return render_to_response('success.html')
+	#zipProcessedData(request) # zipfiles
+	#open_new_tab(request.META['HTTP_HOST']+'/zipOutput') # single scan download
+
+    return HttpResponseRedirect('/zipOutput/multiProjTuple')
+    #return render_to_response('success.html')
 
 
 def createProj(request, webargs=None):
@@ -135,7 +141,7 @@ def createProj(request, webargs=None):
         userDefProjectName = os.path.join(uploadDirPath, userDefProjectName) # Fully qualify
         userDefProjectDir =  os.path.join(userDefProjectName, site, subject, session, scanId)
 	
-        return HttpResponseRedirect('/pipelineUpload/') # Redirect after POST
+        return HttpResponseRedirect('/pipelineUpload') # Redirect after POST
     
     ''' Form '''
     if request.method == 'POST':
@@ -150,7 +156,7 @@ def createProj(request, webargs=None):
 	    userDefProjectName = os.path.join(uploadDirPath, userDefProjectName) # Fully qualify
 	    userDefProjectDir =  os.path.join(userDefProjectName, site, subject, session, scanId)
 	
-        return HttpResponseRedirect('/pipelineUpload/') # Redirect after POST
+        return HttpResponseRedirect('/pipelineUpload') # Redirect after POST
     else:
         form = DataForm() # An unbound form
    
@@ -170,8 +176,9 @@ def defDataDirs(projectDir):
     rawdata = os.path.join(projectDir, 'rawdata')
     graphs = os.path.join(projectDir, 'graphs')
     graphInvariants = os.path.join(projectDir, 'graphInvariants')
+    images = os.path.join(projectDir, 'images')
     
-    return [derivatives, rawdata, graphs, graphInvariants]
+    return [derivatives, rawdata, graphs, graphInvariants, images]
 
 ''' Successful completion of task'''
 def success(request):
@@ -183,6 +190,7 @@ def pipelineUpload(request, webargs=None):
     global rawdata
     global graphs
     global graphInvariants
+    global images
     
     print "Uploading files..."
     
@@ -211,7 +219,7 @@ def pipelineUpload(request, webargs=None):
         roi_xml_fn += 'roi/' +  basename +'roi.xml'
 	
 	''' Define data directory paths '''
-	derivatives, rawdata,  graphs, graphInvariants = defDataDirs(userDefProjectDir)
+	derivatives, rawdata,  graphs, graphInvariants, images = defDataDirs(userDefProjectDir)
 
         for files in [fiber_fn, roi_xml_fn, roi_raw_fn] : # Names of files
             doc = Document() # create a new Document for each file
@@ -226,7 +234,7 @@ def pipelineUpload(request, webargs=None):
 	roi_xml_fn = roi_xml_fn.split('/')[-1]
 	    
         ''' Make appropriate dirs if they dont already exist'''
-        createDirStruct.createDirStruct([derivatives, rawdata, graphs, graphInvariants])
+        createDirStruct.createDirStruct([derivatives, rawdata, graphs, graphInvariants, images])
 	
 	#import pdb; pdb.set_trace()
 	
@@ -238,7 +246,7 @@ def pipelineUpload(request, webargs=None):
         if form.is_valid():
 	    
 	    ''' Define data directory paths '''
-	    derivatives, rawdata,  graphs, graphInvariants = defDataDirs(userDefProjectDir)
+	    derivatives, rawdata,  graphs, graphInvariants, images = defDataDirs(userDefProjectDir)
 	    
             newdoc = Document(docfile = request.FILES['docfile'])
 	    newdoc._meta.get_field('docfile').upload_to = derivatives # route files to correct location
@@ -261,7 +269,7 @@ def pipelineUpload(request, webargs=None):
             print '\nSaving all files complete...'
                
             ''' Make appropriate dirs if they dont already exist '''	    
-            createDirStruct.createDirStruct([derivatives, rawdata, graphs, graphInvariants])
+            createDirStruct.createDirStruct([derivatives, rawdata, graphs, graphInvariants, images])
             
             # Redirect to Processing page
         return HttpResponseRedirect('/processInput')
@@ -296,6 +304,8 @@ def processInputData(request):
 	if fileName == "": # Means a file is missing from i/p
 	    return render_to_response('pipelineUpload.html', {'form': form}, context_instance=RequestContext(request)) # Missing file for processing Gengraph    
     
+    baseName = fiber_fn[:-9] #MAY HAVE TO CHANGE
+    
     ''' Fully qualify file names''' 
     fiber_fn = os.path.join(derivatives, fiber_fn)
     roi_raw_fn = os.path.join(derivatives, roi_raw_fn)
@@ -308,7 +318,7 @@ def processInputData(request):
     
     '''Run gengraph SMALL & save output'''
     print("Running Small gengraph....")
-    smallGraphOutputFileName = os.path.join(graphs, 'SmallGraph.mat')
+    smallGraphOutputFileName = os.path.join(graphs, (fiber_fn[:-9] +'fiberSmGr.mat'))
     ''' spawn subprocess to create small since its result is not necessary for processing '''
     #arguments = 'python ' + '/home/disa/MR-connectome/mrcap/gengraph.py /home/disa' + fiber_fn + ' /home/disa' + smallGraphOutputFileName +' /home/disa' + roi_xml_fn + ' /home/disa' + roi_raw_fn
     #arguments = 'python ' + '/Users/dmhembere44/MR-connectome/mrcap/gengraph.py /Users/dmhembere44' + fiber_fn + ' /Users/dmhembere44' + smallGraphOutputFileName + ' roixmlname=/Users/dmhembere44' + roi_xml_fn + ' roirawname=/Users/dmhembere44' + roi_raw_fn
@@ -318,26 +328,20 @@ def processInputData(request):
     ''' Run gengrah BIG & save output '''
     global bigGraphOutputFileName  # Change global name for small graph o/p file name
     print("\nRunning Big gengraph....")
-    bigGraphOutputFileName = os.path.join(graphs, 'BigGraph.mat')
+    bigGraphOutputFileName = os.path.join(graphs, (fiber_fn[:-9] +'fiberBgGr.mat')) 
     gengraph.genGraph(fiber_fn, bigGraphOutputFileName, roi_xml_fn ,roi_raw_fn, True)
     
     ''' Run LCC '''
     global graphInvariants
-    lccOutputFileName = os.path.join(graphInvariants, 'LCC.npy')
+    lccOutputFileName = os.path.join(graphInvariants, (baseName + 'lcc.npy'))
     
-    #figDirPath = graphInvariants + 'images/'
-    figDirPath = os.path.join(graphInvariants, 'images')
-
-    if not os.path.exists(figDirPath):
-	os.makedirs(figDirPath)
-
     '''Should be big but we'll do small for now'''
     lcc.process_single_brain(roi_xml_fn, roi_raw_fn, bigGraphOutputFileName, lccOutputFileName)
     #**lcc.process_single_brain(roi_xml_fn, roi_raw_fn, smallGraphOutputFileName, lccOutputFileName)
     
     ''' Run Embed - SVD '''
     global embedSVDOutputFileName
-    embedSVDOutputFileName = os.path.join(graphInvariants, 'EMBED.npy')
+    embedSVDOutputFileName = os.path.join(graphInvariants, (baseName + 'embed.npy'))
     
     print("Running SVD....")
     roiBaseName = str(roi_xml_fn[:-4])
@@ -345,12 +349,12 @@ def processInputData(request):
     #**svd.embed_graph(lccOutputFileName, roiBaseName, smallGraphOutputFileName, embedSVDOutputFileName)
     
     if (multiProgBit):
-	return request
+	return request # response
 
     if (progBit):
-	return HttpResponseRedirect('/zipOutput/')
+	return HttpResponseRedirect('/zipOutput')
 
-    return HttpResponseRedirect('/confirmDownload/')
+    return HttpResponseRedirect('/confirmDownload')
 
 def confirmDownload(request):
     if request.method == 'POST': # If form is submitted
@@ -364,25 +368,41 @@ def confirmDownload(request):
         'form': form,
     })
 
-def zipProcessedData(request):
+def zipProcessedData(request, multiarg = None):
     '''
     Compress data products to single zip for upload
     '''
-    
     print '\nBeginning file compression...'
+    # Take dir with multiple scans, compress it & send it off 
+    if (multiarg):
+	global multiProjTuple
+	
+	''' Zip it '''
+	temp = zipper.zipFilesFromFolders(multiTuple = multiProjTuple)
+	''' Wrap it '''
+	wrapper = FileWrapper(temp)
+	response = HttpResponse(wrapper, content_type='application/zip')
+	response['Content-Disposition'] = ('attachment; filename=MultiScan.zip')
+	response['Content-Length'] = temp.tell()
+	temp.seek(0)
+	''' Send it '''
+	return response
+    
     global scanId
     global userDefProjectDir
     
-    ''' Zip routine '''
-    temp = zipper.zipFilesFromFolders(userDefProjectDir, scanId)
-    
-    wrapper = FileWrapper(temp)
+    ''' Zip it '''
+    temp = zipper.zipFilesFromFolders(dirName = userDefProjectDir)
+    ''' Wrap it '''
+    wrapper = FileWrapper(temp) 
     response = HttpResponse(wrapper, content_type='application/zip')
     response['Content-Disposition'] = ('attachment; filename='+ scanId +'.zip')
     response['Content-Length'] = temp.tell()
     temp.seek(0)
-    
+    ''' Send it '''
     return response
+
+
 
 ''' ###################### Test Area ####################### '''
 
@@ -398,6 +418,3 @@ def upload(request, *args, **kwargs):
     return HttpResponse('True')
 
 ''' ###################### Test Area ####################### '''    
-
-
-

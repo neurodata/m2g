@@ -2,7 +2,7 @@
  Read a fiber file and generate the corresponding sparse graph
  @author randalburns
  
- - minor edits for web service by: dmhembe1
+ - minor edits for web service by: Disa Mhembere
 '''
 
 import argparse
