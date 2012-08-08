@@ -1,9 +1,32 @@
 <!DOCTYPE html>
-<html><body>
-   <legend>Congratulations! Your data was sucessfully processed</legend>    
+<html>
+    <div id="header-container">	
+		<div id="header">	
+			<div id="site-logo">
+				<a href="http://openconnecto.me"><img src="http://openconnecto.me/wp-content/themes/DMG/img/logo.png"/></a>
+			</div>
+		</div>
+	</div>			
+	<div id="content-container">
+            
+     <head>
+        <title>Confirm Download | MROCP</title>
+            <style type="text/css"> 
+                body
+                {
+                 background-image:url('http://a0.twimg.com/profile_images/1279484811/brain_favicon__1_.png');
+                 background-repeat: no-repeat;
+                 background-attachment:fixed;
+                 background-position:center;
+                 }
+        </style>
+    </head>
+     
+    <body>
+        <p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p>
+   <legend><p><h2>Congratulations! Your data was sucessfully processed</h2></p></legend>    
         <form action="" method="post" enctype="multipart/form-data">     
-            {% csrf_token %}
-                <!--<p>Please add patient's name{{ form }}</p> -->     
+            {% csrf_token %} 
             <input name = "confirmDwnld"  type="submit" value="Obtain processed data" class="button">        
             <input type="reset" value="Reset" class="button">
         </form> 
