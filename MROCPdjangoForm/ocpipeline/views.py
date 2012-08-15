@@ -34,6 +34,7 @@ from django.core.servers.basehttp import FileWrapper
 import subprocess
 from shutil import move, rmtree # For moving files
 
+'''
 Global Paths
 '''
 uploadDirPath = '/data/projects/disa/OCPprojects/' # Global path to files that are uploaded by users
