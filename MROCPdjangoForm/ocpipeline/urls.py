@@ -29,6 +29,8 @@ urlpatterns = patterns('ocpipeline.views',
     url(r'^zipOutput/([multiProjTuple])*$','zipProcessedData', name = 'zip-processed-data'), # 2nd param function is view, 3rd param - anything
     url(r'^multiFileProcess/','multiFileProcess',name = 'process-multi-file'),
     url(r'^multiUpload(.+$)', 'multiUpload', name ='multi-upload'),
+    # restful API 
+    url(r'^upload/(.*$)', 'upload', name= 'form-create-project'),
     # Examples
     # url(r'^$', 'myapp.views.home', name='home'),
     # url(r'^myapp/', include('myapp.foo.urls')),
