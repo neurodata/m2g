@@ -22,8 +22,8 @@ from django.http import HttpResponse
 ''' Data Processing imports'''
 from mrcap import gengraph as gengraph
 
-import mrcap.svd as svd
-import mrcap.lcc as lcc
+#import mrcap.svd as svd
+#import mrcap.lcc as lcc
 
 import ocpipeline.filesorter as filesorter
 import ocpipeline.zipper as zipper
@@ -34,9 +34,6 @@ from django.core.servers.basehttp import FileWrapper
 import subprocess
 from shutil import move, rmtree # For moving files
 
-from webbrowser import open_new_tab # soon to be replaced
-
-'''
 Global Paths
 '''
 uploadDirPath = '/data/projects/disa/OCPprojects/' # Global path to files that are uploaded by users
