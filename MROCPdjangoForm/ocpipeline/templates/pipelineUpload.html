@@ -1,27 +1,29 @@
-<!DOCTYPE html>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
 <html>
-    <div id="header-container">	
-		<div id="header">	
-			<div id="site-logo">
-				<a href="http://openconnecto.me"><img src="http://openconnecto.me/wp-content/themes/DMG/img/logo.png"/></a>
-			</div>
-		</div>
-	</div>			
-	<div id="content-container">
-    <head>
+ <head>
+    <link  rel="shortcut icon" type="image/x-icon" href="/favicon.ico" >
         <title>Upload | MROCP</title>
             <style type="text/css"> 
             body
             {
-	    background-image:url('http://a0.twimg.com/profile_images/1279484811/brain_favicon__1_.png');
-            /*background-image:url('http://i1061.photobucket.com/albums/t473/dmhembe/MR-connectome/diffSpect.jpg');*/
-            background-repeat: no-repeat;
-            background-position:top right;
+		background-image:url('http://a0.twimg.com/profile_images/1279484811/brain_favicon__1_.png');
+		/*background-image:url('http://i1061.photobucket.com/albums/t473/dmhembe/MR-connectome/diffSpect.jpg');*/
+		background-repeat: no-repeat;
+		background-position:top right;
+		background-size: 10%;
             }
+	    
+	    p
+	    {
+		line-height: 150%
+	    }
             </style>
     </head>
     
 <body>
+    <a href="http://openconnecto.me"><img src="http://openconnecto.me/wp-content/themes/DMG/img/logo.png"/></a>
     <h1>Please upload data derivative files</h1>
         <form action="" method="post" enctype="multipart/form-data">     
             {% csrf_token %}
@@ -30,16 +32,27 @@
             <input type="reset" value="Reset" class="button">
         </form>
 
-	<p><h2> For programmatic use read below </h2></p>
+	<h2> For programmatic use read below </h2>
 
-	<p>To proceed programmatically APPEND fully qualified name of name of fiber track file to the url root</p> <p> For example: /Users/brain/{directory}/{subdirectory}/{filename_fiber.dat}</p>
-	<p><h2> Required derivative file naming conventions </h2></p>
-	<p>Track files are expected to follow the naming convention filename_fiber.dat. Don't forget the underscore (_)</p>
-	<p>Roi's are expected to follow the naming convention filename_roi.[raw | xml]</p>
-	<p><h2>*NOTE: filename MUST BE IDENTICAL IN ALL CASES</h2></p>
-	<p>
+	<p>To proceed programmatically APPEND fully qualified name of name of fiber track file to the url root <br/>
+	For example: /Users/brain/{directory}/{subdirectory}/{filename_fiber.dat}</p>
+	
+	<h2> Required derivative file naming conventions </h2>
+	<p>Track files are expected to follow the naming convention filename_fiber.dat. Don't forget the underscore (_)<br/>
+	Roi's are expected to follow the naming convention filename_roi.[raw | xml]</p>
+	
+	<h2>*NOTE: <em> filename </em> MUST BE IDENTICAL IN ALL CASES</h2>
+	<p> </p>
 
 	<h2> The following directory structure is also required for programmatic use: </h2>
-	<a href="http://s1061.photobucket.com/albums/t473/dmhembe/MR-connectome/?action=view&amp;current=theDirStruct.png" target="_blank"><img src="http://i1061.photobucket.com/albums/t473/dmhembe/MR-connectome/theDirStruct.png" border="0" alt="Photobucket"></a>
+	<!--
+	<p> Use this <a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjangoForm/ocpipeline/convertToReqd.py"
+	target="_blank">link</a> to download a <em>python</em> script that will convert a directory with all files (i.e. _fiber.dat, _roi.[raw|xml])
+	structure to one that mimics the structure required for programmatic use.
+	
+	You must have or install <a href="http://www.python.org/getit/" target="_blank">python </a>2.7 or better to run the script. From the terminal/command
+	line type: <em> python createDirStruct.py nameOfYourDataDir nameOfResultingDir </em>
+	</p> -->
+	<img src="http://i1061.photobucket.com/albums/t473/dmhembe/MR-connectome/theDirStruct.png" border="0" alt="Photobucket"/>
 </body>
 </html>

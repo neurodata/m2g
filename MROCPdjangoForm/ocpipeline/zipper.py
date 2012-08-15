@@ -44,7 +44,6 @@ def zipFilesFromFolders(dirName = None, multiTuple = []):
                 print "Compressing: " + thefile
 
     myzip.close()
-    #import pdb; pdb.set_trace()
     return temp
 
 def main():

@@ -1,14 +1,9 @@
-<!DOCTYPE html>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
 <html>
-    <div id="header-container">	
-		<div id="header">	
-			<div id="site-logo">
-				<a href="http://openconnecto.me"><img src="http://openconnecto.me/wp-content/themes/DMG/img/logo.png"/></a>
-			</div>
-		</div>
-	</div>			
-	<div id="content-container">
     <head>
+	<link  rel="shortcut icon" type="image/x-icon" href="/favicon.ico" >
         <title>Direct Scan | MROCP</title>
             <style type="text/css"> 
             body
@@ -17,12 +12,14 @@
             background-repeat: no-repeat;
             /*background-attachment:fixed;*/
             background-position:top right;
+	    background-size: 10%;
             }
             </style>
     </head>
     
     <body>
-       <h2>To ensure your data is routed correctly submit the form below</h2>
+	<a href="http://openconnecto.me"><img src="http://openconnecto.me/wp-content/themes/DMG/img/logo.png"/></a>
+	 <h2>To ensure your data is routed correctly submit the form below</h2>
        
             <form action="" method="post" enctype="multipart/form-data">     
                 {% csrf_token %}

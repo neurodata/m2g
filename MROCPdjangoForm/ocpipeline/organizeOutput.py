@@ -2,6 +2,10 @@
 @author Disa Mhembere
 Module available for download to turn unstructured output of MR one-click pipeline
 into a sensible subdir format in accordance with braingraph1's MRN directory
+
+dependencies - python 2.7 or later
+usage: from terminal/command line. For help, 'cd' into containing directory & type:
+ python organizeOutput.py -h
 '''
 import os
 import glob
