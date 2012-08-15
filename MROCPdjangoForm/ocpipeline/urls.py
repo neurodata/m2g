@@ -10,7 +10,6 @@ from ocpipeline.views import success
 from ocpipeline.views import zipProcessedData
 from ocpipeline.views import processInputData
 from ocpipeline.views import confirmDownload
-from ocpipeline.views import upload
 
 #from django.conf.urls.defaults import * # deletable
 
@@ -30,8 +29,6 @@ urlpatterns = patterns('ocpipeline.views',
     url(r'^zipOutput/([multiProjTuple])*$','zipProcessedData', name = 'zip-processed-data'), # 2nd param function is view, 3rd param - anything
     url(r'^multiFileProcess/','multiFileProcess',name = 'process-multi-file'),
     url(r'^multiUpload(.+$)', 'multiUpload', name ='multi-upload'),
-    #url(r'upload/$', upload, name='uploadify_upload'), # Uploadify
-    #(r'^uploadify/', include('uploadify.urls')),
     # Examples
     # url(r'^$', 'myapp.views.home', name='home'),
     # url(r'^myapp/', include('myapp.foo.urls')),

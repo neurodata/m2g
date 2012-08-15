@@ -294,8 +294,6 @@ def processInputData(request):
     global derivatives
     global progBit
     
-    
-    
     filesInUploadDir = os.listdir(derivatives)
     
     roi_xml_fn, fiber_fn, roi_raw_fn = filesorter.checkFileExtGengraph(filesInUploadDir) # Check & sort files
@@ -323,20 +321,20 @@ def processInputData(request):
     #arguments = 'python ' + '/home/disa/MR-connectome/mrcap/gengraph.py /home/disa' + fiber_fn + ' /home/disa' + smallGraphOutputFileName +' /home/disa' + roi_xml_fn + ' /home/disa' + roi_raw_fn
     #arguments = 'python ' + '/Users/dmhembere44/MR-connectome/mrcap/gengraph.py /Users/dmhembere44' + fiber_fn + ' /Users/dmhembere44' + smallGraphOutputFileName + ' roixmlname=/Users/dmhembere44' + roi_xml_fn + ' roirawname=/Users/dmhembere44' + roi_raw_fn
     #subprocess.Popen(arguments,shell=True) 
-    gengraph.genGraph(fiber_fn, smallGraphOutputFileName, roi_xml_fn ,roi_raw_fn)
+    #**gengraph.genGraph(fiber_fn, smallGraphOutputFileName, roi_xml_fn ,roi_raw_fn)
     
     ''' Run gengrah BIG & save output '''
     global bigGraphOutputFileName  # Change global name for small graph o/p file name
     print("\nRunning Big gengraph....")
     bigGraphOutputFileName = os.path.join(graphs, (fiber_fn[:-9] +'fiberBgGr.mat')) 
-    gengraph.genGraph(fiber_fn, bigGraphOutputFileName, roi_xml_fn ,roi_raw_fn, True)
+    #**gengraph.genGraph(fiber_fn, bigGraphOutputFileName, roi_xml_fn ,roi_raw_fn, True)
     
     ''' Run LCC '''
     global graphInvariants
     lccOutputFileName = os.path.join(graphInvariants, (baseName + 'lcc.npy'))
     
     '''Should be big but we'll do small for now'''
-    lcc.process_single_brain(roi_xml_fn, roi_raw_fn, bigGraphOutputFileName, lccOutputFileName)
+    #**lcc.process_single_brain(roi_xml_fn, roi_raw_fn, bigGraphOutputFileName, lccOutputFileName)
     #**lcc.process_single_brain(roi_xml_fn, roi_raw_fn, smallGraphOutputFileName, lccOutputFileName)
     
     ''' Run Embed - SVD '''
@@ -345,7 +343,7 @@ def processInputData(request):
     
     print("Running SVD....")
     roiBaseName = str(roi_xml_fn[:-4])
-    svd.embed_graph(lccOutputFileName, roiBaseName, bigGraphOutputFileName, embedSVDOutputFileName)
+    #**svd.embed_graph(lccOutputFileName, roiBaseName, bigGraphOutputFileName, embedSVDOutputFileName)
     #**svd.embed_graph(lccOutputFileName, roiBaseName, smallGraphOutputFileName, embedSVDOutputFileName)
     
     if (multiProgBit):
@@ -401,20 +399,3 @@ def zipProcessedData(request, multiarg = None):
     temp.seek(0)
     ''' Send it '''
     return response
-
-
-
-''' ###################### Test Area ####################### '''
-
-import django.dispatch
-from django.views.decorators.csrf import csrf_exempt
-
-upload_received = django.dispatch.Signal(providing_args=['data'])
-@csrf_exempt
-def upload(request, *args, **kwargs):
-    if request.method == 'POST':
-        if request.FILES:
-            upload_received.send(sender='uploadify', data=request.FILES['Filedata'])
-    return HttpResponse('True')
-
-''' ###################### Test Area ####################### '''    
