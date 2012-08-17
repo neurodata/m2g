@@ -17,6 +17,10 @@ from ocpipeline.forms import OKForm
 from ocpipeline.forms import DataForm
 import mrpaths
 
+import django
+import zipfile
+import tempfile
+
 from django.http import HttpResponse
 
 ''' Data Processing imports'''
@@ -153,7 +157,6 @@ def createProj(request, webargs=None):
         
 	    userDefProjectName = os.path.join(uploadDirPath, userDefProjectName) # Fully qualify
 	    userDefProjectDir =  os.path.join(userDefProjectName, site, subject, session, scanId)
-	
         return HttpResponseRedirect('/pipelineUpload') # Redirect after POST
     else:
         form = DataForm() # An unbound form
@@ -233,8 +236,6 @@ def pipelineUpload(request, webargs=None):
 	    
         ''' Make appropriate dirs if they dont already exist'''
         createDirStruct.createDirStruct([derivatives, rawdata, graphs, graphInvariants, images])
-	
-	#import pdb; pdb.set_trace()
 	
 	return HttpResponseRedirect('/processInput') # Redirect after POST
 
@@ -397,3 +398,30 @@ def zipProcessedData(request, multiarg = None):
     temp.seek(0)
     ''' Send it '''
     return response
+
+
+# RB testing
+
+def upload(request, webargs=None):
+  """Programmatic interface for uploading data"""
+
+  [ project, site, subject, session, scanid ] = webargs.split('/')[:-1]
+
+  if request.method == 'POST':
+
+    tmpfile = tempfile.NamedTemporaryFile()
+    tmpfile.write ( request.body )
+    tmpfile.flush()
+    tmpfile.seek(0)
+    rzfile = zipfile.ZipFile ( tmpfile.name, "r" )
+
+#  DMTODO -- at this point you have the zip file and the metadata
+
+#    ret = rzfile.printdir()
+#    ret = rzfile.testzip()
+#    ret = rzfile.namelist()
+
+    return HttpResponse ( "Not fully implemented yet." )
+
+  else:
+    django.http.HttpResponseBadRequest ("Expected POST data")
