@@ -18,6 +18,4 @@ class DataForm(forms.Form):
     scanId = forms.CharField(label='Scan ID  ', help_text='                          ', max_length=255, required = True)
 
 class OKForm(forms.Form):
-    projectName  = forms.BooleanField(label='Do you accept the data   ',
-                        error_messages={'required': 'Please select yes or no'},
-                            help_text="You cannot obtain data without yes")
+    pass #DM TODO: Track responses to zip or view as dir structure

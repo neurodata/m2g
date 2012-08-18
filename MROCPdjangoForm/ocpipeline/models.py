@@ -29,7 +29,8 @@ class Data(models.Model):
         return self.name
     
 class OK(models.Model):
-    projectName  = models.BooleanField()
+    #DM TODO: Track responses to zip or view as dir structure
+    pass
     
     def __unicode__(self):
         return self.name
