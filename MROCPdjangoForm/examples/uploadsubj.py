@@ -28,9 +28,9 @@ def main():
     tmpfile = tempfile.NamedTemporaryFile()
     zfile = zipfile.ZipFile ( tmpfile.name, "w" )
 
-    zfile.write ( result.fiberfile, 'fiber.dat' )
-    zfile.write ( result.roixmlfile, 'roixml.xml' )
-    zfile.write ( result.roirawfile, 'roiraw.raw' )
+    zfile.write ( result.fiberfile)
+    zfile.write ( result.roixmlfile )
+    zfile.write ( result.roirawfile)
     zfile.close()
 
     tmpfile.flush()
@@ -42,13 +42,14 @@ def main():
 #    ret = rzfile.printdir()
 #    ret = rzfile.testzip()
 #    ret = rzfile.namelist()
-
+#    import pdb; pdb.set_trace()
     
   except:
-    print "All broke"
+    print "Invalid file name. Check the filenames: " + result.fiberfile,  result.roixmlfile,  result.roirawfile
     sys.exit(0)
 
   try:
+    #req = urllib2.Request ( result.url,'this is a test')
     req = urllib2.Request ( result.url, tmpfile.read() ) 
     response = urllib2.urlopen(req)
   except urllib2.URLError, e:

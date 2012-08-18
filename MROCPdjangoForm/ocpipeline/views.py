@@ -26,9 +26,6 @@ from django.http import HttpResponse
 ''' Data Processing imports'''
 from mrcap import gengraph as gengraph
 
-#import mrcap.svd as svd
-#import mrcap.lcc as lcc
-
 import ocpipeline.filesorter as filesorter
 import ocpipeline.zipper as zipper
 import ocpipeline.createDirStruct as createDirStruct
@@ -51,16 +48,11 @@ roi_xml_fn = ''
 fiber_fn = ''
 roi_raw_fn = ''
 
-smallGraphOutputFileName = '' # fileName of output of gengraph for a small graph
-bigGraphOutputFileName = '' # fileName of output of gengraph for a big graph
-lccOutputFileName = ''
-embedSVDOutputFileName = ''
-
 ''' To hold each type of file available for download'''
 derivatives = ''    # _fiber.dat, _roi.xml, _roi.raw
 rawdata = ''        # none yet
 graphs = ''         # biggraph, smallgraph
-graphInvariants = ''# LCC.npy (largest connected components), EMBED.ny (Single Value Decomposition)
+graphInvariants = ''# lcc.npy (largest connected components), svd.ny (Single Value Decomposition)
 images = ''	    # To hold images  
 
 userDefProjectDir = '' # To be defined by user
@@ -101,7 +93,7 @@ def multiFileProcess(request):
     
     multiProgBit = True
     
-    fiberPattern = re.compile('.+\.dat$') # regex matching fiber track file name
+    fiberPattern = re.compile('.+\.dat$') # regex matching fiber tract file name
     fiberList = []
     
     for it in os.listdir(multiFileDir):
@@ -110,13 +102,13 @@ def multiFileProcess(request):
     
     for it in fiberList:
         fiber_fn = it
-        roi_raw_fn = getbaseNameFromFiber(fiber_fn) +'roi.raw'
-        roi_xml_fn = getbaseNameFromFiber(fiber_fn) + 'roi.xml'
+        roi_raw_fn = getFiberPath(fiber_fn) +'roi.raw'
+        roi_xml_fn = getFiberPath(fiber_fn) + 'roi.xml'
 	
 	# Use regex to get as scanId as the baseName of the files
 	scanId = re.search(re.compile('.+(?=_)'), fiber_fn).group().split('/')[-1] # regex may have to change
 	
-	''' Hard coded now, but should be something we can extract from metadata of track file'''
+	''' Hard coded now, but should be something we can extract from metadata of tract file'''
 	userDefProjectDir = os.path.join(uploadDirPath, 'Multiprojects', 'site', 'subject', 'session', scanId)
 	multiProjTuple.append(userDefProjectDir) # add new scan to project
 	
@@ -129,8 +121,6 @@ def multiFileProcess(request):
 	#open_new_tab(request.META['HTTP_HOST']+'/zipOutput') # single scan download
 
     return HttpResponseRedirect('/zipOutput/multiProjTuple')
-    #return render_to_response('success.html')
-
 
 def createProj(request, webargs=None):
     global userDefProjectDir
@@ -157,6 +147,7 @@ def createProj(request, webargs=None):
         
 	    userDefProjectName = os.path.join(uploadDirPath, userDefProjectName) # Fully qualify
 	    userDefProjectDir =  os.path.join(userDefProjectName, site, subject, session, scanId)
+	    
         return HttpResponseRedirect('/pipelineUpload') # Redirect after POST
     else:
         form = DataForm() # An unbound form
@@ -165,21 +156,9 @@ def createProj(request, webargs=None):
         'form': form,
     })
 
-def getbaseNameFromFiber(fileName):
-    basename = ''
-    for i in fileName.split('/')[1:-2]:
-        basename = os.path.join(basename,fileName)
-    return basename[:-9]
 
-def defDataDirs(projectDir):
-    
-    derivatives = os.path.join(projectDir, 'derivatives')
-    rawdata = os.path.join(projectDir, 'rawdata')
-    graphs = os.path.join(projectDir, 'graphs')
-    graphInvariants = os.path.join(projectDir, 'graphInvariants')
-    images = os.path.join(projectDir, 'images')
-    
-    return [derivatives, rawdata, graphs, graphInvariants, images]
+
+
 
 ''' Successful completion of task'''
 def success(request):
@@ -196,7 +175,7 @@ def pipelineUpload(request, webargs=None):
     print "Uploading files..."
     
     ''' Programmatic Version
-        webargs should be fully qualified name of track file e.g /data/files/name_fiber.dat
+        webargs should be fully qualified name of tract file e.g /data/files/name_fiber.dat
         Assumption is naming convention is name_fiber.dat, name_roi.dat, name_roi.xml, where
         'name' is the same in all cases
     ''' 
@@ -310,40 +289,11 @@ def processInputData(request):
     
     
     global graphs  # let function see path for final graph residence
-    global smallGraphOutputFileName # Change global name for small graph o/p file name so all methods can see it
     global processingScriptDirPath
-    
-    '''Run gengraph SMALL & save output'''
-    print("Running Small gengraph....")
-    smallGraphOutputFileName = os.path.join(graphs, (fiber_fn[:-9] +'fiberSmGr.mat'))
-    ''' spawn subprocess to create small since its result is not necessary for processing '''
-    #arguments = 'python ' + '/home/disa/MR-connectome/mrcap/gengraph.py /home/disa' + fiber_fn + ' /home/disa' + smallGraphOutputFileName +' /home/disa' + roi_xml_fn + ' /home/disa' + roi_raw_fn
-    #arguments = 'python ' + '/Users/dmhembere44/MR-connectome/mrcap/gengraph.py /Users/dmhembere44' + fiber_fn + ' /Users/dmhembere44' + smallGraphOutputFileName + ' roixmlname=/Users/dmhembere44' + roi_xml_fn + ' roirawname=/Users/dmhembere44' + roi_raw_fn
-    #subprocess.Popen(arguments,shell=True) 
-    #**gengraph.genGraph(fiber_fn, smallGraphOutputFileName, roi_xml_fn ,roi_raw_fn)
-    
-    ''' Run gengrah BIG & save output '''
-    global bigGraphOutputFileName  # Change global name for small graph o/p file name
-    print("\nRunning Big gengraph....")
-    bigGraphOutputFileName = os.path.join(graphs, (fiber_fn[:-9] +'fiberBgGr.mat')) 
-    #**gengraph.genGraph(fiber_fn, bigGraphOutputFileName, roi_xml_fn ,roi_raw_fn, True)
-    
-    ''' Run LCC '''
     global graphInvariants
-    lccOutputFileName = os.path.join(graphInvariants, (baseName + 'lcc.npy'))
     
-    '''Should be big but we'll do small for now'''
-    #**lcc.process_single_brain(roi_xml_fn, roi_raw_fn, bigGraphOutputFileName, lccOutputFileName)
-    #**lcc.process_single_brain(roi_xml_fn, roi_raw_fn, smallGraphOutputFileName, lccOutputFileName)
-    
-    ''' Run Embed - SVD '''
-    global embedSVDOutputFileName
-    embedSVDOutputFileName = os.path.join(graphInvariants, (baseName + 'embed.npy'))
-    
-    print("Running SVD....")
-    roiBaseName = str(roi_xml_fn[:-4])
-    #**svd.embed_graph(lccOutputFileName, roiBaseName, bigGraphOutputFileName, embedSVDOutputFileName)
-    #**svd.embed_graph(lccOutputFileName, roiBaseName, smallGraphOutputFileName, embedSVDOutputFileName)
+    [ smGrfn, bgGrfn, lccfn, SVDfn ] \
+	= processData(fiber_fn, roi_xml_fn, roi_raw_fn,graphs, graphInvariants, True)
     
     if (multiProgBit):
 	return request # response
@@ -353,14 +303,17 @@ def processInputData(request):
 
     return HttpResponseRedirect('/confirmDownload')
 
+
 def confirmDownload(request):
-    if request.method == 'POST': # If form is submitted
-        form = OKForm(request.POST)
-        if form.is_valid():
-            pass # Maybe log response in database
-        return HttpResponseRedirect('/zipOutput') # Redirect after POST
+    if 'zipDwnld' in request.POST: # If zipDwnl option is chosen
+	form = OKForm(request.POST)
+	return HttpResponseRedirect('/zipOutput') # Redirect after POST
+    
+    elif 'getProdByDir' in  request.POST: # If view dir structure option is chosen
+	form = OKForm(request.POST)
+	return HttpResponseRedirect('http://www.openconnecto.me' + userDefProjectDir) # Redirect after POST
     else:
-        form = OKForm() # An unbound form
+	form = OKForm()
     return render(request, 'confirmDownload.html', {
         'form': form,
     })
@@ -399,29 +352,132 @@ def zipProcessedData(request, multiarg = None):
     ''' Send it '''
     return response
 
-
-# RB testing
-
 def upload(request, webargs=None):
   """Programmatic interface for uploading data"""
-
-  [ project, site, subject, session, scanid ] = webargs.split('/')[:-1]
-
-  if request.method == 'POST':
-
+  
+  if (webargs and request.method == 'POST'):
+    
+    [userDefProjectName, site, subject, session, scanId] = webargs.split('/') # [:-1] # Add to server version
+    
+    userDefProjectDir = os.path.join(uploadDirPath, userDefProjectName, site, subject, session, scanId)
+    
+    ''' Define data directory paths '''
+    derivatives, rawdata,  graphs, graphInvariants, images = defDataDirs(userDefProjectDir)
+    
+    ''' Make appropriate dirs if they dont already exist '''    
+    createDirStruct.createDirStruct([derivatives, rawdata, graphs, graphInvariants, images])
+    print 'Directory structure created...'
+    
+    ''' Get data from request.body '''
+    
     tmpfile = tempfile.NamedTemporaryFile()
     tmpfile.write ( request.body )
     tmpfile.flush()
     tmpfile.seek(0)
     rzfile = zipfile.ZipFile ( tmpfile.name, "r" )
+    print 'Temporary file created...'
+    
+    ''' Extract & save zipped files '''
+    Uploadfiles = []
+    for name in (rzfile.namelist()):	
+      outfile = open(os.path.join(derivatives, name), 'wb')
+      outfile.write(rzfile.read(name))
+      outfile.flush()
+      outfile.close()
+      Uploadfiles.append(os.path.join(derivatives, name)) # add to list of files
+      print name + " written to disk.."
+    
+      # Check which file is which
+    roi_xml_fn, fiber_fn, roi_raw_fn = filesorter.checkFileExtGengraph(Uploadfiles) # Check & sort files
+    
+    ''' Data Processing '''
+    [ smGrfn, bgGrfn, lccfn, SVDfn ] \
+      = processData(fiber_fn, roi_xml_fn, roi_raw_fn,graphs, graphInvariants, True)
+    
+    #ret = rzfile.printdir()
+    #ret = rzfile.testzip()
+    #ret = rzfile.namelist()
+    return HttpResponse ( "Files should be available for download..." )
 
-#  DMTODO -- at this point you have the zip file and the metadata
-
-#    ret = rzfile.printdir()
-#    ret = rzfile.testzip()
-#    ret = rzfile.namelist()
-
-    return HttpResponse ( "Not fully implemented yet." )
+  elif(not webargs):
+    return django.http.HttpResponseBadRequest ("Expected web arguments to direct project correctly")
 
   else:
-    django.http.HttpResponseBadRequest ("Expected POST data")
+    return django.http.HttpResponseBadRequest ("Expected POST data, but none given")
+
+'''********************* Standalone Methods  *********************'''
+
+def getFiberPath(fiberFileName):
+    '''
+    fiberFileName - is a tract file name with naming convention '[filename]_fiber.dat'
+	where filename may vary but _fiber.dat may not.
+    This returns fiberfn's full path less the 'fiber.dat' portion
+    '''
+    basename = ''
+    for i in fiberFileName.split('/')[1:-2]:
+	basename = os.path.join(basename,fiberFileName)
+    return basename[:-9]
+
+def defDataDirs(projectDir):
+    
+    derivatives = os.path.join(projectDir, 'derivatives')
+    rawdata = os.path.join(projectDir, 'rawdata')
+    graphs = os.path.join(projectDir, 'graphs')
+    graphInvariants = os.path.join(projectDir, 'graphInvariants')
+    images = os.path.join(projectDir, 'images')
+    
+    return [derivatives, rawdata, graphs, graphInvariants, images]
+
+def getFiberID(fiberfn):
+    '''
+    Assumptions about the data made here as far as file naming conventions
+    '''
+    if fiberfn.endswith('/'):
+	fiberfn = fiberfn[:-1] # get rid of trailing slash
+    return fiberfn.split('/')[-1][:-9]
+
+def processData(fiber_fn, roi_xml_fn, roi_raw_fn,graphs, graphInvariants, run = False):
+    '''
+    graphs - Dir where biggraphs & smallgraphs are saved
+    graphInvariants - Dir where graph invariants are saved
+    run - Default is false so nothing is actually run
+    '''
+    if (run):
+	import mrcap.svd as svd
+	import mrcap.lcc as lcc
+	
+	baseName = getFiberID(fiber_fn) #VERY TEMPORARY
+		
+	'''Run gengraph SMALL & save output'''
+	print("Running Small gengraph....")
+	smGrfn = os.path.join(graphs, (baseName +'fiberSmGr.mat'))
+	''' spawn subprocess to create small since its result is not necessary for processing '''
+	#arguments = 'python ' + '/home/disa/MR-connectome/mrcap/gengraph.py /home/disa' + fiber_fn + ' /home/disa' + smallGraphOutputFileName +' /home/disa' + roi_xml_fn + ' /home/disa' + roi_raw_fn
+	#arguments = 'python ' + '/Users/dmhembere44/MR-connectome/mrcap/gengraph.py /Users/dmhembere44' + fiber_fn + ' /Users/dmhembere44' + smallGraphOutputFileName + ' roixmlname=/Users/dmhembere44' + roi_xml_fn + ' roirawname=/Users/dmhembere44' + roi_raw_fn
+	#subprocess.Popen(arguments,shell=True) 
+	#**gengraph.genGraph(fiber_fn, smGrfn, roi_xml_fn ,roi_raw_fn)
+	
+	''' Run gengrah BIG & save output '''
+	print("\nRunning Big gengraph....")
+	bgGrfn = os.path.join(graphs, (baseName +'fiberBgGr.mat')) 
+	#**gengraph.genGraph(fiber_fn, bgGrfn, roi_xml_fn ,roi_raw_fn, True)
+	
+	''' Run LCC '''
+	lccfn = os.path.join(graphInvariants, (baseName + 'lcc.npy'))
+	
+	'''Should be big but we'll do small for now'''
+	#**lcc.process_single_brain(roi_xml_fn, roi_raw_fn, bgGrfn, lccfn)
+	#**lcc.process_single_brain(roi_xml_fn, roi_raw_fn, smGrfn, lccfn)
+	
+	''' Run Embed - SVD '''
+	SVDfn = os.path.join(graphInvariants, (baseName + 'svd.npy'))
+	
+	print("Running SVD....")
+	
+	#**svd.embed_graph(lccfn, baseName, bgGrfn, SVDfn)
+	#**svd.embed_graph(lccfn, baseName, smGrfn, SVDfn)
+	import pdb; pdb.set_trace()
+	return [ smGrfn, bgGrfn, lccfn, SVDfn ] 
+    else:
+	print 'Theoretically I just run some processing...'
+	return [ '','','','' ] 

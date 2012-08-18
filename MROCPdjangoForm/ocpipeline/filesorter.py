@@ -17,7 +17,7 @@ def checkFileExtGengraph(files):
             
        if re.match( re.compile( r'.+\.raw'), fileName) != None:
             rawFileName = fileName
-
+   
    return [xmlFileName, datFileName, rawFileName]
    
 def checkFileExtSVD(files = 0):

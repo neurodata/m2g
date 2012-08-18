@@ -22,6 +22,12 @@
    <legend><p><h2>Congratulations! Your data was sucessfully processed</h2></p></legend>    
         <form action=""  method="post" enctype="multipart/form-data">     
             {% csrf_token %}
-            <input name = "confirmDwnld"  type="submit" value="Obtain processed data" class="button">        
-        </form> 
+            <input name = "zipDwnld"  type="submit" value="Obtain all processed data as a zipfile" class="button">        
+        </form>
+        
+        <form action="" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <input name = "getProdByDir"  type="submit" value="View Directory to choose from individual files" class="button">        
+        </form>
+        
 </body></html>

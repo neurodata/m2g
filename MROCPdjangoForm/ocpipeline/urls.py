@@ -30,7 +30,7 @@ urlpatterns = patterns('ocpipeline.views',
     url(r'^multiFileProcess/','multiFileProcess',name = 'process-multi-file'),
     url(r'^multiUpload(.+$)', 'multiUpload', name ='multi-upload'),
     # restful API 
-    url(r'^upload/(.*$)', 'upload', name= 'form-create-project'),
+    url(r'^upload/(.*$)', 'upload', name= 'prog-upload'),
     # Examples
     # url(r'^$', 'myapp.views.home', name='home'),
     # url(r'^myapp/', include('myapp.foo.urls')),
