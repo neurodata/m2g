@@ -1,21 +1,14 @@
 import urllib2
 import argparse
-import numpy as np
-import urllib2
-import cStringIO
 import sys
  
 import zipfile
 import tempfile
 
-
-
-from pprint import pprint
-
 def main():
 
   parser = argparse.ArgumentParser(description='Upload a subject to MROCP.')
-  parser.add_argument('url', action="store")
+  parser.add_argument('url', action="store", help='url must be in the form  upload/{project}/{site}/{subject}/{session}/{scanID}')
   parser.add_argument('fiberfile', action="store")
   parser.add_argument('roixmlfile', action="store")
   parser.add_argument('roirawfile', action="store")
@@ -49,7 +42,6 @@ def main():
     sys.exit(0)
 
   try:
-    #req = urllib2.Request ( result.url,'this is a test')
     req = urllib2.Request ( result.url, tmpfile.read() ) 
     response = urllib2.urlopen(req)
   except urllib2.URLError, e:
@@ -59,7 +51,18 @@ def main():
 
   the_page = response.read()
   print "Success with id %s" % the_page
+  
+  ''' Open up a tab in your browser to view results'''
+  redir = '/'
+  for Dir in result.url.split('/')[-5:]:
+    if (Dir != result.url.split('/')[-1]):
+      redir += Dir + '/'
+    else:
+      redir += Dir
+  import webbrowser
+  webbrowser.open('http://www.openconnecto.me/data/projects/disa/OCPprojects' + redir)
 
+  
 if __name__ == "__main__":
   main()
 

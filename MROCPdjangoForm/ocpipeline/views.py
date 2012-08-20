@@ -375,12 +375,13 @@ def upload(request, webargs=None):
     tmpfile.flush()
     tmpfile.seek(0)
     rzfile = zipfile.ZipFile ( tmpfile.name, "r" )
+    
     print 'Temporary file created...'
     
     ''' Extract & save zipped files '''
     Uploadfiles = []
     for name in (rzfile.namelist()):	
-      outfile = open(os.path.join(derivatives, name), 'wb')
+      outfile = open(os.path.join(derivatives, name.split('/')[-1]), 'wb') # strip name of source folders if in file name
       outfile.write(rzfile.read(name))
       outfile.flush()
       outfile.close()
@@ -392,12 +393,14 @@ def upload(request, webargs=None):
     
     ''' Data Processing '''
     [ smGrfn, bgGrfn, lccfn, SVDfn ] \
-      = processData(fiber_fn, roi_xml_fn, roi_raw_fn,graphs, graphInvariants, True)
+      = processData(fiber_fn, roi_xml_fn, roi_raw_fn,graphs, graphInvariants, False) # Change to false to not process anything
     
     #ret = rzfile.printdir()
     #ret = rzfile.testzip()
     #ret = rzfile.namelist()
-    return HttpResponse ( "Files should be available for download..." )
+    
+    dwnldLoc = "http://www.openconnecto.me/data/projects/disa/OCPproject/"+ webargs
+    return HttpResponse ( "Files available for download at " + dwnldLoc) # change to render of a page with a link to data result
 
   elif(not webargs):
     return django.http.HttpResponseBadRequest ("Expected web arguments to direct project correctly")
@@ -476,7 +479,6 @@ def processData(fiber_fn, roi_xml_fn, roi_raw_fn,graphs, graphInvariants, run = 
 	
 	#**svd.embed_graph(lccfn, baseName, bgGrfn, SVDfn)
 	#**svd.embed_graph(lccfn, baseName, smGrfn, SVDfn)
-	import pdb; pdb.set_trace()
 	return [ smGrfn, bgGrfn, lccfn, SVDfn ] 
     else:
 	print 'Theoretically I just run some processing...'
