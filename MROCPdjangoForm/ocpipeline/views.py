@@ -17,11 +17,12 @@ from ocpipeline.forms import OKForm
 from ocpipeline.forms import DataForm
 import mrpaths
 
-import django
+#import django
 import zipfile
 import tempfile
 
 from django.http import HttpResponse
+from django.http import HttpResponseBadRequest
 
 ''' Data Processing imports'''
 from mrcap import gengraph as gengraph
@@ -59,68 +60,10 @@ userDefProjectDir = '' # To be defined by user
 scanId = '' # To be defined by user
 
 progBit = False # This bit will be set if user decides to proceed programmatically
-multiProgBit = False # Multiple file option
-multiProjTuple = [] # Tuple to hold names of all scan session Dirs
-
-multiFileDir = '' # directory to hold numerous case files 
 
 ''' Little welcome message'''
 def default(request):
     return render_to_response('welcome.html')
-
-def multiUpload(request, webargs):
-    global multiFileDir
-    '''TODO: Upload a bunch of files to a single directory & save name of dir in multiFileDir '''
-    print '\nProcessing directory for multi scan dataset...'
-    multiFileDir =  webargs	# '/data/Multi' dir already exists right now    
-    return HttpResponseRedirect('/multiFileProcess')
-
-def multiFileProcess(request):
-    global multiFileDir
-    global userDefProjectDir
-    global scanId
-    
-    global derivatives
-    global rawdata
-    global graphs
-    global graphInvariants
-    global images
-    
-    global roi_xml_fn
-    global fiber_fn
-    global roi_raw_fn
-    global multiProgBit
-    
-    multiProgBit = True
-    
-    fiberPattern = re.compile('.+\.dat$') # regex matching fiber tract file name
-    fiberList = []
-    
-    for it in os.listdir(multiFileDir):
-        if (re.search(fiberPattern, it)):
-            fiberList.append(os.path.join(multiFileDir, it)) #
-    
-    for it in fiberList:
-        fiber_fn = it
-        roi_raw_fn = getFiberPath(fiber_fn) +'roi.raw'
-        roi_xml_fn = getFiberPath(fiber_fn) + 'roi.xml'
-	
-	# Use regex to get as scanId as the baseName of the files
-	scanId = re.search(re.compile('.+(?=_)'), fiber_fn).group().split('/')[-1] # regex may have to change
-	
-	''' Hard coded now, but should be something we can extract from metadata of tract file'''
-	userDefProjectDir = os.path.join(uploadDirPath, 'Multiprojects', 'site', 'subject', 'session', scanId)
-	multiProjTuple.append(userDefProjectDir) # add new scan to project
-	
-	fiber_fn, roi_raw_fn, roi_xml_fn = createDirStruct.createDirStruct(userDefProjectDir, [fiber_fn, roi_raw_fn, roi_xml_fn])
-	derivatives, rawdata,  graphs, graphInvariants, images = defDataDirs(userDefProjectDir)	
-	
-	processInputData(request) # run files through data analysis & return to here
-	
-	#zipProcessedData(request) # zipfiles
-	#open_new_tab(request.META['HTTP_HOST']+'/zipOutput') # single scan download
-
-    return HttpResponseRedirect('/zipOutput/multiProjTuple')
 
 def createProj(request, webargs=None):
     global userDefProjectDir
@@ -155,10 +98,6 @@ def createProj(request, webargs=None):
     return render(request, 'nameProject.html', {
         'form': form,
     })
-
-
-
-
 
 ''' Successful completion of task'''
 def success(request):
@@ -295,8 +234,8 @@ def processInputData(request):
     [ smGrfn, bgGrfn, lccfn, SVDfn ] \
 	= processData(fiber_fn, roi_xml_fn, roi_raw_fn,graphs, graphInvariants, True)
     
-    if (multiProgBit):
-	return request # response
+   # if (multiProgBit):
+	#return request # response
 
     if (progBit):
 	return HttpResponseRedirect('/zipOutput')
@@ -318,25 +257,12 @@ def confirmDownload(request):
         'form': form,
     })
 
-def zipProcessedData(request, multiarg = None):
+def zipProcessedData(request):
     '''
     Compress data products to single zip for upload
     '''
     print '\nBeginning file compression...'
     # Take dir with multiple scans, compress it & send it off 
-    if (multiarg):
-	global multiProjTuple
-	
-	''' Zip it '''
-	temp = zipper.zipFilesFromFolders(multiTuple = multiProjTuple)
-	''' Wrap it '''
-	wrapper = FileWrapper(temp)
-	response = HttpResponse(wrapper, content_type='application/zip')
-	response['Content-Disposition'] = ('attachment; filename=MultiScan.zip')
-	response['Content-Length'] = temp.tell()
-	temp.seek(0)
-	''' Send it '''
-	return response
     
     global scanId
     global userDefProjectDir
@@ -422,7 +348,10 @@ def getFiberPath(fiberFileName):
     return basename[:-9]
 
 def defDataDirs(projectDir):
-    
+    '''
+    Define all the paths to the data product directories
+    projectDir - the fully qualified path of the project directory
+    '''
     derivatives = os.path.join(projectDir, 'derivatives')
     rawdata = os.path.join(projectDir, 'rawdata')
     graphs = os.path.join(projectDir, 'graphs')
@@ -434,6 +363,7 @@ def defDataDirs(projectDir):
 def getFiberID(fiberfn):
     '''
     Assumptions about the data made here as far as file naming conventions
+    fiberfn - the dMRI streamline file in format {filename}_fiber.dat
     '''
     if fiberfn.endswith('/'):
 	fiberfn = fiberfn[:-1] # get rid of trailing slash
