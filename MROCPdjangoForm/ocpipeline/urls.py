@@ -11,8 +11,6 @@ from ocpipeline.views import zipProcessedData
 from ocpipeline.views import processInputData
 from ocpipeline.views import confirmDownload
 
-#from django.conf.urls.defaults import * # deletable
-
 # Uncomment the next two lines to enable the admin:
 from django.contrib import admin
 admin.autodiscover()
@@ -21,14 +19,11 @@ urlpatterns = patterns('ocpipeline.views',
     url(r'^$', 'default', name= 'welcome'),
     url(r'^create/$', 'createProj', name= 'form-create-project'),
     url(r'^create/([a-zA-Z+#-.0-9]+/){5}$','createProj', name='prog-create-project'),  # No spaces yet...
-    url(r'^pipelineUpload/$', 'pipelineUpload', name='single-file-upload'),
-    url(r'^pipelineUpload/(.)+$', 'pipelineUpload', name='single-file-upload'),
+    url(r'^pipelineUpload/(.*$)', 'pipelineUpload', name='single-file-upload'),
     url(r'^success/$', 'success', name='success-page'),
     url(r'^confirmDownload/$', 'confirmDownload', name='confirm-dwnd-page'),
     url(r'^processInput/$', 'processInputData', name='process-input-data'),
-    url(r'^zipOutput/([multiProjTuple])*$','zipProcessedData', name = 'zip-processed-data'), # 2nd param function is view, 3rd param - anything
-    url(r'^multiFileProcess/','multiFileProcess',name = 'process-multi-file'),
-    url(r'^multiUpload(.+$)', 'multiUpload', name ='multi-upload'),
+    url(r'^zipOutput/$','zipProcessedData', name = 'zip-processed-data'), # 2nd param function is view, 3rd param - anything
     # restful API 
     url(r'^upload/(.*$)', 'upload', name= 'prog-upload'),
     # Examples

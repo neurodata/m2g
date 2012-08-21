@@ -6,6 +6,8 @@ import os
 import zipfile
 import tempfile
 
+import webbrowser
+
 def getFiberID(fiberfn):
     '''
     Assumptions about the data made here as far as file naming conventions
@@ -81,7 +83,7 @@ def main():
       redir += Dir + '/'
     else:
       redir += Dir
-  import webbrowser
+  
   webbrowser.open('http://www.openconnecto.me/data/projects/disa/OCPprojects' + redir)
 
 if __name__ == "__main__":
