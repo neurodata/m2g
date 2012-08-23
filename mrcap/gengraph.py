@@ -20,7 +20,7 @@ from fiber import FiberReader
 #   based on input and output names.
 #   Outputs a matlab file. 
 #
-def genGraph(infname, outfname, roixmlname = None, roirawname = None, bigGraph = False, numfibers=0 ): # Edit
+def genGraph(infname, outfname, roixmlname = None, roirawname = None, bigGraph = False , numfibers=0): # Edit
   """
   infname - file name of _fiber.dat file
   outfname - Dir+fileName of output .mat file 
@@ -116,18 +116,13 @@ def genGraph(infname, outfname, roixmlname = None, roirawname = None, bigGraph =
 def main ():
   
   parser = argparse.ArgumentParser(description='Read the contents of MRI Studio file and generate a sparse connectivity graph in SciDB.')
-  parser.add_argument('--count', action="store", type=int, default=-1)
-  parser.add_argument('fbrfile', action="store")
+  parser.add_argument( '--count', action="store", type=int, default=-1 )
+  parser.add_argument( 'fbrfile', action="store" )
+  parser.add_argument( 'output', action="store" )
   
-  parser.add_argument('--xmlfile', action = 'store') # Edit .xml file optional arg if
-  parser.add_argument('--rawfile', action = 'store') # Edit .raw file
-  parser.add_argument('--bigGraph', action = 'store', default = False) #Edit True or False for big graph 
-   
-  parser.add_argument('output', action="store")
-
   result = parser.parse_args()
   
-  genGraph ( result.fbrfile, result.output, result.xmlfile, result.rawfile, result.bigGraph, result.count)
+  genGraph ( result.fbrfile, result.output, result.count )
 
 if __name__ == "__main__":
   main()

@@ -304,21 +304,21 @@ def upload(request, webargs=None):
 	print 'Temporary file created...'
 	
 	''' Extract & save zipped files '''
-	Uploadfiles = []
+	uploadFiles = []
 	for name in (rzfile.namelist()):	
 	    outfile = open(os.path.join(derivatives, name.split('/')[-1]), 'wb') # strip name of source folders if in file name
 	    outfile.write(rzfile.read(name))
 	    outfile.flush()
 	    outfile.close()
-	    Uploadfiles.append(os.path.join(derivatives, name)) # add to list of files
+	    uploadFiles.append(os.path.join(derivatives, name.split('/')[-1])) # add to list of files
 	    print name + " written to disk.."
 	
 	  # Check which file is which
-	roi_xml_fn, fiber_fn, roi_raw_fn = filesorter.checkFileExtGengraph(Uploadfiles) # Check & sort files
+	roi_xml_fn, fiber_fn, roi_raw_fn = filesorter.checkFileExtGengraph(uploadFiles) # Check & sort files
 	
 	''' Data Processing '''
 	[ smGrfn, bgGrfn, lccfn, SVDfn ] \
-	  = processData(fiber_fn, roi_xml_fn, roi_raw_fn,graphs, graphInvariants, False) # Change to false to not process anything
+	  = processData(fiber_fn, roi_xml_fn, roi_raw_fn,graphs, graphInvariants, True) # Change to false to not process anything
 	
 	#ret = rzfile.printdir()
 	#ret = rzfile.testzip()
@@ -332,14 +332,6 @@ def upload(request, webargs=None):
   
     else:
 	return django.http.HttpResponseBadRequest ("Expected POST data, but none given")
-
-
-
-
-
-
-
-
 
 '''********************* Standalone Methods  *********************'''
 
@@ -394,8 +386,8 @@ def processData(fiber_fn, roi_xml_fn, roi_raw_fn,graphs, graphInvariants, run = 
 	''' spawn subprocess to create small since its result is not necessary for processing '''
 	#arguments = 'python ' + '/home/disa/MR-connectome/mrcap/gengraph.py /home/disa' + fiber_fn + ' /home/disa' + smallGraphOutputFileName +' /home/disa' + roi_xml_fn + ' /home/disa' + roi_raw_fn
 	#arguments = 'python ' + '/Users/dmhembere44/MR-connectome/mrcap/gengraph.py /Users/dmhembere44' + fiber_fn + ' /Users/dmhembere44' + smallGraphOutputFileName + ' roixmlname=/Users/dmhembere44' + roi_xml_fn + ' roirawname=/Users/dmhembere44' + roi_raw_fn
-	#subprocess.Popen(arguments,shell=True) 
-	#**gengraph.genGraph(fiber_fn, smGrfn, roi_xml_fn ,roi_raw_fn)
+	#subprocess.Popen(arguments,shell=True)
+	gengraph.genGraph(fiber_fn, smGrfn, roi_xml_fn, roi_raw_fn)
 	
 	''' Run gengrah BIG & save output '''
 	print("\nRunning Big gengraph....")
