@@ -279,60 +279,67 @@ def zipProcessedData(request):
     return response
 
 def upload(request, webargs=None):
-  """Programmatic interface for uploading data"""
+    """Programmatic interface for uploading data"""  
+    if (webargs and request.method == 'POST'):
+      
+	[userDefProjectName, site, subject, session, scanId] = webargs.split('/') # [:-1] # Add to server version
+	
+	userDefProjectDir = os.path.join(uploadDirPath, userDefProjectName, site, subject, session, scanId)
+	
+	''' Define data directory paths '''
+	derivatives, rawdata,  graphs, graphInvariants, images = defDataDirs(userDefProjectDir)
+	
+	''' Make appropriate dirs if they dont already exist '''    
+	createDirStruct.createDirStruct([derivatives, rawdata, graphs, graphInvariants, images])
+	print 'Directory structure created...'
+	
+	''' Get data from request.body '''
+	
+	tmpfile = tempfile.NamedTemporaryFile()
+	tmpfile.write ( request.body )
+	tmpfile.flush()
+	tmpfile.seek(0)
+	rzfile = zipfile.ZipFile ( tmpfile.name, "r" )
+	
+	print 'Temporary file created...'
+	
+	''' Extract & save zipped files '''
+	Uploadfiles = []
+	for name in (rzfile.namelist()):	
+	    outfile = open(os.path.join(derivatives, name.split('/')[-1]), 'wb') # strip name of source folders if in file name
+	    outfile.write(rzfile.read(name))
+	    outfile.flush()
+	    outfile.close()
+	    Uploadfiles.append(os.path.join(derivatives, name)) # add to list of files
+	    print name + " written to disk.."
+	
+	  # Check which file is which
+	roi_xml_fn, fiber_fn, roi_raw_fn = filesorter.checkFileExtGengraph(Uploadfiles) # Check & sort files
+	
+	''' Data Processing '''
+	[ smGrfn, bgGrfn, lccfn, SVDfn ] \
+	  = processData(fiber_fn, roi_xml_fn, roi_raw_fn,graphs, graphInvariants, False) # Change to false to not process anything
+	
+	#ret = rzfile.printdir()
+	#ret = rzfile.testzip()
+	#ret = rzfile.namelist()
+	
+	dwnldLoc = "http://www.openconnecto.me/data/projects/disa/OCPproject/"+ webargs
+	return HttpResponse ( "Files available for download at " + dwnldLoc) # change to render of a page with a link to data result
+    
+    elif(not webargs):
+	return django.http.HttpResponseBadRequest ("Expected web arguments to direct project correctly")
   
-  if (webargs and request.method == 'POST'):
-    
-    [userDefProjectName, site, subject, session, scanId] = webargs.split('/') # [:-1] # Add to server version
-    
-    userDefProjectDir = os.path.join(uploadDirPath, userDefProjectName, site, subject, session, scanId)
-    
-    ''' Define data directory paths '''
-    derivatives, rawdata,  graphs, graphInvariants, images = defDataDirs(userDefProjectDir)
-    
-    ''' Make appropriate dirs if they dont already exist '''    
-    createDirStruct.createDirStruct([derivatives, rawdata, graphs, graphInvariants, images])
-    print 'Directory structure created...'
-    
-    ''' Get data from request.body '''
-    
-    tmpfile = tempfile.NamedTemporaryFile()
-    tmpfile.write ( request.body )
-    tmpfile.flush()
-    tmpfile.seek(0)
-    rzfile = zipfile.ZipFile ( tmpfile.name, "r" )
-    
-    print 'Temporary file created...'
-    
-    ''' Extract & save zipped files '''
-    Uploadfiles = []
-    for name in (rzfile.namelist()):	
-      outfile = open(os.path.join(derivatives, name.split('/')[-1]), 'wb') # strip name of source folders if in file name
-      outfile.write(rzfile.read(name))
-      outfile.flush()
-      outfile.close()
-      Uploadfiles.append(os.path.join(derivatives, name)) # add to list of files
-      print name + " written to disk.."
-    
-      # Check which file is which
-    roi_xml_fn, fiber_fn, roi_raw_fn = filesorter.checkFileExtGengraph(Uploadfiles) # Check & sort files
-    
-    ''' Data Processing '''
-    [ smGrfn, bgGrfn, lccfn, SVDfn ] \
-      = processData(fiber_fn, roi_xml_fn, roi_raw_fn,graphs, graphInvariants, False) # Change to false to not process anything
-    
-    #ret = rzfile.printdir()
-    #ret = rzfile.testzip()
-    #ret = rzfile.namelist()
-    
-    dwnldLoc = "http://www.openconnecto.me/data/projects/disa/OCPproject/"+ webargs
-    return HttpResponse ( "Files available for download at " + dwnldLoc) # change to render of a page with a link to data result
+    else:
+	return django.http.HttpResponseBadRequest ("Expected POST data, but none given")
 
-  elif(not webargs):
-    return django.http.HttpResponseBadRequest ("Expected web arguments to direct project correctly")
 
-  else:
-    return django.http.HttpResponseBadRequest ("Expected POST data, but none given")
+
+
+
+
+
+
 
 '''********************* Standalone Methods  *********************'''
 
