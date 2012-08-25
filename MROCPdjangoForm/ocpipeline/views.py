@@ -61,6 +61,8 @@ scanId = '' # To be defined by user
 
 progBit = False # This bit will be set if user decides to proceed programmatically
 
+BASE_URL = '' # '/disa' # Server version
+
 ''' Little welcome message'''
 def default(request):
     return render_to_response('welcome.html')
@@ -76,7 +78,7 @@ def createProj(request, webargs=None):
         userDefProjectName = os.path.join(uploadDirPath, userDefProjectName) # Fully qualify
         userDefProjectDir =  os.path.join(userDefProjectName, site, subject, session, scanId)
 	
-        return HttpResponseRedirect('/pipelineUpload') # Redirect after POST
+        return HttpResponseRedirect(BASE_URL+'/pipelineUpload') # Redirect after POST
     
     ''' Form '''
     if request.method == 'POST':
@@ -91,7 +93,7 @@ def createProj(request, webargs=None):
 	    userDefProjectName = os.path.join(uploadDirPath, userDefProjectName) # Fully qualify
 	    userDefProjectDir =  os.path.join(userDefProjectName, site, subject, session, scanId)
 	    
-        return HttpResponseRedirect('/pipelineUpload') # Redirect after POST
+        return HttpResponseRedirect(BASE_URL+'/pipelineUpload') # Redirect after POST
     else:
         form = DataForm() # An unbound form
    
@@ -155,7 +157,7 @@ def pipelineUpload(request, webargs=None):
         ''' Make appropriate dirs if they dont already exist'''
         createDirStruct.createDirStruct([derivatives, rawdata, graphs, graphInvariants, images])
 	
-	return HttpResponseRedirect('/processInput') # Redirect after POST
+	return HttpResponseRedirect(BASE_URL+'/processInput') # Redirect after POST
 
     ''' Form '''
     if request.method == 'POST':
@@ -189,7 +191,7 @@ def pipelineUpload(request, webargs=None):
             createDirStruct.createDirStruct([derivatives, rawdata, graphs, graphInvariants, images])
             
             # Redirect to Processing page
-        return HttpResponseRedirect('/processInput')
+        return HttpResponseRedirect(BASE_URL+'/processInput')
     else:
         form = DocumentForm() # An empty, unbound form
         
@@ -233,24 +235,21 @@ def processInputData(request):
     
     [ smGrfn, bgGrfn, lccfn, SVDfn ] \
 	= processData(fiber_fn, roi_xml_fn, roi_raw_fn,graphs, graphInvariants, True)
-    
-   # if (multiProgBit):
-	#return request # response
 
     if (progBit):
-	return HttpResponseRedirect('/zipOutput')
+	return HttpResponseRedirect(BASE_URL+'/zipOutput')
 
-    return HttpResponseRedirect('/confirmDownload')
+    return HttpResponseRedirect(BASE_URL+'/confirmDownload')
 
 
 def confirmDownload(request):
     if 'zipDwnld' in request.POST: # If zipDwnl option is chosen
 	form = OKForm(request.POST)
-	return HttpResponseRedirect('/zipOutput') # Redirect after POST
+	return HttpResponseRedirect(BASE_URL+'/zipOutput') # Redirect after POST
     
     elif 'getProdByDir' in  request.POST: # If view dir structure option is chosen
 	form = OKForm(request.POST)
-	return HttpResponseRedirect('http://www.openconnecto.me' + userDefProjectDir) # Redirect after POST
+	return HttpResponseRedirect(BASE_URL+'http://www.openconnecto.me' + userDefProjectDir) # Redirect after POST
     else:
 	form = OKForm()
     return render(request, 'confirmDownload.html', {
@@ -399,7 +398,7 @@ def processData(fiber_fn, roi_xml_fn, roi_raw_fn,graphs, graphInvariants, run = 
 	
 	'''Should be big but we'll do small for now'''
 	#**lcc.process_single_brain(roi_xml_fn, roi_raw_fn, bgGrfn, lccfn)
-	#**lcc.process_single_brain(roi_xml_fn, roi_raw_fn, smGrfn, lccfn)
+	lcc.process_single_brain(roi_xml_fn, roi_raw_fn, smGrfn, lccfn)
 	
 	''' Run Embed - SVD '''
 	SVDfn = os.path.join(graphInvariants, (baseName + 'svd.npy'))
@@ -407,7 +406,7 @@ def processData(fiber_fn, roi_xml_fn, roi_raw_fn,graphs, graphInvariants, run = 
 	print("Running SVD....")
 	
 	#**svd.embed_graph(lccfn, baseName, bgGrfn, SVDfn)
-	#**svd.embed_graph(lccfn, baseName, smGrfn, SVDfn)
+	svd.embed_graph(lccfn, baseName, smGrfn, SVDfn)
 	return [ smGrfn, bgGrfn, lccfn, SVDfn ] 
     else:
 	print 'Theoretically I just run some processing...'

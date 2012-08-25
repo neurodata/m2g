@@ -172,7 +172,7 @@ def process_single_brain(roiXml, roiRaw, mat_fn, lccOutputFileName, figDir = Non
     print 'Processing connected components'
     vcc = ConnectedComponent(fg.spcscmat) # CC object 
     
-    np.save(lccOutputFileName,sp.lil_matrix(vcc.vertexCC)) # save as .np
+    np.save(lccOutputFileName,sp.lil_matrix(vcc.vertexCC)) # save as .npy
     
     if figDir != None:
         #save_figures(vcc.get_coords_for_lccs(10), figDir+lccOutputFileName) # Save figures
