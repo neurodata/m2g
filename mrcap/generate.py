@@ -17,6 +17,8 @@ def main():
     parser = argparse.ArgumentParser(description='Process a directory containing MRI Studio files and generate a sparse graph in Matlab format.')
     parser.add_argument('inputdir', action="store")
     parser.add_argument('outputdir', action="store")
+    parser.add_argument('--big', action='store_true', help='Big graph.', default=False)
+
     parser.add_argument("--pattern", dest='pattern', action="store", default="", help="Process files matching this pattern only.  Matches any file with the specified substring.")
 
     result = parser.parse_args()
@@ -43,7 +45,10 @@ def main():
         outfile = os.path.splitext(infile)[0]
         infp = os.path.normpath ( result.inputdir + '/' + infile )
         outfp = os.path.normpath ( result.outputdir + '/' + outfile + '.mat' )
-        genGraph ( infp, outfp )
+        if not result.big:
+          genGraph ( infp, outfp )
+        else:
+          genGraph ( infp, outfp, None, None, True )
       else:
         pass
 
