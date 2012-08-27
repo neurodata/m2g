@@ -30,8 +30,10 @@ from mrcap import gengraph as gengraph
 import ocpipeline.filesorter as filesorter
 import ocpipeline.zipper as zipper
 import ocpipeline.createDirStruct as createDirStruct
+import ocpipeline.convertTo as convertTo
 
 from django.core.servers.basehttp import FileWrapper
+from django.conf import settings
 
 import subprocess
 from shutil import move, rmtree # For moving files
@@ -61,7 +63,10 @@ scanId = '' # To be defined by user
 
 progBit = False # This bit will be set if user decides to proceed programmatically
 
-BASE_URL = '' # '/disa' # Server version
+smGrfn_gl = ''
+bgGrfn_gl = ''
+lccfn_gl = ''
+SVDfn_gl = ''
 
 ''' Little welcome message'''
 def default(request):
@@ -78,7 +83,7 @@ def createProj(request, webargs=None):
         userDefProjectName = os.path.join(uploadDirPath, userDefProjectName) # Fully qualify
         userDefProjectDir =  os.path.join(userDefProjectName, site, subject, session, scanId)
 	
-        return HttpResponseRedirect(BASE_URL+'/pipelineUpload') # Redirect after POST
+        return HttpResponseRedirect(settings.BASE_URL+'/pipelineUpload') # Redirect after POST
     
     ''' Form '''
     if request.method == 'POST':
@@ -93,7 +98,7 @@ def createProj(request, webargs=None):
 	    userDefProjectName = os.path.join(uploadDirPath, userDefProjectName) # Fully qualify
 	    userDefProjectDir =  os.path.join(userDefProjectName, site, subject, session, scanId)
 	    
-        return HttpResponseRedirect(BASE_URL+'/pipelineUpload') # Redirect after POST
+        return HttpResponseRedirect(settings.BASE_URL+'/pipelineUpload') # Redirect after POST
     else:
         form = DataForm() # An unbound form
    
@@ -157,7 +162,7 @@ def pipelineUpload(request, webargs=None):
         ''' Make appropriate dirs if they dont already exist'''
         createDirStruct.createDirStruct([derivatives, rawdata, graphs, graphInvariants, images])
 	
-	return HttpResponseRedirect(BASE_URL+'/processInput') # Redirect after POST
+	return HttpResponseRedirect(settings.BASE_URL+'/processInput') # Redirect after POST
 
     ''' Form '''
     if request.method == 'POST':
@@ -191,7 +196,7 @@ def pipelineUpload(request, webargs=None):
             createDirStruct.createDirStruct([derivatives, rawdata, graphs, graphInvariants, images])
             
             # Redirect to Processing page
-        return HttpResponseRedirect(BASE_URL+'/processInput')
+        return HttpResponseRedirect(settings.BASE_URL+'/processInput')
     else:
         form = DocumentForm() # An empty, unbound form
         
@@ -233,28 +238,59 @@ def processInputData(request):
     global processingScriptDirPath
     global graphInvariants
     
-    [ smGrfn, bgGrfn, lccfn, SVDfn ] \
+    global smGrfn_gl
+    global bgGrfn_gl
+    global lccfn_gl
+    global SVDfn_gl
+    
+    [ smGrfn_gl, bgGrfn_gl, lccfn_gl, SVDfn_gl ] \
 	= processData(fiber_fn, roi_xml_fn, roi_raw_fn,graphs, graphInvariants, True)
 
     if (progBit):
-	return HttpResponseRedirect(BASE_URL+'/zipOutput')
+	return HttpResponseRedirect(settings.BASE_URL+'/zipOutput')
 
-    return HttpResponseRedirect(BASE_URL+'/confirmDownload')
+    return HttpResponseRedirect(settings.BASE_URL+'/confirmDownload')
 
 
 def confirmDownload(request):
+    
+    global smGrfn_gl
+    global bgGrfn_gl
+    global lccfn_gl
+    global SVDfn_gl
+    
     if 'zipDwnld' in request.POST: # If zipDwnl option is chosen
 	form = OKForm(request.POST)
-	return HttpResponseRedirect(BASE_URL+'/zipOutput') # Redirect after POST
+	return HttpResponseRedirect(settings.BASE_URL+'/zipOutput') # Redirect after POST
     
-    elif 'getProdByDir' in  request.POST: # If view dir structure option is chosen
+    elif 'convToMatNzip' in request.POST: # If view dir structure option is chosen
 	form = OKForm(request.POST)
-	return HttpResponseRedirect(BASE_URL+'http://www.openconnecto.me' + userDefProjectDir) # Redirect after POST
+	convertTo.convertLCCtoMat(lccfn_gl)
+	convertTo.convertSVDtoMat(SVDfn_gl)
+	# Incomplete
+	#convertTo.convertGraphToCSV(smGrfn_gl)
+	#convertTo.convertGraphToCSV(bgGrfn_gl)
+	return HttpResponseRedirect(settings.BASE_URL+'/zipOutput')
+    
+    elif 'getProdByDir' in request.POST: # If view dir structure option is chosen
+	form = OKForm(request.POST)
+	return HttpResponseRedirect('http://www.openconnecto.me' + userDefProjectDir)
+    
+    elif 'convToMatNgetByDir' in request.POST: # If view dir structure option is chosen
+	form = OKForm(request.POST)
+	convertTo.convertLCCtoMat(lccfn_gl)
+	convertTo.convertSVDtoMat(SVDfn_gl)
+	# Incomplete
+	#convertTo.convertGraphToCSV(smGrfn_gl)
+	#convertTo.convertGraphToCSV(bgGrfn_gl)
+	return HttpResponseRedirect('http://www.openconnecto.me' + userDefProjectDir)
+    
     else:
 	form = OKForm()
     return render(request, 'confirmDownload.html', {
         'form': form,
     })
+
 
 def zipProcessedData(request):
     '''
@@ -280,8 +316,8 @@ def zipProcessedData(request):
 def upload(request, webargs=None):
     """Programmatic interface for uploading data"""  
     if (webargs and request.method == 'POST'):
-      
-	[userDefProjectName, site, subject, session, scanId] = webargs.split('/') # [:-1] # Add to server version
+	
+	[userDefProjectName, site, subject, session, scanId, addmatNcsv] = webargs.split('/') # [:-1] # Add to server version
 	
 	userDefProjectDir = os.path.join(uploadDirPath, userDefProjectName, site, subject, session, scanId)
 	
@@ -319,6 +355,14 @@ def upload(request, webargs=None):
 	[ smGrfn, bgGrfn, lccfn, SVDfn ] \
 	  = processData(fiber_fn, roi_xml_fn, roi_raw_fn,graphs, graphInvariants, True) # Change to false to not process anything
 	
+	''' If optional .mat graph invariants & .csv graphs '''
+	if re.match(re.compile('(y|yes)$',re.I),addmatNcsv):
+	    convertTo.convertLCCtoMat(lccfn)
+	    convertTo.convertSVDtoMat(SVDfn)
+		# Incomplete
+	    #convertTo.convertGraphToCSV(smGrfn)
+	    #convertTo.convertGraphToCSV(bgGrfn)
+	    
 	#ret = rzfile.printdir()
 	#ret = rzfile.testzip()
 	#ret = rzfile.namelist()
@@ -381,7 +425,7 @@ def processData(fiber_fn, roi_xml_fn, roi_raw_fn,graphs, graphInvariants, run = 
 		
 	'''Run gengraph SMALL & save output'''
 	print("Running Small gengraph....")
-	smGrfn = os.path.join(graphs, (baseName +'fiberSmGr.mat'))
+	smGrfn = os.path.join(graphs, (baseName +'smgr.mat'))
 	''' spawn subprocess to create small since its result is not necessary for processing '''
 	#arguments = 'python ' + '/home/disa/MR-connectome/mrcap/gengraph.py /home/disa' + fiber_fn + ' /home/disa' + smallGraphOutputFileName +' /home/disa' + roi_xml_fn + ' /home/disa' + roi_raw_fn
 	#arguments = 'python ' + '/Users/dmhembere44/MR-connectome/mrcap/gengraph.py /Users/dmhembere44' + fiber_fn + ' /Users/dmhembere44' + smallGraphOutputFileName + ' roixmlname=/Users/dmhembere44' + roi_xml_fn + ' roirawname=/Users/dmhembere44' + roi_raw_fn
@@ -390,7 +434,7 @@ def processData(fiber_fn, roi_xml_fn, roi_raw_fn,graphs, graphInvariants, run = 
 	
 	''' Run gengrah BIG & save output '''
 	print("\nRunning Big gengraph....")
-	bgGrfn = os.path.join(graphs, (baseName +'fiberBgGr.mat')) 
+	bgGrfn = os.path.join(graphs, (baseName +'bggr.mat')) 
 	#**gengraph.genGraph(fiber_fn, bgGrfn, roi_xml_fn ,roi_raw_fn, True)
 	
 	''' Run LCC '''
@@ -405,9 +449,10 @@ def processData(fiber_fn, roi_xml_fn, roi_raw_fn,graphs, graphInvariants, run = 
 	
 	print("Running SVD....")
 	
-	#**svd.embed_graph(lccfn, baseName, bgGrfn, SVDfn)
-	svd.embed_graph(lccfn, baseName, smGrfn, SVDfn)
+	roiBasename = str(roi_xml_fn[:-4]) # WILL NEED ADAPTATION
+	#**svd.embed_graph(lccfn, roiBasename, bgGrfn, SVDfn)
+	svd.embed_graph(lccfn, roiBasename, smGrfn, SVDfn)
 	return [ smGrfn, bgGrfn, lccfn, SVDfn ] 
     else:
-	print 'Theoretically I just run some processing...'
+	print 'Theoretically I just ran some processing...'
 	return [ '','','','' ] 
