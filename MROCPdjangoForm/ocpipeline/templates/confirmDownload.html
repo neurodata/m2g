@@ -27,7 +27,18 @@
         
         <form action="" method="post" enctype="multipart/form-data">
             {% csrf_token %}
+            <input name = "convToMatNzip"  type="submit" value="Convert graph invariants to .mat and zip" class="button">        
+        </form>
+        
+        <form action="" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
             <input name = "getProdByDir"  type="submit" value="View Directory to choose from individual files" class="button">        
         </form>
+        
+        <form action="" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <input name = "convToMatNgetByDir"  type="submit" value="Convert graph invariants to .mat & view Directory" class="button">        
+        </form>
+        
         
 </body></html>

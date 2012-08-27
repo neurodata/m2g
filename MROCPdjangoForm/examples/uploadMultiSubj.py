@@ -20,7 +20,8 @@ def main():
 
   parser = argparse.ArgumentParser(description='Upload a mulitple subjects to MROCP via \
                                    a single dir that must match bg1/MRN')
-  parser.add_argument('url', action="store", help='url must be in the form: upload/{project}/{site}/{subject}/{session}')
+  parser.add_argument('url', action="store", help='url must be in the form: upload/{project}/{site}/{subject}/{session}/yes|no, \
+                where the last param is either \'yes\' or \'no\', but not both. \'yes\' adds .mat files for graph invariant result & .csv for graphs, \'no\' does not   ')
   parser.add_argument('dataDir', action="store", help ='Data directory must have a fiber\
                       subdirectory with tract files & an roi subdirectory with rois')
   

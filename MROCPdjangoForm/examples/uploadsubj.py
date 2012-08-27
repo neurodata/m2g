@@ -10,7 +10,8 @@ import webbrowser
 def main():
 
   parser = argparse.ArgumentParser(description='Upload a subject to MROCP.')
-  parser.add_argument('url', action="store", help='url must be in the form  upload/{project}/{site}/{subject}/{session}/{scanID}')
+  parser.add_argument('url', action="store", help='url must be in the form  upload/{project}/{site}/{subject}/{session}/{scanID}/yes|no, \
+          where the last param is either \'yes\' or \'no\', but not both. \'yes\' adds .mat files for graph invariant result & .csv for graphs, \'no\' does not')
   parser.add_argument('fiberfile', action="store")
   parser.add_argument('roixmlfile', action="store")
   parser.add_argument('roirawfile', action="store")
