@@ -61,7 +61,7 @@ images = ''	    # To hold images
 userDefProjectDir = '' # To be defined by user
 scanId = '' # To be defined by user
 
-progBit = False # This bit will be set if user decides to proceed programmatically
+urlBit = False # This bit will be set if user decides to proceed using url version
 
 smGrfn_gl = ''
 bgGrfn_gl = ''
@@ -76,7 +76,7 @@ def createProj(request, webargs=None):
     global userDefProjectDir
     global scanId
     
-    ''' Programmatic''' 
+    ''' Browser url version''' 
     if (webargs):
         [userDefProjectName, site, subject, session, scanId] = request.path.split('/')[2:7] # This will always be true
     
@@ -120,14 +120,14 @@ def pipelineUpload(request, webargs=None):
     
     print "Uploading files..."
     
-    ''' Programmatic Version
-        webargs should be fully qualified name of tract file e.g /data/files/name_fiber.dat
+    ''' Browser url version
+        webargs should be just the fully qualified name of tract file e.g /data/files/name_fiber.dat
         Assumption is naming convention is name_fiber.dat, name_roi.dat, name_roi.xml, where
         'name' is the same in all cases
     ''' 
     if(webargs):
-	global progBit
-	progBit = True # Set the programmatic marker
+	global urlBit
+	urlBit = True # Set the url version marker
 	
         fiber_fn = request.path[15:] # Directory where
         if fiber_fn[-1] == '/': # in case of trailing backslash
@@ -216,7 +216,7 @@ def processInputData(request):
     global fiber_fn
     global roi_raw_fn
     global derivatives
-    global progBit
+    global urlBit
     
     filesInUploadDir = os.listdir(derivatives)
     
@@ -246,7 +246,7 @@ def processInputData(request):
     [ smGrfn_gl, bgGrfn_gl, lccfn_gl, SVDfn_gl ] \
 	= processData(fiber_fn, roi_xml_fn, roi_raw_fn,graphs, graphInvariants, True)
 
-    if (progBit):
+    if (urlBit):
 	return HttpResponseRedirect(settings.BASE_URL+'/zipOutput')
 
     return HttpResponseRedirect(settings.BASE_URL+'/confirmDownload')
