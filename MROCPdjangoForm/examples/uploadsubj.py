@@ -57,8 +57,10 @@ def main():
   
   ''' Open up a tab in your browser to view results'''
   redir = '/'
-  for Dir in result.url.split('/')[-5:]:
-    if (Dir != result.url.split('/')[-1]):
+  result.url = result.url[:-1] if result.url.endswith('/') else result.url # remove trailing backslash
+  
+  for i, Dir in enumerate(result.url.split('/')[-6:-1]):
+    if (i != len(result.url.split('/')[-6:-1])-1):
       redir += Dir + '/'
     else:
       redir += Dir

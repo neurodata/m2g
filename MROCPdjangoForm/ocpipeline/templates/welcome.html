@@ -14,12 +14,39 @@
                  background-attachment:fixed;
                  background-position:top right;
                  }
+                 p
+	    {
+		line-height: 180%
+	    }
         </style>
     </head>
     <body>                
 	<a href="http://openconnecto.me"><img src="http://openconnecto.me/wp-content/themes/DMG/img/logo.png"/></a>
 	<h1>Welcome to the MROC pipeline beta version</h1>
+        
+        <h2>Form based use: </h2>
 	<p>APPEND '/create' (without quotes), to url root to proceed to Form based version</p>
-	<p>APPEND '/create/{projectName}/{site}/{subject}/{session}/{scanID}' (without quotes), to proceed programmatically</p>
+        
+        <h2>Browser url use: </h2>
+	<p>APPEND '/create/{YOUR_projectName}/{YOUR_site}/{YOUR_subject}/{YOUR_session}/{YOUR_scanID}' (without quotes), to proceed using the url based version</p>
+        
+        <h2>Programmatic use: </h2>
+        <p>To use a programmatic version please refer to our github <a href='https://github.com/openconnectome/MR-connectome/tree/master/MROCPdjangoForm/examples' target='blank'>sample code </a>
+        for examples of use and sample python scripts. <br/>
+        The base url for an upload is always <strong>http://openconnecto.me/disa/upload/ </strong>. <br/>
+        
+        The example <a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjangoForm/examples/uploadsubj.py"
+        target="blank"> uploadsubj.py</a> can be used as follows from a terminal session: <br/>
+        
+        <strong>python uploadsubj.py http://openconnecto.me/disa/upload/{YOUR_project}/{YOUR_site}/{YOUR_subject}/{YOUR_session}/{scanID}/yes|no.</strong>
+         The last param is either 'yes' or 'no', but not both: 'yes' adds .mat files for graph invariant result and .csv for graphs, while 'no' does not'. <br/>
+         
+        <a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjangoForm/examples/uploadMultiSubj.py">Multi-subject/scan example</a>
+        is also provided for batch uploading and processing of multiple scans. The use is similar to uploadsubj.py.
+        Help can be obtained by typing in a teminal/command line session: <strong>python uploadMultiSubj.py -h </strong>, for multi or <strong>python uploadsubj.py -h</strong> for single scans.
+        Please remember that 
+         
+        </p>
+        
     </body>
 </html>
