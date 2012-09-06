@@ -46,7 +46,7 @@ class ConnectedComponent(object):
         cc_dict[-2] = 0
         
         self.vertexCC = np.array([cc_dict[v] for v in vertexCC])
-        self.ccsize = Counter(vertexCC)
+        self.ccsize = Counter(self.vertexCC)
     
     def save(self,fn, suffix=True):
         if suffix:
@@ -59,9 +59,17 @@ class ConnectedComponent(object):
         self.n = self.vertexCC.shape[1]
         self.vertexCC = self.vertexCC.reshape(self.n)
         
-    def induced_subgraph(self, G, cc=1):
+    def induced_subgraph(self, G, cc=1, binarize=True, symetrize=True):
         incc = np.equal(self.vertexCC,cc).nonzero()[0]
-        return G[:,incc][incc,:]
+        Gind = G[:,incc][incc,:]
+        
+        if symetrize:
+            Gind = Gind+Gind.T #SYMETRIZE
+        if binarize:
+            Gind.data[:] = 1 # BINARIZE
+
+        return Gind
+
 
     
     def __getitem__(self,key):
@@ -160,7 +168,7 @@ Determine lcc on a single big graph a provided my a remote user
 This is for use in the one-click processing pipeline to be found at http://www.openconnecto.me/STUB
 '''
 
-def process_single_brain(gengraph, roiXml, roiRaw, mat_fn, lccOutputFileName, figDir = None): # I assume mat_fn is the fiber .mat file used to generate graph?
+def process_single_brain(roiXml, roiRaw, mat_fn, lccOutputFileName, figDir = None): # I assume mat_fn is the fiber .mat file used to generate graph?
     
     print "Processing single brain... "
     #roix = roiXml
@@ -172,7 +180,7 @@ def process_single_brain(gengraph, roiXml, roiRaw, mat_fn, lccOutputFileName, fi
     print 'Processing connected components'
     vcc = ConnectedComponent(fg.spcscmat) # CC object 
     
-    np.save(lccOutputFileName,sp.lil_matrix(self.vertexCC)) # save as .np
+    np.save(lccOutputFileName,sp.lil_matrix(vcc.vertexCC)) # save as .np
     
     if figDir != None:
         #save_figures(vcc.get_coords_for_lccs(10), figDir+lccOutputFileName) # Save figures
@@ -231,9 +239,9 @@ def save_fa_overlay(faDir, ccDir, figDir, slist, orientationList):
     brainFiles = [fn.split('_')[0] for fn in os.listdir(ccDir)]
     f = plt.figure();
     
+        fax = fa.FAXML(faDir+bfn+'_fa.xml')
     for bfn in brainFiles:
         vcc = ConnectedComponent(fn=ccDir+bfn+'_concomp.npy')
-        fax = fa.FAXML(faDir+bfn+'_fa.xml')
         fas = fa.FAData(faDir+bfn+'_fa.raw',fax.getShape())
         cc3d = vcc.get_3d_cc(fax.getShape())
         
