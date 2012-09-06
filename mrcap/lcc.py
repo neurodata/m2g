@@ -168,7 +168,7 @@ Determine lcc on a single big graph a provided my a remote user
 This is for use in the one-click processing pipeline to be found at http://www.openconnecto.me/STUB
 '''
 
-def process_single_brain(roiXml, roiRaw, mat_fn, lccOutputFileName, figDir = None): # I assume mat_fn is the fiber .mat file used to generate graph?
+def process_single_brain(roiXml, roiRaw, mat_fn, lccOutputFileName, figDir = None): 
     
     print "Processing single brain... "
     #roix = roiXml
@@ -180,7 +180,7 @@ def process_single_brain(roiXml, roiRaw, mat_fn, lccOutputFileName, figDir = Non
     print 'Processing connected components'
     vcc = ConnectedComponent(fg.spcscmat) # CC object 
     
-    np.save(lccOutputFileName,sp.lil_matrix(vcc.vertexCC)) # save as .np
+    np.save(lccOutputFileName,sp.lil_matrix(vcc.vertexCC)) # save as .npy
     
     if figDir != None:
         #save_figures(vcc.get_coords_for_lccs(10), figDir+lccOutputFileName) # Save figures
@@ -239,9 +239,9 @@ def save_fa_overlay(faDir, ccDir, figDir, slist, orientationList):
     brainFiles = [fn.split('_')[0] for fn in os.listdir(ccDir)]
     f = plt.figure();
     
-        fax = fa.FAXML(faDir+bfn+'_fa.xml')
     for bfn in brainFiles:
         vcc = ConnectedComponent(fn=ccDir+bfn+'_concomp.npy')
+        fax = fa.FAXML(faDir+bfn+'_fa.xml')
         fas = fa.FAData(faDir+bfn+'_fa.raw',fax.getShape())
         cc3d = vcc.get_3d_cc(fax.getShape())
         
