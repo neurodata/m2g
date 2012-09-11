@@ -7,6 +7,9 @@ import tempfile
 
 import webbrowser
 
+
+''' RESTful API '''
+
 def main():
 
   parser = argparse.ArgumentParser(description='Upload a subject to MROCP.')
