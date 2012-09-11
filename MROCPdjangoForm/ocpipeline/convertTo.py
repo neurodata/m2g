@@ -25,12 +25,12 @@ def convertGraphToCSV(graph_fn):
   graph_fn - the full file name of the graph. 
   '''
   gr_csc = sio.loadmat(graph_fn)['fibergraph'] # key is always fibergraph
-  dense_gr_csc = graph_csc.todense()
-  gr_list = dense_g_csc.tolist()
+  #dense_gr_csc = graph_csc.todense()
+  #gr_list = dense_gr_csc.tolist()
   
   ##### ***** MORE HERE ****** ######
     
-  gr_csv = csv.writer(gr_list, dialect='excel', )
+  #gr_csv = csv.writer(gr_list, dialect='excel', )
   
   
   
