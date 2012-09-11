@@ -46,7 +46,7 @@ class ConnectedComponent(object):
         cc_dict[-2] = 0
         
         self.vertexCC = np.array([cc_dict[v] for v in vertexCC])
-        self.ccsize = Counter(vertexCC)
+        self.ccsize = Counter(self.vertexCC)
     
     def save(self,fn, suffix=True):
         if suffix:
@@ -59,9 +59,17 @@ class ConnectedComponent(object):
         self.n = self.vertexCC.shape[1]
         self.vertexCC = self.vertexCC.reshape(self.n)
         
-    def induced_subgraph(self, G, cc=1):
+    def induced_subgraph(self, G, cc=1, binarize=True, symetrize=True):
         incc = np.equal(self.vertexCC,cc).nonzero()[0]
-        return G[:,incc][incc,:]
+        Gind = G[:,incc][incc,:]
+        
+        if symetrize:
+            Gind = Gind+Gind.T #SYMETRIZE
+        if binarize:
+            Gind.data[:] = 1 # BINARIZE
+
+        return Gind
+
 
     
     def __getitem__(self,key):
