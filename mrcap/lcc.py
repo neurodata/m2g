@@ -46,7 +46,7 @@ class ConnectedComponent(object):
         cc_dict[-2] = 0
         
         self.vertexCC = np.array([cc_dict[v] for v in vertexCC])
-        self.ccsize = Counter(self.vertexCC)
+        self.ccsize = Counter(vertexCC)
     
     def save(self,fn, suffix=True):
         if suffix:
@@ -59,17 +59,9 @@ class ConnectedComponent(object):
         self.n = self.vertexCC.shape[1]
         self.vertexCC = self.vertexCC.reshape(self.n)
         
-    def induced_subgraph(self, G, cc=1, binarize=True, symetrize=True):
+    def induced_subgraph(self, G, cc=1):
         incc = np.equal(self.vertexCC,cc).nonzero()[0]
-        Gind = G[:,incc][incc,:]
-        
-        if symetrize:
-            Gind = Gind+Gind.T #SYMETRIZE
-        if binarize:
-            Gind.data[:] = 1 # BINARIZE
-
-        return Gind
-
+        return G[:,incc][incc,:]
 
     
     def __getitem__(self,key):
@@ -179,7 +171,10 @@ def process_single_brain(roiXml, roiRaw, mat_fn, lccOutputFileName, figDir = Non
     fg.loadFromMatlab('fibergraph', mat_fn) # (key, fileName)
     print 'Processing connected components'
     vcc = ConnectedComponent(fg.spcscmat) # CC object 
-    
+    '''
+    # replace all above code with this
+    vcc = ConnectedComponent(loadmat(mat_fn)['fibergraph'])
+    '''
     np.save(lccOutputFileName,sp.lil_matrix(vcc.vertexCC)) # save as .npy
     
     if figDir != None:
