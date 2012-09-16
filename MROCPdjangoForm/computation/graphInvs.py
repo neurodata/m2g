@@ -109,13 +109,15 @@ class graph():
     if not self.sym:
       self.symmetrize() # Make sure graph is symmetric
       
-    self.eigvals = scsp.linalg.eigs(self.G)[0] # get eigenvalues
+    self.eigvals = scsp.linalg.eigen(self.G)[0] # get eigenvalues
     self.maxAveDeg =  self.eigvals.max() # Est. MAD is the max eigenvalue
   
   def calcScanStat1(self):
     '''
     Determine scan statistic of neighborhood n = 1
     '''
+    #for vertx in self.vertices
+    
     pass
   
   def calcScanStat2(self):
