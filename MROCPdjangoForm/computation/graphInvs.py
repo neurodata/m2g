@@ -9,7 +9,7 @@ import numpy as np
 import os
 import argparse
 
-import scipy.sparse as scsp
+import scipy.sparse.linalg.eigen.arpack as arpack
 
 from time import clock
 
@@ -45,7 +45,6 @@ class graph():
       self.classification = 'small'
  
  
-    #self.G = self.G_sparse.data
     self.indices = self.G_sparse.indices
       
     if(self.binary):      
@@ -60,7 +59,7 @@ class graph():
       if (big):
 	print 'Cannot convert \'big\' matrix to python matrix!'
       else:
-	self.G = self.G.tolist() # turn into python list of lists
+	self.G_dense = self.G_sparse.tolist() # turn into python list of lists
   
   def symmetrize(self):
     '''
@@ -69,37 +68,45 @@ class graph():
     self.G_sparse = self.G_sparse + self.G_sparse.T
     self.sym = True if not (self.sym) else self.sym
   
+  ##### ******************** #####
   def calcGraphInv(self):
     '''
     Calculate several graph invariants
     1. The maximum average degree (MAD) of the graph
     2. 
     '''
-    self.vertices = np.array(vertex())
-    self.vertices = np.tile(self.vertices, self.G_sparse.shape[0])
+    self.vertices = np.zeros(self.G_sparse.shape[0])
+    
+    self.vertices = []
+    for v in range(self.G_sparse.shape[0]):
+      self.vertices.append(vertex())
+      
+    self.vertices = np.array(self.vertices)
     
     ''' Get the degree of each vertex in the graph'''
     print 'Getting vertex degree..'
-    self.getVertexDegree()  # Slow...
+    self.getVertexDegree()  # ~80sec
     
     ''' Calc Maximum Average Degree of the graph'''
     print 'Getting Maximum Average Degree..'
     self.getMaxAveDegree()
   
+  ##### ******************** #####
   
   
-  
-  def getVertexDegree(self): # Slow...
+  def getVertexDegree(self): # ~80s
     '''
     Calc the degree of each vertex in the graph
     '''
+    self.MVD = 0 # Max vertex degree
     
     start = clock()
-    
     for val in self.G_sparse.indices:
       self.vertices[val].degree += 1
+      if self.vertices[val].degree > self.MVD:
+	self.MVD = self.vertices[val].degree
     
-    print "Time taken: ", (clock() - start)
+    print "\nCalculating vertex degree took: ", (clock() - start), "secs"
   
   def getMaxAveDegree(self):
     '''
@@ -109,16 +116,21 @@ class graph():
     if not self.sym:
       self.symmetrize() # Make sure graph is symmetric
       
-    self.eigvals = scsp.linalg.eigen(self.G)[0] # get eigenvalues
-    self.maxAveDeg =  self.eigvals.max() # Est. MAD is the max eigenvalue
+    start = clock()
+      # LR = Largest Real part
+    self.maxAveDeg = (np.max(arpack.eigs(self.G_sparse, which='LR')[0])).real # get eigenvalues, then +ve max REAL part is MAD eigenvalue estimation
+    print "\n Calculating MAD took: ", (clock() - start), "secs"
   
+  def getIndSubr(self):
+    pass
+    
   def calcScanStat1(self):
     '''
     Determine scan statistic of neighborhood n = 1
     '''
-    #for vertx in self.vertices
+    for vertx in self.vertices:
+      pass  
     
-    pass
   
   def calcScanStat2(self):
     '''
@@ -143,7 +155,10 @@ class graph():
     Path length between each pair of vertices
     '''
     pass
-    
+ 
+##########################
+  # Vertex Class #
+##########################
 class vertex():
   '''
   Class to hold a vertex object
@@ -151,8 +166,12 @@ class vertex():
   def __init__(self, degree = 0):
     self.degree = degree
     #self.adjList = np.array([])
-    self.indSubgrSize = 0 # size of enduced subgraph
+    #self.indSubgr  # induced subgraph
     
+  def getInducedSubgr(self):
+    return self.indSubgr
+    
+  # Unused
   def getAveDegree(self):
     '''
     Calculate the Average Degree of a vertex
@@ -167,7 +186,15 @@ class vertex():
       self.aveDeg = (2*self.indSubgrSize)/self.order # Average Degree of graph eq.2.3 p.4
     # else it remains zero
     return self.aveDeg
+
+##########################
+  # Edge Class #
+##########################
+
+class edge():
   
+  def __init__(self):
+    pass
  
 
 
@@ -178,7 +205,7 @@ class vertex():
 
 def main():
   gr = graph()
-  #gr.loadgraphMatx('/Users/dmhembere44/Downloads/Scan/M87102217_smgr.mat', False, True, True)
+  #gr.loadgraphMatx('/Users/dmhembere44/Downloads/Scan/M87102217_smgr.mat', big = False, sym = True, binarize = True)
   #gr.loadgraphMatx('/Users/dmhembere44/Downloads/M87199728_fiber.mat', True, True, True)
   gr.loadgraphMatx('/data/projects/MRN/graphs/biggraphs/M87199728_fiber.mat', True, True, False) # server
   gr.calcGraphInv()
