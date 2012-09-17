@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 '''
 @author: Disa Mhembere
 Determine some graph invariants on big and small graphs
