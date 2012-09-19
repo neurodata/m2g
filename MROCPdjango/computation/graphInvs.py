@@ -12,6 +12,7 @@ import os
 import argparse
 
 import scipy.sparse.linalg.eigen.arpack as arpack
+from collections import Counter
 
 from time import clock
 
@@ -152,20 +153,22 @@ class graph():
   ####################
   # INDUCED SUBGRAPH #
   ####################
-  def getIndSubr(self, vertx):
-    '''
-    Get the induced subgraph of a single vertex
-    '''
+  def calcScanStat1(self, vertx):
     
-    col = vertx.ind;
-    for v in self.G_sparse.indices[self.G_sparse.indptr[col]:self.G_sparse.indptr[col+1]]: # Rows of nnz entries - corresponding to vertices
-      vertx.adjList.append(self.vertices[v]) # append vertices. * Vertices still empty containers though
-    vertx.indSubgrEdgeNum = len(vertx.adjList) # number of edges
+    for vertx in self.vertices: 
     
-    for v in vertx.adjList:
-      if self.G_sparse.indices[self.G_sparse.indptr[v.ind]:self.G_sparse.indptr[v.ind+1]]:
-	
+      # Count edges
+      col = vertx.ind;
+      vertx.indSubgrEdgeNum = self.G_sparse.indptr[col+1] - self.G_sparse.indptr[col] # wheel vertex edges
       
+      adj = self.G_sparse.indices[self.G_sparse.indptr[col]:self.G_sparse.indptr[col+1]] # Rows of nnz entries - corresponding to vertices
+      '''
+      Count the list of all matches
+      Going to adj[idx:] ensures no double counting
+      '''
+      for idx, v in enumerate (adj): 
+	vertx.indSubgrEdgeNum += len(list( (Counter(self.G_sparse.indices[self.G_sparse.indptr[v]:\
+					    self.G_sparse.indptr[v+1]]) & Counter(adj[idx:])).elements()))
   
   def calcScanStat2(self):
     '''
