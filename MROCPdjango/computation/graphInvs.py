@@ -63,6 +63,9 @@ class graph():
       else:
 	self.G_dense = self.G_sparse.tolist() # turn into python list of lists
   
+  #####################
+  # SYMMETRIZE MATRIX #
+  #####################
   def symmetrize(self):
     '''
     Symmetrize an upper/lower triangular matrix
@@ -79,37 +82,49 @@ class graph():
     '''
     self.vertices = np.zeros(self.G_sparse.shape[0])
     
+    # Create vertex list
     self.vertices = []
     for v in range(self.G_sparse.shape[0]):
-      self.vertices.append(vertex())
+      self.vertices.append(vertex(v))
       
-    self.vertices = np.array(self.vertices)
+    self.vertices = np.array(self.vertices) # make list a numpy array
     
-    ''' Get the degree of each vertex in the graph'''
-    print 'Getting vertex degree..'
-    self.getVertexDegree()  # ~80sec
+    
+    #''' Get the degree of each vertex in the graph'''
+    #print 'Getting vertex degree..'
+    #self.getVertices()  # ~80sec
     
     ''' Calc Maximum Average Degree of the graph'''
     print 'Getting Maximum Average Degree..'
     self.getMaxAveDegree()
+    
+    ''' Calc scan statistic 1'''
+    print 'Calculating scan statistic 1...'
+    self.calcScanStat1()
+    
+    
   
   ##### ******************** #####
   
-  
-  def getVertexDegree(self): # ~80s
-    '''
-    Calc the degree of each vertex in the graph
-    '''
-    self.MVD = 0 # Max vertex degree
+  '''
+  def getVertices(self): # ~80s
+    #self.MVD = 0 # Max vertex degree
     
     start = clock()
+    prevVal = float('inf')
     for val in self.G_sparse.indices:
       self.vertices[val].degree += 1
-      if self.vertices[val].degree > self.MVD:
-	self.MVD = self.vertices[val].degree
-    
-    print "\nCalculating vertex degree took: ", (clock() - start), "secs"
+      if val <  
+      
+    # if self.vertices[val].degree > self.MVD:
+    #self.MVD = self.vertices[val].degree
   
+    print "\nCalculating vertex degree took: ", (clock() - start), "secs"
+  '''
+  #################################
+  # MAX AVERAGE DEGREE EIGENVALUE #
+  #################################
+    
   def getMaxAveDegree(self):
     '''
     Calc the Eigenvalue Max Average Degree of the graph
@@ -123,16 +138,34 @@ class graph():
     self.maxAveDeg = (np.max(arpack.eigs(self.G_sparse, which='LR')[0])).real # get eigenvalues, then +ve max REAL part is MAD eigenvalue estimation
     print "\n Calculating MAD took: ", (clock() - start), "secs"
   
-  def getIndSubr(self):
-    pass
-    
+  ####################
+  # SCAN STATISTIC 1 #
+  ####################
   def calcScanStat1(self):
     '''
     Determine scan statistic of neighborhood n = 1
     '''
-    for vertx in self.vertices:
-      pass  
+    for vertx in self.vertices: 
+      # Determine induced subgraph caused by this vertex
+      self.getIndSubr(vertx)  
+  
+  ####################
+  # INDUCED SUBGRAPH #
+  ####################
+  def getIndSubr(self, vertx):
+    '''
+    Get the induced subgraph of a single vertex
+    '''
     
+    col = vertx.ind;
+    for v in self.G_sparse.indices[self.G_sparse.indptr[col]:self.G_sparse.indptr[col+1]]: # Rows of nnz entries - corresponding to vertices
+      vertx.adjList.append(self.vertices[v]) # append vertices. * Vertices still empty containers though
+    vertx.indSubgrEdgeNum = len(vertx.adjList) # number of edges
+    
+    for v in vertx.adjList:
+      if self.G_sparse.indices[self.G_sparse.indptr[v.ind]:self.G_sparse.indptr[v.ind+1]]:
+	
+      
   
   def calcScanStat2(self):
     '''
@@ -165,13 +198,11 @@ class vertex():
   '''
   Class to hold a vertex object
   '''
-  def __init__(self, degree = 0):
+  def __init__(self, ind ,degree = 0):
     self.degree = degree
-    #self.adjList = np.array([])
-    #self.indSubgr  # induced subgraph
-    
-  def getInducedSubgr(self):
-    return self.indSubgr
+    self.adjList = []
+    self.ind = ind
+    self.indSubgrEdgeNum = 0  # induced subgraph
     
   # Unused
   def getAveDegree(self):
