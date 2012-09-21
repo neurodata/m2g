@@ -74,7 +74,9 @@ class graph():
     self.G_sparse = self.G_sparse + self.G_sparse.T
     self.sym = True if not (self.sym) else self.sym
   
-  ##### ******************** #####
+  ########################
+  # RUN GRAPH INVARIANTS #
+  ########################
   def calcGraphInv(self):
     '''
     Calculate several graph invariants
@@ -90,38 +92,20 @@ class graph():
       
     self.vertices = np.array(self.vertices) # make list a numpy array
     
-    
-    #''' Get the degree of each vertex in the graph'''
-    #print 'Getting vertex degree..'
-    #self.getVertices()  # ~80sec
-    
+    ############ Graph Invariant calcs ############
     ''' Calc Maximum Average Degree of the graph'''
     print 'Getting Maximum Average Degree..'
     self.getMaxAveDegree()
     
-    ''' Calc scan statistic 1'''
+    ''' Calc scan statistic'''
     print 'Calculating scan statistic 1...'
-    self.calcScanStat1()
+    self.calcScanStat()
     
+    self.printVertDegrees() # print all degrees
+    self.printVertSS1() # print SS1
     
-  
-  ##### ******************** #####
-  
-  '''
-  def getVertices(self): # ~80s
-    #self.MVD = 0 # Max vertex degree
+    ''' Calc scan statistic 2'''
     
-    start = clock()
-    prevVal = float('inf')
-    for val in self.G_sparse.indices:
-      self.vertices[val].degree += 1
-      if val <  
-      
-    # if self.vertices[val].degree > self.MVD:
-    #self.MVD = self.vertices[val].degree
-  
-    print "\nCalculating vertex degree took: ", (clock() - start), "secs"
-  '''
   #################################
   # MAX AVERAGE DEGREE EIGENVALUE #
   #################################
@@ -140,41 +124,50 @@ class graph():
     print "\n Calculating MAD took: ", (clock() - start), "secs"
   
   ####################
-  # SCAN STATISTIC 1 #
-  ####################
-  def calcScanStat1(self):
-    '''
-    Determine scan statistic of neighborhood n = 1
-    '''
-    for vertx in self.vertices: 
-      # Determine induced subgraph caused by this vertex
-      self.getIndSubr(vertx)  
-  
-  ####################
   # INDUCED SUBGRAPH #
   ####################
-  def calcScanStat1(self, vertx):
-    
+  def calcScanStat(self, N=1):
+    '''
+    Determine scan statistic of neighborhood n = N
+    '''  
     for vertx in self.vertices: 
     
       # Count edges
-      col = vertx.ind;
+      col = vertx.ind; # index corresponds to vertex number
       vertx.indSubgrEdgeNum = self.G_sparse.indptr[col+1] - self.G_sparse.indptr[col] # wheel vertex edges
+      
+      #import pdb; pdb.set_trace()
+      # This happens to also be the vertex degree
+      vertx.degree = self.G_sparse.indptr[col+1] - self.G_sparse.indptr[col] # wheel vertex edges
       
       adj = self.G_sparse.indices[self.G_sparse.indptr[col]:self.G_sparse.indptr[col+1]] # Rows of nnz entries - corresponding to vertices
       '''
       Count the list of all matches
       Going to adj[idx:] ensures no double counting
       '''
-      for idx, v in enumerate (adj): 
+      for idx, v in enumerate (adj):
 	vertx.indSubgrEdgeNum += len(list( (Counter(self.G_sparse.indices[self.G_sparse.indptr[v]:\
 					    self.G_sparse.indptr[v+1]]) & Counter(adj[idx:])).elements()))
-  
-  def calcScanStat2(self):
+
+      # Write all edge numbers to file then del
+      
+	
+  def printVertSS1(self):
     '''
-    Determine scan statistic of neighborhood n = 2
+    Print the Scan statistic 1
     '''
-    pass
+    print '\nScan statistics\n=======================\n'
+    for idx, vert in enumerate (self.vertices):
+      print 'Vertex: %d, Scan stat 1: %d' % (vert.ind, vert.indSubgrEdgeNum)
+      
+  def printVertDegrees(self):
+    '''
+    Print the vertex degree of all vertices
+    '''
+    print '\nVertx Degrees \n=======================\n'
+    for idx, vert in enumerate (self.vertices):
+      print 'Vertex: %d, Degree 1: %d' % (vert.ind, vert.degree)
+	
   
   def calcNumTriangles(self):
     '''
@@ -207,7 +200,7 @@ class vertex():
     self.ind = ind
     self.indSubgrEdgeNum = 0  # induced subgraph
     
-  # Unused
+  # Unused currently
   def getAveDegree(self):
     '''
     Calculate the Average Degree of a vertex
@@ -231,22 +224,16 @@ class edge():
   
   def __init__(self):
     pass
- 
-
-
-
-
-
 
 
 def main():
   gr = graph()
-  #gr.loadgraphMatx('/Users/dmhembere44/Downloads/Scan/M87102217_smgr.mat', big = False, sym = True, binarize = True)
+  gr.loadgraphMatx('/Users/dmhembere44/Downloads/Scan/M87102217_smgr.mat', big = False, sym = True, binarize = True)
   #gr.loadgraphMatx('/Users/dmhembere44/Downloads/M87199728_fiber.mat', True, True, True)
-  gr.loadgraphMatx('/data/projects/MRN/graphs/biggraphs/M87199728_fiber.mat', True, True, False) # server
+  #gr.loadgraphMatx('/data/projects/MRN/graphs/biggraphs/M87199728_fiber.mat', True, True, False) # server
   gr.calcGraphInv()
   
-  import pdb; pdb.set_trace()
+  #import pdb; pdb.set_trace()
 
 if __name__ == '__main__':
   main()
