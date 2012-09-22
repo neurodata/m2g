@@ -25,7 +25,7 @@ from django.http import HttpResponse
 from django.http import HttpResponseBadRequest
 
 ''' Data Processing imports'''
-#from mrcap import gengraph as gengraph
+from mrcap import gengraph as gengraph
 
 import ocpipeline.filesorter as filesorter
 import ocpipeline.zipper as zipper
