@@ -75,6 +75,7 @@ def default(request):
 def createProj(request, webargs=None):
     global userDefProjectDir
     global scanId
+    global uploadDirPath
     
     ''' Browser url version''' 
     if (webargs):
@@ -97,7 +98,7 @@ def createProj(request, webargs=None):
         
 	    userDefProjectName = os.path.join(uploadDirPath, userDefProjectName) # Fully qualify
 	    userDefProjectDir =  os.path.join(userDefProjectName, site, subject, session, scanId)
-	    
+
         return HttpResponseRedirect(settings.BASE_URL+'/pipelineUpload') # Redirect after POST
     else:
         form = DataForm() # An unbound form
@@ -314,6 +315,7 @@ def zipProcessedData(request):
     return response
 
 def upload(request, webargs=None):
+    global uploadDirPath
     """Programmatic interface for uploading data"""  
     if (webargs and request.method == 'POST'):
 	
