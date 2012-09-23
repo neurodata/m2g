@@ -237,4 +237,15 @@ def main():
 
 if __name__ == '__main__':
   main()
+'''
+neigh = G [:,v].nonzero()[0]
+An = G[:,neigh][neigh,:]
+s1 =  An.sum()
 
+G2 = G.dot(G)+G
+
+Forget scan 2
+
+triange(v) = scan1 - degree
+cc(v) = triangle(v)/(degree choose 2)
+'''
