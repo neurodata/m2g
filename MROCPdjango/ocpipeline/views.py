@@ -98,6 +98,7 @@ def createProj(request, webargs=None):
         
 	    userDefProjectName = os.path.join(uploadDirPath, userDefProjectName) # Fully qualify
 	    userDefProjectDir =  os.path.join(userDefProjectName, site, subject, session, scanId)
+	    ###userDefProjectDir ='/data/projects/disa/OCPprojects/Test1/Site/Name/Session/Scan'
 
         return HttpResponseRedirect(settings.BASE_URL+'/pipelineUpload') # Redirect after POST
     else:
