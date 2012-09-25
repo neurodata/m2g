@@ -255,7 +255,8 @@ def main():
   gr = graph()
   #gr.loadgraphMatx('/Users/dmhembere44/Downloads/Scan/M87102217_smgr.mat', big = False, sym = True, binarize = True)
   #gr.loadgraphMatx('/Users/dmhembere44/Downloads/M87199728_fiber.mat', True, True, True)
-  gr.loadgraphMatx('/data/projects/MRN/graphs/biggraphs/M87199728_fiber.mat', True, True, False) # bg1
+  #gr.loadgraphMatx('/data/projects/MRN/graphs/biggraphs/M87199728_fiber.mat', True, True, False) # bg1
+  gr.loadgraphMatx('/home/disa/testgraphs/M87199728_fiber.mat', True, True, False) # mrbrain
   gr.calcGraphInv()
   
   #import pdb; pdb.set_trace()
