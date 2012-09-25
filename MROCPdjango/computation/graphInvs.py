@@ -104,8 +104,11 @@ class graph():
     
     ''' Calc scan statistic'''
     print 'Calculating scan statistic 1...'
-    self.calcScanStat()
+    calcScanStat(G_sparse, G_fn=graph_fn,N=1)
     
+    ''' Calc number of triangles'''
+    print 'Getting number of triangles...'
+    def calcNumTriangles(ss1Array, degArray, G_fn = '')
     #self.printVertDegrees() # print all degrees
     #self.printVertSS1() # print SS1
     
@@ -180,7 +183,7 @@ class graph():
 # SCAN STATISTICS #
 ###################
   
-def calcScanStat(self, G, G_fn='',N=1):
+def calcScanStat(G, G_fn='',N=1):
   '''
   G - Sparse adjacency matrix (rep a graph)
   N - Scan statistic number i.e 1 or 2 ONLY
@@ -196,11 +199,14 @@ def calcScanStat(self, G, G_fn='',N=1):
     vertxDeg[vertx] = nbors.shape[0] # degree of each vertex
     nborsAdjMat = G[:,nbors][nbors,:]
     indSubgrEdgeNum[vertx] = nborsAdjMat.nnz # scan stat 1
-  
+
   '''write to file '''
-  if not (G_fn):
-    np.save(getFiberPath(G_fn) + 'scanstat'+N+'.npy', indSubgrEdgeNum) # save location wrong!
-    np.save(getFiberPath(G_fn) + 'degree'+N+'.npy', vertxDeg)  # save location wrong!
+  if (G_fn):
+    ss1_fn = getFiberPath(G_fn) + 'scanstat'+str(N)+'.npy'
+    deg_fn = getFiberPath(G_fn) + 'degree'+str(N)+'.npy'
+    
+    np.save(ss1_fn, indSubgrEdgeNum) # save location wrong - Should be invariants
+    np.save(deg_fn, vertxDeg)  # save location wrong - Should be invariants
   else:
     np.save('scanstat'+N+'.npy', indSubgrEdgeNum)
     np.save('degree'+N+'.npy', vertxDeg)
@@ -226,16 +232,14 @@ def calcNumTriangles(ss1Array, degArray, G_fn = ''):
     print "Array lengths unequal"
     sys.exit(-1)
   
-  triangles = np.zeros(len(degArray))
-  for idx in range (degArray):
-    numTri = ss1Array[idx] - degArray[idx]
-    if numTri < 0:
-      print 'There is an error in index %d. This num cannot be negative' % idx
+  triangles = np.subtract(ss1Array, degArray)
+  if np.any(triangles[:] < 0):
+      print 'No entry should be negative in triangles array!'
       
-    triangles[idx] = numTri
-    
-  np.save('triangles.npy', triangles)  # save location wrong!
-  
+  if G_fn:  
+    np.save(getFiberPath(G_fn) +'triangles.npy', triangles)  # save location wrong!
+  else:
+    np.save('triangles.npy', triangles)  # save location wrong!
     
 ##########################
   # Vertex Class #
