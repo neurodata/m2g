@@ -387,10 +387,7 @@ def getFiberPath(fiberFileName):
 	where filename may vary but _fiber.dat may not.
     This returns fiberfn's full path less the 'fiber.dat' portion
     '''
-    basename = ''
-    for i in fiberFileName.split('/')[1:-2]:
-	basename = os.path.join(basename,fiberFileName)
-    return basename[:-9]
+    return fiberFileName.partition('_')[0]
 
 def defDataDirs(projectDir):
     '''
