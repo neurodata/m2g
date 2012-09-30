@@ -10,13 +10,12 @@ import scipy.io as sio
 import numpy as np
 import os
 import argparse
-from ocpipeline.views import getFiberPath
-
+import sys
 
 import scipy.sparse.linalg.eigen.arpack as arpack
 from collections import Counter
 
-from time import clock
+from time import time
 
 class graph():
   def __init__(self):
@@ -43,6 +42,7 @@ class graph():
     self.G_sparse = sio.loadmat(graph_fn)['fibergraph'] # key is always fibergraph & comp is compressed
     self.binary = binarize
     self.sym = sym
+    self.G_fn = graph_fn
     
     if (big):
       self.classification = 'big'
@@ -100,20 +100,28 @@ class graph():
     ############ Graph Invariant calcs ############
     ''' Calc Maximum Average Degree of the graph'''
     print 'Getting Maximum Average Degree..'
+    start = time()
     self.getMaxAveDegree()
-    
+    print 'Time taken to calc MAD: %f secs\n' % (time() - start)
+
     ''' Calc scan statistic'''
     print 'Calculating scan statistic 1...'
-    calcScanStat(G_sparse, G_fn=graph_fn,N=1)
-    
+    start = time()
+    ss1Array, degArray = calcScanStat(self.G_sparse, G_fn=self.G_fn,N=1)
+    print 'Time taken to calc  SS1: %f secs\n' % (time() - start)
+
     ''' Calc number of triangles'''
     print 'Getting number of triangles...'
-    def calcNumTriangles(ss1Array, degArray, G_fn = '')
-    #self.printVertDegrees() # print all degrees
-    #self.printVertSS1() # print SS1
-    
-    ''' Calc scan statistic 2'''
-    
+    start = time()
+    triArray = calcNumTriangles(ss1Array, degArray, G_fn=self.G_fn)
+    print 'Time taken to calc Num triangles: %f secs\n' % (time() - start)
+
+    '''
+    printVertInv(ss1Array, 'Scan Statistic 1') # print scan stat 1
+    printVertInv(degArray, 'Vertex Degree') # print vertex degree
+    printVertInv(triArray, 'Number of triangles') # print number triangles 
+    '''
+
   #################################
   # MAX AVERAGE DEGREE EIGENVALUE #
   #################################
@@ -126,10 +134,9 @@ class graph():
     if not self.sym:
       self.symmetrize() # Make sure graph is symmetric
       
-    start = clock()
+    start = time()
       # LR = Largest Real part
     self.maxAveDeg = (np.max(arpack.eigs(self.G_sparse, which='LR')[0])).real # get eigenvalues, then +ve max REAL part is MAD eigenvalue estimation
-    print "\n Calculating MAD took: ", (clock() - start), "secs"
   
   def getAveDegree(self, vertDegArr):
     '''
@@ -140,27 +147,8 @@ class graph():
     '''
     return np.average(vertDegreArr)
       
-  ####################
-  # TODO DM: FIX these #
-  ####################
   
-  def printVertSS1(self):
-    '''
-    Print the Scan statistic 1
-    '''
-    print '\nScan statistics\n=======================\n'
-    for idx, vert in enumerate (self.vertices):
-      print 'Vertex: %d, Scan stat 1: %d' % (vert.ind, vert.indSubgrEdgeNum)
-      
-  def printVertDegrees(self):
-    '''
-    Print the vertex degree of all vertices
-    '''
-    print '\nVertx Degrees \n=======================\n'
-    for idx, vert in enumerate (self.vertices):
-      print 'Vertex: %d, Degree 1: %d' % (vert.ind, vert.degree)
-  
-  
+
   def calcNumTriangles(self):
     '''
     Number of traingles in the graph
@@ -191,7 +179,7 @@ def calcScanStat(G, G_fn='',N=1):
   if (N == 2):
     G = G.dot(G)+G
   
-  vertDeg = np.zeros(G.shape[0]) # Vertex degrees of all vertices
+  vertxDeg = np.zeros(G.shape[0]) # Vertex degrees of all vertices
   indSubgrEdgeNum = np.zeros(G.shape[0]) # Induced subgraph edge number i.e scan statistic
   
   for vertx in range (G.shape[0]):
@@ -202,8 +190,8 @@ def calcScanStat(G, G_fn='',N=1):
 
   '''write to file '''
   if (G_fn):
-    ss1_fn = getFiberPath(G_fn) + 'scanstat'+str(N)+'.npy'
-    deg_fn = getFiberPath(G_fn) + 'degree'+str(N)+'.npy'
+    ss1_fn = getbaseName(G_fn) + 'scanstat'+str(N)+'.npy'
+    deg_fn = getbaseName(G_fn) + 'degree'+str(N)+'.npy'
     
     np.save(ss1_fn, indSubgrEdgeNum) # save location wrong - Should be invariants
     np.save(deg_fn, vertxDeg)  # save location wrong - Should be invariants
@@ -211,7 +199,8 @@ def calcScanStat(G, G_fn='',N=1):
     np.save('scanstat'+N+'.npy', indSubgrEdgeNum)
     np.save('degree'+N+'.npy', vertxDeg)
     
-  del vertxDeg, indSubgrEdgeNum
+  # del vertxDeg, indSubgrEdgeNum
+  return [ss1_fn, deg_fn]
 
 def calcNumTriangles(ss1Array, degArray, G_fn = ''):
   if not isinstance(ss1Array, np.ndarray):
@@ -228,7 +217,7 @@ def calcNumTriangles(ss1Array, degArray, G_fn = ''):
       print "File not found: %s" % degArray
       sys.exit(-1)
   
-  if (len(degArray) == len(ss1Array)):
+  if (len(degArray) != len(ss1Array)):
     print "Array lengths unequal"
     sys.exit(-1)
   
@@ -236,11 +225,43 @@ def calcNumTriangles(ss1Array, degArray, G_fn = ''):
   if np.any(triangles[:] < 0):
       print 'No entry should be negative in triangles array!'
       
-  if G_fn:  
-    np.save(getFiberPath(G_fn) +'triangles.npy', triangles)  # save location wrong!
+  if G_fn:
+    triArr_fn = getbaseName(G_fn) +'triangles.npy'  
+    np.save(triArr_fn, triangles)  # save location wrong!
   else:
-    np.save('triangles.npy', triangles)  # save location wrong!
-    
+    triArr_fn = 'triangles.npy'
+    np.save(triArr_fn, triangles)  # save location wrong!
+  
+  #del triangles
+  return triArr_fn 
+
+####################
+# Base name getter #
+####################
+def getbaseName(G_fn):
+  return G_fn.partition('_')[0]
+
+
+######################
+# Printing Functions #
+######################
+
+def printVertInv(fn, invariantName):
+  '''
+  fn - Invariant full filename
+  invariantName - String describing the invariant 
+  Print the Scan statistic 1
+  '''
+  try:
+    inv = np.load(fn)
+  except:
+    print 'Invalid file name: %s' % fn
+    sys.exit(-1)
+
+  print '\n%s\n=======================\n' % (invariantName)
+  for idx, vert in enumerate (inv):
+    print 'Vertex: %d, Value: %d' % (idx, vert)
+
 ##########################
   # Vertex Class #
 ##########################
@@ -260,15 +281,14 @@ def main():
   #gr.loadgraphMatx('/Users/dmhembere44/Downloads/Scan/M87102217_smgr.mat', big = False, sym = True, binarize = True)
   #gr.loadgraphMatx('/Users/dmhembere44/Downloads/M87199728_fiber.mat', True, True, True)
   #gr.loadgraphMatx('/data/projects/MRN/graphs/biggraphs/M87199728_fiber.mat', True, True, False) # bg1
-  gr.loadgraphMatx('/home/disa/testgraphs/M87199728_fiber.mat', True, True, False) # mrbrain
+  #gr.loadgraphMatx('/home/disa/testgraphs/M87102217_smgr.mat', False, True, True) # mrbrain small
+  gr.loadgraphMatx('/home/disa/testgraphs/M87199728_fiber.mat', True, True, False) # mrbrain big
+  
   gr.calcGraphInv()
   
-  #import pdb; pdb.set_trace()
-
 if __name__ == '__main__':
   main()
 
 '''
-
 cc(v) = triangle(v)/(degree choose 2)
 '''
