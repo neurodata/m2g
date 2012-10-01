@@ -37,7 +37,7 @@ class OK(models.Model):
 
 # DM 09/30
 class TrialDoc(models.Model):
-    docfile = models.FileField(upload_to = ('/data/projects/disa/OCPprojects/STATtest')) 
+    docfile = models.FileField(upload_to = (' ')) 
 
         
 admin.site.register(Document)

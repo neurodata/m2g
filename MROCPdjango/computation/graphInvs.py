@@ -101,7 +101,7 @@ class graph():
     ''' Calc Maximum Average Degree of the graph'''
     print 'Getting Maximum Average Degree..'
     start = time()
-    self.getMaxAveDegree()
+    #self.getMaxAveDegree() # Takes ~5min on 16Mil  vertices with 60Mil edges 
     print 'Time taken to calc MAD: %f secs\n' % (time() - start)
 
     ''' Calc scan statistic'''
@@ -116,11 +116,10 @@ class graph():
     triArray = calcNumTriangles(ss1Array, degArray, G_fn=self.G_fn)
     print 'Time taken to calc Num triangles: %f secs\n' % (time() - start)
 
-    '''
-    printVertInv(ss1Array, 'Scan Statistic 1') # print scan stat 1
-    printVertInv(degArray, 'Vertex Degree') # print vertex degree
-    printVertInv(triArray, 'Number of triangles') # print number triangles 
-    '''
+    if (self.classification == 'small'):
+      printVertInv(ss1Array, 'Scan Statistic 1') # print scan stat 1
+      printVertInv(degArray, 'Vertex Degree') # print vertex degree
+      printVertInv(triArray, 'Number of triangles') # print number triangles 
 
   #################################
   # MAX AVERAGE DEGREE EIGENVALUE #
@@ -183,10 +182,16 @@ def calcScanStat(G, G_fn='',N=1):
   indSubgrEdgeNum = np.zeros(G.shape[0]) # Induced subgraph edge number i.e scan statistic
   
   for vertx in range (G.shape[0]):
+    if (vertx > 0 and G.classification == 'big' and vertx/G.shape[0]%10 == 0)
+	print ((vertx/G.shape[0])*100), "% complete..."
     nbors = G[:,vertx].nonzero()[0]
     vertxDeg[vertx] = nbors.shape[0] # degree of each vertex
-    nborsAdjMat = G[:,nbors][nbors,:]
-    indSubgrEdgeNum[vertx] = nborsAdjMat.nnz # scan stat 1
+ 
+    if (nbors.shape[0] > 0):
+      nborsAdjMat = G[:,nbors][nbors,:]
+      indSubgrEdgeNum[vertx] = nborsAdjMat.nnz # scan stat 1
+    else:
+      indSubgrEdgeNum[vertx] = 0 # zero neighbors hence zero cardinality enduced subgraph
 
   '''write to file '''
   if (G_fn):
