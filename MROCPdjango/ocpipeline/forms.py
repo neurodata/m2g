@@ -19,3 +19,8 @@ class DataForm(forms.Form):
 
 class OKForm(forms.Form):
     pass #DM TODO: Track responses to zip or view as dir structure
+
+# DM 09/30
+class TestForm(forms.Form):
+    docfile = forms.FileField(label='Upload trial', help_text='                          ', required = True)
+    
