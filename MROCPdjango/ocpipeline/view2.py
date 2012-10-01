@@ -12,9 +12,11 @@ from django.http import HttpResponseRedirect
 from django.core.files import File        # For programmatic file upload
 
 from ocpipeline.models import Document
+from ocpipeline.models import TrialDoc
 from ocpipeline.forms import DocumentForm
 from ocpipeline.forms import OKForm
 from ocpipeline.forms import DataForm
+from ocpipeline.forms import TestForm
 import mrpaths
 
 #import django
@@ -37,7 +39,6 @@ from django.conf import settings
 
 import subprocess
 from shutil import move, rmtree # For moving files
-from django.core.urlresolvers import reverse
 
 '''
 Global Paths
@@ -101,8 +102,7 @@ def createProj(request, webargs=None):
 	    userDefProjectDir =  os.path.join(userDefProjectName, site, subject, session, scanId)
 	    ###userDefProjectDir ='/data/projects/disa/OCPprojects/Test1/Site/Name/Session/Scan'
 
-        #return HttpResponseRedirect(settings.BASE_URL+'/pipelineUpload') # Redirect after POST
-	return HttpResponseRedirect(reverse('/pipelineUpload')) # Redirect after POST
+        return HttpResponseRedirect(settings.BASE_URL+'/pipelineUpload') # Redirect after POST
     else:
         form = DataForm() # An unbound form
    
@@ -114,6 +114,11 @@ def createProj(request, webargs=None):
 def success(request):
     return render_to_response('success.html')   
 
+
+
+
+
+
 def pipelineUpload(request, webargs=None):
     global userDefProjectDir
     global derivatives
@@ -122,87 +127,22 @@ def pipelineUpload(request, webargs=None):
     global graphInvariants
     global images
     
-    print "Uploading files..."
-    
-    ''' Browser url version
-        webargs should be just the fully qualified name of tract file e.g /data/files/name_fiber.dat
-        Assumption is naming convention is name_fiber.dat, name_roi.dat, name_roi.xml, where
-        'name' is the same in all cases
-    ''' 
-    if(webargs):
-	global urlBit
-	urlBit = True # Set the url version marker
-	
-        fiber_fn = request.path[15:] # Directory where
-        if fiber_fn[-1] == '/': # in case of trailing backslash
-            fiber_fn = fiber_fn[:-1]
-            
-        '''Assume directory & naming structure matches braingraph1's: "/data/projects/MRN/base" structure'''
-	roi_raw_fn = roi_xml_fn = '/'
-        for i in fiber_fn.split('/')[1:-2]:
-            roi_raw_fn += i + '/'
-            roi_xml_fn += i + '/'
-
-        basename = fiber_fn.split('/')[-1][:-9]
-
-        roi_raw_fn += 'roi/' +  basename +'roi.raw'
-        roi_xml_fn += 'roi/' +  basename +'roi.xml'
-	
-	''' Define data directory paths '''
-	derivatives, rawdata,  graphs, graphInvariants, images = defDataDirs(userDefProjectDir)
-
-        for files in [fiber_fn, roi_xml_fn, roi_raw_fn] : # Names of files
-            doc = Document() # create a new Document for each file
-            with open(files, 'rb') as doc_file: # Open file for reading
-		doc._meta.get_field('docfile').upload_to = derivatives # route files to correct location
-                doc.docfile.save(files, File(doc_file), save=True) # Save upload files
-                doc.save()
-        
-	''' Just the filename with no path info '''
-	fiber_fn = fiber_fn.split('/')[-1] 
-	roi_raw_fn = roi_raw_fn.split('/')[-1]
-	roi_xml_fn = roi_xml_fn.split('/')[-1]
-	    
-        ''' Make appropriate dirs if they dont already exist'''
-        createDirStruct.createDirStruct([derivatives, rawdata, graphs, graphInvariants, images])
-	
-	return HttpResponseRedirect(settings.BASE_URL+'/processInput') # Redirect after POST
-
     ''' Form '''
     if request.method == 'POST':
-        form = DocumentForm(request.POST, request.FILES) # instantiating form
+        form = TestForm(request.POST, request.FILES) # instantiating form
         if form.is_valid():
 	    
 	    ''' Define data directory paths '''
 	    derivatives, rawdata,  graphs, graphInvariants, images = defDataDirs(userDefProjectDir)
 	    
-            newdoc = Document(docfile = request.FILES['docfile'])
-	    newdoc._meta.get_field('docfile').upload_to = derivatives # route files to correct location
-	    
-	    newdoc2 = Document(docfile = request.FILES['roi_raw_file'])
-	    newdoc2._meta.get_field('docfile').upload_to = derivatives
-	    
-            newdoc3 = Document(docfile = request.FILES['roi_xml_file'])
-            newdoc3._meta.get_field('docfile').upload_to = derivatives
-	    
-            ''' Acquire fileNames '''
-            fiber_fn = form.cleaned_data['docfile'].name # get the name of the file input by user
-            roi_raw_fn = form.cleaned_data['roi_raw_file'].name
-            roi_xml_fn = form.cleaned_data['roi_xml_file'].name
-	    
-            ''' Save files to temp location '''
+            newdoc = TrialDoc(docfile = request.FILES['docfile'])
+	    #newdoc._meta.get_field('docfile').upload_to = '/data/projects/disa/OCPprojects/STATtest' # route files to correct location
             newdoc.save()
-            newdoc2.save()
-            newdoc3.save()
             print '\nSaving all files complete...'
                
-            ''' Make appropriate dirs if they dont already exist '''	    
-            createDirStruct.createDirStruct([derivatives, rawdata, graphs, graphInvariants, images])
-            
-            # Redirect to Processing page
         return HttpResponseRedirect(settings.BASE_URL+'/processInput')
     else:
-        form = DocumentForm() # An empty, unbound form
+        form = TestForm() # An empty, unbound form
         
     # Render the form
     return render_to_response(
@@ -210,6 +150,10 @@ def pipelineUpload(request, webargs=None):
         {'form': form},
         context_instance=RequestContext(request) # Some failure to input data & returns a key signaling what is requested
     )
+
+
+
+
 
 def processInputData(request):
     '''
