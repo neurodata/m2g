@@ -136,17 +136,16 @@ def pipelineUpload(request, webargs=None):
 	    derivatives, rawdata,  graphs, graphInvariants, images = defDataDirs(userDefProjectDir)
 	    
             newdoc = TrialDoc(docfile = request.FILES['docfile'])
-	    #newdoc._meta.get_field('docfile').upload_to = '/data/projects/disa/OCPprojects/STATtest' # route files to correct location
-            newdoc.save()
+	    newdoc._meta.get_field('docfile').upload_to = '/data/projects/disa/OCPprojects/STATtest/jhsdgk/gdagsdg/dgsdgg' # route files to correct location
             print '\nSaving all files complete...'
-               
-        return HttpResponseRedirect(settings.BASE_URL+'/processInput')
+            newdoc.save()
+        return HttpResponseRedirect('disa'+'/success')
     else:
         form = TestForm() # An empty, unbound form
         
     # Render the form
     return render_to_response(
-        'pipelineUpload.html',
+        'singtrial.html',
         {'form': form},
         context_instance=RequestContext(request) # Some failure to input data & returns a key signaling what is requested
     )

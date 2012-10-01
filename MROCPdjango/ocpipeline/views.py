@@ -33,11 +33,10 @@ import ocpipeline.createDirStruct as createDirStruct
 import ocpipeline.convertTo as convertTo
 
 from django.core.servers.basehttp import FileWrapper
-from django.conf import settings
 
 import subprocess
 from shutil import move, rmtree # For moving files
-from django.core.urlresolvers import reverse
+from django.core.urlresolvers import get_script_prefix
 
 '''
 Global Paths
@@ -85,7 +84,7 @@ def createProj(request, webargs=None):
         userDefProjectName = os.path.join(uploadDirPath, userDefProjectName) # Fully qualify
         userDefProjectDir =  os.path.join(userDefProjectName, site, subject, session, scanId)
 	
-        return HttpResponseRedirect(settings.BASE_URL+'/pipelineUpload') # Redirect after POST
+        return HttpResponseRedirect(get_script_prefix()+'pipelineUpload') # Redirect after POST
     
     ''' Form '''
     if request.method == 'POST':
@@ -99,10 +98,9 @@ def createProj(request, webargs=None):
         
 	    userDefProjectName = os.path.join(uploadDirPath, userDefProjectName) # Fully qualify
 	    userDefProjectDir =  os.path.join(userDefProjectName, site, subject, session, scanId)
-	    ###userDefProjectDir ='/data/projects/disa/OCPprojects/Test1/Site/Name/Session/Scan'
 
-        #return HttpResponseRedirect(settings.BASE_URL+'/pipelineUpload') # Redirect after POST
-	return HttpResponseRedirect(reverse('/pipelineUpload')) # Redirect after POST
+	return HttpResponseRedirect(get_script_prefix()+'pipelineUpload') # Redirect after POST
+
     else:
         form = DataForm() # An unbound form
    
@@ -166,7 +164,7 @@ def pipelineUpload(request, webargs=None):
         ''' Make appropriate dirs if they dont already exist'''
         createDirStruct.createDirStruct([derivatives, rawdata, graphs, graphInvariants, images])
 	
-	return HttpResponseRedirect(settings.BASE_URL+'/processInput') # Redirect after POST
+	return HttpResponseRedirect(get_script_prefix()+'processInput') # Redirect after POST
 
     ''' Form '''
     if request.method == 'POST':
@@ -175,32 +173,34 @@ def pipelineUpload(request, webargs=None):
 	    
 	    ''' Define data directory paths '''
 	    derivatives, rawdata,  graphs, graphInvariants, images = defDataDirs(userDefProjectDir)
-	    
+	   
+	    #derivatives = '/data/projects/disa/OCPprojects/afssdgs/argsdgds/sd/hhsh/gs'
+		 
             newdoc = Document(docfile = request.FILES['docfile'])
 	    newdoc._meta.get_field('docfile').upload_to = derivatives # route files to correct location
-	    
+
 	    newdoc2 = Document(docfile = request.FILES['roi_raw_file'])
 	    newdoc2._meta.get_field('docfile').upload_to = derivatives
 	    
             newdoc3 = Document(docfile = request.FILES['roi_xml_file'])
             newdoc3._meta.get_field('docfile').upload_to = derivatives
-	    
+
             ''' Acquire fileNames '''
-            fiber_fn = form.cleaned_data['docfile'].name # get the name of the file input by user
+	    fiber_fn = form.cleaned_data['docfile'].name # get the name of the file input by user
             roi_raw_fn = form.cleaned_data['roi_raw_file'].name
             roi_xml_fn = form.cleaned_data['roi_xml_file'].name
-	    
+
             ''' Save files to temp location '''
             newdoc.save()
-            newdoc2.save()
+	    newdoc2.save()
             newdoc3.save()
-            print '\nSaving all files complete...'
+ 	    print '\nSaving all files complete...'
                
             ''' Make appropriate dirs if they dont already exist '''	    
             createDirStruct.createDirStruct([derivatives, rawdata, graphs, graphInvariants, images])
             
             # Redirect to Processing page
-        return HttpResponseRedirect(settings.BASE_URL+'/processInput')
+        return HttpResponseRedirect(get_script_prefix()+'processInput')
     else:
         form = DocumentForm() # An empty, unbound form
         
@@ -251,9 +251,9 @@ def processInputData(request):
 	= processData(fiber_fn, roi_xml_fn, roi_raw_fn,graphs, graphInvariants, True)
 
     if (urlBit):
-	return HttpResponseRedirect(settings.BASE_URL+'/zipOutput')
+	return HttpResponseRedirect(get_script_prefix()+'zipOutput')
 
-    return HttpResponseRedirect(settings.BASE_URL+'/confirmDownload')
+    return HttpResponseRedirect(get_script_prefix()+'confirmDownload')
 
 
 def confirmDownload(request):
@@ -265,7 +265,7 @@ def confirmDownload(request):
     
     if 'zipDwnld' in request.POST: # If zipDwnl option is chosen
 	form = OKForm(request.POST)
-	return HttpResponseRedirect(settings.BASE_URL+'/zipOutput') # Redirect after POST
+	return HttpResponseRedirect(get_script_prefix()+'zipOutput') # Redirect after POST
     
     elif 'convToMatNzip' in request.POST: # If view dir structure option is chosen
 	form = OKForm(request.POST)
@@ -274,7 +274,7 @@ def confirmDownload(request):
 	# Incomplete
 	#convertTo.convertGraphToCSV(smGrfn_gl)
 	#convertTo.convertGraphToCSV(bgGrfn_gl)
-	return HttpResponseRedirect(settings.BASE_URL+'/zipOutput')
+	return HttpResponseRedirect(get_script_prefix()+'zipOutput')
     
     elif 'getProdByDir' in request.POST: # If view dir structure option is chosen
 	form = OKForm(request.POST)
