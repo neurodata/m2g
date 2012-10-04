@@ -16,6 +16,8 @@ import scipy.sparse.linalg.eigen.arpack as arpack
 from collections import Counter
 
 from time import time
+import mrpaths
+import mrcap.lcc as lcc
 
 class graph():
   def __init__(self):
@@ -88,15 +90,6 @@ class graph():
     4. 
     '''
     
-    #self.vertices = np.zeros(self.G_sparse.shape[0])
-    
-    #Create vertex list
-    #self.vertices = []
-    #for v in range(self.G_sparse.shape[0]):
-     # self.vertices.append(vertex(v))
-      
-    #self.vertices = np.array(self.vertices) # make list a numpy array
-    
     ############ Graph Invariant calcs ############
     ''' Calc Maximum Average Degree of the graph'''
     print 'Getting Maximum Average Degree..'
@@ -104,23 +97,26 @@ class graph():
     #self.getMaxAveDegree() # Takes ~5min on 16Mil  vertices with 60Mil edges 
     print 'Time taken to calc MAD: %f secs\n' % (time() - start)
 
-    ''' Calc scan statistic'''
+    ''' 
+    Calc scan statistic
     print 'Calculating scan statistic 1...'
     start = time()
     ss1Array, degArray = calcScanStat(self.G_sparse, G_fn=self.G_fn,N=1)
     print 'Time taken to calc  SS1: %f secs\n' % (time() - start)
-
-    ''' Calc number of triangles'''
+    '''
+ 
+    ''' Calc number of triangles
     print 'Getting number of triangles...'
     start = time()
     triArray = calcNumTriangles(ss1Array, degArray, G_fn=self.G_fn)
     print 'Time taken to calc Num triangles: %f secs\n' % (time() - start)
-
+    '''
+    '''
     if (self.classification == 'small'):
       printVertInv(ss1Array, 'Scan Statistic 1') # print scan stat 1
       printVertInv(degArray, 'Vertex Degree') # print vertex degree
       printVertInv(triArray, 'Number of triangles') # print number triangles 
-
+    '''
   #################################
   # MAX AVERAGE DEGREE EIGENVALUE #
   #################################
@@ -145,15 +141,10 @@ class graph():
     The Average degree of a vertex
     '''
     return np.average(vertDegreArr)
-      
-  
-
-  def calcNumTriangles(self):
-    '''
-    Number of traingles in the graph
-    '''
-    pass
-  
+ 
+  #####################
+  # CLUSTERING CO-EFF #
+  #####################
   def calcLocalClustCoeff(self):
     '''
     Local clustering coefficient of each vertex
@@ -166,24 +157,35 @@ class graph():
     '''
     pass
 
-###################
-# SCAN STATISTICS #
-###################
-  
-def calcScanStat(G, G_fn='',N=1):
+  ###################
+  # SCAN STATISTICS #
+  ###################
+def calcScanStat(G_fn, lcc_fn, roiRootName = None ,bin = False, N=1):
   '''
-  G - Sparse adjacency matrix (rep a graph)
+  lcc_fn - largest connected component full filename (.npy)
+  G_fn - fibergraph full filename (.mat)
+  bin - binarize or not
   N - Scan statistic number i.e 1 or 2 ONLY
   '''
+
+  if not roiRootName:
+     roiRootName = G_fn.split('_')+'_roi'
+
+  vcc = lcc.ConnectedComponent(fn = lcc_fn)
+  fg = lcc._load_fibergraph(roiRootName , G_fn) 
+  G = vcc.induced_subgraph(fg.spcscmat)
+  G = G+G.T # Symmetrize
+
   if (N == 2):
     G = G.dot(G)+G
   
   vertxDeg = np.zeros(G.shape[0]) # Vertex degrees of all vertices
   indSubgrEdgeNum = np.zeros(G.shape[0]) # Induced subgraph edge number i.e scan statistic
-  
+
   for vertx in range (G.shape[0]):
-    if (vertx > 0 and G.classification == 'big' and vertx/G.shape[0]%10 == 0)
-	print ((vertx/G.shape[0])*100), "% complete..."
+    if (vertx > 0 and (vertx% (int(G.shape[0]*0.1)) == 0)):
+        print int(vertx/(float(G.shape[0]))*100), "% complete..."
+
     nbors = G[:,vertx].nonzero()[0]
     vertxDeg[vertx] = nbors.shape[0] # degree of each vertex
  
@@ -194,20 +196,19 @@ def calcScanStat(G, G_fn='',N=1):
       indSubgrEdgeNum[vertx] = 0 # zero neighbors hence zero cardinality enduced subgraph
 
   '''write to file '''
-  if (G_fn):
-    ss1_fn = getbaseName(G_fn) + 'scanstat'+str(N)+'.npy'
-    deg_fn = getbaseName(G_fn) + 'degree'+str(N)+'.npy'
+  ss1_fn = getbaseName(lcc_fn) + '_scanstat'+str(N)+'.npy'
+  deg_fn = getbaseName(lcc_fn) + '_degree'+str(N)+'.npy'
     
-    np.save(ss1_fn, indSubgrEdgeNum) # save location wrong - Should be invariants
-    np.save(deg_fn, vertxDeg)  # save location wrong - Should be invariants
-  else:
-    np.save('scanstat'+N+'.npy', indSubgrEdgeNum)
-    np.save('degree'+N+'.npy', vertxDeg)
+  np.save(ss1_fn, indSubgrEdgeNum) # save location wrong - Should be invariants
+  np.save(deg_fn, vertxDeg)  # save location wrong - Should be invariants
     
   # del vertxDeg, indSubgrEdgeNum
   return [ss1_fn, deg_fn]
 
-def calcNumTriangles(ss1Array, degArray, G_fn = ''):
+#######################
+# NUMBER OF TRIANGLES #
+#######################
+def calcNumTriangles(ss1Array, degArray, lcc_fn):
   if not isinstance(ss1Array, np.ndarray):
     try:
       ss1Array = np.load(ss1Array)
@@ -230,12 +231,8 @@ def calcNumTriangles(ss1Array, degArray, G_fn = ''):
   if np.any(triangles[:] < 0):
       print 'No entry should be negative in triangles array!'
       
-  if G_fn:
-    triArr_fn = getbaseName(G_fn) +'triangles.npy'  
-    np.save(triArr_fn, triangles)  # save location wrong!
-  else:
-    triArr_fn = 'triangles.npy'
-    np.save(triArr_fn, triangles)  # save location wrong!
+  triArr_fn = getbaseName(lcc_fn) +'_triangles.npy'  
+  np.save(triArr_fn, triangles)  # save location wrong!
   
   #del triangles
   return triArr_fn 
@@ -243,8 +240,8 @@ def calcNumTriangles(ss1Array, degArray, G_fn = ''):
 ####################
 # Base name getter #
 ####################
-def getbaseName(G_fn):
-  return G_fn.partition('_')[0]
+def getbaseName(fn):
+  return fn.partition('_')[0]
 
 
 ######################
@@ -287,10 +284,25 @@ def main():
   #gr.loadgraphMatx('/Users/dmhembere44/Downloads/M87199728_fiber.mat', True, True, True)
   #gr.loadgraphMatx('/data/projects/MRN/graphs/biggraphs/M87199728_fiber.mat', True, True, False) # bg1
   #gr.loadgraphMatx('/home/disa/testgraphs/M87102217_smgr.mat', False, True, True) # mrbrain small
-  gr.loadgraphMatx('/home/disa/testgraphs/M87199728_fiber.mat', True, True, False) # mrbrain big
+  G_fn = '/home/disa/testgraphs/big/M87102217_fiber.mat'
+  lcc_fn = '/home/disa/testgraphs/lcc/M87102217_concomp.npy'
+  roiRootName = '/home/disa/testgraphs/roi/M87102217_roi'
+  gr.loadgraphMatx(G_fn, True, True, False) # mrbrain big
   
-  gr.calcGraphInv()
-  
+  #gr.calcGraphInv()
+
+  ''' Calc Scan Stat 1 '''
+  start = time()
+  ss1Array, degArray = calcScanStat(G_fn, lcc_fn, roiRootName ,bin = False, N=1)
+  print 'Time taken to calc  SS1: %f secs\n' % (time() - start)
+
+  ''' Calc number of triangles'''
+  print 'Getting number of triangles...'
+  start = time()
+  triArray = calcNumTriangles(ss1Array, degArray, G_fn=self.G_fn)
+  print 'Time taken to calc Num triangles: %f secs\n' % (time() - start)
+
+
 if __name__ == '__main__':
   main()
 
