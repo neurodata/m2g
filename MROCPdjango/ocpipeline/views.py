@@ -440,14 +440,14 @@ def processData(fiber_fn, roi_xml_fn, roi_raw_fn,graphs, graphInvariants, run = 
 	#**gengraph.genGraph(fiber_fn, bgGrfn, roi_xml_fn ,roi_raw_fn, True)
 	
 	''' Run LCC '''
-	lccfn = os.path.join(graphInvariants, (baseName + 'lcc.npy'))
+	lccfn = os.path.join(graphInvariants, (baseName + 'concomp.npy'))
 	
 	'''Should be big but we'll do small for now'''
 	#**lcc.process_single_brain(roi_xml_fn, roi_raw_fn, bgGrfn, lccfn)
 	lcc.process_single_brain(roi_xml_fn, roi_raw_fn, smGrfn, lccfn)
 	
 	''' Run Embed - SVD '''
-	SVDfn = os.path.join(graphInvariants, (baseName + 'svd.npy'))
+	SVDfn = os.path.join(graphInvariants, (baseName + 'embed.npy'))
 	
 	print("Running SVD....")
 	

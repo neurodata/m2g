@@ -8,6 +8,7 @@ Date: 5 Sept 2012
 
 import scipy.io as sio
 import numpy as np
+from math import ceil
 import os
 import argparse
 import sys
@@ -141,15 +142,6 @@ class graph():
     The Average degree of a vertex
     '''
     return np.average(vertDegreArr)
- 
-  #####################
-  # CLUSTERING CO-EFF #
-  #####################
-  def calcLocalClustCoeff(self):
-    '''
-    Local clustering coefficient of each vertex
-    '''
-    pass
   
   def pathLength(self):
     '''
@@ -157,9 +149,15 @@ class graph():
     '''
     pass
 
-  ###################
-  # SCAN STATISTICS #
-  ###################
+####################
+# CLUSTERING COEFF #
+####################
+
+def clusteringCoeff(triangle_fn):
+  pass
+
+# SCAN STATISTICS #
+###################
 def calcScanStat(G_fn, lcc_fn, roiRootName = None ,bin = False, N=1):
   '''
   lcc_fn - largest connected component full filename (.npy)
@@ -184,7 +182,7 @@ def calcScanStat(G_fn, lcc_fn, roiRootName = None ,bin = False, N=1):
 
   for vertx in range (G.shape[0]):
     if (vertx > 0 and (vertx% (int(G.shape[0]*0.1)) == 0)):
-        print int(vertx/(float(G.shape[0]))*100), "% complete..."
+        print ceil(vertx/(float(G.shape[0]))*100), "% complete..."
 
     nbors = G[:,vertx].nonzero()[0]
     vertxDeg[vertx] = nbors.shape[0] # degree of each vertex
