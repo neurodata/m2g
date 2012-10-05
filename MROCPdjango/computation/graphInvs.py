@@ -13,8 +13,6 @@ import argparse
 import sys
 
 import scipy.sparse.linalg.eigen.arpack as arpack
-from collections import Counter
-
 from time import time
 import mrpaths
 import mrcap.lcc as lcc
@@ -175,7 +173,6 @@ def calcScanStat(G_fn, lcc_fn, roiRootName = None ,bin = False, N=1):
   fg = lcc._load_fibergraph(roiRootName , G_fn) 
   G = vcc.induced_subgraph(fg.spcscmat)
   G = G+G.T # Symmetrize
-
   if (N == 2):
     G = G.dot(G)+G
   
@@ -197,7 +194,7 @@ def calcScanStat(G_fn, lcc_fn, roiRootName = None ,bin = False, N=1):
 
   '''write to file '''
   ss1_fn = getbaseName(lcc_fn) + '_scanstat'+str(N)+'.npy'
-  deg_fn = getbaseName(lcc_fn) + '_degree'+str(N)+'.npy'
+  deg_fn = getbaseName(lcc_fn) + '_degree.npy'
     
   np.save(ss1_fn, indSubgrEdgeNum) # save location wrong - Should be invariants
   np.save(deg_fn, vertxDeg)  # save location wrong - Should be invariants
@@ -230,7 +227,12 @@ def calcNumTriangles(ss1Array, degArray, lcc_fn):
   triangles = np.subtract(ss1Array, degArray)
   if np.any(triangles[:] < 0):
       print 'No entry should be negative in triangles array!'
-      
+  
+  for e in range (len(triangles)-1):
+    if triangles[e] < 0:
+      print "Vertex:", e , ", Value: ", triangles[e]    
+
+  import pdb; pdb.set_trace() 
   triArr_fn = getbaseName(lcc_fn) +'_triangles.npy'  
   np.save(triArr_fn, triangles)  # save location wrong!
   
@@ -293,19 +295,17 @@ def main():
 
   ''' Calc Scan Stat 1 '''
   start = time()
-  ss1Array, degArray = calcScanStat(G_fn, lcc_fn, roiRootName ,bin = False, N=1)
+  #ss1Array, degArray = calcScanStat(G_fn, lcc_fn, roiRootName ,bin = False, N=1)
   print 'Time taken to calc  SS1: %f secs\n' % (time() - start)
 
   ''' Calc number of triangles'''
   print 'Getting number of triangles...'
   start = time()
-  triArray = calcNumTriangles(ss1Array, degArray, G_fn=self.G_fn)
+  ss1Array = '/home/disa/testgraphs/lcc/M87102217_scanstat1.npy'
+  degArray = '/home/disa/testgraphs/lcc/M87102217_degree1.npy'
+  triArray = calcNumTriangles(ss1Array, degArray, G_fn)
   print 'Time taken to calc Num triangles: %f secs\n' % (time() - start)
 
 
 if __name__ == '__main__':
   main()
-
-'''
-cc(v) = triangle(v)/(degree choose 2)
-'''
