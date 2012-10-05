@@ -140,14 +140,6 @@ class graph():
     '''
     return np.average(vertDegreArr)
  
-  #####################
-  # CLUSTERING CO-EFF #
-  #####################
-  def calcLocalClustCoeff(self):
-    '''
-    Local clustering coefficient of each vertex
-    '''
-    pass
   
   def pathLength(self):
     '''
@@ -232,7 +224,6 @@ def calcNumTriangles(ss1Array, degArray, lcc_fn):
     if triangles[e] < 0:
       print "Vertex:", e , ", Value: ", triangles[e]    
 
-  import pdb; pdb.set_trace() 
   triArr_fn = getbaseName(lcc_fn) +'_triangles.npy'  
   np.save(triArr_fn, triangles)  # save location wrong!
   
@@ -266,8 +257,38 @@ def printVertInv(fn, invariantName):
   for idx, vert in enumerate (inv):
     print 'Vertex: %d, Value: %d' % (idx, vert)
 
+#####################
+# CLUSTERING CO-EFF #
+#####################
+def calcLocalClustCoeff(deg_fn, tri_fn):
+  '''
+  deg_fn = full filename of file containing an numpy array with vertex degrees
+  tri_fn = full filename of file containing an numpy array with num triangles
+  '''
+  degArray = np.load(deg_fn)
+  triArray = np.load(tri_fn)
+  
+  ccArray = np.empty_like(degArray)
+
+  if len(degArray) != len(triArray):
+    print "Lengths of triangle and degree arrays must be equal"
+    sys.exit(-1)  
+ 
+  for v in range len(degArray): 
+    if (degArray[v] > 0):
+      maxEdges = int((degArray[v]+1)*(degArray[v]))/2   # +1 to include the vertex in question. Formula: (n(n-1))/2
+      maxNumTri = maxEdges - degArray[v]
+      angles = maxNumTri - triArray[v]
+
+      ccArray[v] = triArray[v]/(triArray[v] + angles) # Eq. 2.12
+    else:
+      ccArray[v] = 0
+
+  ccArr_fn = getbaseName(deg_fn) +'_clustcoeff.npy'
+  np.save(ccArr_fn, ccArray)  # save location wrong!
+
 ##########################
-  # Vertex Class #
+#     Vertex Class       #
 ##########################
 class vertex():
   '''
