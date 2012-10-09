@@ -1,5 +1,4 @@
 #!/usr/bin/python
-
 '''
 @author: Disa Mhembere
 Determine some graph invariants on big and small graphs
@@ -8,12 +7,14 @@ Date: 5 Sept 2012
 
 import scipy.io as sio
 import numpy as np
+from math import ceil
+import scipy.sparse.linalg.eigen.arpack as arpack
+
 import os
 import argparse
 import sys
-
-import scipy.sparse.linalg.eigen.arpack as arpack
 from time import time
+
 import mrpaths
 import mrcap.lcc as lcc
 
@@ -29,7 +30,6 @@ class graph():
     maxAveDeg - Maximum Average Degree
     vertices - numpy array of vertices 
     '''
-    
 
   def loadgraphMatx(self, graph_fn, big = False, sym = False, binarize = False, toPyMat = False):
     ''' 
@@ -95,26 +95,6 @@ class graph():
     #self.getMaxAveDegree() # Takes ~5min on 16Mil  vertices with 60Mil edges 
     print 'Time taken to calc MAD: %f secs\n' % (time() - start)
 
-    ''' 
-    Calc scan statistic
-    print 'Calculating scan statistic 1...'
-    start = time()
-    ss1Array, degArray = calcScanStat(self.G_sparse, G_fn=self.G_fn,N=1)
-    print 'Time taken to calc  SS1: %f secs\n' % (time() - start)
-    '''
- 
-    ''' Calc number of triangles
-    print 'Getting number of triangles...'
-    start = time()
-    triArray = calcNumTriangles(ss1Array, degArray, G_fn=self.G_fn)
-    print 'Time taken to calc Num triangles: %f secs\n' % (time() - start)
-    '''
-    '''
-    if (self.classification == 'small'):
-      printVertInv(ss1Array, 'Scan Statistic 1') # print scan stat 1
-      printVertInv(degArray, 'Vertex Degree') # print vertex degree
-      printVertInv(triArray, 'Number of triangles') # print number triangles 
-    '''
   #################################
   # MAX AVERAGE DEGREE EIGENVALUE #
   #################################
@@ -131,25 +111,33 @@ class graph():
       # LR = Largest Real part
     self.maxAveDeg = (np.max(arpack.eigs(self.G_sparse, which='LR')[0])).real # get eigenvalues, then +ve max REAL part is MAD eigenvalue estimation
   
-  def getAveDegree(self, vertDegArr):
-    '''
-    Calculate the Average Degree of a vertex  
-    Returns:
-    =========
-    The Average degree of a vertex
-    '''
-    return np.average(vertDegreArr)
- 
-  
-  def pathLength(self):
-    '''
-    Path length between each pair of vertices
-    '''
-    pass
+###############
+# PATH LENGTH #
+###############
 
-  ###################
-  # SCAN STATISTICS #
-  ###################
+def pathLength(self):
+  '''
+  Path length between each pair of vertices
+  '''
+  pass
+
+##################
+# AVERAGE DEGREE #
+##################
+
+def getAveDegree(vertDegArr):
+  '''
+  Calculate the Average Degree of a vertex
+  vertDegArr - numpy array of vertex degrees
+  Returns:
+  =========
+  The Average degree of a vertex
+  '''
+  return np.average(vertDegreArr)
+
+###################
+# SCAN STATISTICS #
+###################
 def calcScanStat(G_fn, lcc_fn, roiRootName = None ,bin = False, N=1):
   '''
   lcc_fn - largest connected component full filename (.npy)
@@ -157,7 +145,7 @@ def calcScanStat(G_fn, lcc_fn, roiRootName = None ,bin = False, N=1):
   bin - binarize or not
   N - Scan statistic number i.e 1 or 2 ONLY
   '''
-
+  print 'Calculating scan statistic %d...' % N
   if not roiRootName:
      roiRootName = G_fn.split('_')+'_roi'
 
@@ -173,7 +161,7 @@ def calcScanStat(G_fn, lcc_fn, roiRootName = None ,bin = False, N=1):
 
   for vertx in range (G.shape[0]):
     if (vertx > 0 and (vertx% (int(G.shape[0]*0.1)) == 0)):
-        print int(vertx/(float(G.shape[0]))*100), "% complete..."
+        print ceil(vertx/(float(G.shape[0]))*100), "% complete..."
 
     nbors = G[:,vertx].nonzero()[0]
     vertxDeg[vertx] = nbors.shape[0] # degree of each vertex
@@ -198,6 +186,8 @@ def calcScanStat(G_fn, lcc_fn, roiRootName = None ,bin = False, N=1):
 # NUMBER OF TRIANGLES #
 #######################
 def calcNumTriangles(ss1Array, degArray, lcc_fn):
+  print 'Counting the number of triangles...'
+  start = time()
   if not isinstance(ss1Array, np.ndarray):
     try:
       ss1Array = np.load(ss1Array)
@@ -227,6 +217,7 @@ def calcNumTriangles(ss1Array, degArray, lcc_fn):
   triArr_fn = getbaseName(lcc_fn) +'_triangles.npy'  
   np.save(triArr_fn, triangles)  # save location wrong!
   
+  print 'Time taken to calc Num triangles: %f secs\n' % (time() - start)
   #del triangles
   return triArr_fn 
 
@@ -265,6 +256,7 @@ def calcLocalClustCoeff(deg_fn, tri_fn):
   deg_fn = full filename of file containing an numpy array with vertex degrees
   tri_fn = full filename of file containing an numpy array with num triangles
   '''
+  start = time()
   degArray = np.load(deg_fn)
   triArray = np.load(tri_fn)
   
@@ -274,7 +266,7 @@ def calcLocalClustCoeff(deg_fn, tri_fn):
     print "Lengths of triangle and degree arrays must be equal"
     sys.exit(-1)  
  
-  for v in range len(degArray): 
+  for v in range (len(degArray)): 
     if (degArray[v] > 0):
       maxEdges = int((degArray[v]+1)*(degArray[v]))/2   # +1 to include the vertex in question. Formula: (n(n-1))/2
       maxNumTri = maxEdges - degArray[v]
@@ -286,20 +278,8 @@ def calcLocalClustCoeff(deg_fn, tri_fn):
 
   ccArr_fn = getbaseName(deg_fn) +'_clustcoeff.npy'
   np.save(ccArr_fn, ccArray)  # save location wrong!
-
-##########################
-#     Vertex Class       #
-##########################
-class vertex():
-  '''
-  Class to hold a vertex object
-  '''
-  def __init__(self, ind ,degree = 0):
-    self.degree = degree
-    self.adjList = []
-    self.ind = ind
-    self.indSubgrEdgeNum = 0  # induced subgraph
-    
+  
+  print 'Time taken to calc Num triangles: %f secs\n' % (time() - start)    
 
 def main():
   gr = graph()
@@ -315,17 +295,19 @@ def main():
   #gr.calcGraphInv()
 
   ''' Calc Scan Stat 1 '''
-  start = time()
   #ss1Array, degArray = calcScanStat(G_fn, lcc_fn, roiRootName ,bin = False, N=1)
-  print 'Time taken to calc  SS1: %f secs\n' % (time() - start)
 
   ''' Calc number of triangles'''
-  print 'Getting number of triangles...'
-  start = time()
   ss1Array = '/home/disa/testgraphs/lcc/M87102217_scanstat1.npy'
   degArray = '/home/disa/testgraphs/lcc/M87102217_degree1.npy'
   triArray = calcNumTriangles(ss1Array, degArray, G_fn)
-  print 'Time taken to calc Num triangles: %f secs\n' % (time() - start)
+
+  '''
+    if (self.classification == 'small'):
+      printVertInv(ss1Array, 'Scan Statistic 1') # print scan stat 1
+      printVertInv(degArray, 'Vertex Degree') # print vertex degree
+      printVertInv(triArray, 'Number of triangles') # print number triangles 
+    '''
 
 
 if __name__ == '__main__':
