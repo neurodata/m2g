@@ -34,10 +34,5 @@ class OK(models.Model):
     
     def __unicode__(self):
         return self.name
-
-# DM 09/30
-class TrialDoc(models.Model):
-    docfile = models.FileField(upload_to = (' ')) 
-
         
 admin.site.register(Document)
