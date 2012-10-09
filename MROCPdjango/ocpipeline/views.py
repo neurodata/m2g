@@ -112,8 +112,10 @@ def createProj(request, webargs=None):
 def success(request):
     return render_to_response('success.html')   
 
+
 def pipelineUpload(request, webargs=None):
-    global userDefProjectDir
+    #global userDefProjectDir
+    userDefProjectDir = '/data/projects/disa/OCPprojects/Hardcode/site/subj/sess/scanID'
     global derivatives
     global rawdata
     global graphs
@@ -174,8 +176,6 @@ def pipelineUpload(request, webargs=None):
 	    ''' Define data directory paths '''
 	    derivatives, rawdata,  graphs, graphInvariants, images = defDataDirs(userDefProjectDir)
 	   
-	    #derivatives = '/data/projects/disa/OCPprojects/afssdgs/argsdgds/sd/hhsh/gs'
-		 
             newdoc = Document(docfile = request.FILES['docfile'])
 	    newdoc._meta.get_field('docfile').upload_to = derivatives # route files to correct location
 
@@ -194,13 +194,15 @@ def pipelineUpload(request, webargs=None):
             newdoc.save()
 	    newdoc2.save()
             newdoc3.save()
- 	    print '\nSaving all files complete...'
+ 	    
+	    print '\nSaving all files complete...'
                
             ''' Make appropriate dirs if they dont already exist '''	    
             createDirStruct.createDirStruct([derivatives, rawdata, graphs, graphInvariants, images])
             
             # Redirect to Processing page
         return HttpResponseRedirect(get_script_prefix()+'processInput')
+        #return HttpResponse("SUCCESSFUL TEST")
     else:
         form = DocumentForm() # An empty, unbound form
         
