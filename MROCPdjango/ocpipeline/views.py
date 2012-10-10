@@ -38,36 +38,6 @@ import subprocess
 from django.core.urlresolvers import get_script_prefix
 from django.conf import settings
 
-'''
-Global Paths
-'''
-#uploadDirPath = '/data/projects/disa/OCPprojects/' # Global path to files that are uploaded by users
-#processingScriptDirPath = os.path.abspath(os.path.curdir) + "/ocpipeline/mrcap/" # Global path to location of processing code
-
-'''
-Global file Names all initialized to an empty string
-'''
-#roi_xml_fn = ''
-#fiber_fn = ''
-#roi_raw_fn = ''
-
-''' To hold each type of file available for download'''
-#derivatives = ''    # _fiber.dat, _roi.xml, _roi.raw
-#rawdata = ''        # none yet
-#graphs = ''         # biggraph, smallgraph
-#graphInvariants = ''# lcc.npy (largest connected components), svd.ny (Single Value Decomposition)
-#images = ''	    # To hold images  
-
-#userDefProjectDir = '' # To be defined by user
-#scanId = '' # To be defined by user
-
-#urlBit = False # This bit will be set if user decides to proceed using url version
-
-#smGrfn_gl = ''
-#bgGrfn_gl = ''
-#lccfn_gl = ''
-#SVDfn_gl = ''
-
 ''' Little welcome message'''
 def default(request):
     request.session.clear()
@@ -86,7 +56,7 @@ def createProj(request, webargs=None):
         userDefProjectName = os.path.join(settings.MEDIA_ROOT, userDefProjectName) # Fully qualify
 	
 	request.session['usrDefProjDir'] = os.path.join(userDefProjectName, site, subject, session, scanId)
-
+	request.session['scanId'] = scanId
         return HttpResponseRedirect(get_script_prefix()+'pipelineUpload') # Redirect after POST
     
     ''' Form '''
@@ -101,7 +71,7 @@ def createProj(request, webargs=None):
         
 	    userDefProjectName = os.path.join(settings.MEDIA_ROOT, userDefProjectName) # Fully qualify
 	    request.session['usrDefProjDir'] = os.path.join(userDefProjectName, site, subject, session, scanId)
-
+	    request.session['scanId'] = scanId
 	return HttpResponseRedirect(get_script_prefix()+'pipelineUpload') # Redirect after POST
 
     else:
@@ -255,8 +225,9 @@ def processInputData(request):
     request.session['smGrfn'], request.session['bgGrfn'], request.session['lccfn'],request.session['SVDfn'] \
 	= processData(fiber_fn, roi_xml_fn, roi_raw_fn,request.session['graphs'], request.session['graphInvariants'], True)
 
-    if (request.session['urlBit']):
-	return HttpResponseRedirect(get_script_prefix()+'zipOutput')
+    if ('urlBit' in request.session):
+	if (request.session['urlBit']):
+	    return HttpResponseRedirect(get_script_prefix()+'zipOutput')
 
     return HttpResponseRedirect(get_script_prefix()+'confirmDownload')
 
