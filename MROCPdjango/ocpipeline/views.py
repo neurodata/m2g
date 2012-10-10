@@ -3,11 +3,15 @@
 Module to hold the views of a Django one-click MR-connectome pipeline
 '''
 import os, sys, re
+import zipfile
+import tempfile
 
 from django.shortcuts import render_to_response
 from django.shortcuts import render
 from django.template import RequestContext
 from django.http import HttpResponseRedirect
+from django.http import HttpResponse
+from django.http import HttpResponseBadRequest
 
 from django.core.files import File        # For programmatic file upload
 
@@ -16,10 +20,6 @@ from ocpipeline.forms import DocumentForm
 from ocpipeline.forms import OKForm
 from ocpipeline.forms import DataForm
 import mrpaths
-
-#import django
-import zipfile
-import tempfile
 
 from django.http import HttpResponse
 from django.http import HttpResponseBadRequest
@@ -35,55 +35,58 @@ import ocpipeline.convertTo as convertTo
 from django.core.servers.basehttp import FileWrapper
 
 import subprocess
-from shutil import move, rmtree # For moving files
 from django.core.urlresolvers import get_script_prefix
+from django.conf import settings
 
 '''
 Global Paths
 '''
-uploadDirPath = '/data/projects/disa/OCPprojects/' # Global path to files that are uploaded by users
-processingScriptDirPath = os.path.abspath(os.path.curdir) + "/ocpipeline/mrcap/" # Global path to location of processing code
+#uploadDirPath = '/data/projects/disa/OCPprojects/' # Global path to files that are uploaded by users
+#processingScriptDirPath = os.path.abspath(os.path.curdir) + "/ocpipeline/mrcap/" # Global path to location of processing code
 
 '''
 Global file Names all initialized to an empty string
 '''
-roi_xml_fn = ''
-fiber_fn = ''
-roi_raw_fn = ''
+#roi_xml_fn = ''
+#fiber_fn = ''
+#roi_raw_fn = ''
 
 ''' To hold each type of file available for download'''
-derivatives = ''    # _fiber.dat, _roi.xml, _roi.raw
-rawdata = ''        # none yet
-graphs = ''         # biggraph, smallgraph
-graphInvariants = ''# lcc.npy (largest connected components), svd.ny (Single Value Decomposition)
-images = ''	    # To hold images  
+#derivatives = ''    # _fiber.dat, _roi.xml, _roi.raw
+#rawdata = ''        # none yet
+#graphs = ''         # biggraph, smallgraph
+#graphInvariants = ''# lcc.npy (largest connected components), svd.ny (Single Value Decomposition)
+#images = ''	    # To hold images  
 
-userDefProjectDir = '' # To be defined by user
-scanId = '' # To be defined by user
+#userDefProjectDir = '' # To be defined by user
+#scanId = '' # To be defined by user
 
-urlBit = False # This bit will be set if user decides to proceed using url version
+#urlBit = False # This bit will be set if user decides to proceed using url version
 
-smGrfn_gl = ''
-bgGrfn_gl = ''
-lccfn_gl = ''
-SVDfn_gl = ''
+#smGrfn_gl = ''
+#bgGrfn_gl = ''
+#lccfn_gl = ''
+#SVDfn_gl = ''
 
 ''' Little welcome message'''
 def default(request):
+    request.session.clear()
     return render_to_response('welcome.html')
 
+''' Set project Dirs '''
 def createProj(request, webargs=None):
-    global userDefProjectDir
-    global scanId
-    global uploadDirPath
+    
+    request.session.clear()
+    request.session['lastView'] = 'createProj'
     
     ''' Browser url version''' 
     if (webargs):
         [userDefProjectName, site, subject, session, scanId] = request.path.split('/')[2:7] # This will always be true
     
-        userDefProjectName = os.path.join(uploadDirPath, userDefProjectName) # Fully qualify
-        userDefProjectDir =  os.path.join(userDefProjectName, site, subject, session, scanId)
+        userDefProjectName = os.path.join(settings.MEDIA_ROOT, userDefProjectName) # Fully qualify
 	
+	request.session['usrDefProjDir'] = os.path.join(userDefProjectName, site, subject, session, scanId)
+
         return HttpResponseRedirect(get_script_prefix()+'pipelineUpload') # Redirect after POST
     
     ''' Form '''
@@ -96,8 +99,8 @@ def createProj(request, webargs=None):
             session = form.cleaned_data['session']
             scanId = form.cleaned_data['scanId']
         
-	    userDefProjectName = os.path.join(uploadDirPath, userDefProjectName) # Fully qualify
-	    userDefProjectDir =  os.path.join(userDefProjectName, site, subject, session, scanId)
+	    userDefProjectName = os.path.join(settings.MEDIA_ROOT, userDefProjectName) # Fully qualify
+	    request.session['usrDefProjDir'] = os.path.join(userDefProjectName, site, subject, session, scanId)
 
 	return HttpResponseRedirect(get_script_prefix()+'pipelineUpload') # Redirect after POST
 
@@ -110,33 +113,40 @@ def createProj(request, webargs=None):
 
 ''' Successful completion of task'''
 def success(request):
+    request.session['lastView'] = 'success'
     return render_to_response('success.html')   
 
-
+''' Upload files from user '''
 def pipelineUpload(request, webargs=None):
-    #global userDefProjectDir
-    userDefProjectDir = '/data/projects/disa/OCPprojects/Hardcode/site/subj/sess/scanID'
-    global derivatives
-    global rawdata
-    global graphs
-    global graphInvariants
-    global images
+
+    # If you haven't come through the create proj - start again 
+    if (('usrDefProjDir' not in request.session) or ('lastView' not in request.session)):
+        return HttpResponseRedirect(get_script_prefix()+'create') # Return to start
+    '''
+    if ('lastView' in request.session):
+	if (request.session['lastView'] != 'createProj'):
+	    return HttpResponseRedirect(get_script_prefix()+'create') # Redirect to start
+    '''
+
+    request.session['lastView'] = 'pipelineUpload' 
     
     print "Uploading files..."
     
-    ''' Browser url version
-        webargs should be just the fully qualified name of tract file e.g /data/files/name_fiber.dat
-        Assumption is naming convention is name_fiber.dat, name_roi.dat, name_roi.xml, where
-        'name' is the same in all cases
+    ''' 
+    Browser url version
+    webargs should be just the fully qualified name of tract file e.g /data/files/name_fiber.dat
+    Assumption is naming convention is name_fiber.dat, name_roi.dat, name_roi.xml, where
+    'name' is the same in all cases
     ''' 
     if(webargs):
-	global urlBit
-	urlBit = True # Set the url version marker
+	#global urlBit
+	request.session['urlBit'] = True
+	#urlBit = True # Set the url version marker
 	
         fiber_fn = request.path[15:] # Directory where
-        if fiber_fn[-1] == '/': # in case of trailing backslash
+        if fiber_fn.endswith('/'): # in case of trailing backslash
             fiber_fn = fiber_fn[:-1]
-            
+        
         '''Assume directory & naming structure matches braingraph1's: "/data/projects/MRN/base" structure'''
 	roi_raw_fn = roi_xml_fn = '/'
         for i in fiber_fn.split('/')[1:-2]:
@@ -149,12 +159,13 @@ def pipelineUpload(request, webargs=None):
         roi_xml_fn += 'roi/' +  basename +'roi.xml'
 	
 	''' Define data directory paths '''
-	derivatives, rawdata,  graphs, graphInvariants, images = defDataDirs(userDefProjectDir)
+	request.session['derivatives'], request.session['rawdata'], request.session['graphs'],\
+	    request.session['graphInvariants'], request.session['images'] = defDataDirs(request.session['usrDefProjDir'])
 
         for files in [fiber_fn, roi_xml_fn, roi_raw_fn] : # Names of files
             doc = Document() # create a new Document for each file
             with open(files, 'rb') as doc_file: # Open file for reading
-		doc._meta.get_field('docfile').upload_to = derivatives # route files to correct location
+		doc._meta.get_field('docfile').upload_to = request.session['derivatives'] # route files to correct location
                 doc.docfile.save(files, File(doc_file), save=True) # Save upload files
                 doc.save()
         
@@ -162,9 +173,14 @@ def pipelineUpload(request, webargs=None):
 	fiber_fn = fiber_fn.split('/')[-1] 
 	roi_raw_fn = roi_raw_fn.split('/')[-1]
 	roi_xml_fn = roi_xml_fn.split('/')[-1]
-	    
+	
+	request.session['fiber_fn'] = fiber_fn
+	request.session['roi_raw_fn'] = roi_raw_fn
+	request.session['roi_xml_fn'] = roi_xml_fn
+
         ''' Make appropriate dirs if they dont already exist'''
-        createDirStruct.createDirStruct([derivatives, rawdata, graphs, graphInvariants, images])
+        createDirStruct.createDirStruct([request.session['derivatives'], request.session['rawdata'],\
+		request.session['graphs'], request.session['graphInvariants'], request.session['images']])
 	
 	return HttpResponseRedirect(get_script_prefix()+'processInput') # Redirect after POST
 
@@ -174,16 +190,17 @@ def pipelineUpload(request, webargs=None):
         if form.is_valid():
 	    
 	    ''' Define data directory paths '''
-	    derivatives, rawdata,  graphs, graphInvariants, images = defDataDirs(userDefProjectDir)
-	   
+	    request.session['derivatives'], request.session['rawdata'], request.session['graphs'],\
+		request.session['graphInvariants'],request.session['images']= defDataDirs(request.session['usrDefProjDir'])
+
             newdoc = Document(docfile = request.FILES['docfile'])
-	    newdoc._meta.get_field('docfile').upload_to = derivatives # route files to correct location
+	    newdoc._meta.get_field('docfile').upload_to = request.session['derivatives'] # route files to correct location
 
 	    newdoc2 = Document(docfile = request.FILES['roi_raw_file'])
-	    newdoc2._meta.get_field('docfile').upload_to = derivatives
+	    newdoc2._meta.get_field('docfile').upload_to = request.session['derivatives']
 	    
             newdoc3 = Document(docfile = request.FILES['roi_xml_file'])
-            newdoc3._meta.get_field('docfile').upload_to = derivatives
+            newdoc3._meta.get_field('docfile').upload_to = request.session['derivatives']
 
             ''' Acquire fileNames '''
 	    fiber_fn = form.cleaned_data['docfile'].name # get the name of the file input by user
@@ -198,11 +215,11 @@ def pipelineUpload(request, webargs=None):
 	    print '\nSaving all files complete...'
                
             ''' Make appropriate dirs if they dont already exist '''	    
-            createDirStruct.createDirStruct([derivatives, rawdata, graphs, graphInvariants, images])
-            
+            createDirStruct.createDirStruct([request.session['derivatives'], request.session['rawdata'],\
+		request.session['graphs'], request.session['graphInvariants'], request.session['images']])
+
             # Redirect to Processing page
         return HttpResponseRedirect(get_script_prefix()+'processInput')
-        #return HttpResponse("SUCCESSFUL TEST")
     else:
         form = DocumentForm() # An empty, unbound form
         
@@ -218,13 +235,9 @@ def processInputData(request):
     Extract File Name
     Determine what file corresponds to what for gengraph
     '''
-    global roi_xml_fn
-    global fiber_fn
-    global roi_raw_fn
-    global derivatives
-    global urlBit
-    
-    filesInUploadDir = os.listdir(derivatives)
+    #if 
+
+    filesInUploadDir = os.listdir(request.session['derivatives'])
     
     roi_xml_fn, fiber_fn, roi_raw_fn = filesorter.checkFileExtGengraph(filesInUploadDir) # Check & sort files
     
@@ -235,24 +248,14 @@ def processInputData(request):
     baseName = fiber_fn[:-9] #MAY HAVE TO CHANGE
     
     ''' Fully qualify file names''' 
-    fiber_fn = os.path.join(derivatives, fiber_fn)
-    roi_raw_fn = os.path.join(derivatives, roi_raw_fn)
-    roi_xml_fn = os.path.join(derivatives, roi_xml_fn)
+    fiber_fn = os.path.join(request.session['derivatives'], fiber_fn)
+    roi_raw_fn = os.path.join(request.session['derivatives'], roi_raw_fn)
+    roi_xml_fn = os.path.join(request.session['derivatives'], roi_xml_fn)
     
-    
-    global graphs  # let function see path for final graph residence
-    global processingScriptDirPath
-    global graphInvariants
-    
-    global smGrfn_gl
-    global bgGrfn_gl
-    global lccfn_gl
-    global SVDfn_gl
-    
-    [ smGrfn_gl, bgGrfn_gl, lccfn_gl, SVDfn_gl ] \
-	= processData(fiber_fn, roi_xml_fn, roi_raw_fn,graphs, graphInvariants, True)
+    request.session['smGrfn'], request.session['bgGrfn'], request.session['lccfn'],request.session['SVDfn'] \
+	= processData(fiber_fn, roi_xml_fn, roi_raw_fn,request.session['graphs'], request.session['graphInvariants'], True)
 
-    if (urlBit):
+    if (request.session['urlBit']):
 	return HttpResponseRedirect(get_script_prefix()+'zipOutput')
 
     return HttpResponseRedirect(get_script_prefix()+'confirmDownload')
@@ -260,36 +263,37 @@ def processInputData(request):
 
 def confirmDownload(request):
     
-    global smGrfn_gl
-    global bgGrfn_gl
-    global lccfn_gl
-    global SVDfn_gl
-    
     if 'zipDwnld' in request.POST: # If zipDwnl option is chosen
 	form = OKForm(request.POST)
 	return HttpResponseRedirect(get_script_prefix()+'zipOutput') # Redirect after POST
     
     elif 'convToMatNzip' in request.POST: # If view dir structure option is chosen
 	form = OKForm(request.POST)
-	convertTo.convertLCCtoMat(lccfn_gl)
-	convertTo.convertSVDtoMat(SVDfn_gl)
+	convertTo.convertLCCtoMat(request.session['lccfn'])
+	convertTo.convertSVDtoMat(request.session['SVDfn'])
 	# Incomplete
-	#convertTo.convertGraphToCSV(smGrfn_gl)
-	#convertTo.convertGraphToCSV(bgGrfn_gl)
+	#convertTo.convertGraphToCSV(request.session['smGrfn'])
+	#convertTo.convertGraphToCSV(request.session['bgGrfn'])
 	return HttpResponseRedirect(get_script_prefix()+'zipOutput')
     
     elif 'getProdByDir' in request.POST: # If view dir structure option is chosen
 	form = OKForm(request.POST)
-	return HttpResponseRedirect('http://www.openconnecto.me' + userDefProjectDir)
+
+	request.session.clear() # Very important
+
+	return HttpResponseRedirect('http://mrbrain.cs.jhu.edu' + request.session['usrDefProjDir'])
     
     elif 'convToMatNgetByDir' in request.POST: # If view dir structure option is chosen
 	form = OKForm(request.POST)
-	convertTo.convertLCCtoMat(lccfn_gl)
-	convertTo.convertSVDtoMat(SVDfn_gl)
+	convertTo.convertLCCtoMat(request.session['lccfn'])
+	convertTo.convertSVDtoMat(request.session['SVDfn'])
 	# Incomplete
-	#convertTo.convertGraphToCSV(smGrfn_gl)
-	#convertTo.convertGraphToCSV(bgGrfn_gl)
-	return HttpResponseRedirect('http://www.openconnecto.me' + userDefProjectDir)
+	#convertTo.convertGraphToCSV(request.session['smGrfn'])
+	#convertTo.convertGraphToCSV(request.session['bgGrfn'])
+
+	request.session.clear() # Very important
+
+	return HttpResponseRedirect('http://mrbrain.cs.jhu.edu' + userDefProjectDir)
     
     else:
 	form = OKForm()
@@ -305,17 +309,16 @@ def zipProcessedData(request):
     print '\nBeginning file compression...'
     # Take dir with multiple scans, compress it & send it off 
     
-    global scanId
-    global userDefProjectDir
-    
     ''' Zip it '''
-    temp = zipper.zipFilesFromFolders(dirName = userDefProjectDir)
+    temp = zipper.zipFilesFromFolders(dirName = request.session['usrDefProjDir'])
     ''' Wrap it '''
     wrapper = FileWrapper(temp) 
     response = HttpResponse(wrapper, content_type='application/zip')
-    response['Content-Disposition'] = ('attachment; filename='+ scanId +'.zip')
+    response['Content-Disposition'] = ('attachment; filename='+ request.session['scanId'] +'.zip')
     response['Content-Length'] = temp.tell()
     temp.seek(0)
+
+    request.session.clear() # Very Important
     ''' Send it '''
     return response
 
