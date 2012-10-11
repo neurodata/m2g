@@ -20,17 +20,30 @@
 		line-height: 150%
 	    }
             </style>
+	    
+	    <script type="text/javascript">
+		// Function to add a spinner during upload & processing
+		function showSpinner(){
+		    //if (document.loadForm.Derivatives.clicked){
+			document.getElementById('loadingImage').style.visibility='visible';			
+		    //}
+		}
+	    
+	    </script>
+	    
     </head>
     
 <body>
     <a href="http://openconnecto.me"><img src="http://openconnecto.me/wp-content/themes/DMG/img/logo.png"/></a>
     <h1>Please upload data derivative files</h1>
-        <form action="" method="post" enctype="multipart/form-data">     
-            {% csrf_token %}
-                <p>{{ form }}</p>      
-            <input name = "Derivatives"  type="submit" value="Submit All & Process" class="button">        
-            <input type="reset" value="Reset" class="button">
+        <form action="" method="post" enctype="multipart/form-data" name="loadForm">     
+	    {% csrf_token %}
+            <p>{{ form }}</p>
+	    <input name = "Derivatives"  type="submit" value="Submit All & Process" class="button" onclick="showSpinner();">    
+            <input type="reset" value="Reset" class="button" name="clearForm" >
         </form>
+	
+	<img id="loadingImage" src="loadinfo.net.gif" style="visibility:hidden"/>
 
 	<h2> For browser url based use read below </h2>
 
