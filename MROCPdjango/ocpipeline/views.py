@@ -331,10 +331,10 @@ def upload(request, webargs=None):
 	  # Check which file is which
 	roi_xml_fn, fiber_fn, roi_raw_fn = filesorter.checkFileExtGengraph(uploadFiles) # Check & sort files
 
-	import pdb; pdb.set_trace()
+	#import pdb; pdb.set_trace()
 
 	''' Data Processing '''
-	smGrfn, bgGrfn, lccfn, SVDfn
+	smGrfn, bgGrfn, lccfn, SVDfn \
 	  = processData(fiber_fn, roi_xml_fn, roi_raw_fn,graphs, graphInvariants, True) # Change to false to not process anything
 	
 	''' If optional .mat graph invariants & .csv graphs '''
