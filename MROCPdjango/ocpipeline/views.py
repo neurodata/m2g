@@ -294,13 +294,12 @@ def zipProcessedData(request):
     return response
 
 def upload(request, webargs=None):
-    global uploadDirPath
     """Programmatic interface for uploading data"""  
     if (webargs and request.method == 'POST'):
 	
 	[userDefProjectName, site, subject, session, scanId, addmatNcsv] = webargs.split('/') # [:-1] # Add to server version
 	
-	userDefProjectDir = os.path.join(uploadDirPath, userDefProjectName, site, subject, session, scanId)
+	userDefProjectDir = os.path.join(settings.MEDIA_ROOT, userDefProjectName, site, subject, session, scanId)
 	
 	''' Define data directory paths '''
 	derivatives, rawdata,  graphs, graphInvariants, images = defDataDirs(userDefProjectDir)
@@ -328,12 +327,14 @@ def upload(request, webargs=None):
 	    outfile.close()
 	    uploadFiles.append(os.path.join(derivatives, name.split('/')[-1])) # add to list of files
 	    print name + " written to disk.."
-	
+
 	  # Check which file is which
 	roi_xml_fn, fiber_fn, roi_raw_fn = filesorter.checkFileExtGengraph(uploadFiles) # Check & sort files
-	
+
+	import pdb; pdb.set_trace()
+
 	''' Data Processing '''
-	[ smGrfn, bgGrfn, lccfn, SVDfn ] \
+	smGrfn, bgGrfn, lccfn, SVDfn
 	  = processData(fiber_fn, roi_xml_fn, roi_raw_fn,graphs, graphInvariants, True) # Change to false to not process anything
 	
 	''' If optional .mat graph invariants & .csv graphs '''
@@ -348,7 +349,7 @@ def upload(request, webargs=None):
 	#ret = rzfile.testzip()
 	#ret = rzfile.namelist()
 	
-	dwnldLoc = "http://www.openconnecto.me/data/projects/disa/OCPproject/"+ webargs
+	dwnldLoc = "http://www.mrbrain.cs.jhu.edu/data/projects/disa/OCPproject/"+ webargs
 	return HttpResponse ( "Files available for download at " + dwnldLoc) # change to render of a page with a link to data result
     
     elif(not webargs):

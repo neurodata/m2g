@@ -18,10 +18,9 @@ def getFiberID(fiberfn):
 
 def main():
 
-  parser = argparse.ArgumentParser(description='Upload a mulitple subjects to MROCP via \
-                                   a single dir that must match bg1/MRN')
-  parser.add_argument('url', action="store", help='url must be in the form: upload/{project}/{site}/{subject}/{session}/yes|no, \
-                where the last param is either \'yes\' or \'no\', but not both. \'yes\' adds .mat files for graph invariant result & .csv for graphs, \'no\' does not   ')
+  parser = argparse.ArgumentParser(description='Upload a mulitple subjects to MROCP via a single dir that must match bg1/MRN\
+		   . Base url -> http://www.mrbrain.cs.jhu.edu/')
+  parser.add_argument('url', action="store", help='url must be in the form: upload/{project}/{site}/{subject}/{session}/yes|no\      , where the last param is either \'yes\' or \'no\', but not both. \'yes\' adds .mat files for graph invariant result & \	    .csv for graphs, \'no\' does not')
   parser.add_argument('dataDir', action="store", help ='Data directory must have a fiber\
                       subdirectory with tract files & an roi subdirectory with rois')
   
@@ -85,7 +84,7 @@ def main():
     else:
       redir += Dir
   
-  webbrowser.open('http://www.openconnecto.me/data/projects/disa/OCPprojects' + redir)
+  webbrowser.open('http://mrbrain.cs.jhu.edu/data/projects/disa/OCPprojects' + redir)
 
 if __name__ == "__main__":
   main()
