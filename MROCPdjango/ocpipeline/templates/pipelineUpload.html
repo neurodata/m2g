@@ -24,11 +24,8 @@
 	    <script type="text/javascript">
 		// Function to add a spinner during upload & processing
 		function showSpinner(){
-		    //if (document.loadForm.Derivatives.clicked){
 			document.getElementById('loadingImage').style.visibility='visible';			
-		    //}
-		}
-	    
+		}	    
 	    </script>
 	    
     </head>
@@ -39,11 +36,11 @@
         <form action="" method="post" enctype="multipart/form-data" name="loadForm">     
 	    {% csrf_token %}
             <p>{{ form }}</p>
-	    <input name = "Derivatives"  type="submit" value="Submit All & Process" class="button" onclick="showSpinner();">    
-            <input type="reset" value="Reset" class="button" name="clearForm" >
+	    <input name = "Derivatives"  type="submit" value="Submit All & Process" class="button" onclick="showSpinner();"/>    
+            <input type="reset" value="Reset" class="button" name="clearForm" />
         </form>
 	
-	<img id="loadingImage" src="loadinfo.net.gif" style="visibility:hidden"/>
+	<div style="position:absolute; left:153px; top: 212px;"> <img id="loadingImage" src="http://i1061.photobucket.com/albums/t473/dmhembe/MR-connectome/loading_zpsac6e6d22.gif" border="0" alt="loading" style="visibility:hidden;opacity:0.5"/> </div>
 
 	<h2> For browser url based use read below </h2>
 
