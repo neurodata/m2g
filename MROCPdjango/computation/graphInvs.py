@@ -31,7 +31,7 @@ class graph():
     vertices - numpy array of vertices 
     '''
 
-  def loadgraphMatx(self, graph_fn, big = False, sym = False, binarize = False, toPyMat = False):
+  def loadgraphMatx(self, graph_fn, big = False, sym = True, binarize = False, toPyMat = False):
     ''' 
     load a graph. symmetrize, binarize & convert to python matrix if specified
     graph_fn - full file name of graph
@@ -76,50 +76,19 @@ class graph():
     self.G_sparse = self.G_sparse + self.G_sparse.T
     self.sym = True if not (self.sym) else self.sym
   
-  ########################
-  # RUN GRAPH INVARIANTS #
-  ########################
-  def calcGraphInv(self):
-    '''
-    Calculate several graph invariants
-    1. The maximum average degree (MAD) of the graph
-    2. The degree of each vertex
-    3. The Scan Statistic 1
-    4. 
-    '''
+#################################
+# MAX AVERAGE DEGREE EIGENVALUE #
+#################################
     
-    ############ Graph Invariant calcs ############
-    ''' Calc Maximum Average Degree of the graph'''
-    print 'Getting Maximum Average Degree..'
-    start = time()
-    #self.getMaxAveDegree() # Takes ~5min on 16Mil  vertices with 60Mil edges 
-    print 'Time taken to calc MAD: %f secs\n' % (time() - start)
-
-  #################################
-  # MAX AVERAGE DEGREE EIGENVALUE #
-  #################################
-    
-  def getMaxAveDegree(self):
-    '''
-    Calc the Eigenvalue Max Average Degree of the graph
-    Note this is an estimation and is guaranteed to be greater than or equal to the true MAD
-    '''
-    if not self.sym:
-      self.symmetrize() # Make sure graph is symmetric
-      
-    start = time()
-      # LR = Largest Real part
-    self.maxAveDeg = (np.max(arpack.eigs(self.G_sparse, which='LR')[0])).real # get eigenvalues, then +ve max REAL part is MAD eigenvalue estimation
-  
-###############
-# PATH LENGTH #
-###############
-
-def pathLength(self):
+def getMaxAveDegree(G_sparse):
   '''
-  Path length between each pair of vertices
-  '''
-  pass
+  Calc the Eigenvalue Max Average Degree of the graph
+  Note this is an estimation and is guaranteed to be greater than or equal to the true MAD
+  '''  
+  start = time()
+    # LR = Largest Real part
+  maxAveDeg = (np.max(arpack.eigs(G_sparse, which='LR')[0])).real # get eigenvalues, then +ve max REAL part is MAD eigenvalue estimation
+  print "Maxium average degree = ", maxAveDeg
 
 ##################
 # AVERAGE DEGREE #
@@ -146,16 +115,19 @@ def calcScanStat(G_fn, lcc_fn, roiRootName = None ,bin = False, N=1):
   N - Scan statistic number i.e 1 or 2 ONLY
   '''
   print 'Calculating scan statistic %d...' % N
-  if not roiRootName:
-     roiRootName = G_fn.split('_')+'_roi'
-
-  vcc = lcc.ConnectedComponent(fn = lcc_fn)
-  fg = lcc._load_fibergraph(roiRootName , G_fn) 
-  G = vcc.induced_subgraph(fg.spcscmat)
-  G = G+G.T # Symmetrize
-  if (N == 2):
-    G = G.dot(G)+G
   
+  if (lcc_fn != "test_"):
+  
+    if not roiRootName:
+       roiRootName = G_fn.split('_')+'_roi'
+  
+    vcc = lcc.ConnectedComponent(fn = lcc_fn)
+    fg = lcc._load_fibergraph(roiRootName , G_fn) 
+    G = vcc.induced_subgraph(fg.spcscmat)
+    G = G+G.T # Symmetrize
+    if (N == 2):
+      G = G.dot(G)+G
+    
   vertxDeg = np.zeros(G.shape[0]) # Vertex degrees of all vertices
   indSubgrEdgeNum = np.zeros(G.shape[0]) # Induced subgraph edge number i.e scan statistic
 
@@ -281,18 +253,35 @@ def calcLocalClustCoeff(deg_fn, tri_fn):
   
   print 'Time taken to calc Num triangles: %f secs\n' % (time() - start)    
 
-def main():
+###############
+# PATH LENGTH #
+###############
+
+def pathLength(self):
+  '''
+  Path length between each pair of vertices
+  '''
+  pass
+
+#########################  ************** #########################
+###########
+# TESTING #
+###########
+
+def testing():
+  G_fn = sys.argv[1]
+  getMaxAveDegree(G_sparse)
+  
+  calcScanStat(G_fn,"test_", roiRootName = None , bin = False, N=1)
+  
+  
+  
+def realgraph():
   gr = graph()
-  #gr.loadgraphMatx('/Users/dmhembere44/Downloads/Scan/M87102217_smgr.mat', big = False, sym = True, binarize = True)
-  #gr.loadgraphMatx('/Users/dmhembere44/Downloads/M87199728_fiber.mat', True, True, True)
-  #gr.loadgraphMatx('/data/projects/MRN/graphs/biggraphs/M87199728_fiber.mat', True, True, False) # bg1
-  #gr.loadgraphMatx('/home/disa/testgraphs/M87102217_smgr.mat', False, True, True) # mrbrain small
   G_fn = '/home/disa/testgraphs/big/M87102217_fiber.mat'
   lcc_fn = '/home/disa/testgraphs/lcc/M87102217_concomp.npy'
   roiRootName = '/home/disa/testgraphs/roi/M87102217_roi'
   gr.loadgraphMatx(G_fn, True, True, False) # mrbrain big
-  
-  #gr.calcGraphInv()
 
   ''' Calc Scan Stat 1 '''
   #ss1Array, degArray = calcScanStat(G_fn, lcc_fn, roiRootName ,bin = False, N=1)
@@ -308,6 +297,10 @@ def main():
       printVertInv(degArray, 'Vertex Degree') # print vertex degree
       printVertInv(triArray, 'Number of triangles') # print number triangles 
     '''
+    
+
+def main():
+  testing()
 
 
 if __name__ == '__main__':
