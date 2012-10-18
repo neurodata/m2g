@@ -5,12 +5,12 @@ from scipy.sparse import *
 from scipy import *
 import os
 
-from utilhltcoe import evaluate_graph
+from goldstd import evaluate_graph
 
 def createGraph(numNodes = 10):
   
   G_fn = "bench.lcc"+str(numNodes)
-  nodeProb = 0.65
+  nodeProb = 0.30
   randGr = nx.binomial_graph(numNodes,nodeProb,directed=False)
   
   adjMat = [ [ 0 for i in range(numNodes) ] for j in range(numNodes) ]
@@ -21,7 +21,7 @@ def createGraph(numNodes = 10):
   
   # Make equivalent csc_matrix
   Gsparse = csc_matrix(adjMat, dtype=float64)
-  sio.savemat(os.path.join("bench",G_fn),{'fibergraph': Gsparse}, appendmat = True)
+  sio.savemat(os.path.join("bench",str(numNodes) ,G_fn),{'fibergraph': Gsparse}, appendmat = True)
   #Gdense = (sio.loadmat(G_fn)['fibergraph']).todense()
   
   inv = evaluate_graph(randGr, -1)
@@ -42,8 +42,8 @@ def printUTIL(inv):
   
 def writeUTIL(inv):
   
-  f = open(os.path.join("bench","bench.lcc.meta"+str(inv[7])),'w')
-  f.write("utilhltcoe.py \n===========================\n")
+  f = open(os.path.join("bench",str(inv[7]),"bench.lcc.meta"+str(inv[7])),'w')
+  f.write("GLOBALS\n===========================\n")
   f.write("\nSize/Number of edges = "+str(inv[0])+"\nMax degree = "+str(inv[1]) )
   f.write("\nMAD Eigenvalue = "+str(inv[2])+"\nScan Stat1 = "+str(inv[3]))
   f.write("\nScan Stat1 = "+str(inv[3]) + "\nNum triangles = "+str(inv[4]))
