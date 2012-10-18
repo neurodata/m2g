@@ -7,6 +7,7 @@ from math import sqrt
 import os
 from math import ceil
 
+import numpy as np
 import networkx as nx
 import scipy.linalg
 
@@ -56,6 +57,9 @@ def evaluate_graph( thisReplicate, invariant):
             degArr.append(replicateDegree[entry])
             writeArrayToFile(degArr, os.path.join("bench",str(thisReplicate.number_of_nodes()),"degArr"))
             
+        degArr = np.array(degArr)
+        np.save(os.path.join("bench",str(thisReplicate.number_of_nodes()),"degArr.npy"), degArr)
+            
         if doAllInvariants:
             thisReplicateInvariantValue.append(maxDegree)
         else:
@@ -97,6 +101,9 @@ def evaluate_graph( thisReplicate, invariant):
         
         writeArrayToFile(scanStatArr, os.path.join("bench",str(thisReplicate.number_of_nodes()),"scanStatArr"))
         
+        scanStatArr = np.array(scanStatArr)
+        np.save(os.path.join("bench",str(thisReplicate.number_of_nodes()),"scanStatArr.npy"), scanStatArr)
+        
         if doAllInvariants:
             thisReplicateInvariantValue.append(maxScanStat)
         else:
@@ -118,11 +125,13 @@ def evaluate_graph( thisReplicate, invariant):
         
         writeArrayToFile(triArr,os.path.join("bench",str(thisReplicate.number_of_nodes()),"triArr"))
         
+        triArr = np.array(triArr)
+        np.save(os.path.join("bench",str(thisReplicate.number_of_nodes()),"triArr.npy"), triArr)
+        
         if doAllInvariants:
             thisReplicateInvariantValue.append(triangles)
         else:
             thisReplicateInvariantValue = triangles
-
 
     ##########################
     # Clustering Coefficient #
@@ -131,7 +140,10 @@ def evaluate_graph( thisReplicate, invariant):
         try:
             cc = nx.average_clustering( thisReplicate )
             ccArr = nx.clustering( thisReplicate )
-            writeDictToFile(ccArr,os.path.join("bench",str(thisReplicate.number_of_nodes()),"ccArr"))
+            writeArrayToFile(ccArr.values(),os.path.join("bench",str(thisReplicate.number_of_nodes()),"ccArr"))
+            
+            ccArr = np.array(ccArr)
+            np.save(os.path.join("bench",str(thisReplicate.number_of_nodes()),"ccArr.npy"), ccArr)
             
         except ZeroDivisionError: #This only occurs with degenerate Graphs --GAC
             cc = -999
@@ -155,6 +167,9 @@ def evaluate_graph( thisReplicate, invariant):
             aplArr.append(ceil(total/float(len(pairsArr[vert]))))
         
         writeArrayToFile(aplArr,os.path.join("bench",str(thisReplicate.number_of_nodes()),"aplArr"))
+        
+        aplArr = np.array(aplArr)
+        np.save(os.path.join("bench",str(thisReplicate.number_of_nodes()),"aplArr.npy"), aplArr)
         
         if doAllInvariants:
             thisReplicateInvariantValue.append(apl)
@@ -218,9 +233,9 @@ def writeArrayToFile(arr, name):
         f.write(str(ind)+ " : " + str(val) + "\n")
     f.close()
 
-################
-# DICT WRITER #
-################
+#################
+# DICT TO ARRAY #
+#################
 
 def writeDictToFile(dic, name):
     f = open(name, 'w')
