@@ -9,8 +9,8 @@ from goldstd import evaluate_graph
 
 def createGraph(numNodes = 10):
   
-  G_fn = "bench.lcc"+str(numNodes)
-  nodeProb = 0.30
+  G_fn = "bench_concomp"+str(numNodes)+".npy"
+  nodeProb = 0.35
   randGr = nx.binomial_graph(numNodes,nodeProb,directed=False)
   
   adjMat = [ [ 0 for i in range(numNodes) ] for j in range(numNodes) ]
@@ -21,7 +21,10 @@ def createGraph(numNodes = 10):
   
   # Make equivalent csc_matrix
   Gsparse = csc_matrix(adjMat, dtype=float64)
-  sio.savemat(os.path.join("bench",str(numNodes) ,G_fn),{'fibergraph': Gsparse}, appendmat = True)
+  
+  np.save(os.path.join("bench",str(numNodes),G_fn), Gsparse)
+  
+  #sio.savemat(os.path.join("bench",str(numNodes) ,G_fn),{'fibergraph': Gsparse}, appendmat = True)
   #Gdense = (sio.loadmat(G_fn)['fibergraph']).todense()
   
   inv = evaluate_graph(randGr, -1)
@@ -29,7 +32,7 @@ def createGraph(numNodes = 10):
   writeUTIL(inv)
   
 def printUTIL(inv):
-  print "\n utilhltcoe.py \n==========================="
+  print "\n GLOBALS\n==========================="
   print "Size/Number of edges =", inv[0]
   print "Max degree =", inv[1]
   print "MAD Eigenvalue=", inv[2]
@@ -42,7 +45,7 @@ def printUTIL(inv):
   
 def writeUTIL(inv):
   
-  f = open(os.path.join("bench",str(inv[7]),"bench.lcc.meta"+str(inv[7])),'w')
+  f = open(os.path.join("bench",str(inv[7]),"bench_concomp.meta."+str(inv[7])),'w')
   f.write("GLOBALS\n===========================\n")
   f.write("\nSize/Number of edges = "+str(inv[0])+"\nMax degree = "+str(inv[1]) )
   f.write("\nMAD Eigenvalue = "+str(inv[2])+"\nScan Stat1 = "+str(inv[3]))

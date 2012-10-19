@@ -18,6 +18,8 @@ from time import time
 import mrpaths
 import mrcap.lcc as lcc
 
+import unittesting
+
 class graph():
   def __init__(self):
     '''
@@ -80,11 +82,16 @@ class graph():
 # MAX AVERAGE DEGREE EIGENVALUE #
 #################################
     
-def getMaxAveDegree(G_sparse):
+def getMaxAveDegree(G_fn):
   '''
   Calc the Eigenvalue Max Average Degree of the graph
   Note this is an estimation and is guaranteed to be greater than or equal to the true MAD
-  '''  
+  '''
+  try:
+    G_sparse = np.load(G_fn)
+  except:
+    print "file not found %s" % G_fn
+  #import pdb; pdb.set_trace()
   start = time()
     # LR = Largest Real part
   maxAveDeg = (np.max(arpack.eigs(G_sparse, which='LR')[0])).real # get eigenvalues, then +ve max REAL part is MAD eigenvalue estimation
@@ -127,6 +134,9 @@ def calcScanStat(G_fn, lcc_fn, roiRootName = None ,bin = False, N=1):
     G = G+G.T # Symmetrize
     if (N == 2):
       G = G.dot(G)+G
+  
+  else:
+    G = np.load(G_fn)
     
   vertxDeg = np.zeros(G.shape[0]) # Vertex degrees of all vertices
   indSubgrEdgeNum = np.zeros(G.shape[0]) # Induced subgraph edge number i.e scan statistic
@@ -145,8 +155,14 @@ def calcScanStat(G_fn, lcc_fn, roiRootName = None ,bin = False, N=1):
       indSubgrEdgeNum[vertx] = 0 # zero neighbors hence zero cardinality enduced subgraph
 
   '''write to file '''
-  ss1_fn = getbaseName(lcc_fn) + '_scanstat'+str(N)+'.npy'
-  deg_fn = getbaseName(lcc_fn) + '_degree.npy'
+  if (lcc_fn == "test_"):
+    ss1_fn = os.path.join('bench', str(G.shape[0]), 'test_scanstat')+ str(N)+'.npy'
+    deg_fn = os.path.join('bench' + str(G.shape[0]),'test_degree.npy')
+  
+  else:
+    ss1_fn = getbaseName(lcc_fn) + '_scanstat'+str(N)+'.npy'
+    deg_fn = getbaseName(lcc_fn) + '_degree.npy'
+  
     
   np.save(ss1_fn, indSubgrEdgeNum) # save location wrong - Should be invariants
   np.save(deg_fn, vertxDeg)  # save location wrong - Should be invariants
@@ -157,7 +173,7 @@ def calcScanStat(G_fn, lcc_fn, roiRootName = None ,bin = False, N=1):
 #######################
 # NUMBER OF TRIANGLES #
 #######################
-def calcNumTriangles(ss1Array, degArray, lcc_fn):
+def calcNumTriangles(ss1Array, degArray, lcc_fn, test=False):
   print 'Counting the number of triangles...'
   start = time()
   if not isinstance(ss1Array, np.ndarray):
@@ -186,7 +202,11 @@ def calcNumTriangles(ss1Array, degArray, lcc_fn):
     if triangles[e] < 0:
       print "Vertex:", e , ", Value: ", triangles[e]    
 
-  triArr_fn = getbaseName(lcc_fn) +'_triangles.npy'  
+  if (test):
+    triArr_fn =  os.path.join('bench/', str(len(triangles))) + '_triangles.npy'
+  else:
+    triArr_fn =  getbaseName(lcc_fn) +'_triangles.npy'
+    
   np.save(triArr_fn, triangles)  # save location wrong!
   
   print 'Time taken to calc Num triangles: %f secs\n' % (time() - start)
@@ -223,7 +243,7 @@ def printVertInv(fn, invariantName):
 #####################
 # CLUSTERING CO-EFF #
 #####################
-def calcLocalClustCoeff(deg_fn, tri_fn):
+def calcLocalClustCoeff(deg_fn, tri_fn, test=False):
   '''
   deg_fn = full filename of file containing an numpy array with vertex degrees
   tri_fn = full filename of file containing an numpy array with num triangles
@@ -247,8 +267,10 @@ def calcLocalClustCoeff(deg_fn, tri_fn):
       ccArray[v] = triArray[v]/(triArray[v] + angles) # Eq. 2.12
     else:
       ccArray[v] = 0
-
-  ccArr_fn = getbaseName(deg_fn) +'_clustcoeff.npy'
+  
+  joiner = "test" if (test) else ""
+  
+  ccArr_fn = getbaseName(deg_fn) +joiner+'_clustcoeff.npy'
   np.save(ccArr_fn, ccArray)  # save location wrong!
   
   print 'Time taken to calc Num triangles: %f secs\n' % (time() - start)    
@@ -270,11 +292,17 @@ def pathLength(self):
 
 def testing():
   G_fn = sys.argv[1]
-  getMaxAveDegree(G_sparse)
   
-  calcScanStat(G_fn,"test_", roiRootName = None , bin = False, N=1)
+  getMaxAveDegree(G_fn)
+  ss1_fn, deg_fn = calcScanStat(G_fn, "test_", roiRootName = None ,bin = False, N=1)
+  tri_fn = calcNumTriangles(ss1_fn, deg_fn, lcc_fn, test=True)
+  calcLocalClustCoeff(deg_fn, tri_fn, test=True)
   
-  
+  t = unittesting.test()
+  t.testSS1()
+  t.testDegree()
+  t.testTriangles()
+
   
 def realgraph():
   gr = graph()
