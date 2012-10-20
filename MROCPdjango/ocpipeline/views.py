@@ -264,7 +264,7 @@ def confirmDownload(request):
 
 	request.session.clear() # Very important
 
-	return HttpResponseRedirect('http://mrbrain.cs.jhu.edu' + userDefProjectDir)
+	return HttpResponseRedirect('http://mrbrain.cs.jhu.edu' + request.session['usrDefProjDir'])
     
     else:
 	form = OKForm()
