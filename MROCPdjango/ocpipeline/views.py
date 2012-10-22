@@ -250,9 +250,10 @@ def confirmDownload(request):
     elif 'getProdByDir' in request.POST: # If view dir structure option is chosen
 	form = OKForm(request.POST)
 
+	dataUrlTail = request.session['usrDefProjDir']
 	request.session.clear() # Very important
 
-	return HttpResponseRedirect('http://mrbrain.cs.jhu.edu' + request.session['usrDefProjDir'])
+	return HttpResponseRedirect('http://mrbrain.cs.jhu.edu' + dataUrlTail)
     
     elif 'convToMatNgetByDir' in request.POST: # If view dir structure option is chosen
 	form = OKForm(request.POST)
@@ -262,9 +263,10 @@ def confirmDownload(request):
 	#convertTo.convertGraphToCSV(request.session['smGrfn'])
 	#convertTo.convertGraphToCSV(request.session['bgGrfn'])
 
+	dataUrlTail = request.session['usrDefProjDir']
 	request.session.clear() # Very important
 
-	return HttpResponseRedirect('http://mrbrain.cs.jhu.edu' + request.session['usrDefProjDir'])
+	return HttpResponseRedirect('http://mrbrain.cs.jhu.edu' + dataUrlTail)
     
     else:
 	form = OKForm()
