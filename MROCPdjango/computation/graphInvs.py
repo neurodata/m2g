@@ -168,7 +168,7 @@ def calcScanStat(G_fn, lcc_fn, roiRootName = None ,bin = False, N=1):
   np.save(deg_fn, vertxDeg)  # save location wrong - Should be invariants
     
   # del vertxDeg, indSubgrEdgeNum
-  return [ss1_fn, deg_fn]
+  return [ss1_fn, deg_fn, G.shape[0]] #return scan stat1, degree of each node, the number of nodes in the graph
 
 #######################
 # NUMBER OF TRIANGLES #
@@ -274,12 +274,13 @@ def calcLocalClustCoeff(deg_fn, tri_fn, test=False):
   np.save(ccArr_fn, ccArray)  # save location wrong!
   
   print 'Time taken to calc Num triangles: %f secs\n' % (time() - start)    
-
+  return ccArr_fn
+  
 ###############
 # PATH LENGTH #
 ###############
 
-def pathLength(self):
+def pathLength():
   '''
   Path length between each pair of vertices
   '''
@@ -291,18 +292,18 @@ def pathLength(self):
 ###########
 
 def testing():
-  G_fn = sys.argv[1]
+  G_fn = sys.argv[1]  # Name of the graph file
+  dataDir = sys.argv[2]   # Name of the dir where you want the result to go
   
-  getMaxAveDegree(G_fn)
-  ss1_fn, deg_fn = calcScanStat(G_fn, "test_", roiRootName = None ,bin = False, N=1)
+  getMaxAveDegree(G_fn) 
+  ss1_fn, deg_fn, numNodes = calcScanStat(G_fn, "test_", roiRootName = None ,bin = False, N=1)
   tri_fn = calcNumTriangles(ss1_fn, deg_fn, lcc_fn, test=True)
-  calcLocalClustCoeff(deg_fn, tri_fn, test=True)
+  ccArr_fn = calcLocalClustCoeff(deg_fn, tri_fn, test=True)
   
-  t = unittesting.test()
-  t.testSS1()
-  t.testDegree()
-  t.testTriangles()
-
+  testObj = unittesting.test(G_fn, numNodes, dataDir, ss1_fn = ss1_fn, deg_fn = deg_fn, tri_fn = tri_fn, ccArr_fn = ccArr_fn) # Create unittest object
+  testObj.testSS1()
+  testObj.testDegree()
+  testObj.testTriangles()
   
 def realgraph():
   gr = graph()

@@ -4,35 +4,59 @@ import os
 #Global filenames
 
 class test():
-  benchdirNm = "bench"
   aplArr = "aplArr"
   ccArr = "ccArr"
   degArr = "degArr"
   scanStatArr = "scanStatArr"
   triArr = "triArr"   
   
-  def __init__(self,num):
-    self.num = num
-
+  def __init__(self, G_fn, dataDir, numNodes, ss1_fn = None, deg_fn = None, tri_fn = None, ccArr_fn = None):
+    self.G_fn = G_fn
+    self.numNodes = numNodes
+    self.ss1_fn = ss1_fn 
+    self.deg_fn = deg_fn
+    self.tri_fn = tri_fn
+    self.ccArr_fn = ccArr_fn
+    self.dataDir = dataDir
+    
+    if not os.path.exists(dataDir):
+      os.makedirs(dataDir)
+  
   def testDegree():
     #for num in [10,50,100]:
-    deg_fn = os.path.join(benchdirNm,str(self.num),self.degArr)
+    #deg_fn = os.path.join(benchdirNm,str(self.numNodes),self.degArr)
     
-    bench = np.load(deg_fn)
-    test = np.load("test_degree.npy")
-  
+    test = np.load(self.deg_fn)
+    bench = np.load(os.path.join(benchdirNm, self.numNodes,"degArr.npy"))
     np.testing.assert_equal(bench,test,"Disa: Inequality testing DEGREE failure on %d test" % self.num, False)
   
   def testSS1():
     #for num in [10,50,100]:
-    scanStatArr_fn = os.path.join(benchdirNm,str(self.num),self.scanStatArr)
-    
-    np.load(scanStatArr)
-    np.load("test_scanstat1.npy")
-    
+    #scanStatArr_fn = os.path.join(benchdirNm,str(self.num),self.scanStatArr)
+
+    test = np.load(self.ss1_fn)    
+    bench = np.load(os.path.join(benchdirNm, self.numNodes, "scanStatArr.npy"))
+
     np.testing.assert_equal(bench,test,"Disa: Inequality testing SCANSTAT1 failure on %d test" % self.num, False)
   
-  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+'''  
   def testTriangles():
     #for num in [10,50,100]:      
     triArr_fn = os.path.join(benchdirNm,str(self.num),self.triArr)
@@ -60,3 +84,4 @@ class test():
 
   def testSS2():
     pass
+'''
