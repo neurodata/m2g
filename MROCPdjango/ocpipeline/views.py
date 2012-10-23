@@ -38,6 +38,11 @@ import subprocess
 from django.core.urlresolvers import get_script_prefix
 from django.conf import settings
 
+####################
+## Graph Analysis ##
+import computation.graphInvs as graphInvs
+
+
 ''' Little welcome message'''
 def default(request):
     request.session.clear()
@@ -431,6 +436,20 @@ def processData(fiber_fn, roi_xml_fn, roi_raw_fn,graphs, graphInvariants, run = 
 	roiBasename = str(roi_xml_fn[:-4]) # WILL NEED ADAPTATION
 	#**svd.embed_graph(lccfn, roiBasename, bgGrfn, SVDfn)
 	svd.embed_graph(lccfn, roiBasename, smGrfn, SVDfn)
+	
+	''' Scan Statistic 1 AND Degree per vertex '''
+	
+	''' Maximum Average Degree '''
+	
+	
+	########### TODO ############
+	''' Triangle counting '''
+	
+	
+	''' Clustering coefficient '''
+	
+	
+	
 	return [ smGrfn, bgGrfn, lccfn, SVDfn ] 
     else:
 	print 'Theoretically I just ran some processing...'
