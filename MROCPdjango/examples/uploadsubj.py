@@ -12,8 +12,8 @@ import webbrowser
 
 def main():
 
-  parser = argparse.ArgumentParser(description='Upload a subject to MROCP. Base url -> http://mrbrain.cs.jhu.edu/')
-  parser.add_argument('url', action="store", help='url must be in the form  upload/{project}/{site}/{subject}/ \\			{session}/{scanID}/yes|no, where the last param is either \'yes\' or \'no\', but not both. \
+  parser = argparse.ArgumentParser(description='Upload a subject to MROCP. Base url -> http://mrbrain.cs.jhu.edu/disa/upload')
+  parser.add_argument('url', action="store", help='url must be in the form  {project}/{site}/{subject}/ \\			{session}/{scanID}/yes|no, where the last param is either \'yes\' or \'no\', but not both. \
 		\'yes\' adds .mat files for graph invariant result & .csv for graphs, \'no\' does not')
   parser.add_argument('fiberfile', action="store")
   parser.add_argument('roixmlfile', action="store")
@@ -68,7 +68,7 @@ def main():
     else:
       redir += Dir
   
-  webbrowser.open('http://www.openconnecto.me/data/projects/disa/OCPprojects' + redir)
+  webbrowser.open('http://mbrain.cs.jhu.edu/data/projects/disa/OCPprojects' + redir)
   
 if __name__ == "__main__":
   main()
