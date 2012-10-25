@@ -292,7 +292,7 @@ def pathLength():
 ###########
 
 def testing():
-  G_fn = sys.argv[1]  # Name of the graph file
+  G_fn = sys.argv[1]  # Name of the graph file - format .npy
   dataDir = sys.argv[2]   # Name of the dir where you want the result to go
   
   getMaxAveDegree(G_fn) 
