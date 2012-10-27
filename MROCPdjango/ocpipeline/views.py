@@ -40,7 +40,7 @@ from django.conf import settings
 
 ####################
 ## Graph Analysis ##
-import computation.graphInvs as graphInvs
+#import computation.graphInvs as graphInvs
 
 
 ''' Little welcome message'''
