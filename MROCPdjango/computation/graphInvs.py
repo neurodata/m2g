@@ -82,19 +82,35 @@ class graph():
 # MAX AVERAGE DEGREE EIGENVALUE #
 #################################
     
-def getMaxAveDegree(G_fn):
+def getMaxAveDegree(G_fn, lcc_fn = None):
   '''
   Calc the Eigenvalue Max Average Degree of the graph
   Note this is an estimation and is guaranteed to be greater than or equal to the true MAD
+  G_fn - filename of the graph .npy
+  lcc_fn - largest connected component of the graph. If none then this is a test case. .npy file
   '''
-  try:
-    G_sparse = np.load(G_fn)
-  except:
-    print "file not found %s" % G_fn
+  if lcc_fn:
+    vcc = lcc.ConnectedComponent(fn = lcc_fn)
+    try:
+      fg = lcc._load_fibergraph(roiRootName , G_fn) 
+      G = vcc.induced_subgraph(fg.spcscmat)
+      G = G+G.T # Symmetrize
+    except:
+      print "Problem loading real lcc & graph"
+  
+  # test case
+  else:    
+    try:
+      G = sio.loadmat(G_fn)['fibergraph']
+    except:
+      print "file not found %s" % G_fn
+
+  
   #import pdb; pdb.set_trace()
   start = time()
     # LR = Largest Real part
-  maxAveDeg = (np.max(arpack.eigs(G_sparse, which='LR')[0])).real # get eigenvalues, then +ve max REAL part is MAD eigenvalue estimation
+  
+  maxAveDeg = (np.max(arpack.eigs(G, which='LR')[0])).real # get eigenvalues, then +ve max REAL part is MAD eigenvalue estimation
   print "Maxium average degree = ", maxAveDeg
 
 ##################
@@ -114,7 +130,7 @@ def getAveDegree(vertDegArr):
 ###################
 # SCAN STATISTICS #
 ###################
-def calcScanStat(G_fn, lcc_fn, roiRootName = None ,bin = False, N=1):
+def calcScanStat(G_fn, lcc_fn = None, roiRootName = None ,bin = False, N=1):
   '''
   lcc_fn - largest connected component full filename (.npy)
   G_fn - fibergraph full filename (.mat)
@@ -123,8 +139,7 @@ def calcScanStat(G_fn, lcc_fn, roiRootName = None ,bin = False, N=1):
   '''
   print 'Calculating scan statistic %d...' % N
   
-  if (lcc_fn != "test_"):
-  
+  if (lcc_fn):
     if not roiRootName:
        roiRootName = G_fn.split('_')+'_roi'
   
@@ -135,8 +150,9 @@ def calcScanStat(G_fn, lcc_fn, roiRootName = None ,bin = False, N=1):
     if (N == 2):
       G = G.dot(G)+G
   
+  # test case
   else:
-    G = np.load(G_fn)
+    G = sio.loadmat(G_fn)['fibergraph']
     
   vertxDeg = np.zeros(G.shape[0]) # Vertex degrees of all vertices
   indSubgrEdgeNum = np.zeros(G.shape[0]) # Induced subgraph edge number i.e scan statistic
@@ -150,19 +166,19 @@ def calcScanStat(G_fn, lcc_fn, roiRootName = None ,bin = False, N=1):
  
     if (nbors.shape[0] > 0):
       nborsAdjMat = G[:,nbors][nbors,:]
-      indSubgrEdgeNum[vertx] = nborsAdjMat.nnz # scan stat 1
+      indSubgrEdgeNum[vertx] = nbors.shape[0] + nborsAdjMat.nnz # scan stat 1
     else:
       indSubgrEdgeNum[vertx] = 0 # zero neighbors hence zero cardinality enduced subgraph
 
   '''write to file '''
-  if (lcc_fn == "test_"):
-    ss1_fn = os.path.join('bench', str(G.shape[0]), 'test_scanstat')+ str(N)+'.npy'
-    deg_fn = os.path.join('bench' + str(G.shape[0]),'test_degree.npy')
-  
-  else:
+  if (lcc_fn):
     ss1_fn = getbaseName(lcc_fn) + '_scanstat'+str(N)+'.npy'
     deg_fn = getbaseName(lcc_fn) + '_degree.npy'
   
+  else:  
+    ss1_fn = os.path.join('bench', str(G.shape[0]), 'test_scanstat')+ str(N)+'.npy'
+    deg_fn = os.path.join('bench', str(G.shape[0]),'test_degree.npy')
+    
     
   np.save(ss1_fn, indSubgrEdgeNum) # save location wrong - Should be invariants
   np.save(deg_fn, vertxDeg)  # save location wrong - Should be invariants
@@ -173,7 +189,7 @@ def calcScanStat(G_fn, lcc_fn, roiRootName = None ,bin = False, N=1):
 #######################
 # NUMBER OF TRIANGLES #
 #######################
-def calcNumTriangles(ss1Array, degArray, lcc_fn, test=False):
+def calcNumTriangles(ss1Array, degArray, lcc_fn = None):
   print 'Counting the number of triangles...'
   start = time()
   if not isinstance(ss1Array, np.ndarray):
@@ -201,11 +217,11 @@ def calcNumTriangles(ss1Array, degArray, lcc_fn, test=False):
   for e in range (len(triangles)-1):
     if triangles[e] < 0:
       print "Vertex:", e , ", Value: ", triangles[e]    
-
-  if (test):
-    triArr_fn =  os.path.join('bench/', str(len(triangles))) + '_triangles.npy'
-  else:
+  
+  if (lcc_fn):
     triArr_fn =  getbaseName(lcc_fn) +'_triangles.npy'
+  else:
+    triArr_fn =  os.path.join('bench', str(len(triangles)),'test_triangles.npy')
     
   np.save(triArr_fn, triangles)  # save location wrong!
   
@@ -295,15 +311,20 @@ def testing():
   G_fn = sys.argv[1]  # Name of the graph file - format .npy
   dataDir = sys.argv[2]   # Name of the dir where you want the result to go
   
-  getMaxAveDegree(G_fn) 
-  ss1_fn, deg_fn, numNodes = calcScanStat(G_fn, "test_", roiRootName = None ,bin = False, N=1)
-  tri_fn = calcNumTriangles(ss1_fn, deg_fn, lcc_fn, test=True)
-  ccArr_fn = calcLocalClustCoeff(deg_fn, tri_fn, test=True)
+  getMaxAveDegree(G_fn, lcc_fn = None) 
+  ss1_fn, deg_fn, numNodes = calcScanStat(G_fn, lcc_fn = None, roiRootName = None ,bin = False, N=1)
+  tri_fn = calcNumTriangles(ss1_fn, deg_fn, lcc_fn = None)
   
-  testObj = unittesting.test(G_fn, numNodes, dataDir, ss1_fn = ss1_fn, deg_fn = deg_fn, tri_fn = tri_fn, ccArr_fn = ccArr_fn) # Create unittest object
+  testObj = unittesting.test(G_fn, dataDir, numNodes, ss1_fn = ss1_fn, deg_fn = deg_fn, tri_fn = tri_fn, ccArr_fn = None) # Create unittest object
   testObj.testSS1()
   testObj.testDegree()
   testObj.testTriangles()
+  
+  
+  '''
+  ccArr_fn = calcLocalClustCoeff(deg_fn, tri_fn, test=True)
+  
+  '''
   
 def realgraph():
   gr = graph()

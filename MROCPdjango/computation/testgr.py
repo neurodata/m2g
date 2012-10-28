@@ -9,7 +9,7 @@ from goldstd import evaluate_graph
 
 def createGraph(numNodes = 10):
   
-  G_fn = "bench_concomp"+str(numNodes)+".npy"
+  G_fn = "bench_concomp"+str(numNodes)
   nodeProb = 0.35
   randGr = nx.binomial_graph(numNodes,nodeProb,directed=False)
   
@@ -22,9 +22,7 @@ def createGraph(numNodes = 10):
   # Make equivalent csc_matrix
   Gsparse = csc_matrix(adjMat, dtype=float64)
   
-  np.save(os.path.join("bench",str(numNodes),G_fn), Gsparse)
-  
-  #sio.savemat(os.path.join("bench",str(numNodes) ,G_fn),{'fibergraph': Gsparse}, appendmat = True)
+  sio.savemat(os.path.join("bench",str(numNodes) ,G_fn),{'fibergraph': Gsparse}, appendmat = True)
   #Gdense = (sio.loadmat(G_fn)['fibergraph']).todense()
   
   inv = evaluate_graph(randGr, -1)
