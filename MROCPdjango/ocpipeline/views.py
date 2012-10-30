@@ -363,6 +363,23 @@ def upload(request, webargs=None):
     else:
 	return django.http.HttpResponseBadRequest ("Expected POST data, but none given")
 
+################## TO DOs ########################
+def download(request, webargs=None):
+    # DM: TODO - Allow for data to be downloaded by the directory name/filename/projectName
+    pass
+
+def matConvert(request, webargs=None):
+    #DM: TODO - Allow for all invariants to be converted to .mat format
+    pass
+
+
+
+
+
+
+
+
+
 '''********************* Standalone Methods  *********************'''
 
 def getFiberPath(fiberFileName):

@@ -4,7 +4,7 @@
 Determine some graph invariants on big and small graphs
 Date: 5 Sept 2012
 '''
-
+import math
 import scipy.io as sio
 import numpy as np
 from math import ceil
@@ -82,7 +82,7 @@ class graph():
 # MAX AVERAGE DEGREE EIGENVALUE #
 #################################
     
-def getMaxAveDegree(G_fn, lcc_fn = None):
+def getMaxAveDegree(G_fn, lcc_fn = None, roiRootName = None):
   '''
   Calc the Eigenvalue Max Average Degree of the graph
   Note this is an estimation and is guaranteed to be greater than or equal to the true MAD
@@ -90,14 +90,8 @@ def getMaxAveDegree(G_fn, lcc_fn = None):
   lcc_fn - largest connected component of the graph. If none then this is a test case. .npy file
   '''
   if lcc_fn:
-    vcc = lcc.ConnectedComponent(fn = lcc_fn)
-    try:
-      fg = lcc._load_fibergraph(roiRootName , G_fn) 
-      G = vcc.induced_subgraph(fg.spcscmat)
-      G = G+G.T # Symmetrize
-    except:
-      print "Problem loading real lcc & graph"
-  
+    G = loadAdjMat(G_fn, lcc_fn, roiRootName)
+    
   # test case
   else:    
     try:
@@ -140,15 +134,9 @@ def calcScanStat(G_fn, lcc_fn = None, roiRootName = None ,bin = False, N=1):
   print 'Calculating scan statistic %d...' % N
   
   if (lcc_fn):
-    if not roiRootName:
-       roiRootName = G_fn.split('_')+'_roi'
-  
-    vcc = lcc.ConnectedComponent(fn = lcc_fn)
-    fg = lcc._load_fibergraph(roiRootName , G_fn) 
-    G = vcc.induced_subgraph(fg.spcscmat)
-    G = G+G.T # Symmetrize
-    if (N == 2):
-      G = G.dot(G)+G
+    G = loadAdjMat(G_fn, lcc_fn)
+  if (N == 2):
+    G = G.dot(G)+G
   
   # test case
   else:
@@ -227,7 +215,67 @@ def calcNumTriangles(ss1Array, degArray, lcc_fn = None):
   
   print 'Time taken to calc Num triangles: %f secs\n' % (time() - start)
   #del triangles
-  return triArr_fn 
+  return triArr_fn
+
+########################
+# EIGEN TRIANGLE LOCAL #
+########################
+
+def eignTriangleLocal(G_fn, lcc_fn = None, roiRootName = None,k=1,  N=1):
+  '''
+  DM: TODO
+  '''
+  
+  if (lcc_fn):
+    G = loadAdjMat(G_fn, lcc_fn)
+  if (N == 2): # SS2
+    G = G.dot(G)+G
+  
+  # test case
+  else:
+    G = sio.loadmat(G_fn)['fibergraph']
+  
+  n = G.shape[0] # number of nodes
+  numTri = np.zeros(n) # local triangle count
+  
+  #eigval, eigvect = arpack.eigs(G, k=G.shape[0]-2, sigma='real', which='LM', OPpart='r') # LanczosMethod(A,0) 
+  eigval, eigvect = arpack.eigs(G, k=G.shape[0]-2, which='LM') # LanczosMethod(A,0) 
+  #import pdb; pdb.set_trace()
+  
+  l = np.diag(eigvect.real).conj()
+  l = (np.matrix(l)).T
+  
+  import pdb; pdb.set_trace()
+  
+  for j in range(n):
+    numTri[j] = (sum( np.power(l,3) * (eigval[j:].real**2)) ) / 2.0
+  
+  #import pdb; pdb.set_trace()
+  
+  #Alf = abs(eigval[0].real) # has real & img
+  #U = eigvect[0] # has real & img
+
+  #i = 1
+  #loop = True
+  #while (loop and i <= (G.shape[0]-2)):
+    
+  #  eigval, eigvect = arpack.eigs(G, k = i) # LanczosMethod(A,i) 
+    
+  #  Alf = abs(eigval[0].real) # ?????
+  #  U = eigval[0] # ?????
+  #  i += 1
+  #  print "i = ", i
+    
+  #  bound = abs(pow(eigval[i-2].real,3)) / sum(pow(eigval[:i-2].real,3))
+  #  if (bound <= 0 or bound <= tol): 
+  #    loop = False
+  
+  #for j in range(n-2):
+  #  numr = 0
+  #  for k in range(i-2):
+  #   
+  #    numTri[j] += ( pow(eigvect[j][k].real,2)*pow(eigval[k],3) ) / 2
+  
 
 ####################
 # Base name getter #
@@ -235,7 +283,28 @@ def calcNumTriangles(ss1Array, degArray, lcc_fn = None):
 def getbaseName(fn):
   return fn.partition('_')[0]
 
-
+##########################
+# Load Adj mat from lcc #
+#########################
+def loadAdjMat(G_fn, lcc_fn, roiRootName = None):
+  '''
+  Load adjacency matrix given lcc_fn & G_fn. lcc has z-indicies corresponding to the lcc :
+  G_fn - the .mat file holding graph
+  lcc_fn - the largest connected component .npy z-ordering
+  '''
+  if not roiRootName:
+    roiRootName = G_fn.split('_')+'_roi'
+       
+  vcc = lcc.ConnectedComponent(fn = lcc_fn)
+  try:
+    fg = lcc._load_fibergraph(roiRootName , G_fn) 
+    G = vcc.induced_subgraph(fg.spcscmat)
+    G = G+G.T # Symmetrize
+  except:
+    print "Problem loading real lcc & graph"
+    
+  return G
+  
 ######################
 # Printing Functions #
 ######################
@@ -311,11 +380,12 @@ def testing():
   G_fn = sys.argv[1]  # Name of the graph file - format .npy
   dataDir = sys.argv[2]   # Name of the dir where you want the result to go
   
-  getMaxAveDegree(G_fn, lcc_fn = None) 
-  ss1_fn, deg_fn, numNodes = calcScanStat(G_fn, lcc_fn = None, roiRootName = None ,bin = False, N=1)
-  tri_fn = calcNumTriangles(ss1_fn, deg_fn, lcc_fn = None)
+  #mad = getMaxAveDegree(G_fn, lcc_fn = None) 
+  #ss1_fn, deg_fn, numNodes = calcScanStat(G_fn, lcc_fn = None, roiRootName = None ,bin = False, N=1)
+  #tri_fn = calcNumTriangles(ss1_fn, deg_fn, lcc_fn = None)
+  tri_fn = eignTriangleLocal(G_fn)
   
-  testObj = unittesting.test(G_fn, dataDir, numNodes, ss1_fn = ss1_fn, deg_fn = deg_fn, tri_fn = tri_fn, ccArr_fn = None) # Create unittest object
+  testObj = unittesting.test(G_fn, dataDir, numNodes, ss1_fn = ss1_fn, deg_fn = deg_fn, tri_fn = tri_fn, ccArr_fn = None, mad = mad) # Create unittest object
   testObj.testSS1()
   testObj.testDegree()
   testObj.testTriangles()

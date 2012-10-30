@@ -4,7 +4,7 @@ import os
 #Global filenames
 
 class test():
-  def __init__(self, G_fn, dataDir, numNodes, ss1_fn = None, deg_fn = None, tri_fn = None, ccArr_fn = None):
+  def __init__(self, G_fn, dataDir, numNodes, ss1_fn = None, deg_fn = None, tri_fn = None, ccArr_fn = None, mad = None):
     self.G_fn = G_fn
     self.numNodes = numNodes
     self.ss1_fn = ss1_fn 
@@ -12,10 +12,20 @@ class test():
     self.tri_fn = tri_fn
     self.ccArr_fn = ccArr_fn
     self.dataDir = dataDir
+    self.mad = mad
     self.benchdir = 'bench'
     
     if not os.path.exists(dataDir):
       os.makedirs(dataDir)
+  
+  def testMAD(self):
+    
+    fMAD = open(os.path.join(self.benchdir, str(self.numNodes),'MAD'))
+    benchMAD = flaot(fMAD.read())
+    fMAD.close()
+    
+    assert self.mad != benchMAD, 'MAD does not equal'
+  
   
   def testDegree(self):
     #for num in [10,50,100]:
@@ -46,6 +56,22 @@ class test():
     bench = np.load(os.path.join(self.benchdir, str(self.numNodes), "triArr.npy"))
     
     np.testing.assert_equal(bench,test,"Disa: Inequality testing TRIANGLE failure on %d test" % self.numNodes, False)
+  
+  def proximityAssertion(arr, benchArr ,tol = 0.2):
+    if len(arr) != len(benchArr):
+      print "Triangle Arrays unequal! Test terminated" 
+      return
+  
+    diffArr = abs(np.subtract(arr, benchArr)) # difference of the two arrays
+    percdiff = np.empty(len(arr))
+    
+    for idx in range(len(arr)):
+      percdiff[idx] = (diffArr[idx]/float(benchArr[idx]))
+    
+    diff = sum(percdiff)/float(len(percdiff)) # Average difference in bench & test
+    
+    if (diff > tol):
+      print "Global percent difference too high by", (diff-tol)
     
   '''
   def testClustCoeff():
