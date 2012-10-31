@@ -99,10 +99,7 @@ def getMaxAveDegree(G_fn, lcc_fn = None, roiRootName = None):
     except:
       print "file not found %s" % G_fn
 
-  
-  #import pdb; pdb.set_trace()
   start = time()
-    # LR = Largest Real part
   
   maxAveDeg = (np.max(arpack.eigs(G, which='LR')[0])).real # get eigenvalues, then +ve max REAL part is MAD eigenvalue estimation
   print "Maxium average degree = ", maxAveDeg
@@ -206,6 +203,7 @@ def eignTriangleLocal(G_fn, lcc_fn = None, roiRootName = None,k=1,  N=1):
   
   for j in range(n):
     numTri[j] = (sum( np.power(l,3) * (eigval[j:].real**2)) ) / 2.0
+    #numTri[j] = (sum( np.power(l,3) * (eigval[j:].real**2)) ) / 2.0
   
   #import pdb; pdb.set_trace()
   
@@ -232,7 +230,81 @@ def eignTriangleLocal(G_fn, lcc_fn = None, roiRootName = None,k=1,  N=1):
   #  for k in range(i-2):
   #   
   #    numTri[j] += ( pow(eigvect[j][k].real,2)*pow(eigval[k],3) ) / 2
+
+#####################
+# CLUSTERING CO-EFF #
+#####################
+# Based on http://networkx.lanl.gov/reference/generated/networkx.algorithms.cluster.clustering.html#networkx.algorithms.cluster.clustering
+def calcLocalClustCoeff(deg_fn, tri_fn, G_fn = None, weighted= False, test=False):
+  '''
+  deg_fn = full filename of file containing an numpy array with vertex degrees
+  tri_fn = full filename of file containing an numpy array with num triangles
+  '''
   
+  start = time()
+  degArray = np.load(deg_fn)
+  triArray = np.load(tri_fn)
+  
+  ccArray = np.empty_like(degArray)
+  
+  if len(degArray) != len(triArray):
+    print "Lengths of triangle and degree arrays must be equal"
+    sys.exit(-1)  
+ 
+  # Weighted graphs 
+  if(weighted):
+    G = loadAdjMat(G_fn, lcc_fn)  
+    
+    maxWeight = np.max(G) # max weight of the graph
+    maxIdx = G.argmax() #indx of max when flattened
+    maxX = maxIdx / G.shape[0] # max x-index
+    maxY = maxIdx % G.shape[0]# max y-index
+  
+  # DM: TODO # (3 Jari et al)
+  cubedSum = 0
+  for i in range(G.shape[0]):
+    for k in range(G.shape[0]):
+      for j in range(G.shape[0]):
+        #cubedSum = G[0][0]
+      
+    #ccArray[i] = (1/(( degArray[u] * (degArray[u] - 1))) * 0
+  
+  # Binarized graphs 
+  else:
+    for u in range (len(degArray)):
+      if (degArray[u] > 2):
+        ccArray[u] = (2.0 * triArray[u]) / ( degArray[u] * (degArray[u] - 1) ) #(1) Jari et al
+      else:
+        ccArray[u] = 0
+
+  ccArr_fn =  getbaseName(tri_fn) +'_clustcoeff.npy'
+  
+  np.save(ccArr_fn, ccArray)  # save location wrong!
+  
+  print 'Time taken to calc Num triangles: %f secs\n' % (time() - start)    
+  return ccArr_fn
+  
+###############
+# PATH LENGTH #
+###############
+
+def pathLength():
+  '''
+  Path length between each pair of vertices
+  '''
+  # TODO: DM
+  pass
+
+
+####################
+# SCAN STATISTIC 2 #
+####################
+
+def calcScanStat2():
+  '''
+  #TODO: DM
+  '''
+  pass
 
 ####################
 # Base name getter #
@@ -282,62 +354,6 @@ def printVertInv(fn, invariantName):
   for idx, vert in enumerate (inv):
     print 'Vertex: %d, Value: %d' % (idx, vert)
 
-#####################
-# CLUSTERING CO-EFF #
-#####################
-# Based on http://networkx.lanl.gov/reference/generated/networkx.algorithms.cluster.clustering.html#networkx.algorithms.cluster.clustering
-def calcLocalClustCoeff(deg_fn, tri_fn, G_fn = None, weighted= False, test=False):
-  '''
-  deg_fn = full filename of file containing an numpy array with vertex degrees
-  tri_fn = full filename of file containing an numpy array with num triangles
-  '''
-  
-  start = time()
-  degArray = np.load(deg_fn)
-  triArray = np.load(tri_fn)
-  
-  ccArray = np.empty_like(degArray)
-  
-  if len(degArray) != len(triArray):
-    print "Lengths of triangle and degree arrays must be equal"
-    sys.exit(-1)  
- 
-  # Weighted graphs 
-  if(weighted):
-    G = loadAdjMat(G_fn, lcc_fn)  
-    
-    maxWeight = np.max(G) # max weight of the graph
-    maxIdx = G.argmax() #indx of max when flattened
-    maxX = maxIdx / G.shape[0] # max x-index
-    maxY = maxIdx % G.shape[0]# max y-index
-  
-  # DM: TODO
-  # Summation cubed root
-  
-  # Binarized graphs 
-  else:
-    for u in range (len(degArray)):
-      if (degArray[u] > 2):
-        ccArray[u] = (2.0 * triArray[u]) / ( degArray[u] * (degArray[u] - 1) )
-      else:
-        ccArray[u] = 0
-
-  ccArr_fn =  getbaseName(tri_fn) +'_clustcoeff.npy'
-  
-  np.save(ccArr_fn, ccArray)  # save location wrong!
-  
-  print 'Time taken to calc Num triangles: %f secs\n' % (time() - start)    
-  return ccArr_fn
-  
-###############
-# PATH LENGTH #
-###############
-
-def pathLength():
-  '''
-  Path length between each pair of vertices
-  '''
-  pass
 
 #########################  ************** #########################
 ###########
