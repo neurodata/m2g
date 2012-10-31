@@ -51,6 +51,8 @@ class test():
   def testTriangles(self):
     #for num in [10,50,100]:      
     #triArr_fn = os.path.join(self.benchdir,str(self.numNodes),self.triArr)
+    
+    proximityAssertion(self.tri_fn, bench = np.load(os.path.join(self.benchdir, str(self.numNodes), "triArr.npy")), tol = 0.25 )
       
     test = np.load(self.tri_fn)
     bench = np.load(os.path.join(self.benchdir, str(self.numNodes), "triArr.npy"))

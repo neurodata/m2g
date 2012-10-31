@@ -174,49 +174,6 @@ def calcScanStat(G_fn, lcc_fn = None, roiRootName = None ,bin = False, N=1):
   # del vertxDeg, indSubgrEdgeNum
   return [ss1_fn, deg_fn, G.shape[0]] #return scan stat1, degree of each node, the number of nodes in the graph
 
-#######################
-# NUMBER OF TRIANGLES #
-#######################
-def calcNumTriangles(ss1Array, degArray, lcc_fn = None):
-  print 'Counting the number of triangles...'
-  start = time()
-  if not isinstance(ss1Array, np.ndarray):
-    try:
-      ss1Array = np.load(ss1Array)
-    except:
-      print "ERROR: File not found: %s OR not valid format" % ss1Array
-      sys.exit(-1)
-  
-  if not isinstance(degArray, np.ndarray):
-    try:
-      degArray = np.load(degArray)
-    except:
-      print "File not found: %s" % degArray
-      sys.exit(-1)
-  
-  if (len(degArray) != len(ss1Array)):
-    print "Array lengths unequal"
-    sys.exit(-1)
-  
-  triangles = np.subtract(ss1Array, degArray)
-  if np.any(triangles[:] < 0):
-      print 'No entry should be negative in triangles array!'
-  
-  for e in range (len(triangles)-1):
-    if triangles[e] < 0:
-      print "Vertex:", e , ", Value: ", triangles[e]    
-  
-  if (lcc_fn):
-    triArr_fn =  getbaseName(lcc_fn) +'_triangles.npy'
-  else:
-    triArr_fn =  os.path.join('bench', str(len(triangles)),'test_triangles.npy')
-    
-  np.save(triArr_fn, triangles)  # save location wrong!
-  
-  print 'Time taken to calc Num triangles: %f secs\n' % (time() - start)
-  #del triangles
-  return triArr_fn
-
 ########################
 # EIGEN TRIANGLE LOCAL #
 ########################
@@ -328,34 +285,45 @@ def printVertInv(fn, invariantName):
 #####################
 # CLUSTERING CO-EFF #
 #####################
-def calcLocalClustCoeff(deg_fn, tri_fn, test=False):
+# Based on http://networkx.lanl.gov/reference/generated/networkx.algorithms.cluster.clustering.html#networkx.algorithms.cluster.clustering
+def calcLocalClustCoeff(deg_fn, tri_fn, G_fn = None, weighted= False, test=False):
   '''
   deg_fn = full filename of file containing an numpy array with vertex degrees
   tri_fn = full filename of file containing an numpy array with num triangles
   '''
+  
   start = time()
   degArray = np.load(deg_fn)
   triArray = np.load(tri_fn)
   
   ccArray = np.empty_like(degArray)
-
+  
   if len(degArray) != len(triArray):
     print "Lengths of triangle and degree arrays must be equal"
     sys.exit(-1)  
  
-  for v in range (len(degArray)): 
-    if (degArray[v] > 0):
-      maxEdges = int((degArray[v]+1)*(degArray[v]))/2   # +1 to include the vertex in question. Formula: (n(n-1))/2
-      maxNumTri = maxEdges - degArray[v]
-      angles = maxNumTri - triArray[v]
+  # Weighted graphs 
+  if(weighted):
+    G = loadAdjMat(G_fn, lcc_fn)  
+    
+    maxWeight = np.max(G) # max weight of the graph
+    maxIdx = G.argmax() #indx of max when flattened
+    maxX = maxIdx / G.shape[0] # max x-index
+    maxY = maxIdx % G.shape[0]# max y-index
+  
+  # DM: TODO
+  # Summation cubed root
+  
+  # Binarized graphs 
+  else:
+    for u in range (len(degArray)):
+      if (degArray[u] > 2):
+        ccArray[u] = (2.0 * triArray[u]) / ( degArray[u] * (degArray[u] - 1) )
+      else:
+        ccArray[u] = 0
 
-      ccArray[v] = triArray[v]/(triArray[v] + angles) # Eq. 2.12
-    else:
-      ccArray[v] = 0
+  ccArr_fn =  getbaseName(tri_fn) +'_clustcoeff.npy'
   
-  joiner = "test" if (test) else ""
-  
-  ccArr_fn = getbaseName(deg_fn) +joiner+'_clustcoeff.npy'
   np.save(ccArr_fn, ccArray)  # save location wrong!
   
   print 'Time taken to calc Num triangles: %f secs\n' % (time() - start)    
