@@ -9,6 +9,7 @@ import scipy.io as sio
 import numpy as np
 from math import ceil
 import scipy.sparse.linalg.eigen.arpack as arpack
+import scipy.special
 
 import os
 import argparse
@@ -64,9 +65,9 @@ class graph():
       
     if (toPyMat):
       if (big):
-	print 'Cannot convert \'big\' matrix to python matrix!'
+        print 'Cannot convert \'big\' matrix to python matrix!'
       else:
-	self.G_dense = self.G_sparse.tolist() # turn into python list of lists
+        self.G_dense = self.G_sparse.tolist() # turn into python list of lists
   
   #####################
   # SYMMETRIZE MATRIX #
@@ -88,7 +89,9 @@ def getMaxAveDegree(G_fn, lcc_fn = None, roiRootName = None):
   Note this is an estimation and is guaranteed to be greater than or equal to the true MAD
   G_fn - filename of the graph .npy
   lcc_fn - largest connected component of the graph. If none then this is a test case. .npy file
+  roiRootName - full path of roi + root (i.g. /Users/disa/roi/MXXX_roi)
   '''
+  
   if lcc_fn:
     G = loadAdjMat(G_fn, lcc_fn, roiRootName)
     
@@ -126,12 +129,13 @@ def calcScanStat(G_fn, lcc_fn = None, roiRootName = None ,bin = False, N=1):
   lcc_fn - largest connected component full filename (.npy)
   G_fn - fibergraph full filename (.mat)
   bin - binarize or not
+  roiRootName - full path of roi + root (i.g. /Users/disa/roi/MXXX_roi)
   N - Scan statistic number i.e 1 or 2 ONLY
   '''
   print 'Calculating scan statistic %d...' % N
   
   if (lcc_fn):
-    G = loadAdjMat(G_fn, lcc_fn)
+    G = loadAdjMat(G_fn, lcc_fn, roiRootName)
   if (N == 2):
     G = G.dot(G)+G
   
@@ -174,14 +178,18 @@ def calcScanStat(G_fn, lcc_fn = None, roiRootName = None ,bin = False, N=1):
 ########################
 # EIGEN TRIANGLE LOCAL #
 ########################
-
+# Based on work by: Charalampos E. Tsourakakis
+# Published as: Counting Triangles in Real-World Networks using Projections
 def eignTriangleLocal(G_fn, lcc_fn = None, roiRootName = None,k=1,  N=1):
   '''
-  DM: TODO
+  Local Estimation of Triangle count
+  lcc_fn - largest connected component full filename (.npy)
+  G_fn - fibergraph full filename (.mat)
+  roiRootName - full path of roi + root (i.g. /Users/disa/roi/MXXX_roi)
   '''
   
   if (lcc_fn):
-    G = loadAdjMat(G_fn, lcc_fn)
+    G = loadAdjMat(G_fn, lcc_fn, roiRootName)
   if (N == 2): # SS2
     G = G.dot(G)+G
   
@@ -192,55 +200,27 @@ def eignTriangleLocal(G_fn, lcc_fn = None, roiRootName = None,k=1,  N=1):
   n = G.shape[0] # number of nodes
   numTri = np.zeros(n) # local triangle count
   
-  #eigval, eigvect = arpack.eigs(G, k=G.shape[0]-2, sigma='real', which='LM', OPpart='r') # LanczosMethod(A,0) 
-  eigval, eigvect = arpack.eigs(G, k=G.shape[0]-2, which='LM') # LanczosMethod(A,0) 
-  #import pdb; pdb.set_trace()
+  l, u = arpack.eigs(G, k=2, which='LM') # LanczosMethod(A,0) 
   
-  l = np.diag(eigvect.real).conj()
-  l = (np.matrix(l)).T
+  for j in range(n):
+    numTri[j] = abs(ceil((sum( np.power(l,3) * (u[j][:].real**2)) ) / 2.0))
   
   import pdb; pdb.set_trace()
   
-  for j in range(n):
-    numTri[j] = (sum( np.power(l,3) * (eigval[j:].real**2)) ) / 2.0
-    #numTri[j] = (sum( np.power(l,3) * (eigval[j:].real**2)) ) / 2.0
   
-  #import pdb; pdb.set_trace()
-  
-  #Alf = abs(eigval[0].real) # has real & img
-  #U = eigvect[0] # has real & img
-
-  #i = 1
-  #loop = True
-  #while (loop and i <= (G.shape[0]-2)):
-    
-  #  eigval, eigvect = arpack.eigs(G, k = i) # LanczosMethod(A,i) 
-    
-  #  Alf = abs(eigval[0].real) # ?????
-  #  U = eigval[0] # ?????
-  #  i += 1
-  #  print "i = ", i
-    
-  #  bound = abs(pow(eigval[i-2].real,3)) / sum(pow(eigval[:i-2].real,3))
-  #  if (bound <= 0 or bound <= tol): 
-  #    loop = False
-  
-  #for j in range(n-2):
-  #  numr = 0
-  #  for k in range(i-2):
-  #   
-  #    numTri[j] += ( pow(eigvect[j][k].real,2)*pow(eigval[k],3) ) / 2
-
 #####################
 # CLUSTERING CO-EFF #
 #####################
-# Based on http://networkx.lanl.gov/reference/generated/networkx.algorithms.cluster.clustering.html#networkx.algorithms.cluster.clustering
-def calcLocalClustCoeff(deg_fn, tri_fn, G_fn = None, weighted= False, test=False):
+# Based on work by: Jari Saramaki
+# Published as: Generalizations of the clustering coefficient to weighted complex networks
+def calcLocalClustCoeff(deg_fn, tri_fn, G_fn = None, lcc_fn = None, roiRootName = None , weighted= False, test=False):
   '''
   deg_fn = full filename of file containing an numpy array with vertex degrees
   tri_fn = full filename of file containing an numpy array with num triangles
+  roiRootName - full path of roi + root (i.g. /Users/disa/roi/MXXX_roi)
+  lcc_fn - largest connected component full filename (.npy)
+  G_fn - fibergraph full filename (.mat)
   '''
-  
   start = time()
   degArray = np.load(deg_fn)
   triArray = np.load(tri_fn)
@@ -253,21 +233,41 @@ def calcLocalClustCoeff(deg_fn, tri_fn, G_fn = None, weighted= False, test=False
  
   # Weighted graphs 
   if(weighted):
-    G = loadAdjMat(G_fn, lcc_fn)  
+    G = loadAdjMat(G_fn, lcc_fn, roiRootName)  
     
     maxWeight = np.max(G) # max weight of the graph
     maxIdx = G.argmax() #indx of max when flattened
     maxX = maxIdx / G.shape[0] # max x-index
     maxY = maxIdx % G.shape[0]# max y-index
   
-  # DM: TODO # (3 Jari et al)
-  cubedSum = 0
+  triArr2 = np.empty_like(degArray)
+  
+  # (3) Jari et al
   for i in range(G.shape[0]):
+    cubedRtSum = 0
+    triCnt = 0
+    w_i = G.indicies[G.indptr[i]:G.indptr[i+1]]
     for k in range(G.shape[0]):
+      w_k = G.indicies[G.indptr[k]:G.indptr[k+1]]
       for j in range(G.shape[0]):
-        #cubedSum = G[0][0]
+        
+        if [j,k] not in w_i:
+          break # No edge
+        if [j] not in w_k:
+          break # No edge
+        
+        iNeigh = G.indices[G.indptr[i]:G.indptr[i+1]]
+        idx_ij = np.where( iNeigh == j)[0][0]
+        idx_ik = np.where( iNeigh == k)[0][0]
+        idx_jk = np.where( G.indices[G.indptr[k]:G.indptr[k+1]] == j)[0][0]
       
-    #ccArray[i] = (1/(( degArray[u] * (degArray[u] - 1))) * 0
+        cubedRtSum += scipy.special.cbrt( (G.data[G.indptr[i]:G.indptr[i+1]][idx_ij])/float(maxWeight) * \
+          (G.data[G.indptr[i]:G.indptr[i+1]][idx_ik])/float(maxWeight) *\
+          (G.data[G.indptr[k]:G.indptr[k+1]][idx_jk])/float(maxWeight) )
+        triCnt += 1
+    
+    ccArray[i] = cubedRtSum
+    triArr2[i] = triCnt
   
   # Binarized graphs 
   else:
