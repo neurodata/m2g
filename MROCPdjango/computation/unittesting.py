@@ -52,28 +52,12 @@ class test():
     #for num in [10,50,100]:      
     #triArr_fn = os.path.join(self.benchdir,str(self.numNodes),self.triArr)
     
-    proximityAssertion(self.tri_fn, bench = np.load(os.path.join(self.benchdir, str(self.numNodes), "triArr.npy")), tol = 0.25 )
+    proximityAssertion(arr = np.load(self.tri_fn), benchArr = np.load(os.path.join(self.benchdir, str(self.numNodes), "triArr.npy")), tol = 0.25 )
       
     test = np.load(self.tri_fn)
     bench = np.load(os.path.join(self.benchdir, str(self.numNodes), "triArr.npy"))
     
-    np.testing.assert_equal(bench,test,"Disa: Inequality testing TRIANGLE failure on %d test" % self.numNodes, False)
-  
-  def proximityAssertion(arr, benchArr ,tol = 0.2):
-    if len(arr) != len(benchArr):
-      print "Triangle Arrays unequal! Test terminated" 
-      return
-  
-    diffArr = abs(np.subtract(arr, benchArr)) # difference of the two arrays
-    percdiff = np.empty(len(arr))
-    
-    for idx in range(len(arr)):
-      percdiff[idx] = (diffArr[idx]/float(benchArr[idx]))
-    
-    diff = sum(percdiff)/float(len(percdiff)) # Average difference in bench & test
-    
-    if (diff > tol):
-      print "Global percent difference too high by", (diff-tol)
+    #np.testing.assert_equal(bench,test,"Disa: Inequality testing TRIANGLE failure on %d test" % self.numNodes, False)
     
   '''
   def testClustCoeff():
@@ -94,3 +78,22 @@ class test():
   def testSS2():
     pass
 '''
+######################### ************** #########################
+#                     STAND ALONE FUNCTIONS                      #
+######################### ************** #########################
+
+def proximityAssertion(arr, benchArr ,tol = 0.2):
+  if len(arr) != len(benchArr):
+    print "Triangle Arrays unequal! Test terminated" 
+    return
+
+  diffArr = abs(np.subtract(arr, benchArr)) # difference of the two arrays
+  percdiff = np.empty(len(arr))
+  
+  for idx in range(len(arr)):
+    percdiff[idx] = (diffArr[idx]/float(benchArr[idx]))
+  
+  diff = sum(percdiff)/float(len(percdiff)) # Average difference in bench & test
+  #import pdb; pdb.set_trace()
+  if (diff > tol):
+    print "Global percent difference too high by %f%%" %  ((diff-tol)*100.0)
