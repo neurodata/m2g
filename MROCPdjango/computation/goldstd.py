@@ -119,7 +119,7 @@ def evaluate_graph( thisReplicate, invariant):
         triangleList = nx.triangles(thisReplicate) #This returns a list with the number of triangles each node participates in
         
         for vertex in (triangleList):
-            triArr.append(int(ceil(vertex/3.0)))
+            triArr.append(int(round(triangleList[vertex]/3.0)))
         
         triangles = sum(triangleList.values())/3
         
