@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 # Author: Disa Mhembere, Johns Hopkins University
-# 10/2/2012
+# Separated: 10/2/2012
 # Get the base name of MRN dataset graphs
 
 import os

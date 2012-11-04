@@ -4,10 +4,12 @@ import scipy.io as sio
 from scipy.sparse import *
 from scipy import *
 import os
+import argparse
 
 from goldstd import evaluate_graph
-
 def createGraph(numNodes = 10):
+  
+  #numNodes = int(NumNodes)
   
   G_fn = "bench_concomp"+str(numNodes)
   nodeProb = 0.4
@@ -26,9 +28,9 @@ def createGraph(numNodes = 10):
     os.makedirs(os.path.join("bench",str(numNodes)))
   
   sio.savemat(os.path.join("bench",str(numNodes) ,G_fn),{'fibergraph': Gsparse}, appendmat = True)
-  #Gdense = (sio.loadmat(G_fn)['fibergraph']).todense()
   
   inv = evaluate_graph(randGr, -1)
+  
   printUTIL(inv)
   writeUTIL(inv)
   
@@ -56,7 +58,17 @@ def writeUTIL(inv):
   
   f.close()
 
+def main():
+    
+    parser = argparse.ArgumentParser(description='Calculate true local Scan Statistic and Degree in a graph')
+    parser.add_argument('numNodes', type = int, action='store',help='The number of nodes in the graph you want to generate')
+    
+    result = parser.parse_args()
+    
+    createGraph(result.numNodes)
+    
 if __name__ == '__main__':
+  main()
   #createGraph(10)
   #createGraph(50)
-  createGraph(1000)
+  #createGraph(1000)

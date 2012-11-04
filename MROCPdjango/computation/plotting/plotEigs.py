@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 # Author: Disa Mhembere, Johns Hopkins University
-# 10/2/2012
+# Separated: 10/2/2012
 # Plot all .np arrays in a common dir on the same axis & save
 # 1 indexed
 
