@@ -6,11 +6,12 @@
 from math import sqrt
 import os
 from math import ceil
+import argparse
 
 import numpy as np
 import networkx as nx
 import scipy.linalg
-
+import networkXserial as nxs
 from numpy import *
 import time
 
@@ -24,7 +25,8 @@ def evaluate_graph( thisReplicate, invariant):
     """
     Take the NetworkX graph in thisReplicate and evaluate it using
     the invariant specified. Return said value.
-    """    
+    """
+    
     doAllInvariants = False
     if invariant == -1:
         doAllInvariants = True
@@ -55,7 +57,7 @@ def evaluate_graph( thisReplicate, invariant):
                 maxDegree = entry
                 
             degArr.append(replicateDegree[entry])
-            writeArrayToFile(degArr, os.path.join("bench",str(thisReplicate.number_of_nodes()),"degArr"))
+            writeArrayToFile(degArr, os.path.join("bench",str(thisReplicate.number_of_nodes()),"degArr.txt"))
             
         degArr = np.array(degArr)
         np.save(os.path.join("bench",str(thisReplicate.number_of_nodes()),"degArr.npy"), degArr)
@@ -73,6 +75,8 @@ def evaluate_graph( thisReplicate, invariant):
         thisEigenvalues.sort()
         if len(thisEigenvalues) > 0:
             MADe = float(thisEigenvalues[-1])
+            np.save(os.path.join("bench",str(thisReplicate.number_of_nodes()),"MAD.npy"), MADe)
+            
         else:
             MADe= 0
         if doAllInvariants:
@@ -94,12 +98,14 @@ def evaluate_graph( thisReplicate, invariant):
             inducedSubgraph = thisReplicate.subgraph(tempNodeList)
             thisNodeScanStat = inducedSubgraph.number_of_edges() #The number of edges in the 1-hop neighborhood of node
             
+            import pdb; pdb.set_trace();
+            
             scanStatArr.append(thisNodeScanStat)
             
             if thisNodeScanStat > maxScanStat:
                 maxScanStat = thisNodeScanStat
         
-        writeArrayToFile(scanStatArr, os.path.join("bench",str(thisReplicate.number_of_nodes()),"scanStatArr"))
+        writeArrayToFile(scanStatArr, os.path.join("bench",str(thisReplicate.number_of_nodes()),"scanStatArr.txt"))
         
         scanStatArr = np.array(scanStatArr)
         np.save(os.path.join("bench",str(thisReplicate.number_of_nodes()),"scanStatArr.npy"), scanStatArr)
@@ -123,7 +129,7 @@ def evaluate_graph( thisReplicate, invariant):
         
         triangles = sum(triangleList.values())/3
         
-        writeArrayToFile(triArr,os.path.join("bench",str(thisReplicate.number_of_nodes()),"triArr"))
+        writeArrayToFile(triArr,os.path.join("bench",str(thisReplicate.number_of_nodes()),"triArr.txt"))
         
         triArr = np.array(triArr)
         np.save(os.path.join("bench",str(thisReplicate.number_of_nodes()),"triArr.npy"), triArr)
@@ -140,9 +146,10 @@ def evaluate_graph( thisReplicate, invariant):
         try:
             cc = nx.average_clustering( thisReplicate )
             ccArr = nx.clustering( thisReplicate )
-            writeArrayToFile(ccArr.values(),os.path.join("bench",str(thisReplicate.number_of_nodes()),"ccArr"))
+            writeArrayToFile(ccArr.values(),os.path.join("bench",str(thisReplicate.number_of_nodes()),"ccArr.txt"))
             
             ccArr = np.array(ccArr)
+            ccArr = ccArr[()].values()
             np.save(os.path.join("bench",str(thisReplicate.number_of_nodes()),"ccArr.npy"), ccArr)
             
         except ZeroDivisionError: #This only occurs with degenerate Graphs --GAC
@@ -166,7 +173,7 @@ def evaluate_graph( thisReplicate, invariant):
                 total += (len(pairsArr[vert][neigh]) - 1)
             aplArr.append(ceil(total/float(len(pairsArr[vert]))))
         
-        writeArrayToFile(aplArr,os.path.join("bench",str(thisReplicate.number_of_nodes()),"aplArr"))
+        writeArrayToFile(aplArr,os.path.join("bench",str(thisReplicate.number_of_nodes()),"aplArr.txt"))
         
         aplArr = np.array(aplArr)
         np.save(os.path.join("bench",str(thisReplicate.number_of_nodes()),"aplArr.npy"), aplArr)
@@ -242,3 +249,14 @@ def writeDictToFile(dic, name):
     for ind in range (len(dic)):
         f.write(str(ind)+ " : " + str(dic[ind]) + "\n")
     f.close()
+
+def main():
+    parser = argparse.ArgumentParser(description='Performs bench statistics on networkX graphs')
+    parser.add_argument('G_fn', action='store',help='Full filename of networkX graph')
+    parser.add_argument('tnum', type = int, action='store',help='Test number. Each test assigned a number. See source code for understanding')
+    
+    result = parser.parse_args()
+    evaluate_graph( nxs.load( os.path.join(os.path.abspath(os.path.curdir), result.G_fn)), result.tnum )
+
+if __name__ == '__main__':
+    main()
