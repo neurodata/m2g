@@ -27,7 +27,17 @@ def loadAdjMat(G_fn, lcc_fn, roiRootName = None):
     G = vcc.induced_subgraph(fg.spcscmat)
     G = G+G.T # Symmetrize
   except:
-    print "****Problem loading real lcc & graph****"
+    if not os.path.exists(roiRootName):
+      print "%s Doesn't exist" % roiRootName
+    
+    if not os.path.exists(lcc_fn):
+      print "%s Doesn't exist" % lcc_fn
+      
+    if not os.path.exists(G_fn):
+      print "%s Doesn't exist" % G_fn
+    
+    if os.path.exist(roiRootName) and os.path.exist(lcc_fn) and os.path.exist(G_fn):
+      print "****Some wild Problem loading real lcc & graph****"
     sys.exit(-1)
     
   return G
