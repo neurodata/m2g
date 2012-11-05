@@ -9,6 +9,7 @@ import argparse
 import mrcap.lcc as lcc
 from getBaseName import getBaseName
 import os
+import sys
 
 def loadAdjMat(G_fn, lcc_fn, roiRootName = None):
   '''
@@ -18,14 +19,15 @@ def loadAdjMat(G_fn, lcc_fn, roiRootName = None):
   '''
   if not roiRootName:
     roiRootName =  os.path.join(getRoiRoot(G_fn),getBaseName(G_fn))
-       
+    #import pdb; pdb.set_trace()   
   vcc = lcc.ConnectedComponent(fn = lcc_fn)
   try:
     fg = lcc._load_fibergraph(roiRootName , G_fn) 
     G = vcc.induced_subgraph(fg.spcscmat)
     G = G+G.T # Symmetrize
   except:
-    print "Problem loading real lcc & graph"
+    print "****Problem loading real lcc & graph****"
+    sys.exit(-1)
     
   return G
 

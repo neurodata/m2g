@@ -4,6 +4,7 @@
 # Calculate some graph invariants on big and small graphs
 # Date: 5 Sept 2012
 
+import os
 import argparse
 import unittesting
 
@@ -18,12 +19,10 @@ from clustCoeff import calcLocalClustCoeff
 def realgraph(G_fn, lcc_fn, toDir, roiRootName = None):
   
   MADdir, eigvDir, ssDir, degDir, triDir, ccDir = createInvDirs(toDir)
-  
-  mad = getMaxAveDegree(G_fn, lcc_fn, roiRootName, MADdir, True)
+  mad = getMaxAveDegree(G_fn, lcc_fn, roiRootName, MADdir, eigvDir, True)
   ss1_fn, deg_fn, numNodes = calcScanStat_Degree(G_fn, lcc_fn, roiRootName, ssDir, degDir)
-  eignTriangleLocal(result.G_fn, result.lcc_fn, result.roiRootName, result.k , triDir)
-  ccArr_fn = calcLocalClustCoeff(deg_fn, tri_fn, test=False)
-  calcLocalClustCoeff(deg_fn, tri_fn, ccDir, test)
+  eignTriangleLocal(G_fn, lcc_fn, roiRootName, triDir, k)
+  ccArr_fn = calcLocalClustCoeff(deg_fn, tri_fn, ccDir, False)
   
 #************************#
 # Create Invariate Dirs  #
