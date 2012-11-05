@@ -11,20 +11,22 @@ import unittesting
 # Invariant imports
 from getBaseName import getBaseName
 from loadAdjMatrix import loadAdjMat
-from maxavgdeg import getMaxAveDegree
+#from maxavgdeg import getMaxAveDegree
 from scanstat_degr import calcScanStat_Degree
-from triCount import eignTriangleLocal
+#from triCount import eignTriangleLocal
 from clustCoeff import calcLocalClustCoeff
 from loadAdjMatrix import loadAdjMat
+from triCount_MAD import eignTriLocal_MAD
   
 def realgraph(G_fn, lcc_fn, toDir, roiRootName = None):
   
   G = loadAdjMat(G_fn, lcc_fn, roiRootName) # load up graph into main mem
   
-  
   MADdir, eigvDir, ssDir, degDir, triDir, ccDir = createInvDirs(toDir)
-  eignTriangleLocal(G_fn, G, lcc_fn, roiRootName, triDir, None)
-  mad = getMaxAveDegree(G_fn, G, lcc_fn, roiRootName, MADdir, eigvDir, True)
+  #tri_fn = eignTriangleLocal(G_fn, G, lcc_fn, roiRootName, triDir, None)
+  #mad = getMaxAveDegree(G_fn, G, lcc_fn, roiRootName, MADdir, eigvDir, True)
+  
+  tri_fn = eignTriLocal_MAD(G_fn, G , lcc_fn, roiRootName , triDir , MADdir, eigvDir, None)
   ss1_fn, deg_fn, numNodes = calcScanStat_Degree(G_fn, G, lcc_fn, roiRootName, ssDir, degDir)
   ccArr_fn = calcLocalClustCoeff(deg_fn, tri_fn, None, None, ccDir, False)
   
