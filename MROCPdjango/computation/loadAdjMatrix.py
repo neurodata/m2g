@@ -48,7 +48,7 @@ def getRoiRoot(G_fn):
   G_fn - full filename of graph (e.g of format /{User}/{disa}/{graphs}/filename_fiber.mat)
   * {} - Not necessary
   '''
-  roiRoot = ''
+  roiRoot = '/'
   for i in G_fn.split('/')[1:-3]:
     roiRoot = os.path.join(roiRoot, i)
   roiRoot = os.path.join(roiRoot, "base", "roi")
