@@ -15,22 +15,25 @@ from loadAdjMatrix import loadAdjMat
 import argparse
 from time import time
   
-def getMaxAveDegree(G_fn, lcc_fn = None, roiRootName = None, MADdir = None, eigvDir = None, saveTop = True):
+def getMaxAveDegree(G_fn, G = None, lcc_fn = None, roiRootName = None, MADdir = None, eigvDir = None, saveTop = True):
   '''
   Calc the Eigenvalue Max Average Degree of the graph
   Note this is an estimation and is guaranteed to be greater than or equal to the true MAD
   G_fn - filename of the graph .npy
+  G - the sparse matrix containing the graph
   lcc_fn - largest connected component of the graph. If none then this is a test case. .npy file
   roiRootName - full path of roi + root (i.g. /Users/disa/roi/MXXX_roi)
   toDir - Directory where resulting array is placed
   saveTop - If true save the top 50 eigenvalues
   '''
   print "\nCalcuting maximum average degree..."
-  start = time()
   
-  if lcc_fn:
+  if G:
+    pass
+  
+  elif lcc_fn:
     G = loadAdjMat(G_fn, lcc_fn, roiRootName)
-    
+  
   # test case
   else:    
     try:
@@ -48,6 +51,7 @@ def getMaxAveDegree(G_fn, lcc_fn = None, roiRootName = None, MADdir = None, eigv
       
   numEigs = 100 if (G.shape[0] > 101) else G.shape[0]-2 # Number of eigenvalues to compute
   
+  start = time()
   topEigs = (arpack.eigs(G, k = numEigs, which='LR')[0]).real # get eigenvalues, then +ve max REAL part is MAD eigenvalue estimation
   maxAveDeg = np.max(topEigs) 
   print 'Time taken to calc MAD: %f secs' % (time() - start)
@@ -74,9 +78,9 @@ def main():
     
     result = parser.parse_args()
     if (results.saveTop5):
-      getMaxAveDegree(result.G_fn, result.lcc_fn, result.roiRootName, result.MADdir, result.eigvDir)
+      getMaxAveDegree(result.G_fn, None, result.lcc_fn, result.roiRootName, result.MADdir, result.eigvDir)
     else:
-      getMaxAveDegree(result.G_fn, result.lcc_fn, result.roiRootName, result.MADdir, result.eigvDir, False)
+      getMaxAveDegree(result.G_fn, None, result.lcc_fn, result.roiRootName, result.MADdir, result.eigvDir, False)
 
 if __name__ == '__main__':
   main()
