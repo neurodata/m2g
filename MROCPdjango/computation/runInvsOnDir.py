@@ -25,7 +25,7 @@ def getLccfn(G_fn):
   G_fn - full filename of graph (e.g of format /{User}/{disa}/{graphs}/filename_fiber.mat)
   * {} - Not necessary
   '''
-  lcc_fn = ''
+  lcc_fn = '/'
   for i in G_fn.split('/')[1:-3]:
     lcc_fn = os.path.join(lcc_fn, i)
   lcc_fn = os.path.join(lcc_fn, "connectedcomp", getBaseName(G_fn)+'_concomp.npy')
