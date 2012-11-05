@@ -35,32 +35,32 @@ def createInvDirs(toDir):
   #Maximum Avearage Degree
   MADdir = os.path.join(toDir, "MAD")
   if not os.path.exists(MADdir):
-    os.makedirs(MADdir)
+    pass #os.makedirs(MADdir)
   
   # Eigenvalues 
   eigvDir = os.path.join(toDir, "Eigen")
   if not os.path.exists(eigvDir):
-    os.makedirs(eigvDir)
+    pass #os.makedirs(eigvDir)
   
   # Scan statistic 
   ssDir = os.path.join(toDir, "ScanStat")
   if not os.path.exists(ssDir):
-    os.makedirs(ssDir)
+    pass #os.makedirs(ssDir)
   
   # Degree
   degDir = os.path.join(toDir, "Degree")
   if not os.path.exists(degDir):
-    os.makedirs(degDir)
+    pass #os.makedirs(degDir)
   
   # Triangle count
   triDir = os.path.join(toDir, "Triangle")
   if not os.path.exists(triDir):
-    os.makedirs(triDir)
+    pass #os.makedirs(triDir)
   
   # Clustering Coeff
   ccDir = os.path.join(toDir, "ClustCoeff")
   if not os.path.exists(ccDir):
-    os.makedirs(ccDir)
+    pass #os.makedirs(ccDir)
   
   return [ MADdir, eigvDir, ssDir, degDir, triDir, ccDir ]
   
