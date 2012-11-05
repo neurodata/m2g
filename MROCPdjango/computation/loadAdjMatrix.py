@@ -28,13 +28,13 @@ def loadAdjMat(G_fn, lcc_fn, roiRootName = None):
     G = G+G.T # Symmetrize
   except:
     if not os.path.exists(roiRootName):
-      print "%s Roi: Doesn't exist" % roiRootName
+      print "Roi: %s Doesn't exist" % roiRootName
     
     if not os.path.exists(lcc_fn):
-      print "%s Lcc: Doesn't exist" % lcc_fn
+      print "Lcc: %s Doesn't exist" % lcc_fn
       
     if not os.path.exists(G_fn):
-      print "%s Graph: Doesn't exist" % G_fn
+      print "Graph: %s Doesn't exist" % G_fn
     
     if os.path.exists(roiRootName) and os.path.exists(lcc_fn) and os.path.exists(G_fn):
       print "****Some wild Problem loading real lcc & graph****"

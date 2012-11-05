@@ -29,7 +29,7 @@ def eignTriangleLocal(G_fn, G = None, lcc_fn = None, roiRootName = None, triDir=
   '''
   print '\nCalculating Eigen triangle count estimation...'
   
-  if G:
+  if (G !=None):
     pass
   elif (lcc_fn):
     G = loadAdjMat(G_fn, lcc_fn, roiRootName)
