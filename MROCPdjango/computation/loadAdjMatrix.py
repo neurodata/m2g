@@ -19,7 +19,7 @@ def loadAdjMat(G_fn, lcc_fn, roiRootName = None):
   '''
   print "Loading adjacency matrix..."
   if not roiRootName:
-    roiRootName =  os.path.join(getRoiRoot(G_fn),getBaseName(G_fn))
+    roiRootName =  os.path.join(getRoiRoot(G_fn),getBaseName(G_fn)) + '_roi'
     #import pdb; pdb.set_trace()   
   vcc = lcc.ConnectedComponent(fn = lcc_fn)
   try:
