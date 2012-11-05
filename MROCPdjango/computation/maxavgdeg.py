@@ -26,7 +26,7 @@ def getMaxAveDegree(G_fn, G = None, lcc_fn = None, roiRootName = None, MADdir = 
   toDir - Directory where resulting array is placed
   saveTop - If true save the top 50 eigenvalues
   '''
-  print "\nCalcuting maximum average degree..."
+  print "\nCalculating maximum average degree..."
   if (G !=None):
     pass
   
