@@ -25,7 +25,7 @@ def calcScanStat_Degree(G_fn, G = None, lcc_fn = None, roiRootName = None, ssDir
   '''
   print '\nCalculating scan statistic %d...' % N
   
-  if (G):
+  if (G !=None):
     pass
   elif (lcc_fn):
     G = loadAdjMat(G_fn, lcc_fn, roiRootName)
