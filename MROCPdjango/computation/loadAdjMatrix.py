@@ -17,6 +17,7 @@ def loadAdjMat(G_fn, lcc_fn, roiRootName = None):
   G_fn - the .mat file holding graph
   lcc_fn - the largest connected component .npy z-ordering
   '''
+  print "Loading adjacency matrix..."
   if not roiRootName:
     roiRootName =  os.path.join(getRoiRoot(G_fn),getBaseName(G_fn))
     #import pdb; pdb.set_trace()   
@@ -38,9 +39,9 @@ def getRoiRoot(G_fn):
   * {} - Not necessary
   '''
   roiRoot = ''
-  for i in G_fn.split('/')[1:-2]:
+  for i in G_fn.split('/')[1:-3]:
     roiRoot = os.path.join(roiRoot, i)
-  roiRoot = os.path.join(roiRoot, 'roi')
+  roiRoot = os.path.join(roiRoot, "base", "roi")
   return roiRoot
   
 def main():

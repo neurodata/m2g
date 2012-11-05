@@ -14,25 +14,33 @@ import os
 import argparse
 from time import time
 
-def calcLocalClustCoeff(deg_fn, tri_fn, ccDir=None, test=False):
+def calcLocalClustCoeff(deg_fn, tri_fn, degArray = None, triArray = None, ccDir=None, test=False):
   '''
   deg_fn  full filename of file containing an numpy array with vertex degrees
   tri_fn - full filename of file containing an numpy array with num triangles
+  degArray - Numpy array holding local degree
+  triArray - Numpy array holding local triangle count
   ccDir - Directory where resulting array is placed
   test - if true then this is a test else not
   '''
   
   print "\nCalculating local clustering coeff.."
-  start = time()
-  degArray = np.load(deg_fn)
-  triArray = np.load(tri_fn)
   
+  if (degArray and triArray):
+    pass
+  
+  else:
+    degArray = np.load(deg_fn)
+    triArray = np.load(tri_fn)
+    
   ccArray = np.empty_like(degArray)
   
   if len(degArray) != len(triArray):
     print "Lengths of triangle and degree arrays must be equal"
     sys.exit(-1)
-    
+  
+  start = time()
+  
   for u in range (len(degArray)):
     if (degArray[u] > 2):
       ccArray[u] = (2.0 * triArray[u]) / ( degArray[u] * (degArray[u] - 1) ) #(1) Jari et al
@@ -62,9 +70,9 @@ def main():
     result = parser.parse_args()
     
     if (result.test):
-      calcLocalClustCoeff(result.deg_fn, result.tri_fn, result.ccDir, test=True)
+      calcLocalClustCoeff(result.deg_fn, result.tri_fn, None, None, result.ccDir, test=True)
     else:
-      calcLocalClustCoeff(result.deg_fn, result.tri_fn, result.ccDir, test=False)
+      calcLocalClustCoeff(result.deg_fn, result.tri_fn, None, None, result.ccDir, test=False)
 
 if __name__ == '__main__':
   main()

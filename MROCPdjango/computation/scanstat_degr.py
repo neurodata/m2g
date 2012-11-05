@@ -13,22 +13,24 @@ from loadAdjMatrix import loadAdjMat
 import argparse
 from time import time
 
-def calcScanStat_Degree(G_fn, lcc_fn = None, roiRootName = None, ssDir = None, degDir = None , N=1):
+def calcScanStat_Degree(G_fn, G = None, lcc_fn = None, roiRootName = None, ssDir = None, degDir = None , N=1):
   '''
   lcc_fn - largest connected component full filename (.npy)
   G_fn - fibergraph full filename (.mat)
+  G - the sparse matrix containing the graphs
   bin - binarize or not
   roiRootName - full path of roi + root (i.g. /Users/disa/roi/MXXX_roi)
   toDir - Directory where resulting array is placed
   N - Scan statistic number i.e 1 or 2 ONLY
   '''
   print '\nCalculating scan statistic %d...' % N
-  start = time()
   
-  if (lcc_fn):
+  if (G):
+    pass
+  elif (lcc_fn):
     G = loadAdjMat(G_fn, lcc_fn, roiRootName)
-  if (N == 2):
-    G = G.dot(G)+G
+  #if (N == 2):
+   # G = G.dot(G)+G
   
   # test case
   else:
@@ -36,7 +38,8 @@ def calcScanStat_Degree(G_fn, lcc_fn = None, roiRootName = None, ssDir = None, d
     
   vertxDeg = np.zeros(G.shape[0]) # Vertex degrees of all vertices
   indSubgrEdgeNum = np.zeros(G.shape[0]) # Induced subgraph edge number i.e scan statistic
-
+  
+  start = time()
   for vertx in range (G.shape[0]):
     if (vertx > 0 and (vertx% (int(G.shape[0]*0.1)) == 0)):
         print ceil(vertx/(float(G.shape[0]))*100), "% complete..."
@@ -80,7 +83,7 @@ def main():
     ssDir = None, degDir
     result = parser.parse_args()
     
-    calcScanStat_Degree(result.G_fn, result.lcc_fn, result.roiRootName, result.ssDir, result.degDir)
+    calcScanStat_Degree(result.G_fn, None, result.lcc_fn, result.roiRootName, result.ssDir, result.degDir)
 
 if __name__ == '__main__':
   main()

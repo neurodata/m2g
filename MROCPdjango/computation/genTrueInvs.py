@@ -15,14 +15,17 @@ from maxavgdeg import getMaxAveDegree
 from scanstat_degr import calcScanStat_Degree
 from triCount import eignTriangleLocal
 from clustCoeff import calcLocalClustCoeff
+from loadAdjMatrix import loadAdjMat
   
 def realgraph(G_fn, lcc_fn, toDir, roiRootName = None):
   
+  G = loadAdjMat(G_fn, lcc_fn, roiRootName) # load up graph into main mem
+  
   MADdir, eigvDir, ssDir, degDir, triDir, ccDir = createInvDirs(toDir)
-  mad = getMaxAveDegree(G_fn, lcc_fn, roiRootName, MADdir, eigvDir, True)
-  ss1_fn, deg_fn, numNodes = calcScanStat_Degree(G_fn, lcc_fn, roiRootName, ssDir, degDir)
-  eignTriangleLocal(G_fn, lcc_fn, roiRootName, triDir, k)
-  ccArr_fn = calcLocalClustCoeff(deg_fn, tri_fn, ccDir, False)
+  mad = getMaxAveDegree(G_fn, G, lcc_fn, roiRootName, MADdir, eigvDir, True)
+  ss1_fn, deg_fn, numNodes = calcScanStat_Degree(G_fn, G, lcc_fn, roiRootName, ssDir, degDir)
+  eignTriangleLocal(G_fn, G, lcc_fn, roiRootName, triDir, k)
+  ccArr_fn = calcLocalClustCoeff(deg_fn, tri_fn, None, None, ccDir, False)
   
 #************************#
 # Create Invariate Dirs  #
