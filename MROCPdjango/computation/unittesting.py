@@ -85,7 +85,11 @@ def proximityAssertion(arr, benchArr, tol, testName):
       percdiff[idx] = (diffArr[idx]/0.000001)
   
   diff = 0 if sum(percdiff) ==  0 else sum(percdiff)/float(len(percdiff))     # Average difference in bench & test
+  percDiff =  diff*100.0
+  
   if (abs(diff) > tol):
     print testName+" !!!!**** ALERT***** Global percent difference too high by %f%%****ALERT*****!!!!\n" % ((diff-tol)*100.0)
   else:
-    print testName+" global percent difference OK! at %f%% off" % ((diff)*100.0)
+    print testName+" global percent difference OK! at %f%% off" % (percDiff)
+    
+  return percDiff
