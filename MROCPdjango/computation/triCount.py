@@ -17,7 +17,7 @@ from loadAdjMatrix import loadAdjMat
 import argparse
 from time import time
 
-def eignTriangleLocal(G_fn, G = None, lcc_fn = None, roiRootName = None, triDir=None, k=None):
+def eignTriangleLocal(G_fn, G = None, lcc_fn = None, roiRootName = None, triDir=None, k=None, degradeTest = False):
   '''
   Local Estimation of Triangle count
   lcc_fn - largest connected component full filename (.npy)
@@ -49,18 +49,20 @@ def eignTriangleLocal(G_fn, G = None, lcc_fn = None, roiRootName = None, triDir=
   for j in range(n):
     numTri[j] = abs(round((sum( np.power(l.real,3) * (u[j][:].real**2)) ) / 6.0)) # Divide by six because we count locally
   
-  print 'Time taken to calc Num triangles: %f secs\n' % (time() - start)
+  stopTime = time() - start
+  print 'Time taken to calc Num triangles: %f secs\n' % (stopTime)
   
   '''write to file '''
   
   if triDir:
     tri_fn = os.path.join(triDir, getBaseName(G_fn) + '_triangles.npy')
-      
+  elif degradeTest:
+    tri_fn = os.path.join(triDir, getBaseName(G_fn) + '_triangles'+ str(k)+'.npy')  
   else: # test
     tri_fn = os.path.join('bench', str(G.shape[0]), getBaseName(G_fn) + '_triangles.npy')
-
+    
   np.save(tri_fn, numTri)
-  return tri_fn
+  return tri_fn, stopTime
 
 def main():
   parser = argparse.ArgumentParser(description='Calculate an estimat of triangle counting on a graph')

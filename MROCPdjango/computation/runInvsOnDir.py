@@ -15,9 +15,7 @@ def runInvariants(grDir, lccDir, toDir, start, stop):
   files = glob.glob(os.path.join(grDir,'*'))
   for n, G_fn in enumerate (files[start:stop]):
     realgraph(G_fn, getLccfn(G_fn), toDir, roiRootName = None)
-    #print "n = %d, G_fn = %s " % (n, G_fn)
-  
-  print "\n\n*Sucessfull Invariants run*\n\n"
+      print "\n\n*Sucessfull Invariants run*\n\n"
   
 def getLccfn(G_fn):
   '''
