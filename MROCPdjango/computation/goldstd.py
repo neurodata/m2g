@@ -98,8 +98,6 @@ def evaluate_graph( thisReplicate, invariant):
             inducedSubgraph = thisReplicate.subgraph(tempNodeList)
             thisNodeScanStat = inducedSubgraph.number_of_edges() #The number of edges in the 1-hop neighborhood of node
             
-            import pdb; pdb.set_trace();
-            
             scanStatArr.append(thisNodeScanStat)
             
             if thisNodeScanStat > maxScanStat:
