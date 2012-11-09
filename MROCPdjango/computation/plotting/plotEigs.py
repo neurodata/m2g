@@ -30,18 +30,24 @@ def plotEigs(eigValDir, toDir):
     
     n = len(eigv)
     #import pdb; pdb.set_trace()
-    pl.plot(range(1,n+1), eigv, color='grey')
+    pl.plot(range(1,n+1), np.sort(eigv),'o', color='grey')
     #plt.axis([1, n+1]) # DM TODO: Axis scaling 
-      
-  pl.title('100 largest eigenvalues')  
-  pl.ylabel('Eigenvalue')
-  pl.xlabel('Rank')
+   
+  pl.title('Clustering Coefficient')
+  pl.xlabel('log count')
+  pl.ylabel('Raw bin count')   
+  #pl.title('Sorted edges per graph')  
+  #pl.ylabel('Edges Count')
+  #pl.xlabel('Graph Number')
+  #pl.ylabel('Eigenvalue')
+  #pl.xlabel('Rank')
   pl.show()
   
   #if not os.path.exists():
   #  os.makedirs(toDir)
     
-  pl.savefig(os.path.join(toDir, "CombinedEigenvalues.png")) 
+  pl.savefig(os.path.join(toDir, "edgenum.png")) 
+  #pl.savefig(os.path.join(toDir, "eigs.png")) 
   
 def main():
     
