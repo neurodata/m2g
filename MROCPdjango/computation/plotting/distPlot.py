@@ -96,7 +96,7 @@ def plotInvDist(invDir, pngName, numBins =100):
   
   ''' Eigenvalues '''
   ax = pl.subplot(3,2,5)
-  #ax.set_yticks(scipy.arange(0,180000,40000))
+  ax.set_yticks(scipy.arange(0,4,1))
   for eigValInstance in glob(os.path.join(invDir, EigDir,"*.npy")):
     try:
       eigv = np.load(eigValInstance)
