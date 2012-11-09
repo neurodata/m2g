@@ -19,6 +19,7 @@ import argparse
 import scipy
 from scipy import interpolate
 
+# Issues: Done nothing with MAD
 
 def plotInvDist(invDir, pngName, numBins =100):
   # ClustCoeff  Degree  Eigen  MAD  numEdges.npy  ScanStat  Triangle
@@ -29,7 +30,7 @@ def plotInvDist(invDir, pngName, numBins =100):
   SS1dir = "ScanStat"
   triDir = "Triangle"
   
-  invDirs = [triDir, ccDir, SS1dir, DegDir ] #   MADdir
+  invDirs = [triDir, ccDir, SS1dir, DegDir ] 
   
   if not os.path.exists(invDir):
     print "%s does not exist" % invDir
@@ -54,6 +55,7 @@ def plotInvDist(invDir, pngName, numBins =100):
     
       fig = pl.figure(2)
       fig.subplots_adjust(hspace=.5)
+      fig.tight_layout()
       ax = pl.subplot(3,2,idx+1)
       
       if idx == 0:
@@ -81,13 +83,14 @@ def plotInvDist(invDir, pngName, numBins =100):
       #pl.ylabel('Probability')
       pl.xlabel('log local clustering coefficient')
     if idx == 2:
-      #pl.ylabel('Probability')
+      pl.ylabel('Probability')
       pl.xlabel('log scan1')
     if idx == 3:
-      pl.ylabel('Probability')
+      #pl.ylabel('Probability')
       pl.xlabel('log local degree')
   
-  # Eigenvalues
+  ''' Eigenvalues '''
+  
   ax = pl.subplot(3,2,5)
   ax.set_yticks(scipy.arange(0,180000,40000))
   for eigValInstance in glob(os.path.join(invDir, EigDir,"*.npy")):
@@ -101,6 +104,35 @@ def plotInvDist(invDir, pngName, numBins =100):
     pl.ylabel('Magnitude')
     pl.xlabel('Eigenvalue rank in top 100')
     
+  ''' Edges '''
+  
+  arrfn = os.path.join(invDir, 'numEdges.py')
+  try:
+    arr = np.load(arrfn)
+    arr = np.log(arr[arr.nonzero()])
+    print "Processing %s..." % arrfn
+  except:
+    print "Ivariant file not found %s"  % arrfn
+  pl.figure(1)
+  n, bins, patches = pl.hist(arr, bins=10 , range=None, normed=False, weights=None, cumulative=False, \
+           bottom=None, histtype='stepfilled', align='mid', orientation='vertical', \
+           rwidth=None, log=False, color=None, label=None, hold=None)
+
+  n = np.append(n,0)
+  
+  
+  fig = pl.figure(2)
+  ax = pl.subplot(3,2,5)
+  
+  f = interpolate.interp1d(bins, n, kind='cubic') 
+  x = np.arange(bins[0],bins[-1],0.03) # vary linspc
+  
+  interp = f(x)
+  ltz = interp < 0
+  interp[ltz] = 0
+  pl.plot(x, interp,color ='grey' ,linewidth=1)
+  pl.ylabel('Frequency')
+  pl.xlabel('log global edge number')
     
   pl.savefig(pngName) 
   #pl.savefig(os.path.join(toDir, "CombinedTriangles.png")) 
