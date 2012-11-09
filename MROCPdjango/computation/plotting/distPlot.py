@@ -54,9 +54,15 @@ def plotInvDist(invDir, pngName, numBins =100):
     
       fig = pl.figure(2)
       fig.subplots_adjust(hspace=.5)
-      pl.subplot(3,2,idx+1)
+      ax = pl.subplot(3,2,idx+1)
+      
       if idx == 0:
-        plt.axis([0, 35, 0, 0.4])
+        plt.axis([0, 35, 0, 0.04])
+        ax.set_yticks(scipy.arange(0,0.04,0.01))
+      if idx == 1 or idx == 2:
+        ax.set_yticks(scipy.arange(0,0.03,0.01))
+      if idx == 3:
+        ax.set_yticks(scipy.arange(0,0.04,0.01))
       
       # Interpolation
       f = interpolate.interp1d(bins, n, kind='cubic') 
