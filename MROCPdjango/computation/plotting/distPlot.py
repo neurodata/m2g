@@ -54,6 +54,7 @@ def plotInvDist(invDir, pngName, numBins =100):
     
       fig = pl.figure(2)
       fig.subplots_adjust(hspace=.5)
+      fig.subplots_adjust(vspace=.5)
       ax = pl.subplot(3,2,idx+1)
       
       if idx == 0:
