@@ -55,7 +55,10 @@ def plotInvDist(invDir, pngName, numBins =100):
     
       fig = pl.figure(2)
       fig.subplots_adjust(hspace=.5)
-      fig.tight_layout()
+      
+      fig_gl, axes = pl.subplots(nrows=3, ncols=2)
+      fig_gl.tight_layout()
+      
       ax = pl.subplot(3,2,idx+1)
       
       if idx == 0:
