@@ -16,7 +16,7 @@ import os
 import sys
 from glob import glob
 import argparse
-
+import scipy
 from scipy import interpolate
 
 
