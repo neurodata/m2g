@@ -78,7 +78,7 @@ def plotInvDist(invDir, pngName, numBins =100):
       interp = f(x)
       ltz = interp < 0
       interp[ltz] = 0
-      pl.plot(x*100, interp,color ='grey' ,linewidth=1)
+      pl.plot(x, interp,color ='grey' ,linewidth=1)
     
     if idx == 0:
       pl.ylabel('Probability (%)')
@@ -105,8 +105,8 @@ def plotInvDist(invDir, pngName, numBins =100):
     
     n = len(eigv)
     sa = (np.sort(eigv)[::-1])
-    pl.plot(range(1,n+1), sa/np.max(sa), color='grey')
-    pl.ylabel('Normalized Eigenvalue')
+    pl.plot(range(1,n+1), sa/10000, color='grey')
+    pl.ylabel('Magnitude ($X 10^4$) ')
     pl.xlabel('Rank')
     
   ''' Edges '''
@@ -138,10 +138,7 @@ def plotInvDist(invDir, pngName, numBins =100):
   pl.ylabel('Frequency')
   pl.xlabel('log global edge number')
   
-  #pp = PdfPages(pngName+'.pdf')
-  #pp.savefig()
   pl.savefig(pngName+'.pdf') 
-  #pl.savefig(os.path.join(toDir, "CombinedTriangles.png")) 
   
 def main():
     
