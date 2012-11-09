@@ -17,7 +17,6 @@ import sys
 import glob
 import argparse
 
-import numpy as np
 from scipy import interpolate
 
 
@@ -30,11 +29,12 @@ def plotInvDist(invDir, pngName, numBins =10):
   for arrfn in glob.glob(os.path.join(invDir,'*.npy')):
     try:
       arr = np.load(arrfn)
+      arr = arr[arr.nonzero()]
       print "Processing %s..." % arrfn
       #import pdb; pdb.set_trace()
     except:
       print "Ivariant file not found %s"  % arrfn
-    #pl.figure(1)
+    pl.figure(1)
     n, bins, patches = pl.hist(arr, bins=numBins , range=None, normed=False, weights=None, cumulative=False, \
              bottom=None, histtype='stepfilled', align='mid', orientation='vertical', \
              rwidth=None, log=False, color=None, label=None, hold=None)
@@ -43,20 +43,20 @@ def plotInvDist(invDir, pngName, numBins =10):
     #import pdb; pdb.set_trace()
   
     n = np.append(n,0)
-    #pl.figure(2)
+    pl.figure(2)
     # Flat follow
-    pl.plot(bins, n, 'r--', linewidth=1)
+    pl.plot(bins, n, '-r', linewidth=1)
     
     # Interpolation
     #f = interpolate.interp1d(bins, n, kind='cubic') 
     
-    #x = np.arange(bins[0],bins[-1],100) # vary linspc
+    #x = np.arange(bins[0],bins[-1],0.01) # vary linspc
     #pl.plot(x, f(x),'-b' ,linewidth=1)
     
   pl.title('Invariant distribution')  
   pl.ylabel('Raw count')
   pl.xlabel('Bin number')
-  #plt.show()
+  pl.show()
   
   #if not os.path.exists(toDir):
   #  os.makedirs(toDir)
