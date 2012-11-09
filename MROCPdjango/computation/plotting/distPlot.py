@@ -96,7 +96,7 @@ def plotInvDist(invDir, pngName, numBins =100):
   
   ''' Eigenvalues '''
   ax = pl.subplot(3,2,5)
-  ax.set_yticks(scipy.arange(0,180000,40000))
+  #ax.set_yticks(scipy.arange(0,180000,40000))
   for eigValInstance in glob(os.path.join(invDir, EigDir,"*.npy")):
     try:
       eigv = np.load(eigValInstance)
@@ -104,8 +104,8 @@ def plotInvDist(invDir, pngName, numBins =100):
       print "Eigenvalue array"
     
     n = len(eigv)
-    pl.plot(range(1,n+1), (np.sort(eigv)[::-1]), color='grey')
-    pl.ylabel('Magnitude')
+    pl.plot(range(1,n+1), (np.sort(eigv)[::-1])/40000, color='grey')
+    pl.ylabel('Magnitude X 40^4')
     pl.xlabel('Eigenvalue rank in top 100')
     
   ''' Edges '''
