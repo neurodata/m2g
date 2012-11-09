@@ -29,7 +29,7 @@ def plotInvDist(invDir, pngName, numBins =100):
   SS1dir = "ScanStat"
   triDir = "Triangle"
   
-  invDirs = [triDir, ccDir, SS1dir, DegDir ] # EigDir,  MADdir
+  invDirs = [triDir, ccDir, SS1dir, DegDir ] #   MADdir
   
   if not os.path.exists(invDir):
     print "%s does not exist" % invDir
@@ -78,10 +78,20 @@ def plotInvDist(invDir, pngName, numBins =100):
     if idx == 3:
       pl.ylabel('Probability')
       pl.xlabel('log local degree')
+  
+  # Eigenvalues
+  pl.subplot(3,2,5)
+  for eigValInstance in glob(os.path.join(invDir, EigDir,"*.npy")):
+    try:
+      eigv = np.load(eigValInstance)
+    except:
+      print "Eigenvalue array"
     
+    n = len(eigv)
+    pl.plot(range(1,n+1), np.sort(eigv), color='grey')
+    pl.ylabel('Magnitude')
+    pl.xlabel('Eigenvalue rank in top 100')
     
-  #if not os.path.exists(toDir):
-  #  os.makedirs(toDir)
     
   pl.savefig(pngName) 
   #pl.savefig(os.path.join(toDir, "CombinedTriangles.png")) 
