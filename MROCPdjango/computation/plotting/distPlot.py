@@ -20,12 +20,24 @@ import argparse
 from scipy import interpolate
 
 
-def plotInvDist(invDir, pngName, numBins =10):
+def plotInvDist(invDir, pngName, numBins =100):
+  # ClustCoeff  Degree  Eigen  MAD  numEdges.npy  ScanStat  Triangle
+  MADdir = "MAD"
+  ccDir = "ClustCoeff"
+  DegDir = "Degree"
+  EigDir = "Eigen"
+  SS1dir = "ScanStat"
+  triDir = "Triangle"
+  
+  invDirs = [MADdir, ccDir, DegDir, EigDir, SS1dir, triDir]
   
   if not os.path.exists(invDir):
     print "%s does not exist" % invDir
     sys.exit(1)
   
+  # for idx, drty in enumerate (invDirs):
+  # for arrfn in glob.glob(os.path.join(invDir, drty,'*.npy')):
+    
   for arrfn in glob.glob(os.path.join(invDir,'*.npy')):
     try:
       arr = np.load(arrfn)
@@ -39,10 +51,9 @@ def plotInvDist(invDir, pngName, numBins =10):
              bottom=None, histtype='stepfilled', align='mid', orientation='vertical', \
              rwidth=None, log=False, color=None, label=None, hold=None)
 
-    # plain plot
-    #import pdb; pdb.set_trace()
-  
     n = np.append(n,0)
+    n = n/float(sum(n))
+    
     pl.figure(2)
     # Flat follow
     #pl.plot(bins, n, '-r', linewidth=1)
@@ -79,6 +90,7 @@ def main():
     parser.add_argument('numBins', type = int, action='store', help='Number of bins')
     
     result = parser.parse_args()
+    
     plotInvDist(result.invDir, result.pngName, result.numBins)
 
 if __name__ == '__main__':
