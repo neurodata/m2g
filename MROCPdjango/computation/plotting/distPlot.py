@@ -29,10 +29,9 @@ def plotInvDist(invDir, pngName, numBins =10):
   for arrfn in glob.glob(os.path.join(invDir,'*.npy')):
     try:
       arr = np.load(arrfn)
+      import pdb; pdb.set_trace()
       arr = np.log(arr[arr.nonzero()])
-      #arr = arr[arr.nonzero()]
       print "Processing %s..." % arrfn
-      #import pdb; pdb.set_trace()
     except:
       print "Ivariant file not found %s"  % arrfn
     pl.figure(1)
@@ -58,8 +57,10 @@ def plotInvDist(invDir, pngName, numBins =10):
     interp[ltz] = 0
     pl.plot(x, interp,color ='grey' ,linewidth=1)
     
-  pl.title('Triangle Count')  
-  pl.ylabel('Raw bin count ')
+  #pl.title('Triangle Count')  
+  #pl.title('Scan1')  
+  #pl.title('Clustering Co-eff')  
+  pl.ylabel('Raw bin count')
   pl.xlabel('log count')
   
   #pl.show()
