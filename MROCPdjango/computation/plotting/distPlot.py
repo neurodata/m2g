@@ -139,7 +139,7 @@ def plotInvDist(invDir, pngName, numBins =100):
   
   pp = PdfPages(pngName+'.pdf')
   pp.savefig()
-  pl.savefig(pngName+'.Fpdf') 
+  pl.savefig(pngName+'F.pdf') 
   #pl.savefig(os.path.join(toDir, "CombinedTriangles.png")) 
   
 def main():
