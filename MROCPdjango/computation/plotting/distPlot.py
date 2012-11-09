@@ -127,7 +127,7 @@ def plotInvDist(invDir, pngName, numBins =100):
   
   fig = pl.figure(2)
   ax = pl.subplot(3,2,6)
-  #ax.set_yticks(scipy.arange(0,180000,40000))
+  ax.set_xticks(scipy.arange(17.2,18.1,0.04))
   
   f = interpolate.interp1d(bins, n, kind='cubic') 
   x = np.arange(bins[0],bins[-1],0.01) # vary linspc
