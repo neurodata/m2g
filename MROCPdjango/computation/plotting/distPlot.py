@@ -29,55 +29,58 @@ def plotInvDist(invDir, pngName, numBins =100):
   SS1dir = "ScanStat"
   triDir = "Triangle"
   
-  invDirs = [MADdir, ccDir, DegDir, EigDir, SS1dir, triDir]
+  invDirs = [triDir, ccDir, SS1dir, DegDir ] # EigDir,  MADdir
   
   if not os.path.exists(invDir):
     print "%s does not exist" % invDir
     sys.exit(1)
   
-  # for idx, drty in enumerate (invDirs):
-  # for arrfn in glob.glob(os.path.join(invDir, drty,'*.npy')):
-    
-  for arrfn in glob.glob(os.path.join(invDir,'*.npy')):
-    try:
-      arr = np.load(arrfn)
-      import pdb; pdb.set_trace()
-      arr = np.log(arr[arr.nonzero()])
-      print "Processing %s..." % arrfn
-    except:
-      print "Ivariant file not found %s"  % arrfn
-    pl.figure(1)
-    n, bins, patches = pl.hist(arr, bins=numBins , range=None, normed=False, weights=None, cumulative=False, \
-             bottom=None, histtype='stepfilled', align='mid', orientation='vertical', \
-             rwidth=None, log=False, color=None, label=None, hold=None)
-
-    n = np.append(n,0)
-    n = n/float(sum(n))
-    
-    pl.figure(2)
-    # Flat follow
-    #pl.plot(bins, n, '-r', linewidth=1)
-    
-    # Interpolation
-    f = interpolate.interp1d(bins, n, kind='cubic') 
-    
-    x = np.arange(bins[0],bins[-1],0.03) # vary linspc
-    
-    interp = f(x)
-    ltz = interp < 0
-    interp[ltz] = 0
-    pl.plot(x, interp,color ='grey' ,linewidth=1)
-    
-  #pl.title('Triangle Count')  
-  #pl.title('Scan1')  
-  #pl.title('Clustering Co-eff')  
-  pl.ylabel('Raw bin count')
-  pl.xlabel('log count')
+  for idx, drcty in enumerate (invDirs):
+    for arrfn in glob.glob(os.path.join(invDir, drcty,'*.npy')): 
+    #for arrfn in glob.glob(os.path.join(invDir,'*.npy')):
+      try:
+        arr = np.load(arrfn)
+        arr = np.log(arr[arr.nonzero()])
+        print "Processing %s..." % arrfn
+      except:
+        print "Ivariant file not found %s"  % arrfn
+      pl.figure(1)
+      n, bins, patches = pl.hist(arr, bins=numBins , range=None, normed=False, weights=None, cumulative=False, \
+               bottom=None, histtype='stepfilled', align='mid', orientation='vertical', \
+               rwidth=None, log=False, color=None, label=None, hold=None)
   
-  #pl.show()
-  
-  #if not os.path.exists(toDir):
-  #  os.makedirs(toDir)
+      n = np.append(n,0)
+      n = n/float(sum(n))
+    
+      pl.figure(2)
+      pl.subplot(3,2,idx)
+      
+      # Interpolation
+      f = interpolate.interp1d(bins, n, kind='cubic') 
+      
+      x = np.arange(bins[0],bins[-1],0.03) # vary linspc
+      
+      interp = f(x)
+      ltz = interp < 0
+      interp[ltz] = 0
+      pl.plot(x, interp,color ='grey' ,linewidth=1)
+    
+    if idx == 1:
+      pl.ylabel('Probability')
+      pl.xlabel('log number of local triangles')
+    if idx == 2:
+      pl.ylabel('Probability')
+      pl.xlabel('log local clustering coefficient')
+    if idx == 3:
+      pl.ylabel('Probability')
+      pl.xlabel('log scan1')
+    if idx == 4:
+      pl.ylabel('Probability')
+      pl.xlabel('log local degree')
+    
+    
+  if not os.path.exists(toDir):
+    os.makedirs(toDir)
     
   pl.savefig(pngName) 
   #pl.savefig(os.path.join(toDir, "CombinedTriangles.png")) 
