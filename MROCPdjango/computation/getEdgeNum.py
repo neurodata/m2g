@@ -12,6 +12,7 @@ def getEdgeNum(graphDir, toDir):
   edgeNum = {}
   
   for f in glob(os.path.join(graphDir,'*')):
+    print "Running: %s..." % f
     edgeNum [getBaseName(f)] = (sio.loadmat(f)['fibergraph']).nnz 
     #json.dumps(edgeNum)
   
@@ -20,7 +21,7 @@ def getEdgeNum(graphDir, toDir):
   if not os.path.exists(toDir):
     os.makedirs(toDir)
   
-  np.save("numEdges.npy", edgeArr)
+  np.save(os.path.join(toDir,"numEdges.npy"), edgeArr)
   
 def main():
     
