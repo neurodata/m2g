@@ -53,7 +53,7 @@ def plotInvDist(invDir, pngName, numBins =100):
       n = n/float(sum(n))
     
       pl.figure(2)
-      pl.subplot(3,2,idx)
+      pl.subplot(3,2,idx+1)
       
       # Interpolation
       f = interpolate.interp1d(bins, n, kind='cubic') 
@@ -65,22 +65,22 @@ def plotInvDist(invDir, pngName, numBins =100):
       interp[ltz] = 0
       pl.plot(x, interp,color ='grey' ,linewidth=1)
     
-    if idx == 1:
+    if idx == 0:
       pl.ylabel('Probability')
       pl.xlabel('log number of local triangles')
-    if idx == 2:
+    if idx == 1:
       pl.ylabel('Probability')
       pl.xlabel('log local clustering coefficient')
-    if idx == 3:
+    if idx == 2:
       pl.ylabel('Probability')
       pl.xlabel('log scan1')
-    if idx == 4:
+    if idx == 3:
       pl.ylabel('Probability')
       pl.xlabel('log local degree')
     
     
-  if not os.path.exists(toDir):
-    os.makedirs(toDir)
+  #if not os.path.exists(toDir):
+  #  os.makedirs(toDir)
     
   pl.savefig(pngName) 
   #pl.savefig(os.path.join(toDir, "CombinedTriangles.png")) 
