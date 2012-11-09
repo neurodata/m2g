@@ -45,7 +45,7 @@ def plotInvDist(invDir, pngName, numBins =100):
     for arrfn in glob(os.path.join(invDir, drcty,'*.npy')): 
       try:
         arr = np.load(arrfn)
-        arr = np.log(arr[arr.nonzero()]) * 100
+        arr = np.log(arr[arr.nonzero()])
         print "Processing %s..." % arrfn
       except:
         print "Ivariant file not found %s"  % arrfn
@@ -78,7 +78,7 @@ def plotInvDist(invDir, pngName, numBins =100):
       interp = f(x)
       ltz = interp < 0
       interp[ltz] = 0
-      pl.plot(x, interp,color ='grey' ,linewidth=1)
+      pl.plot(x*100, interp,color ='grey' ,linewidth=1)
     
     if idx == 0:
       pl.ylabel('Probability (%)')
