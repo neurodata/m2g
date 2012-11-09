@@ -110,7 +110,7 @@ def plotInvDist(invDir, pngName, numBins =100):
     
   ''' Edges '''
   
-  arrfn = os.path.join(invDir, 'numEdges.py')
+  arrfn = os.path.join(invDir, 'numEdges.npy')
   try:
     arr = np.load(arrfn)
     arr = np.log(arr[arr.nonzero()])
