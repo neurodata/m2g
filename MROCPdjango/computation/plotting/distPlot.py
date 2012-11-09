@@ -32,7 +32,7 @@ def plotInvDist(invDir, pngName, numBins =100):
   triDir = "Triangle"
   
   invDirs = [triDir, ccDir, SS1dir, DegDir ] 
-  '''
+  
   if not os.path.exists(invDir):
     print "%s does not exist" % invDir
     sys.exit(1)
@@ -92,7 +92,7 @@ def plotInvDist(invDir, pngName, numBins =100):
     if idx == 3:
       #pl.ylabel('Probability') #**
       pl.xlabel('log local degree')
-  '''
+  
   
   ''' Eigenvalues '''
   ax = pl.subplot(3,2,5)
@@ -137,9 +137,9 @@ def plotInvDist(invDir, pngName, numBins =100):
   pl.ylabel('Frequency')
   pl.xlabel('log global edge number')
   
-  pp = PdfPages(pngName+'.pdf')
-  pp.savefig()
-  pl.savefig(pngName+'F.pdf') 
+  #pp = PdfPages(pngName+'.pdf')
+  #pp.savefig()
+  pl.savefig(pngName+'.pdf') 
   #pl.savefig(os.path.join(toDir, "CombinedTriangles.png")) 
   
 def main():
