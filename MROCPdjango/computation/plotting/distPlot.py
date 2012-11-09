@@ -45,7 +45,7 @@ def plotInvDist(invDir, pngName, numBins =100):
     for arrfn in glob(os.path.join(invDir, drcty,'*.npy')): 
       try:
         arr = np.load(arrfn)
-        arr = np.log(arr[arr.nonzero()])
+        arr = np.log(arr[arr.nonzero()]) * 100
         print "Processing %s..." % arrfn
       except:
         print "Ivariant file not found %s"  % arrfn
@@ -104,9 +104,10 @@ def plotInvDist(invDir, pngName, numBins =100):
       print "Eigenvalue array"
     
     n = len(eigv)
-    pl.plot(range(1,n+1), (np.sort(eigv)[::-1])/40000, color='grey')
-    pl.ylabel('Magnitude $X 40^4$')
-    pl.xlabel('Eigenvalue rank in top 100')
+    sa = (np.sort(eigv)[::-1])
+    pl.plot(range(1,n+1), sa/np.max(sa), color='grey')
+    pl.ylabel('Normalized Eigenvalue')
+    pl.xlabel('Rank')
     
   ''' Edges '''
   arrfn = os.path.join(invDir, 'numEdges.npy')
