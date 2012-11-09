@@ -29,7 +29,7 @@ def plotInvDist(invDir, pngName, numBins =10):
   for arrfn in glob.glob(os.path.join(invDir,'*.npy')):
     try:
       arr = np.load(arrfn)
-      arr = arr[arr.nonzero()]
+      arr = np.log(arr[arr.nonzero()])
       print "Processing %s..." % arrfn
       #import pdb; pdb.set_trace()
     except:

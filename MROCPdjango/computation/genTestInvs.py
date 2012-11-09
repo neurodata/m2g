@@ -24,7 +24,7 @@ def testing(G_fn, dataDir):
   
   mad = getMaxAveDegree(G_fn)
   ss1_fn, deg_fn, numNodes = calcScanStat_Degree(G_fn)
-  tri_fn[0] = eignTriangleLocal(G_fn)
+  tri_fn = eignTriangleLocal(G_fn)[0]
   ccArr_fn = calcLocalClustCoeff(deg_fn, tri_fn, test=True)
   
   testObj = unittesting.test(G_fn, dataDir, numNodes, ss1_fn = ss1_fn, deg_fn = deg_fn, tri_fn = tri_fn, ccArr_fn = ccArr_fn, mad = mad) # Create unittest object
