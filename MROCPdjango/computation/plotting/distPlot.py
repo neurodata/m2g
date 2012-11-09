@@ -84,13 +84,13 @@ def plotInvDist(invDir, pngName, numBins =100):
       pl.ylabel('Probability')
       pl.xlabel('log number of local triangles')
     if idx == 1:
-      #pl.ylabel('Probability')
+      pl.ylabel('Probability') #**
       pl.xlabel('log local clustering coefficient')
     if idx == 2:
       pl.ylabel('Probability')
       pl.xlabel('log scan1')
     if idx == 3:
-      #pl.ylabel('Probability')
+      pl.ylabel('Probability') #**
       pl.xlabel('log local degree')
   
   ''' Eigenvalues '''
@@ -124,9 +124,8 @@ def plotInvDist(invDir, pngName, numBins =100):
 
   n = np.append(n,0)
   
-  
   fig = pl.figure(2)
-  ax = pl.subplot(3,2,5)
+  ax = pl.subplot(3,2,6)
   
   f = interpolate.interp1d(bins, n, kind='cubic') 
   x = np.arange(bins[0],bins[-1],0.03) # vary linspc
