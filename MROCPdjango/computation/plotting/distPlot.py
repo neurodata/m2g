@@ -9,6 +9,7 @@ import matplotlib
 matplotlib.use("Agg")
 
 import matplotlib.pyplot as plt
+from matplotlib.backends.backend_pdf import PdfPages
 import pylab as pl
 
 import numpy as np
@@ -39,7 +40,7 @@ def plotInvDist(invDir, pngName, numBins =100):
   pl.figure(2)
   fig_gl, axes = pl.subplots(nrows=3, ncols=2)
   fig_gl.tight_layout()
-  
+  '''
   for idx, drcty in enumerate (invDirs):
     for arrfn in glob(os.path.join(invDir, drcty,'*.npy')): 
       try:
@@ -80,21 +81,20 @@ def plotInvDist(invDir, pngName, numBins =100):
       pl.plot(x, interp,color ='grey' ,linewidth=1)
     
     if idx == 0:
-      pl.ylabel('Probability')
+      pl.ylabel('Probability (%)')
       pl.xlabel('log number of local triangles')
     if idx == 1:
       #pl.ylabel('Probability') #**
       pl.xlabel('log local clustering coefficient')
     if idx == 2:
-      pl.ylabel('Probability')
-      pl.xlabel('log scan1')
+      pl.ylabel('Probability (%)')
+      pl.xlabel('log scan1 statistic')
     if idx == 3:
       #pl.ylabel('Probability') #**
       pl.xlabel('log local degree')
-  
+  '''
   
   ''' Eigenvalues '''
-  
   ax = pl.subplot(3,2,5)
   ax.set_yticks(scipy.arange(0,180000,40000))
   for eigValInstance in glob(os.path.join(invDir, EigDir,"*.npy")):
@@ -104,12 +104,11 @@ def plotInvDist(invDir, pngName, numBins =100):
       print "Eigenvalue array"
     
     n = len(eigv)
-    pl.plot(range(1,n+1), np.sort(eigv), color='grey')
+    pl.plot(range(1,n+1), np.sort(eigv)[::-1], color='grey')
     pl.ylabel('Magnitude')
     pl.xlabel('Eigenvalue rank in top 100')
     
   ''' Edges '''
-  
   arrfn = os.path.join(invDir, 'numEdges.npy')
   try:
     arr = np.load(arrfn)
@@ -137,8 +136,9 @@ def plotInvDist(invDir, pngName, numBins =100):
   pl.plot(x, interp,color ='grey' ,linewidth=1)
   pl.ylabel('Frequency')
   pl.xlabel('log global edge number')
-    
-  pl.savefig(pngName) 
+  
+  pp = PdfPages(pngName+'.pdf')
+  pl.savefig(pngName+'.png') 
   #pl.savefig(os.path.join(toDir, "CombinedTriangles.png")) 
   
 def main():
