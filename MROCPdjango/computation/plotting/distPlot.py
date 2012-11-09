@@ -55,6 +55,8 @@ def plotInvDist(invDir, pngName, numBins =100):
       fig = pl.figure(2)
       fig.subplots_adjust(hspace=.5)
       pl.subplot(3,2,idx+1)
+      if idx == 0:
+        plt.axis([0, 35, 0, 0.4])
       
       # Interpolation
       f = interpolate.interp1d(bins, n, kind='cubic') 
@@ -80,7 +82,8 @@ def plotInvDist(invDir, pngName, numBins =100):
       pl.xlabel('log local degree')
   
   # Eigenvalues
-  pl.subplot(3,2,5)
+  ax = pl.subplot(3,2,5)
+  ax.set_yticks(scipy.arange(0,180000,40000))
   for eigValInstance in glob(os.path.join(invDir, EigDir,"*.npy")):
     try:
       eigv = np.load(eigValInstance)
