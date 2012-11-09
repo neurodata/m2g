@@ -54,7 +54,6 @@ def plotInvDist(invDir, pngName, numBins =100):
     
       fig = pl.figure(2)
       fig.subplots_adjust(hspace=.5)
-      fig.subplots_adjust(vspace=.5)
       ax = pl.subplot(3,2,idx+1)
       
       if idx == 0:
@@ -79,10 +78,10 @@ def plotInvDist(invDir, pngName, numBins =100):
       pl.ylabel('Probability')
       pl.xlabel('log number of local triangles')
     if idx == 1:
-      pl.ylabel('Probability')
+      #pl.ylabel('Probability')
       pl.xlabel('log local clustering coefficient')
     if idx == 2:
-      pl.ylabel('Probability')
+      #pl.ylabel('Probability')
       pl.xlabel('log scan1')
     if idx == 3:
       pl.ylabel('Probability')
