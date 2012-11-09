@@ -105,7 +105,7 @@ def plotInvDist(invDir, pngName, numBins =100):
     
     n = len(eigv)
     pl.plot(range(1,n+1), (np.sort(eigv)[::-1])/40000, color='grey')
-    pl.ylabel('Magnitude (X 40^4)')
+    pl.ylabel('Magnitude $X 40^4$')
     pl.xlabel('Eigenvalue rank in top 100')
     
   ''' Edges '''
