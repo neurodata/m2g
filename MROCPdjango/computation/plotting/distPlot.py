@@ -81,13 +81,13 @@ def plotInvDist(invDir, pngName, numBins =100):
       pl.plot(x, interp,color ='grey' ,linewidth=1)
     
     if idx == 0:
-      pl.ylabel('Probability (%)')
+      pl.ylabel('Probability')
       pl.xlabel('log number of local triangles')
     if idx == 1:
       #pl.ylabel('Probability') #**
       pl.xlabel('log local clustering coefficient')
     if idx == 2:
-      pl.ylabel('Probability (%)')
+      pl.ylabel('Probability')
       pl.xlabel('log scan1 statistic')
     if idx == 3:
       #pl.ylabel('Probability') #**
@@ -96,7 +96,7 @@ def plotInvDist(invDir, pngName, numBins =100):
   
   ''' Eigenvalues '''
   ax = pl.subplot(3,2,5)
-  ax.set_yticks(scipy.arange(0,4,1))
+  ax.set_yticks(scipy.arange(0,16,4))
   for eigValInstance in glob(os.path.join(invDir, EigDir,"*.npy")):
     try:
       eigv = np.load(eigValInstance)
