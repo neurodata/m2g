@@ -40,7 +40,7 @@ def plotInvDist(invDir, pngName, numBins =100):
   pl.figure(2)
   fig_gl, axes = pl.subplots(nrows=3, ncols=2)
   fig_gl.tight_layout()
-  '''
+  
   for idx, drcty in enumerate (invDirs):
     for arrfn in glob(os.path.join(invDir, drcty,'*.npy')): 
       try:
@@ -92,7 +92,7 @@ def plotInvDist(invDir, pngName, numBins =100):
     if idx == 3:
       #pl.ylabel('Probability') #**
       pl.xlabel('log local degree')
-  '''
+  
   
   ''' Eigenvalues '''
   ax = pl.subplot(3,2,5)
