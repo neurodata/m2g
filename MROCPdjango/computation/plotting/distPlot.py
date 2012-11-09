@@ -36,6 +36,10 @@ def plotInvDist(invDir, pngName, numBins =100):
     print "%s does not exist" % invDir
     sys.exit(1)
   
+  pl.figure(2)
+  fig_gl, axes = pl.subplots(nrows=3, ncols=2)
+  fig_gl.tight_layout()
+  
   for idx, drcty in enumerate (invDirs):
     for arrfn in glob(os.path.join(invDir, drcty,'*.npy')): 
     #for arrfn in glob(os.path.join(invDir,'*.npy')):
@@ -55,9 +59,6 @@ def plotInvDist(invDir, pngName, numBins =100):
     
       fig = pl.figure(2)
       fig.subplots_adjust(hspace=.5)
-      
-      fig_gl, axes = pl.subplots(nrows=3, ncols=2)
-      fig_gl.tight_layout()
       
       ax = pl.subplot(3,2,idx+1)
       
