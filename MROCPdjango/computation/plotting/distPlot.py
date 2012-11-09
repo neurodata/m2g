@@ -105,7 +105,7 @@ def plotInvDist(invDir, pngName, numBins =100):
     
     n = len(eigv)
     pl.plot(range(1,n+1), (np.sort(eigv)[::-1])/40000 , color='grey')
-    pl.ylabel('Magnitude (X 40^(-4))')
+    pl.ylabel('Magnitude')
     pl.xlabel('Eigenvalue rank in top 100')
     
   ''' Edges '''
@@ -138,7 +138,8 @@ def plotInvDist(invDir, pngName, numBins =100):
   pl.xlabel('log global edge number')
   
   pp = PdfPages(pngName+'.pdf')
-  pl.savefig(pngName+'.png') 
+  pp.saverfig()
+  pl.savefig(pngName+'.Fpdf') 
   #pl.savefig(os.path.join(toDir, "CombinedTriangles.png")) 
   
 def main():
