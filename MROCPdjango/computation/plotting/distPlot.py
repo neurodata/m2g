@@ -14,7 +14,7 @@ import pylab as pl
 import numpy as np
 import os
 import sys
-import glob
+from glob import glob
 import argparse
 
 from scipy import interpolate
@@ -36,8 +36,8 @@ def plotInvDist(invDir, pngName, numBins =100):
     sys.exit(1)
   
   for idx, drcty in enumerate (invDirs):
-    for arrfn in glob.glob(os.path.join(invDir, drcty,'*.npy')): 
-    #for arrfn in glob.glob(os.path.join(invDir,'*.npy')):
+    for arrfn in glob(os.path.join(invDir, drcty,'*.npy')): 
+    #for arrfn in glob(os.path.join(invDir,'*.npy')):
       try:
         arr = np.load(arrfn)
         arr = np.log(arr[arr.nonzero()])
