@@ -52,7 +52,8 @@ def plotInvDist(invDir, pngName, numBins =100):
       n = np.append(n,0)
       n = n/float(sum(n))
     
-      pl.figure(2)
+      fig = pl.figure(2)
+      fig.subplots_adjust(hspace=.5)
       pl.subplot(3,2,idx+1)
       
       # Interpolation
