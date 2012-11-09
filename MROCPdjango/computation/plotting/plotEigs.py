@@ -5,11 +5,16 @@
 # Plot all .np arrays in a common dir on the same axis & save
 # 1 indexed
 
-import matplotlib.pyplot as plt
+import matplotlib
+matplotlib.use("Agg")
+
+import pylab as pl
+#import matplotlib.pyplot as plt
 import numpy as np
 import os
 import sys
 from glob import glob
+import argparse
 
 def plotEigs(eigValDir, toDir):
   
@@ -17,27 +22,26 @@ def plotEigs(eigValDir, toDir):
     print "%s does not exist" % eigValDir
     sys.exit(1)
   
-  n = 0
   for eigValInstance in glob(os.path.join(eigValDir,"*.npy")):
     try:
       eigv = np.load(eigValInstance)
     except:
       print "Eigenvalue array"
     
-    #if n == 0:
     n = len(eigv)
-    plt.plot([range(1,n+1)], eigv,'-b')
+    #import pdb; pdb.set_trace()
+    pl.plot(range(1,n+1), eigv, color='grey')
     #plt.axis([1, n+1]) # DM TODO: Axis scaling 
       
-  plt.title('Top 50 largest eigenvalues')  
-  plt.ylabel('Eigenvalue number')
-  plt.xlabel('Eigenvalue')
-  plt.show()
+  pl.title('100 largest eigenvalues')  
+  pl.ylabel('Eigenvalue')
+  pl.xlabel('Rank')
+  pl.show()
   
-  if not  os.path.exists():
-    os.makedirs(toDir)
+  #if not os.path.exists():
+  #  os.makedirs(toDir)
     
-  plt.savefig(os.path.join(toDir, "CombinedEigenvalues.png")) 
+  pl.savefig(os.path.join(toDir, "CombinedEigenvalues.png")) 
   
 def main():
     
