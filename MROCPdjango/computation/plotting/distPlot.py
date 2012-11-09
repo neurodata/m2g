@@ -107,7 +107,7 @@ def plotInvDist(invDir, pngName, numBins =100):
     sa = (np.sort(eigv)[::-1])
     pl.plot(range(1,n+1), sa/10000, color='grey')
     pl.ylabel('Magnitude ($X 10^4$) ')
-    pl.xlabel('Rank')
+    pl.xlabel('eigenvalue rank')
     
   ''' Edges '''
   arrfn = os.path.join(invDir, 'numEdges.npy')
