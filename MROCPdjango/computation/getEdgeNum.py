@@ -25,7 +25,7 @@ def getEdgeNum(graphDir, toDir):
 def main():
     
     parser = argparse.ArgumentParser(description='Get the number of edges per graph')
-    parser.add_argument('grapgDir', action='store',help='Full dir name of directory with graphs (.mat)')
+    parser.add_argument('graphDir', action='store',help='Full dir name of directory with graphs (.mat)')
     parser.add_argument('toDir', action='store', help='Full path of directory where you want result .npy array to go')
     
     result = parser.parse_args()
