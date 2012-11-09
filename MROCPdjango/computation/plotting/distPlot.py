@@ -30,6 +30,7 @@ def plotInvDist(invDir, pngName, numBins =10):
     try:
       arr = np.load(arrfn)
       arr = np.log(arr[arr.nonzero()])
+      #arr = arr[arr.nonzero()]
       print "Processing %s..." % arrfn
       #import pdb; pdb.set_trace()
     except:
@@ -45,18 +46,23 @@ def plotInvDist(invDir, pngName, numBins =10):
     n = np.append(n,0)
     pl.figure(2)
     # Flat follow
-    pl.plot(bins, n, '-r', linewidth=1)
+    #pl.plot(bins, n, '-r', linewidth=1)
     
     # Interpolation
-    #f = interpolate.interp1d(bins, n, kind='cubic') 
+    f = interpolate.interp1d(bins, n, kind='cubic') 
     
-    #x = np.arange(bins[0],bins[-1],0.01) # vary linspc
-    #pl.plot(x, f(x),'-b' ,linewidth=1)
+    x = np.arange(bins[0],bins[-1],0.03) # vary linspc
     
-  pl.title('Invariant distribution')  
-  pl.ylabel('Raw count')
-  pl.xlabel('Bin number')
-  pl.show()
+    interp = f(x)
+    ltz = interp < 0
+    interp[ltz] = 0
+    pl.plot(x, interp,color ='grey' ,linewidth=1)
+    
+  pl.title('Triangle Count')  
+  pl.ylabel('Raw bin count ')
+  pl.xlabel('log count')
+  
+  #pl.show()
   
   #if not os.path.exists(toDir):
   #  os.makedirs(toDir)
