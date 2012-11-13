@@ -10,6 +10,7 @@ import mrcap.lcc as lcc
 from getBaseName import getBaseName
 import os
 import sys
+from time import time
 
 def loadAdjMat(G_fn, lcc_fn, roiRootName = None):
   '''
@@ -17,6 +18,8 @@ def loadAdjMat(G_fn, lcc_fn, roiRootName = None):
   G_fn - the .mat file holding graph
   lcc_fn - the largest connected component .npy z-ordering
   '''
+
+  start = time()
   print "Loading adjacency matrix..."
   if not roiRootName:
     roiRootName =  os.path.join(getRoiRoot(G_fn),getBaseName(G_fn)) + '_roi'
@@ -39,7 +42,7 @@ def loadAdjMat(G_fn, lcc_fn, roiRootName = None):
     if os.path.exists(roiRootName) and os.path.exists(lcc_fn) and os.path.exists(G_fn):
       print "****Some wild Problem loading real lcc & graph****"
     sys.exit(-1)
-    
+  print "Time to load: %s secs" % (time()-start)
   return G
 
 def getRoiRoot(G_fn):
