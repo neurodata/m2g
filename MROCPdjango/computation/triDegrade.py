@@ -40,22 +40,23 @@ def triangleDegrade(G_fn, dataDir):
   timeArray = []
   for k in numEigsArray:
     tri_fn, tm = eignTriangleLocal(G_fn, G , lcc_fn = None, roiRootName = None, triDir = dataDir, k = k, degradeTest = True)
-    #percOffBy = testTriangles( dataDir, k, tri_fn)
     timeArray.append(tm)
-    percDiffArray.append(testTriangles( dataDir, k, tri_fn))
+    percDiffArray.append(testTriangles( dataDir, k, tri_fn, numNodes, 0.1))
   
   print "***Triangle eignvalue number degradation complete..."
   graphDegrade(percDiffArray, timeArray, dataDir, numEigsArray, numNodes, numEdges)
 
 
 
-def testTriangles(dataDir, numEigsArray, tri_fn, tol = 0.1):
-   percOffBy = proximityAssertion(np.load(tri_fn), np.load(os.path.join("bench","1000","triArr.npy")), tol, "Triangle count" )
+def testTriangles(dataDir, numEigsArray, tri_fn, numNodes, tol = 0.1):
+   percOffBy = proximityAssertion(np.load(tri_fn), np.load(os.path.join("bench",str(numNodes),"triArr.npy")), tol, "Triangle count" )
    print "==========================================================================="
    return percOffBy
 
 def graphDegrade(percDiffArray, timeArray, toDir, numEigsArray, numNodes, numEdges):
-  
+  if not os.path.exists(toDir):
+    os.makedirs(toDir)
+    
   ''' % difference & time '''
   plt.figure(1)
   #plt.subplot(131)
@@ -69,7 +70,8 @@ def graphDegrade(percDiffArray, timeArray, toDir, numEigsArray, numNodes, numEdg
   plt.ylabel('Time taken (s) & Global percent difference')
   plt.xlabel('Number of Eigenvalues computed')
   #plt.show()
-  
+  plt.savefig(os.path.join(toDir, "degradeTimeAndPercDiff"+str(numNodes)+".png"))
+
   ''' % Diff alone '''
   plt.figure(2)
   #plt.subplot(132)
@@ -81,7 +83,7 @@ def graphDegrade(percDiffArray, timeArray, toDir, numEigsArray, numNodes, numEdg
   plt.ylabel('Global percent difference')
   plt.xlabel('Number of Eigenvalues computed')
   #plt.show()
-  
+  plt.savefig(os.path.join(toDir, "degradePercDiff"+str(numNodes)+".png")) 
   
   ''' Time alone '''
   plt.figure(3)
@@ -95,11 +97,7 @@ def graphDegrade(percDiffArray, timeArray, toDir, numEigsArray, numNodes, numEdg
   plt.xlabel('Number of Eigenvalues computed')
   #plt.show()
   
-  
-  if not os.path.exists(toDir):
-    os.makedirs(toDir)
-    
-  plt.savefig(os.path.join(toDir, "degrade"+str(numNodes)+".png"))
+  plt.savefig(os.path.join(toDir, "degradeTime"+str(numNodes)+".png"))
   
 def main():
   
