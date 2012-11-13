@@ -46,11 +46,15 @@ def eignTriLocal_MAD(G_fn, G = None, lcc_fn = None, roiRootName = None, triDir=N
   start = time()
   ''' Calculate Eigenvalues & Eigen vectors'''
   l, u = arpack.eigs(G, k=k, which='LM') # LanczosMethod(A,0) 
-  
+  print 'Time taken to calc Eigenvalues: %f secs\n' % (time() - start)
+
+  start = time()
   ''' Triangle count'''
   for j in range(n):
     numTri[j] = abs(round((sum( np.power(l.real,3) * (u[j][:].real**2)) ) / 6.0)) # Divide by six because we count locally
-  
+  print 'Time taken to do triangle calculations: %f secs\n' % (time() - start)  
+
+
   ''' MAD '''
   maxAveDeg = np.max(l.real)
   
@@ -58,7 +62,7 @@ def eignTriLocal_MAD(G_fn, G = None, lcc_fn = None, roiRootName = None, triDir=N
   ''' Top eigenvalues'''
   # l.real
   
-  print 'Time taken to calc Num triangles & MAD: %f secs\n' % (time() - start)
+  #print 'Time taken to calc Num triangles & MAD: %f secs\n' % (time() - start)
   
   '''write to file '''
   
