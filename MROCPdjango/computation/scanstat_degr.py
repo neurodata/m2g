@@ -85,7 +85,6 @@ def main():
     parser.add_argument('ssDir', action='store', help='Full path of directory where you want Scan stat .npy array resulting file to go')
     parser.add_argument('degDir', action='store', help='Full path of directory where you want Degree .npy array resulting file to go')
     
-    ssDir = None, degDir
     result = parser.parse_args()
     
     calcScanStat_Degree(result.G_fn, None, result.lcc_fn, result.roiRootName, result.ssDir, result.degDir)
