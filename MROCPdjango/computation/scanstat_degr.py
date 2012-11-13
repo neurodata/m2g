@@ -35,14 +35,18 @@ def calcScanStat_Degree(G_fn, G = None, lcc_fn = None, roiRootName = None, ssDir
   # test case
   else:
     G = sio.loadmat(G_fn)['fibergraph']
-    
-  vertxDeg = np.zeros(G.shape[0]) # Vertex degrees of all vertices
-  indSubgrEdgeNum = np.zeros(G.shape[0]) # Induced subgraph edge number i.e scan statistic
   
+  numNodes = G.shape[0]  
+  vertxDeg = np.zeros(numNodes) # Vertex degrees of all vertices
+  indSubgrEdgeNum = np.zeros(numNodes) # Induced subgraph edge number i.e scan statistic
+  
+  percNodes = int(numNodes*0.1)
+  mulNodes = float(numNodes)
+
   start = time()
-  for vertx in range (G.shape[0]):
-    if (vertx > 0 and (vertx% (int(G.shape[0]*0.1)) == 0)):
-        print ceil(vertx/(float(G.shape[0]))*100), "% complete..."
+  for vertx in range (numNodes):
+    if (vertx > 0 and (vertx% (percNodes) == 0)):
+      print ceil((vertx/mulNodes)*100), "% complete..."
    
     nbors = G[:,vertx].nonzero()[0]
     vertxDeg[vertx] = nbors.shape[0] # degree of each vertex
@@ -55,6 +59,7 @@ def calcScanStat_Degree(G_fn, G = None, lcc_fn = None, roiRootName = None, ssDir
       indSubgrEdgeNum[vertx] = 0 # zero neighbors hence zero cardinality enduced subgraph
 
   print "100 % complete"
+  print "Time taken Scan Stat 1: %f secs" % float(time() - start)
   '''write to file '''
   
   if ssDir:
