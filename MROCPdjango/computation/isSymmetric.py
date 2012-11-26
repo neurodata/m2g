@@ -24,7 +24,8 @@ def graphIsUpperTri():
       f.write(alertStmt+"\n")
       f.write(debugStmt+"\n")
       
-    for row in G.indices:
+    unqInd = np.unique(G.indices)
+    for row in unqInd:
       nodeNonzero = G[row,:].nonzero()[1]
     
       errorNodes = nodeNonzero[np.where(nodeNonzero <= row)]   
