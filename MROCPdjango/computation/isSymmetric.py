@@ -2,6 +2,8 @@ import scipy.io as sio
 import sys
 from glob import glob
 import os
+import numpy as np
+
 
 def graphIsUpperTri():
   
@@ -21,20 +23,18 @@ def graphIsUpperTri():
       print debugStmt
       f.write(alertStmt+"\n")
       f.write(debugStmt+"\n")
+      
+    for row in G.indices:
+      nodeNonzero = G[row,:].nonzero()[1]
     
-    for row in range(1, G.shape[0]):
-      for col in range (row):
-        if (G[row,col]>0 and (row > col)):
+      errorNodes = nodeNonzero[np.where(nodeNonzero >= row)]   
+      if errorNodes.shape[0] == 0:
+        f.write( str(row) +" node OK!\n")
+      else:
+        for col in errorNodes:
           fatalStmt =  "Error row:%d , col:%d > 0" % (row, col)
           print fatalStmt
           f.write(fatalStmt +"\n")
-    
-    # Diagonal
-    for diag in range(G.shape[0]):
-      if (G[diag,diag] > 0):
-        fatalStmt =  "Error row:%d , col:%d > 0" % (diag, diag)
-        print fatalStmt
-        f.write(fatalStmt +"\n")
     
     finishStmt = gr + " completed"
     print finishStmt
