@@ -1,12 +1,14 @@
 import scipy.io as sio
 import sys
 from glob import glob
+import os
+
 def graphIsUpperTri():
   
   f = open("SymmetryResults.txt",'w')
-  for gr in glob(sys.argv[1],'*'):
+  for gr in glob(os.path.join(sys.argv[1],'*')):
     
-    idStmt = "Assessing" + gr
+    idStmt = "Assessing " + gr
     print idStmt
     f.write("\n\n" + idStmt + "\n")
     
@@ -26,7 +28,11 @@ def graphIsUpperTri():
           fatalStmt =  "Error row:%d , col:%d > 0" % (row, col)
           print fatalStmt
           f.write(fatalStmt +"\n")
-          
+    
+    finishStmt = gr + " completed"
+    print finishStmt
+    f.write(finishStmt + "\n")
+  
   f.close()
   
 if __name__ == '__main__':
