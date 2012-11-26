@@ -3,19 +3,31 @@ import sys
 from glob import glob
 def graphIsUpperTri():
   
+  f = open("SymmetryResults.txt",'w')
   for gr in glob(sys.argv[1],'*'):
     
-    print "Assessing" + gr
+    idStmt = "Assessing" + gr
+    print idStmt
+    f.write("\n\n" + idStmt + "\n")
+    
     G = sio.loadmat(gr)['fibergraph']
     
     if (G.shape[0] != G.shape[1]):
-      print gr + " has unequal rows and columns"
-      print gr + " rows = %d and cols = %d" % (G.shape[0], G.shape[1])
+      alertStmt =  gr + " has unequal rows and columns"
+      debugStmt = gr + " rows = %d and cols = %d" % (G.shape[0], G.shape[1])
+      print alertStmt
+      print debugStmt
+      f.write(alertStmt+"\n")
+      f.write(debugStmt+"\n")
   
     for row in range(G.shape[0]):
       for col in range (G.shape[1]):
         if (G[row,col]>0 and (row > col)):
-          print "Error row:%d , col:%d > 0" % (row, col)
+          fatalStmt =  "Error row:%d , col:%d > 0" % (row, col)
+          print fatalStmt
+          f.write(fatalStmt +"\n")
           
+  f.close()
+  
 if __name__ == '__main__':
   graphIsUpperTri()
