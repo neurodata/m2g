@@ -27,7 +27,7 @@ def graphIsUpperTri():
     for row in G.indices:
       nodeNonzero = G[row,:].nonzero()[1]
     
-      errorNodes = nodeNonzero[np.where(nodeNonzero >= row)]   
+      errorNodes = nodeNonzero[np.where(nodeNonzero <= row)]   
       if errorNodes.shape[0] == 0:
         f.write( str(row) +" node OK!\n")
       else:
