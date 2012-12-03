@@ -11,11 +11,21 @@ class DocumentForm(forms.Form):
     required_css_class = 'required'
 
 class DataForm(forms.Form):
-    UserDefprojectName  = forms.CharField(label='Project name   ', help_text='                          ', max_length=255, required = True, error_messages={'required': 'Please your Project name'})
+    UserDefprojectName  = forms.CharField(label='Project name   ', help_text='                          ', max_length=255, required = True, error_messages={'required': 'Please enter your Project name'})
     site = forms.CharField(label='Enter Site   ', help_text='                          ', max_length=255, required = True)
     subject = forms.CharField(label='Enter Subject ID  ', help_text='                          ', max_length=255, required = True)
     session = forms.CharField(label='Enter Session ID ', help_text='                          ', max_length=255, required = True)
     scanId = forms.CharField(label='Scan ID  ', help_text='                          ', max_length=255, required = True)
+
+class MyForm(forms.Form):
+    my_field = forms.MultipleChoiceField(choices=SOME_CHOICES, widget=forms.CheckboxSelectMultiple())
+
+    def clean_my_field(self):
+        if len(self.cleaned_data['my_field']) > 3:
+            raise forms.ValidationError('Select no more than 3.')
+        return self.cleaned_data['my_field']
+
+
 
 class OKForm(forms.Form):
     pass #DM TODO: Track responses to zip or view as dir structure
