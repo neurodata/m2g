@@ -12,7 +12,7 @@ class Document(models.Model):
     (This is a little hacky & can be done better using a custom manager)
     see: https://docs.djangoproject.com/en/dev/ref/models/instances/?from=olddocs
     '''
-    docfile = models.FileField(upload_to = (' ')) 
+    docfile = models.FileField(upload_to = (' '))
     
     def __unicode__(self):
         return self.name

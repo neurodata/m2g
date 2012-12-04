@@ -3,7 +3,7 @@
 
 <html>
  <head>
-    <link  rel="shortcut icon" type="image/x-icon" href="/favicon.ico" >
+    <link  rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
         <title>Upload | MROCP</title>
             <style type="text/css"> 
             body
@@ -32,7 +32,9 @@
     
 <body>
     <a href="http://openconnecto.me"><img src="http://openconnecto.me/wp-content/themes/DMG/img/logo.png"/></a>
-    <h1>Please upload data derivative files</h1>
+    <h1>Please upload data derivative files and optionally<br/>
+       select any invariants to be computed 
+    </h1>
         <form action="" method="post" enctype="multipart/form-data" name="loadForm">     
 	    {% csrf_token %}
             <p>{{ form }}</p>
@@ -42,6 +44,10 @@
 	
 	<div style="position:absolute; left:153px; top: 212px;"> <img id="loadingImage" src="http://i1061.photobucket.com/albums/t473/dmhembe/MR-connectome/loading_zpsac6e6d22.gif" border="0" alt="loading" style="visibility:hidden;opacity:0.5"/> </div>
 
+    <h2> </h2>
+    
+    
+	<!--
 	<h2> For browser url based use read below </h2>
 
 	<p>To proceed using url based version APPEND fully qualified name of name of dMRI (tract) file to the url root <br/>
@@ -53,16 +59,17 @@
 	
 	<h2>*NOTE: <em> filename </em> MUST BE IDENTICAL IN ALL CASES</h2>
 	<p> </p>
-
+	
 	<h2> The following directory structure is also required for url based use: </h2>
-	<!--
+	
 	<p> Use this <a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjangoForm/ocpipeline/convertToReqd.py"
 	target="_blank">link</a> to download a <em>python</em> script that will convert a directory with all files (i.e. _fiber.dat, _roi.[raw|xml])
 	structure to one that mimics the structure required for url version use.
 	
 	You must have or install <a href="http://www.python.org/getit/" target="_blank">python </a>2.7 or better to run the script. From the terminal/command
 	line type: <em> python createDirStruct.py nameOfYourDataDir nameOfResultingDir </em>
-	</p> -->
+	</p> 
 	<img src="http://i1061.photobucket.com/albums/t473/dmhembe/MR-connectome/theDirStruct.png" border="0" alt="Photobucket"/>
+	-->
 </body>
 </html>
