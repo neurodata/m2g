@@ -26,6 +26,8 @@ urlpatterns = patterns('ocpipeline.views',
     url(r'^zipOutput/$','zipProcessedData', name = 'zip-processed-data'), # 2nd param function is view, 3rd param - anything
     # restful API 
     url(r'^upload/(.*$)', 'upload', name= 'prog-upload'),
+    #url(r'^convert/(.*$)', 'convertFormat', name= 'prog-upload'),
+    #url(r'^invariant/(.*$)', 'calcInvariant', name= 'prog-upload'),
     # Examples
     # url(r'^$', 'myapp.views.home', name='home'),
     # url(r'^myapp/', include('myapp.foo.urls')),
