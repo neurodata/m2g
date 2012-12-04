@@ -457,19 +457,19 @@ def processData(fiber_fn, roi_xml_fn, roi_raw_fn,graphs, graphInvariants, run = 
 	#arguments = 'python ' + '/home/disa/MR-connectome/mrcap/gengraph.py /home/disa' + fiber_fn + ' /home/disa' + smallGraphOutputFileName +' /home/disa' + roi_xml_fn + ' /home/disa' + roi_raw_fn
 	#arguments = 'python ' + '/Users/dmhembere44/MR-connectome/mrcap/gengraph.py /Users/dmhembere44' + fiber_fn + ' /Users/dmhembere44' + smallGraphOutputFileName + ' roixmlname=/Users/dmhembere44' + roi_xml_fn + ' roirawname=/Users/dmhembere44' + roi_raw_fn
 	#subprocess.Popen(arguments,shell=True)
-	#**gengraph.genGraph(fiber_fn, smGrfn, roi_xml_fn, roi_raw_fn)
+	gengraph.genGraph(fiber_fn, smGrfn, roi_xml_fn, roi_raw_fn)
 
 	''' Run gengrah BIG & save output '''
 	print("\nRunning Big gengraph....")
 	bgGrfn = os.path.join(graphs, (baseName +'bggr.mat'))
-	gengraph.genGraph(fiber_fn, bgGrfn, roi_xml_fn ,roi_raw_fn, True)
+	#**gengraph.genGraph(fiber_fn, bgGrfn, roi_xml_fn ,roi_raw_fn, True)
 
 	''' Run LCC '''
 	lccfn = os.path.join(graphInvariants, (baseName + 'concomp.npy'))
 
 	'''Should be big but we'll do small for now'''
-	lcc.process_single_brain(roi_xml_fn, roi_raw_fn, bgGrfn, lccfn)
-	#**lcc.process_single_brain(roi_xml_fn, roi_raw_fn, smGrfn, lccfn)
+	#**lcc.process_single_brain(roi_xml_fn, roi_raw_fn, bgGrfn, lccfn)
+	lcc.process_single_brain(roi_xml_fn, roi_raw_fn, smGrfn, lccfn)
 
 	''' Run Embed - SVD '''
 	SVDfn = os.path.join(graphInvariants, (baseName + 'embed.npy'))
@@ -477,8 +477,8 @@ def processData(fiber_fn, roi_xml_fn, roi_raw_fn,graphs, graphInvariants, run = 
 	print("Running SVD....")
 
 	roiBasename = str(roi_xml_fn[:-4]) # WILL NEED ADAPTATION
-	svd.embed_graph(lccfn, roiBasename, bgGrfn, SVDfn)
-	#**svd.embed_graph(lccfn, roiBasename, smGrfn, SVDfn)
+	#**svd.embed_graph(lccfn, roiBasename, bgGrfn, SVDfn)
+	svd.embed_graph(lccfn, roiBasename, smGrfn, SVDfn)
 
 	return [ smGrfn, bgGrfn, lccfn, SVDfn ]
     else:
