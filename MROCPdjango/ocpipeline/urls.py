@@ -10,6 +10,8 @@ from ocpipeline.views import success
 from ocpipeline.views import zipProcessedData
 from ocpipeline.views import processInputData
 from ocpipeline.views import confirmDownload
+from ocpipeline.views import graphLoadInv
+from ocpipeline.views import convert
 
 # Uncomment the next two lines to enable the admin:
 from django.contrib import admin
@@ -24,10 +26,10 @@ urlpatterns = patterns('ocpipeline.views',
     url(r'^confirmDownload/$', 'confirmDownload', name='confirm-dwnd-page'),
     url(r'^processInput/$', 'processInputData', name='process-input-data'),
     url(r'^zipOutput/$','zipProcessedData', name = 'zip-processed-data'), # 2nd param function is view, 3rd param - anything
-    # restful API 
+    # restful API
     url(r'^upload/(.*$)', 'upload', name= 'prog-upload'),
-    #url(r'^convert/(.*$)', 'convertFormat', name= 'prog-upload'),
-    #url(r'^invariant/(.*$)', 'calcInvariant', name= 'prog-upload'),
+    url(r'^graphupload/(.*$)', 'graphLoadInv', name= 'graph-upload-invariant-processing'),
+    url(r'^convert/(.*$)', 'convert', name= 'convert-to-format'),
     # Examples
     # url(r'^$', 'myapp.views.home', name='home'),
     # url(r'^myapp/', include('myapp.foo.urls')),
@@ -38,4 +40,3 @@ urlpatterns = patterns('ocpipeline.views',
     # Uncomment the next line to enable the admin:
     url(r'^admin/', include(admin.site.urls)),
 )
-

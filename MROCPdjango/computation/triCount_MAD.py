@@ -41,7 +41,7 @@ def eignTriLocal_MAD(G_fn, G = None, lcc_fn = None, roiRootName = None, triDir=N
   numTri = np.zeros(n) # local triangle count
 
   if not (k):
-    k =  100 if G.shape[0]-2 > 101 else G.shape[0]
+    k =  100 if G.shape[0]-2 > 101 else G.shape[0] - 2
 
   start = time()
   ''' Calculate Eigenvalues & Eigen vectors'''
