@@ -46,18 +46,17 @@ class GraphUploadForm(forms.Form):
     widget=CheckboxSelectMultiple, choices=INVARIANT_CHOICES)
 
 
-class CovertForm(forms.Form):
-    fileObj = forms.FileField(label='Upload data', help_text='                          ', required = False)
+class ConvertForm(forms.Form):
+    fileObj = forms.FileField(label='Upload data', help_text='                          ', required = True)
 
     FORMAT_CHOICES = (('.npy', 'Numpy format (.npy)',), ('.mat', 'Matlab format (.mat)',), \
         ('.csv', '(Excel) Comma separated values (.csv)',))
 
-    Select_current_format = forms.MultipleChoiceField(required=True,
+    Select_current_format = forms.MultipleChoiceField(required=True, \
     widget=RadioSelect, choices=FORMAT_CHOICES)
 
-    Select_conversion_format = forms.MultipleChoiceField(required=True,
+    Select_conversion_format = forms.MultipleChoiceField(required=True, \
     widget=CheckboxSelectMultiple, choices=FORMAT_CHOICES)
-
 
 
 class OKForm(forms.Form):
