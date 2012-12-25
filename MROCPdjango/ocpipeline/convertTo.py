@@ -15,36 +15,41 @@ def convertLCCNpyToMat(lcc_fn):
   print ('Lcc sucessfully converted from .npy to .mat in  %.2f secs') % (time()-start)
 
 
-def convertArray(fn, toFormat, arrayName = "Array"):
+def convertAndSave(fn, toFormat, saveLoc, fileType):
   '''
   * Big graphs
   Covert an array between .npy, .csv, .mat
   fn - the filename of the file to be converted
-  arrayName - the nickname of whatever is being converted e.g 'lcc' or 'triangles' or 'eigs'
+  fileType - the fileType is the type of invariant ('cc','ss1' etc) or 'fg'|'fibergraph'
   '''
 
   fnExt = os.path.splitext(fn)[1]
-  fnBase = os.path.splitext(fn)[0]
-  start  = time().item().toarray()
-  if (fnExt == '.npy' and toFormat == '.mat'):
-    arr = np.load(fn)
-    sio.savemat(fnBase, {arrayName ,arr}, appendmat = True)
+  fnBase = os.path.splitext(fn.split('/')[-1])[0] # eg. M854656235_degree
 
-  elif (fnExt == '.mat' and toFormat == '.npy'):
+  start = time()
 
-    arr = sio.loadmat(fn) # Temp dict with headers etc + data
-    dataMemberName = (set(arr.keys()) - set(['__version__', '__header__', '__globals__'])).pop()
-    arr = arr[dataMemberName]
-    np.save(fnBase, arr)
+  theFile = loadFile(fn, fileType)
+  # Fix this
 
-  elif ((fnExt == '.mat' or fnExt == '.npy') and toFormat == '.csv'):
-    pass # TODO DM: Convert to csv
+  #if (fnExt == '.npy' and toFormat == '.mat'):
+  #  arr = np.load(fn)
+  #  sio.savemat(os.path.join(saveLoc, fnBase), {fileType ,arr}, appendmat = True)
+  #
+  #elif (fnExt == '.mat' and toFormat == '.npy'):
+  #
+  #  arr = sio.loadmat(fn) # Temp dict with headers etc + data
+  #  dataMemberName = (set(arr.keys()) - set(['__version__', '__header__', '__globals__'])).pop() # extract data member from .mat
+  #  arr = arr[dataMemberName]
+  #  np.save(os.path.join(saveLoc, fnBase), arr)
+  #
+  #elif ((fnExt == '.mat' or fnExt == '.npy') and toFormat == '.csv'):
+  #  pass # TODO DM: Convert to csv
+  #
+  #else:
+  #  print "[ERROR] in convertArray Invalid file format! Only .csv, .npy & .mat"
+  #  sys.exit(-1)
 
-  else:
-    print "[ERROR] in convertArray Invalid file format! Only .csv, .npy & .mat"
-    sys.exit(-1)
-
-  print ('%s sucessfully converted from .npy to .mat in  %.2f secs') % (arrayName, fnExt, toFormat ,(time()-start))
+  print ('%s sucessfully converted from .npy to .mat in  %.2f secs') % (fileType, fnExt, toFormat ,(time()-start))
 
 
 def convertGraph(G_fn, toFormat):
@@ -103,3 +108,35 @@ def convertGraphToCSV(G_fn, G=None):
 
   else:
     print ('Sorry your graph is too big. Max size = 500 X 500')
+
+def loadFile(file_fn, fileType):
+    '''
+    @param file_fn the filename of the file to be loaded
+    @param fileType the fileType to loaded.
+    @return the loaded file
+
+    The following are valid fileTypes:
+    1.'cc'|'clustCoeff' is the clustering coefficient
+    2.'deg'|'degree' is the local vertex degree
+    3.'eig'|'eigen' is the eigenvalues
+    4.'mad'|'maxAvgDeg'
+    5.'ss1'| 'scanStat1'
+    6.'tri'|'triangle',
+    7.'fg'|'fibergraph'
+    '''
+    fn, ext  = os.path.splitext(file_fn)
+    if (ext == '.mat' and  fileType in settings.EQUIV_NP_ARRAYS.keys()):
+      theFile = sio.loadmat(result.fileToConvert)[fileType]
+
+    elif (ext == '.mat'and fileType in settings.EQUIV_NP_ARRAYS.values()):  # All currently available
+      theFile = sio.loadmat(result.fileToConvert)[settings.EQUIV_NP_ARRAYS[fileType]]
+
+    elif (ext == '.mat'and (fileType == 'fibergraph' or fileType == 'fg')):  # fibergraph
+      theFile = sio.loadmat(result.fileToConvert)['fibergraph']
+
+    elif (ext == '.mat'and (fileType == 'maxAvgDeg' or fileType == 'mad')): # MAD
+      theFile = sio.loadmat(result.fileToConvert)['mad']
+
+    elif (ext == '.npy'):
+      theFile = np.load(result.fileToConvert)
+    return theFile

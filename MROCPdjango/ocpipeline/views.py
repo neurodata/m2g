@@ -20,11 +20,8 @@ from ocpipeline.forms import DocumentForm
 from ocpipeline.forms import OKForm
 from ocpipeline.forms import DataForm
 from ocpipeline.forms import GraphUploadForm
-from ocpipeline.forms import CovertForm
+from ocpipeline.forms import ConvertForm
 import mrpaths
-
-from django.http import HttpResponse
-from django.http import HttpResponseBadRequest
 
 ''' Data Processing imports'''
 from mrcap import gengraph as gengraph
@@ -174,7 +171,7 @@ def processInputData(request):
     roi_xml_fn = os.path.join(request.session['derivatives'], roi_xml_fn)
 
     request.session['smGrfn'], request.session['bgGrfn'], request.session['lccfn'],request.session['SVDfn'] \
-	= processData(fiber_fn, roi_xml_fn, roi_raw_fn,request.session['graphs'], request.session['graphInvariants'], False)
+	= processData(fiber_fn, roi_xml_fn, roi_raw_fn,request.session['graphs'], request.session['graphInvariants'], True)
 
     # Run ivariants here
     if len(request.session['invariants']) > 0:
@@ -278,6 +275,7 @@ def upload(request, webargs=None):
 	''' Extract & save zipped files '''
 	uploadFiles = []
 	for name in (rzfile.namelist()):
+
 	    outfile = open(os.path.join(derivatives, name.split('/')[-1]), 'wb') # strip name of source folders if in file name
 	    outfile.write(rzfile.read(name))
 	    outfile.flush()
@@ -304,7 +302,7 @@ def upload(request, webargs=None):
 	#ret = rzfile.testzip()
 	#ret = rzfile.namelist()
 
-	dwnldLoc = "http://www.mrbrain.cs.jhu.edu/data/projects/disa/OCPproject/"+ webargs
+	dwnldLoc = "http://www.mrbrain.cs.jhu.edu" + settings.MEDIA_ROOT + webargs
 	return HttpResponse ( "Files available for download at " + dwnldLoc) # change to render of a page with a link to data result
 
     elif(not webargs):
@@ -333,7 +331,7 @@ def graphLoadInv(request, webargs=None):
 	    # We got a zip
 	    if os.path.splitext(data.name)[1] == '.zip':
 		rzfile = putDataInTempZip(data.read())
-		uploadedFiles = writeTempZipToFile(rzfile,os.path.join(settings.MEDIA_ROOT, \
+		uploadedFiles = writeTempZipToDisk(rzfile,os.path.join(settings.MEDIA_ROOT, \
 					'tmp', strftime("projectStamp%a%d%b%Y_%H.%M.%S/", localtime()) ))
 
 		for fn in uploadedFiles:
@@ -363,42 +361,82 @@ def graphLoadInv(request, webargs=None):
 
 def convert(request, webargs=None):
     ''' Form '''
-    if request.method == 'POST':
-        form = CovertForm(request.POST, request.FILES) # instantiating form
+    if (request.method == 'POST' and not webargs):
+        form = ConvertForm( request.FILES, request.POST) # instantiating form
+	import pdb; pdb.set_trace()
         if form.is_valid():
-	    data = form.files['fileOjb'] # get data
+	    data = request.FILES['fileObj'] # get data
 
 	    request.session['currentGraphFormat'] = form.cleaned_data['Select_current_format']
 	    request.session['conversionFormats'] = form.cleaned_data['Select_conversion_format']
 
-	    # We got a zip
-	    if os.path.splitext(data.name)[1] == '.zip':
-		rzfile = putDataInTempZip(data.read())
-		uploadedFiles = writeTempZipToFile(rzfile, os.path.join(settings.MEDIA_ROOT, 'tmp', strftime("zippedUpload%a%d%b%Y_%H.%M.%S/", localtime())))
+	    baseDir = os.path.join(settings.MEDIA_ROOT, 'tmp', strftime('formUpload%a%d%b%Y_%H.%M.%S/', localtime()))
+	    saveDir = os.path.join(baseDir,'upload') # Save location of original uploads
+	    convertFileSaveLoc = os.path.join(baseDir,'converted') # Save location of converted data
 
-		for f in uploadedFiles:
-		    if form.cleaned_data['Select_conversion_format'] == form.cleaned_data['Select_current_format']:
-			pass
-		    elif form.cleaned_data['Select_conversion_format'] == 'mat':
-			pass
+	    if not os.path.exists(os.path.join(baseDir,'upload')):
+		os.makedirs(os.path.join(baseDir,'upload'))
 
-	    else:
-		path = default_storage.save(os.path.join(settings.MEDIA_ROOT, 'tmp', strftime("individualUpload%a%d%b%Y_%H.%M.%S/", localtime()), data.name), ContentFile(data.read()))
-		print '\nSaving %s complete...' % data.name
-		tmp_file = os.path.join(settings.MEDIA_ROOT, path)
-		print '\nSaving %s complete...' % data.name
+	    uploadedFiles = writeBodyToDisk(data, saveDir)
 
+	    for f in uploadedFiles:
+		if form.cleaned_data['Select_conversion_format'] == form.cleaned_data['Select_current_format']:
+		    pass
+		elif form.cleaned_data['Select_conversion_format'] == 'mat':
+		    pass
+		else:
+		    pass  # convert
+
+	#    else:
+	#	path = default_storage.save(os.path.join(settings.MEDIA_ROOT, 'tmp', strftime("individualUpload%a%d%b%Y_%H.%M.%S/", localtime()), data.name), ContentFile(data.read()))
+	#	print '\nSaving %s complete...' % data.name
+	#	tmp_file = os.path.join(settings.MEDIA_ROOT, path)
+	#	print '\nSaving %s complete...' % data.name
 
             # Redirect to Processing page
-        return HttpResponseRedirect(get_script_prefix()+'success') # STUB
+	    return HttpResponseRedirect(get_script_prefix()+'success') # STUB
+
+    # Programmtic API
+    elif(request.method == 'POST' and webargs):
+	# webargs is {fileType}/{toFormat}
+	fileType = webargs.split('/')[0] # E.g 'cc', 'deg', 'triangle'
+	toFormat = webargs.split('/')[1] # E.g 'mat', 'npy'
+	toFormat = '.'+toFormat if not toFormat.startswith('.') else toFormat # Make sure toFormat startswith '.'
+
+	baseDir = os.path.join(settings.MEDIA_ROOT, 'tmp', strftime('progUpload%a%d%b%Y_%H.%M.%S/', localtime()))
+	saveDir = os.path.join(baseDir,'upload') # Save location of original uploads
+	convertFileSaveLoc = os.path.join(baseDir,'converted') # Save location of converted data
+
+	if not os.path.exists(os.path.join(baseDir,'upload')):
+	    os.makedirs(os.path.join(baseDir,'upload'))
+
+	uploadedFiles = writeBodyToDisk(request.body, saveDir)
+
+	for file_fn in uploadedFiles:
+
+	    # determine type of the file
+	    if (os.path.splitext(file_fn) == '.npy'):
+		if (fileType in settings.EQUIV_NP_ARRAYS):
+		    convertTo.convertAndSave(file_fn, toFormat, convertFileSaveLoc, fileType)
+
+	dwnldLoc = "http://www.mrbrain.cs.jhu.edu"+ convertFileSaveLoc
+	return HttpResponse ( "Converted files available for download at " + dwnldLoc) # change to render of a page with a link to data result
+
     else:
-        form = CovertForm() # An empty, unbound form
+        form = ConvertForm() # An empty, unbound form
 
     # Render the form
     return render_to_response(
         'convertupload.html',
         {'form': form},
         context_instance=RequestContext(request))
+
+############################ TEMP #####################################
+# The following are all equivalent in the type of the data
+
+
+
+############################ END TEMP ####################################
 
 #########################################
 #	*******************		#
@@ -425,6 +463,7 @@ def processData(fiber_fn, roi_xml_fn, roi_raw_fn,graphs, graphInvariants, run = 
 	#arguments = 'python ' + '/home/disa/MR-connectome/mrcap/gengraph.py /home/disa' + fiber_fn + ' /home/disa' + smallGraphOutputFileName +' /home/disa' + roi_xml_fn + ' /home/disa' + roi_raw_fn
 	#arguments = 'python ' + '/Users/dmhembere44/MR-connectome/mrcap/gengraph.py /Users/dmhembere44' + fiber_fn + ' /Users/dmhembere44' + smallGraphOutputFileName + ' roixmlname=/Users/dmhembere44' + roi_xml_fn + ' roirawname=/Users/dmhembere44' + roi_raw_fn
 	#subprocess.Popen(arguments,shell=True)
+
 	gengraph.genGraph(fiber_fn, smGrfn, roi_xml_fn, roi_raw_fn)
 
     ''' Run gengrah BIG & save output '''
@@ -726,6 +765,40 @@ def getFiberID(fiberfn):
 	fiberfn = fiberfn[:-1] # get rid of trailing slash
     return fiberfn.split('/')[-1][:-9]
 
+def writeBodyToDisk(data, saveDir):
+    '''
+    @param data the data to be written to file
+    @param saveDir - the location of where data is to be written
+    @return a list with the names of the uplaoded files
+    '''
+    tmpfile = tempfile.NamedTemporaryFile()
+    tmpfile.write ( data )
+    tmpfile.flush()
+    tmpfile.seek(0)
+    rzfile = zipfile.ZipFile ( tmpfile.name, "r" )
+
+    print 'Temporary file created...'
+
+    ''' Extract & save zipped files '''
+    uploadFiles = []
+    for name in (rzfile.namelist()):
+	outfile = open(os.path.join(saveDir, name.split('/')[-1]), 'wb') # strip name of source folders if in file name
+	outfile.write(rzfile.read(name))
+	outfile.flush()
+	outfile.close()
+	uploadFiles.append(os.path.join(saveDir, name.split('/')[-1])) # add to list of files
+	print name + " written to disk.."
+    return uploadFiles
+
+
+
+
+
+
+
+
+
+
 def putDataInTempZip(data):
     '''
     Put data in a temporary zipped file
@@ -738,7 +811,7 @@ def putDataInTempZip(data):
     print 'Temporary file created...'
     return zipfile.ZipFile ( tmpfile.name, "r" )
 
-def writeTempZipToFile(rzfile, saveDir):
+def writeTempZipToDisk(rzfile, saveDir):
     '''
     Extract & save zipped files
     rzfile - A zipfile
