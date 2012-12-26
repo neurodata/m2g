@@ -363,7 +363,7 @@ def convert(request, webargs=None):
     ''' Form '''
     if (request.method == 'POST' and not webargs):
         form = ConvertForm( request.FILES, request.POST) # instantiating form
-	import pdb; pdb.set_trace()
+	##################   BUG HERE ###############################
         if form.is_valid():
 	    data = request.FILES['fileObj'] # get data
 
@@ -400,27 +400,62 @@ def convert(request, webargs=None):
     elif(request.method == 'POST' and webargs):
 	# webargs is {fileType}/{toFormat}
 	fileType = webargs.split('/')[0] # E.g 'cc', 'deg', 'triangle'
-	toFormat = webargs.split('/')[1] # E.g 'mat', 'npy'
-	toFormat = '.'+toFormat if not toFormat.startswith('.') else toFormat # Make sure toFormat startswith '.'
+	toFormat =  (webargs.split('/')[1]).split(',')   # E.g 'mat', 'npy' or 'mat,csv'
+
+	toFormat = list(set(toFormat)) # Eliminate duplicates if any exist
+
+	# Make sure filetype is valid before doing any work
+	if (fileType not in settings.VALID_FILE_TYPES.keys() and fileType not in settings.VALID_FILE_TYPES.values()):
+	    return HttpResponse('Invalid conversion type. Make sure toFormat is a valid type')
+
+	# In case to format does not start with a '.'. Add if not
+	for idx in range (len(toFormat)):
+	    if not toFormat[idx].startswith('.'):
+		toFormat[idx] = '.'+toFormat[idx]
 
 	baseDir = os.path.join(settings.MEDIA_ROOT, 'tmp', strftime('progUpload%a%d%b%Y_%H.%M.%S/', localtime()))
 	saveDir = os.path.join(baseDir,'upload') # Save location of original uploads
 	convertFileSaveLoc = os.path.join(baseDir,'converted') # Save location of converted data
 
-	if not os.path.exists(os.path.join(baseDir,'upload')):
-	    os.makedirs(os.path.join(baseDir,'upload'))
+	if not os.path.exists(saveDir):
+	    os.makedirs(saveDir)
+
+	if not os.path.exists(convertFileSaveLoc):
+	    os.makedirs(convertFileSaveLoc)
 
 	uploadedFiles = writeBodyToDisk(request.body, saveDir)
 
-	for file_fn in uploadedFiles:
+	correctFileFormat = False # Checks if at least 1 file has the correct extension
+	correctFileType = False # Checks if at leat 1 file is a valid fileType
 
+	for file_fn in uploadedFiles:
 	    # determine type of the file
-	    if (os.path.splitext(file_fn) == '.npy'):
-		if (fileType in settings.EQUIV_NP_ARRAYS):
-		    convertTo.convertAndSave(file_fn, toFormat, convertFileSaveLoc, fileType)
+
+	    if (os.path.splitext(file_fn)[1] in ['.mat','.csv','.npy']):
+		correctFileFormat = True
+		if (fileType == 'fg' or fileType == 'fibergraph'):
+		    correctFileType = True
+		    pass # TODO : DM
+		elif( fileType == 'lcc' or fileType == 'lrgstConnComp'):
+		    correctFileType = True
+		    pass # TODO : DM
+		elif (fileType in settings.VALID_FILE_TYPES.keys() or fileType in settings.VALID_FILE_TYPES.values()):
+		    # Check if file format is the same as the toFormat
+		    if (os.path.splitext(file_fn)[1] in toFormat):
+			toFormat.remove(os.path.splitext(file_fn)[1])
+		    if (len(toFormat) == 0):
+			pass # No work to be done here
+		    else:
+			correctFileType = True
+			convertTo.convertAndSave(file_fn, toFormat, convertFileSaveLoc, fileType) # toFormat is a list
+		else:
+		    return HttpResponse("You did not enter a valid FileType.")
+	    else:
+		return HttpResponse("You do not have any files with the correct extension for conversion")
 
 	dwnldLoc = "http://www.mrbrain.cs.jhu.edu"+ convertFileSaveLoc
-	return HttpResponse ( "Converted files available for download at " + dwnldLoc) # change to render of a page with a link to data result
+	return HttpResponse ( "Converted files available for download at " + dwnldLoc + ". The directory " +
+		"may be empty if you try to convert to the same format the file is already in or .") # change to render of a page with a link to data result
 
     else:
         form = ConvertForm() # An empty, unbound form

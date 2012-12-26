@@ -1,6 +1,7 @@
 import scipy.io as sio
 import numpy as np
 import os
+import sys
 import csv
 from time import time
 
@@ -17,10 +18,10 @@ def convertLCCNpyToMat(lcc_fn):
 
 def convertAndSave(fn, toFormat, saveLoc, fileType):
   '''
-  * Big graphs
-  Covert an array between .npy, .csv, .mat
+  * Not for fibergraph yet
+  Convert invariant array between .npy, .csv, .mat
   fn - the filename of the file to be converted
-  fileType - the fileType is the type of invariant ('cc','ss1' etc) or 'fg'|'fibergraph'
+  fileType - the fileType is the type of invariant ('cc','ss1', 'scanStat1')
   '''
 
   fnExt = os.path.splitext(fn)[1]
@@ -28,28 +29,23 @@ def convertAndSave(fn, toFormat, saveLoc, fileType):
 
   start = time()
 
-  theFile = loadFile(fn, fileType)
-  # Fix this
+  arr = loadFile(fn, fileType) # load up the file as either a .mat, .npy
 
-  #if (fnExt == '.npy' and toFormat == '.mat'):
-  #  arr = np.load(fn)
-  #  sio.savemat(os.path.join(saveLoc, fnBase), {fileType ,arr}, appendmat = True)
-  #
-  #elif (fnExt == '.mat' and toFormat == '.npy'):
-  #
-  #  arr = sio.loadmat(fn) # Temp dict with headers etc + data
-  #  dataMemberName = (set(arr.keys()) - set(['__version__', '__header__', '__globals__'])).pop() # extract data member from .mat
-  #  arr = arr[dataMemberName]
-  #  np.save(os.path.join(saveLoc, fnBase), arr)
-  #
-  #elif ((fnExt == '.mat' or fnExt == '.npy') and toFormat == '.csv'):
-  #  pass # TODO DM: Convert to csv
-  #
-  #else:
-  #  print "[ERROR] in convertArray Invalid file format! Only .csv, .npy & .mat"
-  #  sys.exit(-1)
+  if ('.mat' in toFormat):
+    sio.savemat(os.path.join(saveLoc, fnBase), {fileType:arr}, appendmat = True)
+    print fnBase + ' converted to mat format'
 
-  print ('%s sucessfully converted from .npy to .mat in  %.2f secs') % (fileType, fnExt, toFormat ,(time()-start))
+  if ('.npy' in toFormat):
+    np.save(os.path.join(saveLoc, fnBase), arr)
+    print fnBase + ' converted to npy format'
+
+  if ('.csv' in toFormat):
+    with open( os.path.join(saveLoc, fnBase)+'.csv', 'wb') as csvfile:
+      writer = csv.writer(csvfile, dialect='excel')
+      writer.writerow(arr)
+    print fnBase + ' converted to csv format'
+
+  print ('%s sucessfully converted from .npy to .mat in  %.2f secs') % (fnBase ,(time()-start))
 
 
 def convertGraph(G_fn, toFormat):
@@ -70,7 +66,7 @@ def convertGraph(G_fn, toFormat):
     sio.savemat(os.path.splitext(G_fn)[0], {'fibergraph':np.load(G_fn)} , appendmat=True)
     print ('Graph successfully converted from .mat to .npy in  %.2f secs') % (time()-start)
 
-  elif ((fnExt == '.npy' or fnExt == '.npy')  and toFormat == '.csv'):
+  elif ((fnExt == '.npy' or fnExt == '.mat')  and toFormat == '.csv'):
     convertGraphToCSV(G_fn)
 
   else:
@@ -111,6 +107,9 @@ def convertGraphToCSV(G_fn, G=None):
 
 def loadFile(file_fn, fileType):
     '''
+    Determine how to load a file based on the extension &
+    the fileType
+
     @param file_fn the filename of the file to be loaded
     @param fileType the fileType to loaded.
     @return the loaded file
@@ -121,22 +120,22 @@ def loadFile(file_fn, fileType):
     3.'eig'|'eigen' is the eigenvalues
     4.'mad'|'maxAvgDeg'
     5.'ss1'| 'scanStat1'
-    6.'tri'|'triangle',
-    7.'fg'|'fibergraph'
+    6.'ss1'| 'scanStat1'
+    7.'tri'|'triangle'
     '''
+
     fn, ext  = os.path.splitext(file_fn)
-    if (ext == '.mat' and  fileType in settings.EQUIV_NP_ARRAYS.keys()):
-      theFile = sio.loadmat(result.fileToConvert)[fileType]
+    if (ext == '.mat' and  fileType in settings.VALID_FILE_TYPES.keys()):
+      theFile = sio.loadmat(file_fn)[fileType]
 
-    elif (ext == '.mat'and fileType in settings.EQUIV_NP_ARRAYS.values()):  # All currently available
-      theFile = sio.loadmat(result.fileToConvert)[settings.EQUIV_NP_ARRAYS[fileType]]
-
-    elif (ext == '.mat'and (fileType == 'fibergraph' or fileType == 'fg')):  # fibergraph
-      theFile = sio.loadmat(result.fileToConvert)['fibergraph']
-
-    elif (ext == '.mat'and (fileType == 'maxAvgDeg' or fileType == 'mad')): # MAD
-      theFile = sio.loadmat(result.fileToConvert)['mad']
+    elif (ext == '.mat'and fileType in settings.VALID_FILE_TYPES.values()):  # All currently available
+      theFile = sio.loadmat(file_fn)[settings.VALID_FILE_TYPES[fileType]]
+      #arr = sio.loadmat(fn) # Temp dict with headers etc + data
+      #dataMemberName = (set(arr.keys()) - set(['__version__', '__header__', '__globals__'])).pop() # extract data member from .mat
+      #arr = arr[dataMemberName]
 
     elif (ext == '.npy'):
-      theFile = np.load(result.fileToConvert)
+      theFile = np.load(file_fn)
+
+    import pdb; pdb.set_trace()
     return theFile
