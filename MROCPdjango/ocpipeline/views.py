@@ -449,9 +449,9 @@ def convert(request, webargs=None):
 			correctFileType = True
 			convertTo.convertAndSave(file_fn, toFormat, convertFileSaveLoc, fileType) # toFormat is a list
 		else:
-		    return HttpResponse("You did not enter a valid FileType.")
+		    return HttpResponse("[ERROR]: You did not enter a valid FileType.")
 	    else:
-		return HttpResponse("You do not have any files with the correct extension for conversion")
+		return HttpResponse("[ERROR]: You do not have any files with the correct extension for conversion")
 
 	dwnldLoc = "http://www.mrbrain.cs.jhu.edu"+ convertFileSaveLoc
 	return HttpResponse ( "Converted files available for download at " + dwnldLoc + ". The directory " +
