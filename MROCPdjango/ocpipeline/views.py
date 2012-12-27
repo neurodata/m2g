@@ -430,7 +430,6 @@ def convert(request, webargs=None):
 
 	for file_fn in uploadedFiles:
 	    # determine type of the file
-
 	    if (os.path.splitext(file_fn)[1] in ['.mat','.csv','.npy']):
 		correctFileFormat = True
 		if (fileType == 'fg' or fileType == 'fibergraph'):
@@ -448,14 +447,15 @@ def convert(request, webargs=None):
 		    else:
 			correctFileType = True
 			convertTo.convertAndSave(file_fn, toFormat, convertFileSaveLoc, fileType) # toFormat is a list
-		else:
-		    return HttpResponse("[ERROR]: You did not enter a valid FileType.")
-	    else:
-		return HttpResponse("[ERROR]: You do not have any files with the correct extension for conversion")
+
+	if not (correctFileType):
+	    return HttpResponse("[ERROR]: You did not enter a valid FileType.")
+	if not (correctFileFormat):
+	    return HttpResponse("[ERROR]: You do not have any files with the correct extension for conversion")
 
 	dwnldLoc = "http://www.mrbrain.cs.jhu.edu"+ convertFileSaveLoc
 	return HttpResponse ( "Converted files available for download at " + dwnldLoc + ". The directory " +
-		"may be empty if you try to convert to the same format the file is already in or .") # change to render of a page with a link to data result
+		"may be empty if you try to convert to the same format the file is already in.") # change to render of a page with a link to data result
 
     else:
         form = ConvertForm() # An empty, unbound form
