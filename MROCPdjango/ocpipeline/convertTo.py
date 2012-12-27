@@ -136,6 +136,5 @@ def loadFile(file_fn, fileType):
 
     elif (ext == '.npy'):
       theFile = np.load(file_fn)
-
-    import pdb; pdb.set_trace()
+      
     return theFile
