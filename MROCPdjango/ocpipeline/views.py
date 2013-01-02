@@ -47,15 +47,15 @@ from django.core.files.base import ContentFile
 ####################
 ## Graph Analysis ##
 from computation.scanstat_degr import calcScanStat_Degree #as calcScanStat_Degree
-'''from computation.clustCoeff import calcLocalClustCoeff #as calcLocalClustCoeff
-from computation.loadAdjMatrix import loadAdjMat #as loadAdjMat
-from computation.triCount_MAD import eignTriLocal_MAD #as eignTriLocal_MAD
-from computation.degree import calcDegree #as calcDegree
-from computation.MAD import calcMAD #as calcMAD
-from computation.Eigenvalues import calcEigs #as calcEigs
 from computation.clustCoeff import calcLocalClustCoeff #as calcLocalClustCoeff
-from computation.triCount_deg_MAD import eignTriLocal_deg_MAD #as eignTriLocal_deg_MAD
-'''
+from computation.loadAdjMatrix import loadAdjMat #as loadAdjMat
+#from computation.triCount_MAD import eignTriLocal_MAD #as eignTriLocal_MAD
+from computation.degree import calcDegree #as calcDegree
+#from computation.MAD import calcMAD #as calcMAD
+#from computation.Eigenvalues import calcEigs #as calcEigs
+from computation.clustCoeff import calcLocalClustCoeff #as calcLocalClustCoeff
+#from computation.triCount_deg_MAD import eignTriLocal_deg_MAD #as eignTriLocal_deg_MAD
+
 ''' Little welcome message'''
 def default(request):
     request.session.clear()
