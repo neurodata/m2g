@@ -10,7 +10,7 @@ call( ['python', manageFn, 'syncdb'] ) # sync the DB
 
 db = MySQLdb.connect(host="localhost",
                      user="root",
-                      passwd="",
+                      passwd="mysql",
                       db="MRdjango")
 
 cur = db.cursor()
