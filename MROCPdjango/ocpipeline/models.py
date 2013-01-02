@@ -13,26 +13,35 @@ class Document(models.Model):
     see: https://docs.djangoproject.com/en/dev/ref/models/instances/?from=olddocs
     '''
     docfile = models.FileField(upload_to = (' '))
-    
+
     def __unicode__(self):
         return self.name
-    
+
+class ConvertModel(models.Model):
+    '''
+    upload_to location dynamically altered in view
+    '''
+    filename = models.FileField(upload_to = (' '))
+
+    def __unicode__(self):
+        return self.name
+
 class Data(models.Model):
     projectName  = models.CharField(max_length=255)
     site = models.CharField(max_length=255,)
     subject = models.CharField(max_length=255,)
     session = models.CharField(max_length=255,)
     scanId = models.CharField(max_length=255)
-    
-    
+
+
     def __unicode__(self):
         return self.name
-    
+
 class OK(models.Model):
     #DM TODO: Track responses to zip or view as dir structure
     pass
-    
+
     def __unicode__(self):
         return self.name
-        
+
 admin.site.register(Document)

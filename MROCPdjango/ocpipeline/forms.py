@@ -24,6 +24,20 @@ class DocumentForm(forms.Form):
     #class Meta:
     #    model = Document
 
+class ConvertForm(forms.Form):
+    fileObj = forms.FileField(label='Upload data', help_text='                          ', required = True)
+
+    FORMAT_CHOICES = (('.npy', 'Numpy format (.npy)',), ('.mat', 'Matlab format (.mat)',), \
+        ('.csv', '(Excel) Comma separated values (.csv)',))
+
+    FILE_TYPES = [('cc','Clustering Coefficient'), ('deg','Local Degree'), ('eig','Largest Eigenvalues'), ('apl','Average Path Length'),\
+        ('ss1', 'Scan Statistic 1'),('ss2', 'Scan Statistic 2'),('tri','Triangle Count'),('svd','Single Value Decomposition'), \
+        ('mad', 'Maximum Average Degree'), ('fg', 'Fiber Graph'), ('lcc', 'Largest Connected Component')]
+
+    Select_file_type = forms.ChoiceField(choices=FILE_TYPES, widget=forms.RadioSelect())
+
+    Select_conversion_format = forms.MultipleChoiceField(required=True, \
+    widget=CheckboxSelectMultiple, choices=FORMAT_CHOICES)
 
 class DataForm(forms.Form):
     UserDefprojectName  = forms.CharField(label='Project name   ', help_text='                          ', max_length=255, required = True, error_messages={'required': 'Please enter your Project name'})
@@ -44,19 +58,6 @@ class GraphUploadForm(forms.Form):
 
     Select_Invariants_you_want_computed = forms.MultipleChoiceField(required=False,
     widget=CheckboxSelectMultiple, choices=INVARIANT_CHOICES)
-
-
-class ConvertForm(forms.Form):
-    fileObj = forms.FileField(label='Upload data', help_text='                          ', required = True)
-
-    FORMAT_CHOICES = (('.npy', 'Numpy format (.npy)',), ('.mat', 'Matlab format (.mat)',), \
-        ('.csv', '(Excel) Comma separated values (.csv)',))
-
-    Select_current_format = forms.MultipleChoiceField(required=True, \
-    widget=RadioSelect, choices=FORMAT_CHOICES)
-
-    Select_conversion_format = forms.MultipleChoiceField(required=True, \
-    widget=CheckboxSelectMultiple, choices=FORMAT_CHOICES)
 
 
 class OKForm(forms.Form):
