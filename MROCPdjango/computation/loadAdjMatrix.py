@@ -6,7 +6,8 @@
 
 import mrpaths
 import argparse
-import mrcap.lcc as lcc
+#import mrcap.lcc as lcc
+#import lcc
 from getBaseName import getBaseName
 import os
 import sys
