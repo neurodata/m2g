@@ -15,7 +15,10 @@ from django.http import HttpResponseBadRequest
 
 from django.core.files import File        # For programmatic file upload
 
+# Model imports
 from ocpipeline.models import Document
+from ocpipeline.models import ConvertModel
+
 from ocpipeline.forms import DocumentForm
 from ocpipeline.forms import OKForm
 from ocpipeline.forms import DataForm
@@ -52,6 +55,8 @@ from computation.MAD import calcMAD #as calcMAD
 from computation.Eigenvalues import calcEigs #as calcEigs
 from computation.clustCoeff import calcLocalClustCoeff #as calcLocalClustCoeff
 from computation.triCount_deg_MAD import eignTriLocal_deg_MAD #as eignTriLocal_deg_MAD
+
+from glob import glob
 
 ''' Little welcome message'''
 def default(request):
@@ -100,12 +105,12 @@ def pipelineUpload(request, webargs=None):
 
     request.session['lastView'] = 'pipelineUpload'
 
-    print "Uploading files..."
-
     ''' Form '''
     if request.method == 'POST':
         form = DocumentForm(request.POST, request.FILES) # instantiating form
         if form.is_valid():
+
+	    print "Uploading files..."
 
 	    ''' Define data directory paths '''
 	    request.session['derivatives'], request.session['rawdata'], request.session['graphs'],\
@@ -360,41 +365,42 @@ def graphLoadInv(request, webargs=None):
 #########################################
 
 def convert(request, webargs=None):
+
     ''' Form '''
     if (request.method == 'POST' and not webargs):
-        form = ConvertForm( request.FILES, request.POST) # instantiating form
-	##################   BUG HERE ###############################
+        form = ConvertForm(request.POST, request.FILES) # instantiating form
         if form.is_valid():
-	    data = request.FILES['fileObj'] # get data
-
-	    request.session['currentGraphFormat'] = form.cleaned_data['Select_current_format']
-	    request.session['conversionFormats'] = form.cleaned_data['Select_conversion_format']
 
 	    baseDir = os.path.join(settings.MEDIA_ROOT, 'tmp', strftime('formUpload%a%d%b%Y_%H.%M.%S/', localtime()))
 	    saveDir = os.path.join(baseDir,'upload') # Save location of original uploads
 	    convertFileSaveLoc = os.path.join(baseDir,'converted') # Save location of converted data
 
-	    if not os.path.exists(os.path.join(baseDir,'upload')):
-		os.makedirs(os.path.join(baseDir,'upload'))
+	    if not (os.path.exists(convertFileSaveLoc)):
+		os.makedirs(convertFileSaveLoc)
 
-	    uploadedFiles = writeBodyToDisk(data, saveDir)
+	    # ALTER TABLE ocpipeline_convertmodel MODIFY COLUMN filename TEXT;
+	    data = ConvertModel(filename = request.FILES['fileObj'])
+	    data._meta.get_field('filename').upload_to = saveDir # route files to correct location
+	    data.save()
 
-	    for f in uploadedFiles:
-		if form.cleaned_data['Select_conversion_format'] == form.cleaned_data['Select_current_format']:
-		    pass
-		elif form.cleaned_data['Select_conversion_format'] == 'mat':
-		    pass
-		else:
-		    pass  # convert
+	    savedFile = os.path.join(saveDir, request.FILES['fileObj'].name)
 
-	#    else:
-	#	path = default_storage.save(os.path.join(settings.MEDIA_ROOT, 'tmp', strftime("individualUpload%a%d%b%Y_%H.%M.%S/", localtime()), data.name), ContentFile(data.read()))
-	#	print '\nSaving %s complete...' % data.name
-	#	tmp_file = os.path.join(settings.MEDIA_ROOT, path)
-	#	print '\nSaving %s complete...' % data.name
+	    # If zip is uploaded
+	    if os.path.splitext(request.FILES['fileObj'].name)[1].strip() == '.zip':
+		uploadedFiles = zipper.unzip(savedFile, saveDir)
+		# Delete zip
+		os.remove(savedFile)
+	    else:
+		uploadedFiles = [savedFile]
 
-            # Redirect to Processing page
-	    return HttpResponseRedirect(get_script_prefix()+'success') # STUB
+	correctFileFormat, correctFileType = convertFiles(uploadedFiles, form.cleaned_data['Select_file_type'], \
+							  form.cleaned_data['Select_conversion_format'], convertFileSaveLoc)
+
+	if not (correctFileFormat):
+	    return HttpResponse("[ERROR]: You do not have any files with the correct extension for conversion")
+
+	dwnldLoc = "http://www.mrbrain.cs.jhu.edu"+ convertFileSaveLoc
+	return HttpResponseRedirect(dwnldLoc)
 
     # Programmtic API
     elif(request.method == 'POST' and webargs):
@@ -425,28 +431,7 @@ def convert(request, webargs=None):
 
 	uploadedFiles = writeBodyToDisk(request.body, saveDir)
 
-	correctFileFormat = False # Checks if at least 1 file has the correct extension
-	correctFileType = False # Checks if at leat 1 file is a valid fileType
-
-	for file_fn in uploadedFiles:
-	    # determine type of the file
-	    if (os.path.splitext(file_fn)[1] in ['.mat','.csv','.npy']):
-		correctFileFormat = True
-		if (fileType == 'fg' or fileType == 'fibergraph'):
-		    correctFileType = True
-		    pass # TODO : DM
-		elif( fileType == 'lcc' or fileType == 'lrgstConnComp'):
-		    correctFileType = True
-		    pass # TODO : DM
-		elif (fileType in settings.VALID_FILE_TYPES.keys() or fileType in settings.VALID_FILE_TYPES.values()):
-		    # Check if file format is the same as the toFormat
-		    if (os.path.splitext(file_fn)[1] in toFormat):
-			toFormat.remove(os.path.splitext(file_fn)[1])
-		    if (len(toFormat) == 0):
-			pass # No work to be done here
-		    else:
-			correctFileType = True
-			convertTo.convertAndSave(file_fn, toFormat, convertFileSaveLoc, fileType) # toFormat is a list
+	correctFileFormat, correctFileType = convertFiles(uploadedFiles, fileType, toFormat, convertFileSaveLoc)
 
 	if not (correctFileType):
 	    return HttpResponse("[ERROR]: You did not enter a valid FileType.")
@@ -454,7 +439,7 @@ def convert(request, webargs=None):
 	    return HttpResponse("[ERROR]: You do not have any files with the correct extension for conversion")
 
 	dwnldLoc = "http://www.mrbrain.cs.jhu.edu"+ convertFileSaveLoc
-	return HttpResponse ( "Converted files available for download at " + dwnldLoc + ". The directory " +
+	return HttpResponse ( "Converted files available for download at " + dwnldLoc + " . The directory " +
 		"may be empty if you try to convert to the same format the file is already in.") # change to render of a page with a link to data result
 
     else:
@@ -465,13 +450,6 @@ def convert(request, webargs=None):
         'convertupload.html',
         {'form': form},
         context_instance=RequestContext(request))
-
-############################ TEMP #####################################
-# The following are all equivalent in the type of the data
-
-
-
-############################ END TEMP ####################################
 
 #########################################
 #	*******************		#
@@ -825,15 +803,6 @@ def writeBodyToDisk(data, saveDir):
 	print name + " written to disk.."
     return uploadFiles
 
-
-
-
-
-
-
-
-
-
 def putDataInTempZip(data):
     '''
     Put data in a temporary zipped file
@@ -861,3 +830,33 @@ def writeTempZipToDisk(rzfile, saveDir):
 	uploadFiles.append(os.path.join(saveDir, name.split('/')[-1])) # add to list of files
 	print name + " written to disk.."
     return uploadFiles
+
+def convertFiles(uploadedFiles, fileType , toFormat, convertFileSaveLoc):
+    '''
+    @param uploadedFiles - array with all file names of uploaded files
+    @param fileType -
+    @param toFormat -
+    @param convertFileSaveLoc -
+    @return correctFileFormat - check if at least one file has the correct format
+    @return correctFileType - check if file type is legal
+    '''
+    for file_fn in uploadedFiles:
+	# determine type of the file
+	if (os.path.splitext(file_fn)[1] in ['.mat','.csv','.npy']):
+	    correctFileFormat = True
+	    if (fileType == 'fg' or fileType == 'fibergraph'):
+		correctFileType = True
+		pass # TODO : DM
+	    elif( fileType == 'lcc' or fileType == 'lrgstConnComp'):
+		correctFileType = True
+		pass # TODO : DM
+	    elif (fileType in settings.VALID_FILE_TYPES.keys() or fileType in settings.VALID_FILE_TYPES.values()):
+		# Check if file format is the same as the toFormat
+		if (os.path.splitext(file_fn)[1] in toFormat):
+		    toFormat.remove(os.path.splitext(file_fn)[1])
+		if (len(toFormat) == 0):
+		    pass # No work to be done here
+		else:
+		    correctFileType = True
+		    convertTo.convertAndSave(file_fn, toFormat, convertFileSaveLoc, fileType) # toFormat is a list
+    return correctFileFormat, correctFileType

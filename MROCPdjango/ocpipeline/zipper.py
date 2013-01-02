@@ -49,7 +49,11 @@ def zipFilesFromFolders(dirName = None, multiTuple = []):
 
 
 def zipper(dir, zip_file):
+    '''
+    Write a zipfile
+    
 
+    '''
     zip_file = tempfile.TemporaryFile()
 
     zip = zipfile.ZipFile(zip_file, 'w', compression=zipfile.ZIP_DEFLATED)
@@ -63,6 +67,35 @@ def zipper(dir, zip_file):
             zip.write(fullpath, archive_name, zipfile.ZIP_DEFLATED)
     zip.close()
     return zip_file
+
+def unzip(zfilename, saveToDir ):
+    '''
+    Unzip a zipped folder
+
+    zfilename - full filename of the zipfile
+    saveToDir - the save location
+
+    '''
+    # open the zipped file
+    zfile = zipfile.ZipFile( zfilename, "r" )
+
+    unzippedFiles = []
+
+    # get each archived file and process the decompressed data
+    for info in zfile.infolist():
+        fname = info.filename
+        # decompress each file's data
+        data = zfile.read(fname)
+
+        # save the decompressed data to a new file
+        filename = os.path.join(saveToDir, fname)
+        unzippedFiles.append(filename)
+        fout = open(filename, "w")
+        fout.write(data)
+        fout.close()
+        print "New file created --> %s" % filename
+
+    return unzippedFiles
 
 
 if __name__ == '__main__':
