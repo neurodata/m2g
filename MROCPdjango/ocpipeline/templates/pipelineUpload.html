@@ -4,23 +4,8 @@
 <html>
  <head>
     <link  rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+    <link rel="stylesheet" type="text/css" href="default.css" media="screen"/>
         <title> pipelineUpload | MROCP</title>
-            <style type="text/css">
-            body
-            {
-		background-image:url('http://a0.twimg.com/profile_images/1279484811/brain_favicon__1_.png');
-		/*background-image:url('http://i1061.photobucket.com/albums/t473/dmhembe/MR-connectome/diffSpect.jpg');*/
-		background-repeat: no-repeat;
-		background-position:top right;
-		background-size: 10%;
-            }
-
-	    p
-	    {
-		line-height: 150%
-	    }
-            </style>
-
 	    <script type="text/javascript">
 		// Function to add a spinner during upload & processing
 		function showSpinner(){
@@ -32,6 +17,18 @@
 
 <body>
     <a href="http://openconnecto.me"><img src="http://openconnecto.me/wp-content/themes/DMG/img/logo.png"/></a>
+    
+    <div class="container">
+        <div class="navigation">
+          <a href="http://mrbrain.cs.jhu.edu/disa">Home</a>
+          <a href="http://mrbrain.cs.jhu.edu/disa/create">Build Graph</a>
+          <a href="http://mrbrain.cs.jhu.edu/disa/graphupload">Compute Invariants</a>
+          <a href="http://mrbrain.cs.jhu.edu/disa/convert">Convert Format</a>
+          <a href="https://github.com/openconnectome/MR-connectome/tree/master/MROCPdjango/examples">Code Examples</a>
+          <a href="">Documentation</a>
+        </div>
+    </div>
+
     <h2>Please upload data derivative files and optionally select any invariants to be computed </h2>
      <p>
         <form action="" method="post" enctype="multipart/form-data" name="loadForm">
@@ -43,6 +40,8 @@
     </p>
 	<div style="position:absolute; left:153px; top: 212px;"> <img id="loadingImage" src="http://i1061.photobucket.com/albums/t473/dmhembe/MR-connectome/loading_zpsac6e6d22.gif" border="0" alt="loading" style="visibility:hidden;opacity:0.5"/> </div>
 
-    <h2> </h2>
+        <div class="footer">
+        Property of the Johns Hopkins University Storage Lab (HSSL) |  Author: Disa Mhembere
+    </div>
 </body>
 </html>

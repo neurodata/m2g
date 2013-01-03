@@ -3,42 +3,48 @@
 
 <html>
      <head>
-	<link  rel="shortcut icon" type="image/x-icon" href="/favicon.ico" >	
+	<link  rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="stylesheet" type="text/css" href="default.css" media="screen"/>
         <title>Confirm Download | MROCP</title>
-            <style type="text/css"> 
-                body
-                {
-                 background-image:url('http://a0.twimg.com/profile_images/1279484811/brain_favicon__1_.png');
-                 background-repeat: no-repeat;
-                 background-attachment:fixed;
-                 background-position:center;
-                 }
-        </style>
+
     </head>
-     
+
     <body>
 	<a href="http://openconnecto.me"><img src="http://openconnecto.me/wp-content/themes/DMG/img/logo.png"/></a>
+        <div class="container">
+	    <div class="navigation">
+		    <a href="http://mrbrain.cs.jhu.edu/disa">Home</a>
+		    <a href="http://mrbrain.cs.jhu.edu/disa/create">Build Graph</a>
+		    <a href="http://mrbrain.cs.jhu.edu/disa/graphupload">Compute Invariants</a>
+		    <a href="http://mrbrain.cs.jhu.edu/disa/convert">Convert Format</a>
+		    <a href="https://github.com/openconnectome/MR-connectome/tree/master/MROCPdjango/examples">Code Examples</a>
+		    <a href="">Documentation</a>
+	    </div>
+	</div>
         <br/>
-   <legend><p><h2>Congratulations! Your data was sucessfully processed</h2></p></legend>    
-        <form action=""  method="post" enctype="multipart/form-data">     
+   <legend><p><h2>Congratulations! Your data was sucessfully processed</h2></p></legend>
+        <form action=""  method="post" enctype="multipart/form-data">
             {% csrf_token %}
-            <input name = "zipDwnld"  type="submit" value="Obtain all processed data as a zipfile" class="button">        
+            <input name = "zipDwnld"  type="submit" value="Obtain all processed data as a zipfile" class="button"/>
         </form>
-        
+
         <form action="" method="post" enctype="multipart/form-data">
             {% csrf_token %}
-            <input name = "convToMatNzip"  type="submit" value="Convert graph invariants to .mat and zip" class="button">        
+            <input name = "convToMatNzip"  type="submit" value="Convert graph invariants to .mat and zip" class="button"/>
         </form>
-        
+
         <form action="" method="post" enctype="multipart/form-data">
             {% csrf_token %}
-            <input name = "getProdByDir"  type="submit" value="View directory to choose from individual files" class="button">        
+            <input name = "getProdByDir"  type="submit" value="View directory to choose from individual files" class="button"/>
         </form>
-        
+
         <form action="" method="post" enctype="multipart/form-data">
             {% csrf_token %}
-            <input name = "convToMatNgetByDir"  type="submit" value="Convert graph invariants to .mat & view directory" class="button">        
+            <input name = "convToMatNgetByDir"  type="submit" value="Convert graph invariants to .mat & view directory" class="button"/>
         </form>
-        
-        
-</body></html>
+
+	<div class="footer">
+	  Property of the Johns Hopkins University Storage Lab (HSSL) |  Author: Disa Mhembere
+	</div>
+  </body>
+</html>
