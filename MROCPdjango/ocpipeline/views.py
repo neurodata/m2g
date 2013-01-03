@@ -2,7 +2,12 @@
 @author : Disa Mhembere
 Module to hold the views of a Django one-click MR-connectome pipeline
 '''
+
 import os, sys, re
+os.environ['MPLCONFIGDIR'] = '/tmp/'
+#import matplotlib
+#matplotlib.use( 'Agg' )
+
 import zipfile
 import tempfile
 
@@ -55,6 +60,8 @@ from computation.degree import calcDegree #as calcDegree
 #from computation.Eigenvalues import calcEigs #as calcEigs
 from computation.clustCoeff import calcLocalClustCoeff #as calcLocalClustCoeff
 #from computation.triCount_deg_MAD import eignTriLocal_deg_MAD #as eignTriLocal_deg_MAD
+
+#import scipy.sparse.linalg.eigen.arpack as arpack # THIS IS THE PROBLEM IMPORT
 
 ''' Little welcome message'''
 def default(request):
