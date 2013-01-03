@@ -1,52 +1,148 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
-<html>	
+<html>
     <head>
-	<link  rel="shortcut icon" type="image/x-icon" href="/favicon.ico" >
+	<link  rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
         <title>Welcome | MROCP</title>
-            <style type="text/css"> 
-                body
-                {
-                 background-image:url('http://a0.twimg.com/profile_images/1279484811/brain_favicon__1_.png');
-		 background-size: 10%;
-                 background-repeat: no-repeat;
-                 background-attachment:fixed;
-                 background-position:top right;
-                 }
-                 p
-	    {
-		line-height: 180%
-	    }
-        </style>
+
+	<style type="text/css">
+	    /* standard elements */
+	html {min-height: 100%;}
+
+	* {
+		margin: 20;
+		padding: 10;
+	}
+
+	a {color: #963;}
+	a:hover {color: #C60;}
+
+	body {
+		background-image:url('http://a0.twimg.com/profile_images/1279484811/brain_favicon__1_.png');
+		background-size: 10%;
+		background-repeat: no-repeat;
+		background-attachment:fixed;
+		background-position:top right;
+		color: #444;
+		font: normal 95% Tahoma,sans-serif;
+		padding-bottom: 40px;
+	}
+
+	p,code,ul {padding-bottom: 1.2em; line-height: 180%;}
+
+	li {list-style: none;}
+
+	h1 {
+		font: normal 1.8em Tahoma,sans-serif;
+		margin-bottom: 4px;
+	}
+
+	code {
+		background: #FFF;
+		border: 1px solid #EEE;
+		border-left: 6px solid #C1CAD3;
+		color: #666;
+		display: block;
+		font: normal 1em Tahoma,sans-serif;
+		line-height: 1.6em;
+		margin-bottom: 12px;
+		padding: 8px 10px;
+		white-space: pre;
+	}
+
+
+	h1,h2,h3 {padding-top: 6px;}
+
+	/* structure */
+	.container {
+		background: #FFF;
+		font-size: 1.2em;
+		margin: 0 auto;
+		padding: 0 10px 10px;
+		width: 987px;
+	}
+
+	/* navigation */
+	.navigation {
+		background: #D9E1E5 url(http://i1061.photobucket.com/albums/t473/dmhembe/MR-connectome/nav_zps63ec1c19.gif);
+		border: 1px solid #DFEEF7;
+		border-color: #DFEEF7 #CFDEE7;
+		height: 41px;
+	}
+	.navigation a {
+		background: #D9E1E5 url(http://i1061.photobucket.com/albums/t473/dmhembe/MR-connectome/nav_zps63ec1c19.gif);
+		border-right: 1px solid #AFBEC7;
+		color: #456;
+		display: block;
+		float: left;
+		font: bold 1.1em sans-serif;
+		line-height: 41px;
+		padding: 0 15px;
+		text-decoration: none;
+	}
+	.navigation a:hover {background-position: left bottom; color: #234;}
+
+	/* footer */
+	.footer {
+		background: url(http://i1061.photobucket.com/albums/t473/dmhembe/MR-connectome/bgfooter_zpsc0c60f37.gif) repeat-x;
+		color: #456;
+		font: bold 1em sans-serif;
+		line-height: 39px;
+		padding: 0 12px;
+		text-align: center;
+	}
+
+	.footer a, .footer a:hover {color: #444;}
+
+	/*Button*/
+
+	.button {
+	  color: #444;
+	  border: 1px solid #3da7f5;
+	  font-weight: bold;
+	}
+	</style>
     </head>
-    <body>                
+    <body>
 	<a href="http://openconnecto.me"><img src="http://openconnecto.me/wp-content/themes/DMG/img/logo.png"/></a>
+
+	<div class="container">
+	    <div class="navigation">
+		    <a href="http://mrbrain.cs.jhu.edu/disa">Home</a>
+		    <a href="http://mrbrain.cs.jhu.edu/disa/create">Build Graph</a>
+		    <a href="http://mrbrain.cs.jhu.edu/disa/graphupload">Compute Invariants</a>
+		    <a href="http://mrbrain.cs.jhu.edu/disa/convert">Convert Format</a>
+		    <a href="https://github.com/openconnectome/MR-connectome/tree/master/MROCPdjango/examples">Code Examples</a>
+		    <a href="">Documentation</a>
+	    </div>
+	</div>
+
 	<h1>Welcome to the MROC pipeline [under construction]</h1>
-        
+
         <h2>Form based use: </h2>
-	<p>Click <a href='http://mrbrain.cs.jhu.edu/disa/create'> here </a> to proceed with a Form based version</p>
-        
-        <h2>Browser url use: </h2>
-	<p>APPEND '/create/{YOUR_projectName}/{YOUR_site}/{YOUR_subject}/{YOUR_session}/{YOUR_scanID}' (without quotes), to proceed using the url based version</p>
-        
+	<p>Click <a href='http://mrbrain.cs.jhu.edu/disa/create'><strong>here</strong></a> to proceed with a Form based version</p>
+
         <h2>Programmatic use: </h2>
         <p>To use a programmatic version please refer to our github <a href='https://github.com/openconnectome/MR-connectome/tree/master/MROCPdjango/examples' target='blank'>sample code </a>
         for examples of use and sample python scripts. <br/>
-        The base url for an upload is always <strong>http://openconnecto.me/disa/upload/ </strong>. <br/>
-        
+        The base url for an upload is always <strong>http://mrbrain.cs.jhu.edu/disa/upload/ </strong>. <br/>
+
         The example <a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjango/examples/uploadsubj.py"
         target="blank"> uploadsubj.py</a> can be used as follows from a terminal session: <br/>
-        
-        <strong>python uploadsubj.py http://openconnecto.me/disa/upload/{YOUR_project}/{YOUR_site}/{YOUR_subject}/{YOUR_session}/{scanID}/yes|no.</strong>
+
+        <strong>python uploadsubj.py http://mrbrain.cs.jhu.edu/disa/upload/{YOUR_project}/{YOUR_site}/{YOUR_subject}/{YOUR_session}/{scanID}/yes|no.</strong>
          The last param is either 'yes' or 'no', but not both: 'yes' adds .mat files for graph invariant result and .csv for graphs, while 'no' does not'. <br/>
-         
+
         <a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjango/examples/uploadMultiSubj.py">Multi-subject/scan example</a>
         is also provided for batch uploading and processing of multiple scans. The use is similar to uploadsubj.py.
         Help can be obtained by typing in a teminal/command line session: <strong>python uploadMultiSubj.py -h </strong>, for multi or <strong>python uploadsubj.py -h</strong> for single scans.
-        Please remember that 
-         
+        Please remember that
+
         </p>
-        
+
+	<div class="footer">
+	    Property of the Johns Hopkins University Storage Lab (HSSL) |  Author: Disa Mhembere
+	</div>
     </body>
 </html>
