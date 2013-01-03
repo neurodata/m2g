@@ -1,7 +1,8 @@
+#!/usr/bin/python
 '''
 @author : Disa Mhembere
-Create a ZIP file on disk and transmit it in chunks of 8KB,                 
-    without loading the whole file into memory.                            
+Create a ZIP file on disk and transmit it in chunks of 8KB,
+    without loading the whole file into memory.
 '''
 
 import os
@@ -14,14 +15,14 @@ def zipFilesFromFolders(dirName = None, multiTuple = []):
     '''
     temp = tempfile.TemporaryFile()
     myzip = zipfile.ZipFile(temp ,'w', zipfile.ZIP_DEFLATED)
-    
-    
+
+
     if (multiTuple):
         for dirName in multiTuple:
             if dirName[0] != '.': # ignore metadata
                 dirName = os.path.join(multiTuple, dirName)
                 filesInOutputDir = os.listdir(dirName)
-                
+
                 for thefolder in filesInOutputDir:
                     if thefolder[0] != '.': # ignore metadata
                         dataProdDir = os.path.join(dirName, thefolder)
@@ -31,10 +32,10 @@ def zipFilesFromFolders(dirName = None, multiTuple = []):
                             print "Compressing: " + thefile
         myzip.close()
         return temp
-        
-    
+
+
     filesInOutputDir = os.listdir(dirName)
-    
+
     for thefolder in filesInOutputDir:
         if thefolder[0] != '.': # ignore metadata
             dataProdDir = os.path.join(dirName, thefolder)
@@ -46,15 +47,74 @@ def zipFilesFromFolders(dirName = None, multiTuple = []):
     myzip.close()
     return temp
 
-def main():
+
+def zipper(dir, zip_file):
+    '''
+    Write a zipfile
     
+
+    '''
+    zip_file = tempfile.TemporaryFile()
+
+    zip = zipfile.ZipFile(zip_file, 'w', compression=zipfile.ZIP_DEFLATED)
+    root_len = len(os.path.abspath(dir))
+    for root, dirs, files in os.walk(dir):
+        archive_root = os.path.abspath(root)[root_len:]
+        for f in files:
+            fullpath = os.path.join(root, f)
+            archive_name = os.path.join(archive_root, f)
+            print "Compressing: " + f
+            zip.write(fullpath, archive_name, zipfile.ZIP_DEFLATED)
+    zip.close()
+    return zip_file
+
+def unzip(zfilename, saveToDir ):
+    '''
+    Unzip a zipped folder
+
+    zfilename - full filename of the zipfile
+    saveToDir - the save location
+
+    '''
+    # open the zipped file
+    zfile = zipfile.ZipFile( zfilename, "r" )
+
+    unzippedFiles = []
+
+    # get each archived file and process the decompressed data
+    for info in zfile.infolist():
+        fname = info.filename
+        # decompress each file's data
+        data = zfile.read(fname)
+
+        # save the decompressed data to a new file
+        filename = os.path.join(saveToDir, fname)
+        unzippedFiles.append(filename)
+        fout = open(filename, "w")
+        fout.write(data)
+        fout.close()
+        print "New file created --> %s" % filename
+
+    return unzippedFiles
+
+
+if __name__ == '__main__':
+    main()
+
+
+
+
+
+
+def main():
+
     parser = argparse.ArgumentParser(description='Zip the contents of an entire directory & place contents in single zip File')
     parser.add_argument('dirName', action='store')
     parser.add_argument('--multiTuple', action='store')
-    
+
     result = parser.parse_args()
-    
+
     zipFilesFromFolders(result.dirName, result.multiTuple)
-    
+
 if __name__ == '__main__':
     main()

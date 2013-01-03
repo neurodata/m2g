@@ -6,7 +6,6 @@ Created on Mar 12, 2012
 import pyximport;
 pyximport.install()
 
-import os
 import numpy as np
 from scipy import sparse as sp 
 import roi

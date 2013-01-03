@@ -2,10 +2,11 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
 <html>
- <head>
+  <head>
     <link  rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
-        <title> pipelineUpload | MROCP</title>
-		<style type="text/css">
+    <title>GraphUpload | MROCP</title>
+
+	<style type="text/css">
 	    /* standard elements */
 	html {min-height: 100%;}
 
@@ -102,14 +103,14 @@
 	  font-weight: bold;
 	}
 	</style>
-	    <script type="text/javascript">
-		// Function to add a spinner during upload & processing
-		function showSpinner(){
-			document.getElementById('loadingImage').style.visibility='visible';
-		}
-	    </script>
 
-    </head>
+    <script type="text/javascript">
+        // Function to add a spinner during upload & processing
+        function showSpinner(){
+                document.getElementById('loadingImage').style.visibility='visible';
+        }
+    </script>
+  </head>
 
 <body>
     <a href="http://openconnecto.me"><img src="http://openconnecto.me/wp-content/themes/DMG/img/logo.png"/></a>
@@ -125,19 +126,22 @@
         </div>
     </div>
 
-    <h2>Please upload data derivative files and optionally select any invariants to be computed </h2>
-     <p>
-        <form action="" method="post" enctype="multipart/form-data" name="loadForm">
-	    {% csrf_token %}
-            <p>{{ form }}</p>
-	    <input name = "Derivatives"  type="submit" value="Submit All & Process" class="button" onclick="showSpinner();"/>
-            <input type="reset" value="Reset" class="button" name="clearForm" />
-        </form>
+    <h2>Please upload the graph(s) on which you would like invariants to be computed </h2>
+    <p> You may choose to upload either a <strong> zipfile <i> (.zip)  </i></strong> or single file in either <strong><i>.mat, .npy or .csv </i></strong> format
+    If both are selected the zipfile will receive priority and be processed.
     </p>
-	<div style="position:absolute; left:153px; top: 212px;"> <img id="loadingImage" src="http://i1061.photobucket.com/albums/t473/dmhembe/MR-connectome/loading_zpsac6e6d22.gif" border="0" alt="loading" style="visibility:hidden;opacity:0.5"/> </div>
+    <form action="" method="post" enctype="multipart/form-data" name="loadForm">
+        {% csrf_token %}
+        <p>{{ form }}</p>
+        <input name = "Derivatives"  type="submit" value="Upload Graph(s)" class="button" onclick="showSpinner();"/>
+        <input type="reset" value="Reset" class="button" name="clearForm" />
+    </form>
 
-        <div class="footer">
+    <div style="position:absolute; left:153px; top: 212px;"> <img id="loadingImage" src="http://i1061.photobucket.com/albums/t473/dmhembe/MR-connectome/loading_zpsac6e6d22.gif" border="0" alt="loading" style="visibility:hidden;opacity:0.5"/> </div>
+
+    <div class="footer">
         Property of the Johns Hopkins University Storage Lab (HSSL) |  Author: Disa Mhembere
     </div>
+
 </body>
 </html>
