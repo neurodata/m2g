@@ -4,35 +4,36 @@
 <html>
     <head>
 	<link  rel="shortcut icon" type="image/x-icon" href="/favicon.ico"/>
+	<link rel="stylesheet" type="text/css" href="default.css" media="screen"/>
         <title>Direct Scan | MROCP</title>
-            <style type="text/css"> 
-            body
-            {
-            background-image:url('http://a0.twimg.com/profile_images/1279484811/brain_favicon__1_.png');
-            background-repeat: no-repeat;
-            /*background-attachment:fixed;*/
-            background-position:top right;
-	    background-size: 10%;
-            }
-            </style>
     </head>
-    
+
     <body>
 	<a href="http://openconnecto.me"><img src="http://openconnecto.me/wp-content/themes/DMG/img/logo.png"/></a>
+
+    <div class="container">
+        <div class="navigation">
+          <a href="http://mrbrain.cs.jhu.edu/disa">Home</a>
+          <a href="http://mrbrain.cs.jhu.edu/disa/create">Build Graph</a>
+          <a href="http://mrbrain.cs.jhu.edu/disa/graphupload">Compute Invariants</a>
+          <a href="http://mrbrain.cs.jhu.edu/disa/convert">Convert Format</a>
+          <a href="https://github.com/openconnectome/MR-connectome/tree/master/MROCPdjango/examples">Code Examples</a>
+          <a href="">Documentation</a>
+        </div>
+    </div>
+
 	 <h2>To ensure your data is routed correctly submit the form below</h2>
-       
-       
-            <form action="" method="post" enctype="multipart/form-data">     
+
+            <form action="" method="post" enctype="multipart/form-data">
                 {% csrf_token %}
-                    <p>{{ form }}</p>      
-                <input name = "Get Info"  type="submit" value="Confirm name & begin project" class="button"/>        
+                    <p>{{ form }}</p>
+                <input name = "Get Info"  type="submit" value="Confirm name & begin project" class="button"/>
                 <input type="reset" value="Reset" class="button"/>
             </form>
-            <!--
-            <h2>To proceed using browser urls only, follow directions below </h2>
-            <p> APPEND {YOUR_ProjectName}/{YOUR_Site}/{YOUR_Subject}/{YOUR_Session}/{YOUR_ScanID} with only '/' separating every term </p>
-            <p>Use camelCase as opposed to spaces for multiple word statements</p>
-            <p> Exact dupllicates in all terms are not replaced, they are identically named with a numerical suffix</p>
-	    -->
+
+    <div class="footer">
+        Property of the Johns Hopkins University Storage Lab (HSSL) |  Author: Disa Mhembere
+    </div>
+    
     </body>
 </html>
