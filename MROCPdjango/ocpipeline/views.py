@@ -87,8 +87,9 @@ def createProj(request, webargs=None):
 	    userDefProjectName = os.path.join(settings.MEDIA_ROOT, userDefProjectName) # Fully qualify
 	    request.session['usrDefProjDir'] = os.path.join(userDefProjectName, site, subject, session, scanId)
 	    request.session['scanId'] = scanId
-	return HttpResponseRedirect(get_script_prefix()+'pipelineUpload') # Redirect after POST
-
+	    return HttpResponseRedirect(get_script_prefix()+'pipelineUpload') # Redirect after POST
+	#if not form.is_valid():
+	#    pass
     else:
         form = DataForm() # An unbound form
 
@@ -149,7 +150,7 @@ def pipelineUpload(request, webargs=None):
 		request.session['graphs'], request.session['graphInvariants'], request.session['images']])
 
             # Redirect to Processing page
-        return HttpResponseRedirect(get_script_prefix()+'processInput')
+	    return HttpResponseRedirect(get_script_prefix()+'processInput')
     else:
         form = DocumentForm() # An empty, unbound form
 
@@ -353,7 +354,7 @@ def graphLoadInv(request, webargs=None):
 		print '\nSaving %s complete...' % data.name
 		runNoProjInvariants(ContentFile(data.read()), request.session['invariants'])
 
-        return HttpResponseRedirect(get_script_prefix()+'success') # STUB
+	    return HttpResponseRedirect(get_script_prefix()+'success') # STUB
     else:
         form = GraphUploadForm() # An empty, unbound form
 

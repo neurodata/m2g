@@ -56,7 +56,7 @@ class GraphUploadForm(forms.Form):
         ('SS2', 'Scan Statistic 2 [Not yet available]',), ('APL', 'Average Path Length [Not yet available]',),\
         ('GDia', 'Graph Diameter [Not yet available]',))
 
-    Select_Invariants_you_want_computed = forms.MultipleChoiceField(required=False,
+    Select_Invariants_you_want_computed = forms.MultipleChoiceField(required=True,
     widget=CheckboxSelectMultiple, choices=INVARIANT_CHOICES)
 
 
