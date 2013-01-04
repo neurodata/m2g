@@ -26,7 +26,6 @@ urlpatterns = patterns('ocpipeline.views',
     url(r'^confirmDownload/$', 'confirmDownload', name='confirm-dwnd-page'),
     url(r'^processInput/$', 'processInputData', name='process-input-data'),
     url(r'^zipOutput/$','zipProcessedData', name = 'zip-processed-data'), # 2nd param function is view, 3rd param - anything
-    # restful API
     url(r'^upload/(.*$)', 'upload', name= 'prog-upload'),
     url(r'^graphupload/(.*$)', 'graphLoadInv', name= 'graph-upload-invariant-processing'),
     url(r'^convert/(.*$)', 'convert', name= 'convert-to-format'),
@@ -40,11 +39,3 @@ urlpatterns = patterns('ocpipeline.views',
     # Uncomment the next line to enable the admin:
     url(r'^admin/', include(admin.site.urls)),
 )
-
-# For rendering aesthetics of html
-from django.conf import settings
-
-if settings.DEBUG:
-    urlpatterns += patterns('',
-        (r'^templates/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.TEMPLATE_DIR}),
-    )
