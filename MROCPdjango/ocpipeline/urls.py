@@ -40,3 +40,11 @@ urlpatterns = patterns('ocpipeline.views',
     # Uncomment the next line to enable the admin:
     url(r'^admin/', include(admin.site.urls)),
 )
+
+# For rendering aesthetics of html
+from django.conf import settings
+
+if settings.DEBUG:
+    urlpatterns += patterns('',
+        (r'^templates/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.TEMPLATE_DIR}),
+    )
