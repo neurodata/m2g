@@ -165,45 +165,49 @@
 	    <h2>Programmatic use </h2>
 	    All services can also be accessed programmatically as follows:
 		<ul>
-		<li>
-		    <h2>Upload derivatives to build a graph</h2>
-		    This services base url for an upload is
-		    <strong>http://mrbrain.cs.jhu.edu/disa/upload/ </strong>. <br/>
+		    <li>
+			<h3>Upload derivatives to build a graph</h3>
+			This services base url for an upload is <strong>http://mrbrain.cs.jhu.edu/disa/upload/ </strong>. <br/>
 
-		     The example <a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjango/examples/uploadsubj.py"
-        target="blank"> uploadsubj.py</a> can be used as follows from a terminal session: <br/>
+			The example <a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjango/examples/uploadsubj.py"
+			target="blank"> uploadsubj.py</a> can be used as follows from a terminal session: <br/>
 
-        <strong>python uploadsubj.py http://mrbrain.cs.jhu.edu/disa/upload/{YOUR_project}/{YOUR_site}/{YOUR_subject}/{YOUR_session}/{scanID}/yes|no.</strong>
-         The last param is either 'yes' or 'no', but not both: 'yes' adds .mat files for graph invariant result and .csv for graphs, while 'no' does not'. <br/>
+			<strong>python uploadsubj.py http://mrbrain.cs.jhu.edu/disa/upload/{YOUR_project}/{YOUR_site}/{YOUR_subject}/{YOUR_session}/{scanID}/yes|no.</strong>
+			 The last param is either 'yes' or 'no', but not both: 'yes' adds .mat files for largest connected component and single value decomposition into .mat format
+			 , while 'no' does not. <br/>
 
-        <a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjango/examples/uploadMultiSubj.py">Multi-subject/scan example</a>
-        is also provided for batch uploading and processing of multiple scans. The use is similar to uploadsubj.py.
-        Help can be obtained by typing in a teminal/command line session: <strong>python uploadMultiSubj.py -h </strong>, for multi or <strong>python uploadsubj.py -h</strong> for single scans.
-        Please remember that
+			<a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjango/examples/uploadMultiSubj.py">Multi-subject/scan example</a>
+			is also provided for batch uploading and processing of multiple scans. The use is similar to uploadsubj.py.
+			Help can be obtained by typing in a teminal/command line session: <strong>python uploadMultiSubj.py -h </strong>, for multi or
+			<strong>python uploadsubj.py -h</strong> for single scans.
+		    </li>
 
-		</li>
-		<li>
-		     Compute Invariants of graphs built, including by using
-		    <ul>
-			<li> - The Scan Statistic 1</li>
-			<li> - The Triangle Count </li>
-			<li> - The Clustering Coefficient</li>
-			<li> - The Maximum Average Degree</li>
-			<li> - The Local Degree Count</li>
-			<li> - The Top 100 eigenvalues</li>
-			<li> - The Scan Statistic 2 [Coming soon]</li>
-			<li> - The Average Path Length [Coming soon]</li>
-			<li> - The Graph Diameter [Coming soon]</li>
-		    </ul>
-		</li>
-		<li>
-		    <a href="http://mrbrain.cs.jhu.edu/disa/graphupload">Upload a graph</a> previously built through MROCP and compute other desired invariants.
-		</li>
+		    <li>
+			<h3> Compute Invariants of built graphs </h3>
+			<p> This is not yet available via programmatic API</p>
+		    </li>
 
-		<li>
-		    <a href="http://mrbrain.cs.jhu.edu/disa/convert"> Convert</a> data files between npy, mat and csv formats.
-		    Data files include built graphs, largest connected component, and all invariants.
-		</li>
+		    <li>
+			<h3> Convert data file formats</h3>
+			The use is similar to building a graph progmatically. The base url is <strong>http://mrbrain.cs.jhu.edu/disa/convert/</strong>. <br/>
+			Single and batch conversion examples can be found in the <a href="https://github.com/openconnectome/MR-connectome/tree/master/MROCPdjango/examples"> code examples</a>. <br/>
+
+			An example of executing the sample code from the command line is <strong>python singleConvert.py filename.npy http://mrbrain.cs.jhu.edu/disa/convert/cc/mat,csv</strong> <br/>
+			This would convert a file of file type <i>cc</i> from <i>npy</i> format to <i>mat</i> and <i>csv</i> format.<br/>
+
+			The following are the ONLY accepted file types:
+			<ul>
+			    <li> - 'ss1' or 'scanStat1' for the Scan Statistic 1</li>
+			    <li> - 'tri' or 'triangle' for the Triangle Count </li>
+			    <li> - 'cc' or 'clustCoeff' for the Clustering Coefficient</li>
+			    <li> - 'mad' or 'maxAvgDeg' for the Maximum Average Degree</li>
+			    <li> - 'deg' or 'degree' for The Local Degree Count</li>
+			    <li> - 'eig' or 'eigen' for the Top 100 eigenvalues</li>
+			    <li> - 'ss2'or 'scanStat2' for the Scan Statistic 2 [Coming soon]</li>
+			    <li> - 'apl' or 'avePathLen'for the Average Path Length [Coming soon]</li>
+			    <li> - 'gdia' or 'graphDiam' for the Graph Diameter [Coming soon]</li>
+			</ul>
+		    </li>
 
 		</ul>
 	    </div>
