@@ -1,6 +1,13 @@
-'''
-This form has only one field. See Form FileField reference for details.
-'''
+#!/usr/bin/python
+
+"""
+@author: Disa Mhembere
+@organization: Johns Hopkins University
+@contact: disa@jhu.edu
+
+@summary: All forms required for web services
+"""
+
 from django import forms # for UploadFileForm
 from django.forms.fields import MultipleChoiceField
 from django.forms.widgets import RadioSelect, CheckboxSelectMultiple

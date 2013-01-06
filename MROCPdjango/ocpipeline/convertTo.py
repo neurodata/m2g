@@ -1,3 +1,11 @@
+#!/usr/bin/python
+"""
+@author: Disa Mhembere
+@organization: Johns Hopkins University
+@contact: disa@jhu.edu
+
+@summary: A module to load and convert graphs and invariant data between mat, npy and csv format
+"""
 import scipy.io as sio
 import numpy as np
 import os
@@ -7,8 +15,11 @@ from time import time
 
 def convertLCCNpyToMat(lcc_fn):
   '''
-  Convert a npy largest connected components file to an equivalent .mat file
-  lcc_fn - largest connected components full file name which should be a .npy
+  Convert a npy largest connected components file to an equivalent .mat file.
+
+  @param lcc_fn: largest connected components full file name which should be a .npy
+  @type lcc_fn: string
+  @deprecated
   '''
   start  = time()
   lcc = np.load(lcc_fn).item().toarray()
@@ -18,10 +29,21 @@ def convertLCCNpyToMat(lcc_fn):
 
 def convertAndSave(fn, toFormat, saveLoc, fileType):
   '''
-  * Not for fibergraph yet
-  Convert invariant array between .npy, .csv, .mat
-  fn - the filename of the file to be converted
-  fileType - the fileType is the type of invariant ('cc','ss1', 'scanStat1')
+  Convert invariant array between .npy, .csv, .mat.
+
+  @param fn: the filename of the file to be converted
+  @type fn: string
+
+  @param toFormat: the desired output format i.e. I{.npy, .csv, .mat.}.
+  @type toFormat: string
+
+  @param saveLoc: full path of where files are to be saved after conversion
+  @type saveLoc: string
+
+  @param fileType: the fileType is the type of invariant ('cc','ss1', 'scanStat1')
+  @type fileType: string
+
+  @todo: Not for fibergraph yet
   '''
 
   fnExt = os.path.splitext(fn)[1]
@@ -51,7 +73,12 @@ def convertAndSave(fn, toFormat, saveLoc, fileType):
 def convertGraph(G_fn, toFormat):
   '''
   Convert a graph from mat format to npy format
-  G_fn - the graph name
+
+  @param G_fn: the graph name
+  @type G_fn: string
+
+  @param toFormat: the format to convert to. Either .mat, .npy, csv
+  @type toFormat: string
   '''
   fnExt = os.path.splitext(fn)[1]
 
@@ -77,14 +104,22 @@ def convertSVDNpyToMat(svd_fn):
   '''
   Convert a npy sigular value decomposition file to an equivalent .mat file
   svd_fn - sigular value decomposition full file name which should be a .npy
+
+  @param svd_fn: the full filename of the svd file
+  @type svd_fn: string
+  @deprecated
   '''
   sio.savemat(os.path.splitext(svd_fn)[0],{'svd': np.load(svd_fn)}, appendmat = True)
 
 def convertGraphToCSV(G_fn, G=None):
   '''
-  * Infesible for big graphs ~9T space & 62 Days!
+  @todo: Infesible for big graphs ~9T space & 62 Days!
   Convert a graph .mat format to a dense comma separated value file (.csv)
-  graph_fn - the full file name of the graph.
+
+  @param G_fn: the full file name of the graph file
+  @type G_fn: string
+
+  @deprecated
   '''
   fnExt = os.path.splitext(G_fn)[1]
   if not G:
@@ -110,18 +145,22 @@ def loadFile(file_fn, fileType):
     Determine how to load a file based on the extension &
     the fileType
 
-    @param file_fn the filename of the file to be loaded
-    @param fileType the fileType to loaded.
+    @param file_fn: the filename of the file to be loaded.
+    @type file_fn: string
+
+    @param fileType: the fileType to loaded.
+    @type fileType: string
+
     @return the loaded file
 
     The following are valid fileTypes:
-    1.'cc'|'clustCoeff' is the clustering coefficient
-    2.'deg'|'degree' is the local vertex degree
-    3.'eig'|'eigen' is the eigenvalues
-    4.'mad'|'maxAvgDeg'
-    5.'ss1'| 'scanStat1'
-    6.'ss1'| 'scanStat1'
-    7.'tri'|'triangle'
+        1.'cc'|'clustCoeff' is the clustering coefficient
+        2.'deg'|'degree' is the local vertex degree
+        3.'eig'|'eigen' is the eigenvalues
+        4.'mad'|'maxAvgDeg'
+        5.'ss1'| 'scanStat1'
+        6.'ss1'| 'scanStat1'
+        7.'tri'|'triangle'
     '''
 
     fn, ext  = os.path.splitext(file_fn)
@@ -136,5 +175,5 @@ def loadFile(file_fn, fileType):
 
     elif (ext == '.npy'):
       theFile = np.load(file_fn)
-      
+
     return theFile

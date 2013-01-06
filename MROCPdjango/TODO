@@ -1,6 +1,6 @@
 Do documentation
 Finish graphupload view
-Finish work on convert
+Finish work on convert csv
 Fix import errors
 Fix parallel processing of ss
 Get static content to load via apache for production mode

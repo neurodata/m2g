@@ -1,16 +1,25 @@
+#!/usr/bin/python
+"""
+@author: Disa Mhembere
+@organization: Johns Hopkins University
+@contact: disa@jhu.edu
+
+@summary: A module to create the directories necessary for the OCPIPELINE
+"""
+
 import os
 import argparse
 from shutil import move # For moving files
 
-'''
-Module creates a directory structure as defined by a string userDefProjectDir & moves files in
-tuple args to the userDefProjectDir
-'''
 def createDirStruct(resultDirs, derivFiles = None):
     '''
-    resultDirs - Directories to hold results
+    @param resultDirs: Directories to hold results
+    @type resultDirs: string
+
+    @param derivFiles: The name of the derivatives files uploaded
+    @type derivFiles: string
     '''
-    
+
     newDir = ''
     if (derivFiles):
         for folder in resultDirs.split('/'):
@@ -20,13 +29,13 @@ def createDirStruct(resultDirs, derivFiles = None):
                     os.makedirs(newDir)
                 else:
                     print "%s, already exists" % newDir
-            
+
         for subfolder in ['derivatives/', 'rawdata/', 'graphs/', 'graphInvariants/']:
             if not os.path.exists(os.path.join(newDir, subfolder)):
                 os.makedirs (os.path.join(newDir, subfolder))
             else:
                 print "%s, already exists" % os.path.join(newDir, subfolder)
-        
+
         ''' Move files into a derivative folder'''
         #### If duplicate proj,subj,session,site & scanID given - no duplicates for now #####
         for f in derivFiles:
@@ -34,7 +43,7 @@ def createDirStruct(resultDirs, derivFiles = None):
                 move(f, os.path.join(resultDirs, 'derivatives'))
             #else:
             #    print "%s, already in derivatives folder" % os.path.join(resultDirs,'derivatives', f.split('/')[-1])
-            
+
             # Unqulify file names for processing
             if (f[-4:] == '.dat'):
                 fiber_fn = f.split('/')[-1]
@@ -45,26 +54,24 @@ def createDirStruct(resultDirs, derivFiles = None):
             elif (f[-4:] == '.raw'):
                 roi_raw_fn = f.split('/')[-1]
                 #new_roi_raw_fn = os.path.join(resultDirs,'derivatives', f.split('/')[-1])
-                
+
         return [fiber_fn, roi_xml_fn, roi_raw_fn]
-        
-    for folder in resultDirs: 
+
+    for folder in resultDirs:
         if not os.path.exists(folder):
             os.makedirs(folder)
         else:
             print "%s, already exist" % folder
-            
-    
-    
+
 def main():
     parser = argparse.ArgumentParser(description='Create appropriate dir structure for a project')
     parser.add_argument('resultDir', action="store")
     parser.add_argument('derivFiles', action="store", default = None)
-    
-    
+
+
     result = parser.parse_args()
-    
+
     createDirStruct(result.resultDir, result.derivFiles)
-    
+
 if __name__ == '__main__':
     main()
