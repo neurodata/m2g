@@ -1,6 +1,11 @@
+#!/usr/bin/python
+
 '''
 @author : Disa Mhembere
-Module to hold the views of a Django one-click MR-connectome pipeline
+@organization: Johns Hopkins University
+@contact: disa@jhu.edu
+
+@summary: Module to hold the views of a Django one-click MR-connectome pipeline
 '''
 
 import os, sys, re
@@ -163,8 +168,8 @@ def pipelineUpload(request, webargs=None):
 
 def processInputData(request):
     '''
-    Extract File Name
-    Determine what file corresponds to what for gengraph
+    Extract File name & determine what file corresponds to what for gengraph
+    @param request: the request object
     '''
     filesInUploadDir = os.listdir(request.session['derivatives'])
 
@@ -240,6 +245,7 @@ def confirmDownload(request):
 def zipProcessedData(request):
     '''
     Compress data products to single zip for upload
+    @param request: the request object
     '''
     print '\nBeginning file compression...'
     # Take dir with multiple scans, compress it & send it off
@@ -259,7 +265,12 @@ def zipProcessedData(request):
     return response
 
 def upload(request, webargs=None):
-    """Programmatic interface for uploading data"""
+    """
+    Programmatic interface for uploading data
+    @param request: the request object
+
+    @param webargs: POST data with userDefProjectName, site, subject, session, scanId, addmatNcsv info
+    """
     if (webargs and request.method == 'POST'):
 
 	[userDefProjectName, site, subject, session, scanId, addmatNcsv] = webargs.split('/') # [:-1] # Add to server version
@@ -463,9 +474,14 @@ def convert(request, webargs=None):
 #########################################
 def processData(fiber_fn, roi_xml_fn, roi_raw_fn,graphs, graphInvariants, run = False):
     '''
-    graphs - Dir where biggraphs & smallgraphs are saved
-    graphInvariants - Dir where graph invariants are saved
-    run - Default is false so nothing is actually run
+    Run graph building and other related scripts
+    @param fiber_fn: fiber tract file
+    @param roi_xml_fn: region of interest xml file
+    @param roi_raw_fn: region of interest raw file
+
+    @param graphs: Dir where biggraphs & smallgraphs are saved
+    @param graphInvariants:  Dir where graph invariants are saved
+    @param run: Whether or not to run processor intensive jobs. Default is - false so nothing is actually run
     '''
     if (run):
 	import mrcap.svd as svd
@@ -518,8 +534,9 @@ def processData(fiber_fn, roi_xml_fn, roi_raw_fn,graphs, graphInvariants, run = 
 #########################################
 def runInvariants(lccG, req_sess):
     '''
-    lccG - Sparse largest connected component adjacency matrix
-    req_sess - current session dict containing session varibles
+    @todo
+    @param lccG: Sparse largest connected component adjacency matrix
+    @param req_sess: current session dict containing session varibles
     '''
     SS1fn = None
     TriCntfn = Degfn =  SS2fn = APLfn = GDiafn = CCfn = numNodes = SS1fn
@@ -629,8 +646,10 @@ def runInvariants(lccG, req_sess):
 #########################################
 def runNoProjInvariants(lccG, req_sess_invs):
     '''
-    lccG - Sparse largest connected component adjacency matrix
-    req_sess - current session dict containing session varibles
+    @todo
+
+    @param lccG: Sparse largest connected component adjacency matrix
+    @param req_sess_invs: current session dict containing session varibles
     '''
 
     print "STUB!"
@@ -739,9 +758,9 @@ def runNoProjInvariants(lccG, req_sess_invs):
 '''********************* Standalone Methods  *********************'''
 def makeDirIfNone(dirPathList):
     '''
-    Create a dir specified by dirPath
-    Failure usual due to permissions issues
-    dirPathList - A 'list' of the full paths of directory(ies) to be created
+    Create a dir specified by dirPathList. Failure usual due to permissions issues.
+
+    @param dirPathList: A 'list' of the full paths of directory(ies) to be created
     '''
     for dirPath in dirPathList:
 	try:
@@ -756,16 +775,18 @@ def makeDirIfNone(dirPathList):
 
 def getFiberPath(fiberFileName):
     '''
-    fiberFileName - is a tract file name with naming convention '[filename]_fiber.dat'
-	where filename may vary but _fiber.dat may not.
     This returns fiberfn's full path less the 'fiber.dat' portion
+
+    @param fiberFileName - is a tract file name with naming convention '[filename]_fiber.dat'
+	where filename may vary but _fiber.dat may not.
     '''
     return fiberFileName.partition('_')[0]
 
 def defDataDirs(projectDir):
     '''
     Define all the paths to the data product directories
-    projectDir - the fully qualified path of the project directory
+
+    @param projectDir: the fully qualified path of the project directory
     '''
     derivatives = os.path.join(projectDir, 'derivatives')
     rawdata = os.path.join(projectDir, 'rawdata')
@@ -778,7 +799,8 @@ def defDataDirs(projectDir):
 def getFiberID(fiberfn):
     '''
     Assumptions about the data made here as far as file naming conventions
-    fiberfn - the dMRI streamline file in format {filename}_fiber.dat
+
+    @param fiberfn: the dMRI streamline file in format {filename}_fiber.dat
     '''
     if fiberfn.endswith('/'):
 	fiberfn = fiberfn[:-1] # get rid of trailing slash
@@ -786,8 +808,11 @@ def getFiberID(fiberfn):
 
 def writeBodyToDisk(data, saveDir):
     '''
-    @param data the data to be written to file
-    @param saveDir - the location of where data is to be written
+    Write the requests body to disk
+
+    @param data: the data to be written to file
+    @param saveDir: the location of where data is to be written
+
     @return a list with the names of the uplaoded files
     '''
     tmpfile = tempfile.NamedTemporaryFile()
@@ -812,7 +837,9 @@ def writeBodyToDisk(data, saveDir):
 def putDataInTempZip(data):
     '''
     Put data in a temporary zipped file
-    data - any writable sum of bytes
+
+    @param data - any writable sum of bytes
+    @return the temp zipped file
     '''
     tmpfile = tempfile.NamedTemporaryFile()
     tmpfile.write ( data )
@@ -823,6 +850,7 @@ def putDataInTempZip(data):
 
 def writeTempZipToDisk(rzfile, saveDir):
     '''
+    @todo
     Extract & save zipped files
     rzfile - A zipfile
     saveDir - the location where it should be saved
@@ -839,8 +867,10 @@ def writeTempZipToDisk(rzfile, saveDir):
 
 def convertFiles(uploadedFiles, fileType , toFormat, convertFileSaveLoc):
     '''
-    @param uploadedFiles - array with all file names of uploaded files
-    @param fileType -
+    @todo
+
+    @param uploadedFiles: array with all file names of uploaded files
+    @param fileType
     @param toFormat -
     @param convertFileSaveLoc -
     @return correctFileFormat - check if at least one file has the correct format
