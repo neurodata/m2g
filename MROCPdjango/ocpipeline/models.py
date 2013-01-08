@@ -1,3 +1,12 @@
+#!/usr/bin/python
+"""
+@author: Disa Mhembere
+@organization: Johns Hopkins University
+@contact: disa@jhu.edu
+
+@summary: A module to create the directories necessary for the OCPIPELINE
+"""
+
 '''
 FileField stores files e.g. to media/documents based MEDIA_ROOT
 Generally, each model maps to a single database table.

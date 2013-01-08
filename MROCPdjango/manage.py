@@ -1,4 +1,12 @@
 #!/usr/bin/env python
+"""
+@author: Disa Mhembere
+@organization: Johns Hopkins University
+@contact: disa@jhu.edu
+
+@summary: The django management module
+"""
+
 import os
 import sys
 

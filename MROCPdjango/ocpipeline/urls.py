@@ -1,7 +1,10 @@
-'''
-@author Disa Mhembere
-urls patterns for one-click MR-connectome pipeline
-'''
+"""
+@author: Disa Mhembere
+@organization: Johns Hopkins University
+@contact: disa@jhu.edu
+
+@summary: A module to hold url patterns for one-click MR-connectome pipeline
+"""
 
 from django.conf.urls import patterns, include, url
 from ocpipeline.views import createProj

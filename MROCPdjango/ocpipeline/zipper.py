@@ -1,9 +1,12 @@
 #!/usr/bin/python
-'''
-@author : Disa Mhembere
-Create a ZIP file on disk and transmit it in chunks of 8KB,
+"""
+@author: Disa Mhembere
+@organization: Johns Hopkins University
+@contact: disa@jhu.edu
+
+@summary: A module to Create a ZIP file on disk and transmit it in chunks of 8KB,
     without loading the whole file into memory.
-'''
+"""
 
 import os
 import tempfile, zipfile
@@ -11,11 +14,11 @@ import argparse
 
 def zipFilesFromFolders(dirName = None, multiTuple = []):
     '''
-    dirName - any folder
+    @deprecated
+    @param dirName: any folder
     '''
     temp = tempfile.TemporaryFile()
     myzip = zipfile.ZipFile(temp ,'w', zipfile.ZIP_DEFLATED)
-
 
     if (multiTuple):
         for dirName in multiTuple:
@@ -47,12 +50,15 @@ def zipFilesFromFolders(dirName = None, multiTuple = []):
     myzip.close()
     return temp
 
-
 def zipper(dir, zip_file):
     '''
-    Write a zipfile
-    
+    Write a zipfile from a directory
 
+    @param dir: the path to directory to be zipped
+    @type dir: string
+
+    @param zip_file: name of zip file
+    @type zip_file: string
     '''
     zip_file = tempfile.TemporaryFile()
 
@@ -72,10 +78,13 @@ def unzip(zfilename, saveToDir ):
     '''
     Unzip a zipped folder
 
-    zfilename - full filename of the zipfile
-    saveToDir - the save location
+    @param zfilename: full filename of the zipfile
+    @type zfilename: string
 
+    @param saveToDir: the save location
+    @type saveToDir: string
     '''
+
     # open the zipped file
     zfile = zipfile.ZipFile( zfilename, "r" )
 
@@ -97,14 +106,8 @@ def unzip(zfilename, saveToDir ):
 
     return unzippedFiles
 
-
 if __name__ == '__main__':
     main()
-
-
-
-
-
 
 def main():
 
