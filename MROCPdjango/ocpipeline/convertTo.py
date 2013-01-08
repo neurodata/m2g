@@ -119,7 +119,7 @@ def convertGraphToCSV(G_fn, G=None):
   @param G_fn: the full file name of the graph file
   @type G_fn: string
 
-  @deprecated
+  @deprecated: this method
   '''
   fnExt = os.path.splitext(G_fn)[1]
   if not G:
@@ -151,16 +151,16 @@ def loadFile(file_fn, fileType):
     @param fileType: the fileType to loaded.
     @type fileType: string
 
-    @return the loaded file
+    @return: the loaded file
 
     The following are valid fileTypes:
-        1.'cc'|'clustCoeff' is the clustering coefficient
-        2.'deg'|'degree' is the local vertex degree
-        3.'eig'|'eigen' is the eigenvalues
-        4.'mad'|'maxAvgDeg'
-        5.'ss1'| 'scanStat1'
-        6.'ss1'| 'scanStat1'
-        7.'tri'|'triangle'
+        1. 'cc'|'clustCoeff' is the clustering coefficient
+        2. 'deg'|'degree' is the local vertex degree
+        3. 'eig'|'eigen' is the eigenvalues
+        4. 'mad'|'maxAvgDeg'
+        5. 'ss1'| 'scanStat1'
+        6. 'ss1'| 'scanStat1'
+        7. 'tri'|'triangle'
     '''
 
     fn, ext  = os.path.splitext(file_fn)

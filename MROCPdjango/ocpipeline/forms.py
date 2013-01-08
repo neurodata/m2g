@@ -71,7 +71,7 @@ class ConvertForm(forms.Form):
 class DataForm(forms.Form):
     '''
     This form will be used for routing data correctly when building graphs.
-        It also is used in naming projects etc..
+    It also is used in naming projects etc..
 
     @var UserDefprojectName: The name of the project
     @type UserDefprojectName: string
@@ -99,7 +99,7 @@ class DataForm(forms.Form):
 class GraphUploadForm(forms.Form):
     '''
     This form will be used for uploading an already built graph & then giving options for
-        desired invariants to be computed
+    desired invariants to be computed
 
     @cvar INVARIANT_CHOICES: The current invariants that can be computed by the MROCP
     '''
@@ -118,7 +118,7 @@ class GraphUploadForm(forms.Form):
 class OKForm(forms.Form):
     '''
     This form will be used for picking file return type
-        of computed products after building a graph
+    of computed products after building a graph
     '''
 
     pass #DM TODO: Track responses to zip or view as dir structure
