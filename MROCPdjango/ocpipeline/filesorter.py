@@ -34,13 +34,13 @@ def checkFileExtGengraph(files):
 
 def checkFileExtSVD(files = 0):
   '''
-  @todo
+  @todo: This method
   '''
   print "STUB for SVD check files"
 
 def checkFilesLCC(files = 0):
   '''
-  @todo
+  @todo: This method
   '''
   print "STUB for lcc check files"
 
