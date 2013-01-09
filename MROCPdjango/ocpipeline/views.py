@@ -271,6 +271,8 @@ def upload(request, webargs=None):
 
     @param webargs: POST data with userDefProjectName, site, subject, session, scanId, addmatNcsv info
     """
+    request.session.clear() # NEW
+
     if (webargs and request.method == 'POST'):
 
 	[userDefProjectName, site, subject, session, scanId, addmatNcsv] = webargs.split('/') # [:-1] # Add to server version
@@ -324,13 +326,17 @@ def upload(request, webargs=None):
 	#ret = rzfile.testzip()
 	#ret = rzfile.namelist()
 
+	request.session.clear() # NEW
+
 	dwnldLoc = "http://www.mrbrain.cs.jhu.edu" + settings.MEDIA_ROOT + webargs
 	return HttpResponse ( "Files available for download at " + dwnldLoc) # change to render of a page with a link to data result
 
     elif(not webargs):
+	request.session.clear() # NEW
 	return django.http.HttpResponseBadRequest ("Expected web arguments to direct project correctly")
 
     else:
+	request.session.clear() # NEW
 	return django.http.HttpResponseBadRequest ("Expected POST data, but none given")
 
 ################## TO DOs ########################
@@ -344,6 +350,9 @@ def download(request, webargs=None):
 #########################################
 def graphLoadInv(request, webargs=None):
     ''' Form '''
+
+    request.session.clear() # NEW
+
     if request.method == 'POST':
         form = GraphUploadForm(request.POST, request.FILES) # instantiating form
         if form.is_valid():
@@ -365,6 +374,7 @@ def graphLoadInv(request, webargs=None):
 		print '\nSaving %s complete...' % data.name
 		runNoProjInvariants(ContentFile(data.read()), request.session['invariants'])
 
+	    request.session.clear() # NEW
 	    return HttpResponseRedirect(get_script_prefix()+'success') # STUB
     else:
         form = GraphUploadForm() # An empty, unbound form
@@ -382,8 +392,9 @@ def graphLoadInv(request, webargs=None):
 #########################################
 
 def convert(request, webargs=None):
-
     ''' Form '''
+    request.session.clear() # NEW
+
     if (request.method == 'POST' and not webargs):
         form = ConvertForm(request.POST, request.FILES) # instantiating form
         if form.is_valid():
@@ -414,9 +425,11 @@ def convert(request, webargs=None):
 							  form.cleaned_data['Select_conversion_format'], convertFileSaveLoc)
 
 	if not (correctFileFormat):
+	    request.session.clear() # NEW
 	    return HttpResponse("[ERROR]: You do not have any files with the correct extension for conversion")
 
 	dwnldLoc = "http://www.mrbrain.cs.jhu.edu"+ convertFileSaveLoc
+	request.session.clear() # NEW
 	return HttpResponseRedirect(dwnldLoc)
 
     # Programmtic API
@@ -451,11 +464,14 @@ def convert(request, webargs=None):
 	correctFileFormat, correctFileType = convertFiles(uploadedFiles, fileType, toFormat, convertFileSaveLoc)
 
 	if not (correctFileType):
+	    request.session.clear() # NEW
 	    return HttpResponse("[ERROR]: You did not enter a valid FileType.")
 	if not (correctFileFormat):
+	    request.session.clear() # NEW
 	    return HttpResponse("[ERROR]: You do not have any files with the correct extension for conversion")
 
 	dwnldLoc = "http://www.mrbrain.cs.jhu.edu"+ convertFileSaveLoc
+	request.session.clear() # NEW
 	return HttpResponse ( "Converted files available for download at " + dwnldLoc + " . The directory " +
 		"may be empty if you try to convert to the same format the file is already in.") # change to render of a page with a link to data result
 
