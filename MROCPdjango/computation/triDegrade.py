@@ -42,6 +42,11 @@ def triangleDegrade(G_fn, dataDir):
     tri_fn, tm = eignTriangleLocal(G_fn, G , lcc_fn = None, roiRootName = None, triDir = dataDir, k = k, degradeTest = True)
     timeArray.append(tm)
     percDiffArray.append(testTriangles( dataDir, k, tri_fn, numNodes, 0.1))
+
+  
+  
+  np.save("bench/3000/percDiffArray.npy", np.array(percDiffArray))
+  np.save("bench/3000/timeArray.npy", np.array(timeArray))
   
   print "***Triangle eignvalue number degradation complete..."
   graphDegrade(percDiffArray, timeArray, dataDir, numEigsArray, numNodes, numEdges)
@@ -75,12 +80,12 @@ def graphDegrade(percDiffArray, timeArray, toDir, numEigsArray, numNodes, numEdg
   ''' % Diff alone '''
   plt.figure(2)
   #plt.subplot(132)
-  p1, = plt.plot(numEigsArray,percDiffArray ,'-b')
+  p1, = plt.plot(numEigsArray[:-1],percDiffArray[:-1] ,'-b')
   #plt.text(600, 0.12, 'Nodes: '+ str(numNodes))
   #plt.text(600, 0.1, 'Edges: '+ str(numEdges))
-  plt.legend([p1], ['% Difference'])
+  #plt.legend([p1], ['% Difference'])
   plt.title('Num eigenvalues VS Accuracy')  
-  plt.ylabel('Global percent difference')
+  plt.ylabel('Global percent error')
   plt.xlabel('Number of Eigenvalues computed')
   #plt.show()
   plt.savefig(os.path.join(toDir, "degradePercDiff"+str(numNodes)+".png")) 
@@ -88,10 +93,10 @@ def graphDegrade(percDiffArray, timeArray, toDir, numEigsArray, numNodes, numEdg
   ''' Time alone '''
   plt.figure(3)
   #plt.subplot(133)
-  p2, =plt.plot(numEigsArray, timeArray ,'-r')
+  p2, =plt.plot(numEigsArray[:-1], timeArray[:-1] ,'-r')
   #plt.text(600, 7, 'Nodes: '+ str(numNodes))
   #plt.text(600, 6, 'Edges: '+ str(numEdges))
-  plt.legend([p2], ['Time taken'])
+  #plt.legend([p2], ['Time taken'])
   plt.title('Num eigenvalues VS Time (s)')  
   plt.ylabel('Time taken')
   plt.xlabel('Number of Eigenvalues computed')
@@ -99,14 +104,58 @@ def graphDegrade(percDiffArray, timeArray, toDir, numEigsArray, numNodes, numEdg
   
   plt.savefig(os.path.join(toDir, "degradeTime"+str(numNodes)+".png"))
   
-def main():
+def graphDegrade2(percDiffArray, timeArray, toDir):
+
+  maxEigs = 3000 - 2
+  x = range(1,10)
+  x.reverse()
+  numEigsArray =  np.append(maxEigs/np.array(range(1,30)),x)
+
+  if not os.path.exists(toDir):
+    os.makedirs(toDir)
+
+  #import pdb; pdb.set_trace()
+    
+  ''' % Diff alone '''
+  plt.figure(1)
+  plt.subplot(121)
+  p1, = plt.plot(numEigsArray[1:],percDiffArray[1:] ,'-g')
+  #plt.text(600, 0.12, 'Nodes: '+ str(numNodes))
+  #plt.text(600, 0.1, 'Edges: '+ str(numEdges))
+  #plt.legend([p1], ['% Difference'])
+  plt.title('Num eigenvalues VS Accuracy')  
+  plt.ylabel('Global percent error')
+  plt.xlabel('Number of Eigenvalues computed')
+  #plt.show()
+  #plt.savefig(os.path.join(toDir, "HBMdegradePercDiff"+".png")) 
   
+  ''' Time alone '''
+  #plt.figure(2)
+  plt.subplot(122)
+  p2, =plt.plot(numEigsArray[1:], timeArray[1:],'-g')
+  #plt.text(600, 7, 'Nodes: '+ str(numNodes))
+  #plt.text(600, 6, 'Edges: '+ str(numEdges))
+  #plt.legend([p2], ['Time taken'])
+  plt.title('Num eigenvalues VS Time (s)')  
+  plt.ylabel('Time taken')
+  plt.xlabel('Number of Eigenvalues computed')
+  #plt.show()
+  
+  #plt.savefig(os.path.join(toDir, "HBMdegradeTime"+".png"))
+  plt.savefig(os.path.join(toDir, "TotaldegradeTime"+".png"))
+  print "****DONE*****"
+
+def main():
+  '''
   parser = argparse.ArgumentParser(description='Test triangle counting degradation with number of eigenvalues')
   parser.add_argument('G_fn', action='store',help='Full filename sparse graph (.mat)')
   parser.add_argument('dataDir', action='store', help='Full path of directory where you want .npy arrays resulting file to go')
   
   result = parser.parse_args()
   triangleDegrade( result.G_fn, result.dataDir )
+  '''
+  import sys
+  graphDegrade2(np.load('bench/3000/percDiffArray.npy'), np.load('bench/3000/timeArray.npy'), sys.argv[1])
   
 if __name__ == '__main__':
   main()

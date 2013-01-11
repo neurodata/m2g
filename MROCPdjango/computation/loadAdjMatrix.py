@@ -4,7 +4,7 @@
 # Separated: 10/2/2012
 # Load up an adjacency matrix given G_fn, lcc & roiRoot
 
-#import mrpaths
+import mrpaths
 import argparse
 import mrcap.lcc as lcc
 #import lcc
