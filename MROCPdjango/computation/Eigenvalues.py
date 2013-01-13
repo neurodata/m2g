@@ -45,10 +45,21 @@ def calcEigs(G_fn, G = None, lcc_fn = None, roiRootName = None,  eigvDir = None,
   l, u = arpack.eigs(G, k=k, which='LM') # LanczosMethod(A,0)
   print 'Time taken to calc Eigenvalues: %f secs\n' % (time() - start)
 
-  eigvl_fn = os.path.join(eigvDir, getBaseName(G_fn) + '_eigvl.npy')
-  np.save(eigvl_fn, l.real)
+  eigvalDir = os.path.join(eigvDir,"values", getBaseName(G_fn))
+  eigvectDir = os.path.join(eigvDir,"vectors", getBaseName(G_fn))
 
-  print "Top eigenvalues saved..."
+  if not os.path.exists(eigvalDir):
+    os.makedirs(eigvalDir)
+  if not os.path.exists(eigvectDir):
+    os.makedirs(eigvectDir)
+
+  eigvl_fn = os.path.join(eigvalDir, getBaseName(G_fn) + '_eigvl.npy')
+  np.save(eigvl_fn, l.real) # save eigenvalues
+
+  eigvect_fn = os.path.join(eigvectDir, getBaseName(G_fn) + '_eigvect.npy')
+  np.save(eigvect_fn, u) # save eigenvectors
+
+  print "Top eigs saved..."
 
 def main():
   parser = argparse.ArgumentParser(description='Calculate an estimat of triangle counting on a graph')
