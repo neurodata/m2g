@@ -45,8 +45,8 @@ def calcEigs(G_fn, G = None, lcc_fn = None, roiRootName = None,  eigvDir = None,
   l, u = arpack.eigs(G, k=k, which='LM') # LanczosMethod(A,0)
   print 'Time taken to calc Eigenvalues: %f secs\n' % (time() - start)
 
-  eigvalDir = os.path.join(eigvDir,"values", getBaseName(G_fn))
-  eigvectDir = os.path.join(eigvDir,"vectors", getBaseName(G_fn))
+  eigvalDir = os.path.join(eigvDir,"values")
+  eigvectDir = os.path.join(eigvDir,"vectors")
 
   if not os.path.exists(eigvalDir):
     os.makedirs(eigvalDir)
