@@ -4,7 +4,6 @@ from getBaseName import getBaseName
 
 import os
 import argparse
-import glob
 
 
 def runEigs(grDir, lccDir, toDir):
@@ -13,9 +12,8 @@ def runEigs(grDir, lccDir, toDir):
   grDir - Full path of dir with graphs
   lccDir - Full path of dir with largest connected components
   '''
-
   for G_fn in glob(os.path.join(grDir,'*')):
-    calcEigs(G_fn, lcc_fn=getLccfn(G_fn), roiRootName= getRoiRoot, eigvDir = toDir, k=100)
+    calcEigs(G_fn, lcc_fn=getLccfn(G_fn), roiRootName= getRoiRoot(G_fn), eigvDir = toDir, k=100)
     print G_fn, "Sucessfull processed...\n\n"
   print "****JOB DONE****"
 
