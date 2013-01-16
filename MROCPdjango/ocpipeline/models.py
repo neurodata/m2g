@@ -16,6 +16,29 @@ from django.contrib import admin
 import os
 from time import strftime, localtime
 
+##########################################
+##########################################
+##########################################
+
+class BuildGraphModel(models.Model):
+    '''
+    upload_to location dynamically altered in view
+    (This is a little hacky & can be done better using a custom manager)
+    see: https://docs.djangoproject.com/en/dev/ref/models/instances/?from=olddocs
+    '''
+
+    derivfile = models.FileField(upload_to = (' '))
+
+    projectName  = models.CharField(max_length=255)
+    site = models.CharField(max_length=255,)
+    subject = models.CharField(max_length=255,)
+    session = models.CharField(max_length=255,)
+    scanId = models.CharField(max_length=255)
+
+##########################################
+##########################################
+##########################################
+
 class Document(models.Model):
     '''upload_to location dynamically altered in view
     (This is a little hacky & can be done better using a custom manager)

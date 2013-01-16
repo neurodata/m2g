@@ -73,6 +73,88 @@ def default(request):
     request.session.clear()
     return render_to_response('welcome.html')
 
+###############################################
+###############################################
+###############################################
+
+def buildGraph(request):
+    from forms import BuildGraphForm # move
+    from models import BuildGraphModel # move
+
+    request.session.clear()
+
+    if request.method == 'POST':
+        form = BuildGraphForm(request.POST, request.FILES) # instantiating form
+        if form.is_valid():
+	    print "Uploading files..."
+
+	    # Acquire proj names
+	    userDefProjectName = form.cleaned_data['UserDefprojectName']
+            site = form.cleaned_data['site']
+            subject = form.cleaned_data['subject']
+            session = form.cleaned_data['session']
+            scanId = form.cleaned_data['scanId']
+
+	    userDefProjectName = os.path.join(settings.MEDIA_ROOT, userDefProjectName) # Fully qualify
+	    request.session['usrDefProjDir'] = os.path.join(userDefProjectName, site, subject, session, scanId)
+	    request.session['scanId'] = scanId
+
+	    ''' Define data directory paths '''
+	    request.session['derivatives'], request.session['rawdata'], request.session['graphs'],\
+		request.session['graphInvariants'],request.session['images']= defDataDirs(request.session['usrDefProjDir'])
+
+            grModObj = BuildGraphModel(derivfile = request.FILES['fiber_file'])
+	    grModObj._meta.get_field('derivfile').upload_to = request.session['derivatives'] # route files to correct location
+
+	    grModObj2 = BuildGraphModel(derivfile = request.FILES['roi_raw_file'])
+	    grModObj2._meta.get_field('derivfile').upload_to = request.session['derivatives']
+
+            grModObj3 = BuildGraphModel(derivfile =  request.FILES['roi_xml_file'])
+            grModObj3._meta.get_field('derivfile').upload_to = request.session['derivatives']
+
+	    grModObj.projectName = grModObj2.projectName = grModObj3.projectName =  form.cleaned_data['UserDefprojectName']# set project name
+	    grModObj.site = grModObj2.site = grModObj3.site =  form.cleaned_data['site']# set the site
+	    grModObj.subject = grModObj2.subject = grModObj3.subject =  form.cleaned_data['subject']# set the subject
+	    grModObj.session = grModObj2.session = grModObj3.session =  form.cleaned_data['session']# set the session
+	    grModObj.scanId = grModObj2.scanId = grModObj3.scanId =  form.cleaned_data['scanId']# set the scanId
+
+	    request.session['invariants'] = form.cleaned_data['Select_Invariants_you_want_computed']
+
+            ''' Acquire fileNames '''
+	    fiber_fn = form.cleaned_data['fiber_file'].name # get the name of the file input by user
+            roi_raw_fn = form.cleaned_data['roi_raw_file'].name
+            roi_xml_fn = form.cleaned_data['roi_xml_file'].name
+
+            ''' Save files to temp location '''
+            grModObj.save()
+	    grModObj2.save()
+            grModObj3.save()
+
+	    print '\nSaving all files complete...'
+
+            ''' Make appropriate dirs if they dont already exist '''
+            createDirStruct.createDirStruct([request.session['derivatives'], request.session['rawdata'],\
+		request.session['graphs'], request.session['graphInvariants'], request.session['images']])
+
+            # Redirect to Processing page
+	    return HttpResponseRedirect(get_script_prefix()+'processInput')
+    else:
+        form = BuildGraphForm() # An empty, unbound form
+
+    # Render the form
+    return render_to_response(
+        'buildgraph.html',
+        {'form': form},
+        context_instance=RequestContext(request) # Some failure to input data & returns a key signaling what is requested
+    )
+
+
+
+###############################################
+###############################################
+###############################################
+
+
 ''' Set project Dirs '''
 def createProj(request, webargs=None):
 

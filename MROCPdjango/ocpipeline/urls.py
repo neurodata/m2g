@@ -16,6 +16,10 @@ from ocpipeline.views import confirmDownload
 from ocpipeline.views import graphLoadInv
 from ocpipeline.views import convert
 
+#########################################
+from ocpipeline.views import buildGraph
+#########################################
+
 # Uncomment the next two lines to enable the admin:
 from django.contrib import admin
 admin.autodiscover()
@@ -32,6 +36,7 @@ urlpatterns = patterns('ocpipeline.views',
     url(r'^upload/(.*$)', 'upload', name= 'prog-upload'),
     url(r'^graphupload/(.*$)', 'graphLoadInv', name= 'graph-upload-invariant-processing'),
     url(r'^convert/(.*$)', 'convert', name= 'convert-to-format'),
+    url(r'^buildgraph/$', 'buildGraph', name= 'build-graph'),
     # Examples
     # url(r'^$', 'myapp.views.home', name='home'),
     # url(r'^myapp/', include('myapp.foo.urls')),
