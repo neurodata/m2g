@@ -503,6 +503,9 @@ def processData(fiber_fn, roi_xml_fn, roi_raw_fn,graphs, graphInvariants, run = 
     #**gengraph.genGraph(fiber_fn, bgGrfn, roi_xml_fn ,roi_raw_fn, True)
 
     ''' Run LCC '''
+    if not os.path.exists(os.path.join(graphInvariants,"LCC")):
+	print "Making LCC directory"
+	os.makedirs(os.path.join(graphInvariants,"LCC"))
     lccfn = os.path.join(graphInvariants,"LCC", (baseName + 'concomp.npy'))
 
     if (run):
@@ -511,6 +514,9 @@ def processData(fiber_fn, roi_xml_fn, roi_raw_fn,graphs, graphInvariants, run = 
 	lcc.process_single_brain(roi_xml_fn, roi_raw_fn, smGrfn, lccfn)
 
     ''' Run Embed - SVD '''
+    if not os.path.exists(os.path.join(graphInvariants,"SVD")):
+	print "Making SVD directory"
+	os.makedirs(os.path.join(graphInvariants,"SVD"))
     SVDfn = os.path.join(graphInvariants,"SVD" ,(baseName + 'embed.npy'))
 
     print("Running SVD....")
