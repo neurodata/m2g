@@ -26,12 +26,11 @@ admin.autodiscover()
 urlpatterns = patterns('ocpipeline.views',
     url(r'^$', 'default', name= 'welcome'),
     #url(r'^create/$', 'createProj', name= 'form-create-project'),
-    #url(r'^create/([a-zA-Z+#-.0-9]+/){5}$','createProj', name='prog-create-project'),  # No spaces yet...
     #url(r'^pipelineUpload/(.*$)', 'pipelineUpload', name='single-file-upload'),
     url(r'^success/$', 'success', name='success-page'),
-    url(r'^confirmDownload/$', 'confirmDownload', name='confirm-dwnd-page'),
-    url(r'^processInput/$', 'processInputData', name='process-input-data'),
-    url(r'^zipOutput/$','zipProcessedData', name = 'zip-processed-data'), # 2nd param function is view, 3rd param - anything
+    url(r'^confirmdownload/$', 'confirmDownload', name='confirm-dwnd-page'),
+    url(r'^processinput/$', 'processInputData', name='process-input-data'),
+    url(r'^zipoutput/$','zipProcessedData', name = 'zip-processed-data'), # 2nd param function is view, 3rd param - anything
     url(r'^upload/(.*$)', 'upload', name= 'prog-upload'),
     url(r'^graphupload/(.*$)', 'graphLoadInv', name= 'graph-upload-invariant-processing'),
     url(r'^convert/(.*$)', 'convert', name= 'convert-to-format'),
