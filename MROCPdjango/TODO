@@ -1,9 +1,13 @@
-Do documentation
-Finish graphupload view
-Finish work on convert csv
-Fix import errors
-Fix parallel processing of ss
-Get static content to load via apache for production mode
+0. Fix import errors
+
+1. Do more documentation
+1. Get static content to load via apache for production mode
+
+2. Finish graphupload view
+
+3. Fix parallel processing of ss
+
+4. Finish work on convert csv
 
 Invariants still to compute
 *SS2

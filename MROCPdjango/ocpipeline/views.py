@@ -72,10 +72,6 @@ def default(request):
     request.session.clear()
     return render_to_response('welcome.html')
 
-###############################################
-###############################################
-###############################################
-
 def buildGraph(request):
     request.session.clear()
 
@@ -169,10 +165,12 @@ def processInputData(request):
     roi_xml_fn = os.path.join(request.session['derivatives'], roi_xml_fn)
 
     request.session['smGrfn'], request.session['bgGrfn'], request.session['lccfn'],request.session['SVDfn'] \
-	= processData(fiber_fn, roi_xml_fn, roi_raw_fn,request.session['graphs'], request.session['graphInvariants'], True)
+	= processData(fiber_fn, roi_xml_fn, roi_raw_fn,request.session['graphs'], request.session['graphInvariants'], False)
 
     # Run ivariants here
+    print "Havent died yet"
     if len(request.session['invariants']) > 0:
+	print "Still havent died yet"
 	#lccG = loadAdjMat(request.session['smGrfn'], request.session['lccfn'], roiRootName = os.path.splitext(roi_xml_fn)[0])
 	import scipy.io as sio
 	lccG = sio.loadmat(request.session['smGrfn'])['fibergraph']
