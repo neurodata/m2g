@@ -168,9 +168,8 @@ def processInputData(request):
 	= processData(fiber_fn, roi_xml_fn, roi_raw_fn,request.session['graphs'], request.session['graphInvariants'], False)
 
     # Run ivariants here
-    print "Havent died yet"
     if len(request.session['invariants']) > 0:
-	print "Still havent died yet"
+	print "Computing invariants"
 	#lccG = loadAdjMat(request.session['smGrfn'], request.session['lccfn'], roiRootName = os.path.splitext(roi_xml_fn)[0])
 	import scipy.io as sio
 	lccG = sio.loadmat(request.session['smGrfn'])['fibergraph']
@@ -478,6 +477,7 @@ def processData(fiber_fn, roi_xml_fn, roi_raw_fn,graphs, graphInvariants, run = 
     @param run: Whether or not to run processor intensive jobs. Default is - false so nothing is actually run
     '''
     if (run):
+	print "Importing svd and lcc modules..."
 	import mrcap.svd as svd
 	import mrcap.lcc as lcc
 
