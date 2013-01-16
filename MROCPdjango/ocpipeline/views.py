@@ -28,10 +28,7 @@ from django.core.files import File        # For programmatic file upload
 # Model imports
 from models import ConvertModel
 from models import BuildGraphModel
-
-#from forms import DocumentForm
 from forms import OKForm
-#from forms import DataForm
 from forms import GraphUploadForm
 from forms import ConvertForm
 from forms import BuildGraphForm
@@ -136,7 +133,7 @@ def buildGraph(request):
 		request.session['graphs'], request.session['graphInvariants'], request.session['images']])
 
             # Redirect to Processing page
-	    return HttpResponseRedirect(get_script_prefix()+'processInput')
+	    return HttpResponseRedirect(get_script_prefix()+'processinput')
     else:
         form = BuildGraphForm() # An empty, unbound form
 
@@ -149,7 +146,6 @@ def buildGraph(request):
 
 ''' Successful completion of task'''
 def success(request):
-    request.session['lastView'] = 'success'
     return render_to_response('success.html')
 
 def processInputData(request):
@@ -181,7 +177,7 @@ def processInputData(request):
 	import scipy.io as sio
 	lccG = sio.loadmat(request.session['smGrfn'])['fibergraph']
 	runInvariants(lccG, request.session)
-    return HttpResponseRedirect(get_script_prefix()+'confirmDownload')
+    return HttpResponseRedirect(get_script_prefix()+'confirmdownload')
 
 def confirmDownload(request):
 
@@ -196,7 +192,7 @@ def confirmDownload(request):
 	# Incomplete
 	#convertTo.convertGraphToCSV(request.session['smGrfn'])
 	#convertTo.convertGraphToCSV(request.session['bgGrfn'])
-	return HttpResponseRedirect(get_script_prefix()+'zipOutput')
+	return HttpResponseRedirect(get_script_prefix()+'zipoutput')
 
     elif 'getProdByDir' in request.POST: # If view dir structure option is chosen
 	form = OKForm(request.POST)
@@ -507,7 +503,7 @@ def processData(fiber_fn, roi_xml_fn, roi_raw_fn,graphs, graphInvariants, run = 
     #**gengraph.genGraph(fiber_fn, bgGrfn, roi_xml_fn ,roi_raw_fn, True)
 
     ''' Run LCC '''
-    lccfn = os.path.join(graphInvariants, (baseName + 'concomp.npy'))
+    lccfn = os.path.join(graphInvariants,"LCC", (baseName + 'concomp.npy'))
 
     if (run):
 	'''Should be big but we'll do small for now'''
@@ -515,7 +511,7 @@ def processData(fiber_fn, roi_xml_fn, roi_raw_fn,graphs, graphInvariants, run = 
 	lcc.process_single_brain(roi_xml_fn, roi_raw_fn, smGrfn, lccfn)
 
     ''' Run Embed - SVD '''
-    SVDfn = os.path.join(graphInvariants, (baseName + 'embed.npy'))
+    SVDfn = os.path.join(graphInvariants,"SVD" ,(baseName + 'embed.npy'))
 
     print("Running SVD....")
 
@@ -547,20 +543,20 @@ def runInvariants(lccG, req_sess):
     # Since we predefine the index order in forms.py
     for inv in req_sess['invariants']:
 	if inv == "SS1": # Get degree for free
-	    ssDir = os.path.join(req_sess['derivatives'],'ScanStat1')
-	    degDir = os.path.join(req_sess['derivatives'],'Degree')
+	    ssDir = os.path.join(req_sess['graphInvariants'],'ScanStat1')
+	    degDir = os.path.join(req_sess['graphInvariants'],'Degree')
 	    makeDirIfNone([ssDir, degDir])
 
 	    SS1fn, Degfn, numNodes = calcScanStat_Degree(G_fn = req_sess['smGrfn'],\
 		G = lccG,  ssDir = ssDir, degDir = degDir)
 
 	if inv == "TriCnt": # Get "Eigs" & "MAD" for free
-	    triDir = os.path.join(req_sess['derivatives'],'Triangle')
-	    MADdir = os.path.join(req_sess['derivatives'],'MAD')
-	    eigvDir = os.path.join(req_sess['derivatives'],'Eigen')
+	    triDir = os.path.join(req_sess['graphInvariants'],'Triangle')
+	    MADdir = os.path.join(req_sess['graphInvariants'],'MAD')
+	    eigvDir = os.path.join(req_sess['graphInvariants'],'Eigen')
 
 	    if not (degDir):
-		degDir = os.path.join(req_sess['derivatives'],'Degree')
+		degDir = os.path.join(req_sess['graphInvariants'],'Degree')
 		makeDirIfNone([triDir, MADdir, eigvDir, degDir])
 
 		TriCntfn, Degfn =  eignTriLocal_deg_MAD(G_fn = req_sess['smGrfn'],\
@@ -573,10 +569,10 @@ def runInvariants(lccG, req_sess):
 
 	if inv == "CC":  # We need "Deg" & "TriCnt"
 	    if not (degDir):
-		degDir = os.path.join(req_sess['derivatives'],'Degree')
+		degDir = os.path.join(req_sess['graphInvariants'],'Degree')
 	    if not (triDir):
-		triDir = os.path.join(req_sess['derivatives'],'Triangle')
-	    ccDir = os.path.join(req_sess['derivatives'],'ClustCoeff')
+		triDir = os.path.join(req_sess['graphInvariants'],'Triangle')
+	    ccDir = os.path.join(req_sess['graphInvariants'],'ClustCoeff')
 
 	    makeDirIfNone([degDir, triDir, ccDir])
 	    if (Degfn and TriCntfn):
@@ -603,8 +599,8 @@ def runInvariants(lccG, req_sess):
 	    if (TriCntfn):
 		pass
 	    else:
-		MADdir = os.path.join(req_sess['derivatives'],'MAD')
-		eigvDir = os.path.join(req_sess['derivatives'],'Eigen')
+		MADdir = os.path.join(req_sess['graphInvariants'],'MAD')
+		eigvDir = os.path.join(req_sess['graphInvariants'],'Eigen')
 		makeDirIfNone([MADdir, eigvDir])
 
 		calcMAD(G_fn = req_sess['smGrfn'], G = lccG , \
@@ -614,7 +610,7 @@ def runInvariants(lccG, req_sess):
 	    if (Degfn):
 		pass
 	    else:
-		degDir = os.path.join(req_sess['derivatives'],'Degree')
+		degDir = os.path.join(req_sess['graphInvariants'],'Degree')
 		makeDirIfNone([degDir])
 
 		Degfn = calcDegree(G_fn = req_sess['smGrfn'], \
@@ -624,7 +620,7 @@ def runInvariants(lccG, req_sess):
 	    if (TriCntfn):
 		pass
 	    else:
-		eigvDir = os.path.join(req_sess['derivatives'],'Eigen')
+		eigvDir = os.path.join(req_sess['graphInvariants'],'Eigen')
 		makeDirIfNone([eigvDir])
 
 		calcEigs(G_fn = req_sess['smGrfn'],\
