@@ -26,9 +26,9 @@ admin.autodiscover()
 
 urlpatterns = patterns('ocpipeline.views',
     url(r'^$', 'default', name= 'welcome'),
-    url(r'^create/$', 'createProj', name= 'form-create-project'),
-    url(r'^create/([a-zA-Z+#-.0-9]+/){5}$','createProj', name='prog-create-project'),  # No spaces yet...
-    url(r'^pipelineUpload/(.*$)', 'pipelineUpload', name='single-file-upload'),
+    #url(r'^create/$', 'createProj', name= 'form-create-project'),
+    #url(r'^create/([a-zA-Z+#-.0-9]+/){5}$','createProj', name='prog-create-project'),  # No spaces yet...
+    #url(r'^pipelineUpload/(.*$)', 'pipelineUpload', name='single-file-upload'),
     url(r'^success/$', 'success', name='success-page'),
     url(r'^confirmDownload/$', 'confirmDownload', name='confirm-dwnd-page'),
     url(r'^processInput/$', 'processInputData', name='process-input-data'),

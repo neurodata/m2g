@@ -26,23 +26,25 @@ from django.http import HttpResponseBadRequest
 from django.core.files import File        # For programmatic file upload
 
 # Model imports
-from ocpipeline.models import Document
-from ocpipeline.models import ConvertModel
+from models import ConvertModel
+from models import BuildGraphModel
 
-from ocpipeline.forms import DocumentForm
-from ocpipeline.forms import OKForm
-from ocpipeline.forms import DataForm
-from ocpipeline.forms import GraphUploadForm
-from ocpipeline.forms import ConvertForm
+#from forms import DocumentForm
+from forms import OKForm
+#from forms import DataForm
+from forms import GraphUploadForm
+from forms import ConvertForm
+from forms import BuildGraphForm
+
 import mrpaths
 
 ''' Data Processing imports'''
 from mrcap import gengraph as gengraph
 
-import ocpipeline.filesorter as filesorter
-import ocpipeline.zipper as zipper
-import ocpipeline.createDirStruct as createDirStruct
-import ocpipeline.convertTo as convertTo
+import filesorter as filesorter
+import zipper as zipper
+import createDirStruct as createDirStruct
+import convertTo as convertTo
 
 from django.core.servers.basehttp import FileWrapper
 
@@ -78,9 +80,6 @@ def default(request):
 ###############################################
 
 def buildGraph(request):
-    from forms import BuildGraphForm # move
-    from models import BuildGraphModel # move
-
     request.session.clear()
 
     if request.method == 'POST':
@@ -148,105 +147,10 @@ def buildGraph(request):
         context_instance=RequestContext(request) # Some failure to input data & returns a key signaling what is requested
     )
 
-
-
-###############################################
-###############################################
-###############################################
-
-
-''' Set project Dirs '''
-def createProj(request, webargs=None):
-
-    request.session.clear()
-    request.session['lastView'] = 'createProj'
-
-    ''' Form '''
-    if request.method == 'POST':
-        form = DataForm(request.POST)
-        if form.is_valid():
-            userDefProjectName = form.cleaned_data['UserDefprojectName']
-            site = form.cleaned_data['site']
-            subject = form.cleaned_data['subject']
-            session = form.cleaned_data['session']
-            scanId = form.cleaned_data['scanId']
-
-	    userDefProjectName = os.path.join(settings.MEDIA_ROOT, userDefProjectName) # Fully qualify
-	    request.session['usrDefProjDir'] = os.path.join(userDefProjectName, site, subject, session, scanId)
-	    request.session['scanId'] = scanId
-	    return HttpResponseRedirect(get_script_prefix()+'pipelineUpload') # Redirect after POST
-	#if not form.is_valid():
-	#    pass
-    else:
-        form = DataForm() # An unbound form
-
-    return render(request, 'nameProject.html', {
-        'form': form,
-    })
-
 ''' Successful completion of task'''
 def success(request):
     request.session['lastView'] = 'success'
     return render_to_response('success.html')
-
-''' Upload files from user '''
-def pipelineUpload(request, webargs=None):
-
-    # If you haven't come through the create proj - start again
-    if (('usrDefProjDir' not in request.session) or ('lastView' not in request.session)):
-        return HttpResponseRedirect(get_script_prefix()+'create') # Return to start
-
-    request.session['lastView'] = 'pipelineUpload'
-
-    ''' Form '''
-    if request.method == 'POST':
-        form = DocumentForm(request.POST, request.FILES) # instantiating form
-        if form.is_valid():
-
-	    print "Uploading files..."
-
-	    ''' Define data directory paths '''
-	    request.session['derivatives'], request.session['rawdata'], request.session['graphs'],\
-		request.session['graphInvariants'],request.session['images']= defDataDirs(request.session['usrDefProjDir'])
-
-            newdoc = Document(docfile = request.FILES['docfile'])
-	    newdoc._meta.get_field('docfile').upload_to = request.session['derivatives'] # route files to correct location
-
-	    newdoc2 = Document(docfile = request.FILES['roi_raw_file'])
-	    newdoc2._meta.get_field('docfile').upload_to = request.session['derivatives']
-
-            newdoc3 = Document(docfile = request.FILES['roi_xml_file'])
-            newdoc3._meta.get_field('docfile').upload_to = request.session['derivatives']
-
-	    request.session['invariants'] = form.cleaned_data['Select_Invariants_you_want_computed']
-
-            ''' Acquire fileNames '''
-	    fiber_fn = form.cleaned_data['docfile'].name # get the name of the file input by user
-            roi_raw_fn = form.cleaned_data['roi_raw_file'].name
-            roi_xml_fn = form.cleaned_data['roi_xml_file'].name
-
-            ''' Save files to temp location '''
-            newdoc.save()
-	    newdoc2.save()
-            newdoc3.save()
-
-	    print '\nSaving all files complete...'
-
-            ''' Make appropriate dirs if they dont already exist '''
-            createDirStruct.createDirStruct([request.session['derivatives'], request.session['rawdata'],\
-		request.session['graphs'], request.session['graphInvariants'], request.session['images']])
-
-            # Redirect to Processing page
-	    return HttpResponseRedirect(get_script_prefix()+'processInput')
-    else:
-        form = DocumentForm() # An empty, unbound form
-
-    # Render the form
-    return render_to_response(
-        'pipelineUpload.html',
-        {'form': form},
-        context_instance=RequestContext(request) # Some failure to input data & returns a key signaling what is requested
-    )
 
 def processInputData(request):
     '''
@@ -277,9 +181,7 @@ def processInputData(request):
 	import scipy.io as sio
 	lccG = sio.loadmat(request.session['smGrfn'])['fibergraph']
 	runInvariants(lccG, request.session)
-
     return HttpResponseRedirect(get_script_prefix()+'confirmDownload')
-
 
 def confirmDownload(request):
 
