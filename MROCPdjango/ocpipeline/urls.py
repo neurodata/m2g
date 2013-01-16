@@ -7,14 +7,13 @@
 """
 
 from django.conf.urls import patterns, include, url
-from ocpipeline.views import createProj
-from ocpipeline.views import pipelineUpload
-from ocpipeline.views import success
-from ocpipeline.views import zipProcessedData
-from ocpipeline.views import processInputData
-from ocpipeline.views import confirmDownload
-from ocpipeline.views import graphLoadInv
-from ocpipeline.views import convert
+from views import buildGraph
+from views import success
+from views import zipProcessedData
+from views import processInputData
+from views import confirmDownload
+from views import graphLoadInv
+from views import convert
 
 #########################################
 from ocpipeline.views import buildGraph
