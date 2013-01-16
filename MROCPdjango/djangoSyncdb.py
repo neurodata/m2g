@@ -25,3 +25,4 @@ cur = db.cursor()
 # So as to avoid truncation errors
 cur.execute("ALTER TABLE ocpipeline_convertmodel MODIFY COLUMN filename TEXT;")
 cur.execute("ALTER TABLE ocpipeline_document MODIFY COLUMN docfile TEXT;")
+cur.execute("ALTER TABLE ocpipeline_buildgraphmodel MODIFY COLUMN derivfile TEXT;")
