@@ -9,7 +9,7 @@
 '''
 
 import os, sys, re
-os.environ['MPLCONFIGDIR'] = '/tmp/'
+#os.environ['MPLCONFIGDIR'] = '/tmp/'
 #import matplotlib
 #matplotlib.use( 'Agg' )
 
@@ -55,6 +55,8 @@ from django.core.files.base import ContentFile
 
 ####################
 ## Graph Analysis ##
+####################
+
 from computation.scanstat_degr import calcScanStat_Degree #as calcScanStat_Degree
 from computation.clustCoeff import calcLocalClustCoeff #as calcLocalClustCoeff
 from computation.loadAdjMatrix import loadAdjMat #as loadAdjMat
@@ -165,7 +167,7 @@ def processInputData(request):
     roi_xml_fn = os.path.join(request.session['derivatives'], roi_xml_fn)
 
     request.session['smGrfn'], request.session['bgGrfn'], request.session['lccfn'],request.session['SVDfn'] \
-	= processData(fiber_fn, roi_xml_fn, roi_raw_fn,request.session['graphs'], request.session['graphInvariants'], False)
+	= processData(fiber_fn, roi_xml_fn, roi_raw_fn,request.session['graphs'], request.session['graphInvariants'], True)
 
     # Run ivariants here
     if len(request.session['invariants']) > 0:
@@ -477,9 +479,9 @@ def processData(fiber_fn, roi_xml_fn, roi_raw_fn,graphs, graphInvariants, run = 
     @param run: Whether or not to run processor intensive jobs. Default is - false so nothing is actually run
     '''
     if (run):
-	print "Importing svd and lcc modules..."
 	import mrcap.svd as svd
 	import mrcap.lcc as lcc
+	print "Imported svd and lcc modules..."
 
     baseName = getFiberID(fiber_fn) #VERY TEMPORARY
 

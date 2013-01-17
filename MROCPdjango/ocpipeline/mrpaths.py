@@ -4,7 +4,7 @@
 @organization: Johns Hopkins University
 @contact: disa@jhu.edu
 
-@summary: A module to all packages in the project to see each other
+@summary: A module for visibility of all packages in the project
 """
 
 #
