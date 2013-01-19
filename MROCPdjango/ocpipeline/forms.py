@@ -57,11 +57,11 @@ class BuildGraphForm(forms.Form):
     roi_raw_file = forms.FileField(label='Select roi.raw file', help_text=' ', required = True, error_messages={'required': 'You must upload ROIs'})
     roi_xml_file = forms.FileField(label='Select roi.xml file', help_text='<br/>', required = True, error_messages={'required': 'You must upload ROIs'})
 
-    INVARIANT_CHOICES = (('SS1', 'Scan Statistic 1',), ('TriCnt', 'Triangle Count',), \
-        ('CC', 'Clustering co-efficient',), ('MAD', 'Maximum Average Degree',) \
-        ,('Deg', 'Vertex Degree',), ('Eigs', 'Top 100 Eigenvalues and Eigenvectors',), \
-        ('SS2', 'Scan Statistic 2 [Not yet available]',), ('APL', 'Average Path Length [Not yet available]',),\
-        ('GDia', 'Graph Diameter [Not yet available]',))
+    INVARIANT_CHOICES = (('ss1', 'Scan Statistic 1',), ('tri', 'Triangle Count',), \
+    ('cc', 'Clustering co-efficient',), ('mad', 'Maximum Average Degree',) \
+    ,('deg', 'Vertex Degree',), ('eig', 'Top 100 Eigenvalues and Eigenvectors',), \
+    ('ss2', 'Scan Statistic 2 [Not yet available]',), ('apl', 'Average Path Length [Not yet available]',),\
+    ('gdia', 'Graph Diameter [Not yet available]',))
 
     Select_Invariants_you_want_computed = forms.MultipleChoiceField(required=False,
     widget=CheckboxSelectMultiple, choices=INVARIANT_CHOICES)
@@ -99,11 +99,11 @@ class GraphUploadForm(forms.Form):
     '''
     fileObj = forms.FileField(label='Upload data', help_text=' ', required = True)
 
-    INVARIANT_CHOICES = (('SS1', 'Scan Statistic 1',), ('TriCnt', 'Triangle Count',), \
-        ('CC', 'Clustering co-efficient',), ('MAD', 'Maximum Average Degree',) \
-        ,('Deg', 'Vertex Degree',), ('Eigs', 'Top 100 Eigenvalues',), \
-        ('SS2', 'Scan Statistic 2 [Not yet available]',), ('APL', 'Average Path Length [Not yet available]',),\
-        ('GDia', 'Graph Diameter [Not yet available]',))
+    INVARIANT_CHOICES = (('ss1', 'Scan Statistic 1',), ('tri', 'Triangle Count',), \
+        ('cc', 'Clustering co-efficient',), ('mad', 'Maximum Average Degree',) \
+        ,('deg', 'Vertex Degree',), ('eig', 'Top 100 Eigenvalues and Eigenvectors',), \
+        ('ss2', 'Scan Statistic 2 [Not yet available]',), ('apl', 'Average Path Length [Not yet available]',),\
+        ('gdia', 'Graph Diameter [Not yet available]',))
 
     Select_Invariants_you_want_computed = forms.MultipleChoiceField(required=True,
     widget=CheckboxSelectMultiple, choices=INVARIANT_CHOICES)
