@@ -127,9 +127,16 @@
         </div>
     </div>
 
-    <h2>Please upload the graph(s) on which you would like invariants to be computed </h2>
-    <p> You may choose to upload either a <strong> zipfile <i> (.zip)  </i></strong> or single file in either <strong><i>.mat, .npy or .csv </i></strong> format
-    If both are selected the zipfile will receive priority and be processed.
+    <h2>Please upload the graph(s) with largest connected components(LCC), and ROIs for each graph you would like invariants to be computed. </h2>
+    <p> You must use a single<strong> zipfile <i> (.zip) </i> containing ALL</strong> data in a single directory even for multiple graphs. <br/>
+    Note the following file naming convention for single graph below where the <strong>base file name </strong> is the the same:
+    <ul>
+      <li>The <strong>base file name </strong> here is <strong>graph1</strong></li>
+      <li>Graph file name: graph1_fiber.mat or graph1_bggr.mat are acceptible</li>
+      <li>LCC file name: graph1_concomp.mat </li>
+      <li>ROI's: graph1_roi.xml and graph1_roi.raw</li>
+    </ul>
+
     </p>
     <form action="" method="post" enctype="multipart/form-data" name="loadForm">
         {% csrf_token %}

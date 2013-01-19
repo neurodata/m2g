@@ -57,15 +57,15 @@ from django.core.files.base import ContentFile
 ## Graph Analysis ##
 ####################
 
-from computation.scanstat_degr import calcScanStat_Degree #as calcScanStat_Degree
-from computation.clustCoeff import calcLocalClustCoeff #as calcLocalClustCoeff
-from computation.loadAdjMatrix import loadAdjMat #as loadAdjMat
-#from computation.triCount_MAD import eignTriLocal_MAD #as eignTriLocal_MAD
-from computation.degree import calcDegree #as calcDegree
-#from computation.MAD import calcMAD #as calcMAD
-#from computation.Eigenvalues import calcEigs #as calcEigs
-from computation.clustCoeff import calcLocalClustCoeff #as calcLocalClustCoeff
-#from computation.triCount_deg_MAD import eignTriLocal_deg_MAD #as eignTriLocal_deg_MAD
+from computation.scanstat_degr import calcScanStat_Degree
+from computation.clustCoeff import calcLocalClustCoeff
+from computation.loadAdjMatrix import loadAdjMat
+from computation.triCount_MAD import eignTriLocal_MAD #****
+from computation.degree import calcDegree
+from computation.MAD import calcMAD #****
+from computation.Eigenvalues import calcEigs #****
+from computation.clustCoeff import calcLocalClustCoeff
+from computation.triCount_deg_MAD import eignTriLocal_deg_MAD #****
 
 #import scipy.sparse.linalg.eigen.arpack as arpack # THIS IS THE PROBLEM IMPORT
 
@@ -172,7 +172,7 @@ def processInputData(request):
     # Run ivariants here
     if len(request.session['invariants']) > 0:
 	print "Computing invariants"
-	#lccG = loadAdjMat(request.session['smGrfn'], request.session['lccfn'], roiRootName = os.path.splitext(roi_xml_fn)[0])
+	#lccG = loadAdjMat(request.session['bgGrfn], request.session['lccfn'], roiRootName = os.path.splitext(roi_xml_fn)[0])
 	import scipy.io as sio
 	lccG = sio.loadmat(request.session['smGrfn'])['fibergraph']
 	runInvariants(lccG, request.session)
@@ -329,32 +329,83 @@ def download(request, webargs=None):
 #########################################
 def graphLoadInv(request, webargs=None):
     ''' Form '''
-
+    from glob import glob # Move
     request.session.clear() # NEW
 
-    if request.method == 'POST':
+    if request.method == 'POST' and not webargs:
         form = GraphUploadForm(request.POST, request.FILES) # instantiating form
         if form.is_valid():
 	    data = form.files['fileObj'] # get data
 	    request.session['invariants'] = form.cleaned_data['Select_Invariants_you_want_computed']
 
+	    dataDir = os.path.join(settings.MEDIA_ROOT, 'tmp', strftime("projectStamp%a%d%b%Y_%H.%M.%S/", localtime()))
+	    makeDirIfNone([dataDir])
+
 	    # We got a zip
 	    if os.path.splitext(data.name)[1] == '.zip':
-		rzfile = putDataInTempZip(data.read())
-		uploadedFiles = writeTempZipToDisk(rzfile,os.path.join(settings.MEDIA_ROOT, \
-					'tmp', strftime("projectStamp%a%d%b%Y_%H.%M.%S/", localtime()) ))
 
-		for fn in uploadedFiles:
-		    #runNoProjInvariants(rzfile.read(name), request.session['invariants'])
-		    print 'No proj inv %s complete...' % name
+		writeBodyToDisk(data.read(), dataDir)
+		# Get all graphs in the directory
+		graphs = glob(os.path.join(dataDir,'*_fiber.mat'))
+		graphs.extend(glob(os.path.join(dataDir,'*_bggr.mat')))
+		graphs.extend(glob(os.path.join(dataDir,'*_smgr.mat')))
 
+		request.session['graphInvariants'] = os.path.join(dataDir, 'graphInvariants')
+
+		for G_fn in graphs:
+		    #***request.session['bgGrfn'] = G_fn
+		    #***lccfn = G_fn.split('_')[0] + '_concomp.mat'
+		    #***roiRootName = G_fn.split('_')[0] + '_roi'
+		    #***lccG = loadAdjMat(request.session['bgGrfn'], lccfn, roiRootName = roiRootName)
+
+		    request.session['smGrfn'] = G_fn
+		    import scipy.io as sio
+		    lccG = sio.loadmat(request.session['smGrfn'])['fibergraph']
+
+		    runInvariants(lccG, request.session)
+		    print 'No project invariants %s complete...' % G_fn
 	    else:
-		#path = default_storage.save(os.path.join(settings.MEDIA_ROOT, 'tmp', strftime("projectStamp%a%d%b%Y_%H.%M.%S/", localtime()), data.name), ContentFile(data.read()))
-		print '\nSaving %s complete...' % data.name
-		runNoProjInvariants(ContentFile(data.read()), request.session['invariants'])
+		return HttpResponse("<h2>The file you uploaded is not a zip see the instructions on the page before proceeding.</h2>")
 
 	    request.session.clear() # NEW
+	    dwnldLoc = "http://www.mrbrain.cs.jhu.edu"+ dataDir
+
 	    return HttpResponseRedirect(get_script_prefix()+'success') # STUB
+
+    if request.method == 'POST' and webargs:
+	dataDir = os.path.join(settings.MEDIA_ROOT, 'tmp', strftime("projectStamp%a%d%b%Y_%H.%M.%S/", localtime()))
+	makeDirIfNone([dataDir])
+	#if (request.body.name)
+	uploadedZip = writeBodyToDisk(request.body, dataDir)[0]
+
+	zipper.unzip(uploadedZip, dataDir) # Unzip the zip
+	os.remove(uploadedZip) # Delete the zip
+
+	request.session['invariants'] = webargs.split(',')
+
+	graphs = glob(os.path.join(dataDir,'*_fiber.mat'))
+	graphs.extend(glob(os.path.join(dataDir,'*_bggr.mat')))
+	graphs.extend(glob(os.path.join(dataDir,'*_smgr.mat')))
+
+	request.session['graphInvariants'] = os.path.join(dataDir, 'graphInvariants')
+
+	for G_fn in graphs:
+	    #***request.session['bgGrfn'] = G_fn
+	    #***lccfn = G_fn.split('_')[0] + '_concomp.mat'
+	    #***roiRootName = G_fn.split('_')[0] + '_roi'
+	    #***lccG = loadAdjMat(request.session['bgGrfn'], lccfn, roiRootName = roiRootName)
+
+	    request.session['smGrfn'] = G_fn
+	    import scipy.io as sio
+	    lccG = sio.loadmat(request.session['smGrfn'])['fibergraph']
+
+	    runInvariants(lccG, request.session)
+	    print 'No project invariants %s complete...' % G_fn
+
+	request.session.clear() # NEW
+	dwnldLoc = "http://www.mrbrain.cs.jhu.edu"+ dataDir
+	return HttpResponse("View Data at: " + dwnldLoc) # STUB
+
     else:
         form = GraphUploadForm() # An empty, unbound form
 
@@ -364,6 +415,18 @@ def graphLoadInv(request, webargs=None):
         {'form': form},
         context_instance=RequestContext(request) # Some failure to input data & returns a key signaling what is requested
     )
+
+#    else:
+#	projDir = os.path.join(settings.MEDIA_ROOT, 'tmp', strftime("projectStamp%a%d%b%Y_%H.%M.%S/", localtime()))
+#	request.session['smGrfn'] = default_storage.save(os.path.join(projDir, data.name), ContentFile(data.read()))
+#	print '\nSaving %s complete...' % data.name
+#
+#	request.session['graphInvariants'] = os.path.join(projDir, 'graphInvariants')
+#
+#	#lccG = loadAdjMat(request.session['bgGrfn'], request.session['lccfn'], roiRootName = os.path.splitext(roi_xml_fn)[0])
+#	import scipy.io as sio
+#	lccG = sio.loadmat(request.session['smGrfn'])['fibergraph']
+#	runInvariants(lccG, request.session)
 
 #########################################
 #	*******************		#
@@ -546,9 +609,18 @@ def runInvariants(lccG, req_sess):
     degDir = None
     ssDir = triDir = MADdir = eigvDir = degDir
 
-    # Since we predefine the index order in forms.py
+    # Order the invariants correctly
+    order = { 0:'ss1', 1:'tri', 2:'cc', 3:'mad', 4:'deg', 5:'eig',6:'ss2', 7:'apl', 8:'gdia' }
+    invariants = []
+    for i in range(len(order)):
+	if order[i] in req_sess['invariants']:
+	    invariants.append(order[i])
+
+    req_sess['invariants'] = invariants
+
+    #** ASSUMES ORDER OF INVARIANTS ARE PREDEFINED **#
     for inv in req_sess['invariants']:
-	if inv == "SS1": # Get degree for free
+	if inv == "ss1": # Get degree for free
 	    ssDir = os.path.join(req_sess['graphInvariants'],'ScanStat1')
 	    degDir = os.path.join(req_sess['graphInvariants'],'Degree')
 	    makeDirIfNone([ssDir, degDir])
@@ -556,7 +628,7 @@ def runInvariants(lccG, req_sess):
 	    SS1fn, Degfn, numNodes = calcScanStat_Degree(G_fn = req_sess['smGrfn'],\
 		G = lccG,  ssDir = ssDir, degDir = degDir)
 
-	if inv == "TriCnt": # Get "Eigs" & "MAD" for free
+	if inv == "tri": # Get "Eigs" & "MAD" for free
 	    triDir = os.path.join(req_sess['graphInvariants'],'Triangle')
 	    MADdir = os.path.join(req_sess['graphInvariants'],'MAD')
 	    eigvDir = os.path.join(req_sess['graphInvariants'],'Eigen')
@@ -573,7 +645,7 @@ def runInvariants(lccG, req_sess):
 		TriCntfn = eignTriLocal_MAD(G_fn = req_sess['smGrfn'],\
 		    G = lccG, triDir = triDir, MADdir = MADdir, eigvDir = eigvDir)
 
-	if inv == "CC":  # We need "Deg" & "TriCnt"
+	if inv == "cc":  # We need "Deg" & "TriCnt"
 	    if not (degDir):
 		degDir = os.path.join(req_sess['graphInvariants'],'Degree')
 	    if not (triDir):
@@ -601,7 +673,7 @@ def runInvariants(lccG, req_sess):
 		    G = lccG , degDir = degDir)
 		calcLocalClustCoeff(Degfn, TriCntfn, ccDir = ccDir)
 
-	if inv == "MAD": # Get "Eigs" for free
+	if inv == "mad": # Get "Eigs" for free
 	    if (TriCntfn):
 		pass
 	    else:
@@ -612,7 +684,7 @@ def runInvariants(lccG, req_sess):
 		calcMAD(G_fn = req_sess['smGrfn'], G = lccG , \
 		    MADdir = MADdir, eigvDir = eigvDir)
 
-	if inv == "Deg": # Nothing for free
+	if inv == "deg": # Nothing for free
 	    if (Degfn):
 		pass
 	    else:
@@ -622,7 +694,7 @@ def runInvariants(lccG, req_sess):
 		Degfn = calcDegree(G_fn = req_sess['smGrfn'], \
 		    G = lccG ,  degDir = degDir)
 
-	if inv == "Eigs": # Nothing for free
+	if inv == "eig": # Nothing for free
 	    if (TriCntfn):
 		pass
 	    else:
@@ -632,129 +704,15 @@ def runInvariants(lccG, req_sess):
 		calcEigs(G_fn = req_sess['smGrfn'],\
 			G = lccG , eigvDir = eigvDir)
 
-	if inv == "SS2":
+	if inv == "ss2":
 	    #makeDirIfNone(dirPath)
 	    pass # TODO DM
-	if inv == "APL":
+	if inv == "apl":
 	    #makeDirIfNone(dirPath)
 	    pass # TODO DM
-	if inv == "GDia":
+	if inv == "gdia":
 	    #makeDirIfNone(dirPath)
 	    pass # TODO DM
-
-#########################################
-#	*******************		#
-#	INVARIANTS NO PROJECT		#
-#########################################
-def runNoProjInvariants(lccG, req_sess_invs):
-    '''
-    @todo
-
-    @param lccG: Sparse largest connected component adjacency matrix
-    @param req_sess_invs: current session dict containing session varibles
-    '''
-
-    print "STUB!"
-    '''
-    SS1fn = None
-    TriCntfn = Degfn =  SS2fn = APLfn = GDiafn = CCfn = numNodes
-
-    # Since we predefine the index order in forms.py
-    for inv in req_sess['invariants']:
-	if inv == "SS1": # Get degree for free
-	    ssDir = os.path.join(req_sess['derivatives'],'ScanStat1')
-	    degDir = os.path.join(req_sess['derivatives'],'Degree')
-	    makeDirIfNone([ssDir, degDir])
-
-	    SS1fn, Degfn, numNodes = calcScanStat_Degree(G_fn = req_sess['smGrfn'],\
-		G = lccG,  ssDir = ssDir, degDir = degDir)
-
-	if inv == "TriCnt": # Get "Eigs" & "MAD" for free
-	    triDir = os.path.join(req_sess['derivatives'],'Triangle')
-	    MADdir = os.path.join(req_sess['derivatives'],'MAD')
-	    eigvDir = os.path.join(req_sess['derivatives'],'Eigen')
-
-	    if not (degDir):
-		degDir = os.path.join(req_sess['derivatives'],'Degree')
-		makeDirIfNone([triDir, MADdir, eigvDir, degDir])
-
-		TriCntfn, Degfn =  eignTriLocal_deg_MAD(G_fn = req_sess['smGrfn'],\
-				    G = lccG, triDir = triDir, MADdir = MADdir, eigvDir = eigvDir, degDir = degDir)
-	    else:
-		makeDirIfNone([triDir, MADdir, eigvDir])
-
-		TriCntfn = eignTriLocal_MAD(G_fn = req_sess['smGrfn'],\
-		    G = lccG, triDir = triDir, MADdir = MADdir, eigvDir = eigvDir)
-
-	if inv == "CC":  # We need "Deg" & "TriCnt"
-	    if not (degDir):
-		degDir = os.path.join(req_sess['derivatives'],'Degree')
-	    if not (triDir):
-		triDir = os.path.join(req_sess['derivatives'],'Triangle')
-	    ccDir = os.path.join(req_sess['derivatives'],'ClustCoeff')
-
-	    makeDirIfNone([degDir, triDir, ccDir])
-	    if (Degfn and TriCntfn):
-		calcLocalClustCoeff(Degfn, TriCntfn, ccDir = ccDir)
-
-	    elif (Degfn and (not TriCntfn)):
-		TriCntfn = eignTriLocal_MAD(G_fn = req_sess['smGrfn'],\
-		    G = lccG, triDir = triDir, MADdir = MADdir, eigvDir = eigvDir)
-		calcLocalClustCoeff(Degfn, TriCntfn, ccDir = ccDir)
-
-	    elif (TriCntfn and (not Degfn)):
-		Degfn = calcDegree(G_fn = req_sess['smGrfn'], \
-		    G = lccG , degDir = degDir)
-		calcLocalClustCoeff(Degfn, TriCntfn, ccDir = ccDir)
-
-	    else:
-		TriCntfn = eignTriLocal_MAD(G_fn = req_sess['smGrfn'],\
-		    G = lccG, triDir = triDir, MADdir = MADdir, eigvDir = eigvDir)
-		Degfn = calcDegree(G_fn = req_sess['smGrfn'], \
-		    G = lccG , degDir = degDir)
-		calcLocalClustCoeff(Degfn, TriCntfn, ccDir = ccDir)
-
-	if inv == "MAD": # Get "Eigs" for free
-	    if (TriCntfn):
-		pass
-	    else:
-		MADdir = os.path.join(req_sess['derivatives'],'MAD')
-		eigvDir = os.path.join(req_sess['derivatives'],'Eigen')
-		makeDirIfNone([MADdir, eigvDir])
-
-		calcMAD(G_fn = req_sess['smGrfn'], G = lccG , \
-		    MADdir = MADdir, eigvDir = eigvDir)
-
-	if inv == "Deg": # Nothing for free
-	    if (Degfn):
-		pass
-	    else:
-		degDir = os.path.join(req_sess['derivatives'],'Degree')
-		makeDirIfNone([degDir])
-
-		Degfn = calcDegree(G_fn = req_sess['smGrfn'], \
-		    G = lccG ,  degDir = degDir)
-
-	if inv == "Eigs": # Nothing for free
-	    if (TriCntfn):
-		pass
-	    else:
-		eigvDir = os.path.join(req_sess['derivatives'],'Eigen')
-		makeDirIfNone([eigvDir])
-
-		calcEigs(G_fn = req_sess['smGrfn'],\
-			G = lccG , eigvDir = eigvDir)
-
-	if inv == "SS2":
-	    #makeDirIfNone(dirPath)
-	    pass # TODO DM
-	if inv == "APL":
-	    #makeDirIfNone(dirPath)
-	    pass # TODO DM
-	if inv == "GDia":
-	    #makeDirIfNone(dirPath)
-	    pass # TODO DM
-    '''
 
 
 '''********************* Standalone Methods  *********************'''
@@ -826,37 +784,6 @@ def writeBodyToDisk(data, saveDir):
     print 'Temporary file created...'
 
     ''' Extract & save zipped files '''
-    uploadFiles = []
-    for name in (rzfile.namelist()):
-	outfile = open(os.path.join(saveDir, name.split('/')[-1]), 'wb') # strip name of source folders if in file name
-	outfile.write(rzfile.read(name))
-	outfile.flush()
-	outfile.close()
-	uploadFiles.append(os.path.join(saveDir, name.split('/')[-1])) # add to list of files
-	print name + " written to disk.."
-    return uploadFiles
-
-def putDataInTempZip(data):
-    '''
-    Put data in a temporary zipped file
-
-    @param data - any writable sum of bytes
-    @return the temp zipped file
-    '''
-    tmpfile = tempfile.NamedTemporaryFile()
-    tmpfile.write ( data )
-    tmpfile.flush()
-    tmpfile.seek(0)
-    print 'Temporary file created...'
-    return zipfile.ZipFile ( tmpfile.name, "r" )
-
-def writeTempZipToDisk(rzfile, saveDir):
-    '''
-    @todo
-    Extract & save zipped files
-    rzfile - A zipfile
-    saveDir - the location where it should be saved
-    '''
     uploadFiles = []
     for name in (rzfile.namelist()):
 	outfile = open(os.path.join(saveDir, name.split('/')[-1]), 'wb') # strip name of source folders if in file name

@@ -9,6 +9,9 @@
 
 4. Finish work on convert csv
 
+5. Fix Eigenvalue add to other services
+- Rename computation.Eigenvalues & update all others
+
 Invariants still to compute
 *SS2
 *APL
