@@ -60,12 +60,12 @@ from django.core.files.base import ContentFile
 from computation.scanstat_degr import calcScanStat_Degree
 from computation.clustCoeff import calcLocalClustCoeff
 from computation.loadAdjMatrix import loadAdjMat
-from computation.triCount_MAD import eignTriLocal_MAD #****
+#from computation.triCount_MAD import eignTriLocal_MAD #****
 from computation.degree import calcDegree
-from computation.MAD import calcMAD #****
-from computation.Eigenvalues import calcEigs #****
+#from computation.MAD import calcMAD #****
+#from computation.Eigenvalues import calcEigs #****
 from computation.clustCoeff import calcLocalClustCoeff
-from computation.triCount_deg_MAD import eignTriLocal_deg_MAD #****
+#from computation.triCount_deg_MAD import eignTriLocal_deg_MAD #****
 
 #import scipy.sparse.linalg.eigen.arpack as arpack # THIS IS THE PROBLEM IMPORT
 
