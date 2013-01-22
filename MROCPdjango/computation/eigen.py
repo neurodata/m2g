@@ -2,7 +2,7 @@
 
 # Author: Disa Mhembere, Johns Hopkins University
 # Separated: 10/2/2012
-# Eigenvalues of a sparse graph
+# Compute the eigenvalues and eigenvectors of a sparse graph
 
 import os
 import scipy.io as sio

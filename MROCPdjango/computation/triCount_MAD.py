@@ -59,16 +59,25 @@ def eignTriLocal_MAD(G_fn, G = None, lcc_fn = None, roiRootName = None, triDir=N
   maxAveDeg = np.max(l.real)
 
 
-  ''' Top eigenvalues'''
+  ''' Top eigenvalues and eigenvectors'''
   # l.real
 
   #print 'Time taken to calc Num triangles & MAD: %f secs\n' % (time() - start)
+  eigvalDir = os.path.join(eigvDir,"values")
+  eigvectDir = os.path.join(eigvDir,"vectors")
+
+  if not os.path.exists(eigvalDir):
+    os.makedirs(eigvalDir)
+  if not os.path.exists(eigvectDir):
+    os.makedirs(eigvectDir)
 
   '''write to file '''
 
   if MADdir:
-    eigvl_fn = os.path.join(eigvDir, getBaseName(G_fn) + '_eigvl.npy')
     MAD_fn = os.path.join(MADdir, getBaseName(G_fn) + '_MAD.npy')
+    eigvl_fn = os.path.join(eigvalDir, getBaseName(G_fn) + '_eigvl.npy')
+    eigvect_fn = os.path.join(eigvectDir, getBaseName(G_fn) + '_eigvect.npy')
+
 
   if triDir:
     tri_fn = os.path.join(triDir, getBaseName(G_fn) + '_triangles.npy')
@@ -76,11 +85,13 @@ def eignTriLocal_MAD(G_fn, G = None, lcc_fn = None, roiRootName = None, triDir=N
   elif not (MADdir and triDir): # test
     tri_fn = os.path.join('bench', str(G.shape[0]), getBaseName(G_fn) + '_triangles.npy')
     eigvl_fn = os.path.join('bench', str(G.shape[0]), getBaseName(G_fn) + '_eigvl.npy')
+    eigvect_fn = os.path.join('bench', str(G.shape[0]), getBaseName(G_fn) + '_eigvect.npy')
     MAD_fn = os.path.join('bench', str(G.shape[0]), getBaseName(G_fn) + '_MAD.npy')
 
   np.save(MAD_fn ,maxAveDeg)
   np.save(eigvl_fn, l.real)
   np.save(tri_fn, numTri)
+  np.save(eigvect_fn, u) # save eigenvectors
 
   print "MAD, Triangle count & top eigenvalues saved..."
 
