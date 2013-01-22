@@ -46,13 +46,23 @@ def calcMAD(G_fn, G = None, lcc_fn = None, roiRootName = None,  MADdir = None, e
   l, u = arpack.eigs(G, k=k, which='LM') # LanczosMethod(A,0)
   print 'Time taken to calc Eigenvalues: %f secs\n' % (time() - start)
 
+  eigvalDir = os.path.join(eigvDir,"values")
+  eigvectDir = os.path.join(eigvDir,"vectors")
+
+  if not os.path.exists(eigvalDir):
+    os.makedirs(eigvalDir)
+  if not os.path.exists(eigvectDir):
+    os.makedirs(eigvectDir)
+
+
   ''' MAD '''
   maxAveDeg = np.max(l.real)
 
   '''write to file '''
 
   if MADdir:
-    eigvl_fn = os.path.join(eigvDir, getBaseName(G_fn) + '_eigvl.npy')
+    eigvl_fn = os.path.join(eigvalDir, getBaseName(G_fn) + '_eigvl.npy')
+    eigvect_fn = os.path.join(eigvectDir, getBaseName(G_fn) + '_eigvect.npy')
     MAD_fn = os.path.join(MADdir, getBaseName(G_fn) + '_MAD.npy')
 
   elif not (MADdir and triDir): # test
@@ -61,6 +71,7 @@ def calcMAD(G_fn, G = None, lcc_fn = None, roiRootName = None,  MADdir = None, e
 
   np.save(MAD_fn ,maxAveDeg)
   np.save(eigvl_fn, l.real)
+  np.save(eigvect_fn, u) # save eigenvectors
 
   print "MAD & top eigenvalues saved..."
 
