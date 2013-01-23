@@ -99,7 +99,7 @@ def eignTriLocal_deg_MAD(G_fn, G = None, lcc_fn = None, roiRootName = None, triD
 
   print "MAD, Triangle count & top eigenvalues saved..."
 
-  return tri_fn, deg_fn
+  return [tri_fn, deg_fn, MAD_fn, eigvl_fn, eigvect_fn] # Changed may break other code
 
 def main():
   parser = argparse.ArgumentParser(description='Calculate an estimat of triangle counting on a graph')

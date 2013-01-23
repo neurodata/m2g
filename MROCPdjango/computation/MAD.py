@@ -74,6 +74,7 @@ def calcMAD(G_fn, G = None, lcc_fn = None, roiRootName = None,  MADdir = None, e
   np.save(eigvect_fn, u) # save eigenvectors
 
   print "MAD & top eigenvalues saved..."
+  return [MAD_fn, eigvl_fn, eigvect_fn] # Change here may break other code
 
 def main():
   parser = argparse.ArgumentParser(description='Calculate an estimat of triangle counting on a graph')

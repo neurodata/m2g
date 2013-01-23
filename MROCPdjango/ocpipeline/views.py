@@ -175,8 +175,25 @@ def processInputData(request):
 	#lccG = loadAdjMat(request.session['bgGrfn], request.session['lccfn'], roiRootName = os.path.splitext(roi_xml_fn)[0])
 	import scipy.io as sio
 	lccG = sio.loadmat(request.session['smGrfn'])['fibergraph']
-	runInvariants(lccG, request.session)
+	request.session['invariant_fns'] =  runInvariants(lccG, request.session)
     return HttpResponseRedirect(get_script_prefix()+'confirmdownload')
+
+#################################
+#################################
+
+def getDirFromFilename(filename):
+    '''
+    @summary: Get the directort location of a file
+    @param filename: the full filename of the file in question
+    @return: the directory of the file passed in as a param
+    '''
+    path = ''
+    for part in filename.split('/')[:-1]:
+	path += part + '/'
+    return path
+
+#################################
+#################################
 
 def confirmDownload(request):
 
@@ -188,9 +205,23 @@ def confirmDownload(request):
 	form = OKForm(request.POST)
 	convertTo.convertLCCNpyToMat(request.session['lccfn'])
 	convertTo.convertSVDNpyToMat(request.session['SVDfn'])
-	# Incomplete
+
+	import pdb; pdb.set_trace()
+
+	# Conversion of all files
+	for inv in request.session['invariant_fns'].keys():
+	    if isinstance(request.session['invariant_fns'][inv], list):
+		for fn in request.session['invariant_fns'][inv]:
+		    convertTo.convertAndSave(fn, 'mat', getDirFromFilename(fn), inv)
+	    else:
+		convertTo.convertAndSave(request.session['invariant_fns'][inv], 'mat', \
+					 getDirFromFilename(request.session['invariant_fns'][inv]) , inv)
+
+	# TODO: DM
 	#convertTo.convertGraphToCSV(request.session['smGrfn'])
 	#convertTo.convertGraphToCSV(request.session['bgGrfn'])
+
+	# Tests here
 	return HttpResponseRedirect(get_script_prefix()+'zipoutput')
 
     elif 'getProdByDir' in request.POST: # If view dir structure option is chosen
@@ -205,6 +236,7 @@ def confirmDownload(request):
 	form = OKForm(request.POST)
 	convertTo.convertLCCNpyToMat(request.session['lccfn'])
 	convertTo.convertSVDNpyToMat(request.session['SVDfn'])
+
 	# Incomplete
 	#convertTo.convertGraphToCSV(request.session['smGrfn'])
 	#convertTo.convertGraphToCSV(request.session['bgGrfn'])
@@ -603,8 +635,10 @@ def runInvariants(lccG, req_sess):
     @param lccG: Sparse largest connected component adjacency matrix
     @param req_sess: current session dict containing session varibles
     '''
-    SS1fn = None
-    TriCntfn = Degfn =  SS2fn = APLfn = GDiafn = CCfn = numNodes = SS1fn
+
+    # NOTE: The *_fn variable names are in accordance with settings.VALID_FILE_TYPES
+    ss1_fn = None
+    tri_fn = deg_fn =  ss2_fn = apl_fn = gdia_fn = cc_fn = numNodes = eigvlfn = eigvectfn = mad_fn = ss1_fn
 
     degDir = None
     ssDir = triDir = MADdir = eigvDir = degDir
@@ -617,6 +651,7 @@ def runInvariants(lccG, req_sess):
 	    invariants.append(order[i])
 
     req_sess['invariants'] = invariants
+    invariant_fns = {}
 
     #** ASSUMES ORDER OF INVARIANTS ARE PREDEFINED **#
     for inv in req_sess['invariants']:
@@ -625,8 +660,8 @@ def runInvariants(lccG, req_sess):
 	    degDir = os.path.join(req_sess['graphInvariants'],'Degree')
 	    makeDirIfNone([ssDir, degDir])
 
-	    SS1fn, Degfn, numNodes = calcScanStat_Degree(G_fn = req_sess['smGrfn'],\
-		G = lccG,  ssDir = ssDir, degDir = degDir)
+	    ss1_fn, deg_fn, numNodes = calcScanStat_Degree(G_fn = req_sess['smGrfn'],\
+		G = lccG,  ssDir = ssDir, degDir = degDir) # Good to go
 
 	if inv == "tri": # Get "Eigs" & "MAD" for free
 	    triDir = os.path.join(req_sess['graphInvariants'],'Triangle')
@@ -637,13 +672,13 @@ def runInvariants(lccG, req_sess):
 		degDir = os.path.join(req_sess['graphInvariants'],'Degree')
 		makeDirIfNone([triDir, MADdir, eigvDir, degDir])
 
-		TriCntfn, Degfn =  eignTriLocal_deg_MAD(G_fn = req_sess['smGrfn'],\
-				    G = lccG, triDir = triDir, MADdir = MADdir, eigvDir = eigvDir, degDir = degDir)
+		tri_fn, deg_fn, MAD_fn, eigvl_fn, eigvect_fn =  eignTriLocal_deg_MAD(G_fn = req_sess['smGrfn'],\
+		    G = lccG, triDir = triDir, MADdir = MADdir, eigvDir = eigvDir, degDir = degDir) # Good to go
 	    else:
 		makeDirIfNone([triDir, MADdir, eigvDir])
 
-		TriCntfn = eignTriLocal_MAD(G_fn = req_sess['smGrfn'],\
-		    G = lccG, triDir = triDir, MADdir = MADdir, eigvDir = eigvDir)
+		tri_fn, eigvlfn, eigvectfn, mad_fn  = eignTriLocal_MAD(G_fn = req_sess['smGrfn'],\
+		    G = lccG, triDir = triDir, MADdir = MADdir, eigvDir = eigvDir) # Good to go
 
 	if inv == "cc":  # We need "Deg" & "TriCnt"
 	    if not(eigvDir):
@@ -658,55 +693,55 @@ def runInvariants(lccG, req_sess):
 	    ccDir = os.path.join(req_sess['graphInvariants'],'ClustCoeff')
 
 	    makeDirIfNone([degDir, triDir, ccDir, eigvDir, MADdir])
-	    if (Degfn and TriCntfn):
-		calcLocalClustCoeff(Degfn, TriCntfn, ccDir = ccDir)
+	    if (deg_fn and tri_fn):
+		cc_fn = calcLocalClustCoeff(deg_fn, tri_fn, ccDir = ccDir) # Good to go
 
-	    elif (Degfn and (not TriCntfn)):
-		TriCntfn = eignTriLocal_MAD(G_fn = req_sess['smGrfn'],\
-		    G = lccG, triDir = triDir, MADdir = MADdir, eigvDir = eigvDir)
-		calcLocalClustCoeff(Degfn, TriCntfn, ccDir = ccDir)
+	    elif (deg_fn and (not tri_fn)):
+		tri_fn, eigvlfn, eigvectfn, mad_fn = eignTriLocal_MAD(G_fn = req_sess['smGrfn'],\
+		    G = lccG, triDir = triDir, MADdir = MADdir, eigvDir = eigvDir) # Good to go
+		cc_fn = calcLocalClustCoeff(deg_fn, tri_fn, ccDir = ccDir) # Good to go
 
-	    elif (TriCntfn and (not Degfn)):
-		Degfn = calcDegree(G_fn = req_sess['smGrfn'], \
-		    G = lccG , degDir = degDir)
-		calcLocalClustCoeff(Degfn, TriCntfn, ccDir = ccDir)
+	    elif (tri_fn and (not deg_fn)):
+		deg_fn = calcDegree(G_fn = req_sess['smGrfn'], \
+		    G = lccG , degDir = degDir) # Good to go
+		cc_fn = calcLocalClustCoeff(deg_fn, tri_fn, ccDir = ccDir) # Good to go
 
 	    else:
-		TriCntfn = eignTriLocal_MAD(G_fn = req_sess['smGrfn'],\
-		    G = lccG, triDir = triDir, MADdir = MADdir, eigvDir = eigvDir)
-		Degfn = calcDegree(G_fn = req_sess['smGrfn'], \
-		    G = lccG , degDir = degDir)
-		calcLocalClustCoeff(Degfn, TriCntfn, ccDir = ccDir)
+		tri_fn, eigvlfn, eigvectfn, mad_fn = eignTriLocal_MAD(G_fn = req_sess['smGrfn'],\
+		    G = lccG, triDir = triDir, MADdir = MADdir, eigvDir = eigvDir) # Good to go
+		deg_fn = calcDegree(G_fn = req_sess['smGrfn'], \
+		    G = lccG , degDir = degDir) # Good to go
+		cc_fn = calcLocalClustCoeff(deg_fn, tri_fn, ccDir = ccDir) # Good to go
 
 	if inv == "mad": # Get "Eigs" for free
-	    if (TriCntfn):
+	    if (tri_fn):
 		pass
 	    else:
 		MADdir = os.path.join(req_sess['graphInvariants'],'MAD')
 		eigvDir = os.path.join(req_sess['graphInvariants'],'Eigen')
 		makeDirIfNone([MADdir, eigvDir])
 
-		calcMAD(G_fn = req_sess['smGrfn'], G = lccG , \
-		    MADdir = MADdir, eigvDir = eigvDir)
+		mad_fn, eigvlfn, eigvectfn = calcMAD(G_fn = req_sess['smGrfn'], G = lccG , \
+		    MADdir = MADdir, eigvDir = eigvDir) # Good to go
 
 	if inv == "deg": # Nothing for free
-	    if (Degfn):
+	    if (deg_fn):
 		pass
 	    else:
 		degDir = os.path.join(req_sess['graphInvariants'],'Degree')
 		makeDirIfNone([degDir])
 
-		Degfn = calcDegree(G_fn = req_sess['smGrfn'], \
-		    G = lccG ,  degDir = degDir)
+		deg_fn = calcDegree(G_fn = req_sess['smGrfn'], \
+		    G = lccG ,  degDir = degDir) # Good to go
 
 	if inv == "eig": # Nothing for free
-	    if (TriCntfn):
+	    if (tri_fn):
 		pass
 	    else:
 		eigvDir = os.path.join(req_sess['graphInvariants'],'Eigen')
 		makeDirIfNone([eigvDir])
 
-		calcEigs(G_fn = req_sess['smGrfn'],\
+		eigvlfn, eigvectfn = calcEigs(G_fn = req_sess['smGrfn'],\
 			G = lccG , eigvDir = eigvDir)
 
 	if inv == "ss2":
@@ -718,6 +753,27 @@ def runInvariants(lccG, req_sess):
 	if inv == "gdia":
 	    #makeDirIfNone(dirPath)
 	    pass # TODO DM
+
+    for fn in [ ss1_fn, tri_fn, deg_fn, ss2_fn, apl_fn,  gdia_fn , cc_fn, ss1_fn]:
+	if ss1_fn:
+	    invariant_fns['ss1'] = ss1_fn
+	if tri_fn:
+	    invariant_fns['tri'] = tri_fn
+	if deg_fn:
+	    invariant_fns['deg'] = deg_fn
+	if ss2_fn:
+	    invariant_fns['ss2'] = ss2_fn
+	if apl_fn:
+	    invariant_fns['apl'] = apl_fn
+	if gdia_fn:
+	    invariant_fns['gdia'] = gdia_fn
+	if cc_fn:
+	    invariant_fns['cc'] = cc_fn
+	if mad_fn:
+	    invariant_fns['mad'] = mad_fn
+	if eigvectfn:
+	    invariant_fns['eig'] = eigvectfn, eigvlfn # Note this
+    return invariant_fns
 
 
 '''********************* Standalone Methods  *********************'''

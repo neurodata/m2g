@@ -2,20 +2,22 @@
 
 1. Do more documentation
 1. Get static content to load via apache for production mode
-
 3. Fix parallel processing of ss
+4. Finish work on convert fibergraph to csv
+5. Redo confirmDownload to account for csv addition
 
-4. Finish work on convert csv
-
-5. Fix Eigenvalue add to other services
-- Rename computation. Eigenvalues & update all others.
-
-6. Make convert after graph processing also convert all invariants
-
-7. Figure out where I use maxavedegree.py
 Invariants still to compute
 *SS2
 *APL
 *GDia
 
---2. Finish graphupload view--
+<-- 2. Finish graphupload view -->
+<-- 5. Fix Eigenvalue add to other services -->
+<-- Rename computation.Eigenvalues & update all others. -->
+<-- 7. Figure out where I use maxavedegree.py -->
+<-- 6. Make convert after graph processing also convert all invariants -->
+<-- 7. Fix runInvariants() method camelCase problems - views.py -->
+
+* Web server dev mode
+- MPLCONFIGURE
+- Eig imports
