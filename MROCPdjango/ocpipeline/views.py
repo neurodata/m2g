@@ -60,12 +60,12 @@ from django.core.files.base import ContentFile
 from computation.scanstat_degr import calcScanStat_Degree
 from computation.clustCoeff import calcLocalClustCoeff
 from computation.loadAdjMatrix import loadAdjMat
-from computation.triCount_MAD import eignTriLocal_MAD #****
+#from computation.triCount_MAD import eignTriLocal_MAD #****
 from computation.degree import calcDegree
-from computation.MAD import calcMAD #****
-from computation.eigen import calcEigs #****
+#from computation.MAD import calcMAD #****
+#from computation.eigen import calcEigs #****
 from computation.clustCoeff import calcLocalClustCoeff
-from computation.triCount_deg_MAD import eignTriLocal_deg_MAD #****
+#from computation.triCount_deg_MAD import eignTriLocal_deg_MAD #****
 
 #import scipy.sparse.linalg.eigen.arpack as arpack # THIS IS THE PROBLEM IMPORT
 
@@ -167,7 +167,7 @@ def processInputData(request):
     roi_xml_fn = os.path.join(request.session['derivatives'], roi_xml_fn)
 
     request.session['smGrfn'], request.session['bgGrfn'], request.session['lccfn'],request.session['SVDfn'] \
-	= processData(fiber_fn, roi_xml_fn, roi_raw_fn,request.session['graphs'], request.session['graphInvariants'], True)
+	= processData(fiber_fn, roi_xml_fn, roi_raw_fn,request.session['graphs'], request.session['graphInvariants'],True)
 
     # Run ivariants here
     if len(request.session['invariants']) > 0:
@@ -646,13 +646,18 @@ def runInvariants(lccG, req_sess):
 		    G = lccG, triDir = triDir, MADdir = MADdir, eigvDir = eigvDir)
 
 	if inv == "cc":  # We need "Deg" & "TriCnt"
+	    if not(eigvDir):
+		eigvDir = os.path.join(req_sess['graphInvariants'],'Eigen')
 	    if not (degDir):
 		degDir = os.path.join(req_sess['graphInvariants'],'Degree')
 	    if not (triDir):
 		triDir = os.path.join(req_sess['graphInvariants'],'Triangle')
+
+	    if not (MADdir):
+		MADdir = os.path.join(req_sess['graphInvariants'],'MAD')
 	    ccDir = os.path.join(req_sess['graphInvariants'],'ClustCoeff')
 
-	    makeDirIfNone([degDir, triDir, ccDir])
+	    makeDirIfNone([degDir, triDir, ccDir, eigvDir, MADdir])
 	    if (Degfn and TriCntfn):
 		calcLocalClustCoeff(Degfn, TriCntfn, ccDir = ccDir)
 

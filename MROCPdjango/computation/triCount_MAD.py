@@ -73,7 +73,7 @@ def eignTriLocal_MAD(G_fn, G = None, lcc_fn = None, roiRootName = None, triDir=N
 
   '''write to file '''
 
-  if MADdir:
+  if (MADdir or triDir):
     MAD_fn = os.path.join(MADdir, getBaseName(G_fn) + '_MAD.npy')
     eigvl_fn = os.path.join(eigvalDir, getBaseName(G_fn) + '_eigvl.npy')
     eigvect_fn = os.path.join(eigvectDir, getBaseName(G_fn) + '_eigvect.npy')
