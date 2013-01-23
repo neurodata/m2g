@@ -9,7 +9,7 @@
 '''
 
 import os, sys, re
-#os.environ['MPLCONFIGDIR'] = '/tmp/'
+os.environ['MPLCONFIGDIR'] = '/tmp/'
 #import matplotlib
 #matplotlib.use( 'Agg' )
 
@@ -60,12 +60,12 @@ from django.core.files.base import ContentFile
 from computation.scanstat_degr import calcScanStat_Degree
 from computation.clustCoeff import calcLocalClustCoeff
 from computation.loadAdjMatrix import loadAdjMat
-#from computation.triCount_MAD import eignTriLocal_MAD #****
+from computation.triCount_MAD import eignTriLocal_MAD #****
 from computation.degree import calcDegree
-#from computation.MAD import calcMAD #****
-#from computation.eigen import calcEigs #****
+from computation.MAD import calcMAD #****
+from computation.eigen import calcEigs #****
 from computation.clustCoeff import calcLocalClustCoeff
-#from computation.triCount_deg_MAD import eignTriLocal_deg_MAD #****
+from computation.triCount_deg_MAD import eignTriLocal_deg_MAD #****
 
 #import scipy.sparse.linalg.eigen.arpack as arpack # THIS IS THE PROBLEM IMPORT
 
@@ -120,9 +120,9 @@ def buildGraph(request):
             roi_xml_fn = form.cleaned_data['roi_xml_file'].name
 
             ''' Save files to temp location '''
-            grModObj.save()
-	    grModObj2.save()
-            grModObj3.save()
+            #grModObj.save()
+	    #grModObj2.save()
+            #grModObj3.save()
 
 	    print '\nSaving all files complete...'
 
@@ -167,7 +167,7 @@ def processInputData(request):
     roi_xml_fn = os.path.join(request.session['derivatives'], roi_xml_fn)
 
     request.session['smGrfn'], request.session['bgGrfn'], request.session['lccfn'],request.session['SVDfn'] \
-	= processData(fiber_fn, roi_xml_fn, roi_raw_fn,request.session['graphs'], request.session['graphInvariants'],True)
+	= processData(fiber_fn, roi_xml_fn, roi_raw_fn,request.session['graphs'], request.session['graphInvariants'],False)
 
     # Run ivariants here
     if len(request.session['invariants']) > 0:
@@ -206,15 +206,15 @@ def confirmDownload(request):
 	convertTo.convertLCCNpyToMat(request.session['lccfn'])
 	convertTo.convertSVDNpyToMat(request.session['SVDfn'])
 
-	import pdb; pdb.set_trace()
+	#import pdb; pdb.set_trace()
 
 	# Conversion of all files
 	for inv in request.session['invariant_fns'].keys():
 	    if isinstance(request.session['invariant_fns'][inv], list):
 		for fn in request.session['invariant_fns'][inv]:
-		    convertTo.convertAndSave(fn, 'mat', getDirFromFilename(fn), inv)
+		    convertTo.convertAndSave(fn, '.mat', getDirFromFilename(fn), inv)
 	    else:
-		convertTo.convertAndSave(request.session['invariant_fns'][inv], 'mat', \
+		convertTo.convertAndSave(request.session['invariant_fns'][inv], '.mat', \
 					 getDirFromFilename(request.session['invariant_fns'][inv]) , inv)
 
 	# TODO: DM
@@ -772,7 +772,7 @@ def runInvariants(lccG, req_sess):
 	if mad_fn:
 	    invariant_fns['mad'] = mad_fn
 	if eigvectfn:
-	    invariant_fns['eig'] = eigvectfn, eigvlfn # Note this
+	    invariant_fns['eig'] = [eigvectfn, eigvlfn] # Note this
     return invariant_fns
 
 
