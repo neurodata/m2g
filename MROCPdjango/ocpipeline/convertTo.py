@@ -26,7 +26,6 @@ def convertLCCNpyToMat(lcc_fn):
   sio.savemat(os.path.splitext(lcc_fn)[0],{'lcc': lcc}, appendmat = True)
   print ('Lcc sucessfully converted from .npy to .mat in  %.2f secs') % (time()-start)
 
-
 def convertAndSave(fn, toFormat, saveLoc, fileType):
   '''
   Convert invariant array between .npy, .csv, .mat.
@@ -159,7 +158,7 @@ def loadFile(file_fn, fileType):
         3. 'eig'|'eigen' is the eigenvalues
         4. 'mad'|'maxAvgDeg'
         5. 'ss1'| 'scanStat1'
-        6. 'ss1'| 'scanStat1'
+        6. 'ss2'| 'scanStat2'
         7. 'tri'|'triangle'
     '''
 
@@ -175,5 +174,16 @@ def loadFile(file_fn, fileType):
 
     elif (ext == '.npy'):
       theFile = np.load(file_fn)
+
+    elif (ext == '.csv'): # CSV for invariants only graphs will not work
+      f = open(file_fn,'rt')
+      try:
+        reader = csv.reader(f)
+        theFile = reader.next() # Expecting one line with all invariant values
+      except:
+        print "[ERROR:] CSV read file failure!"
+      finally:
+        f.close()
+      theFile = np.array(theFile)
 
     return theFile
