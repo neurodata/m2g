@@ -19,12 +19,23 @@ def convertLCCNpyToMat(lcc_fn):
 
   @param lcc_fn: largest connected components full file name which should be a .npy
   @type lcc_fn: string
-  @deprecated
+
   '''
   start  = time()
   lcc = np.load(lcc_fn).item().toarray()
   sio.savemat(os.path.splitext(lcc_fn)[0],{'lcc': lcc}, appendmat = True)
   print ('Lcc sucessfully converted from .npy to .mat in  %.2f secs') % (time()-start)
+
+def convertSVDNpyToMat(svd_fn):
+  '''
+  Convert a npy sigular value decomposition file to an equivalent .mat file
+  svd_fn - sigular value decomposition full file name which should be a .npy
+
+  @param svd_fn: the full filename of the svd file
+  @type svd_fn: string
+  '''
+  sio.savemat(os.path.splitext(svd_fn)[0],{'svd': np.load(svd_fn)}, appendmat = True)
+
 
 def convertAndSave(fn, toFormat, saveLoc, fileType):
   '''
@@ -63,11 +74,18 @@ def convertAndSave(fn, toFormat, saveLoc, fileType):
     np.save(os.path.join(saveLoc, fnBase), arr)
     print fnBase + ' converted to npy format'
 
+  #import pdb; pdb.set_trace()
+
   if ('.csv' in toFormat):
-    with open( os.path.join(saveLoc, fnBase)+'.csv', 'wb') as csvfile:
-      writer = csv.writer(csvfile, dialect='excel')
-      writer.writerow(arr)
-    print fnBase + ' converted to csv format'
+    if (fileType) == 'mad': # Case of the MAD
+      f = open( os.path.join(saveLoc, fnBase)+'.csv', 'wb')
+      f.write(str(arr.item()))
+      f.close
+    else:
+      with open( os.path.join(saveLoc, fnBase)+'.csv', 'wb') as csvfile:
+        writer = csv.writer(csvfile, dialect='excel')
+        writer.writerow(arr)
+      print fnBase + ' converted to csv format'
 
   print ('%s sucessfully converted from .npy to .mat in  %.2f secs') % (fnBase ,(time()-start))
 
@@ -101,17 +119,6 @@ def convertGraph(G_fn, toFormat):
   else:
     print "[ERROR] in convertGraph Invalid file format! Only .csv, .npy & .mat"
     sys.exit(-1)
-
-def convertSVDNpyToMat(svd_fn):
-  '''
-  Convert a npy sigular value decomposition file to an equivalent .mat file
-  svd_fn - sigular value decomposition full file name which should be a .npy
-
-  @param svd_fn: the full filename of the svd file
-  @type svd_fn: string
-  @deprecated
-  '''
-  sio.savemat(os.path.splitext(svd_fn)[0],{'svd': np.load(svd_fn)}, appendmat = True)
 
 def convertGraphToCSV(G_fn, G=None):
   '''
@@ -190,3 +197,8 @@ def loadFile(file_fn, fileType):
       theFile = np.array(theFile)
 
     return theFile
+
+
+if __name__ == '__main__':
+  convertAndSave('/Users/dmhembere44/Downloads/0001/graphInvariants/MAD/M87102217_MAD.npy',
+                 'csv', '/Users/dmhembere44/Sandbox','mad')
