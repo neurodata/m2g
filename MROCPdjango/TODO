@@ -1,16 +1,21 @@
-0. Fix import errors
+*MR OCP To do list Disa
 
 1. Do more documentation
 1. Get static content to load via apache for production mode
 3. Fix parallel processing of ss
-4. Finish work on convert fibergraph to csv
-5. Redo confirmDownload to account for csv addition
+4. Finish work on convert fibergraph, lcc, svd to csv
 
 Invariants still to compute
 *SS2
 *APL
 *GDia
 
+Rencently completed
+
+<-- 0. Fix import errors -->
+<-- 5. Redo confirmDownload to account for csv addition -->
+<-- 6. Get rid of lccnpytomat -->
+<-- 7. Move convertTo to computation -->
 <-- 2. Finish graphupload view -->
 <-- 5. Fix Eigenvalue add to other services -->
 <-- Rename computation.Eigenvalues & update all others. -->

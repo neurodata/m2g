@@ -28,7 +28,7 @@ from django.core.files import File        # For programmatic file upload
 # Model imports
 from models import ConvertModel
 from models import BuildGraphModel
-#from forms import OKForm
+from forms import DownloadForm
 from forms import GraphUploadForm
 from forms import ConvertForm
 from forms import BuildGraphForm
@@ -41,7 +41,7 @@ from mrcap import gengraph as gengraph
 import filesorter as filesorter
 import zipper as zipper
 import createDirStruct as createDirStruct
-import convertTo as convertTo
+import computation.convertTo as convertTo
 
 from django.core.servers.basehttp import FileWrapper
 
@@ -119,9 +119,9 @@ def buildGraph(request):
             roi_xml_fn = form.cleaned_data['roi_xml_file'].name
 
             ''' Save files to temp location '''
-            #grModObj.save()
-	    #grModObj2.save()
-            #grModObj3.save()
+            grModObj.save()
+	    grModObj2.save()
+            grModObj3.save()
 
 	    print '\nSaving all files complete...'
 
@@ -166,7 +166,7 @@ def processInputData(request):
     roi_xml_fn = os.path.join(request.session['derivatives'], roi_xml_fn)
 
     request.session['smGrfn'], request.session['bgGrfn'], request.session['lccfn'],request.session['SVDfn'] \
-	= processData(fiber_fn, roi_xml_fn, roi_raw_fn,request.session['graphs'], request.session['graphInvariants'],False)
+	= processData(fiber_fn, roi_xml_fn, roi_raw_fn,request.session['graphs'], request.session['graphInvariants'],True)
 
     # Run ivariants here
     if len(request.session['invariants']) > 0:
@@ -177,29 +177,11 @@ def processInputData(request):
 	request.session['invariant_fns'] =  runInvariants(lccG, request.session)
     return HttpResponseRedirect(get_script_prefix()+'confirmdownload')
 
-#################################
-#################################
-
-def getDirFromFilename(filename):
-    '''
-    @summary: Get the directort location of a file
-    @param filename: the full filename of the file in question
-    @return: the directory of the file passed in as a param
-    '''
-    path = ''
-    for part in filename.split('/')[:-1]:
-	path += part + '/'
-    return path
-
-#################################
-#################################
-
 def confirmDownload(request):
-    from forms import DownloadForm
 
     #-- BEGIN TEMP FIX --#
-    request.session['invariant_fns']['lcc'] = request.session['lccfn']
-    request.session['invariant_fns']['svd'] = request.session['SVDfn']
+    #request.session['invariant_fns']['lcc'] = request.session['lccfn']
+    #request.session['invariant_fns']['svd'] = request.session['SVDfn']
     #-- END TEMP FIX --#
 
     if request.method == 'POST':
@@ -209,11 +191,10 @@ def confirmDownload(request):
 	    grConvertToFormats = form.cleaned_data['Select_Graph_conversion_format']
 	    dataReturn = form.cleaned_data['Select_output_type']
 
-	    import pdb; pdb.set_trace()
-
 	    for fileFormat in invConvertToFormats:
-		#convertTo.convertLCCNpyToMat(request.session['lccfn'])
-		#convertTo.convertSVDNpyToMat(request.session['SVDfn'])
+		if fileFormat == '.mat':
+		    convertTo.convertLCCNpyToMat(request.session['lccfn'])
+		    convertTo.convertSVDNpyToMat(request.session['SVDfn'])
 
 		# Conversion of all files
 		for inv in request.session['invariant_fns'].keys():
@@ -225,77 +206,23 @@ def confirmDownload(request):
 					    getDirFromFilename(request.session['invariant_fns'][inv]) , inv)
 
 	    for fileFormat in grConvertToFormats:
+		#convertTo.convertGraphToCSV(request.session['smGrfn'])
+		#***convertTo.convertGraphToCSV(request.session['bgGrfn'])
 		pass # Convert graphs as necessary
 
 	    if dataReturn == 'vd': # View data directory
-		pass
+	    	dataUrlTail = request.session['usrDefProjDir']
+		request.session.clear() # Very important
+		return HttpResponseRedirect('http://mrbrain.cs.jhu.edu' + dataUrlTail)
+
 	    elif dataReturn == 'dz': #Download all as zip
-		pass
-
-
-	    return HttpResponse('STUB')
+		return HttpResponseRedirect(get_script_prefix()+'zipoutput')
 
     else:
         form = DownloadForm()
 
     return render_to_response('confirmDownload.html',{'form': form},\
 		    context_instance=RequestContext(request))
-
-
-#    if 'zipDwnld' in request.POST: # If zipDwnl option is chosen
-#	form = OKForm(request.POST)
-#	return HttpResponseRedirect(get_script_prefix()+'zipOutput') # Redirect after POST
-#
-#    elif 'convToMatNzip' in request.POST: # If view dir structure option is chosen
-#	form = OKForm(request.POST)
-#	convertTo.convertLCCNpyToMat(request.session['lccfn'])
-#	convertTo.convertSVDNpyToMat(request.session['SVDfn'])
-#
-#	#import pdb; pdb.set_trace()
-#
-#	# Conversion of all files
-#	for inv in request.session['invariant_fns'].keys():
-#	    if isinstance(request.session['invariant_fns'][inv], list):
-#		for fn in request.session['invariant_fns'][inv]:
-#		    convertTo.convertAndSave(fn, '.mat', getDirFromFilename(fn), inv)
-#	    else:
-#		convertTo.convertAndSave(request.session['invariant_fns'][inv], '.mat', \
-#					 getDirFromFilename(request.session['invariant_fns'][inv]) , inv)
-#
-#	# TODO: DM
-#	#convertTo.convertGraphToCSV(request.session['smGrfn'])
-#	#convertTo.convertGraphToCSV(request.session['bgGrfn'])
-#
-#	# Tests here
-#	return HttpResponseRedirect(get_script_prefix()+'zipoutput')
-#
-#    elif 'getProdByDir' in request.POST: # If view dir structure option is chosen
-#	form = OKForm(request.POST)
-#
-#	dataUrlTail = request.session['usrDefProjDir']
-#	request.session.clear() # Very important
-#
-#	return HttpResponseRedirect('http://mrbrain.cs.jhu.edu' + dataUrlTail)
-#
-#    elif 'convToMatNgetByDir' in request.POST: # If view dir structure option is chosen
-#	form = OKForm(request.POST)
-#	convertTo.convertLCCNpyToMat(request.session['lccfn'])
-#	convertTo.convertSVDNpyToMat(request.session['SVDfn'])
-#
-#	# Incomplete
-#	#convertTo.convertGraphToCSV(request.session['smGrfn'])
-#	#convertTo.convertGraphToCSV(request.session['bgGrfn'])
-#
-#	dataUrlTail = request.session['usrDefProjDir']
-#	request.session.clear() # Very important
-#
-#	return HttpResponseRedirect('http://mrbrain.cs.jhu.edu' + dataUrlTail)
-#
-#    else:
-#	form = OKForm()
-#    return render(request, 'confirmDownload.html', {
-#        'form': form,
-#    })
 
 
 def zipProcessedData(request):
@@ -492,18 +419,6 @@ def graphLoadInv(request, webargs=None):
         {'form': form},
         context_instance=RequestContext(request) # Some failure to input data & returns a key signaling what is requested
     )
-
-#    else:
-#	projDir = os.path.join(settings.MEDIA_ROOT, 'tmp', strftime("projectStamp%a%d%b%Y_%H.%M.%S/", localtime()))
-#	request.session['smGrfn'] = default_storage.save(os.path.join(projDir, data.name), ContentFile(data.read()))
-#	print '\nSaving %s complete...' % data.name
-#
-#	request.session['graphInvariants'] = os.path.join(projDir, 'graphInvariants')
-#
-#	#lccG = loadAdjMat(request.session['bgGrfn'], request.session['lccfn'], roiRootName = os.path.splitext(roi_xml_fn)[0])
-#	import scipy.io as sio
-#	lccG = sio.loadmat(request.session['smGrfn'])['fibergraph']
-#	runInvariants(lccG, request.session)
 
 #########################################
 #	*******************		#
@@ -900,9 +815,20 @@ def writeBodyToDisk(data, saveDir):
 	print name + " written to disk.."
     return uploadFiles
 
+def getDirFromFilename(filename):
+    '''
+    @summary: Get the directort location of a file
+    @param filename: the full filename of the file in question
+    @return: the directory of the file passed in as a param
+    '''
+    path = ''
+    for part in filename.split('/')[:-1]:
+	path += part + '/'
+    return path
+
 def convertFiles(uploadedFiles, fileType , toFormat, convertFileSaveLoc):
     '''
-    @todo
+    Helper method to call convertTo module for invariant and graph format conversion
 
     @param uploadedFiles: array with all file names of uploaded files
     @param fileType

@@ -108,18 +108,13 @@ class GraphUploadForm(forms.Form):
     Select_Invariants_you_want_computed = forms.MultipleChoiceField(required=True,
     widget=CheckboxSelectMultiple, choices=INVARIANT_CHOICES)
 
-
-#class OKForm(forms.Form):
-    #'''
-    #This form will be used for picking file return type
-    #of computed products after building a graph
-    #'''
-    #
-    #pass #DM TODO: Track responses to zip or view as dir structure
-
 class DownloadForm(forms.Form):
+    '''
+    Used on confirmdownload page to choose whether to convert any invariant formats
+    and how the user would like the result back i.e download as zip or see directory
+    '''
 
-    INVARIANT_CONVERSION_CHOICES = (('.mat', 'Matlab format (.mat)',), ('.csv', '(Excel) Comma separated values (.csv)',))
+    INVARIANT_CONVERSION_CHOICES = (('.mat', 'Matlab format (.mat)',), ('.csv', '(Excel) Comma separated values (.csv) [LCC and SVD Not available yet]',))
 
     GRAPH_CONVERSION_CHOICES = (('.npy', 'Numpy format (.npy)',), ('.csv', '(Excel) Comma separated values (.csv) [Not yet available]',))
 
@@ -132,4 +127,4 @@ class DownloadForm(forms.Form):
     Select_Graph_conversion_format = forms.MultipleChoiceField(required=False, \
     widget=CheckboxSelectMultiple, choices=GRAPH_CONVERSION_CHOICES)
 
-    Select_output_type = forms.ChoiceField(choices=OUPUT_TYPES, widget=forms.RadioSelect())
+    Select_output_type = forms.ChoiceField(choices=OUPUT_TYPES, widget=forms.RadioSelect(), required=True)
