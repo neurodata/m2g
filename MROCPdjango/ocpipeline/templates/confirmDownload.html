@@ -121,29 +121,13 @@
         <br/>
         <h2>Congratulations! Your data was sucessfully processed</h2>
         <h4> What would you like to do?</h4>
-        <form action=""  method="post" enctype="multipart/form-data">
-            {% csrf_token %}
-            <input name = "zipDwnld"  type="submit" value="Obtain all processed data as a zipfile" class="button"/>
+
+        <form action="" method="post" enctype="multipart/form-data" name="confirmDLForm">
+	    {% csrf_token %}
+            <p>{{ form }}</p>
+	    <input name = "Output"  type="submit" value="Obtain processed data" class="button" onclick="showSpinner();"/>
+            <input type="reset" value="Reset" class="button" name="clearForm" />
         </form>
-	<!--
-
-        <form action="" method="post" enctype="multipart/form-data">
-            {% csrf_token %}
-            <input name = "convToMatNzip"  type="submit" value="Convert graph invariants to .mat and zip" class="button"/>
-        </form>
-
-        <form action="" method="post" enctype="multipart/form-data">
-            {% csrf_token %}
-            <input name = "getProdByDir"  type="submit" value="View directory to choose from individual files" class="button"/>
-        </form>
-
-        <form action="" method="post" enctype="multipart/form-data">
-            {% csrf_token %}
-            <input name = "convToMatNgetByDir"  type="submit" value="Convert graph invariants to .mat & view directory" class="button"/>
-        </form>
-
-	-->
-
 	<div class="footer">
 	  Property of the Johns Hopkins University Storage Lab (HSSL) |  Author: Disa Mhembere
 	</div>

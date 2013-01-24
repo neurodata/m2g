@@ -198,8 +198,8 @@ def confirmDownload(request):
     from forms import DownloadForm
 
     #-- BEGIN TEMP FIX --#
-    request.session['invariant_fns']['lcc'] = request.session['lccfn']
-    request.session['invariant_fns']['svd'] = request.session['SVDfn']
+    #request.session['invariant_fns']['lcc'] = request.session['lccfn']
+    #request.session['invariant_fns']['svd'] = request.session['SVDfn']
     #-- END TEMP FIX --#
 
     if request.method == 'POST':
