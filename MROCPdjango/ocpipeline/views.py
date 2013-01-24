@@ -206,9 +206,8 @@ def confirmDownload(request):
 					    getDirFromFilename(request.session['invariant_fns'][inv]) , inv)
 
 	    for fileFormat in grConvertToFormats:
-		#convertTo.convertGraphToCSV(request.session['smGrfn'])
-		#***convertTo.convertGraphToCSV(request.session['bgGrfn'])
-		pass # Convert graphs as necessary
+		convertTo.convertGraph(request.session['smGrfn'], fileFormat)
+		#***convertTo.convertGraph(request.session['bgGrfn'], fileFormat)
 
 	    if dataReturn == 'vd': # View data directory
 	    	dataUrlTail = request.session['usrDefProjDir']

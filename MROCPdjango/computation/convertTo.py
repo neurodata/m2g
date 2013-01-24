@@ -114,7 +114,8 @@ def convertGraph(G_fn, toFormat):
     print ('Graph successfully converted from .mat to .npy in  %.2f secs') % (time()-start)
 
   elif ((fnExt == '.npy' or fnExt == '.mat')  and toFormat == '.csv'):
-    convertGraphToCSV(G_fn)
+    pass
+    #convertGraphToCSV(G_fn)
 
   else:
     print "[ERROR] in convertGraph Invalid file format! Only .csv, .npy & .mat"
@@ -128,7 +129,6 @@ def convertGraphToCSV(G_fn, G=None):
   @param G_fn: the full file name of the graph file
   @type G_fn: string
 
-  @deprecated: this method
   '''
   fnExt = os.path.splitext(G_fn)[1]
   if not G:
