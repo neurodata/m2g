@@ -7,7 +7,7 @@
 @summary: All forms required for web services
 """
 
-from django import forms # for UploadFileForm
+from django import forms
 from django.forms.fields import MultipleChoiceField
 from django.forms.widgets import RadioSelect, CheckboxSelectMultiple
 
@@ -109,13 +109,13 @@ class GraphUploadForm(forms.Form):
     widget=CheckboxSelectMultiple, choices=INVARIANT_CHOICES)
 
 
-class OKForm(forms.Form):
-    '''
-    This form will be used for picking file return type
-    of computed products after building a graph
-    '''
-
-    pass #DM TODO: Track responses to zip or view as dir structure
+#class OKForm(forms.Form):
+    #'''
+    #This form will be used for picking file return type
+    #of computed products after building a graph
+    #'''
+    #
+    #pass #DM TODO: Track responses to zip or view as dir structure
 
 class DownloadForm(forms.Form):
 
