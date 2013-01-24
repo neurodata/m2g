@@ -67,7 +67,6 @@ from computation.eigen import calcEigs #****
 from computation.clustCoeff import calcLocalClustCoeff
 from computation.triCount_deg_MAD import eignTriLocal_deg_MAD #****
 
-#import scipy.sparse.linalg.eigen.arpack as arpack # THIS IS THE PROBLEM IMPORT
 
 ''' Little welcome message'''
 def default(request):
@@ -196,61 +195,103 @@ def getDirFromFilename(filename):
 #################################
 
 def confirmDownload(request):
+    from forms import DownloadForm
 
-    if 'zipDwnld' in request.POST: # If zipDwnl option is chosen
-	form = OKForm(request.POST)
-	return HttpResponseRedirect(get_script_prefix()+'zipOutput') # Redirect after POST
+    #-- BEGIN TEMP FIX --#
+    request.session['invariant_fns']['lcc'] = request.session['lccfn']
+    request.session['invariant_fns']['svd'] = request.session['SVDfn']
+    #-- END TEMP FIX --#
 
-    elif 'convToMatNzip' in request.POST: # If view dir structure option is chosen
-	form = OKForm(request.POST)
-	convertTo.convertLCCNpyToMat(request.session['lccfn'])
-	convertTo.convertSVDNpyToMat(request.session['SVDfn'])
+    if request.method == 'POST':
+	form = DownloadForm(request.POST) # instantiating form
+        if form.is_valid():
+	    invConvertToFormats = form.cleaned_data['Select_Invariant_conversion_format'] # Which form to convert to
+	    grConvertToFormats = form.cleaned_data['Select_Graph_conversion_format']
+	    dataReturn = form.cleaned_data['Select_output_type']
 
-	#import pdb; pdb.set_trace()
+	    #import pdb; pdb.set_trace()
 
-	# Conversion of all files
-	for inv in request.session['invariant_fns'].keys():
-	    if isinstance(request.session['invariant_fns'][inv], list):
-		for fn in request.session['invariant_fns'][inv]:
-		    convertTo.convertAndSave(fn, '.mat', getDirFromFilename(fn), inv)
-	    else:
-		convertTo.convertAndSave(request.session['invariant_fns'][inv], '.mat', \
-					 getDirFromFilename(request.session['invariant_fns'][inv]) , inv)
+	    for fileFormat in invConvertToFormats:
+		#convertTo.convertLCCNpyToMat(request.session['lccfn'])
+		#convertTo.convertSVDNpyToMat(request.session['SVDfn'])
 
-	# TODO: DM
-	#convertTo.convertGraphToCSV(request.session['smGrfn'])
-	#convertTo.convertGraphToCSV(request.session['bgGrfn'])
+		# Conversion of all files
+		for inv in request.session['invariant_fns'].keys():
+		    if isinstance(request.session['invariant_fns'][inv], list): # Case of eigs
+			for fn in request.session['invariant_fns'][inv]:
+			    convertTo.convertAndSave(fn, fileFormat, getDirFromFilename(fn), inv)
+		    else:
+			convertTo.convertAndSave(request.session['invariant_fns'][inv], fileFormat, \
+					    getDirFromFilename(request.session['invariant_fns'][inv]) , inv)
 
-	# Tests here
-	return HttpResponseRedirect(get_script_prefix()+'zipoutput')
+	    for fileFormat in grConvertToFormats:
+		pass # Convert graphs as necessary
 
-    elif 'getProdByDir' in request.POST: # If view dir structure option is chosen
-	form = OKForm(request.POST)
+	    if dataReturn:
+		pass
 
-	dataUrlTail = request.session['usrDefProjDir']
-	request.session.clear() # Very important
+	else:
+	    form = DownloadForm()
+	return render(request, 'confirmDownload.html', {
+	    'form': form,
+	})
 
-	return HttpResponseRedirect('http://mrbrain.cs.jhu.edu' + dataUrlTail)
 
-    elif 'convToMatNgetByDir' in request.POST: # If view dir structure option is chosen
-	form = OKForm(request.POST)
-	convertTo.convertLCCNpyToMat(request.session['lccfn'])
-	convertTo.convertSVDNpyToMat(request.session['SVDfn'])
 
-	# Incomplete
-	#convertTo.convertGraphToCSV(request.session['smGrfn'])
-	#convertTo.convertGraphToCSV(request.session['bgGrfn'])
-
-	dataUrlTail = request.session['usrDefProjDir']
-	request.session.clear() # Very important
-
-	return HttpResponseRedirect('http://mrbrain.cs.jhu.edu' + dataUrlTail)
-
-    else:
-	form = OKForm()
-    return render(request, 'confirmDownload.html', {
-        'form': form,
-    })
+#    if 'zipDwnld' in request.POST: # If zipDwnl option is chosen
+#	form = OKForm(request.POST)
+#	return HttpResponseRedirect(get_script_prefix()+'zipOutput') # Redirect after POST
+#
+#    elif 'convToMatNzip' in request.POST: # If view dir structure option is chosen
+#	form = OKForm(request.POST)
+#	convertTo.convertLCCNpyToMat(request.session['lccfn'])
+#	convertTo.convertSVDNpyToMat(request.session['SVDfn'])
+#
+#	#import pdb; pdb.set_trace()
+#
+#	# Conversion of all files
+#	for inv in request.session['invariant_fns'].keys():
+#	    if isinstance(request.session['invariant_fns'][inv], list):
+#		for fn in request.session['invariant_fns'][inv]:
+#		    convertTo.convertAndSave(fn, '.mat', getDirFromFilename(fn), inv)
+#	    else:
+#		convertTo.convertAndSave(request.session['invariant_fns'][inv], '.mat', \
+#					 getDirFromFilename(request.session['invariant_fns'][inv]) , inv)
+#
+#	# TODO: DM
+#	#convertTo.convertGraphToCSV(request.session['smGrfn'])
+#	#convertTo.convertGraphToCSV(request.session['bgGrfn'])
+#
+#	# Tests here
+#	return HttpResponseRedirect(get_script_prefix()+'zipoutput')
+#
+#    elif 'getProdByDir' in request.POST: # If view dir structure option is chosen
+#	form = OKForm(request.POST)
+#
+#	dataUrlTail = request.session['usrDefProjDir']
+#	request.session.clear() # Very important
+#
+#	return HttpResponseRedirect('http://mrbrain.cs.jhu.edu' + dataUrlTail)
+#
+#    elif 'convToMatNgetByDir' in request.POST: # If view dir structure option is chosen
+#	form = OKForm(request.POST)
+#	convertTo.convertLCCNpyToMat(request.session['lccfn'])
+#	convertTo.convertSVDNpyToMat(request.session['SVDfn'])
+#
+#	# Incomplete
+#	#convertTo.convertGraphToCSV(request.session['smGrfn'])
+#	#convertTo.convertGraphToCSV(request.session['bgGrfn'])
+#
+#	dataUrlTail = request.session['usrDefProjDir']
+#	request.session.clear() # Very important
+#
+#	return HttpResponseRedirect('http://mrbrain.cs.jhu.edu' + dataUrlTail)
+#
+#    else:
+#	form = OKForm()
+#    return render(request, 'confirmDownload.html', {
+#        'form': form,
+#    })
 
 
 def zipProcessedData(request):
