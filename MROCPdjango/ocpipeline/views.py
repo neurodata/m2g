@@ -198,8 +198,8 @@ def confirmDownload(request):
     from forms import DownloadForm
 
     #-- BEGIN TEMP FIX --#
-    #request.session['invariant_fns']['lcc'] = request.session['lccfn']
-    #request.session['invariant_fns']['svd'] = request.session['SVDfn']
+    request.session['invariant_fns']['lcc'] = request.session['lccfn']
+    request.session['invariant_fns']['svd'] = request.session['SVDfn']
     #-- END TEMP FIX --#
 
     if request.method == 'POST':
@@ -209,7 +209,7 @@ def confirmDownload(request):
 	    grConvertToFormats = form.cleaned_data['Select_Graph_conversion_format']
 	    dataReturn = form.cleaned_data['Select_output_type']
 
-	    #import pdb; pdb.set_trace()
+	    import pdb; pdb.set_trace()
 
 	    for fileFormat in invConvertToFormats:
 		#convertTo.convertLCCNpyToMat(request.session['lccfn'])
@@ -227,8 +227,12 @@ def confirmDownload(request):
 	    for fileFormat in grConvertToFormats:
 		pass # Convert graphs as necessary
 
-	    if dataReturn:
+	    if dataReturn == 'vd': # View data directory
 		pass
+	    elif dataReturn == 'dz': #Download all as zip
+		pass
+
+
 	    return HttpResponse('STUB')
 
     else:
