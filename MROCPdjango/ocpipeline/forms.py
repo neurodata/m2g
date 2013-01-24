@@ -116,3 +116,20 @@ class OKForm(forms.Form):
     '''
 
     pass #DM TODO: Track responses to zip or view as dir structure
+
+class DownloadForm(forms.Form):
+
+    INVARIANT_CONVERSION_CHOICES = (('.mat', 'Matlab format (.mat)',), ('.csv', '(Excel) Comma separated values (.csv)',))
+
+    GRAPH_CONVERSION_CHOICES = (('.npy', 'Numpy format (.npy)',), ('.csv', '(Excel) Comma separated values (.csv) [Not yet available]',))
+
+    OUPUT_TYPES = [('dz','Download all data as zip'), ('vd','View directory with all data')]
+
+
+    Select_Invariant_conversion_format = forms.MultipleChoiceField(required=False, \
+    widget=CheckboxSelectMultiple, choices=INVARIANT_CONVERSION_CHOICES)
+
+    Select_Graph_conversion_format = forms.MultipleChoiceField(required=False, \
+    widget=CheckboxSelectMultiple, choices=GRAPH_CONVERSION_CHOICES)
+
+    Select_output_type = forms.ChoiceField(choices=OUPUT_TYPES, widget=forms.RadioSelect())

@@ -52,6 +52,9 @@ def convertAndSave(fn, toFormat, saveLoc, fileType):
 
   arr = loadFile(fn, fileType) # load up the file as either a .mat, .npy
 
+  # Incase anyone ever forgets to put the (.) before toFormat
+  toFormat = '.'+toFormat if not toFormat.startswith('.') else toFormat
+
   if ('.mat' in toFormat):
     sio.savemat(os.path.join(saveLoc, fnBase), {fileType:arr}, appendmat = True)
     print fnBase + ' converted to mat format'
