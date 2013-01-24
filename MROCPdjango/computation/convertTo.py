@@ -100,7 +100,8 @@ def convertGraph(G_fn, toFormat):
   @param toFormat: the format to convert to. Either .mat, .npy, csv
   @type toFormat: string
   '''
-  fnExt = os.path.splitext(fn)[1]
+  toFormat = '.'+toFormat if not toFormat.startswith('.') else toFormat
+  fnExt = os.path.splitext(G_fn)[1]
 
   if (fnExt == '.mat' and toFormat == '.npy'):
     start  = time()
@@ -197,8 +198,3 @@ def loadFile(file_fn, fileType):
       theFile = np.array(theFile)
 
     return theFile
-
-
-if __name__ == '__main__':
-  convertAndSave('/Users/dmhembere44/Downloads/0001/graphInvariants/MAD/M87102217_MAD.npy',
-                 'csv', '/Users/dmhembere44/Sandbox','mad')
