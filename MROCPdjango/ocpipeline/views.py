@@ -28,7 +28,7 @@ from django.core.files import File        # For programmatic file upload
 # Model imports
 from models import ConvertModel
 from models import BuildGraphModel
-from forms import OKForm
+#from forms import OKForm
 from forms import GraphUploadForm
 from forms import ConvertForm
 from forms import BuildGraphForm
@@ -229,13 +229,13 @@ def confirmDownload(request):
 
 	    if dataReturn:
 		pass
+	    return HttpResponse('STUB')
 
-	else:
-	    form = DownloadForm()
-	return render(request, 'confirmDownload.html', {
-	    'form': form,
-	})
+    else:
+        form = DownloadForm()
 
+    return render_to_response('confirmDownload.html',{'form': form},\
+		    context_instance=RequestContext(request))
 
 
 #    if 'zipDwnld' in request.POST: # If zipDwnl option is chosen
