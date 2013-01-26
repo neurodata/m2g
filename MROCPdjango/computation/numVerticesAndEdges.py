@@ -11,7 +11,7 @@ def main():
   parser.add_argument('saveDir', action='store', help='Full path of directory where you want .npy array resulting files to go')
 
   result = parser.parse_args()
-  countVerticesAndEdges(result.G_fn, result.saveDir)
+  countVerticesAndEdges(result.grDir, result.saveDir)
 
 def countVerticesAndEdges(grDir, saveDir):
   numvertices = []
@@ -22,15 +22,14 @@ def countVerticesAndEdges(grDir, saveDir):
     print 'Directory created --> %s'
 
   for f in glob(os.path.join(grDir,"*")):
+    print "Processing", f
     G = sio.loadmat(f)['fibergraph']
     numvertices.append(G.shape[0]) # gets global num edges
 
     edgeCount = 0 # Individual count of edge per graph
-    for vertex in  G.shape[0]:
-      edgeCount += G[0].nnz
+    for vertex in range(G.shape[0]):
+      edgeCount += G[vertex].nnz
     numEdges.append(edgeCount)
-
-    import pdb; pdb.set_trace()
 
   np.save(os.path.join(saveDir, 'numVerices'), np.array(numvertices)) # save the number of vertices
   np.save(os.path.join(saveDir, 'numEdges'), np.array(numEdges)) # save the number of edges
