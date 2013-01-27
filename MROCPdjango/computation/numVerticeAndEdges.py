@@ -13,9 +13,13 @@ def main():
   result = parser.parse_args()
   countVerticesAndEdges(result.G_fn, result.saveDir)
 
+def root(arrfn):
+  return (arrfn.split('/')[-1]).split('_')[0]
+
 def countVerticesAndEdges(grDir, saveDir):
-  numvertices = []
-  numEdges = []
+
+  numVertDict = {}
+  numEdgesDict = {}
 
   if not os.path.exists(saveDir):
     os.makedirs(saveDir)
@@ -23,17 +27,15 @@ def countVerticesAndEdges(grDir, saveDir):
 
   for f in glob(os.path.join(grDir,"*")):
     G = sio.loadmat(f)['fibergraph']
-    numvertices.append(G.shape[0]) # gets global num edges
+    numVertDict[root(f)] = G.shape[0]
 
     edgeCount = 0 # Individual count of edge per graph
-    for vertex in  G.shape[0]:
+    for vertex in G.shape[0]:
       edgeCount += G[0].nnz
-    numEdges.append(edgeCount)
+    numEdgesDict[root(f)] = edgeCount
 
-    import pdb; pdb.set_trace()
-
-  np.save(os.path.join(saveDir, 'numVerices'), np.array(numvertices)) # save the number of vertices
-  np.save(os.path.join(saveDir, 'numEdges'), np.array(numEdges)) # save the number of edges
+  np.save(os.path.join(saveDir, 'numVericesDict'), np.array(numVericesDict)) # save the number of vertices
+  np.save(os.path.join(saveDir, 'numEdgesDict'), np.array(numEdgesDict)) # save the number of edges
 
 if __name__ == '__main__':
   main()
