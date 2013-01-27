@@ -35,7 +35,7 @@ def countVerticesAndEdges(grDir, saveDir):
       edgeCount += G[vertex].nnz
     numEdgesDict[root(f)] = edgeCount
 
-  np.save(os.path.join(saveDir, 'numVericesDict'), np.array(numVericesDict)) # save the number of vertices
+  np.save(os.path.join(saveDir, 'numVericesDict'), np.array(numVertDict)) # save the number of vertices
   np.save(os.path.join(saveDir, 'numEdgesDict'), np.array(numEdgesDict)) # save the number of edges
 
 if __name__ == '__main__':
