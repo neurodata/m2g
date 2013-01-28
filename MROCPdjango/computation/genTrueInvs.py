@@ -11,22 +11,22 @@ import unittesting
 # Invariant imports
 from getBaseName import getBaseName
 from loadAdjMatrix import loadAdjMat
-#from maxavgdeg import getMaxAveDegree
 from scanstat_degr import calcScanStat_Degree
-#from triCount import eignTriangleLocal
 from clustCoeff import calcLocalClustCoeff
 from loadAdjMatrix import loadAdjMat
 from triCount_MAD import eignTriLocal_MAD
+import scipy.io as sio
+ 
+def realgraph(G_fn, lcc_fn, toDir, roiRootName = None, biggraph = True)):
   
-def realgraph(G_fn, lcc_fn, toDir, roiRootName = None):
-  
-  G = loadAdjMat(G_fn, lcc_fn, roiRootName) # load up graph into main mem
+  if biggraph:
+    G = loadAdjMat(G_fn, lcc_fn, roiRootName) # load up graph into main mem
+  else:
+    G = sio.loadmat(G_fn)['fibergraph']  # Adaptation for small graphs
   
   MADdir, eigvDir, ssDir, degDir, triDir, ccDir = createInvDirs(toDir)
-  #tri_fn = eignTriangleLocal(G_fn, G, lcc_fn, roiRootName, triDir, None)
-  #mad = getMaxAveDegree(G_fn, G, lcc_fn, roiRootName, MADdir, eigvDir, True)
   
-  tri_fn = eignTriLocal_MAD(G_fn, G , lcc_fn, roiRootName , triDir , MADdir, eigvDir, k=1)
+  tri_fn, eigvl_fn, eigvect_fn, MAD_fn = eignTriLocal_MAD(G_fn, G , lcc_fn, roiRootName , triDir , MADdir, eigvDir)
   ss1_fn, deg_fn, numNodes = calcScanStat_Degree(G_fn, G, lcc_fn, roiRootName, ssDir, degDir)
   ccArr_fn = calcLocalClustCoeff(deg_fn, tri_fn, None, None, ccDir, False)
   
@@ -94,10 +94,13 @@ def main():
   parser.add_argument('lcc_fn', action='store',help='Full filename of largest connected component (.npy)')
   parser.add_argument('toDir', action='store', help='Full path of directory where you want .npy array resulting files to go')
   parser.add_argument('roiRootName', action='store',help='Full path of roi director + baseName')
+  parser.add_argument('biggraph', action='store',help='True or False. Do you want a biggraph. t=T=True=true & f=F=False=false ')
   
   result = parser.parse_args()
-  
-  realgraph(result.G_fn, result.lcc_fn, result.toDir, result.roiRootName)
+	
+  big = True if result.biggraph.lower().startswith('t') else False
+	  
+  realgraph(result.G_fn, result.lcc_fn, result.toDir, result.roiRootName, big)
 
 if __name__ == '__main__':
   main()
