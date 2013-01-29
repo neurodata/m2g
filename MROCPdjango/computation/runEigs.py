@@ -1,4 +1,4 @@
-from Eigenvalues import calcEigs
+from eigen import calcEigs
 from glob import glob
 from getBaseName import getBaseName
 
