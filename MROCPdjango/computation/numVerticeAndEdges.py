@@ -3,7 +3,7 @@ from glob import glob
 import os
 import numpy as np
 import argparse
-import loadAdjMatrix
+from loadAdjMatrix import loadAdjMat
 from getBaseName import getBaseName
 
 def main():
@@ -58,15 +58,15 @@ def countLCCVerticesAndEdges(grDir, saveDir):
   for f in glob(os.path.join(grDir,"*")):
     print "Processing %s .." % f
     G = loadAdjMat(f,'/data/projects/MR/MRN/connectedcomp/'+ getBaseName(f) + '_concomp.npy')
-    numVertDict[root(f)] = G.shape[0]
+    numVertLCCDict[root(f)] = G.shape[0]
 
     #edgeCount = 0 # Individual count of edge per graph
     #for vertex in range(G.shape[0]):
     #  edgeCount += G[vertex].nnz
-    #numEdgesDict[root(f)] = edgeCount
+    #numEdgeLCCDict[root(f)] = edgeCount
 
   np.save(os.path.join(saveDir, 'numLCCVerticesDict'), np.array(numVertLCCDict)) # save the number of vertices
-  #np.save(os.path.join(saveDir, 'numEdgesDict'), np.array(numEdgesDict)) # save the number of edges
+  #np.save(os.path.join(saveDir, 'numLCCEdgesDict'), np.array(numEdgeLCCDict)) # save the number of edges
 
 if __name__ == '__main__':
   main()
