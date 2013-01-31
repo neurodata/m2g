@@ -12,6 +12,8 @@ def main():
   parser.add_argument('grDir', action='store',help='Full filename sparse graph (.mat) directory')
   parser.add_argument('saveDir', action='store', help='Full path of directory where you want .npy array resulting files to go')
 
+  parser.add_argument('-l', '--lcc', action='store', help='Use lcc of graph and not full graph')
+
   result = parser.parse_args()
   #countVerticesAndEdges(result.grDir, result.saveDir)
   countLCCVerticesAndEdges(result.grDir, result.saveDir)
