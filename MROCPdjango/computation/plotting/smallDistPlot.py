@@ -208,59 +208,59 @@ def plotstdmean(invDir, pngName, char, numBins =100, function = 'mean'):
   #*********** Start comment here for plot _2 *******#
   for idx, drcty in enumerate (invDirs):
 
-    #matricesArray = assembleAggMatrices(glob(os.path.join(invDir, drcty,'*.npy')), charDict, function, char, 70)
-    #processingArrs = perfOpOnMatrices(matricesArray, function, True)
+    matricesArray = assembleAggMatrices(glob(os.path.join(invDir, drcty,'*.npy')), charDict, char, 70)
+    processingArrs = perfOpOnMatrices(matricesArray, function, True)
 
-    allmat = np.zeros(shape=(len(charDict),70)); allcnt = 0
-    zeromat = np.zeros(shape=(len(zero_type),70)) ; zerocnt = 0
-    onemat = np.zeros(shape=(len(one_type),70)); onecnt = 0
-
-    if char == 'class':
-      twomat = np.zeros(shape=(len(two_type),70)); twocnt = 0
-
-    for arrfn in glob(os.path.join(invDir, drcty,'*.npy')):
-      try:
-        arr = np.load(arrfn)
-        print "Processing %s..., length --> %d" % (arrfn, len(arr))
-      except:
-        print "[ERROR]: Line %s: Invariant file not found %s"  % (lineno(),arrfn)
-
-      allmat[allcnt] = arr
-      allcnt += 1
-
-      # Populate each matrix by characterization
-      if charDict[root(arrfn)] == '0':
-        zeromat[zerocnt]  = arr
-        zerocnt += 1
-
-      elif charDict[root(arrfn)] == '1':
-        onemat[onecnt] = arr
-        onecnt += 1
-
-      if char == 'class':
-        if charDict[root(arrfn)] == '2':
-          twomat[twocnt] = arr
-          twocnt += 1
-
+    #allmat = np.zeros(shape=(len(charDict),70)); allcnt = 0
+    #zeromat = np.zeros(shape=(len(zero_type),70)) ; zerocnt = 0
+    #onemat = np.zeros(shape=(len(one_type),70)); onecnt = 0
+    #
+    #if char == 'class':
+    #  twomat = np.zeros(shape=(len(two_type),70)); twocnt = 0
+    #
+    #for arrfn in glob(os.path.join(invDir, drcty,'*.npy')):
+    #  try:
+    #    arr = np.load(arrfn)
+    #    print "Processing %s..., length --> %d" % (arrfn, len(arr))
+    #  except:
+    #    print "[ERROR]: Line %s: Invariant file not found %s"  % (lineno(),arrfn)
+    #
+    #  allmat[allcnt] = arr
+    #  allcnt += 1
+    #
+    #   Populate each matrix by characterization
+    #  if charDict[root(arrfn)] == '0':
+    #    zeromat[zerocnt]  = arr
+    #    zerocnt += 1
+    #
+    #  elif charDict[root(arrfn)] == '1':
+    #    onemat[onecnt] = arr
+    #    onecnt += 1
+    #
+    #  if char == 'class':
+    #    if charDict[root(arrfn)] == '2':
+    #      twomat[twocnt] = arr
+    #      twocnt += 1
+    #
     # Mean of non-zero elements
-    if function == 'mean':
-      allmatFunc_nnz = allmat.mean(axis=0)[allmat.mean(axis=0).nonzero()]
-      zeromatFunc_nnz = zeromat.mean(axis=0)[zeromat.mean(axis=0).nonzero()]
-      onematFunc_nnz = onemat.mean(axis=0)[onemat.mean(axis=0).nonzero()]
-    elif function == 'stddev':
-      allmatFunc_nnz = allmat.std(axis=0)[allmat.std(axis=0).nonzero()]
-      zeromatFunc_nnz = zeromat.std(axis=0)[zeromat.std(axis=0).nonzero()]
-      onematFunc_nnz = onemat.std(axis=0)[onemat.std(axis=0).nonzero()]
-
+    #if function == 'mean':
+    #  allmatFunc_nnz = allmat.mean(axis=0)[allmat.mean(axis=0).nonzero()]
+    #  zeromatFunc_nnz = zeromat.mean(axis=0)[zeromat.mean(axis=0).nonzero()]
+    #  onematFunc_nnz = onemat.mean(axis=0)[onemat.mean(axis=0).nonzero()]
+    #elif function == 'stddev':
+    #  allmatFunc_nnz = allmat.std(axis=0)[allmat.std(axis=0).nonzero()]
+    #  zeromatFunc_nnz = zeromat.std(axis=0)[zeromat.std(axis=0).nonzero()]
+    #  onematFunc_nnz = onemat.std(axis=0)[onemat.std(axis=0).nonzero()]
+    #
     # Take the log of the mean for clarity
-    processingArrs = [np.log(allmatFunc_nnz), np.log(zeromatFunc_nnz), np.log(onematFunc_nnz)]
-
-    if char == 'class':
-      if function == 'mean':
-        twomatFunc_nnz = twomat.mean(axis=0)[twomat.mean(axis=0).nonzero()]
-      elif function == 'stddev':
-        twomatFunc_nnz = twomat.std(axis=0)[twomat.std(axis=0).nonzero()]
-      processingArrs.append(np.log(twomatFunc_nnz))
+    #processingArrs = [np.log(allmatFunc_nnz), np.log(zeromatFunc_nnz), np.log(onematFunc_nnz)]
+    #
+    #if char == 'class':
+    #  if function == 'mean':
+    #    twomatFunc_nnz = twomat.mean(axis=0)[twomat.mean(axis=0).nonzero()]
+    #  elif function == 'stddev':
+    #    twomatFunc_nnz = twomat.std(axis=0)[twomat.std(axis=0).nonzero()]
+    #  processingArrs.append(np.log(twomatFunc_nnz))
 
     #############################################
     for proccCnt, arr in enumerate (processingArrs):
@@ -684,11 +684,15 @@ def main():
     parser.add_argument('numBins', type = int, action='store', help='Number of bins')
     parser.add_argument('char', action='store', help='Characteristic on which to partition data: gender or class')
 
+    parser.add_argument('-b', '--big', action='store', help='if working on big graphs pass in numLCCVertices.npy full with this param')
+
     result = parser.parse_args()
 
     #plotInvDist(result.invDir, result.pngName, result.numBins, result.char)
     #plotstdmean(result.invDir, result.pngName, "gender", result.numBins)
     #func(result.invDir)
+    if result.big:
+      pass # TODO
     plotstdmean(result.invDir, result.pngName, result.char, result.numBins, function = 'mean') # !!!! NOTE HARDCODE!!!! #
 
 if __name__ == '__main__':
