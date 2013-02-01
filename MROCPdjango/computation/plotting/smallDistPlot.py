@@ -42,7 +42,7 @@ def plotInvDist(invDir, pngName, numBins =100, char = 'class'):
 
   pl.figure(2)
   fig_gl, axes = pl.subplots(nrows=3, ncols=2)
-  fig_gl.tight_layout()
+  #fig_gl.tight_layout()
 
   for idx, drcty in enumerate (invDirs):
     for arrfn in glob(os.path.join(invDir, drcty,'*.npy')):
@@ -178,7 +178,7 @@ def plotInvDist(invDir, pngName, numBins =100, char = 'class'):
 
 
 def plotstdmean(invDir, pngName, char, numBins =100, function = 'mean'):
-  charDict, zero_type, one_type, two_type = csvtodict(char = char)
+  #charDict, zero_type, one_type, two_type = csvtodict(char = char)
 
   print "function =" + function
 
@@ -203,12 +203,12 @@ def plotstdmean(invDir, pngName, char, numBins =100, function = 'mean'):
 
   pl.figure(2)
   fig_gl, axes = pl.subplots(nrows=nrows, ncols=ncols)
-  fig_gl.tight_layout()
+  #fig_gl.tight_layout()
 
   #*********** Start comment here for plot _2 *******#
   for idx, drcty in enumerate (invDirs):
 
-    matricesArray = assembleAggMatrices(glob(os.path.join(invDir, drcty,'*.npy')), charDict, char, 70)
+    matricesArray = assembleAggMatrices(glob(os.path.join(invDir, drcty,'*.npy')), char, 70)
     processingArrs = perfOpOnMatrices(matricesArray, function, True)
 
     #allmat = np.zeros(shape=(len(charDict),70)); allcnt = 0
@@ -546,7 +546,8 @@ def getMaxVertices(globalVertFn):
 #########################################
 #########################################
 
-def assembleAggMatrices(drctyArray, charDict, char, matRowLen):
+def assembleAggMatrices(drctyArray, char, matRowLen):
+    charDict, zero_type, one_type, two_type = csvtodict(char = char)
 
     allmat = np.zeros(shape=(len(charDict),matRowLen)); allcnt = 0
     zeromat = np.zeros(shape=(len(zero_type),matRowLen)) ; zerocnt = 0
@@ -599,9 +600,9 @@ def perfOpOnMatrices(matricesArray, function, takeLog):
     processingArrs = []
     for mat in matricesArray:
       if function == 'mean':
-        mat_nnz = allmat.mean(axis=0)[allmat.mean(axis=0).nonzero()]
+        mat_nnz = mat.mean(axis=0)[mat.mean(axis=0).nonzero()]
       elif function == 'stddev':
-        mat_nnz = allmat.std(axis=0)[allmat.std(axis=0).nonzero()]
+        mat_nnz = mat.std(axis=0)[mat.std(axis=0).nonzero()]
       processingArrs.append(mat_nnz)
 
     # For visualization take the log of the numbers in some cases
