@@ -23,59 +23,6 @@ import csv
 
 # Issues: Done nothing with MAD
 
-def lineno():
-  '''
-  Get current line number
-  '''
-  return str(inspect.getframeinfo(inspect.currentframe())[1])
-
-def csvtodict(fn ='/home/disa/code/mrn_covariates_n120-v4.csv', char = 'class'):
-  alldict = {}
-  zerosdict = {}
-  onesdict = {}
-  twosdict = {}
-
-  if char == 'class':
-    col = 4
-  elif char == 'gender':
-    col = 2
-  reader = csv.reader(open(fn, 'rb'))
-
-
-  for row in reader:
-    alldict[row[0].strip()] = row[col].strip()
-
-    if row[col].strip() == '0':
-      zerosdict[row[0].strip()] = row[col].strip()
-
-    if row[col].strip() == '1':
-      onesdict[row[0].strip()] = row[col].strip()
-
-    if row[col].strip() == '2':
-      twosdict[row[0].strip()] = row[col].strip()
-
-    #print row[0] ,'TYPE' ,alldict[row[0]]
-    #import pdb; pdb.set_trace()
-
-  del alldict ['URSI'] # Header
-
-  return [alldict, zerosdict, onesdict, twosdict]
-
-
-def pickprintcolor(charDict, arrfn):
-  '''
-  charDict: dict
-  '''
-  if (charDict[(arrfn.split('/')[-1]).split('_')[0]] == '0'):
-    plot_color = 'grey'
-  elif (charDict[(arrfn.split('/')[-1]).split('_')[0]] == '1'):
-    plot_color = 'blue'
-  elif (charDict[(arrfn.split('/')[-1]).split('_')[0]] == '2'):
-    plot_color = 'green'
-  else:
-    print "[ERROR]: %s, no match on subject type" % lineno()
-  return plot_color
-
 
 def plotInvDist(invDir, pngName, numBins =100, char = 'class'):
   subj_types,vzero_type, one_type, two_type = csvtodict(char = char) # load up subject types
@@ -663,6 +610,66 @@ def perfOpOnMatrices(matricesArray, function, takeLog):
         processingArrs[idx] = np.log(mat_nnz)
 
     return processingArrs
+
+#########################################
+#########################################
+
+def lineno():
+  '''
+  Get current line number
+  '''
+  return str(inspect.getframeinfo(inspect.currentframe())[1])
+
+#########################################
+#########################################
+
+def csvtodict(fn ='/home/disa/code/mrn_covariates_n120-v4.csv', char = 'class'):
+  alldict = {}
+  zerosdict = {}
+  onesdict = {}
+  twosdict = {}
+
+  if char == 'class':
+    col = 4
+  elif char == 'gender':
+    col = 2
+  reader = csv.reader(open(fn, 'rb'))
+
+  for row in reader:
+    alldict[row[0].strip()] = row[col].strip()
+
+    if row[col].strip() == '0':
+      zerosdict[row[0].strip()] = row[col].strip()
+
+    if row[col].strip() == '1':
+      onesdict[row[0].strip()] = row[col].strip()
+
+    if row[col].strip() == '2':
+      twosdict[row[0].strip()] = row[col].strip()
+
+    #print row[0] ,'TYPE' ,alldict[row[0]]
+    #import pdb; pdb.set_trace()
+
+  del alldict ['URSI'] # Header
+
+  return [alldict, zerosdict, onesdict, twosdict]
+
+#########################################
+#########################################
+
+def pickprintcolor(charDict, arrfn):
+  '''
+  charDict: dict
+  '''
+  if (charDict[(arrfn.split('/')[-1]).split('_')[0]] == '0'):
+    plot_color = 'grey'
+  elif (charDict[(arrfn.split('/')[-1]).split('_')[0]] == '1'):
+    plot_color = 'blue'
+  elif (charDict[(arrfn.split('/')[-1]).split('_')[0]] == '2'):
+    plot_color = 'green'
+  else:
+    print "[ERROR]: %s, no match on subject type" % lineno()
+  return plot_color
 
 #########################################
 #########################################
