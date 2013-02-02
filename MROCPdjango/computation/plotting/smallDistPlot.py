@@ -236,15 +236,8 @@ def newPlotStdMean(invDir, pngName, char, numBins =100, function = 'mean'):
       #ax = pl.subplot(nrows,ncols,(idx*ncols)+2) if proccCnt > 0 else pl.subplot(nrows,ncols,(idx*ncols)+1)
       ax = pl.subplot(nrows,ncols,idx+1)
 
-      #if proccCnt == 0: # All
-      #  plot_color = 'red'
-      if proccCnt == 0: # zero
-        plot_color = 'grey'
-      if proccCnt == 1: # one
-        plot_color = 'blue'
-      if proccCnt == 2: # two
-        plot_color = 'green'
-      # How to plot index
+      plot_color = getPlotColor(proccCnt, allmat = False)
+
       if function == 'mean':
         pl.plot(x, interp*100, color = plot_color, linewidth=1)
       elif function == 'stddev':
@@ -260,9 +253,9 @@ def newPlotStdMean(invDir, pngName, char, numBins =100, function = 'mean'):
             pl.ylabel('Percent')
           elif function == 'stddev':
             pl.ylabel('Magnitude')
-          pl.xlabel(funcVal +' Log # of Local Triangles')
+          pl.xlabel('Log # of Local Triangles')
         else:
-          pl.xlabel(funcVal +' Log # Triangles')
+          pl.xlabel('Log # Triangles')
 
       if idx == 1:
         if function == 'mean':
@@ -270,7 +263,7 @@ def newPlotStdMean(invDir, pngName, char, numBins =100, function = 'mean'):
         elif function == 'stddev':
           ax.set_yticks(scipy.arange(0,0.15,0.03))
 
-        pl.xlabel(funcVal + ' Log Local Clustering Coefficient')
+        pl.xlabel('Log Local Clustering Coefficient')
 
       if idx == 2:
         if function == 'mean':
@@ -283,7 +276,7 @@ def newPlotStdMean(invDir, pngName, char, numBins =100, function = 'mean'):
           elif function == 'stddev':
             pl.ylabel('Magnitude')
 
-        pl.xlabel(funcVal + ' Log Scan Statistic 1')
+        pl.xlabel('Log Scan_1 Statistic')
 
       if idx == 3:
         if function == 'mean':
@@ -292,7 +285,7 @@ def newPlotStdMean(invDir, pngName, char, numBins =100, function = 'mean'):
           ax.set_yticks(scipy.arange(0,0.08,0.02))
           ax.set_xticks(scipy.arange(-2.5,2.0,1.0))
 
-        pl.xlabel(funcVal + ' Log Degree')
+        pl.xlabel('Log Degree')
 
   #### Eigenvalues ####
 
@@ -313,13 +306,13 @@ def newPlotStdMean(invDir, pngName, char, numBins =100, function = 'mean'):
       ax.set_yticks(scipy.arange(0,35,10))
       pl.plot(range(1,len(arr)+1), arr/10, color=plot_color)
 
-  pl.xlabel(funcVal +' Eigenvalue rank')
+  pl.xlabel('Eigenvalue rank')
   if function == 'mean':
-    pl.ylabel('Magnitude ($\times 10^4$) ')
+    pl.ylabel('Magnitude x ($10^4$) ')
   elif function == 'stddev':
-    pl.ylabel('Magnitude ($\times 10$) ')
+    pl.ylabel('Magnitude x ($ 10$) ')
 
-  pl.xlabel( funcVal +' Eigenvalue rank')
+  pl.xlabel('Eigenvalue rank')
 
   ######## Global Edge number #######
   charDict, zero_type, one_type, two_type = csvtodict(char = char)
@@ -462,8 +455,6 @@ def newPlotErrStdMean(invDir, pngName, char, numBins =100, function = 'mean'):
       #ax = pl.subplot(nrows,ncols,(idx*ncols)+2) if proccCnt > 0 else pl.subplot(nrows,ncols,(idx*ncols)+1)
       ax = pl.subplot(nrows,ncols,idx+1)
 
-      #if proccCnt == 0: # All
-      #  plot_color = 'red'
       if proccCnt == 0: # zero
         plot_color = 'grey'
         label = 'male'
@@ -472,21 +463,18 @@ def newPlotErrStdMean(invDir, pngName, char, numBins =100, function = 'mean'):
         label = 'female'
       if proccCnt == 2: # two
         plot_color = 'green'
-      # How to plot index
 
-      ax.errorbar(x, interp*100, yerr = stdx, color='g')
+      ax.errorbar(x, interp*100, yerr = stdinterp, color='green')
 
       if idx == 1:
         pl.plot(x, interp*100, color = plot_color, linewidth=1, label=label)
-        plt.legend(bbox_to_anchor=(0.8, 0.5), loc=2, borderaxespad=0.)
+        plt.legend(bbox_to_anchor=(0.7, 1.3), loc=2, prop={'size':8}, borderaxespad=0.)
+	#plt.legend().draw_frame(False)
       else:
         pl.plot(x, interp*100, color = plot_color, linewidth=1)
 
       if idx == 0:
-        if function == 'mean':
-          ax.set_yticks(scipy.arange(0,7,2))
-        elif function == 'stddev':
-          ax.set_yticks(scipy.arange(0,0.07,0.02))
+        ax.set_yticks(scipy.arange(0,7,2))
         if proccCnt == 0:
           if function == 'mean':
             pl.ylabel('Percent')
@@ -497,19 +485,11 @@ def newPlotErrStdMean(invDir, pngName, char, numBins =100, function = 'mean'):
           pl.xlabel(funcVal +' Log # Triangles')
 
       if idx == 1:
-        if function == 'mean':
-          ax.set_yticks(scipy.arange(0,10,2))
-        elif function == 'stddev':
-          ax.set_yticks(scipy.arange(0,0.15,0.03))
-
+        ax.set_yticks(scipy.arange(0,12,3))
         pl.xlabel(funcVal + ' Log Local Clustering Coefficient')
-        #plt.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
 
       if idx == 2:
-        if function == 'mean':
-          ax.set_yticks(scipy.arange(0,8,2))
-        elif function == 'stddev':
-          ax.set_yticks(scipy.arange(0,0.08,0.02))
+        ax.set_yticks(scipy.arange(0,8,2))
         if proccCnt == 0:
           if function == 'mean':
             pl.ylabel('Percent')
@@ -519,12 +499,7 @@ def newPlotErrStdMean(invDir, pngName, char, numBins =100, function = 'mean'):
         pl.xlabel(funcVal + ' Log Scan Statistic 1')
 
       if idx == 3:
-        if function == 'mean':
-          ax.set_yticks(scipy.arange(0,6,2))
-        if function == 'stddev':
-          ax.set_yticks(scipy.arange(0,0.08,0.02))
-          ax.set_xticks(scipy.arange(-2.5,2.0,1.0))
-
+        ax.set_yticks(scipy.arange(0,6,2))
         pl.xlabel(funcVal + ' Log Degree')
 
   #### Eigenvalues ####
@@ -548,9 +523,9 @@ def newPlotErrStdMean(invDir, pngName, char, numBins =100, function = 'mean'):
 
   pl.xlabel(funcVal +' Eigenvalue rank')
   if function == 'mean':
-    pl.ylabel('Magnitude ($\times 10^4$) ')
+    pl.ylabel('Magnitude x ($10^4$) ')
   elif function == 'stddev':
-    pl.ylabel('Magnitude ($\times 10$) ')
+    pl.ylabel('Magnitude x ($10$) ')
 
   pl.xlabel( funcVal +' Eigenvalue rank')
 
@@ -1060,8 +1035,8 @@ def main():
     pass # TODO
   #plotstdmean(result.invDir, result.pngName, result.char, result.numBins, function = 'mean') # !!!! NOTE HARDCODE!!!! #
 
-  #newPlotStdMean(result.invDir, result.pngName, result.char, result.numBins, function = 'mean')
-  newPlotErrStdMean(result.invDir, result.pngName, result.char, result.numBins, function = 'mean')
+  newPlotStdMean(result.invDir, result.pngName, result.char, result.numBins, function = 'mean')
+  #newPlotErrStdMean(result.invDir, result.pngName, result.char, result.numBins, function = 'mean')
 
 if __name__ == '__main__':
   main()
