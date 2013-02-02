@@ -758,9 +758,9 @@ def assembleAggMatrices(drctyArray, char, matRowLen, eig = False):
       #Pad array with zeros
       arr = np.append(arr, np.zeros(matRowLen - len(arr)))
 
-  if eig:
-    n = len(arr)
-    arr = (np.sort(arr)[::-1])
+    if eig:
+      n = len(arr)
+      arr = (np.sort(arr)[::-1])
 
     allmat[allcnt] = arr
     allcnt += 1
