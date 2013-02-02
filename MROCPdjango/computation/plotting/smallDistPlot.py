@@ -478,7 +478,7 @@ def newPlotErrStdMean(invDir, pngName, char, numBins =100, function = 'mean'):
       if idx == 1:
         if proccCnt == 0:
           pl.plot(x, interp*100, color = plot_color, linewidth=1, label=label)
-          legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
+          pl.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
       else:
         pl.plot(x, interp*100, color = plot_color, linewidth=1)
       ax.errorbar(x, interp*100, yerr = stdx, color='g')
