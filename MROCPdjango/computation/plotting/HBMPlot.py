@@ -29,7 +29,7 @@ def lineno():
   '''
   return str(inspect.getframeinfo(inspect.currentframe())[1])
 
-def csvtodict(fn ='/data/projects/MR/MRN/raw/mrn_covariates_n120-v4.csv', char = 'class'):
+def csvtodict(fn ='/home/disa/code/mrn_covariates_n120-v4.csv', char = 'class'):
 
   if char == 'class':
     col = 4
@@ -79,7 +79,6 @@ def plotInvDist(invDir, pngName, numBins =100):
 
   pl.figure(2)
   fig_gl, axes = pl.subplots(nrows=3, ncols=2)
-  fig_gl.tight_layout()
 
   for idx, drcty in enumerate (invDirs):
     for arrfn in glob(os.path.join(invDir, drcty,'*.npy')):
