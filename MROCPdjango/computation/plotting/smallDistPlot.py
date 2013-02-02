@@ -474,14 +474,14 @@ def newPlotErrStdMean(invDir, pngName, char, numBins =100, function = 'mean'):
         plot_color = 'green'
       # How to plot index
 
-
+      ax.errorbar(x, interp*100, yerr = stdx, color='g')
+      
       if idx == 1:
         if proccCnt == 0:
           pl.plot(x, interp*100, color = plot_color, linewidth=1, label=label)
-          pl.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
+          plt.legend(bbox_to_anchor=(0.5, 1), loc=2, borderaxespad=0.)
       else:
         pl.plot(x, interp*100, color = plot_color, linewidth=1)
-      ax.errorbar(x, interp*100, yerr = stdx, color='g')
 
       if idx == 0:
         if function == 'mean':
