@@ -269,14 +269,8 @@ def newPlotStdMean(invDir, pngName, char, numBins =100, function = 'mean'):
           ax.set_yticks(scipy.arange(0,10,2))
         elif function == 'stddev':
           ax.set_yticks(scipy.arange(0,0.15,0.03))
-        if proccCnt == 0:
-          if function == 'mean':
-            pl.ylabel('Percent')
-          elif function == 'stddev':
-            pl.ylabel('Magnitude')
-          pl.xlabel(funcVal + ' Log Local Clustering Coefficient')
-        else:
-          pl.xlabel(funcVal + ' Log Local Clustering Coefficient by '+ charVal)
+
+        pl.xlabel(funcVal + ' Log Local Clustering Coefficient by '+ charVal)
 
       if idx == 2:
         if function == 'mean':
@@ -288,9 +282,8 @@ def newPlotStdMean(invDir, pngName, char, numBins =100, function = 'mean'):
             pl.ylabel('Percent')
           elif function == 'stddev':
             pl.ylabel('Magnitude')
-          pl.xlabel(funcVal + ' Log Scan Statistic 1')
-        else:
-          pl.xlabel(funcVal + ' Log Scan Statistic 1 by '+ charVal)
+
+        pl.xlabel(funcVal + ' Log Scan Statistic 1 by '+ charVal)
 
       if idx == 3:
         if function == 'mean':
@@ -298,14 +291,8 @@ def newPlotStdMean(invDir, pngName, char, numBins =100, function = 'mean'):
         if function == 'stddev':
           ax.set_yticks(scipy.arange(0,0.08,0.02))
           ax.set_xticks(scipy.arange(-2.5,2.0,1.0))
-        if proccCnt == 0:
-          if function == 'mean':
-            pl.ylabel('Percent')
-          elif function == 'stddev':
-            pl.ylabel('Magnitude')
-          pl.xlabel(funcVal + ' Log Degree')
-        else:
-          pl.xlabel(funcVal + ' Log Degree by '+ charVal)
+
+        pl.xlabel(funcVal + ' Log Degree by '+ charVal)
 
   #### Eigenvalues ####
 
@@ -614,56 +601,6 @@ def plotstdmean(invDir, pngName, char, numBins =100, function = 'mean'):
     pl.plot(x, interp,color = plot_color ,linewidth=1)
 
   ##### Eigenvalues ####
-  #
-  #allmat = np.zeros(shape=(len(charDict),68)); allcnt = 0
-  #zeromat = np.zeros(shape=(len(zero_type),68)) ; zerocnt = 0
-  #onemat = np.zeros(shape=(len(one_type),68)); onecnt = 0
-  #if char == 'class':
-  #  twomat = np.zeros(shape=(len(two_type),68)); twocnt = 0
-  #
-  #for arrfn in glob(os.path.join(invDir, EigDir,"*.npy")):
-  #  try:
-  #    eigv = np.load(arrfn)
-  #  except:
-  #    print "Eigenvalue array"
-  #
-  #  n = len(eigv)
-  #  arr = (np.sort(eigv)[::-1])
-  #
-  #  allmat[allcnt] = arr
-  #  allcnt += 1
-  #
-  #  # Populate each matrix by characterization
-  #  if charDict[root(arrfn)] == '0':
-  #    zeromat[zerocnt]  = arr
-  #    zerocnt += 1
-  #
-  #  elif charDict[root(arrfn)] == '1':
-  #    onemat[onecnt] = arr
-  #    onecnt += 1
-  #
-  #  if char == 'class':
-  #    if charDict[root(arrfn)] == '2':
-  #      twomat[twocnt] = arr
-  #      twocnt += 1
-  #
-  #if function == 'mean':
-  #  allmatFunc_nnz = allmat.mean(axis=0)[allmat.mean(axis=0).nonzero()]
-  #  zeromatFunc_nnz = zeromat.mean(axis=0)[zeromat.mean(axis=0).nonzero()]
-  #  onematFunc_nnz = onemat.mean(axis=0)[onemat.mean(axis=0).nonzero()]
-  #elif function == 'stddev':
-  #  allmatFunc_nnz = allmat.std(axis=0)[allmat.std(axis=0).nonzero()]
-  #  zeromatFunc_nnz = zeromat.std(axis=0)[zeromat.std(axis=0).nonzero()]
-  #  onematFunc_nnz = onemat.std(axis=0)[onemat.std(axis=0).nonzero()]
-  #
-  #processingArrs = [allmatFunc_nnz, zeromatFunc_nnz, onematFunc_nnz]
-  #
-  #if char == 'class':
-  #  if function == 'mean':
-  #    twomatFunc_nnz = twomat.mean(axis=0)[twomat.mean(axis=0).nonzero()]
-  #  if function == 'stddev':
-  #    twomatFunc_nnz = twomat.std(axis=0)[twomat.std(axis=0).nonzero()]
-  #  processingArrs.append(twomatFunc_nnz)
 
   matricesArray = assembleAggMatrices(glob(os.path.join(invDir, EigDir,'*.npy')), char, 70, eig = True)
   processingArrs = perfOpOnMatrices(matricesArray, function, False)
