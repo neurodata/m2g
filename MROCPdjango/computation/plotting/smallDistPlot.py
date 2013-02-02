@@ -201,7 +201,8 @@ def newPlotStdMean(invDir, pngName, char, numBins =100, function = 'mean', numLC
   if not numLCCVerticesfn:
     matDimZero = 70
   else:
-    matDimZero = getMaxVertices()
+    matDimZero = getMaxVertices(numLCCVerticesfn)
+    print "Max dimension --> ", matDimZero
 
   if not os.path.exists(invDir):
     print "%s does not exist" % invDir
@@ -341,6 +342,7 @@ def newPlotStdMean(invDir, pngName, char, numBins =100, function = 'mean', numLC
   pl.xlabel('Eigenvalue rank')
 
   ######## Global Edge number #######
+  '''
   charDict, zero_type, one_type, two_type = csvtodict(char = char)
   ax = pl.subplot(nrows,ncols,6)
 
@@ -395,7 +397,7 @@ def newPlotStdMean(invDir, pngName, char, numBins =100, function = 'mean', numLC
 
     plot_color = getPlotColor(proccCnt, allmat = False)
     pl.plot(x, interp,color = plot_color ,linewidth=1)
-
+  '''
   pl.savefig(pngName+'.pdf')
   print '~**** Done  ****~'
 
@@ -927,7 +929,8 @@ def assembleAggMatrices(drctyArray, char, matRowLen, eig = False):
     except:
       print "[ERROR]: Line %s: Invariant file not found %s"  % (lineno(),arrfn)
 
-    if len(arr) > matRowLen:
+    if len(arr) > matRowLen: 
+      import pdb; pdb.set_trace()
       print "SERIOUS ERROR! THIS SHOULD NEVER HAPPEN!"
 
     if len(arr) < matRowLen:
@@ -1063,9 +1066,9 @@ def main():
   if result.big:
     newPlotStdMean(result.invDir, result.pngName, result.char, result.numBins, function = 'mean', numLCCVerticesfn = result.big) # '/mnt/braingraph1data/projects/MR/MRN/invariants/big/Globals/numLCCVerticesDict.npy'
   #plotstdmean(result.invDir, result.pngName, result.char, result.numBins, function = 'mean') # !!!! NOTE HARDCODE!!!! #
-
-  newPlotStdMean(result.invDir, result.pngName, result.char, result.numBins, function = 'mean')
-  #newPlotErrStdMean(result.invDir, result.pngName, result.char, result.numBins, function = 'mean')
+  else:
+    newPlotStdMean(result.invDir, result.pngName, result.char, result.numBins, function = 'mean')
+    #newPlotErrStdMean(result.invDir, result.pngName, result.char, result.numBins, function = 'mean')
 
 if __name__ == '__main__':
   main()
