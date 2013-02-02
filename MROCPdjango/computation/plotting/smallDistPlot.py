@@ -456,8 +456,6 @@ def newPlotErrStdMean(invDir, pngName, char, numBins =100, function = 'mean'):
       ltz = interp < 0
       stdinterp[ltz] = 0
 
-      import pdb; pdb.set_trace()
-
       fig = pl.figure(2)
       fig.subplots_adjust(hspace=.6)
 
@@ -468,15 +466,22 @@ def newPlotErrStdMean(invDir, pngName, char, numBins =100, function = 'mean'):
       #  plot_color = 'red'
       if proccCnt == 0: # zero
         plot_color = 'grey'
+        label = 'male'
       if proccCnt == 1: # one
         plot_color = 'blue'
+        label = 'female'
       if proccCnt == 2: # two
         plot_color = 'green'
       # How to plot index
-      if function == 'mean':
+
+
+      if idx == 1:
+        if proccCnt == 0:
+          pl.plot(x, interp*100, color = plot_color, linewidth=1, label=label)
+          legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
+      else:
         pl.plot(x, interp*100, color = plot_color, linewidth=1)
-      elif function == 'stddev':
-        pl.plot(x, interp, color = plot_color, linewidth=1)
+      ax.errorbar(x, interp*100, yerr = stdx, color='g')
 
       if idx == 0:
         if function == 'mean':
@@ -499,6 +504,7 @@ def newPlotErrStdMean(invDir, pngName, char, numBins =100, function = 'mean'):
           ax.set_yticks(scipy.arange(0,0.15,0.03))
 
         pl.xlabel(funcVal + ' Log Local Clustering Coefficient')
+        #plt.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
 
       if idx == 2:
         if function == 'mean':
