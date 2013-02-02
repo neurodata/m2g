@@ -306,8 +306,9 @@ def newPlotStdMean(invDir, pngName, char, numBins =100, function = 'mean'):
           pl.xlabel(funcVal + ' Log Degree')
         else:
           pl.xlabel(funcVal + ' Log Degree by '+ charVal)
-
-  ''' Eigenvalues '''
+  '''
+  #### Eigenvalues ####
+  charDict, zero_type, one_type, two_type = csvtodict(char = char)
   ax = pl.subplot(nrows,ncols,5)
 
   arrfn = os.path.join(invDir, 'Globals/numEdgesDict.npy')
@@ -365,11 +366,11 @@ def newPlotStdMean(invDir, pngName, char, numBins =100, function = 'mean'):
       plot_color = 'green'
 
     pl.plot(x, interp,color = plot_color ,linewidth=1)
-
+  '''
   #### Eigenvalues ####
 
   matricesArray = assembleAggMatrices(glob(os.path.join(invDir, EigDir,'*.npy')), char, 70)
-  processingArrs = perfOpOnMatrices(matricesArray, function, True)
+  processingArrs = perfOpOnMatrices(matricesArray, function, False)
 
   #charDict, zero_type, one_type, two_type = csvtodict(char = char)
   #
@@ -656,7 +657,7 @@ def plotstdmean(invDir, pngName, char, numBins =100, function = 'mean'):
 
   #*********** Start comment here for plot _1 *******#
   ######## Global Edge number #######
-
+  charDict, zero_type, one_type, two_type = csvtodict(char = char)
   arrfn = os.path.join(invDir, 'Globals/numEdgesDict.npy')
   try:
     ass_ray = np.load(arrfn).item() # associative array
@@ -775,7 +776,7 @@ def plotstdmean(invDir, pngName, char, numBins =100, function = 'mean'):
   #  processingArrs.append(twomatFunc_nnz)
 
   matricesArray = assembleAggMatrices(glob(os.path.join(invDir, EigDir,'*.npy')), char, 70)
-  processingArrs = perfOpOnMatrices(matricesArray, function, True)
+  processingArrs = perfOpOnMatrices(matricesArray, function, False)
 
   for proccCnt, arr in enumerate (processingArrs):
     if proccCnt == 0: # All
