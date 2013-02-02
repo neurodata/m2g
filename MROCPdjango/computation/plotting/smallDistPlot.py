@@ -306,123 +306,12 @@ def newPlotStdMean(invDir, pngName, char, numBins =100, function = 'mean'):
           pl.xlabel(funcVal + ' Log Degree')
         else:
           pl.xlabel(funcVal + ' Log Degree by '+ charVal)
-  '''
+
   #### Eigenvalues ####
-  charDict, zero_type, one_type, two_type = csvtodict(char = char)
+
   ax = pl.subplot(nrows,ncols,5)
-
-  arrfn = os.path.join(invDir, 'Globals/numEdgesDict.npy')
-  try:
-    ass_ray = np.load(arrfn).item() # associative array
-    print "Processing %s..." % arrfn
-  except:
-    print "[ERROR]: Line %s: Invariant file not found %s"  % (lineno(),arrfn)
-
-  zeros = []
-  ones = []
-  twos = []
-
-  for key in ass_ray.keys():
-    if charDict[key] == '0':
-      zeros.append(ass_ray[key])
-    if charDict[key] == '1':
-      ones.append(ass_ray[key])
-    if charDict[key] == '2':
-      twos.append(ass_ray[key])
-
-  processingArrs = [zeros, ones]
-  if char == 'class':
-    processingArrs.append(twos)
-
-  for cnt, arr in enumerate (processingArrs):
-    pl.figure(1)
-    n, bins, patches = pl.hist(arr, bins=10 , range=None, normed=False, weights=None, cumulative=False, \
-             bottom=None, histtype='stepfilled', align='mid', orientation='vertical', \
-             rwidth=None, log=False, color=None, label=None, hold=None)
-
-    n = np.append(n,0)
-
-    fig = pl.figure(2)
-    fig.subplots_adjust(hspace=.5)
-
-    ax = pl.subplot(nrows,ncols,1) if cnt == 0 else pl.subplot(nrows,ncols,2)
-
-    pl.xlabel('Log Global Edge Number by '+ charVal)
-    ax.set_yticks(scipy.arange(0,15,3))
-    ax.set_xticks(scipy.arange(800,1250,200))
-
-    f = interpolate.interp1d(bins, n, kind='cubic')
-    x = np.arange(bins[0],bins[-1],0.01) # vary linspc
-
-    interp = f(x)
-    ltz = interp < 0
-    interp[ltz] = 0
-
-    if cnt == 0: # zeros
-      plot_color = 'grey'
-    if cnt == 1: # ones
-      plot_color = 'blue'
-    if cnt == 2:# twos
-      plot_color = 'green'
-
-    pl.plot(x, interp,color = plot_color ,linewidth=1)
-  '''
-  #### Eigenvalues ####
-
-  matricesArray = assembleAggMatrices(glob(os.path.join(invDir, EigDir,'*.npy')), char, 70)
+  matricesArray = assembleAggMatrices(glob(os.path.join(invDir, EigDir,'*.npy')), char, 68)
   processingArrs = perfOpOnMatrices(matricesArray, function, False)
-
-  #charDict, zero_type, one_type, two_type = csvtodict(char = char)
-  #
-  #allmat = np.zeros(shape=(len(charDict),68)); allcnt = 0
-  #zeromat = np.zeros(shape=(len(zero_type),68)) ; zerocnt = 0
-  #onemat = np.zeros(shape=(len(one_type),68)); onecnt = 0
-  #if char == 'class':
-  #  twomat = np.zeros(shape=(len(two_type),68)); twocnt = 0
-  #
-  #for arrfn in glob(os.path.join(invDir, EigDir,"*.npy")):
-  #  try:
-  #    eigv = np.load(arrfn)
-  #  except:
-  #    print "Eigenvalue array"
-  #
-  #  n = len(eigv)
-  #  arr = (np.sort(eigv)[::-1])
-  #
-  #  allmat[allcnt] = arr
-  #  allcnt += 1
-  #
-  #  # Populate each matrix by characterization
-  #  if charDict[root(arrfn)] == '0':
-  #    zeromat[zerocnt]  = arr
-  #    zerocnt += 1
-  #
-  #  elif charDict[root(arrfn)] == '1':
-  #    onemat[onecnt] = arr
-  #    onecnt += 1
-  #
-  #  if char == 'class':
-  #    if charDict[root(arrfn)] == '2':
-  #      twomat[twocnt] = arr
-  #      twocnt += 1
-  #
-  #if function == 'mean':
-  #  allmatFunc_nnz = allmat.mean(axis=0)[allmat.mean(axis=0).nonzero()]
-  #  zeromatFunc_nnz = zeromat.mean(axis=0)[zeromat.mean(axis=0).nonzero()]
-  #  onematFunc_nnz = onemat.mean(axis=0)[onemat.mean(axis=0).nonzero()]
-  #elif function == 'stddev':
-  #  allmatFunc_nnz = allmat.std(axis=0)[allmat.std(axis=0).nonzero()]
-  #  zeromatFunc_nnz = zeromat.std(axis=0)[zeromat.std(axis=0).nonzero()]
-  #  onematFunc_nnz = onemat.std(axis=0)[onemat.std(axis=0).nonzero()]
-  #
-  #processingArrs = [allmatFunc_nnz, zeromatFunc_nnz, onematFunc_nnz]
-  #
-  #if char == 'class':
-  #  if function == 'mean':
-  #    twomatFunc_nnz = twomat.mean(axis=0)[twomat.mean(axis=0).nonzero()]
-  #  if function == 'stddev':
-  #    twomatFunc_nnz = twomat.std(axis=0)[twomat.std(axis=0).nonzero()]
-  #  processingArrs.append(twomatFunc_nnz)
 
   for proccCnt, arr in enumerate (processingArrs):
     plot_color = getPlotColor(proccCnt, allmat = False)
@@ -992,9 +881,9 @@ def main():
   #func(result.invDir)
   if result.big:
     pass # TODO
-  plotstdmean(result.invDir, result.pngName, result.char, result.numBins, function = 'mean') # !!!! NOTE HARDCODE!!!! #
+  #plotstdmean(result.invDir, result.pngName, result.char, result.numBins, function = 'mean') # !!!! NOTE HARDCODE!!!! #
 
-  #newPlotStdMean(result.invDir, result.pngName, result.char, result.numBins, function = 'mean')
+  newPlotStdMean(result.invDir, result.pngName, result.char, result.numBins, function = 'mean')
 
 if __name__ == '__main__':
   main()
