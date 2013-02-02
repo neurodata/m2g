@@ -335,6 +335,7 @@ def newPlotStdMean(invDir, pngName, char, numBins =100, function = 'mean'):
   pl.xlabel( funcVal +' Eigenvalue rank by ' + charVal)
 
   ######## Global Edge number #######
+  charDict, zero_type, one_type, two_type = csvtodict(char = char)
   ax = pl.subplot(nrows,ncols,6)
 
   arrfn = os.path.join(invDir, 'Globals/numEdgesDict.npy')
