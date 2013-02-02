@@ -179,7 +179,7 @@ def plotInvDist(invDir, pngName, numBins =100, char = 'class'):
 ##########################################################################
 ###########################################################################
 
-def newPlotStdMean(invDir, pngName, char, numBins =100, function = 'mean'):
+def newPlotStdMean(invDir, pngName, char, numBins =100, function = 'mean', numLCCVerticesfn = None):
 
   MADdir = "MAD"
   ccDir = "ClustCoeff"
@@ -198,6 +198,11 @@ def newPlotStdMean(invDir, pngName, char, numBins =100, function = 'mean'):
   nrows = 3
   ncols=2
 
+  if not numLCCVerticesfn:
+    matDimZero = 70
+  else:
+    matDimZero = getMaxVertices()
+
   if not os.path.exists(invDir):
     print "%s does not exist" % invDir
     sys.exit(1)
@@ -208,7 +213,7 @@ def newPlotStdMean(invDir, pngName, char, numBins =100, function = 'mean'):
 
   for idx, drcty in enumerate (invDirs):
 
-    matricesArray = assembleAggMatrices(glob(os.path.join(invDir, drcty,'*.npy')), char, 70)
+    matricesArray = assembleAggMatrices(glob(os.path.join(invDir, drcty,'*.npy')), char, matDimZero)
     processingArrs = perfOpOnMatrices(matricesArray, function, True)
 
 
@@ -245,7 +250,11 @@ def newPlotStdMean(invDir, pngName, char, numBins =100, function = 'mean'):
 
       if idx == 0:
         if function == 'mean':
-          ax.set_yticks(scipy.arange(0,7,2))
+          if numLCCVerticesfn:
+            plt.axis([0, 35, 0, 0.04])
+            ax.set_yticks(scipy.arange(0,0.04,0.01))
+          else:
+            ax.set_yticks(scipy.arange(0,7,2))
         elif function == 'stddev':
           ax.set_yticks(scipy.arange(0,0.07,0.02))
         if proccCnt == 0:
@@ -259,7 +268,10 @@ def newPlotStdMean(invDir, pngName, char, numBins =100, function = 'mean'):
 
       if idx == 1:
         if function == 'mean':
-          ax.set_yticks(scipy.arange(0,10,2))
+          if numLCCVerticesfn:
+            ax.set_yticks(scipy.arange(0,0.03,0.01))
+          else:
+            ax.set_yticks(scipy.arange(0,10,2))
         elif function == 'stddev':
           ax.set_yticks(scipy.arange(0,0.15,0.03))
 
@@ -267,7 +279,10 @@ def newPlotStdMean(invDir, pngName, char, numBins =100, function = 'mean'):
 
       if idx == 2:
         if function == 'mean':
-          ax.set_yticks(scipy.arange(0,8,2))
+          if numLCCVerticesfn:
+            ax.set_yticks(scipy.arange(0,0.03,0.01))
+          else:
+            ax.set_yticks(scipy.arange(0,8,2))
         elif function == 'stddev':
           ax.set_yticks(scipy.arange(0,0.08,0.02))
         if proccCnt == 0:
@@ -280,7 +295,10 @@ def newPlotStdMean(invDir, pngName, char, numBins =100, function = 'mean'):
 
       if idx == 3:
         if function == 'mean':
-          ax.set_yticks(scipy.arange(0,6,2))
+          if numLCCVerticesfn:
+            ax.set_yticks(scipy.arange(0,0.04,0.01))
+          else:
+            ax.set_yticks(scipy.arange(0,6,2))
         if function == 'stddev':
           ax.set_yticks(scipy.arange(0,0.08,0.02))
           ax.set_xticks(scipy.arange(-2.5,2.0,1.0))
@@ -289,8 +307,13 @@ def newPlotStdMean(invDir, pngName, char, numBins =100, function = 'mean'):
 
   #### Eigenvalues ####
 
+  if not numLCCVerticesfn:
+    numEigs = 68
+  else:
+    numEigs = 100
+
   ax = pl.subplot(nrows,ncols,5)
-  matricesArray = assembleAggMatrices(glob(os.path.join(invDir, EigDir,'*.npy')), char, 68, eig = True)
+  matricesArray = assembleAggMatrices(glob(os.path.join(invDir, EigDir,'*.npy')), char, numEigs, eig = True)
   processingArrs = perfOpOnMatrices(matricesArray, function, False)
 
   for proccCnt, arr in enumerate (processingArrs):
@@ -300,7 +323,10 @@ def newPlotStdMean(invDir, pngName, char, numBins =100, function = 'mean'):
     fig.subplots_adjust(hspace=.6)
 
     if function == 'mean':
-      ax.set_yticks(scipy.arange(-0.2,0.2,0.1))
+      if numLCCVerticesfn:
+        pass
+      else:
+        ax.set_yticks(scipy.arange(-0.2,0.2,0.1))
       pl.plot(range(1,len(arr)+1), arr/10000, color=plot_color)
     elif function == 'stddev':
       ax.set_yticks(scipy.arange(0,35,10))
@@ -308,9 +334,9 @@ def newPlotStdMean(invDir, pngName, char, numBins =100, function = 'mean'):
 
   pl.xlabel('Eigenvalue rank')
   if function == 'mean':
-    pl.ylabel('Magnitude x ($10^4$) ')
+    pl.ylabel('Magnitude x $10^4$ ')
   elif function == 'stddev':
-    pl.ylabel('Magnitude x ($ 10$) ')
+    pl.ylabel('Magnitude x $ 10$ ')
 
   pl.xlabel('Eigenvalue rank')
 
@@ -354,8 +380,11 @@ def newPlotStdMean(invDir, pngName, char, numBins =100, function = 'mean'):
     pl.ylabel('Frequency')
 
     pl.xlabel('Log Global Edge Number')
-    ax.set_yticks(scipy.arange(0,15,3))
-    ax.set_xticks(scipy.arange(800,1250,200))
+    if numLCCVerticesfn:
+      pass
+    else:
+      ax.set_yticks(scipy.arange(0,15,3))
+      ax.set_xticks(scipy.arange(800,1250,200))
 
     f = interpolate.interp1d(bins, n, kind='cubic')
     x = np.arange(bins[0],bins[-1],0.01) # vary linspc
@@ -523,9 +552,9 @@ def newPlotErrStdMean(invDir, pngName, char, numBins =100, function = 'mean'):
 
   pl.xlabel(funcVal +' Eigenvalue rank')
   if function == 'mean':
-    pl.ylabel('Magnitude x ($10^4$) ')
+    pl.ylabel('Magnitude x $10^4$ ')
   elif function == 'stddev':
-    pl.ylabel('Magnitude x ($10$) ')
+    pl.ylabel('Magnitude x $10$ ')
 
   pl.xlabel( funcVal +' Eigenvalue rank')
 
@@ -1032,7 +1061,7 @@ def main():
   #plotstdmean(result.invDir, result.pngName, "gender", result.numBins)
   #func(result.invDir)
   if result.big:
-    pass # TODO
+    newPlotStdMean(result.invDir, result.pngName, result.char, result.numBins, function = 'mean', numLCCVerticesfn = result.big) # '/mnt/braingraph1data/projects/MR/MRN/invariants/big/Globals/numLCCVerticesDict.npy'
   #plotstdmean(result.invDir, result.pngName, result.char, result.numBins, function = 'mean') # !!!! NOTE HARDCODE!!!! #
 
   newPlotStdMean(result.invDir, result.pngName, result.char, result.numBins, function = 'mean')
