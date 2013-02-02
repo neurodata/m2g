@@ -310,7 +310,7 @@ def newPlotStdMean(invDir, pngName, char, numBins =100, function = 'mean'):
   #### Eigenvalues ####
 
   ax = pl.subplot(nrows,ncols,5)
-  matricesArray = assembleAggMatrices(glob(os.path.join(invDir, EigDir,'*.npy')), char, 68)
+  matricesArray = assembleAggMatrices(glob(os.path.join(invDir, EigDir,'*.npy')), char, 68, eig = True)
   processingArrs = perfOpOnMatrices(matricesArray, function, False)
 
   for proccCnt, arr in enumerate (processingArrs):
@@ -665,7 +665,7 @@ def plotstdmean(invDir, pngName, char, numBins =100, function = 'mean'):
   #    twomatFunc_nnz = twomat.std(axis=0)[twomat.std(axis=0).nonzero()]
   #  processingArrs.append(twomatFunc_nnz)
 
-  matricesArray = assembleAggMatrices(glob(os.path.join(invDir, EigDir,'*.npy')), char, 70)
+  matricesArray = assembleAggMatrices(glob(os.path.join(invDir, EigDir,'*.npy')), char, 70, eig = True)
   processingArrs = perfOpOnMatrices(matricesArray, function, False)
 
   for proccCnt, arr in enumerate (processingArrs):
@@ -734,7 +734,7 @@ def getMaxVertices(globalVertFn):
 #########################################
 #########################################
 
-def assembleAggMatrices(drctyArray, char, matRowLen):
+def assembleAggMatrices(drctyArray, char, matRowLen, eig = False):
   charDict, zero_type, one_type, two_type = csvtodict(char = char)
 
   allmat = np.zeros(shape=(len(charDict),matRowLen)); allcnt = 0
@@ -757,6 +757,10 @@ def assembleAggMatrices(drctyArray, char, matRowLen):
     if len(arr) < matRowLen:
       #Pad array with zeros
       arr = np.append(arr, np.zeros(matRowLen - len(arr)))
+
+  if eig:
+    n = len(arr)
+    arr = (np.sort(arr)[::-1])
 
     allmat[allcnt] = arr
     allcnt += 1
