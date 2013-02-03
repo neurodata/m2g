@@ -208,14 +208,12 @@ def main():
   parser.add_argument('numBins', type = int, action='store', help='Number of bins')
   parser.add_argument('char', action='store', help='Characteristic on which to partition data: gender or class')
 
-  parser.add_argument('-b', '--big', action='store', help='if working on big graphs pass in numLCCVertices.npy full with this param')
+  parser.add_argument('-b', '--big', action="store_true", help='if working on big graphs pass in numLCCVertices.npy full with this param')
 
   result = parser.parse_args()
 
   if result.big:
-    plotInvDist(result.invDir, result.pngName, result.numBins, result.char, True)
-  else:
-    plotInvDist(result.invDir, result.pngName, result.numBins, result.char)
+    plotInvDist(result.invDir, result.pngName, result.numBins, result.char, result.dada)
 
 if __name__ == '__main__':
   main()
