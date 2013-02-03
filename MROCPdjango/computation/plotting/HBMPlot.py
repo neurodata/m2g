@@ -81,6 +81,7 @@ def plotInvDist(invDir, pngName, numBins =100):
   fig_gl, axes = pl.subplots(nrows=3, ncols=2)
 
   for idx, drcty in enumerate (invDirs):
+    xval = 0;
     for arrfn in glob(os.path.join(invDir, drcty,'*.npy')):
       try:
         arr = np.load(arrfn)
@@ -121,6 +122,9 @@ def plotInvDist(invDir, pngName, numBins =100):
       plot_color = pickprintcolor(subj_types, arrfn)
 
       pl.plot(x, interp, color = plot_color, linewidth=1)
+      if xval == x:
+        print '***Same!***'
+      xval = x;
 
     if idx == 0:
       pl.ylabel('Probability')
