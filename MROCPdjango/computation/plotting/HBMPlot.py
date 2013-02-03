@@ -81,7 +81,7 @@ def plotInvDist(invDir, pngName, numBins =100):
   fig_gl, axes = pl.subplots(nrows=3, ncols=2)
 
   for idx, drcty in enumerate (invDirs):
-    xval = 0;
+
     for arrfn in glob(os.path.join(invDir, drcty,'*.npy')):
       try:
         arr = np.load(arrfn)
@@ -102,13 +102,13 @@ def plotInvDist(invDir, pngName, numBins =100):
 
       ax = pl.subplot(3,2,idx+1)
 
-      if idx == 0:
-        plt.axis([0, 35, 0, 0.04])
-        ax.set_yticks(scipy.arange(0,0.04,0.01))
-      if idx == 1 or idx == 2:
-        ax.set_yticks(scipy.arange(0,0.03,0.01))
-      if idx == 3:
-        ax.set_yticks(scipy.arange(0,0.04,0.01))
+      #if idx == 0:
+      #  plt.axis([0, 35, 0, 0.04])
+      #  ax.set_yticks(scipy.arange(0,0.04,0.01))
+      #if idx == 1 or idx == 2:
+      #  ax.set_yticks(scipy.arange(0,0.03,0.01))
+      #if idx == 3:
+      #  ax.set_yticks(scipy.arange(0,0.04,0.01))
 
       # Interpolation
       f = interpolate.interp1d(bins, n, kind='cubic')
@@ -121,10 +121,8 @@ def plotInvDist(invDir, pngName, numBins =100):
 
       plot_color = pickprintcolor(subj_types, arrfn)
 
-      pl.plot(x, interp, color = plot_color, linewidth=1)
-      if xval == x:
-        print '***Same!***'
-      xval = x;
+      #pl.plot(x, interp, color = plot_color, linewidth=1)
+      pl.plot(interp, color = plot_color, linewidth=1)
 
     if idx == 0:
       pl.ylabel('Probability')
