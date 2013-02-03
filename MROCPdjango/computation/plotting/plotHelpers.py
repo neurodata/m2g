@@ -8,6 +8,7 @@ import os
 from glob import glob
 import inspect
 import csv
+from scipy import interpolate
 
 #########################################
 #########################################
@@ -15,20 +16,6 @@ import csv
 
 def root(arrfn):
   return (arrfn.split('/')[-1]).split('_')[0]
-
-##########################################
-##########################################
-
-#def func(d):
-#  charDict, zero_type, one_type = csvtodict(char = 'gender')
-#
-#  arrDir  = []
-#  for fn in glob(os.path.join(d,"*")):
-#    arrDir.append(root(fn))
-#
-#  for i in charDict.keys():
-#    if i not in arrDir:
-#      print i
 
 #########################################
 #########################################
