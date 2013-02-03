@@ -218,6 +218,7 @@ def newPlotStdMean(invDir, pngName, char, numBins =100, function = 'mean', numLC
     processingArrs = perfOpOnMatrices(matricesArray, function, True)
 
 
+
     for proccCnt, arr in enumerate (processingArrs):
       pl.figure(1)
       n, bins, patches = pl.hist(arr, bins=numBins , range=None, normed=False, weights=None, cumulative=False, \
@@ -230,7 +231,10 @@ def newPlotStdMean(invDir, pngName, char, numBins =100, function = 'mean', numLC
       # Interpolation
       f = interpolate.interp1d(bins, n, kind='cubic')
 
-      x = np.arange(bins[0],bins[-1],0.07) # vary linspc
+      if numLCCVerticesfn:
+        x = np.arange(bins[0],bins[-1],0.03) # vary linspc
+      else:
+        x = np.arange(bins[0],bins[-1],0.07) # vary linspc
 
       interp = f(x)
       ltz = interp < 0
@@ -252,8 +256,9 @@ def newPlotStdMean(invDir, pngName, char, numBins =100, function = 'mean', numLC
       if idx == 0:
         if function == 'mean':
           if numLCCVerticesfn:
-            plt.axis([0, 35, 0, 0.04])
-            ax.set_yticks(scipy.arange(0,0.04,0.01))
+            pass
+            #plt.axis([0, 35, 0, 0.04])
+            #ax.set_yticks(scipy.arange(0,0.04,0.01))
           else:
             ax.set_yticks(scipy.arange(0,7,2))
         elif function == 'stddev':
@@ -263,14 +268,15 @@ def newPlotStdMean(invDir, pngName, char, numBins =100, function = 'mean', numLC
             pl.ylabel('Percent')
           elif function == 'stddev':
             pl.ylabel('Magnitude')
-          pl.xlabel('Log # of Local Triangles')
+          pl.xlabel('Log Number of Local Triangles')
         else:
-          pl.xlabel('Log # Triangles')
+          pl.xlabel('Log Number of Triangles')
 
       if idx == 1:
         if function == 'mean':
           if numLCCVerticesfn:
-            ax.set_yticks(scipy.arange(0,0.03,0.01))
+            #ax.set_yticks(scipy.arange(0,0.03,0.01))
+            pass
           else:
             ax.set_yticks(scipy.arange(0,10,2))
         elif function == 'stddev':
@@ -281,7 +287,8 @@ def newPlotStdMean(invDir, pngName, char, numBins =100, function = 'mean', numLC
       if idx == 2:
         if function == 'mean':
           if numLCCVerticesfn:
-            ax.set_yticks(scipy.arange(0,0.03,0.01))
+            pass
+            #ax.set_yticks(scipy.arange(0,0.03,0.01))
           else:
             ax.set_yticks(scipy.arange(0,8,2))
         elif function == 'stddev':
@@ -297,7 +304,8 @@ def newPlotStdMean(invDir, pngName, char, numBins =100, function = 'mean', numLC
       if idx == 3:
         if function == 'mean':
           if numLCCVerticesfn:
-            ax.set_yticks(scipy.arange(0,0.04,0.01))
+            pass
+            #ax.set_yticks(scipy.arange(0,0.04,0.01))
           else:
             ax.set_yticks(scipy.arange(0,6,2))
         if function == 'stddev':
@@ -342,7 +350,7 @@ def newPlotStdMean(invDir, pngName, char, numBins =100, function = 'mean', numLC
   pl.xlabel('Eigenvalue rank')
 
   ######## Global Edge number #######
-  '''
+
   charDict, zero_type, one_type, two_type = csvtodict(char = char)
   ax = pl.subplot(nrows,ncols,6)
 
@@ -371,6 +379,9 @@ def newPlotStdMean(invDir, pngName, char, numBins =100, function = 'mean', numLC
 
   for proccCnt, arr in enumerate (processingArrs):
     pl.figure(1)
+
+    arr = np.log(np.array(arr)[np.array(arr).nonzero()]) # NOTE THIS CHANGE
+
     n, bins, patches = pl.hist(arr, bins=10 , range=None, normed=False, weights=None, cumulative=False, \
              bottom=None, histtype='stepfilled', align='mid', orientation='vertical', \
              rwidth=None, log=False, color=None, label=None, hold=None)
@@ -385,8 +396,9 @@ def newPlotStdMean(invDir, pngName, char, numBins =100, function = 'mean', numLC
     if numLCCVerticesfn:
       pass
     else:
-      ax.set_yticks(scipy.arange(0,15,3))
-      ax.set_xticks(scipy.arange(800,1250,200))
+      #ax.set_yticks(scipy.arange(0,15,3))
+      #ax.set_xticks(scipy.arange(800,1250,200))
+      pass
 
     f = interpolate.interp1d(bins, n, kind='cubic')
     x = np.arange(bins[0],bins[-1],0.01) # vary linspc
@@ -397,7 +409,7 @@ def newPlotStdMean(invDir, pngName, char, numBins =100, function = 'mean', numLC
 
     plot_color = getPlotColor(proccCnt, allmat = False)
     pl.plot(x, interp,color = plot_color ,linewidth=1)
-  '''
+
   pl.savefig(pngName+'.pdf')
   print '~**** Done  ****~'
 
@@ -929,7 +941,7 @@ def assembleAggMatrices(drctyArray, char, matRowLen, eig = False):
     except:
       print "[ERROR]: Line %s: Invariant file not found %s"  % (lineno(),arrfn)
 
-    if len(arr) > matRowLen: 
+    if len(arr) > matRowLen:
       import pdb; pdb.set_trace()
       print "SERIOUS ERROR! THIS SHOULD NEVER HAPPEN!"
 
@@ -1073,3 +1085,4 @@ def main():
 if __name__ == '__main__':
   main()
   #csvtodict(sys.argv[1])
+
