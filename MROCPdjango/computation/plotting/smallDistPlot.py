@@ -23,159 +23,6 @@ import csv
 
 # Issues: Done nothing with MAD
 
-
-def plotInvDist(invDir, pngName, numBins =100, char = 'class'):
-  subj_types,zero_type, one_type, two_type = csvtodict(char = char) # load up subject types
-
-  MADdir = "MAD"
-  ccDir = "ClustCoeff"
-  DegDir = "Degree"
-  EigDir = "Eigen/values"
-  SS1dir = "ScanStat1"
-  triDir = "Triangle"
-
-  invDirs = [triDir, ccDir, SS1dir, DegDir ]
-
-  if not os.path.exists(invDir):
-    print "%s does not exist" % invDir
-    sys.exit(1)
-
-  pl.figure(2)
-  fig_gl, axes = pl.subplots(nrows=3, ncols=2)
-  #fig_gl.tight_layout()
-
-  for idx, drcty in enumerate (invDirs):
-    for arrfn in glob(os.path.join(invDir, drcty,'*.npy')):
-      try:
-        arr = np.load(arrfn)
-        #arr = np.log(arr)
-        arr = np.log(arr[arr.nonzero()])
-        print "Processing %s..." % arrfn
-      except:
-        print "[ERROR]: Line %s: Invariant file not found %s"  % (lineno(),arrfn)
-      pl.figure(1)
-      n, bins, patches = pl.hist(arr, bins=numBins , range=None, normed=False, weights=None, cumulative=False, \
-               bottom=None, histtype='stepfilled', align='mid', orientation='vertical', \
-               rwidth=None, log=False, color=None, label=None, hold=None)
-
-      n = np.append(n,0)
-      n = n/float(sum(n))
-
-      fig = pl.figure(2)
-      fig.subplots_adjust(hspace=.5)
-
-      ax = pl.subplot(3,2,idx+1)
-
-      if idx+1 == 3:
-        ax.set_yticks(scipy.arange(0,12,2))
-      if idx+1 == 4:
-        ax.set_yticks(scipy.arange(0,15,3))
-        ax.set_xticks(scipy.arange(0,5,1))
-
-      # Interpolation
-      f = interpolate.interp1d(bins, n, kind='cubic')
-
-      x = np.arange(bins[0],bins[-1],0.03) # vary linspc
-
-      interp = f(x)
-      ltz = interp < 0
-      interp[ltz] = 0
-
-      plot_color = pickprintcolor(subj_types, arrfn)
-
-      pl.plot(x, interp*100, color = plot_color, linewidth=1)
-
-    if idx == 0:
-      pl.ylabel('Percent')
-      pl.xlabel('Log Number of Local Triangles')
-    if idx == 1:
-      #pl.ylabel('Probability') #**
-      pl.xlabel('Log Local Clustering Coefficient')
-    if idx == 2:
-      pl.ylabel('Percent')
-      pl.xlabel('Log Scan Statistic 1')
-    if idx == 3:
-      #pl.ylabel('Probability') #**
-      pl.xlabel('Log Degree')
-
-  ''' Eigenvalues '''
-  ax = pl.subplot(3,2,5)
-  #ax.set_yticks(scipy.arange(0,16,4))
-  for eigValInstance in glob(os.path.join(invDir, EigDir,"*.npy")):
-    try:
-      eigv = np.load(eigValInstance)
-    except:
-      print "Eigenvalue array"
-
-    n = len(eigv)
-    sa = (np.sort(eigv)[::-1])
-
-    plot_color = pickprintcolor(subj_types, eigValInstance)
-
-    pl.plot(range(1,n+1), sa/10000, color=plot_color)
-    pl.ylabel('Magnitude ($X 10^4$) ')
-    pl.xlabel('Eigenvalue rank')
-
-  ''' Global Edges '''
-  arrfn = os.path.join(invDir, 'Globals/numEdgesDict.npy')
-
-  try:
-    ass_ray = np.load(arrfn).item() # associative array
-    print "Processing %s..." % arrfn
-  except:
-    print "[ERROR]: Line %s: Invariant file not found %s"  % (lineno(),arrfn)
-
-  zeros = []
-  ones = []
-  twos = []
-
-  for key in ass_ray.keys():
-    if subj_types[key] == '0':
-      zeros.append(ass_ray[key])
-    if subj_types[key] == '1':
-      ones.append(ass_ray[key])
-    if subj_types[key] == '2':
-      twos.append(ass_ray[key])
-
-  for cnt, arr in enumerate ([zeros, ones]): #, twos, ass_ray.values()
-    pl.figure(1)
-    n, bins, patches = pl.hist(arr, bins=10 , range=None, normed=False, weights=None, cumulative=False, \
-             bottom=None, histtype='stepfilled', align='mid', orientation='vertical', \
-             rwidth=None, log=False, color=None, label=None, hold=None)
-
-    n = np.append(n,0)
-
-    fig = pl.figure(2)
-    ax = pl.subplot(3,2,6)
-    ax.set_xticks(scipy.arange(800,1250,200))
-    ax.set_yticks(scipy.arange(0,16,4))
-
-    f = interpolate.interp1d(bins, n, kind='cubic')
-    x = np.arange(bins[0],bins[-1],0.01) # vary linspc
-
-    interp = f(x)
-    ltz = interp < 0
-    interp[ltz] = 0
-
-    if cnt == 0: # zeros
-      plot_color = 'grey'
-    if cnt == 1: # ones
-      plot_color = 'blue'
-    if cnt == 2:# twos
-      plot_color = 'green'
-    if cnt == 3: # ALL
-      plot_color = 'red'
-
-    pl.plot(x, interp,color = plot_color ,linewidth=1)
-
-  pl.ylabel('Frequency')
-  pl.xlabel('Log Global Edge Number')
-
-  caption = 'Six invariants '
-
-  pl.savefig(pngName+'.pdf')
-  print '~**** FIN ****~'
-
 ##########################################################################
 ###########################################################################
 
@@ -412,11 +259,6 @@ def newPlotStdMean(invDir, pngName, char, numBins =100, function = 'mean', numLC
 
   pl.savefig(pngName+'.pdf')
   print '~**** Done  ****~'
-
-
-############################################################################
-############################################################################
-
 
 ##########################################################################
 ###########################################################################
@@ -1072,17 +914,20 @@ def main():
 
   result = parser.parse_args()
 
-  #plotInvDist(result.invDir, result.pngName, result.numBins, result.char)
+  if result.big:
+    plotInvDist(result.invDir, result.pngName, result.numBins, result.char, True)
+  else:
+    plotInvDist(result.invDir, result.pngName, result.numBins, result.char)
+
   #plotstdmean(result.invDir, result.pngName, "gender", result.numBins)
   #func(result.invDir)
-  if result.big:
-    newPlotStdMean(result.invDir, result.pngName, result.char, result.numBins, function = 'mean', numLCCVerticesfn = result.big) # '/mnt/braingraph1data/projects/MR/MRN/invariants/big/Globals/numLCCVerticesDict.npy'
+  #if result.big:
+  #  newPlotStdMean(result.invDir, result.pngName, result.char, result.numBins, function = 'mean', numLCCVerticesfn = result.big) # '/mnt/braingraph1data/projects/MR/MRN/invariants/big/Globals/numLCCVerticesDict.npy'
   #plotstdmean(result.invDir, result.pngName, result.char, result.numBins, function = 'mean') # !!!! NOTE HARDCODE!!!! #
-  else:
-    newPlotStdMean(result.invDir, result.pngName, result.char, result.numBins, function = 'mean')
-    #newPlotErrStdMean(result.invDir, result.pngName, result.char, result.numBins, function = 'mean')
+  #else:
+  #  newPlotStdMean(result.invDir, result.pngName, result.char, result.numBins, function = 'mean')
+  #  newPlotErrStdMean(result.invDir, result.pngName, result.char, result.numBins, function = 'mean')
 
 if __name__ == '__main__':
   main()
   #csvtodict(sys.argv[1])
-
