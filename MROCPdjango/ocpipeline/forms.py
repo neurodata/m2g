@@ -63,6 +63,10 @@ class BuildGraphForm(forms.Form):
     ('ss2', 'Scan Statistic 2 [Not yet available]',), ('apl', 'Average Path Length [Not yet available]',),\
     ('gdia', 'Graph Diameter [Not yet available]',))
 
+    # Select size of graph
+    Select_graph_size = forms.ChoiceField(choices=[('small','Small graph [~30 min processing time]'), ('big','Big graph [~1.h hr] processing time')]\
+                                          , widget=forms.RadioSelect(), required = True, error_messages={'required': 'You must choose a graph size'})
+
     Select_Invariants_you_want_computed = forms.MultipleChoiceField(required=False,
     widget=CheckboxSelectMultiple, choices=INVARIANT_CHOICES)
 
