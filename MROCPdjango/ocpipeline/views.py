@@ -113,6 +113,8 @@ def buildGraph(request):
 
 	    request.session['invariants'] = form.cleaned_data['Select_Invariants_you_want_computed']
 
+            request.session['graphsize'] = form.cleaned_data['Select_graph_size']
+
             ''' Acquire fileNames '''
 	    fiber_fn = form.cleaned_data['fiber_file'].name # get the name of the file input by user
             roi_raw_fn = form.cleaned_data['roi_raw_file'].name
@@ -160,20 +162,22 @@ def processInputData(request):
 
     baseName = fiber_fn[:-9] #MAY HAVE TO CHANGE
 
-    ''' Fully qualify file names'''
+    ''' Fully qualify file names '''
     fiber_fn = os.path.join(request.session['derivatives'], fiber_fn)
     roi_raw_fn = os.path.join(request.session['derivatives'], roi_raw_fn)
     roi_xml_fn = os.path.join(request.session['derivatives'], roi_xml_fn)
 
     request.session['smGrfn'], request.session['bgGrfn'], request.session['lccfn'],request.session['SVDfn'] \
-	= processData(fiber_fn, roi_xml_fn, roi_raw_fn,request.session['graphs'], request.session['graphInvariants'],True)
+	= processData(fiber_fn, roi_xml_fn, roi_raw_fn,request.session['graphs'], request.session['graphInvariants'], request.session['graphsize'], True)
 
     # Run ivariants here
     if len(request.session['invariants']) > 0:
 	print "Computing invariants"
-	#lccG = loadAdjMat(request.session['bgGrfn], request.session['lccfn'], roiRootName = os.path.splitext(roi_xml_fn)[0])
-	import scipy.io as sio
-	lccG = sio.loadmat(request.session['smGrfn'])['fibergraph']
+        if (request.session['graphsize'] == 'big'):
+          lccG = loadAdjMat(request.session['bgGrfn'], request.session['lccfn'], roiRootName = os.path.splitext(roi_xml_fn)[0])
+        elif (request.session['graphsize'] == 'small'):
+          import scipy.io as sio
+          lccG = sio.loadmat(request.session['smGrfn'])['fibergraph']
 	request.session['invariant_fns'] =  runInvariants(lccG, request.session)
     return HttpResponseRedirect(get_script_prefix()+'confirmdownload')
 
@@ -201,13 +205,15 @@ def confirmDownload(request):
 		    if isinstance(request.session['invariant_fns'][inv], list): # Case of eigs
 			for fn in request.session['invariant_fns'][inv]:
 			    convertTo.convertAndSave(fn, fileFormat, getDirFromFilename(fn), inv)
-		    else:
+		    else: # case of all other invariants
 			convertTo.convertAndSave(request.session['invariant_fns'][inv], fileFormat, \
 					    getDirFromFilename(request.session['invariant_fns'][inv]) , inv)
 
 	    for fileFormat in grConvertToFormats:
-		convertTo.convertGraph(request.session['smGrfn'], fileFormat)
-		#***convertTo.convertGraph(request.session['bgGrfn'], fileFormat)
+                if request.session['graphsize'] == 'big':
+                    convertTo.convertGraph(request.session['bgGrfn'], fileFormat)
+                elif request.session['graphsize'] == 'small':
+                    convertTo.convertGraph(request.session['smGrfn'], fileFormat)
 
 	    if dataReturn == 'vd': # View data directory
 	    	dataUrlTail = request.session['usrDefProjDir']
@@ -251,25 +257,31 @@ def upload(request, webargs=None):
     Programmatic interface for uploading data
     @param request: the request object
 
-    @param webargs: POST data with userDefProjectName, site, subject, session, scanId, addmatNcsv info
+    @param webargs: POST data with userDefProjectName, site, subject, session, scanId, graphsize, [list of invariants to compute] info
     """
     request.session.clear() # NEW
 
     if (webargs and request.method == 'POST'):
+        # Check for malformatted input
+        webargs = webargs[1:] if webargs.startswith('/') else webargs
+        webargs = webargs[:-1] if webargs.endswith('/') else webargs
 
-	[userDefProjectName, site, subject, session, scanId, addmatNcsv] = webargs.split('/') # [:-1] # Add to server version
+        if len(webargs.split('/')) == 7:
+            [userDefProjectName, site, subject, session, scanId, graphsize, request.session['invariants'] ] = webargs.split('/')
+            request.session['invariants'] = request.session['invariants'].split(',')
+        elif len(webargs.split('/')) == 6:
+            [userDefProjectName, site, subject, session, scanId, graphsize] = webargs.split('/')
 
 	userDefProjectDir = os.path.join(settings.MEDIA_ROOT, userDefProjectName, site, subject, session, scanId)
 
 	''' Define data directory paths '''
-	derivatives, rawdata,  graphs, graphInvariants, images = defDataDirs(userDefProjectDir)
+	derivatives, rawdata,  graphs, request.session['graphInvariants'], images = defDataDirs(userDefProjectDir)
 
 	''' Make appropriate dirs if they dont already exist '''
-	createDirStruct.createDirStruct([derivatives, rawdata, graphs, graphInvariants, images])
+	createDirStruct.createDirStruct([derivatives, rawdata, graphs, request.session['graphInvariants'], images])
 	print 'Directory structure created...'
 
 	''' Get data from request.body '''
-
 	tmpfile = tempfile.NamedTemporaryFile()
 	tmpfile.write ( request.body )
 	tmpfile.flush()
@@ -293,32 +305,41 @@ def upload(request, webargs=None):
 	roi_xml_fn, fiber_fn, roi_raw_fn = filesorter.checkFileExtGengraph(uploadFiles) # Check & sort files
 
 	''' Data Processing '''
-	smGrfn, bgGrfn, lccfn, SVDfn \
-	  = processData(fiber_fn, roi_xml_fn, roi_raw_fn,graphs, graphInvariants, True) # Change to false to not process anything
+        if (re.match(re.compile('(b|big)', re.IGNORECASE), graphsize)):
+            request.session['graphsize'] = 'big'
+            smGrfn, bgGrfn, lccfn, SVDfn \
+              = processData(fiber_fn, roi_xml_fn, roi_raw_fn,graphs, request.session['graphInvariants'], request.session['graphsize'],True) # Change to false to not process anything
 
-	''' If optional .mat graph invariants & .csv graphs '''
-	if re.match(re.compile('(y|yes)$',re.I),addmatNcsv):
-	    convertTo.convertLCCNpyToMat(lccfn)
-	    convertTo.convertSVDNpyToMat(SVDfn)
-	    # Incomplete
-	    #convertTo.convertGraphToCSV(smGrfn)
-	    #convertTo.convertGraphToCSV(bgGrfn)
+            # process invariants if requested
+            if request.session['invariants']:
+              lccG = loadAdjMat(bgGrfn, lccfn, roiRootName = os.path.splitext(roi_xml_fn)[0])
+
+        elif(re.match(re.compile('(s|small)', re.IGNORECASE), graphsize)):
+            request.session['graphsize'] = 'small'
+            smGrfn, bgGrfn, lccfn, SVDfn \
+              = processData(fiber_fn, roi_xml_fn, roi_raw_fn,graphs, request.session['graphInvariants'], request.session['graphsize'],True) # Change to false to not process anything
+
+            if request.session['invariants']:
+              lccG = loadAdjMat(smGrfn, lccfn, roiRootName = os.path.splitext(roi_xml_fn)[0])
+
+        if lccG:
+            invariant_fns =  runInvariants(lccG, request.session)
 
 	#ret = rzfile.printdir()
 	#ret = rzfile.testzip()
 	#ret = rzfile.namelist()
 
-	request.session.clear() # NEW
+	request.session.clear()
 
 	dwnldLoc = "http://www.mrbrain.cs.jhu.edu" + settings.MEDIA_ROOT + webargs
 	return HttpResponse ( "Files available for download at " + dwnldLoc) # change to render of a page with a link to data result
 
     elif(not webargs):
-	request.session.clear() # NEW
+	request.session.clear()
 	return django.http.HttpResponseBadRequest ("Expected web arguments to direct project correctly")
 
     else:
-	request.session.clear() # NEW
+	request.session.clear()
 	return django.http.HttpResponseBadRequest ("Expected POST data, but none given")
 
 ################## TO DOs ########################
@@ -521,7 +542,7 @@ def convert(request, webargs=None):
 #	*******************		#
 #	   PROCESS DATA			#
 #########################################
-def processData(fiber_fn, roi_xml_fn, roi_raw_fn,graphs, graphInvariants, run = False):
+def processData(fiber_fn, roi_xml_fn, roi_raw_fn,graphs, graphInvariants, graphsize, run = False):
     '''
     Run graph building and other related scripts
     @param fiber_fn: fiber tract file
@@ -530,6 +551,7 @@ def processData(fiber_fn, roi_xml_fn, roi_raw_fn,graphs, graphInvariants, run = 
 
     @param graphs: Dir where biggraphs & smallgraphs are saved
     @param graphInvariants:  Dir where graph invariants are saved
+    @param graphsize: the size of the graph 'big' or 'small'
     @param run: Whether or not to run processor intensive jobs. Default is - false so nothing is actually run
     '''
     if (run):
@@ -539,22 +561,25 @@ def processData(fiber_fn, roi_xml_fn, roi_raw_fn,graphs, graphInvariants, run = 
 
     baseName = getFiberID(fiber_fn) #VERY TEMPORARY
 
-    '''Run gengraph SMALL & save output'''
-    print("Running Small gengraph....")
     smGrfn = os.path.join(graphs, (baseName +'smgr.mat'))
+    bgGrfn = os.path.join(graphs, (baseName +'bggr.mat'))
 
     if (run):
-	''' spawn subprocess to create small since its result is not necessary for processing '''
-	#arguments = 'python ' + '/home/disa/MR-connectome/mrcap/gengraph.py /home/disa' + fiber_fn + ' /home/disa' + smallGraphOutputFileName +' /home/disa' + roi_xml_fn + ' /home/disa' + roi_raw_fn
-	#arguments = 'python ' + '/Users/dmhembere44/MR-connectome/mrcap/gengraph.py /Users/dmhembere44' + fiber_fn + ' /Users/dmhembere44' + smallGraphOutputFileName + ' roixmlname=/Users/dmhembere44' + roi_xml_fn + ' roirawname=/Users/dmhembere44' + roi_raw_fn
-	#subprocess.Popen(arguments,shell=True)
+        ''' spawn subprocess to create small since its result is not necessary for processing '''
+        #arguments = 'python ' + '/home/disa/MR-connectome/mrcap/gengraph.py /home/disa' + fiber_fn + ' /home/disa' + smallGraphOutputFileName +' /home/disa' + roi_xml_fn + ' /home/disa' + roi_raw_fn
+        #arguments = 'python ' + '/Users/dmhembere44/MR-connectome/mrcap/gengraph.py /Users/dmhembere44' + fiber_fn + ' /Users/dmhembere44' + smallGraphOutputFileName + ' roixmlname=/Users/dmhembere44' + roi_xml_fn + ' roirawname=/Users/dmhembere44' + roi_raw_fn
+        #subprocess.Popen(arguments,shell=True)
+        if (graphsize == 'small'):
+            ''' Run gengraph SMALL & save output '''
+            print("Running Small gengraph....")
+            gengraph.genGraph(fiber_fn, smGrfn, roi_xml_fn, roi_raw_fn, bigGraph=False)
 
-	gengraph.genGraph(fiber_fn, smGrfn, roi_xml_fn, roi_raw_fn)
-
-    ''' Run gengrah BIG & save output '''
-    print("\nRunning Big gengraph....")
-    bgGrfn = os.path.join(graphs, (baseName +'bggr.mat'))
-    #**gengraph.genGraph(fiber_fn, bgGrfn, roi_xml_fn ,roi_raw_fn, True)
+        elif(graphsize == 'big'):
+            ''' Run gengrah BIG & save output '''
+            print("\nRunning Big gengraph....")
+            gengraph.genGraph(fiber_fn, bgGrfn, roi_xml_fn, roi_raw_fn, bigGraph=True)
+        else:
+            return None # should cause an explotion
 
     ''' Run LCC '''
     if not os.path.exists(os.path.join(graphInvariants,"LCC")):
@@ -562,10 +587,13 @@ def processData(fiber_fn, roi_xml_fn, roi_raw_fn,graphs, graphInvariants, run = 
 	os.makedirs(os.path.join(graphInvariants,"LCC"))
     lccfn = os.path.join(graphInvariants,"LCC", (baseName + 'concomp.npy'))
 
+
     if (run):
 	'''Should be big but we'll do small for now'''
-	#**lcc.process_single_brain(roi_xml_fn, roi_raw_fn, bgGrfn, lccfn)
-	lcc.process_single_brain(roi_xml_fn, roi_raw_fn, smGrfn, lccfn)
+        if (graphsize == 'big'):
+          lcc.process_single_brain(roi_xml_fn, roi_raw_fn, bgGrfn, lccfn)
+        if (graphsize == 'small'):
+          lcc.process_single_brain(roi_xml_fn, roi_raw_fn, smGrfn, lccfn)
 
     ''' Run Embed - SVD '''
     if not os.path.exists(os.path.join(graphInvariants,"SVD")):
@@ -574,12 +602,13 @@ def processData(fiber_fn, roi_xml_fn, roi_raw_fn,graphs, graphInvariants, run = 
     SVDfn = os.path.join(graphInvariants,"SVD" ,(baseName + 'embed.npy'))
 
     print("Running SVD....")
-
     roiBasename = str(roi_xml_fn[:-4]) # WILL NEED ADAPTATION
 
     if (run):
-	#**svd.embed_graph(lccfn, roiBasename, bgGrfn, SVDfn)
-	svd.embed_graph(lccfn, roiBasename, smGrfn, SVDfn)
+        if (graphsize == 'big'):
+            svd.embed_graph(lccfn, roiBasename, bgGrfn, SVDfn)
+        if (graphsize == 'small'):
+            svd.embed_graph(lccfn, roiBasename, smGrfn, SVDfn)
 
     print "Generating graph, lcc & svd complete!"
     return [ smGrfn, bgGrfn, lccfn, SVDfn ]
@@ -594,6 +623,13 @@ def runInvariants(lccG, req_sess):
     @param lccG: Sparse largest connected component adjacency matrix
     @param req_sess: current session dict containing session varibles
     '''
+
+    if req_sess['graphsize'] == 'small':
+        grfn = req_sess['smGrfn']
+    elif req_sess['graphsize'] == 'big':
+        grfn = req_sess['bgGrfn']
+    else:
+        return None # Should make things explode - TODO better handling
 
     # NOTE: The *_fn variable names are in accordance with settings.VALID_FILE_TYPES
     ss1_fn = None
@@ -619,7 +655,7 @@ def runInvariants(lccG, req_sess):
 	    degDir = os.path.join(req_sess['graphInvariants'],'Degree')
 	    makeDirIfNone([ssDir, degDir])
 
-	    ss1_fn, deg_fn, numNodes = calcScanStat_Degree(G_fn = req_sess['smGrfn'],\
+	    ss1_fn, deg_fn, numNodes = calcScanStat_Degree(G_fn = grfn,\
 		G = lccG,  ssDir = ssDir, degDir = degDir) # Good to go
 
 	if inv == "tri": # Get "Eigs" & "MAD" for free
@@ -631,12 +667,12 @@ def runInvariants(lccG, req_sess):
 		degDir = os.path.join(req_sess['graphInvariants'],'Degree')
 		makeDirIfNone([triDir, MADdir, eigvDir, degDir])
 
-		tri_fn, deg_fn, MAD_fn, eigvl_fn, eigvect_fn =  eignTriLocal_deg_MAD(G_fn = req_sess['smGrfn'],\
+		tri_fn, deg_fn, MAD_fn, eigvl_fn, eigvect_fn =  eignTriLocal_deg_MAD(G_fn = grfn,\
 		    G = lccG, triDir = triDir, MADdir = MADdir, eigvDir = eigvDir, degDir = degDir) # Good to go
 	    else:
 		makeDirIfNone([triDir, MADdir, eigvDir])
 
-		tri_fn, eigvlfn, eigvectfn, mad_fn  = eignTriLocal_MAD(G_fn = req_sess['smGrfn'],\
+		tri_fn, eigvlfn, eigvectfn, mad_fn  = eignTriLocal_MAD(G_fn = grfn,\
 		    G = lccG, triDir = triDir, MADdir = MADdir, eigvDir = eigvDir) # Good to go
 
 	if inv == "cc":  # We need "Deg" & "TriCnt"
@@ -656,19 +692,19 @@ def runInvariants(lccG, req_sess):
 		cc_fn = calcLocalClustCoeff(deg_fn, tri_fn, ccDir = ccDir) # Good to go
 
 	    elif (deg_fn and (not tri_fn)):
-		tri_fn, eigvlfn, eigvectfn, mad_fn = eignTriLocal_MAD(G_fn = req_sess['smGrfn'],\
+		tri_fn, eigvlfn, eigvectfn, mad_fn = eignTriLocal_MAD(G_fn = grfn,\
 		    G = lccG, triDir = triDir, MADdir = MADdir, eigvDir = eigvDir) # Good to go
 		cc_fn = calcLocalClustCoeff(deg_fn, tri_fn, ccDir = ccDir) # Good to go
 
 	    elif (tri_fn and (not deg_fn)):
-		deg_fn = calcDegree(G_fn = req_sess['smGrfn'], \
+		deg_fn = calcDegree(G_fn = grfn, \
 		    G = lccG , degDir = degDir) # Good to go
 		cc_fn = calcLocalClustCoeff(deg_fn, tri_fn, ccDir = ccDir) # Good to go
 
 	    else:
-		tri_fn, eigvlfn, eigvectfn, mad_fn = eignTriLocal_MAD(G_fn = req_sess['smGrfn'],\
+		tri_fn, eigvlfn, eigvectfn, mad_fn = eignTriLocal_MAD(G_fn = grfn,\
 		    G = lccG, triDir = triDir, MADdir = MADdir, eigvDir = eigvDir) # Good to go
-		deg_fn = calcDegree(G_fn = req_sess['smGrfn'], \
+		deg_fn = calcDegree(G_fn = grfn, \
 		    G = lccG , degDir = degDir) # Good to go
 		cc_fn = calcLocalClustCoeff(deg_fn, tri_fn, ccDir = ccDir) # Good to go
 
@@ -680,7 +716,7 @@ def runInvariants(lccG, req_sess):
 		eigvDir = os.path.join(req_sess['graphInvariants'],'Eigen')
 		makeDirIfNone([MADdir, eigvDir])
 
-		mad_fn, eigvlfn, eigvectfn = calcMAD(G_fn = req_sess['smGrfn'], G = lccG , \
+		mad_fn, eigvlfn, eigvectfn = calcMAD(G_fn = grfn, G = lccG , \
 		    MADdir = MADdir, eigvDir = eigvDir) # Good to go
 
 	if inv == "deg": # Nothing for free
@@ -690,7 +726,7 @@ def runInvariants(lccG, req_sess):
 		degDir = os.path.join(req_sess['graphInvariants'],'Degree')
 		makeDirIfNone([degDir])
 
-		deg_fn = calcDegree(G_fn = req_sess['smGrfn'], \
+		deg_fn = calcDegree(G_fn = grfn, \
 		    G = lccG ,  degDir = degDir) # Good to go
 
 	if inv == "eig": # Nothing for free
@@ -700,7 +736,7 @@ def runInvariants(lccG, req_sess):
 		eigvDir = os.path.join(req_sess['graphInvariants'],'Eigen')
 		makeDirIfNone([eigvDir])
 
-		eigvlfn, eigvectfn = calcEigs(G_fn = req_sess['smGrfn'],\
+		eigvlfn, eigvectfn = calcEigs(G_fn = grfn,\
 			G = lccG , eigvDir = eigvDir)
 
 	if inv == "ss2":
@@ -783,8 +819,12 @@ def getFiberID(fiberfn):
     @param fiberfn: the dMRI streamline file in format {filename}_fiber.dat
     '''
     if fiberfn.endswith('/'):
-	fiberfn = fiberfn[:-1] # get rid of trailing slash
-    return fiberfn.split('/')[-1][:-9]
+      fiberfn = fiberfn[:-1] # get rid of trailing slash
+
+    if re.match(re.compile(r'.+_fiber$'), os.path.splitext(fiberfn.split('/')[-1])[0]):
+      return(os.path.splitext(fiberfn.split('/')[-1])[0]).split('_')[0]
+    else:
+      return os.path.splitext(fiberfn.split('/')[-1])[0]
 
 def writeBodyToDisk(data, saveDir):
     '''
