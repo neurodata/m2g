@@ -104,6 +104,14 @@
 	  font-weight: bold;
 	}
 	</style>
+
+	    <script type="text/javascript">
+		// Function to add a spinner during upload & processing
+		function showSpinner(){
+			document.getElementById('loadingImage').style.visibility='visible';
+		}
+	</script>
+
     </head>
 
     <body>
@@ -128,6 +136,11 @@
 	    <input name = "Output"  type="submit" value="Obtain processed data" class="button" onclick="showSpinner();"/>
             <input type="reset" value="Reset" class="button" name="clearForm" />
         </form>
+        <!-- Spinner Image -->
+        <div style="position:absolute; left:153px; top: 212px;"> <img id="loadingImage"
+            src="http://i1061.photobucket.com/albums/t473/dmhembe/MR-connectome/loading_zpsac6e6d22.gif"
+            border="0" alt="loading" style="visibility:hidden;opacity:0.5"/> </div>
+
 	<div class="footer">
 	  Property of the Johns Hopkins University Storage Lab (HSSL) |  Author: Disa Mhembere
 	</div>
