@@ -1,12 +1,12 @@
 *MR OCP To do list Disa
+** Resolve biggraph degree and eigenvalue non-conversion to csv
 0. Update html for programmatic uses
 1. Test non-uniform file names
-2. Check if directory exists before project begins
 
-1. Do more documentation
-1. Get static content to load via apache for production mode
-3. Fix parallel processing of ss
-4. Finish work on convert fibergraph, lcc, svd to csv
+2. Do more documentation
+3. Get static content to load via apache for production mode
+4. Fix parallel processing of ss
+5. Finish work on convert fibergraph, lcc, svd to csv
 
 Invariants still to compute
 *SS2

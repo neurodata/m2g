@@ -70,8 +70,8 @@ from computation.triCount_deg_MAD import eignTriLocal_deg_MAD #****
 
 ''' Little welcome message'''
 def default(request):
-    request.session.clear()
-    return render_to_response('welcome.html')
+  request.session.clear()
+  return render_to_response('welcome.html')
 
 def buildGraph(request):
     request.session.clear()
@@ -88,7 +88,8 @@ def buildGraph(request):
             session = form.cleaned_data['session']
             scanId = form.cleaned_data['scanId']
 
-	    userDefProjectName = os.path.join(settings.MEDIA_ROOT, userDefProjectName) # Fully qualify
+	    userDefProjectName = adaptProjNameIfReq(os.path.join(settings.MEDIA_ROOT, userDefProjectName)) # Fully qualify AND handle identical projects
+
 	    request.session['usrDefProjDir'] = os.path.join(userDefProjectName, site, subject, session, scanId)
 	    request.session['scanId'] = scanId
 
@@ -272,7 +273,7 @@ def upload(request, webargs=None):
         elif len(webargs.split('/')) == 6:
             [userDefProjectName, site, subject, session, scanId, graphsize] = webargs.split('/')
 
-	userDefProjectDir = os.path.join(settings.MEDIA_ROOT, userDefProjectName, site, subject, session, scanId)
+	userDefProjectDir = adaptProjNameIfReq(os.path.join(settings.MEDIA_ROOT, userDefProjectName, site, subject, session, scanId))
 
 	''' Define data directory paths '''
 	derivatives, rawdata,  graphs, request.session['graphInvariants'], images = defDataDirs(userDefProjectDir)
@@ -362,6 +363,8 @@ def graphLoadInv(request, webargs=None):
 	    data = form.files['fileObj'] # get data
 	    request.session['invariants'] = form.cleaned_data['Select_Invariants_you_want_computed']
 
+            request.session['graphsize'] = form.cleaned_data['Select_graph_size']
+
 	    dataDir = os.path.join(settings.MEDIA_ROOT, 'tmp', strftime("projectStamp%a%d%b%Y_%H.%M.%S/", localtime()))
 	    makeDirIfNone([dataDir])
 
@@ -377,17 +380,21 @@ def graphLoadInv(request, webargs=None):
 		request.session['graphInvariants'] = os.path.join(dataDir, 'graphInvariants')
 
 		for G_fn in graphs:
-		    #***request.session['bgGrfn'] = G_fn
-		    #***lccfn = G_fn.split('_')[0] + '_concomp.mat'
-		    #***roiRootName = G_fn.split('_')[0] + '_roi'
-		    #***lccG = loadAdjMat(request.session['bgGrfn'], lccfn, roiRootName = roiRootName)
+                    if request.session['graphsize'] == 'big':
+                        request.session['bgGrfn'] = G_fn
+                        lccfn = G_fn.split('_')[0] + '_concomp.mat'
+                        roiRootName = G_fn.split('_')[0] + '_roi'
+                        lccG = loadAdjMat(request.session['bgGrfn'], lccfn, roiRootName = roiRootName)
 
-		    request.session['smGrfn'] = G_fn
-		    import scipy.io as sio
-		    lccG = sio.loadmat(request.session['smGrfn'])['fibergraph']
+                    elif request.session['graphsize'] == 'small':
+                        request.session['smGrfn'] = G_fn
+                        import scipy.io as sio
+                        lccG = sio.loadmat(request.session['smGrfn'])['fibergraph']
 
-		    runInvariants(lccG, request.session)
-		    print 'No project invariants %s complete...' % G_fn
+                        runInvariants(lccG, request.session)
+                        print 'No project invariants %s complete...' % G_fn
+                    else:
+                        HttpResponse("<h2>The graph size is required to proceed.</h2>")
 	    else:
 		return HttpResponse("<h2>The file you uploaded is not a zip see the instructions on the page before proceeding.</h2>")
 
@@ -561,8 +568,8 @@ def processData(fiber_fn, roi_xml_fn, roi_raw_fn,graphs, graphInvariants, graphs
 
     baseName = getFiberID(fiber_fn) #VERY TEMPORARY
 
-    smGrfn = os.path.join(graphs, (baseName +'smgr.mat'))
-    bgGrfn = os.path.join(graphs, (baseName +'bggr.mat'))
+    smGrfn = os.path.join(graphs, (baseName +'_smgr.mat'))
+    bgGrfn = os.path.join(graphs, (baseName +'_bggr.mat'))
 
     if (run):
         ''' spawn subprocess to create small since its result is not necessary for processing '''
@@ -770,129 +777,163 @@ def runInvariants(lccG, req_sess):
 	    invariant_fns['eig'] = [eigvectfn, eigvlfn] # Note this
     return invariant_fns
 
-
 '''********************* Standalone Methods  *********************'''
+# TABS FIXED BELOW HERE
 def makeDirIfNone(dirPathList):
-    '''
-    Create a dir specified by dirPathList. Failure usual due to permissions issues.
+  '''
+  Create a dir specified by dirPathList. Failure usual due to permissions issues.
 
-    @param dirPathList: A 'list' of the full paths of directory(ies) to be created
-    '''
-    for dirPath in dirPathList:
-	try:
-	    if not (os.path.exists(dirPath)):
-		os.makedirs(dirPath)
-		print "%s directory made successfully" % dirPath
-	    else:
-		print "%s directory already exists" % dirPath
-	except:
-	    print "[ERROR] while attempting to create %s" % dirPath
-	    sys.exit(-1)
+  @param dirPathList: A 'list' of the full paths of directory(ies) to be created
+  '''
+  for dirPath in dirPathList:
+    try:
+      if not (os.path.exists(dirPath)):
+        os.makedirs(dirPath)
+        print "%s directory made successfully" % dirPath
+      else:
+        print "%s directory already exists" % dirPath
+    except:
+      print "[ERROR] while attempting to create %s" % dirPath
+      sys.exit(-1)
 
 def getFiberPath(fiberFileName):
-    '''
-    This returns fiberfn's full path less the 'fiber.dat' portion
+  '''
+  This returns fiberfn's full path less the 'fiber.dat' portion
 
-    @param fiberFileName - is a tract file name with naming convention '[filename]_fiber.dat'
-	where filename may vary but _fiber.dat may not.
-    '''
-    return fiberFileName.partition('_')[0]
+  @param fiberFileName - is a tract file name with naming convention '[filename]_fiber.dat'
+      where filename may vary but _fiber.dat may not.
+  '''
+  return fiberFileName.partition('_')[0]
 
 def defDataDirs(projectDir):
-    '''
-    Define all the paths to the data product directories
+  '''
+  Define all the paths to the data product directories
 
-    @param projectDir: the fully qualified path of the project directory
-    '''
-    derivatives = os.path.join(projectDir, 'derivatives')
-    rawdata = os.path.join(projectDir, 'rawdata')
-    graphs = os.path.join(projectDir, 'graphs')
-    graphInvariants = os.path.join(projectDir, 'graphInvariants')
-    images = os.path.join(projectDir, 'images')
+  @param projectDir: the fully qualified path of the project directory
+  '''
+  derivatives = os.path.join(projectDir, 'derivatives')
+  rawdata = os.path.join(projectDir, 'rawdata')
+  graphs = os.path.join(projectDir, 'graphs')
+  graphInvariants = os.path.join(projectDir, 'graphInvariants')
+  images = os.path.join(projectDir, 'images')
 
-    return [derivatives, rawdata, graphs, graphInvariants, images]
+  return [derivatives, rawdata, graphs, graphInvariants, images]
 
 def getFiberID(fiberfn):
-    '''
-    Assumptions about the data made here as far as file naming conventions
+  '''
+  Assumptions about the data made here as far as file naming conventions
 
-    @param fiberfn: the dMRI streamline file in format {filename}_fiber.dat
-    '''
-    if fiberfn.endswith('/'):
-      fiberfn = fiberfn[:-1] # get rid of trailing slash
+  @param fiberfn: the dMRI streamline file in format {filename}_fiber.dat
+  '''
+  if fiberfn.endswith('/'):
+    fiberfn = fiberfn[:-1] # get rid of trailing slash
 
-    if re.match(re.compile(r'.+_fiber$'), os.path.splitext(fiberfn.split('/')[-1])[0]):
-      return(os.path.splitext(fiberfn.split('/')[-1])[0]).split('_')[0]
-    else:
-      return os.path.splitext(fiberfn.split('/')[-1])[0]
+  if re.match(re.compile(r'.+_fiber$'), os.path.splitext(fiberfn.split('/')[-1])[0]):
+    return(os.path.splitext(fiberfn.split('/')[-1])[0]).split('_')[0]
+  else:
+    return os.path.splitext(fiberfn.split('/')[-1])[0]
 
 def writeBodyToDisk(data, saveDir):
-    '''
-    Write the requests body to disk
+  '''
+  Write the requests body to disk
 
-    @param data: the data to be written to file
-    @param saveDir: the location of where data is to be written
+  @param data: the data to be written to file
+  @param saveDir: the location of where data is to be written
 
-    @return a list with the names of the uplaoded files
-    '''
-    tmpfile = tempfile.NamedTemporaryFile()
-    tmpfile.write ( data )
-    tmpfile.flush()
-    tmpfile.seek(0)
-    rzfile = zipfile.ZipFile ( tmpfile.name, "r" )
+  @return a list with the names of the uplaoded files
+  '''
+  tmpfile = tempfile.NamedTemporaryFile()
+  tmpfile.write ( data )
+  tmpfile.flush()
+  tmpfile.seek(0)
+  rzfile = zipfile.ZipFile ( tmpfile.name, "r" )
 
-    print 'Temporary file created...'
+  print 'Temporary file created...'
 
-    ''' Extract & save zipped files '''
-    uploadFiles = []
-    for name in (rzfile.namelist()):
-	outfile = open(os.path.join(saveDir, name.split('/')[-1]), 'wb') # strip name of source folders if in file name
-	outfile.write(rzfile.read(name))
-	outfile.flush()
-	outfile.close()
-	uploadFiles.append(os.path.join(saveDir, name.split('/')[-1])) # add to list of files
-	print name + " written to disk.."
-    return uploadFiles
+  ''' Extract & save zipped files '''
+  uploadFiles = []
+  for name in (rzfile.namelist()):
+    outfile = open(os.path.join(saveDir, name.split('/')[-1]), 'wb') # strip name of source folders if in file name
+    outfile.write(rzfile.read(name))
+    outfile.flush()
+    outfile.close()
+    uploadFiles.append(os.path.join(saveDir, name.split('/')[-1])) # add to list of files
+    print name + " written to disk.."
+  return uploadFiles
 
 def getDirFromFilename(filename):
-    '''
-    @summary: Get the directort location of a file
-    @param filename: the full filename of the file in question
-    @return: the directory of the file passed in as a param
-    '''
-    path = ''
-    for part in filename.split('/')[:-1]:
-	path += part + '/'
-    return path
+  '''
+  @summary: Get the directort location of a file
+  @param filename: the full filename of the file in question
+  @return: the directory of the file passed in as a param
+  '''
+  path = ''
+  for part in filename.split('/')[:-1]:
+    path += part + '/'
+  return path
 
 def convertFiles(uploadedFiles, fileType , toFormat, convertFileSaveLoc):
-    '''
-    Helper method to call convertTo module for invariant and graph format conversion
+  '''
+  Helper method to call convertTo module for invariant and graph format conversion
 
-    @param uploadedFiles: array with all file names of uploaded files
-    @param fileType
-    @param toFormat -
-    @param convertFileSaveLoc -
-    @return correctFileFormat - check if at least one file has the correct format
-    @return correctFileType - check if file type is legal
-    '''
-    for file_fn in uploadedFiles:
-	# determine type of the file
-	if (os.path.splitext(file_fn)[1] in ['.mat','.csv','.npy']):
-	    correctFileFormat = True
-	    if (fileType == 'fg' or fileType == 'fibergraph'):
-		correctFileType = True
-		pass # TODO : DM
-	    elif( fileType == 'lcc' or fileType == 'lrgstConnComp'):
-		correctFileType = True
-		pass # TODO : DM
-	    elif (fileType in settings.VALID_FILE_TYPES.keys() or fileType in settings.VALID_FILE_TYPES.values()):
-		# Check if file format is the same as the toFormat
-		if (os.path.splitext(file_fn)[1] in toFormat):
-		    toFormat.remove(os.path.splitext(file_fn)[1])
-		if (len(toFormat) == 0):
-		    pass # No work to be done here
-		else:
-		    correctFileType = True
-		    convertTo.convertAndSave(file_fn, toFormat, convertFileSaveLoc, fileType) # toFormat is a list
-    return correctFileFormat, correctFileType
+  @param uploadedFiles: array with all file names of uploaded files
+  @param fileType
+  @param toFormat -
+  @param convertFileSaveLoc -
+  @return correctFileFormat - check if at least one file has the correct format
+  @return correctFileType - check if file type is legal
+  '''
+  for file_fn in uploadedFiles:
+    # determine type of the file
+    if (os.path.splitext(file_fn)[1] in ['.mat','.csv','.npy']):
+      correctFileFormat = True
+      if (fileType == 'fg' or fileType == 'fibergraph'):
+        correctFileType = True
+        pass # TODO : DM
+      elif( fileType == 'lcc' or fileType == 'lrgstConnComp'):
+        correctFileType = True
+        pass # TODO : DM
+      elif (fileType in settings.VALID_FILE_TYPES.keys() or fileType in settings.VALID_FILE_TYPES.values()):
+        # Check if file format is the same as the toFormat
+        if (os.path.splitext(file_fn)[1] in toFormat):
+          toFormat.remove(os.path.splitext(file_fn)[1])
+        if (len(toFormat) == 0):
+          pass # No work to be done here
+        else:
+          correctFileType = True
+          convertTo.convertAndSave(file_fn, toFormat, convertFileSaveLoc, fileType) # toFormat is a list
+  return correctFileFormat, correctFileType
+
+def adaptProjNameIfReq(projPath):
+  '''
+  If the directory already exists take a name close to
+  the requested one just as file systems do with files
+  named the same in a directory
+
+  '''
+  if not os.path.exists(projPath):
+    return projPath
+  else:
+    projbase = projPath[:-(len(projPath.split('/')[-1]))]
+    scanID = projPath.split('/')[-1]
+
+    while (os.path.exists(projPath)):
+      if not (re.match(re.compile('.*_\d+$'), scanID)):
+        return  os.path.join(projbase, scanID+'_1')
+      else:
+        return os.path.join(projbase, addOneToDirNum(scanID))
+
+
+def addOneToDirNum(dirname):
+  '''
+  Adds one to the directory number of a directory with
+  pattern matching regex = r'.*_\d+$'
+  '''
+  idx = -1
+  char =  dirname[idx]
+
+  while(char != '_'):
+    idx -= 1
+    char = dirname[idx]
+
+  return dirname[:idx+1] + str(int(dirname[idx + 1:]) + 1)

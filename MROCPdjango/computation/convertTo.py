@@ -68,11 +68,11 @@ def convertAndSave(fn, toFormat, saveLoc, fileType):
 
   if ('.mat' in toFormat):
     sio.savemat(os.path.join(saveLoc, fnBase), {fileType:arr}, appendmat = True)
-    print fnBase + ' converted to mat format'
+    print fnBase + ' converted to mat format',
 
   if ('.npy' in toFormat):
     np.save(os.path.join(saveLoc, fnBase), arr)
-    print fnBase + ' converted to npy format'
+    print fnBase + ' converted to npy format',
 
   #import pdb; pdb.set_trace()
 
@@ -85,9 +85,9 @@ def convertAndSave(fn, toFormat, saveLoc, fileType):
       with open( os.path.join(saveLoc, fnBase)+'.csv', 'wb') as csvfile:
         writer = csv.writer(csvfile, dialect='excel')
         writer.writerow(arr)
-      print fnBase + ' converted to csv format'
+      print fnBase + ' converted to csv format',
 
-  print ('%s sucessfully converted from .npy to .mat in  %.2f secs') % (fnBase ,(time()-start))
+  print ('in %.2f secs') % ((time()-start))
 
 
 def convertGraph(G_fn, toFormat):
