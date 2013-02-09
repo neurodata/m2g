@@ -23,7 +23,7 @@
 		background-image:url('http://a0.twimg.com/profile_images/1279484811/brain_favicon__1_.png');
 		background-size: 10%;
 		background-repeat: no-repeat;
-		background-attachment:fixed;
+		/*background-attachment:fixed;*/
 		background-position:top right;
 		color: #444;
 		font: normal 95% Tahoma,sans-serif;
@@ -32,7 +32,7 @@
 
 	p,code,ul {padding-bottom: 1.2em; line-height: 180%;}
 
-	li {list-style: none;}
+	/*li {list-style: none;}*/
 
 	h1 {
 		font: normal 1.8em Tahoma,sans-serif;
@@ -139,6 +139,55 @@
     </p>
 	<div style="position:absolute; left:153px; top: 212px;"> <img id="loadingImage" src="http://i1061.photobucket.com/albums/t473/dmhembe/MR-connectome/loading_zpsac6e6d22.gif" border="0" alt="loading" style="visibility:hidden;opacity:0.5"/> </div>
 
+        <div id="Programmatic uses">
+          <h2> Graphs may also be built programmatically </h2>
+          The base url for an upload is <strong>http://mrbrain.cs.jhu.edu/disa/upload/ </strong> <br/>
+
+          <h3> Single graph </h3>
+          <p>
+          The example <a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjango/examples/uploadsubj.py"
+          target="blank"> uploadsubj.py</a> can be used as follows from a terminal session: <br/>
+
+          <strong>python uploadsubj.py http://mrbrain.cs.jhu.edu/disa/upload/YOUR_project/YOUR_site/YOUR_subject/YOUR_session/scanID/s
+          -i cc,tri,ss1,mad,deg,eig .</strong>
+           The parameter after YOUR_scan can either be 's' or 'b', but not both. Using 's' or 'small' builds a small graph (70 x 70 vertices) while 'b' or 'big' builds a
+           big graph on the order of < 10M x 10M vertices. This would build a small graph and compute all invariants currently available.
+           <strong>The result of uploadsubj.py is a url containing all data produced. Simply follow the url to download it.</strong>
+          </p>
+
+          The optional arguments given as -i are simply appended to the final url in uploadsubj.py. The options available must be in a comma separated list and are as follows:
+          <ul>
+            <li>'ss1' for the Scan Statistic 1</li>
+            <li>'tri' for the Triangle Count </li>
+            <li>'cc'  for the Clustering Coefficient</li>
+            <li>'mad' for the Maximum Average Degree</li>
+            <li>'deg' for The Local Degree Count</li>
+            <li>'eig' for the Top 100 (or maximum available) eigenvalues</li>
+            <li>'ss2' for the Scan Statistic 2 [Coming soon]</li>
+            <li>'apl' for the Average Path Length [Coming soon]</li>
+            <li>'gdia' for the Graph Diameter [Coming soon]</li>
+          </ul>
+
+          <h3> Multiple graphs </h3>
+          <p>
+          <a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjango/examples/uploadMultiSubj.py">Multi-subject/scan example</a>
+          is also provided for batch uploading and processing of multiple scans.
+
+          <strong>Note: a zip file must be uploaded containing only two directories</strong>:
+          <ul>
+            <li>A directory named 'fiber' (lower case)  containing all fiber tract files you wish to be processed. [May need update for naming convention] </li>
+            <li>A directory named 'roi' (lower case) containing all corresponding roi files (i.e both an xml and raw file for each fiber tract file).
+            Note the root of each roi file name should match that of the corresponding fiber file. E.g if fiber tract file is 'sample1_fiber.dat' we would expect
+            to find both 'sample1_roi.xml' and 'sample1_roi.raw' in the roi directory.
+            </li>
+          </ul>
+
+          All fiber tract files will be treated as single project with multiple scans.
+          The example above's use is similar to uploadsubj.py. Download the file and help can be obtained by typing in a terminal/command line session:
+          <strong>python uploadMultiSubj.py -h </strong>. The same is true for the single scan example: <strong>python uploadsubj.py -h</strong> will give help.
+          </p>
+
+        </div>
         <div class="footer">
         Property of the Johns Hopkins University Storage Lab (HSSL) |  Author: Disa Mhembere
     </div>
