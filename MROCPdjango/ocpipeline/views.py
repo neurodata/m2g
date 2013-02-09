@@ -321,7 +321,10 @@ def upload(request, webargs=None):
               = processData(fiber_fn, roi_xml_fn, roi_raw_fn,graphs, request.session['graphInvariants'], request.session['graphsize'],True) # Change to false to not process anything
 
             if request.session['invariants']:
-              lccG = loadAdjMat(smGrfn, lccfn, roiRootName = os.path.splitext(roi_xml_fn)[0])
+                import scipy.io as sio
+                lccG = sio.loadmat(request.session['smGrfn'])['fibergraph']
+        else:
+          return django.http.HttpResponseBadRequest ("Missing graph size specify big or small")
 
         if lccG:
             invariant_fns =  runInvariants(lccG, request.session)
@@ -549,236 +552,236 @@ def convert(request, webargs=None):
 #	*******************		#
 #	   PROCESS DATA			#
 #########################################
+# INDENTATION FIXED BELOW HERE
 def processData(fiber_fn, roi_xml_fn, roi_raw_fn,graphs, graphInvariants, graphsize, run = False):
-    '''
-    Run graph building and other related scripts
-    @param fiber_fn: fiber tract file
-    @param roi_xml_fn: region of interest xml file
-    @param roi_raw_fn: region of interest raw file
+  '''
+  Run graph building and other related scripts
+  @param fiber_fn: fiber tract file
+  @param roi_xml_fn: region of interest xml file
+  @param roi_raw_fn: region of interest raw file
 
-    @param graphs: Dir where biggraphs & smallgraphs are saved
-    @param graphInvariants:  Dir where graph invariants are saved
-    @param graphsize: the size of the graph 'big' or 'small'
-    @param run: Whether or not to run processor intensive jobs. Default is - false so nothing is actually run
-    '''
-    if (run):
-	import mrcap.svd as svd
-	import mrcap.lcc as lcc
-	print "Imported svd and lcc modules..."
+  @param graphs: Dir where biggraphs & smallgraphs are saved
+  @param graphInvariants:  Dir where graph invariants are saved
+  @param graphsize: the size of the graph 'big' or 'small'
+  @param run: Whether or not to run processor intensive jobs. Default is - false so nothing is actually run
+  '''
+  if (run):
+    import mrcap.svd as svd
+    import mrcap.lcc as lcc
+    print "Imported svd and lcc modules..."
 
-    baseName = getFiberID(fiber_fn) #VERY TEMPORARY
+  baseName = getFiberID(fiber_fn) #VERY TEMPORARY
 
-    smGrfn = os.path.join(graphs, (baseName +'_smgr.mat'))
-    bgGrfn = os.path.join(graphs, (baseName +'_bggr.mat'))
+  smGrfn = os.path.join(graphs, (baseName +'_smgr.mat'))
+  bgGrfn = os.path.join(graphs, (baseName +'_bggr.mat'))
 
-    if (run):
-        ''' spawn subprocess to create small since its result is not necessary for processing '''
-        #arguments = 'python ' + '/home/disa/MR-connectome/mrcap/gengraph.py /home/disa' + fiber_fn + ' /home/disa' + smallGraphOutputFileName +' /home/disa' + roi_xml_fn + ' /home/disa' + roi_raw_fn
-        #arguments = 'python ' + '/Users/dmhembere44/MR-connectome/mrcap/gengraph.py /Users/dmhembere44' + fiber_fn + ' /Users/dmhembere44' + smallGraphOutputFileName + ' roixmlname=/Users/dmhembere44' + roi_xml_fn + ' roirawname=/Users/dmhembere44' + roi_raw_fn
-        #subprocess.Popen(arguments,shell=True)
-        if (graphsize == 'small'):
-            ''' Run gengraph SMALL & save output '''
-            print("Running Small gengraph....")
-            gengraph.genGraph(fiber_fn, smGrfn, roi_xml_fn, roi_raw_fn, bigGraph=False)
+  if (run):
+    ''' spawn subprocess to create small since its result is not necessary for processing '''
+    #arguments = 'python ' + '/home/disa/MR-connectome/mrcap/gengraph.py /home/disa' + fiber_fn + ' /home/disa' + smallGraphOutputFileName +' /home/disa' + roi_xml_fn + ' /home/disa' + roi_raw_fn
+    #arguments = 'python ' + '/Users/dmhembere44/MR-connectome/mrcap/gengraph.py /Users/dmhembere44' + fiber_fn + ' /Users/dmhembere44' + smallGraphOutputFileName + ' roixmlname=/Users/dmhembere44' + roi_xml_fn + ' roirawname=/Users/dmhembere44' + roi_raw_fn
+    #subprocess.Popen(arguments,shell=True)
+    if (graphsize == 'small'):
+      ''' Run gengraph SMALL & save output '''
+      print("Running Small gengraph....")
+      gengraph.genGraph(fiber_fn, smGrfn, roi_xml_fn, roi_raw_fn, bigGraph=False)
 
-        elif(graphsize == 'big'):
-            ''' Run gengrah BIG & save output '''
-            print("\nRunning Big gengraph....")
-            gengraph.genGraph(fiber_fn, bgGrfn, roi_xml_fn, roi_raw_fn, bigGraph=True)
-        else:
-            return None # should cause an explotion
+    elif(graphsize == 'big'):
+      ''' Run gengrah BIG & save output '''
+      print("\nRunning Big gengraph....")
+      gengraph.genGraph(fiber_fn, bgGrfn, roi_xml_fn, roi_raw_fn, bigGraph=True)
+    else:
+      return None # should cause an explotion
 
-    ''' Run LCC '''
-    if not os.path.exists(os.path.join(graphInvariants,"LCC")):
-	print "Making LCC directory"
-	os.makedirs(os.path.join(graphInvariants,"LCC"))
-    lccfn = os.path.join(graphInvariants,"LCC", (baseName + 'concomp.npy'))
+  ''' Run LCC '''
+  if not os.path.exists(os.path.join(graphInvariants,"LCC")):
+    print "Making LCC directory"
+    os.makedirs(os.path.join(graphInvariants,"LCC"))
+  lccfn = os.path.join(graphInvariants,"LCC", (baseName + 'concomp.npy'))
 
 
-    if (run):
-	'''Should be big but we'll do small for now'''
-        if (graphsize == 'big'):
-          lcc.process_single_brain(roi_xml_fn, roi_raw_fn, bgGrfn, lccfn)
-        if (graphsize == 'small'):
-          lcc.process_single_brain(roi_xml_fn, roi_raw_fn, smGrfn, lccfn)
+  if (run):
+    '''Should be big but we'll do small for now'''
+    if (graphsize == 'big'):
+      lcc.process_single_brain(roi_xml_fn, roi_raw_fn, bgGrfn, lccfn)
+    if (graphsize == 'small'):
+      lcc.process_single_brain(roi_xml_fn, roi_raw_fn, smGrfn, lccfn)
 
-    ''' Run Embed - SVD '''
-    if not os.path.exists(os.path.join(graphInvariants,"SVD")):
-	print "Making SVD directory"
-	os.makedirs(os.path.join(graphInvariants,"SVD"))
-    SVDfn = os.path.join(graphInvariants,"SVD" ,(baseName + 'embed.npy'))
+  ''' Run Embed - SVD '''
+  if not os.path.exists(os.path.join(graphInvariants,"SVD")):
+    print "Making SVD directory"
+    os.makedirs(os.path.join(graphInvariants,"SVD"))
+  SVDfn = os.path.join(graphInvariants,"SVD" ,(baseName + 'embed.npy'))
 
-    print("Running SVD....")
-    roiBasename = str(roi_xml_fn[:-4]) # WILL NEED ADAPTATION
+  print("Running SVD....")
+  roiBasename = str(roi_xml_fn[:-4]) # WILL NEED ADAPTATION
 
-    if (run):
-        if (graphsize == 'big'):
-            svd.embed_graph(lccfn, roiBasename, bgGrfn, SVDfn)
-        if (graphsize == 'small'):
-            svd.embed_graph(lccfn, roiBasename, smGrfn, SVDfn)
+  if (run):
+    if (graphsize == 'big'):
+      svd.embed_graph(lccfn, roiBasename, bgGrfn, SVDfn)
+    if (graphsize == 'small'):
+      svd.embed_graph(lccfn, roiBasename, smGrfn, SVDfn)
 
-    print "Generating graph, lcc & svd complete!"
-    return [ smGrfn, bgGrfn, lccfn, SVDfn ]
+  print "Generating graph, lcc & svd complete!"
+  return [ smGrfn, bgGrfn, lccfn, SVDfn ]
 
 #########################################
 #	*******************		#
 #	     INVARIANTS			#
 #########################################
 def runInvariants(lccG, req_sess):
-    '''
-    @todo
-    @param lccG: Sparse largest connected component adjacency matrix
-    @param req_sess: current session dict containing session varibles
-    '''
+  '''
+  @todo
+  @param lccG: Sparse largest connected component adjacency matrix
+  @param req_sess: current session dict containing session varibles
+  '''
 
-    if req_sess['graphsize'] == 'small':
-        grfn = req_sess['smGrfn']
-    elif req_sess['graphsize'] == 'big':
-        grfn = req_sess['bgGrfn']
-    else:
-        return None # Should make things explode - TODO better handling
+  if req_sess['graphsize'] == 'small':
+    grfn = req_sess['smGrfn']
+  elif req_sess['graphsize'] == 'big':
+    grfn = req_sess['bgGrfn']
+  else:
+    return None # Should make things explode - TODO better handling
 
-    # NOTE: The *_fn variable names are in accordance with settings.VALID_FILE_TYPES
-    ss1_fn = None
-    tri_fn = deg_fn =  ss2_fn = apl_fn = gdia_fn = cc_fn = numNodes = eigvlfn = eigvectfn = mad_fn = ss1_fn
+  # NOTE: The *_fn variable names are in accordance with settings.VALID_FILE_TYPES
+  ss1_fn = None
+  tri_fn = deg_fn =  ss2_fn = apl_fn = gdia_fn = cc_fn = numNodes = eigvlfn = eigvectfn = mad_fn = ss1_fn
 
-    degDir = None
-    ssDir = triDir = MADdir = eigvDir = degDir
+  degDir = None
+  ssDir = triDir = MADdir = eigvDir = degDir
 
-    # Order the invariants correctly
-    order = { 0:'ss1', 1:'tri', 2:'cc', 3:'mad', 4:'deg', 5:'eig',6:'ss2', 7:'apl', 8:'gdia' }
-    invariants = []
-    for i in range(len(order)):
-	if order[i] in req_sess['invariants']:
-	    invariants.append(order[i])
+  # Order the invariants correctly
+  order = { 0:'ss1', 1:'tri', 2:'cc', 3:'mad', 4:'deg', 5:'eig',6:'ss2', 7:'apl', 8:'gdia' }
+  invariants = []
+  for i in range(len(order)):
+    if order[i] in req_sess['invariants']:
+      invariants.append(order[i])
 
-    req_sess['invariants'] = invariants
-    invariant_fns = {}
+  req_sess['invariants'] = invariants
+  invariant_fns = {}
 
-    #** ASSUMES ORDER OF INVARIANTS ARE PREDEFINED **#
-    for inv in req_sess['invariants']:
-	if inv == "ss1": # Get degree for free
-	    ssDir = os.path.join(req_sess['graphInvariants'],'ScanStat1')
-	    degDir = os.path.join(req_sess['graphInvariants'],'Degree')
-	    makeDirIfNone([ssDir, degDir])
+  #** ASSUMES ORDER OF INVARIANTS ARE PREDEFINED **#
+  for inv in req_sess['invariants']:
+    if inv == "ss1": # Get degree for free
+      ssDir = os.path.join(req_sess['graphInvariants'],'ScanStat1')
+      degDir = os.path.join(req_sess['graphInvariants'],'Degree')
+      makeDirIfNone([ssDir, degDir])
 
-	    ss1_fn, deg_fn, numNodes = calcScanStat_Degree(G_fn = grfn,\
-		G = lccG,  ssDir = ssDir, degDir = degDir) # Good to go
+      ss1_fn, deg_fn, numNodes = calcScanStat_Degree(G_fn = grfn,\
+          G = lccG,  ssDir = ssDir, degDir = degDir) # Good to go
 
-	if inv == "tri": # Get "Eigs" & "MAD" for free
-	    triDir = os.path.join(req_sess['graphInvariants'],'Triangle')
-	    MADdir = os.path.join(req_sess['graphInvariants'],'MAD')
-	    eigvDir = os.path.join(req_sess['graphInvariants'],'Eigen')
+    if inv == "tri": # Get "Eigs" & "MAD" for free
+      triDir = os.path.join(req_sess['graphInvariants'],'Triangle')
+      MADdir = os.path.join(req_sess['graphInvariants'],'MAD')
+      eigvDir = os.path.join(req_sess['graphInvariants'],'Eigen')
 
-	    if not (degDir):
-		degDir = os.path.join(req_sess['graphInvariants'],'Degree')
-		makeDirIfNone([triDir, MADdir, eigvDir, degDir])
+      if not (degDir):
+        degDir = os.path.join(req_sess['graphInvariants'],'Degree')
+        makeDirIfNone([triDir, MADdir, eigvDir, degDir])
 
-		tri_fn, deg_fn, MAD_fn, eigvl_fn, eigvect_fn =  eignTriLocal_deg_MAD(G_fn = grfn,\
-		    G = lccG, triDir = triDir, MADdir = MADdir, eigvDir = eigvDir, degDir = degDir) # Good to go
-	    else:
-		makeDirIfNone([triDir, MADdir, eigvDir])
+        tri_fn, deg_fn, MAD_fn, eigvl_fn, eigvect_fn =  eignTriLocal_deg_MAD(G_fn = grfn,\
+            G = lccG, triDir = triDir, MADdir = MADdir, eigvDir = eigvDir, degDir = degDir) # Good to go
+      else:
+        makeDirIfNone([triDir, MADdir, eigvDir])
 
-		tri_fn, eigvlfn, eigvectfn, mad_fn  = eignTriLocal_MAD(G_fn = grfn,\
-		    G = lccG, triDir = triDir, MADdir = MADdir, eigvDir = eigvDir) # Good to go
+        tri_fn, eigvlfn, eigvectfn, mad_fn  = eignTriLocal_MAD(G_fn = grfn,\
+            G = lccG, triDir = triDir, MADdir = MADdir, eigvDir = eigvDir) # Good to go
 
-	if inv == "cc":  # We need "Deg" & "TriCnt"
-	    if not(eigvDir):
-		eigvDir = os.path.join(req_sess['graphInvariants'],'Eigen')
-	    if not (degDir):
-		degDir = os.path.join(req_sess['graphInvariants'],'Degree')
-	    if not (triDir):
-		triDir = os.path.join(req_sess['graphInvariants'],'Triangle')
+    if inv == "cc":  # We need "Deg" & "TriCnt"
+      if not(eigvDir):
+        eigvDir = os.path.join(req_sess['graphInvariants'],'Eigen')
+      if not (degDir):
+        degDir = os.path.join(req_sess['graphInvariants'],'Degree')
+      if not (triDir):
+        triDir = os.path.join(req_sess['graphInvariants'],'Triangle')
 
-	    if not (MADdir):
-		MADdir = os.path.join(req_sess['graphInvariants'],'MAD')
-	    ccDir = os.path.join(req_sess['graphInvariants'],'ClustCoeff')
+      if not (MADdir):
+        MADdir = os.path.join(req_sess['graphInvariants'],'MAD')
+      ccDir = os.path.join(req_sess['graphInvariants'],'ClustCoeff')
 
-	    makeDirIfNone([degDir, triDir, ccDir, eigvDir, MADdir])
-	    if (deg_fn and tri_fn):
-		cc_fn = calcLocalClustCoeff(deg_fn, tri_fn, ccDir = ccDir) # Good to go
+      makeDirIfNone([degDir, triDir, ccDir, eigvDir, MADdir])
+      if (deg_fn and tri_fn):
+        cc_fn = calcLocalClustCoeff(deg_fn, tri_fn, ccDir = ccDir) # Good to go
 
-	    elif (deg_fn and (not tri_fn)):
-		tri_fn, eigvlfn, eigvectfn, mad_fn = eignTriLocal_MAD(G_fn = grfn,\
-		    G = lccG, triDir = triDir, MADdir = MADdir, eigvDir = eigvDir) # Good to go
-		cc_fn = calcLocalClustCoeff(deg_fn, tri_fn, ccDir = ccDir) # Good to go
+      elif (deg_fn and (not tri_fn)):
+        tri_fn, eigvlfn, eigvectfn, mad_fn = eignTriLocal_MAD(G_fn = grfn,\
+            G = lccG, triDir = triDir, MADdir = MADdir, eigvDir = eigvDir) # Good to go
+        cc_fn = calcLocalClustCoeff(deg_fn, tri_fn, ccDir = ccDir) # Good to go
 
-	    elif (tri_fn and (not deg_fn)):
-		deg_fn = calcDegree(G_fn = grfn, \
-		    G = lccG , degDir = degDir) # Good to go
-		cc_fn = calcLocalClustCoeff(deg_fn, tri_fn, ccDir = ccDir) # Good to go
+      elif (tri_fn and (not deg_fn)):
+        deg_fn = calcDegree(G_fn = grfn, \
+            G = lccG , degDir = degDir) # Good to go
+        cc_fn = calcLocalClustCoeff(deg_fn, tri_fn, ccDir = ccDir) # Good to go
 
-	    else:
-		tri_fn, eigvlfn, eigvectfn, mad_fn = eignTriLocal_MAD(G_fn = grfn,\
-		    G = lccG, triDir = triDir, MADdir = MADdir, eigvDir = eigvDir) # Good to go
-		deg_fn = calcDegree(G_fn = grfn, \
-		    G = lccG , degDir = degDir) # Good to go
-		cc_fn = calcLocalClustCoeff(deg_fn, tri_fn, ccDir = ccDir) # Good to go
+      else:
+        tri_fn, eigvlfn, eigvectfn, mad_fn = eignTriLocal_MAD(G_fn = grfn,\
+            G = lccG, triDir = triDir, MADdir = MADdir, eigvDir = eigvDir) # Good to go
+        deg_fn = calcDegree(G_fn = grfn, \
+            G = lccG , degDir = degDir) # Good to go
+        cc_fn = calcLocalClustCoeff(deg_fn, tri_fn, ccDir = ccDir) # Good to go
 
-	if inv == "mad": # Get "Eigs" for free
-	    if (tri_fn):
-		pass
-	    else:
-		MADdir = os.path.join(req_sess['graphInvariants'],'MAD')
-		eigvDir = os.path.join(req_sess['graphInvariants'],'Eigen')
-		makeDirIfNone([MADdir, eigvDir])
+    if inv == "mad": # Get "Eigs" for free
+        if (tri_fn):
+          pass
+        else:
+          MADdir = os.path.join(req_sess['graphInvariants'],'MAD')
+          eigvDir = os.path.join(req_sess['graphInvariants'],'Eigen')
+          makeDirIfNone([MADdir, eigvDir])
 
-		mad_fn, eigvlfn, eigvectfn = calcMAD(G_fn = grfn, G = lccG , \
-		    MADdir = MADdir, eigvDir = eigvDir) # Good to go
+          mad_fn, eigvlfn, eigvectfn = calcMAD(G_fn = grfn, G = lccG , \
+              MADdir = MADdir, eigvDir = eigvDir) # Good to go
 
-	if inv == "deg": # Nothing for free
-	    if (deg_fn):
-		pass
-	    else:
-		degDir = os.path.join(req_sess['graphInvariants'],'Degree')
-		makeDirIfNone([degDir])
+    if inv == "deg": # Nothing for free
+      if (deg_fn):
+        pass
+      else:
+        degDir = os.path.join(req_sess['graphInvariants'],'Degree')
+        makeDirIfNone([degDir])
 
-		deg_fn = calcDegree(G_fn = grfn, \
-		    G = lccG ,  degDir = degDir) # Good to go
+        deg_fn = calcDegree(G_fn = grfn, \
+            G = lccG ,  degDir = degDir) # Good to go
 
-	if inv == "eig": # Nothing for free
-	    if (tri_fn):
-		pass
-	    else:
-		eigvDir = os.path.join(req_sess['graphInvariants'],'Eigen')
-		makeDirIfNone([eigvDir])
+    if inv == "eig": # Nothing for free
+      if (tri_fn):
+        pass
+      else:
+        eigvDir = os.path.join(req_sess['graphInvariants'],'Eigen')
+        makeDirIfNone([eigvDir])
 
-		eigvlfn, eigvectfn = calcEigs(G_fn = grfn,\
-			G = lccG , eigvDir = eigvDir)
+        eigvlfn, eigvectfn = calcEigs(G_fn = grfn,\
+                G = lccG , eigvDir = eigvDir)
 
-	if inv == "ss2":
-	    #makeDirIfNone(dirPath)
-	    pass # TODO DM
-	if inv == "apl":
-	    #makeDirIfNone(dirPath)
-	    pass # TODO DM
-	if inv == "gdia":
-	    #makeDirIfNone(dirPath)
-	    pass # TODO DM
+    if inv == "ss2":
+      #makeDirIfNone(dirPath)
+      pass # TODO DM
+    if inv == "apl":
+      #makeDirIfNone(dirPath)
+      pass # TODO DM
+    if inv == "gdia":
+      #makeDirIfNone(dirPath)
+      pass # TODO DM
 
-    for fn in [ ss1_fn, tri_fn, deg_fn, ss2_fn, apl_fn,  gdia_fn , cc_fn, ss1_fn]:
-	if ss1_fn:
-	    invariant_fns['ss1'] = ss1_fn
-	if tri_fn:
-	    invariant_fns['tri'] = tri_fn
-	if deg_fn:
-	    invariant_fns['deg'] = deg_fn
-	if ss2_fn:
-	    invariant_fns['ss2'] = ss2_fn
-	if apl_fn:
-	    invariant_fns['apl'] = apl_fn
-	if gdia_fn:
-	    invariant_fns['gdia'] = gdia_fn
-	if cc_fn:
-	    invariant_fns['cc'] = cc_fn
-	if mad_fn:
-	    invariant_fns['mad'] = mad_fn
-	if eigvectfn:
-	    invariant_fns['eig'] = [eigvectfn, eigvlfn] # Note this
-    return invariant_fns
+  for fn in [ ss1_fn, tri_fn, deg_fn, ss2_fn, apl_fn,  gdia_fn , cc_fn, ss1_fn]:
+    if ss1_fn:
+      invariant_fns['ss1'] = ss1_fn
+    if tri_fn:
+      invariant_fns['tri'] = tri_fn
+    if deg_fn:
+      invariant_fns['deg'] = deg_fn
+    if ss2_fn:
+      invariant_fns['ss2'] = ss2_fn
+    if apl_fn:
+      invariant_fns['apl'] = apl_fn
+    if gdia_fn:
+      invariant_fns['gdia'] = gdia_fn
+    if cc_fn:
+      invariant_fns['cc'] = cc_fn
+    if mad_fn:
+      invariant_fns['mad'] = mad_fn
+    if eigvectfn:
+      invariant_fns['eig'] = [eigvectfn, eigvlfn] # Note this
+  return invariant_fns
 
 '''********************* Standalone Methods  *********************'''
-# TABS FIXED BELOW HERE
 def makeDirIfNone(dirPathList):
   '''
   Create a dir specified by dirPathList. Failure usual due to permissions issues.
