@@ -60,13 +60,14 @@ from django.core.files.base import ContentFile
 from computation.scanstat_degr import calcScanStat_Degree
 from computation.clustCoeff import calcLocalClustCoeff
 from computation.loadAdjMatrix import loadAdjMat
-from computation.triCount_MAD import eignTriLocal_MAD #****
+from computation.triCount_MAD import eignTriLocal_MAD
 from computation.degree import calcDegree
-from computation.MAD import calcMAD #****
-from computation.eigen import calcEigs #****
+from computation.MAD import calcMAD
+from computation.eigen import calcEigs
 from computation.clustCoeff import calcLocalClustCoeff
-from computation.triCount_deg_MAD import eignTriLocal_deg_MAD #****
+from computation.triCount_deg_MAD import eignTriLocal_deg_MAD
 
+import scipy.io as sio
 
 ''' Little welcome message'''
 def default(request):
@@ -177,7 +178,7 @@ def processInputData(request):
         if (request.session['graphsize'] == 'big'):
           lccG = loadAdjMat(request.session['bgGrfn'], request.session['lccfn'], roiRootName = os.path.splitext(roi_xml_fn)[0])
         elif (request.session['graphsize'] == 'small'):
-          import scipy.io as sio
+
           lccG = sio.loadmat(request.session['smGrfn'])['fibergraph']
 	request.session['invariant_fns'] =  runInvariants(lccG, request.session)
     return HttpResponseRedirect(get_script_prefix()+'confirmdownload')
@@ -308,23 +309,22 @@ def upload(request, webargs=None):
 	''' Data Processing '''
         if (re.match(re.compile('(b|big)', re.IGNORECASE), graphsize)):
             request.session['graphsize'] = 'big'
-            smGrfn, bgGrfn, lccfn, SVDfn \
+            request.session['smGrfn'], request.session['bgGrfn'], lccfn, SVDfn \
               = processData(fiber_fn, roi_xml_fn, roi_raw_fn,graphs, request.session['graphInvariants'], request.session['graphsize'],True) # Change to false to not process anything
 
             # process invariants if requested
             if request.session['invariants']:
-              lccG = loadAdjMat(bgGrfn, lccfn, roiRootName = os.path.splitext(roi_xml_fn)[0])
+              lccG = loadAdjMat(request.session['bgGrfn'], lccfn, roiRootName = os.path.splitext(roi_xml_fn)[0])
 
         elif(re.match(re.compile('(s|small)', re.IGNORECASE), graphsize)):
             request.session['graphsize'] = 'small'
-            smGrfn, bgGrfn, lccfn, SVDfn \
+            request.session['smGrfn'], request.session['bgGrfn'], lccfn, SVDfn \
               = processData(fiber_fn, roi_xml_fn, roi_raw_fn,graphs, request.session['graphInvariants'], request.session['graphsize'],True) # Change to false to not process anything
 
             if request.session['invariants']:
-                import scipy.io as sio
                 lccG = sio.loadmat(request.session['smGrfn'])['fibergraph']
         else:
-          return django.http.HttpResponseBadRequest ("Missing graph size specify big or small")
+          return django.http.HttpResponseBadRequest ("Missing graph size. Specify big or small")
 
         if lccG:
             invariant_fns =  runInvariants(lccG, request.session)
@@ -391,7 +391,6 @@ def graphLoadInv(request, webargs=None):
 
                     elif request.session['graphsize'] == 'small':
                         request.session['smGrfn'] = G_fn
-                        import scipy.io as sio
                         lccG = sio.loadmat(request.session['smGrfn'])['fibergraph']
 
                         runInvariants(lccG, request.session)
@@ -424,13 +423,13 @@ def graphLoadInv(request, webargs=None):
 	request.session['graphInvariants'] = os.path.join(dataDir, 'graphInvariants')
 
 	for G_fn in graphs:
+            ########### TODO ##########
 	    #***request.session['bgGrfn'] = G_fn
 	    #***lccfn = G_fn.split('_')[0] + '_concomp.mat'
 	    #***roiRootName = G_fn.split('_')[0] + '_roi'
 	    #***lccG = loadAdjMat(request.session['bgGrfn'], lccfn, roiRootName = roiRootName)
 
 	    request.session['smGrfn'] = G_fn
-	    import scipy.io as sio
 	    lccG = sio.loadmat(request.session['smGrfn'])['fibergraph']
 
 	    runInvariants(lccG, request.session)
@@ -572,8 +571,8 @@ def processData(fiber_fn, roi_xml_fn, roi_raw_fn,graphs, graphInvariants, graphs
 
   baseName = getFiberID(fiber_fn) #VERY TEMPORARY
 
-  smGrfn = os.path.join(graphs, (baseName +'_smgr.mat'))
-  bgGrfn = os.path.join(graphs, (baseName +'_bggr.mat'))
+  smGrfn = os.path.join(graphs, (baseName +'smgr.mat'))
+  bgGrfn = os.path.join(graphs, (baseName +'bggr.mat'))
 
   if (run):
     ''' spawn subprocess to create small since its result is not necessary for processing '''
@@ -590,7 +589,7 @@ def processData(fiber_fn, roi_xml_fn, roi_raw_fn,graphs, graphInvariants, graphs
       print("\nRunning Big gengraph....")
       gengraph.genGraph(fiber_fn, bgGrfn, roi_xml_fn, roi_raw_fn, bigGraph=True)
     else:
-      return None # should cause an explotion
+      print '[ERROR]: Graphsize Unkwown' # should never happen
 
   ''' Run LCC '''
   if not os.path.exists(os.path.join(graphInvariants,"LCC")):
@@ -602,8 +601,10 @@ def processData(fiber_fn, roi_xml_fn, roi_raw_fn,graphs, graphInvariants, graphs
   if (run):
     '''Should be big but we'll do small for now'''
     if (graphsize == 'big'):
+      print "Running biggraph Largest connected component..."
       lcc.process_single_brain(roi_xml_fn, roi_raw_fn, bgGrfn, lccfn)
     if (graphsize == 'small'):
+      print "Running smallgraph Largest connected component..."
       lcc.process_single_brain(roi_xml_fn, roi_raw_fn, smGrfn, lccfn)
 
   ''' Run Embed - SVD '''
@@ -613,15 +614,17 @@ def processData(fiber_fn, roi_xml_fn, roi_raw_fn,graphs, graphInvariants, graphs
   SVDfn = os.path.join(graphInvariants,"SVD" ,(baseName + 'embed.npy'))
 
   print("Running SVD....")
-  roiBasename = str(roi_xml_fn[:-4]) # WILL NEED ADAPTATION
+  roiBasename = os.path.splitext(roi_xml_fn) # MAY NEED ADAPTATION
 
   if (run):
     if (graphsize == 'big'):
+      print "Running SVD on biggraph"
       svd.embed_graph(lccfn, roiBasename, bgGrfn, SVDfn)
     if (graphsize == 'small'):
+      print "Running SVD on smallgraph"
       svd.embed_graph(lccfn, roiBasename, smGrfn, SVDfn)
 
-  print "Generating graph, lcc & svd complete!"
+  print "Completed generating - graph, lcc & svd"
   return [ smGrfn, bgGrfn, lccfn, SVDfn ]
 
 #########################################
@@ -832,9 +835,9 @@ def getFiberID(fiberfn):
     fiberfn = fiberfn[:-1] # get rid of trailing slash
 
   if re.match(re.compile(r'.+_fiber$'), os.path.splitext(fiberfn.split('/')[-1])[0]):
-    return(os.path.splitext(fiberfn.split('/')[-1])[0]).split('_')[0]
+    return(os.path.splitext(fiberfn.split('/')[-1])[0]).split('_')[0] + '_'
   else:
-    return os.path.splitext(fiberfn.split('/')[-1])[0]
+    return os.path.splitext(fiberfn.split('/')[-1])[0] + '_'
 
 def writeBodyToDisk(data, saveDir):
   '''

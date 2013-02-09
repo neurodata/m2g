@@ -1,5 +1,7 @@
 *MR OCP To do list Disa
 ** Resolve biggraph degree and eigenvalue non-conversion to csv
+* LoadGraphInv programmatic update to big as well
+
 0. Update html for programmatic uses
 1. Test non-uniform file names
 1.5 Test programmatic examples
