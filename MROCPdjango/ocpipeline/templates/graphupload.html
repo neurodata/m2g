@@ -23,7 +23,7 @@
 		background-image:url('http://a0.twimg.com/profile_images/1279484811/brain_favicon__1_.png');
 		background-size: 10%;
 		background-repeat: no-repeat;
-		background-attachment:fixed;
+		/*background-attachment:fixed;*/
 		background-position:top right;
 		color: #444;
 		font: normal 95% Tahoma,sans-serif;
@@ -129,6 +129,7 @@
 
     <h2>Please upload the graph(s) with largest connected components(LCC), and ROIs for each graph you would like invariants to be computed. </h2>
     <p> You must use a single<strong> zipfile <i> (.zip) </i> containing ALL</strong> data in a single directory even for multiple graphs. <br/>
+    <strong> <FONT COLOR='#ff0000'> DO NOT zip a directory </FONT> instead zip the files themselves into an archive.</strong>
     Note the following file naming convention for single graph below where the <strong>base file name </strong> is the the same:
     <ul>
       <li>The <strong>base file name </strong> here is <strong>graph1</strong></li>
@@ -136,6 +137,11 @@
       <li>LCC file name: graph1_concomp.mat </li>
       <li>ROI's: graph1_roi.xml and graph1_roi.raw</li>
     </ul>
+
+    <strong>Lastly note all graphs must have their suffix be either _fiber.mat, _smgr.mat or _bggr.mat</strong>. Eg graph1_fiber.mat, xyz_smgr.mat and
+    foobar_bggr.mat are all acceptable names. You may adapt the names of you datasets by appending these suffixes using
+    <a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjango/dirconformance/renameDerivs.py" target="blank">this script</a>.
+    Ensure you have backups before doing this. <FONT COLOR='#ff0000'> This may change in the future.</FONT>
 
     </p>
     <form action="" method="post" enctype="multipart/form-data" name="loadForm">
@@ -147,6 +153,14 @@
 
     <div style="position:absolute; left:153px; top: 212px;"> <img id="loadingImage" src="http://i1061.photobucket.com/albums/t473/dmhembe/MR-connectome/loading_zpsac6e6d22.gif" border="0" alt="loading" style="visibility:hidden;opacity:0.5"/> </div>
 
+    <div id="Programmatic options">
+    <h2>Programmatic use </h2>
+    <p> This is can be accessed using the base url <strong>http://www.mrbrain.cs.jhu.edu/disa/graphupload/</strong>. An
+        example of usage can be found <a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjango/examples/computeInvariants.py" target="blank">here</a>.
+        <FONT COLOR='#ff0000'> Examples out of date with new interface. This section will be updated shortly</FONT> <!-- TODO UPDATE WHEN COMPLETE-->
+    </p>
+
+    </div>
     <div class="footer">
         Property of the Johns Hopkins University Storage Lab (HSSL) |  Author: Disa Mhembere
     </div>

@@ -1,10 +1,11 @@
 *MR OCP To do list Disa
-** Resolve biggraph degree and eigenvalue non-conversion to csv
-* LoadGraphInv programmatic update to big as well
 
-0. Update html for programmatic uses
-1. Test non-uniform file names
-1.5 Test programmatic examples
+** Resolve biggraph degree and eigenvalue non-conversion to csv
+* LoadGraphInv programmatic view, examples and html update for big as well
+* Add  graph specs to html
+
+0. Resolve url fot non-uniform file names (spaces etc)
+1. Production Test programmatic examples
 
 2. Do more documentation
 3. Get static content to load via apache for production mode
@@ -28,6 +29,9 @@ Recently completed
 <-- 7. Figure out where I use maxavedegree.py -->
 <-- 6. Make convert after graph processing also convert all invariants -->
 <-- 7. Fix runInvariants() method camelCase problems - views.py -->
+<-- 0. Update html for programmatic uses -->
+<-- Test non-uniform file names -->
+<-- Dev server Test programmatic examples -->
 
 * Web server dev mode
 - MPLCONFIGURE

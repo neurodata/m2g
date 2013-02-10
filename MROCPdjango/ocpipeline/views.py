@@ -348,106 +348,114 @@ def upload(request, webargs=None):
 
 ################## TO DOs ########################
 def download(request, webargs=None):
-    # DM: TODO - Allow for data to be downloaded by the directory name/filename/projectName
-    pass
+  # DM: TODO - Allow for data to be downloaded by the directory name/filename/projectName
+  pass
 
 #########################################
 #	*******************		#
 #	   GRAPH LOAD VIEW		#
 #########################################
 def graphLoadInv(request, webargs=None):
-    ''' Form '''
-    from glob import glob # Move
-    request.session.clear() # NEW
+  ''' Form '''
+  from glob import glob # Move
+  request.session.clear() # NEW
 
-    if request.method == 'POST' and not webargs:
-        form = GraphUploadForm(request.POST, request.FILES) # instantiating form
-        if form.is_valid():
-	    data = form.files['fileObj'] # get data
-	    request.session['invariants'] = form.cleaned_data['Select_Invariants_you_want_computed']
+  if request.method == 'POST' and not webargs:
+    form = GraphUploadForm(request.POST, request.FILES) # instantiating form
+    if form.is_valid():
+      data = form.files['fileObj'] # get data
+      request.session['invariants'] = form.cleaned_data['Select_Invariants_you_want_computed']
 
-            request.session['graphsize'] = form.cleaned_data['Select_graph_size']
+      request.session['graphsize'] = form.cleaned_data['Select_graph_size']
 
-	    dataDir = os.path.join(settings.MEDIA_ROOT, 'tmp', strftime("projectStamp%a%d%b%Y_%H.%M.%S/", localtime()))
-	    makeDirIfNone([dataDir])
+      dataDir = os.path.join(settings.MEDIA_ROOT, 'tmp', strftime("projectStamp%a%d%b%Y_%H.%M.%S/", localtime()))
+      makeDirIfNone([dataDir])
 
-	    # We got a zip
-	    if os.path.splitext(data.name)[1] == '.zip':
+      # We got a zip
+      if os.path.splitext(data.name)[1] == '.zip':
 
-		writeBodyToDisk(data.read(), dataDir)
-		# Get all graphs in the directory
-		graphs = glob(os.path.join(dataDir,'*_fiber.mat'))
-		graphs.extend(glob(os.path.join(dataDir,'*_bggr.mat')))
-		graphs.extend(glob(os.path.join(dataDir,'*_smgr.mat')))
+        writeBodyToDisk(data.read(), dataDir)
+        # Get all graphs in the directory
+        graphs = glob(os.path.join(dataDir,'*_fiber.mat'))
+        graphs.extend(glob(os.path.join(dataDir,'*_bggr.mat')))
+        graphs.extend(glob(os.path.join(dataDir,'*_smgr.mat')))
 
-		request.session['graphInvariants'] = os.path.join(dataDir, 'graphInvariants')
+        request.session['graphInvariants'] = os.path.join(dataDir, 'graphInvariants')
 
-		for G_fn in graphs:
-                    if request.session['graphsize'] == 'big':
-                        request.session['bgGrfn'] = G_fn
-                        lccfn = G_fn.split('_')[0] + '_concomp.mat'
-                        roiRootName = G_fn.split('_')[0] + '_roi'
-                        lccG = loadAdjMat(request.session['bgGrfn'], lccfn, roiRootName = roiRootName)
+        for G_fn in graphs:
+          if request.session['graphsize'] == 'big':
+            request.session['bgGrfn'] = G_fn
+            lccfn = G_fn.split('_')[0] + '_concomp.mat'
+            roiRootName = G_fn.split('_')[0] + '_roi'
+            lccG = loadAdjMat(request.session['bgGrfn'], lccfn, roiRootName = roiRootName)
 
-                    elif request.session['graphsize'] == 'small':
-                        request.session['smGrfn'] = G_fn
-                        lccG = sio.loadmat(request.session['smGrfn'])['fibergraph']
+          elif request.session['graphsize'] == 'small':
+            request.session['smGrfn'] = G_fn
+            lccG = sio.loadmat(request.session['smGrfn'])['fibergraph']
 
-                        runInvariants(lccG, request.session)
-                        print 'No project invariants %s complete...' % G_fn
-                    else:
-                        HttpResponse("<h2>The graph size is required to proceed.</h2>")
-	    else:
-		return HttpResponse("<h2>The file you uploaded is not a zip see the instructions on the page before proceeding.</h2>")
+            runInvariants(lccG, request.session)
+            print 'No project invariants %s complete...' % G_fn
+          else:
+            HttpResponse("<h2>The graph size is required to proceed.</h2>")
+      else:
+        return HttpResponse("<h2>The file you uploaded is not a zip see the instructions on the page before proceeding.</h2>")
 
-	    request.session.clear() # NEW
-	    dwnldLoc = "http://www.mrbrain.cs.jhu.edu"+ dataDir
+      request.session.clear() # NEW
+      dwnldLoc = "http://mrbrain.cs.jhu.edu"+ dataDir
 
-	    return HttpResponseRedirect(get_script_prefix()+'success') # STUB
+      return HttpResponseRedirect(get_script_prefix()+'success') # STUB
 
-    if request.method == 'POST' and webargs:
-	dataDir = os.path.join(settings.MEDIA_ROOT, 'tmp', strftime("projectStamp%a%d%b%Y_%H.%M.%S/", localtime()))
-	makeDirIfNone([dataDir])
-	#if (request.body.name)
-	uploadedZip = writeBodyToDisk(request.body, dataDir)[0]
-
-	zipper.unzip(uploadedZip, dataDir) # Unzip the zip
-	os.remove(uploadedZip) # Delete the zip
-
-	request.session['invariants'] = webargs.split(',')
-
-	graphs = glob(os.path.join(dataDir,'*_fiber.mat'))
-	graphs.extend(glob(os.path.join(dataDir,'*_bggr.mat')))
-	graphs.extend(glob(os.path.join(dataDir,'*_smgr.mat')))
-
-	request.session['graphInvariants'] = os.path.join(dataDir, 'graphInvariants')
-
-	for G_fn in graphs:
-            ########### TODO ##########
-	    #***request.session['bgGrfn'] = G_fn
-	    #***lccfn = G_fn.split('_')[0] + '_concomp.mat'
-	    #***roiRootName = G_fn.split('_')[0] + '_roi'
-	    #***lccG = loadAdjMat(request.session['bgGrfn'], lccfn, roiRootName = roiRootName)
-
-	    request.session['smGrfn'] = G_fn
-	    lccG = sio.loadmat(request.session['smGrfn'])['fibergraph']
-
-	    runInvariants(lccG, request.session)
-	    print 'No project invariants %s complete...' % G_fn
-
-	request.session.clear() # NEW
-	dwnldLoc = "http://www.mrbrain.cs.jhu.edu"+ dataDir
-	return HttpResponse("View Data at: " + dwnldLoc) # STUB
-
+  if request.method == 'POST' and webargs:
+    if (re.match(re.compile('(b|big)', re.IGNORECASE), webargs.split('/')[0])):
+      request.session['graphsize'] = 'big'
+    elif (re.match(re.compile('(s|small)', re.IGNORECASE), webargs.split('/')[0])):
+       request.session['graphsize'] = 'small'
     else:
-        form = GraphUploadForm() # An empty, unbound form
+      return django.http.HttpResponseBadRequest("The graph size is required as a web argument")
 
-    # Render the form
-    return render_to_response(
-        'graphupload.html',
-        {'form': form},
-        context_instance=RequestContext(request) # Some failure to input data & returns a key signaling what is requested
-    )
+    dataDir = os.path.join(settings.MEDIA_ROOT, 'tmp', strftime("projectStamp%a%d%b%Y_%H.%M.%S/", localtime()))
+    makeDirIfNone([dataDir])
+    #if (request.body.name)
+    uploadedZip = writeBodyToDisk(request.body, dataDir)[0]
+
+    zipper.unzip(uploadedZip, dataDir) # Unzip the zip
+    os.remove(uploadedZip) # Delete the zip)
+
+    request.session['invariants'] = webargs.split('/')[1].split(',')
+
+    graphs = glob(os.path.join(dataDir,'*_fiber.mat'))
+    graphs.extend(glob(os.path.join(dataDir,'*_bggr.mat')))
+    graphs.extend(glob(os.path.join(dataDir,'*_smgr.mat')))
+
+    request.session['graphInvariants'] = os.path.join(dataDir, 'graphInvariants')
+
+    for G_fn in graphs:
+      if request.session['graphsize'] == 'big':
+        request.session['bgGrfn'] = G_fn
+        lccfn = G_fn.split('_')[0] + '_concomp.mat'
+        roiRootName = G_fn.split('_')[0] + '_roi'
+        lccG = loadAdjMat(request.session['bgGrfn'], lccfn, roiRootName = roiRootName)
+
+      elif request.session['graphsize'] == 'small':
+        request.session['smGrfn'] = G_fn
+        lccG = sio.loadmat(request.session['smGrfn'])['fibergraph']
+
+      runInvariants(lccG, request.session)
+      print 'Invariants computed with no project for: %s ...' % G_fn
+
+    request.session.clear() # NEW
+    dwnldLoc = "http://mrbrain.cs.jhu.edu"+ dataDir
+    return HttpResponse("View Data at: " + dwnldLoc)
+
+  else:
+    form = GraphUploadForm() # An empty, unbound form
+
+  # Render the form
+  return render_to_response(
+      'graphupload.html',
+      {'form': form},
+      context_instance=RequestContext(request) # Some failure to input data & returns a key signaling what is requested
+  )
 
 #########################################
 #	*******************		#
@@ -491,7 +499,7 @@ def convert(request, webargs=None):
 	    request.session.clear() # NEW
 	    return HttpResponse("[ERROR]: You do not have any files with the correct extension for conversion")
 
-	dwnldLoc = "http://www.mrbrain.cs.jhu.edu"+ convertFileSaveLoc
+	dwnldLoc = "http://mrbrain.cs.jhu.edu"+ convertFileSaveLoc
 	request.session.clear() # NEW
 	return HttpResponseRedirect(dwnldLoc)
 
@@ -533,7 +541,7 @@ def convert(request, webargs=None):
 	    request.session.clear() # NEW
 	    return HttpResponse("[ERROR]: You do not have any files with the correct extension for conversion")
 
-	dwnldLoc = "http://www.mrbrain.cs.jhu.edu"+ convertFileSaveLoc
+	dwnldLoc = "http://mrbrain.cs.jhu.edu"+ convertFileSaveLoc
 	request.session.clear() # NEW
 	return HttpResponse ( "Converted files available for download at " + dwnldLoc + " . The directory " +
 		"may be empty if you try to convert to the same format the file is already in.") # change to render of a page with a link to data result
