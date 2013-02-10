@@ -110,7 +110,6 @@
 			document.getElementById('loadingImage').style.visibility='visible';
 		}
 	    </script>
-
     </head>
 
 <body>
@@ -148,8 +147,8 @@
           The example <a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjango/examples/uploadsubj.py"
           target="blank"> uploadsubj.py</a> can be used as follows from a terminal session: <br/>
 
-          <strong>python uploadsubj.py http://mrbrain.cs.jhu.edu/disa/upload/YOUR_project/YOUR_site/YOUR_subject/YOUR_session/scanID/s
-          -i cc,tri,ss1,mad,deg,eig .</strong>
+          <strong>python uploadsubj.py http://mrbrain.cs.jhu.edu/disa/upload/YOUR_project/YOUR_site/YOUR_subject/YOUR_session/YOUR_scanID/s
+          fiber_tract_file roi_raw_file roi_xml_file -i cc,tri,ss1,mad,deg,eig .</strong>
            The parameter after YOUR_scan can either be 's' or 'b', but not both. Using 's' or 'small' builds a small graph (70 x 70 vertices) while 'b' or 'big' builds a
            big graph on the order of < 10M x 10M vertices. This would build a small graph and compute all invariants currently available.
            <strong>The result of uploadsubj.py is a url containing all data produced. Simply follow the url to download it.</strong>
@@ -171,20 +170,29 @@
           <h3> Multiple graphs </h3>
           <p>
           <a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjango/examples/uploadMultiSubj.py">Multi-subject/scan example</a>
-          is also provided for batch uploading and processing of multiple scans.
+          is also provided for example of how to process of multiple scans with a single programmatic call.<br/>
 
-          <strong>Note: a zip file must be uploaded containing only two directories</strong>:
+          From within a terminal session, it can be used as follows: <strong>python uploadMultiSubj.py http://mrbrain.cs.jhu.edu/disa/upload/YOUR_project/YOUR_site/YOUR_subject/YOUR_session/ s
+          fiber_tract_dirctory roi_dirctory -i cc,tri,ss1,mad,deg,eig.</strong> This would build graphs for multiple scans and compute all invariants noted in the -i flag.
+          The example assumes the following:
+
           <ul>
-            <li>A directory named 'fiber' (lower case)  containing all fiber tract files you wish to be processed. [May need update for naming convention] </li>
-            <li>A directory named 'roi' (lower case) containing all corresponding roi files (i.e both an xml and raw file for each fiber tract file).
-            Note the root of each roi file name should match that of the corresponding fiber file. E.g if fiber tract file is 'sample1_fiber.dat' we would expect
-            to find both 'sample1_roi.xml' and 'sample1_roi.raw' in the roi directory.
+            <li>There is a directory containing all fiber tract files you wish to be processed with no other subdirectories or files you do not wish to process</li>
+            <li>There is a directory containing all corresponding roi files (i.e both an xml and raw file for each fiber tract file) with file names in accordance with the convention noted below.
+            <strong>Note the root of each roi file name should:</strong>
+              <ol>
+                <li>End in <strong> _roi</strong> E.g filename_roi.xml and filename_roi.raw.</li>
+                <li>
+                  Be identical to the root of its corresponding fiber tract file. E.g If the fiber file name is <strong> sample1.dat</strong>,
+                  then there must be a <strong>sample1_roi.raw</strong> AND a <strong> sample1_roi.xml</strong>. Thus the root is <strong><i>sample1</i></strong>.
+                </li>
+              </ol>
             </li>
           </ul>
 
-          All fiber tract files will be treated as single project with multiple scans.
-          The example above's use is similar to uploadsubj.py. Download the file and help can be obtained by typing in a terminal/command line session:
-          <strong>python uploadMultiSubj.py -h </strong>. The same is true for the single scan example: <strong>python uploadsubj.py -h</strong> will give help.
+          All fiber tract files  will be treated as single project with multiple scanIDs derived from the file name.
+          Download the file and help can be obtained by typing in a terminal/command line session:
+          <strong>python uploadMultiSubj.py -h </strong>. The same is true for the single scan example: <strong>python uploadsubj.py -h</strong>, will give help.
           </p>
 
         </div>

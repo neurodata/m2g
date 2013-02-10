@@ -63,19 +63,10 @@ def main():
     sys.exit(0)
 
   the_page = response.read()
-  print "Success with id %s" % the_page
+  print '/n' +  the_page
 
-  ''' Open up a tab in your browser to view results'''
-  redir = '/'
-  result.url = result.url[:-1] if result.url.endswith('/') else result.url # remove trailing backslash
-
-  for i, Dir in enumerate(result.url.split('/')[-6:-1]):
-    if (i != len(result.url.split('/')[-6:-1])-1):
-      redir += Dir + '/'
-    else:
-      redir += Dir
-
-  webbrowser.open('http://mbrain.cs.jhu.edu/data/projects/disa/OCPprojects' + redir)
+  ''' Optional: Open up a tab/window in your browser to view results'''
+  webbrowser.open(the_page.split(' ')[5])
 
 if __name__ == "__main__":
   main()
