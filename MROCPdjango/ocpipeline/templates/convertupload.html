@@ -32,7 +32,7 @@
 
 	p,code,ul {padding-bottom: 1.2em; line-height: 180%;}
 
-	li {list-style: none;}
+	/*li {list-style: none;}*/
 
 	h1 {
 		font: normal 1.8em Tahoma,sans-serif;
@@ -139,6 +139,30 @@
 
 	<div style="position:absolute; left:153px; top: 212px;"> <img id="loadingImage" src="http://i1061.photobucket.com/albums/t473/dmhembe/MR-connectome/loading_zpsac6e6d22.gif" border="0" alt="loading" style="visibility:hidden;opacity:0.5"/> </div>
 
+        <div id="Programmatic uses">
+        <h2> File conversions may also be done programmatically</h2>
+        <p>
+        The use is similar to building a graph progmatically. The base url is <strong>http://mrbrain.cs.jhu.edu/disa/convert/</strong>. <br/>
+        <a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjango/examples/singleConvert.py" target="blank">Single</a> and
+        <a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjango/examples/multiConvert.py" target="blank"></a>
+        batch conversion examples are available in the <a href="https://github.com/openconnectome/MR-connectome/tree/master/MROCPdjango/examples" target="blank">examples</a> directory. <br/>
+
+        An example of executing the sample code from the command line is <strong>python singleConvert.py filename.npy http://mrbrain.cs.jhu.edu/disa/convert/cc/mat,csv</strong> <br/>
+	This would convert a file of file type <i>cc</i> from <i>npy</i> format to <i>mat</i> and <i>csv</i> format.<br/>
+        </p>
+          The following are the ONLY accepted file types:
+          <ul>
+              <li> 'ss1' or 'scanStat1' for the Scan Statistic 1</li>
+              <li> 'tri' or 'triangle' for the Triangle Count </li>
+              <li> 'cc' or 'clustCoeff' for the Clustering Coefficient</li>
+              <li> 'mad' or 'maxAvgDeg' for the Maximum Average Degree</li>
+              <li> 'deg' or 'degree' for The Local Degree Count</li>
+              <li> 'eig' or 'eigen' for the Top 100 eigenvalues</li>
+              <li> 'ss2'or 'scanStat2' for the Scan Statistic 2 [Coming soon]</li>
+              <li> 'apl' or 'avePathLen'for the Average Path Length [Coming soon]</li>
+              <li> 'gdia' or 'graphDiam' for the Graph Diameter [Coming soon]</li>
+          </ul>
+        </div>
     	<div class="footer">
           Property of the Johns Hopkins University Storage Lab (HSSL) |  Author: Disa Mhembere
 	</div>
