@@ -326,7 +326,7 @@ def upload(request, webargs=None):
         else:
           return django.http.HttpResponseBadRequest ("Missing graph size. Specify big or small")
 
-        if lccG:
+        if request.session['invariants']:
             invariant_fns =  runInvariants(lccG, request.session)
 
 	#ret = rzfile.printdir()
@@ -335,7 +335,7 @@ def upload(request, webargs=None):
 
 	request.session.clear()
 
-	dwnldLoc = "http://www.mrbrain.cs.jhu.edu" + settings.MEDIA_ROOT + webargs
+	dwnldLoc = "http://mrbrain.cs.jhu.edu" + userDefProjectDir
 	return HttpResponse ( "Files available for download at " + dwnldLoc) # change to render of a page with a link to data result
 
     elif(not webargs):
@@ -614,7 +614,7 @@ def processData(fiber_fn, roi_xml_fn, roi_raw_fn,graphs, graphInvariants, graphs
   SVDfn = os.path.join(graphInvariants,"SVD" ,(baseName + 'embed.npy'))
 
   print("Running SVD....")
-  roiBasename = os.path.splitext(roi_xml_fn) # MAY NEED ADAPTATION
+  roiBasename = os.path.splitext(roi_xml_fn)[0] # MAY NEED ADAPTATION
 
   if (run):
     if (graphsize == 'big'):
