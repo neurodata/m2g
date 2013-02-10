@@ -151,49 +151,52 @@
           <strong>python uploadsubj.py http://mrbrain.cs.jhu.edu/disa/upload/YOUR_project/YOUR_site/YOUR_subject/YOUR_session/YOUR_scanID/s
           fiber_tract_file roi_raw_file roi_xml_file -i cc,tri,ss1,mad,deg,eig .</strong>
            The parameter after YOUR_scan can either be 's' or 'b', but not both. Using 's' or 'small' builds a small graph (70 x 70 vertices) while 'b' or 'big' builds a
-           big graph on the order of < 10M x 10M vertices. This would build a small graph and compute all invariants currently available.
+           big graph on the order of < 10M x 10M vertices. <br/>
+           The particular invocation in bold above would build a small graph and compute all invariants currently available. A list of invariant contractions is
+           available below.
            <strong>The result of uploadsubj.py is a url containing all data produced. Simply follow the url to download it.</strong>
           </p>
 
           The optional arguments given as -i are simply appended to the final url in uploadsubj.py. The options available must be in a comma separated list and are as follows:
           <ul>
-            <li>'ss1' for the Scan Statistic 1</li>
-            <li>'tri' for the Triangle Count </li>
-            <li>'cc'  for the Clustering Coefficient</li>
-            <li>'mad' for the Maximum Average Degree</li>
-            <li>'deg' for The Local Degree Count</li>
-            <li>'eig' for the Top 100 (or maximum available) eigenvalues</li>
-            <li>'ss2' for the Scan Statistic 2 [Coming soon]</li>
-            <li>'apl' for the Average Path Length [Coming soon]</li>
-            <li>'gdia' for the Graph Diameter [Coming soon]</li>
+            <li> <i>ss1</i> for the Scan Statistic 1</li>
+            <li> <i>tri</i> for the Triangle Count </li>
+            <li> <i>cc</i> for the Clustering Coefficient</li>
+            <li> <i>mad</i> for the Maximum Average Degree</li>
+            <li> <i>deg</i> for The Local Degree Count</li>
+            <li> <i>eig</i> for the Top 100 (or maximum available) eigenvalues</li>
+            <li> <i>ss2</i> for the Scan Statistic 2 [Coming soon]</li>
+            <li> <i>apl</i> for the Average Path Length [Coming soon]</li>
+            <li> <i>gdia</i> for the Graph Diameter [Coming soon]</li>
           </ul>
 
           <h3> Multiple graphs </h3>
           <p>
           <a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjango/examples/uploadMultiSubj.py">Multi-subject/scan example</a>
-          is also provided for example of how to process of multiple scans with a single programmatic call.<br/>
+          is also provided as an example of how to process multiple scans with a single programmatic call.<br/>
 
           From within a terminal session, it can be used as follows: <strong>python uploadMultiSubj.py http://mrbrain.cs.jhu.edu/disa/upload/YOUR_project/YOUR_site/YOUR_subject/YOUR_session/ s
-          fiber_tract_dirctory roi_dirctory -i cc,tri,ss1,mad,deg,eig.</strong> This would build graphs for multiple scans and compute all invariants noted in the -i flag.
+          fiber_tract_dirctory roi_dirctory -i cc,tri,ss1,mad,deg,eig.</strong> This call would build graphs for multiple scans and compute all invariants noted in the -i flag.
           The example assumes the following:
 
           <ul>
-            <li>There is a directory containing all fiber tract files you wish to be processed with no other subdirectories or files you do not wish to process</li>
+            <li>There is a directory containing all fiber tract files you wish to be processed with no other sub-directories or files you do not wish to process.</li>
             <li>There is a directory containing all corresponding roi files (i.e both an xml and raw file for each fiber tract file) with file names in accordance with the convention noted below.
             <strong>Note the root of each roi file name should:</strong>
               <ol>
                 <li>End in <strong> _roi</strong> E.g filename_roi.xml and filename_roi.raw.</li>
                 <li>
                   Be identical to the root of its corresponding fiber tract file. E.g If the fiber file name is <strong> sample1.dat</strong>,
-                  then there must be a <strong>sample1_roi.raw</strong> AND a <strong> sample1_roi.xml</strong>. Thus the root is <strong><i>sample1</i></strong>.
+                  then there must be a <strong>sample1_roi.raw</strong> AND a <strong> sample1_roi.xml</strong>. Thus the root is <strong>sample1</strong> in this example.
                 </li>
               </ol>
             </li>
           </ul>
 
           All fiber tract files  will be treated as single project with multiple scanIDs derived from the file name.
-          Download the file and help can be obtained by typing in a terminal/command line session:
-          <strong>python uploadMultiSubj.py -h </strong>. The same is true for the single scan example: <strong>python uploadsubj.py -h</strong>, will give help.
+          <a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjango/examples/uploadMultiSubj.py">Download the file</a>
+          and help can be obtained by typing in a terminal/command line session:
+          <strong>python uploadMultiSubj.py -h </strong>. The same is true for the single scan example, where: <strong>python uploadsubj.py -h</strong> gives help.
           </p>
         </div>
 
@@ -208,7 +211,7 @@
 
               <h3>What's the difference between big and small graphs?</h3>
 
-              Small graphs are 70 x 70 vertices of a CSC matix. <br/>
+              Small graphs are 70 x 70 vertices of a CSC matrix. <br/>
               Big graphs are on the order of < 10 M x 10 M vertices.
             </ul>
         </div>
