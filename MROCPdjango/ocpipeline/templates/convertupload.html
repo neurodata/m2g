@@ -143,26 +143,45 @@
         <div id="Programmatic uses">
         <h2> File conversions may also be done programmatically</h2>
         <p>
-        The use is similar to building a graph progmatically. The base url is <strong>http://mrbrain.cs.jhu.edu/disa/convert/</strong>. <br/>
+        The use is similar to building a graph programmatically. The base url is <strong>http://mrbrain.cs.jhu.edu/disa/convert/</strong>. <br/>
         <a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjango/examples/singleConvert.py" target="blank">Single</a> and
-        <a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjango/examples/multiConvert.py" target="blank"></a>
-        batch conversion examples are available in the <a href="https://github.com/openconnectome/MR-connectome/tree/master/MROCPdjango/examples" target="blank">examples</a> directory. <br/>
-
-        An example of executing the sample code from the command line is <strong>python singleConvert.py filename.npy http://mrbrain.cs.jhu.edu/disa/convert/cc/mat,csv</strong> <br/>
-	This would convert a file of file type <i>cc</i> from <i>npy</i> format to <i>mat</i> and <i>csv</i> format.<br/>
+        <a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjango/examples/multiConvert.py" target="blank">batch</a>
+        conversion examples are available in the <a href="https://github.com/openconnectome/MR-connectome/tree/master/MROCPdjango/examples" target="blank">examples</a> directory. <br/>
         </p>
+
+        <div id="single prog">
+          <h3> Single file conversion </h3>
+            <p>
+            An example of executing the sample code from the command line is <strong>python singleConvert.py filename.npy http://mrbrain.cs.jhu.edu/disa/convert/cc/mat,csv</strong> <br/>
+            This would convert a file of file type <i>cc (Clustering Coefficient)</i> from <i>npy</i> format to <i>mat</i> and <i>csv</i> format.<br/>
+            </p>
+        </div>
+
           The following are the ONLY accepted file types:
           <ul>
-              <li> 'ss1' or 'scanStat1' for the Scan Statistic 1</li>
-              <li> 'tri' or 'triangle' for the Triangle Count </li>
-              <li> 'cc' or 'clustCoeff' for the Clustering Coefficient</li>
-              <li> 'mad' or 'maxAvgDeg' for the Maximum Average Degree</li>
-              <li> 'deg' or 'degree' for The Local Degree Count</li>
-              <li> 'eig' or 'eigen' for the Top 100 eigenvalues</li>
-              <li> 'ss2'or 'scanStat2' for the Scan Statistic 2 [Coming soon]</li>
-              <li> 'apl' or 'avePathLen'for the Average Path Length [Coming soon]</li>
-              <li> 'gdia' or 'graphDiam' for the Graph Diameter [Coming soon]</li>
+              <li> <i>ss1</i> or <i>scanStat1</i> for the Scan Statistic 1</li>
+              <li> <i>tri</i> or <i>triangle</i> for the Triangle Count </li>
+              <li> <i>cc</i> or <i>clustCoeff</i> for the Clustering Coefficient</li>
+              <li> <i>mad</i> or <i>maxAvgDeg</i> for the Maximum Average Degree</li>
+              <li> <i>deg</i> or <i>degree</i> for The Local Degree Count</li>
+              <li> <i>eig</i> or <i>eigen</i> for the Top 100 (or maximum available) eigenvalues</li>
+              <li> <i>ss2</i> or <i>scanStat2</i> for the Scan Statistic 2 [Coming soon]</li>
+              <li> <i>apl</i> or <i>avePathLenfor</i> the Average Path Length [Coming soon]</li>
+              <li> <i>gdia</i> or <i>graphDiam</i> for the Graph Diameter [Coming soon]</li>
           </ul>
+
+          <div id="multi prog">
+          <h3> Multiple file conversion</h3>
+            <p>
+            <a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjango/examples/multiConvert.py" target="blank">The example</a> converts a directory of files of ONE type from one format to another. It assumes you have this
+            directory somewhere already. It's use is similar to that of the <a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjango/examples/singleConvert.py" target="blank">single</a>
+             conversion. <br/>
+
+            An example of executing the sample code from the command line is <strong>python multiConvert.py SomeDirectory http://mrbrain.cs.jhu.edu/disa/convert/ss1/mat,csv</strong> <br/>
+            This would convert a directory of files of type <i>ss1(Scan Statistic 1)</i> from whatever format the files are in - to <i>mat</i> and <i>csv</i> format. Note that if you convert
+            from one format to the same format you will be returned your original file.<strong>Format is determined by file extension.</strong><br/>
+            </p>
+          </div>
         </div>
     	<div class="footer">
           Property of the Johns Hopkins University Storage Lab (HSSL) |  Author: Disa Mhembere
