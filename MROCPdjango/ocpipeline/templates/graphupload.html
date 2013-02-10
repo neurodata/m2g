@@ -32,7 +32,7 @@
 
 	p,code,ul {padding-bottom: 1.2em; line-height: 180%;}
 
-	li {list-style: none;}
+	/*li {list-style: none;}*/
 
 	h1 {
 		font: normal 1.8em Tahoma,sans-serif;
@@ -114,7 +114,8 @@
   </head>
 
 <body>
-    <a href="http://openconnecto.me" target="blank"><img src="http://i1061.photobucket.com/albums/t473/dmhembe/MR-connectome/openconnectome_zpsb648dd80.png"/></a>
+    <a href="http://openconnecto.me" target="blank">
+      <img src="http://i1061.photobucket.com/albums/t473/dmhembe/MR-connectome/openconnectome_zpsf2f06e95.png" border="0"/></a>
 
     <div class="container">
         <div class="navigation">
@@ -133,15 +134,38 @@
     Note the following file naming convention for single graph below where the <strong>base file name </strong> is the the same:
     <ul>
       <li>The <strong>base file name </strong> here is <strong>graph1</strong></li>
-      <li>Graph file name: graph1_fiber.mat or graph1_bggr.mat are acceptible</li>
-      <li>LCC file name: graph1_concomp.mat </li>
-      <li>ROI's: graph1_roi.xml and graph1_roi.raw</li>
+      <li>Graph file name: graph1_fiber.mat, graph1_smgr.mat graph1_bggr.mat are acceptible</li>
+      <li>LCC file name: graph1_concomp.mat (Big graphs only)</li>
+      <li>ROI's: graph1_roi.xml and graph1_roi.raw (Big graphs only)</li>
+      <li><strong>All graphs must have their suffix be either _fiber.mat, _smgr.mat or _bggr.mat</strong>. Eg graph1_fiber.mat, xyz_smgr.mat and
+        foobar_bggr.mat are all acceptable names.</li>
     </ul>
 
-    <strong>Lastly note all graphs must have their suffix be either _fiber.mat, _smgr.mat or _bggr.mat</strong>. Eg graph1_fiber.mat, xyz_smgr.mat and
-    foobar_bggr.mat are all acceptable names. You may adapt the names of you datasets by appending these suffixes using
+    <!--
+    You may adapt the file names of you datasets by appending these suffixes using
     <a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjango/dirconformance/renameDerivs.py" target="blank">this script</a>.
-    Ensure you have backups before doing this. <FONT COLOR='#ff0000'> This may change in the future.</FONT>
+    You need to have a directory that contains a folder named <i>fiber</i> (containing fiber files)
+    Ensure you have backups before doing this. <FONT COLOR='#ff0000'> This may change in the future.</FONT> -->
+
+    <h2>Specifications for acceptable graphs</h2>
+    <ul>
+      <li> A <a href="http://www.mathworks.com/help/matlab/ref/struct.html"> MATLAB struct </a> with a data element named named
+      <i>fibergraph</i> that is a <a href="http://docs.scipy.org/doc/scipy/reference/generated/scipy.sparse.csc_matrix.html#scipy.sparse.csc_matrix">
+      numpy CSC (Compressed Sparse Column) matrix</a>. <br/>
+      It should be loadable with using <a href="http://docs.scipy.org/doc/scipy/reference/generated/scipy.io.loadmat.html">scipy.io.loadmat</a>(filename)['fibergraph'].
+      </li>
+
+      <h3>What's the difference between big and small graphs?</h3>
+
+      We consider small graphs to be 70 x 70 vertices of a CSC matix. The service will accept larger or smaller
+      matrices to be considered as a small graph but we do not recommend it as it may produce unexected
+      be behaviour. <br/>
+
+      The big graphs the MROCP constructs are on the order of < 10 M x 10 M vertices, but is other wise identical
+      small graph. Working with big graphs requires the largest connected component (LCC) as well as we do not consider
+      grey matter in evaluation.
+
+    </ul>
 
     </p>
     <form action="" method="post" enctype="multipart/form-data" name="loadForm">
@@ -157,7 +181,7 @@
     <h2>Programmatic use </h2>
     <p> This is can be accessed using the base url <strong>http://www.mrbrain.cs.jhu.edu/disa/graphupload/</strong>. An
         example of usage can be found <a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjango/examples/computeInvariants.py" target="blank">here</a>.
-        <FONT COLOR='#ff0000'> Examples out of date with new interface. This section will be updated shortly</FONT> <!-- TODO UPDATE WHEN COMPLETE-->
+        <FONT COLOR='#ff0000'> This section will be updated shortly. Big graph testing incomplete.</FONT> <!-- TODO UPDATE WHEN COMPLETE-->
     </p>
 
     </div>

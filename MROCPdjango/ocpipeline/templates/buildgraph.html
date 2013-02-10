@@ -113,7 +113,8 @@
     </head>
 
 <body>
-    <a href="http://openconnecto.me" target="blank"><img src="http://i1061.photobucket.com/albums/t473/dmhembe/MR-connectome/openconnectome_zpsb648dd80.png"/></a>
+    <a href="http://openconnecto.me" target="blank">
+      <img src="http://i1061.photobucket.com/albums/t473/dmhembe/MR-connectome/openconnectome_zpsf2f06e95.png" border="0"/></a>
 
     <div class="container">
         <div class="navigation">
@@ -194,8 +195,24 @@
           Download the file and help can be obtained by typing in a terminal/command line session:
           <strong>python uploadMultiSubj.py -h </strong>. The same is true for the single scan example: <strong>python uploadsubj.py -h</strong>, will give help.
           </p>
-
         </div>
+
+        <div id="Graph specs">
+           <h2>Specifications for graphs built</h2>
+            <ul>
+              <li> A <a href="http://www.mathworks.com/help/matlab/ref/struct.html"> MATLAB struct </a> with a data element named named
+              <i>fibergraph</i> that is a <a href="http://docs.scipy.org/doc/scipy/reference/generated/scipy.sparse.csc_matrix.html#scipy.sparse.csc_matrix">
+              numpy CSC (Compressed Sparse Column) matrix</a>. <br/>
+              It is loadable from a python shell using <a href="http://docs.scipy.org/doc/scipy/reference/generated/scipy.io.loadmat.html">scipy.io.loadmat</a>(filename)['fibergraph'].
+              </li>
+
+              <h3>What's the difference between big and small graphs?</h3>
+
+              Small graphs are 70 x 70 vertices of a CSC matix. <br/>
+              Big graphs are on the order of < 10 M x 10 M vertices.
+            </ul>
+        </div>
+
         <div class="footer">
         Property of the Johns Hopkins University Storage Lab (HSSL) |  Author: Disa Mhembere
     </div>
