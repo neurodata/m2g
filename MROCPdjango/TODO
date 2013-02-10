@@ -1,8 +1,9 @@
-*MR OCP To do list Disa
+*MR OCP TODO list Disa
+===========================
 
+* MERGE TO MASTER SOON
 ** Resolve biggraph degree and eigenvalue non-conversion to csv
-* LoadGraphInv programmatic view, examples and html update for big as well
-* Add  graph specs to html
+* Add graph specs to html
 
 0. Resolve url fot non-uniform file names (spaces etc)
 1. Production Test programmatic examples
@@ -13,12 +14,18 @@
 5. Finish work on convert fibergraph, lcc, svd to csv
 
 Invariants still to compute
+=============================
+
 *SS2
 *APL
 *GDia
 
 Recently completed
+===================
 
+<-- Test non-uniform file names -->
+<-- Dev server Test programmatic examples -->
+<-- LoadGraphInv programmatic view, examples and html update for big as well -->
 <-- 0. Fix import errors -->
 <-- 5. Redo confirmDownload to account for csv addition -->
 <-- 6. Get rid of lccnpytomat -->
@@ -30,8 +37,6 @@ Recently completed
 <-- 6. Make convert after graph processing also convert all invariants -->
 <-- 7. Fix runInvariants() method camelCase problems - views.py -->
 <-- 0. Update html for programmatic uses -->
-<-- Test non-uniform file names -->
-<-- Dev server Test programmatic examples -->
 
 * Web server dev mode
 - MPLCONFIGURE
