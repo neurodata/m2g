@@ -1,11 +1,8 @@
 *MR OCP TODO list Disa
 ===========================
 
-* MERGE TO MASTER SOON
 ** Resolve biggraph degree and eigenvalue non-conversion to csv
-* Add graph specs to html
 
-0. Resolve url for non-uniform file names (spaces etc)
 1. Production Test programmatic examples
 
 2. Do more documentation
@@ -23,6 +20,9 @@ Invariants still to compute
 Recently completed
 ===================
 
+<-- Enable SSL on mrbrain -->
+<-- 0. Resolve url for non-uniform file names (spaces etc) -->
+<-- * Add graph specs to html -->
 <-- Test non-uniform file names -->
 <-- Dev server Test programmatic examples -->
 <-- LoadGraphInv programmatic view, examples and html update for big as well -->
