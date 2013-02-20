@@ -17,13 +17,12 @@ from loadAdjMatrix import loadAdjMat
 import argparse
 from time import time
 
-def eignTriLocal_deg_MAD(G_fn, G = None, lcc_fn = None, roiRootName = None, triDir=None, MADdir = None, eigvDir = None, degDir = None , k=None):
+def eignTriLocal_deg_MAD(G_fn, G = None, lcc_fn = None, triDir=None, MADdir = None, eigvDir = None, degDir = None , k=None):
   '''
   Local Estimation of Triangle count
   G_fn - fibergraph full filename (.mat)
   G - the sparse matrix containing the graph
   lcc_fn - largest connected component full filename (.npy)
-  roiRootName - full path of roi + root (i.g. /Users/disa/roi/MXXXXX_roi)
   k - Number of eigenvalues to compute. The more the higher accuracy achieved
   degDir - Directory where resulting degree array is placed
   triDir - Directory where resulting array is placed
@@ -33,7 +32,7 @@ def eignTriLocal_deg_MAD(G_fn, G = None, lcc_fn = None, roiRootName = None, triD
   if (G !=None):
     pass
   elif (lcc_fn):
-    G = loadAdjMat(G_fn, lcc_fn, roiRootName)
+    G = loadAdjMat(G_fn, lcc_fn)
   # test case
   else:
     G = sio.loadmat(G_fn)['fibergraph']
@@ -105,7 +104,6 @@ def main():
   parser = argparse.ArgumentParser(description='Calculate an estimat of triangle counting on a graph')
   parser.add_argument('G_fn', action='store',help='Full filename sparse graph (.mat)')
   parser.add_argument('lcc_fn', action='store',help='Full filename of largest connected component (.npy)')
-  parser.add_argument('roiRootName', action='store',help='Full path of roi director + baseName')
   parser.add_argument('triDir', action='store', help='Full path of directory where you want .npy array resulting file to go')
   parser.add_argument('MADdir', action='store', help='Full path of directory where you want .npy array resulting file to go')
   parser.add_argument('eigvDir', action='store', help='Full path of directory where you want .npy array resulting file to go')
@@ -113,7 +111,7 @@ def main():
   parser.add_argument('k', type = int, action='store', help='The number of Eigenvalues/vectors to compute' )
 
   result = parser.parse_args()
-  eignTriLocal_deg_MAD(result.G_fn, None, result.lcc_fn, result.roiRootName, result.triDir, result.MADdir, result.eigvDir, result.degDir, result.k )
+  eignTriLocal_deg_MAD(result.G_fn, None, result.lcc_fn, result.triDir, result.MADdir, result.eigvDir, result.degDir, result.k )
 
 if __name__ == '__main__':
   main()

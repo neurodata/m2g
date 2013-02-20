@@ -13,13 +13,12 @@ from loadAdjMatrix import loadAdjMat
 import argparse
 from time import time
 
-def calcDegree(G_fn, G = None, lcc_fn = None, roiRootName = None, degDir = None):
+def calcDegree(G_fn, G = None, lcc_fn = None, degDir = None):
   '''
   Count the degree of each vertex of a graph
   G_fn - fibergraph full filename (.mat)
   G - the sparse matrix containing the graphs
   lcc_fn - largest connected component full filename (.npy)
-  roiRootName - full path of roi + root (i.g. /Users/disa/roi/MXXX_roi)
   degDir - Directory where resulting degree array is placed
   '''
   print '\nCalculating vertex degree ...'
@@ -27,7 +26,7 @@ def calcDegree(G_fn, G = None, lcc_fn = None, roiRootName = None, degDir = None)
   if (G !=None):
     pass
   elif (lcc_fn):
-    G = loadAdjMat(G_fn, lcc_fn, roiRootName)
+    G = loadAdjMat(G_fn, lcc_fn)
 
   # test case
   else:
@@ -67,12 +66,11 @@ def main():
     parser = argparse.ArgumentParser(description='Calculate true local Scan Statistic and Degree in a graph')
     parser.add_argument('G_fn', action='store',help='Full filename sparse graph (.mat)')
     parser.add_argument('lcc_fn', action='store',help='Full filename of largest connected component (.npy)')
-    parser.add_argument('roiRootName', action='store',help='Full path of roi director + baseName')
     parser.add_argument('degDir', action='store', help='Full path of directory where you want Degree .npy array resulting file to go')
 
     result = parser.parse_args()
 
-    calcScanStat_Degree(result.G_fn, None, result.lcc_fn, result.roiRootName, result.degDir)
+    calcScanStat_Degree(result.G_fn, None, result.lcc_fn, result.degDir)
 
 if __name__ == '__main__':
   main()

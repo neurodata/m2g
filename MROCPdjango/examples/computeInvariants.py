@@ -14,12 +14,12 @@ import webbrowser
 
 def main():
 
-  parser = argparse.ArgumentParser(description='Upload a single or multiple graphs,lccs, rois via a single zipped dir. \
+  parser = argparse.ArgumentParser(description='Upload a single or multiple graphs, & possibly lcc\'s via a single zipped dir. \
                                   Base url -> http://www.mrbrain.cs.jhu.edu/disa/graphupload/')
   parser.add_argument('url', action="store", help='url is http://mrbrain.cs.jhu.edu/disa/graphupload/{s|b} where s= smallgraph OR b = biggraph')
   parser.add_argument('webargs', action="store", help='comma separated list of invariant types. E.g cc,tri,deg,mad for \
                       clustering coefficient, triangle count, degree & maximum average degree')
-  parser.add_argument('zippedFile', action="store", help ='Data zipped directory with one or more (a) graph(s) with (an) lcc(s) & (an) roi(s)')
+  parser.add_argument('zippedFile', action="store", help ='Data zipped directory with one or more (a) graph(s) with (an) lcc(s)')
 
   result = parser.parse_args()
 

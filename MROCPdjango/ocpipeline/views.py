@@ -75,276 +75,271 @@ def default(request):
   return render_to_response('welcome.html')
 
 def buildGraph(request):
-    request.session.clear()
+  request.session.clear()
 
-    if request.method == 'POST':
-        form = BuildGraphForm(request.POST, request.FILES) # instantiating form
-        if form.is_valid():
-	    print "Uploading files..."
+  if request.method == 'POST':
+    form = BuildGraphForm(request.POST, request.FILES) # instantiating form
+    if form.is_valid():
+      print "Uploading files..."
 
-	    # Acquire proj names
-	    userDefProjectName = form.cleaned_data['UserDefprojectName']
-            site = form.cleaned_data['site']
-            subject = form.cleaned_data['subject']
-            session = form.cleaned_data['session']
-            scanId = form.cleaned_data['scanId']
+      # Acquire proj names
+      userDefProjectName = form.cleaned_data['UserDefprojectName']
+      site = form.cleaned_data['site']
+      subject = form.cleaned_data['subject']
+      session = form.cleaned_data['session']
+      scanId = form.cleaned_data['scanId']
 
-	    userDefProjectName = adaptProjNameIfReq(os.path.join(settings.MEDIA_ROOT, userDefProjectName)) # Fully qualify AND handle identical projects
+      userDefProjectName = adaptProjNameIfReq(os.path.join(settings.MEDIA_ROOT, userDefProjectName)) # Fully qualify AND handle identical projects
 
-	    request.session['usrDefProjDir'] = os.path.join(userDefProjectName, site, subject, session, scanId)
-	    request.session['scanId'] = scanId
+      request.session['usrDefProjDir'] = os.path.join(userDefProjectName, site, subject, session, scanId)
+      request.session['scanId'] = scanId
 
-	    ''' Define data directory paths '''
-	    request.session['derivatives'], request.session['rawdata'], request.session['graphs'],\
-		request.session['graphInvariants'],request.session['images']= defDataDirs(request.session['usrDefProjDir'])
+      ''' Define data directory paths '''
+      request.session['derivatives'], request.session['rawdata'], request.session['graphs'],\
+          request.session['graphInvariants'],request.session['images']= defDataDirs(request.session['usrDefProjDir'])
 
-            grModObj = BuildGraphModel(derivfile = request.FILES['fiber_file'])
-	    grModObj._meta.get_field('derivfile').upload_to = request.session['derivatives'] # route files to correct location
+      grModObj = BuildGraphModel(derivfile = request.FILES['fiber_file'])
+      grModObj._meta.get_field('derivfile').upload_to = request.session['derivatives'] # route files to correct location
 
-	    grModObj2 = BuildGraphModel(derivfile = request.FILES['roi_raw_file'])
-	    grModObj2._meta.get_field('derivfile').upload_to = request.session['derivatives']
+      grModObj2 = BuildGraphModel(derivfile = request.FILES['roi_raw_file'])
+      grModObj2._meta.get_field('derivfile').upload_to = request.session['derivatives']
 
-            grModObj3 = BuildGraphModel(derivfile =  request.FILES['roi_xml_file'])
-            grModObj3._meta.get_field('derivfile').upload_to = request.session['derivatives']
+      grModObj3 = BuildGraphModel(derivfile =  request.FILES['roi_xml_file'])
+      grModObj3._meta.get_field('derivfile').upload_to = request.session['derivatives']
 
-	    grModObj.projectName = grModObj2.projectName = grModObj3.projectName =  form.cleaned_data['UserDefprojectName']# set project name
-	    grModObj.site = grModObj2.site = grModObj3.site =  form.cleaned_data['site']# set the site
-	    grModObj.subject = grModObj2.subject = grModObj3.subject =  form.cleaned_data['subject']# set the subject
-	    grModObj.session = grModObj2.session = grModObj3.session =  form.cleaned_data['session']# set the session
-	    grModObj.scanId = grModObj2.scanId = grModObj3.scanId =  form.cleaned_data['scanId']# set the scanId
+      grModObj.projectName = grModObj2.projectName = grModObj3.projectName =  form.cleaned_data['UserDefprojectName']# set project name
+      grModObj.site = grModObj2.site = grModObj3.site =  form.cleaned_data['site']# set the site
+      grModObj.subject = grModObj2.subject = grModObj3.subject =  form.cleaned_data['subject']# set the subject
+      grModObj.session = grModObj2.session = grModObj3.session =  form.cleaned_data['session']# set the session
+      grModObj.scanId = grModObj2.scanId = grModObj3.scanId =  form.cleaned_data['scanId']# set the scanId
 
-	    request.session['invariants'] = form.cleaned_data['Select_Invariants_you_want_computed']
+      request.session['invariants'] = form.cleaned_data['Select_Invariants_you_want_computed']
 
-            request.session['graphsize'] = form.cleaned_data['Select_graph_size']
+      request.session['graphsize'] = form.cleaned_data['Select_graph_size']
 
-            ''' Acquire fileNames '''
-	    fiber_fn = form.cleaned_data['fiber_file'].name # get the name of the file input by user
-            roi_raw_fn = form.cleaned_data['roi_raw_file'].name
-            roi_xml_fn = form.cleaned_data['roi_xml_file'].name
+      ''' Acquire fileNames '''
+      fiber_fn = form.cleaned_data['fiber_file'].name # get the name of the file input by user
+      roi_raw_fn = form.cleaned_data['roi_raw_file'].name
+      roi_xml_fn = form.cleaned_data['roi_xml_file'].name
 
-            ''' Save files to temp location '''
-            grModObj.save()
-	    grModObj2.save()
-            grModObj3.save()
+      ''' Save files to temp location '''
+      grModObj.save()
+      grModObj2.save()
+      grModObj3.save()
 
-	    print '\nSaving all files complete...'
+      print '\nSaving all files complete...'
 
-            ''' Make appropriate dirs if they dont already exist '''
-            createDirStruct.createDirStruct([request.session['derivatives'], request.session['rawdata'],\
-		request.session['graphs'], request.session['graphInvariants'], request.session['images']])
+      ''' Make appropriate dirs if they dont already exist '''
+      createDirStruct.createDirStruct([request.session['derivatives'], request.session['rawdata'],\
+          request.session['graphs'], request.session['graphInvariants'], request.session['images']])
 
-            # Redirect to Processing page
-	    return HttpResponseRedirect(get_script_prefix()+'processinput')
-    else:
-        form = BuildGraphForm() # An empty, unbound form
+      # Redirect to Processing page
+      return HttpResponseRedirect(get_script_prefix()+'processinput')
+  else:
+    form = BuildGraphForm() # An empty, unbound form
 
-    # Render the form
-    return render_to_response(
-        'buildgraph.html',
-        {'form': form},
-        context_instance=RequestContext(request) # Some failure to input data & returns a key signaling what is requested
-    )
+  # Render the form
+  return render_to_response(
+      'buildgraph.html',
+      {'form': form},
+      context_instance=RequestContext(request) # Some failure to input data & returns a key signaling what is requested
+  )
 
 ''' Successful completion of task'''
 def success(request):
-    return render_to_response('success.html')
+  return render_to_response('success.html')
 
 def processInputData(request):
-    '''
-    Extract File name & determine what file corresponds to what for gengraph
-    @param request: the request object
-    '''
-    filesInUploadDir = os.listdir(request.session['derivatives'])
+  '''
+  Extract File name & determine what file corresponds to what for gengraph
+  @param request: the request object
+  '''
+  filesInUploadDir = os.listdir(request.session['derivatives'])
 
-    roi_xml_fn, fiber_fn, roi_raw_fn = filesorter.checkFileExtGengraph(filesInUploadDir) # Check & sort files
+  roi_xml_fn, fiber_fn, roi_raw_fn = filesorter.checkFileExtGengraph(filesInUploadDir) # Check & sort files
 
-    for fileName in [roi_xml_fn, fiber_fn, roi_raw_fn]:
-	if fileName == "": # Means a file is missing from i/p
-	    return render_to_response('pipelineUpload.html', {'form': form}, context_instance=RequestContext(request)) # Missing file for processing Gengraph
+  for fileName in [roi_xml_fn, fiber_fn, roi_raw_fn]:
+    if fileName == "": # Means a file is missing from i/p
+      return render_to_response('pipelineUpload.html', {'form': form}, context_instance=RequestContext(request)) # Missing file for processing Gengraph
 
-    baseName = fiber_fn[:-9] #MAY HAVE TO CHANGE
+  baseName = fiber_fn[:-9] #MAY HAVE TO CHANGE
 
-    ''' Fully qualify file names '''
-    fiber_fn = os.path.join(request.session['derivatives'], fiber_fn)
-    roi_raw_fn = os.path.join(request.session['derivatives'], roi_raw_fn)
-    roi_xml_fn = os.path.join(request.session['derivatives'], roi_xml_fn)
+  ''' Fully qualify file names '''
+  fiber_fn = os.path.join(request.session['derivatives'], fiber_fn)
+  roi_raw_fn = os.path.join(request.session['derivatives'], roi_raw_fn)
+  roi_xml_fn = os.path.join(request.session['derivatives'], roi_xml_fn)
 
-    request.session['smGrfn'], request.session['bgGrfn'], request.session['lccfn'],request.session['SVDfn'] \
-	= processData(fiber_fn, roi_xml_fn, roi_raw_fn,request.session['graphs'], request.session['graphInvariants'], request.session['graphsize'], True)
+  request.session['smGrfn'], request.session['bgGrfn'], request.session['lccfn'],request.session['SVDfn'] \
+      = processData(fiber_fn, roi_xml_fn, roi_raw_fn,request.session['graphs'], request.session['graphInvariants'], request.session['graphsize'], True)
 
-    # Run ivariants here
-    if len(request.session['invariants']) > 0:
-	print "Computing invariants"
-        if (request.session['graphsize'] == 'big'):
-          lccG = loadAdjMat(request.session['bgGrfn'], request.session['lccfn'], roiRootName = os.path.splitext(roi_xml_fn)[0])
-        elif (request.session['graphsize'] == 'small'):
+  # Run ivariants here
+  if len(request.session['invariants']) > 0:
+    print "Computing invariants"
+    if (request.session['graphsize'] == 'big'):
+      lccG = loadAdjMat(request.session['bgGrfn'], request.session['lccfn'])
 
-          lccG = sio.loadmat(request.session['smGrfn'])['fibergraph']
-	request.session['invariant_fns'] =  runInvariants(lccG, request.session)
-    return HttpResponseRedirect(get_script_prefix()+'confirmdownload')
+    elif (request.session['graphsize'] == 'small'):
+      lccG = sio.loadmat(request.session['smGrfn'])['fibergraph']
+
+    request.session['invariant_fns'] =  runInvariants(lccG, request.session)
+  return HttpResponseRedirect(get_script_prefix()+'confirmdownload')
 
 def confirmDownload(request):
 
-    #-- BEGIN TEMP FIX --#
-    #request.session['invariant_fns']['lcc'] = request.session['lccfn']
-    #request.session['invariant_fns']['svd'] = request.session['SVDfn']
-    #-- END TEMP FIX --#
+  if request.method == 'POST':
+    form = DownloadForm(request.POST) # instantiating form
+    if form.is_valid():
+      invConvertToFormats = form.cleaned_data['Select_Invariant_conversion_format'] # Which form to convert to
+      grConvertToFormats = form.cleaned_data['Select_Graph_conversion_format']
+      dataReturn = form.cleaned_data['Select_output_type']
 
-    if request.method == 'POST':
-	form = DownloadForm(request.POST) # instantiating form
-        if form.is_valid():
-	    invConvertToFormats = form.cleaned_data['Select_Invariant_conversion_format'] # Which form to convert to
-	    grConvertToFormats = form.cleaned_data['Select_Graph_conversion_format']
-	    dataReturn = form.cleaned_data['Select_output_type']
+      for fileFormat in invConvertToFormats:
+        if fileFormat == '.mat':
+          convertTo.convertLCCNpyToMat(request.session['lccfn'])
+          convertTo.convertSVDNpyToMat(request.session['SVDfn'])
 
-	    for fileFormat in invConvertToFormats:
-		if fileFormat == '.mat':
-		    convertTo.convertLCCNpyToMat(request.session['lccfn'])
-		    convertTo.convertSVDNpyToMat(request.session['SVDfn'])
+        # Conversion of all files
+        for inv in request.session['invariant_fns'].keys():
+          if isinstance(request.session['invariant_fns'][inv], list): # Case of eigs
+            for fn in request.session['invariant_fns'][inv]:
+              convertTo.convertAndSave(fn, fileFormat, getDirFromFilename(fn), inv)
+          else: # case of all other invariants
+            convertTo.convertAndSave(request.session['invariant_fns'][inv], fileFormat, \
+                                getDirFromFilename(request.session['invariant_fns'][inv]) , inv)
 
-		# Conversion of all files
-		for inv in request.session['invariant_fns'].keys():
-		    if isinstance(request.session['invariant_fns'][inv], list): # Case of eigs
-			for fn in request.session['invariant_fns'][inv]:
-			    convertTo.convertAndSave(fn, fileFormat, getDirFromFilename(fn), inv)
-		    else: # case of all other invariants
-			convertTo.convertAndSave(request.session['invariant_fns'][inv], fileFormat, \
-					    getDirFromFilename(request.session['invariant_fns'][inv]) , inv)
+      for fileFormat in grConvertToFormats:
+        if request.session['graphsize'] == 'big':
+          convertTo.convertGraph(request.session['bgGrfn'], fileFormat)
+        elif request.session['graphsize'] == 'small':
+          convertTo.convertGraph(request.session['smGrfn'], fileFormat)
 
-	    for fileFormat in grConvertToFormats:
-                if request.session['graphsize'] == 'big':
-                    convertTo.convertGraph(request.session['bgGrfn'], fileFormat)
-                elif request.session['graphsize'] == 'small':
-                    convertTo.convertGraph(request.session['smGrfn'], fileFormat)
+      if dataReturn == 'vd': # View data directory
+        dataUrlTail = request.session['usrDefProjDir']
+        request.session.clear() # Very important
+        return HttpResponseRedirect('http://mrbrain.cs.jhu.edu' + dataUrlTail)
 
-	    if dataReturn == 'vd': # View data directory
-	    	dataUrlTail = request.session['usrDefProjDir']
-		request.session.clear() # Very important
-		return HttpResponseRedirect('http://mrbrain.cs.jhu.edu' + dataUrlTail)
+      elif dataReturn == 'dz': #Download all as zip
+        return HttpResponseRedirect(get_script_prefix()+'zipoutput')
 
-	    elif dataReturn == 'dz': #Download all as zip
-		return HttpResponseRedirect(get_script_prefix()+'zipoutput')
+  else:
+    form = DownloadForm()
 
-    else:
-        form = DownloadForm()
-
-    return render_to_response('confirmDownload.html',{'form': form},\
-		    context_instance=RequestContext(request))
-
+  return render_to_response('confirmDownload.html',{'form': form},\
+                  context_instance=RequestContext(request))
 
 def zipProcessedData(request):
-    '''
-    Compress data products to single zip for upload
-    @param request: the request object
-    '''
-    print '\nBeginning file compression...'
-    # Take dir with multiple scans, compress it & send it off
+  '''
+  Compress data products to single zip for upload
+  @param request: the request object
+  '''
+  print '\nBeginning file compression...'
+  # Take dir with multiple scans, compress it & send it off
 
-    ''' Zip it '''
-    #temp = zipper.zipFilesFromFolders(dirName = request.session['usrDefProjDir'])
-    temp = zipper.zipper(request.session['usrDefProjDir'], zip_file = request.session['usrDefProjDir'] + '.zip')
-    ''' Wrap it '''
-    wrapper = FileWrapper(temp)
-    response = HttpResponse(wrapper, content_type='application/zip')
-    response['Content-Disposition'] = ('attachment; filename='+ request.session['scanId'] +'.zip')
-    response['Content-Length'] = temp.tell()
-    temp.seek(0)
+  ''' Zip it '''
+  #temp = zipper.zipFilesFromFolders(dirName = request.session['usrDefProjDir'])
+  temp = zipper.zipper(request.session['usrDefProjDir'], zip_file = request.session['usrDefProjDir'] + '.zip')
+  ''' Wrap it '''
+  wrapper = FileWrapper(temp)
+  response = HttpResponse(wrapper, content_type='application/zip')
+  response['Content-Disposition'] = ('attachment; filename='+ request.session['scanId'] +'.zip')
+  response['Content-Length'] = temp.tell()
+  temp.seek(0)
 
-    request.session.clear() # Very Important
-    ''' Send it '''
-    return response
+  request.session.clear() # Very Important
+  ''' Send it '''
+  return response
 
 def upload(request, webargs=None):
-    """
-    Programmatic interface for uploading data
-    @param request: the request object
+  """
+  Programmatic interface for uploading data
+  @param request: the request object
 
-    @param webargs: POST data with userDefProjectName, site, subject, session, scanId, graphsize, [list of invariants to compute] info
-    """
-    request.session.clear() # NEW
+  @param webargs: POST data with userDefProjectName, site, subject, session, scanId, graphsize, [list of invariants to compute] info
+  """
+  request.session.clear() # NEW
 
-    if (webargs and request.method == 'POST'):
-        # Check for malformatted input
-        webargs = webargs[1:] if webargs.startswith('/') else webargs
-        webargs = webargs[:-1] if webargs.endswith('/') else webargs
+  if (webargs and request.method == 'POST'):
+    # Check for malformatted input
+    webargs = webargs[1:] if webargs.startswith('/') else webargs
+    webargs = webargs[:-1] if webargs.endswith('/') else webargs
 
-        if len(webargs.split('/')) == 7:
-            [userDefProjectName, site, subject, session, scanId, graphsize, request.session['invariants'] ] = webargs.split('/')
-            request.session['invariants'] = request.session['invariants'].split(',')
-        elif len(webargs.split('/')) == 6:
-            [userDefProjectName, site, subject, session, scanId, graphsize] = webargs.split('/')
+    if len(webargs.split('/')) == 7:
+      [userDefProjectName, site, subject, session, scanId, graphsize, request.session['invariants'] ] = webargs.split('/')
+      request.session['invariants'] = request.session['invariants'].split(',')
+    elif len(webargs.split('/')) == 6:
+      [userDefProjectName, site, subject, session, scanId, graphsize] = webargs.split('/')
 
-	userDefProjectDir = adaptProjNameIfReq(os.path.join(settings.MEDIA_ROOT, userDefProjectName, site, subject, session, scanId))
+    userDefProjectDir = adaptProjNameIfReq(os.path.join(settings.MEDIA_ROOT, userDefProjectName, site, subject, session, scanId))
 
-	''' Define data directory paths '''
-	derivatives, rawdata,  graphs, request.session['graphInvariants'], images = defDataDirs(userDefProjectDir)
+    ''' Define data directory paths '''
+    derivatives, rawdata,  graphs, request.session['graphInvariants'], images = defDataDirs(userDefProjectDir)
 
-	''' Make appropriate dirs if they dont already exist '''
-	createDirStruct.createDirStruct([derivatives, rawdata, graphs, request.session['graphInvariants'], images])
-	print 'Directory structure created...'
+    ''' Make appropriate dirs if they dont already exist '''
+    createDirStruct.createDirStruct([derivatives, rawdata, graphs, request.session['graphInvariants'], images])
+    print 'Directory structure created...'
 
-	''' Get data from request.body '''
-	tmpfile = tempfile.NamedTemporaryFile()
-	tmpfile.write ( request.body )
-	tmpfile.flush()
-	tmpfile.seek(0)
-	rzfile = zipfile.ZipFile ( tmpfile.name, "r" )
+    ''' Get data from request.body '''
+    tmpfile = tempfile.NamedTemporaryFile()
+    tmpfile.write ( request.body )
+    tmpfile.flush()
+    tmpfile.seek(0)
+    rzfile = zipfile.ZipFile ( tmpfile.name, "r" )
 
-	print 'Temporary file created...'
+    print 'Temporary file created...'
 
-	''' Extract & save zipped files '''
-	uploadFiles = []
-	for name in (rzfile.namelist()):
+    ''' Extract & save zipped files '''
+    uploadFiles = []
+    for name in (rzfile.namelist()):
 
-	    outfile = open(os.path.join(derivatives, name.split('/')[-1]), 'wb') # strip name of source folders if in file name
-	    outfile.write(rzfile.read(name))
-	    outfile.flush()
-	    outfile.close()
-	    uploadFiles.append(os.path.join(derivatives, name.split('/')[-1])) # add to list of files
-	    print name + " written to disk.."
+      outfile = open(os.path.join(derivatives, name.split('/')[-1]), 'wb') # strip name of source folders if in file name
+      outfile.write(rzfile.read(name))
+      outfile.flush()
+      outfile.close()
+      uploadFiles.append(os.path.join(derivatives, name.split('/')[-1])) # add to list of files
+      print name + " written to disk.."
 
-	  # Check which file is which
-	roi_xml_fn, fiber_fn, roi_raw_fn = filesorter.checkFileExtGengraph(uploadFiles) # Check & sort files
+    # Check which file is which
+    roi_xml_fn, fiber_fn, roi_raw_fn = filesorter.checkFileExtGengraph(uploadFiles) # Check & sort files
 
-	''' Data Processing '''
-        if (re.match(re.compile('(b|big)', re.IGNORECASE), graphsize)):
-            request.session['graphsize'] = 'big'
-            request.session['smGrfn'], request.session['bgGrfn'], lccfn, SVDfn \
-              = processData(fiber_fn, roi_xml_fn, roi_raw_fn,graphs, request.session['graphInvariants'], request.session['graphsize'],True) # Change to false to not process anything
+    ''' Data Processing '''
+    if (re.match(re.compile('(b|big)', re.IGNORECASE), graphsize)):
+      request.session['graphsize'] = 'big'
+      request.session['smGrfn'], request.session['bgGrfn'], lccfn, SVDfn \
+        = processData(fiber_fn, roi_xml_fn, roi_raw_fn,graphs, request.session['graphInvariants'], request.session['graphsize'],True) # Change to false to not process anything
 
-            # process invariants if requested
-            if request.session['invariants']:
-              lccG = loadAdjMat(request.session['bgGrfn'], lccfn, roiRootName = os.path.splitext(roi_xml_fn)[0])
+      # process invariants if requested
+      if request.session['invariants']:
+        lccG = loadAdjMat(request.session['bgGrfn'], lccfn)
 
-        elif(re.match(re.compile('(s|small)', re.IGNORECASE), graphsize)):
-            request.session['graphsize'] = 'small'
-            request.session['smGrfn'], request.session['bgGrfn'], lccfn, SVDfn \
-              = processData(fiber_fn, roi_xml_fn, roi_raw_fn,graphs, request.session['graphInvariants'], request.session['graphsize'],True) # Change to false to not process anything
+    elif(re.match(re.compile('(s|small)', re.IGNORECASE), graphsize)):
+      request.session['graphsize'] = 'small'
+      request.session['smGrfn'], request.session['bgGrfn'], lccfn, SVDfn \
+        = processData(fiber_fn, roi_xml_fn, roi_raw_fn,graphs, request.session['graphInvariants'], request.session['graphsize'],True) # Change to false to not process anything
 
-            if request.session['invariants']:
-                lccG = sio.loadmat(request.session['smGrfn'])['fibergraph']
-        else:
-          return django.http.HttpResponseBadRequest ("Missing graph size. Specify big or small")
-
-        if request.session['invariants']:
-            invariant_fns =  runInvariants(lccG, request.session)
-
-	#ret = rzfile.printdir()
-	#ret = rzfile.testzip()
-	#ret = rzfile.namelist()
-
-	request.session.clear()
-
-	dwnldLoc = "http://mrbrain.cs.jhu.edu" + userDefProjectDir
-	return HttpResponse ( "Files available for download at " + dwnldLoc) # change to render of a page with a link to data result
-
-    elif(not webargs):
-	request.session.clear()
-	return django.http.HttpResponseBadRequest ("Expected web arguments to direct project correctly")
-
+      if request.session['invariants']:
+        lccG = sio.loadmat(request.session['smGrfn'])['fibergraph']
     else:
-	request.session.clear()
-	return django.http.HttpResponseBadRequest ("Expected POST data, but none given")
+      return django.http.HttpResponseBadRequest ("Missing graph size. Specify big or small")
+
+    if request.session['invariants']:
+      invariant_fns =  runInvariants(lccG, request.session)
+
+    #ret = rzfile.printdir()
+    #ret = rzfile.testzip()
+    #ret = rzfile.namelist()
+
+    request.session.clear()
+
+    dwnldLoc = "http://mrbrain.cs.jhu.edu" + userDefProjectDir
+    return HttpResponse ( "Files available for download at " + dwnldLoc) # change to render of a page with a link to data result
+
+  elif(not webargs):
+    request.session.clear()
+    return django.http.HttpResponseBadRequest ("Expected web arguments to direct project correctly")
+
+  else:
+    request.session.clear()
+    return django.http.HttpResponseBadRequest ("Expected POST data, but none given")
 
 ################## TO DOs ########################
 def download(request, webargs=None):
@@ -386,8 +381,7 @@ def graphLoadInv(request, webargs=None):
           if request.session['graphsize'] == 'big':
             request.session['bgGrfn'] = G_fn
             lccfn = G_fn.split('_')[0] + '_concomp.mat'
-            roiRootName = G_fn.split('_')[0] + '_roi'
-            lccG = loadAdjMat(request.session['bgGrfn'], lccfn, roiRootName = roiRootName)
+            lccG = loadAdjMat(request.session['bgGrfn'], lccfn)
 
           elif request.session['graphsize'] == 'small':
             request.session['smGrfn'] = G_fn
@@ -433,8 +427,7 @@ def graphLoadInv(request, webargs=None):
       if request.session['graphsize'] == 'big':
         request.session['bgGrfn'] = G_fn
         lccfn = G_fn.split('_')[0] + '_concomp.mat'
-        roiRootName = G_fn.split('_')[0] + '_roi'
-        lccG = loadAdjMat(request.session['bgGrfn'], lccfn, roiRootName = roiRootName)
+        lccG = loadAdjMat(request.session['bgGrfn'], lccfn)
 
       elif request.session['graphsize'] == 'small':
         request.session['smGrfn'] = G_fn
@@ -463,103 +456,103 @@ def graphLoadInv(request, webargs=None):
 #########################################
 
 def convert(request, webargs=None):
-    ''' Form '''
+  ''' Form '''
+  request.session.clear() # NEW
+
+  if (request.method == 'POST' and not webargs):
+    form = ConvertForm(request.POST, request.FILES) # instantiating form
+    if form.is_valid():
+
+      baseDir = os.path.join(settings.MEDIA_ROOT, 'tmp', strftime('formUpload%a%d%b%Y_%H.%M.%S/', localtime()))
+      saveDir = os.path.join(baseDir,'upload') # Save location of original uploads
+      convertFileSaveLoc = os.path.join(baseDir,'converted') # Save location of converted data
+
+      if not (os.path.exists(convertFileSaveLoc)):
+        os.makedirs(convertFileSaveLoc)
+
+      # ALTER TABLE ocpipeline_convertmodel MODIFY COLUMN filename TEXT;
+      data = ConvertModel(filename = request.FILES['fileObj'])
+      data._meta.get_field('filename').upload_to = saveDir # route files to correct location
+      data.save()
+
+      savedFile = os.path.join(saveDir, request.FILES['fileObj'].name)
+
+      # If zip is uploaded
+      if os.path.splitext(request.FILES['fileObj'].name)[1].strip() == '.zip':
+        uploadedFiles = zipper.unzip(savedFile, saveDir)
+        # Delete zip
+        os.remove(savedFile)
+      else:
+        uploadedFiles = [savedFile]
+
+      correctFileFormat, correctFileType = convertFiles(uploadedFiles, form.cleaned_data['Select_file_type'], \
+                                                      form.cleaned_data['Select_conversion_format'], convertFileSaveLoc)
+
+      if not (correctFileFormat):
+        request.session.clear() # NEW
+        return HttpResponse("[ERROR]: You do not have any files with the correct extension for conversion")
+
+        dwnldLoc = "http://mrbrain.cs.jhu.edu"+ convertFileSaveLoc
+        request.session.clear() # NEW
+        return HttpResponseRedirect(dwnldLoc)
+
+  # Programmtic API
+  elif(request.method == 'POST' and webargs):
+    # webargs is {fileType}/{toFormat}
+    fileType = webargs.split('/')[0] # E.g 'cc', 'deg', 'triangle'
+    toFormat =  (webargs.split('/')[1]).split(',')   # E.g 'mat', 'npy' or 'mat,csv'
+
+    toFormat = list(set(toFormat)) # Eliminate duplicates if any exist
+
+    # Make sure filetype is valid before doing any work
+    if (fileType not in settings.VALID_FILE_TYPES.keys() and fileType not in settings.VALID_FILE_TYPES.values()):
+      return HttpResponse('Invalid conversion type. Make sure toFormat is a valid type')
+
+    # In case to format does not start with a '.'. Add if not
+    for idx in range (len(toFormat)):
+      if not toFormat[idx].startswith('.'):
+        toFormat[idx] = '.'+toFormat[idx]
+
+    baseDir = os.path.join(settings.MEDIA_ROOT, 'tmp', strftime('progUpload%a%d%b%Y_%H.%M.%S/', localtime()))
+    saveDir = os.path.join(baseDir,'upload') # Save location of original uploads
+    convertFileSaveLoc = os.path.join(baseDir,'converted') # Save location of converted data
+
+    if not os.path.exists(saveDir):
+      os.makedirs(saveDir)
+
+    if not os.path.exists(convertFileSaveLoc):
+      os.makedirs(convertFileSaveLoc)
+
+    uploadedFiles = writeBodyToDisk(request.body, saveDir)
+
+    correctFileFormat, correctFileType = convertFiles(uploadedFiles, fileType, toFormat, convertFileSaveLoc)
+
+    if not (correctFileType):
+      request.session.clear() # NEW
+      return HttpResponse("[ERROR]: You did not enter a valid FileType.")
+    if not (correctFileFormat):
+      request.session.clear() # NEW
+      return HttpResponse("[ERROR]: You do not have any files with the correct extension for conversion")
+
+    dwnldLoc = "http://mrbrain.cs.jhu.edu"+ convertFileSaveLoc
     request.session.clear() # NEW
+    return HttpResponse ( "Converted files available for download at " + dwnldLoc + " . The directory " +
+            "may be empty if you try to convert to the same format the file is already in.") # change to render of a page with a link to data result
 
-    if (request.method == 'POST' and not webargs):
-        form = ConvertForm(request.POST, request.FILES) # instantiating form
-        if form.is_valid():
+  else:
+    form = ConvertForm() # An empty, unbound form
 
-	    baseDir = os.path.join(settings.MEDIA_ROOT, 'tmp', strftime('formUpload%a%d%b%Y_%H.%M.%S/', localtime()))
-	    saveDir = os.path.join(baseDir,'upload') # Save location of original uploads
-	    convertFileSaveLoc = os.path.join(baseDir,'converted') # Save location of converted data
-
-	    if not (os.path.exists(convertFileSaveLoc)):
-		os.makedirs(convertFileSaveLoc)
-
-	    # ALTER TABLE ocpipeline_convertmodel MODIFY COLUMN filename TEXT;
-	    data = ConvertModel(filename = request.FILES['fileObj'])
-	    data._meta.get_field('filename').upload_to = saveDir # route files to correct location
-	    data.save()
-
-	    savedFile = os.path.join(saveDir, request.FILES['fileObj'].name)
-
-	    # If zip is uploaded
-	    if os.path.splitext(request.FILES['fileObj'].name)[1].strip() == '.zip':
-		uploadedFiles = zipper.unzip(savedFile, saveDir)
-		# Delete zip
-		os.remove(savedFile)
-	    else:
-		uploadedFiles = [savedFile]
-
-	correctFileFormat, correctFileType = convertFiles(uploadedFiles, form.cleaned_data['Select_file_type'], \
-							  form.cleaned_data['Select_conversion_format'], convertFileSaveLoc)
-
-	if not (correctFileFormat):
-	    request.session.clear() # NEW
-	    return HttpResponse("[ERROR]: You do not have any files with the correct extension for conversion")
-
-	dwnldLoc = "http://mrbrain.cs.jhu.edu"+ convertFileSaveLoc
-	request.session.clear() # NEW
-	return HttpResponseRedirect(dwnldLoc)
-
-    # Programmtic API
-    elif(request.method == 'POST' and webargs):
-	# webargs is {fileType}/{toFormat}
-	fileType = webargs.split('/')[0] # E.g 'cc', 'deg', 'triangle'
-	toFormat =  (webargs.split('/')[1]).split(',')   # E.g 'mat', 'npy' or 'mat,csv'
-
-	toFormat = list(set(toFormat)) # Eliminate duplicates if any exist
-
-	# Make sure filetype is valid before doing any work
-	if (fileType not in settings.VALID_FILE_TYPES.keys() and fileType not in settings.VALID_FILE_TYPES.values()):
-	    return HttpResponse('Invalid conversion type. Make sure toFormat is a valid type')
-
-	# In case to format does not start with a '.'. Add if not
-	for idx in range (len(toFormat)):
-	    if not toFormat[idx].startswith('.'):
-		toFormat[idx] = '.'+toFormat[idx]
-
-	baseDir = os.path.join(settings.MEDIA_ROOT, 'tmp', strftime('progUpload%a%d%b%Y_%H.%M.%S/', localtime()))
-	saveDir = os.path.join(baseDir,'upload') # Save location of original uploads
-	convertFileSaveLoc = os.path.join(baseDir,'converted') # Save location of converted data
-
-	if not os.path.exists(saveDir):
-	    os.makedirs(saveDir)
-
-	if not os.path.exists(convertFileSaveLoc):
-	    os.makedirs(convertFileSaveLoc)
-
-	uploadedFiles = writeBodyToDisk(request.body, saveDir)
-
-	correctFileFormat, correctFileType = convertFiles(uploadedFiles, fileType, toFormat, convertFileSaveLoc)
-
-	if not (correctFileType):
-	    request.session.clear() # NEW
-	    return HttpResponse("[ERROR]: You did not enter a valid FileType.")
-	if not (correctFileFormat):
-	    request.session.clear() # NEW
-	    return HttpResponse("[ERROR]: You do not have any files with the correct extension for conversion")
-
-	dwnldLoc = "http://mrbrain.cs.jhu.edu"+ convertFileSaveLoc
-	request.session.clear() # NEW
-	return HttpResponse ( "Converted files available for download at " + dwnldLoc + " . The directory " +
-		"may be empty if you try to convert to the same format the file is already in.") # change to render of a page with a link to data result
-
-    else:
-        form = ConvertForm() # An empty, unbound form
-
-    # Render the form
-    return render_to_response(
-        'convertupload.html',
-        {'form': form},
-        context_instance=RequestContext(request))
+  # Render the form
+  return render_to_response(
+      'convertupload.html',
+      {'form': form},
+      context_instance=RequestContext(request))
 
 #########################################
 #	*******************		#
 #	   PROCESS DATA			#
 #########################################
-# INDENTATION FIXED BELOW HERE
+
 def processData(fiber_fn, roi_xml_fn, roi_raw_fn,graphs, graphInvariants, graphsize, run = False):
   '''
   Run graph building and other related scripts
