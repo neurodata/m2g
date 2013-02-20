@@ -15,13 +15,12 @@ from loadAdjMatrix import loadAdjMat
 import argparse
 from time import time
 
-def calcMAD(G_fn, G = None, lcc_fn = None, roiRootName = None,  MADdir = None, eigvDir = None, k=None):
+def calcMAD(G_fn, G = None, lcc_fn = None,  MADdir = None, eigvDir = None, k=None):
   '''
   Estimation of the maximum average degree
   G_fn - fibergraph full filename (.mat)
   G - the sparse matrix containing the graph
   lcc_fn - largest connected component full filename (.npy)
-  roiRootName - full path of roi + root (i.g. /Users/disa/roi/MXXXXX_roi)
   MADdir - the directory where the file holding the MADdir should go
   k - Number of eigenvalues to compute. The more the higher accuracy achieved
   '''
@@ -30,7 +29,7 @@ def calcMAD(G_fn, G = None, lcc_fn = None, roiRootName = None,  MADdir = None, e
   if (G !=None):
     pass
   elif (lcc_fn):
-    G = loadAdjMat(G_fn, lcc_fn, roiRootName)
+    G = loadAdjMat(G_fn, lcc_fn)
   # test case
   else:
     G = sio.loadmat(G_fn)['fibergraph']
@@ -80,13 +79,12 @@ def main():
   parser = argparse.ArgumentParser(description='Calculate an estimat of triangle counting on a graph')
   parser.add_argument('G_fn', action='store',help='Full filename sparse graph (.mat)')
   parser.add_argument('lcc_fn', action='store',help='Full filename of largest connected component (.npy)')
-  parser.add_argument('roiRootName', action='store',help='Full path of roi director + baseName')
   parser.add_argument('MADdir', action='store', help='Full path of directory where you want .npy array resulting file to go')
   parser.add_argument('eigvDir', action='store', help='Full path of directory where you want .npy array resulting file to go')
   parser.add_argument('k', type = int, action='store', help='The number of Eigenvalues/vectors to compute' )
 
   result = parser.parse_args()
-  calcMAD(result.G_fn, None, result.lcc_fn, result.roiRootName, result.MADdir, result.eigvDir, result.k )
+  calcMAD(result.G_fn, None, result.lcc_fn, result.MADdir, result.eigvDir, result.k )
 
 if __name__ == '__main__':
   main()

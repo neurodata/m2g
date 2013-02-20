@@ -15,7 +15,7 @@ from loadAdjMatrix import loadAdjMat
 import argparse
 from time import time
 
-def calcEigs(G_fn, G = None, lcc_fn = None, roiRootName = None,  eigvDir = None, k=None):
+def calcEigs(G_fn, G = None, lcc_fn = None, eigvDir = None, k=None):
   '''
   Calculate the top k eigenvalues
   G_fn - fibergraph full filename (.mat)
@@ -30,7 +30,7 @@ def calcEigs(G_fn, G = None, lcc_fn = None, roiRootName = None,  eigvDir = None,
   if (G !=None):
     pass
   elif (lcc_fn):
-    G = loadAdjMat(G_fn, lcc_fn, roiRootName)
+    G = loadAdjMat(G_fn, lcc_fn)
   # test case
   else:
     G = sio.loadmat(G_fn)['fibergraph']
@@ -66,12 +66,11 @@ def main():
   parser = argparse.ArgumentParser(description='Calculate an estimat of triangle counting on a graph')
   parser.add_argument('G_fn', action='store',help='Full filename sparse graph (.mat)')
   parser.add_argument('lcc_fn', action='store',help='Full filename of largest connected component (.npy)')
-  parser.add_argument('roiRootName', action='store',help='Full path of roi director + baseName')
   parser.add_argument('eigvDir', action='store', help='Full path of directory where you want .npy array resulting file to go')
   parser.add_argument('k', type = int, action='store', help='The number of Eigenvalues/vectors to compute' )
 
   result = parser.parse_args()
-  calcEigs(result.G_fn, None, result.lcc_fn, result.roiRootName, result.eigvDir, result.k )
+  calcEigs(result.G_fn, None, result.lcc_fn, result.eigvDir, result.k )
 
 if __name__ == '__main__':
   main()

@@ -1,7 +1,12 @@
+#!/usr/bin/python
+
+# Author: Disa Mhembere, Johns Hopkins University
+# Separated: 10/2/2012
+# Compute all eigenvalues and eigenvectors for a directory
+
 from eigen import calcEigs
 from glob import glob
 from getBaseName import getBaseName
-
 import os
 import argparse
 
@@ -13,26 +18,13 @@ def runEigs(grDir, lccDir, toDir):
   lccDir - Full path of dir with largest connected components
   '''
   for G_fn in glob(os.path.join(grDir,'*')):
-    calcEigs(G_fn, lcc_fn=getLccfn(G_fn), roiRootName= getRoiRoot(G_fn), eigvDir = toDir, k=100)
+    calcEigs(G_fn, lcc_fn=getLccfn(G_fn), eigvDir = toDir, k=100)
     print G_fn, "Sucessfull processed...\n\n"
   print "****JOB DONE****"
 
-def getRoiRoot(G_fn):
-  '''
-  Get the roi root name form G_fn
-  G_fn - full filename of graph (e.g of format /{User}/{disa}/{graphs}/filename_fiber.mat)
-  * {} - Not necessary
-  '''
-  roiRoot = '/'
-  for i in G_fn.split('/')[1:-3]:
-    roiRoot = os.path.join(roiRoot, i)
-  roiRoot = os.path.join(roiRoot, "base","roi" ,getBaseName(G_fn)+'_roi')
-
-  return roiRoot
-
 def getLccfn(G_fn):
   '''
-  Get the roi root name form G_fn
+  Get the lcc filename form G_fn
   G_fn - full filename of graph (e.g of format /{User}/{disa}/{graphs}/filename_fiber.mat)
   * {} - Not necessary
   '''
