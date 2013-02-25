@@ -1,0 +1,34 @@
+{% extends "registration/base.html" %}
+
+{% block title %}Log In{% endblock %}
+
+{% block content %}
+  {% if form.errors %}
+    <div id="errors">
+      <p>Sorry, your username and password didn't match our records. Please try again.</p>
+      <p>If you don't have an account yet, you should <a href="{% url registration_register %}">register one</a>.</p>
+    </div>
+  {% endif %}
+
+  <div id="login">
+  	<div id="content">
+  	  <form method="post" action=".">{% csrf_token %}
+    		<p class="form">
+    		  {{ form.username.label_tag }}: {{ form.username }} <br />
+    		  {{ form.password.label_tag }}: {{ form.password }}
+    		</p>
+
+    		<p class="submit">
+    		  <input type="submit" value="Log In" />
+    		  <input type="hidden" name="next" value="{{ next }}" />
+    		</p>
+  		</form>
+
+  		<p class="register">
+  		  Don't have an account? <a href="{% url registration_register %}">Register!</a><br/>
+                  Forgot your password? <a href="{% url password_reset %}">Set a new one</a>.
+  		</p>
+
+  	</div>
+  </div>
+{% endblock content %}
