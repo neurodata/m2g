@@ -1,0 +1,48 @@
+{% extends "registration/base.html" %}
+
+{% block title %}Register{% endblock %}
+
+{% block customheader %}
+
+<script type="text/javascript">
+    function showYearField() { $('#id_year').parent().parent().show() }
+    function hideYearField() { $('#id_year').parent().parent().hide() }
+
+    function updateYearField() {
+        kind = $("#id_kind").val();
+        if (kind == "s" || kind == "a") {
+            showYearField();
+        } else {
+            hideYearField();
+        }
+    }
+
+    // update when the selectbox is changed
+    $(function() { $('#id_kind').change(updateYearField); });
+    $(updateYearField); // update at load
+</script>
+{% endblock %}
+
+{% block content %}
+<div id="register">
+    <div id="content">
+        <form method="post" action=".">{% csrf_token %}
+            <p class="form">
+                <table>
+                    {{ form }}
+                </table>
+            </p>
+
+            <p class="submit">
+                <input type="submit" value="Register" />
+                <input type="hidden" name="next" value="{{ next }}" />
+            </p>
+        </form>
+
+        <p class="register">
+            Already have an account? <a href="{% url auth_login %}">Log in!</a>
+        </p>
+
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% load humanize %}
+
+{% block title %}Account Activation{% endblock %}
+
+{% block content %}
+    <h1>Activation Error</h1>
+    <p>
+      Sorry, it didn't work. Either your activation link was wrong, or the key has expired; activation keys only last {{ expiration_days|apnumber }} days.
+    </p>
+{% endblock %}

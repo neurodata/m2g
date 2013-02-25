@@ -3,6 +3,8 @@
 
 ** Resolve biggraph degree and eigenvalue non-conversion to csv
 
+-1. Registration, Authentication, Login, Logout
+0. Run djangoSyncdb.py on mrbrain & apt-get-install python-django-registration
 1. Production Test programmatic examples
 
 2. Do more documentation
