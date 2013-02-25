@@ -11,6 +11,26 @@ from django import forms
 from django.forms.fields import MultipleChoiceField
 from django.forms.widgets import RadioSelect, CheckboxSelectMultiple
 
+#
+#class LoginForm(forms.Form):
+#  username = forms.CharField(required = True, error_messages={'required': 'You must enter a username'})
+#  password = forms.PasswordInput()
+#
+#class RegisterForm(forms.Form):
+#  username = forms.CharField(required = True, error_messages={'required': 'You must enter a username'})
+#  email = forms.EmailField(required = True, error_messages={'required': 'You must enter an email address'})
+#  confirmEmail = forms.EmailField(required = True, error_messages={'required': 'You must enter an email address'})
+#  password = forms.PasswordInput()
+#  confirmPassword = forms.PasswordInput()
+
+class LogoutForm(forms.Form):
+  pass
+
+class PasswordResetForm(forms.Form):
+  username = forms.CharField(required = True, error_messages={'required': 'You must enter a username'})
+  email = forms.EmailField(required = True, error_messages={'required': 'You must enter an email address'})
+
+
 class BuildGraphForm(forms.Form):
     '''
     This form will be used for:
