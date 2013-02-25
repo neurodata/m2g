@@ -16,36 +16,51 @@ from django.contrib import admin
 import os
 from time import strftime, localtime
 
+#from django.contrib.auth.models import User, check_password
+#
+#class LoginModel(User):
+#  '''
+#  table to hold user names and hashed passwords
+#  for logging
+#  '''
+#  pass
+#
+#class RegisterModel(models.Model):
+#  '''
+#  table to hold registered users - not specifically active users
+#  '''
+#  pass
+
 class BuildGraphModel(models.Model):
-    '''
-    upload_to location dynamically altered in view
-    (This is a little hacky & can be done better using a custom manager)
-    see: https://docs.djangoproject.com/en/dev/ref/models/instances/?from=olddocs
-    '''
+  '''
+  upload_to location dynamically altered in view
+  (This is a little hacky & can be done better using a custom manager)
+  see: https://docs.djangoproject.com/en/dev/ref/models/instances/?from=olddocs
+  '''
 
-    derivfile = models.FileField(upload_to = (' '))
+  derivfile = models.FileField(upload_to = (' '))
 
-    projectName  = models.CharField(max_length=255)
-    site = models.CharField(max_length=255,)
-    subject = models.CharField(max_length=255,)
-    session = models.CharField(max_length=255,)
-    scanId = models.CharField(max_length=255)
+  projectName  = models.CharField(max_length=255)
+  site = models.CharField(max_length=255,)
+  subject = models.CharField(max_length=255,)
+  session = models.CharField(max_length=255,)
+  scanId = models.CharField(max_length=255)
 
 class ConvertModel(models.Model):
-    '''
-    upload_to location dynamically altered in view
-    '''
-    filename = models.FileField(upload_to = (' '))
+  '''
+  upload_to location dynamically altered in view
+  '''
+  filename = models.FileField(upload_to = (' '))
 
-    def __unicode__(self):
-        return self.name
+  def __unicode__(self):
+      return self.name
 
 class OK(models.Model):
-    #DM TODO: Track responses to zip or view as dir structure
-    pass
+  #DM TODO: Track responses to zip or view as dir structure
+  pass
 
-    def __unicode__(self):
-        return self.name
+  def __unicode__(self):
+      return self.name
 
 admin.site.register(BuildGraphModel)
 admin.site.register(ConvertModel)
