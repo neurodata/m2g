@@ -52,10 +52,11 @@ def main():
     sys.exit(0)
 
   try:
-    if (result.invariants):
+    if (result.invariants is not None):
       req = urllib2.Request ( result.url + result.invariants , tmpfile.read() ) # Important to concatenate these in this order
     else:
-      req = urllib2.Request ( result.url, tmpfile.read() ) # Important to concatenate these in this order
+      req = urllib2.Request ( result.url, tmpfile.read() )
+
     response = urllib2.urlopen(req)
   except urllib2.URLError, e:
     print "Failed URL", result.url
