@@ -34,7 +34,7 @@ urlpatterns = patterns('ocpipeline.views',
     url(r'^convert/(.*$)', 'convert', name= 'convert-to-format'),
     url(r'^buildgraph/$', 'buildGraph', name= 'build-graph'),
     url(r'^accounts/password/reset', 'password_reset', name='password_reset'), # hard-coded is bad
-    #(r'^accounts/', include('registration.backends.default.urls')),
+    (r'^accounts/', include('registration.backends.default.urls')),
     # url(r'^accounts/login/$', 'django.contrib.auth.views.login', {'template_name': 'myapp/login.html'}),
     # Examples
     # url(r'^$', 'myapp.views.home', name='home'),
