@@ -140,16 +140,16 @@ def default(request):
 #    HttpResponse("Logged out") # STUB
 #  else:
 #    HttpResponse("You aren't logged in") # STUB
-
-from django.contrib.auth.tokens import PasswordResetTokenGenerator
-
-def password_reset(request, is_admin_site=False,
-            template_name='registration/password_reset_form.html',
-            email_template_name='registration/password_reset_email.html',
-            password_reset_form=PasswordResetForm,
-            token_generator=PasswordResetTokenGenerator,
-            post_reset_redirect=None):
-  return HttpResponse("stub")
+#
+#from django.contrib.auth.tokens import PasswordResetTokenGenerator
+#
+#def password_reset(request, is_admin_site=False,
+#            template_name='registration/password_reset_form.html',
+#            email_template_name='registration/password_reset_email.html',
+#            password_reset_form=PasswordResetForm,
+#            token_generator=PasswordResetTokenGenerator,
+#            post_reset_redirect=None):
+#  return HttpResponse("stub")
 
 
 # Login decorator
