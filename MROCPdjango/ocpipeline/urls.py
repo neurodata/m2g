@@ -33,6 +33,7 @@ urlpatterns = patterns('ocpipeline.views',
     url(r'^graphupload/(.*$)', 'graphLoadInv', name= 'graph-upload-invariant-processing'),
     url(r'^convert/(.*$)', 'convert', name= 'convert-to-format'),
     url(r'^buildgraph/$', 'buildGraph', name= 'build-graph'),
+    (r'^accounts/', include('registration.backends.default.urls')),
     # url(r'^accounts/login/$', 'django.contrib.auth.views.login', {'template_name': 'myapp/login.html'}),
     # Examples
     # url(r'^$', 'myapp.views.home', name='home'),
@@ -45,6 +46,7 @@ urlpatterns = patterns('ocpipeline.views',
     url(r'^admin/', include(admin.site.urls)),
 )
 
+'''
 urlpatterns += patterns('django.contrib.auth.views',
     url(r'^accounts/login/$', 'login', name='login'),
     url(r'^accounts/logout/$', 'logout', name='logout'),
@@ -57,3 +59,4 @@ urlpatterns += patterns('django.contrib.auth.views',
         name='password_reset_confirm'),
     url(r'^accounts/reset/done/$', 'password_reset_complete', name='password_reset_complete'),
 )
+'''
