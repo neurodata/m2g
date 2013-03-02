@@ -53,6 +53,7 @@ from django.conf import settings
 from time import strftime, localtime
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
+from django.shortcuts import redirect
 
 ####################
 ## Graph Analysis ##
@@ -75,10 +76,15 @@ import scipy.io as sio
 # Helpers
 from util import *
 
-''' Little welcome message'''
+''' Base url just redirects to welcome'''
 def default(request):
+  return redirect('/welcome')
+
+''' Little welcome message'''
+def welcome(request):
   request.session.clear()
   return render_to_response('welcome.html')
+
 
 #def login(request):
 #  request.session.clear()
