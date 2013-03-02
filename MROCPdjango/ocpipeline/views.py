@@ -78,7 +78,7 @@ from util import *
 
 ''' Base url just redirects to welcome'''
 def default(request):
-  return redirect('/welcome')
+  return redirect(get_script_prefix()+'welcome')
 
 ''' Little welcome message'''
 def welcome(request):
