@@ -14,7 +14,7 @@ from views import processInputData
 from views import confirmDownload
 from views import graphLoadInv
 from views import convert
-
+#from django.contrib import auth  
 #########################################
 from ocpipeline.views import buildGraph
 #########################################
@@ -34,7 +34,7 @@ urlpatterns = patterns('ocpipeline.views',
     url(r'^convert/(.*$)', 'convert', name= 'convert-to-format'),
     url(r'^buildgraph/$', 'buildGraph', name= 'build-graph'),
     url(r'^accounts/password/reset', 'password_reset', name='password_reset'), # hard-coded is bad
-    (r'^accounts/', include('registration.backends.default.urls')),
+    #(r'^accounts/', include('registration.backends.default.urls')),
     # url(r'^accounts/login/$', 'django.contrib.auth.views.login', {'template_name': 'myapp/login.html'}),
     # Examples
     # url(r'^$', 'myapp.views.home', name='home'),
@@ -46,3 +46,9 @@ urlpatterns = patterns('ocpipeline.views',
     # Uncomment the next line to enable the admin:
     url(r'^admin/', include(admin.site.urls)),
 )
+
+urlpatterns += patterns('django.contrib.auth.views',
+		    (r'^accounts/login/$',  'login', {}, 'login'),
+		        
+			)
+
