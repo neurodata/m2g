@@ -14,7 +14,7 @@ from views import processInputData
 from views import confirmDownload
 from views import graphLoadInv
 from views import convert
-#from django.contrib import auth  
+#from django.contrib import auth
 #########################################
 from ocpipeline.views import buildGraph
 #########################################
@@ -33,8 +33,6 @@ urlpatterns = patterns('ocpipeline.views',
     url(r'^graphupload/(.*$)', 'graphLoadInv', name= 'graph-upload-invariant-processing'),
     url(r'^convert/(.*$)', 'convert', name= 'convert-to-format'),
     url(r'^buildgraph/$', 'buildGraph', name= 'build-graph'),
-    url(r'^accounts/password/reset', 'password_reset', name='password_reset'), # hard-coded is bad
-    #(r'^accounts/', include('registration.backends.default.urls')),
     # url(r'^accounts/login/$', 'django.contrib.auth.views.login', {'template_name': 'myapp/login.html'}),
     # Examples
     # url(r'^$', 'myapp.views.home', name='home'),
@@ -48,7 +46,14 @@ urlpatterns = patterns('ocpipeline.views',
 )
 
 urlpatterns += patterns('django.contrib.auth.views',
-		    (r'^accounts/login/$',  'login', {}, 'login'),
-		        
-			)
-
+    url(r'^accounts/login/$', 'login', name='login'),
+    url(r'^accounts/logout/$', 'logout', name='logout'),
+    url(r'^accounts/password_change/$', 'password_change', name='password_change'),
+    url(r'^accounts/password_change/done/$', 'password_change_done', name='password_change_done'),
+    url(r'^accounts/password_reset/$', 'password_reset', name='password_reset'),
+    url(r'^accounts/password_reset/done/$', 'password_reset_done', name='password_reset_done'),
+    url(r'^accounts/reset/(?P<uidb36>[0-9A-Za-z]{1,13})-(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})/$',
+        'password_reset_confirm',
+        name='password_reset_confirm'),
+    url(r'^accounts/reset/done/$', 'password_reset_complete', name='password_reset_complete'),
+)
