@@ -28,12 +28,13 @@
         <!-- Navigation pane -->
 	<div class="container">
 	    <div class="navigation">
-		    <a href="http://mrbrain.cs.jhu.edu/disa">Home</a>
+		    <a href="http://mrbrain.cs.jhu.edu/disa/welcome">Home</a>
 		    <a href="http://mrbrain.cs.jhu.edu/disa/buildgraph">Build Graph</a>
 		    <a href="http://mrbrain.cs.jhu.edu/disa/graphupload">Compute Invariants</a>
 		    <a href="http://mrbrain.cs.jhu.edu/disa/convert">Convert Format</a>
 		    <a href="https://github.com/openconnectome/MR-connectome/tree/master/MROCPdjango/examples">Code Examples</a>
 		    <a href="">Documentation</a>
+		    <!-- <a href="{% static 'doc/index.html' %}">Documentation</a> -->
 	    </div>
 	</div>
 
@@ -41,9 +42,19 @@
         <div id="loginStatus">
           {% if user.is_authenticated %}
             <b><FONT COLOR='#27fd1e'>Logged in as: {{ user.username }} </FONT></b>
+	    
+	    <form action=" /disa/accounts/logout/" method="post" enctype="multipart/form-data" name="logoutForm">
+	      {% csrf_token %}
+	      <p>{{ form }}</p>
+	      <input name = "logout"  type="submit" value="Log out" class="button" />
+   	   </form> 
+
           {% else %}
             <b><FONT COLOR='#fdc23c'> You are currently not logged in </FONT> </b>
-          {% endif %}
+
+	    <input type="submit" onclick="location.href='/disa/accounts/login/'" value="Log in">
+	      
+	  {% endif %}
         </div>
 
         <h1><b> {% block bigheading %}{% endblock bigheading %}</b></h1>

@@ -1,10 +1,9 @@
 *MR OCP TODO list Disa
 ===========================
 
-create: 
-registration/logout.html
-registration/logged_out.html
-Log in/out button in all templates
+0. Alter default.css for buttons and user status THEN manage.py staticfiles
+1. Rerun epydoc with new modules
+2. Fix placement of login/logout buttons on views
 
 ** Resolve biggraph degree and eigenvalue non-conversion to csv
 
@@ -22,6 +21,9 @@ Invariants still to compute
 Recently completed
 ===================
 
+<-- registration/logout.html -->
+<-- registration/logged_out.html -->
+<-- Log in/out button in all templates -->
 <-- 3. Get static content to load via apache for production mode -->
 <-- -1. Registration, Authentication, Login, Logout -->
 <-- 0. Run djangoSyncdb.py on mrbrain & apt-get-install python-django-registration -->

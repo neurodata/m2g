@@ -78,12 +78,14 @@ from util import *
 
 ''' Base url just redirects to welcome'''
 def default(request):
-  return redirect(get_script_prefix()+'welcome')
+  return redirect(get_script_prefix()+'welcome', {"user":request.user})
 
 ''' Little welcome message'''
 def welcome(request):
   #request.session.clear()
-  return render_to_response('welcome.html')
+  return render_to_response('welcome.html', 
+		  {"user":request.user}, 
+		  context_instance=RequestContext(request))
 
 
 # Login decorator
@@ -231,7 +233,7 @@ def confirmDownload(request):
 
       if dataReturn == 'vd': # View data directory
         dataUrlTail = request.session['usrDefProjDir']
-        request.session.clear() # Very important
+        # request.session.clear() # Very important
         return HttpResponseRedirect('http://mrbrain.cs.jhu.edu' + dataUrlTail.replace(' ','%20'))
 
       elif dataReturn == 'dz': #Download all as zip
@@ -261,7 +263,7 @@ def zipProcessedData(request):
   response['Content-Length'] = temp.tell()
   temp.seek(0)
 
-  request.session.clear() # Very Important
+  # request.session.clear() # Very Important
   ''' Send it '''
   return response
 
@@ -272,7 +274,7 @@ def upload(request, webargs=None):
 
   @param webargs: POST data with userDefProjectName, site, subject, session, scanId, graphsize, [list of invariants to compute] info
   """
-  request.session.clear()
+  # request.session.clear()
 
   if (webargs and request.method == 'POST'):
     # Check for malformatted input
@@ -326,17 +328,17 @@ def upload(request, webargs=None):
     #ret = rzfile.testzip()
     #ret = rzfile.namelist()
 
-    request.session.clear()
+    # request.session.clear()
 
     dwnldLoc = "http://mrbrain.cs.jhu.edu" + userDefProjectDir.replace(' ','%20')
     return HttpResponse ( "Files available for download at " + dwnldLoc) # change to render of a page with a link to data result
 
   elif(not webargs):
-    request.session.clear()
+    # request.session.clear()
     return django.http.HttpResponseBadRequest ("Expected web arguments to direct project correctly")
 
   else:
-    request.session.clear()
+    # request.session.clear()
     return django.http.HttpResponseBadRequest ("Expected POST data, but none given")
 
 ################## TO DOs ########################
@@ -351,7 +353,7 @@ def download(request, webargs=None):
 def graphLoadInv(request, webargs=None):
   ''' Form '''
   from glob import glob # Move
-  request.session.clear() # NEW
+  # request.session.clear() # NEW
 
   if request.method == 'POST' and not webargs:
     form = GraphUploadForm(request.POST, request.FILES) # instantiating form
@@ -392,7 +394,7 @@ def graphLoadInv(request, webargs=None):
       else:
         return HttpResponse("<h2>The file you uploaded is not a zip see the instructions on the page before proceeding.</h2>")
 
-      request.session.clear() # NEW
+      # request.session.clear() # NEW
       return HttpResponseRedirect("http://mrbrain.cs.jhu.edu"+ dataDir.replace(' ','%20')) # All spaces are replaced with %20 for urls
 
   if request.method == 'POST' and webargs:
@@ -432,7 +434,7 @@ def graphLoadInv(request, webargs=None):
       runInvariants(lccG, request.session)
       print 'Invariants computed with no project for: %s ...' % G_fn
 
-    request.session.clear()
+    # request.session.clear()
     dwnldLoc = "http://mrbrain.cs.jhu.edu"+ dataDir.replace(' ','%20')
     return HttpResponse("View Data at: " + dwnldLoc)
 
@@ -453,7 +455,7 @@ def graphLoadInv(request, webargs=None):
 
 def convert(request, webargs=None):
   ''' Form '''
-  request.session.clear() # NEW
+  # request.session.clear() # NEW
 
   if (request.method == 'POST' and not webargs):
     form = ConvertForm(request.POST, request.FILES) # instantiating form
@@ -485,11 +487,11 @@ def convert(request, webargs=None):
                                                       form.cleaned_data['Select_conversion_format'], convertFileSaveLoc)
 
       if not (correctFileFormat):
-        request.session.clear()
+        # request.session.clear()
         return HttpResponse("[ERROR]: You do not have any files with the correct extension for conversion")
 
         dwnldLoc = "http://mrbrain.cs.jhu.edu"+ convertFileSaveLoc.replace(' ','%20')
-        request.session.clear()
+        # request.session.clear()
         return HttpResponseRedirect(dwnldLoc)
 
   # Programmtic API
@@ -524,14 +526,14 @@ def convert(request, webargs=None):
     correctFileFormat, correctFileType = convertFiles(uploadedFiles, fileType, toFormat, convertFileSaveLoc)
 
     if not (correctFileType):
-      request.session.clear()
+      # request.session.clear()
       return HttpResponse("[ERROR]: You did not enter a valid FileType.")
     if not (correctFileFormat):
-      request.session.clear()
+      # request.session.clear()
       return HttpResponse("[ERROR]: You do not have any files with the correct extension for conversion")
 
     dwnldLoc = "http://mrbrain.cs.jhu.edu"+ convertFileSaveLoc.replace(' ','%20')
-    request.session.clear()
+    # request.session.clear()
     return HttpResponse ( "Converted files available for download at " + dwnldLoc + " . The directory " +
             "may be empty if you try to convert to the same format the file is already in.") # change to render of a page with a link to data result
 
