@@ -1,36 +1,14 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+{% extends "base.html" %}
 
-<html>
-  <head>
-    <link  rel="shortcut icon" type="image/x-icon" href="{{STATIC_URL}}/images/favicon.ico" />
-    <link rel="stylesheet" type="text/css" href="{{STATIC_URL}}default.css"/>
-    <title>GraphUpload | MROCP</title>
+  {% block title %}
+    GraphUpload | MROCP
+  {% endblock title %}
 
-    <script type="text/javascript">
-        // Function to add a spinner during upload & processing
-        function showSpinner(){
-                document.getElementById('loadingImage').style.visibility='visible';
-        }
-    </script>
-  </head>
+  {% block medheading %}
+    Please upload the graph(s). Largest connected components(LCC) for big graphs
+  {% endblock medheading %}
 
-<body>
-    <a href="http://openconnecto.me" target="blank">
-      <img src="{{STATIC_URL}}images/openconnectome_brain_logo.png" border="0"/></a>
-
-    <div class="container">
-        <div class="navigation">
-          <a href="http://mrbrain.cs.jhu.edu/disa">Home</a>
-          <a href="http://mrbrain.cs.jhu.edu/disa/buildgraph">Build Graph</a>
-          <a href="http://mrbrain.cs.jhu.edu/disa/graphupload">Compute Invariants</a>
-          <a href="http://mrbrain.cs.jhu.edu/disa/convert">Convert Format</a>
-          <a href="https://github.com/openconnectome/MR-connectome/tree/master/MROCPdjango/examples">Code Examples</a>
-          <a href="">Documentation</a>
-        </div>
-    </div>
-
-    <h2>Please upload the graph(s). Largest connected components(LCC) for big graphs.</h2>
+  {% block content %}
     <p> You must use a single<strong> zipfile <i> (.zip) </i> containing ALL</strong> data in a single directory even for multiple graphs. <br/>
     <strong> <FONT COLOR='#ff0000'> DO NOT zip a directory </FONT> instead zip the files themselves into an archive.</strong>
     Note the following file naming convention for graphs - where the <strong>base file name must be the same</strong>:
@@ -79,17 +57,12 @@
     <div style="position:absolute; left:153px; top: 212px;">
       <img id="loadingImage" src="{{STATIC_URL}}images/loading.gif" border="0" alt="loading" style="visibility:hidden;opacity:0.5"/> </div>
 
-    <div id="Programmatic uses">
-    <h2>Programmatic use </h2>
-    <p> This is can be accessed using the base url <strong>http://www.mrbrain.cs.jhu.edu/disa/graphupload/</strong>. An
-        example of usage can be found <a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjango/examples/computeInvariants.py" target="blank">here</a>.
-        <FONT COLOR='#ff0000'> This section will be updated shortly. Big graph testing incomplete.</FONT> <!-- TODO UPDATE WHEN COMPLETE-->
-    </p>
-
-    </div>
-    <div class="footer">
-        Property of the Johns Hopkins University |  Author: Disa Mhembere
-    </div>
-
-</body>
-</html>
+    {% block programmatic %}
+      <div id="Programmatic uses">
+      <h2>Programmatic use </h2>
+      <p> This is can be accessed using the base url <strong>http://www.mrbrain.cs.jhu.edu/disa/graphupload/</strong>. An
+          example of usage can be found <a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjango/examples/computeInvariants.py" target="blank">here</a>.
+          <FONT COLOR='#ff0000'> This section will be updated shortly. Big graph testing incomplete.</FONT> <!-- TODO UPDATE WHEN COMPLETE-->
+      </p>
+    {% endblock programmatic %}
+  {% endblock content%}

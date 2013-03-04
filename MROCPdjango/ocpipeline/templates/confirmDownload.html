@@ -1,36 +1,14 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+{% extends "base.html" %}
 
-<html>
-     <head>
-	<link  rel="shortcut icon" type="image/x-icon" href="{{STATIC_URL}}/images/favicon.ico" />
-        <link rel="stylesheet" type="text/css" href="{{STATIC_URL}}default.css"/>
-        <title>Confirm Download | MROCP</title>
+  {% block title %}
+    Confirm Download | MROCP
+  {% endblock title %}
 
-	    <script type="text/javascript">
-		// Function to add a spinner during upload & processing
-		function showSpinner(){
-			document.getElementById('loadingImage').style.visibility='visible';
-		}
-	</script>
+  {% block medheading %}
+  Congratulations! Your data was sucessfully processed
+  {% endblock medheading %}
 
-    </head>
-
-    <body>
-	<a href="http://openconnecto.me" target="blank">
-            <img src="{{STATIC_URL}}images/openconnectome_brain_logo.png" border="0"/></a>
-        <div class="container">
-	    <div class="navigation">
-		    <a href="http://mrbrain.cs.jhu.edu/disa">Home</a>
-		    <a href="http://mrbrain.cs.jhu.edu/disa/buildgraph">Build Graph</a>
-		    <a href="http://mrbrain.cs.jhu.edu/disa/graphupload">Compute Invariants</a>
-		    <a href="http://mrbrain.cs.jhu.edu/disa/convert">Convert Format</a>
-		    <a href="https://github.com/openconnectome/MR-connectome/tree/master/MROCPdjango/examples">Code Examples</a>
-		    <a href="">Documentation</a>
-	    </div>
-	</div>
-        <br/>
-        <h2>Congratulations! Your data was sucessfully processed</h2>
+  {% block content %}
         <h4> What would you like to do?</h4>
 
         <form action="" method="post" enctype="multipart/form-data" name="confirmDLForm">
@@ -43,8 +21,4 @@
       	<div style="position:absolute; left:153px; top: 212px;">
           <img id="loadingImage" src="{{STATIC_URL}}images/loading.gif"
                border="0" alt="loading" style="visibility:hidden;opacity:0.5"/> </div>
-	<div class="footer">
-	  Property of the Johns Hopkins University |  Author: Disa Mhembere
-	</div>
-  </body>
-</html>
+  {% endblock content%}

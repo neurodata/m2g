@@ -1,94 +1,72 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+{% extends "base.html" %}
 
-<html>
- <head>
-    <link  rel="shortcut icon" type="image/x-icon" href="{{STATIC_URL}}/images/favicon.ico" />
-    <link rel="stylesheet" type="text/css" href="{{STATIC_URL}}default.css"/>
-        <title>Graph conversion | MROCP</title>
+  {% block title %}
+    Graph conversion | MROCP
+  {% endblock title %}
 
-	    <script type="text/javascript">
-		// Function to add a spinner during upload & processing
-		function showSpinner(){
-			document.getElementById('loadingImage').style.visibility='visible';
-		}
-	    </script>
+  {% block bigheading %}
+    Please upload graph(s) in a valid format
+  {% endblock bigheading %}
 
-    </head>
+  {% block medheading %}
+    Select the file type of the data to be converted (Mandatory). File type will also  be checked before conversion is attempted
+  {% endblock medheading %}
 
-<body>
-    <a href="http://openconnecto.me" target="blank">
-      <img src="{{STATIC_URL}}images/openconnectome_brain_logo.png" border="0"/></a>
+  {% block content %}
+    <form action="" method="post" enctype="multipart/form-data" name="loadForm">
+      {% csrf_token %}
+      {{ form }}
+      <input name = "Convert button"  type="submit" value="Convert All" class="button" onclick="showSpinner();"/>
+      <input type="reset" value="Reset" class="button" name="clearForm" />
+    </form>
 
-    	<div class="container">
-	    <div class="navigation">
-		    <a href="http://mrbrain.cs.jhu.edu/disa">Home</a>
-		    <a href="http://mrbrain.cs.jhu.edu/disa/buildgraph">Build Graph</a>
-		    <a href="http://mrbrain.cs.jhu.edu/disa/graphupload">Compute Invariants</a>
-		    <a href="http://mrbrain.cs.jhu.edu/disa/convert">Convert Format</a>
-		    <a href="https://github.com/openconnectome/MR-connectome/tree/master/MROCPdjango/examples">Code Examples</a>
-		    <a href="">Documentation</a>
-	    </div>
-	</div>
+    <div style="position:absolute; left:153px; top: 212px;">
+      <img id="loadingImage" src="{{STATIC_URL}}images/loading.gif" border="0" alt="loading" style="visibility:hidden;opacity:0.5"/>
+    </div>
 
-    <h1>Please upload graph(s) in a valid format </h1>
-    <h3>Select the file type of the data to be converted (Mandatory). File type will also  be checked before conversion is attempted.</h3>
-        <form action="" method="post" enctype="multipart/form-data" name="loadForm">
-	    {% csrf_token %}
-            {{ form }}
-	    <input name = "Convert button"  type="submit" value="Convert All" class="button" onclick="showSpinner();"/>
-            <input type="reset" value="Reset" class="button" name="clearForm" />
-        </form>
+    {% block programmatic %}
+    <div id="Programmatic uses">
+      <h2> File conversions may also be done programmatically</h2>
+      <p>
+      The use is similar to building a graph programmatically. The base url is <strong>http://mrbrain.cs.jhu.edu/disa/convert/</strong>. <br/>
+      <a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjango/examples/singleConvert.py" target="blank">Single</a> and
+      <a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjango/examples/multiConvert.py" target="blank">batch</a>
+      conversion examples are available in the <a href="https://github.com/openconnectome/MR-connectome/tree/master/MROCPdjango/examples" target="blank">examples</a> directory. <br/>
+      </p>
 
-	<div style="position:absolute; left:153px; top: 212px;">
-          <img id="loadingImage" src="{{STATIC_URL}}images/loading.gif" border="0" alt="loading" style="visibility:hidden;opacity:0.5"/> </div>
-
-        <div id="Programmatic uses">
-        <h2> File conversions may also be done programmatically</h2>
+    <div id="single prog">
+      <h3> Single file conversion </h3>
         <p>
-        The use is similar to building a graph programmatically. The base url is <strong>http://mrbrain.cs.jhu.edu/disa/convert/</strong>. <br/>
-        <a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjango/examples/singleConvert.py" target="blank">Single</a> and
-        <a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjango/examples/multiConvert.py" target="blank">batch</a>
-        conversion examples are available in the <a href="https://github.com/openconnectome/MR-connectome/tree/master/MROCPdjango/examples" target="blank">examples</a> directory. <br/>
+        An example of executing the sample code from the command line is <strong>python singleConvert.py filename.npy http://mrbrain.cs.jhu.edu/disa/convert/cc/mat,csv</strong> <br/>
+        This would convert a file of file type <i>cc (Clustering Coefficient)</i> from <i>npy</i> format to <i>mat</i> and <i>csv</i> format.<br/>
         </p>
+    </div>
 
-        <div id="single prog">
-          <h3> Single file conversion </h3>
-            <p>
-            An example of executing the sample code from the command line is <strong>python singleConvert.py filename.npy http://mrbrain.cs.jhu.edu/disa/convert/cc/mat,csv</strong> <br/>
-            This would convert a file of file type <i>cc (Clustering Coefficient)</i> from <i>npy</i> format to <i>mat</i> and <i>csv</i> format.<br/>
-            </p>
-        </div>
+      The following are the ONLY accepted file types:
+      <ul>
+          <li> <i>ss1</i> or <i>scanStat1</i> for the Scan Statistic 1</li>
+          <li> <i>tri</i> or <i>triangle</i> for the Triangle Count </li>
+          <li> <i>cc</i> or <i>clustCoeff</i> for the Clustering Coefficient</li>
+          <li> <i>mad</i> or <i>maxAvgDeg</i> for the Maximum Average Degree</li>
+          <li> <i>deg</i> or <i>degree</i> for The Local Degree Count</li>
+          <li> <i>eig</i> or <i>eigen</i> for the Top 100 (or maximum available) eigenvalues</li>
+          <li> <i>ss2</i> or <i>scanStat2</i> for the Scan Statistic 2 [Coming soon]</li>
+          <li> <i>apl</i> or <i>avePathLenfor</i> the Average Path Length [Coming soon]</li>
+          <li> <i>gdia</i> or <i>graphDiam</i> for the Graph Diameter [Coming soon]</li>
+      </ul>
 
-          The following are the ONLY accepted file types:
-          <ul>
-              <li> <i>ss1</i> or <i>scanStat1</i> for the Scan Statistic 1</li>
-              <li> <i>tri</i> or <i>triangle</i> for the Triangle Count </li>
-              <li> <i>cc</i> or <i>clustCoeff</i> for the Clustering Coefficient</li>
-              <li> <i>mad</i> or <i>maxAvgDeg</i> for the Maximum Average Degree</li>
-              <li> <i>deg</i> or <i>degree</i> for The Local Degree Count</li>
-              <li> <i>eig</i> or <i>eigen</i> for the Top 100 (or maximum available) eigenvalues</li>
-              <li> <i>ss2</i> or <i>scanStat2</i> for the Scan Statistic 2 [Coming soon]</li>
-              <li> <i>apl</i> or <i>avePathLenfor</i> the Average Path Length [Coming soon]</li>
-              <li> <i>gdia</i> or <i>graphDiam</i> for the Graph Diameter [Coming soon]</li>
-          </ul>
+    <div id="multi prog">
+      <h3> Multiple file conversion</h3>
+        <p>
+        <a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjango/examples/multiConvert.py" target="blank">The example</a> converts a directory of files of ONE type from one format to another. It assumes you have this
+        directory somewhere already. It's use is similar to that of the <a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjango/examples/singleConvert.py" target="blank">single</a>
+         conversion. <br/>
 
-          <div id="multi prog">
-          <h3> Multiple file conversion</h3>
-            <p>
-            <a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjango/examples/multiConvert.py" target="blank">The example</a> converts a directory of files of ONE type from one format to another. It assumes you have this
-            directory somewhere already. It's use is similar to that of the <a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjango/examples/singleConvert.py" target="blank">single</a>
-             conversion. <br/>
-
-            An example of executing the sample code from the command line is <strong>python multiConvert.py SomeDirectory http://mrbrain.cs.jhu.edu/disa/convert/ss1/mat,csv</strong> <br/>
-            This would convert a directory of files of type <i>ss1(Scan Statistic 1)</i> from whatever format the files are in - to <i>mat</i> and <i>csv</i> format. Note that if you convert
-            from one format to the same format you will be returned your original file.<strong>Format is determined by file extension.</strong><br/>
-            </p>
-          </div>
-        </div>
-    	<div class="footer">
-          Property of the Johns Hopkins University |  Author: Disa Mhembere
-	</div>
-
-</body>
-</html>
+        An example of executing the sample code from the command line is <strong>python multiConvert.py SomeDirectory http://mrbrain.cs.jhu.edu/disa/convert/ss1/mat,csv</strong> <br/>
+        This would convert a directory of files of type <i>ss1(Scan Statistic 1)</i> from whatever format the files are in - to <i>mat</i> and <i>csv</i> format. Note that if you convert
+        from one format to the same format you will be returned your original file.<strong>Format is determined by file extension.</strong><br/>
+        </p>
+      </div>
+    </div>
+    {% endblock programmatic %}
+  {% endblock content%}

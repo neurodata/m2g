@@ -26,8 +26,9 @@ p,code,ul {padding-bottom: 1.2em; line-height: 180%;}
 li {list-style: none;}
 
 h1 {
-	font: normal 1.8em Tahoma,sans-serif;
+	font: normal Tahoma,sans-serif;
 	margin-bottom: 4px;
+
 }
 
 code {
