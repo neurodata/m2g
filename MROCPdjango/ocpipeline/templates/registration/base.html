@@ -1,46 +1,42 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
-  "http://www.w3.org/TR/html4/loose.dtd">
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+{% load static %}
 <html lang="en">
+    <head>
+      <!-- Style sheet and logo image -->
+      <link  rel="shortcut icon" type="image/x-icon" href= "{% static 'images/favicon.ico' %}"/>
+      <link rel="stylesheet" type="text/css" href="{% static 'default.css' %}"/>
 
-<head>
-  <title>
-    {% block full-title %}
-    {% block title %}{% endblock title %}
-    {% endblock full-title %}
-  </title>
+      <title>
+      {% block title %}
+        {# Title here!#}
+      {% endblock title %}
+      </title>
 
-  <link rel="icon" type="image/x-icon" href="/static/images/favicon.ico" />
-
-
-  <script type="text/javascript">
-      function swapHoverSrc() {
-          var currentImg = $(this).attr('src');
-          $(this).attr('src', $(this).attr('hover'));
-          $(this).attr('hover', currentImg);
+    <script type="text/javascript">
+      // Function to add a spinner during upload & processing
+      function showSpinner(){
+              document.getElementById('loadingImage').style.visibility='visible';
       }
-
-      $(function() { $('.rollerover').hover(swapHoverSrc, swapHoverSrc) });
-  </script>
+    </script>
 
   {% block customheader %}{% endblock %}
+    </head>
 
-</head>
+  <body>
+    <a href="http://openconnecto.me" target="blank">
+      <img src="{% static 'images/openconnectome_brain_logo.png' %}" border="0"/></a>
+  <!-- Logged in status -->
+    <div id="loginStatus">
+      {% if user.is_authenticated %}
+        <b><FONT COLOR='#27fd1e'>Logged in as: {{ user.username }} </FONT></b>
+      {% else %}
+        <b><FONT COLOR='#fdc23c'> You are currently not logged in </FONT> </b>
+      {% endif %}
+    </div>
 
-<body>
+  {% block content %}
+  {% endblock %}
 
-{% block content %}
-{% endblock %}
-
-
-
-<script type="text/javascript">
-	var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
-	document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
-	</script>
-	<script type="text/javascript">
-	var pageTracker = _gat._getTracker("UA-1785594-4");
-	pageTracker._trackPageview();
-</script>
-
-</body>
+  </body>
 </html>
