@@ -13,6 +13,13 @@
         {% endblock title %}
         </title>
 
+          <script type="text/javascript">
+              // Function to add a spinner during upload & processing
+              function showSpinner(){
+                      document.getElementById('loadingImage').style.visibility='visible';
+              }
+          </script>
+
     </head>
     <body>
       <a href="http://openconnecto.me" target="blank">
@@ -33,24 +40,22 @@
         <!-- Tell me who is logged in -->
         <div id="loginStatus">
           {% if user.is_authenticated %}
-            <b> Logged in as: {{ user.username }}</b>
+            <b><FONT COLOR='#27fd1e'>Logged in as: {{ user.username }} </FONT></b>
           {% else %}
-            <b> You are currently not logged in</b>
+            <b><FONT COLOR='#fdc23c'> You are currently not logged in </FONT> </b>
           {% endif %}
         </div>
 
-        <h1>{% block bigheading %}{% endblock bigheading %}</h1>
+        <h1><b> {% block bigheading %}{% endblock bigheading %}</b></h1>
         <h2>{% block medheading %}{% endblock medheading %}</h2>
 
-        {% block content %}
 
+        {% block content %}
+          <!-- Programmatic instructions -->
+          {% block programmatic %}
+          {% endblock programmatic %}
         {% endblock content%}
 
-
-        <!-- Programmatic instructions -->
-        {% block prgrammatic %}
-
-        {% endblock prgrammatic %}
 
         {% block footer %}
           <div class="footer">

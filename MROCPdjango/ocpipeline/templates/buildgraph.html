@@ -1,108 +1,92 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+{% extends "base.html" %}
 
-<html>
- <head>
-    <link  rel="shortcut icon" type="image/x-icon" href="{{STATIC_URL}}/images/favicon.ico" />
-    <link rel="stylesheet" type="text/css" href="{{STATIC_URL}}default.css"/>
-        <title> Build Graph | MROCP</title>
+  {% block title %}
+    Build Graph | MROCP
+  {% endblock title %}
 
-          <script type="text/javascript">
-              // Function to add a spinner during upload & processing
-              function showSpinner(){
-                      document.getElementById('loadingImage').style.visibility='visible';
-              }
-          </script>
-    </head>
+  {% block medheading %}
+  To ensure your data is routed correctly submit the form below. Then
+  upload data derivative files and optionally select any invariants to be computed.
+  {% endblock medheading %}
 
-<body>
-    <a href="http://openconnecto.me" target="blank">
-      <img src="{{STATIC_URL}}images/openconnectome_brain_logo.png" border="0"/></a>
+  {% block content %}
+    <p>
+      <form action="" method="post" enctype="multipart/form-data" name="loadForm">
+        {% csrf_token %}
+        <p>{{ form }}</p>
+        <input name = "Derivatives"  type="submit" value="Submit All & Process" class="button" onclick="showSpinner();"/>
+        <input type="reset" value="Reset" class="button" name="clearForm" />
+      </form>
+    </p>
 
-    <div class="container">
-        <div class="navigation">
-          <a href="http://mrbrain.cs.jhu.edu/disa">Home</a>
-          <a href="http://mrbrain.cs.jhu.edu/disa/buildgraph">Build Graph</a>
-          <a href="http://mrbrain.cs.jhu.edu/disa/graphupload">Compute Invariants</a>
-          <a href="http://mrbrain.cs.jhu.edu/disa/convert">Convert Format</a>
-          <a href="https://github.com/openconnectome/MR-connectome/tree/master/MROCPdjango/examples">Code Examples</a>
-          <a href="">Documentation</a>
-        </div>
+    <div style="position:absolute; left:153px; top: 212px;">
+      <img id="loadingImage" src="{{STATIC_URL}}images/loading.gif" border="0" alt="loading" style="visibility:hidden;opacity:0.5"/>
     </div>
 
-    <h2>To ensure your data is routed correctly submit the form below. Then
-       upload data derivative files and optionally select any invariants to be computed.</h2>
-     <p>
-        <form action="" method="post" enctype="multipart/form-data" name="loadForm">
-	    {% csrf_token %}
-            <p>{{ form }}</p>
-	    <input name = "Derivatives"  type="submit" value="Submit All & Process" class="button" onclick="showSpinner();"/>
-            <input type="reset" value="Reset" class="button" name="clearForm" />
-        </form>
-    </p>
-	<div style="position:absolute; left:153px; top: 212px;">
-          <img id="loadingImage" src="{{STATIC_URL}}images/loading.gif" border="0" alt="loading" style="visibility:hidden;opacity:0.5"/> </div>
 
-        <div id="Programmatic uses">
-          <h2> Graphs may also be built programmatically </h2>
-          The base url for an upload is <strong>http://mrbrain.cs.jhu.edu/disa/upload/ </strong> <br/>
+    {% block programmatic %}
+      <div id="Programmatic uses">
+        <h2> Graphs may also be built programmatically </h2>
+        The base url for an upload is <strong>http://mrbrain.cs.jhu.edu/disa/upload/ </strong> <br/>
 
-          <h3> Single graph </h3>
-          <p>
-          The example <a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjango/examples/uploadsubj.py"
-          target="blank"> uploadsubj.py</a> can be used as follows from a terminal session: <br/>
+        <h3> Single graph </h3>
+        <p>
+        The example <a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjango/examples/uploadsubj.py"
+        target="blank"> uploadsubj.py</a> can be used as follows from a terminal session: <br/>
 
-          <strong>python uploadsubj.py http://mrbrain.cs.jhu.edu/disa/upload/YOUR_project/YOUR_site/YOUR_subject/YOUR_session/YOUR_scanID/s
-          fiber_tract_file roi_raw_file roi_xml_file -i cc,tri,ss1,mad,deg,eig .</strong>
-           The parameter after YOUR_scan can either be 's' or 'b', but not both. Using 's' or 'small' builds a small graph (70 x 70 vertices) while 'b' or 'big' builds a
-           big graph on the order of > 10 M x 10 M vertices. <br/>
-           The particular invocation in bold above would build a small graph and compute all invariants currently available. A list of invariant contractions is
-           available below.
-           <strong>The result of uploadsubj.py is a url containing all data produced. Simply follow the url to download it.</strong>
-          </p>
+        <strong>python uploadsubj.py http://mrbrain.cs.jhu.edu/disa/upload/YOUR_project/YOUR_site/YOUR_subject/YOUR_session/YOUR_scanID/s
+        fiber_tract_file roi_raw_file roi_xml_file -i cc,tri,ss1,mad,deg,eig .</strong>
+         The parameter after YOUR_scan can either be 's' or 'b', but not both. Using 's' or 'small' builds a small graph (70 x 70 vertices) while 'b' or 'big' builds a
+         big graph on the order of > 10 M x 10 M vertices. <br/>
+         The particular invocation in bold above would build a small graph and compute all invariants currently available. A list of invariant contractions is
+         available below.
+         <strong>The result of uploadsubj.py is a url containing all data produced. Simply follow the url to download it.</strong>
+        </p>
 
-          The optional arguments given as -i are simply appended to the final url in uploadsubj.py. The options available must be in a comma separated list and are as follows:
-          <ul>
-            <li> <i>ss1</i> for the Scan Statistic 1</li>
-            <li> <i>tri</i> for the Triangle Count </li>
-            <li> <i>cc</i> for the Clustering Coefficient</li>
-            <li> <i>mad</i> for the Maximum Average Degree</li>
-            <li> <i>deg</i> for The Local Degree Count</li>
-            <li> <i>eig</i> for the Top 100 (or maximum available) eigenvalues</li>
-            <li> <i>ss2</i> for the Scan Statistic 2 [Coming soon]</li>
-            <li> <i>apl</i> for the Average Path Length [Coming soon]</li>
-            <li> <i>gdia</i> for the Graph Diameter [Coming soon]</li>
-          </ul>
+        The optional arguments given as -i are simply appended to the final url in uploadsubj.py. The options available must be in a comma separated list and are as follows:
+        <ul>
+          <li> <i>ss1</i> for the Scan Statistic 1</li>
+          <li> <i>tri</i> for the Triangle Count </li>
+          <li> <i>cc</i> for the Clustering Coefficient</li>
+          <li> <i>mad</i> for the Maximum Average Degree</li>
+          <li> <i>deg</i> for The Local Degree Count</li>
+          <li> <i>eig</i> for the Top 100 (or maximum available) eigenvalues</li>
+          <li> <i>ss2</i> for the Scan Statistic 2 [Coming soon]</li>
+          <li> <i>apl</i> for the Average Path Length [Coming soon]</li>
+          <li> <i>gdia</i> for the Graph Diameter [Coming soon]</li>
+        </ul>
 
-          <h3> Multiple graphs </h3>
-          <p>
-          <a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjango/examples/uploadMultiSubj.py">Multi-subject/scan example</a>
-          is also provided as an example of how to process multiple scans with a single programmatic call.<br/>
+        <h3> Multiple graphs </h3>
+        <p>
+        <a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjango/examples/uploadMultiSubj.py">Multi-subject/scan example</a>
+        is also provided as an example of how to process multiple scans with a single programmatic call.<br/>
 
-          From within a terminal session, it can be used as follows: <strong>python uploadMultiSubj.py http://mrbrain.cs.jhu.edu/disa/upload/YOUR_project/YOUR_site/YOUR_subject/YOUR_session/ s
-          fiber_tract_dirctory roi_dirctory -i cc,tri,ss1,mad,deg,eig.</strong> This call would build graphs for multiple scans and compute all invariants noted in the -i flag.
-          The example assumes the following:
+        From within a terminal session, it can be used as follows: <strong>python uploadMultiSubj.py http://mrbrain.cs.jhu.edu/disa/upload/YOUR_project/YOUR_site/YOUR_subject/YOUR_session/ s
+        fiber_tract_dirctory roi_dirctory -i cc,tri,ss1,mad,deg,eig.</strong> This call would build graphs for multiple scans and compute all invariants noted in the -i flag.
+        The example assumes the following:
 
-          <ul>
-            <li>There is a directory containing all fiber tract files you wish to be processed with no other sub-directories or files you do not wish to process.</li>
-            <li>There is a directory containing all corresponding roi files (i.e both an xml and raw file for each fiber tract file) with file names in accordance with the convention noted below.
-            <strong>Note the root of each roi file name should:</strong>
-              <ol>
-                <li>End in <strong> _roi</strong> E.g filename_roi.xml and filename_roi.raw.</li>
-                <li>
-                  Be identical to the root of its corresponding fiber tract file. E.g If the fiber file name is <strong> sample1.dat</strong>,
-                  then there must be a <strong>sample1_roi.raw</strong> AND a <strong> sample1_roi.xml</strong>. Thus the root is <strong>sample1</strong> in this example.
-                </li>
-              </ol>
-            </li>
-          </ul>
+        <ul>
+          <li>There is a directory containing all fiber tract files you wish to be processed with no other sub-directories or files you do not wish to process.</li>
+          <li>There is a directory containing all corresponding roi files (i.e both an xml and raw file for each fiber tract file) with file names in accordance with the convention noted below.
+          <strong>Note the root of each roi file name should:</strong>
+            <ol>
+              <li>End in <strong> _roi</strong> E.g filename_roi.xml and filename_roi.raw.</li>
+              <li>
+                Be identical to the root of its corresponding fiber tract file. E.g If the fiber file name is <strong> sample1.dat</strong>,
+                then there must be a <strong>sample1_roi.raw</strong> AND a <strong> sample1_roi.xml</strong>. Thus the root is <strong>sample1</strong> in this example.
+              </li>
+            </ol>
+          </li>
+        </ul>
 
-          All fiber tract files  will be treated as single project with multiple scanIDs derived from the file name.
-          <a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjango/examples/uploadMultiSubj.py">Download the file</a>
-          and help can be obtained by typing in a terminal/command line session:
-          <strong>python uploadMultiSubj.py -h </strong>. The same is true for the single scan example, where: <strong>python uploadsubj.py -h</strong> gives help.
-          </p>
-        </div>
+        <p>
+        All fiber tract files  will be treated as single project with multiple scanIDs derived from the file name.
+        <a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjango/examples/uploadMultiSubj.py">Download the file</a>
+        and help can be obtained by typing in a terminal/command line session:
+        <strong>python uploadMultiSubj.py -h </strong>. The same is true for the single scan example, where: <strong>python uploadsubj.py -h</strong> gives help.
+      </div>
+        </p>
+    {% endblock programmatic %}
 
         <div id="Graph specs">
            <h2>Specifications for graphs built</h2>
@@ -119,9 +103,4 @@
               Big graphs are on the order of > 10 M x 10 M vertices.
             </ul>
         </div>
-
-        <div class="footer">
-        Property of the Johns Hopkins University |  Author: Disa Mhembere
-    </div>
-</body>
-</html>
+  {% endblock content%}
