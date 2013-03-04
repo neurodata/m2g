@@ -1,27 +1,7 @@
-{% extends "registration/base.html" %}
+{% extends "base.html" %}
 
 {% block title %} Register | MROCP {% endblock %}
 
-{% block customheader %}
-
-<script type="text/javascript">
-    function showYearField() { $('#id_year').parent().parent().show() }
-    function hideYearField() { $('#id_year').parent().parent().hide() }
-
-    function updateYearField() {
-        kind = $("#id_kind").val();
-        if (kind == "s" || kind == "a") {
-            showYearField();
-        } else {
-            hideYearField();
-        }
-    }
-
-    // update when the selectbox is changed
-    $(function() { $('#id_kind').change(updateYearField); });
-    $(updateYearField); // update at load
-</script>
-{% endblock %}
 
 {% block content %}
 <div id="register">
