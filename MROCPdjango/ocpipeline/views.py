@@ -82,80 +82,8 @@ def default(request):
 
 ''' Little welcome message'''
 def welcome(request):
-  request.session.clear()
+  #request.session.clear()
   return render_to_response('welcome.html')
-
-
-#def login(request):
-#  request.session.clear()
-#  if request.method == 'POST':
-#    form = LoginForm(request.POST)
-#    if form.is_valid():
-#
-#      username = form.cleaned_data['username']
-#      password = form.cleaned_data['password']
-#      user = authenticate(username=username, password=password)
-#      if user is not None:
-#        if user.is_active:
-#          login(request, user)
-#
-#          HttpResponse("successful login") # STUB
-#        else:
-#          # Return a 'disabled account' error message
-#          HttpResponse("disabled account") # STUB
-#      else:
-#        # Return an 'invalid login' error message.
-#        HttpResponse('invalid login') # STUB
-#  else:
-#    form = () # An empty, unbound form
-#
-#  # Render the form
-#  return render_to_response(
-#      'login.html',
-#      {'form': form},
-#      context_instance=RequestContext(request) # Some failure to input data & returns a key signaling what is requested
-#  )
-
-#def register(request):
-#  from django.core.mail import send_mail
-#  from django.contrib.auth.models import User
-#
-#  username = request.POST['username']
-#  password = request.POST['password']
-#  confirmPassword = request.POST['confirmPassword']
-#  email = request.POST['email']
-#  confirmEmail = request.POST['confirmEmail']
-#
-#  if not (password == confirmPassword):
-#    HttpResponse("password mismatch") # stub
-#
-#  if not (email == confirmEmail):
-#    HttpResponse("email mismatch") # stub
-#
-#  else:
-#    user = User.objects.create_user(username, email, password)
-#
-#    # send verification email
-#    send_mail('Subject here', 'Here is the message.', 'from@example.com',
-#      ['to@example.com'], fail_silently=False)
-#    HttpResponse("go confirm email")
-
-#def logout(request):
-#  if request.user.is_authenticated():
-#    logout(request)
-#    HttpResponse("Logged out") # STUB
-#  else:
-#    HttpResponse("You aren't logged in") # STUB
-#
-#from django.contrib.auth.tokens import PasswordResetTokenGenerator
-#
-#def password_reset(request, is_admin_site=False,
-#            template_name='registration/password_reset_form.html',
-#            email_template_name='registration/password_reset_email.html',
-#            password_reset_form=PasswordResetForm,
-#            token_generator=PasswordResetTokenGenerator,
-#            post_reset_redirect=None):
-#  return HttpResponse("stub")
 
 
 # Login decorator
@@ -163,7 +91,7 @@ def welcome(request):
 #@login_required(redirect_field_name='my_redirect_field')
 #@login_required # OR EASIER
 def buildGraph(request):
-  request.session.clear()
+  #request.session.clear()
 
   if request.method == 'POST':
     form = BuildGraphForm(request.POST, request.FILES) # instantiating form
