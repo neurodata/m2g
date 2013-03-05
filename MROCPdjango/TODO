@@ -1,9 +1,8 @@
 *MR OCP TODO list Disa
 ===========================
 
-0. Alter default.css for buttons and user status THEN manage.py staticfiles
+0. Check email activation failure view
 1. Rerun epydoc with new modules
-2. Fix placement of login/logout buttons on views
 
 ** Resolve biggraph degree and eigenvalue non-conversion to csv
 
@@ -21,6 +20,8 @@ Invariants still to compute
 Recently completed
 ===================
 
+<-- 2. Fix placement of login/logout buttons on views -->
+<-- 0. Alter default.css for buttons and user status THEN manage.py staticfiles -->
 <-- registration/logout.html -->
 <-- registration/logged_out.html -->
 <-- Log in/out button in all templates -->

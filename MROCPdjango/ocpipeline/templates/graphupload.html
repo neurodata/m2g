@@ -49,7 +49,7 @@
     </p>
     <form action="" method="post" enctype="multipart/form-data" name="loadForm">
         {% csrf_token %}
-        <p>{{ form }}</p>
+        <p>{{ graphUploadForm }}</p>
         <input name = "Derivatives"  type="submit" value="Upload Graph(s)" class="button" onclick="showSpinner();"/>
         <input type="reset" value="Reset" class="button" name="clearForm" />
     </form>
