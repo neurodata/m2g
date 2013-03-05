@@ -2,6 +2,6 @@ Thank you creating a Magnetic Resonance One-Click Pipeline account!
 
 To finalize your account, just visit the address below. (If it's not a link, you can copy and paste it into your web browser's address bar.)
 
-http://mrbrain.cs.jhu.edu/disa/accounts/activate/{{ activation_key }}/
+https://mrbrain.cs.jhu.edu/disa/accounts/activate/{{ activation_key }}/
 
 If you didn't sign up for an account, just ignore this message: we won't email you again, and the person who said this was their email won't be able to verify their account.
