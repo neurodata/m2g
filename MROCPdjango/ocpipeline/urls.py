@@ -25,7 +25,7 @@ admin.autodiscover()
 
 urlpatterns = patterns('ocpipeline.views',
     url(r'^$', 'default', name= 'default'),
-    url(r'^welcome$', 'welcome', name= 'welcome'),
+    url(r'^welcome/$', 'welcome', name= 'welcome'),
     url(r'^success/$', 'success', name='success-page'),
     url(r'^confirmdownload/$', 'confirmDownload', name='confirm-dwnd-page'),
     url(r'^processinput/$', 'processInputData', name='process-input-data'),
