@@ -83,9 +83,8 @@ def default(request):
 ''' Little welcome message'''
 def welcome(request):
   #request.session.clear()
-  return render_to_response('welcome.html', 
-		  {"user":request.user}, 
-		  context_instance=RequestContext(request))
+  return render_to_response('welcome.html', {"user":request.user},
+                            context_instance=RequestContext(request))
 
 
 # Login decorator
@@ -159,7 +158,7 @@ def buildGraph(request):
   # Render the form
   return render_to_response(
       'buildgraph.html',
-      {'form': form},
+      {'buildGraphform': form},
       context_instance=RequestContext(request) # Some failure to input data & returns a key signaling what is requested
   )
 
@@ -178,7 +177,7 @@ def processInputData(request):
 
   for fileName in [roi_xml_fn, fiber_fn, roi_raw_fn]:
     if fileName == "": # Means a file is missing from i/p
-      return render_to_response('pipelineUpload.html', {'form': form}, context_instance=RequestContext(request)) # Missing file for processing Gengraph
+      return render_to_response('pipelineUpload.html', context_instance=RequestContext(request)) # Missing file for processing Gengraph
 
   baseName = fiber_fn[:-9] #MAY HAVE TO CHANGE
 
@@ -200,7 +199,7 @@ def processInputData(request):
       lccG = sio.loadmat(request.session['smGrfn'])['fibergraph']
 
     request.session['invariant_fns'] =  runInvariants(lccG, request.session)
-  return HttpResponseRedirect(get_script_prefix()+'confirmdownload')
+  return HttpResponseRedirect(get_script_prefix()+'confirmdownload', context_instance=RequestContext(request))
 
 def confirmDownload(request):
 
@@ -242,7 +241,7 @@ def confirmDownload(request):
   else:
     form = DownloadForm()
 
-  return render_to_response('confirmDownload.html',{'form': form},\
+  return render_to_response('confirmDownload.html',{'downloadForm': form},\
                   context_instance=RequestContext(request))
 
 def zipProcessedData(request):
@@ -444,7 +443,7 @@ def graphLoadInv(request, webargs=None):
   # Render the form
   return render_to_response(
       'graphupload.html',
-      {'form': form},
+      {'graphUploadForm': form},
       context_instance=RequestContext(request) # Some failure to input data & returns a key signaling what is requested
   )
 
@@ -543,7 +542,7 @@ def convert(request, webargs=None):
   # Render the form
   return render_to_response(
       'convertupload.html',
-      {'form': form},
+      {'convertForm': form},
       context_instance=RequestContext(request))
 
 #########################################

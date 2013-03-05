@@ -13,7 +13,7 @@
 
         <form action="" method="post" enctype="multipart/form-data" name="confirmDLForm">
 	    {% csrf_token %}
-            <p>{{ form }}</p>
+            <p>{{ downloadForm }}</p>
 	    <input name = "Output"  type="submit" value="Obtain processed data" class="button" onclick="showSpinner();"/>
             <input type="reset" value="Reset" class="button" name="clearForm" />
         </form>

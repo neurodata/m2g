@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "registration/base.html" %}
 
 {% block title %} Register | MROCP {% endblock %}
 
@@ -14,7 +14,7 @@
             </p>
 
             <p class="submit">
-                <input type="submit" value="Register" />
+                <input type="submit" value="Register" class="button"/>
                 <input type="hidden" name="next" value="{{ next }}" />
             </p>
         </form>

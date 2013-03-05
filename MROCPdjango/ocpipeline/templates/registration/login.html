@@ -1,6 +1,6 @@
-{% extends "base.html" %}
+{% extends "registration/base.html" %}
 
-{% block title %}Log In{% endblock %}
+{% block title %}Log In | MROCP {% endblock %}
 
 {% block content %}
   {% if form.errors %}
@@ -19,11 +19,11 @@
     		</p>
 
     		<p class="submit">
-    		  <input type="submit" value="Log In" />
+    		  <input type="submit" value="Log In" class="button"/>
 		  <input type="hidden" name="next" value="/disa/" /> {# TEMPORARY#}
     		  {#<input type="hidden" name="next" value="{{ next }}" /> #}
     		</p>
-  		</form>
+  	</form>
 
   		<p class="register">
 		Don't have an account? <a href="{% url registration_register %}">Register!</a><br/>

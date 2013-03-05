@@ -13,7 +13,7 @@
     <p>
       <form action="" method="post" enctype="multipart/form-data" name="loadForm">
         {% csrf_token %}
-        <p>{{ form }}</p>
+        <p>{{ buildGraphform }}</p>
         <input name = "Derivatives"  type="submit" value="Submit All & Process" class="button" onclick="showSpinner();"/>
         <input type="reset" value="Reset" class="button" name="clearForm" />
       </form>
