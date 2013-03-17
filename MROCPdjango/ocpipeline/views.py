@@ -76,13 +76,13 @@ import scipy.io as sio
 # Helpers
 from util import *
 
-''' Base url just redirects to welcome'''
+''' Base url just redirects to welcome '''
 def default(request):
   return redirect(get_script_prefix()+'welcome', {"user":request.user})
 
-''' Little welcome message'''
+''' Little welcome message '''
 def welcome(request):
-  #request.session.clear()
+  #import pdb; pdb.set_trace()
   return render_to_response('welcome.html', {"user":request.user},
                             context_instance=RequestContext(request))
 

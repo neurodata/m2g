@@ -1,6 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 {% load static %}
+{% load getScriptPrefix %}
 <html lang="en">
     <head>
         <!-- Style sheet and logo image -->
@@ -28,7 +29,8 @@
         <!-- Navigation pane -->
 	<div class="container">
 	    <div class="navigation">
-		    <a href="/disa/welcome/">Home</a>
+                    <a href={{"welcome"|getScriptPrefix}}>Home</a>
+		    <!--<a href="/disa/welcome/">Home</a>-->
 		    <a href="/disa/buildgraph/">Build Graph</a>
 		    <a href="/disa/graphupload/">Compute Invariants</a>
 		    <a href="/disa/convert/">Convert Format</a>

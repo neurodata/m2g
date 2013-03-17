@@ -1,13 +1,15 @@
 *MR OCP TODO list Disa
 ===========================
-0. Merge to master to update examples on mrbrain site
-1. Rerun epydoc with new modules
 
-** Resolve biggraph degree and eigenvalue non-conversion to csv
+- Add to project create - private project
+- Add sql queries to retrieve all private projects for a single user
+- Add projects page for users
+- Create sharing tokens
 
-2. Do more documentation
-4. Fix parallel processing of ss
-5. Finish work on convert fibergraph, lcc, svd to csv
+- Resolve biggraph degree and eigenvalue non-conversion to csv
+
+- Fix parallel processing of ss
+- Finish work on convert fibergraph, lcc, svd to csv
 
 Invariants still to compute
 =============================
@@ -19,6 +21,7 @@ Invariants still to compute
 Recently completed
 ===================
 
+<-- 0. Merge to master to update examples on mrbrain site -->
 <-- 0. Check email activation failure view -->
 <-- 2. Fix placement of login/logout buttons on views -->
 <-- 0. Alter default.css for buttons and user status THEN manage.py staticfiles -->
