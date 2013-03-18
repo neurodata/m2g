@@ -16,21 +16,6 @@ from django.contrib import admin
 import os
 from time import strftime, localtime
 
-#from django.contrib.auth.models import User, check_password
-#
-#class LoginModel(User):
-#  '''
-#  table to hold user names and hashed passwords
-#  for logging
-#  '''
-#  pass
-#
-#class RegisterModel(models.Model):
-#  '''
-#  table to hold registered users - not specifically active users
-#  '''
-#  pass
-
 class BuildGraphModel(models.Model):
   '''
   upload_to location dynamically altered in view

@@ -4,6 +4,10 @@
 {% load getScriptPrefix %}
 <html lang="en">
     <head>
+        <!--meta data-->
+        <meta property="og:title" content="connectome"/>
+        <meta property="og:type" content="website"/>
+        <meta property="og:site_name" content="mr connectome"/>
         <!-- Style sheet and logo image -->
 	<link  rel="shortcut icon" type="image/x-icon" href= "{% static 'images/favicon.ico' %}"/>
 	<link rel="stylesheet" type="text/css" href="{% static 'default.css' %}"/>
@@ -30,12 +34,13 @@
 	<div class="container">
 	    <div class="navigation">
                     <a href={{"welcome"|getScriptPrefix}}>Home</a>
-		    <!--<a href="/disa/welcome/">Home</a>-->
-		    <a href="/disa/buildgraph/">Build Graph</a>
-		    <a href="/disa/graphupload/">Compute Invariants</a>
-		    <a href="/disa/convert/">Convert Format</a>
+
+		    <a href={{"buildgraph"|getScriptPrefix}}>Build Graph</a>
+		    <a href={{"graphupload"|getScriptPrefix}}>Compute Invariants</a>
+		    <a href={{"convert"|getScriptPrefix}}>Convert Format</a>
 		    <a href="https://github.com/openconnectome/MR-connectome/tree/master/MROCPdjango/examples">Code Examples</a>
-		    <a href="{% static 'doc/index.html' %}">Documentation</a>
+		    <a href={{"viewprojects"|getScriptPrefix}}>Projects</a>
+                    <!--<a href="">Sample Data</a>-->
 	    </div>
 	</div>
 
@@ -44,7 +49,7 @@
           {% if user.is_authenticated %}
             <FONT COLOR='#07c4ce'>Hi, {{ user.username }} </FONT>
 
-	    <form action=" /disa/accounts/logout/" method="post" enctype="multipart/form-data" name="logoutForm">
+	    <form action= {{"accounts/logout/"|getScriptPrefix}} method="post" enctype="multipart/form-data" name="logoutForm">
 	      {% csrf_token %}
 	      {{ form }}
 	      <input name = "logout"  type="submit" value="Log out" class="button" />
@@ -52,7 +57,7 @@
 
           {% else %}
 
-	    <input type="submit" class="button" onclick="location.href='/disa/accounts/login/'" value="Log in"/>
+	    <input type="submit" class="button" onclick="location.href='{{"accounts/login"|getScriptPrefix}}'" value="Log in"/>
 
 	  {% endif %}
         </div>
@@ -70,7 +75,7 @@
 
         {% block footer %}
           <div class="footer">
-              Property of the Johns Hopkins University (HSSL) |  Author: Disa Mhembere
+              Property of the Johns Hopkins University (HSSL) | All rights reserved &copy {% now "YEAR_MONTH_FORMAT" %} |  Author: Disa Mhembere
           </div>
         {% endblock footer %}
 

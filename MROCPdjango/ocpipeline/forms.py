@@ -65,6 +65,9 @@ class BuildGraphForm(forms.Form):
     @type scanId: string
     '''
 
+    # Public or private Project
+    Project_Type = forms.ChoiceField([('private','private'), ('public', 'public')], required=True, widget=forms.RadioSelect())
+
     # Name project
     UserDefprojectName  = forms.CharField(label='Project name', help_text=' ', max_length=255, required = True, error_messages={'required': 'You must enter a Project name'})
     site = forms.CharField(label='Enter Site', help_text=' ', max_length=255, required = True, error_messages={'required': 'You must enter a site'})

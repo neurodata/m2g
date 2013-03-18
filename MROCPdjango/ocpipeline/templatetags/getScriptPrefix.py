@@ -15,4 +15,9 @@ register = template.Library()
 @register.filter(name='getScriptPrefix', is_safe=True)
 @stringfilter
 def getScriptPrefix(tailurl):
+  '''
+  Custom filter used to get the script prefix of a certain url
+  @param tailurl: the tail of the url
+  @return str: the fully built url
+  '''
   return get_script_prefix() + tailurl
