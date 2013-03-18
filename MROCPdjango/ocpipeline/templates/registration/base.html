@@ -1,8 +1,13 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 {% load static %}
+{% load getScriptPrefix %}
 <html lang="en">
     <head>
+      <!--meta data-->
+      <meta property="og:title" content="connectome"/>
+      <meta property="og:type" content="website"/>
+      <meta property="og:site_name" content="mr connectome"/>
       <!-- Style sheet and logo image -->
       <link  rel="shortcut icon" type="image/x-icon" href= "{% static 'images/favicon.ico' %}"/>
       <link rel="stylesheet" type="text/css" href="{% static 'default.css' %}"/>
@@ -30,12 +35,14 @@
      <!-- Navigation pane -->
 	<div class="container">
 	    <div class="navigation">
-		    <a href="/disa/welcome/">Home</a>
-		    <a href="/disa/buildgraph/">Build Graph</a>
-		    <a href="/disa/graphupload/">Compute Invariants</a>
-		    <a href="/disa/convert/">Convert Format</a>
+                    <a href={{"welcome"|getScriptPrefix}}>Home</a>
+
+		    <a href={{"buildgraph"|getScriptPrefix}}>Build Graph</a>
+		    <a href={{"graphupload"|getScriptPrefix}}>Compute Invariants</a>
+		    <a href={{"convert"|getScriptPrefix}}>Convert Format</a>
 		    <a href="https://github.com/openconnectome/MR-connectome/tree/master/MROCPdjango/examples">Code Examples</a>
-		    <a href="{% static 'doc/index.html' %}">Documentation</a>
+		    <a href={{"viewprojects"|getScriptPrefix}}>Projects</a>
+                    <!--<a href="">Sample Data</a>-->
 	    </div>
 	</div>
 

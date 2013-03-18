@@ -70,7 +70,7 @@ h1,h2,h3 {padding-top: 6px;}
 	display: block;
 	float: left;
 	font: bold 1.1em sans-serif;
-	line-height: 41px;
+	/*line-height: 41px;*/
 	padding: 0 15px;
 	text-decoration: none;
 }

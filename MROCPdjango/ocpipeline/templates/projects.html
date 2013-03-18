@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+  {% block title %}
+    Projects | MROCP
+  {% endblock title %}
+
+  {% block medheading %}
+  Projects Page
+  {% endblock medheading %}
+
+  {% block content %}
+
+  To browse projects to which you have an authentication token click <a href={% static 'placeholder.html' %}>here</a>
+
+   <div id="projectsViewable">
+    {% if user.is_authenticated %}
+
+
+    Here are all projects (private and public) associated with your account:
+
+
+    {% else %}
+
+    To browse your own private projects please <a href={{"accounts/login"|getScriptPrefix}}>login</a>.<br/>
+
+    <input type="submit" class="button" onclick="location.href='{{"accounts/login"|getScriptPrefix}}'" value="Log in"/>
+
+    {% endif %}
+  </div>
+
+    {% block programmatic %}
+    {% endblock programmatic %}
+
+  {% endblock content%}
