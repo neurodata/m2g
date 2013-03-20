@@ -68,10 +68,13 @@ from computation.MAD import calcMAD
 from computation.eigen import calcEigs
 from computation.clustCoeff import calcLocalClustCoeff
 from computation.triCount_deg_MAD import eignTriLocal_deg_MAD
+import scipy.io as sio
 
+# Registration
 from django.contrib.auth import authenticate, login, logout
 
-import scipy.io as sio
+# Private Projects
+from pysql import pysqlprocedures as psp
 
 # Helpers
 from util import *
@@ -92,12 +95,12 @@ def welcome(request):
 #@login_required(redirect_field_name='my_redirect_field')
 #@login_required # OR EASIER
 def buildGraph(request):
-  #request.session.clear()
+
+  error_msg = ''
 
   if request.method == 'POST':
     form = BuildGraphForm(request.POST, request.FILES) # instantiating form
     if form.is_valid():
-      print "Uploading files..."
 
       # Acquire proj names
       userDefProjectName = form.cleaned_data['UserDefprojectName']
@@ -106,6 +109,33 @@ def buildGraph(request):
       session = form.cleaned_data['session']
       scanId = form.cleaned_data['scanId']
 
+      # Private project error checking
+      if (form.cleaned_data['Project_Type'] == 'private'):
+        if not request.user.is_authenticated():
+          error_msg = "You must be logged in to make/alter a private project! Please Login or make/alter a public project."
+
+        elif not (psp.isPrivateProject(request.user, userDefProjectName)):
+          error_msg = "The project you requested is not a private one! No changes were made to it"
+
+        elif (psp.scanExists(request.user, userDefProjectName, site, subject, session, scanId)):
+          error_msg = "The scanID you requested to create already exists in this project path. Please change any of the form values."
+
+      if error_msg:
+        return render_to_response(
+          'buildgraph.html',
+          {'buildGraphform': form, 'error_msg': error_msg},
+          context_instance=RequestContext(request)
+          )
+
+      print "Uploading files..."
+
+      # If a user is logged in associate the project with thier directory
+      if request.user.is_authenticated():
+        userDefProjectName = os.path.join(request.user.username, userDefProjectName)
+      else:
+        userDefProjectName = os.path.join('public', userDefProjectName)
+
+      # Adapt project name if necesary on disk
       userDefProjectName = adaptProjNameIfReq(os.path.join(settings.MEDIA_ROOT, userDefProjectName)) # Fully qualify AND handle identical projects
 
       request.session['usrDefProjDir'] = os.path.join(userDefProjectName, site, subject, session, scanId)
@@ -115,23 +145,18 @@ def buildGraph(request):
       request.session['derivatives'], request.session['rawdata'], request.session['graphs'],\
           request.session['graphInvariants'],request.session['images']= defDataDirs(request.session['usrDefProjDir'])
 
-      grModObj = BuildGraphModel(derivfile = request.FILES['fiber_file'])
-      grModObj._meta.get_field('derivfile').upload_to = request.session['derivatives'] # route files to correct location
+      # Create a model object to save data to DB
 
-      grModObj2 = BuildGraphModel(derivfile = request.FILES['roi_raw_file'])
-      grModObj2._meta.get_field('derivfile').upload_to = request.session['derivatives']
+      grModObj = BuildGraphModel(project_name = form.cleaned_data['UserDefprojectName'])
+      grModObj.owner = request.user # Who created the project
+      grModObj.location = request.session['usrDefProjDir'] # Where the particular scan location is
 
-      grModObj3 = BuildGraphModel(derivfile =  request.FILES['roi_xml_file'])
-      grModObj3._meta.get_field('derivfile').upload_to = request.session['derivatives']
-
-      grModObj.projectName = grModObj2.projectName = grModObj3.projectName =  form.cleaned_data['UserDefprojectName']# set project name
-      grModObj.site = grModObj2.site = grModObj3.site =  form.cleaned_data['site']# set the site
-      grModObj.subject = grModObj2.subject = grModObj3.subject =  form.cleaned_data['subject']# set the subject
-      grModObj.session = grModObj2.session = grModObj3.session =  form.cleaned_data['session']# set the session
-      grModObj.scanId = grModObj2.scanId = grModObj3.scanId =  form.cleaned_data['scanId']# set the scanId
+      grModObj.site = form.cleaned_data['site']# set the site
+      grModObj.subject = form.cleaned_data['subject']# set the subject
+      grModObj.session = form.cleaned_data['session']# set the session
+      grModObj.scanId = form.cleaned_data['scanId']# set the scanId
 
       request.session['invariants'] = form.cleaned_data['Select_Invariants_you_want_computed']
-
       request.session['graphsize'] = form.cleaned_data['Select_graph_size']
 
       ''' Acquire fileNames '''
@@ -139,10 +164,12 @@ def buildGraph(request):
       roi_raw_fn = form.cleaned_data['roi_raw_file'].name
       roi_xml_fn = form.cleaned_data['roi_xml_file'].name
 
-      ''' Save files to temp location '''
-      grModObj.save()
-      grModObj2.save()
-      grModObj3.save()
+      ''' Save files in appropriate location '''
+      saveFileToDisk(form.cleaned_data['fiber_file'], os.path.join(request.session['derivatives'], fiber_fn))
+      saveFileToDisk(form.cleaned_data['roi_raw_file'], os.path.join(request.session['derivatives'], roi_raw_fn))
+      saveFileToDisk(form.cleaned_data['roi_xml_file'], os.path.join(request.session['derivatives'], roi_xml_fn))
+
+      grModObj.save() # Save project data to DB after file upload
 
       print '\nSaving all files complete...'
 

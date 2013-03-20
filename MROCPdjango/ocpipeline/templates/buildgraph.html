@@ -10,6 +10,9 @@
   {% endblock medheading %}
 
   {% block content %}
+
+
+  <b><FONT COLOR='#ff0000'>{{error_msg}}</FONT></b>
     <p>
       <form action="" method="post" enctype="multipart/form-data" name="loadForm">
         {% csrf_token %}
@@ -19,7 +22,7 @@
       </form>
     </p>
 
-    <div style="position:absolute; left:153px; top: 212px;">
+    <div style="position:absolute; left:153px; top: 600px;">
       <img id="loadingImage" src="{{STATIC_URL}}images/loading.gif" border="0" alt="loading" style="visibility:hidden;opacity:0.5"/>
     </div>
 

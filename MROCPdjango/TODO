@@ -1,7 +1,22 @@
 *MR OCP TODO list Disa
 ===========================
 
-- Add to project create - private project
+- Add Groups Table (User, Group)
+
+html:
+  - Display all projects for a user in a drop downlist
+  - Then use selection to determine what must be displayed at lower levels
+
+
+Private project Rules:
+- Select new project or add to existing
+- Each project name must be unique for a single user or else we add to project
+- If project exists - add to project
+- If proj...scanID exists - return error for existing scan (stored procedure checks if scan exists given user and project name)
+
+- Update models used for saving files only
+
+- Hook up registration form with lastname & firstname to registration system
 - Add sql queries to retrieve all private projects for a single user
 - Add projects page for users
 - Create sharing tokens
@@ -21,6 +36,8 @@ Invariants still to compute
 Recently completed
 ===================
 
+- Enforce each project being unique for private projects of a single user
+- Add to project create -> private project
 <-- 0. Merge to master to update examples on mrbrain site -->
 <-- 0. Check email activation failure view -->
 <-- 2. Fix placement of login/logout buttons on views -->

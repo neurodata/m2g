@@ -10,19 +10,33 @@
 from subprocess import call
 import MySQLdb
 import os
+import argparse
+from ocpipeline.settings_secret import DATABASES
 
-manageFn =  os.path.join(os.path.abspath('.'),'manage.py')
-call( ['python', manageFn, 'syncdb'] ) # sync the DB
+def manageMRDjango(alter=False):
 
+  manageFn =  os.path.join(os.path.abspath('.'),'manage.py')
+  call( ['python', manageFn, 'syncdb'] ) # sync the DB
 
-db = MySQLdb.connect(host="localhost",
-                     user="root",
-                      passwd="",
-                      db="MRdjango")
+  if alter:
+    db = MySQLdb.connect(host = 'localhost',
+                           user = DATABASES['default']['USER'],
+                           passwd = DATABASES['default']['PASSWORD'],
+                           db = DATABASES['default']['NAME'])
 
-cur = db.cursor()
+    cur = db.cursor()
 
-# So as to avoid truncation errors
-cur.execute("ALTER TABLE ocpipeline_convertmodel MODIFY COLUMN filename TEXT;")
-cur.execute("ALTER TABLE ocpipeline_document MODIFY COLUMN docfile TEXT;")
-cur.execute("ALTER TABLE ocpipeline_buildgraphmodel MODIFY COLUMN derivfile TEXT;")
+    cur.execute("ALTER TABLE OwnedProjects ADD UNIQUE INDEX(project_name, owner);")
+    cur.execute("ALTER TABLE ocpipeline_convertmodel MODIFY COLUMN filename TEXT;") # depr
+
+    db.close() # close connection
+
+def main():
+  parser = argparse.ArgumentParser(description='Run the python database synchronizer with some extra flags if necessary')
+  parser.add_argument('--alter', '-a', action='store_true', help='use this flag if you want to alter the tables for referencial integrity etc. Only necessary once')
+
+  result = parser.parse_args()
+  manageMRDjango(result.alter)
+
+if __name__ == '__main__':
+  main()
