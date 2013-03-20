@@ -11,7 +11,7 @@ import zipfile
 import tempfile
 import re
 
-'''********************* Standalone Methods  *********************'''
+
 def makeDirIfNone(dirPathList):
   '''
   Create a dir specified by dirPathList. Failure usual due to permissions issues.
@@ -29,6 +29,8 @@ def makeDirIfNone(dirPathList):
       print "[ERROR] while attempting to create %s" % dirPath
       sys.exit(-1)
 
+################################################################################
+
 def getFiberPath(fiberFileName):
   '''
   This returns fiberfn's full path less the 'fiber.dat' portion
@@ -37,6 +39,8 @@ def getFiberPath(fiberFileName):
       where filename may vary but _fiber.dat may not.
   '''
   return fiberFileName.partition('_')[0]
+
+################################################################################
 
 def defDataDirs(projectDir):
   '''
@@ -52,6 +56,8 @@ def defDataDirs(projectDir):
 
   return [derivatives, rawdata, graphs, graphInvariants, images]
 
+################################################################################
+
 def getFiberID(fiberfn):
   '''
   Assumptions about the data made here as far as file naming conventions
@@ -65,6 +71,8 @@ def getFiberID(fiberfn):
     return(os.path.splitext(fiberfn.split('/')[-1])[0]).split('_')[0] + '_'
   else:
     return os.path.splitext(fiberfn.split('/')[-1])[0] + '_'
+
+################################################################################
 
 def writeBodyToDisk(data, saveDir):
   '''
@@ -94,6 +102,8 @@ def writeBodyToDisk(data, saveDir):
     print name + " written to disk.."
   return uploadFiles
 
+################################################################################
+
 def getDirFromFilename(filename):
   '''
   @summary: Get the directort location of a file
@@ -104,6 +114,8 @@ def getDirFromFilename(filename):
   for part in filename.split('/')[:-1]:
     path += part + '/'
   return path
+
+################################################################################
 
 def convertFiles(uploadedFiles, fileType , toFormat, convertFileSaveLoc):
   '''
@@ -137,6 +149,8 @@ def convertFiles(uploadedFiles, fileType , toFormat, convertFileSaveLoc):
           convertTo.convertAndSave(file_fn, toFormat, convertFileSaveLoc, fileType) # toFormat is a list
   return correctFileFormat, correctFileType
 
+################################################################################
+
 def adaptProjNameIfReq(projPath):
   '''
   If the directory already exists take a name close to
@@ -156,9 +170,11 @@ def adaptProjNameIfReq(projPath):
       else:
         return os.path.join(projbase, addOneToDirNum(scanID))
 
+################################################################################
 
 def addOneToDirNum(dirname):
   '''
+  Used for file uploads where file directory match another
   Adds one to the directory number of a directory with
   pattern matching regex = r'.*_\d+$'
   '''
@@ -170,3 +186,22 @@ def addOneToDirNum(dirname):
     char = dirname[idx]
 
   return dirname[:idx+1] + str(int(dirname[idx + 1:]) + 1)
+
+################################################################################
+
+def saveFileToDisk(fileData, fullFileName):
+  '''
+  @param f: the file data from a form that is to be saved
+  @param fullFileName: the fully qualified file name i.e where it should be stored
+    and what it should be named
+  '''
+  if not os.path.exists(os.path.dirname(fullFileName)):
+    os.makedirs(os.path.dirname(fullFileName))
+    print "Making directory: %s ..." % os.path.dirname(fullFileName)
+
+  destination = open(fullFileName, 'wb+') # Consider try: except for this
+  for chunk in fileData.chunks():
+      destination.write(chunk)
+  destination.close()
+
+  print "Saving file: %s " % fullFileName

@@ -4,7 +4,7 @@
 @organization: Johns Hopkins University
 @contact: disa@jhu.edu
 
-@summary: A module to create the directories necessary for the OCPIPELINE
+@summary: A module to alter/update the MRdjango database as necessary
 """
 
 '''
@@ -18,18 +18,22 @@ from time import strftime, localtime
 
 class BuildGraphModel(models.Model):
   '''
-  upload_to location dynamically altered in view
-  (This is a little hacky & can be done better using a custom manager)
-  see: https://docs.djangoproject.com/en/dev/ref/models/instances/?from=olddocs
+  Allows us to store data on build graph view
   '''
-
-  derivfile = models.FileField(upload_to = (' '))
-
-  projectName  = models.CharField(max_length=255)
+  project_name = models.CharField(max_length=255)
   site = models.CharField(max_length=255,)
   subject = models.CharField(max_length=255,)
   session = models.CharField(max_length=255,)
   scanId = models.CharField(max_length=255)
+  location = models.TextField()
+  owner = models.CharField(max_length=30, null=True, default="NULL")
+
+class OwnedProjects(models.Model):
+  project_name = models.CharField(max_length=255)
+  owner = models.ForeignKey(auth_user, username) # Many-to-one . Many here, other in auth_user
+  is_private = models.BooleanField(null=False)
+  owner_group = models.CharField(max_length=255, null=True) # Will reference other table soon
+
 
 class ConvertModel(models.Model):
   '''
