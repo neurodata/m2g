@@ -3,12 +3,12 @@
 - Add sql queries to ...
 - Handle wrong input files by using error message
 - Sample case of enforcing visibility of project on disk
-- Fix html header
 html:
   - Display all projects for a user in a drop downlist
   - Then use selection to determine what must be displayed at lower levels
+- Create app to hold all common data e.g http://stackoverflow.com/questions/890942/django-how-to-have-a-project-wide-templatetags-shared-among-all-my-apps-in-th
 
-- Update models used for saving files only
+- Complete ssl of django e.g http://security.stackexchange.com/questions/8964/trying-to-make-a-django-based-site-use-https-only-not-sure-if-its-secure
 
 - Hook up registration form with lastname & firstname to registration system
 - Add sql queries to retrieve all private projects for a single user
@@ -30,6 +30,8 @@ Invariants still to compute
 Recently completed
 ===================
 
+- Fix html header
+- Update models used for saving files only
 - Add private project DBing
 Private project Rules:
 - Select new project or add to existing
