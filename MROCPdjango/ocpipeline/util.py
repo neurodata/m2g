@@ -11,6 +11,8 @@ import zipfile
 import tempfile
 import re
 
+import computation.convertTo as convertTo
+from django.conf import settings
 
 def makeDirIfNone(dirPathList):
   '''
@@ -125,18 +127,18 @@ def convertFiles(uploadedFiles, fileType , toFormat, convertFileSaveLoc):
   @param fileType
   @param toFormat -
   @param convertFileSaveLoc -
-  @return correctFileFormat - check if at least one file has the correct format
-  @return correctFileType - check if file type is legal
+  @return isCorrectFileFormat - check if at least one file has the correct format
+  @return isCorrectFileType - check if file type is legal
   '''
   for file_fn in uploadedFiles:
     # determine type of the file
     if (os.path.splitext(file_fn)[1] in ['.mat','.csv','.npy']):
-      correctFileFormat = True
+      isCorrectFileFormat = True
       if (fileType == 'fg' or fileType == 'fibergraph'):
-        correctFileType = True
+        isCorrectFileType = True
         pass # TODO : DM
       elif( fileType == 'lcc' or fileType == 'lrgstConnComp'):
-        correctFileType = True
+        isCorrectFileType = True
         pass # TODO : DM
       elif (fileType in settings.VALID_FILE_TYPES.keys() or fileType in settings.VALID_FILE_TYPES.values()):
         # Check if file format is the same as the toFormat
@@ -145,9 +147,9 @@ def convertFiles(uploadedFiles, fileType , toFormat, convertFileSaveLoc):
         if (len(toFormat) == 0):
           pass # No work to be done here
         else:
-          correctFileType = True
+          isCorrectFileType = True
           convertTo.convertAndSave(file_fn, toFormat, convertFileSaveLoc, fileType) # toFormat is a list
-  return correctFileFormat, correctFileType
+  return isCorrectFileFormat, isCorrectFileType
 
 ################################################################################
 

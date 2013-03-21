@@ -9,7 +9,7 @@
 
 from django import forms
 from django.forms.fields import MultipleChoiceField
-from django.forms.widgets import RadioSelect, CheckboxSelectMultiple
+from django.forms.widgets import RadioSelect, CheckboxSelectMultiple, Select, SelectMultiple
 
 #
 #class LoginForm(forms.Form):
@@ -66,7 +66,7 @@ class BuildGraphForm(forms.Form):
     '''
 
     # Public or private Project
-    Project_Type = forms.ChoiceField([('public', 'public'), ('private','private'), ('pr_grp', 'private group')], help_text=' ', required=True)
+    Project_Type = forms.ChoiceField([('public', 'public'), ('private','private')], help_text=' ', required=True)
 
     # Name project
     UserDefprojectName  = forms.CharField(label='Project name', help_text=' ', max_length=255, required = True, error_messages={'required': 'You must enter a Project name'})
@@ -88,7 +88,7 @@ class BuildGraphForm(forms.Form):
 
     # Select size of graph
     Select_graph_size = forms.ChoiceField(choices=[('small','Small graph [~30 min processing time]'), ('big','Big graph [~1.5 hr] processing time')]\
-                                          , widget=forms.RadioSelect(), required = True, error_messages={'required': 'You must choose a graph size'})
+                                          , widget=RadioSelect, required = True, error_messages={'required': 'You must choose a graph size'})
 
     Select_Invariants_you_want_computed = forms.MultipleChoiceField(required=False,
     widget=CheckboxSelectMultiple, choices=INVARIANT_CHOICES)
@@ -112,7 +112,11 @@ class ConvertForm(forms.Form):
         ('ss1', 'Scan Statistic 1'),('ss2', 'Scan Statistic 2'),('tri','Triangle Count'),('svd','Single Value Decomposition'), \
         ('mad', 'Maximum Average Degree'), ('fg', 'Fiber Graph'), ('lcc', 'Largest Connected Component')]
 
-    Select_file_type = forms.ChoiceField(choices=FILE_TYPES, widget=forms.RadioSelect())
+    #Select_file_type = forms.ChoiceField(choices=FILE_TYPES, widget=Select, help_text=' ')
+    #Select_conversion_format = forms.MultipleChoiceField(required=True, \
+    #widget=SelectMultiple, choices=FORMAT_CHOICES)
+
+    Select_file_type = forms.ChoiceField(choices=FILE_TYPES, widget=RadioSelect, help_text=' ')
 
     Select_conversion_format = forms.MultipleChoiceField(required=True, \
     widget=CheckboxSelectMultiple, choices=FORMAT_CHOICES)
@@ -128,7 +132,7 @@ class GraphUploadForm(forms.Form):
 
     # Select size of graph
     Select_graph_size = forms.ChoiceField(choices=[('small','Small graph'), ('big','Big graph')]\
-                                          , widget=forms.RadioSelect(), required = True, error_messages={'required': 'You must choose a graph size'})
+                                          , widget=RadioSelect, required = True, error_messages={'required': 'You must choose a graph size'})
 
     INVARIANT_CHOICES = (('ss1', 'Scan Statistic 1',), ('tri', 'Triangle Count',), \
         ('cc', 'Clustering co-efficient',), ('mad', 'Maximum Average Degree',) \
@@ -158,4 +162,4 @@ class DownloadForm(forms.Form):
     Select_Graph_conversion_format = forms.MultipleChoiceField(required=False, \
     widget=CheckboxSelectMultiple, choices=GRAPH_CONVERSION_CHOICES)
 
-    Select_output_type = forms.ChoiceField(choices=OUPUT_TYPES, widget=forms.RadioSelect(), required=True)
+    Select_output_type = forms.ChoiceField(choices=OUPUT_TYPES, widget=RadioSelect, required=True)

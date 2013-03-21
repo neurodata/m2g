@@ -13,6 +13,7 @@ Generally, each model maps to a single database table.
 '''
 from django.db import models
 from django.contrib import admin
+from django.contrib.auth.models import User
 import os
 from time import strftime, localtime
 
@@ -26,31 +27,42 @@ class BuildGraphModel(models.Model):
   session = models.CharField(max_length=255,)
   scanId = models.CharField(max_length=255)
   location = models.TextField()
-  owner = models.CharField(max_length=30, null=True, default="NULL")
+  owner = models.ForeignKey(to=User, to_field='username', null=True) # Many-to-one .Many here, other in auth_user
+
+  def __repr__(self):
+    _repr = '\n' + "project_name: " + str(self.project_name) + '\n' + \
+            "site: " + str(self.site) + '\n' + \
+            "subject: " + str(self.subject) + '\n' + \
+            "session: " + str(self.session) + '\n' + \
+            "scanId: " + str(self.scanId) + '\n' + \
+            "location: " + str(self.location) + '\n' + \
+            "owner: " + str(self.owner) + '\n'
+
+    return super(BuildGraphModel, self).__repr__() + _repr
+
 
 class OwnedProjects(models.Model):
+  '''
+  This will let us keep track of owned projects for
+  integrity constraints & sharing
+  '''
   project_name = models.CharField(max_length=255)
-  owner = models.ForeignKey(auth_user, username) # Many-to-one . Many here, other in auth_user
+  owner = models.ForeignKey(User, 'username') # Many-to-one .Many here, other in auth_user
   is_private = models.BooleanField(null=False)
   owner_group = models.CharField(max_length=255, null=True) # Will reference other table soon
+  # Really should be --> owner_groups = models.ForeignKey(to=User, to_field='groups')
 
-
-class ConvertModel(models.Model):
+class SharingTokens(models.Model):
   '''
-  upload_to location dynamically altered in view
+  Class to allow you to create a project sharing token
+  that allows a user to let others see a private project.
   '''
-  filename = models.FileField(upload_to = (' '))
-
-  def __unicode__(self):
-      return self.name
-
-class OK(models.Model):
-  #DM TODO: Track responses to zip or view as dir structure
-  pass
-
-  def __unicode__(self):
-      return self.name
+  token = models.CharField(max_length=64)
+  issued_by = models.ForeignKey(User, 'username') # Many-to-one . Many here, other in auth_user
+  project_name = models.ManyToManyRel(to=BuildGraphModel, related_name='project_name')
+  issue_date = models.DateTimeField(auto_now_add=True)
+  expire_date = models.DateField(null=True)
 
 admin.site.register(BuildGraphModel)
-admin.site.register(ConvertModel)
-admin.site.register(OK)
+admin.site.register(OwnedProjects)
+admin.site.register(SharingTokens)

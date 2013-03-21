@@ -14,6 +14,7 @@ from views import processInputData
 from views import confirmDownload
 from views import graphLoadInv
 from views import convert
+
 #from django.contrib import auth
 #########################################
 from ocpipeline.views import buildGraph
@@ -45,6 +46,11 @@ urlpatterns = patterns('ocpipeline.views',
     # Uncomment the next line to enable the admin:
     url(r'^admin/', include(admin.site.urls)),
 )
+
+from ocpipeline.accounts.views import projects
+urlpatterns +=patterns('ocpipeline.accounts.views',
+                      url(r'^accounts/projects/$', 'projects', name='project-accounts'),
+                       )
 
 '''
 urlpatterns += patterns('django.contrib.auth.views',
