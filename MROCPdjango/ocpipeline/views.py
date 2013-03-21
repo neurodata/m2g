@@ -72,9 +72,6 @@ import scipy.io as sio
 # Registration
 from django.contrib.auth import authenticate, login, logout
 
-# Private Projects
-from pysql import pysqlprocedures as psp
-
 # Helpers
 from util import *
 

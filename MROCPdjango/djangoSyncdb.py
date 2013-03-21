@@ -25,7 +25,7 @@ def manageMRDjango(alter=False):
                            db = DATABASES['default']['NAME'])
 
     cur = db.cursor()
-    cur.execute("ALTER TABLE ocpipeline_OwnedProjects ADD UNIQUE INDEX(project_name, owner_id);")
+    cur.execute("ALTER TABLE ocpipeline_ownedprojects ADD UNIQUE INDEX(project_name, owner_id);")
     db.close() # close connection
 
 def main():
