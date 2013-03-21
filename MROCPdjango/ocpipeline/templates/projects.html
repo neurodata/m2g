@@ -10,20 +10,23 @@
 
   {% block content %}
 
-  To browse projects to which you have an authentication token click <a href={% static 'placeholder.html' %}>here</a>
+  <p>
+    ** CONTENT COMING SOON! **
+  </p>
+
 
    <div id="projectsViewable">
     {% if user.is_authenticated %}
 
 
-    Here are all projects (private and public) associated with your account:
-
+    Here are all projects (private and public) associated with your account: <br/>
+    <b>STUB FOR CONTENT</b>
 
     {% else %}
 
-    To browse your own private projects please <a href={{"accounts/login"|getScriptPrefix}}>login</a>.<br/>
+    {# To browse your own private projects please <a href={{"accounts/login"|getScriptPrefix}}>login</a>.<br/>#}
 
-    <input type="submit" class="button" onclick="location.href='{{"accounts/login"|getScriptPrefix}}'" value="Log in"/>
+    {#<input type="submit" class="button" onclick="location.href='{{"accounts/login"|getScriptPrefix}}'" value="Log in"/>#}
 
     {% endif %}
   </div>

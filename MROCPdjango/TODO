@@ -1,18 +1,12 @@
 *MR OCP TODO list Disa
 ===========================
-
-- Add Groups Table (User, Group)
-
+- Add sql queries to ...
+- Handle wrong input files by using error message
+- Sample case of enforcing visibility of project on disk
+- Fix html header
 html:
   - Display all projects for a user in a drop downlist
   - Then use selection to determine what must be displayed at lower levels
-
-
-Private project Rules:
-- Select new project or add to existing
-- Each project name must be unique for a single user or else we add to project
-- If project exists - add to project
-- If proj...scanID exists - return error for existing scan (stored procedure checks if scan exists given user and project name)
 
 - Update models used for saving files only
 
@@ -35,6 +29,13 @@ Invariants still to compute
 
 Recently completed
 ===================
+
+- Add private project DBing
+Private project Rules:
+- Select new project or add to existing
+- Each project name must be unique for a single user or else we add to project
+- If project exists - add to project
+- If proj...scanID exists - return error for existing scan (stored procedure checks if scan exists given user and project name)
 
 - Enforce each project being unique for private projects of a single user
 - Add to project create -> private project

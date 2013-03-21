@@ -12,6 +12,7 @@ import os
 import sys
 import csv
 from time import time
+from django.conf import settings
 
 def convertLCCNpyToMat(lcc_fn):
   '''
@@ -44,7 +45,7 @@ def convertAndSave(fn, toFormat, saveLoc, fileType):
   @param fn: the filename of the file to be converted
   @type fn: string
 
-  @param toFormat: the desired output format i.e. I{.npy, .csv, .mat.}.
+  @param toFormat: the desired output format i.e. a list with optional [.npy, .csv, .mat.].
   @type toFormat: string
 
   @param saveLoc: full path of where files are to be saved after conversion
@@ -63,8 +64,9 @@ def convertAndSave(fn, toFormat, saveLoc, fileType):
 
   arr = loadFile(fn, fileType) # load up the file as either a .mat, .npy
 
-  # Incase anyone ever forgets to put the (.) before toFormat
-  toFormat = '.'+toFormat if not toFormat.startswith('.') else toFormat
+  # Incase anyone ever forgets to put the (.) before toFormat value
+  for item in toFormat:
+    item = item if item.startswith('.') else ('.' + item)
 
   if ('.mat' in toFormat):
     sio.savemat(os.path.join(saveLoc, fnBase), {fileType:arr}, appendmat = True)
@@ -73,8 +75,6 @@ def convertAndSave(fn, toFormat, saveLoc, fileType):
   if ('.npy' in toFormat):
     np.save(os.path.join(saveLoc, fnBase), arr)
     print fnBase + ' converted to npy format',
-
-  #import pdb; pdb.set_trace()
 
   if ('.csv' in toFormat):
     if (fileType) == 'mad': # Case of the MAD

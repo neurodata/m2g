@@ -17,7 +17,6 @@ import zipfile
 import tempfile
 
 from django.shortcuts import render_to_response
-from django.shortcuts import render
 from django.template import RequestContext
 from django.http import HttpResponseRedirect
 from django.http import HttpResponse
@@ -25,9 +24,9 @@ from django.http import HttpResponseBadRequest
 
 from django.core.files import File        # For programmatic file upload
 
-# Model imports
-from models import ConvertModel
+# Model & Form imports
 from models import BuildGraphModel
+from models import OwnedProjects
 from forms import DownloadForm
 from forms import GraphUploadForm
 from forms import ConvertForm
@@ -85,7 +84,6 @@ def default(request):
 
 ''' Little welcome message '''
 def welcome(request):
-  #import pdb; pdb.set_trace()
   return render_to_response('welcome.html', {"user":request.user},
                             context_instance=RequestContext(request))
 
@@ -114,11 +112,14 @@ def buildGraph(request):
         if not request.user.is_authenticated():
           error_msg = "You must be logged in to make/alter a private project! Please Login or make/alter a public project."
 
-        elif not (psp.isPrivateProject(request.user, userDefProjectName)):
-          error_msg = "The project you requested is not a private one! No changes were made to it"
+        '''
+        # Untested TODO: Add join to ensure it a private project
+        elif BuildGraphModel.objects.filter(owner=request.user, project_name=userDefProjectName, \
+                                    site=site, subject=subject, session=session, scanId=scanId).exists():
 
-        elif (psp.scanExists(request.user, userDefProjectName, site, subject, session, scanId)):
-          error_msg = "The scanID you requested to create already exists in this project path. Please change any of the form values."
+           error_msg = "The scanID you requested to create already exists in this project path. Please change any of the form values."
+        '''
+      # TODO DM: Many unaccounted for scenarios here!
 
       if error_msg:
         return render_to_response(
@@ -130,7 +131,7 @@ def buildGraph(request):
       print "Uploading files..."
 
       # If a user is logged in associate the project with thier directory
-      if request.user.is_authenticated():
+      if form.cleaned_data['Project_Type'] == 'private':
         userDefProjectName = os.path.join(request.user.username, userDefProjectName)
       else:
         userDefProjectName = os.path.join('public', userDefProjectName)
@@ -148,13 +149,15 @@ def buildGraph(request):
       # Create a model object to save data to DB
 
       grModObj = BuildGraphModel(project_name = form.cleaned_data['UserDefprojectName'])
-      grModObj.owner = request.user # Who created the project
       grModObj.location = request.session['usrDefProjDir'] # Where the particular scan location is
 
       grModObj.site = form.cleaned_data['site']# set the site
       grModObj.subject = form.cleaned_data['subject']# set the subject
       grModObj.session = form.cleaned_data['session']# set the session
       grModObj.scanId = form.cleaned_data['scanId']# set the scanId
+
+      if request.user.is_authenticated():
+        grModObj.owner = request.user # Who created the project
 
       request.session['invariants'] = form.cleaned_data['Select_Invariants_you_want_computed']
       request.session['graphsize'] = form.cleaned_data['Select_graph_size']
@@ -170,6 +173,12 @@ def buildGraph(request):
       saveFileToDisk(form.cleaned_data['roi_xml_file'], os.path.join(request.session['derivatives'], roi_xml_fn))
 
       grModObj.save() # Save project data to DB after file upload
+
+      # add entry to owned project
+      if request.user.is_authenticated():
+        ownedProjModObj = OwnedProjects(project_name=grModObj.project_name, \
+                                        owner=grModObj.owner, is_private=form.cleaned_data['Project_Type'] == 'private')
+        ownedProjModObj.save()
 
       print '\nSaving all files complete...'
 
@@ -226,7 +235,7 @@ def processInputData(request):
       lccG = sio.loadmat(request.session['smGrfn'])['fibergraph']
 
     request.session['invariant_fns'] =  runInvariants(lccG, request.session)
-  return HttpResponseRedirect(get_script_prefix()+'confirmdownload', context_instance=RequestContext(request))
+  return HttpResponseRedirect(get_script_prefix()+'confirmdownload')
 
 def confirmDownload(request):
 
@@ -259,7 +268,11 @@ def confirmDownload(request):
 
       if dataReturn == 'vd': # View data directory
         dataUrlTail = request.session['usrDefProjDir']
-        # request.session.clear() # Very important
+
+        # baseurl = request.META['HTTP_HOST']
+        # host = request.META['wsgi.url_scheme']
+        # rooturl = host + '://' + baseurl # Originally was: 'http://mrbrain.cs.jhu.edu' # Done for http & https
+
         return HttpResponseRedirect('http://mrbrain.cs.jhu.edu' + dataUrlTail.replace(' ','%20'))
 
       elif dataReturn == 'dz': #Download all as zip
@@ -494,12 +507,9 @@ def convert(request, webargs=None):
       if not (os.path.exists(convertFileSaveLoc)):
         os.makedirs(convertFileSaveLoc)
 
-      # ALTER TABLE ocpipeline_convertmodel MODIFY COLUMN filename TEXT;
-      data = ConvertModel(filename = request.FILES['fileObj'])
-      data._meta.get_field('filename').upload_to = saveDir # route files to correct location
-      data.save()
-
       savedFile = os.path.join(saveDir, request.FILES['fileObj'].name)
+
+      saveFileToDisk(request.FILES['fileObj'], savedFile)
 
       # If zip is uploaded
       if os.path.splitext(request.FILES['fileObj'].name)[1].strip() == '.zip':
@@ -509,16 +519,20 @@ def convert(request, webargs=None):
       else:
         uploadedFiles = [savedFile]
 
-      correctFileFormat, correctFileType = convertFiles(uploadedFiles, form.cleaned_data['Select_file_type'], \
+      isCorrectFileFormat, isCorrectFileType = convertFiles(uploadedFiles, form.cleaned_data['Select_file_type'], \
                                                       form.cleaned_data['Select_conversion_format'], convertFileSaveLoc)
 
-      if not (correctFileFormat):
+      if not (isCorrectFileFormat):
         # request.session.clear()
         return HttpResponse("[ERROR]: You do not have any files with the correct extension for conversion")
 
-        dwnldLoc = "http://mrbrain.cs.jhu.edu"+ convertFileSaveLoc.replace(' ','%20')
-        # request.session.clear()
-        return HttpResponseRedirect(dwnldLoc)
+
+      baseurl = request.META['HTTP_HOST']
+      host = request.META['wsgi.url_scheme']
+      rooturl = host + '://' + baseurl # Originally was: 'http://mrbrain.cs.jhu.edu' # Done for http & https
+
+      dwnldLoc = rooturl + convertFileSaveLoc.replace(' ','%20') # TODO: Verify this works
+      return HttpResponseRedirect(dwnldLoc)
 
   # Programmtic API
   elif(request.method == 'POST' and webargs):
@@ -549,12 +563,12 @@ def convert(request, webargs=None):
 
     uploadedFiles = writeBodyToDisk(request.body, saveDir)
 
-    correctFileFormat, correctFileType = convertFiles(uploadedFiles, fileType, toFormat, convertFileSaveLoc)
+    isCorrectFileFormat, isCorrectFileType = convertFiles(uploadedFiles, fileType, toFormat, convertFileSaveLoc)
 
-    if not (correctFileType):
+    if not (isCorrectFileType):
       # request.session.clear()
       return HttpResponse("[ERROR]: You did not enter a valid FileType.")
-    if not (correctFileFormat):
+    if not (isCorrectFileFormat):
       # request.session.clear()
       return HttpResponse("[ERROR]: You do not have any files with the correct extension for conversion")
 
