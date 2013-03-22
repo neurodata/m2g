@@ -15,8 +15,10 @@ html:
 - Add projects page for users
 - Create sharing tokens
 
+Invariants
+===========
 - Resolve biggraph degree and eigenvalue non-conversion to csv
-
+- Big Eigenvectors to large to convert to csv
 - Fix parallel processing of ss
 - Finish work on convert fibergraph, lcc, svd to csv
 
@@ -27,9 +29,11 @@ Invariants still to compute
 *APL
 *GDia
 
-Recently completed
+
+*Recently completed*
 ===================
 
+- Add Eigenvector to convert files
 - Fix html header
 - Update models used for saving files only
 - Add private project DBing
