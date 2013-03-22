@@ -1,0 +1,161 @@
+#!/usr/bin/python
+
+# inv_exec
+# Created by Disa Mhembere on 2013-03-21.
+# Email: dmhembe1@jhu.edu
+# Copyright (c) 2013. All rights reserved.
+
+# A python script to run invariants on a file based on CL flag
+
+import argparse
+import utils.loadAdjMatrix # TODO: Move loadAdjMatrix to utils directory
+
+from eigs_mad_deg_tri import eigs_mad_deg_tri
+from vert_edge_deg_cc_ss1 import vert_edge_deg_cc_ss1
+
+
+def run(lccG, req_sess):
+  #'''
+  #@todo
+  #@param lccG: Sparse largest connected component adjacency matrix
+  #@param req_sess: current session dict containing session varibles
+  #'''
+  #
+  #if req_sess['graphsize'] == 'small':
+  #  grfn = req_sess['smGrfn']
+  #elif req_sess['graphsize'] == 'big':
+  #  grfn = req_sess['bgGrfn']
+  #else:
+  #  return None # Should make things explode - TODO better handling
+  #
+  ## NOTE: The *_fn variable names are in accordance with settings.VALID_FILE_TYPES
+  #ss1_fn = None
+  #tri_fn = deg_fn =  ss2_fn = apl_fn = gdia_fn = cc_fn = numNodes = eigvlfn = eigvectfn = mad_fn = ss1_fn
+  #
+  #degDir = None
+  #ssDir = triDir = MADdir = eigvDir = degDir
+  #
+  ## Order the invariants correctly
+  #order = { 0:'ss1', 1:'tri', 2:'cc', 3:'mad', 4:'deg', 5:'eig',6:'ss2', 7:'apl', 8:'gdia' }
+  #invariants = []
+  #for i in range(len(order)):
+  #  if order[i] in req_sess['invariants']:
+  #    invariants.append(order[i])
+  #
+  #req_sess['invariants'] = invariants
+  #invariant_fns = {}
+  #
+  ##** ASSUMES ORDER OF INVARIANTS ARE PREDEFINED **#
+  #for inv in req_sess['invariants']:
+  #  if inv == "ss1": # Get degree for free
+  #    ssDir = os.path.join(req_sess['graphInvariants'],'ScanStat1')
+  #    degDir = os.path.join(req_sess['graphInvariants'],'Degree')
+  #    makeDirIfNone([ssDir, degDir])
+  #
+  #    ss1_fn, deg_fn, numNodes = calcScanStat_Degree(G_fn = grfn,\
+  #        G = lccG,  ssDir = ssDir, degDir = degDir) # Good to go
+  #
+  #  if inv == "tri": # Get "Eigs" & "MAD" for free
+  #    triDir = os.path.join(req_sess['graphInvariants'],'Triangle')
+  #    MADdir = os.path.join(req_sess['graphInvariants'],'MAD')
+  #    eigvDir = os.path.join(req_sess['graphInvariants'],'Eigen')
+  #
+  #    if not (degDir):
+  #      degDir = os.path.join(req_sess['graphInvariants'],'Degree')
+  #      makeDirIfNone([triDir, MADdir, eigvDir, degDir])
+  #
+  #      tri_fn, deg_fn, MAD_fn, eigvl_fn, eigvect_fn =  eignTriLocal_deg_MAD(G_fn = grfn,\
+  #          G = lccG, triDir = triDir, MADdir = MADdir, eigvDir = eigvDir, degDir = degDir) # Good to go
+  #    else:
+  #      makeDirIfNone([triDir, MADdir, eigvDir])
+  #
+  #      tri_fn, eigvlfn, eigvectfn, mad_fn  = eignTriLocal_MAD(G_fn = grfn,\
+  #          G = lccG, triDir = triDir, MADdir = MADdir, eigvDir = eigvDir) # Good to go
+  #
+  #  if inv == "cc":  # We need "Deg" & "TriCnt"
+  #    if not(eigvDir):
+  #      eigvDir = os.path.join(req_sess['graphInvariants'],'Eigen')
+  #    if not (degDir):
+  #      degDir = os.path.join(req_sess['graphInvariants'],'Degree')
+  #    if not (triDir):
+  #      triDir = os.path.join(req_sess['graphInvariants'],'Triangle')
+  #
+  #    if not (MADdir):
+  #      MADdir = os.path.join(req_sess['graphInvariants'],'MAD')
+  #    ccDir = os.path.join(req_sess['graphInvariants'],'ClustCoeff')
+  #
+  #    makeDirIfNone([degDir, triDir, ccDir, eigvDir, MADdir])
+  #    if (deg_fn and tri_fn):
+  #      cc_fn = calcLocalClustCoeff(deg_fn, tri_fn, ccDir = ccDir) # Good to go
+  #
+  #    elif (deg_fn and (not tri_fn)):
+  #      tri_fn, eigvlfn, eigvectfn, mad_fn = eignTriLocal_MAD(G_fn = grfn,\
+  #          G = lccG, triDir = triDir, MADdir = MADdir, eigvDir = eigvDir) # Good to go
+  #      cc_fn = calcLocalClustCoeff(deg_fn, tri_fn, ccDir = ccDir) # Good to go
+  #
+  #    elif (tri_fn and (not deg_fn)):
+  #      deg_fn = calcDegree(G_fn = grfn, \
+  #          G = lccG , degDir = degDir) # Good to go
+  #      cc_fn = calcLocalClustCoeff(deg_fn, tri_fn, ccDir = ccDir) # Good to go
+  #
+  #    else:
+  #      tri_fn, eigvlfn, eigvectfn, mad_fn = eignTriLocal_MAD(G_fn = grfn,\
+  #          G = lccG, triDir = triDir, MADdir = MADdir, eigvDir = eigvDir) # Good to go
+  #      deg_fn = calcDegree(G_fn = grfn, \
+  #          G = lccG , degDir = degDir) # Good to go
+  #      cc_fn = calcLocalClustCoeff(deg_fn, tri_fn, ccDir = ccDir) # Good to go
+  #
+  #  if inv == "mad": # Get "Eigs" for free
+  #      if (tri_fn):
+  #        pass
+  #      else:
+  #        MADdir = os.path.join(req_sess['graphInvariants'],'MAD')
+  #        eigvDir = os.path.join(req_sess['graphInvariants'],'Eigen')
+  #        makeDirIfNone([MADdir, eigvDir])
+  #
+  #        mad_fn, eigvlfn, eigvectfn = calcMAD(G_fn = grfn, G = lccG , \
+  #            MADdir = MADdir, eigvDir = eigvDir) # Good to go
+  #
+  #  if inv == "deg": # Nothing for free
+  #    if (deg_fn):
+  #      pass
+  #    else:
+  #      degDir = os.path.join(req_sess['graphInvariants'],'Degree')
+  #      makeDirIfNone([degDir])
+  #
+  #      deg_fn = calcDegree(G_fn = grfn, \
+  #          G = lccG ,  degDir = degDir) # Good to go
+  #
+  #  if inv == "eig": # Nothing for free
+  #    if (tri_fn):
+  #      pass
+  #    else:
+  #      eigvDir = os.path.join(req_sess['graphInvariants'],'Eigen')
+  #      makeDirIfNone([eigvDir])
+  #
+  #      eigvlfn, eigvectfn = calcEigs(G_fn = grfn,\
+  #              G = lccG , eigvDir = eigvDir)
+  #
+  print "Invariants computed for graph %s" % G_fn
+
+
+def main():
+  parser = argparse.ArgumentParser(description='A script run selected/all invariants on the largest connected component of a graph')
+
+  # Files and storage
+  parser.add_argument('G_fn', action='store',help='the full filename of the the CSC matrix representing a graph (.mat format)')
+  parser.add_argument('lcc_fn', action='store',help='the full filename of the largest connected component (.npy format)')
+  parser.add_argument('save_dir', action='store', help='the directory where the invariants are to stored (each will create its own subdirectory within this)')
+
+  # Invariant options
+  parser.add_argument('-d', '--deg', action='store_true', help='use flag to compute local degree of lcc')
+  parser.add_argument('-e', '--eigs', action='store_true', help='use flag to compute global top k eigenvalues & eigenvectors of lcc')
+  parser.add_argument('-c', '--cc', action='store_true', help='use flag to compute local clustering coefficient of lcc')
+  parser.add_argument('-t', '--tri', action='store_true', help='use flag to compute local triangle count of lcc')
+  parser.add_argument('-s', '--ss1', action='store_true', help='use flag to compute scan 1 statistic of lcc')
+  parser.add_argument('-m', '--mad', action='store_true', help='use flag to compute global max. average degree of lcc')
+  parser.add_argument('-g', '--edge', action='store_true', help='use flag to compute global egde count of lcc')
+  parser.add_argument('-v', '--ver', action='store_true', help='use this flag to compute global vertex count of lcc')
+
+if __name__ == '__main__':
+  main()

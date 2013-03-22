@@ -108,7 +108,7 @@ class ConvertForm(forms.Form):
     FORMAT_CHOICES = (('.npy', 'Numpy format (.npy)',), ('.mat', 'Matlab format (.mat)',), \
         ('.csv', '(Excel) Comma separated values (.csv)',))
 
-    FILE_TYPES = [('cc','Clustering Coefficient'), ('deg','Local Degree'), ('eig','Largest Eigenvalues'), ('apl','Average Path Length'),\
+    FILE_TYPES = [('cc','Clustering Coefficient'), ('deg','Local Degree'), ('eig','Largest Eigenvalues/Eigenvectors'), ('apl','Average Path Length'),\
         ('ss1', 'Scan Statistic 1'),('ss2', 'Scan Statistic 2'),('tri','Triangle Count'),('svd','Single Value Decomposition'), \
         ('mad', 'Maximum Average Degree'), ('fg', 'Fiber Graph'), ('lcc', 'Largest Connected Component')]
 
