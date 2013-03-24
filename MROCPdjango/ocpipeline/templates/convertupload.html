@@ -19,11 +19,13 @@
     <strong> <FONT COLOR='#ff0000'> DO NOT zip a directory </FONT>, instead zip the files themselves into an archive.</strong>
     </p>
 
-    <form action="" method="post" enctype="multipart/form-data" name="loadForm">
+    <FONT COLOR='#ff0000'>{{err_msg}} </FONT>
+
+    <form action="" method="post" enctype="multipart/form-data" name="loadForm" onsubmit="return Validate(this,['.zip','.npy','.mat','.csv'] );">
       {% csrf_token %}
       {{ convertForm }}
       <input name = "Convert button"  type="submit" value="Convert All" class="button" onclick="showSpinner();"/>
-      <input type="reset" value="Reset" class="button" name="clearForm" />
+      <input type="reset" value="Reset" class="button" name="clearForm"/>
     </form>
 
     <div style="position:absolute; left:153px; top: 212px;">

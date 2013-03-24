@@ -11,13 +11,13 @@ import numpy as np
 from math import ceil
 import scipy.sparse.linalg.eigen.arpack as arpack
 
-from utils.getBaseName import getBaseName # Duplicates right now
-from utils.loadAdjMatrix import loadAdjMatrix # Duplicates right now
+from computation.utils import getBaseName # Duplicates right now
+from computation.utils import loadAdjMatrix # Duplicates right now
 
 import argparse
 from time import time
 
-from utils.file_util import createSave
+from computation.utils.file_util import createSave
 
 # function originally called eignTriLocal_deg_MAD
 def eigs_mad_deg_tri(G_fn, G=None, lcc_fn=None, triDir=None, MADdir = None,\
@@ -42,6 +42,8 @@ def eigs_mad_deg_tri(G_fn, G=None, lcc_fn=None, triDir=None, MADdir = None,\
   @param tri: Count triangles? True for yes else no. If triDir is given assumed to be True
   @param deg: Compute local degree? True for yes else False. If degDir assumed to be True
   @param mad: Compute max ave degree? True for yes else no. If MADdir is given assumed to be True
+
+  @return returnDict: a dict with the attribute & its filename # TODO: May change
   '''
 
   returnDict = dict()

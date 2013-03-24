@@ -5,10 +5,11 @@
   {% endblock title %}
 
   {% block medheading %}
-    Please upload the graph(s). Largest connected components(LCC) for big graphs
+    Please upload the graph(s).
   {% endblock medheading %}
 
   {% block content %}
+    <b>Uploading the largest connected components(LCC) file for big graphs is highly recommended for resonable processing time.</b>
     <p> You must use a single<strong> zipfile <i> (.zip) </i> containing ALL</strong> data in a single directory even for multiple graphs. <br/>
     <strong> <FONT COLOR='#ff0000'> DO NOT zip a directory</FONT>, instead zip the files themselves into an archive.</strong>
     Note the following file naming convention for graphs - where the <strong>base file name must be the same</strong>:
@@ -47,7 +48,7 @@
     </ul>
 
     </p>
-    <form action="" method="post" enctype="multipart/form-data" name="loadForm">
+    <form action="" method="post" enctype="multipart/form-data" name="loadForm" onsubmit="return Validate(this,['.mat'] );">
         {% csrf_token %}
         <p>{{ graphUploadForm }}</p>
         <input name = "Derivatives"  type="submit" value="Upload Graph(s)" class="button" onclick="showSpinner();"/>
@@ -55,7 +56,8 @@
     </form>
 
     <div style="position:absolute; left:153px; top: 212px;">
-      <img id="loadingImage" src="{{STATIC_URL}}images/loading.gif" border="0" alt="loading" style="visibility:hidden;opacity:0.5"/> </div>
+      <img id="loadingImage" src="{{STATIC_URL}}images/loading.gif" border="0" alt="loading" style="visibility:hidden;opacity:0.5"/>
+    </div>
 
     {% block programmatic %}
       <div id="Programmatic uses">

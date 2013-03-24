@@ -8,13 +8,18 @@
 # A python script to run invariants on a file based on CL flag
 
 import argparse
-import utils.loadAdjMatrix # TODO: Move loadAdjMatrix to utils directory
+from computation.utils import loadAdjMatrix
 
 from eigs_mad_deg_tri import eigs_mad_deg_tri
-from vert_edge_deg_cc_ss1 import vert_edge_deg_cc_ss1
+from vert_edge_deg_ss_cc import vert_edge_deg_ss_cc
 
 
 def run(lccG, req_sess):
+
+
+
+
+
   #'''
   #@todo
   #@param lccG: Sparse largest connected component adjacency matrix
@@ -156,6 +161,11 @@ def main():
   parser.add_argument('-m', '--mad', action='store_true', help='use flag to compute global max. average degree of lcc')
   parser.add_argument('-g', '--edge', action='store_true', help='use flag to compute global egde count of lcc')
   parser.add_argument('-v', '--ver', action='store_true', help='use this flag to compute global vertex count of lcc')
+
+  result = parser.parse_args()
+  import pdb; pdb.set_trace()
+
+  print 'main run'
 
 if __name__ == '__main__':
   main()

@@ -130,6 +130,9 @@ def convertFiles(uploadedFiles, fileType , toFormat, convertFileSaveLoc):
   @return isCorrectFileFormat - check if at least one file has the correct format
   @return isCorrectFileType - check if file type is legal
   '''
+  isCorrectFileFormat = False # Guilty until proven innocent
+  isCorrectFileType = False # Guilty until proven innocent
+
   for file_fn in uploadedFiles:
     # determine type of the file
     if (os.path.splitext(file_fn)[1] in ['.mat','.csv','.npy']):
@@ -141,13 +144,14 @@ def convertFiles(uploadedFiles, fileType , toFormat, convertFileSaveLoc):
         isCorrectFileType = True
         pass # TODO : DM
       elif (fileType in settings.VALID_FILE_TYPES.keys() or fileType in settings.VALID_FILE_TYPES.values()):
+        isCorrectFileType = True
+
         # Check if file format is the same as the toFormat
         if (os.path.splitext(file_fn)[1] in toFormat):
           toFormat.remove(os.path.splitext(file_fn)[1])
         if (len(toFormat) == 0):
           pass # No work to be done here
         else:
-          isCorrectFileType = True
           convertTo.convertAndSave(file_fn, toFormat, convertFileSaveLoc, fileType) # toFormat is a list
   return isCorrectFileFormat, isCorrectFileType
 
