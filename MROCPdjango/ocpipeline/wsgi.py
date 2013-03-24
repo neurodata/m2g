@@ -32,3 +32,6 @@ application = get_wsgi_application()
 # Apply WSGI middleware here.
 # from helloworld.wsgi import HelloWorldApplication
 # application = HelloWorldApplication(application)
+
+# Http add on
+#os.environ['HTTPS'] = "on" # DM 03/24/2013

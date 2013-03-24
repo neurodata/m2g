@@ -10,9 +10,9 @@ from scipy.io import loadmat
 import numpy as np
 from math import ceil
 
-from utils.getBaseName import getBaseName # Duplicates right now
-from utils.loadAdjMatrix import loadAdjMatrix # Duplicates right now
-from utils.file_util import createSave
+from computation.utils import getBaseName # Duplicates right now
+from computation.utils import loadAdjMatrix # Duplicates right now
+from computation.utils.file_util import createSave
 
 import argparse
 from time import time

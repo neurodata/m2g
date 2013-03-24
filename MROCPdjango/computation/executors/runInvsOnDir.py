@@ -1,5 +1,5 @@
 from genTrueInvs import realgraph
-from getBaseName import getBaseName
+from computation.utils import getBaseName
 
 import os
 import argparse

@@ -164,6 +164,9 @@ def buildGraph(request):
       roi_raw_fn = form.cleaned_data['roi_raw_file'].name
       roi_xml_fn = form.cleaned_data['roi_xml_file'].name
 
+      print "Uploading files..."
+
+
       ''' Save files in appropriate location '''
       saveFileToDisk(form.cleaned_data['fiber_file'], os.path.join(request.session['derivatives'], fiber_fn))
       saveFileToDisk(form.cleaned_data['roi_raw_file'], os.path.join(request.session['derivatives'], roi_raw_fn))
@@ -520,8 +523,11 @@ def convert(request, webargs=None):
                                                       form.cleaned_data['Select_conversion_format'], convertFileSaveLoc)
 
       if not (isCorrectFileFormat):
-        # request.session.clear()
-        return HttpResponse("[ERROR]: You do not have any files with the correct extension for conversion")
+        err_msg = "You did not upload any files with the correct extension for conversion!"
+        return render_to_response(
+        'convertupload.html',
+        {'convertForm': form, 'err_msg': err_msg},
+        context_instance=RequestContext(request))
 
 
       baseurl = request.META['HTTP_HOST']

@@ -4,9 +4,9 @@
 # Separated: 10/2/2012
 # Compute all eigenvalues and eigenvectors for a directory
 
-from eigen import calcEigs
+from computation.eigen import calcEigs
 from glob import glob
-from getBaseName import getBaseName
+from computation.utils import getBaseName
 import os
 import argparse
 
