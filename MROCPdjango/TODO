@@ -1,6 +1,7 @@
 *MR OCP TODO list Disa
 ===========================
 - Add sql queries to ...
+- Programmatic options
 - Sample case of enforcing visibility of project on disk
 html:
   - Display all projects for a user in a drop downlist
