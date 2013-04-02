@@ -1,5 +1,12 @@
 *MR OCP TODO list Disa
 ===========================
+* Refactor & repackage all invariant code
+
+* Add ability to upload arbitrary .mat files to graphupload with some size limit for invariant computation
+* Add feedback for graph too big & estimated time to completion
+* Add clear html documentation of supported file upload formats
+* Header looks like crap in Firefox 
+
 - Add sql queries to ...
 - Programmatic options
 - Sample case of enforcing visibility of project on disk
