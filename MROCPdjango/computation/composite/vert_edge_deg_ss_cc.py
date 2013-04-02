@@ -58,8 +58,6 @@ def vert_edge_deg_ss_cc(inv_dict):
 
   numNodes = G.shape[0]
 
-  import pdb; pdb.set_trace()
-
   ''' Initialize computation variables '''
   if (inv_dict['ver']):
     numVertices = numNodes
@@ -73,37 +71,26 @@ def vert_edge_deg_ss_cc(inv_dict):
 
     # if either #tri or deg is undefined
     if not (inv_dict['tri_fn'] or inv_dict['deg_fn']):
-      # run other code to get em #TODO HERE
+      inv_dict['tri'] = True
+      inv_dict['deg'] = True
 
-
-      if not numTri and vertxDeg:
-        numTri = eigs_mad_deg_tri(graph_fn, G, lcc_fn, triDir=None, tri=True)['tri_fn'] # SAVES TO DEFAULT LOCATION
-      if not vertxDeg and numTri:
-        vertxDeg = eigs_mad_deg_tri(graph_fn, G, lcc_fn, degDir=None, deg=True)['deg_fn'] # SAVES TO DEFAULT LOCATION
-      else:
-        res = eigs_mad_deg_tri(graph_fn, G, lcc_fn, triDir=None, degDir=None, deg=True, tri=True) # SAVES TO DEFAULT LOCATION
-        numTri = res['tri_fn']
-        vertxDeg = res['deg_fn']
-
-    # load/get the number of triangles if defined.
-    if numTri:
-      numTri = numTri if isinstance(numTri, np.ndarray) else np.load(numTri)
-    if vertxDeg:
-      vertxDeg = vertxDeg if isinstance(vertxDeg, np.ndarray) else np.load(vertxDeg)
+      inv_dict = eigs_mad_deg_tri(inv_dict) # SAVES TO DEFAULT LOCATION
+      numTri = np.load(inv_dict['tri_fn'])
+      vertxDeg = np.load(inv_dict['deg_fn'])
 
     ccArray = np.empty_like(vertxDeg)
 
   # Degree count
-  if (degDir or deg):
-    vertxDeg = np.zeros(numNodes) if vertxDeg is None else vertxDeg
+  if not inv_dict['deg_fn'] and inv_dict['deg']:
+    vertxDeg = np.zeros(numNodes) #if vertxDeg is None else vertxDeg
 
   # Edge count
-  if (edgeDir or edge):
-    numEdges = 0 if not vertxDeg else np.sum(vertxDeg)
-    edges_done = True if not (numEdges == 0) else False
+  if not inv_dict['edge_fn'] and inv_dict['edge']:
+    numEdges = 0 #if not vertxDeg else np.sum(vertxDeg)
+    #edges_done = True if not (numEdges == 0) else False
 
   # Check if computation has already been done
-  vertx_done = False if np.all(vertxDeg) == 0 else True # Always defined so this is OK
+  #vertx_done = False if np.all(vertxDeg) == 0 else True # Always defined so this is OK
 
   ''' Perform computation '''
   percNodes = int(numNodes*0.1)
@@ -114,7 +101,7 @@ def vert_edge_deg_ss_cc(inv_dict):
     if (vertx > 0 and (vertx % (percNodes) == 0)):
       print ceil((vertx/mulNodes)*100), "% complete..."
 
-    if locals().has_key('indSubgrEdgeNum'):
+    if not inv_dict['ss1_fn'] and inv_dict['ss1']:
       nbors = G[:,vertx].nonzero()[0]
       if (nbors.shape[0] > 0):
         nborsAdjMat = G[:,nbors][nbors,:]
@@ -123,7 +110,7 @@ def vert_edge_deg_ss_cc(inv_dict):
       else:
         indSubgrEdgeNum[vertx] = 0 # zero neighbors hence zero cardinality enduced subgraph
 
-    if (deg and not vertx_done): # TODO: Note this explict deg must be used
+    if (not inv_dict['deg_fn'] and inv_dict['deg']): # TODO: Note this explict deg must be used
       vertxDeg[vertx] = G[:,vertx].nonzero()[0].shape[0] # degree of each vertex #TODO check if slow
 
     if locals().has_key('ccArray'):

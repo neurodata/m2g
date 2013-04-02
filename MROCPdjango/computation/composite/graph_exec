@@ -1,0 +1,61 @@
+#!/usr/bin/python
+
+# graph_exec
+# Created by Disa Mhembere on 2013-04-02.
+# Email: dmhembe1@jhu.edu
+# Copyright (c) 2013. All rights reserved.
+
+# Script to provide CL interface to buildgraphs
+
+import argparse
+import os
+
+from mrcap.gengraph import genGraph
+from computation.utils.file_util import getPathLeaf, makeDirIfNone
+
+def build_graph(fiber_fn, roi_raw_fn, roi_xml_fn, is_big, save_dir, graph_fn):
+  if not graph_fn:
+    # Constants
+    SM_GRAPH_FN_SFX = '_70_smgr' # 70 may change
+    BG_GRAPH_FN_SFX = '_bggr'
+
+    suffix = BG_GRAPH_FN_SFX if is_big else SM_GRAPH_FN_SFX
+    graph_fn = os.path.join(save_dir, os.path.splitext(getPathLeaf(fiber_fn))[0] + suffix + '.mat')
+
+  else:
+    if not os.path.splitext(graph_fn) == '.mat':
+      graph_fn = os.path.splitext(graph_fn)[0] + '.mat'
+
+    graph_fn = os.path.join(save_dir, graph_fn)
+
+  stmt = "Building " + graph_fn + ( " BIG" if is_big else " SMALL") + " graph ..."
+  makeDirIfNone(os.path.dirname(graph_fn))
+
+  print stmt
+  genGraph(fiber_fn, graph_fn, roi_xml_fn, roi_raw_fn, is_big)
+
+  return graph_fn
+
+def main():
+  default_save_dir = os.path.join(os.path.dirname(__file__), 'mrdata', 'graphs')
+
+  parser = argparse.ArgumentParser(description='Run graph generation code based on size of graph')
+
+  parser.add_argument('fiber_fn', action='store', help ='the full filename of the fiber streamline file (.dat format expected)')
+  parser.add_argument('roixml_fn', action='store', help='the full file name of the ROI.xml file (.xml format expected)')
+  parser.add_argument('roiraw_fn', action='store', help='the full file name of the ROI.xml file (.raw format expected)')
+  parser.add_argument('-b', '--is_big', action='store_true', help ='[TO BE ALTERED] big graph? Pass the flag. If no flag assumed to be small.')
+  parser.add_argument('-S', '--save_dir', action='store', help='the directory where the invariants \
+                      are to stored (each invariant will create its own subdirectory within this). \
+                      The default is %s' % default_save_dir)
+  parser.add_argument('-g', '--graph_fn', action='store', help='the full file name you would like the resulting graph to have')
+
+  result = parser.parse_args()
+
+  if result.save_dir is None:
+    result.save_dir = default_save_dir
+
+  build_graph(result.fiber_fn, result.roiraw_fn, result.roixml_fn, result.is_big, result.save_dir, result.graph_fn)
+
+if __name__ == '__main__':
+  main()
