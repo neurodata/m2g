@@ -12,31 +12,6 @@ import argparse
 import os
 from scipy.io import loadmat
 
-#def embed_graph(ccfn, roiRootName, fgfn, embedfn, dim=10):
-#    """
-#    ccfn - connected components file with numpy arrray
-#    roiRootName - roi files root name
-#    fgfn - mat file with the fibergraph
-#    embedfn - full file name of output file to be saved
-#    dim - desired dimension for the embedding
-#    """
-#
-#    vcc = lcc.ConnectedComponent(fn =ccfn)
-#    # Load the fibergraph
-#    fg = lcc._load_fibergraph(roiRootName, fgfn)
-#    # Now get the subgraph for the lcc, binarize and symmetrize
-#    G = vcc.induced_subgraph(fg.spcscmat)
-#    G.data = np.ones_like(G.data) # Binarize
-#    G = G+G.T # Symmetrize
-#
-#    e = Embed.Embed(dim, matrix=Embed.self_matrix)
-#
-#    if not os.path.exists(os.path.dirname(embedfn)):
-#      print "Creating svd directory: %s" % os.path.dirname(embedfn)
-#      os.makedirs(os.path.dirname(embedfn))
-#    np.save(embedfn, e.embed(G).get_scaled())
-
-
 def embed_graph(ccfn, fgfn, embedfn, dim=10):
     """
     ccfn - connected components file with numpy arrray
@@ -58,8 +33,6 @@ def embed_graph(ccfn, fgfn, embedfn, dim=10):
       print "Creating svd directory: %s" % os.path.dirname(embedfn)
       os.makedirs(os.path.dirname(embedfn))
     np.save(embedfn, e.embed(G).get_scaled())
-
-
 
 def main():
 

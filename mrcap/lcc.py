@@ -148,42 +148,6 @@ def cc_for_each_brain(graphDir, roiDir, ccDir, figDir):
 
         del fg
 
-
-
-#'''
-#Created on June 29, 2012
-#@author: dmhembe1
-#
-#Determine lcc on a single big graph a provided my a remote user
-#This is for use in the one-click processing pipeline to be found at http://www.openconnecto.me/STUB
-#'''
-#def process_single_brain(roiXml, roiRaw, mat_fn, lccOutputFileName, figDir = None):
-#    import os
-#    print "Processing single brain... "
-#    #roix = roiXml
-#    roix = roi.ROIXML( roiXml )
-#    rois = roi.ROIData(roiRaw, roix.getShape())
-#
-#    fg = fibergraph.FiberGraph(roix.getShape(),rois,[])
-#    fg.loadFromMatlab('fibergraph', mat_fn) # (key, fileName)
-#    print 'Processing connected components'
-#    vcc = ConnectedComponent(fg.spcscmat) # CC object
-#    '''
-#    # replace all above code with this
-#    vcc = ConnectedComponent(loadmat(mat_fn)['fibergraph'])
-#    '''
-#    if not os.path.exists(os.path.dirname(lccOutputFileName)):
-#      print "Creating lcc directory %s" % os.path.dirname(lccOutputFileName)
-#      os.makedirs(os.path.dirname(lccOutputFileName))
-#    np.save(lccOutputFileName,sp.lil_matrix(vcc.vertexCC)) # save as .npy
-#
-#    if figDir != None:
-#        #save_figures(vcc.get_coords_for_lccs(10), figDir+lccOutputFileName) # Save figures
-#        print 'Saving figures'
-#
-#    del fg
-
-
 '''
 Created on June 29, 2012
 @author: dmhembe1

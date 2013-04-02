@@ -619,10 +619,6 @@ def processData(fiber_fn, roi_xml_fn, roi_raw_fn,graphs, graphInvariants, graphs
   bgGrfn = os.path.join(graphs, (baseName +'bggr.mat'))
 
   if (run):
-    ''' spawn subprocess to create small since its result is not necessary for processing '''
-    #arguments = 'python ' + '/home/disa/MR-connectome/mrcap/gengraph.py /home/disa' + fiber_fn + ' /home/disa' + smallGraphOutputFileName +' /home/disa' + roi_xml_fn + ' /home/disa' + roi_raw_fn
-    #arguments = 'python ' + '/Users/dmhembere44/MR-connectome/mrcap/gengraph.py /Users/dmhembere44' + fiber_fn + ' /Users/dmhembere44' + smallGraphOutputFileName + ' roixmlname=/Users/dmhembere44' + roi_xml_fn + ' roirawname=/Users/dmhembere44' + roi_raw_fn
-    #subprocess.Popen(arguments,shell=True)
     if (graphsize == 'small'):
       ''' Run gengraph SMALL & save output '''
       print("Running Small gengraph....")
@@ -636,37 +632,28 @@ def processData(fiber_fn, roi_xml_fn, roi_raw_fn,graphs, graphInvariants, graphs
       print '[ERROR]: Graphsize Unkwown' # should never happen
 
   ''' Run LCC '''
-  #if not os.path.exists(os.path.join(graphInvariants,"LCC")):
-  #  print "Making LCC directory"
-  #  os.makedirs(os.path.join(graphInvariants,"LCC"))
   lccfn = os.path.join(graphInvariants,"LCC", (baseName + 'concomp.npy'))
-
 
   if (run):
     '''Should be big but we'll do small for now'''
     if (graphsize == 'big'):
       print "Running biggraph Largest connected component..."
-      lcc.process_single_brain(roi_xml_fn, roi_raw_fn, bgGrfn, lccfn)
+      lcc.process_single_brain(bgGrfn, lccfn)
     if (graphsize == 'small'):
       print "Running smallgraph Largest connected component..."
-      lcc.process_single_brain(roi_xml_fn, roi_raw_fn, smGrfn, lccfn)
+      lcc.process_single_brain(smGrfn, lccfn)
 
   ''' Run Embed - SVD '''
-  #if not os.path.exists(os.path.join(graphInvariants,"SVD")):
-  #  print "Making SVD directory"
-  #  os.makedirs(os.path.join(graphInvariants,"SVD"))
   SVDfn = os.path.join(graphInvariants,"SVD" ,(baseName + 'embed.npy'))
 
   print("Running SVD....")
-  roiBasename = os.path.splitext(roi_xml_fn)[0] # MAY NEED ADAPTATION
-
   if (run):
     if (graphsize == 'big'):
       print "Running SVD on biggraph"
-      svd.embed_graph(lccfn, roiBasename, bgGrfn, SVDfn)
+      svd.embed_graph(lccfn, bgGrfn, SVDfn)
     if (graphsize == 'small'):
       print "Running SVD on smallgraph"
-      svd.embed_graph(lccfn, roiBasename, smGrfn, SVDfn)
+      svd.embed_graph(lccfn, smGrfn, SVDfn)
 
   print "Completed generating - graph, lcc & svd"
   return [ smGrfn, bgGrfn, lccfn, SVDfn ]
