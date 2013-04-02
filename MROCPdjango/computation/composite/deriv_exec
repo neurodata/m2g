@@ -27,6 +27,11 @@ def compute_lcc(graph_fn, save_dir, lcc_fn=None):
 
   if lcc_fn is None:
     lcc_fn = os.path.join(lcc_dir, getBaseName(graph_fn) + LCC_FN_SFX + '.npy')
+  else:
+    if not os.path.splitext(lcc_fn) == '.npy':
+      lcc_fn = os.path.splitext(lcc_fn)[0] + '.npy'
+
+    lcc_fn = os.path.join(save_dir, lcc_fn)
 
   print "Computing lcc ..."
   lcc.process_single_brain (graph_fn, lcc_fn)
@@ -35,15 +40,20 @@ def compute_lcc(graph_fn, save_dir, lcc_fn=None):
 ################################################################################
 #                        SINGLE VALUE DECOMPOSITION                            #
 ################################################################################
-def compute_svd(lcc_fn, graph_fn, save_dir, svd_fn, dim=10): # TODO
-  if lcc_fn is None:
-    lcc_fn = compute_lcc(graph_fn, save_dir)
-
+def compute_svd(lcc_fn, graph_fn, save_dir, svd_fn, dim=10):
   svd_dir = os.path.join(save_dir, "SVD")
   SVD_FN_SFX = '_embed'
 
+  if lcc_fn is None: # No lcc given so we must compute it first
+    lcc_fn = compute_lcc(graph_fn, save_dir)
   if svd_fn is None:
     svd_fn = os.path.join(svd_dir, getBaseName(graph_fn) + SVD_FN_SFX + '.npy')
+  else:
+    if not os.path.splitext(graph_fn) == '.npy':
+      svd_fn = os.path.splitext(svd_fn)[0] + '.npy'
+
+    svd_fn = os.path.join(svd_dir, svd_fn)
+
   svd.embed_graph(lcc_fn, graph_fn, svd_fn, dim=10)
 
 
