@@ -256,9 +256,11 @@ def confirmDownload(request):
           if isinstance(request.session['invariant_fns'][inv], list): # Case of eigs
             for fn in request.session['invariant_fns'][inv]:
               convertTo.convertAndSave(fn, fileFormat, getDirFromFilename(fn), inv)
+              # TODO replace getDirFromFilename with os.path.dirname
           else: # case of all other invariants
             convertTo.convertAndSave(request.session['invariant_fns'][inv], fileFormat, \
                                 getDirFromFilename(request.session['invariant_fns'][inv]) , inv)
+            # TODO replace getDirFromFilename with os.path.dirname
 
       for fileFormat in grConvertToFormats:
         if request.session['graphsize'] == 'big':
@@ -634,9 +636,9 @@ def processData(fiber_fn, roi_xml_fn, roi_raw_fn,graphs, graphInvariants, graphs
       print '[ERROR]: Graphsize Unkwown' # should never happen
 
   ''' Run LCC '''
-  if not os.path.exists(os.path.join(graphInvariants,"LCC")):
-    print "Making LCC directory"
-    os.makedirs(os.path.join(graphInvariants,"LCC"))
+  #if not os.path.exists(os.path.join(graphInvariants,"LCC")):
+  #  print "Making LCC directory"
+  #  os.makedirs(os.path.join(graphInvariants,"LCC"))
   lccfn = os.path.join(graphInvariants,"LCC", (baseName + 'concomp.npy'))
 
 
@@ -650,9 +652,9 @@ def processData(fiber_fn, roi_xml_fn, roi_raw_fn,graphs, graphInvariants, graphs
       lcc.process_single_brain(roi_xml_fn, roi_raw_fn, smGrfn, lccfn)
 
   ''' Run Embed - SVD '''
-  if not os.path.exists(os.path.join(graphInvariants,"SVD")):
-    print "Making SVD directory"
-    os.makedirs(os.path.join(graphInvariants,"SVD"))
+  #if not os.path.exists(os.path.join(graphInvariants,"SVD")):
+  #  print "Making SVD directory"
+  #  os.makedirs(os.path.join(graphInvariants,"SVD"))
   SVDfn = os.path.join(graphInvariants,"SVD" ,(baseName + 'embed.npy'))
 
   print("Running SVD....")

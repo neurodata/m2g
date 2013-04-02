@@ -32,3 +32,9 @@ def createSave(fn, content):
   '''
   makeDirIfNone(os.path.dirname(fn))
   save(fn, content)
+
+def getPathLeaf(path):
+  import ntpath
+
+  head, tail = ntpath.split(path)
+  return tail

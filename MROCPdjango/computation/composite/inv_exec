@@ -8,164 +8,173 @@
 # A python script to run invariants on a file based on CL flag
 
 import argparse
+import sys
+import os
+
 from computation.utils import loadAdjMatrix
 
 from eigs_mad_deg_tri import eigs_mad_deg_tri
 from vert_edge_deg_ss_cc import vert_edge_deg_ss_cc
 
+import mrcap.lcc as lcc
+import mrcap.svd as svd
+from  mrcap.gengraph import genGraph
+from computation.utils.getBaseName import getBaseName
 
-def run(lccG, req_sess):
+from computation.utils.file_util import getPathLeaf, makeDirIfNone
 
+# Some default constants that can be changed freely as necessary
+# Data directories
+'''
+DEG_DIR = os.path.join(MR_DATA_DIR, "Degree")
+EIGV_DIR = os.path.join(MR_DATA_DIR, "Eigen")
+CC_DIR = os.path.join(MR_DATA_DIR, "ClustCoeff")
+MAD_DIR = os.path.join(MR_DATA_DIR, "MAD")
+SS1_DIR = os.path.join(MR_DATA_DIR, "ScanStat1")
+TRI_DIR = os.path.join(MR_DATA_DIR, "Triangle")
+SVD_DIR = os.path.join(MR_DATA_DIR, "SVD")
 
+# File naming suffixes
+SVD_FN_SFX = '_embed'
+DEG_FN_SFX = '_degree'
+VER_FN_SFX = '_vertnum' #TODO
+EIGVL_FN_SFX = '_eigvl' # eigenvalue
+EIGVC_FN_SFX = '_eigvec' # eigenvalue
+MAD_FN_SFX = '_mad' # max ave degree
+TRI_FN_SFX = '_triangles'
+CLST_FN_SFX = '_clustcoeff'
+EDGE_FN_SFX = '_numedges.npy'
+'''
 
+def compute_inv(inv_dict):
+  '''
+  @todo
+  @param lccG: Sparse largest connected component adjacency matrix
+  @param inv_dict: current session dict containing session varibles
+  '''
+  # Add filenames with None attached since invariant computations look
+  # for filenames when asked to compute an invariant - if they see 'None'
+  # they will compute it & populate the file name. If they see a file name,
+  # they won't recompute it.
 
+  inv_dict['deg_fn'] = inv_dict['eigvl_fn'] = inv_dict['eigvect_fn'] = inv_dict['tri_fn'] \
+        = inv_dict['mad_fn'] = inv_dict['cc_fn'] = inv_dict['ver_fn'] = inv_dict['ss1_fn']\
+        = inv_dict['edge_fn']  = None
 
-  #'''
-  #@todo
-  #@param lccG: Sparse largest connected component adjacency matrix
-  #@param req_sess: current session dict containing session varibles
-  #'''
-  #
-  #if req_sess['graphsize'] == 'small':
-  #  grfn = req_sess['smGrfn']
-  #elif req_sess['graphsize'] == 'big':
-  #  grfn = req_sess['bgGrfn']
-  #else:
-  #  return None # Should make things explode - TODO better handling
-  #
-  ## NOTE: The *_fn variable names are in accordance with settings.VALID_FILE_TYPES
-  #ss1_fn = None
-  #tri_fn = deg_fn =  ss2_fn = apl_fn = gdia_fn = cc_fn = numNodes = eigvlfn = eigvectfn = mad_fn = ss1_fn
-  #
-  #degDir = None
-  #ssDir = triDir = MADdir = eigvDir = degDir
-  #
-  ## Order the invariants correctly
-  #order = { 0:'ss1', 1:'tri', 2:'cc', 3:'mad', 4:'deg', 5:'eig',6:'ss2', 7:'apl', 8:'gdia' }
-  #invariants = []
-  #for i in range(len(order)):
-  #  if order[i] in req_sess['invariants']:
-  #    invariants.append(order[i])
-  #
-  #req_sess['invariants'] = invariants
-  #invariant_fns = {}
-  #
-  ##** ASSUMES ORDER OF INVARIANTS ARE PREDEFINED **#
-  #for inv in req_sess['invariants']:
-  #  if inv == "ss1": # Get degree for free
-  #    ssDir = os.path.join(req_sess['graphInvariants'],'ScanStat1')
-  #    degDir = os.path.join(req_sess['graphInvariants'],'Degree')
-  #    makeDirIfNone([ssDir, degDir])
-  #
-  #    ss1_fn, deg_fn, numNodes = calcScanStat_Degree(G_fn = grfn,\
-  #        G = lccG,  ssDir = ssDir, degDir = degDir) # Good to go
-  #
-  #  if inv == "tri": # Get "Eigs" & "MAD" for free
-  #    triDir = os.path.join(req_sess['graphInvariants'],'Triangle')
-  #    MADdir = os.path.join(req_sess['graphInvariants'],'MAD')
-  #    eigvDir = os.path.join(req_sess['graphInvariants'],'Eigen')
-  #
-  #    if not (degDir):
-  #      degDir = os.path.join(req_sess['graphInvariants'],'Degree')
-  #      makeDirIfNone([triDir, MADdir, eigvDir, degDir])
-  #
-  #      tri_fn, deg_fn, MAD_fn, eigvl_fn, eigvect_fn =  eignTriLocal_deg_MAD(G_fn = grfn,\
-  #          G = lccG, triDir = triDir, MADdir = MADdir, eigvDir = eigvDir, degDir = degDir) # Good to go
-  #    else:
-  #      makeDirIfNone([triDir, MADdir, eigvDir])
-  #
-  #      tri_fn, eigvlfn, eigvectfn, mad_fn  = eignTriLocal_MAD(G_fn = grfn,\
-  #          G = lccG, triDir = triDir, MADdir = MADdir, eigvDir = eigvDir) # Good to go
-  #
-  #  if inv == "cc":  # We need "Deg" & "TriCnt"
-  #    if not(eigvDir):
-  #      eigvDir = os.path.join(req_sess['graphInvariants'],'Eigen')
-  #    if not (degDir):
-  #      degDir = os.path.join(req_sess['graphInvariants'],'Degree')
-  #    if not (triDir):
-  #      triDir = os.path.join(req_sess['graphInvariants'],'Triangle')
-  #
-  #    if not (MADdir):
-  #      MADdir = os.path.join(req_sess['graphInvariants'],'MAD')
-  #    ccDir = os.path.join(req_sess['graphInvariants'],'ClustCoeff')
-  #
-  #    makeDirIfNone([degDir, triDir, ccDir, eigvDir, MADdir])
-  #    if (deg_fn and tri_fn):
-  #      cc_fn = calcLocalClustCoeff(deg_fn, tri_fn, ccDir = ccDir) # Good to go
-  #
-  #    elif (deg_fn and (not tri_fn)):
-  #      tri_fn, eigvlfn, eigvectfn, mad_fn = eignTriLocal_MAD(G_fn = grfn,\
-  #          G = lccG, triDir = triDir, MADdir = MADdir, eigvDir = eigvDir) # Good to go
-  #      cc_fn = calcLocalClustCoeff(deg_fn, tri_fn, ccDir = ccDir) # Good to go
-  #
-  #    elif (tri_fn and (not deg_fn)):
-  #      deg_fn = calcDegree(G_fn = grfn, \
-  #          G = lccG , degDir = degDir) # Good to go
-  #      cc_fn = calcLocalClustCoeff(deg_fn, tri_fn, ccDir = ccDir) # Good to go
-  #
-  #    else:
-  #      tri_fn, eigvlfn, eigvectfn, mad_fn = eignTriLocal_MAD(G_fn = grfn,\
-  #          G = lccG, triDir = triDir, MADdir = MADdir, eigvDir = eigvDir) # Good to go
-  #      deg_fn = calcDegree(G_fn = grfn, \
-  #          G = lccG , degDir = degDir) # Good to go
-  #      cc_fn = calcLocalClustCoeff(deg_fn, tri_fn, ccDir = ccDir) # Good to go
-  #
-  #  if inv == "mad": # Get "Eigs" for free
-  #      if (tri_fn):
-  #        pass
-  #      else:
-  #        MADdir = os.path.join(req_sess['graphInvariants'],'MAD')
-  #        eigvDir = os.path.join(req_sess['graphInvariants'],'Eigen')
-  #        makeDirIfNone([MADdir, eigvDir])
-  #
-  #        mad_fn, eigvlfn, eigvectfn = calcMAD(G_fn = grfn, G = lccG , \
-  #            MADdir = MADdir, eigvDir = eigvDir) # Good to go
-  #
-  #  if inv == "deg": # Nothing for free
-  #    if (deg_fn):
-  #      pass
-  #    else:
-  #      degDir = os.path.join(req_sess['graphInvariants'],'Degree')
-  #      makeDirIfNone([degDir])
-  #
-  #      deg_fn = calcDegree(G_fn = grfn, \
-  #          G = lccG ,  degDir = degDir) # Good to go
-  #
-  #  if inv == "eig": # Nothing for free
-  #    if (tri_fn):
-  #      pass
-  #    else:
-  #      eigvDir = os.path.join(req_sess['graphInvariants'],'Eigen')
-  #      makeDirIfNone([eigvDir])
-  #
-  #      eigvlfn, eigvectfn = calcEigs(G_fn = grfn,\
-  #              G = lccG , eigvDir = eigvDir)
-  #
-  print "Invariants computed for graph %s" % G_fn
+  print "Computing invariants ..."
+
+  if (inv_dict['ss1'] or inv['cc']):
+    vert_edge_deg_ss_cc(inv_dict)
+  if (inv_dict['eig'] or inv_dict['mad'] or inv_dict['tri']):
+    eigs_mad_deg_tri(inv_dict)
+
+  # pick one - doesnt matter
+  vert_edge_deg_ss_cc(inv_dict)
+
+################################################################################
+#                             GRAPH BUILDER                                    #
+################################################################################
+def build_graph(fiber_fn, roi_raw_fn, roi_xml_fn, size, G_fn):
+  stmt = "Building " + ("BIG" if size == 'b' else "SMALL") + " graph ..."
+  print stmt
+  makeDirIfNone(os.path.dirname(G_fn))
+  #genGraph(fiber_fn, G_fn, roi_xml_fn, roi_raw_fn, True if size == 'b' else False);
+
+################################################################################
+#                      LARGEST CONNECTED COMPONENT                             #
+################################################################################
+def compute_lcc(roi_xml_fn, roi_raw_fn, G_fn, mr_data_dir, lcc_fn=None):
+  lcc_dir = os.path.join(mr_data_dir, "LCC")
+  LCC_FN_SFX = '_concomp'
+
+  if lcc_fn is None:
+    lcc_fn = os.path.join(lcc_dir, getBaseName(G_fn) + LCC_FN_SFX + '.npy')
+
+  print "Computing lcc ..."
+  #lcc.process_single_brain(roi_xml_fn, roi_raw_fn, G_fn, lcc_fn)
+  return lcc_fn
+
+################################################################################
+#                        SINGLE VALUE DECOMPOSITION                            #
+################################################################################
+def compute_svd(): # TODO
+  print "Computing svd ..."
 
 
 def main():
-  parser = argparse.ArgumentParser(description='A script run selected/all invariants on the largest connected component of a graph')
+  # Constants
+  SM_GRAPH_FN_SFX = '_70_smgr' # 70 may change
+  BG_GRAPH_FN_SFX = '_bggr'
+
+  mr_data_dir = os.path.join(os.path.dirname(__file__), 'mrdata')
+
+  parser = argparse.ArgumentParser(description='A script run selected/all invariants on the largest\
+                                   connected component of a graph. Pass minimally only G_fn[-l]|-f -rx -rr')
+
+  # If fiber_fn is passed the assumption is that you don't have a
+  # graph & want it made under the default name or G_fn if provided
 
   # Files and storage
-  parser.add_argument('G_fn', action='store',help='the full filename of the the CSC matrix representing a graph (.mat format)')
-  parser.add_argument('lcc_fn', action='store',help='the full filename of the largest connected component (.npy format)')
-  parser.add_argument('save_dir', action='store', help='the directory where the invariants are to stored (each will create its own subdirectory within this)')
+  parser.add_argument('graphsize', action='store', help='graphsize [s|b]. s is for small and b is for big.')
+  parser.add_argument('-G_fn', '--graph_fn', action='store',help='the full filename you want the \
+                      CSC matrix representing a graph (.mat format) to have *NOTE DO NOT USE UNDERSCORES (_)')
+  parser.add_argument('-S', '--savedir', action='store', help='the directory where the invariants \
+                      are to stored (each invariant will create its own subdirectory within this). \
+                      The defualt is %s' % mr_data_dir)
+
+  parser.add_argument('-f', '--fiber_fn', action='store', help ='the full filename of the fiber DMRI file (.dat format expected)')
+  parser.add_argument('-rx', '--roixml_fn', action='store', help='the full file name of the ROI.xml file')
+  parser.add_argument('-rr', '--roiraw_fn', action='store', help='the full file name of the ROI.xml file')
 
   # Invariant options
-  parser.add_argument('-d', '--deg', action='store_true', help='use flag to compute local degree of lcc')
-  parser.add_argument('-e', '--eigs', action='store_true', help='use flag to compute global top k eigenvalues & eigenvectors of lcc')
-  parser.add_argument('-c', '--cc', action='store_true', help='use flag to compute local clustering coefficient of lcc')
-  parser.add_argument('-t', '--tri', action='store_true', help='use flag to compute local triangle count of lcc')
-  parser.add_argument('-s', '--ss1', action='store_true', help='use flag to compute scan 1 statistic of lcc')
-  parser.add_argument('-m', '--mad', action='store_true', help='use flag to compute global max. average degree of lcc')
-  parser.add_argument('-g', '--edge', action='store_true', help='use flag to compute global egde count of lcc')
-  parser.add_argument('-v', '--ver', action='store_true', help='use this flag to compute global vertex count of lcc')
+  parser.add_argument('-A', '--all', action='store_true', help='pass to compute ALL invariants')
+  parser.add_argument('-d', '--deg', action='store_true', help='pass to compute local degree of lcc')
+  parser.add_argument('-e', '--eigs', action='store_true', help='pass to compute global top k eigenvalues & eigenvectors of lcc')
+  parser.add_argument('-c', '--cc', action='store_true', help='pass to compute local clustering coefficient of lcc')
+  parser.add_argument('-t', '--tri', action='store_true', help='pass to compute local triangle count of lcc')
+  parser.add_argument('-s', '--ss1', action='store_true', help='pass to compute scan 1 statistic of lcc')
+  parser.add_argument('-m', '--mad', action='store_true', help='pass to compute global max. average degree of lcc')
+  parser.add_argument('-g', '--edge', action='store_true', help='pass to compute global egde count of lcc')
+  parser.add_argument('-v', '--ver', action='store_true', help='pass to compute global vertex count of lcc')
+  parser.add_argument('-i', '--svd', action='store_true', help='pass to compute the singular value decomposition of graph')
+  parser.add_argument('-l', '--lcc', action='store_true',help='the full filename of the largest connected component (.npy format)')
 
   result = parser.parse_args()
-  import pdb; pdb.set_trace()
 
-  print 'main run'
+  if not (result.fiber_fn and result.roiraw_fn and result.roixml_fn):
+    sys.stderr.write("You must at least provide dMRI fiber file and both ROIs (.raw and .xml)\n")
+    sys.exit(-1)
+
+  if result.savedir:
+    mr_data_dir = result.savedir # Only place where global is adjusted
+
+  # Build graph
+  if not result.graph_fn:
+    suffix = BG_GRAPH_FN_SFX if result.graphsize == 'b' else SM_GRAPH_FN_SFX
+    result.graph_fn = os.path.join(mr_data_dir, os.path.splitext(getPathLeaf(result.fiber_fn))[0] + suffix + '.mat')
+
+  build_graph(result.fiber_fn, result.roiraw_fn, result.roixml_fn, result.graphsize, result.graph_fn) # Saving the graph is required
+
+  # Largest Conn Comp
+  if result.lcc or result.all or result.graphsize == "b":
+    if not (result.roixml_fn and result.roiraw_fn):
+      sys.stderr.write("To produce the largest connected component you must\
+                       provide both ROIs. Flags roixml_fn and roiraw_fn\n")
+      sys.exit(-1)
+    result.lcc_fn = compute_lcc(result.roixml_fn, result.roiraw_fn, result.graph_fn, mr_data_dir)
+
+  if result.svd or result.all:
+    if not (result.roixml_fn and result.roiraw_fn):
+      sys.stderr.write("To produce the largest connected component you must\
+                       provide both ROIs. Flags roixml_fn and roiraw_fn\n")
+    compute_svd() #TODO
+
+  if result.all:
+    for key in result.__dict__:
+      if result.__dict__[key] == False:
+        result.__dict__[key] = True
+
+  compute_inv(result.__dict__)
 
 if __name__ == '__main__':
   main()
