@@ -13,10 +13,14 @@ import os
 from mrcap.gengraph import genGraph
 from computation.utils.file_util import getPathLeaf, makeDirIfNone
 
+################################################################################
+#                             GRAPH BUILDER                                    #
+################################################################################
+
 def build_graph(fiber_fn, roi_raw_fn, roi_xml_fn, is_big, save_dir, graph_fn):
   if not graph_fn:
     # Constants
-    SM_GRAPH_FN_SFX = '_70_smgr' # 70 may change
+    SM_GRAPH_FN_SFX = '_70_smgr' # 70 will change to something dynamic
     BG_GRAPH_FN_SFX = '_bggr'
 
     suffix = BG_GRAPH_FN_SFX if is_big else SM_GRAPH_FN_SFX

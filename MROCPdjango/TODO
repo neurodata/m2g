@@ -1,6 +1,6 @@
 *MR OCP TODO list Disa
 ===========================
-* Strip ROIs from lcc computation in webservices
+
 * Refactor & repackage all invariant code
 
 * Add ability to upload arbitrary .mat files to graphupload with some size limit for invariant computation
@@ -38,6 +38,7 @@ Invariants still to compute
 *Recently completed*
 ===================
 
+- Strip ROIs from lcc computation in webservices
 - Complete ssl of django -  Not enabled yet
 - Handle wrong input files by using error message - Javascripted
 - Add Eigenvector to convert files
