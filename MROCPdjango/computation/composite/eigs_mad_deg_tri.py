@@ -95,66 +95,44 @@ def eigs_mad_deg_tri(inv_dict):
   ''' Triangle count '''
   if not inv_dict['tri_fn'] and inv_dict['tri']:
     triDir = os.path.join(os.path.dirname(inv_dict['graph_fn']), "Triangle") #if triDir is None else triDir
-    tri_fn = os.path.join(triDir, getBaseName(inv_dict['graph_fn']) + '_triangles.npy') # TODO HERE
-    createSave(tri_fn, numTri)
-
-    returnDict['tri_fn'] = tri_fn
+    inv_dict['tri_fn'] = os.path.join(triDir, getBaseName(inv_dict['graph_fn']) + '_triangles.npy') # TODO HERE
+    createSave(inv_dict['tri_fn'], numTri)
     print 'Triangle Count saved ...'
 
   ''' Degree count'''
-  if locals().has_key('vertxDeg'):
-    degDir = os.path.join(os.path.dirname(inv_dict['graph_fn']), "Degree") if degDir is None else degDir
-    deg_fn = os.path.join(degDir, getBaseName(inv_dict['graph_fn']) + '_degree.npy')
-    createSave(deg_fn, vertxDeg)
-
-    returnDict['deg_fn'] = deg_fn
+  if not inv_dict['deg_fn'] and inv_dict['deg']:
+    degDir = os.path.join(os.path.dirname(inv_dict['graph_fn']), "Degree") #if degDir is None else degDir
+    inv_dict['deg_fn'] = os.path.join(degDir, getBaseName(inv_dict['graph_fn']) + '_degree.npy')
+    createSave(inv_dict['deg_fn'], vertxDeg)
     print 'Degree saved ...'
 
   ''' MAD '''
-  if locals().has_key('maxAveDeg'):
-    MADdir = os.path.join(os.path.dirname(inv_dict['graph_fn']), "MAD") if MADdir is None else MADdir
-    MAD_fn = os.path.join(MADdir, getBaseName(inv_dict['graph_fn']) + '_MAD.npy')
-    createSave(MAD_fn, maxAveDeg)
-
-    returnDict['MAD_fn'] = MAD_fn
+  if not inv_dict['mad_fn'] and inv_dict['mad']:
+    MADdir = os.path.join(os.path.dirname(inv_dict['graph_fn']), "MAD") #if MADdir is None else MADdir
+    inv_dict['mad_fn'] = os.path.join(MADdir, getBaseName(inv_dict['graph_fn']) + '_mad.npy')
+    createSave(inv_dict['mad_fn'], maxAveDeg)
     print 'Maximum Average Degree saved ...'
 
   ''' Top eigenvalues & eigenvectors '''
-  if (eig or eigvDir):
+  if not inv_dict['eigvl_fn'] and inv_dict['eig'] : # If there is no eigvl_fn there is no eigvect_fn
     eigvDir = os.path.join(os.path.dirname(inv_dict['graph_fn']), "Eigen") if eigvDir is None else eigvDir
     eigvalDir = os.path.join(eigvDir,"values")
     eigvectDir = os.path.join(eigvDir,"vectors")
 
     # Immediately write eigs to file
-    eigvl_fn = os.path.join(eigvalDir, getBaseName(inv_dict['graph_fn']) + '_eigvl.npy')
-    eigvect_fn = os.path.join(eigvectDir, getBaseName(inv_dict['graph_fn']) + '_eigvect.npy')
-    createSave(eigvl_fn, l.real) # eigenvalues
-    createSave(eigvect_fn, u)# eigenvectors
-
-    returnDict['eigvl_fn'] = eigvl_fn
-    returnDict['eigvect_fn'] = eigvect_fn
+    inv_dict['eigvl_fn'] = os.path.join(eigvalDir, getBaseName(inv_dict['graph_fn']) + '_eigvl.npy')
+    inv_dict['eigvect_fn'] = os.path.join(eigvectDir, getBaseName(inv_dict['graph_fn']) + '_eigvect.npy')
+    createSave(inv_dict['eigvl_fn'], l.real) # eigenvalues
+    createSave(inv_dict['eigvect_fn'], u) # eigenvectors
     print 'Eigenvalues and eigenvectors saved ...'
 
-  if test: # bench test
-    tri_fn = os.path.join('bench', str(G.shape[0]), getBaseName(inv_dict['graph_fn']) + '_triangles.npy')
-    eigvl_fn = os.path.join('bench', str(G.shape[0]), getBaseName(inv_dict['graph_fn']) + '_eigvl.npy')
-    eigvect_fn = os.path.join('bench', str(G.shape[0]), getBaseName(inv_dict['graph_fn']) + '_eigvect.npy')
-    MAD_fn = os.path.join('bench', str(G.shape[0]), getBaseName(inv_dict['graph_fn']) + '_MAD.npy')
+  #if test: # bench test
+  #  tri_fn = os.path.join('bench', str(G.shape[0]), getBaseName(inv_dict['graph_fn']) + '_triangles.npy')
+  #  eigvl_fn = os.path.join('bench', str(G.shape[0]), getBaseName(inv_dict['graph_fn']) + '_eigvl.npy')
+  #  eigvect_fn = os.path.join('bench', str(G.shape[0]), getBaseName(inv_dict['graph_fn']) + '_eigvect.npy')
+  #  MAD_fn = os.path.join('bench', str(G.shape[0]), getBaseName(inv_dict['graph_fn']) + '_MAD.npy')
 
-  return returnDict # TODO: Fix code this breaks. Originally was [tri_fn, deg_fn, MAD_fn, eigvl_fn, eigvect_fn]
-
-#def main():
-#  parser = argparse.ArgumentParser(description='Calculate an estimat of triangle counting on a graph')
-#  parser.add_argument('inv_dict['graph_fn']', action='store',help='Full filename sparse graph (.mat)')
-#  parser.add_argument('lcc_fn', action='store',help='Full filename of largest connected component (.npy)')
-#  parser.add_argument('triDir', action='store', help='Full path of directory where you want .npy array resulting file to go')
-#  parser.add_argument('MADdir', action='store', help='Full path of directory where you want .npy array resulting file to go')
-#  parser.add_argument('eigvDir', action='store', help='Full path of directory where you want .npy array resulting file to go')
-#  parser.add_argument('degDir', action='store', help='Full path of directory where you want .npy array resulting file to go')
-#  parser.add_argument('k', type = int, action='store', help='The number of Eigenvalues/vectors to compute' )
-#
-#  result = parser.parse_args()
-#  eigs_mad_deg_tri(result.inv_dict['graph_fn'], None, result.lcc_fn, result.triDir, result.MADdir, result.eigvDir, result.degDir, result.k )
+  return inv_dict # TODO: Fix code this breaks. Originally was [tri_fn, deg_fn, MAD_fn, eigvl_fn, eigvect_fn]
 
 if __name__ == '__main__':
   print 'This file is not to be called directly. Use helpers'

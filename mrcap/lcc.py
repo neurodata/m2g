@@ -19,6 +19,7 @@ from matplotlib import pyplot as plt
 import fa
 #import mprage # DISA - I don't have
 import argparse
+import os
 
 class ConnectedComponent(object):
     vertexCC = None
@@ -185,6 +186,23 @@ def process_single_brain(roiXml, roiRaw, mat_fn, lccOutputFileName, figDir = Non
 
     del fg
 
+
+
+'''
+Created on June 29, 2012
+@author: dmhembe1
+
+Determine lcc on a single big graph a provided my a remote user
+This is for use in the one-click processing pipeline to be found at http://www.openconnecto.me/STUB
+'''
+def new_process_single_brain(graph_fn, lccOutputFileName):
+    print "Processing single brain... "
+    # replace all above code with this
+    vcc = ConnectedComponent(loadmat(graph_fn)['fibergraph'])
+    if not os.path.exists(os.path.dirname(lccOutputFileName)):
+      print "Creating lcc directory %s" % os.path.dirname(lccOutputFileName)
+      os.makedirs(os.path.dirname(lccOutputFileName))
+    np.save(lccOutputFileName,sp.lil_matrix(vcc.vertexCC)) # save as .npy
 
 
 
