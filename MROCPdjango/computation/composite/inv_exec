@@ -68,7 +68,7 @@ def main():
   parser.add_argument('graph_fn', action='store',help='the full filename of the  \
                       CSC matrix representing a graph (.mat format) to have *NOTE DO NOT USE UNDERSCORES (_)')
   parser.add_argument('graphsize', action='store', help='graphsize [s|b]. s is for small and b is for big.')
-  parser.add_argument('-S', '--savedir', action='store', default= mr_data_dir, help='the directory where the invariants \
+  parser.add_argument('-S', '--save_dir', action='store', default= mr_data_dir, help='the directory where the invariants \
                       are to be stored (each invariant will create its own subdirectory within this). \
                       The defualt is %s' % mr_data_dir)
 

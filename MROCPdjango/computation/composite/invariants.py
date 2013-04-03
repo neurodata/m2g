@@ -19,35 +19,28 @@ from time import time
 
 from computation.utils.file_util import createSave
 
-# function originally called eignTriLocal_deg_MAD
-'''
-def eigs_mad_deg_tri(inv_dict['graph_fn'], G=None, lcc_fn=None, triDir=None, MADdir = None,\
-                         eigvDir=None, degDir=None, k=None, eig=False, tri=False, mad=False, deg=False, test=False):
+def compute(inv_dict, save=True):
+  '''
+  @param inv_dict: is a dict optinally containing any of these:
+    - inv_dict['edge']: boolean for global edge count
+    - inv_dict['ver']: boolean for global vertex number
+    - inv_dict['tri']: boolean for local triangle count
+    - inv_dict['tri_fn']: the path of a precomputed triangle count (.npy)
+    - inv_dict['eig']: boolean for eigenvalues and eigenvectors
+    - inv_dict['eigvl_fn']: the path of a precomputed eigenvalues (.npy)
+    - inv_dict['eigvect_fn']: the path of a precomputed eigenvectors (.npy)
+    - inv_dict['deg']: boolean for local degree count
+    - inv_dict['deg_fn']: the path of a precomputed triangle count (.npy)
+    - inv_dict['ss1']: boolean for scan 1 statistic
+    - inv_dict['cc']: boolean for clustering coefficient
+    - inv_dict['mad']: boolean for maximum average degree
+    - inv_dict['save_dir']: the base path where all invariants will create sub-dirs & be should be saved
 
-  All invariants that require the top k eigenvalues computed can be computed here.
-  Only exception is degree which is here because clustering coefficient requires
-  triangle number + degree. Best to compute both here if reqd.
+  @param save: boolean for auto save or not. TODO: use this
+  '''
 
-  Which ones you want computed is a choice based on params
-
-  @param inv_dict['graph_fn']: fibergraph full filename (.mat)
-  @param G: the sparse matrix containing the graph
-  @param lcc_fn: largest connected component full filename (.npy)
-  @param k: Number of eigenvalues to compute. The more the higher accuracy achieved
-  @param triDir: Directory where resulting array is placed
-  @param degDir: Directory where to place local degree result
-
-  # Invariant options
-
-  @param eig: Compute eigs? True for yes else no. If eigvDir is given assumed to be True
-  @param tri: Count triangles? True for yes else no. If triDir is given assumed to be True
-  @param deg: Compute local degree? True for yes else False. If degDir assumed to be True
-  @param mad: Compute max ave degree? True for yes else no. If MADdir is given assumed to be True
-
-  @return returnDict: a dict with the attribute & its filename # TODO: May change
-'''
-
-def compute(inv_dict):
+  if inv_dict['save_dir'] is None:
+   inv_dict['save_dir'] = os.path.dirname(inv_dict['graph_fn'])
 
   if (inv_dict.has_key('G')):
     if inv_dict['G'] is not None:
@@ -146,7 +139,7 @@ def compute(inv_dict):
 
   ''' Top eigenvalues & eigenvectors '''
   if not inv_dict['eigvl_fn'] and inv_dict['eig'] :
-    eigvDir = os.path.join(os.path.dirname(inv_dict['graph_fn']), "Eigen") #if eigvDir is None else eigvDir
+    eigvDir = os.path.join(inv_dict['save_dir'], "Eigen") #if eigvDir is None else eigvDir
 
     # Immediately write eigs to file
     inv_dict['eigvl_fn'] = os.path.join(eigvDir, getBaseName(inv_dict['graph_fn']) + '_eigvl.npy')
@@ -157,49 +150,49 @@ def compute(inv_dict):
 
   ''' Triangle count '''
   if not inv_dict['tri_fn'] and inv_dict['tri']:
-    triDir = os.path.join(os.path.dirname(inv_dict['graph_fn']), "Triangle") #if triDir is None else triDir
+    triDir = os.path.join(inv_dict['save_dir'], "Triangle") #if triDir is None else triDir
     inv_dict['tri_fn'] = os.path.join(triDir, getBaseName(inv_dict['graph_fn']) + '_triangles.npy') # TODO HERE
     createSave(inv_dict['tri_fn'], tri_array)
     print 'Triangle Count saved ...'
 
   ''' Degree count'''
   if not inv_dict['deg_fn'] and inv_dict['deg']:
-    degDir = os.path.join(os.path.dirname(inv_dict['graph_fn']), "Degree") #if degDir is None else degDir
+    degDir = os.path.join(inv_dict['save_dir'], "Degree") #if degDir is None else degDir
     inv_dict['deg_fn'] = os.path.join(degDir, getBaseName(inv_dict['graph_fn']) + '_degree.npy')
     createSave(inv_dict['deg_fn'], deg_array)
     print 'Degree saved ...'
 
   ''' MAD '''
   if inv_dict['mad']:
-    MADdir = os.path.join(os.path.dirname(inv_dict['graph_fn']), "MAD") #if MADdir is None else MADdir
+    MADdir = os.path.join(inv_dict['save_dir'], "MAD") #if MADdir is None else MADdir
     inv_dict['mad_fn'] = os.path.join(MADdir, getBaseName(inv_dict['graph_fn']) + '_mad.npy')
     createSave(inv_dict['mad_fn'], max_ave_deg)
-    print 'Maximum Average Degree saved ...'
+    print 'Maximum average Degree saved ...'
 
   ''' Scan Statistic 1'''
   if inv_dict['ss1']:
-    ss1Dir = os.path.join(os.path.dirname(inv_dict['graph_fn']), "SS1") #if ss1Dir is None else ss1Dir
+    ss1Dir = os.path.join(inv_dict['save_dir'], "SS1") #if ss1Dir is None else ss1Dir
     inv_dict['ss1_fn'] = os.path.join(ss1Dir, getBaseName(inv_dict['graph_fn']) + '_scanstat1.npy')
     createSave(inv_dict['ss1_fn'], ss1_array) # save it
     print 'Scan 1 statistic saved ...'
 
   ''' Clustering coefficient '''
   if inv_dict['cc']:
-    ccDir = os.path.join(os.path.dirname(inv_dict['graph_fn']), "ClustCoeff") #if ccDir is None else ccDir
+    ccDir = os.path.join(inv_dict['save_dir'], "ClustCoeff") #if ccDir is None else ccDir
     inv_dict['cc_fn'] = os.path.join(ccDir, getBaseName(inv_dict['graph_fn']) + '_clustcoeff.npy')
     createSave(inv_dict['cc_fn'], cc_array) # save it
     print 'Clustering coefficient saved ...'
 
   ''' Global Vertices '''
   if inv_dict['ver']:
-    vertDir = os.path.join(os.path.dirname(inv_dict['graph_fn']), "Globals") #if vertDir is None else vertDir
+    vertDir = os.path.join(inv_dict['save_dir'], "Globals") #if vertDir is None else vertDir
     inv_dict['ver_fn'] = os.path.join(vertDir, getBaseName(inv_dict['graph_fn']) + '_numvert.npy')
     createSave(inv_dict['ver_fn'], num_nodes) # save it
     print 'Global vertices number saved ...'
 
   ''' Global number of edges '''
   if inv_dict['edge']:
-    edgeDir = os.path.join(os.path.dirname(inv_dict['graph_fn']), "Globals") #if edgeDir is None else edgeDir
+    edgeDir = os.path.join(inv_dict['save_dir'], "Globals") #if edgeDir is None else edgeDir
     inv_dict['edge_fn'] = os.path.join(edgeDir, getBaseName(inv_dict['graph_fn']) + '_numedges.npy')
     createSave(inv_dict['edge_fn'], edge_count) # save it
     print 'Global edge number saved ...'
