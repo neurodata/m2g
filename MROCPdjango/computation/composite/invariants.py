@@ -43,7 +43,7 @@ def compute(inv_dict, save=True):
 
   if (inv_dict.has_key('G')):
     if inv_dict['G'] is not None:
-      pass
+      G = inv_dict['G']
   elif (inv_dict['graphsize'] == 'b' or inv_dict['graphsize'] == 'big'):
     G = loadAdjMat(inv_dict['graph_fn'], inv_dict['lcc_fn']) # TODO: test
   # small graphs
@@ -60,12 +60,16 @@ def compute(inv_dict, save=True):
     # if either #tri or deg is undefined
     if not inv_dict['tri_fn']:
       inv_dict['tri'] = True
-      if not inv_dict['eigvl_fn']:
-        inv_dict['eig'] = True
     if not inv_dict['deg_fn']:
       inv_dict['deg'] = True
 
     cc_array = np.zeros(num_nodes)
+
+  # All invariants that require eigenvalues
+  if ((inv_dict['tri'] and not inv_dict['tri_fn'])
+      or (inv_dict['mad'])):
+    if not inv_dict['eigvl_fn']:
+      inv_dict['eig'] = True
 
   # Only create arrays if the computation will be done
   if inv_dict['tri']:
@@ -89,9 +93,16 @@ def compute(inv_dict, save=True):
 
   start = time()
   # Calculate Eigenvalues & Eigen vectors
-  if (inv_dict['eig'] and not inv_dict['eigvl_fn']):
-    l, u = arpack.eigs(G, k=k, which='LM') # LanczosMethod(A,0)
-    print 'Time taken to calc Eigenvalues: %f secs\n' % (time() - start)
+  if inv_dict['eig']:
+    if not (inv_dict['eigvl_fn'] or inv_dict['eigvect_fn']):
+      l, u = arpack.eigs(G, k=k, which='LM') # LanczosMethod(A,0)
+      print 'Time taken to calc Eigenvalues: %f secs\n' % (time() - start)
+    else:
+      try:
+        l = np.load(inv_dict['eigvl_fn'])
+        u = l = np.load(inv_dict['eigvect_fn'])
+      except Exception:
+        return "[IOERROR: ]Eigenvalues failed to load"
 
   # All other invariants
   start = time()

@@ -79,7 +79,7 @@ def main():
   # Invariant options
   parser.add_argument('-A', '--all', action='store_true', help='pass to compute ALL invariants')
   parser.add_argument('-d', '--deg', action='store_true', help='pass to compute local degree')
-  parser.add_argument('-e', '--eigs', action='store_true', help='pass to compute global top k eigenvalues & eigenvectors')
+  parser.add_argument('-e', '--eig', action='store_true', help='pass to compute global top k eigenvalues & eigenvectors')
   parser.add_argument('-c', '--cc', action='store_true', help='pass to compute local clustering coefficient')
   parser.add_argument('-t', '--tri', action='store_true', help='pass to compute local triangle count')
   parser.add_argument('-s', '--ss1', action='store_true', help='pass to compute scan 1 statistic')
