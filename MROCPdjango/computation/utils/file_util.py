@@ -55,13 +55,16 @@ def loadAnyMat(fn, data_elem=None):
 
   G = loadmat(fn)
   if data_elem:
-    G = G[data_elem]
+    try:
+      G = G[data_elem]
+    except:
+      return "[IOERROR]: The data element '%s' you provided was not found." % data_elem
+
   else:
     key = list(set(G.keys()) - set(['__version__', '__header__', '__globals__']))
     if len(key) > 1:
-      return "Too many data elements to distinguish the graph - use only one data element or specify explicitly"
+      return "[ERROR]: Too many data elements to distinguish the graph - use only one data element or specify explicitly"
 
   if not isinstance(G, csc):
     G = csc(G)
-
   return G
