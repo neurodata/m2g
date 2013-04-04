@@ -66,24 +66,26 @@ def main():
 
   # Files and storage
   parser.add_argument('graph_fn', action='store',help='the full filename of the  \
-                      CSC matrix representing a graph (.mat format) to have *NOTE DO NOT USE UNDERSCORES (_)')
+                      CSC matrix representing a graph (.mat format) to have *NOTE DO NOT USE UNDERSCORES (_)\
+                      in path leaf. eg. /foo/bar_bar/foo.mat is OK but /foo/bar/foo_bar.mat is NOT. [TODO fix]')
   parser.add_argument('graphsize', action='store', help='graphsize [s|b]. s is for small and b is for big.')
+
+  parser.add_argument('-D', '--data_elem', action='store', default='fibergraph', help='the name of the data element within the .mat matrix.')
   parser.add_argument('-S', '--save_dir', action='store', default= mr_data_dir, help='the directory where the invariants \
                       are to be stored (each invariant will create its own subdirectory within this). \
                       The defualt is %s' % mr_data_dir)
 
-  parser.add_argument('-l', '--lcc', action='store_true',help='the full filename of the largest connected component (.npy format)')
 
   # Invariant options
   parser.add_argument('-A', '--all', action='store_true', help='pass to compute ALL invariants')
-  parser.add_argument('-d', '--deg', action='store_true', help='pass to compute local degree of lcc')
-  parser.add_argument('-e', '--eigs', action='store_true', help='pass to compute global top k eigenvalues & eigenvectors of lcc')
-  parser.add_argument('-c', '--cc', action='store_true', help='pass to compute local clustering coefficient of lcc')
-  parser.add_argument('-t', '--tri', action='store_true', help='pass to compute local triangle count of lcc')
-  parser.add_argument('-s', '--ss1', action='store_true', help='pass to compute scan 1 statistic of lcc')
-  parser.add_argument('-m', '--mad', action='store_true', help='pass to compute global max. average degree of lcc')
-  parser.add_argument('-g', '--edge', action='store_true', help='pass to compute global egde count of lcc')
-  parser.add_argument('-v', '--ver', action='store_true', help='pass to compute global vertex count of lcc')
+  parser.add_argument('-d', '--deg', action='store_true', help='pass to compute local degree')
+  parser.add_argument('-e', '--eigs', action='store_true', help='pass to compute global top k eigenvalues & eigenvectors')
+  parser.add_argument('-c', '--cc', action='store_true', help='pass to compute local clustering coefficient')
+  parser.add_argument('-t', '--tri', action='store_true', help='pass to compute local triangle count')
+  parser.add_argument('-s', '--ss1', action='store_true', help='pass to compute scan 1 statistic')
+  parser.add_argument('-m', '--mad', action='store_true', help='pass to compute global max. average degree')
+  parser.add_argument('-g', '--edge', action='store_true', help='pass to compute global egde count')
+  parser.add_argument('-v', '--ver', action='store_true', help='pass to compute global vertex count')
 
   parser.add_argument('-ef', '--eigvl_fn', action='store', help='If the eigenvalue file \
                       already exists pass it in to avoid recomputing. Used for -m, -t, -c, -A')
@@ -91,13 +93,14 @@ def main():
                       already exists, pass it in to avoid recomputing. Used for -c')
   parser.add_argument('-df', '--deg_fn', action='store', help='If degree count file\
                       already exists, pass it in to avoid recomputing. Used for -c')
+  parser.add_argument('-lf', '--lcc_fn', action='store_true',help='the full filename of the largest connected component (.npy format)')
 
   parser.add_argument('-k', action='store', help='The number of eigenvalues to compute. Max is 100')
 
   result = parser.parse_args()
 
-  if (result.graphsize == 'b' and not result.lcc):
-    sys.stderr.write("You must provide lcc given a biggraph \n")
+  if (result.graphsize == 'b' and not result.lcc_fn):
+    sys.stderr.write("You must provide the largest connected component given a biggraph \n")
     sys.exit(-1)
 
   if result.all:

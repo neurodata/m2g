@@ -8,7 +8,6 @@
 # make a directory if none exists
 
 import os
-from numpy import save
 
 def makeDirIfNone(dirname):
   '''
@@ -30,11 +29,39 @@ def createSave(fn, content):
   @param fn: file name
   @param content: numpy saveable file
   '''
+  from numpy import save
+
   makeDirIfNone(os.path.dirname(fn))
   save(fn, content)
 
 def getPathLeaf(path):
+  '''
+  Get the leaf of a path
+  @param path: the full path of which you want to extract the leaf
+  '''
   import ntpath
 
   head, tail = ntpath.split(path)
   return tail
+
+def loadAnyMat(fn, data_elem=None):
+  '''
+  Load up arbitrary.mat matrix as a csc matrix
+  @param fn: the filename
+  @param data_ele: the data element item name
+  '''
+  from scipy.io import loadmat
+  from scipy.sparse import csc_matrix as csc
+
+  G = loadmat(fn)
+  if data_elem:
+    G = G[data_elem]
+  else:
+    key = list(set(G.keys()) - set(['__version__', '__header__', '__globals__']))
+    if len(key) > 1:
+      return "Too many data elements to distinguish the graph - use only one data element or specify explicitly"
+
+  if not isinstance(G, csc):
+    G = csc(G)
+
+  return G
