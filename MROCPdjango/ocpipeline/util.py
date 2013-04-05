@@ -11,7 +11,7 @@ import zipfile
 import tempfile
 import re
 
-import computation.convertTo as convertTo
+import computation.utils.convertTo as convertTo
 from django.conf import settings
 
 def makeDirIfNone(dirPathList):

@@ -41,7 +41,7 @@ from mrcap import gengraph as gengraph
 import filesorter as filesorter
 import zipper as zipper
 import createDirStruct as createDirStruct
-import computation.convertTo as convertTo
+import computation.utils.convertTo as convertTo
 
 from django.core.servers.basehttp import FileWrapper
 
@@ -57,16 +57,7 @@ from django.shortcuts import redirect
 ####################
 ## Graph Analysis ##
 ####################
-
-from computation.scanstat_degr import calcScanStat_Degree
-from computation.clustCoeff import calcLocalClustCoeff
-from computation.loadAdjMatrix import loadAdjMat
-from computation.triCount_MAD import eignTriLocal_MAD
-from computation.degree import calcDegree
-from computation.MAD import calcMAD
-from computation.eigen import calcEigs
-from computation.clustCoeff import calcLocalClustCoeff
-from computation.triCount_deg_MAD import eignTriLocal_deg_MAD
+import computation.composite.invariants as cci
 import scipy.io as sio
 
 # Registration
@@ -215,26 +206,33 @@ def processInputData(request):
     if fileName == "": # Means a file is missing from i/p
       return render_to_response('pipelineUpload.html', context_instance=RequestContext(request)) # Missing file for processing Gengraph
 
-  baseName = fiber_fn[:-9] #MAY HAVE TO CHANGE
+  baseName = fiber_fn[:-9] # MAY HAVE TO CHANGE
 
   ''' Fully qualify file names '''
   fiber_fn = os.path.join(request.session['derivatives'], fiber_fn)
   roi_raw_fn = os.path.join(request.session['derivatives'], roi_raw_fn)
   roi_xml_fn = os.path.join(request.session['derivatives'], roi_xml_fn)
 
-  request.session['smGrfn'], request.session['bgGrfn'], request.session['lccfn'],request.session['SVDfn'] \
-      = processData(fiber_fn, roi_xml_fn, roi_raw_fn,request.session['graphs'], request.session['graphInvariants'], request.session['graphsize'], True)
+  request.session['smGrfn'], request.session['bgGrfn'], request.session['lccfn']\
+    ,request.session['SVDfn'] = processData(fiber_fn, roi_xml_fn, roi_raw_fn, \
+                                request.session['graphs'], request.session['graphInvariants'],\
+                                request.session['graphsize'], True)
 
   # Run ivariants here
   if len(request.session['invariants']) > 0:
     print "Computing invariants"
     if (request.session['graphsize'] == 'big'):
-      lccG = loadAdjMat(request.session['bgGrfn'], request.session['lccfn'])
+      graph_fn = request.session['bgGrfn']
+      lcc_fn = request.session['lccfn']
 
     elif (request.session['graphsize'] == 'small'):
-      lccG = sio.loadmat(request.session['smGrfn'])['fibergraph']
+      graph_fn = request.session['smGrfn']
+      lcc_fn = None
 
-    request.session['invariant_fns'] =  runInvariants(lccG, request.session)
+    request.session['invariant_fns'] = runInvariants(request.session['invariants'],\
+                                        graph_fn, request.session['graphInvariants'],\
+                                        lcc_fn, request.session['graphsize'])
+
   return HttpResponseRedirect(get_script_prefix()+'confirmdownload')
 
 def confirmDownload(request):
@@ -328,7 +326,7 @@ def upload(request, webargs=None):
     elif len(webargs.split('/')) == 6:
       [userDefProjectName, site, subject, session, scanId, graphsize] = webargs.split('/')
 
-    userDefProjectDir = adaptProjNameIfReq(os.path.join(settings.MEDIA_ROOT, userDefProjectName, site, subject, session, scanId))
+    userDefProjectDir = adaptProjNameIfReq(os.path.join(settings.MEDIA_ROOT, 'public', userDefProjectName, site, subject, session, scanId))
 
     ''' Define data directory paths '''
     derivatives, rawdata,  graphs, request.session['graphInvariants'], images = defDataDirs(userDefProjectDir)
@@ -346,24 +344,32 @@ def upload(request, webargs=None):
     if (re.match(re.compile('(b|big)', re.IGNORECASE), graphsize)):
       request.session['graphsize'] = 'big'
       request.session['smGrfn'], request.session['bgGrfn'], lccfn, SVDfn \
-        = processData(fiber_fn, roi_xml_fn, roi_raw_fn,graphs, request.session['graphInvariants'], request.session['graphsize'],True) # Change to false to not process anything
-
-      # process invariants if requested
-      if request.session['invariants']:
-        lccG = loadAdjMat(request.session['bgGrfn'], lccfn)
+        = processData(fiber_fn, roi_xml_fn, roi_raw_fn,graphs,\
+                      request.session['graphInvariants'],\
+                      request.session['graphsize'],True)
 
     elif(re.match(re.compile('(s|small)', re.IGNORECASE), graphsize)):
       request.session['graphsize'] = 'small'
       request.session['smGrfn'], request.session['bgGrfn'], lccfn, SVDfn \
-        = processData(fiber_fn, roi_xml_fn, roi_raw_fn,graphs, request.session['graphInvariants'], request.session['graphsize'],True) # Change to false to not process anything
+        = processData(fiber_fn, roi_xml_fn, roi_raw_fn,graphs, request.session['graphInvariants'], request.session['graphsize'],True)
 
-      if request.session['invariants']:
-        lccG = sio.loadmat(request.session['smGrfn'])['fibergraph']
     else:
       return django.http.HttpResponseBadRequest ("Missing graph size. Specify big or small")
 
-    if request.session['invariants']:
-      invariant_fns =  runInvariants(lccG, request.session)
+    # Run invariants
+    if len(request.session['invariants']) > 0:
+      print "Computing invariants"
+      if (request.session['graphsize'] == 'big'):
+        graph_fn = request.session['bgGrfn']
+        lcc_fn = request.session['lccfn']
+
+      elif (request.session['graphsize'] == 'small'):
+        graph_fn = request.session['smGrfn']
+        lcc_fn = None
+
+      invariant_fns = runInvariants(request.session['invariants'],\
+                                          graph_fn, request.session['graphInvariants'],\
+                                          lcc_fn, request.session['graphsize'])
 
     #ret = rzfile.printdir()
     #ret = rzfile.testzip()
@@ -405,6 +411,8 @@ def graphLoadInv(request, webargs=None):
       request.session['graphsize'] = form.cleaned_data['Select_graph_size']
 
       dataDir = os.path.join(settings.MEDIA_ROOT, 'tmp', strftime("projectStamp%a%d%b%Y_%H.%M.%S/", localtime()))
+      request.session['graphInvariants'] = os.path.join(dataDir, 'graphInvariants')
+
       makeDirIfNone([dataDir])
 
       # We got a zip
@@ -416,29 +424,28 @@ def graphLoadInv(request, webargs=None):
         graphs.extend(glob(os.path.join(dataDir,'*_bggr.mat')))
         graphs.extend(glob(os.path.join(dataDir,'*_smgr.mat')))
 
-        request.session['graphInvariants'] = os.path.join(dataDir, 'graphInvariants')
+      else: # View only accepts .mat & zip as regulated by template
+        graphs = [os.path.join(dataDir, data.name)]
+        saveFileToDisk(data, graphs[0])
 
-        for G_fn in graphs:
-          if request.session['graphsize'] == 'big':
-            request.session['bgGrfn'] = G_fn
-            lccfn = G_fn.split('_')[0] + '_concomp.mat'
-            lccG = loadAdjMat(request.session['bgGrfn'], lccfn)
+      for graph_fn in graphs:
+        if request.session['graphsize'] == 'big':
+          request.session['bgGrfn'] = graph_fn
+          lcc_fn = graph_fn.split('_')[0] + '_concomp.mat'
 
-          elif request.session['graphsize'] == 'small':
-            request.session['smGrfn'] = G_fn
-            lccG = sio.loadmat(request.session['smGrfn'])['fibergraph']
+        elif request.session['graphsize'] == 'small':
+          graph_fn = request.session['smGrfn'] = graph_fn
+          lcc_fn = None
 
-            runInvariants(lccG, request.session)
-            print 'No project invariants %s complete...' % G_fn
-          else:
-            HttpResponse("<h2>The graph size is required to proceed.</h2>")
-      else:
-        return HttpResponse("<h2>The file you uploaded is not a zip see the instructions on the page before proceeding.</h2>")
+          runInvariants(request.session['invariants'], graph_fn,
+                        request.session['graphInvariants'], lcc_fn,
+                        request.session['graphsize'])
+          print 'Invariants for annoymous project %s complete...' % graph_fn
 
-      # request.session.clear() # NEW
+
       return HttpResponseRedirect("http://mrbrain.cs.jhu.edu"+ dataDir.replace(' ','%20')) # All spaces are replaced with %20 for urls
 
-  if request.method == 'POST' and webargs:
+  elif request.method == 'POST' and webargs:
     if (re.match(re.compile('(b|big)', re.IGNORECASE), webargs.split('/')[0])):
       request.session['graphsize'] = 'big'
     elif (re.match(re.compile('(s|small)', re.IGNORECASE), webargs.split('/')[0])):
@@ -448,7 +455,7 @@ def graphLoadInv(request, webargs=None):
 
     dataDir = os.path.join(settings.MEDIA_ROOT, 'tmp', strftime("projectStamp%a%d%b%Y_%H.%M.%S/", localtime()))
     makeDirIfNone([dataDir])
-    #if (request.body.name)
+
     uploadedZip = writeBodyToDisk(request.body, dataDir)[0]
 
     zipper.unzip(uploadedZip, dataDir) # Unzip the zip
@@ -462,18 +469,19 @@ def graphLoadInv(request, webargs=None):
 
     request.session['graphInvariants'] = os.path.join(dataDir, 'graphInvariants')
 
-    for G_fn in graphs:
+    for graph_fn in graphs:
       if request.session['graphsize'] == 'big':
-        request.session['bgGrfn'] = G_fn
-        lccfn = G_fn.split('_')[0] + '_concomp.mat'
-        lccG = loadAdjMat(request.session['bgGrfn'], lccfn)
+        request.session['bgGrfn'] = graph_fn
+        lcc_fn = graph_fn.split('_')[0] + '_concomp.mat'
 
       elif request.session['graphsize'] == 'small':
-        request.session['smGrfn'] = G_fn
-        lccG = sio.loadmat(request.session['smGrfn'])['fibergraph']
+        request.session['smGrfn'] = graph_fn
+        lcc_fn = None
 
-      runInvariants(lccG, request.session)
-      print 'Invariants computed with no project for: %s ...' % G_fn
+      runInvariants(request.session['invariants'], graph_fn,
+                        request.session['graphInvariants'], lcc_fn,
+                        request.session['graphsize'])
+      print 'Invariants for annoymous project %s complete...' % graph_fn
 
     # request.session.clear()
     dwnldLoc = "http://mrbrain.cs.jhu.edu"+ dataDir.replace(' ','%20')
@@ -658,318 +666,41 @@ def processData(fiber_fn, roi_xml_fn, roi_raw_fn,graphs, graphInvariants, graphs
   print "Completed generating - graph, lcc & svd"
   return [ smGrfn, bgGrfn, lccfn, SVDfn ]
 
-#########################################
-#	*******************		#
-#	     INVARIANTS			#
-#########################################
-def runInvariants(lccG, req_sess):
-  '''
-  @todo
-  @param lccG: Sparse largest connected component adjacency matrix
-  @param req_sess: current session dict containing session varibles
-  '''
-
-  if req_sess['graphsize'] == 'small':
-    grfn = req_sess['smGrfn']
-  elif req_sess['graphsize'] == 'big':
-    grfn = req_sess['bgGrfn']
-  else:
-    return None # Should make things explode - TODO better handling
-
-  # NOTE: The *_fn variable names are in accordance with settings.VALID_FILE_TYPES
-  ss1_fn = None
-  tri_fn = deg_fn =  ss2_fn = apl_fn = gdia_fn = cc_fn = numNodes = eigvlfn = eigvectfn = mad_fn = ss1_fn
-
-  degDir = None
-  ssDir = triDir = MADdir = eigvDir = degDir
-
-  # Order the invariants correctly
-  order = { 0:'ss1', 1:'tri', 2:'cc', 3:'mad', 4:'deg', 5:'eig',6:'ss2', 7:'apl', 8:'gdia' }
-  invariants = []
-  for i in range(len(order)):
-    if order[i] in req_sess['invariants']:
-      invariants.append(order[i])
-
-  req_sess['invariants'] = invariants
-  invariant_fns = {}
-
-  #** ASSUMES ORDER OF INVARIANTS ARE PREDEFINED **#
-  for inv in req_sess['invariants']:
-    if inv == "ss1": # Get degree for free
-      ssDir = os.path.join(req_sess['graphInvariants'],'ScanStat1')
-      degDir = os.path.join(req_sess['graphInvariants'],'Degree')
-      makeDirIfNone([ssDir, degDir])
-
-      ss1_fn, deg_fn, numNodes = calcScanStat_Degree(G_fn = grfn,\
-          G = lccG,  ssDir = ssDir, degDir = degDir) # Good to go
-
-    if inv == "tri": # Get "Eigs" & "MAD" for free
-      triDir = os.path.join(req_sess['graphInvariants'],'Triangle')
-      MADdir = os.path.join(req_sess['graphInvariants'],'MAD')
-      eigvDir = os.path.join(req_sess['graphInvariants'],'Eigen')
-
-      if not (degDir):
-        degDir = os.path.join(req_sess['graphInvariants'],'Degree')
-        makeDirIfNone([triDir, MADdir, eigvDir, degDir])
-
-        tri_fn, deg_fn, MAD_fn, eigvl_fn, eigvect_fn =  eignTriLocal_deg_MAD(G_fn = grfn,\
-            G = lccG, triDir = triDir, MADdir = MADdir, eigvDir = eigvDir, degDir = degDir) # Good to go
-      else:
-        makeDirIfNone([triDir, MADdir, eigvDir])
-
-        tri_fn, eigvlfn, eigvectfn, mad_fn  = eignTriLocal_MAD(G_fn = grfn,\
-            G = lccG, triDir = triDir, MADdir = MADdir, eigvDir = eigvDir) # Good to go
-
-    if inv == "cc":  # We need "Deg" & "TriCnt"
-      if not(eigvDir):
-        eigvDir = os.path.join(req_sess['graphInvariants'],'Eigen')
-      if not (degDir):
-        degDir = os.path.join(req_sess['graphInvariants'],'Degree')
-      if not (triDir):
-        triDir = os.path.join(req_sess['graphInvariants'],'Triangle')
-
-      if not (MADdir):
-        MADdir = os.path.join(req_sess['graphInvariants'],'MAD')
-      ccDir = os.path.join(req_sess['graphInvariants'],'ClustCoeff')
-
-      makeDirIfNone([degDir, triDir, ccDir, eigvDir, MADdir])
-      if (deg_fn and tri_fn):
-        cc_fn = calcLocalClustCoeff(deg_fn, tri_fn, ccDir = ccDir) # Good to go
-
-      elif (deg_fn and (not tri_fn)):
-        tri_fn, eigvlfn, eigvectfn, mad_fn = eignTriLocal_MAD(G_fn = grfn,\
-            G = lccG, triDir = triDir, MADdir = MADdir, eigvDir = eigvDir) # Good to go
-        cc_fn = calcLocalClustCoeff(deg_fn, tri_fn, ccDir = ccDir) # Good to go
-
-      elif (tri_fn and (not deg_fn)):
-        deg_fn = calcDegree(G_fn = grfn, \
-            G = lccG , degDir = degDir) # Good to go
-        cc_fn = calcLocalClustCoeff(deg_fn, tri_fn, ccDir = ccDir) # Good to go
-
-      else:
-        tri_fn, eigvlfn, eigvectfn, mad_fn = eignTriLocal_MAD(G_fn = grfn,\
-            G = lccG, triDir = triDir, MADdir = MADdir, eigvDir = eigvDir) # Good to go
-        deg_fn = calcDegree(G_fn = grfn, \
-            G = lccG , degDir = degDir) # Good to go
-        cc_fn = calcLocalClustCoeff(deg_fn, tri_fn, ccDir = ccDir) # Good to go
-
-    if inv == "mad": # Get "Eigs" for free
-        if (tri_fn):
-          pass
-        else:
-          MADdir = os.path.join(req_sess['graphInvariants'],'MAD')
-          eigvDir = os.path.join(req_sess['graphInvariants'],'Eigen')
-          makeDirIfNone([MADdir, eigvDir])
-
-          mad_fn, eigvlfn, eigvectfn = calcMAD(G_fn = grfn, G = lccG , \
-              MADdir = MADdir, eigvDir = eigvDir) # Good to go
-
-    if inv == "deg": # Nothing for free
-      if (deg_fn):
-        pass
-      else:
-        degDir = os.path.join(req_sess['graphInvariants'],'Degree')
-        makeDirIfNone([degDir])
-
-        deg_fn = calcDegree(G_fn = grfn, \
-            G = lccG ,  degDir = degDir) # Good to go
-
-    if inv == "eig": # Nothing for free
-      if (tri_fn):
-        pass
-      else:
-        eigvDir = os.path.join(req_sess['graphInvariants'],'Eigen')
-        makeDirIfNone([eigvDir])
-
-        eigvlfn, eigvectfn = calcEigs(G_fn = grfn,\
-                G = lccG , eigvDir = eigvDir)
-
-    if inv == "ss2":
-      #makeDirIfNone(dirPath)
-      pass # TODO DM
-    if inv == "apl":
-      #makeDirIfNone(dirPath)
-      pass # TODO DM
-    if inv == "gdia":
-      #makeDirIfNone(dirPath)
-      pass # TODO DM
-
-  for fn in [ ss1_fn, tri_fn, deg_fn, ss2_fn, apl_fn,  gdia_fn , cc_fn, ss1_fn]:
-    if ss1_fn:
-      invariant_fns['ss1'] = ss1_fn
-    if tri_fn:
-      invariant_fns['tri'] = tri_fn
-    if deg_fn:
-      invariant_fns['deg'] = deg_fn
-    if ss2_fn:
-      invariant_fns['ss2'] = ss2_fn
-    if apl_fn:
-      invariant_fns['apl'] = apl_fn
-    if gdia_fn:
-      invariant_fns['gdia'] = gdia_fn
-    if cc_fn:
-      invariant_fns['cc'] = cc_fn
-    if mad_fn:
-      invariant_fns['mad'] = mad_fn
-    if eigvectfn:
-      invariant_fns['eig'] = [eigvectfn, eigvlfn] # Note this
-  return invariant_fns
-
-
 ###############################################################################
 #                          NEW INVARIANTS                                     #
 ###############################################################################
 
-def runInvariants(lccG, req_sess):
-  '''
-  @todo
-  @param lccG: Sparse largest connected component adjacency matrix
-  @param req_sess: current session dict containing session varibles
+def runInvariants(inv_list, graph_fn, save_dir, lcc_fn, graphsize):
   '''
 
-  if req_sess['graphsize'] == 'small':
-    grfn = req_sess['smGrfn']
-  elif req_sess['graphsize'] == 'big':
-    grfn = req_sess['bgGrfn']
-  else:
-    return None # Should make things explode - TODO better handling
+  '''
 
-  # NOTE: The *_fn variable names are in accordance with settings.VALID_FILE_TYPES
-  ss1_fn = None
-  tri_fn = deg_fn =  ss2_fn = apl_fn = gdia_fn = cc_fn = numNodes = eigvlfn = eigvectfn = mad_fn = ss1_fn
+  inv_dict = {'graph_fn':graph_fn, 'save_dir':save_dir, \
+              'lcc_fn':lcc_fn,'graphsize':graphsize}
+  for inv in inv_list:
+    inv_dict[inv] = True
+  inv_dict = cci.compute(inv_dict)
 
-  degDir = None
-  ssDir = triDir = MADdir = eigvDir = degDir
+  return_dict = dict()
 
-  # Order the invariants correctly
-  order = { 0:'ss1', 1:'tri', 2:'cc', 3:'mad', 4:'deg', 5:'eig',6:'ss2', 7:'apl', 8:'gdia' }
-  invariants = []
-  for i in range(len(order)):
-    if order[i] in req_sess['invariants']:
-      invariants.append(order[i])
+  if inv_dict['ss1_fn']:
+    return_dict['ss1'] = inv_dict['ss1_fn']
+  if inv_dict['tri_fn']:
+    return_dict['tri'] = inv_dict['tri_fn']
+  if inv_dict['deg_fn']:
+    return_dict['deg'] = inv_dict['deg_fn']
+  if inv_dict['ss2_fn']:
+    return_dict['ss2'] = inv_dict['ss2_fn']
+  if inv_dict['apl_fn']:
+    return_dict['apl'] = inv_dict['apl_fn']
+  if inv_dict['gdia_fn']:
+    return_dict['gdia'] = inv_dict['gdia_fn']
+  if inv_dict['cc_fn']:
+    return_dict['cc'] = inv_dict['cc_fn']
+  if inv_dict['mad_fn']:
+    return_dict['mad'] = inv_dict['mad_fn']
+  if inv_dict['eigvl_fn']:
+    return_dict['eig'] = [inv_dict['eigvect_fn'], inv_dict['eigvl_fn']] # Note this
 
-  req_sess['invariants'] = invariants
-  invariant_fns = {}
-
-  #** ASSUMES ORDER OF INVARIANTS ARE PREDEFINED **#
-  for inv in req_sess['invariants']:
-    if inv == "ss1": # Get degree for free
-      ssDir = os.path.join(req_sess['graphInvariants'],'ScanStat1')
-      degDir = os.path.join(req_sess['graphInvariants'],'Degree')
-      makeDirIfNone([ssDir, degDir])
-
-      ss1_fn, deg_fn, numNodes = calcScanStat_Degree(G_fn = grfn,\
-          G = lccG,  ssDir = ssDir, degDir = degDir) # Good to go
-
-    if inv == "tri": # Get "Eigs" & "MAD" for free
-      triDir = os.path.join(req_sess['graphInvariants'],'Triangle')
-      MADdir = os.path.join(req_sess['graphInvariants'],'MAD')
-      eigvDir = os.path.join(req_sess['graphInvariants'],'Eigen')
-
-      if not (degDir):
-        degDir = os.path.join(req_sess['graphInvariants'],'Degree')
-        makeDirIfNone([triDir, MADdir, eigvDir, degDir])
-
-        tri_fn, deg_fn, MAD_fn, eigvl_fn, eigvect_fn =  eignTriLocal_deg_MAD(G_fn = grfn,\
-            G = lccG, triDir = triDir, MADdir = MADdir, eigvDir = eigvDir, degDir = degDir) # Good to go
-      else:
-        makeDirIfNone([triDir, MADdir, eigvDir])
-
-        tri_fn, eigvlfn, eigvectfn, mad_fn  = eignTriLocal_MAD(G_fn = grfn,\
-            G = lccG, triDir = triDir, MADdir = MADdir, eigvDir = eigvDir) # Good to go
-
-    if inv == "cc":  # We need "Deg" & "TriCnt"
-      if not(eigvDir):
-        eigvDir = os.path.join(req_sess['graphInvariants'],'Eigen')
-      if not (degDir):
-        degDir = os.path.join(req_sess['graphInvariants'],'Degree')
-      if not (triDir):
-        triDir = os.path.join(req_sess['graphInvariants'],'Triangle')
-
-      if not (MADdir):
-        MADdir = os.path.join(req_sess['graphInvariants'],'MAD')
-      ccDir = os.path.join(req_sess['graphInvariants'],'ClustCoeff')
-
-      makeDirIfNone([degDir, triDir, ccDir, eigvDir, MADdir])
-      if (deg_fn and tri_fn):
-        cc_fn = calcLocalClustCoeff(deg_fn, tri_fn, ccDir = ccDir) # Good to go
-
-      elif (deg_fn and (not tri_fn)):
-        tri_fn, eigvlfn, eigvectfn, mad_fn = eignTriLocal_MAD(G_fn = grfn,\
-            G = lccG, triDir = triDir, MADdir = MADdir, eigvDir = eigvDir) # Good to go
-        cc_fn = calcLocalClustCoeff(deg_fn, tri_fn, ccDir = ccDir) # Good to go
-
-      elif (tri_fn and (not deg_fn)):
-        deg_fn = calcDegree(G_fn = grfn, \
-            G = lccG , degDir = degDir) # Good to go
-        cc_fn = calcLocalClustCoeff(deg_fn, tri_fn, ccDir = ccDir) # Good to go
-
-      else:
-        tri_fn, eigvlfn, eigvectfn, mad_fn = eignTriLocal_MAD(G_fn = grfn,\
-            G = lccG, triDir = triDir, MADdir = MADdir, eigvDir = eigvDir) # Good to go
-        deg_fn = calcDegree(G_fn = grfn, \
-            G = lccG , degDir = degDir) # Good to go
-        cc_fn = calcLocalClustCoeff(deg_fn, tri_fn, ccDir = ccDir) # Good to go
-
-    if inv == "mad": # Get "Eigs" for free
-        if (tri_fn):
-          pass
-        else:
-          MADdir = os.path.join(req_sess['graphInvariants'],'MAD')
-          eigvDir = os.path.join(req_sess['graphInvariants'],'Eigen')
-          makeDirIfNone([MADdir, eigvDir])
-
-          mad_fn, eigvlfn, eigvectfn = calcMAD(G_fn = grfn, G = lccG , \
-              MADdir = MADdir, eigvDir = eigvDir) # Good to go
-
-    if inv == "deg": # Nothing for free
-      if (deg_fn):
-        pass
-      else:
-        degDir = os.path.join(req_sess['graphInvariants'],'Degree')
-        makeDirIfNone([degDir])
-
-        deg_fn = calcDegree(G_fn = grfn, \
-            G = lccG ,  degDir = degDir) # Good to go
-
-    if inv == "eig": # Nothing for free
-      if (tri_fn):
-        pass
-      else:
-        eigvDir = os.path.join(req_sess['graphInvariants'],'Eigen')
-        makeDirIfNone([eigvDir])
-
-        eigvlfn, eigvectfn = calcEigs(G_fn = grfn,\
-                G = lccG , eigvDir = eigvDir)
-
-    if inv == "ss2":
-      #makeDirIfNone(dirPath)
-      pass # TODO DM
-    if inv == "apl":
-      #makeDirIfNone(dirPath)
-      pass # TODO DM
-    if inv == "gdia":
-      #makeDirIfNone(dirPath)
-      pass # TODO DM
-
-  for fn in [ ss1_fn, tri_fn, deg_fn, ss2_fn, apl_fn,  gdia_fn , cc_fn, ss1_fn]:
-    if ss1_fn:
-      invariant_fns['ss1'] = ss1_fn
-    if tri_fn:
-      invariant_fns['tri'] = tri_fn
-    if deg_fn:
-      invariant_fns['deg'] = deg_fn
-    if ss2_fn:
-      invariant_fns['ss2'] = ss2_fn
-    if apl_fn:
-      invariant_fns['apl'] = apl_fn
-    if gdia_fn:
-      invariant_fns['gdia'] = gdia_fn
-    if cc_fn:
-      invariant_fns['cc'] = cc_fn
-    if mad_fn:
-      invariant_fns['mad'] = mad_fn
-    if eigvectfn:
-      invariant_fns['eig'] = [eigvectfn, eigvlfn] # Note this
-  return invariant_fns
+  return return_dict
 
