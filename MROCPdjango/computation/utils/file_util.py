@@ -61,9 +61,12 @@ def loadAnyMat(fn, data_elem=None):
       return "[IOERROR]: The data element '%s' you provided was not found." % data_elem
 
   else:
-    key = list(set(G.keys()) - set(['__version__', '__header__', '__globals__']))
+    key = set(G.keys()) - set(['__version__', '__header__', '__globals__'])
+    key = list(key)
     if len(key) > 1:
       return "[ERROR]: Too many data elements to distinguish the graph - use only one data element or specify explicitly"
+    else:
+      G = G[key[0]]
 
   if not isinstance(G, csc):
     G = csc(G)

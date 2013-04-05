@@ -37,6 +37,9 @@ def compute(inv_dict, save=True):
 
   @param save: boolean for auto save or not. TODO: use this
   '''
+  # Popualate inv_dict
+  inv_dict = populate_inv_dict(inv_dict)
+
 
   if inv_dict['save_dir'] is None:
    inv_dict['save_dir'] = os.path.dirname(inv_dict['graph_fn'])
@@ -217,6 +220,37 @@ def compute(inv_dict, save=True):
   #  MAD_fn = os.path.join('bench', str(G.shape[0]), getBaseName(inv_dict['graph_fn']) + '_MAD.npy')
 
   return inv_dict # TODO: Fix code this breaks. Originally was [tri_fn, deg_fn, MAD_fn, eigvl_fn, eigvect_fn]
+
+def populate_inv_dict(arg):
+
+  fns = ['ss1_fn', 'tri_fn', 'deg_fn', 'ss2_fn', 'apl_fn', 'apl_fn', 'ver_fn',
+          'mad_fn', 'gdia_fn', 'cc_fn', 'eigvl_fn', 'eigvect_fn', 'edge_fn']
+  invs = ['ss1', 'tri', 'deg', 'ss2', 'apl', 'apl', 'ver', 
+          'mad', 'gdia', 'cc', 'eigvl', 'eigvect', 'edge']
+
+  data = ['data_elem', 'k']
+  if not isinstance(arg, dict):
+    print "[ERROR]: argument to compute method must be of type dict"
+
+  # Add filenames
+  for fn in fns:
+    if not arg.has_key(fn):
+      arg[fn] = None
+
+  # Add invariants
+  for inv in invs:
+    if not arg.has_key(inv):
+      arg[inv] = None
+
+  # Add auxiliary data
+  for dat in data:
+    if not arg.has_key(dat):
+      arg[dat] = None
+
+  return arg
+
+
+
 
 if __name__ == '__main__':
   print 'This file is not to be called directly. Use helpers'
