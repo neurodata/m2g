@@ -67,9 +67,9 @@ def main():
   parser.add_argument('-V', '--svd_fn', action='store', help='the full file name you would like the resulting svd to have')
   parser.add_argument('-L', '--lcc_fn', action='store', help='the full file name of the connected component (.npy only)')
 
-  parser.add_argument('-l', '--lcc', action='store_true', help='must pass to compute lcc')
-  parser.add_argument('-v', '--svd', action='store_true', help='must pass to compute svd')
-  parser.add_argument('-d', '--svd_dim', type=int, default=10, action='store', help='Level of svd embedding')
+  parser.add_argument('-l', '--lcc', action='store_true', help='MUST pass to compute lcc')
+  parser.add_argument('-v', '--svd', action='store_true', help='MUST pass to compute svd')
+  parser.add_argument('-d', '--svd_dim', type=int, default=10, action='store', help='Level of svd embedding. Default is 10')
 
   parser.add_argument('-S', '--save_dir', action='store', help='the directory where the invariants \
                       are to stored (each invariant will create its own subdirectory within this). \
