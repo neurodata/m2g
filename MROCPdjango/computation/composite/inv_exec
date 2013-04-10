@@ -93,7 +93,7 @@ def main():
                       already exists, pass it in to avoid recomputing. Used for -c')
   parser.add_argument('-df', '--deg_fn', action='store', help='If degree count file\
                       already exists, pass it in to avoid recomputing. Used for -c')
-  parser.add_argument('-lf', '--lcc_fn', action='store_true',help='the full filename of the largest connected component (.npy format)')
+  parser.add_argument('-lf', '--lcc_fn', action='store',help='the full filename of the largest connected component (.npy format)')
 
   parser.add_argument('-k', action='store', help='The number of eigenvalues to compute. Max is 100')
 

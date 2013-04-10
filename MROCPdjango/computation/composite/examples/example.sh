@@ -33,5 +33,5 @@ echo "./deriv_exec -h. For help"
 
 # Invariants:
 echo "./inv_exec -h. For help"
-.././inv_exec ./testdata/big/bigtest_bggr.mat b -D fibergraph -A -S ./testdata/big -lf ./testdata/big/bigtest_concomp.npy
+.././inv_exec ./testdata/big/bigtest_bggr.mat b -D fibergraph -A -S ./testdata/big -lf ./testdata/big/LCC/bigtest_concomp.npy
 

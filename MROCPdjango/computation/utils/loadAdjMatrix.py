@@ -10,13 +10,13 @@
 # Separated: 10/2/2012
 # Load up an adjacency matrix given G_fn, lcc & roiRoot
 
-#import mrpaths
 import argparse
 import mrcap.lcc as lcc
 import os
 import sys
 from time import time
 import scipy.io as sio
+from file_util import loadAnyMat
 
 def loadAdjMat(G_fn, lcc_fn):
   '''
@@ -29,7 +29,7 @@ def loadAdjMat(G_fn, lcc_fn):
   print "Loading adjacency matrix..."
   try:
     vcc = lcc.ConnectedComponent(fn = lcc_fn) # creates conn_comp array
-    G_full = sio.loadmat(G_fn)['fibergraph'] # load the full sparse graph
+    G_full = loadAnyMat(G_fn) # sio.loadmat(G_fn)['fibergraph'] # load the full sparse graph
 
     G_lcc = vcc.induced_subgraph(G_full) # sparse graph of LCC
 
