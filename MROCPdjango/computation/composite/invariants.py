@@ -13,6 +13,7 @@ import scipy.sparse.linalg.eigen.arpack as arpack
 from computation.utils.getBaseName import getBaseName # Duplicates right now
 from computation.utils import loadAdjMatrix # Duplicates right now
 from computation.utils.file_util import loadAnyMat
+from computation.utils.loadAdjMatrix import loadAdjMat
 
 import argparse
 from time import time
@@ -48,8 +49,8 @@ def compute(inv_dict, save=True):
     if inv_dict['G'] is not None:
       G = inv_dict['G']
   elif (inv_dict['graphsize'] == 'b' or inv_dict['graphsize'] == 'big'):
-    G = loadAdjMat(inv_dict['graph_fn'], inv_dict['lcc_fn']) # TODO: test
-  # small graphs
+    G = loadAdjMat(inv_dict['graph_fn'], inv_dict['lcc_fn']) 
+    # small graphs
   else:
     G = loadAnyMat(inv_dict['graph_fn'], inv_dict['data_elem'])
     if isinstance(G, str):
