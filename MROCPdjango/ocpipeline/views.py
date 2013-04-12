@@ -409,6 +409,7 @@ def graphLoadInv(request, webargs=None):
       request.session['invariants'] = form.cleaned_data['Select_Invariants_you_want_computed']
 
       request.session['graphsize'] = form.cleaned_data['Select_graph_size']
+      request.session['graphsize'] = 'small' if not request.session['graphsize'] else request.session['graphsize']
 
       dataDir = os.path.join(settings.MEDIA_ROOT, 'tmp', strftime("projectStamp%a%d%b%Y_%H.%M.%S/", localtime()))
       request.session['graphInvariants'] = os.path.join(dataDir, 'graphInvariants')

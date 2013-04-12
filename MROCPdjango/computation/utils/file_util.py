@@ -52,6 +52,7 @@ def loadAnyMat(fn, data_elem=None):
   '''
   from scipy.io import loadmat
   from scipy.sparse import csc_matrix as csc
+  from numpy import float32, float64
 
   G = loadmat(fn)
   if data_elem:
@@ -67,6 +68,10 @@ def loadAnyMat(fn, data_elem=None):
       return "[ERROR]: Too many data elements to distinguish the graph - use only one data element or specify explicitly"
     else:
       G = G[key[0]]
+
+  # Ensure float64 type
+  if not (isinstance(G[0,0], float32)  or isinstance(G[0,0], float64)):
+    G = float32(G)
 
   if not isinstance(G, csc):
     G = csc(G)

@@ -132,7 +132,7 @@ class GraphUploadForm(forms.Form):
 
     # Select size of graph
     Select_graph_size = forms.ChoiceField(choices=[('small','Small graph'), ('big','Big graph')]\
-                                          , widget=RadioSelect, required = True, error_messages={'required': 'You must choose a graph size'})
+                                          , widget=RadioSelect, required = False)
 
     INVARIANT_CHOICES = (('ss1', 'Scan Statistic 1',), ('tri', 'Triangle Count',), \
         ('cc', 'Clustering co-efficient',), ('mad', 'Maximum Average Degree',) \
