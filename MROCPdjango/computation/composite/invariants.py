@@ -49,7 +49,7 @@ def compute(inv_dict, save=True):
     if inv_dict['G'] is not None:
       G = inv_dict['G']
   elif (inv_dict['graphsize'] == 'b' or inv_dict['graphsize'] == 'big'):
-    G = loadAdjMat(inv_dict['graph_fn'], inv_dict['lcc_fn']) 
+    G = loadAdjMat(inv_dict['graph_fn'], inv_dict['lcc_fn'])
     # small graphs
   else:
     G = loadAnyMat(inv_dict['graph_fn'], inv_dict['data_elem'])
@@ -224,9 +224,9 @@ def compute(inv_dict, save=True):
 
 def populate_inv_dict(arg):
 
-  fns = ['ss1_fn', 'tri_fn', 'deg_fn', 'ss2_fn', 'apl_fn', 'apl_fn', 'ver_fn',
+  fns = ['ss1_fn', 'tri_fn', 'deg_fn', 'ss2_fn', 'apl_fn', 'ver_fn',
           'mad_fn', 'gdia_fn', 'cc_fn', 'eigvl_fn', 'eigvect_fn', 'edge_fn']
-  invs = ['ss1', 'tri', 'deg', 'ss2', 'apl', 'apl', 'ver', 
+  invs = ['ss1', 'tri', 'deg', 'ss2', 'apl', 'ver', 'eig',
           'mad', 'gdia', 'cc', 'eigvl', 'eigvect', 'edge']
 
   data = ['data_elem', 'k']
