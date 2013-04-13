@@ -4,9 +4,7 @@
 * Viewer: http://cmtk.org/viewer/ visualization tool
 * Add ability to name graphs anything for all products
 * Refactor views with programmatic access to shorten views.py
-* Create a Will only branch
 * Add feedback for graph too big & estimated time to completion
-* Add clear html documentation of supported file upload formats
 * Header looks like crap in Firefox
 
 - Add sql queries to ...
@@ -36,8 +34,10 @@ Invariants still to compute
 *GDia
 
 *Recently completed*
-===================
+=====================
 
+* Add clear html documentation of supported file upload formats
+* Create a Will only branch
 * Example script for Will
 - Big Eigenvectors to large to convert to csv -> 500 MB
 * Add ability to upload arbitrary .mat files to graphupload with some size limit for invariant computation
