@@ -108,9 +108,11 @@ class ConvertForm(forms.Form):
     FORMAT_CHOICES = (('.npy', 'Numpy format (.npy)',), ('.mat', 'Matlab format (.mat)',), \
         ('.csv', '(Excel) Comma separated values (.csv)',))
 
-    FILE_TYPES = [('cc','Clustering Coefficient'), ('deg','Local Degree'), ('eig','Largest Eigenvalues/Eigenvectors'), ('apl','Average Path Length'),\
-        ('ss1', 'Scan Statistic 1'),('ss2', 'Scan Statistic 2'),('tri','Triangle Count'),('svd','Single Value Decomposition'), \
-        ('mad', 'Maximum Average Degree'), ('fg', 'Fiber Graph'), ('lcc', 'Largest Connected Component')]
+    FILE_TYPES = [('cc','Clustering Coefficient'), ('deg','Local Degree'),\
+        ('eig','Largest Eigenvalues/Eigenvectors'), ('apl','Average Path Length'),\
+        ('ss1', 'Scan Statistic 1'),('ss2', 'Scan Statistic 2'),('tri','Triangle Count'),\
+        ('svd','Single Value Decomposition'), ('mad', 'Maximum Average Degree'), \
+        ('fg', 'Fiber Graph'), ('lcc', 'Largest Connected Component')]
 
     #Select_file_type = forms.ChoiceField(choices=FILE_TYPES, widget=Select, help_text=' ')
     #Select_conversion_format = forms.MultipleChoiceField(required=True, \
@@ -142,6 +144,9 @@ class GraphUploadForm(forms.Form):
 
     Select_Invariants_you_want_computed = forms.MultipleChoiceField(required=True,
     widget=CheckboxSelectMultiple, choices=INVARIANT_CHOICES)
+
+    Convert_result = forms.MultipleChoiceField(required=True,
+        widget=CheckboxSelectMultiple, choices=(('.mat', 'MAT'),))
 
 class DownloadForm(forms.Form):
     '''

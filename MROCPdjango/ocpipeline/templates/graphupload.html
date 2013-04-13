@@ -5,33 +5,35 @@
   {% endblock title %}
 
   {% block medheading %}
-    Please upload the graph(s).
+    Please upload the graph(s) on which invariants will be computed
   {% endblock medheading %}
 
   {% block content %}
-    <b>Uploading the largest connected components(LCC) file for big graphs is highly recommended for resonable processing time.</b>
+    <b>Uploading the largest connected components(LCC) file for big fiber streamline graphs is required for resonable processing time.</b>
 
      <div id=graphspecs>
       <h2>Two Specifications for acceptable graphs</h2>
       <ul>
         <li>A <a href="http://www.mathworks.com/help/matlab/ref/struct.html"> MATLAB struct </a> with a <FONT COLOR='#ff0000'>single</FONT> data element
-        that is of type a <a href="http://docs.scipy.org/doc/scipy/reference/generated/scipy.sparse.csc_matrix.html#scipy.sparse.csc_matrix">
+        that is of type <a href="http://docs.scipy.org/doc/scipy/reference/generated/scipy.sparse.csc_matrix.html#scipy.sparse.csc_matrix">
         numpy CSC (Compressed Sparse Column) matrix</a>. <br/>
         <li>
-          Any <FONT COLOR='#ff0000'>2 Dimensional</FONT> MATLAB matrix.
+          Any <FONT COLOR='#ff0000'>2 Dimensional</FONT> square MATLAB matrix.
         </li>
-        It should be loadable from a python shell with using <a href="http://docs.scipy.org/doc/scipy/reference/generated/scipy.io.loadmat.html">scipy.io.loadmat</a>(filename)[<FONT COLOR='#ff0000'>'your_data_element_name'</FONT>] only.
+        It should be loadable from the python shell via the following call: <a href="http://docs.scipy.org/doc/scipy/reference/generated/scipy.io.loadmat.html">scipy.io.loadmat</a>(filename)[<FONT COLOR='#ff0000'>'your_data_element_name'</FONT>] only.<br/>
+        Such a matrix can be created by creating an MATLAB matrix and using the <a href="http://www.mathworks.com/help/matlab/ref/save.html">save</a> function.
         </li>
     </div>
 
     <div id='single'>
-      <h3> Single graph </h3>
+      <h3> Single graph invariant computation </h3>
         <p>
-          As long as your graph meets one of the above <a href=#graphspecs>specifications</a> you may compute invariants on any MATLAB (.mat) graph of your choosing.
+          As long as your graph meets one of the above <a href=#graphspecs>specifications</a> you may compute invariants on any MATLAB (.mat) graph of your choosing. <br/>
+          Simply upload your file below, choose the invariants you want to compute and you are on your way!
         </p>
     </div>
 
-    <h3> Multiple or graphs with largest connected component </h3>
+    <h3> Multiple graphs or graphs with a largest connected component file </h3>
     <p> You must use a single<strong> zipfile <i> (.zip) </i> containing ALL</strong> data in a single directory even for multiple graphs. <br/>
     <strong> <FONT COLOR='#ff0000'> DO NOT zip a directory</FONT>, instead zip the files themselves into an archive.</strong>
     Note the following <b>file naming convention</b> for graphs - where the <strong>base file name must be the same</strong>:
@@ -39,7 +41,7 @@
       <li>The <strong>base file name </strong> here is <strong>graph1</strong></li>
       <li>Graph file name: graph1_fiber.mat, graph1_smgr.mat graph1_bggr.mat are acceptable.</li>
       <li>LCC file name: graph1_concomp.mat (Big graphs only).</li>
-      <li><strong>All graphs must have their suffix be either _fiber.mat, _smgr.mat or _bggr.mat</strong>. Eg graph1_fiber.mat, xyz_smgr.mat and
+      <li><strong>All graphs must have their suffix be either _fiber.mat, _smgr.mat or _bggr.mat</strong>. E.g. graph1_fiber.mat, xyz_smgr.mat and
         foobar_bggr.mat are all acceptable names.</li>
     </ul>
 
@@ -52,11 +54,13 @@
       <h3>What's the difference between big and small graphs?</h3>
 
       <p>
-      We consider small graphs to be 70 x 70 vertices of a CSC matrix. The service will accept larger or smaller
-      matrices to be considered as a small graph, but we do not recommend it as it may produce unexpected
-      be behavior. <br/>
+      Glad you asked! The big graph term is particularly germane to fiber streamline graphs with dimensions greater than 70 x 70, where a largest
+      connected component is required when computing invariants. If you have a small fiber streamline graph (dimension < 70 x 70) or any other
+      graph you should select the small graph option (which is the default if you choose not to select either).
+      <br/>
 
-      The big graphs the MROCP constructs are on the order of > 10 M x 10 M vertices, but are other wise identical to
+
+      Please note the big graphs the MROCP constructs are on the order of > 10 M x 10 M vertices, but are other wise identical to
       small graph. Working with big graphs requires the largest connected component (LCC) as well since we do not consider
       grey matter in computation.
       </p>
@@ -80,7 +84,7 @@
       <h2>Programmatic use </h2>
       <p> This is can be accessed using the base url <strong>http://www.mrbrain.cs.jhu.edu/disa/graphupload/</strong>. An
           example of usage can be found <a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjango/examples/computeInvariants.py" target="blank">here</a>.
-          <FONT COLOR='#ff0000'> This section will be updated shortly. Big graph testing incomplete.</FONT> <!-- TODO UPDATE WHEN COMPLETE-->
+          <FONT COLOR='#ff0000'> This section will be updated shortl.</FONT> <!-- TODO UPDATE WHEN COMPLETE-->
       </p>
     {% endblock programmatic %}
   {% endblock content%}

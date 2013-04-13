@@ -438,11 +438,24 @@ def graphLoadInv(request, webargs=None):
           graph_fn = request.session['smGrfn'] = graph_fn
           lcc_fn = None
 
-          runInvariants(request.session['invariants'], graph_fn,
+          invariant_fns = runInvariants(request.session['invariants'], graph_fn,
                         request.session['graphInvariants'], lcc_fn,
                         request.session['graphsize'])
+
           print 'Invariants for annoymous project %s complete...' % graph_fn
 
+        invConvertToFormats =  form.cleaned_data['Convert_result']
+
+        # TODO: Make function for this. Duplicate of buildgraph code
+        for fileFormat in invConvertToFormats:
+          # Conversion of all files
+          for inv in invariant_fns.keys():
+            if isinstance(invariant_fns[inv], list): # Case of eigs
+              for fn in invariant_fns[inv]:
+                convertTo.convertAndSave(fn, fileFormat, os.path.dirname(fn), inv)
+            else: # case of all other invariants
+              convertTo.convertAndSave(invariant_fns[inv], fileFormat, \
+                                  os.path.dirname(invariant_fns[inv]), inv)
 
       return HttpResponseRedirect("http://mrbrain.cs.jhu.edu"+ dataDir.replace(' ','%20')) # All spaces are replaced with %20 for urls
 
@@ -673,7 +686,7 @@ def processData(fiber_fn, roi_xml_fn, roi_raw_fn,graphs, graphInvariants, graphs
 
 def runInvariants(inv_list, graph_fn, save_dir, lcc_fn, graphsize):
   '''
-
+  Run the selected multivariate invariants as defined
   '''
 
   inv_dict = {'graph_fn':graph_fn, 'save_dir':save_dir, \
