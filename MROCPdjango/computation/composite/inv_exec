@@ -58,8 +58,9 @@ def main():
 
   mr_data_dir = os.path.join(os.path.dirname(__file__), 'mrdata')
 
-  parser = argparse.ArgumentParser(description='A script run selected/all invariants on the largest\
-                                   connected component of a graph. Pass minimally only G_fn[-l]|-f -rx -rr')
+  parser = argparse.ArgumentParser(description='A script run selected/all invariants on a graph\
+                                   connected component of a graph. Pass minimally only graph_fn \
+                                   [s|b] [-A|-d|-e|-c|-t|-s|-m|-g|-v]')
 
   # If fiber_fn is passed the assumption is that you don't have a
   # graph & want it made under the default name or G_fn if provided
@@ -95,7 +96,7 @@ def main():
                       already exists, pass it in to avoid recomputing. Used for -c')
   parser.add_argument('-lf', '--lcc_fn', action='store',help='the full filename of the largest connected component (.npy format)')
 
-  parser.add_argument('-k', action='store', help='The number of eigenvalues to compute. Max is 100')
+  parser.add_argument('-k', action='store', type = int, help='The number of eigenvalues to compute. Max is 100')
 
   result = parser.parse_args()
 

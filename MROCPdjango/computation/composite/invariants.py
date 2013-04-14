@@ -93,13 +93,13 @@ def compute(inv_dict, save=True):
     ss1_array = np.zeros(num_nodes) # Induced subgraph edge number i.e scan statistic
 
   if (not inv_dict['k'] or inv_dict['k'] > 100 or inv_dict['k'] > G.shape[0] - 2):
-    k = 100 if G.shape[0]-2 > 101 else G.shape[0] - 2 # Maximum of 100 eigenvalues
+    inv_dict['k'] = 100 if G.shape[0]-2 > 101 else G.shape[0] - 2 # Maximum of 100 eigenvalues
 
   start = time()
   # Calculate Eigenvalues & Eigen vectors
   if inv_dict['eig']:
     if not (inv_dict['eigvl_fn'] or inv_dict['eigvect_fn']):
-      l, u = arpack.eigs(G, k=k, which='LM') # LanczosMethod(A,0)
+      l, u = arpack.eigs(G, k=inv_dict['k'], which='LM') # LanczosMethod(A,0)
       print 'Time taken to calc Eigenvalues: %f secs\n' % (time() - start)
     else:
       try:
@@ -163,56 +163,56 @@ def compute(inv_dict, save=True):
     inv_dict['eigvect_fn'] = os.path.join(eigvDir, getBaseName(inv_dict['graph_fn']) + '_eigvect.npy')
     createSave(inv_dict['eigvl_fn'], l.real) # eigenvalues
     createSave(inv_dict['eigvect_fn'], u) # eigenvectors
-    print 'Eigenvalues and eigenvectors saved ...'
+    print 'Eigenvalues and eigenvectors saved as ' + inv_dict['eigvect_fn']
 
   ''' Triangle count '''
   if not inv_dict['tri_fn'] and inv_dict['tri']:
     triDir = os.path.join(inv_dict['save_dir'], "Triangle") #if triDir is None else triDir
     inv_dict['tri_fn'] = os.path.join(triDir, getBaseName(inv_dict['graph_fn']) + '_triangles.npy') # TODO HERE
     createSave(inv_dict['tri_fn'], tri_array)
-    print 'Triangle Count saved ...'
+    print 'Triangle Count saved as ' + inv_dict['tri_fn']
 
   ''' Degree count'''
   if not inv_dict['deg_fn'] and inv_dict['deg']:
     degDir = os.path.join(inv_dict['save_dir'], "Degree") #if degDir is None else degDir
     inv_dict['deg_fn'] = os.path.join(degDir, getBaseName(inv_dict['graph_fn']) + '_degree.npy')
     createSave(inv_dict['deg_fn'], deg_array)
-    print 'Degree saved ...'
+    print 'Degree saved as ' + inv_dict['deg_fn']
 
   ''' MAD '''
   if inv_dict['mad']:
     MADdir = os.path.join(inv_dict['save_dir'], "MAD") #if MADdir is None else MADdir
     inv_dict['mad_fn'] = os.path.join(MADdir, getBaseName(inv_dict['graph_fn']) + '_mad.npy')
     createSave(inv_dict['mad_fn'], max_ave_deg)
-    print 'Maximum average Degree saved ...'
+    print 'Maximum average Degree saved as ' + inv_dict['mad_fn']
 
   ''' Scan Statistic 1'''
   if inv_dict['ss1']:
     ss1Dir = os.path.join(inv_dict['save_dir'], "SS1") #if ss1Dir is None else ss1Dir
     inv_dict['ss1_fn'] = os.path.join(ss1Dir, getBaseName(inv_dict['graph_fn']) + '_scanstat1.npy')
     createSave(inv_dict['ss1_fn'], ss1_array) # save it
-    print 'Scan 1 statistic saved ...'
+    print 'Scan 1 statistic saved as ' + inv_dict['ss1_fn']
 
   ''' Clustering coefficient '''
   if inv_dict['cc']:
     ccDir = os.path.join(inv_dict['save_dir'], "ClustCoeff") #if ccDir is None else ccDir
     inv_dict['cc_fn'] = os.path.join(ccDir, getBaseName(inv_dict['graph_fn']) + '_clustcoeff.npy')
     createSave(inv_dict['cc_fn'], cc_array) # save it
-    print 'Clustering coefficient saved ...'
+    print 'Clustering coefficient saved as ' + inv_dict['cc_fn']
 
   ''' Global Vertices '''
   if inv_dict['ver']:
     vertDir = os.path.join(inv_dict['save_dir'], "Globals") #if vertDir is None else vertDir
     inv_dict['ver_fn'] = os.path.join(vertDir, getBaseName(inv_dict['graph_fn']) + '_numvert.npy')
     createSave(inv_dict['ver_fn'], num_nodes) # save it
-    print 'Global vertices number saved ...'
+    print 'Global vertices number saved as ' + inv_dict['ver_fn']
 
   ''' Global number of edges '''
   if inv_dict['edge']:
     edgeDir = os.path.join(inv_dict['save_dir'], "Globals") #if edgeDir is None else edgeDir
     inv_dict['edge_fn'] = os.path.join(edgeDir, getBaseName(inv_dict['graph_fn']) + '_numedges.npy')
     createSave(inv_dict['edge_fn'], edge_count) # save it
-    print 'Global edge number saved ...'
+    print 'Global edge number saved as ' + inv_dict['edge_fn']
 
   #if test: # bench test
   #  tri_fn = os.path.join('bench', str(G.shape[0]), getBaseName(inv_dict['graph_fn']) + '_triangles.npy')
@@ -247,7 +247,6 @@ def populate_inv_dict(arg):
   for dat in data:
     if not arg.has_key(dat):
       arg[dat] = None
-
   return arg
 
 
