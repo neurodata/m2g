@@ -54,6 +54,9 @@ from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 from django.shortcuts import redirect
 
+''' Auth imports '''
+from django.contrib.auth.decorators import login_required
+
 ####################
 ## Graph Analysis ##
 ####################
@@ -77,7 +80,6 @@ def welcome(request):
 
 
 # Login decorator
-#from django.contrib.auth.decorators import login_required
 #@login_required(redirect_field_name='my_redirect_field')
 #@login_required # OR EASIER
 def buildGraph(request):
@@ -284,6 +286,16 @@ def confirmDownload(request):
   return render_to_response('confirmDownload.html',{'downloadForm': form},\
                   context_instance=RequestContext(request))
 
+#################################################################################
+
+@login_required
+def showdir(request):
+  #directory = request.session['usrDefProjDir']
+  #import pdb; pdb.set_trace()
+  return render('STUB')
+
+
+#################################################################################
 def zipProcessedData(request):
   '''
   Compress data products to single zip for upload
