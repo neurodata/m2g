@@ -76,7 +76,7 @@ def plotInvDist(invDir, pngName, numBins =100, char = 'class', big = False):
         plt.legend(bbox_to_anchor=(0.7, 1.3), loc=2, prop={'size':8}, borderaxespad=0.)
         maleLabelAdded = True
 
-      if (idx == 1 and plot_color == 'blue' and not femaleLabelAdded):
+      if (idx == 1 and plot_color == 'cyan' and not femaleLabelAdded):
         pl.plot(x, interp*100, color = plot_color, linewidth=1, label = 'female')
         plt.legend(bbox_to_anchor=(0.7, 1.3), loc=2, prop={'size':8}, borderaxespad=0.)
         femaleLabelAdded = True
@@ -92,7 +92,7 @@ def plotInvDist(invDir, pngName, numBins =100, char = 'class', big = False):
       #pl.ylabel('Probability') #**
       pl.xlabel('Log Local Clustering Coefficient')
 
-      if big:
+      if big and char == 'class':
         ax.set_yticks(scipy.arange(0,3,1))
 
     if idx == 2:
@@ -100,14 +100,17 @@ def plotInvDist(invDir, pngName, numBins =100, char = 'class', big = False):
       pl.xlabel('Log scan_1 statistic')
 
       if big:
-        ax.set_yticks(scipy.arange(0,3,1))
+	if char == 'class':
+          ax.set_yticks(scipy.arange(0,3,1))
       else:
         ax.set_yticks(scipy.arange(0,12,2))
+
     if idx == 3:
       pl.xlabel('Log Degree')
 
       if big:
-        ax.set_yticks(scipy.arange(0,4,1))
+	if char == 'class':
+          ax.set_yticks(scipy.arange(0,4,1))
       else:
         ax.set_yticks(scipy.arange(0,15,3))
         ax.set_xticks(scipy.arange(0,5,1))
@@ -182,7 +185,7 @@ def plotInvDist(invDir, pngName, numBins =100, char = 'class', big = False):
     if cnt == 0: # zeros
       plot_color = 'grey'
     if cnt == 1: # ones
-      plot_color = 'blue'
+      plot_color = 'cyan'
     if cnt == 2:# twos
       plot_color = 'green'
     if cnt == 3: # ALL
@@ -213,7 +216,7 @@ def main():
   result = parser.parse_args()
 
   if result.big:
-    plotInvDist(result.invDir, result.pngName, result.numBins, result.char, result.dada)
+    plotInvDist(result.invDir, result.pngName, result.numBins, result.char, result.big)
 
 if __name__ == '__main__':
   main()
