@@ -1,6 +1,7 @@
 *MR OCP TODO list Disa
 ===========================
 
+* Alter url to: openconnecto.me/graph-services
 * Viewer: http://cmtk.org/viewer/ visualization tool
 * Add ability to name graphs anything for all products
 * Refactor views with programmatic access to shorten views.py

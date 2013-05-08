@@ -13,6 +13,7 @@ import re
 
 import computation.utils.convertTo as convertTo
 from django.conf import settings
+from django.core.mail import send_mail
 
 def makeDirIfNone(dirPathList):
   '''
@@ -211,3 +212,32 @@ def saveFileToDisk(fileData, fullFileName):
   destination.close()
 
   print "Saving file: %s " % fullFileName
+
+################################################################################
+
+def sendJobBeginEmail(email_addr, invariants):
+
+  msg = "Hello,\n\nThe following actions were requested using %s:\n- Generate big graph\n" % email_addr
+
+  for inv in invariants:
+    msg += "- Compute " + settings.VALID_FILE_TYPES[inv] + "\n"
+
+  msg +=  "\nYou will receive another email when your job completes.\n\nThanks for using MROCP,\nThe MROCP team"
+
+  send_mail("MROCP: Big graph job request",
+            msg, settings.SERVER_EMAIL, [email_addr], fail_silently=False)
+
+def sendJobFailureEmail(email_addr):
+  msg = "Hello,\n\nYour most recent job failed either because your fiber streamline file or ROI mask was incorrectly formatted."
+  msg += " Please check both and try again.\n\n"
+  msg += "Thanks for using MROCP,\nThe MROCP team"
+
+  send_mail("MROCP: Big graph job FAILURE!",
+            msg, settings.SERVER_EMAIL, [email_addr], fail_silently=False)
+
+def sendJobCompleteEmail(email_addr, dataLoc):
+  msg = "Congratulations,\n\nThe MROCP job you requested is complete and available at %s for download" % dataLoc
+  msg += "\n\nThanks for using MROCP,\nThe MROCP team"
+
+  send_mail("MROCP: Big graph job COMPLETE!",
+            msg, settings.SERVER_EMAIL, [email_addr], fail_silently=False)
