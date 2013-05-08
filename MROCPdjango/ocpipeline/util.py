@@ -222,7 +222,8 @@ def sendJobBeginEmail(email_addr, invariants):
   for inv in invariants:
     msg += "- Compute " + settings.VALID_FILE_TYPES[inv] + "\n"
 
-  msg +=  "\nYou will receive another email when your job completes.\n\nThanks for using MROCP,\nThe MROCP team"
+  msg +=  "\nFeel free to close your browser window or start a new job. Your current job will not be affected.\n"
+  msg += "You will receive another email when your job completes.\n\nThanks for using MROCP,\nThe MROCP team"
 
   send_mail("MROCP: Big graph job request",
             msg, settings.SERVER_EMAIL, [email_addr], fail_silently=False)

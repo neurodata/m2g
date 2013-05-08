@@ -228,7 +228,7 @@ def pickprintcolor(charDict, arrfn):
   if (charDict[(arrfn.split('/')[-1]).split('_')[0]] == '0'):
     plot_color = 'grey'
   elif (charDict[(arrfn.split('/')[-1]).split('_')[0]] == '1'):
-    plot_color = 'blue'
+    plot_color = 'cyan'
   elif (charDict[(arrfn.split('/')[-1]).split('_')[0]] == '2'):
     plot_color = 'green'
   else:

@@ -13,7 +13,8 @@
 
 
   <b><FONT COLOR='#ff0000'>{{error_msg}}</FONT></b> <br/>
-  <FONT COLOR='#ff0000'> Please do not attempt to create private projects yet. The interface is still under development. </FONT>
+  <FONT COLOR='#ff0000'> Please do not attempt to create private projects yet. The interface is still under development. </FONT> <br/>
+  If running big graphs an email will be sent out when your job begins and ends. Feel free to navigate away from the page or start new jobs while you wait - it will not affect your current job.
     <p>
       <form action="" method="post" enctype="multipart/form-data" name="loadForm" onsubmit="return Validate(this,['.xml','.dat','.raw'] );">
         {% csrf_token %}
