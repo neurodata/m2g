@@ -46,14 +46,13 @@
                     document.getElementById('loadingImage').style.visibility='hidden';
                     alert("Sorry, " + sFileName.split("\\").pop() + " is invalid, allowed extensions are: " + _validFileExtensions.join(", "));
                     return false;
+                  }
                 }
+              }
             }
-        }
-    }
-
-    return true;
-}
-</script>
+            return true;
+          }
+        </script>
 
     </head>
     <body>

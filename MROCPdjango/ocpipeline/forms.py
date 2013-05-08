@@ -9,7 +9,7 @@
 
 from django import forms
 from django.forms.fields import MultipleChoiceField
-from django.forms.widgets import RadioSelect, CheckboxSelectMultiple, Select, SelectMultiple
+from django.forms.widgets import RadioSelect, CheckboxSelectMultiple, Select, SelectMultiple, TextInput
 
 #
 #class LoginForm(forms.Form):
@@ -82,13 +82,16 @@ class BuildGraphForm(forms.Form):
 
   INVARIANT_CHOICES = (('ss1', 'Scan Statistic 1',), ('tri', 'Triangle Count',), \
   ('cc', 'Clustering co-efficient',), ('mad', 'Maximum Average Degree',) \
-  ,('deg', 'Vertex Degree',), ('eig', 'Top 100 (or max possible) Eigenvalues and Eigenvectors',), \
-  ('ss2', 'Scan Statistic 2 [Not yet available]',), ('apl', 'Average Path Length [Not yet available]',),\
-  ('gdia', 'Graph Diameter [Not yet available]',))
+  ,('deg', 'Vertex Degree',), ('eig', 'Top 100 (or max possible) Eigenvalues and Eigenvectors',))
+  #, \
+  #('ss2', 'Scan Statistic 2 [Not yet available]',), ('apl', 'Average Path Length [Not yet available]',),\
+  #('gdia', 'Graph Diameter [Not yet available]',))
 
   # Select size of graph
   Select_graph_size = forms.ChoiceField(choices=[('small','Small graph [~30 min processing time]'), ('big','Big graph [~1.5 hr] processing time')]\
                                         , widget=RadioSelect, required = True, error_messages={'required': 'You must choose a graph size'})
+
+  Email = forms.EmailField(widget=TextInput(), required=False,  help_text=" ",)
 
   Select_Invariants_you_want_computed = forms.MultipleChoiceField(required=False,
   widget=CheckboxSelectMultiple, choices=INVARIANT_CHOICES)

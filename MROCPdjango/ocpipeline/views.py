@@ -79,6 +79,15 @@ def welcome(request):
   return render_to_response('welcome.html', {"user":request.user},
                             context_instance=RequestContext(request))
 
+''' Successful completion of task'''
+def success(request):
+  return render_to_response('success.html', {"msg": "Congratulations, Your job is complete. Please await an email with confirmation and data product url!"}
+                            ,context_instance=RequestContext(request))
+
+''' Job failure '''
+def jobfailure(request):
+  return render_to_response('job_failure.html', {"msg": "Please check that your fiber streamline file and ROI's are correctly formatted"}
+                            ,context_instance=RequestContext(request))
 
 # Login decorator
 #@login_required(redirect_field_name='my_redirect_field')
@@ -152,6 +161,14 @@ def buildGraph(request):
 
       request.session['invariants'] = form.cleaned_data['Select_Invariants_you_want_computed']
       request.session['graphsize'] = form.cleaned_data['Select_graph_size']
+      request.session['email'] = form.cleaned_data['Email']
+
+      if request.session['graphsize'] == 'big' and not request.session['email']:
+        return render_to_response(
+          'buildgraph.html',
+          {'buildGraphform': form, 'error_msg': 'Email address must be provided when processing big graphs'},
+          context_instance=RequestContext(request)
+          )
 
       ''' Acquire fileNames '''
       fiber_fn = form.cleaned_data['fiber_file'].name # get the name of the file input by user
@@ -180,6 +197,9 @@ def buildGraph(request):
       createDirStruct.createDirStruct([request.session['derivatives'], request.session['rawdata'],\
           request.session['graphs'], request.session['graphInvariants'], request.session['images']])
 
+      if request.session['graphsize'] == 'big':
+        sendJobBeginEmail(request.session['email'], request.session['invariants'])
+
       # Redirect to Processing page
       return HttpResponseRedirect(get_script_prefix()+'processinput')
   else:
@@ -191,10 +211,6 @@ def buildGraph(request):
       {'buildGraphform': form},
       context_instance=RequestContext(request) # Some failure to input data & returns a key signaling what is requested
   )
-
-''' Successful completion of task'''
-def success(request):
-  return render_to_response('success.html')
 
 def processInputData(request):
   '''
@@ -216,10 +232,15 @@ def processInputData(request):
   roi_raw_fn = os.path.join(request.session['derivatives'], roi_raw_fn)
   roi_xml_fn = os.path.join(request.session['derivatives'], roi_xml_fn)
 
-  request.session['smGrfn'], request.session['bgGrfn'], request.session['lccfn']\
+  try:
+    request.session['smGrfn'], request.session['bgGrfn'], request.session['lccfn']\
     ,request.session['SVDfn'] = processData(fiber_fn, roi_xml_fn, roi_raw_fn, \
                                 request.session['graphs'], request.session['graphInvariants'],\
                                 request.session['graphsize'], True)
+  except:
+    if request.session['graphsize'] == 'big':
+      sendJobFailureEmail(request.session['email'])
+    return HttpResponseRedirect(get_script_prefix()+"jobfailure")
 
   # Run ivariants here
   if len(request.session['invariants']) > 0:
@@ -235,6 +256,10 @@ def processInputData(request):
     request.session['invariant_fns'] = runInvariants(request.session['invariants'],\
                                         graph_fn, request.session['graphInvariants'],\
                                         lcc_fn, request.session['graphsize'])
+
+  if request.session['graphsize'] == 'big':
+    sendJobCompleteEmail('http://mrbrain.cs.jhu.edu' + request.session['usrDefProjDir'].replace(' ','%20'))
+    return HttpResponseRedirect(get_script_prefix()+'success')
 
   return HttpResponseRedirect(get_script_prefix()+'confirmdownload')
 
