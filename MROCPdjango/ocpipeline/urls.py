@@ -15,6 +15,7 @@ from views import confirmDownload
 from views import graphLoadInv
 from views import convert
 from views import showdir
+from views import contact
 
 #from django.contrib import auth
 #########################################
@@ -37,6 +38,7 @@ urlpatterns = patterns('ocpipeline.views',
     url(r'^convert/(.*$)', 'convert', name= 'convert-to-format'),
     url(r'^buildgraph/$', 'buildGraph', name= 'build-graph'),
     url(r'^showdir/$', 'showdir', name='serve-dir'),
+    url(r'^contact/$', 'contact', name='serve-dir'),
     (r'^accounts/', include('registration.backends.default.urls')),
     # Examples
     # url(r'^$', 'myapp.views.home', name='home'),
