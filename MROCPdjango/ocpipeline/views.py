@@ -21,6 +21,7 @@ from django.template import RequestContext
 from django.http import HttpResponseRedirect
 from django.http import HttpResponse
 from django.http import HttpResponseBadRequest
+from django.shortcuts import render
 
 from django.core.files import File        # For programmatic file upload
 
@@ -293,6 +294,9 @@ def showdir(request):
   #directory = request.session['usrDefProjDir']
   #import pdb; pdb.set_trace()
   return render('STUB')
+
+def contact(request):
+  return render_to_response('contact.html')
 
 
 #################################################################################
