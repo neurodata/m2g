@@ -237,7 +237,7 @@ def sendJobFailureEmail(email_addr):
             msg, settings.SERVER_EMAIL, [email_addr], fail_silently=False)
 
 def sendJobCompleteEmail(email_addr, dataLoc):
-  msg = "Congratulations,\n\nThe MROCP job you requested is complete and available at %s for download" % dataLoc
+  msg = "Congratulations,\n\nThe MROCP job you requested is complete and available for download at %s" % dataLoc
   msg += "\n\nThanks for using MROCP,\nThe MROCP team"
 
   send_mail("MROCP: Big graph job COMPLETE!",

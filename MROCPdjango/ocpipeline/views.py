@@ -265,7 +265,7 @@ def processInputData(request):
                                         lcc_fn, request.session['graphsize'])
 
   if request.session['graphsize'] == 'big':
-    sendJobCompleteEmail('http://mrbrain.cs.jhu.edu' + request.session['usrDefProjDir'].replace(' ','%20'))
+    sendJobCompleteEmail(request.session['email'], 'http://mrbrain.cs.jhu.edu' + request.session['usrDefProjDir'].replace(' ','%20'))
 
   return HttpResponseRedirect(get_script_prefix()+'confirmdownload')
 
