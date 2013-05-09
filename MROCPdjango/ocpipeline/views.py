@@ -203,8 +203,8 @@ def buildGraph(request):
         sendJobBeginEmail(request.session['email'], request.session['invariants'])
         thr = threading.Thread(target=processInputData, args=(request,))
         thr.start()
-        request.session['success_msg'] = "Your job was successfully launched. You should receive an email when your"
-        request.session['success_msg'] += "job begins another when it completes. The process may take ~5hrs for all invariants"
+        request.session['success_msg'] = "Your job was successfully launched. You should receive an email when your "
+        request.session['success_msg'] += "job begins and another one when it completes. The process may take ~5hrs if you selected to compute all invariants"
         return HttpResponseRedirect(get_script_prefix()+'success')
 
       # Redirect to Processing page
