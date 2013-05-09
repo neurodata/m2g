@@ -9,6 +9,7 @@
 '''
 
 import os, sys, re
+import threading
 os.environ['MPLCONFIGDIR'] = '/tmp/'
 #import matplotlib
 #matplotlib.use( 'Agg' )
@@ -81,7 +82,7 @@ def welcome(request):
 
 ''' Successful completion of task'''
 def success(request):
-  return render_to_response('success.html', {"msg": "Congratulations, Your job is complete. Please await an email with confirmation and data product url!"}
+  return render_to_response('success.html', {"msg": request.session["success_msg"]}
                             ,context_instance=RequestContext(request))
 
 ''' Job failure '''
@@ -198,7 +199,13 @@ def buildGraph(request):
           request.session['graphs'], request.session['graphInvariants'], request.session['images']])
 
       if request.session['graphsize'] == 'big':
+        # Launch thread for big graphs & email user
         sendJobBeginEmail(request.session['email'], request.session['invariants'])
+        thr = threading.Thread(target=processInputData, args=(request,))
+        thr.start()
+        request.session['success_msg'] = "Your job was successfully launched. You should receive an email when your"
+        request.session['success_msg'] += "job begins another when it completes. The process may take ~5hrs for all invariants"
+        return HttpResponseRedirect(get_script_prefix()+'success')
 
       # Redirect to Processing page
       return HttpResponseRedirect(get_script_prefix()+'processinput')
@@ -259,7 +266,6 @@ def processInputData(request):
 
   if request.session['graphsize'] == 'big':
     sendJobCompleteEmail('http://mrbrain.cs.jhu.edu' + request.session['usrDefProjDir'].replace(' ','%20'))
-    return HttpResponseRedirect(get_script_prefix()+'success')
 
   return HttpResponseRedirect(get_script_prefix()+'confirmdownload')
 
@@ -478,6 +484,18 @@ def graphLoadInv(request, webargs=None):
         elif request.session['graphsize'] == 'small':
           graph_fn = request.session['smGrfn'] = graph_fn
           lcc_fn = None
+
+          #try:
+          #  if request.session['graphsize'] == 'big':
+              # Launch thread for big graphs & email user
+              #sendJobBeginEmail(request.session['email'], request.session['invariants'])
+              #thr = threading.Thread(target=processInputData, args=(request,))
+              #thr.start()
+              #request.session['success_msg'] = "Your job was successfully launched. You should receive an email when your"
+              #request.session['success_msg'] += "job begins another when it completes. The process may take ~5hrs for all invariants"
+              #return HttpResponseRedirect(get_script_prefix()+'success')
+          #except Exception:
+          #  pass
 
           invariant_fns = runInvariants(request.session['invariants'], graph_fn,
                         request.session['graphInvariants'], lcc_fn,
