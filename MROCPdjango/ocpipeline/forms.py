@@ -141,9 +141,10 @@ class GraphUploadForm(forms.Form):
 
   INVARIANT_CHOICES = (('ss1', 'Scan Statistic 1',), ('tri', 'Triangle Count',), \
       ('cc', 'Clustering co-efficient',), ('mad', 'Maximum Average Degree',) \
-      ,('deg', 'Vertex Degree',), ('eig', 'Top 100 Eigenvalues and Eigenvectors',), \
-      ('ss2', 'Scan Statistic 2 [Not yet available]',), ('apl', 'Average Path Length [Not yet available]',),\
-      ('gdia', 'Graph Diameter [Not yet available]',))
+      ,('deg', 'Vertex Degree',), ('eig', 'Top 100 Eigenvalues and Eigenvectors',))
+  #, \
+  #    ('ss2', 'Scan Statistic 2 [Not yet available]',), ('apl', 'Average Path Length [Not yet available]',),\
+  #    ('gdia', 'Graph Diameter [Not yet available]',))
 
   Select_Invariants_you_want_computed = forms.MultipleChoiceField(required=True,
   widget=CheckboxSelectMultiple, choices=INVARIANT_CHOICES)
