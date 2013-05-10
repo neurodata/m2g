@@ -215,9 +215,12 @@ def saveFileToDisk(fileData, fullFileName):
 
 ################################################################################
 
-def sendJobBeginEmail(email_addr, invariants):
+def sendJobBeginEmail(email_addr, invariants, genGraph=True):
 
-  msg = "Hello,\n\nThe following actions were requested using %s:\n- Generate big graph\n" % email_addr
+  msg = "Hello,\n\nThe following actions were requested using %s:\n" % email_addr
+
+  if genGraph:
+    msg += "- Generate big graph\n"+" "*randint(0,10)
 
   for inv in invariants:
     msg += "- Compute " + settings.VALID_FILE_TYPES[inv] + "\n"
@@ -230,9 +233,7 @@ def sendJobBeginEmail(email_addr, invariants):
   send_mail("MROCP: Big graph job request",
             msg, settings.SERVER_EMAIL, [email_addr], fail_silently=False)
 
-def sendJobFailureEmail(email_addr):
-  msg = "Hello,\n\nYour most recent job failed either because your fiber streamline file or ROI mask was incorrectly formatted."
-  msg += " Please check both and try again.\n\n"
+def sendJobFailureEmail(email_addr, msg):
   msg += " "*randint(0,10)
   msg += "Thanks for using MROCP,\nThe MROCP team"
 

@@ -10,6 +10,7 @@
 
 import os, sys, re
 import threading
+from random import randint
 os.environ['MPLCONFIGDIR'] = '/tmp/'
 #import matplotlib
 #matplotlib.use( 'Agg' )
@@ -246,7 +247,9 @@ def processInputData(request):
                                 request.session['graphsize'], True)
   except:
     if request.session['graphsize'] == 'big':
-      sendJobFailureEmail(request.session['email'])
+      msg = "Hello,\n\nYour most recent job failed either because your fiber streamline file or ROI mask was incorrectly formatted."
+      msg += " Please check both and try again.\n\n"
+      sendJobFailureEmail(request.session['email'], msg)
     return HttpResponseRedirect(get_script_prefix()+"jobfailure")
 
   # Run ivariants here
@@ -453,7 +456,12 @@ def asyncInvCompute(request):
                           request.session['graphInvariants'], lcc_fn,
                           request.session['graphsize'])
     except:
-      sendJobFailureEmail(request.session['email'])
+      msg = "Hello,\n\nYour most recent job failed possibly because:\n" + " "*randint(0,10)
+      if not os.path.exists(lcc_fn):
+        msg += "- the lcc file %s does not exists" % lcc_fn
+      msg += "the graph you uploaded does not match any accepted type"+ " "*randint(0,10)
+      msg += " Please check both and try again.\n\n"
+      sendJobFailureEmail(request.session['email'], msg)
     return HttpResponseRedirect(get_script_prefix()+"jobfailure")
 
     print 'Invariants for annoymous project %s complete...' % graph_fn
@@ -470,7 +478,7 @@ def asyncInvCompute(request):
                               os.path.dirname(invariant_fns[inv]), inv)
 
   # Email user of job finished
-  sendJobCompleteEmail(request.session['email'], "http://mrbrain.cs.jhu.edu"+ reques.session['dataDir'].replace(' ','%20'))
+  sendJobCompleteEmail(request.session['email'], "http://mrbrain.cs.jhu.edu"+ request.session['dataDir'].replace(' ','%20'))
 
 
 #########################################
