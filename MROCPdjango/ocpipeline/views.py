@@ -440,6 +440,36 @@ def download(request, webargs=None):
   # DM: TODO - Allow for data to be downloaded by the directory name/filename/projectName
   pass
 
+###################################################
+
+def asyncInvCompute(request):
+
+  for graph_fn in request.session['uploaded_graphs']:
+    request.session['bgGrfn'] = graph_fn
+    lcc_fn = graph_fn.split('_')[0] + '_concomp.mat'
+
+
+    invariant_fns = runInvariants(request.session['invariants'], graph_fn,
+                          request.session['graphInvariants'], lcc_fn,
+                          request.session['graphsize'])
+
+    print 'Invariants for annoymous project %s complete...' % graph_fn
+
+    # TODO: Make function for this. Duplicate of buildgraph code
+    for fileFormat in request.session['invConvertToFormats'] :
+      # Conversion of all files
+      for inv in invariant_fns.keys():
+        if isinstance(invariant_fns[inv], list): # Case of eigs
+          for fn in invariant_fns[inv]:
+            convertTo.convertAndSave(fn, fileFormat, os.path.dirname(fn), inv)
+        else: # case of all other invariants
+          convertTo.convertAndSave(invariant_fns[inv], fileFormat, \
+                              os.path.dirname(invariant_fns[inv]), inv)
+
+  # Email user of job finished
+  sendJobCompleteEmail(request.session['email'], "http://mrbrain.cs.jhu.edu"+ reques.session['dataDir'].replace(' ','%20'))
+
+
 #########################################
 #	*******************		#
 #	   GRAPH LOAD VIEW		#
@@ -447,16 +477,23 @@ def download(request, webargs=None):
 def graphLoadInv(request, webargs=None):
   ''' Form '''
   from glob import glob # Move
-  # request.session.clear() # NEW
 
   if request.method == 'POST' and not webargs:
     form = GraphUploadForm(request.POST, request.FILES) # instantiating form
     if form.is_valid():
-      data = form.files['fileObj'] # get data
-      request.session['invariants'] = form.cleaned_data['Select_Invariants_you_want_computed']
 
       request.session['graphsize'] = form.cleaned_data['Select_graph_size']
       request.session['graphsize'] = 'small' if not request.session['graphsize'] else request.session['graphsize']
+
+      if request.session['graphsize'] == 'big' and not form.cleaned_data['Email']:
+        return render_to_response(
+          'graphupload.html',
+          {'graphUploadForm': form, 'error_msg': 'Please supply an email address to receive notifications of your big graph job starting & finishing'},
+          context_instance=RequestContext(request)
+          )
+
+      data = form.files['fileObj'] # get data
+      request.session['invariants'] = form.cleaned_data['Select_Invariants_you_want_computed']
 
       dataDir = os.path.join(settings.MEDIA_ROOT, 'tmp', strftime("projectStamp%a%d%b%Y_%H.%M.%S/", localtime()))
       request.session['graphInvariants'] = os.path.join(dataDir, 'graphInvariants')
@@ -476,45 +513,45 @@ def graphLoadInv(request, webargs=None):
         graphs = [os.path.join(dataDir, data.name)]
         saveFileToDisk(data, graphs[0])
 
-      for graph_fn in graphs:
-        if request.session['graphsize'] == 'big':
-          request.session['bgGrfn'] = graph_fn
-          lcc_fn = graph_fn.split('_')[0] + '_concomp.mat'
+      request.session['uploaded_graphs'] = graphs
+      request.session['invConvertToFormats'] = form.cleaned_data['Convert_result']
+      request.session['dataDir'] = dataDir
 
-        elif request.session['graphsize'] == 'small':
+      if request.session['graphsize'] == 'big':
+        # Launch thread for big graphs & email user
+        request.session['email'] = form.cleaned_data['Email']
+        sendJobBeginEmail(request.session['email'], request.session['invariants'])
+
+        thr = threading.Thread(target=asyncInvCompute, args=(request,))
+
+        thr.start()
+        request.session['success_msg'] = "Your job was successfully launched. You should receive an email when your "
+        request.session['success_msg'] += "job begins and another one when it completes. The process may take ~3hrs if you selected to compute all invariants"
+        return HttpResponseRedirect(get_script_prefix()+'success')
+
+      else:
+        for graph_fn in graphs:
           graph_fn = request.session['smGrfn'] = graph_fn
           lcc_fn = None
 
-          #try:
-          #  if request.session['graphsize'] == 'big':
-              # Launch thread for big graphs & email user
-              #sendJobBeginEmail(request.session['email'], request.session['invariants'])
-              #thr = threading.Thread(target=processInputData, args=(request,))
-              #thr.start()
-              #request.session['success_msg'] = "Your job was successfully launched. You should receive an email when your"
-              #request.session['success_msg'] += "job begins another when it completes. The process may take ~5hrs for all invariants"
-              #return HttpResponseRedirect(get_script_prefix()+'success')
-          #except Exception:
-          #  pass
-
           invariant_fns = runInvariants(request.session['invariants'], graph_fn,
-                        request.session['graphInvariants'], lcc_fn,
-                        request.session['graphsize'])
+                          request.session['graphInvariants'], lcc_fn,
+                          request.session['graphsize'])
 
           print 'Invariants for annoymous project %s complete...' % graph_fn
 
-        invConvertToFormats =  form.cleaned_data['Convert_result']
+          invConvertToFormats =  form.cleaned_data['Convert_result']
 
-        # TODO: Make function for this. Duplicate of buildgraph code
-        for fileFormat in invConvertToFormats:
-          # Conversion of all files
-          for inv in invariant_fns.keys():
-            if isinstance(invariant_fns[inv], list): # Case of eigs
-              for fn in invariant_fns[inv]:
-                convertTo.convertAndSave(fn, fileFormat, os.path.dirname(fn), inv)
-            else: # case of all other invariants
-              convertTo.convertAndSave(invariant_fns[inv], fileFormat, \
-                                  os.path.dirname(invariant_fns[inv]), inv)
+          # TODO: Make function for this. Duplicate of buildgraph code
+          for fileFormat in invConvertToFormats:
+            # Conversion of all files
+            for inv in invariant_fns.keys():
+              if isinstance(invariant_fns[inv], list): # Case of eigs
+                for fn in invariant_fns[inv]:
+                  convertTo.convertAndSave(fn, fileFormat, os.path.dirname(fn), inv)
+              else: # case of all other invariants
+                convertTo.convertAndSave(invariant_fns[inv], fileFormat, \
+                                    os.path.dirname(invariant_fns[inv]), inv)
 
       return HttpResponseRedirect("http://mrbrain.cs.jhu.edu"+ dataDir.replace(' ','%20')) # All spaces are replaced with %20 for urls
 

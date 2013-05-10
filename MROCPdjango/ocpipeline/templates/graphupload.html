@@ -64,10 +64,13 @@
       small graph. Working with big graphs requires the largest connected component (LCC) as well since we do not consider
       grey matter in computation.
       </p>
-
     </ul>
-
     </p>
+
+    * You must supply an Email address for big graph invariant computation so as to receive the job completion email with result url.
+    We will never share or use your email address for any other purpose (scout's honor!).<br/>
+
+    <FONT COLOR='#ff0000'> {{error_msg}}</FONT> <br/>
     <form action="" method="post" enctype="multipart/form-data" name="loadForm" onsubmit="return Validate(this,['.mat', '.zip'] );">
         {% csrf_token %}
         <p>{{ graphUploadForm }}</p>
