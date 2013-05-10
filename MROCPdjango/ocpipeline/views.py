@@ -248,7 +248,7 @@ def processInputData(request):
   except:
     if request.session['graphsize'] == 'big':
       msg = "Hello,\n\nYour most recent job failed either because your fiber streamline file or ROI mask was incorrectly formatted."
-      msg += " Please check both and try again.\n\n"
+      msg += " Please check both and try again.%s\n\n" % (" "*randint(0,10))
       sendJobFailureEmail(request.session['email'], msg)
     return HttpResponseRedirect(get_script_prefix()+"jobfailure")
 
@@ -448,21 +448,20 @@ def download(request, webargs=None):
 def asyncInvCompute(request):
 
   for graph_fn in request.session['uploaded_graphs']:
-    #request.session['bgGrfn'] = graph_fn
-    lcc_fn = graph_fn.split('_')[0] + '_concomp.mat'
+    lcc_fn = os.path.join(os.path.dirname(graph_fn), (os.path.basename(graph_fn).split('_')[0]+ '_concomp.npy'))
 
     try:
       invariant_fns = runInvariants(request.session['invariants'], graph_fn,
                           request.session['graphInvariants'], lcc_fn,
                           request.session['graphsize'])
     except:
-      msg = "Hello,\n\nYour most recent job failed possibly because:\n" + " "*randint(0,10)
+      msg = "Hello,\n\nYour most recent job failed possibly because:%s\n" % (" "*randint(0,10))
       if not os.path.exists(lcc_fn):
-        msg += "- the lcc file %s does not exists" % lcc_fn
-      msg += "the graph you uploaded does not match any accepted type"+ " "*randint(0,10)
-      msg += " Please check both and try again.\n\n"
+        msg += "- the lcc file %s does not exists\n" % os.path.basename(lcc_fn)
+      msg += "- the graph you uploaded does not match any accepted type %s\n\n" % (" "*randint(0,10))
+      msg += "Please check these and try again. %s\n\n" % (" "*randint(0,10))
       sendJobFailureEmail(request.session['email'], msg)
-    return HttpResponseRedirect(get_script_prefix()+"jobfailure")
+
 
     print 'Invariants for annoymous project %s complete...' % graph_fn
 
@@ -531,11 +530,11 @@ def graphLoadInv(request, webargs=None):
       if request.session['graphsize'] == 'big':
         # Launch thread for big graphs & email user
         request.session['email'] = form.cleaned_data['Email']
-        sendJobBeginEmail(request.session['email'], request.session['invariants'])
+        sendJobBeginEmail(request.session['email'], request.session['invariants'], genGraph=False)
 
         thr = threading.Thread(target=asyncInvCompute, args=(request,))
-
         thr.start()
+
         request.session['success_msg'] = "Your job was successfully launched. You should receive an email when your "
         request.session['success_msg'] += "job begins and another one when it completes. The process may take ~3hrs if you selected to compute all invariants"
         return HttpResponseRedirect(get_script_prefix()+'success')
@@ -795,7 +794,7 @@ def runInvariants(inv_list, graph_fn, save_dir, lcc_fn, graphsize):
   '''
   Run the selected multivariate invariants as defined
   '''
-
+  # import pdb; pdb.set_trace()
   inv_dict = {'graph_fn':graph_fn, 'save_dir':save_dir, \
               'lcc_fn':lcc_fn,'graphsize':graphsize}
   for inv in inv_list:
