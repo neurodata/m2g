@@ -477,7 +477,7 @@ def asyncInvCompute(request):
                               os.path.dirname(invariant_fns[inv]), inv)
 
   # Email user of job finished
-  sendJobCompleteEmail(request.session['email'], "http://mrbrain.cs.jhu.edu"+ request.session['dataDir'].replace(' ','%20'))
+  #sendJobCompleteEmail(request.session['email'], "http://mrbrain.cs.jhu.edu"+ request.session['dataDir'].replace(' ','%20'))
 
 
 #########################################
@@ -530,10 +530,11 @@ def graphLoadInv(request, webargs=None):
       if request.session['graphsize'] == 'big':
         # Launch thread for big graphs & email user
         request.session['email'] = form.cleaned_data['Email']
-        sendJobBeginEmail(request.session['email'], request.session['invariants'], genGraph=False)
+        #sendJobBeginEmail(request.session['email'], request.session['invariants'], genGraph=False)
 
-        thr = threading.Thread(target=asyncInvCompute, args=(request,))
-        thr.start()
+        #thr = threading.Thread(target=asyncInvCompute, args=(request,))
+        #thr.start()
+        asyncInvCompute(request)
 
         request.session['success_msg'] = "Your job was successfully launched. You should receive an email when your "
         request.session['success_msg'] += "job begins and another one when it completes. The process may take ~3hrs if you selected to compute all invariants"

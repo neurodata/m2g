@@ -151,7 +151,7 @@ class GraphUploadForm(forms.Form):
   Select_Invariants_you_want_computed = forms.MultipleChoiceField(required=True,
   widget=CheckboxSelectMultiple, choices=INVARIANT_CHOICES)
 
-  Convert_result = forms.MultipleChoiceField(required=True,
+  Convert_result = forms.MultipleChoiceField(required=False,
       widget=CheckboxSelectMultiple, choices=(('.mat', 'MAT'),))
 
 class DownloadForm(forms.Form):
