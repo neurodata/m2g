@@ -10,7 +10,7 @@ import sys
 import zipfile
 import tempfile
 import re
-
+from random import randint
 import computation.utils.convertTo as convertTo
 from django.conf import settings
 from django.core.mail import send_mail
@@ -223,7 +223,9 @@ def sendJobBeginEmail(email_addr, invariants):
     msg += "- Compute " + settings.VALID_FILE_TYPES[inv] + "\n"
 
   msg +=  "\nFeel free to close your browser window or start a new job. Your current job will not be affected. You will receive another email when your job completes."
+  msg += " "*randint(0,10)
   msg += "\n\nThanks for using MROCP,\nThe MROCP team"
+  msg += " "*randint(0,10)
 
   send_mail("MROCP: Big graph job request",
             msg, settings.SERVER_EMAIL, [email_addr], fail_silently=False)
@@ -231,6 +233,7 @@ def sendJobBeginEmail(email_addr, invariants):
 def sendJobFailureEmail(email_addr):
   msg = "Hello,\n\nYour most recent job failed either because your fiber streamline file or ROI mask was incorrectly formatted."
   msg += " Please check both and try again.\n\n"
+  msg += " "*randint(0,10)
   msg += "Thanks for using MROCP,\nThe MROCP team"
 
   send_mail("MROCP: Big graph job FAILURE!",
@@ -238,6 +241,7 @@ def sendJobFailureEmail(email_addr):
 
 def sendJobCompleteEmail(email_addr, dataLoc):
   msg = "Congratulations,\n\nThe MROCP job you requested is complete and available for download at %s" % dataLoc
+  msg += " "*randint(0,10)
   msg += "\n\nThanks for using MROCP,\nThe MROCP team"
 
   send_mail("MROCP: Big graph job COMPLETE!",

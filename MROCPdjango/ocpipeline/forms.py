@@ -139,6 +139,8 @@ class GraphUploadForm(forms.Form):
   Select_graph_size = forms.ChoiceField(choices=[('small','Small graph'), ('big','Big graph')]\
                                         , widget=RadioSelect, required = False)
 
+  Email = forms.EmailField(widget=TextInput(), required=False,  help_text=" ",)
+
   INVARIANT_CHOICES = (('ss1', 'Scan Statistic 1',), ('tri', 'Triangle Count',), \
       ('cc', 'Clustering co-efficient',), ('mad', 'Maximum Average Degree',) \
       ,('deg', 'Vertex Degree',), ('eig', 'Top 100 Eigenvalues and Eigenvectors',))
