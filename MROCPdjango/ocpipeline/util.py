@@ -234,7 +234,6 @@ def sendJobBeginEmail(email_addr, invariants, genGraph=True):
             msg, settings.SERVER_EMAIL, [email_addr], fail_silently=False)
 
 def sendJobFailureEmail(email_addr, msg):
-  msg += " "*randint(0,10)
   msg += "Thanks for using MROCP,\nThe MROCP team"
 
   send_mail("MROCP: Big graph job FAILURE!",
