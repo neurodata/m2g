@@ -57,7 +57,6 @@ def compute(inv_dict, save=True):
       print G
       return G # Error message
 
-  #import pdb; pdb.set_trace()
   num_nodes = G.shape[0] # number of nodes
 
   # CC requires deg_fn and tri_fn. Load if available

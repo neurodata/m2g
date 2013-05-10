@@ -477,7 +477,7 @@ def asyncInvCompute(request):
                               os.path.dirname(invariant_fns[inv]), inv)
 
   # Email user of job finished
-  #sendJobCompleteEmail(request.session['email'], "http://mrbrain.cs.jhu.edu"+ request.session['dataDir'].replace(' ','%20'))
+  sendJobCompleteEmail(request.session['email'], "http://mrbrain.cs.jhu.edu"+ request.session['dataDir'].replace(' ','%20'))
 
 
 #########################################
@@ -530,11 +530,11 @@ def graphLoadInv(request, webargs=None):
       if request.session['graphsize'] == 'big':
         # Launch thread for big graphs & email user
         request.session['email'] = form.cleaned_data['Email']
-        #sendJobBeginEmail(request.session['email'], request.session['invariants'], genGraph=False)
+        sendJobBeginEmail(request.session['email'], request.session['invariants'], genGraph=False)
 
-        #thr = threading.Thread(target=asyncInvCompute, args=(request,))
-        #thr.start()
-        asyncInvCompute(request)
+        thr = threading.Thread(target=asyncInvCompute, args=(request,))
+        thr.start()
+        #asyncInvCompute(request)
 
         request.session['success_msg'] = "Your job was successfully launched. You should receive an email when your "
         request.session['success_msg'] += "job begins and another one when it completes. The process may take ~3hrs if you selected to compute all invariants"
@@ -795,7 +795,6 @@ def runInvariants(inv_list, graph_fn, save_dir, lcc_fn, graphsize):
   '''
   Run the selected multivariate invariants as defined
   '''
-  # import pdb; pdb.set_trace()
   inv_dict = {'graph_fn':graph_fn, 'save_dir':save_dir, \
               'lcc_fn':lcc_fn,'graphsize':graphsize}
   for inv in inv_list:
