@@ -445,13 +445,16 @@ def download(request, webargs=None):
 def asyncInvCompute(request):
 
   for graph_fn in request.session['uploaded_graphs']:
-    request.session['bgGrfn'] = graph_fn
+    #request.session['bgGrfn'] = graph_fn
     lcc_fn = graph_fn.split('_')[0] + '_concomp.mat'
 
-
-    invariant_fns = runInvariants(request.session['invariants'], graph_fn,
+    try:
+      invariant_fns = runInvariants(request.session['invariants'], graph_fn,
                           request.session['graphInvariants'], lcc_fn,
                           request.session['graphsize'])
+    except:
+      sendJobFailureEmail(request.session['email'])
+    return HttpResponseRedirect(get_script_prefix()+"jobfailure")
 
     print 'Invariants for annoymous project %s complete...' % graph_fn
 
