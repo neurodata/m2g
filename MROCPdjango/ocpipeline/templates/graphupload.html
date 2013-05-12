@@ -14,13 +14,13 @@
      <div id=graphspecs>
       <h2>Two Specifications for acceptable graphs</h2>
       <ul>
-        <li>A <a href="http://www.mathworks.com/help/matlab/ref/struct.html"> MATLAB struct </a> with a <FONT COLOR='#ff0000'>single</FONT> data element
+        <li>A <a href="http://www.mathworks.com/help/matlab/ref/struct.html"> MATLAB struct </a> with a <FONT COLOR='#2373ff'>single</FONT> data element
         that is of type <a href="http://docs.scipy.org/doc/scipy/reference/generated/scipy.sparse.csc_matrix.html#scipy.sparse.csc_matrix">
         numpy CSC (Compressed Sparse Column) matrix</a>. <br/>
         <li>
-          Any <FONT COLOR='#ff0000'>2 Dimensional</FONT> square MATLAB matrix.
+          Any <FONT COLOR='#2373ff'>2 Dimensional</FONT> square MATLAB matrix.
         </li>
-        It should be loadable from the python shell via the following call: <a href="http://docs.scipy.org/doc/scipy/reference/generated/scipy.io.loadmat.html">scipy.io.loadmat</a>(filename)[<FONT COLOR='#ff0000'>'your_data_element_name'</FONT>] only.<br/>
+        It should be loadable from the python shell via the following call: <a href="http://docs.scipy.org/doc/scipy/reference/generated/scipy.io.loadmat.html">scipy.io.loadmat</a>(filename)[<FONT COLOR='#2373ff'>'your_data_element_name'</FONT>] only.<br/>
         Such a matrix can be created by creating an MATLAB matrix and using the <a href="http://www.mathworks.com/help/matlab/ref/save.html">save</a> function.
         </li>
     </div>
@@ -35,7 +35,7 @@
 
     <h3> Multiple graphs or graphs with a largest connected component file </h3>
     <p> You must use a single<strong> zipfile <i> (.zip) </i> containing ALL</strong> data in a single directory even for multiple graphs. <br/>
-    <strong> <FONT COLOR='#ff0000'> DO NOT zip a directory</FONT>, instead zip the files themselves into an archive.</strong>
+    <strong> <FONT COLOR='#2373ff'> DO NOT zip a directory</FONT>, instead zip the files themselves into an archive.</strong>
     Note the following <b>file naming convention</b> for graphs - where the <strong>base file name must be the same</strong>:
     <ul>
       <li>The <strong>base file name </strong> here is <strong>graph1</strong></li>
@@ -49,7 +49,7 @@
     You may adapt the file names of you data sets by appending these suffixes using
     <a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjango/dirconformance/renameDerivs.py" target="blank">this script</a>.
     You need to have a directory that contains a folder named <i>fiber</i> (containing fiber files)
-    Ensure you have backups before doing this. <FONT COLOR='#ff0000'> This may change in the future.</FONT> -->
+    Ensure you have backups before doing this. <FONT COLOR='#2373ff'> This may change in the future.</FONT> -->
 
       <h3>What's the difference between big and small graphs?</h3>
 
@@ -87,7 +87,7 @@
       <h2>Programmatic use </h2>
       <p> This is can be accessed using the base url <strong>http://www.mrbrain.cs.jhu.edu/disa/graphupload/</strong>. An
           example of usage can be found <a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjango/examples/computeInvariants.py" target="blank">here</a>.
-          <FONT COLOR='#ff0000'> This section will be updated shortly.</FONT> <!-- TODO UPDATE WHEN COMPLETE-->
+          <FONT COLOR='#2373ff'> This section will be updated shortly.</FONT> <!-- TODO UPDATE WHEN COMPLETE-->
       </p>
     {% endblock programmatic %}
   {% endblock content%}
