@@ -7,7 +7,7 @@
 	}
 
 	a {color: #963;}
-	a:hover {color: #C60;}
+	a:hover {color: #f17b0d;}
 
 	body {
 		color: #444;
@@ -48,6 +48,10 @@
 		padding: 0 10px 10px;
 		width: 1027px; /*Alter this when adding new headers. Remove to fill center*/
 	}
+
+        .errorlist{
+          color: #fa1426;
+        }
 
 	/* navigation */
 	.navigation {
