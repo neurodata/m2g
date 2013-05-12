@@ -154,18 +154,12 @@ class GraphUploadForm(forms.Form):
   Convert_result = forms.MultipleChoiceField(required=False,
       widget=CheckboxSelectMultiple, choices=(('.mat', 'MAT'),))
 
-  #def is_valid(self):
-  #  valid = super(GraphUploadForm, self).is_valid()
-  #  # we're done now if not valid
-  #  if not valid:
-  #      return valid
-  #
-  #  if self.data['Select_graph_size'] == 'big' and not self.data['Email']:
-  #    return False
-  #
-  #  #if self.Select_graph_size == 'big' and not self.Email:
-  #  #  raise forms.ValidationError("You must provide an email address when computing invariants on big graphs")
+  def clean(self):
+    cleaned_data = super(GraphUploadForm, self).clean()
 
+    if cleaned_data['Select_graph_size'] == 'big' and not cleaned_data['Email']:
+      raise forms.ValidationError("You must provide an email address when computing invariants on big graphs")
+    return cleaned_data
 
 class DownloadForm(forms.Form):
   '''

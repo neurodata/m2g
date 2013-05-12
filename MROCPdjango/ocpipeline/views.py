@@ -495,13 +495,6 @@ def graphLoadInv(request, webargs=None):
       request.session['graphsize'] = form.cleaned_data['Select_graph_size']
       request.session['graphsize'] = 'small' if not request.session['graphsize'] else request.session['graphsize']
 
-      if request.session['graphsize'] == 'big' and not form.cleaned_data['Email']:
-        return render_to_response(
-          'graphupload.html',
-          {'graphUploadForm': form, 'error_msg': 'Please supply an email address to receive notifications of your big graph job starting & finishing'},
-          context_instance=RequestContext(request)
-          )
-
       data = form.files['fileObj'] # get data
       request.session['invariants'] = form.cleaned_data['Select_Invariants_you_want_computed']
 
