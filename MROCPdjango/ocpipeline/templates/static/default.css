@@ -43,35 +43,63 @@
 	/* structure */
 	.container {
 		background: #FFF;
-		font-size: 1.2em;
+		font-size: 1.4em;
 		margin: 0 auto;
 		padding: 0 10px 10px;
-		width: 1027px; /*Alter this when adding new headers. Remove to fill center*/
+		/*width: 1027px; /*Alter this when adding new headers. Remove to fill center*/*/
 	}
 
         .errorlist{
           color: #fa1426;
         }
 
-	/* navigation */
-	.navigation {
-		background: #D9E1E5 url(/static/images/nav.gif);
-		border: 1px solid #DFEEF7;
-		border-color: #DFEEF7 #CFDEE7;
-		height: 41px;
-	}
-	.navigation a {
-		background: #D9E1E5 url(/static/images/nav.gif);
-		border-right: 1px solid #AFBEC7;
-		color: #456;
-		display: block;
-		float: left;
-		font: bold 1.1em sans-serif;
-		line-height: 41px;
-		padding: 0 15px;
-		text-decoration: none;
-	}
-	.navigation a:hover {background-position: left bottom; color: #234;}
+        /* Navigation panel */
+        .navigation ul {
+                margin: 0;
+                padding: 0;
+                list-style: none;
+        }
+
+        .navigation ul li {
+                display: block;
+                position: relative;
+                float: left;
+        }
+
+        .navigation li ul {
+                display: none;
+        }
+
+        .navigation  ul li a {
+                display: block;
+                text-decoration: none;
+                color: #ffffff;
+                border-top: 1px solid #ffffff;
+                padding: 5px 15px 5px 15px;
+                background: #06aaac;
+                margin-left: 1px;
+                white-space: nowrap;
+        }
+
+        .navigation  ul li a:hover {
+            background: #3b3b3b;
+        }
+
+        .navigation  li:hover ul {
+                display: block;
+                position: absolute;
+        }
+
+        .navigation li:hover li {
+                float: none;
+                font-size: 14px;
+        }
+
+        .navigation li:hover a { background: #3b3b3b; }
+
+        .navigation li:hover li a:hover {
+                background: #1e7c9a;
+        }
 
 	/* footer */
 	.footer {
