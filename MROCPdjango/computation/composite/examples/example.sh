@@ -1,11 +1,13 @@
 #!/bin/bash
 echo "Example downloads ./testdata directory from http://mrbrain.cs.jhu.edu/data/projects/disa/OCPprojects/testdata/ ..."
-mkdir ./testdata
-cd testdata
-wget http://mrbrain.cs.jhu.edu/data/projects/disa/OCPprojects/testdata/test_fiber.dat
-wget http://mrbrain.cs.jhu.edu/data/projects/disa/OCPprojects/testdata/test_roi.raw
-wget http://mrbrain.cs.jhu.edu/data/projects/disa/OCPprojects/testdata/test_roi.xml
-cd ..
+
+# Uncomment if you want to redownload test data
+#mkdir ./testdata
+#cd testdata
+#wget http://mrbrain.cs.jhu.edu/data/projects/disa/OCPprojects/testdata/test_fiber.dat
+#wget http://mrbrain.cs.jhu.edu/data/projects/disa/OCPprojects/testdata/test_roi.raw
+#wget http://mrbrain.cs.jhu.edu/data/projects/disa/OCPprojects/testdata/test_roi.xml
+#cd ..
 
 # SMALL
 # Graph generation:
@@ -23,15 +25,15 @@ echo "./deriv_exec -h. For help"
 .././deriv_exec ./testdata/small/test_fiber_70_smgr.mat -v -l -S ./testdata/small
 
 # BIG
-# Build big graph
-.././graph_exec ./testdata/test_fiber.dat ./testdata/test_roi.xml ./testdata/test_roi.raw  -S ./testdata/big -b -g bigtest_bggr.mat
+# Uncomment to Build big graph WARNING: Can take up to 6 hours to complete
+#.././graph_exec ./testdata/test_fiber.dat ./testdata/test_roi.xml ./testdata/test_roi.raw  -S ./testdata/big -b -g bigtest_bggr.mat
 
 # largest connected component & single value:
-echo "./deriv_exec -h. For help"
+#echo "./deriv_exec -h. For help"
 # Compute LCC & SVD
-.././deriv_exec ./testdata/big/bigtest_bggr.mat -v -l -S ./testdata/big
+#.././deriv_exec ./testdata/big/bigtest_bggr.mat -v -l -S ./testdata/big
 
 # Invariants:
-echo "./inv_exec -h. For help"
-.././inv_exec ./testdata/big/bigtest_bggr.mat b -D fibergraph -A -S ./testdata/big -lf ./testdata/big/LCC/bigtest_concomp.npy
+#echo "./inv_exec -h. For help"
+#.././inv_exec ./testdata/big/bigtest_bggr.mat b -D fibergraph -A -S ./testdata/big -lf ./testdata/big/LCC/bigtest_concomp.npy
 
