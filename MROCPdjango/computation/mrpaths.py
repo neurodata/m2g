@@ -1,6 +1,6 @@
-#
-# Code to load project paths
-#
+"""
+Code to load project paths
+"""
 
 import os, sys
 

@@ -4,11 +4,12 @@ import xml.dom.minidom
 import math
 import numpy as np
 
-#
-#  Makes a ton of assumptions about the XML data.  
-#  Totally customize for MRCAP data.  Needs to be checked with 
-#  anything that's not the original 109 data files on braingraph1
-#
+"""
+Makes a ton of assumptions about the XML data.
+Totally customize for MRCAP data.  Needs to be checked with
+anything that's not the original 109 data files on braingraph1
+"""
+
 class FAXML:
   """"Class to read the *.xml file and pull out important parameters"""
 
@@ -27,7 +28,7 @@ class FAXML:
 
 
 class FAData:
-  """Class to read FA data derived from MRCAP.""" 
+  """Class to read FA data derived from MRCAP."""
 
   # Get the dimension
   def __init__(self, filename, dim):

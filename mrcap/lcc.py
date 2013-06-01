@@ -13,11 +13,11 @@ import fibergraph
 import zindex
 from scipy.io import loadmat, savemat
 from collections import Counter
-#from mayavi import mlab # DISA - I don't have
+#from mayavi import mlab # DM - commented out
 import itertools as itt
 from matplotlib import pyplot as plt
 import fa
-#import mprage # DISA - I don't have
+#import mprage # DM - commented out
 import argparse
 import os
 

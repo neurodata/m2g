@@ -249,8 +249,14 @@ def populate_inv_dict(arg):
       arg[dat] = None
   return arg
 
-
-
-
 if __name__ == '__main__':
-  print 'This file is not to be called directly. Use helpers'
+  inv_dict = {}
+  inv_dict["graph_fn"] = "/data/projects/disa/groundTruthSmGraph_fiber.mat"
+  inv_dict["save_dir"] =  "/Users/disa/MR-connectome/MROCPdjango/computation/tests/profile_results"
+
+  inv_dict["graphsize"] = 's'
+  inv_dict["cc"] = inv_dict["ss1"] = inv_dict["tri"] = inv_dict["mad"] = True
+
+  compute(inv_dict, save = True)
+
+  #python -m cProfile -o profile.pstats invariants.py

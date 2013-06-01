@@ -1,10 +1,12 @@
 #!/usr/bin/python
-"""
-@author: Disa Mhembere
-@organization: Johns Hopkins University
-@contact: disa@jhu.edu
 
-@summary: A module to load and convert graphs and invariant data between mat, npy and csv format
+# convertTo.py
+# Created by Disa Mhembere
+# Email: dmhembe1@jhu.edu
+# Copyright (c) 2013. All rights reserved.
+
+"""
+A module to load and convert graphs and invariant data between mat, npy and csv format
 """
 import scipy.io as sio
 import numpy as np
@@ -18,9 +20,9 @@ def convertLCCNpyToMat(lcc_fn):
   '''
   Convert a npy largest connected components file to an equivalent .mat file.
 
-  @param lcc_fn: largest connected components full file name which should be a .npy
-  @type lcc_fn: string
-
+  positional args:
+  ================
+  lcc_fn - largest connected components full file name which should be a .npy
   '''
   start  = time()
   lcc = np.load(lcc_fn).item().toarray()
@@ -32,8 +34,9 @@ def convertSVDNpyToMat(svd_fn):
   Convert a npy sigular value decomposition file to an equivalent .mat file
   svd_fn - sigular value decomposition full file name which should be a .npy
 
-  @param svd_fn: the full filename of the svd file
-  @type svd_fn: string
+  positional args:
+  ================
+  svd_fn - the full filename of the svd file
   '''
   sio.savemat(os.path.splitext(svd_fn)[0],{'svd': np.load(svd_fn)}, appendmat = True)
 
@@ -42,19 +45,16 @@ def convertAndSave(fn, toFormat, saveLoc, fileType):
   '''
   Convert invariant array between .npy, .csv, .mat.
 
-  @param fn: the filename of the file to be converted
-  @type fn: string
+  positional args:
+  ================
+  fn - the filename of the file to be converted
+  toFormat - the desired output format i.e. a list with optional [.npy, .csv, .mat.].
+  saveLoc - full path of where files are to be saved after conversion
+  fileType - the fileType is the type of invariant ('cc','ss1', 'scanStat1')
 
-  @param toFormat: the desired output format i.e. a list with optional [.npy, .csv, .mat.].
-  @type toFormat: string
-
-  @param saveLoc: full path of where files are to be saved after conversion
-  @type saveLoc: string
-
-  @param fileType: the fileType is the type of invariant ('cc','ss1', 'scanStat1')
-  @type fileType: string
-
-  @todo: Not for fibergraph yet
+  TODO:
+  =====
+  Add fibergraph convert and save case
   '''
 
   fnExt = os.path.splitext(fn)[1]
@@ -94,11 +94,10 @@ def convertGraph(G_fn, toFormat):
   '''
   Convert a graph from mat format to npy format
 
-  @param G_fn: the graph name
-  @type G_fn: string
-
-  @param toFormat: the format to convert to. Either .mat, .npy, csv
-  @type toFormat: string
+  positional args:
+  ================
+  G_fn - the graph name
+  toFormat - the format to convert to. Either .mat, .npy, csv
   '''
   toFormat = '.'+toFormat if not toFormat.startswith('.') else toFormat
   fnExt = os.path.splitext(G_fn)[1]
@@ -124,12 +123,19 @@ def convertGraph(G_fn, toFormat):
 
 def convertGraphToCSV(G_fn, G=None):
   '''
-  @todo: Infesible for big graphs ~9T space & 62 Days!
   Convert a graph .mat format to a dense comma separated value file (.csv)
 
-  @param G_fn: the full file name of the graph file
-  @type G_fn: string
+  positional args:
+  ================
+  G_fn - the full file name of the graph file
 
+  optional args:
+  ================
+  G - the actual graph loaded into memory already
+
+  TODO:
+  =====
+  Infesible for big graphs ~9T space & 62 Days!
   '''
   fnExt = os.path.splitext(G_fn)[1]
   if not G:
@@ -151,50 +157,51 @@ def convertGraphToCSV(G_fn, G=None):
     print ('Sorry your graph is too big. Max size = 500 X 500')
 
 def loadFile(file_fn, fileType):
-    '''
-    Determine how to load a file based on the extension &
-    the fileType
+  '''
+  Determine how to load a file based on the extension &
+  the fileType
 
-    @param file_fn: the filename of the file to be loaded.
-    @type file_fn: string
+  positional args:
+  ================
+  file_fn  - the filename of the file to be loaded.
+  fileType - the fileType to loaded.
 
-    @param fileType: the fileType to loaded.
-    @type fileType: string
+  returns:
+  =======
+  the loaded file
 
-    @return: the loaded file
+  The following are valid fileTypes:
+      1. 'cc'|'clustCoeff' is the clustering coefficient
+      2. 'deg'|'degree' is the local vertex degree
+      3. 'eig'|'eigen' is the eigenvalues
+      4. 'mad'|'maxAvgDeg'
+      5. 'ss1'| 'scanStat1'
+      6. 'ss2'| 'scanStat2'
+      7. 'tri'|'triangle'
+  '''
 
-    The following are valid fileTypes:
-        1. 'cc'|'clustCoeff' is the clustering coefficient
-        2. 'deg'|'degree' is the local vertex degree
-        3. 'eig'|'eigen' is the eigenvalues
-        4. 'mad'|'maxAvgDeg'
-        5. 'ss1'| 'scanStat1'
-        6. 'ss2'| 'scanStat2'
-        7. 'tri'|'triangle'
-    '''
+  fn, ext  = os.path.splitext(file_fn)
+  if (ext == '.mat' and  fileType in settings.VALID_FILE_TYPES.keys()):
+    theFile = sio.loadmat(file_fn)[fileType]
 
-    fn, ext  = os.path.splitext(file_fn)
-    if (ext == '.mat' and  fileType in settings.VALID_FILE_TYPES.keys()):
-      theFile = sio.loadmat(file_fn)[fileType]
+  elif (ext == '.mat'and fileType in settings.VALID_FILE_TYPES.values()):  # All currently available
+    theFile = sio.loadmat(file_fn)[settings.VALID_FILE_TYPES[fileType]]
+    #arr = sio.loadmat(fn) # Temp dict with headers etc + data
+    #dataMemberName = (set(arr.keys()) - set(['__version__', '__header__', '__globals__'])).pop() # extract data member from .mat
+    #arr = arr[dataMemberName]
 
-    elif (ext == '.mat'and fileType in settings.VALID_FILE_TYPES.values()):  # All currently available
-      theFile = sio.loadmat(file_fn)[settings.VALID_FILE_TYPES[fileType]]
-      #arr = sio.loadmat(fn) # Temp dict with headers etc + data
-      #dataMemberName = (set(arr.keys()) - set(['__version__', '__header__', '__globals__'])).pop() # extract data member from .mat
-      #arr = arr[dataMemberName]
+  elif (ext == '.npy'):
+    theFile = np.load(file_fn)
 
-    elif (ext == '.npy'):
-      theFile = np.load(file_fn)
+  elif (ext == '.csv'): # CSV for invariants only graphs will not work
+    f = open(file_fn,'rt')
+    try:
+      reader = csv.reader(f)
+      theFile = reader.next() # Expecting one line with all invariant values
+    except:
+      print "[ERROR:] CSV read file failure!"
+    finally:
+      f.close()
+    theFile = np.array(theFile)
 
-    elif (ext == '.csv'): # CSV for invariants only graphs will not work
-      f = open(file_fn,'rt')
-      try:
-        reader = csv.reader(f)
-        theFile = reader.next() # Expecting one line with all invariant values
-      except:
-        print "[ERROR:] CSV read file failure!"
-      finally:
-        f.close()
-      theFile = np.array(theFile)
-
-    return theFile
+  return theFile

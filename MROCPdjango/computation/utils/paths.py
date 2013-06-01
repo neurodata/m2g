@@ -1,6 +1,6 @@
-#
-# Code to load necessary paths
-#
+"""
+Code to load necessary paths
+"""
 
 import os, sys
 

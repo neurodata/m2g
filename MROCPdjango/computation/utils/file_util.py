@@ -5,7 +5,10 @@
 # Email: dmhembe1@jhu.edu
 # Copyright (c) 2013. All rights reserved.
 
-# make a directory if none exists
+"""
+A script containing useful file related operations that are performed
+with frequency.
+"""
 
 import os
 
@@ -13,7 +16,9 @@ def makeDirIfNone(dirname):
   '''
   Make a directory if none exists already
 
-  @param dirname: the directory to be created
+  positional args:
+  ================
+  dirname - the directory to be created
   '''
   if os.path.exists(dirname):
     return
@@ -26,8 +31,10 @@ def createSave(fn, content):
   Wrapper for numpy.save(fn, content)
   but creates the dir if not already there
 
-  @param fn: file name
-  @param content: numpy saveable file
+  positional args:
+  ================
+  fn - file name
+  content - numpy saveable file
   '''
   from numpy import save
 
@@ -37,7 +44,10 @@ def createSave(fn, content):
 def getPathLeaf(path):
   '''
   Get the leaf of a path
-  @param path: the full path of which you want to extract the leaf
+
+  positional args:
+  ================
+  path - the full path of which you want to extract the leaf
   '''
   import ntpath
 
@@ -47,8 +57,14 @@ def getPathLeaf(path):
 def loadAnyMat(fn, data_elem=None):
   '''
   Load up arbitrary.mat matrix as a csc matrix
-  @param fn: the filename
-  @param data_ele: the data element item name
+
+  positional args:
+  ================
+  fn - the filename
+
+  optional args:
+  ================
+  data_elem - the data element item name
   '''
   from scipy.io import loadmat
   from scipy.sparse import csc_matrix as csc

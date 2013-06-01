@@ -5,8 +5,10 @@
 # Email: dmhembe1@jhu.edu
 # Copyright (c) 2013. All rights reserved.
 
-# Script to provide CL interface to computing Largest Connected Component and
-# Single Value Decomposition
+"""
+Script to provide command line interface to computing Largest Connected Component and
+Single Value Decomposition
+"""
 
 import argparse
 import os
@@ -22,6 +24,18 @@ from computation.utils.getBaseName import getBaseName
 #                      LARGEST CONNECTED COMPONENT                             #
 ################################################################################
 def compute_lcc(graph_fn, save_dir, lcc_fn=None):
+  """
+  Run code to compute the largest connected component
+
+  positional args:
+  ================
+  graph_fn - the full file name of the graph
+  save_dir - full path of where the resulting lcc should be saved
+
+  optional args:
+  =============
+  lcc_fn - the name of the new lcc file
+  """
   lcc_dir = os.path.join(save_dir, "LCC")
   LCC_FN_SFX = '_concomp'
 
@@ -41,6 +55,22 @@ def compute_lcc(graph_fn, save_dir, lcc_fn=None):
 #                        SINGLE VALUE DECOMPOSITION                            #
 ################################################################################
 def compute_svd(lcc_fn, graph_fn, save_dir, svd_fn, dim=10):
+  """
+  Run code to compute the singular value decomposition of the adjacency matrix
+
+  positional args:
+  ================
+  lcc_fn - the full file name of the largest connected component file
+  graph_fn - the full filr name of the graph (adj matrix)
+  save_dir - path of where to save created svd
+  svd_fn - name of the created svd file
+
+  optional args:
+  =============
+
+  dim - embedding dimension default is 10
+  """
+
   svd_dir = os.path.join(save_dir, "SVD")
   SVD_FN_SFX = '_embed'
 
@@ -58,6 +88,10 @@ def compute_svd(lcc_fn, graph_fn, save_dir, svd_fn, dim=10):
 
 
 def main():
+  """
+  Main function runs functions according to command line args
+  """
+
   default_save_dir = os.path.join(os.path.dirname(__file__), 'mrdata', 'derivatives')
 
   parser = argparse.ArgumentParser(description='Run graph generation code based on size of graph')
