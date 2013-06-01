@@ -1,8 +1,8 @@
 from scipy.sparse import lil_matrix, csc_matrix
 from scipy.io import loadmat, savemat
-from fiber import Fiber
-import roi
-import mask
+from mrcap.fiber import Fiber
+import mrcap.roi
+import mrcap.mask
 import zindex
 import math
 import itertools
