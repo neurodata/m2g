@@ -14,7 +14,7 @@ import os
 import sys
 from time import time
 import scipy.io as sio
-from file_util import loadAnyMat
+from computation.utils.file_util import loadAnyMat
 
 def loadAdjMat(G_fn, lcc_fn):
   """
