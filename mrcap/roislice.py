@@ -4,11 +4,11 @@ import matplotlib.pyplot
 import roi
 import sys
 
-#
-#  roislice
-#
-#  Draw an ROI XY slice using matplotlib.pyplot as a pcolor graph
-#
+"""
+  roislice
+
+  Draw an ROI XY slice using matplotlib.pyplot as a pcolor graph
+"""
 
 def main ():
 
@@ -23,7 +23,7 @@ def main ():
   # Read the XML file and then the data
   try:
     roix = roi.ROIXML( result.roixmlfile )
-    rois = roi.ROIData ( result.roirawfile, roix.getShape() ) 
+    rois = roi.ROIData ( result.roirawfile, roix.getShape() )
   except:
     print "Failed to parse ROI files at: ", result.roixmlfile, result.roixmlfile
     assert 0

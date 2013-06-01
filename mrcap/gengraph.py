@@ -9,19 +9,17 @@ import argparse
 import sys
 import os
 import roi
-#import mask
-#from fibergraph import FiberGraph
-#from fibergraph_sm import FiberGraph
 from fiber import FiberReader
 
-
-#
-# Generate a sparse graph of an MRI file
-#   based on input and output names.
-#   Outputs a matlab file.
-#
 def genGraph(infname, outfname, roixmlname = None, roirawname = None, bigGraph = False , numfibers=0): # Edit
   """
+
+  Generate a sparse graph of an MRI file
+  based on input and output names.
+  Outputs a matlab file.
+
+  positional args:
+  ================
   infname - file name of _fiber.dat file
   outfname - Dir+fileName of output .mat file
   roixmlname - file name of _roi.xml file

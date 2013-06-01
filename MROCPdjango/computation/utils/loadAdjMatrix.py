@@ -1,14 +1,12 @@
 #!/usr/bin/python
 
-# newloadAdjMatrix.py
-# Created by Disa Mhembere on 2013-02-19.
-# Copyright (c) 2013. All rights reserved.
-
-#!/usr/bin/python
-
+# loadAdjMatrix.py
 # Author: Disa Mhembere, Johns Hopkins University
 # Separated: 10/2/2012
-# Load up an adjacency matrix given G_fn, lcc & roiRoot
+
+"""
+Load up an adjacency matrix given G_fn, lcc & roiRoot
+"""
 
 import argparse
 import mrcap.lcc as lcc
@@ -19,11 +17,18 @@ import scipy.io as sio
 from file_util import loadAnyMat
 
 def loadAdjMat(G_fn, lcc_fn):
-  '''
-  Load adjacency matrix given lcc_fn & G_fn. lcc has z-indicies corresponding to the lcc :
+  """
+  Load adjacency matrix given lcc_fn & G_fn. lcc has z-indicies corresponding to the lcc.
+
+  positional args:
+  ================
   G_fn - the .mat file holding graph
   lcc_fn - the largest connected component .npy z-ordering
-  '''
+
+  returns:
+  =======
+  G_lcc - The largest connected component of a graph
+  """
 
   start = time()
   print "Loading adjacency matrix..."
@@ -48,13 +53,16 @@ def loadAdjMat(G_fn, lcc_fn):
   return G_lcc
 
 def main():
+  """
+  CL parser and main runner
+  """
 
-    parser = argparse.ArgumentParser(description='Calculate Max Avg Degree estimate as max eigenvalue for biggraphs')
-    parser.add_argument('G_fn', action='store',help='Full filename sparse graph (.mat)')
-    parser.add_argument('lcc_fn', action='store',help='Full filename of largest connected component (.npy)')
+  parser = argparse.ArgumentParser(description='Calculate Max Avg Degree estimate as max eigenvalue for biggraphs')
+  parser.add_argument('G_fn', action='store',help='Full filename sparse graph (.mat)')
+  parser.add_argument('lcc_fn', action='store',help='Full filename of largest connected component (.npy)')
 
-    result = parser.parse_args()
-    loadAdjMat(result.G_fn, result.lcc_fn)
+  result = parser.parse_args()
+  loadAdjMat(result.G_fn, result.lcc_fn)
 
 if __name__ == '__main__':
   main()

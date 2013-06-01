@@ -5,7 +5,9 @@
 # Email: dmhembe1@jhu.edu
 # Copyright (c) 2013. All rights reserved.
 
-# A python script to run invariants on a file based on CL flag
+"""
+A python script to run invariants on a file based on CL flag
+"""
 
 import argparse
 import sys
@@ -30,9 +32,11 @@ from computation.utils.file_util import getPathLeaf, makeDirIfNone
 ################################################################################
 def compute_inv(inv_dict):
   '''
-  @todo
-  @param lccG: Sparse largest connected component adjacency matrix
-  @param inv_dict: current session dict containing session varibles
+  Used to call code to run invariat computation
+
+  positional args:
+  ================
+  inv_dict: current session dict containing session varibles
   '''
   # Add filenames with None attached since invariant computations look
   # for filenames when asked to compute an invariant - if they see 'None'
@@ -52,6 +56,10 @@ def compute_inv(inv_dict):
 
 
 def main():
+  """
+  Command line parser to determine what invariants to compute and
+  what data is passed in. This is the meat of the script
+  """
   # Constants
   SM_GRAPH_FN_SFX = '_70_smgr' # 70 may change
   BG_GRAPH_FN_SFX = '_bggr'

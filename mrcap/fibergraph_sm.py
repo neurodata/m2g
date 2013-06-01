@@ -8,38 +8,38 @@ import math
 import itertools
 from cStringIO import StringIO
 
-
-# fibgergraph_sm provides the same interfaces as fibergraph but 
-#  makes the 70 x 70 matrix
-
-#
-#  This routine uses two different sparse matrix representations.
-#  The calls need to be performed in the following order
-#
-#     Create FiberGraph
-#     Add Edges (lil format)
-#     Complete -- this converts from dictionary of keys format to Column CSC
-#     Write or SVD (on csc format)
-#
+"""
+ fibgergraph_sm provides the same interfaces as fibergraph but
+  makes the 70 x 70 matrix
 
 
-#
-#  Sparse matrix representation of a Fiber graph
-#
+  This routine uses two different sparse matrix representations.
+  The calls need to be performed in the following order
+
+    Create FiberGraph
+    Add Edges (lil format)
+    Complete -- this converts from dictionary of keys format to Column CSC
+    Write or SVD (on csc format)
+
+"""
+
 class FiberGraph:
+  """
+    Sparse matrix representation of a Fiber graph
+  """
 
-  #
-  # Constructor: number of nodes in the graph
-  #   convert it to a maximum element
-  #
   def __init__(self, matrixdim, rois, mask ):
-    
+    """
+     Constructor: number of nodes in the graph
+       convert it to a maximum element
+    """
+
     # Regions of interest
     self.rois = rois
 
     # Brainmask
 #    self.mask = mask
-    
+
     # Get the maxval from the number of rois
 #    self._maxval = rois.maxval()
     self._maxval = 70
@@ -50,14 +50,15 @@ class FiberGraph:
     self.spcscmat = csc_matrix ( (self._maxval, self._maxval), dtype=float )
 
 
-  #
-  # Destructor
-  #
+
   def __del__(self):
+    """
+      Destructor
+    """
     pass
-  
+
   #
-  # Add a fiber to the graph.  
+  # Add a fiber to the graph.
   #  This is not idempotent, i.e. if you add the same fiber twice you get a different result
   #  in terms of graph weigths.
   #
@@ -70,19 +71,19 @@ class FiberGraph:
     roilist = []
     # Use only the important voxels
     for i in allvoxels:
-      
+
     # this is for the small graph version
-       xyz = zindex.MortonXYZ(i) 
+       xyz = zindex.MortonXYZ(i)
        roival = self.rois.get(xyz)
        # if it's an roi and in the brain
-#       if roival and self.mask.get (xyz): 
+#       if roival and self.mask.get (xyz):
        if roival:
          roilist.append ( roi.translate( roival ) )
-       
+
     roilist = set ( roilist )
 
-    for v1,v2 in itertools.combinations((roilist),2): 
-      if ( v1 < v2 ):  
+    for v1,v2 in itertools.combinations((roilist),2):
+      if ( v1 < v2 ):
         self.spedgemat [ v1, v2 ] += 1.0
       else:
         self.spedgemat [ v2, v1 ] += 1.0
@@ -119,7 +120,7 @@ class FiberGraph:
 
     print "Reading key ", key, " from file ", filename
 
-    # first convert to csc 
+    # first convert to csc
     t = loadmat ( filename  )
     self.spcscmat = t[key]
 
