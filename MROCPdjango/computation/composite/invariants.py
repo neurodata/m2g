@@ -257,6 +257,11 @@ def populate_inv_dict(arg):
   return arg
 
 if __name__ == '__main__':
+
+  # Added for -h flag
+  parser = argparse.ArgumentParser(description="Script to run selected invariants")
+  result =  parser.parse_args()
+
   inv_dict = {}
   inv_dict["graph_fn"] = "/data/projects/disa/groundTruthSmGraph_fiber.mat"
   inv_dict["save_dir"] =  "/Users/disa/MR-connectome/MROCPdjango/computation/tests/profile_results"

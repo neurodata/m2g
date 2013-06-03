@@ -332,6 +332,11 @@ def main ():
 
 
 if __name__=='__main__':
+
+    # Added for -h flag # DM
+    parser = argparse.ArgumentParser(description="Largest connected component generator")
+    result =  parser.parse_args()
+
     graphDir = '/mnt/braingraph1data/projects/MRN/graphs/biggraphs/'
     roiDir = '/mnt/braingraph1data/projects/will/mar12data/roi/'
     ccDir = '/data/biggraphs/connectedcomp/'
