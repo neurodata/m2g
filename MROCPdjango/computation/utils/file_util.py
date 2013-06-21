@@ -94,6 +94,19 @@ def loadAnyMat(fn, data_elem=None):
   return G
 
 def recursive_listdir(drcty, hidden=False):
+  """
+  Recursively list a directory.
+  *NOTE - only includes filenames not starting with . and whose extension has 2 or less chars
+
+  positional args:
+  ================
+  drcty - the directory to recursively list
+
+  optional args:
+  ==============
+  hidden - Include hidden directories in the listing
+  """
+
   filelist = []
   for top, dirs, files in os.walk(drcty):
     for nm in files:
