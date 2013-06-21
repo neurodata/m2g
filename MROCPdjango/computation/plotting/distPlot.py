@@ -39,7 +39,7 @@ def plotInvDist(invDir, pngName, numBins =100):
   
   pl.figure(2)
   fig_gl, axes = pl.subplots(nrows=3, ncols=2)
-  fig_gl.tight_layout()
+#  fig_gl.tight_layout()
   
   for idx, drcty in enumerate (invDirs):
     for arrfn in glob(os.path.join(invDir, drcty,'*.npy')): 
@@ -110,7 +110,7 @@ def plotInvDist(invDir, pngName, numBins =100):
     pl.xlabel('eigenvalue rank')
     
   ''' Edges '''
-  arrfn = os.path.join(invDir, 'numEdges.npy')
+  arrfn = os.path.join(invDir, 'Globals', 'numEdges.npy')
   try:
     arr = np.load(arrfn)
     arr = np.log(arr[arr.nonzero()])
@@ -138,7 +138,8 @@ def plotInvDist(invDir, pngName, numBins =100):
   pl.ylabel('Frequency')
   pl.xlabel('log global edge number')
   
-  pl.savefig(pngName+'.pdf') 
+  #pl.savefig(pngName+'.pdf') 
+  pl.savefig(pngName+'.png') 
   
 def main():
     

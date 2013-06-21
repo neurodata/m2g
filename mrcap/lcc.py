@@ -8,15 +8,15 @@ pyximport.install()
 
 import numpy as np
 from scipy import sparse as sp
-import roi
-import fibergraph
+import mrcap.roi
+import mrcap.fibergraph
 import zindex
 from scipy.io import loadmat, savemat
 from collections import Counter
 #from mayavi import mlab # DM - commented out
 import itertools as itt
 from matplotlib import pyplot as plt
-import fa
+import mrcap.fa
 #import mprage # DM - commented out
 import argparse
 import os
@@ -332,6 +332,11 @@ def main ():
 
 
 if __name__=='__main__':
+
+    # Added for -h flag # DM
+    parser = argparse.ArgumentParser(description="Largest connected component generator")
+    result =  parser.parse_args()
+
     graphDir = '/mnt/braingraph1data/projects/MRN/graphs/biggraphs/'
     roiDir = '/mnt/braingraph1data/projects/will/mar12data/roi/'
     ccDir = '/data/biggraphs/connectedcomp/'

@@ -1,17 +1,15 @@
 import argparse
 
 import matplotlib.pyplot
-import roi
+import mrcap.roi
 import sys
 
-"""
-  roislice
-
-  Draw an ROI XY slice using matplotlib.pyplot as a pcolor graph
-"""
-
 def main ():
+  """
+    roislice
 
+    Draw an ROI XY slice using matplotlib.pyplot as a pcolor graph
+  """
   parser = argparse.ArgumentParser(description='Draw the ROI map of a brain.')
   parser.add_argument('roixmlfile', action="store")
   parser.add_argument('roirawfile', action="store")
