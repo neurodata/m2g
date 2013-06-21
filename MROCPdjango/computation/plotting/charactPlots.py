@@ -26,6 +26,7 @@ def plotInvDist(invDir, pngName, numBins =100, char = 'class', big = False):
   triDir = "Triangle"
 
   invDirs = [triDir, ccDir, SS1dir, DegDir ]
+  #invDirs = []
 
   if not os.path.exists(invDir):
     print "%s does not exist" % invDir
@@ -71,46 +72,48 @@ def plotInvDist(invDir, pngName, numBins =100, char = 'class', big = False):
 
       plot_color = pickprintcolor(subj_types, arrfn)
 
-      if (idx == 1 and plot_color == 'grey' and not maleLabelAdded):
-        pl.plot(x, interp*100, color = plot_color, linewidth=1, label = 'male')
-        plt.legend(bbox_to_anchor=(0.7, 1.3), loc=2, prop={'size':8}, borderaxespad=0.)
+      if (idx == 1 and plot_color == 'black' and not maleLabelAdded):
+        #pl.plot(x, interp*100, color = plot_color, linewidth=1, label = 'male')
+        #plt.legend(bbox_to_anchor=(0.7, 1.3), loc=2, prop={'size':8}, borderaxespad=0.)
         maleLabelAdded = True
 
-      if (idx == 1 and plot_color == 'cyan' and not femaleLabelAdded):
-        pl.plot(x, interp*100, color = plot_color, linewidth=1, label = 'female')
-        plt.legend(bbox_to_anchor=(0.7, 1.3), loc=2, prop={'size':8}, borderaxespad=0.)
+      if (idx == 1 and plot_color == 'blue' and not femaleLabelAdded):
+        #pl.plot(x, interp*100, color = plot_color, linewidth=1, label = 'female')
+        #plt.legend(bbox_to_anchor=(0.7, 1.3), loc=2, prop={'size':8}, borderaxespad=0.)
         femaleLabelAdded = True
       else:
         pl.plot(x, interp*100, color = plot_color, linewidth=1)
 
     if idx == 0:
-      pl.ylabel('Percent')
-      pl.xlabel('Log Number of Local Triangles')
+			pass
+      #pl.ylabel('Percent')
+      #pl.xlabel('Log Number of Local Triangles')
 
 
     if idx == 1:
+      idx = idx
       #pl.ylabel('Probability') #**
-      pl.xlabel('Log Local Clustering Coefficient')
+      #pl.xlabel('Log Local Clustering Coefficient')
 
       if big and char == 'class':
         ax.set_yticks(scipy.arange(0,3,1))
 
     if idx == 2:
-      pl.ylabel('Percent')
-      pl.xlabel('Log scan_1 statistic')
+      idx = idx
+      #pl.ylabel('Percent')
+      #pl.xlabel('Log scan_1 statistic')
 
       if big:
-	if char == 'class':
           ax.set_yticks(scipy.arange(0,3,1))
       else:
         ax.set_yticks(scipy.arange(0,12,2))
 
     if idx == 3:
-      pl.xlabel('Log Degree')
+      idx = idx
+      #pl.xlabel('Log Degree')
 
       if big:
-	if char == 'class':
-          ax.set_yticks(scipy.arange(0,4,1))
+        ax.set_yticks(scipy.arange(0,4,1))
       else:
         ax.set_yticks(scipy.arange(0,15,3))
         ax.set_xticks(scipy.arange(0,5,1))
@@ -129,8 +132,8 @@ def plotInvDist(invDir, pngName, numBins =100, char = 'class', big = False):
     plot_color = pickprintcolor(subj_types, eigValInstance)
 
     pl.plot(range(1,n+1), sa/10000, color=plot_color)
-    pl.ylabel('Magnitude x $10^4$')
-    pl.xlabel('Eigenvalue rank')
+    #pl.ylabel('Magnitude x $10^4$')
+    #pl.xlabel('Eigenvalue rank')
 
     if big:
       ax.set_yticks(scipy.arange(0,18,3))
@@ -183,9 +186,9 @@ def plotInvDist(invDir, pngName, numBins =100, char = 'class', big = False):
     interp[ltz] = 0
 
     if cnt == 0: # zeros
-      plot_color = 'grey'
+      plot_color = 'black'#'grey'
     if cnt == 1: # ones
-      plot_color = 'cyan'
+      plot_color = 'blue'#'cyan'
     if cnt == 2:# twos
       plot_color = 'green'
     if cnt == 3: # ALL
@@ -193,12 +196,13 @@ def plotInvDist(invDir, pngName, numBins =100, char = 'class', big = False):
 
     pl.plot(x, interp,color = plot_color ,linewidth=1)
 
-  pl.ylabel('Frequency')
-  pl.xlabel('Log Global Edge Number')
+  #pl.ylabel('Frequency')
+  #pl.xlabel('Log Global Edge Number')
 
   caption = 'Six invariants '
 
-  pl.savefig(pngName+'.pdf')
+  #pl.savefig(pngName+'.pdf')
+  pl.savefig(pngName+'.png', dpi=1024)
   print '~**** FIN ****~'
 
 #########################################
