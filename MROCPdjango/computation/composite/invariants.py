@@ -21,7 +21,12 @@ from computation.utils.file_util import createSave
 
 def compute(inv_dict, save=True):
   '''
-  @param inv_dict: is a dict optinally containing any of these:
+  Actual function that computes invariants and saves them to a location
+
+  positional arguments:
+  =====================
+
+  inv_dict: is a dict optinally containing any of these:
     - inv_dict['edge']: boolean for global edge count
     - inv_dict['ver']: boolean for global vertex number
     - inv_dict['tri']: boolean for local triangle count
@@ -36,7 +41,9 @@ def compute(inv_dict, save=True):
     - inv_dict['mad']: boolean for maximum average degree
     - inv_dict['save_dir']: the base path where all invariants will create sub-dirs & be should be saved
 
-  @param save: boolean for auto save or not. TODO: use this
+  optional arguments:
+  ===================
+  save: boolean for auto save or not. TODO: use this
   '''
   # Popualate inv_dict
   inv_dict = populate_inv_dict(inv_dict)
@@ -223,7 +230,7 @@ def compute(inv_dict, save=True):
   return inv_dict # TODO: Fix code this breaks. Originally was [tri_fn, deg_fn, MAD_fn, eigvl_fn, eigvect_fn]
 
 def populate_inv_dict(arg):
-
+  """ Ensures the invariant dictionary input contains all necessary fields in order to not raise keyError exceptions"""
   fns = ['ss1_fn', 'tri_fn', 'deg_fn', 'ss2_fn', 'apl_fn', 'ver_fn',
           'mad_fn', 'gdia_fn', 'cc_fn', 'eigvl_fn', 'eigvect_fn', 'edge_fn']
   invs = ['ss1', 'tri', 'deg', 'ss2', 'apl', 'ver', 'eig',
@@ -250,6 +257,11 @@ def populate_inv_dict(arg):
   return arg
 
 if __name__ == '__main__':
+
+  # Added for -h flag
+  parser = argparse.ArgumentParser(description="Script to run selected invariants")
+  result =  parser.parse_args()
+
   inv_dict = {}
   inv_dict["graph_fn"] = "/data/projects/disa/groundTruthSmGraph_fiber.mat"
   inv_dict["save_dir"] =  "/Users/disa/MR-connectome/MROCPdjango/computation/tests/profile_results"

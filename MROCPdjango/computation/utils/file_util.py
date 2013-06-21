@@ -92,3 +92,27 @@ def loadAnyMat(fn, data_elem=None):
   if not isinstance(G, csc):
     G = csc(G)
   return G
+
+def recursive_listdir(drcty, hidden=False):
+  """
+  Recursively list a directory.
+  *NOTE - only includes filenames not starting with . and whose extension has 2 or less chars
+
+  positional args:
+  ================
+  drcty - the directory to recursively list
+
+  optional args:
+  ==============
+  hidden - Include hidden directories in the listing
+  """
+
+  filelist = []
+  for top, dirs, files in os.walk(drcty):
+    for nm in files:
+      if hidden:
+        filelist.append(os.path.join(top, nm)) # add no matter what when hidden is true
+
+      elif not nm.startswith(".") and len(os.path.splitext(nm)[1]) <= 3: # only add if not hidden
+        filelist.append(os.path.join(top, nm))
+  return filelist

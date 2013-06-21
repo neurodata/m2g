@@ -8,8 +8,8 @@
 import argparse
 import sys
 import os
-import roi
-from fiber import FiberReader
+import mrcap.roi
+from mrcap.fiber import FiberReader
 
 def genGraph(infname, outfname, roixmlname = None, roirawname = None, bigGraph = False , numfibers=0): # Edit
   """

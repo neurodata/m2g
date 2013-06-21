@@ -205,14 +205,14 @@ def getPlotColor(proccCnt, allmat = True):
     if proccCnt == 1: # zero
       return 'grey'
     if proccCnt == 2: # one
-      return 'blue'
+      return 'red'
     if proccCnt == 3: # two
       return 'green'
   else:
     if proccCnt == 0: # zero
       return 'grey'
     if proccCnt == 1: # one
-      return 'blue'
+      return 'red'
     if proccCnt == 2: # two
       return 'green'
 
@@ -226,9 +226,9 @@ def pickprintcolor(charDict, arrfn):
   charDict: dict
   '''
   if (charDict[(arrfn.split('/')[-1]).split('_')[0]] == '0'):
-    plot_color = 'grey'
+    plot_color = 'black'#'grey'
   elif (charDict[(arrfn.split('/')[-1]).split('_')[0]] == '1'):
-    plot_color = 'cyan'
+    plot_color = 'red'#'cyan'
   elif (charDict[(arrfn.split('/')[-1]).split('_')[0]] == '2'):
     plot_color = 'green'
   else:
