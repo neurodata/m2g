@@ -15,7 +15,7 @@ import os
 
 from computation.utils import loadAdjMatrix
 
-import computation.composite.invariants
+import computation.composite.invariants as invariants
 
 import mrcap.lcc as lcc
 import mrcap.svd as svd
