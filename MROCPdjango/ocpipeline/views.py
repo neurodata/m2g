@@ -450,21 +450,10 @@ def download(request, webargs=None):
 def asyncInvCompute(request):
 
   for graph_fn in request.session['uploaded_graphs']:
-
     lcc_fn = None
+
     if request.session['graphsize'] == 'big':
-      poss_lcc_fn = [] # possible names for lcc_fn
-      poss_lcc_fn.append(os.path.join(os.path.dirname(graph_fn), (os.path.basename(graph_fn).split('_')[0]+ '_concomp.npy'))) # legacy mrcap
-      poss_lcc_fn.append(os.path.splitext(graph_fn)[0] + '_concomp.npy')
-
-      #import pdb; pdb.set_trace()
-      print "Looking for possible LCCs..."
-      for fn in poss_lcc_fn:
-        if os.path.exists(fn):
-          lcc_fn = fn
-        else:
-          print "Print possible LCC %s not found ..." % fn
-
+      lcc_fn = getLCCfn(graph_fn)
       if not lcc_fn:
         lcc_fn = os.path.splitext(graph_fn)[0] + '_concomp.npy'
         print "No precomputed LCC found. Computing LCC %s" % lcc_fn
@@ -479,15 +468,16 @@ def asyncInvCompute(request):
 
       # TODO: Make function for this. Duplicate of buildgraph code
       if request.session.has_key('invConvertToFormats'):
-        for fileFormat in request.session['invConvertToFormats'] :
-          # Conversion of all files
-          for inv in invariant_fns.keys():
-            if isinstance(invariant_fns[inv], list): # Case of eigs
-              for fn in invariant_fns[inv]:
-                convertTo.convertAndSave(fn, fileFormat, os.path.dirname(fn), inv)
-            else: # case of all other invariants
-              convertTo.convertAndSave(invariant_fns[inv], fileFormat, \
-                                  os.path.dirname(invariant_fns[inv]), inv)
+        convertInvariants(request.session['invConvertToFormats'], invariant_fns )
+        #for fileFormat in request.session['invConvertToFormats'] :
+        #  # Conversion of all files
+        #  for inv in invariant_fns.keys():
+        #    if isinstance(invariant_fns[inv], list): # Case of eigs
+        #      for fn in invariant_fns[inv]:
+        #        convertTo.convertAndSave(fn, fileFormat, os.path.dirname(fn), inv)
+        #    else: # case of all other invariants
+        #      convertTo.convertAndSave(invariant_fns[inv], fileFormat, \
+        #                          os.path.dirname(invariant_fns[inv]), inv)
 
     except Exception:
       raise Exception
@@ -500,6 +490,44 @@ def asyncInvCompute(request):
   # Email user of job finished
   sendJobCompleteEmail(request.session['email'], "http://mrbrain.cs.jhu.edu"+ request.session['dataDir'].replace(' ','%20'))
 
+############################################################
+
+def convertInvariants(invConvertToFormats, invariant_fns):
+  '''
+  Convert a bunch of invariants to a format requested
+  @param invConvertToFormats - mat, npy [soon csv]
+  @param invariant_fns - dict with key -> invariant name & value -> invariant file name
+  '''
+  #import pdb; pdb.set_trace()
+  #for fileFormat in invConvertToFormats:
+  # Conversion of all files
+  for inv in invariant_fns.keys():
+    if isinstance(invariant_fns[inv], list): # Case of eigs
+      for fn in invariant_fns[inv]:
+        convertTo.convertAndSave(fn, invConvertToFormats, os.path.dirname(fn), inv)
+    else: # case of all other invariants
+      convertTo.convertAndSave(invariant_fns[inv], invConvertToFormats, \
+                          os.path.dirname(invariant_fns[inv]), inv)
+
+##############################################################
+
+def getLCCfn(graph_fn):
+  '''
+  Look for LCC corresponding to graph file name in accordance with website naming rules
+  @param graphfn - the full file name of the graph
+  '''
+  lcc_fn = None
+  poss_lcc_fn = [] # possible names for lcc_fn
+  poss_lcc_fn.append(os.path.join(os.path.dirname(graph_fn), (os.path.basename(graph_fn).split('_')[0]+ '_concomp.npy'))) # legacy MRCAP
+  poss_lcc_fn.append(os.path.splitext(graph_fn)[0] + '_concomp.npy')
+
+  print "Looking for possible LCCs..."
+  for fn in poss_lcc_fn:
+    if os.path.exists(fn):
+      lcc_fn = fn
+    else:
+      print "Print possible LCC %s not found ..." % fn
+  return lcc_fn
 
 #########################################
 #	*******************		#
@@ -527,11 +555,7 @@ def graphLoadInv(request, webargs=None):
       # We got a zip
       if os.path.splitext(data.name)[1] == '.zip':
         writeBodyToDisk(data.read(), dataDir)
-
-        graphs = glob(os.path.join(dataDir,'*.mat'))
-        for fn in graphs: # remove any concomp if any exist
-          if fn[-12:] == '_concomp.npy': # if you named your concomp.npy something wrong too bad
-            graphs.remove(fn) # Works becuase there can never be duplicates in a dir
+        graphs = glob(os.path.join(dataDir,'*.mat')) # TODO: better way to make sure we are actually collecting graphs here
 
       else: # View only accepts .mat & zip as regulated by template
         graphs = [os.path.join(dataDir, data.name)]
@@ -554,39 +578,12 @@ def graphLoadInv(request, webargs=None):
       request.session['success_msg'] += "If you do not see an email in your INBOX check the SPAM folder and add jhmrocp@cs.jhu.edu to your safe list."
       return HttpResponseRedirect(get_script_prefix()+'success')
 
-      #else:
-      #  for graph_fn in graphs:
-      #    graph_fn = request.session['smGrfn'] = graph_fn
-      #    lcc_fn = None
-      #
-      #    invariant_fns = runInvariants(request.session['invariants'], graph_fn,
-      #                    request.session['graphInvariants'], lcc_fn,
-      #                    request.session['graphsize'])
-      #
-      #    print 'Invariants for annoymous project %s complete...' % graph_fn
-      #
-      #    invConvertToFormats =  form.cleaned_data['Convert_result']
-      #
-      #    # TODO: Make function for this. Duplicate of buildgraph code
-      #    for fileFormat in invConvertToFormats:
-      #      # Conversion of all files
-      #      for inv in invariant_fns.keys():
-      #        if isinstance(invariant_fns[inv], list): # Case of eigs
-      #          for fn in invariant_fns[inv]:
-      #            convertTo.convertAndSave(fn, fileFormat, os.path.dirname(fn), inv)
-      #        else: # case of all other invariants
-      #          convertTo.convertAndSave(invariant_fns[inv], fileFormat, \
-      #                              os.path.dirname(invariant_fns[inv]), inv)
-      #
-      #return HttpResponseRedirect("http://mrbrain.cs.jhu.edu"+ dataDir.replace(' ','%20')) # All spaces are replaced with %20 for urls
-
+  # Programmatic RESTful API
   elif request.method == 'POST' and webargs:
     if (re.match(re.compile('(l|lcc)', re.IGNORECASE), webargs.split('/')[0])):
       request.session['graphsize'] = 'big'
     else:
-       request.session['graphsize'] = 'small'
-    #else:
-      #return django.http.HttpResponseBadRequest("The graph size is required as a web argument")
+      request.session['graphsize'] = 'small'
 
     dataDir = os.path.join(settings.MEDIA_ROOT, 'tmp', strftime("projectStamp%a%d%b%Y_%H.%M.%S/", localtime()))
     makeDirIfNone([dataDir])
@@ -594,29 +591,35 @@ def graphLoadInv(request, webargs=None):
     uploadedZip = writeBodyToDisk(request.body, dataDir)[0]
 
     zipper.unzip(uploadedZip, dataDir) # Unzip the zip
-    os.remove(uploadedZip) # Delete the zip)
+    os.remove(uploadedZip) # Delete the zip
 
-    request.session['invariants'] = webargs.split('/')[1].split(',')
-
-    graphs = glob(os.path.join(dataDir,'*_fiber.mat'))
-    graphs.extend(glob(os.path.join(dataDir,'*_bggr.mat')))
-    graphs.extend(glob(os.path.join(dataDir,'*_smgr.mat')))
+    idx = 1 if request.session['graphsize'] ==  'big' else 0
+    request.session['invariants'] = webargs.split('/')[idx].split(',')
+    graphs = glob(os.path.join(dataDir,'*.mat'))
 
     request.session['graphInvariants'] = os.path.join(dataDir, 'graphInvariants')
 
     for graph_fn in graphs:
+      lcc_fn = None
       if request.session['graphsize'] == 'big':
-        request.session['bgGrfn'] = graph_fn
-        lcc_fn = graph_fn.split('_')[0] + '_concomp.mat'
+        lcc_fn = getLCCfn(graph_fn)
 
-      elif request.session['graphsize'] == 'small':
-        request.session['smGrfn'] = graph_fn
-        lcc_fn = None
+        if not lcc_fn:
+          lcc_fn = os.path.splitext(graph_fn)[0] + '_concomp.npy'
+          print "No precomputed LCC found. Computing LCC %s" % lcc_fn
+          lcc.process_single_brain(graph_fn, lcc_fn)
 
-      runInvariants(request.session['invariants'], graph_fn,
+      invariant_fns = runInvariants(request.session['invariants'], graph_fn,
                         request.session['graphInvariants'], lcc_fn,
                         request.session['graphsize'])
-      print 'Invariants for annoymous project %s complete...' % graph_fn
+      print 'Computing Invariants for annoymous project %s complete...' % graph_fn
+
+      try:
+        idx = 2 if request.session['graphsize'] ==  'big' else 1
+        invConvertToFormats = webargs.split('/')[idx].split(',') # could be mat,npy,csv
+        convertInvariants(invConvertToFormats, invariant_fns)
+      except Exception:
+        print "No conversion of invariants done ..."
 
     # request.session.clear()
     dwnldLoc = "http://mrbrain.cs.jhu.edu"+ dataDir.replace(' ','%20')
