@@ -525,6 +525,8 @@ def getLCCfn(graph_fn):
   for fn in poss_lcc_fn:
     if os.path.exists(fn):
       lcc_fn = fn
+      print "LCC %s uploaded found ..." % fn
+      break
     else:
       print "Print possible LCC %s not found ..." % fn
   return lcc_fn
@@ -590,12 +592,16 @@ def graphLoadInv(request, webargs=None):
 
     uploadedZip = writeBodyToDisk(request.body, dataDir)[0]
 
-    zipper.unzip(uploadedZip, dataDir) # Unzip the zip
-    os.remove(uploadedZip) # Delete the zip
+    try: # Assume its a zip first
+      zipper.unzip(uploadedZip, dataDir) # Unzip the zip
+      os.remove(uploadedZip) # Delete the zip
+    except:
+      print "Non-zip file uploaded ..."
+
+    graphs = glob(os.path.join(dataDir,'*.mat'))
 
     idx = 1 if request.session['graphsize'] ==  'big' else 0
     request.session['invariants'] = webargs.split('/')[idx].split(',')
-    graphs = glob(os.path.join(dataDir,'*.mat'))
 
     request.session['graphInvariants'] = os.path.join(dataDir, 'graphInvariants')
 
@@ -607,7 +613,11 @@ def graphLoadInv(request, webargs=None):
         if not lcc_fn:
           lcc_fn = os.path.splitext(graph_fn)[0] + '_concomp.npy'
           print "No precomputed LCC found. Computing LCC %s" % lcc_fn
-          lcc.process_single_brain(graph_fn, lcc_fn)
+          try:
+            lcc.process_single_brain(graph_fn, lcc_fn)
+          except:
+            return HttpResponseBadRequest("Computing the LCC for your graph failed! Check that your graph is binarized and symmetric!")
+
 
       invariant_fns = runInvariants(request.session['invariants'], graph_fn,
                         request.session['graphInvariants'], lcc_fn,

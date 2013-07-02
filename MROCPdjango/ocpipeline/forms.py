@@ -69,16 +69,16 @@ class BuildGraphForm(forms.Form):
   Project_Type = forms.ChoiceField([('public', 'public'), ('private','private')],  required=True)
 
   # Name project
-  UserDefprojectName  = forms.CharField(label='Project name', max_length=255, required = True, error_messages={'required': 'You must enter a Project name'})
-  site = forms.CharField(label='Enter Site', max_length=255, required = True, error_messages={'required': 'You must enter a site'})
-  subject = forms.CharField(label='Enter Subject ID', max_length=255, required = True , error_messages={'required': 'You must enter a Subject ID'})
-  session = forms.CharField(label='Enter Session ID', max_length=255, required = True, error_messages={'required': 'You must enter a Session ID'})
-  scanId = forms.CharField(label='Scan ID', max_length=255, required = True, error_messages={'required': 'You must enter a Scan ID'})
+  UserDefprojectName  = forms.CharField(label='Project name', max_length=255, required = True, help_text= " ", error_messages={'required': 'You must enter a Project name'})
+  site = forms.CharField(label='Enter Site', max_length=255, required = True, help_text= " ", error_messages={'required': 'You must enter a site'})
+  subject = forms.CharField(label='Enter Subject ID', max_length=255, required = True , help_text= " ", error_messages={'required': 'You must enter a Subject ID'})
+  session = forms.CharField(label='Enter Session ID', max_length=255, required = True, help_text= " ", error_messages={'required': 'You must enter a Session ID'})
+  scanId = forms.CharField(label='Scan ID', max_length=255, required = True, help_text= " ", error_messages={'required': 'You must enter a Scan ID'})
 
   # Upload project files
-  fiber_file = forms.FileField(label='Select fiber.dat file', required = True , error_messages={'required': 'You must upload a fiber tract file'})
-  roi_raw_file = forms.FileField(label='Select roi.raw file', required = True, error_messages={'required': 'You must upload ROIs'})
-  roi_xml_file = forms.FileField(label='Select roi.xml file', required = True, error_messages={'required': 'You must upload ROIs'})
+  fiber_file = forms.FileField(label='Select fiber.dat file', required = True, help_text= "<br/> ", error_messages={'required': 'You must upload a fiber tract file'})
+  roi_raw_file = forms.FileField(label='Select roi.raw file', required = True, help_text= " ", error_messages={'required': 'You must upload ROIs'})
+  roi_xml_file = forms.FileField(label='Select roi.xml file', required = True, help_text= " ", error_messages={'required': 'You must upload ROIs'})
 
   INVARIANT_CHOICES = (('ss1', 'Scan Statistic 1',), ('tri', 'Triangle Count',), \
   ('cc', 'Clustering co-efficient',), ('mad', 'Maximum Average Degree',) \
@@ -91,7 +91,7 @@ class BuildGraphForm(forms.Form):
   Select_graph_size = forms.ChoiceField(choices=[('small','Small graph [~30 min processing time]'), ('big','Big graph [~1.5 hr] processing time')]\
                                         , widget=RadioSelect, required = True, error_messages={'required': 'You must choose a graph size'})
 
-  Email = forms.EmailField(widget=TextInput(), required=False)
+  Email = forms.EmailField(widget=TextInput(), help_text= " ", required=False)
 
   Select_Invariants_you_want_computed = forms.MultipleChoiceField(required=False,
   widget=CheckboxSelectMultiple, choices=INVARIANT_CHOICES)
