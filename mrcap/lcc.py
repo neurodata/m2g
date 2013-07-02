@@ -156,7 +156,7 @@ Determine lcc on a single big graph a provided my a remote user
 This is for use in the one-click processing pipeline to be found at http://www.openconnecto.me/STUB
 '''
 def process_single_brain(graph_fn, lccOutputFileName):
-    print "Processing single brain... "
+    print "Computint LCC for single brain... "
     vcc = ConnectedComponent(loadmat(graph_fn)['fibergraph'])
     if not os.path.exists(os.path.dirname(lccOutputFileName)):
       print "Creating lcc directory %s" % os.path.dirname(lccOutputFileName)

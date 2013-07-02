@@ -77,7 +77,7 @@ def main():
   parser.add_argument('graph_fn', action='store',help='the full filename of the  \
                       CSC matrix representing a graph (.mat format) to have *NOTE DO NOT USE UNDERSCORES (_)\
                       in path leaf. eg. /foo/bar_bar/foo.mat is OK but /foo/bar/foo_bar.mat is NOT. [TODO fix]')
-  parser.add_argument('graphsize', action='store', help='graphsize [s|b]. s is for small and b is for big.')
+  #parser.add_argument('graphsize', action='store', help='graphsize [s|b]. s is for small and b is for big.')
 
   parser.add_argument('-D', '--data_elem', action='store', default='fibergraph', help='the name of the data element within the .mat matrix.')
   parser.add_argument('-S', '--save_dir', action='store', default= mr_data_dir, help='the directory where the invariants \
@@ -102,15 +102,23 @@ def main():
                       already exists, pass it in to avoid recomputing. Used for -c')
   parser.add_argument('-df', '--deg_fn', action='store', help='If degree count file\
                       already exists, pass it in to avoid recomputing. Used for -c')
-  parser.add_argument('-lf', '--lcc_fn', action='store',help='the full filename of the largest connected component (.npy format)')
+  parser.add_argument('-lf', '--lcc_fn', action='store', help='If you have a pre-computed largest connected component (.npy format) file add full file name of it here')
+  parser.add_argument('-l', '--lcc', action='store_true', help='Compute the largest connected component for the graph and use it in computations. [DO NOT SELECT IF YOU ALREADY HAVE IT PRE-COMPUTED]')
 
   parser.add_argument('-k', action='store', type = int, help='The number of eigenvalues to compute. Max is 100')
 
   result = parser.parse_args()
 
-  if (result.graphsize == 'b' and not result.lcc_fn):
-    sys.stderr.write("You must provide the largest connected component given a biggraph \n")
-    sys.exit(-1)
+  # Legacy
+  result.graphsize = 'big' if (result.lcc or result.lcc_fn) else 'small'
+
+  if (result.lcc):
+    if result.lcc_fn:
+      if os.path.exists(result.lcc_fn):
+        print "LCC exists so it will not be recomputed..."
+    else:
+      result.lcc_fn = os.path.join(result.save_dir, os.path.splitext(os.path.basename(result.graph_fn))[0] + '_concomp.npy')
+      lcc.process_single_brain(result.graph_fn, result.lcc_fn)
 
   if result.all:
     for key in result.__dict__:
