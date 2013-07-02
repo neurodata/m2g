@@ -40,6 +40,8 @@ import mrpaths
 
 ''' Data Processing imports'''
 from mrcap import gengraph as gengraph
+import mrcap.svd as svd
+import mrcap.lcc as lcc
 
 import filesorter as filesorter
 import zipper as zipper
@@ -233,7 +235,7 @@ def processInputData(request):
     if fileName == "": # Means a file is missing from i/p
       return render_to_response('pipelineUpload.html', context_instance=RequestContext(request)) # Missing file for processing Gengraph
 
-  baseName = fiber_fn[:-9] # MAY HAVE TO CHANGE
+  #baseName = fiber_fn[:-9] # MAY HAVE TO CHANGE
 
   ''' Fully qualify file names '''
   fiber_fn = os.path.join(request.session['derivatives'], fiber_fn)
@@ -448,33 +450,52 @@ def download(request, webargs=None):
 def asyncInvCompute(request):
 
   for graph_fn in request.session['uploaded_graphs']:
-    lcc_fn = os.path.join(os.path.dirname(graph_fn), (os.path.basename(graph_fn).split('_')[0]+ '_concomp.npy'))
+
+    lcc_fn = None
+    if request.session['graphsize'] == 'big':
+      poss_lcc_fn = [] # possible names for lcc_fn
+      poss_lcc_fn.append(os.path.join(os.path.dirname(graph_fn), (os.path.basename(graph_fn).split('_')[0]+ '_concomp.npy'))) # legacy mrcap
+      poss_lcc_fn.append(os.path.splitext(graph_fn)[0] + '_concomp.npy')
+
+      #import pdb; pdb.set_trace()
+      print "Looking for possible LCCs..."
+      for fn in poss_lcc_fn:
+        if os.path.exists(fn):
+          lcc_fn = fn
+        else:
+          print "Print possible LCC %s not found ..." % fn
+
+      if not lcc_fn:
+        lcc_fn = os.path.splitext(graph_fn)[0] + '_concomp.npy'
+        print "No precomputed LCC found. Computing LCC %s" % lcc_fn
+        lcc.process_single_brain(graph_fn, lcc_fn)
 
     try:
       invariant_fns = runInvariants(request.session['invariants'], graph_fn,
-                          request.session['graphInvariants'], lcc_fn,
-                          request.session['graphsize'])
-    except:
+                        request.session['graphInvariants'], lcc_fn,
+                        request.session['graphsize'])
+
+      print 'Invariants for annoymous project %s complete...' % graph_fn
+
+      # TODO: Make function for this. Duplicate of buildgraph code
+      if request.session.has_key('invConvertToFormats'):
+        for fileFormat in request.session['invConvertToFormats'] :
+          # Conversion of all files
+          for inv in invariant_fns.keys():
+            if isinstance(invariant_fns[inv], list): # Case of eigs
+              for fn in invariant_fns[inv]:
+                convertTo.convertAndSave(fn, fileFormat, os.path.dirname(fn), inv)
+            else: # case of all other invariants
+              convertTo.convertAndSave(invariant_fns[inv], fileFormat, \
+                                  os.path.dirname(invariant_fns[inv]), inv)
+
+    except Exception:
+      raise Exception
       msg = "Hello,\n\nYour most recent job failed possibly because:%s\n" % (" "*randint(0,10))
-      if not os.path.exists(lcc_fn):
-        msg += "- the lcc file %s does not exists\n" % os.path.basename(lcc_fn)
-      msg += "- the graph you uploaded does not match any accepted type %s\n\n" % (" "*randint(0,10))
+      msg += "- the graph '%s' you uploaded does not match any accepted type. %s\n\n" % (os.path.basename(graph_fn)," "*randint(0,10))
+      msg += "You may have some partially completed data here: %s" % ("http://mrbrain.cs.jhu.edu"+ request.session['dataDir'].replace(' ','%20'))
       msg += "Please check these and try again. %s\n\n" % (" "*randint(0,10))
       sendJobFailureEmail(request.session['email'], msg)
-
-
-    print 'Invariants for annoymous project %s complete...' % graph_fn
-
-    # TODO: Make function for this. Duplicate of buildgraph code
-    for fileFormat in request.session['invConvertToFormats'] :
-      # Conversion of all files
-      for inv in invariant_fns.keys():
-        if isinstance(invariant_fns[inv], list): # Case of eigs
-          for fn in invariant_fns[inv]:
-            convertTo.convertAndSave(fn, fileFormat, os.path.dirname(fn), inv)
-        else: # case of all other invariants
-          convertTo.convertAndSave(invariant_fns[inv], fileFormat, \
-                              os.path.dirname(invariant_fns[inv]), inv)
 
   # Email user of job finished
   sendJobCompleteEmail(request.session['email'], "http://mrbrain.cs.jhu.edu"+ request.session['dataDir'].replace(' ','%20'))
@@ -492,8 +513,8 @@ def graphLoadInv(request, webargs=None):
     form = GraphUploadForm(request.POST, request.FILES) # instantiating form
     if form.is_valid():
 
-      request.session['graphsize'] = form.cleaned_data['Select_graph_size']
-      request.session['graphsize'] = 'small' if not request.session['graphsize'] else request.session['graphsize']
+      request.session['graphsize'] = 'big' if form.cleaned_data['lcc'] else 'small' # This accounts for use LCC or not
+      request.session['email'] = form.cleaned_data['email']
 
       data = form.files['fileObj'] # get data
       request.session['invariants'] = form.cleaned_data['Select_Invariants_you_want_computed']
@@ -505,12 +526,12 @@ def graphLoadInv(request, webargs=None):
 
       # We got a zip
       if os.path.splitext(data.name)[1] == '.zip':
-
         writeBodyToDisk(data.read(), dataDir)
-        # Get all graphs in the directory
-        graphs = glob(os.path.join(dataDir,'*_fiber.mat'))
-        graphs.extend(glob(os.path.join(dataDir,'*_bggr.mat')))
-        graphs.extend(glob(os.path.join(dataDir,'*_smgr.mat')))
+
+        graphs = glob(os.path.join(dataDir,'*.mat'))
+        for fn in graphs: # remove any concomp if any exist
+          if fn[-12:] == '_concomp.npy': # if you named your concomp.npy something wrong too bad
+            graphs.remove(fn) # Works becuase there can never be duplicates in a dir
 
       else: # View only accepts .mat & zip as regulated by template
         graphs = [os.path.join(dataDir, data.name)]
@@ -519,53 +540,53 @@ def graphLoadInv(request, webargs=None):
       request.session['uploaded_graphs'] = graphs
       request.session['invConvertToFormats'] = form.cleaned_data['Convert_result']
       request.session['dataDir'] = dataDir
+      request.session['email'] = form.cleaned_data['email']
 
-      if request.session['graphsize'] == 'big':
-        # Launch thread for big graphs & email user
-        request.session['email'] = form.cleaned_data['Email']
-        sendJobBeginEmail(request.session['email'], request.session['invariants'], genGraph=False)
+      # Launch thread for graphs & email user
+      sendJobBeginEmail(request.session['email'], request.session['invariants'], genGraph=False)
 
-        thr = threading.Thread(target=asyncInvCompute, args=(request,))
-        thr.start()
-        #asyncInvCompute(request)
+      thr = threading.Thread(target=asyncInvCompute, args=(request,))
+      thr.start()
 
-        request.session['success_msg'] = "Your job was successfully launched. You should receive an email when your "
-        request.session['success_msg'] += "job begins and another one when it completes. The process may take ~3hrs if you selected to compute all invariants"
-        return HttpResponseRedirect(get_script_prefix()+'success')
+      request.session['success_msg'] = "Your job was successfully launched. You should receive an email when your "
+      request.session['success_msg'] += "job begins and another one when it completes. The process may take over "
+      request.session['success_msg'] += "3hrs/graph (dependent on graph size) if you selected to compute all invariants. "
+      request.session['success_msg'] += "If you do not see an email in your INBOX check the SPAM folder and add jhmrocp@cs.jhu.edu to your safe list."
+      return HttpResponseRedirect(get_script_prefix()+'success')
 
-      else:
-        for graph_fn in graphs:
-          graph_fn = request.session['smGrfn'] = graph_fn
-          lcc_fn = None
-
-          invariant_fns = runInvariants(request.session['invariants'], graph_fn,
-                          request.session['graphInvariants'], lcc_fn,
-                          request.session['graphsize'])
-
-          print 'Invariants for annoymous project %s complete...' % graph_fn
-
-          invConvertToFormats =  form.cleaned_data['Convert_result']
-
-          # TODO: Make function for this. Duplicate of buildgraph code
-          for fileFormat in invConvertToFormats:
-            # Conversion of all files
-            for inv in invariant_fns.keys():
-              if isinstance(invariant_fns[inv], list): # Case of eigs
-                for fn in invariant_fns[inv]:
-                  convertTo.convertAndSave(fn, fileFormat, os.path.dirname(fn), inv)
-              else: # case of all other invariants
-                convertTo.convertAndSave(invariant_fns[inv], fileFormat, \
-                                    os.path.dirname(invariant_fns[inv]), inv)
-
-      return HttpResponseRedirect("http://mrbrain.cs.jhu.edu"+ dataDir.replace(' ','%20')) # All spaces are replaced with %20 for urls
+      #else:
+      #  for graph_fn in graphs:
+      #    graph_fn = request.session['smGrfn'] = graph_fn
+      #    lcc_fn = None
+      #
+      #    invariant_fns = runInvariants(request.session['invariants'], graph_fn,
+      #                    request.session['graphInvariants'], lcc_fn,
+      #                    request.session['graphsize'])
+      #
+      #    print 'Invariants for annoymous project %s complete...' % graph_fn
+      #
+      #    invConvertToFormats =  form.cleaned_data['Convert_result']
+      #
+      #    # TODO: Make function for this. Duplicate of buildgraph code
+      #    for fileFormat in invConvertToFormats:
+      #      # Conversion of all files
+      #      for inv in invariant_fns.keys():
+      #        if isinstance(invariant_fns[inv], list): # Case of eigs
+      #          for fn in invariant_fns[inv]:
+      #            convertTo.convertAndSave(fn, fileFormat, os.path.dirname(fn), inv)
+      #        else: # case of all other invariants
+      #          convertTo.convertAndSave(invariant_fns[inv], fileFormat, \
+      #                              os.path.dirname(invariant_fns[inv]), inv)
+      #
+      #return HttpResponseRedirect("http://mrbrain.cs.jhu.edu"+ dataDir.replace(' ','%20')) # All spaces are replaced with %20 for urls
 
   elif request.method == 'POST' and webargs:
-    if (re.match(re.compile('(b|big)', re.IGNORECASE), webargs.split('/')[0])):
+    if (re.match(re.compile('(l|lcc)', re.IGNORECASE), webargs.split('/')[0])):
       request.session['graphsize'] = 'big'
-    elif (re.match(re.compile('(s|small)', re.IGNORECASE), webargs.split('/')[0])):
-       request.session['graphsize'] = 'small'
     else:
-      return django.http.HttpResponseBadRequest("The graph size is required as a web argument")
+       request.session['graphsize'] = 'small'
+    #else:
+      #return django.http.HttpResponseBadRequest("The graph size is required as a web argument")
 
     dataDir = os.path.join(settings.MEDIA_ROOT, 'tmp', strftime("projectStamp%a%d%b%Y_%H.%M.%S/", localtime()))
     makeDirIfNone([dataDir])
@@ -730,10 +751,6 @@ def processData(fiber_fn, roi_xml_fn, roi_raw_fn,graphs, graphInvariants, graphs
   @param graphsize: the size of the graph 'big' or 'small'
   @param run: Whether or not to run processor intensive jobs. Default is - false so nothing is actually run
   '''
-  if (run):
-    import mrcap.svd as svd
-    import mrcap.lcc as lcc
-    print "Imported svd and lcc modules..."
 
   baseName = getFiberID(fiber_fn) #VERY TEMPORARY
 
@@ -757,7 +774,6 @@ def processData(fiber_fn, roi_xml_fn, roi_raw_fn,graphs, graphInvariants, graphs
   lccfn = os.path.join(graphInvariants,"LCC", (baseName + 'concomp.npy'))
 
   if (run):
-    '''Should be big but we'll do small for now'''
     if (graphsize == 'big'):
       print "Running biggraph Largest connected component..."
       lcc.process_single_brain(bgGrfn, lccfn)

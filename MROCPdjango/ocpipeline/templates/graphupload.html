@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
   {% block title %}
-    GraphUpload | MROCP
+    Compute Invariants | MROCP
   {% endblock title %}
 
   {% block medheading %}
@@ -9,47 +9,55 @@
   {% endblock medheading %}
 
   {% block content %}
-    <b>Uploading the largest connected components(LCC) file for big fiber streamline graphs is required for resonable processing time.</b>
+    {# <b>Uploading the largest connected components(LCC) file for big fiber streamline graphs is required for resonable processing time.</b> #}
 
      <div id=graphspecs>
       <h2>Two Specifications for acceptable graphs</h2>
       <ul>
-        <li>A <a href="http://www.mathworks.com/help/matlab/ref/struct.html"> MATLAB struct </a> with a <FONT COLOR='#2373ff'>single</FONT> data element
-        that is of type <a href="http://docs.scipy.org/doc/scipy/reference/generated/scipy.sparse.csc_matrix.html#scipy.sparse.csc_matrix">
+        <li>A <a href="http://www.mathworks.com/help/matlab/ref/struct.html" target="blank"> MATLAB struct </a> with a <FONT COLOR='#2373ff'>single</FONT> data element
+        that is of type <a href="http://docs.scipy.org/doc/scipy/reference/generated/scipy.sparse.csc_matrix.html#scipy.sparse.csc_matrix" target="blank">
         numpy CSC (Compressed Sparse Column) matrix</a>. <br/>
         <li>
           Any <FONT COLOR='#2373ff'>2 Dimensional</FONT> square MATLAB matrix.
         </li>
-        It should be loadable from the python shell via the following call: <a href="http://docs.scipy.org/doc/scipy/reference/generated/scipy.io.loadmat.html">scipy.io.loadmat</a>(filename)[<FONT COLOR='#2373ff'>'your_data_element_name'</FONT>] only.<br/>
-        Such a matrix can be created by creating an MATLAB matrix and using the <a href="http://www.mathworks.com/help/matlab/ref/save.html">save</a> function.
+        It should be loadable from the python shell via the following call: <a href="http://docs.scipy.org/doc/scipy/reference/generated/scipy.io.loadmat.html" target="blank">scipy.io.loadmat</a>(filename)[<FONT COLOR='#2373ff'>'your_data_element_name'</FONT>] only.<br/>
+        Such a matrix can be created by creating an MATLAB matrix and using the <a href="http://www.mathworks.com/help/matlab/ref/save.html" target="blank">save</a> function or via Python's
+            <a href="http://docs.scipy.org/doc/scipy/reference/generated/scipy.io.savemat.html" target="blank">scipy.io.savemat </a> function.
         </li>
     </div>
 
-    <div id='single'>
-      <h3> Single graph invariant computation </h3>
-        <p>
-          As long as your graph meets one of the above <a href=#graphspecs>specifications</a> you may compute invariants on any MATLAB (.mat) graph of your choosing. <br/>
-          Simply upload your file below, choose the invariants you want to compute and you are on your way!
-        </p>
-    </div>
-
-    <h3> Multiple graphs or graphs with a largest connected component file </h3>
+    <h3 id="mult_lcc"> Graph(s) <FONT COLOR='#2373ff'>with precomputed </FONT>largest connected component</h3>
     <p> You must use a single<strong> zipfile <i> (.zip) </i> containing ALL</strong> data in a single directory even for multiple graphs. <br/>
-    <strong> <FONT COLOR='#2373ff'> DO NOT zip a directory</FONT>, instead zip the files themselves into an archive.</strong>
     Note the following <b>file naming convention</b> for graphs - where the <strong>base file name must be the same</strong>:
     <ul>
       <li>The <strong>base file name </strong> here is <strong>graph1</strong></li>
-      <li>Graph file name: graph1_fiber.mat, graph1_smgr.mat graph1_bggr.mat are acceptable.</li>
-      <li>LCC file name: graph1_concomp.mat (Big graphs only).</li>
-      <li><strong>All graphs must have their suffix be either _fiber.mat, _smgr.mat or _bggr.mat</strong>. E.g. graph1_fiber.mat, xyz_smgr.mat and
-        foobar_bggr.mat are all acceptable names.</li>
+      <li>Graph file name: graph1.mat, graph1_fiber.mat, graph1_smgr.mat, graph1_bggr.mat are all acceptable file names.</li>
+      <li>LCC file name: <b>graph1_concomp<FONT COLOR='#ff0000'>.npy</FONT> is the only acceptable LCC file name given the base file name graph1</b>
+      The connnected component file must be a &lt1 x #vertices&gt sparse matrix of type '&lttype 'numpy.int64'&gt' <a href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.array.html" target="blank"> Numpy array</a>.
+      </li>
+
     </ul>
+
+    <div id='single'>
+      <h3> Single graph <FONT COLOR='#2373ff'>without precomputed </FONT>largest connected component</h3>
+        <p>
+          There are NO file naming restrictions. As long as your graph meets one of the above <a href=#graphspecs>specifications</a> you may compute invariants on any MATLAB (.mat) graph of your choosing. <br/>
+          Simply upload your file below, fill the <a href="#id_loadForm">form</a> below and you're on your way! Click <a href=#mult_lcc>here</a> for graphs with a largest connected component (LCC). <br/>
+        </p>
+    </div>
+
+    <h3 id=mult> Multiple graphs <FONT COLOR='#2373ff'>without precomputed </FONT>largest connected component</h3>
+    <p>
+      There are NO file naming restrictions. To compute invariants for multiple graphs, with one click &#8212, upload a zipfile <i> (.zip) </i> with all the graphs in a <b>single</b> folder, fill the <a href="#id_loadForm">form</a> below and submit.
     </p>
+
+
+
     <!--
     You may adapt the file names of you data sets by appending these suffixes using
     <a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjango/dirconformance/renameDerivs.py" target="blank">this script</a>.
     You need to have a directory that contains a folder named <i>fiber</i> (containing fiber files)
-    Ensure you have backups before doing this. <FONT COLOR='#2373ff'> This may change in the future.</FONT> -->
+    Ensure you have backups before doing this. <FONT COLOR='#2373ff'> This may change in the future.</FONT>
 
       <h3>What's the difference between big and small graphs?</h3>
 
@@ -65,18 +73,22 @@
       grey matter in computation.
       </p>
     </ul>
+    -->
 
+    <h4> You must supply an <FONT COLOR='#ff0000'> Email address: </FONT> </h4>
 
-    <FONT COLOR='#2373ff'>* You must supply an Email address for big graph invariant computation so as to receive the job completion email with result url.
-    We will never share or use your email address for any other purpose (scout's honor!).<br/></FONT>
+    You will receive an email at the start and end of the job completion email with a url link for the result.<br/>
+    <FONT COLOR='#2373ff'>
+      We do not save email addresses. We will never share or use your email address for any other purpose.
+    </FONT>
+    </p>
 
-    {#<FONT COLOR='#ff0000'> {{error_msg}}</FONT> <br/>#}
-    <form action="" method="post" enctype="multipart/form-data" name="loadForm" onsubmit="return Validate(this,['.mat', '.zip'] );">
-        {% csrf_token %}
-        <p>{{ graphUploadForm }}</p>
-        <input name = "Derivatives"  type="submit" value="Upload Graph(s)" class="button" onclick="showSpinner();"/>
-        <input type="reset" value="Reset" class="button" name="clearForm" />
-    </form>
+      <form action="" method="post" enctype="multipart/form-data" name="loadForm" onsubmit="return (Validate(this,['.mat', '.zip'] ) && checkLcc())" class="forms" id="id_loadForm">
+          {% csrf_token %}
+          {{ graphUploadForm.as_ul }}
+          <input name = "Derivatives"  type="submit" value="Upload Graph(s)" class="button" onclick="showSpinner();"/>
+          <input type="reset" value="Reset" class="button" name="clearForm" />
+      </form>
 
     <div style="position:absolute; left:153px; top: 1300px;">
       <img id="loadingImage" src="{{STATIC_URL}}images/loading.gif" border="0" alt="loading" style="visibility:hidden;opacity:0.5"/>

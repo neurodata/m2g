@@ -39,7 +39,10 @@ def loadAdjMat(G_fn, lcc_fn):
     G_lcc = vcc.induced_subgraph(G_full) # sparse graph of LCC
 
     G_lcc = G_lcc + G_lcc.T # Symmetrize
-  except Exception:
+    print "Time to load Symmetrized LCC: %s secs" % (time()-start)
+    return G_lcc
+
+  except Exception, err:
 
     if not os.path.exists(lcc_fn):
       print "[IOError]: Lcc: %s Doesn't exist" % lcc_fn
@@ -49,8 +52,9 @@ def loadAdjMat(G_fn, lcc_fn):
       print "[IOError]: Graph: %s Doesn't exist" % G_fn
       sys.exit(-1)
 
-  print "Time to load: %s secs" % (time()-start)
-  return G_lcc
+    else:
+      print Exception, err
+      raise Exception
 
 def main():
   """

@@ -19,7 +19,7 @@ def main():
   parser.add_argument('url', action="store", help='url is http://mrbrain.cs.jhu.edu/disa/graphupload/{s|b} where s= smallgraph OR b = biggraph')
   parser.add_argument('webargs', action="store", help='comma separated list of invariant types. E.g cc,tri,deg,mad for \
                       clustering coefficient, triangle count, degree & maximum average degree')
-  parser.add_argument('zippedFile', action="store", help ='Data zipped directory with one or more (a) graph(s) with (an) lcc(s)')
+  parser.add_argument('zippedFile', action="store", help ='Data zipped directory with one or more graphs and OPTIONAL corresponding lcc(s) named correctly.')
 
   result = parser.parse_args()
 

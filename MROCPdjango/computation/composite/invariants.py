@@ -227,7 +227,7 @@ def compute(inv_dict, save=True):
   #  eigvect_fn = os.path.join('bench', str(G.shape[0]), getBaseName(inv_dict['graph_fn']) + '_eigvect.npy')
   #  MAD_fn = os.path.join('bench', str(G.shape[0]), getBaseName(inv_dict['graph_fn']) + '_MAD.npy')
 
-  return inv_dict # TODO: Fix code this breaks. Originally was [tri_fn, deg_fn, MAD_fn, eigvl_fn, eigvect_fn]
+  return inv_dict
 
 def populate_inv_dict(arg):
   """ Ensures the invariant dictionary input contains all necessary fields in order to not raise keyError exceptions"""
