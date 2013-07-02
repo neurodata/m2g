@@ -20,9 +20,19 @@
 
           <script type="text/javascript">
             // Function to add a spinner during upload & processing
-            function showSpinner(){
-                    document.getElementById('loadingImage').style.visibility='visible';
+            function showSpinner( show )
+            {
+              show = typeof show !== 'undefined' ? show : true;
+
+              if ( show == true )
+              {
+                document.getElementById('loadingImage').style.visibility='visible';
               }
+              else
+              {
+                document.getElementById('loadingImage').style.visibility='hidden';
+              }
+            }
           </script>
 
         <script type="text/javascript">
@@ -43,12 +53,38 @@
                       }
 
                 if (!blnValid) {
-                    document.getElementById('loadingImage').style.visibility='hidden';
+                    showSpinner(false);
                     alert("Sorry, " + sFileName.split("\\").pop() + " is invalid, allowed extensions are: " + _validFileExtensions.join(", "));
                     return false;
                   }
                 }
               }
+            }
+            return true;
+          }
+        </script>
+
+        <script type="text/javascript">
+          function checkLcc() {
+
+            var emailValue = document.getElementById("id_email").value;
+            var fileObjName = document.getElementById("id_fileObj").value;
+            var sCurExtension = ".zip";
+
+           // Case where we are using lcc and no zip
+            if ( (document.getElementById("id_lcc").checked && !emailValue) )
+            {
+              alert( "You must input an Email address if you use the LCC" );
+              showSpinner(false);
+              return false;
+            }
+            // Case where we have a zip but no email
+            else if ( fileObjName.substr(fileObjName.length - sCurExtension.length, sCurExtension.length).toLowerCase()
+                     == sCurExtension.toLowerCase() && !emailValue)
+            {
+              alert( "You must enter an email address for multiple file computations" );
+              showSpinner(false);
+              return false;
             }
             return true;
           }
@@ -118,7 +154,7 @@
         <!-- Tell me who is logged in -->
         <div id="loginStatus">
           {% if user.is_authenticated %}
-            <FONT COLOR='#07c4ce'>Hi, {{ user.username }} </FONT>
+            <FONT COLOR='#00f5ff'>Hi, {{ user.username }} </FONT>
 
 	    <form action= {{"accounts/logout/"|getScriptPrefix}} method="post" enctype="multipart/form-data" name="logoutForm">
 	      {% csrf_token %}

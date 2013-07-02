@@ -97,12 +97,15 @@ def writeBodyToDisk(data, saveDir):
   ''' Extract & save zipped files '''
   uploadFiles = []
   for name in (rzfile.namelist()):
-    outfile = open(os.path.join(saveDir, name.split('/')[-1]), 'wb') # strip name of source folders if in file name
-    outfile.write(rzfile.read(name))
-    outfile.flush()
-    outfile.close()
-    uploadFiles.append(os.path.join(saveDir, name.split('/')[-1])) # add to list of files
-    print name + " written to disk.."
+    try:
+      outfile = open(os.path.join(saveDir, name.split('/')[-1]), 'wb') # strip name of source folders if in file name
+      outfile.write(rzfile.read(name))
+      outfile.flush()
+      outfile.close()
+      uploadFiles.append(os.path.join(saveDir, name.split('/')[-1])) # add to list of files
+      print name + " written to disk.."
+    except Exception:
+      print "\n[WARNING]: Item %s rejected for file download ...\n" % name
   return uploadFiles
 
 ################################################################################
@@ -221,7 +224,7 @@ def sendJobBeginEmail(email_addr, invariants, genGraph=True):
   msg = "Hello,\n\nThe following actions were requested using %s:\n" % email_addr
 
   if genGraph:
-    msg += "- Generate big graph\n"+" "*randint(0,10)
+    msg += "- Generate graph\n"+" "*randint(0,10)
 
   for inv in invariants:
     msg += "- Compute " + settings.VALID_FILE_TYPES[inv] + "\n"
@@ -231,13 +234,13 @@ def sendJobBeginEmail(email_addr, invariants, genGraph=True):
   msg += "\n\nThanks for using MROCP,\nThe MROCP team"
   msg += " "*randint(0,10)
 
-  send_mail("MROCP: Big graph job request",
+  send_mail("MROCP: Graph job request",
             msg, settings.SERVER_EMAIL, [email_addr], fail_silently=False)
 
 def sendJobFailureEmail(email_addr, msg):
   msg += "Thanks for using MROCP,\nThe MROCP team"
 
-  send_mail("MROCP: Big graph job FAILURE!",
+  send_mail("MROCP: Graph job FAILURE!",
             msg, settings.SERVER_EMAIL, [email_addr], fail_silently=False)
 
 def sendJobCompleteEmail(email_addr, dataLoc):
@@ -245,5 +248,5 @@ def sendJobCompleteEmail(email_addr, dataLoc):
   msg += " "*randint(0,10)
   msg += "\n\nThanks for using MROCP,\nThe MROCP team"
 
-  send_mail("MROCP: Big graph job COMPLETE!",
+  send_mail("MROCP: Graph job COMPLETE!",
             msg, settings.SERVER_EMAIL, [email_addr], fail_silently=False)

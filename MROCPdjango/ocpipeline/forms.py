@@ -8,7 +8,7 @@
 """
 
 from django import forms
-from django.forms.fields import MultipleChoiceField
+from django.forms.fields import MultipleChoiceField, BooleanField
 from django.forms.widgets import RadioSelect, CheckboxSelectMultiple, Select, SelectMultiple, TextInput
 
 #
@@ -66,19 +66,19 @@ class BuildGraphForm(forms.Form):
   '''
 
   # Public or private Project
-  Project_Type = forms.ChoiceField([('public', 'public'), ('private','private')], help_text=' ', required=True)
+  Project_Type = forms.ChoiceField([('public', 'public'), ('private','private')],  required=True)
 
   # Name project
-  UserDefprojectName  = forms.CharField(label='Project name', help_text=' ', max_length=255, required = True, error_messages={'required': 'You must enter a Project name'})
-  site = forms.CharField(label='Enter Site', help_text=' ', max_length=255, required = True, error_messages={'required': 'You must enter a site'})
-  subject = forms.CharField(label='Enter Subject ID', help_text=' ', max_length=255, required = True , error_messages={'required': 'You must enter a Subject ID'})
-  session = forms.CharField(label='Enter Session ID', help_text=' ', max_length=255, required = True, error_messages={'required': 'You must enter a Session ID'})
-  scanId = forms.CharField(label='Scan ID', help_text='<br/>', max_length=255, required = True, error_messages={'required': 'You must enter a Scan ID'})
+  UserDefprojectName  = forms.CharField(label='Project name', max_length=255, required = True, error_messages={'required': 'You must enter a Project name'})
+  site = forms.CharField(label='Enter Site', max_length=255, required = True, error_messages={'required': 'You must enter a site'})
+  subject = forms.CharField(label='Enter Subject ID', max_length=255, required = True , error_messages={'required': 'You must enter a Subject ID'})
+  session = forms.CharField(label='Enter Session ID', max_length=255, required = True, error_messages={'required': 'You must enter a Session ID'})
+  scanId = forms.CharField(label='Scan ID', max_length=255, required = True, error_messages={'required': 'You must enter a Scan ID'})
 
   # Upload project files
-  fiber_file = forms.FileField(label='Select fiber.dat file', help_text=' ', required = True , error_messages={'required': 'You must upload a fiber tract file'})
-  roi_raw_file = forms.FileField(label='Select roi.raw file', help_text=' ', required = True, error_messages={'required': 'You must upload ROIs'})
-  roi_xml_file = forms.FileField(label='Select roi.xml file', help_text='<br/>', required = True, error_messages={'required': 'You must upload ROIs'})
+  fiber_file = forms.FileField(label='Select fiber.dat file', required = True , error_messages={'required': 'You must upload a fiber tract file'})
+  roi_raw_file = forms.FileField(label='Select roi.raw file', required = True, error_messages={'required': 'You must upload ROIs'})
+  roi_xml_file = forms.FileField(label='Select roi.xml file', required = True, error_messages={'required': 'You must upload ROIs'})
 
   INVARIANT_CHOICES = (('ss1', 'Scan Statistic 1',), ('tri', 'Triangle Count',), \
   ('cc', 'Clustering co-efficient',), ('mad', 'Maximum Average Degree',) \
@@ -91,7 +91,7 @@ class BuildGraphForm(forms.Form):
   Select_graph_size = forms.ChoiceField(choices=[('small','Small graph [~30 min processing time]'), ('big','Big graph [~1.5 hr] processing time')]\
                                         , widget=RadioSelect, required = True, error_messages={'required': 'You must choose a graph size'})
 
-  Email = forms.EmailField(widget=TextInput(), required=False,  help_text=" ",)
+  Email = forms.EmailField(widget=TextInput(), required=False)
 
   Select_Invariants_you_want_computed = forms.MultipleChoiceField(required=False,
   widget=CheckboxSelectMultiple, choices=INVARIANT_CHOICES)
@@ -133,13 +133,11 @@ class GraphUploadForm(forms.Form):
 
   @cvar INVARIANT_CHOICES: The current invariants that can be computed by the MROCP
   '''
-  fileObj = forms.FileField(label='Upload data', help_text=' ', required = True)
+  fileObj = forms.FileField(label='Upload data', required=True)
 
   # Select size of graph
-  Select_graph_size = forms.ChoiceField(choices=[('small','Small graph'), ('big','Big graph')]\
-                                        , widget=RadioSelect, required = False)
-
-  Email = forms.EmailField(widget=TextInput(), required=False,  help_text=" ",)
+  lcc = forms.BooleanField(label="Use Largest Connected Component", required=False, help_text="<b>If you do not upload LCC(s), LCC(s) will be computed and used </b>")
+  email = forms.EmailField(widget=TextInput(), required=True)
 
   INVARIANT_CHOICES = (('ss1', 'Scan Statistic 1',), ('tri', 'Triangle Count',), \
       ('cc', 'Clustering co-efficient',), ('mad', 'Maximum Average Degree',) \
@@ -154,12 +152,12 @@ class GraphUploadForm(forms.Form):
   Convert_result = forms.MultipleChoiceField(required=False,
       widget=CheckboxSelectMultiple, choices=(('.mat', 'MAT'),))
 
-  def clean(self):
-    cleaned_data = super(GraphUploadForm, self).clean()
+  #def clean(self):
+    #cleaned_data = super(GraphUploadForm, self).clean()
 
-    if cleaned_data['Select_graph_size'] == 'big' and not cleaned_data['Email']:
-      raise forms.ValidationError("You must provide an email address when computing invariants on big graphs")
-    return cleaned_data
+    #if cleaned_data['Select_graph_size'] == 'big' and not cleaned_data['Email']:
+    #  raise forms.ValidationError("You must provide an email address when computing invariants on big graphs")
+    #return cleaned_data
 
 class DownloadForm(forms.Form):
   '''
