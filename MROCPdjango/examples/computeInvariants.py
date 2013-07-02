@@ -16,10 +16,11 @@ def main():
 
   parser = argparse.ArgumentParser(description='Upload a single or multiple graphs, & possibly lcc\'s via a single zipped dir. \
                                   Base url -> http://www.mrbrain.cs.jhu.edu/disa/graphupload/')
-  parser.add_argument('url', action="store", help='url is http://mrbrain.cs.jhu.edu/disa/graphupload/{s|b} where s= smallgraph OR b = biggraph')
-  parser.add_argument('webargs', action="store", help='comma separated list of invariant types. E.g cc,tri,deg,mad for \
-                      clustering coefficient, triangle count, degree & maximum average degree')
+  parser.add_argument('url', action="store", help='url is http://mrbrain.cs.jhu.edu/disa/graphupload/{l|lcc} where l|lcc means use the lcc. If no lcc is uploaded it will be computed. If you don\'t want to use lcc skip the l|lcc part')
+  parser.add_argument('webargs', action="store", help='comma separated list (no spaces) of invariant types. E.g cc,tri,deg,mad,eig,ss1 for \
+                      clustering coefficient, triangle count, degree, maximum average degree, eigen-pairs & scan statistic')
   parser.add_argument('zippedFile', action="store", help ='Data zipped directory with one or more graphs and OPTIONAL corresponding lcc(s) named correctly.')
+  parser.add_argument('--convertToFormat', '-c', action='store', help='comma separated list of convert to formats. Currently choices: mat (result is npy)')
 
   result = parser.parse_args()
 
@@ -49,9 +50,14 @@ def main():
 
   result.url = result.url if result.url.endswith('/') else result.url + '/' #
 
+  if result.convertToFormat:
+    result.webargs = result.webargs if result.webargs.endswith('/') else result.webargs + '/'
+
+  result.convertToFormat = "" if not result.convertToFormat else result.convertToFormat
+  
   try:
     ''' *IMPORTANT: HOW TO BUILD THE URL '''
-    req = urllib2.Request ( result.url + result.webargs, tmpfile.read() )  # concatenate project with assigned scanID & call url
+    req = urllib2.Request ( result.url + result.webargs + result.convertToFormat, tmpfile.read() )  # concatenate project with assigned scanID & call url
     response = urllib2.urlopen(req)
   except urllib2.URLError, e:
     print "Failed URL", result.url

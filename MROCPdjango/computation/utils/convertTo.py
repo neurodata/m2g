@@ -65,18 +65,18 @@ def convertAndSave(fn, toFormat, saveLoc, fileType):
   arr = loadFile(fn, fileType) # load up the file as either a .mat, .npy
 
   # Incase anyone ever forgets to put the (.) before toFormat value
-  for item in toFormat:
-    item = item if item.startswith('.') else ('.' + item)
+  #for item in toFormat:
+    #item = item if item.startswith('.') else ('.' + item)
 
-  if ('.mat' in toFormat):
+  if (('.mat' in toFormat) or 'mat' in toFormat):
     sio.savemat(os.path.join(saveLoc, fnBase), {fileType:arr}, appendmat = True)
     print fnBase + ' converted to mat format',
 
-  if ('.npy' in toFormat):
+  if (('.npy' in toFormat) or ('npy' in toFormat)):
     np.save(os.path.join(saveLoc, fnBase), arr)
     print fnBase + ' converted to npy format',
 
-  if ('.csv' in toFormat):
+  if (('.csv' in toFormat) or ('csv' in toFormat)):
     if (fileType) == 'mad': # Case of the MAD
       f = open( os.path.join(saveLoc, fnBase)+'.csv', 'wb')
       f.write(str(arr.item()))
