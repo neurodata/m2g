@@ -103,14 +103,14 @@ def main():
   parser.add_argument('-df', '--deg_fn', action='store', help='If degree count file\
                       already exists, pass it in to avoid recomputing. Used for -c')
   parser.add_argument('-lf', '--lcc_fn', action='store', help='If you have a pre-computed largest connected component (.npy format) file add full file name of it here')
-  parser.add_argument('-l', '--lcc', action='store_true', help='Compute the largest connected component for the graph and use it in computations. [DO NOT SELECT IF YOU ALREADY HAVE IT PRE-COMPUTED]')
+  parser.add_argument('-l', '--lcc', action='store_true', help='Compute the largest connected component for the graph and use it in computations. [No need to select if you already have it pre-computed i.e used `-lf`]')
 
   parser.add_argument('-k', action='store', type = int, help='The number of eigenvalues to compute. Max is 100')
 
   result = parser.parse_args()
 
-  # Legacy
-  result.graphsize = 'big' if (result.lcc or result.lcc_fn) else 'small'
+  # Legacy naming
+  result.graphsize = 'big' if (result.lcc or result.lcc_fn) else 'small' # A big graph is a graph that requires an lcc for processing in a `reasonable` amount of time
 
   if (result.lcc):
     if result.lcc_fn:

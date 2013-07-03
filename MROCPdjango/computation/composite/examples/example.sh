@@ -1,13 +1,36 @@
 #!/bin/bash
 echo "Example downloads ./testdata directory from http://mrbrain.cs.jhu.edu/data/projects/disa/OCPprojects/testdata/ ..."
+echo "Example script running ..."
 
-# Uncomment if you want to redownload test data
-#mkdir ./testdata
-#cd testdata
-#wget http://mrbrain.cs.jhu.edu/data/projects/disa/OCPprojects/testdata/test_fiber.dat
-#wget http://mrbrain.cs.jhu.edu/data/projects/disa/OCPprojects/testdata/test_roi.raw
-#wget http://mrbrain.cs.jhu.edu/data/projects/disa/OCPprojects/testdata/test_roi.xml
-#cd ..
+if [ -f ./testdata/test_fiber.dat ]
+then
+  echo "./testdata/test_fiber.dat exists ..."
+else
+  if [ ! -d "$mkdir"];
+  then
+    echo "making testdata directory ..."
+    mkdir ./testdata
+  fi
+  echo "downloading test_fiber.dat file..."
+  wget --output-document=./testdata/test_fiber.dat http://mrbrain.cs.jhu.edu/data/projects/disa/OCPprojects/testdata/test_fiber.dat
+fi
+
+if [ -f ./testdata/test_roi.raw ]
+then
+  echo "./testdata/test_roi.raw exists ..."
+else
+  echo "downloading test_roi.raw file..."
+  wget --output-document=./testdata/test_roi.raw http://mrbrain.cs.jhu.edu/data/projects/disa/OCPprojects/testdata/test_roi.raw
+fi
+
+if [ -f ./testdata/test_roi.xml ]
+then
+  echo "./testdata/test_roi.xml exists ..."
+else
+  echo "downloading test_roi.xml file..."
+  wget --output-document=./testdata/test_roi.xml http://mrbrain.cs.jhu.edu/data/projects/disa/OCPprojects/testdata/test_roi.xml
+fi
+
 
 # SMALL
 # Graph generation:
@@ -17,7 +40,7 @@ echo "../graph_exec -h. For help"
 
 # Invariants:
 echo "./inv_exec -h. For help"
-.././inv_exec ./testdata/small/test_fiber_70_smgr.mat s -D fibergraph -A -S ./testdata/small
+.././inv_exec ./testdata/small/test_fiber_70_smgr.mat -D fibergraph -A -S ./testdata/small
 
 # largest connected component & single value:
 echo "./deriv_exec -h. For help"
@@ -35,5 +58,5 @@ echo "./deriv_exec -h. For help"
 
 # Invariants:
 #echo "./inv_exec -h. For help"
-#.././inv_exec ./testdata/big/bigtest_bggr.mat b -D fibergraph -A -S ./testdata/big -lf ./testdata/big/LCC/bigtest_concomp.npy
+#.././inv_exec ./testdata/big/bigtest_bggr.mat -D fibergraph -A -S ./testdata/big -lf ./testdata/big/LCC/bigtest_concomp.npy
 
