@@ -96,6 +96,11 @@ class BuildGraphForm(forms.Form):
   Select_Invariants_you_want_computed = forms.MultipleChoiceField(required=False,
   widget=CheckboxSelectMultiple, choices=INVARIANT_CHOICES)
 
+  def __init__(self, *args, **kwargs):
+    super(BuildGraphForm, self).__init__(*args, **kwargs)
+    self.fields['Project_Type'].widget.attrs['disabled'] = True # radio / checkbox
+
+
 class ConvertForm(forms.Form):
   '''
   This form will be used for uploading an invariant/graph and converting it to another file format
@@ -136,7 +141,7 @@ class GraphUploadForm(forms.Form):
   fileObj = forms.FileField(label='Upload data', required=True)
 
   # Select size of graph
-  lcc = forms.BooleanField(label="Use Largest Connected Component", required=False, help_text="<b>If you do not upload LCC(s), LCC(s) will be computed and used </b>")
+  lcc = forms.BooleanField(label="Use Largest Connected Component", required=False, help_text="<b>If you select this & do not upload LCC(s), LCC(s) will be computed and used </b>")
   email = forms.EmailField(widget=TextInput(), required=True)
 
   INVARIANT_CHOICES = (('ss1', 'Scan Statistic 1',), ('tri', 'Triangle Count',), \
@@ -150,7 +155,7 @@ class GraphUploadForm(forms.Form):
   widget=CheckboxSelectMultiple, choices=INVARIANT_CHOICES)
 
   Convert_result = forms.MultipleChoiceField(required=False,
-      widget=CheckboxSelectMultiple, choices=(('.mat', 'MAT'),))
+      widget=CheckboxSelectMultiple, choices=(('.mat', 'MAT'),('.csv', 'CSV'),))
 
   #def clean(self):
     #cleaned_data = super(GraphUploadForm, self).clean()

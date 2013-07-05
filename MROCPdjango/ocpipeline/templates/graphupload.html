@@ -48,34 +48,12 @@
 
     <h3 id=mult> Multiple graphs <FONT COLOR='#2373ff'>without precomputed </FONT>largest connected component</h3>
     <p>
-      There are NO file naming restrictions. To compute invariants for multiple graphs, with one click &#8212, upload a zipfile <i> (.zip) </i> with all the graphs in a <b>single</b> folder, fill the <a href="#id_loadForm">form</a> below and submit.
+      There are NO file naming restrictions. To compute invariants for multiple graphs, with one click &#8212 upload a zipfile <i> (.zip) </i> with all the graphs in a <b>single</b> folder, fill the <a href="#id_loadForm">form</a> below and submit.
     </p>
-
-    <!--
-    You may adapt the file names of you data sets by appending these suffixes using
-    <a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjango/dirconformance/renameDerivs.py" target="blank">this script</a>.
-    You need to have a directory that contains a folder named <i>fiber</i> (containing fiber files)
-    Ensure you have backups before doing this. <FONT COLOR='#2373ff'> This may change in the future.</FONT>
-
-      <h3>What's the difference between big and small graphs?</h3>
-
-      <p>
-      Glad you asked! The big graph term is particularly germane to fiber streamline graphs with dimensions greater than 70 x 70, where a largest
-      connected component is required when computing invariants. If you have a small fiber streamline graph (dimension < 70 x 70) or any other
-      graph you should select the small graph option (which is the default if you choose not to select either).
-      </p>
-
-      <p>
-      Please note the big graphs the MROCP constructs are on the order of > 10 M x 10 M vertices, but are other wise identical to
-      small graph. Working with big graphs requires the largest connected component (LCC) as well since we do not consider
-      grey matter in computation.
-      </p>
-    </ul>
-    -->
 
     <h4> You must supply an <FONT COLOR='#ff0000'> Email address: </FONT> </h4>
 
-    You will receive an email at the start and end of the job completion email with a url link for the result.<br/>
+    You will receive an email when your job begins and upon completion, with a url link with the result.<br/>
     <FONT COLOR='#2373ff'>
       We do not save email addresses. We will never share or use your email address for any other purpose.
     </FONT>
@@ -99,59 +77,57 @@
           example of usage can be found <a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjango/examples/computeInvariants.py" target="blank">here</a>.
 
         <h3> How to use the example </h3>
-        <p>After downlaod in the <a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjango/examples/computeInvariants.py" target="blank">example</a>,
+        <p>After downlaoding the <a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjango/examples/computeInvariants.py" target="blank">example</a>,
          start a terminal session. Assuming you are in the same directory as the example. Typing <strong>python computeInvariants.py -h</strong> will give help on how to use the
-         example and what options are available to you. <br/>
+         example and what options are available to you. Below are examples of use of this <a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjango/examples/computeInvariants.py" target="blank">example.</a><br/>
 
-        <h2> Single graph </h2>
-        Assume we have a single graph located in the same directory as the example scipt named <em>data.<FONT COLOR='#ff0000'>mat</FONT></em>.
-        Typing <strong>python computeInvariants.py http://www.mrbrain.cs.jhu.edu/disa/graphupload/ cc,tri,ss1 data.mat -c mat</strong> will
-        upload your <em>data.mat</em> file and compute the clustering co-efficient, local triangle count, and scan statistic-1. You must wait for the http response
-        to get the url containing the result.
+        <h2 id="single_graph"> Single graph </h2>
+        <p>
+        Assume we have a single graph located in the same directory as the example script named <em>data.<FONT COLOR='#ff0000'>mat</FONT></em>.
+        Typing <strong>python computeInvariants.py http://www.mrbrain.cs.jhu.edu/disa/graphupload/ cc,tri,ss1 data.mat -l -c mat</strong> will
+        upload your <em>data.mat</em> file and compute: clustering co-efficient, local triangle count, and scan statistic-1; the LCC will be computed and used in
+        invariant computation;  the invariants will be converted to <i>.mat</i> format.
 
-        The optional arguments given as -i are simply appended to the final url in uploadsubj.py. The options available must be in a comma separated list and are as follows:
-        <ul>
-          <li> <i>ss1</i> for the Scan Statistic 1</li>
-          <li> <i>tri</i> for the Triangle Count </li>
-          <li> <i>cc</i> for the Clustering Coefficient</li>
-          <li> <i>mad</i> for the Maximum Average Degree</li>
-          <li> <i>deg</i> for The Local Degree Count</li>
-          <li> <i>eig</i> for the Top 100 (or maximum available) eigenvalues</li>
-          <li> <i>ss2</i> for the Scan Statistic 2 [Coming soon]</li>
-          <li> <i>apl</i> for the Average Path Length [Coming soon]</li>
-          <li> <i>gdia</i> for the Graph Diameter [Coming soon]</li>
-        </ul>
+        Here is a breakdown of the command line call arguments:
+        <ol>
+          <li><i>http://www.mrbrain.cs.jhu.edu/disa/graphupload/</i> is the base url for uploading graphs for invariants to be computed. This is constant and must not be changed.</li>
+          <li><i>cc,tri,ss1</i> is a comma separated (no spaces) list of the invariant you want computed</li>
+            <div id="inv_opts">
+            The only available options for invariants are:
+            <ul>
+              <li> <i>ss1</i> for the Scan Statistic 1</li>
+              <li> <i>tri</i> for the Triangle Count </li>
+              <li> <i>cc</i> for the Clustering Coefficient</li>
+              <li> <i>mad</i> for the Maximum Average Degree</li>
+              <li> <i>deg</i> for The Local Degree Count</li>
+              <li> <i>eig</i> for the Top 100 (or maximum available) eigenvalues and eigenvectors</li>
+              <!-- <li> <i>ss2</i> for the Scan Statistic 2 [Coming soon]</li>
+              <li> <i>apl</i> for the Average Path Length [Coming soon]</li>
+              <li> <i>gdia</i> for the Graph Diameter [Coming soon]</li> -->
+            </ul>
+          </div>
+        <li><i>-l</i> is an <b>optional</b> boolean flag indicated whether to use the LCC for computations. This can be safely omitted, <b>but is mandatory for big fibergrahs</b></li>
+        <li><i>-c</i> is <b>optional</b> and causes the resulting invariants to be duplicated in other formats. Invariants by default will come in <b>.npy</b> format in addition to other formats you select.</li>
+        <div id="conv_opts">
+          The only available options for conversion type are:
+          <ul>
+            <li><i>mat</i> for MATLAB format</li>
+            <li><i>csv</i> for comma separated values (Not available for eigenvalues and eigenvectors)</li>
+          </ul>
+        </div>
+        </ol>
+
+          Starting a <a href="http://tmux.sourceforge.net/">tmux</a> or <a href="http://linux.die.net/man/1/screen"> screen </a> session is recommended as you must wait for
+          the http response to otbain a url containing the result.
+        </p>
+
 
         <h3> Multiple graphs </h3>
         <p>
-        <a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjango/examples/uploadMultiSubj.py">Multi-subject/scan example</a>
-        is also provided as an example of how to process multiple scans with a single programmatic call.<br/>
-
-        From within a terminal session, it can be used as follows: <strong>python uploadMultiSubj.py http://mrbrain.cs.jhu.edu/disa/upload/YOUR_project/YOUR_site/YOUR_subject/YOUR_session/ s
-        fiber_tract_dirctory roi_dirctory -i cc,tri,ss1,mad,deg,eig.</strong> This call would build graphs for multiple scans and compute all invariants noted in the -i flag.
-        The example assumes the following:
-
-        <ul>
-          <li>There is a directory containing all fiber tract files you wish to be processed with no other sub-directories or files you do not wish to process.</li>
-          <li>There is a directory containing all corresponding roi files (i.e both an xml and raw file for each fiber tract file) with file names in accordance with the convention noted below.
-          <strong>Note the root of each roi file name should:</strong>
-            <ol>
-              <li>End in <strong> _roi</strong> E.g filename_roi.xml and filename_roi.raw.</li>
-              <li>
-                Be identical to the root of its corresponding fiber tract file. E.g If the fiber file name is <strong> sample1.dat</strong>,
-                then there must be a <strong>sample1_roi.raw</strong> AND a <strong> sample1_roi.xml</strong>. Thus the root is <strong>sample1</strong> in this example.
-              </li>
-            </ol>
-          </li>
-        </ul>
-
-        <p>
-        All fiber tract files  will be treated as single project with multiple scanIDs derived from the file name.
-        <a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjango/examples/uploadMultiSubj.py">Download the file</a>
-        and help can be obtained by typing in a terminal/command line session:
-        <strong>python uploadMultiSubj.py -h </strong>. The same is true for the single scan example, where: <strong>python uploadsubj.py -h</strong> gives help.
-
-
+          The same <a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjango/examples/computeInvariants.py" target="blank">example</a> script can be used for multiple
+          graph with or without LCCs. Simply zip all graphs into a single zipfile. If you have precomputed LCCs, zip these into the same zipfile with their corresponding graphs. You must observe the
+          <a href="#mult_lcc"> same file naming conventions</a>
+          as described for in-browser use. Other than zipping graphs (and optinal LCCs) together the functionality is identical to <a href="#single_graph">single graph use</a>.
 
 
       </p>
