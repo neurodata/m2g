@@ -17,15 +17,19 @@ def main():
   parser = argparse.ArgumentParser(description='Upload a single or multiple graphs, & possibly lcc\'s via a single zipped dir. \
                                   Base url -> http://www.mrbrain.cs.jhu.edu/disa/graphupload/')
   parser.add_argument('url', action="store", help='url is http://mrbrain.cs.jhu.edu/disa/graphupload/{l|lcc} where l|lcc means use the lcc. If no lcc is uploaded it will be computed. If you don\'t want to use lcc skip the l|lcc part')
+
   parser.add_argument('webargs', action="store", help='comma separated list (no spaces) of invariant types. E.g cc,tri,deg,mad,eig,ss1 for \
                       clustering coefficient, triangle count, degree, maximum average degree, eigen-pairs & scan statistic')
-  parser.add_argument('zippedFile', action="store", help ='Data zipped directory with one or more graphs and OPTIONAL corresponding lcc(s) named correctly.')
+  parser.add_argument('file', action="store", help ='Single .mat graph or a Zipped directory with one or more graphs and OPTIONAL corresponding largest connected component(s) (LCC) named in accordance with http://mrbrain.cs.jhu.edu/disa/graphupload/#mult_lcc.')
+
+  parser.add_argument('--lcc', '-l', action="store_true", help='Use the LCC when computing invariants. If no lcc is uploaded it will be computed.')
+
   parser.add_argument('--convertToFormat', '-c', action='store', help='comma separated list of convert to formats. Currently choices: mat (result is npy)')
 
   result = parser.parse_args()
 
-  if not (os.path.exists(result.zippedFile)):
-    print "Invalid file name. Check the folder: " + result.zippedFile
+  if not (os.path.exists(result.file)):
+    print "Invalid file name. Check the folder: " + result.file
     sys.exit()
   else:
     print "Loading file into memory.."
@@ -34,7 +38,7 @@ def main():
   tmpfile = tempfile.NamedTemporaryFile()
   zfile = zipfile.ZipFile ( tmpfile.name, "w" )
 
-  zfile.write(result.zippedFile)
+  zfile.write(result.file)
   zfile.close()
 
   tmpfile.flush()
@@ -50,21 +54,24 @@ def main():
 
   result.url = result.url if result.url.endswith('/') else result.url + '/' #
 
+  if result.lcc:
+    result.url += 'lcc/'
+
   if result.convertToFormat:
     result.webargs = result.webargs if result.webargs.endswith('/') else result.webargs + '/'
 
   result.convertToFormat = "" if not result.convertToFormat else result.convertToFormat
-  
+
   try:
-    ''' *IMPORTANT: HOW TO BUILD THE URL '''
-    req = urllib2.Request ( result.url + result.webargs + result.convertToFormat, tmpfile.read() )  # concatenate project with assigned scanID & call url
+    ''' **IMPORTANT: THIS IS HOW TO BUILD THE URL** '''
+    req = urllib2.Request ( result.url + result.webargs + result.convertToFormat, tmpfile.read() )
     response = urllib2.urlopen(req)
   except urllib2.URLError, e:
     print "Failed URL", result.url
     print "Error %s" % (e.read())
     sys.exit(0)
 
-  msg = response.read() # Use this response better
+  msg = response.read() # This is how to get the response
   print msg
 
   ''' Open up a tab in your browser to view results'''
