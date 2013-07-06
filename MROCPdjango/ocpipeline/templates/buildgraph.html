@@ -5,16 +5,17 @@
   {% endblock title %}
 
   {% block medheading %}
-  To ensure your data is routed correctly submit the form below. Then
-  upload data derivative files and optionally select any invariants to be computed.
+  Build a fiber tractography streamline graph
   {% endblock medheading %}
 
   {% block content %}
 
+  Please complete the entire form below, upload data derivative files and optionally select any invariants to be computed.
 
   <b><FONT COLOR='#ff0000'>{{error_msg}}</FONT></b> <br/>
-  <!--<FONT COLOR='#2373ff'> Please do not attempt to create private projects yet. The interface is still under development. </FONT> <br/>-->
-  <FONT COLOR='#2373ff'>*You must supply an Email address for big graph processing so as to receive the job completion email with result url.<br/>
+
+  You must supply an Email address for big graph processing so as to receive the job completion email with result url.<br/>
+  <FONT COLOR='#2373ff'>
   We will never share or use your email address for any other purpose.<br/> </FONT>
     <p>
       <form action="" method="post" enctype="multipart/form-data" name="loadForm" onsubmit="return Validate(this,['.xml','.dat','.raw'] );" class="forms">
@@ -33,7 +34,7 @@
     {% block programmatic %}
       <div id="programmatic">
         <h2> Graphs may also be built programmatically </h2>
-        The base url for an upload is <strong>http://mrbrain.cs.jhu.edu/disa/upload/ </strong> <br/>
+        The base url for an building graphs is <strong>http://mrbrain.cs.jhu.edu/disa/upload/ </strong> <br/>
 
         <h3> Single graph </h3>
         <p>
@@ -46,7 +47,9 @@
          big graph on the order of > 10 M x 10 M vertices. <br/>
          The particular invocation in bold above would build a small graph and compute all invariants currently available. A list of invariant contractions is
          available below.
-         <strong>The result of uploadsubj.py is a url containing all data produced. Simply follow the url to download it.</strong>
+         <strong>The result of uploadsubj.py is a url containing all data produced. Simply wait for the http response and follow the url to download it.</strong>
+         We recommend starting a <a href="http://tmux.sourceforge.net/">tmux</a> or <a href="http://linux.die.net/man/1/screen"> screen </a> session in case your processing time
+         is lengthy.
         </p>
 
         The optional arguments given as -i are simply appended to the final url in uploadsubj.py. The options available must be in a comma separated list and are as follows:
@@ -56,18 +59,18 @@
           <li> <i>cc</i> for the Clustering Coefficient</li>
           <li> <i>mad</i> for the Maximum Average Degree</li>
           <li> <i>deg</i> for The Local Degree Count</li>
-          <li> <i>eig</i> for the Top 100 (or maximum available) eigenvalues</li>
-          <li> <i>ss2</i> for the Scan Statistic 2 [Coming soon]</li>
+          <li> <i>eig</i> for the Top 100 (or maximum available) eigenvectors and eigenvalues</li>
+          <!-- <li> <i>ss2</i> for the Scan Statistic 2 [Coming soon]</li>
           <li> <i>apl</i> for the Average Path Length [Coming soon]</li>
-          <li> <i>gdia</i> for the Graph Diameter [Coming soon]</li>
+          <li> <i>gdia</i> for the Graph Diameter [Coming soon]</li> -->
         </ul>
 
         <h3> Multiple graphs </h3>
         <p>
-        <a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjango/examples/uploadMultiSubj.py">Multi-subject/scan example</a>
-        is also provided as an example of how to process multiple scans with a single programmatic call.<br/>
+        An example of a <a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjango/examples/uploadMultiSubj.py">Multiple subject</a> job
+        is also provided. This is as an example of how to process multiple jobs with a single programmatic call.<br/>
 
-        From within a terminal session, it can be used as follows: <strong>python uploadMultiSubj.py http://mrbrain.cs.jhu.edu/disa/upload/YOUR_project/YOUR_site/YOUR_subject/YOUR_session/ s
+        From within a terminal/command line session, it can be used as follows: <strong>python uploadMultiSubj.py http://mrbrain.cs.jhu.edu/disa/upload/YOUR_project/YOUR_site/YOUR_subject/YOUR_session/ s
         fiber_tract_dirctory roi_dirctory -i cc,tri,ss1,mad,deg,eig.</strong> This call would build graphs for multiple scans and compute all invariants noted in the -i flag.
         The example assumes the following:
 
@@ -78,7 +81,7 @@
             <ol>
               <li>End in <strong> _roi</strong> E.g filename_roi.xml and filename_roi.raw.</li>
               <li>
-                Be identical to the root of its corresponding fiber tract file. E.g If the fiber file name is <strong> sample1.dat</strong>,
+                Be identical to the root of its corresponding fiber tract file. E.g If the fiber tract file name is <strong> sample1.dat</strong>,
                 then there must be a <strong>sample1_roi.raw</strong> AND a <strong> sample1_roi.xml</strong>. Thus the root is <strong>sample1</strong> in this example.
               </li>
             </ol>
@@ -86,9 +89,9 @@
         </ul>
 
         <p>
-        All fiber tract files  will be treated as single project with multiple scanIDs derived from the file name.
+        All fiber tract files  will be treated as a single project with multiple scanIDs derived from the file name.
         <a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjango/examples/uploadMultiSubj.py">Download the file</a>
-        and help can be obtained by typing in a terminal/command line session:
+        and help can be obtained by typing the following in a terminal/command line session:
         <strong>python uploadMultiSubj.py -h </strong>. The same is true for the single scan example, where: <strong>python uploadsubj.py -h</strong> gives help.
       </div>
         </p>
