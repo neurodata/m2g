@@ -14,15 +14,15 @@ import webbrowser
 
 def main():
 
-  parser = argparse.ArgumentParser(description='Upload a single or multiple graphs, & possibly lcc\'s via a single zipped dir. \
+  parser = argparse.ArgumentParser(description='Upload a single or multiple graphs, & possibly largest connected components LCCs via a single zipped dir. \
                                   Base url -> http://www.mrbrain.cs.jhu.edu/disa/graphupload/')
-  parser.add_argument('url', action="store", help='url is http://mrbrain.cs.jhu.edu/disa/graphupload/{l|lcc} where l|lcc means use the lcc. If no lcc is uploaded it will be computed. If you don\'t want to use lcc skip the l|lcc part')
+  parser.add_argument('url', action="store", help='url is http://mrbrain.cs.jhu.edu/disa/graphupload/')
 
   parser.add_argument('webargs', action="store", help='comma separated list (no spaces) of invariant types. E.g cc,tri,deg,mad,eig,ss1 for \
                       clustering coefficient, triangle count, degree, maximum average degree, eigen-pairs & scan statistic')
   parser.add_argument('file', action="store", help ='Single .mat graph or a Zipped directory with one or more graphs and OPTIONAL corresponding largest connected component(s) (LCC) named in accordance with http://mrbrain.cs.jhu.edu/disa/graphupload/#mult_lcc.')
 
-  parser.add_argument('--lcc', '-l', action="store_true", help='Use the LCC when computing invariants. If no lcc is uploaded it will be computed.')
+  parser.add_argument('--lcc', '-l', action="store_true", help='Use the LCC when computing invariants. If no LCC is uploaded it will be computed.')
 
   parser.add_argument('--convertToFormat', '-c', action='store', help='comma separated list of convert to formats. Currently choices: mat (result is npy)')
 

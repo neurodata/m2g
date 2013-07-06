@@ -81,6 +81,10 @@ def convertAndSave(fn, toFormat, saveLoc, fileType):
       f = open( os.path.join(saveLoc, fnBase)+'.csv', 'wb')
       f.write(str(arr.item()))
       f.close
+      
+    elif(fileType == "eig"):
+      pass # Do not convert eigenvectors because that might take a while!
+
     else:
       with open( os.path.join(saveLoc, fnBase)+'.csv', 'wb') as csvfile:
         writer = csv.writer(csvfile, dialect='excel')

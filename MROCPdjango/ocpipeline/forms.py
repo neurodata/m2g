@@ -117,14 +117,10 @@ class ConvertForm(forms.Form):
       ('.csv', '(Excel) Comma separated values (.csv)',))
 
   FILE_TYPES = [('cc','Clustering Coefficient'), ('deg','Local Degree'),\
-      ('eig','Largest Eigenvalues/Eigenvectors'), ('apl','Average Path Length'),\
-      ('ss1', 'Scan Statistic 1'),('ss2', 'Scan Statistic 2'),('tri','Triangle Count'),\
+      ('eig','Largest Eigenvalues/Eigenvectors'),\
+      ('ss1', 'Scan Statistic 1'), ('tri','Triangle Count'),\
       ('svd','Single Value Decomposition'), ('mad', 'Maximum Average Degree'), \
       ('fg', 'Fiber Graph'), ('lcc', 'Largest Connected Component')]
-
-  #Select_file_type = forms.ChoiceField(choices=FILE_TYPES, widget=Select, help_text=' ')
-  #Select_conversion_format = forms.MultipleChoiceField(required=True, \
-  #widget=SelectMultiple, choices=FORMAT_CHOICES)
 
   Select_file_type = forms.ChoiceField(choices=FILE_TYPES, widget=RadioSelect, help_text=' ')
 

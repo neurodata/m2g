@@ -5,7 +5,7 @@
   {% endblock title %}
 
   {% block medheading %}
-    Please upload the graph(s) on which invariants will be computed
+  Compute multivariate invariants on graphs
   {% endblock medheading %}
 
   {% block content %}
@@ -28,12 +28,17 @@
 
     <h3 id="mult_lcc"> Graph(s) <FONT COLOR='#2373ff'>with precomputed </FONT>largest connected component</h3>
     <p> You must use a single<strong> zipfile <i> (.zip) </i> containing ALL</strong> data in a single directory even for multiple graphs. <br/>
-    Note the following <b>file naming convention</b> for graphs - where the <strong>base file name must be the same</strong>:
+    Note the following <b>file naming convention</b> for graphs:
     <ul>
-      <li>The <strong>base file name </strong> here is <strong>graph1</strong></li>
-      <li>Graph file name: graph1.mat, graph1_fiber.mat, graph1_smgr.mat, graph1_bggr.mat are all acceptable file names.</li>
-      <li>LCC file name: <b>graph1_concomp<FONT COLOR='#ff0000'>.npy</FONT> is the only acceptable LCC file name given the base file name graph1</b>
-      The connnected component file must be a &lt1 x #vertices&gt sparse matrix of type '&lttype 'numpy.int64'&gt' <a href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.array.html" target="blank"> Numpy array</a>.
+      <li>Consider the <strong>base file name </strong> here of <strong>graph1</strong></li>
+      <li>The graph file name would be: <strong>graph1.mat</strong> and the only acceptable LCC file would be <b>graph1_concomp<FONT COLOR='#ff0000'>.npy</FONT></b>. Simply append
+      <strong>_concomp</strong> to the graph file name. <br/><br/>
+
+      <li>To maintain backward compatibility with prior versions, and fiber tractography graphs and LCCs we build, you can name your graph: <b>graph1</b><FONT COLOR='#ff0000'>_anything</FONT>.mat, where <FONT COLOR='#ff0000'>_anything</FONT>
+      is any sequence of letters/numbers with <b>no underscores(_)</b> and an LCC that would be <b>graph1_concom</b>p<FONT COLOR='#ff0000'>.npy</FONT>. Note your replacement for <i>graph1</i> in this case should also not contain underscores(_)
+      but may do so if you use the file naming conventions above instead.</li>
+      </li>
+      <li> The connnected component file must be a &lt1 x #vertices&gt sparse matrix of type '&lttype 'numpy.int64'&gt' <a href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.array.html" target="blank"> Numpy array</a>.
       </li>
 
     </ul>
@@ -74,39 +79,39 @@
       <div id="programmatic">
       <h2> Programmatic use </h2>
       <p> This is can be accessed using the base url <strong>http://www.mrbrain.cs.jhu.edu/disa/graphupload/</strong>. The
-          example of usage can be found <a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjango/examples/computeInvariants.py" target="blank">here</a>.
+          example python script can be found <a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjango/examples/computeInvariants.py" target="blank">here</a>.
 
         <h3> How to use the example </h3>
         <p>After downlaoding the <a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjango/examples/computeInvariants.py" target="blank">example</a>,
          start a terminal session. Assuming you are in the same directory as the example. Typing <strong>python computeInvariants.py -h</strong> will give help on how to use the
-         example and what options are available to you. Below are examples of use of this <a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjango/examples/computeInvariants.py" target="blank">example.</a><br/>
+         example and what options are available to you. Below are examples of <a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjango/examples/computeInvariants.py" target="blank">its</a> use.<br/>
 
         <h2 id="single_graph"> Single graph </h2>
         <p>
         Assume we have a single graph located in the same directory as the example script named <em>data.<FONT COLOR='#ff0000'>mat</FONT></em>.
         Typing <strong>python computeInvariants.py http://www.mrbrain.cs.jhu.edu/disa/graphupload/ cc,tri,ss1 data.mat -l -c mat</strong> will
-        upload your <em>data.mat</em> file and compute: clustering co-efficient, local triangle count, and scan statistic-1; the LCC will be computed and used in
+        upload your <em>data.mat</em> file and compute: clustering coefficient, local triangle count, and scan statistic-1; the LCC will be computed and used in
         invariant computation;  the invariants will be converted to <i>.mat</i> format.
 
         Here is a breakdown of the command line call arguments:
         <ol>
           <li><i>http://www.mrbrain.cs.jhu.edu/disa/graphupload/</i> is the base url for uploading graphs for invariants to be computed. This is constant and must not be changed.</li>
-          <li><i>cc,tri,ss1</i> is a comma separated (no spaces) list of the invariant you want computed</li>
+          <li><i>cc,tri,ss1</i> is a comma separated (no spaces) list of the invariants you want computed.</li>
             <div id="inv_opts">
             The only available options for invariants are:
             <ul>
-              <li> <i>ss1</i> for the Scan Statistic 1</li>
-              <li> <i>tri</i> for the Triangle Count </li>
-              <li> <i>cc</i> for the Clustering Coefficient</li>
-              <li> <i>mad</i> for the Maximum Average Degree</li>
-              <li> <i>deg</i> for The Local Degree Count</li>
-              <li> <i>eig</i> for the Top 100 (or maximum available) eigenvalues and eigenvectors</li>
+              <li> <i>ss1</i> for the Scan Statistic 1.</li>
+              <li> <i>tri</i> for the Triangle Count.</li>
+              <li> <i>cc</i> for the Clustering Coefficient.</li>
+              <li> <i>mad</i> for the Maximum Average Degree.</li>
+              <li> <i>deg</i> for The Local Degree Count.</li>
+              <li> <i>eig</i> for the Top 100 (or maximum available) eigenvalues and eigenvectors.</li>
               <!-- <li> <i>ss2</i> for the Scan Statistic 2 [Coming soon]</li>
               <li> <i>apl</i> for the Average Path Length [Coming soon]</li>
               <li> <i>gdia</i> for the Graph Diameter [Coming soon]</li> -->
             </ul>
           </div>
-        <li><i>-l</i> is an <b>optional</b> boolean flag indicated whether to use the LCC for computations. This can be safely omitted, <b>but is mandatory for big fibergrahs</b></li>
+        <li><i>-l</i> is an <b>optional</b> boolean flag indicated whether to use the LCC for computations. This is <b>only mandatory for big fibergrahs</b>.</li>
         <li><i>-c</i> is <b>optional</b> and causes the resulting invariants to be duplicated in other formats. Invariants by default will come in <b>.npy</b> format in addition to other formats you select.</li>
         <div id="conv_opts">
           The only available options for conversion type are:
@@ -128,7 +133,6 @@
           graph with or without LCCs. Simply zip all graphs into a single zipfile. If you have precomputed LCCs, zip these into the same zipfile with their corresponding graphs. You must observe the
           <a href="#mult_lcc"> same file naming conventions</a>
           as described for in-browser use. Other than zipping graphs (and optinal LCCs) together the functionality is identical to <a href="#single_graph">single graph use</a>.
-
 
       </p>
       </div>

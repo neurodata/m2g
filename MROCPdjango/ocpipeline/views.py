@@ -468,16 +468,7 @@ def asyncInvCompute(request):
 
       # TODO: Make function for this. Duplicate of buildgraph code
       if request.session.has_key('invConvertToFormats'):
-        convertInvariants(request.session['invConvertToFormats'], invariant_fns )
-        #for fileFormat in request.session['invConvertToFormats'] :
-        #  # Conversion of all files
-        #  for inv in invariant_fns.keys():
-        #    if isinstance(invariant_fns[inv], list): # Case of eigs
-        #      for fn in invariant_fns[inv]:
-        #        convertTo.convertAndSave(fn, fileFormat, os.path.dirname(fn), inv)
-        #    else: # case of all other invariants
-        #      convertTo.convertAndSave(invariant_fns[inv], fileFormat, \
-        #                          os.path.dirname(invariant_fns[inv]), inv)
+        convertInvariants(request.session['invConvertToFormats'], invariant_fns)
 
     except Exception:
       raise Exception
@@ -495,19 +486,19 @@ def asyncInvCompute(request):
 def convertInvariants(invConvertToFormats, invariant_fns):
   '''
   Convert a bunch of invariants to a format requested
-  @param invConvertToFormats - mat, npy [soon csv]
+  @param invConvertToFormats - mat, npy list [soon csv]
   @param invariant_fns - dict with key -> invariant name & value -> invariant file name
   '''
   #import pdb; pdb.set_trace()
-  #for fileFormat in invConvertToFormats:
-  # Conversion of all files
-  for inv in invariant_fns.keys():
-    if isinstance(invariant_fns[inv], list): # Case of eigs
-      for fn in invariant_fns[inv]:
-        convertTo.convertAndSave(fn, invConvertToFormats, os.path.dirname(fn), inv)
-    else: # case of all other invariants
-      convertTo.convertAndSave(invariant_fns[inv], invConvertToFormats, \
-                          os.path.dirname(invariant_fns[inv]), inv)
+  for fileFormat in invConvertToFormats:
+    # Conversion of all files
+    for inv in invariant_fns.keys():
+      if isinstance(invariant_fns[inv], list): # Case of eigs
+        for fn in invariant_fns[inv]:
+          convertTo.convertAndSave(fn, invConvertToFormats, os.path.dirname(fn), inv)
+      else: # case of all other invariants
+        convertTo.convertAndSave(invariant_fns[inv], invConvertToFormats, \
+                            os.path.dirname(invariant_fns[inv]), inv)
 
 ##############################################################
 
