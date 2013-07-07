@@ -242,17 +242,18 @@ def processInputData(request):
   roi_raw_fn = os.path.join(request.session['derivatives'], roi_raw_fn)
   roi_xml_fn = os.path.join(request.session['derivatives'], roi_xml_fn)
 
-  try:
-    request.session['smGrfn'], request.session['bgGrfn'], request.session['lccfn']\
-    ,request.session['SVDfn'] = processData(fiber_fn, roi_xml_fn, roi_raw_fn, \
-                                request.session['graphs'], request.session['graphInvariants'],\
-                                request.session['graphsize'], True)
-  except:
-    if request.session['graphsize'] == 'big':
-      msg = "Hello,\n\nYour most recent job failed either because your fiber streamline file or ROI mask was incorrectly formatted."
-      msg += " Please check both and try again.%s\n\n" % (" "*randint(0,10))
-      sendJobFailureEmail(request.session['email'], msg)
-    return HttpResponseRedirect(get_script_prefix()+"jobfailure")
+  #try:
+    #import pdb; pdb.set_trace()
+  request.session['smGrfn'], request.session['bgGrfn'], request.session['lccfn']\
+  ,request.session['SVDfn'] = processData(fiber_fn, roi_xml_fn, roi_raw_fn, \
+                              request.session['graphs'], request.session['graphInvariants'],\
+                              request.session['graphsize'], True)
+  #except:
+  #  if request.session['graphsize'] == 'big':
+  #    msg = "Hello,\n\nYour most recent job failed either because your fiber streamline file or ROI mask was incorrectly formatted."
+  #    msg += " Please check both and try again.%s\n\n" % (" "*randint(0,10))
+  #    sendJobFailureEmail(request.session['email'], msg)
+  return HttpResponseRedirect(get_script_prefix()+"jobfailure")
 
   # Run ivariants here
   if len(request.session['invariants']) > 0:
