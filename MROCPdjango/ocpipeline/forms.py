@@ -66,7 +66,7 @@ class BuildGraphForm(forms.Form):
   '''
 
   # Public or private Project
-  Project_Type = forms.ChoiceField([('public', 'public'), ('private','private')],  required=True)
+  Project_Type = forms.ChoiceField([('public', 'public'), ('private','private')],  required=False)
 
   # Name project
   UserDefprojectName  = forms.CharField(label='Project name', max_length=255, required = True, help_text= " ", error_messages={'required': 'You must enter a Project name'})
