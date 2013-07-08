@@ -231,12 +231,6 @@ def processInputData(request):
 
   roi_xml_fn, fiber_fn, roi_raw_fn = filesorter.checkFileExtGengraph(filesInUploadDir) # Check & sort files
 
-  for fileName in [roi_xml_fn, fiber_fn, roi_raw_fn]:
-    if fileName == "": # Means a file is missing from i/p
-      return render_to_response('pipelineUpload.html', context_instance=RequestContext(request)) # Missing file for processing Gengraph
-
-  #baseName = fiber_fn[:-9] # MAY HAVE TO CHANGE
-
   ''' Fully qualify file names '''
   fiber_fn = os.path.join(request.session['derivatives'], fiber_fn)
   roi_raw_fn = os.path.join(request.session['derivatives'], roi_raw_fn)
@@ -245,8 +239,8 @@ def processInputData(request):
   try:
     request.session['smGrfn'], request.session['bgGrfn'], request.session['lccfn']\
     ,request.session['SVDfn'] = processData(fiber_fn, roi_xml_fn, roi_raw_fn, \
-                                request.session['graphs'], request.session['graphInvariants'],\
-                                request.session['graphsize'], True)
+                              request.session['graphs'], request.session['graphInvariants'],\
+                              request.session['graphsize'], True)
   except:
     if request.session['graphsize'] == 'big':
       msg = "Hello,\n\nYour most recent job failed either because your fiber streamline file or ROI mask was incorrectly formatted."
