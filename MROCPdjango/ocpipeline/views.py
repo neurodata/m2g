@@ -9,6 +9,7 @@
 '''
 
 import os, sys, re
+from glob import glob
 import threading
 from random import randint
 os.environ['MPLCONFIGDIR'] = '/tmp/'
@@ -522,8 +523,6 @@ def getLCCfn(graph_fn):
 #########################################
 def graphLoadInv(request, webargs=None):
   ''' Form '''
-  from glob import glob # Move
-
   if request.method == 'POST' and not webargs:
     form = GraphUploadForm(request.POST, request.FILES) # instantiating form
     if form.is_valid():
@@ -656,7 +655,9 @@ def convert(request, webargs=None):
 
       # If zip is uploaded
       if os.path.splitext(request.FILES['fileObj'].name)[1].strip() == '.zip':
-        uploadedFiles = zipper.unzip(savedFile, saveDir)
+        zipper.unzip(savedFile, saveDir)
+        uploadedFiles = glob(os.path.join(saveDir, "*")) # get the uploaded file names
+
         # Delete zip
         os.remove(savedFile)
       else:
