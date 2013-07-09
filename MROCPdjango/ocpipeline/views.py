@@ -360,8 +360,6 @@ def upload(request, webargs=None):
 
   @param webargs: POST data with userDefProjectName, site, subject, session, scanId, graphsize, [list of invariants to compute] info
   """
-  # request.session.clear()
-
   if (webargs and request.method == 'POST'):
     # Check for malformatted input
     webargs = webargs[1:] if webargs.startswith('/') else webargs
@@ -369,9 +367,14 @@ def upload(request, webargs=None):
 
     if len(webargs.split('/')) == 7:
       [userDefProjectName, site, subject, session, scanId, graphsize, request.session['invariants'] ] = webargs.split('/')
+
       request.session['invariants'] = request.session['invariants'].split(',')
     elif len(webargs.split('/')) == 6:
       [userDefProjectName, site, subject, session, scanId, graphsize] = webargs.split('/')
+    else:
+      # Some sort of error
+      return django.http.HttpResponseBadRequest ("Malformatted programmatic \
+          request. Check format of url and data requests")
 
     userDefProjectDir = adaptProjNameIfReq(os.path.join(settings.MEDIA_ROOT, 'public', userDefProjectName, site, subject, session, scanId))
 
@@ -581,7 +584,6 @@ def graphLoadInv(request, webargs=None):
       os.remove(uploadedZip) # Delete the zip
     except:
       print "Non-zip file uploaded ..."
-
     graphs = glob(os.path.join(dataDir,'*.mat'))
 
     idx = 1 if request.session['graphsize'] ==  'big' else 0
@@ -601,7 +603,6 @@ def graphLoadInv(request, webargs=None):
             lcc.process_single_brain(graph_fn, lcc_fn)
           except:
             return HttpResponseBadRequest("Computing the LCC for your graph failed! Check that your graph is binarized and symmetric!")
-
 
       invariant_fns = runInvariants(request.session['invariants'], graph_fn,
                         request.session['graphInvariants'], lcc_fn,
