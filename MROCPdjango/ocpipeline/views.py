@@ -9,6 +9,7 @@
 '''
 
 import os, sys, re
+from glob import glob
 import threading
 from random import randint
 os.environ['MPLCONFIGDIR'] = '/tmp/'
@@ -359,8 +360,6 @@ def upload(request, webargs=None):
 
   @param webargs: POST data with userDefProjectName, site, subject, session, scanId, graphsize, [list of invariants to compute] info
   """
-  # request.session.clear()
-
   if (webargs and request.method == 'POST'):
     # Check for malformatted input
     webargs = webargs[1:] if webargs.startswith('/') else webargs
@@ -368,9 +367,14 @@ def upload(request, webargs=None):
 
     if len(webargs.split('/')) == 7:
       [userDefProjectName, site, subject, session, scanId, graphsize, request.session['invariants'] ] = webargs.split('/')
+
       request.session['invariants'] = request.session['invariants'].split(',')
     elif len(webargs.split('/')) == 6:
       [userDefProjectName, site, subject, session, scanId, graphsize] = webargs.split('/')
+    else:
+      # Some sort of error
+      return django.http.HttpResponseBadRequest ("Malformatted programmatic \
+          request. Check format of url and data requests")
 
     userDefProjectDir = adaptProjNameIfReq(os.path.join(settings.MEDIA_ROOT, 'public', userDefProjectName, site, subject, session, scanId))
 
@@ -522,8 +526,6 @@ def getLCCfn(graph_fn):
 #########################################
 def graphLoadInv(request, webargs=None):
   ''' Form '''
-  from glob import glob # Move
-
   if request.method == 'POST' and not webargs:
     form = GraphUploadForm(request.POST, request.FILES) # instantiating form
     if form.is_valid():
@@ -582,7 +584,6 @@ def graphLoadInv(request, webargs=None):
       os.remove(uploadedZip) # Delete the zip
     except:
       print "Non-zip file uploaded ..."
-
     graphs = glob(os.path.join(dataDir,'*.mat'))
 
     idx = 1 if request.session['graphsize'] ==  'big' else 0
@@ -602,7 +603,6 @@ def graphLoadInv(request, webargs=None):
             lcc.process_single_brain(graph_fn, lcc_fn)
           except:
             return HttpResponseBadRequest("Computing the LCC for your graph failed! Check that your graph is binarized and symmetric!")
-
 
       invariant_fns = runInvariants(request.session['invariants'], graph_fn,
                         request.session['graphInvariants'], lcc_fn,
@@ -656,7 +656,9 @@ def convert(request, webargs=None):
 
       # If zip is uploaded
       if os.path.splitext(request.FILES['fileObj'].name)[1].strip() == '.zip':
-        uploadedFiles = zipper.unzip(savedFile, saveDir)
+        zipper.unzip(savedFile, saveDir)
+        uploadedFiles = glob(os.path.join(saveDir, "*")) # get the uploaded file names
+
         # Delete zip
         os.remove(savedFile)
       else:

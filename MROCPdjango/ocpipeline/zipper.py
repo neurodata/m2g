@@ -74,7 +74,7 @@ def zipper(dir, zip_file):
     zip.close()
     return zip_file
 
-def unzip(zfilename, saveToDir ):
+def unzip( zfilename, saveToDir ):
     '''
     Recursively unzip a zipped folder
 
@@ -84,13 +84,8 @@ def unzip(zfilename, saveToDir ):
     @param saveToDir: the save location
     @type saveToDir: string
     '''
-
-    #import pdb; pdb.set_trace()
-
     # open the zipped file
     zfile = zipfile.ZipFile( zfilename, "r" )
-
-    unzippedFiles = []
 
     # get each archived file and process the decompressed data
     for info in zfile.infolist():
@@ -101,7 +96,6 @@ def unzip(zfilename, saveToDir ):
 
             # save the decompressed data to a new file
             filename = os.path.join(saveToDir, fname.split('/')[-1])
-            unzippedFiles.append(filename)
             fout = open(filename, "w")
             fout.write(data)
             fout.close()
@@ -109,7 +103,8 @@ def unzip(zfilename, saveToDir ):
         else:
            print "Folder ignored --> %s" % fname
 
-    return unzippedFiles
+  # Do not return file names here!
+
 
 if __name__ == '__main__':
     main()
