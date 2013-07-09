@@ -73,47 +73,47 @@ def plotInvDist(invDir, pngName, numBins =100, char = 'class', big = False):
       plot_color = pickprintcolor(subj_types, arrfn)
 
       if (idx == 1 and plot_color == 'black' and not maleLabelAdded):
-        #pl.plot(x, interp*100, color = plot_color, linewidth=1, label = 'male')
-        #plt.legend(bbox_to_anchor=(0.7, 1.3), loc=2, prop={'size':8}, borderaxespad=0.)
+        pl.plot(x, interp*100, color = plot_color, linewidth=1, label = 'male')
+        plt.legend(bbox_to_anchor=(0.7, 1.3), loc=2, prop={'size':8}, borderaxespad=0.)
         maleLabelAdded = True
 
-      if (idx == 1 and plot_color == 'blue' and not femaleLabelAdded):
-        #pl.plot(x, interp*100, color = plot_color, linewidth=1, label = 'female')
-        #plt.legend(bbox_to_anchor=(0.7, 1.3), loc=2, prop={'size':8}, borderaxespad=0.)
+      if (idx == 1 and plot_color == 'red' and not femaleLabelAdded):
+        pl.plot(x, interp*100, color = plot_color, linewidth=1, label = 'female')
+        plt.legend(bbox_to_anchor=(0.7, 1.3), loc=2, prop={'size':8}, borderaxespad=0.)
         femaleLabelAdded = True
       else:
         pl.plot(x, interp*100, color = plot_color, linewidth=1)
 
     if idx == 0:
-			pass
-      #pl.ylabel('Percent')
-      #pl.xlabel('Log Number of Local Triangles')
+      #import pdb; pdb.set_trace()
+      pl.ylabel('Percent')
+      pl.xlabel('Log Number of Local Triangles')
+      ax.set_yticks(scipy.arange(0,13,4))
 
 
     if idx == 1:
-      idx = idx
       #pl.ylabel('Probability') #**
-      #pl.xlabel('Log Local Clustering Coefficient')
+      pl.xlabel('Log Local Clustering Coefficient')
+      ax.set_yticks(scipy.arange(0,13,4))
 
       if big and char == 'class':
         ax.set_yticks(scipy.arange(0,3,1))
 
     if idx == 2:
-      idx = idx
-      #pl.ylabel('Percent')
-      #pl.xlabel('Log scan_1 statistic')
+      pl.ylabel('Percent')
+      pl.xlabel('Log scan statistic-1')
 
       if big:
-          ax.set_yticks(scipy.arange(0,3,1))
+        ax.set_yticks(scipy.arange(0,17,4))
       else:
         ax.set_yticks(scipy.arange(0,12,2))
 
     if idx == 3:
-      idx = idx
-      #pl.xlabel('Log Degree')
+      pl.xlabel('Log Degree')
 
       if big:
-        ax.set_yticks(scipy.arange(0,4,1))
+        ax.set_yticks(scipy.arange(0,17,4))
+        
       else:
         ax.set_yticks(scipy.arange(0,15,3))
         ax.set_xticks(scipy.arange(0,5,1))
@@ -132,11 +132,11 @@ def plotInvDist(invDir, pngName, numBins =100, char = 'class', big = False):
     plot_color = pickprintcolor(subj_types, eigValInstance)
 
     pl.plot(range(1,n+1), sa/10000, color=plot_color)
-    #pl.ylabel('Magnitude x $10^4$')
-    #pl.xlabel('Eigenvalue rank')
+    pl.ylabel('Magnitude x $10^4$')
+    pl.xlabel('Eigenvalue rank')
 
     if big:
-      ax.set_yticks(scipy.arange(0,18,3))
+      ax.set_yticks(scipy.arange(0,18,4))
 
   ''' Global Edges '''
   arrfn = os.path.join(invDir, 'Globals/numEdgesDict.npy')
@@ -173,10 +173,10 @@ def plotInvDist(invDir, pngName, numBins =100, char = 'class', big = False):
 
     fig = pl.figure(2)
 
-    ax.set_yticks(scipy.arange(0,15,3))
 
     if big:
-      ax.set_xticks(scipy.arange(17.2,18.2,.2))
+      pass
+      #ax.set_xticks(scipy.arange(17.2,18.2,.2))
 
     f = interpolate.interp1d(bins, n, kind='cubic')
     x = np.arange(bins[0],bins[-1],0.01) # vary linspc
@@ -188,7 +188,7 @@ def plotInvDist(invDir, pngName, numBins =100, char = 'class', big = False):
     if cnt == 0: # zeros
       plot_color = 'black'#'grey'
     if cnt == 1: # ones
-      plot_color = 'blue'#'cyan'
+      plot_color = 'red'
     if cnt == 2:# twos
       plot_color = 'green'
     if cnt == 3: # ALL
@@ -196,13 +196,22 @@ def plotInvDist(invDir, pngName, numBins =100, char = 'class', big = False):
 
     pl.plot(x, interp,color = plot_color ,linewidth=1)
 
-  #pl.ylabel('Frequency')
-  #pl.xlabel('Log Global Edge Number')
+    ax.set_yticks(scipy.arange(0,16,4))
+    ax.set_xticks(scipy.arange(17.2, 18.2, .3))
+  pl.ylabel('Frequency')
+  pl.xlabel('Log Global Edge Number')
 
-  caption = 'Six invariants '
+  ax = pl.subplot(3,2,6)
+
+
+  font = {'family' : 'monospace',
+        'weight' : 'bold',
+        'size'   : '10'}
+
+  matplotlib.rc('font', **font)  # pass in the font dict as kwargs
 
   #pl.savefig(pngName+'.pdf')
-  pl.savefig(pngName+'.png', dpi=1024)
+  pl.savefig(pngName+'.pdf', dpi=160)
   print '~**** FIN ****~'
 
 #########################################
