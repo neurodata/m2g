@@ -148,7 +148,6 @@ def convertFiles(uploadedFiles, fileType , toFormat, convertFileSaveLoc):
         isCorrectFileType = True
         pass # TODO : DM
       elif (fileType in settings.VALID_FILE_TYPES.keys() or fileType in settings.VALID_FILE_TYPES.values()):
-        import pdb; pdb.set_trace()
         isCorrectFileType = True
 
         # Check if file format is the same as the toFormat
