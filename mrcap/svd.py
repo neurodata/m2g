@@ -10,8 +10,8 @@ Run SVD on a fibergraph. This is a wrapper for Embed.py and uses lcc.py
 Uses Embed.py found at: https://github.com/jovo/PyGraphStat/blob/master/code/Embed.py
 '''
 
-import mrcap.lcc
-import mrcap.Embed
+import mrcap.lcc as lcc
+import mrcap.Embed as Embed
 import numpy as np
 import argparse
 import os

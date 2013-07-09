@@ -8,15 +8,15 @@ pyximport.install()
 
 import numpy as np
 from scipy import sparse as sp
-import mrcap.roi
-import mrcap.fibergraph
+import mrcap.roi as roi
+import mrcap.fibergraph as fibergraph
 import zindex
 from scipy.io import loadmat, savemat
 from collections import Counter
 #from mayavi import mlab # DM - commented out
 import itertools as itt
 from matplotlib import pyplot as plt
-import mrcap.fa
+import mrcap.fa as fa
 #import mprage # DM - commented out
 import argparse
 import os
