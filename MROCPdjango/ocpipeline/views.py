@@ -323,7 +323,6 @@ def confirmDownload(request):
 @login_required
 def showdir(request):
   #directory = request.session['usrDefProjDir']
-  #import pdb; pdb.set_trace()
   return render('STUB')
 
 def contact(request):
@@ -487,7 +486,7 @@ def convertInvariants(invConvertToFormats, invariant_fns):
   @param invConvertToFormats - mat, npy list [soon csv]
   @param invariant_fns - dict with key -> invariant name & value -> invariant file name
   '''
-  #import pdb; pdb.set_trace()
+
   for fileFormat in invConvertToFormats:
     # Conversion of all files
     for inv in invariant_fns.keys():
@@ -714,14 +713,11 @@ def convert(request, webargs=None):
     isCorrectFileFormat, isCorrectFileType = convertFiles(uploadedFiles, fileType, toFormat, convertFileSaveLoc)
 
     if not (isCorrectFileType):
-      # request.session.clear()
       return HttpResponse("[ERROR]: You did not enter a valid FileType.")
     if not (isCorrectFileFormat):
-      # request.session.clear()
       return HttpResponse("[ERROR]: You do not have any files with the correct extension for conversion")
 
     dwnldLoc = "http://mrbrain.cs.jhu.edu"+ convertFileSaveLoc.replace(' ','%20')
-    # request.session.clear()
     return HttpResponse ( "Converted files available for download at " + dwnldLoc + " . The directory " +
             "may be empty if you try to convert to the same format the file is already in.") # change to render of a page with a link to data result
 
