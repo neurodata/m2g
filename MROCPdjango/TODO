@@ -1,13 +1,9 @@
 *MR OCP TODO list Disa
 ===========================
 
-- Alter views to use clean for Email verification
-* Alter url to: openconnecto.me/graph-services
 * Viewer: http://cmtk.org/viewer/ visualization tool
-* Add ability to name graphs anything for all products
 * Refactor views with programmatic access to shorten views.py
 * Add feedback for graph too big & estimated time to completion
-* Header looks like crap in Firefox
 
 - Add sql queries to ...
 - Programmatic options
@@ -24,9 +20,7 @@ html:
 
 Invariants
 ===========
-- Resolve biggraph degree and eigenvalue non-conversion to cs
 - Fix parallel processing of ss
-- Finish work on convert fibergraph, lcc, svd to csv
 
 Invariants still to compute
 =============================
@@ -37,7 +31,11 @@ Invariants still to compute
 
 *Recently completed*
 =====================
-
+- Alter views to use clean for Email verification
+* Alter url to: openconnecto.me/graph-services
+- Finish work on convert fibergraph, lcc, svd to csv
+- Resolve biggraph degree and eigenvalue non-conversion to csv
+* Add ability to name graphs anything for all products
 * Add clear html documentation of supported file upload formats
 * Create a Will only branch
 * Example script for Will
