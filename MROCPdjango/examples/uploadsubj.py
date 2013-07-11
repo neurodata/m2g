@@ -21,6 +21,8 @@ def main():
   parser.add_argument('roixmlfile', action="store")
   parser.add_argument('roirawfile', action="store")
 
+  parser.add_argument('-a', '--auto', action="store_true", help="Use this flag if you want a browser session to open up with the result automatically")
+
   result = parser.parse_args()
 
   result.url = result.url if result.url.endswith('/') else result.url + '/' #
@@ -66,8 +68,9 @@ def main():
   the_page = response.read()
   print '/n' +  the_page
 
-  ''' Optional: Open up a tab/window in your browser to view results'''
-  webbrowser.open(the_page.split(' ')[5])
+  if result.auto:
+    ''' Optional: Open up a tab/window in your browser to view results'''
+    webbrowser.open(the_page.split(' ')[5])
 
 if __name__ == "__main__":
   main()
