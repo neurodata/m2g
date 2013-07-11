@@ -14,8 +14,8 @@ from glob import glob
 
 def main():
 
-  parser = argparse.ArgumentParser(description='Upload and convert a directory of files .mat, .npy, .csv bject. Base url -> http://mrbrain.cs.jhu.edu/disa/convert')
-  parser.add_argument('dirToConvert', action="store")
+  parser = argparse.ArgumentParser(description='Upload and convert a directory of files .mat, .npy, .csv files. Base url -> http://mrbrain.cs.jhu.edu/disa/convert')
+  parser.add_argument('dirToConvert', action="store", help="Name of directory containing files to be converted. Can be zip or normal")
   parser.add_argument('url', action="store", help='url must be in the form http://mrbrain.cs.jhu.edu/disa/convert/{fileType}/{toFormat}. Example {fileType} values fg|[fibergraph], cc|[clustCoeff] \
                       {toFormat} can be a comma separated list e.g mat,npy') #DM TODO
 

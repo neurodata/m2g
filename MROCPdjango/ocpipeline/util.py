@@ -141,13 +141,13 @@ def convertFiles(uploadedFiles, fileType , toFormat, convertFileSaveLoc):
     # determine type of the file
     if (os.path.splitext(file_fn)[1] in ['.mat','.csv','.npy']):
       isCorrectFileFormat = True
-      if (fileType == 'fg' or fileType == 'fibergraph'):
-        isCorrectFileType = True
-        pass # TODO : DM
-      elif( fileType == 'lcc' or fileType == 'lrgstConnComp'):
-        isCorrectFileType = True
-        pass # TODO : DM
-      elif (fileType in settings.VALID_FILE_TYPES.keys() or fileType in settings.VALID_FILE_TYPES.values()):
+      #if (fileType == 'fg' or fileType == 'fibergraph'):
+      #  isCorrectFileType = True
+      #  pass # TODO : DM
+      #elif( fileType == 'lcc' or fileType == 'lrgstConnComp'):
+      #  isCorrectFileType = True
+      #  pass # TODO : DM
+      if (fileType in settings.VALID_FILE_TYPES.keys() or fileType in settings.VALID_FILE_TYPES.values()):
         isCorrectFileType = True
 
         # Check if file format is the same as the toFormat
