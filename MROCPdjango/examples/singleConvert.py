@@ -14,9 +14,9 @@ import webbrowser
 def main():
 
   parser = argparse.ArgumentParser(description='Upload and convert a file between .mat, .npy, .csv bject. Base url -> http://mrbrain.cs.jhu.edu/disa/convert')
-  parser.add_argument('fileToConvert', action="store")
+  parser.add_argument('fileToConvert', action="store", help="The full file name of the file to be converted")
   parser.add_argument('url', action="store", help='url must be in the form http://mrbrain.cs.jhu.edu/disa/convert/{fileType}/{toFormat}. Example {fileType} values fg|[fibergraph], cc|[clustCoeff] \
-                      {toFormat} can be a comma separated list e.g mat,npy') #DM TODO
+                      {toFormat} can be a comma separated list e.g mat,npy,csv')
 
   result = parser.parse_args()
 
