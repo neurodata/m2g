@@ -35,6 +35,8 @@ def main():
   parser.add_argument('-i', '--invariants', action="store", help='OPTIONAL: comma separated list of invariant types. E.g cc,tri,deg,mad for \
                       clustering coefficient, triangle count, degree & maximum average degree')
 
+  parser.add_argument('-a', '--auto', action="store_true", help="Use this flag if you want a browser session to open up with the result automatically")
+
   result = parser.parse_args()
 
   # Sanity checks to ensure the args SEEM valid
@@ -103,8 +105,9 @@ def main():
   the_page = response.read()
   print "Hit parent directory t\n" + the_page
 
-  ''' Optional: Open up a tab/window in your browser to view results'''
-  webbrowser.open(the_page.split(' ')[5][:-len(the_page.split('/')[-1])]) # little string manipulation
+  if result.auto:
+    ''' Optional: Open up a tab/window in your browser to view results'''
+    webbrowser.open(the_page.split(' ')[5][:-len(the_page.split('/')[-1])]) # little string manipulation
 
 if __name__ == "__main__":
   main()

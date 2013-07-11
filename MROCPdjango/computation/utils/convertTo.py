@@ -52,21 +52,18 @@ def convertAndSave(fn, toFormat, saveLoc, fileType):
   saveLoc - full path of where files are to be saved after conversion
   fileType - the fileType is the type of invariant ('cc','ss1', 'scanStat1')
 
-  TODO:
-  =====
-  Add fibergraph convert and save case
   '''
 
   fnExt = os.path.splitext(fn)[1]
   fnBase = os.path.splitext(fn.split('/')[-1])[0] # eg. M854656235_degree
 
+  if (fileType == "fg" or fileType == settings.VALID_FILE_TYPES[fileType]):
+    for fmat in toFormat:
+      convertGraph(fn, fmat, saveLoc)
+    return
+
   start = time()
-
   arr = loadFile(fn, fileType) # load up the file as either a .mat, .npy
-
-  # Incase anyone ever forgets to put the (.) before toFormat value
-  #for item in toFormat:
-    #item = item if item.startswith('.') else ('.' + item)
 
   if (('.mat' in toFormat) or 'mat' in toFormat):
     sio.savemat(os.path.join(saveLoc, fnBase), {fileType:arr}, appendmat = True)
@@ -77,15 +74,22 @@ def convertAndSave(fn, toFormat, saveLoc, fileType):
     print fnBase + ' converted to npy format',
 
   if (('.csv' in toFormat) or ('csv' in toFormat)):
-    if (fileType) == 'mad': # Case of the MAD
-      f = open( os.path.join(saveLoc, fnBase)+'.csv', 'wb')
+    if (fileType == 'mad' or fileType == settings.VALID_FILE_TYPES[fileType]) : # Case of the MAD
+      f = open(os.path.join(saveLoc, fnBase)+'.csv', 'wb')
       f.write(str(arr.item()))
       f.close
-      
-    elif(fileType == "eig"):
-      pass # Do not convert eigenvectors because that might take a while!
 
     else:
+      try: # Means its eigenvector
+        if (arr.shape[1] > 1):
+          writeMultiRowCSV(arr, saveLoc, fnBase)
+          print ('in %.2f secs') % ((time()-start))
+          return
+        else:
+          pass
+      except: # Means its eigenvalue so it can be written normally
+        pass
+
       with open( os.path.join(saveLoc, fnBase)+'.csv', 'wb') as csvfile:
         writer = csv.writer(csvfile, dialect='excel')
         writer.writerow(arr)
@@ -93,8 +97,16 @@ def convertAndSave(fn, toFormat, saveLoc, fileType):
 
   print ('in %.2f secs') % ((time()-start))
 
+def writeMultiRowCSV(data, saveLoc, fnBase):
+  with open( os.path.join(saveLoc, fnBase)+'.csv', 'wb') as csvfile:
+    writer = csv.writer(csvfile, dialect='excel')
+    for row in range(data.shape[1]):
+      writer.writerow(data[row])
+  print fnBase + ' converted to csv format',
 
-def convertGraph(G_fn, toFormat):
+
+
+def convertGraph(G_fn, toFormat, saveLoc=None):
   '''
   Convert a graph from mat format to npy format
 
@@ -106,26 +118,27 @@ def convertGraph(G_fn, toFormat):
   toFormat = '.'+toFormat if not toFormat.startswith('.') else toFormat
   fnExt = os.path.splitext(G_fn)[1]
 
+  save_fn =  os.path.join(saveLoc, os.path.splitext(G_fn.split('/')[-1])[0] ) if saveLoc else os.path.splitext(G_fn)[0]
+
   if (fnExt == '.mat' and toFormat == '.npy'):
     start  = time()
     G = sio.loadmat(G_fn)['fibergraph']
-    np.save(os.path.splitext(G_fn)[0],G)
+    np.save(save_fn,G)
     print ('Graph successfully converted from .mat to .npy in  %.2f secs') % (time()-start)
 
   elif (fnExt == '.npy' and toFormat == '.mat'):
     start  = time()
-    sio.savemat(os.path.splitext(G_fn)[0], {'fibergraph':np.load(G_fn)} , appendmat=True)
+    sio.savemat(save_fn, {'fibergraph':np.load(G_fn)} , appendmat=True)
     print ('Graph successfully converted from .mat to .npy in  %.2f secs') % (time()-start)
 
   elif ((fnExt == '.npy' or fnExt == '.mat')  and toFormat == '.csv'):
-    pass
-    #convertGraphToCSV(G_fn)
+    convertGraphToCSV(G_fn, saveLoc=saveLoc)
 
   else:
     print "[ERROR] in convertGraph Invalid file format! Only .csv, .npy & .mat"
     sys.exit(-1)
 
-def convertGraphToCSV(G_fn, G=None):
+def convertGraphToCSV(G_fn, G=None, saveLoc=None):
   '''
   Convert a graph .mat format to a dense comma separated value file (.csv)
 
@@ -148,13 +161,15 @@ def convertGraphToCSV(G_fn, G=None):
     if (fnExt == '.npy'):
       G = np.load(G_fn)
 
-  if (G.shape[0] > 500):
+  save_fn =  os.path.join(saveLoc, os.path.splitext(G_fn.split('/')[-1])[0] ) if saveLoc else os.path.splitext(G_fn)[0]
+
+  if (G.shape[0] < 1000):
     start = time()
-    with open(os.path.splitext(G_fn)[0]+'.csv', 'wb') as csvfile:
+    with open(save_fn+'.csv', 'wb') as csvfile:
       writer = csv.writer(csvfile, dialect='excel')
-      for vertex in G.shape[0]:
+      for vertex in range(G.shape[0]):
         denseRow = np.array(G[vertex,:].todense())[0].tolist()
-      writer.writerow(denseRow)
+        writer.writerow(denseRow)
     print ('Graph successfully converted from %s to .csv in  %.2f secs') % (fnExt , (time()-start))
 
   else:
@@ -182,11 +197,12 @@ def loadFile(file_fn, fileType):
       5. 'ss1'| 'scanStat1'
       6. 'ss2'| 'scanStat2'
       7. 'tri'|'triangle'
+      8. 'svd'|'singValDecomp'
   '''
 
-  fn, ext  = os.path.splitext(file_fn)
+  fn, ext = os.path.splitext(file_fn)
   if (ext == '.mat' and  fileType in settings.VALID_FILE_TYPES.keys()):
-    theFile = sio.loadmat(file_fn)[fileType]
+      theFile = sio.loadmat(file_fn)[fileType]
 
   elif (ext == '.mat'and fileType in settings.VALID_FILE_TYPES.values()):  # All currently available
     theFile = sio.loadmat(file_fn)[settings.VALID_FILE_TYPES[fileType]]
@@ -195,7 +211,10 @@ def loadFile(file_fn, fileType):
     #arr = arr[dataMemberName]
 
   elif (ext == '.npy'):
-    theFile = np.load(file_fn)
+    if (fileType == "lcc" or fileType == settings.VALID_FILE_TYPES[fileType]):
+      theFile = np.load(file_fn).item().toarray()[0] # unsparsify
+    else:
+      theFile = np.load(file_fn)
 
   elif (ext == '.csv'): # CSV for invariants only graphs will not work
     f = open(file_fn,'rt')

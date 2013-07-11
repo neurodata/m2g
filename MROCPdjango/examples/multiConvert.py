@@ -14,10 +14,12 @@ from glob import glob
 
 def main():
 
-  parser = argparse.ArgumentParser(description='Upload and convert a directory of files .mat, .npy, .csv bject. Base url -> http://mrbrain.cs.jhu.edu/disa/convert')
-  parser.add_argument('dirToConvert', action="store")
+  parser = argparse.ArgumentParser(description='Upload and convert a directory of files .mat, .npy, .csv files. Base url -> http://mrbrain.cs.jhu.edu/disa/convert')
+  parser.add_argument('dirToConvert', action="store", help="Name of DIRECTORY NOT ZIP containing files to be converted")
   parser.add_argument('url', action="store", help='url must be in the form http://mrbrain.cs.jhu.edu/disa/convert/{fileType}/{toFormat}. Example {fileType} values fg|[fibergraph], cc|[clustCoeff] \
-                      {toFormat} can be a comma separated list e.g mat,npy') #DM TODO
+                      {toFormat} can be a comma separated list e.g mat,npy,csv')
+
+  parser.add_argument('-a', '--auto', action="store_true", help="Use this flag if you want a browser session to open up with the result automatically")
 
   result = parser.parse_args()
 
@@ -49,8 +51,9 @@ def main():
   msg = response.read() # Use this response better
   print msg
 
-  ''' Open up a tab in your browser to view results'''
-  #webbrowser.open(msg.split(' ')[6]) # This would change
+  if result.auto:
+    ''' Open up a tab in your browser to view results'''
+    webbrowser.open(msg.split(' ')[6]) # Comment this to disable auto open in a browser
 
 if __name__ == "__main__":
   main()
