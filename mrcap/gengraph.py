@@ -11,9 +11,8 @@ import os
 import mrcap.roi as roi
 from mrcap.fiber import FiberReader
 
-def genGraph(infname, outfname, roixmlname = None, roirawname = None, bigGraph = False , numfibers=0): # Edit
+def genGraph(infname, outfname, roixmlname=None, roirawname=None, bigGraph=False, numfibers=0): # Edit
   """
-
   Generate a sparse graph of an MRI file
   based on input and output names.
   Outputs a matlab file.
@@ -100,9 +99,12 @@ def genGraph(infname, outfname, roixmlname = None, roirawname = None, bigGraph =
   # Done adding edges
   fbrgraph.complete()
 
-  print "Saving matlab file"
+  #**print "Saving matlab file"
   # Save a version of this graph to file
-  fbrgraph.saveToMatlab ( "fibergraph", outfname )
+  #**fbrgraph.saveToMatlab ( "fibergraph", outfname )
+
+  print "Saving graph to file"
+  fbrgraph.saveToIgraph(outfname, )
 
   # Load a version of this graph from
 #  fbrgraph.loadFromMatlab ( "fibergraph", outfname )
@@ -112,14 +114,18 @@ def genGraph(infname, outfname, roixmlname = None, roirawname = None, bigGraph =
 
 def main ():
 
-  parser = argparse.ArgumentParser(description='Read the contents of MRI Studio file and generate a sparse connectivity graph in SciDB.')
-  parser.add_argument( '--count', action="store", type=int, default=-1 )
-  parser.add_argument( 'fbrfile', action="store" )
-  parser.add_argument( 'output', action="store" )
+  parser = argparse.ArgumentParser( description="Read the contents of MRI Studio file and generate a sparse connectivity graph in SciDB." )
+  parser.add_argument( "fbrfile", action="store" )
+  parser.add_argument( "output", action="store", help="resulting name of graph")
+
+  parser.add_argument( "--isbig", "-b", action="store_true", default=False, help="Is the graph big? If so use this flag" )
+  parser.add_argument( "--roixml", "-rx", action="store", default=None, help="The full file name of roi xml file" )
+  parser.add_argument( "--roiraw", "-rr", action="store", default=None, help="The full file name of roi raw file" )
+  parser.add_argument( "--numfib", "-nf", action="store", type=int, default=-1, help="The number of fibers ..." )
 
   result = parser.parse_args()
 
-  genGraph ( result.fbrfile, result.output, result.count )
+  genGraph ( result.fbrfile, result.output, result.roixml, result.roiraw, result.isbig, result.numfib )
 
 if __name__ == "__main__":
   main()

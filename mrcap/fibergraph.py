@@ -6,6 +6,7 @@ import mrcap.mask as mask
 import zindex
 import math
 import itertools
+import igraph
 from cStringIO import StringIO
 
 """
@@ -47,11 +48,15 @@ class FiberGraph:
     self._maxval = zindex.XYZMorton ([xdim-1,ydim-1,zdim-1]) + 1
 
     # list of list matrix for one by one insertion
-    self.spedgemat = lil_matrix ( (self._maxval, self._maxval), dtype=float )
+    #**self.spedgemat = lil_matrix ( (self._maxval, self._maxval), dtype=float )
+
+    # ======================================================================== #
+    self.spedgemat = igraph.Graph(directed=True) # make new igraph DIRECTED graph
+    self.spedgemat += self._maxval # shape the adjacency matrix to be (maxval X maxval)
+    # ======================================================================== #
 
     # empty CSC matrix
     self.spcscmat = csc_matrix ( (self._maxval, self._maxval), dtype=float )
-
 
   #
   # Destructor
@@ -86,18 +91,22 @@ class FiberGraph:
     # Add edges to the big graph
     for v1,v2 in itertools.combinations((voxels),2):
       if ( v1 < v2 ):
-        self.spedgemat [ v1, v2 ] += 1.0
+
+        self.spedgemat += (v1, v2)
+        #**self.spedgemat [ v1, v2 ] += 1.0
       else:
-        self.spedgemat [ v2, v1 ] += 1.0
+        self.spedgemat += (v2, v1)
+        #**self.spedgemat [ v2, v1 ] += 1.0
 
   #
   # Complete the graph.  Get it ready for analysis.
   #
   def complete ( self ):
-    """Done adding fibers.  Prior to analysis"""
+    """Done adding fibers. Prior to analysis"""
 
-    self.spcscmat = csc_matrix ( self.spedgemat )
-    del self.spedgemat
+    self.spcscmat = self.spedgemat #** TODO DM: This is a no-op
+    #**self.spcscmat = csc_matrix ( self.spedgemat )
+    #**del self.spedgemat
 
   #
   #  Write the sparse matrix out in a format that can be reingested.
@@ -125,3 +134,14 @@ class FiberGraph:
     # first convert to csc
     t = loadmat ( filename  )
     self.spcscmat = t[key]
+
+    # ========================================================================== #
+  def saveToIgraph( self, filename, format="picklez" ):
+    """ Save igraph sparse matrix """
+    self.spedgemat.save( filename, format=format )
+
+  def loadFromIgraph( self, filename, format="picklez" ):
+    """ Load a sparse matrix from igraph as a numpy pickle """
+    igraph.load( filename, format=format )
+
+  # ========================================================================== #
