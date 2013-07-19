@@ -106,14 +106,24 @@ def compute(inv_dict, save=True):
   # Calculate Eigenvalues & Eigen vectors
   if inv_dict['eig']:
     if not (inv_dict['eigvl_fn'] or inv_dict['eigvect_fn']):
-      l, u = arpack.eigs(G, k=inv_dict['k'], which='LM') # LanczosMethod(A,0)
+      try:
+        l, u = arpack.eigs(G, k=inv_dict['k'], which='LM') # LanczosMethod(A,0)
+      except Exception, err_msg:
+        print "[ERROR]: Unable to compute Eigen pairs -- graph possibly has too few elements! %s" % err_msg
+        # Remove all eig related invariants and continue ..
+        inv_dict['eig'] = False
+        inv_dict['tri'] = False if not inv_dict['tri_fn']  else inv_dict['tri']
+        inv_dict['cc'] = False if not inv_dict['cc_fn']  else inv_dict['cc']
+        inv_dict['mad'] = False if not inv_dict['mad_fn']  else inv_dict['mad']
+
       print 'Time taken to calc Eigenvalues: %f secs\n' % (time() - start)
     else:
       try:
         l = np.load(inv_dict['eigvl_fn'])
         u = l = np.load(inv_dict['eigvect_fn'])
       except Exception:
-        return "[IOERROR: ]Eigenvalues failed to load"
+        print "[IOERROR]: Eigenvalues failed to load"
+        return -1
 
   # All other invariants
   start = time()
@@ -142,7 +152,7 @@ def compute(inv_dict, save=True):
       # cc
       if inv_dict['cc']:
         if (deg_array[j] > 2):
-          cc_array[j] = (2.0 * tri_array[j]) / ( deg_array[j] * (deg_array[j] - 1) ) # Jari et al
+          cc_array[j] = (2.0 * tri_array[j]) / ( deg_array[j] * (deg_array[j] - 1) )
         else:
           cc_array[j] = 0
 

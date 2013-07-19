@@ -24,9 +24,6 @@ from computation.utils.getBaseName import getBaseName
 
 from computation.utils.file_util import getPathLeaf, makeDirIfNone
 
-# Some default constants that can be changed freely as necessary
-# Data directories
-
 ################################################################################
 #                             COMPUTE INVARIANTS                               #
 ################################################################################

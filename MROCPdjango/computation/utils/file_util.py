@@ -70,7 +70,11 @@ def loadAnyMat(fn, data_elem=None):
   from scipy.sparse import csc_matrix as csc
   from numpy import float32, float64
 
-  G = loadmat(fn)
+  try:
+    G = loadmat(fn)
+  except Exception:
+    return "[ERROR]: Could not load the file from disk. *NOTE: Cannot load matrices with 0 stored entries."
+
   if data_elem:
     try:
       G = G[data_elem]
