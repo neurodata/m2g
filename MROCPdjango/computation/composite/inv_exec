@@ -79,7 +79,7 @@ def main():
                       in path leaf. eg. /foo/bar_bar/foo.mat is OK but /foo/bar/foo_bar.mat is NOT. [TODO fix]')
   #parser.add_argument('graphsize', action='store', help='graphsize [s|b]. s is for small and b is for big.')
 
-  parser.add_argument('-D', '--data_elem', action='store', default='fibergraph', help='the name of the data element within the .mat matrix.')
+  parser.add_argument('-D', '--data_elem', action='store', default=None, help='the name of the data element within the .mat matrix.')
   parser.add_argument('-S', '--save_dir', action='store', default= mr_data_dir, help='the directory where the invariants \
                       are to be stored (each invariant will create its own subdirectory within this). \
                       The defualt is %s' % mr_data_dir)
