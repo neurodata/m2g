@@ -47,7 +47,7 @@ def compute_inv(inv_dict):
     if not inv_dict.has_key(fn):
       inv_dict[fn] = None
 
-  print 'Computing invariants ...'
+  print 'Computing invariants for graph %s...' % inv_dict['graph_fn']
   invariants.compute(inv_dict)
   print 'Invariant computation complete'
 
