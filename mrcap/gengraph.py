@@ -10,6 +10,7 @@ import sys
 import os
 import mrcap.roi as roi
 from mrcap.fiber import FiberReader
+from time import time
 
 def genGraph(infname, outfname, roixmlname=None, roirawname=None, bigGraph=False, numfibers=0): # Edit
   """
@@ -29,6 +30,7 @@ def genGraph(infname, outfname, roixmlname=None, roirawname=None, bigGraph=False
 
   """Generate a sparse graph from an MRI studio file and write it as a Matlab file"""
 
+  start = time()
   # Disa Edit - Determine size of graph to be processed i.e pick a fibergraph module to import
   if bigGraph:
     from fibergraph import FiberGraph
@@ -110,6 +112,7 @@ def genGraph(infname, outfname, roixmlname=None, roirawname=None, bigGraph=False
 #  fbrgraph.loadFromMatlab ( "fibergraph", outfname )
 
   del fbrgraph
+  print "\nGraph building complete in %.3f secs" % ( time () - start )
   return
 
 def main ():
