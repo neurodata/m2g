@@ -93,7 +93,7 @@ class FiberGraph:
   def complete ( self ):
     """Done adding fibers. Prior to analysis"""
     start = time()
-    print "Adding all edges to the graph ..."
+    print "Adding %d edges to the graph ..." % len(self.sorted_edges)
     self.spcscmat += self.sorted_edges
     print "Completed adding edges in %.3f sec" % ( time () - start)
 
