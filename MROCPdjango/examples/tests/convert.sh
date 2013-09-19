@@ -4,6 +4,7 @@
 # Created by Disa Mhembere on 2013-07-10.
 # Email: disa@jhu.edu
 # Copyright (c) 2013. All rights reserved.
+# A script to test the functionality of conversion of file formats
 
 DATA_DIR="/data/projects/disa/OCPprojects/testdata/graphInvariants/"
 
