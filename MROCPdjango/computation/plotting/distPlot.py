@@ -32,7 +32,7 @@ def plotInvDist(invDir, pngName, numBins =100):
   triDir = "Triangle"
   
   invDirs = [triDir, ccDir, SS1dir, DegDir ] 
-  
+
   if not os.path.exists(invDir):
     print "%s does not exist" % invDir
     sys.exit(1)
@@ -108,7 +108,7 @@ def plotInvDist(invDir, pngName, numBins =100):
     pl.plot(range(1,n+1), sa/10000, color='grey')
     pl.ylabel('Magnitude ($X 10^4$) ')
     pl.xlabel('eigenvalue rank')
-    
+
   ''' Edges '''
   arrfn = os.path.join(invDir, 'Globals', 'numEdges.npy')
   try:
@@ -137,6 +137,10 @@ def plotInvDist(invDir, pngName, numBins =100):
   pl.plot(x, interp,color ='grey' ,linewidth=1)
   pl.ylabel('Frequency')
   pl.xlabel('log global edge number')
+  
+  import scipy.io as sio
+  sio.savemat("Edgedata", {"data": interp})
+  sio.savemat("Edgedatax", {"data": x})
   
   #pl.savefig(pngName+'.pdf') 
   pl.savefig(pngName+'.png') 

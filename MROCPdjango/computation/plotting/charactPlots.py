@@ -13,8 +13,8 @@ from scipy import interpolate
 
 from plotHelpers import *
 import pylab as pl
-import scipy.io as sio  
-  
+import scipy.io as sio
+
 # Issues: Done nothing with MAD
 
 def plotInvDist(invDir, pngName, numBins =100, char = 'class', big = False):
@@ -32,14 +32,14 @@ def plotInvDist(invDir, pngName, numBins =100, char = 'class', big = False):
   if not os.path.exists(invDir):
     print "%s does not exist" % invDir
     sys.exit(1)
-  
+
   pl.figure(2)
   fig_gl, axes = pl.subplots(nrows=3, ncols=2)
   #fig_gl.tight_layout()
 
   maleLabelAdded = False
   femaleLabelAdded = False
-  
+
   x_to_disk = []
   interp_to_disk = []
 
@@ -87,7 +87,7 @@ def plotInvDist(invDir, pngName, numBins =100, char = 'class', big = False):
         femaleLabelAdded = True
       else:
         pl.plot(x, interp*100, color = plot_color, linewidth=1)
-      
+
       x_to_disk.append(x)
       interp_to_disk.append(interp)
 
@@ -118,14 +118,17 @@ def plotInvDist(invDir, pngName, numBins =100, char = 'class', big = False):
 
       if big:
         ax.set_yticks(scipy.arange(0,17,4))
-        
+
       else:
         ax.set_yticks(scipy.arange(0,15,3))
         ax.set_xticks(scipy.arange(0,5,1))
-    
+
+    print "Saving for drcty: %s..." % drcty
     sio.savemat( drcty+"x_data", {"data": x_to_disk} )
     sio.savemat( drcty+"interp_data", {"data": interp_to_disk} )
-  """ 
+    x_to_disk = []
+    interp_to_disk = []
+
   ''' Eigenvalues '''
   # For disk saving
   eig_to_disk = []
@@ -144,7 +147,7 @@ def plotInvDist(invDir, pngName, numBins =100, char = 'class', big = False):
     plot_color = pickprintcolor(subj_types, eigValInstance)
 
     pl.plot(range(1,n+1), sa/10000, color=plot_color)
-    
+
     # Save
     eig_to_disk.append(sa/10000)
     eig_range_to_disk.append(range(1,n+1))
@@ -155,15 +158,15 @@ def plotInvDist(invDir, pngName, numBins =100, char = 'class', big = False):
     if big:
       ax.set_yticks(scipy.arange(0,18,4))
 
-  # save   
-  sio.savemat("eigs_data", {"data":eig_to_disk} ) 
+  # save
+  print "Saving eigs!"
+  sio.savemat("eigs_data", {"data":eig_to_disk} )
   sio.savemat("eigs_range_data", {"data":eig_range_to_disk} )
-  """
 
   ''' Global Edges '''
   arrfn = os.path.join(invDir, 'Globals/numEdgesDict.npy')
   ax = pl.subplot(3,2,6)
-  
+
   gle_to_disk = []
   glex_to_disk = []
 
@@ -222,6 +225,7 @@ def plotInvDist(invDir, pngName, numBins =100, char = 'class', big = False):
     ax.set_yticks(scipy.arange(0,16,4))
     ax.set_xticks(scipy.arange(17.2, 18.2, .3))
     
+    print "Saving global edges!"
     sio.savemat( "Global_edges_data_%d"%cnt, {"data":interp} )
     sio.savemat( "Globalx_edges_data%d"%cnt, {"data":x} )
 
