@@ -1,8 +1,7 @@
-import matplotlib
-matplotlib.use("Agg")
+#import matplotlib
+#matplotlib.use("Agg")
 
-import matplotlib.pyplot as plt
-import pylab as pl
+#import matplotlib.pyplot as plt
 
 import numpy as np
 import os
@@ -13,6 +12,9 @@ import scipy
 from scipy import interpolate
 
 from plotHelpers import *
+import pylab as pl
+import scipy.io as sio  
+  
 # Issues: Done nothing with MAD
 
 def plotInvDist(invDir, pngName, numBins =100, char = 'class', big = False):
@@ -27,17 +29,19 @@ def plotInvDist(invDir, pngName, numBins =100, char = 'class', big = False):
 
   invDirs = [triDir, ccDir, SS1dir, DegDir ]
   #invDirs = []
-
   if not os.path.exists(invDir):
     print "%s does not exist" % invDir
     sys.exit(1)
-
+  
   pl.figure(2)
   fig_gl, axes = pl.subplots(nrows=3, ncols=2)
   #fig_gl.tight_layout()
 
   maleLabelAdded = False
   femaleLabelAdded = False
+  
+  x_to_disk = []
+  interp_to_disk = []
 
   for idx, drcty in enumerate (invDirs):
     for arrfn in glob(os.path.join(invDir, drcty,'*.npy')):
@@ -83,13 +87,14 @@ def plotInvDist(invDir, pngName, numBins =100, char = 'class', big = False):
         femaleLabelAdded = True
       else:
         pl.plot(x, interp*100, color = plot_color, linewidth=1)
+      
+      x_to_disk.append(x)
+      interp_to_disk.append(interp)
 
     if idx == 0:
-      #import pdb; pdb.set_trace()
       pl.ylabel('Percent')
       pl.xlabel('Log Number of Local Triangles')
       ax.set_yticks(scipy.arange(0,13,4))
-
 
     if idx == 1:
       #pl.ylabel('Probability') #**
@@ -117,8 +122,15 @@ def plotInvDist(invDir, pngName, numBins =100, char = 'class', big = False):
       else:
         ax.set_yticks(scipy.arange(0,15,3))
         ax.set_xticks(scipy.arange(0,5,1))
-
+    
+    sio.savemat( drcty+"x_data", {"data": x_to_disk} )
+    sio.savemat( drcty+"interp_data", {"data": interp_to_disk} )
+  """ 
   ''' Eigenvalues '''
+  # For disk saving
+  eig_to_disk = []
+  eig_range_to_disk = []
+
   ax = pl.subplot(3,2,5)
   for eigValInstance in glob(os.path.join(invDir, EigDir,"*.npy")):
     try:
@@ -132,15 +144,28 @@ def plotInvDist(invDir, pngName, numBins =100, char = 'class', big = False):
     plot_color = pickprintcolor(subj_types, eigValInstance)
 
     pl.plot(range(1,n+1), sa/10000, color=plot_color)
+    
+    # Save
+    eig_to_disk.append(sa/10000)
+    eig_range_to_disk.append(range(1,n+1))
+
     pl.ylabel('Magnitude x $10^4$')
     pl.xlabel('Eigenvalue rank')
 
     if big:
       ax.set_yticks(scipy.arange(0,18,4))
 
+  # save   
+  sio.savemat("eigs_data", {"data":eig_to_disk} ) 
+  sio.savemat("eigs_range_data", {"data":eig_range_to_disk} )
+  """
+
   ''' Global Edges '''
   arrfn = os.path.join(invDir, 'Globals/numEdgesDict.npy')
   ax = pl.subplot(3,2,6)
+  
+  gle_to_disk = []
+  glex_to_disk = []
 
   try:
     ass_ray = np.load(arrfn).item() # associative array
@@ -170,9 +195,7 @@ def plotInvDist(invDir, pngName, numBins =100, char = 'class', big = False):
              rwidth=None, log=False, color=None, label=None, hold=None)
 
     n = np.append(n,0)
-
     fig = pl.figure(2)
-
 
     if big:
       pass
@@ -198,11 +221,14 @@ def plotInvDist(invDir, pngName, numBins =100, char = 'class', big = False):
 
     ax.set_yticks(scipy.arange(0,16,4))
     ax.set_xticks(scipy.arange(17.2, 18.2, .3))
+    
+    sio.savemat( "Global_edges_data_%d"%cnt, {"data":interp} )
+    sio.savemat( "Globalx_edges_data%d"%cnt, {"data":x} )
+
   pl.ylabel('Frequency')
   pl.xlabel('Log Global Edge Number')
 
   ax = pl.subplot(3,2,6)
-
 
   font = {'family' : 'monospace',
         'weight' : 'bold',
