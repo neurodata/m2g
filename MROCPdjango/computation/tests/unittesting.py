@@ -4,7 +4,7 @@ import os
 #Global filenames
 
 class test():
-  def __init__(self, G_fn, dataDir, numNodes, ss1_fn = None, deg_fn = None, tri_fn = None, ccArr_fn = None, mad = None):
+  def __init__(self, G_fn, dataDir, numNodes, ss1_fn = None, deg_fn = None, tri_fn = None, ccArr_fn = None, mad = None, benchdir=None):
     self.G_fn = G_fn
     self.numNodes = numNodes
     self.ss1_fn = ss1_fn 
@@ -13,19 +13,19 @@ class test():
     self.ccArr_fn = ccArr_fn
     self.dataDir = dataDir
     self.mad = mad
-    self.benchdir = 'bench'
+    self.benchdir = benchdir
     
     if not os.path.exists(dataDir):
       os.makedirs(dataDir)
   
-  def testMAD(self, limit = 0.1):
+  def testMAD(self, tol = 0.1):
     
     benchMAD = float(np.load(os.path.join(self.benchdir, str(self.numNodes),'MAD.npy')))
-    var = abs(benchMAD - self.mad)/benchMAD 
-    if ( var  > limit):
-      print "\n!!!!**** ALERT***** MAD is not within range at %f%% off****ALERT*****!!!!\n" % (var*100)
+    var = abs(benchMAD - np.load(self.mad).item())/benchMAD 
+    if (var  > tol):
+      print "\n!!!!**** ALERT***** MAD is not within tolerance at %f%% off****ALERT*****!!!!\n" % (var*100)
     else:
-      print "\nMAD accurate and within %f%% off" % (var*100)
+      print "\nMAD accurate and within %f%% of actual .." % (var*100)
     
     print "==========================================================================="
   
@@ -54,17 +54,10 @@ class test():
     print "==========================================================================="
 
   def testClustCoeff(self, tol = 0.1):
+    print "==========================================================================="
     proximityAssertion(np.load(self.ccArr_fn), np.load(os.path.join(self.benchdir,\
                           str(self.numNodes), "ccArr.npy")), tol, "Clustering coefficient")
     print "==========================================================================="
-  
-'''  
-  def testAPL(self):
-    pass
-
-  def testSS2(self):
-    pass
-'''
 ######################### ************** #########################
 #                     STAND ALONE FUNCTIONS                      #
 ######################### ************** #########################
@@ -75,21 +68,25 @@ def proximityAssertion(arr, benchArr, tol, testName):
     print testName+" Arrays unequal! Test terminated" 
     return
 
-  diffArr = abs(np.subtract(arr, benchArr)) # difference of the two arrays
-  percdiff = np.empty(len(arr))
+  diffArr = abs(arr - benchArr) # difference of the two arrays
+  meanArr = map(ave, zip(arr, benchArr))
+  percdiff = map(div, zip(diffArr, meanArr))
+  globalPercDiff =  (sum(percdiff)/len(arr))*100.0
   
-  for idx in range(len(arr)):
-    if benchArr[idx] != 0:
-      percdiff[idx] = (diffArr[idx]/float(benchArr[idx]))
-    else:
-      percdiff[idx] = (diffArr[idx]/0.000001)
-  
-  diff = 0 if sum(percdiff) ==  0 else sum(percdiff)/float(len(percdiff))     # Average difference in bench & test
-  percDiff =  diff*100.0
-  
-  if (abs(diff) > tol):
-    print testName+" !!!!**** ALERT***** Global percent difference too high by %f%%****ALERT*****!!!!\n" % ((diff-tol)*100.0)
+  if (abs(globalPercDiff) > tol*100.0):
+    print testName+" !!!!**** ALERT***** Global percent difference too high by %f%%****ALERT*****!!!!\n" % ((globalPercDiff-tol*100.0))
   else:
-    print testName+" global percent difference OK! at %f%% off" % (percDiff)
+    print testName+" global percent difference OK! at %f%% off" % (globalPercDiff)
     
-  return percDiff
+  return globalPercDiff
+
+def ave(args):
+  return (args[0]+args[1])/2.0
+
+def div(args):
+  num = args[0]
+  den = args[1]
+  if num == 0 and den == 0:
+    return 0
+  else:
+    return num/float(den)

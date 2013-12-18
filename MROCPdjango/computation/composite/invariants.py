@@ -60,6 +60,7 @@ def compute(inv_dict, save=True):
     # small graphs
   else:
     G = loadAnyMat(inv_dict['graph_fn'], inv_dict['data_elem'])
+
     if isinstance(G, str):
       print G
       return G # Error message
@@ -123,7 +124,7 @@ def compute(inv_dict, save=True):
     for j in range(num_nodes):
       # tri
       if not inv_dict['tri_fn'] and inv_dict['tri']: # if this is still None we need to compute it
-        tri_array[j] = abs(round((sum( np.power(l.real,3) * (u[j][:].real**2)) ) / 6.0)) # Divide by six because we count locally
+        tri_array[j] = abs(round((sum( np.power(l.real,3) * (u[j][:].real**2)) ) )) # Won't divide by six yet because it affects CC count locally
 
       # ss1 & deg
       if inv_dict['ss1'] or (not inv_dict['deg_fn'] and inv_dict['deg']):
@@ -142,9 +143,15 @@ def compute(inv_dict, save=True):
       # cc
       if inv_dict['cc']:
         if (deg_array[j] > 2):
-          cc_array[j] = (2.0 * tri_array[j]) / ( deg_array[j] * (deg_array[j] - 1) ) # Jari et al
+          if inv_dict['tri_fn']:
+            cc_array[j] = (6.0 * tri_array[j]) / ( deg_array[j] * (deg_array[j] - 1) ) # Saramaki et al
+          else:
+            cc_array[j] = tri_array[j] / ( deg_array[j] * (deg_array[j] - 1) ) # Saramaki et al
         else:
           cc_array[j] = 0
+
+    if not inv_dict['tri_fn'] and inv_dict['tri']:
+      tri_array = map(round, tri_array/6.0)
 
     print 'Time taken to compute loop dependent invariants: %f secs\n' % (time() - start)
 
@@ -175,7 +182,7 @@ def compute(inv_dict, save=True):
   ''' Triangle count '''
   if not inv_dict['tri_fn'] and inv_dict['tri']:
     triDir = os.path.join(inv_dict['save_dir'], "Triangle") #if triDir is None else triDir
-    inv_dict['tri_fn'] = os.path.join(triDir, getBaseName(inv_dict['graph_fn']) + '_triangles.npy') # TODO HERE
+    inv_dict['tri_fn'] = os.path.join(triDir, getBaseName(inv_dict['graph_fn']) + '_triangles.npy')
     createSave(inv_dict['tri_fn'], tri_array)
     print 'Triangle Count saved as ' + inv_dict['tri_fn']
 
