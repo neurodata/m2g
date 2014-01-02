@@ -35,4 +35,8 @@ system.time( igraph::transitivity(g, "local") )
 cat("Processing Triangle count\n")
 system.time( igraph::adjacent.triangles(g) )
 
-cat("Total time for the 4 invariants = ", (proc.time()[3]-begin), " ...\n")
+# Eigendecomposition
+cat("Spectral decomposition\n")
+system.time( igraph::adjacent.spectral.embedding(g, 100) )
+
+cat("Total time for the 5 invariants = ", (proc.time()[3]-begin), " ...\n")

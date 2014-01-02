@@ -15,6 +15,7 @@ import igraph
 from loadAdjMatrix import loadAnyMat
 from multiprocessing import Pool
 from scipy.sparse import triu
+from csc_matrix2 import csc_matrix2
 
 class Node(object):
   def __init__(self, ):
@@ -43,7 +44,11 @@ def csc_to_igraph(g, save=False, fn="igraph_graph"):
   # Iterate through all non-zero edged nodes and add to list for the upper triangular of the matrix
 
   #pp = Pool()
+  #g = csc_matrix2(g)
   #all_new_edges = pp.map(get_edges, g) # Should return a list of np.arrays containing edges I want to add
+
+  #zip(range(TOTAL_NODES), all_new_edges)
+
 
   for node in xrange(g.shape[0]):
     if g[node].nnz: # if we have an edge
@@ -51,7 +56,7 @@ def csc_to_igraph(g, save=False, fn="igraph_graph"):
 
       edges.extend(zip([0]*g[node].nonzero()[1].shape[0], g[node].nonzero()[1]))
 
-    if TOTAL_NODES % 500 == 0:
+    if node % 500 == 0:
       print "Processing node %d / %d" % (node, TOTAL_NODES)
 
   print "All nodes processed ...\n Adding igraph edges ..."
