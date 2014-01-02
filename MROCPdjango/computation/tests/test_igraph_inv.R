@@ -37,6 +37,12 @@ system.time( igraph::adjacent.triangles(g) )
 
 # Eigendecomposition
 cat("Spectral decomposition\n")
-system.time( igraph::adjacent.spectral.embedding(g, 100) )
+if (igraph::vcount(g) >= 102){
+  eigs <- 100
+} else {
+  eigs <- igraph::vcount(g)-2
+}
+
+system.time( igraph::adjacency.spectral.embedding(g, eigs ))
 
 cat("Total time for the 5 invariants = ", (proc.time()[3]-begin), " ...\n")
