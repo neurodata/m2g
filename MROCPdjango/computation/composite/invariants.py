@@ -112,7 +112,7 @@ def compute(inv_dict, save=True):
     else:
       try:
         l = np.load(inv_dict['eigvl_fn'])
-        u = l = np.load(inv_dict['eigvect_fn'])
+        u = np.load(inv_dict['eigvect_fn'])
       except Exception:
         return "[IOERROR: ]Eigenvalues failed to load"
 
