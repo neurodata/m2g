@@ -9,7 +9,6 @@
 
 import argparse
 from scipy.sparse.csc import csc_matrix
-from scipy.sparse.lil import lil_matrix
 import scipy.io as sio
 import igraph
 from loadAdjMatrix import loadAnyMat
@@ -17,18 +16,15 @@ from multiprocessing import Pool
 from scipy.sparse import triu
 from csc_matrix2 import csc_matrix2
 
-class Node(object):
-  def __init__(self, ):
-    """
-    TODO: DM
-    """
-    pass
+g = None # csc global
 
-def csc_to_igraph(g, save=False, fn="igraph_graph"):
+def csc_to_igraph(cscg, save=False, fn="igraph_graph"):
   """
   TODO: DM
   """
-  assert isinstance(g, csc_matrix), "Arg1 'g' must be a Scipy Sparse CSC Matrix"
+  assert isinstance(cscg, csc_matrix), "Arg1 'g' must be a Scipy Sparse CSC Matrix"
+  global g
+  g = cscg
 
   print "Converting CSC to upper triangular ..."
   g = triu(g, k=0)
@@ -39,31 +35,38 @@ def csc_to_igraph(g, save=False, fn="igraph_graph"):
 
   ig = igraph.Graph(n=g.shape[0], directed=False) # **Note: Always undirected
 
-  edges = [] # List of edges
-
   # Iterate through all non-zero edged nodes and add to list for the upper triangular of the matrix
+  print "Parallel get of edges from adjacency matrix ..."
+  pp = Pool()
+  g = csc_matrix2(g)
+  all_new_edges = pp.map(get_edges, g) # Should return a list of np.arrays containing edges I want to add
+  pp.close(); pp.join()
 
-  #pp = Pool()
-  #g = csc_matrix2(g)
-  #all_new_edges = pp.map(get_edges, g) # Should return a list of np.arrays containing edges I want to add
+  # Make 2-tuple with node_id and all_non_zero entries
+  print "Zipping node id its edge list ..."
+  ids_edges = zip(range(TOTAL_NODES), all_new_edges) # get e.g. [ (0, [1,2,6]), (1, [2,5,8]), ... ] i.e. (node_id, [non_zero_elems])
 
-  #zip(range(TOTAL_NODES), all_new_edges)
+  # Create the igraph needed (id1, id2) format for adding multiple edges
+  print "Creating lists of tuple pairs ..."
+  del all_new_edges
+  pp = Pool()
+  edge_tups = pp.map(create_pairs, ids_edges) # Should return a list of lists, each containing 2-tuples
+  pp.close(); pp.join()
 
+  del ids_edges
 
-  for node in xrange(g.shape[0]):
-    if g[node].nnz: # if we have an edge
-      new_edges =  g[node].nonzero()[1]
+  print "Serially appending to edge list ..."
+  edges = []
+  for node_id, l in enumerate(edge_tups):
+    edges.extend(l)
 
-      edges.extend(zip([0]*g[node].nonzero()[1].shape[0], g[node].nonzero()[1]))
+    if node_id % 500 == 0:
+      print "Processing node %d / %d" % (node_id, TOTAL_NODES)
 
-    if node % 500 == 0:
-      print "Processing node %d / %d" % (node, TOTAL_NODES)
-
-  print "All nodes processed ...\n Adding igraph edges ..."
-
+  print "Adding edges to igraph object ..."
   ig += edges
 
-  print "All igraph edges added ..."
+  print "All igraph edges added!"
 
   if save:
     print "Saving to igraph gml file format..."
@@ -71,13 +74,28 @@ def csc_to_igraph(g, save=False, fn="igraph_graph"):
 
   return ig
 
-def get_edges(node):
-  """ TODO: DM """
-  return node.nonzero()[1] # This assumes matrix is already in upper triangular form
+def create_pairs(id_edges):
+  """
+  Create (id1,id2) pairs to be used to add to igraph graph.
+  Used in parallel mapping operations.
 
-def extend_list(l, edges):
-  """ TODO: DM """
-  l.extend(edges)
+  positional arguments:
+  =====================
+  id_edges - the
+  """
+  return zip([id_edges[0]]*id_edges[1].shape[0], id_edges[1])
+
+def get_edges(node):
+  """
+  Returns the edgelist for particular node (index of the adjacency matrix)
+  Used in parallel mapping operations.
+
+  positional arguments:
+  =====================
+  node - a single row of a csc matrix
+
+  """
+  return node.nonzero()[1]
 
 def main():
   parser = argparse.ArgumentParser(description="Convert an igraph to a csc object")
@@ -102,11 +120,11 @@ def test():
   """
   print "Running 5 node test ...."
   g = csc_matrix([
-        [0, 0, 0, 0, 1],
-        [0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0],
-        [1, 0, 0, 0, 0]
+        [0, 1, 0, 0, 1],
+        [1, 0, 1, 1, 0],
+        [0, 1, 0, 1, 0],
+        [0, 1, 1, 0, 0],
+        [1, 0, 0, 0, 1]
         ])
 
   g = csc_to_igraph(g)
