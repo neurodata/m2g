@@ -15,10 +15,11 @@ from loadAdjMatrix import loadAnyMat
 from multiprocessing import Pool
 from scipy.sparse import triu
 from csc_matrix2 import csc_matrix2
+from time import time
 
 g = None # csc global
 
-def csc_to_igraph(cscg, save=False, fn="igraph_graph"):
+def csc_to_igraph(cscg, save=False, fn="igraph_graph", num_procs=None):
   """
   TODO: DM
   """
@@ -37,7 +38,7 @@ def csc_to_igraph(cscg, save=False, fn="igraph_graph"):
 
   # Iterate through all non-zero edged nodes and add to list for the upper triangular of the matrix
   print "Parallel get of edges from adjacency matrix ..."
-  pp = Pool()
+  pp = Pool(num_procs)
   g = csc_matrix2(g)
   all_new_edges = pp.map(get_edges, g) # Should return a list of np.arrays containing edges I want to add
   pp.close(); pp.join()
@@ -49,7 +50,7 @@ def csc_to_igraph(cscg, save=False, fn="igraph_graph"):
   # Create the igraph needed (id1, id2) format for adding multiple edges
   print "Creating lists of tuple pairs ..."
   del all_new_edges
-  pp = Pool()
+  pp = Pool(num_procs)
   edge_tups = pp.map(create_pairs, ids_edges) # Should return a list of lists, each containing 2-tuples
   pp.close(); pp.join()
 
@@ -70,7 +71,9 @@ def csc_to_igraph(cscg, save=False, fn="igraph_graph"):
 
   if save:
     print "Saving to igraph gml file format..."
+    if not os.path.splitext(fn)[1] == ".gml": fn = fn+".gml"
     igraph.write(ig, fn, format="gml")
+    print "\nigraph saved as %s ... \nDone!" % os.path.abspath(fn)
 
   return ig
 
@@ -103,6 +106,7 @@ def main():
   parser.add_argument("-s", "--save", action="store_true", help="Save conversion to disk")
   parser.add_argument("-f", "--save_fn", action="store", default="csc_matlab", help="Save file name")
   parser.add_argument("-d", "--data_elem", action="store", default=None, help="The name of the data element key in the dict.")
+  parser.add_argument("-n", "--num_procs", action="store", default=None, help="The number of processors to use when converting")
 
   parser.add_argument("-t", "--test", action="store_true", help="Run test only!")
   result = parser.parse_args()
@@ -110,9 +114,12 @@ def main():
   if result.test:
     test()
     exit(1)
-
+  
+  st = time()
   g = loadAnyMat(result.graph_fn, result.data_elem)
-  igraph_to_csc(g, result.save, result.save_fn)
+  csc_to_igraph(g, result.save, result.save_fn, result.num_procs)
+  
+  print "Total time for conversion %.4f sec" % (time()-st)
 
 def test():
   """
