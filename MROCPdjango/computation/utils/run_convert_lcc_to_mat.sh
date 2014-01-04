@@ -7,6 +7,7 @@ directories="/data/public/MR/MIGRAINE/KKI-42_MIGRAINE_v1_0_2013-09-25/big_graphs
 "
 for f in $directories
 do
+  #echo $f
   python convert_lcc_to_mat.py $f
 done
 

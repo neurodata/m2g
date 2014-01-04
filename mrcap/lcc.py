@@ -15,7 +15,7 @@ from scipy.io import loadmat, savemat
 from collections import Counter
 #from mayavi import mlab # DM - commented out
 import itertools as itt
-from matplotlib import pyplot as plt
+# from matplotlib import pyplot as plt # DM - commented out
 import mrcap.fa as fa
 #import mprage # DM - commented out
 import argparse
