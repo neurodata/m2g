@@ -11,7 +11,7 @@ import re
 
 __weight__=True # If the graph is weighted this will be set
 
-def csc_to_graphml(g, is_weighted=True, desikan=None, is_directed=False, save_fn="default_name.graphml", is_tri=False, test=False):
+def csc_to_graphml(g, is_weighted=True, desikan=False, is_directed=False, save_fn="default_name.graphml", is_tri=False, test=False):
   """
   g - the csc graph
   """
@@ -28,7 +28,9 @@ def csc_to_graphml(g, is_weighted=True, desikan=None, is_directed=False, save_fn
     <!-- Created by script: %s -->\n""" % __file__
 
   # Do we have desikan labels ?
-  if desikan is not None:
+  if desikan:
+    import desikan
+
     src += "  "*2+"<key id=\"v_region\" for=\"node\" attr.name=\"region\" attr.type=\"string\"/>\n" # Desikan vertex attr called v_region
     tabs = 3
 
@@ -58,11 +60,11 @@ def csc_to_graphml(g, is_weighted=True, desikan=None, is_directed=False, save_fn
   # Can be #pragma for
   for node in xrange(NUM_NODES): # Cycle through all nodes
     s = "<node id=\"n%d\">\n" % node
+
+    if desikan:
+      s += "  "*(tabs+1)+"<data key=\"v_region\">\"%s\"</data>\n" % (desikan.des_map.get(node, "Undefined"))
+
     s += "  "*tabs+"</node>\n"
-
-    if desikan is not None:
-      s += "  "*(tabs+1)+"<data key=\"v_region\">%s </data>\n" % (desikan[node])
-
     src += "  "*tabs+s
 
     if node % 50000 == 0:
@@ -103,7 +105,6 @@ def csc_to_graphml(g, is_weighted=True, desikan=None, is_directed=False, save_fn
   f.close
 
 class Desikan(object):
-  des_map = {}
 
   def __init__(self, g):
     pass
@@ -123,6 +124,7 @@ def graphml_to_csc(fh):
   """
 
   from scipy.sparse.lil import lil_matrix
+  from scipy.sparse.csc import csc_matrix
 
   print "Processing nodes ..."
   # Assume all header stuff is ok
@@ -161,13 +163,13 @@ def graphml_to_csc(fh):
 
     if line.endswith("</edge>"):
       edge = get_edge(line)
-      g[edge[0], edge[1]] = edge[2]
+      g[edge[0], edge[1]] = edge[2] # Naive i.e slow. TODO: Optimize
       line = ""
 
     elif line.endswith("</graphml>"):
       break
 
-  return g
+  return csc_matrix(g) # Convert to CSC first
 
 def get_edge(st):
   """
@@ -193,13 +195,16 @@ def get_edge(st):
   return [src, dest, 1]
 
 def readtest(fn):
+  """
+  Read Test function ran with -T flag
+  """
   g = graphml_to_csc(open(fn, "rb"))
   print g.todense()
   print "Test complete ..."
 
-def test():
+def writetest(desikan):
   """
-  Test function ran with -t flag
+  Write Test function ran with -t flag
   """
   from scipy.sparse.csc import csc_matrix
   print "Running 5 node test ...."
@@ -211,7 +216,7 @@ def test():
         [5, 0, 0, 0, 0]
         ])
 
-  src = csc_to_graphml(g, test=True)
+  src = csc_to_graphml(g, test=True, desikan=desikan)
   print "Test complete ..."
   print src
 
@@ -222,14 +227,14 @@ def main():
   parser.add_argument("-p", "--dump", action="store", help="If we should write a graphml graph to disk")
 
   parser.add_argument("-w", "--weighted", action="store_true", help="Pass flag if the graph is weighted")
-  parser.add_argument("-k", "--desikan", action="store_true", default=None, help="Use Desikan mapping")
+  parser.add_argument("-k", "--desikan", action="store_true", help="Use Desikan mapping for nodes")
   parser.add_argument("-r", "--directed", action="store_true", help="Pass flag if the graph is directed")
   parser.add_argument("-f", "--save_fn", action="store", default="default_name.graphml", help="Save file name")
   parser.add_argument("-g", "--triangular", action="store_true", help="Pass flag if the graph is triangular (upper/lower)")
   parser.add_argument("-d", "--data_elem", action="store", default=None, help="The name of the data element key in the dict.")
-  parser.add_argument("-n", "--num_procs", action="store", default=None, help="STUB: The number of processors to use when converting")
+  parser.add_argument("-n", "--num_procs", action="store", default=None, help="STUB: The number of processors to use when converting") # TODO: CODEME
 
-  parser.add_argument("-t", "--test", action="store_true", help="Run test only!")
+  parser.add_argument("-t", "--writetest", action="store_true", help="Run write graph from csc test only!")
   parser.add_argument("-T", "--readtest", action="store_true", help="Run read graphml to csc test only!")
 
   result = parser.parse_args()
@@ -238,8 +243,8 @@ def main():
     readtest(result.graph_fn)
     exit(1)
 
-  if result.test:
-    test()
+  if result.writetest:
+    writetest(result.desikan)
     exit(1)
 
   from time import time
@@ -248,10 +253,11 @@ def main():
   st = time()
   g = loadAnyMat(result.graph_fn, result.data_elem)
 
-  if result.desikan:
-    result.desikan = Desikan(g).get_mapping()
+  if result.dump:
+    csc_to_graphml(g, result.weighted, result.desikan, result.directed, result.save_fn, result.triangular)
 
-  csc_to_graphml(g, result.weighted, result.desikan, result.directed, result.save_fn, result.triangular)
+  if result.load:
+    graphml_to_csc(open(result.graph_fn, "rb"))
 
   print "Total time for conversion %.4f sec" % (time()-st)
 
