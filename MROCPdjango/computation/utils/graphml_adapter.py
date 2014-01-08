@@ -13,8 +13,22 @@ __weight__=True # If the graph is weighted this will be set
 
 def csc_to_graphml(g, is_weighted=True, desikan=False, is_directed=False, save_fn="default_name.graphml", is_tri=False, test=False):
   """
+  Convert a csc graph to graphml format for writing to disk
+
+  Positional arguments:
+  ====================
   g - the csc graph
+
+  Optional arguments:
+  ===================
+  is_weighted - is the graph weighted. Type: boolean.
+  desikan - use the desikan mapping to label nodes. Type: boolean
+  is_directed - is g symmetric ? Type: boolean
+  save_fn - file name to use when saving. Type: boolean
+  is_tri - is the adjacency mat upper or lower triangular. Type: boolean
+  test - are we running a test. Type: boolean
   """
+
   print "Beginning graphml construction .."
   if test: test_str = ""
 
@@ -105,22 +119,25 @@ def csc_to_graphml(g, is_weighted=True, desikan=False, is_directed=False, save_f
   f.close
 
 class Desikan(object):
-
   def __init__(self, g):
+    """
+    Unimplemented
+    """
     pass
-
   def get_mapping(self, ):
     return [] # FIXME stub
 
 def graphml_to_csc(fh):
   """
-  Cannot account for any node attributes
-  Can only account for edge weight attributes
+  Take the filehandle of a graphml formatted graph written to disk and convert to
+  scipy.sparse.csc.matrix
+
+  *Cannot account for any node attributes*
+  *Can only account for edge weight attributes*
 
   Positional arguments:
   =====================
-
-  fn - filename
+  fh - the file handle to the graphml file
   """
 
   from scipy.sparse.lil import lil_matrix
@@ -197,6 +214,10 @@ def get_edge(st):
 def readtest(fn):
   """
   Read Test function ran with -T flag
+
+  Positional Args:
+  ===============
+  fn - filename of the of test graph
   """
   g = graphml_to_csc(open(fn, "rb"))
   print g.todense()
@@ -205,6 +226,10 @@ def readtest(fn):
 def writetest(desikan):
   """
   Write Test function ran with -t flag
+
+  Positional Args:
+  ===============
+  desikan - use the desikan mapping?
   """
   from scipy.sparse.csc import csc_matrix
   print "Running 5 node test ...."

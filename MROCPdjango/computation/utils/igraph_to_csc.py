@@ -16,11 +16,20 @@ import sys
 
 def igraph_to_csc(g, save=False, fn="csc_matlab"):
   """
-  TODO: DM
+  Convert an igraph to scipy.sparse.csc.csc_matrix
+
+  Positional arguments:
+  =====================
+  g - the igraph graph
+
+  Optional arguments:
+  ===================
+  save - save file to disk
+  fn - the file name to be used when writing (appendmat = True by default)
   """
   assert isinstance(g, igraph.Graph), "Arg1 'g' must be an igraph graph"
   print "Creating CSC from igraph object ..."
-  gs = csc_matrix(g.get_adjacency().data)
+  gs = csc_matrix(g.get_adjacency().data) # Equiv of calling to_dense so may case MemError
   print "CSC creation complete ..."
 
   if save:

@@ -5,8 +5,15 @@ import scipy.io as sio
 import pdb
 import sys
 
-# load up and LCC adjacency matrix and save it elsewhere
 def load_and_store(dirg):
+  """"
+  load up and LCC adjacency matrix and save it elsewhere
+
+  *NOTE: This is not a general script and is specific to the bg1:/data/public/MR/MIGRAINE data
+  Positional Args:
+  ===============
+  dirg - the directory with a graph
+  """
   print "** Processing dataset: %s ... **\n" % dirg
 
   graphs = glob( os.path.join(dirg, "*"))
@@ -24,7 +31,7 @@ def load_and_store(dirg):
 
     fn_root = g_fn.split("/")[-1][:-13]
     lcc_fn = os.path.join(base_dir, "big_lcc", fn_root+"big_lcc.npy")
-    
+
     if os.path.exists(g_fn) and os.path.exists(lcc_fn):
       g = loadAdjMat(g_fn, lcc_fn)
       fn = os.path.join(save_dir, fn_root+"big_lcc_adjmat")
