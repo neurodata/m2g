@@ -248,8 +248,8 @@ def writetest(desikan):
 def main():
   parser = argparse.ArgumentParser(description="Convert an igraph to a csc object")
   parser.add_argument("graph_fn", action="store", help="The name of the graph to read from disk. *Must be scipy.sparse.csc.csc_matrix or graphml format. If running test use any dummy name e.g '_'")
-  parser.add_argument("-l", "--load", action="store", help="If we should load the file from disk")
-  parser.add_argument("-p", "--dump", action="store", help="If we should write a graphml graph to disk")
+  parser.add_argument("-l", "--load", action="store_true", help="If we should load the file from disk")
+  parser.add_argument("-p", "--dump", action="store_true", help="If we should write a graphml graph to disk")
 
   parser.add_argument("-w", "--weighted", action="store_true", help="Pass flag if the graph is weighted")
   parser.add_argument("-k", "--desikan", action="store_true", help="Use Desikan mapping for nodes")
