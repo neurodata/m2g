@@ -1,12 +1,15 @@
 #!/usr/bin/python
 
-# convert_to_graphml.py
+# graphml_adapter.py
 # Created by Disa Mhembere on 2014-01-06.
 # Email: disa@jhu.edu
 # Copyright (c) 2014. All rights reserved.
 
 import argparse
 import os
+import re
+
+__weight__=True # If the graph is weighted this will be set
 
 def csc_to_graphml(g, is_weighted=True, desikan=None, is_directed=False, save_fn="default_name.graphml", is_tri=False, test=False):
   """
@@ -18,7 +21,7 @@ def csc_to_graphml(g, is_weighted=True, desikan=None, is_directed=False, save_fn
   tabs = 2 # How many tabs on affix to the front
 
   src = """<?xml version="1.0" encoding="UTF-8"?>
-  <graphml xmlns="http://graphml.graphdrawing.org/xmlns"  
+  <graphml xmlns="http://graphml.graphdrawing.org/xmlns"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://graphml.graphdrawing.org/xmlns
     http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd">
@@ -28,16 +31,16 @@ def csc_to_graphml(g, is_weighted=True, desikan=None, is_directed=False, save_fn
   if desikan is not None:
     src += "  "*2+"<key id=\"v_region\" for=\"node\" attr.name=\"region\" attr.type=\"string\"/>\n" # Desikan vertex attr called v_region
     tabs = 3
-  
+
   # Is our graph weighted ?
   if is_weighted:
     src += "  "*2+"<key id=\"e_weight\" for=\"edge\" attr.name=\"weight\" attr.type=\"double\"/>\n" # Desikan vertex attr called v_region
     tabs = 3
-  
+
   # Directed graph ?
   if is_directed:
     src += "\n    <graph id=\"G\" edgedefault=\"undirected\">"
-  
+
   # Undirected graph?
   else:  # not directed so just use upper tri
     if not is_tri:
@@ -57,7 +60,7 @@ def csc_to_graphml(g, is_weighted=True, desikan=None, is_directed=False, save_fn
     s = "<node id=\"n%d\">\n" % node
     s += "  "*tabs+"</node>\n"
 
-    if desikan is not None: 
+    if desikan is not None:
       s += "  "*(tabs+1)+"<data key=\"v_region\">%s </data>\n" % (desikan[node])
 
     src += "  "*tabs+s
@@ -67,7 +70,7 @@ def csc_to_graphml(g, is_weighted=True, desikan=None, is_directed=False, save_fn
       if test: test_str += src
       else: f.write(src)
       src = ""
-  
+
   del s # free mem
 
   print "Adding edges to graph ..."
@@ -75,24 +78,24 @@ def csc_to_graphml(g, is_weighted=True, desikan=None, is_directed=False, save_fn
   nodes_from, nodes_to = g.nonzero()
   data = g.data
   del g # free some mem
-  
+
   # Can be #pragma for
   NUM_EDGES = nodes_from.shape[0]
   for idx in xrange(NUM_EDGES): # Only the edges that exist
     src += "  "*tabs+"<edge source=\"n%d\" target=\"n%d\">\n" % (nodes_from[idx], nodes_to[idx])
     if is_weighted:
-      src += "  "*(tabs+1)+"<data key=\"e_weight\">%d</data>\n" % data[idx] 
+      src += "  "*(tabs+1)+"<data key=\"e_weight\">%d</data>\n" % data[idx]
     src += "  "*tabs+"</edge>\n"
 
     if idx % 100000 == 0:
       print "Processing edge %d / %d ..." % (idx, NUM_EDGES)
-      if test: test_str += src 
+      if test: test_str += src
       else: f.write(src)
       src = ""
-      
+
   src += "  </graph>\n</graphml>"
-  
-  if test: 
+
+  if test:
     test_str += src
     return test_str
 
@@ -107,6 +110,92 @@ class Desikan(object):
 
   def get_mapping(self, ):
     return [] # FIXME stub
+
+def graphml_to_csc(fh):
+  """
+  Cannot account for any node attributes
+  Can only account for edge weight attributes
+
+  Positional arguments:
+  =====================
+
+  fn - filename
+  """
+
+  from scipy.sparse.lil import lil_matrix
+
+  print "Processing nodes ..."
+  # Assume all header stuff is ok
+  while True: # Infinite loop
+    pos = fh.tell()
+    line = fh.readline().replace(" ", "").strip() # remove if inefficient
+
+    if line.startswith("<node"):
+      node_pos = pos # May be last node so take position
+
+    if line.startswith("<edge"): # Wait for edges to begin
+      break
+
+  fh.seek(node_pos)
+  print "Getting number of nodes ..."
+  # Get number of nodes
+  node_lines = fh.readline().replace(" ", "").strip()
+  while not node_lines.endswith("</node>"):
+    node_lines += fh.readline().replace(" ", "").strip()
+
+  try:
+    NUM_NODES = int(re.search("(?<=id=['\"]n)\d+", node_lines).group(0))+1 # +1 for 0-based indexing
+  except Exception, msg:
+    print "Cannot determine number of nodes from input file. Check graphml <node> syntax"
+
+  # Got the nodes
+  g = lil_matrix((NUM_NODES, NUM_NODES))
+
+  # Put back file handle iterator
+  fh.seek(pos)
+
+  print "Getting edges ..."
+  line = ""
+  while True:
+    line += fh.readline().replace(" ", "").strip() # remove if inefficient
+
+    if line.endswith("</edge>"):
+      edge = get_edge(line)
+      g[edge[0], edge[1]] = edge[2]
+      line = ""
+
+    elif line.endswith("</graphml>"):
+      break
+
+  return g
+
+def get_edge(st):
+  """
+  Given a string I need to extract src, dest, weight (if available)
+  No other edge attributes are representable
+
+  Positional Args:
+  ===============
+  st - the string
+  """
+  global __weight__
+  src = int(re.search("(?<=source=[\"']n)\d+", st).group())
+  dest = int(re.search("(?<=target=[\"']n)\d+", st).group())
+
+  if __weight__:
+    weight = re.search("(?<=weight[\"']>)[-+]?[0-9]*\.?[0-9]+(?:[eE][-+]?[0-9]+)?", st)
+    if not weight:
+      __weight__ = False # Only done once
+    else:
+      return [src, dest, float(weight.group())]
+
+  #else
+  return [src, dest, 1]
+
+def readtest(fn):
+  g = graphml_to_csc(open(fn, "rb"))
+  print g.todense()
+  print "Test complete ..."
 
 def test():
   """
@@ -128,7 +217,10 @@ def test():
 
 def main():
   parser = argparse.ArgumentParser(description="Convert an igraph to a csc object")
-  parser.add_argument("graph_fn", action="store", help="The name of the graph to read from disk. *Must be scipy.sparse.csc.csc_matrix format!")
+  parser.add_argument("graph_fn", action="store", help="The name of the graph to read from disk. *Must be scipy.sparse.csc.csc_matrix or graphml format. If running test use any dummy name e.g '_'")
+  parser.add_argument("-l", "--load", action="store", help="If we should load the file from disk")
+  parser.add_argument("-p", "--dump", action="store", help="If we should write a graphml graph to disk")
+
   parser.add_argument("-w", "--weighted", action="store_true", help="Pass flag if the graph is weighted")
   parser.add_argument("-k", "--desikan", action="store_true", default=None, help="Use Desikan mapping")
   parser.add_argument("-r", "--directed", action="store_true", help="Pass flag if the graph is directed")
@@ -138,12 +230,18 @@ def main():
   parser.add_argument("-n", "--num_procs", action="store", default=None, help="STUB: The number of processors to use when converting")
 
   parser.add_argument("-t", "--test", action="store_true", help="Run test only!")
+  parser.add_argument("-T", "--readtest", action="store_true", help="Run read graphml to csc test only!")
+
   result = parser.parse_args()
+
+  if result.readtest:
+    readtest(result.graph_fn)
+    exit(1)
 
   if result.test:
     test()
     exit(1)
-  
+
   from time import time
   from loadAdjMatrix import loadAnyMat
 
@@ -154,7 +252,7 @@ def main():
     result.desikan = Desikan(g).get_mapping()
 
   csc_to_graphml(g, result.weighted, result.desikan, result.directed, result.save_fn, result.triangular)
-  
+
   print "Total time for conversion %.4f sec" % (time()-st)
 
 if __name__ == "__main__":
