@@ -1,9 +1,5 @@
-'''
- Read a fiber file and generate the corresponding sparse graph
- @author randalburns
-
- - minor edits for web service by: Disa Mhembere
-'''
+# Read a fiber file and generate the corresponding sparse graph
+# @author Randal Burns, Disa Mhembere
 
 import argparse
 import sys
@@ -12,11 +8,10 @@ import mrcap.roi as roi
 from mrcap.fiber import FiberReader
 from time import time
 
-def genGraph(infname, outfname, roixmlname=None, roirawname=None, bigGraph=False, numfibers=0): # Edit
+def genGraph(infname, outfname, roixmlname=None, roirawname=None, bigGraph=False, outformat="graphml", numfibers=0): # Edit
   """
-  Generate a sparse graph of an MRI file
-  based on input and output names.
-  Outputs a matlab file.
+  Generate a sparse igraph from an MRI file based on input and output names.
+  Outputs a graphml formatted graph by default
 
   positional args:
   ================
@@ -28,16 +23,14 @@ def genGraph(infname, outfname, roixmlname=None, roirawname=None, bigGraph=False
   numfibers - the number of fibers
   """
 
-  """Generate a sparse graph from an MRI studio file and write it as a Matlab file"""
-
   start = time()
-  # Disa Edit - Determine size of graph to be processed i.e pick a fibergraph module to import
+  # Determine size of graph to be processed i.e pick a fibergraph module to import
   if bigGraph:
-    from fibergraph import FiberGraph
+    from fibergraph_bg import FiberGraph
   else:
     from fibergraph_sm import FiberGraph
 
-  # Disa Edit - if these filenames are undefined then,
+  # If these filenames are undefined then,
   # assume that there are ROI files in ../roi
 
   if not(roixmlname and roirawname):
@@ -106,13 +99,13 @@ def genGraph(infname, outfname, roixmlname=None, roirawname=None, bigGraph=False
   #**fbrgraph.saveToMatlab ( "fibergraph", outfname )
 
   print "Saving graph to file"
-  fbrgraph.saveToIgraph(outfname, )
+  fbrgraph.saveToIgraph(outfname, gformat=outformat)
 
   # Load a version of this graph from
 #  fbrgraph.loadFromMatlab ( "fibergraph", outfname )
 
   del fbrgraph
-  print "\nGraph building complete in %.3f secs" % ( time () - start )
+  print "\nGraph building complete in %.3f secs" % (time() - start)
   return
 
 def main ():
@@ -121,14 +114,15 @@ def main ():
   parser.add_argument( "fbrfile", action="store" )
   parser.add_argument( "output", action="store", help="resulting name of graph")
 
+  parser.add_argument( "--outformat", "-f", action="store", default="graphml", help="The output graph format i.e. graphml, gml, dot, pajek etc..")
   parser.add_argument( "--isbig", "-b", action="store_true", default=False, help="Is the graph big? If so use this flag" )
-  parser.add_argument( "--roixml", "-rx", action="store", default=None, help="The full file name of roi xml file" )
-  parser.add_argument( "--roiraw", "-rr", action="store", default=None, help="The full file name of roi raw file" )
-  parser.add_argument( "--numfib", "-nf", action="store", type=int, default=-1, help="The number of fibers ..." )
+  parser.add_argument( "--roixml", "-x", action="store", default=None, help="The full file name of roi xml file" )
+  parser.add_argument( "--roiraw", "-w", action="store", default=None, help="The full file name of roi raw file" )
+  parser.add_argument( "--numfib", "-n", action="store", type=int, default=-1, help="The number of fibers ..." )
 
   result = parser.parse_args()
 
-  genGraph ( result.fbrfile, result.output, result.roixml, result.roiraw, result.isbig, result.numfib )
+  genGraph ( result.fbrfile, result.output, result.roixml, result.roiraw, result.isbig, result.outformat, result.numfib )
 
 if __name__ == "__main__":
   main()
