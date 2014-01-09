@@ -8,6 +8,7 @@ require(argparse)
  
 parser <- ArgumentParser(description="Run same invariants as MROCP on igraphs")
 parser$add_argument("gfn", help="The graph file name")
+parser$add_argument("-f", "--graph_format", default="gml", help="The graph format e.g gml, graphml, pajek, dot etc..")
  
 result <- parser$parse_args()
  
@@ -15,7 +16,7 @@ if (!file.exists(result$gfn)){
     stop(paste("File", result$gfn, "does not exist!!\n"))
 }
 
-g <- igraph::read.graph(result$gfn, format="gml")
+g <- igraph::read.graph(result$gfn, format=result$graph_format) # Throws an exception if the graph format is unknown
 
 begin <- proc.time()[3] 
 
@@ -28,15 +29,15 @@ cat("Processing Scan Statistic...\n")
 system.time( igraph::scan1(g) )
 
 # Clustering Coefficient
-cat("Processing Transitivity (i.e. Clustering Coefficient)\n")
+cat("Processing Transitivity (i.e. Clustering Coefficient) ...\n")
 system.time( igraph::transitivity(g, "local") )
 
 # Triangles
-cat("Processing Triangle count\n")
+cat("Processing Triangle count ...\n")
 system.time( igraph::adjacent.triangles(g) )
 
 # Eigendecomposition
-cat("Spectral decomposition\n")
+cat("Spectral decomposition ...\n")
 if (igraph::vcount(g) >= 102){
   eigs <- 100
 } else {
