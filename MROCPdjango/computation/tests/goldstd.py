@@ -11,7 +11,7 @@ import argparse
 import numpy as np
 import networkx as nx
 import scipy.linalg
-import networkXserial as nxs
+import cPickle as pickle
 from numpy import *
 import time
 
@@ -120,9 +120,10 @@ def evaluate_graph( thisReplicate, invariant):
         
         triArr = []
         
-        triangleList = nx.triangles(thisReplicate) #This returns a list with the number of triangles each node participates in
+        triangleList = nx.triangles(thisReplicate) #This returns a dict with the number of triangles each node participates in
         
-        for vertex in (triangleList):
+        # This maintains order
+        for vertex in sorted(triangleList.keys()):
             triArr.append(int(round(triangleList[vertex]/3.0)))
         
         triangles = sum(triangleList.values())/3
@@ -251,10 +252,10 @@ def writeDictToFile(dic, name):
 def main():
     parser = argparse.ArgumentParser(description='Performs bench statistics on networkX graphs')
     parser.add_argument('G_fn', action='store',help='Full filename of networkX graph')
-    parser.add_argument('tnum', type = int, action='store',help='Test number. Each test assigned a number. See source code for understanding')
+    parser.add_argument('tnum', type = int, default=-1, action='store',help='Test number. Each test assigned a number. See source code for understanding. Default is all tests are run')
     
     result = parser.parse_args()
-    evaluate_graph( nxs.load( os.path.join(os.path.abspath(os.path.curdir), result.G_fn)), result.tnum )
+    evaluate_graph( pickle.load(open(result.Gfn, "rb")), result.tnum )
 
 if __name__ == '__main__':
     main()
