@@ -7,6 +7,9 @@
 
 import os
 import numpy as np
+import igraph
+import rpy2.robjects as robjects
+
 from math import ceil
 import scipy.sparse.linalg.eigen.arpack as arpack
 
@@ -19,7 +22,7 @@ import argparse
 from time import time
 from computation.utils.file_util import createSave
 
-def compute(inv_dict, save=True):
+def compute(inv_dict, save=True, gformat="graphml"):
   '''
   Actual function that computes invariants and saves them to a location
 
@@ -45,138 +48,44 @@ def compute(inv_dict, save=True):
   ===================
   save: boolean for auto save or not. TODO: use this
   '''
-  # Popualate inv_dict
-  inv_dict = populate_inv_dict(inv_dict)
-
-
-  if inv_dict['save_dir'] is None:
+  if inv_dict.get('save_dir', None) is None:
    inv_dict['save_dir'] = os.path.dirname(inv_dict['graph_fn'])
 
-  if (inv_dict.has_key('G')):
+  if inv_dict.has_key('G'):
     if inv_dict['G'] is not None:
       G = inv_dict['G']
-  elif (inv_dict['graphsize'] == 'b' or inv_dict['graphsize'] == 'big'):
-    G = loadAdjMat(inv_dict['graph_fn'], inv_dict['lcc_fn'])
-    # small graphs
   else:
-    G = loadAnyMat(inv_dict['graph_fn'], inv_dict['data_elem'])
-
-    if isinstance(G, str):
-      print G
-      return G # Error message
-
-  num_nodes = G.shape[0] # number of nodes
-
-  # CC requires deg_fn and tri_fn. Load if available
-  if inv_dict['cc']:
-    # if either #tri or deg is undefined
-    if not inv_dict['tri_fn']:
-      inv_dict['tri'] = True
-    if not inv_dict['deg_fn']:
-      inv_dict['deg'] = True
-
-    cc_array = np.zeros(num_nodes)
-
-  # All invariants that require eigenvalues
-  if ((inv_dict['tri'] and not inv_dict['tri_fn'])
-      or (inv_dict['mad'])):
-    if not inv_dict['eigvl_fn']:
-      inv_dict['eig'] = True
-
-  # Only create arrays if the computation will be done
-  if inv_dict['tri']:
-    if inv_dict['tri_fn']:
-      tri_array = np.load(inv_dict['tri_fn']) # load if precomputed
+    try:
+      G = r_igraph_load_graph(inv_dict['graph_fn'], gformat)
+    except Exception, err_msg:
+      return err_msg
+  
+  # Eigs and MAD
+  if inv_dict.has_key('eig') or inv_dict.has_key('mad'):
+    if inv_dict.has_key('eig') and inv_dict.has_key('mad'):
+      eigs = "get_eigs(G)" # FIXME: STUB
+      mad = "get_mad(G)" # FIXME: STUB for max of eigenvalues
+    elif inv_dict.get('mad', None) is not None:
+      mad = "get_mad(G)" # FIXME: STUB for max of eigenvalues
     else:
-      tri_array = np.zeros(num_nodes) # local triangle count
+      eigs = "get_eigs(G)" # FIXME: STUB
 
-  if inv_dict['deg'] or inv_dict['edge']: # edge is global number of edges
-    inv_dict['deg'] = True
-    if inv_dict['deg_fn']:
-      deg_array = np.load(inv_dict['deg_fn'])
-    else:
-      deg_array = np.zeros(num_nodes) # Vertex degrees of all vertices
-
-  if (inv_dict['ss1']):
-    ss1_array = np.zeros(num_nodes) # Induced subgraph edge number i.e scan statistic
-
-  if (not inv_dict['k'] or inv_dict['k'] > 100 or inv_dict['k'] > G.shape[0] - 2):
-    inv_dict['k'] = 100 if G.shape[0]-2 > 101 else G.shape[0] - 2 # Maximum of 100 eigenvalues
+  if inv_dict.has_key('ss1'):
+    pass
+  if inv_dict.has_key('tri'):
+    pass
+  if inv_dict.has_key('cc'):
+    pass
+  if inv_dict.has_key('deg'):
+    pass
+  if inv_dict.has_key('edge'):
+    pass
+  if inv_dict.has_key('ver'):
+    pass
 
   start = time()
-  # Calculate Eigenvalues & Eigen vectors
-  if inv_dict['eig']:
-    if not (inv_dict['eigvl_fn'] or inv_dict['eigvect_fn']):
-      try:
-        l, u = arpack.eigs(G, k=inv_dict['k'], which='LM') # LanczosMethod(A,0)
-      except Exception, err_msg:
-        print "[ERROR]: Unable to compute Eigen pairs -- graph possibly has too few elements! %s" % err_msg
-        # Remove all eig related invariants and continue ..
-        inv_dict['eig'] = False
-        inv_dict['tri'] = False if not inv_dict['tri_fn']  else inv_dict['tri']
-        inv_dict['cc'] = False if not inv_dict['cc_fn']  else inv_dict['cc']
-        inv_dict['mad'] = False if not inv_dict['mad_fn']  else inv_dict['mad']
 
-      print 'Time taken to calc Eigenvalues: %f secs\n' % (time() - start)
-    else:
-      try:
-        l = np.load(inv_dict['eigvl_fn'])
-        u = np.load(inv_dict['eigvect_fn'])
-      except Exception:
-        print "[IOERROR]: Eigenvalues failed to load"
-        return -1
-
-  # All other invariants
-  start = time()
-  #### For loop ####
-  if (inv_dict['cc'] or inv_dict['ss1'] or (inv_dict['tri'] and not inv_dict['tri_fn'])\
-      or (inv_dict['deg'] and not inv_dict['deg_fn'])  ): # one of the others
-    for j in range(num_nodes):
-      # tri
-      if not inv_dict['tri_fn'] and inv_dict['tri']: # if this is still None we need to compute it
-        tri_array[j] = abs(round((sum( np.power(l.real,3) * (u[j][:].real**2)) ) )) # Won't divide by six yet because it affects CC count locally
-
-      # ss1 & deg
-      if inv_dict['ss1'] or (not inv_dict['deg_fn'] and inv_dict['deg']):
-        nbors = G[:,j].nonzero()[0]
-        # deg
-        if (not inv_dict['deg_fn'] and inv_dict['deg']):
-          deg_array[j] = nbors.shape[0]
-        # ss1
-        if inv_dict['ss1']:
-          if (nbors.shape[0] > 0):
-            nbors_mat = G[:,nbors][nbors,:]
-            ss1_array[j] = nbors.shape[0] + (nbors_mat.nnz/2.0)  # scan stat 1 # Divide by two because of symmetric matrix
-          else:
-            ss1_array[j] = 0 # zero neighbors hence zero cardinality enduced subgraph
-      # cc
-      if inv_dict['cc']:
-        if (deg_array[j] > 2):
-          if inv_dict['tri_fn']:
-            cc_array[j] = (6.0 * tri_array[j]) / ( deg_array[j] * (deg_array[j] - 1) ) # Saramaki et al
-          else:
-            cc_array[j] = tri_array[j] / ( deg_array[j] * (deg_array[j] - 1) ) # Saramaki et al
-        else:
-          cc_array[j] = 0
-
-    if not inv_dict['tri_fn'] and inv_dict['tri']:
-      tri_array = map(round, tri_array/6.0)
-
-    print 'Time taken to compute loop dependent invariants: %f secs\n' % (time() - start)
-
-  ### End For ###
-  # global edge
-  if inv_dict['edge']:
-    edge_count = deg_array.sum()
-
-  # global vertices is num_nodes
-
-  ''' MAD '''
-  if (inv_dict['mad']):
-    max_ave_deg = np.max(l.real)
-
-  # Computation complete - handle the saving now ...
-
+  # Saving invariants - FIXME may be obsolete
   if save:
     ''' Top eigenvalues & eigenvectors '''
     if not inv_dict['eigvl_fn'] and inv_dict['eig'] :
@@ -238,46 +147,96 @@ def compute(inv_dict, save=True):
       createSave(inv_dict['edge_fn'], edge_count) # save it
       print 'Global edge number saved as ' + inv_dict['edge_fn']
 
-  #if test: # bench test
-  #  tri_fn = os.path.join('bench', str(G.shape[0]), getBaseName(inv_dict['graph_fn']) + '_triangles.npy')
-  #  eigvl_fn = os.path.join('bench', str(G.shape[0]), getBaseName(inv_dict['graph_fn']) + '_eigvl.npy')
-  #  eigvect_fn = os.path.join('bench', str(G.shape[0]), getBaseName(inv_dict['graph_fn']) + '_eigvect.npy')
-  #  MAD_fn = os.path.join('bench', str(G.shape[0]), getBaseName(inv_dict['graph_fn']) + '_MAD.npy')
-
   return inv_dict
 
-def populate_inv_dict(arg):
-  """ Ensures the invariant dictionary input contains all necessary fields in order to not raise keyError exceptions"""
+# ====================  Rpy2 Area ===================== #
 
-  #begin = time()
+def r_igraph_load_graph(fn, gformat="graphml"):
+  """
+  Load a graph from disk to an igraph object in R
 
-  fns = ['ss1_fn', 'tri_fn', 'deg_fn', 'ss2_fn', 'apl_fn', 'ver_fn',
-          'mad_fn', 'gdia_fn', 'cc_fn', 'eigvl_fn', 'eigvect_fn', 'edge_fn', 'save_dir']
-  invs = ['ss1', 'tri', 'deg', 'ss2', 'apl', 'ver', 'eig',
-          'mad', 'gdia', 'cc', 'eigvl', 'eigvect', 'edge']
+  fn - the file name on disk
+  gformat - the format to read from disk. Default: graphml
+  """
+  get_graph = robjects.r(""" 
+        require(igraph)
+        rg <- function(fn, gformat){
+          igraph::read.graph(fn, format=gformat)
+       } """)
 
-  data = ['data_elem', 'k']
-  if not isinstance(arg, dict):
-    print "[ERROR]: argument to compute method must be of type dict"
+  return get_graph(fn, gformat)
 
-  # Add filenames
-  for fn in fns:
-    if not arg.has_key(fn):
-      arg[fn] = None
+def ss1(g, save_fn=None):
+  """
+  Compute the scan statistic 1 of graph g and save as necessary
 
-  # Add invariants
-  for inv in invs:
-    if not arg.has_key(inv):
-      arg[inv] = None
+  Positional arguments
+  ====================
+  g - The igraph loaded via Rpy2 so an R object
 
-  # Add auxiliary data
-  for dat in data:
-    if not arg.has_key(dat):
-      arg[dat] = None
+  Optional arguments
+  ==================
+  save_fn - the filename you want to use to save it. If not provided
+  the graph adds a scan_stat1 attribute to all nodes and returns.
+  """
+  if not save_fn:
+    save_fn = robjects.r("NULL")
 
-  #print "Time to populate invariant dict = %.4f" % (time()-begin)
+  ss1 = robjects.r("""
+  require(igraph)
+  ss1 <- function(g, save_fn){
+    scan1vector <- igraph::scan1(g)
+  }
+  """)
+  ss1vector = ss1(g, save_fn)
 
-  return arg
+  if save_fn:
+    np.save(save_fn, ss1vector) # TODO: Clean input for programmatic access
+  else:
+    g = r_add_attr(g, ss1vector, "scan_stat1")  # Add ss1 to graph. Attribute name may need to change
+
+  return g # return so we can use for other attributes
+
+def deg(g, save_fn=None):
+  """
+  """
+  pass
+
+def cc(g, save_fn=None):
+  """
+  """
+  pass
+
+def tri(g, save_fn=None):
+  """
+  """
+  pass
+
+def eigs(g, save_fn=None):
+  """
+  """
+  pass
+
+def r_set_vetex_attr(g, attr_name, value):
+  """
+  Set/Add an R vertex attribute to an R igraph object.
+  The vertex length must equal the number of nodes.
+
+  Positional arguments:
+  =====================
+  g - the R igraph object
+  attr_name - the name of the vetex attribute I want to add. Type: string
+  value - the R FloatVector containing the values to be added as attribute
+  """
+
+  set_vert_attr = robjects.r("""
+  require(igraph)
+  sva <- function(g, attr_name, value){
+  set.vertex.attribute(g, attr_name, value)
+  }
+  """)
+  return set_vert_attr(g, attr_name, value)
+
 
 if __name__ == '__main__':
 
