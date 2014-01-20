@@ -16,6 +16,7 @@ from multiprocessing import Pool
 from scipy.sparse import triu
 from csc_matrix2 import csc_matrix2
 from time import time
+import os
 
 g = None # csc global
 
@@ -70,9 +71,9 @@ def csc_to_igraph(cscg, save=False, fn="igraph_graph", num_procs=None):
   print "All igraph edges added!"
 
   if save:
-    print "Saving to igraph gml file format..."
-    if not os.path.splitext(fn)[1] == ".gml": fn = fn+".gml"
-    igraph.write(ig, fn, format="gml")
+    print "Saving to igraph graphml file format..."
+    if not os.path.splitext(fn)[1] == ".graphml": fn = fn+".graphml"
+    igraph.write(ig, fn, format="graphml")
     print "\nigraph saved as %s ... \nDone!" % os.path.abspath(fn)
 
   return ig
@@ -102,7 +103,7 @@ def get_edges(node):
 
 def main():
   parser = argparse.ArgumentParser(description="Convert an igraph to a csc object")
-  parser.add_argument("graph_fn", action="store", help="The name of the igraph to read from disk. *Must be gml format!")
+  parser.add_argument("graph_fn", action="store", help="The name of the igraph to read from disk. *Must be graphml format!")
   parser.add_argument("-s", "--save", action="store_true", help="Save conversion to disk")
   parser.add_argument("-f", "--save_fn", action="store", default="csc_matlab", help="Save file name")
   parser.add_argument("-d", "--data_elem", action="store", default=None, help="The name of the data element key in the dict.")
@@ -114,11 +115,11 @@ def main():
   if result.test:
     test()
     exit(1)
-  
+
   st = time()
   g = loadAnyMat(result.graph_fn, result.data_elem)
   csc_to_igraph(g, result.save, result.save_fn, result.num_procs)
-  
+
   print "Total time for conversion %.4f sec" % (time()-st)
 
 def test():

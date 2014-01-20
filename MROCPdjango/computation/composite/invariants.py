@@ -6,22 +6,22 @@
 # Copyright (c) 2013. All rights reserved.
 
 import os
+from math import ceil
 import numpy as np
+import argparse
+from time import time
+
 import igraph
 import rpy2.robjects as robjects
 from rpy2.rinterface import NULL
-
-from math import ceil
+from rpy2.robjects.vectors import StrVector
 import scipy.sparse.linalg.eigen.arpack as arpack
 
-from computation.utils.getBaseName import getBaseName # Duplicates right now
-from computation.utils import loadAdjMatrix # Duplicates right now
-from computation.utils.file_util import loadAnyMat
-from computation.utils.loadAdjMatrix import loadAdjMat
+from computation.utils.getBaseName import getBaseName
+from computation.utils.file_util import createSave, loadAnyMat
+from computation.utils.igraph_attributes import r_igraph_get_attr
 
-import argparse
-from time import time
-from computation.utils.file_util import createSave
+gl_eigvects = None # global eigenvectors used for fast mapping
 
 def compute(inv_dict, sep_save=True, gformat="graphml"):
   """
@@ -30,7 +30,10 @@ def compute(inv_dict, sep_save=True, gformat="graphml"):
   positional arguments:
   =====================
 
-  inv_dict: is a dict optinally containing any of these:
+  inv_dict: is a dict that must contain:
+    - inv_dict["graph_fn"]
+
+  inv_dict: optional arguments:
     - inv_dict["edge"]: boolean for global edge count
     - inv_dict["ver"]: boolean for global vertex number
     - inv_dict["tri"]: boolean for local triangle count
@@ -39,6 +42,7 @@ def compute(inv_dict, sep_save=True, gformat="graphml"):
     - inv_dict["ss1"]: boolean for scan 1 statistic
     - inv_dict["cc"]: boolean for clustering coefficient
     - inv_dict["mad"]: boolean for maximum average degree
+    - inv_dict["k]: the  number of eigenvalues to compute
     - inv_dict["save_dir"]: the base path where all invariants will create sub-dirs & be should be saved
 
   optional arguments:
@@ -46,82 +50,92 @@ def compute(inv_dict, sep_save=True, gformat="graphml"):
   sep_save: boolean for auto save or not
   """
   if inv_dict.get("save_dir", None) is None:
-   inv_dict["save_dir"] = os.path.dirname(inv_dict["graph_fn"])
+   inv_dict["save_dir"] = os.path.join(os.path.dirname(inv_dict["graph_fn"]), "graphInvariants")
+
+  if not os.path.exists(inv_dict["save_dir"]): os.makedirs(inv_dict["save_dir"])
 
   if inv_dict.has_key("G"):
     if inv_dict["G"] is not None:
       G = inv_dict["G"]
   else:
     try:
-      G = r_igraph_load_graph(inv_dict["graph_fn"], gformat)
+      if gformat in ["edgelist", "pajek", "ncol", "lgl", "graphml", "dimacs", "gml", "dot", "leda"]: #  All igraph supported formats
+        G = r_igraph_load_graph(inv_dict["graph_fn"], gformat)
+      elif gformat == ".mat":
+        G = loadAnyMat(inv_dict['graph_fn'])
+
+      if isinstance(G, str):
+        return G # There was a loading error
     except Exception, err_msg:
       return err_msg
-
-  # Determine invariant file names if we are saving them to disk separately
-  if sep_save:
-    """ Top eigenvalues & eigenvectors """
-    if inv_dict["eigs"]:
-      eigvDir = os.path.join(inv_dict["save_dir"], "Eigen")
-      inv_dict["eigvl_fn"] = os.path.join(eigvDir, getBaseName(inv_dict["graph_fn"]) + "_eigvl.npy")
-      inv_dict["eigvect_fn"] = os.path.join(eigvDir, getBaseName(inv_dict["graph_fn"]) + "_eigvect.npy")
-
-    """ Triangle count """
-    if inv_dict["tri"]:
-      triDir = os.path.join(inv_dict["save_dir"], "Triangle")
-      inv_dict["tri_fn"] = os.path.join(triDir, getBaseName(inv_dict["graph_fn"]) + "_triangles.npy")
-
-    """ Degree count"""
-    if inv_dict["deg"]:
-      degDir = os.path.join(inv_dict["save_dir"], "Degree")
-      inv_dict["deg_fn"] = os.path.join(degDir, getBaseName(inv_dict["graph_fn"]) + "_degree.npy")
-
-    """ MAD """
-    if inv_dict["mad"]:
-      MADdir = os.path.join(inv_dict["save_dir"], "MAD")
-      inv_dict["mad_fn"] = os.path.join(MADdir, getBaseName(inv_dict["graph_fn"]) + "_mad.npy")
-
-    """ Scan Statistic 1"""
-    if inv_dict["ss1"]:
-      ss1Dir = os.path.join(inv_dict["save_dir"], "SS1")
-      inv_dict["ss1_fn"] = os.path.join(ss1Dir, getBaseName(inv_dict["graph_fn"]) + "_scanstat1.npy")
-
-    """ Clustering coefficient """
-    if inv_dict["cc"]:
-      ccDir = os.path.join(inv_dict["save_dir"], "ClustCoeff")
-      inv_dict["cc_fn"] = os.path.join(ccDir, getBaseName(inv_dict["graph_fn"]) + "_clustcoeff.npy")
-
-  return inv_dict
 
   #============================ Call to invariants ============================#
   start = time()
 
   if inv_dict.get("eig", None) is not None:
-    G = r_igraph_eigs(G, inv_dict['k'], (inv_dict["eigvl_fn"], inv_dict["eigvect_fn"]))
+    inv_dict["k"] = max(50, r_igraph_vcount(G, False)-3) # Max of 50 eigenvalues
+    print "Computing eigen decompositon ..."
+    if sep_save:
+      inv_dict["eigvl_fn"] = os.path.join(inv_dict["save_dir"], "Eigen", \
+                                getBaseName(inv_dict["graph_fn"]) + "_eigvl.npy")
+      inv_dict["eigvect_fn"] = os.path.join(inv_dict["save_dir"], "Eigen", \
+                                getBaseName(inv_dict["graph_fn"]) + "_eigvect.npy")
+      G = r_igraph_eigs(G, inv_dict['k'], save_fn=(inv_dict["eigvl_fn"], inv_dict["eigvect_fn"]))
+    else: G = r_igraph_eigs(G, inv_dict['k'], save_fn=None)
 
   if inv_dict.get("mad", None) is not None:
+    if sep_save:
+      inv_dict["mad_fn"] = os.path.join(inv_dict["save_dir"], "MAD", \
+                                getBaseName(inv_dict["graph_fn"]) + "_mad.npy")
+    print "Computing MAD ..."
     G = r_igraph_max_ave_degree(G)
 
   if inv_dict.get("ss1", None) is not None:
-    G = r_igraph_scan1(G, inv_dict["ss1_fn"])
+    print "Computing Scan 1 ..."
+    if sep_save:
+      inv_dict["ss1_fn"] = os.path.join(inv_dict["save_dir"], "SS1", \
+                                getBaseName(inv_dict["graph_fn"]) + "_scanstat1.npy")
+    G = r_igraph_scan1(G, inv_dict.get("ss1_fn", None))
 
   if inv_dict.get("tri", None) is not None:
-    G = r_igraph_triangles(G, inv_dict["tri_fn"])
+    print "Computring triangle count ..."
+    if sep_save:
+      inv_dict["tri_fn"] = os.path.join(inv_dict["save_dir"], "Triangle", \
+                                getBaseName(inv_dict["graph_fn"]) + "_triangles.npy")
+    G = r_igraph_triangles(G, inv_dict.get("tri_fn", None))
 
   if inv_dict.get("cc", None) is not None:
-    G = r_igraph_clust_coeff(G, inv_dict["cc_fn"])
+    print "Computing clustering coefficient .."
+    if sep_save:
+      inv_dict["cc_fn"] = os.path.join(inv_dict["save_dir"], "ClustCoeff",\
+                                getBaseName(inv_dict["graph_fn"]) + "_clustcoeff.npy")
+    G = r_igraph_clust_coeff(G, inv_dict.get("cc_fn", None))
 
   if inv_dict.get("deg", None) is not None:
-    G = r_igraph_degree(G, inv_dict["deg_fn"])
+    print "Computing degree ..."
+    if sep_save:
+      inv_dict["deg_fn"] = os.path.join(inv_dict["save_dir"], "Degree",\
+                                getBaseName(inv_dict["graph_fn"]) + "_degree.npy")
+    G = r_igraph_degree(G, inv_dict.get("deg_fn", None))
 
   # num edges
   if inv_dict.get("edge", None) is not None:
+    print "Computing global edge count ..."
     G = r_igraph_ecount(G, True)
 
   # num vertices
   if inv_dict.get("ver", None) is not None:
+    print "Computing global vertex count ..."
     G = r_igraph_vcount(G, True)
 
   print "Total invariant compute time = %.3fsec" % (time() - start)
+
+  # Save graph with all new attrs
+  inv_dict["out_graph_fn"] = os.path.join(inv_dict["save_dir"], getBaseName(inv_dict["graph_fn"]))
+  if os.path.splitext(inv_dict["out_graph_fn"])[1] != ".graphml": inv_dict["out_graph_fn"] += "."+gformat
+  r_igraph_write(G, inv_dict["out_graph_fn"], gformat)
+
+  return G, inv_dict
 
 # ==============================  Rpy2 Area ================================== #
 
@@ -147,6 +161,8 @@ def r_igraph_write(g, fn, gformat="graphml"):
   fn - the file name on disk
   gformat - the format to read from disk. Default: graphml
   """
+  print "Writing %s to disk ..." % fn
+
   write_graph = robjects.r("""
         require(igraph)
         fn <- function(g, fn, gformat){
@@ -166,7 +182,7 @@ def r_igraph_scan1(g, save_fn=None):
   Optional arguments
   ==================
   save_fn - the filename you want to use to save it. If not provided
-  the graph adds a scan_stat1 attribute to all nodes and returns.
+  the graph adds a scan1 attribute to all nodes and returns.
   """
 
   scanstat1 = robjects.r("""
@@ -182,7 +198,7 @@ def r_igraph_scan1(g, save_fn=None):
     createSave(os.path.abspath(save_fn), ss1vector) # TODO: Clean input for programmatic access
     print  "Scan Statistic saved as %s ..." % save_fn
   else:
-    g = r_igraph_set_vertex_attr(g, "scan_stat1", ss1vector)  # Attribute name may need to change
+    g = r_igraph_set_vertex_attr(g, "scan1", ss1vector)  # Attribute name may need to change
 
   return g # return so we can use for other attributes
 
@@ -197,7 +213,7 @@ def r_igraph_degree(g, save_fn=None):
   Optional arguments
   ==================
   save_fn - the filename you want to use to save it. If not provided
-  the graph adds a scan_stat1 attribute to all nodes and returns.
+  the graph adds a degree attribute to all nodes and returns.
   """
 
   deg = robjects.r("""
@@ -228,18 +244,16 @@ def r_igraph_clust_coeff(g, save_fn=None):
   Optional arguments
   ==================
   save_fn - the filename you want to use to save it. If not provided
-  the graph adds a clustering coefficient attribute to all nodes and returns.
+  the graph adds a clustcoeff attribute to all nodes and returns.
   """
-  if not save_fn:
-    save_fn = robjects.r("NULL")
 
   clustcoeff = robjects.r("""
   require(igraph)
-  fn <- function(g, save_fn){
+  fn <- function(g){
   igraph::transitivity(g, "local")
   }
   """)
-  ccvector = clustcoeff(g, save_fn)
+  ccvector = clustcoeff(g)
 
   if save_fn:
     save_fn = os.path.abspath(save_fn)
@@ -261,18 +275,16 @@ def r_igraph_triangles(g, save_fn=None):
   Optional arguments
   ==================
   save_fn - the filename you want to use to save it. If not provided
-  the graph adds a triangle count attribute to all nodes and returns.
+  the graph adds a tri count attribute to all nodes and returns.
   """
-  if not save_fn:
-    save_fn = robjects.r("NULL")
 
   triangles = robjects.r("""
   require(igraph)
-  fn <- function(g, save_fn){
+  fn <- function(g){
   igraph::adjacent.triangles(g)
   }
   """)
-  trivector = triangles(g, save_fn)
+  trivector = triangles(g)
 
   if save_fn:
     save_fn = os.path.abspath(save_fn)
@@ -283,7 +295,7 @@ def r_igraph_triangles(g, save_fn=None):
 
   return g # return so we can use for other attributes
 
-def r_igraph_eigs(g, k, save_fn=None, return_eigs=False):
+def r_igraph_eigs(g, k, return_eigs=False, save_fn=None):
   """
   Eigen spectral decomposition. Compute the top-k eigen pairs.
 
@@ -295,11 +307,12 @@ def r_igraph_eigs(g, k, save_fn=None, return_eigs=False):
   Optional arguments
   ==================
   save_fn - must an 2 item list/tuple with 2 names OR None
+  return_eigs - boolean on whether to just return the eigenpairs or the whole graph
 
   Returns
   =======
 
-  A graph with eigs as graph attributes
+  A graph with eigs as graph attributes OR actual eigenpairs
   """
 
   esd = robjects.r("""
@@ -311,7 +324,7 @@ def r_igraph_eigs(g, k, save_fn=None, return_eigs=False):
       as.vector(M %*% x) }
 
     eig <- arpack(mv_mult, options=list(n=vcount(g), nev=nev, ncv=ncv,  which="LM", maxiter=500))
-    list(eig$values, eig$vectors) # return [eigvals, eigvects]
+    list(eig$values, t(eig$vectors)) # return [eigvals, eigvects]
   }
   """) # A list with [0]=eigenvalues and [1]=eigenvectors. If an eigensolver error occurs then None
 
@@ -335,11 +348,37 @@ def r_igraph_eigs(g, k, save_fn=None, return_eigs=False):
     print "Eigenvalues saved as %s ..." % save_fn[0]
     print "eigenvectors ssaved as %s ..." % save_fn[1]
   else:
-    g = r_igraph_set_graph_attribute(g, "eigvals", eigs[0])
-    g = r_igraph_set_graph_attribute(g, "eigvects", eigs[1])
-    print "Eigenvalue computation not saved to disk! Eigen-pairs added as graph attributes ...."
+
+    global gl_eigvects
+    gl_eigvects = eigs[1]
+
+    eigvects = map(get_str_eigvects, [(idx, idx+nev) for idx in xrange(0, (vcount*nev), nev)])
+    g = r_igraph_set_graph_attribute(g, "eigvals", str(list(eigs[0]))[1:-1]) # Return a comma separated string
+
+    #g = r_igraph_set_vertex_attr(g, "latent_pos", value=eigvects) # Could not create char sequences only lists :-/
+
+    for node in xrange(vcount):
+      g = r_igraph_set_vertex_attr(g, "latent_pos", value=eigvects[node], index="c(%d)"%(node+1)) # ** +1 for R 1-based indexing **
+    print "Eigenvalue computation not saved to disk. Eigen-pairs added as graph attributes ...."
 
   return g
+
+def get_str_eigvects(idx):
+  """
+  Used for mapping to get eigenvectors that correspond to each vertex of the graph
+
+  Positional arguments
+  ====================
+  idx - a 2-tuple that gives the indexes of the eigenvector 1-d flattened matrix that correspond
+  to the particular vertex
+
+  Returns
+  =======
+  A vector i.e the eigenvector (latent position) for that vertex cast to a string
+  """
+  global gl_eigvects
+  return str(list(gl_eigvects[idx[0]:idx[1]]))[1:-1]
+
 
 def r_igraph_max_ave_degree(g):
   """
@@ -360,8 +399,8 @@ def r_igraph_max_ave_degree(g):
   """
 
   mad = r_igraph_get_attr(g, "eigvals", "g") # See if we already have computed eigenvalues for the graph
-  if isinstance(mad, NULL): # Ok then compute top 1 eig ourself
-    mad = r_igraph_eigs(g, 1, save_fn=None, return_eigs=True)
+  if mad == NULL: # Ok then compute top 1 eig ourself
+    mad = r_igraph_eigs(g, 1, return_eigs=True, save_fn=None)
   else:
     mad = mad[0] # The largest eigenvalue is held at index 0
 
@@ -427,7 +466,7 @@ def r_igraph_ecount(g, set_attr=True):
     return int(ec)
 
     # =========== Graph, Node, Attr ============= #
-def r_igraph_set_vertex_attr(g, attr_name, value):
+def r_igraph_set_vertex_attr(g, attr_name, value, index="V(g)"):
   """
   Set/Add an R vertex attribute to an R igraph object.
   The vertex length must equal the number of nodes.
@@ -442,9 +481,9 @@ def r_igraph_set_vertex_attr(g, attr_name, value):
   set_vert_attr = robjects.r("""
   require(igraph)
   fn <- function(g, attr_name, value){
-  set.vertex.attribute(g, attr_name, value=value)
+  set.vertex.attribute(g, attr_name, index=%s, value=value)
   }
-  """)
+  """ % index)
 
   return set_vert_attr(g, attr_name, value)
 
@@ -465,33 +504,16 @@ def r_igraph_set_graph_attribute(g, attr_name, value):
   """)
   return set_graph_attr(g, attr_name, value)
 
-def r_igraph_get_attr(g, attr_name, which):
-  """
-  Get an igraph graph attribute in R.
+def r_create_test_graph(nodes=5, edges=7):
 
-  Positional arguments
-  ====================
-  g - the R igraph object
-  attr_name - the name of the vetex attribute I want to get. Type: string
-  which - "g"/"e"/"v" stand for graph, edge, vertex
-
-  Returns
-  ======
-  The requested attribute
-
-  """
-
-  attr_dict = {"g":"graph", "e":"edge", "v":"vertex"}
-
-  get = robjects.r("""
+  ctg = robjects.r("""
   require(igraph)
-  fn <- function(g, attr_name){
-  get.%s.attribute(g, attr_name)
+  fn <- function(){
+  g <- erdos.renyi.game(%d, %d, type="gnm", directed=FALSE)
   }
-  """ %attr_dict.get(which, "graph")) # assume graph attr if not specified
+  """ % (nodes, edges))
 
-  return get(g, attr_name)
-
+  return ctg()
 
 if __name__ == "__main__":
 
@@ -499,13 +521,16 @@ if __name__ == "__main__":
   parser = argparse.ArgumentParser(description="Script to run selected invariants")
   result =  parser.parse_args()
 
+  print "Running test ...."
   inv_dict = {}
-  inv_dict["graph_fn"] = "/data/projects/disa/groundTruthSmGraph_fiber.mat"
-  inv_dict["save_dir"] =  "/Users/disa/MR-connectome/MROCPdjango/computation/tests/profile_results"
 
-  inv_dict["graphsize"] = "s"
-  inv_dict["cc"] = inv_dict["ss1"] = inv_dict["tri"] = inv_dict["mad"] = True
+  inv_dict["G"] = r_create_test_graph()
+  inv_dict["graph_fn"] = "testgraph.graphml" # dummy
 
-  compute(inv_dict, save = True)
+  inv_dict["eig"] = True; inv_dict["k"] = 3;
+  inv_dict["cc"] = True; inv_dict["ss1"] = True;
+  inv_dict["tri"] = True; inv_dict["mad"] = True;
+  inv_dict["ver"] =  True; inv_dict["edge"] = True; inv_dict["deg"] = True
 
+  g = compute(inv_dict, sep_save=False)
   #python -m cProfile -o profile.pstats invariants.py
