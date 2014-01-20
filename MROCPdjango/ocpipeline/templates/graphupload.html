@@ -11,60 +11,49 @@
   {% block content %}
     {# <b>Uploading the largest connected components(LCC) file for big fiber streamline graphs is required for resonable processing time.</b> #}
 
-     <div id=graphspecs>
-      <h2>Two Specifications for acceptable graphs</h2>
+     <div id="graphspecs">
+      <h2>Specifications for acceptable input graphs</h2>
       <ul>
+        <li>
+        Any <a href="http://igraph.sourceforge.net/igraphbook/igraphbook-foreign.html" target="blank"> igraph supported format</a> is the preferred format for data ingestion.
+        </li>
+
         <li>A <a href="http://www.mathworks.com/help/matlab/ref/struct.html" target="blank"> MATLAB struct </a> with a <FONT COLOR='#2373ff'>single</FONT> data element
         that is of type <a href="http://docs.scipy.org/doc/scipy/reference/generated/scipy.sparse.csc_matrix.html#scipy.sparse.csc_matrix" target="blank">
-        numpy CSC (Compressed Sparse Column) matrix</a>. <br/>
+        numpy CSC (Compressed Sparse Column) matrix</a>.
+        </li>
         <li>
           Any <FONT COLOR='#2373ff'>2 Dimensional</FONT> square MATLAB matrix.
         </li>
+
         It should be loadable from the python shell via the following call: <a href="http://docs.scipy.org/doc/scipy/reference/generated/scipy.io.loadmat.html" target="blank">scipy.io.loadmat</a>(filename)['your_data_element_name'] <FONT COLOR='#2373ff'>only</FONT>.<br/>
         Such a matrix can be created by creating an MATLAB matrix and using the <a href="http://www.mathworks.com/help/matlab/ref/save.html" target="blank">save</a> function or via Python's
             <a href="http://docs.scipy.org/doc/scipy/reference/generated/scipy.io.savemat.html" target="blank">scipy.io.savemat </a> function.
-        </li>
+
     </div>
 
-    <h3 id="mult_lcc"> Graph(s) <FONT COLOR='#2373ff'>with precomputed </FONT>largest connected component</h3>
-    <p> You must use a single<strong> zipfile <i> (.zip) </i> containing ALL</strong> data in a single directory even for multiple graphs. <br/>
-    Note the following <b>file naming convention</b> for graphs:
-    <ul>
-      <li>Consider the <strong>base file name </strong> here of <strong>graph1</strong></li>
-      <li>The graph file name would be: <strong>graph1.mat</strong> and the only acceptable LCC file would be <b>graph1_concomp<FONT COLOR='#ff0000'>.npy</FONT></b>. Simply append
-      <strong>_concomp</strong> to the graph file name. <br/><br/>
-
-      <li>To maintain backward compatibility with prior versions, and fiber tractography graphs and LCCs we build, you can name your graph: <b>graph1</b><FONT COLOR='#ff0000'>_anything</FONT>.mat, where <FONT COLOR='#ff0000'>_anything</FONT>
-      is any sequence of letters/numbers with <b>no underscores(_)</b> and an LCC that would be <b>graph1_concom</b>p<FONT COLOR='#ff0000'>.npy</FONT>. Note your replacement for <i>graph1</i> in this case should also not contain underscores(_)
-      but may do so if you use the file naming conventions above instead.</li>
-      </li>
-      <li> The connnected component file must be a &lt1 x #vertices&gt sparse matrix of type '&lttype 'numpy.int64'&gt' <a href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.array.html" target="blank"> Numpy array</a>.
-      </li>
-
-    </ul>
-
     <div id='single'>
-      <h3> Single graph <FONT COLOR='#2373ff'>without precomputed </FONT>largest connected component</h3>
+      <h3> Single graph </h3>
         <p>
-          There are NO file naming restrictions. As long as your graph meets one of the above <a href=#graphspecs>specifications</a> you may compute invariants on any MATLAB (.mat) graph of your choosing. <br/>
-          Simply upload your file below, fill the <a href="#id_loadForm">form</a> below and you're on your way! Click <a href=#mult_lcc>here</a> for graphs with a largest connected component (LCC). <br/>
+          As long as your graph meets one of the above <a href=#graphspecs>specifications</a> you may compute invariants on any graph of your choosing. <br/>
+          Simply upload your file below, fill the <a href="#id_loadForm">form</a> below and you're on your way!<br/>
         </p>
     </div>
 
-    <h3 id=mult> Multiple graphs <FONT COLOR='#2373ff'>without precomputed </FONT>largest connected component</h3>
+    <h3 id=mult> Multiple graphs </h3>
     <p>
-      There are NO file naming restrictions. To compute invariants for multiple graphs, with one click &#8212 upload a zipfile <i> (.zip) </i> with all the graphs in a <b>single</b> folder, fill the <a href="#id_loadForm">form</a> below and submit.
+      To compute invariants for multiple graphs, with one click &#8212 upload a zipfile <i> (.zip) </i> with all the graphs in a <b>single</b> folder, fill the <a href="#id_loadForm">form</a> below and submit.
     </p>
 
     <h4> You must supply an <FONT COLOR='#ff0000'> Email address: </FONT> </h4>
 
     You will receive an email when your job begins and upon completion, with a url link with the result.<br/>
     <FONT COLOR='#2373ff'>
-      We do not save email addresses. We will never share or use your email address for any other purpose.
+      We will never share or use your email address for any other purpose.
     </FONT>
-    </p>
+    <p></p>
 
-      <form action="" method="post" enctype="multipart/form-data" name="loadForm" onsubmit="return (Validate(this,['.mat', '.zip'] ) && checkLcc())" class="forms" id="id_loadForm">
+      <form action="" method="post" enctype="multipart/form-data" name="loadForm" onsubmit="return (Validate(this,['.mat', '.graphml', '.zip'] ) && checkLcc())" class="forms" id="id_loadForm">
           {% csrf_token %}
           {{ graphUploadForm.as_ul }}
           <input name = "Derivatives"  type="submit" value="Upload Graph(s)" class="button" onclick="showSpinner();"/>
@@ -80,11 +69,13 @@
       <h2> Programmatic use </h2>
       <p> This is can be accessed using the base url <strong>http://www.mrbrain.cs.jhu.edu/disa/graphupload/</strong>. The
           example python script can be found <a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjango/examples/computeInvariants.py" target="blank">here</a>.
+      </p>
 
         <h3> How to use the example </h3>
         <p>After downlaoding the <a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjango/examples/computeInvariants.py" target="blank">example</a>,
          start a terminal session. Assuming you are in the same directory as the example. Typing <strong>python computeInvariants.py -h</strong> will give help on how to use the
          example and what options are available to you. Below are examples of <a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjango/examples/computeInvariants.py" target="blank">its</a> use.<br/>
+        </p>
 
         <h2 id="single_graph"> Single graph </h2>
         <p>
@@ -105,21 +96,16 @@
               <li> <i>cc</i> for the Clustering Coefficient.</li>
               <li> <i>mad</i> for the Maximum Average Degree.</li>
               <li> <i>deg</i> for The Local Degree Count.</li>
-              <li> <i>eig</i> for the Top 100 (or maximum available) eigenvalues and eigenvectors.</li>
-              <!-- <li> <i>ss2</i> for the Scan Statistic 2 [Coming soon]</li>
-              <li> <i>apl</i> for the Average Path Length [Coming soon]</li>
-              <li> <i>gdia</i> for the Graph Diameter [Coming soon]</li> -->
+              <li> <i>eig</i> for the Top 50 (or maximum available) eigenvalues and eigenvectors.</li>
             </ul>
           </div>
-        <li><i>-l</i> is an <b>optional</b> boolean flag indicated whether to use the LCC for computations. This is <b>only mandatory for big fibergrahs</b>.</li>
-        <li><i>-c</i> is <b>optional</b> and causes the resulting invariants to be duplicated in other formats. Invariants by default will come in <b>.npy</b> format in addition to other formats you select.</li>
-        <div id="conv_opts">
-          The only available options for conversion type are:
-          <ul>
-            <li><i>mat</i> for MATLAB format</li>
-            <li><i>csv</i> for comma separated values (Not available for eigenvalues and eigenvectors)</li>
-          </ul>
+
+        <li>
+        <div id="graph_format_opts">
+          The <i>-f</i> flag allows you to pass the format of the graph(s) being uploaded. Current available options for graph format are:<br/>
+          <i>mat, graphml, pajek, ncol, lgl, graphml, dimacs, gml, dot, leda</i>
         </div>
+        </li>
         </ol>
 
           Starting a <a href="http://tmux.sourceforge.net/">tmux</a> or <a href="http://linux.die.net/man/1/screen"> screen </a> session is recommended as you must wait for
@@ -135,6 +121,5 @@
           as described for in-browser use. Other than zipping graphs (and optinal LCCs) together the functionality is identical to <a href="#single_graph">single graph use</a>.
 
       </p>
-      </div>
     {% endblock programmatic %}
   {% endblock content%}

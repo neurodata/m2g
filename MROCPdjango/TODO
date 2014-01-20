@@ -1,7 +1,5 @@
 *MR OCP TODO list Disa
 ===========================
-* Resolve issue of jobs within 1 sec of one another hitting the server files routed to the same place.
-
 * Viewer: http://cmtk.org/viewer/ visualization tool
 * Refactor views with programmatic access to shorten views.py
 * Add feedback for graph too big & estimated time to completion

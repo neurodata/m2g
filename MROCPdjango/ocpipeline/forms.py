@@ -136,22 +136,21 @@ class GraphUploadForm(forms.Form):
   '''
   fileObj = forms.FileField(label='Upload data', required=True)
 
+  graph_format = forms.MultipleChoiceField(required=False, widget=Select(), choices=(('.mat', 'MAT'), ('.graphml', 'GRAPHML')), label="Graph format")
+
   # Select size of graph
-  lcc = forms.BooleanField(label="Use Largest Connected Component", required=False, help_text="<b>If you select this & do not upload LCC(s), LCC(s) will be computed and used </b>")
+  #lcc = forms.BooleanField(label="Use Largest Connected Component", required=False, help_text="<b>If you select this & do not upload LCC(s), LCC(s) will be computed and used </b>")
   email = forms.EmailField(widget=TextInput(), required=True)
 
   INVARIANT_CHOICES = (('ss1', 'Scan Statistic 1',), ('tri', 'Triangle Count',), \
       ('cc', 'Clustering co-efficient',), ('mad', 'Maximum Average Degree',) \
       ,('deg', 'Vertex Degree',), ('eig', 'Top 100 Eigenvalues and Eigenvectors',))
-  #, \
-  #    ('ss2', 'Scan Statistic 2 [Not yet available]',), ('apl', 'Average Path Length [Not yet available]',),\
-  #    ('gdia', 'Graph Diameter [Not yet available]',))
 
   Select_Invariants_you_want_computed = forms.MultipleChoiceField(required=True,
   widget=CheckboxSelectMultiple, choices=INVARIANT_CHOICES)
 
-  Convert_result = forms.MultipleChoiceField(required=False,
-      widget=CheckboxSelectMultiple, choices=(('.mat', 'MAT'),('.csv', 'CSV'),))
+
+
 
   #def clean(self):
     #cleaned_data = super(GraphUploadForm, self).clean()

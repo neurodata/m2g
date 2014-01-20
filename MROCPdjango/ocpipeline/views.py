@@ -1,20 +1,20 @@
 #!/usr/bin/python
 
-'''
+"""
 @author : Disa Mhembere
 @organization: Johns Hopkins University
 @contact: disa@jhu.edu
 
 @summary: Module to hold the views of a Django one-click MR-connectome pipeline
-'''
+"""
 
 import os, sys, re
 from glob import glob
 import threading
 from random import randint
-os.environ['MPLCONFIGDIR'] = '/tmp/'
+os.environ["MPLCONFIGDIR"] = "/tmp/"
 #import matplotlib
-#matplotlib.use( 'Agg' )
+#matplotlib.use( "Agg" )
 
 import zipfile
 import tempfile
@@ -39,7 +39,7 @@ from forms import PasswordResetForm
 
 import mrpaths
 
-''' Data Processing imports'''
+""" Data Processing imports"""
 from mrcap import gengraph as gengraph
 import mrcap.svd as svd
 import mrcap.lcc as lcc
@@ -60,7 +60,7 @@ from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 from django.shortcuts import redirect
 
-''' Auth imports '''
+""" Auth imports """
 from django.contrib.auth.decorators import login_required
 
 ####################
@@ -75,151 +75,154 @@ from django.contrib.auth import authenticate, login, logout
 # Helpers
 from util import *
 
-''' Base url just redirects to welcome '''
+""" Base url just redirects to welcome """
 def default(request):
-  return redirect(get_script_prefix()+'welcome', {"user":request.user})
+  return redirect(get_script_prefix()+"welcome", {"user":request.user})
 
-''' Little welcome message '''
+""" Little welcome message """
 def welcome(request):
-  return render_to_response('welcome.html', {"user":request.user},
+  return render_to_response("welcome.html", {"user":request.user},
                             context_instance=RequestContext(request))
 
-''' Successful completion of task'''
+""" Successful completion of task"""
 def success(request):
-  return render_to_response('success.html', {"msg": request.session["success_msg"]}
+  return render_to_response("success.html", {"msg": request.session["success_msg"]}
                             ,context_instance=RequestContext(request))
 
-''' Job failure '''
+""" Job failure """
 def jobfailure(request):
-  return render_to_response('job_failure.html', {"msg": "Please check that your fiber streamline file and ROI's are correctly formatted"}
+  return render_to_response("job_failure.html", {"msg": "Please check that your fiber streamline file and ROI's are correctly formatted"}
                             ,context_instance=RequestContext(request))
 
 # Login decorator
-#@login_required(redirect_field_name='my_redirect_field')
+#@login_required(redirect_field_name="my_redirect_field")
 #@login_required # OR EASIER
 def buildGraph(request):
 
-  error_msg = ''
+  error_msg = ""
 
-  if request.method == 'POST':
+  if request.method == "POST":
     form = BuildGraphForm(request.POST, request.FILES) # instantiating form
     if form.is_valid():
 
       # Acquire proj names
-      userDefProjectName = form.cleaned_data['UserDefprojectName']
-      site = form.cleaned_data['site']
-      subject = form.cleaned_data['subject']
-      session = form.cleaned_data['session']
-      scanId = form.cleaned_data['scanId']
+      userDefProjectName = form.cleaned_data["UserDefprojectName"]
+      site = form.cleaned_data["site"]
+      subject = form.cleaned_data["subject"]
+      session = form.cleaned_data["session"]
+      scanId = form.cleaned_data["scanId"]
 
       # Private project error checking
-      if (form.cleaned_data['Project_Type'] == 'private'):
+      if (form.cleaned_data["Project_Type"] == "private"):
         if not request.user.is_authenticated():
           error_msg = "You must be logged in to make/alter a private project! Please Login or make/alter a public project."
 
-        '''
+        """
         # Untested TODO: Add join to ensure it a private project
         elif BuildGraphModel.objects.filter(owner=request.user, project_name=userDefProjectName, \
                                     site=site, subject=subject, session=session, scanId=scanId).exists():
 
            error_msg = "The scanID you requested to create already exists in this project path. Please change any of the form values."
-        '''
+        """
       # TODO DM: Many unaccounted for scenarios here!
 
       if error_msg:
         return render_to_response(
-          'buildgraph.html',
-          {'buildGraphform': form, 'error_msg': error_msg},
+          "buildgraph.html",
+          {"buildGraphform": form, "error_msg": error_msg},
           context_instance=RequestContext(request)
           )
 
       print "Uploading files..."
 
       # If a user is logged in associate the project with thier directory
-      if form.cleaned_data['Project_Type'] == 'private':
+      if form.cleaned_data["Project_Type"] == "private":
         userDefProjectName = os.path.join(request.user.username, userDefProjectName)
       else:
-        userDefProjectName = os.path.join('public', userDefProjectName)
+        userDefProjectName = os.path.join("public", userDefProjectName)
 
       # Adapt project name if necesary on disk
       userDefProjectName = adaptProjNameIfReq(os.path.join(settings.MEDIA_ROOT, userDefProjectName)) # Fully qualify AND handle identical projects
 
-      request.session['usrDefProjDir'] = os.path.join(userDefProjectName, site, subject, session, scanId)
-      request.session['scanId'] = scanId
+      request.session["usrDefProjDir"] = os.path.join(userDefProjectName, site, subject, session, scanId)
+      request.session["scanId"] = scanId
 
-      ''' Define data directory paths '''
-      request.session['derivatives'], request.session['rawdata'], request.session['graphs'],\
-          request.session['graphInvariants'],request.session['images']= defDataDirs(request.session['usrDefProjDir'])
+      """ Define data directory paths """
+      request.session["derivatives"], request.session["rawdata"], request.session["graphs"],\
+          request.session["graphInvariants"],request.session["images"]= defDataDirs(request.session["usrDefProjDir"])
 
       # Create a model object to save data to DB
 
-      grModObj = BuildGraphModel(project_name = form.cleaned_data['UserDefprojectName'])
-      grModObj.location = request.session['usrDefProjDir'] # Where the particular scan location is
+      grModObj = BuildGraphModel(project_name = form.cleaned_data["UserDefprojectName"])
+      grModObj.location = request.session["usrDefProjDir"] # Where the particular scan location is
 
-      grModObj.site = form.cleaned_data['site']# set the site
-      grModObj.subject = form.cleaned_data['subject']# set the subject
-      grModObj.session = form.cleaned_data['session']# set the session
-      grModObj.scanId = form.cleaned_data['scanId']# set the scanId
+      grModObj.site = form.cleaned_data["site"]# set the site
+      grModObj.subject = form.cleaned_data["subject"]# set the subject
+      grModObj.session = form.cleaned_data["session"]# set the session
+      grModObj.scanId = form.cleaned_data["scanId"]# set the scanId
 
       if request.user.is_authenticated():
         grModObj.owner = request.user # Who created the project
 
-      request.session['invariants'] = form.cleaned_data['Select_Invariants_you_want_computed']
-      request.session['graphsize'] = form.cleaned_data['Select_graph_size']
-      request.session['email'] = form.cleaned_data['Email']
+      request.session["invariants"] = form.cleaned_data["Select_Invariants_you_want_computed"]
+      request.session["graphsize"] = form.cleaned_data["Select_graph_size"]
+      request.session["email"] = form.cleaned_data["Email"]
 
-      if request.session['graphsize'] == 'big' and not request.session['email']:
+      if request.session["graphsize"] == "big" and not request.session["email"]:
         return render_to_response(
-          'buildgraph.html',
-          {'buildGraphform': form, 'error_msg': 'Email address must be provided when processing big graphs'},
+          "buildgraph.html",
+          {"buildGraphform": form, "error_msg": "Email address must be provided when processing big graphs"},
           context_instance=RequestContext(request)
           )
 
-      ''' Acquire fileNames '''
-      fiber_fn = form.cleaned_data['fiber_file'].name # get the name of the file input by user
-      roi_raw_fn = form.cleaned_data['roi_raw_file'].name
-      roi_xml_fn = form.cleaned_data['roi_xml_file'].name
+      """ Acquire fileNames """
+      fiber_fn = form.cleaned_data["fiber_file"].name # get the name of the file input by user
+      roi_raw_fn = form.cleaned_data["roi_raw_file"].name
+      roi_xml_fn = form.cleaned_data["roi_xml_file"].name
 
       print "Uploading files..."
 
 
-      ''' Save files in appropriate location '''
-      saveFileToDisk(form.cleaned_data['fiber_file'], os.path.join(request.session['derivatives'], fiber_fn))
-      saveFileToDisk(form.cleaned_data['roi_raw_file'], os.path.join(request.session['derivatives'], roi_raw_fn))
-      saveFileToDisk(form.cleaned_data['roi_xml_file'], os.path.join(request.session['derivatives'], roi_xml_fn))
+      """ Save files in appropriate location """
+      saveFileToDisk(form.cleaned_data["fiber_file"], os.path.join(request.session["derivatives"], fiber_fn))
+      saveFileToDisk(form.cleaned_data["roi_raw_file"], os.path.join(request.session["derivatives"], roi_raw_fn))
+      saveFileToDisk(form.cleaned_data["roi_xml_file"], os.path.join(request.session["derivatives"], roi_xml_fn))
 
       grModObj.save() # Save project data to DB after file upload
 
       # add entry to owned project
       if request.user.is_authenticated():
         ownedProjModObj = OwnedProjects(project_name=grModObj.project_name, \
-                                        owner=grModObj.owner, is_private=form.cleaned_data['Project_Type'] == 'private')
+                                        owner=grModObj.owner, is_private=form.cleaned_data["Project_Type"] == "private")
         ownedProjModObj.save()
 
-      print '\nSaving all files complete...'
+      print "\nSaving all files complete..."
 
-      ''' Make appropriate dirs if they dont already exist '''
-      createDirStruct.createDirStruct([request.session['derivatives'], request.session['rawdata'],\
-          request.session['graphs'], request.session['graphInvariants'], request.session['images']])
+      """ Make appropriate dirs if they dont already exist """
+      createDirStruct.createDirStruct([request.session["derivatives"], request.session["rawdata"],\
+          request.session["graphs"], request.session["graphInvariants"], request.session["images"]])
 
-      if request.session['graphsize'] == 'big':
+      if request.session["graphsize"] == "big":
         # Launch thread for big graphs & email user
-        sendJobBeginEmail(request.session['email'], request.session['invariants'])
+        sendJobBeginEmail(request.session["email"], request.session["invariants"])
         thr = threading.Thread(target=processInputData, args=(request,))
         thr.start()
-        request.session['success_msg'] = "Your job was successfully launched. You should receive an email when your "
-        request.session['success_msg'] += "job begins and another one when it completes. The process may take ~5hrs if you selected to compute all invariants"
-        return HttpResponseRedirect(get_script_prefix()+'success')
+        request.session["success_msg"] =\
+"""
+Your job was successfully launched. You should receive an email when your
+job begins and another one when it completes. The process may take ~5hrs if you selected to compute all invariants
+"""
+        return HttpResponseRedirect(get_script_prefix()+"success")
 
       # Redirect to Processing page
-      return HttpResponseRedirect(get_script_prefix()+'processinput')
+      return HttpResponseRedirect(get_script_prefix()+"processinput")
   else:
     form = BuildGraphForm() # An empty, unbound form
 
   # Render the form
   return render_to_response(
-      'buildgraph.html',
-      {'buildGraphform': form},
+      "buildgraph.html",
+      {"buildGraphform": form},
       context_instance=RequestContext(request) # Some failure to input data & returns a key signaling what is requested
   )
 
@@ -458,17 +461,12 @@ def asyncInvCompute(request):
 
     try:
       invariant_fns = runInvariants(request.session['invariants'], graph_fn,
-                        request.session['graphInvariants'], lcc_fn,
-                        request.session['graphsize'])
+                      request.session['graphInvariants'], lcc_fn,
+                      request.session['graphsize'])
 
       print 'Invariants for annoymous project %s complete...' % graph_fn
 
-      # TODO: Make function for this. Duplicate of buildgraph code
-      if request.session.has_key('invConvertToFormats'):
-        convertInvariants(request.session['invConvertToFormats'], invariant_fns)
-
     except Exception:
-      raise Exception
       msg = "Hello,\n\nYour most recent job failed possibly because:%s\n" % (" "*randint(0,10))
       msg += "- the graph '%s' you uploaded does not match any accepted type. %s\n\n" % (os.path.basename(graph_fn)," "*randint(0,10))
       msg += "You may have some partially completed data here: %s" % ("http://mrbrain.cs.jhu.edu"+ request.session['dataDir'].replace(' ','%20'))
@@ -529,8 +527,8 @@ def graphLoadInv(request, webargs=None):
     form = GraphUploadForm(request.POST, request.FILES) # instantiating form
     if form.is_valid():
 
-      request.session['graphsize'] = 'big' if form.cleaned_data['lcc'] else 'small' # This accounts for use LCC or not
-      request.session['email'] = form.cleaned_data['email']
+      request.session['graphsize'] = 'small' # This accounts for use LCC or not
+      request.session['email'] =  form.cleaned_data['email']
 
       data = form.files['fileObj'] # get data
       request.session['invariants'] = form.cleaned_data['Select_Invariants_you_want_computed']
@@ -550,20 +548,23 @@ def graphLoadInv(request, webargs=None):
         saveFileToDisk(data, graphs[0])
 
       request.session['uploaded_graphs'] = graphs
-      request.session['invConvertToFormats'] = form.cleaned_data['Convert_result']
+      request.session['graph_format'] = form.cleaned_data['graph_format']
       request.session['dataDir'] = dataDir
       request.session['email'] = form.cleaned_data['email']
 
       # Launch thread for graphs & email user
       sendJobBeginEmail(request.session['email'], request.session['invariants'], genGraph=False)
 
+      asyncInvCompute(request) # TODO - rm this line and uncomment 2 below
       thr = threading.Thread(target=asyncInvCompute, args=(request,))
       thr.start()
 
-      request.session['success_msg'] = "Your job was successfully launched. You should receive an email when your "
-      request.session['success_msg'] += "job begins and another one when it completes. The process may take over "
-      request.session['success_msg'] += "3hrs/graph (dependent on graph size) if you selected to compute all invariants. "
-      request.session['success_msg'] += "If you do not see an email in your INBOX check the SPAM folder and add jhmrocp@cs.jhu.edu to your safe list."
+      request.session['success_msg'] = \
+"""
+Your job was successfully launched. You should receive an email when your  job begins and another one when it completes. The process may take several
+request.session['success_msg'] += "hours per graph (dependent on graph size) if you selected to compute all invariants.
+request.session['success_msg'] += "If you do not see an email in your INBOX check the SPAM folder and add jhmrocp@cs.jhu.edu to your safe list.
+"""
       return HttpResponseRedirect(get_script_prefix()+'success')
 
   # Programmatic RESTful API
@@ -796,36 +797,31 @@ def processData(fiber_fn, roi_xml_fn, roi_raw_fn,graphs, graphInvariants, graphs
 #                          NEW INVARIANTS                                     #
 ###############################################################################
 
-def runInvariants(inv_list, graph_fn, save_dir, lcc_fn, graphsize):
+def runInvariants(inv_list, graph_fn, save_dir, lcc_fn, graphsize, sep_save=False):
   '''
   Run the selected multivariate invariants as defined
+
+  @param inv_list: the list of invariants we are to compute
+  @param graph_fn: the graph filename on disk
+  @param save_dir: the directory where to save resultant data
+  @param lcc_fn: deprecated - the name of the largest connected component file
+  @param graphsize: deprecated - the size of the graph i.e big/small
+  @param sep_save: boolean on whether to save invariants in separate files
   '''
   inv_dict = {'graph_fn':graph_fn, 'save_dir':save_dir, \
               'lcc_fn':lcc_fn,'graphsize':graphsize}
   for inv in inv_list:
     inv_dict[inv] = True
-  inv_dict = cci.compute(inv_dict)
+
+  inv_dict = cci.compute(inv_dict, sep_save=sep_save)[1]
 
   return_dict = dict()
 
-  if inv_dict['ss1_fn']:
-    return_dict['ss1'] = inv_dict['ss1_fn']
-  if inv_dict['tri_fn']:
-    return_dict['tri'] = inv_dict['tri_fn']
-  if inv_dict['deg_fn']:
-    return_dict['deg'] = inv_dict['deg_fn']
-  if inv_dict['ss2_fn']:
-    return_dict['ss2'] = inv_dict['ss2_fn']
-  if inv_dict['apl_fn']:
-    return_dict['apl'] = inv_dict['apl_fn']
-  if inv_dict['gdia_fn']:
-    return_dict['gdia'] = inv_dict['gdia_fn']
-  if inv_dict['cc_fn']:
-    return_dict['cc'] = inv_dict['cc_fn']
-  if inv_dict['mad_fn']:
-    return_dict['mad'] = inv_dict['mad_fn']
-  if inv_dict['eigvl_fn']:
-    return_dict['eig'] = [inv_dict['eigvect_fn'], inv_dict['eigvl_fn']] # Note this
+  for key in inv_dict:
+    if key.endswith("_fn") and not key.startswith("eig"): # skip eigs
+      return_dict[key] = inv_dict[key]
+
+  if inv_dict.get("eigvl_fn", None): # or "eigvect_fn"
+    return_dict["eig"] = [inv_dict["eigvect_fn"], inv_dict["eigvl_fn"]] # Note this
 
   return return_dict
-
