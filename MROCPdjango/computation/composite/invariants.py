@@ -20,6 +20,8 @@ import scipy.sparse.linalg.eigen.arpack as arpack
 from computation.utils.getBaseName import getBaseName
 from computation.utils.file_util import createSave, loadAnyMat
 from computation.utils.igraph_attributes import r_igraph_get_attr
+from computation.utils.csc_to_igraph import csc_to_r_igraph
+from computation.utils.r_utils import r_igraph_load_graph
 
 gl_eigvects = None # global eigenvectors used for fast mapping
 
@@ -49,6 +51,7 @@ def compute(inv_dict, sep_save=True, gformat="graphml"):
   ===================
   sep_save: boolean for auto save or not
   """
+
   if inv_dict.get("save_dir", None) is None:
    inv_dict["save_dir"] = os.path.join(os.path.dirname(inv_dict["graph_fn"]), "graphInvariants")
 
@@ -61,8 +64,10 @@ def compute(inv_dict, sep_save=True, gformat="graphml"):
     try:
       if gformat in ["edgelist", "pajek", "ncol", "lgl", "graphml", "dimacs", "gml", "dot", "leda"]: #  All igraph supported formats
         G = r_igraph_load_graph(inv_dict["graph_fn"], gformat)
-      elif gformat == ".mat":
-        G = loadAnyMat(inv_dict['graph_fn'])
+      elif gformat == "mat":
+        G = csc_to_r_igraph(loadAnyMat(inv_dict['graph_fn']))
+
+        gformat = "graphml" # change graph format to something igraph can write
 
       if isinstance(G, str):
         return G # There was a loading error
@@ -138,21 +143,6 @@ def compute(inv_dict, sep_save=True, gformat="graphml"):
   return G, inv_dict
 
 # ==============================  Rpy2 Area ================================== #
-
-def r_igraph_load_graph(fn, gformat="graphml"):
-  """
-  Load a graph from disk to an igraph object in R
-
-  fn - the file name on disk
-  gformat - the format to read from disk. Default: graphml
-  """
-  get_graph = robjects.r("""
-        require(igraph)
-        fn <- function(fn, gformat){
-          igraph::read.graph(fn, format=gformat)
-       } """)
-
-  return get_graph(fn, gformat)
 
 def r_igraph_write(g, fn, gformat="graphml"):
   """
@@ -295,7 +285,7 @@ def r_igraph_triangles(g, save_fn=None):
 
   return g # return so we can use for other attributes
 
-def r_igraph_eigs(g, k, return_eigs=False, save_fn=None):
+def r_igraph_eigs(g, k, return_eigs=False, save_fn=None, real=True):
   """
   Eigen spectral decomposition. Compute the top-k eigen pairs.
 
@@ -317,14 +307,15 @@ def r_igraph_eigs(g, k, return_eigs=False, save_fn=None):
 
   esd = robjects.r("""
   require(igraph)
-  fn <- function(g, nev, ncv){
+  options(digits=2) # 3 decimal places
+  fn <- function(g, nev, ncv, real=FALSE){
     M <- get.adjacency(g, sparse=TRUE)
 
     mv_mult <- function(x, extra=NULL) {
       as.vector(M %*% x) }
 
     eig <- arpack(mv_mult, options=list(n=vcount(g), nev=nev, ncv=ncv,  which="LM", maxiter=500))
-    list(eig$values, t(eig$vectors)) # return [eigvals, eigvects]
+    lapply(list(eig$values, t(eig$vectors)), Re) # return [eigvals, eigvects] real parts only
   }
   """) # A list with [0]=eigenvalues and [1]=eigenvectors. If an eigensolver error occurs then None
 
@@ -334,7 +325,7 @@ def r_igraph_eigs(g, k, return_eigs=False, save_fn=None):
   ncv = nev + 20 if (nev + 20) < vcount else vcount
 
   try:
-    eigs = esd(g, nev, ncv)
+    eigs = esd(g, nev, ncv, real)
   except Exception, msg:
     print msg
     return g # *Note premature exit*
@@ -353,7 +344,7 @@ def r_igraph_eigs(g, k, return_eigs=False, save_fn=None):
     gl_eigvects = eigs[1]
 
     eigvects = map(get_str_eigvects, [(idx, idx+nev) for idx in xrange(0, (vcount*nev), nev)])
-    g = r_igraph_set_graph_attribute(g, "eigvals", str(list(eigs[0]))[1:-1]) # Return a comma separated string
+    g = r_igraph_set_graph_attribute(g, "eigvals", str(list(eigs[0]))) # Return a comma separated string
 
     #g = r_igraph_set_vertex_attr(g, "latent_pos", value=eigvects) # Could not create char sequences only lists :-/
 
@@ -377,7 +368,7 @@ def get_str_eigvects(idx):
   A vector i.e the eigenvector (latent position) for that vertex cast to a string
   """
   global gl_eigvects
-  return str(list(gl_eigvects[idx[0]:idx[1]]))[1:-1]
+  return str(list(gl_eigvects[idx[0]:idx[1]]))
 
 
 def r_igraph_max_ave_degree(g):
@@ -400,12 +391,12 @@ def r_igraph_max_ave_degree(g):
 
   mad = r_igraph_get_attr(g, "eigvals", "g") # See if we already have computed eigenvalues for the graph
   if mad == NULL: # Ok then compute top 1 eig ourself
-    mad = r_igraph_eigs(g, 1, return_eigs=True, save_fn=None)
+    mad = r_igraph_eigs(g, 1, return_eigs=True, save_fn=None)[0]
   else:
-    mad = mad[0] # The largest eigenvalue is held at index 0
+    mad = float(mad[0].split(",")[0][1:]) # The largest eigenvalue is held at index 0
 
   if mad is not None:
-    g = r_igraph_set_graph_attribute(g, "max_ave_degree", mad[0])  # Attribute name may need to change
+    g = r_igraph_set_graph_attribute(g, "max_ave_degree", mad)
   else: # More than likely ran out of memory
     print "Failed to estimate max ave degree because eigensolver failed ..."
 
@@ -433,7 +424,7 @@ def r_igraph_vcount(g, set_attr=True):
   """)
   vc = vcount(g)[0]
   if set_attr:
-    g = r_igraph_set_graph_attribute(g, "vcount", vc)  # Attribute name may need to change
+    g = r_igraph_set_graph_attribute(g, "vcount", vc)
     return g # return so we can use for other attributes
 
   else:
@@ -460,7 +451,7 @@ def r_igraph_ecount(g, set_attr=True):
   """)
   ec = ecount(g)[0]
   if set_attr:
-    g = r_igraph_set_graph_attribute(g, "ecount", ec)  # Attribute name may need to change
+    g = r_igraph_set_graph_attribute(g, "ecount", ec)
     return g # return so we can use for other attributes
   else:
     return int(ec)

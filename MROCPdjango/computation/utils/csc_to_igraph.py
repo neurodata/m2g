@@ -9,97 +9,46 @@
 
 import argparse
 from scipy.sparse.csc import csc_matrix
-import scipy.io as sio
 import igraph
 from loadAdjMatrix import loadAnyMat
-from multiprocessing import Pool
-from scipy.sparse import triu
-from csc_matrix2 import csc_matrix2
 from time import time
 import os
 
-g = None # csc global
-
-def csc_to_igraph(cscg, save=False, fn="igraph_graph", num_procs=None):
+def csc_to_igraph(g, save=False, save_fn=None, save_format=None):
   """
-  TODO: DM
+  Get an igraph python representation of an adjacency matrix given
+  by a sparse csc matrix
+
+  @TODO: Document
   """
-  assert isinstance(cscg, csc_matrix), "Arg1 'g' must be a Scipy Sparse CSC Matrix"
-  global g
-  g = cscg
+  assert isinstance(g, csc_matrix), "Arg1 'g' must be a Scipy Sparse CSC Matrix"
+  ig = igraph.Graph(g.shape[0], directed=True) # Always assume directed
+  nodes_from, nodes_to = g.nonzero()
+  all_edges = zip(nodes_from, nodes_to)
 
-  print "Converting CSC to upper triangular ..."
-  g = triu(g, k=0)
+  print "Adding edges to igraph"
+  ig += all_edges
 
-  print "Creating igraph from csc_matrix object ..."
-
-  TOTAL_NODES = g.shape[0]
-
-  ig = igraph.Graph(n=g.shape[0], directed=False) # **Note: Always undirected
-
-  # Iterate through all non-zero edged nodes and add to list for the upper triangular of the matrix
-  print "Parallel get of edges from adjacency matrix ..."
-  pp = Pool(num_procs)
-  g = csc_matrix2(g)
-  all_new_edges = pp.map(get_edges, g) # Should return a list of np.arrays containing edges I want to add
-  pp.close(); pp.join()
-
-  # Make 2-tuple with node_id and all_non_zero entries
-  print "Zipping node id its edge list ..."
-  ids_edges = zip(range(TOTAL_NODES), all_new_edges) # get e.g. [ (0, [1,2,6]), (1, [2,5,8]), ... ] i.e. (node_id, [non_zero_elems])
-
-  # Create the igraph needed (id1, id2) format for adding multiple edges
-  print "Creating lists of tuple pairs ..."
-  del all_new_edges
-  pp = Pool(num_procs)
-  edge_tups = pp.map(create_pairs, ids_edges) # Should return a list of lists, each containing 2-tuples
-  pp.close(); pp.join()
-
-  del ids_edges
-
-  print "Serially appending to edge list ..."
-  edges = []
-  for node_id, l in enumerate(edge_tups):
-    edges.extend(l)
-
-    if node_id % 500 == 0:
-      print "Processing node %d / %d" % (node_id, TOTAL_NODES)
-
-  print "Adding edges to igraph object ..."
-  ig += edges
-
-  print "All igraph edges added!"
-
-  if save:
-    print "Saving to igraph graphml file format..."
-    if not os.path.splitext(fn)[1] == ".graphml": fn = fn+".graphml"
-    igraph.write(ig, fn, format="graphml")
-    print "\nigraph saved as %s ... \nDone!" % os.path.abspath(fn)
-
+  # TODO - use save etc ...
   return ig
 
-def create_pairs(id_edges):
+def csc_to_r_igraph(g, save=False, save_fn=None):
   """
-  Create (id1,id2) pairs to be used to add to igraph graph.
-  Used in parallel mapping operations.
+  Somewhat of a hack to get a GNU R representation of an igraph object from a
+  python representation by reading and writing to/from a temp file
 
-  positional arguments:
-  =====================
-  id_edges - the
+  Faster on SSD
+  @TODO: Document
   """
-  return zip([id_edges[0]]*id_edges[1].shape[0], id_edges[1])
+  import tempfile
+  from r_utils import r_igraph_load_graph
 
-def get_edges(node):
-  """
-  Returns the edgelist for particular node (index of the adjacency matrix)
-  Used in parallel mapping operations.
-
-  positional arguments:
-  =====================
-  node - a single row of a csc matrix
-
-  """
-  return node.nonzero()[1]
+  t = tempfile.NamedTemporaryFile()
+  py_ig = csc_to_igraph(g)
+  py_ig.write(t.name , format="edgelist")
+  r_ig = r_igraph_load_graph(t.name, gformat="edgelist")
+  t.close()
+  return r_ig 
 
 def main():
   parser = argparse.ArgumentParser(description="Convert an igraph to a csc object")
@@ -134,10 +83,12 @@ def test():
         [0, 1, 1, 0, 0],
         [1, 0, 0, 0, 1]
         ])
+  print "Input csc: \n", g.todense()
 
-  g = csc_to_igraph(g)
-  print "Test complete ..."
-  print g.get_adjacency()
+  print "Python igraph ...\n", csc_to_igraph(g).get_adjacency()
+
+  from r_utils import r_igraph_get_adjacency
+  print "R igraph ...\n", r_igraph_get_adjacency(csc_to_r_igraph(g))
 
 if __name__ == "__main__":
   main()

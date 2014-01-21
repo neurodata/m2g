@@ -268,7 +268,8 @@ def processInputData(request):
                                         lcc_fn, request.session['graphsize'])
 
   if request.session['graphsize'] == 'big':
-    sendJobCompleteEmail(request.session['email'], 'http://mrbrain.cs.jhu.edu' + request.session['usrDefProjDir'].replace(' ','%20'))
+    pass # FIXME - rm
+    #sendJobCompleteEmail(request.session['email'], 'http://mrbrain.cs.jhu.edu' + request.session['usrDefProjDir'].replace(' ','%20')) # FIXME - uncomment me
 
   return HttpResponseRedirect(get_script_prefix()+'confirmdownload')
 
@@ -450,31 +451,21 @@ def download(request, webargs=None):
 def asyncInvCompute(request):
 
   for graph_fn in request.session['uploaded_graphs']:
-    lcc_fn = None
-
-    if request.session['graphsize'] == 'big':
-      lcc_fn = getLCCfn(graph_fn)
-      if not lcc_fn:
-        lcc_fn = os.path.splitext(graph_fn)[0] + '_concomp.npy'
-        print "No precomputed LCC found. Computing LCC %s" % lcc_fn
-        lcc.process_single_brain(graph_fn, lcc_fn)
-
-    try:
+    #try:
       invariant_fns = runInvariants(request.session['invariants'], graph_fn,
-                      request.session['graphInvariants'], lcc_fn,
-                      request.session['graphsize'])
+                      request.session['graphInvariants'], graph_format=request.session['graph_format'])
 
       print 'Invariants for annoymous project %s complete...' % graph_fn
 
-    except Exception:
-      msg = "Hello,\n\nYour most recent job failed possibly because:%s\n" % (" "*randint(0,10))
-      msg += "- the graph '%s' you uploaded does not match any accepted type. %s\n\n" % (os.path.basename(graph_fn)," "*randint(0,10))
-      msg += "You may have some partially completed data here: %s" % ("http://mrbrain.cs.jhu.edu"+ request.session['dataDir'].replace(' ','%20'))
-      msg += "Please check these and try again. %s\n\n" % (" "*randint(0,10))
-      sendJobFailureEmail(request.session['email'], msg)
-
-  # Email user of job finished
-  sendJobCompleteEmail(request.session['email'], "http://mrbrain.cs.jhu.edu"+ request.session['dataDir'].replace(' ','%20'))
+  #  except Exception, msg:
+  #    msg = "Hello,\n\nYour most recent job failed possibly because:%s\n" % (" "*randint(0,10))
+  #    msg += "- the graph '%s' you uploaded does not match any accepted type. %s\n\n" % (os.path.basename(graph_fn)," "*randint(0,10))
+  #    msg += "You may have some partially completed data here: %s" % ("http://mrbrain.cs.jhu.edu"+ request.session['dataDir'].replace(' ','%20'))
+  #    msg += "\n.Please check these and try again. %s\n\n" % (" "*randint(0,10))
+  #    sendJobFailureEmail(request.session['email'], msg)
+  #
+  ## Email user of job finished
+  #sendJobCompleteEmail(request.session['email'], "http://mrbrain.cs.jhu.edu"+ request.session['dataDir'].replace(' ','%20')) #
 
 ############################################################
 
@@ -548,22 +539,22 @@ def graphLoadInv(request, webargs=None):
         saveFileToDisk(data, graphs[0])
 
       request.session['uploaded_graphs'] = graphs
-      request.session['graph_format'] = form.cleaned_data['graph_format']
+      request.session['graph_format'] = form.cleaned_data['graph_format'] # FIXME - uncomment
       request.session['dataDir'] = dataDir
       request.session['email'] = form.cleaned_data['email']
 
       # Launch thread for graphs & email user
-      sendJobBeginEmail(request.session['email'], request.session['invariants'], genGraph=False)
+      #sendJobBeginEmail(request.session['email'], request.session['invariants'], genGraph=False) # FIXME - uncomment me
 
-      asyncInvCompute(request) # TODO - rm this line and uncomment 2 below
-      thr = threading.Thread(target=asyncInvCompute, args=(request,))
-      thr.start()
+      asyncInvCompute(request) # FIXME - rm and uncomment below
+      #thr = threading.Thread(target=asyncInvCompute, args=(request,))
+      #thr.start()
 
       request.session['success_msg'] = \
 """
-Your job was successfully launched. You should receive an email when your  job begins and another one when it completes. The process may take several
-request.session['success_msg'] += "hours per graph (dependent on graph size) if you selected to compute all invariants.
-request.session['success_msg'] += "If you do not see an email in your INBOX check the SPAM folder and add jhmrocp@cs.jhu.edu to your safe list.
+Your job was successfully launched. You should receive an email when your  job begins and another one when it completes.
+The process may take several hours per graph (dependent on graph size) if you selected to compute all invariants.
+If you do not see an email in your INBOX check the SPAM folder and add jhmrocp@cs.jhu.edu to your safe list.
 """
       return HttpResponseRedirect(get_script_prefix()+'success')
 
@@ -797,23 +788,27 @@ def processData(fiber_fn, roi_xml_fn, roi_raw_fn,graphs, graphInvariants, graphs
 #                          NEW INVARIANTS                                     #
 ###############################################################################
 
-def runInvariants(inv_list, graph_fn, save_dir, lcc_fn, graphsize, sep_save=False):
+def runInvariants(inv_list, graph_fn, save_dir, graph_format="graphml", sep_save=False):
   '''
   Run the selected multivariate invariants as defined
 
   @param inv_list: the list of invariants we are to compute
   @param graph_fn: the graph filename on disk
   @param save_dir: the directory where to save resultant data
-  @param lcc_fn: deprecated - the name of the largest connected component file
-  @param graphsize: deprecated - the size of the graph i.e big/small
+
+  TODO: Use these:
   @param sep_save: boolean on whether to save invariants in separate files
   '''
-  inv_dict = {'graph_fn':graph_fn, 'save_dir':save_dir, \
-              'lcc_fn':lcc_fn,'graphsize':graphsize}
+  inv_dict = {'graph_fn':graph_fn, 'save_dir':save_dir}
   for inv in inv_list:
     inv_dict[inv] = True
 
-  inv_dict = cci.compute(inv_dict, sep_save=sep_save)[1]
+  inv_dict = cci.compute(inv_dict, sep_save=sep_save, gformat=graph_format)
+
+  if isinstance(inv_dict, str):
+    return inv_dict # Error message
+  else:
+    inv_dict = inv_dict[1]
 
   return_dict = dict()
 
