@@ -136,10 +136,11 @@ class GraphUploadForm(forms.Form):
   '''
   fileObj = forms.FileField(label='Upload data', required=True)
 
-  graph_format = forms.MultipleChoiceField(required=False, widget=Select(), choices=(('.mat', 'MAT'), ('.graphml', 'GRAPHML')), label="Graph format")
+  graph_format = forms.MultipleChoiceField(required=True, widget=Select(choices=(['.mat', 'MAT'], ['.graphml', 'GRAPHML'],),), \
+       label="Graph format", \
+      error_messages={"required":"You must specify graph type"})
 
   # Select size of graph
-  #lcc = forms.BooleanField(label="Use Largest Connected Component", required=False, help_text="<b>If you select this & do not upload LCC(s), LCC(s) will be computed and used </b>")
   email = forms.EmailField(widget=TextInput(), required=True)
 
   INVARIANT_CHOICES = (('ss1', 'Scan Statistic 1',), ('tri', 'Triangle Count',), \
