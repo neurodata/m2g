@@ -8,7 +8,7 @@
 """
 
 from django import forms
-from django.forms.fields import MultipleChoiceField, BooleanField
+from django.forms.fields import MultipleChoiceField, BooleanField, ChoiceField
 from django.forms.widgets import RadioSelect, CheckboxSelectMultiple, Select, SelectMultiple, TextInput
 
 #
@@ -136,22 +136,17 @@ class GraphUploadForm(forms.Form):
   '''
   fileObj = forms.FileField(label='Upload data', required=True)
 
-  graph_format = forms.MultipleChoiceField(required=True, widget=Select(choices=(['.mat', 'MAT'], ['.graphml', 'GRAPHML'],),), \
-       label="Graph format", \
-      error_messages={"required":"You must specify graph type"})
+  graph_format = forms.ChoiceField(required=True, widget=Select, choices=(('mat', 'MAT'), ('graphml', 'GRAPHML')), label="Graph format", error_messages={"required":"You must specify graph type"})
 
   # Select size of graph
   email = forms.EmailField(widget=TextInput(), required=True)
 
   INVARIANT_CHOICES = (('ss1', 'Scan Statistic 1',), ('tri', 'Triangle Count',), \
       ('cc', 'Clustering co-efficient',), ('mad', 'Maximum Average Degree',) \
-      ,('deg', 'Vertex Degree',), ('eig', 'Top 100 Eigenvalues and Eigenvectors',))
+      ,('deg', 'Vertex Degree',), ('eig', 'Top-k Eigenvalues and Eigenvectors',))
 
   Select_Invariants_you_want_computed = forms.MultipleChoiceField(required=True,
   widget=CheckboxSelectMultiple, choices=INVARIANT_CHOICES)
-
-
-
 
   #def clean(self):
     #cleaned_data = super(GraphUploadForm, self).clean()
