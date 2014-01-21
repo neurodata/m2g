@@ -144,14 +144,16 @@ cat("Unimplemented ..\n") # TODO: DM
 }
 
 # ============= Main =============== #
-parser <- ArgumentParser(description="VERY simple reader and writer from and to igraph, graphSON format")
+if (!interactive())
+{
+  parser <- ArgumentParser(description="VERY simple reader and writer from and to igraph, graphSON format")
 
-parser$add_argument("-f", "--file.name", action="store", help="Pass if file is on disk and needs to be read. If passed we assume its graphSON to igraph")
-parser$add_argument("-t", "--test", action="store_true", help="If its a test pass this flag")
-result <- parser$parse_args()
+  parser$add_argument("-f", "--file.name", action="store", help="Pass if file is on disk and needs to be read. If passed we assume its graphSON to igraph")
+  parser$add_argument("-t", "--test", action="store_true", help="If its a test pass this flag")
+  result <- parser$parse_args()
 
-if (result$test){ # & (nchar(result$file.name)==0) ){
-  TestWrite()
+  if (result$test){ # & (nchar(result$file.name)==0) ){
+    TestWrite()
+  }
 }
-
 
