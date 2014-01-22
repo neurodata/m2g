@@ -7,6 +7,7 @@
 
 import argparse
 from computation.utils import graphml_adapter
+from computation.utils.loadAdjMatrix import loadAnyMat
 from glob import glob
 import os
 
@@ -20,11 +21,11 @@ def main():
     new_dir = dircty+"_graphml"
     print "Making dir %s" % new_dir
     os.makedirs(new_dir)
-    for fn in os.path.join(glob(dircty, "*.mat")):
+    for fn in glob(os.path.join(dircty, "*.mat")):
       print "Converting %s ..." % fn
-      new_fn = os.path.join(new_dir, os.path.basename(fn))
+      new_fn = os.path.join(new_dir, os.path.splitext(os.path.basename(fn))[0]+".graphml")
       print "Creating %s ..." % new_fn
-      #graphml_adapter.csc_to_graphml(g, is_weighted=result.weighted, desikan=True, is_directed=False, save_fn=new_fn)
+      graphml_adapter.csc_to_graphml(loadAnyMat(fn), is_weighted=result.weighted, desikan=True, is_directed=False, save_fn=new_fn)
 
 
 if __name__ == "__main__":
