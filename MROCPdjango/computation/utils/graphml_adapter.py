@@ -5,6 +5,8 @@
 # Email: disa@jhu.edu
 # Copyright (c) 2014. All rights reserved.
 
+# File performs conversion to and from scipy.sparse matrices to graphml and back
+
 import argparse
 import os
 import re
@@ -118,22 +120,14 @@ def csc_to_graphml(g, is_weighted=True, desikan=False, is_directed=False, save_f
   f.write(src)
   f.close
 
-class Desikan(object):
-  def __init__(self, g):
-    """
-    Unimplemented
-    """
-    pass
-  def get_mapping(self, ):
-    return [] # FIXME stub
-
 def graphml_to_csc(fh):
   """
   Take the filehandle of a graphml formatted graph written to disk and convert to
   scipy.sparse.csc.matrix
 
   *Cannot account for any node attributes*
-  *Can only account for edge weight attributes*
+  *CAN ONLY account for edge weight attributes*
+  *All other attributes are ignored if any*
 
   Positional arguments:
   =====================
@@ -207,8 +201,6 @@ def get_edge(st):
       __weight__ = False # Only done once
     else:
       return [src, dest, float(weight.group())]
-
-  #else
   return [src, dest, 1]
 
 def readtest(fn):

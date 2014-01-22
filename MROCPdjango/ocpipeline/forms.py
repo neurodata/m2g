@@ -148,13 +148,6 @@ class GraphUploadForm(forms.Form):
   Select_Invariants_you_want_computed = forms.MultipleChoiceField(required=True,
   widget=CheckboxSelectMultiple, choices=INVARIANT_CHOICES)
 
-  #def clean(self):
-    #cleaned_data = super(GraphUploadForm, self).clean()
-
-    #if cleaned_data['Select_graph_size'] == 'big' and not cleaned_data['Email']:
-    #  raise forms.ValidationError("You must provide an email address when computing invariants on big graphs")
-    #return cleaned_data
-
 class DownloadForm(forms.Form):
   '''
   Used on confirmdownload page to choose whether to convert any invariant formats
