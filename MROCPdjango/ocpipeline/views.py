@@ -268,8 +268,7 @@ def processInputData(request):
                                         lcc_fn, request.session['graphsize'])
 
   if request.session['graphsize'] == 'big':
-    pass # FIXME - rm
-    #sendJobCompleteEmail(request.session['email'], 'http://mrbrain.cs.jhu.edu' + request.session['usrDefProjDir'].replace(' ','%20')) # FIXME - uncomment me
+    sendJobCompleteEmail(request.session['email'], 'http://mrbrain.cs.jhu.edu' + request.session['usrDefProjDir'].replace(' ','%20'))
 
   return HttpResponseRedirect(get_script_prefix()+'confirmdownload')
 
@@ -539,16 +538,15 @@ def graphLoadInv(request, webargs=None):
         saveFileToDisk(data, graphs[0])
 
       request.session['uploaded_graphs'] = graphs
-      request.session['graph_format'] = form.cleaned_data['graph_format'] # FIXME - uncomment
+      request.session['graph_format'] = form.cleaned_data['graph_format']
       request.session['dataDir'] = dataDir
       request.session['email'] = form.cleaned_data['email']
 
       # Launch thread for graphs & email user
-      #sendJobBeginEmail(request.session['email'], request.session['invariants'], genGraph=False) # FIXME - uncomment me
+      sendJobBeginEmail(request.session['email'], request.session['invariants'], genGraph=False)
 
-      asyncInvCompute(request) # FIXME - rm and uncomment below
-      #thr = threading.Thread(target=asyncInvCompute, args=(request,))
-      #thr.start()
+      thr = threading.Thread(target=asyncInvCompute, args=(request,))
+      thr.start()
 
       request.session['success_msg'] = \
 """
