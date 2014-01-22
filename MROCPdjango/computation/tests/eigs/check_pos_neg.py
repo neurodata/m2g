@@ -17,12 +17,12 @@ import pylab as pl
 
 assert len(sys.argv) > 1, "You must provide the directory name with eigenvector data .."
 
-eigs = glob(os.path.join(sys.argv[1], "*.npy"))
+eigs = glob(os.path.join(sys.argv[1], "*_eigvl.npy"))
 all_eigvals = np.array([])
 
-for fh in eigs:
-  print "Processing %s ..." % fh
-  e = np.load(fh)
+for eigfn in eigs:
+  print "Processing %s ..." % eigfn
+  e = np.load(eigfn)
 
   for eigval in e:
     all_eigvals = np.append(all_eigvals, eigval.real)
