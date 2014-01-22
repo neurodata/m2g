@@ -21,6 +21,12 @@ IgraphToGraphson <- function(g, save_fn){
 
 # Open graph
 out.str <- '{\n\t"graph": {\n' # The string that will hold the graph text
+if (is.directed(g)){
+  out.str <- paste0(out.str, '"edgedefault":"directed"\n')
+} else {
+  out.str <- paste0(out.str, '"edgedefault":"undirected"\n')
+}
+
 for (attr in list.graph.attributes(g)){
   attr.val <- get.graph.attribute(g, attr)
   if (is.na(attr.val)){ # Do nothing  
@@ -120,9 +126,25 @@ GraphsonToIgraph <- function(fn){
   #   An igraph object
   
   require(rjson)
-  json.data <- fromJSON(paste(readLines(fn), collapse=""))
+  jd <- fromJSON(paste(readLines(fn), collapse=""))
+  num.nodes <- length(jd$graph$vertices)
   
-  cat("Unimplemented ..\n") # TODO: DM
+  if (!is.null(jd$graph$edgedefault) | jd$graph$edgedefault == FALSE){
+    directed <- FALSE
+  }
+  else{
+    directed <- TRUE
+  } 
+  # Create the graph
+  g <- graph.empty(n=num.nodes, directed=directed)
+  
+  # Add vertex attributes if any
+  
+  # Add edges 
+  
+  # Add edge attributes
+  
+  
 }
 
 TestWrite <- function(){
