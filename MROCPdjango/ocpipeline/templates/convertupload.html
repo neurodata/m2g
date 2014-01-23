@@ -5,18 +5,19 @@
   {% endblock title %}
 
   {% block medheading %}
-    Convert graph and invariant formats
+    Convert between graph formats
   {% endblock medheading %}
 
   {% block content %}
 
-    <b>Select the file type of the data to be converted (Mandatory). File type will also  be checked before conversion is attempted</b>
+    <b>Select the file type of the graph to be converted. File type will also  be checked before conversion is attempted</b>
     <p>
-    This interface currently only gurantees support the following:
-    <ul>
-      <li>Invariant conversion from our default type, <i>npy</i> to <i>mat</i> and <i>csv</i>.</li>
-      <li>Fiber graph conversion from our default graph type <i>mat</i> to <i>npy</i> and <i>csv</i>. Note: csv conversion is only for graphs with 1000 or less vertices.</li>
-    </ul>
+    This interface currently only supports conversion between the following formats:
+    </p>
+    <div id="formats"> <code>graphml, pajek, ncol, lgl, dimacs, gml, dot, leda, npy, mat</code> </div>
+
+    <p>
+    Note that any graph attribute that is not representable in the format of conversion will be ignored during conversion.
 
     To perform conversion on multiple files of the same file type simply upload a zip containing all the files in a single directory.<br/>
     <strong> <FONT COLOR='#2373ff'> DO NOT zip a directory </FONT>, instead zip the files themselves into an archive.</strong>
@@ -24,9 +25,10 @@
 
     <FONT COLOR='#ff0000'>{{err_msg}} </FONT>
 
-    <form action="" method="post" enctype="multipart/form-data" name="loadForm" onsubmit="return Validate(this,['.zip','.npy','.mat','.csv'] );">
+    <form action="" class="nostyle" method="post" enctype="multipart/form-data" name="loadForm"
+          onsubmit="return Validate(this,['.zip','.npy','.mat','.graphml','.pajek','.ncol','.lgl','.graphml','.dimacs','.gml','.dot','.leda']);">
       {% csrf_token %}
-      {{ convertForm }}
+      {{ convertForm.as_ul}}
       <input name = "Convert button"  type="submit" value="Convert All" class="button" onclick="showSpinner();"/>
       <input type="reset" value="Reset" class="button" name="clearForm"/>
     </form>
@@ -39,7 +41,7 @@
     <div id="programmatic">
       <h2> File conversions may also be done programmatically</h2>
       <p>
-      The use is similar to building a graph programmatically. The base url is <strong>http://mrbrain.cs.jhu.edu/disa/convert/</strong>. <br/>
+      The use is similar to building a graph programmatically. The base url is <pre>http://mrbrain.cs.jhu.edu/disa/convert/</pre>
       <a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjango/examples/singleConvert.py" target="blank">Single</a> and
       <a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjango/examples/multiConvert.py" target="blank">batch</a>
       conversion examples are available in the <a href="https://github.com/openconnectome/MR-connectome/tree/master/MROCPdjango/examples" target="blank">examples</a> directory. <br/>
@@ -48,34 +50,22 @@
     <div id="single prog">
       <h3> Single file conversion </h3>
         <p>
-        An example of executing the sample code from the command line is <strong>python singleConvert.py filename.npy http://mrbrain.cs.jhu.edu/disa/convert/cc/mat,csv</strong> <br/>
-        This would convert a file of file type <i>cc (Clustering Coefficient)</i> from <i>npy</i> format to <i>mat</i> and <i>csv</i> format.<br/>
+        An example of executing the sample code from the command line is <code>python singleConvert.py filename.graphml http://mrbrain.cs.jhu.edu/disa/convert/graphml/pajek,dot</code> <br/>
+        This would convert a graph of file type <code>graphml</code> format to <code>pajek</code> and <code>dot</code> format.<br/>
         </p>
     </div>
 
-      The following are the ONLY accepted file types:
-      <ul>
-          <li> <i>ss1</i> or <i>scanStat1</i> for the Scan Statistic 1.</li>
-          <li> <i>tri</i> or <i>triangle</i> for the Triangle Count.</li>
-          <li> <i>cc</i> or <i>clustCoeff</i> for the Clustering Coefficient.</li>
-          <li> <i>mad</i> or <i>maxAvgDeg</i> for the Maximum Average Degree.</li>
-          <li> <i>deg</i> or <i>degree</i> for The Local Degree Count.</li>
-          <li> <i>eig</i> or <i>eigen</i> for the Top 100 (or maximum available) eigenvalues.</li>
-          <!-- <li> <i>ss2</i> or <i>scanStat2</i> for the Scan Statistic 2 [Coming soon]</li>
-          <li> <i>apl</i> or <i>avePathLenfor</i> the Average Path Length [Coming soon]</li>
-          <li> <i>gdia</i> or <i>graphDiam</i> for the Graph Diameter [Coming soon]</li>-->
-      </ul>
+      <a href="#formats">The following</a> are the ONLY accepted file types.
 
     <div id="multi prog">
       <h3> Multiple file conversion</h3>
         <p>
-        <a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjango/examples/multiConvert.py" target="blank">The example</a> converts a directory of files of ONE type from one format to another. It assumes you have this
+        <a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjango/examples/multiConvert.py" target="blank">The example</a> converts a directory of files of one type from one format to another. It assumes you have this
         directory somewhere already. It's use is similar to that of the <a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjango/examples/singleConvert.py" target="blank">single</a>
          conversion. <br/>
 
-        An example of executing the sample code from the command line is <strong>python multiConvert.py SomeDirectory http://mrbrain.cs.jhu.edu/disa/convert/ss1/mat,csv</strong> <br/>
-        This would convert a directory (not a zipfile) of files of type <i>ss1(Scan Statistic 1)</i> from whatever format the files are in to <i>mat</i> and <i>csv</i> format. Note that if you convert
-        from one format to the same format this has no effect. <strong>Note that format of uploaded file(s) is determined solely by file extension.</strong><br/>
+        An example of executing the sample code from the command line is <code>python multiConvert.py SomeDirectory http://mrbrain.cs.jhu.edu/disa/convert/mat/graphml,gml</code> <br/>
+        This would convert a directory (not a zipfile) of files of type <code>mat</code>  to <code>graphml, gml and dot</code> format.
         </p>
       </div>
     </div>

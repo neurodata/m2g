@@ -26,9 +26,9 @@
           Any <FONT COLOR='#2373ff'>2 Dimensional</FONT> square MATLAB matrix.
         </li>
 
-        It should be loadable from the python shell via the following call: <a href="http://docs.scipy.org/doc/scipy/reference/generated/scipy.io.loadmat.html" target="blank">scipy.io.loadmat</a>(filename)['your_data_element_name'] <FONT COLOR='#2373ff'>only</FONT>.<br/>
-        Such a matrix can be created by creating an MATLAB matrix and using the <a href="http://www.mathworks.com/help/matlab/ref/save.html" target="blank">save</a> function or via Python's
-            <a href="http://docs.scipy.org/doc/scipy/reference/generated/scipy.io.savemat.html" target="blank">scipy.io.savemat </a> function.
+        It should be loadable from the python shell via the following call: <code><a href="http://docs.scipy.org/doc/scipy/reference/generated/scipy.io.loadmat.html" target="blank">scipy.io.loadmat</a>(filename)['your_data_element_name']</code>.<br/>
+        Such a matrix can be created by creating an MATLAB matrix and using the <code><a href="http://www.mathworks.com/help/matlab/ref/save.html" target="blank">save</a></code> function or via Python's
+            <code><a href="http://docs.scipy.org/doc/scipy/reference/generated/scipy.io.savemat.html" target="blank">scipy.io.savemat </a></code> function.
 
     </div>
 
@@ -53,7 +53,7 @@
     </FONT>
     <p></p>
 
-      <form action="" method="post" enctype="multipart/form-data" name="loadForm" onsubmit="return (Validate(this,['.mat', '.graphml', '.zip'] ) && checkLcc())" class="forms" id="id_loadForm">
+      <form action="" method="post" class="nostyle" enctype="multipart/form-data" name="loadForm" onsubmit="return (Validate(this,['.mat', '.graphml', '.zip'] ) && checkLcc())" class="forms" id="id_loadForm">
           {% csrf_token %}
           {{ graphUploadForm.as_ul }}
           <input name = "Derivatives"  type="submit" value="Upload Graph(s)" class="button" onclick="showSpinner();"/>
@@ -67,48 +67,48 @@
     {% block programmatic %}
       <div id="programmatic">
       <h2> Programmatic use </h2>
-      <p> This is can be accessed using the base url <strong>http://www.mrbrain.cs.jhu.edu/disa/graphupload/</strong>. The
-          example python script can be found <a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjango/examples/computeInvariants.py" target="blank">here</a>.
+      <p> This is can be accessed using the base url <pre>http://www.mrbrain.cs.jhu.edu/disa/graphupload/</pre>
+      The example python script can be found <a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjango/examples/computeInvariants.py" target="blank">here</a>.
       </p>
 
         <h3> How to use the example </h3>
         <p>After downlaoding the <a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjango/examples/computeInvariants.py" target="blank">example</a>,
-         start a terminal session. Assuming you are in the same directory as the example. Typing <strong>python computeInvariants.py -h</strong> will give help on how to use the
+         start a terminal session. Assuming you are in the same directory as the example. Typing <code>python computeInvariants.py -h</code> will give help on how to use the
          example and what options are available to you. Below are examples of <a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjango/examples/computeInvariants.py" target="blank">its</a> use.<br/>
         </p>
 
-        <h2 id="single_graph"> Single graph </h2>
+        <h3 id="single_graph"> Single graph </h3>
         <p>
-        Assume we have a single graph located in the same directory as the example script named <em>data.<FONT COLOR='#ff0000'>mat</FONT></em>.
-        Typing <strong>python computeInvariants.py http://www.mrbrain.cs.jhu.edu/disa/graphupload/ cc,tri,ss1 data.mat -l -c mat</strong> will
-        upload your <em>data.mat</em> file and compute: clustering coefficient, local triangle count, and scan statistic-1; the LCC will be computed and used in
-        invariant computation;  the invariants will be converted to <i>.mat</i> format.
+        Assume we have a single graph located in the same directory as the example script named <code>data.graphml</code>.
+        Typing <code>python computeInvariants.py http://www.mrbrain.cs.jhu.edu/disa/graphupload/ cc,tri,ss1 data.graphml -f graphml</code> will
+        upload your <code>data.graphml</code> file and compute: clustering coefficient, local triangle count, and scan statistic-1. <code>-f</code> flag specifies the format of the graph.
+        If the <code>-f</code> flag is not used then we infer type based on file extension. All legal formats are noted <a href="#graph_format_opts">here</a>.
 
         Here is a breakdown of the command line call arguments:
         <ol>
-          <li><i>http://www.mrbrain.cs.jhu.edu/disa/graphupload/</i> is the base url for uploading graphs for invariants to be computed. This is constant and must not be changed.</li>
-          <li><i>cc,tri,ss1</i> is a comma separated (no spaces) list of the invariants you want computed.</li>
+          <li><pre>http://www.mrbrain.cs.jhu.edu/disa/graphupload/</pre> is the base url for uploading graphs for invariants to be computed.</li>
+          <li><code>cc,tri,ss1</code> is a comma separated (no spaces) list of the invariants you want computed.</li>
             <div id="inv_opts">
             The only available options for invariants are:
             <ul>
-              <li> <i>ss1</i> for the Scan Statistic 1.</li>
-              <li> <i>tri</i> for the Triangle Count.</li>
-              <li> <i>cc</i> for the Clustering Coefficient.</li>
-              <li> <i>mad</i> for the Maximum Average Degree.</li>
-              <li> <i>deg</i> for The Local Degree Count.</li>
-              <li> <i>eig</i> for the Top-k (50 or maximum available) eigenvalues and eigenvectors.</li>
+              <li> <code>ss1</code> for the Scan Statistic 1.</li>
+              <li> <code>tri</code> for the Triangle Count.</li>
+              <li> <code>cc</code> for the Clustering Coefficient.</li>
+              <li> <code>mad</code> for the Maximum Average Degree.</li>
+              <li> <code>deg</code> for The Local Degree Count.</li>
+              <li> <code>eig</code> for the Top-k (50 or maximum available/computable) eigenvalues and eigenvectors.</li>
             </ul>
           </div>
 
         <li>
         <div id="graph_format_opts">
-          The <i>-f</i> flag allows you to pass the format of the graph(s) being uploaded. Current available options for graph format are:<br/>
-          <i>mat, graphml, pajek, ncol, lgl, graphml, dimacs, gml, dot, leda</i>
+          The <code>-f</code> flag allows you to pass the format of the graph(s) being uploaded. Current available options for graph format are:<br/>
+          <code>mat, graphml, pajek, ncol, lgl, dimacs, gml, dot, leda</code>
         </div>
         </li>
         </ol>
 
-          Starting a <a href="http://tmux.sourceforge.net/">tmux</a> or <a href="http://linux.die.net/man/1/screen"> screen </a> session is recommended as you must wait for
+          Starting a <a href="http://tmux.sourceforge.net/ target="blank">tmux</a> or <a href="http://linux.die.net/man/1/screen" target="blank"> screen </a> session is recommended as you must wait for
           the http response to otbain a url containing the result.
         </p>
 
@@ -116,9 +116,7 @@
         <h3> Multiple graphs </h3>
         <p>
           The same <a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjango/examples/computeInvariants.py" target="blank">example</a> script can be used for multiple
-          graph with or without LCCs. Simply zip all graphs into a single zipfile. If you have precomputed LCCs, zip these into the same zipfile with their corresponding graphs. You must observe the
-          <a href="#mult_lcc"> same file naming conventions</a>
-          as described for in-browser use. Other than zipping graphs (and optinal LCCs) together the functionality is identical to <a href="#single_graph">single graph use</a>.
+          graphs. Simply zip all graphs into a single zipfile. Other than zipping graphs together the functionality is identical to <a href="#single_graph">single graph programmatic use</a>.
 
       </p>
     {% endblock programmatic %}

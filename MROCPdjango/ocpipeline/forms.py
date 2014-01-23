@@ -109,19 +109,15 @@ class ConvertForm(forms.Form):
   '''
   fileObj = forms.FileField(label='Upload data', help_text=' ', required = True)
 
-  FORMAT_CHOICES = (('.npy', 'Numpy format (.npy)',), ('.mat', 'Matlab format (.mat)',), \
-      ('.csv', '(Excel) Comma separated values (.csv)',))
+  FORMAT_CHOICES = ( ('graphml', 'graphml'), ('pajek', 'pajek'), ('ncol','ncol'),
+            ('lgl','lgl'), ('dimacs', 'dimacs'), ('gml', 'gml'), ('dot', 'dot'),
+            ('leda', 'leda'), ('npy', 'numpy format (.npy)'), ('mat', 'MATLAB format (.mat)')
+            )
 
-  FILE_TYPES = [('cc','Clustering Coefficient'), ('deg','Local Degree'),\
-      ('eig','Largest Eigenvalues/Eigenvectors'),\
-      ('ss1', 'Scan Statistic 1'), ('tri','Triangle Count'),\
-      ('svd','Single Value Decomposition'), ('mad', 'Maximum Average Degree'), \
-      ('fg', 'Fiber Graph'), ('lcc', 'Largest Connected Component')]
-
-  Select_file_type = forms.ChoiceField(choices=FILE_TYPES, widget=RadioSelect, help_text=' ')
+  input_format = forms.ChoiceField(choices=FORMAT_CHOICES, widget=Select, label="Select input file type")
 
   Select_conversion_format = forms.MultipleChoiceField(required=True, \
-  widget=CheckboxSelectMultiple, choices=FORMAT_CHOICES)
+  widget=SelectMultiple, choices=FORMAT_CHOICES, label="Select output file type")
 
 class GraphUploadForm(forms.Form):
   '''
@@ -132,7 +128,9 @@ class GraphUploadForm(forms.Form):
   '''
   fileObj = forms.FileField(label='Upload data', required=True)
 
-  graph_format = forms.ChoiceField(required=True, widget=Select, choices=(('mat', 'MAT'), ('graphml', 'GRAPHML')), label="Graph format", error_messages={"required":"You must specify graph type"})
+  graph_format = forms.ChoiceField(required=True, widget=Select,
+          choices=(('mat', 'MAT'), ('graphml', 'GRAPHML')), label="Graph format",
+          error_messages={"required":"You must specify graph type"})
 
   # Select size of graph
   email = forms.EmailField(widget=TextInput(), required=True)
