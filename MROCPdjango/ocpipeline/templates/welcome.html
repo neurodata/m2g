@@ -7,53 +7,50 @@
   {% block bigheading %}<br/> <center>Welcome to the Magnetic Resonance One-Click Pipeline (MROCP) for Connectomes [BETA]</center> {% endblock bigheading %}
 
   {% block content %}
-    <p> Welcome! This is an open source project that provides Web services to perform scientifically
-	interesting tasks involving <a href="http://en.wikipedia.org/wiki/Connectome">Connectomes</a> and general graphs.
+    <p> Welcome! This is an open source project that provides Web services to build and perform scientifically
+	interesting computations on <a href="http://en.wikipedia.org/wiki/Connectome" target="blank">Connectome</a> and general graphs.
 	<br/>
 	Services here can either be accessed programmatically or via web forms.
 
-  <a href="https://github.com/openconnectome/MR-connectome/tree/stand-alone" target="blank"> Click here </a> to obtain a recent version of the code for the <b>Stand-alone Package</b> that builds graphs and computes invariants.
+  <a href="https://github.com/openconnectome/MR-connectome/tree/stand-alone" target="blank"> Click here </a> to obtain a recent version of the code for the
+    <b>Stand-alone Package</b> that builds Connectome graphs and computes invariants.
     </p>
 
-    <div id="Form use options">
+    <div id="Form_use_options">
         <h2>Form based use </h2>
         You may choose to:
         <ul>
           <li>
-            <a href="http://mrbrain.cs.jhu.edu/disa/buildgraph"> Build graphs</a>. The input required is a fiber tractography streamline file in MRI Studio DAT format and two Region of Interest files (one XML format and the other RAW format).
+            <a href="http://mrbrain.cs.jhu.edu/disa/buildgraph"> Build graphs</a>. The input required is a fiber tractography streamline file in
+              <a href=" http://www.mristudio.org/" target="blank">MRI Studio DAT format</a> and two Region of Interest files (one XML format and the other RAW format).
           </li>
         <li>
             <a href="http://mrbrain.cs.jhu.edu/disa/graphupload"> Compute Invariants</a> of graphs. Invariants computed include:
             <ul>
-                <li> The Scan Statistic 1.</li>
-                <li> The Triangle Count.</li>
-                <li> The Clustering Coefficient.</li>
-                <li> The Maximum Average Degree.</li>
+                <li> The Scan Statistic 1</li>
+                <li> The Triangle Count</li>
+                <li> The Clustering Coefficient</li>
+                <li> The Maximum Average Degree</li>
                 <li> The Local Degree Count</li>
-                <li> The Top 100 (or top vertices - 1, if vertices < 100) eigenvalues and eigenvectors.</li>
-                <!-- <li> The Scan Statistic 2 [Coming soon]</li>
-                <li> The Average Path Length [Coming soon]</li>
-                <li> The Graph Diameter [Coming soon]</li> -->
+                <li> The Top-k eigenvalues and eigenvectors</li>
             </ul>
         </li>
 
         <li>
-            <a href="http://mrbrain.cs.jhu.edu/disa/convert"> Convert</a> data files between npy, mat and csv formats.
-            Data files include built graphs, largest connected component, and all invariants <FONT COLOR='#2373ff'>(Some conversion formats unavailable)</FONT>.
+          <a href="http://mrbrain.cs.jhu.edu/disa/convert"> Convert</a> between graph formats and extract individual invariants from attributed graphs.
         </li>
-
         </ul>
     </div>
 
   {% block programmatic %}
 
-    <div id="Programmatic options">
+    <div id="Programmatic_options">
         <h2>Programmatic use </h2>
         All services can also be accessed programmatically:
             <ul>
                 <li>
                     <h3>Upload derivatives to build a graph</h3>
-                    This service's base url is <strong>http://mrbrain.cs.jhu.edu/disa/upload/</strong><br/>
+                    This service's base url is <pre>http://mrbrain.cs.jhu.edu/disa/upload/</pre>
 
                     A single subject graph build example can be found here <a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjango/examples/uploadsubj.py"
                     target="blank"> uploadsubj.py</a>.<br/>
@@ -66,8 +63,8 @@
 
                 <li>
                     <h3> Compute Invariants of built graphs </h3>
-                    <p> This can be accessed using the base url <strong>http://www.mrbrain.cs.jhu.edu/disa/graphupload/</strong>. An
-                    example of usage can be found <a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjango/examples/computeInvariants.py" target="blank">here</a>.
+                    <p> This can be accessed using the base url <pre>http://www.mrbrain.cs.jhu.edu/disa/graphupload/</pre>
+                    An example of usage can be found <a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjango/examples/computeInvariants.py" target="blank">here</a>.
                     <br/>
 
                     Go to the <a href="http://mrbrain.cs.jhu.edu/disa/convert#programmatic">compute invariants</a> page for more detailed instructions on programmatic use and example use cases.
@@ -77,7 +74,7 @@
 
                 <li>
                     <h3> Convert data file formats</h3>
-                    This can be accessed via the base url <strong>http://mrbrain.cs.jhu.edu/disa/convert/</strong>. <br/>
+                    This can be accessed via the base url <pre>http://mrbrain.cs.jhu.edu/disa/convert/</pre>
                     <a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjango/examples/singleConvert.py" target="blank">Single</a> and
                     <a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjango/examples/multiConvert.py" target="blank">batch</a>
                     conversion examples are available in our examples repository. <br/>
@@ -85,6 +82,6 @@
                     Go to the <a href="http://mrbrain.cs.jhu.edu/disa/convert/#programmatic">convert file format</a> page for more detailed instructions on programmatic use and example use cases.
                 </li>
             </ul>
-        </div>
+    </div>
   {% endblock programmatic %}
   {% endblock content%}

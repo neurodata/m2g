@@ -133,8 +133,6 @@ def buildGraph(request):
           context_instance=RequestContext(request)
           )
 
-      print "Uploading files..."
-
       # If a user is logged in associate the project with thier directory
       if form.cleaned_data["Project_Type"] == "private":
         userDefProjectName = os.path.join(request.user.username, userDefProjectName)
@@ -145,11 +143,11 @@ def buildGraph(request):
       userDefProjectName = adaptProjNameIfReq(os.path.join(settings.MEDIA_ROOT, userDefProjectName)) # Fully qualify AND handle identical projects
 
       request.session["usrDefProjDir"] = os.path.join(userDefProjectName, site, subject, session, scanId)
-      request.session["scanId"] = scanId
+      request.session["scanId"] = scanId # TODO: Check me
 
       """ Define data directory paths """
-      request.session["derivatives"], request.session["rawdata"], request.session["graphs"],\
-          request.session["graphInvariants"],request.session["images"]= defDataDirs(request.session["usrDefProjDir"])
+      request.session["derivatives"], request.session["graphs"],\
+          request.session["graphInvariants"] = defDataDirs(request.session["usrDefProjDir"])
 
       # Create a model object to save data to DB
 
@@ -171,7 +169,7 @@ def buildGraph(request):
       if request.session["graphsize"] == "big" and not request.session["email"]:
         return render_to_response(
           "buildgraph.html",
-          {"buildGraphform": form, "error_msg": "Email address must be provided when processing big graphs"},
+          {"buildGraphform": form, "error_msg": "Email address must be provided when processing big graphs due to http timeout's possibly occuring."},
           context_instance=RequestContext(request)
           )
 
@@ -193,14 +191,14 @@ def buildGraph(request):
       # add entry to owned project
       if request.user.is_authenticated():
         ownedProjModObj = OwnedProjects(project_name=grModObj.project_name, \
-                                        owner=grModObj.owner, is_private=form.cleaned_data["Project_Type"] == "private")
+          owner=grModObj.owner, is_private=form.cleaned_data["Project_Type"] == "private")
         ownedProjModObj.save()
 
       print "\nSaving all files complete..."
 
       """ Make appropriate dirs if they dont already exist """
-      createDirStruct.createDirStruct([request.session["derivatives"], request.session["rawdata"],\
-          request.session["graphs"], request.session["graphInvariants"], request.session["images"]])
+      createDirStruct.createDirStruct([request.session["derivatives"],\
+          request.session["graphs"], request.session["graphInvariants"]])
 
       if request.session["graphsize"] == "big":
         # Launch thread for big graphs & email user
@@ -241,8 +239,7 @@ def processInputData(request):
   roi_xml_fn = os.path.join(request.session['derivatives'], roi_xml_fn)
 
   try:
-    request.session['smGrfn'], request.session['bgGrfn'], request.session['lccfn']\
-    ,request.session['SVDfn'] = processData(fiber_fn, roi_xml_fn, roi_raw_fn, \
+    request.session['Gfn']= call_gengraph(fiber_fn, roi_xml_fn, roi_raw_fn, \
                               request.session['graphs'], request.session['graphInvariants'],\
                               request.session['graphsize'], True)
   except:
@@ -254,18 +251,10 @@ def processInputData(request):
 
   # Run ivariants here
   if len(request.session['invariants']) > 0:
-    print "Computing invariants"
-    if (request.session['graphsize'] == 'big'):
-      graph_fn = request.session['bgGrfn']
-      lcc_fn = request.session['lccfn']
-
-    elif (request.session['graphsize'] == 'small'):
-      graph_fn = request.session['smGrfn']
-      lcc_fn = None
+    print "Computing invariants ..."
 
     request.session['invariant_fns'] = runInvariants(request.session['invariants'],\
-                                        graph_fn, request.session['graphInvariants'],\
-                                        lcc_fn, request.session['graphsize'])
+                                request.session['Gfn'], request.session['graphInvariants'])
 
   if request.session['graphsize'] == 'big':
     sendJobCompleteEmail(request.session['email'], 'http://mrbrain.cs.jhu.edu' + request.session['usrDefProjDir'].replace(' ','%20'))
@@ -277,31 +266,8 @@ def confirmDownload(request):
   if request.method == 'POST':
     form = DownloadForm(request.POST) # instantiating form
     if form.is_valid():
-      invConvertToFormats = form.cleaned_data['Select_Invariant_conversion_format'] # Which form to convert to
-      grConvertToFormats = form.cleaned_data['Select_Graph_conversion_format']
+
       dataReturn = form.cleaned_data['Select_output_type']
-
-      for fileFormat in invConvertToFormats:
-        if fileFormat == '.mat':
-          convertTo.convertLCCNpyToMat(request.session['lccfn'])
-          convertTo.convertSVDNpyToMat(request.session['SVDfn'])
-
-        # Conversion of all files
-        for inv in request.session['invariant_fns'].keys():
-          if isinstance(request.session['invariant_fns'][inv], list): # Case of eigs
-            for fn in request.session['invariant_fns'][inv]:
-              convertTo.convertAndSave(fn, fileFormat, getDirFromFilename(fn), inv)
-              # TODO replace getDirFromFilename with os.path.dirname
-          else: # case of all other invariants
-            convertTo.convertAndSave(request.session['invariant_fns'][inv], fileFormat, \
-                                getDirFromFilename(request.session['invariant_fns'][inv]) , inv)
-            # TODO replace getDirFromFilename with os.path.dirname
-
-      for fileFormat in grConvertToFormats:
-        if request.session['graphsize'] == 'big':
-          convertTo.convertGraph(request.session['bgGrfn'], fileFormat)
-        elif request.session['graphsize'] == 'small':
-          convertTo.convertGraph(request.session['smGrfn'], fileFormat)
 
       if dataReturn == 'vd': # View data directory
         dataUrlTail = request.session['usrDefProjDir']
@@ -311,13 +277,10 @@ def confirmDownload(request):
         # rooturl = host + '://' + baseurl # Originally was: 'http://mrbrain.cs.jhu.edu' # Done for http & https
 
         return HttpResponseRedirect('http://mrbrain.cs.jhu.edu' + dataUrlTail.replace(' ','%20'))
-
       elif dataReturn == 'dz': #Download all as zip
         return HttpResponseRedirect(get_script_prefix()+'zipoutput')
-
   else:
     form = DownloadForm()
-
   return render_to_response('confirmDownload.html',{'downloadForm': form},\
                   context_instance=RequestContext(request))
 
@@ -351,10 +314,10 @@ def zipProcessedData(request):
   response['Content-Length'] = temp.tell()
   temp.seek(0)
 
-  # request.session.clear() # Very Important
   ''' Send it '''
   return response
 
+# TODO - FIXME Programmatic
 def upload(request, webargs=None):
   """
   Programmatic interface for uploading data
@@ -396,14 +359,14 @@ def upload(request, webargs=None):
     if (re.match(re.compile('(b|big)', re.IGNORECASE), graphsize)):
       request.session['graphsize'] = 'big'
       request.session['smGrfn'], request.session['bgGrfn'], lccfn, SVDfn \
-        = processData(fiber_fn, roi_xml_fn, roi_raw_fn,graphs,\
+        = call_gengraph(fiber_fn, roi_xml_fn, roi_raw_fn,graphs,\
                       request.session['graphInvariants'],\
                       request.session['graphsize'],True)
 
     elif(re.match(re.compile('(s|small)', re.IGNORECASE), graphsize)):
       request.session['graphsize'] = 'small'
       request.session['smGrfn'], request.session['bgGrfn'], lccfn, SVDfn \
-        = processData(fiber_fn, roi_xml_fn, roi_raw_fn,graphs, request.session['graphInvariants'], request.session['graphsize'],True)
+        = call_gengraph(fiber_fn, roi_xml_fn, roi_raw_fn,graphs, request.session['graphInvariants'], request.session['graphsize'],True)
 
     else:
       return django.http.HttpResponseBadRequest ("Missing graph size. Specify big or small")
@@ -427,17 +390,13 @@ def upload(request, webargs=None):
     #ret = rzfile.testzip()
     #ret = rzfile.namelist()
 
-    # request.session.clear()
-
     dwnldLoc = "http://mrbrain.cs.jhu.edu" + userDefProjectDir.replace(' ','%20')
     return HttpResponse ( "Files available for download at " + dwnldLoc) # change to render of a page with a link to data result
 
   elif(not webargs):
-    # request.session.clear()
     return django.http.HttpResponseBadRequest ("Expected web arguments to direct project correctly")
 
   else:
-    # request.session.clear()
     return django.http.HttpResponseBadRequest ("Expected POST data, but none given")
 
 ################## TO DOs ########################
@@ -450,21 +409,21 @@ def download(request, webargs=None):
 def asyncInvCompute(request):
 
   for graph_fn in request.session['uploaded_graphs']:
-    #try:
+    try:
       invariant_fns = runInvariants(request.session['invariants'], graph_fn,
                       request.session['graphInvariants'], graph_format=request.session['graph_format'])
 
       print 'Invariants for annoymous project %s complete...' % graph_fn
 
-  #  except Exception, msg:
-  #    msg = "Hello,\n\nYour most recent job failed possibly because:%s\n" % (" "*randint(0,10))
-  #    msg += "- the graph '%s' you uploaded does not match any accepted type. %s\n\n" % (os.path.basename(graph_fn)," "*randint(0,10))
-  #    msg += "You may have some partially completed data here: %s" % ("http://mrbrain.cs.jhu.edu"+ request.session['dataDir'].replace(' ','%20'))
-  #    msg += "\n.Please check these and try again. %s\n\n" % (" "*randint(0,10))
-  #    sendJobFailureEmail(request.session['email'], msg)
-  #
-  ## Email user of job finished
-  #sendJobCompleteEmail(request.session['email'], "http://mrbrain.cs.jhu.edu"+ request.session['dataDir'].replace(' ','%20')) #
+    except Exception, msg:
+      msg = "Hello,\n\nYour most recent job failed possibly because:%s\n" % (" "*randint(0,10))
+      msg += "- the graph '%s' you uploaded does not match any accepted type. %s\n\n" % (os.path.basename(graph_fn)," "*randint(0,10))
+      msg += "You may have some partially completed data here: %s" % ("http://mrbrain.cs.jhu.edu"+ request.session['dataDir'].replace(' ','%20'))
+      msg += "\n.Please check these and try again. %s\n\n" % (" "*randint(0,10))
+      sendJobFailureEmail(request.session['email'], msg)
+
+  # Email user of job finished
+  sendJobCompleteEmail(request.session['email'], "http://mrbrain.cs.jhu.edu"+ request.session['dataDir'].replace(' ','%20'))
 
 ############################################################
 
@@ -725,7 +684,7 @@ def convert(request, webargs=None):
 #	   PROCESS DATA			#
 #########################################
 
-def processData(fiber_fn, roi_xml_fn, roi_raw_fn,graphs, graphInvariants, graphsize, run = False):
+def call_gengraph(fiber_fn, roi_xml_fn, roi_raw_fn, graphs, graphInvariants, graphsize, run = False):
   '''
   Run graph building and other related scripts
   @param fiber_fn: fiber tract file
@@ -740,47 +699,21 @@ def processData(fiber_fn, roi_xml_fn, roi_raw_fn,graphs, graphInvariants, graphs
 
   baseName = getFiberID(fiber_fn) #VERY TEMPORARY
 
-  smGrfn = os.path.join(graphs, (baseName +'smgr.mat'))
-  bgGrfn = os.path.join(graphs, (baseName +'bggr.mat'))
+  Gfn = os.path.join(graphs, baseName) # partial name
 
   if (run):
     if (graphsize == 'small'):
-      ''' Run gengraph SMALL & save output '''
-      print("Running Small gengraph....")
-      gengraph.genGraph(fiber_fn, smGrfn, roi_xml_fn, roi_raw_fn, bigGraph=False)
+      print("Running Small gengraph ...")
+      Gfn+="smgr.graphml"
+      gengraph.genGraph(fiber_fn, Gfn, roi_xml_fn, roi_raw_fn, bigGraph=False)
 
     elif(graphsize == 'big'):
-      ''' Run gengrah BIG & save output '''
-      print("\nRunning Big gengraph....")
-      gengraph.genGraph(fiber_fn, bgGrfn, roi_xml_fn, roi_raw_fn, bigGraph=True)
+      print("\nRunning Big gengraph ...")
+      Gfn+="bggr.graphml"
+      gengraph.genGraph(fiber_fn, Gfn+"bggr", roi_xml_fn, roi_raw_fn, bigGraph=True)
     else:
       print '[ERROR]: Graphsize Unkwown' # should never happen
-
-  ''' Run LCC '''
-  lccfn = os.path.join(graphInvariants,"LCC", (baseName + 'concomp.npy'))
-
-  if (run):
-    if (graphsize == 'big'):
-      print "Running biggraph Largest connected component..."
-      lcc.process_single_brain(bgGrfn, lccfn)
-    if (graphsize == 'small'):
-      print "Running smallgraph Largest connected component..."
-      lcc.process_single_brain(smGrfn, lccfn)
-
-  ''' Run Embed - SVD '''
-  SVDfn = os.path.join(graphInvariants,"SVD" ,(baseName + 'embed.npy'))
-
-  print("Running SVD....")
-  if (run):
-    if (graphsize == 'big'):
-      print "Running SVD on biggraph"
-      svd.embed_graph(lccfn, bgGrfn, SVDfn)
-    if (graphsize == 'small'):
-      print "Running SVD on smallgraph"
-      svd.embed_graph(lccfn, smGrfn, SVDfn)
-
-  print "Completed generating - graph, lcc & svd"
-  return [ smGrfn, bgGrfn, lccfn, SVDfn ]
+  return Gfn
 
 ###############################################################################
 #                          NEW INVARIANTS                                     #

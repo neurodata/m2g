@@ -10,68 +10,70 @@
 
   {% block content %}
 
-  Please complete the entire form below, upload data derivative files and optionally select any invariants to be computed.
+  <p>Please complete the entire form below, upload data derivative files and optionally select any invariants to be computed.
 
   <b><FONT COLOR='#ff0000'>{{error_msg}}</FONT></b> <br/>
 
   You must supply an Email address for big graph processing so as to receive the job completion email with result url.<br/>
   <FONT COLOR='#2373ff'>
-  We will never share or use your email address for any other purpose.<br/> </FONT>
-    <p>
+  We will never share or use your email address for any other purpose.</FONT>
+
       <form action="" method="post" enctype="multipart/form-data" name="loadForm" onsubmit="return Validate(this,['.xml','.dat','.raw'] );" class="forms">
         {% csrf_token %}
         <p>{{ buildGraphform }}</p>
         <input name = "Derivatives"  type="submit" value="Submit All & Process" class="button" onclick="showSpinner();"/>
         <input type="reset" value="Reset" class="button" name="clearForm" />
       </form>
-    </p>
+  </p>
 
     <div style="position:absolute; left:153px; top: 600px;">
       <img id="loadingImage" src="{{STATIC_URL}}images/loading.gif" border="0" alt="loading" style="visibility:hidden;opacity:0.5"/>
     </div>
 
-
     {% block programmatic %}
       <div id="programmatic">
         <h2> Graphs may also be built programmatically </h2>
-        The base url for an building graphs is <strong>http://mrbrain.cs.jhu.edu/disa/upload/ </strong> <br/>
+        The base url for building graphs is <pre>http://mrbrain.cs.jhu.edu/disa/upload/</pre>
 
         <h3> Single graph </h3>
         <p>
         The example <a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjango/examples/uploadsubj.py"
-        target="blank"> uploadsubj.py</a> can be used as follows from a terminal session: <br/>
+        target="blank"> uploadsubj.py</a> can be used as follows from a terminal session:
+        </p>
 
-        <strong>python uploadsubj.py http://mrbrain.cs.jhu.edu/disa/upload/YOUR_project/YOUR_site/YOUR_subject/YOUR_session/YOUR_scanID/s
-        fiber_tract_file roi_raw_file roi_xml_file -i cc,tri,ss1,mad,deg,eig .</strong>
-         The parameter after YOUR_scan can either be 's' or 'b', but not both. Using 's' or 'small' builds a small graph (70 x 70 vertices) while 'b' or 'big' builds a
-         big graph on the order of > 10 M x 10 M vertices. <br/>
+        <code>python uploadsubj.py http://mrbrain.cs.jhu.edu/disa/upload/YOUR_project/YOUR_site/YOUR_subject/YOUR_session/YOUR_scanID/s fiber_tract_file roi_raw_file roi_xml_file -i cc,tri,ss1,mad,deg,eig</code>
+
+        <p>
+         The parameter after YOUR_scan can either be <code>s</code> or <code>b</code>, but not both. Using <code>s</code> or <code>small</code> builds a small graph
+         (70 x 70 vertices) while <code>b</code> or <code>big</code> builds a big graph on the order of 10 M x 10 M vertices. <br/>
+
          The particular invocation in bold above would build a small graph and compute all invariants currently available. A list of invariant contractions is
          available below.
          <strong>The result of uploadsubj.py is a url containing all data produced. Simply wait for the http response and follow the url to download it.</strong>
-         We recommend starting a <a href="http://tmux.sourceforge.net/">tmux</a> or <a href="http://linux.die.net/man/1/screen"> screen </a> session in case your processing time
+         We recommend starting a <a href="http://tmux.sourceforge.net/" target="blank">tmux</a> or <a href="http://linux.die.net/man/1/screen" target="blank"> screen </a> session in case your processing time
          is lengthy.
         </p>
 
-        The optional arguments given as -i are simply appended to the final url in uploadsubj.py. The options available must be in a comma separated list and are as follows:
+        The optional arguments given as <code>-i</code> are simply appended to the final url in uploadsubj.py. The options available must be in a comma separated list and are as follows:
         <ul>
-          <li> <i>ss1</i> for the Scan Statistic 1</li>
-          <li> <i>tri</i> for the Triangle Count </li>
-          <li> <i>cc</i> for the Clustering Coefficient</li>
-          <li> <i>mad</i> for the Maximum Average Degree</li>
-          <li> <i>deg</i> for The Local Degree Count</li>
-          <li> <i>eig</i> for the Top 100 (or maximum available) eigenvectors and eigenvalues</li>
-          <!-- <li> <i>ss2</i> for the Scan Statistic 2 [Coming soon]</li>
-          <li> <i>apl</i> for the Average Path Length [Coming soon]</li>
-          <li> <i>gdia</i> for the Graph Diameter [Coming soon]</li> -->
+          <li> <code>ss1</code> for the Scan Statistic 1</li>
+          <li> <code>tri</code> for the Triangle Count </li>
+          <li> <code>cc</code> for the Clustering Coefficient</li>
+          <li> <code>mad</code> for the Maximum Average Degree</li>
+          <li> <code>deg</code> for The Local Degree Count</li>
+          <li> <code>eig</code> for the Top-k eigenvectors and eigenvalues</li>
         </ul>
 
         <h3> Multiple graphs </h3>
         <p>
-        An example of a <a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjango/examples/uploadMultiSubj.py">Multiple subject</a> job
+        An example of a <a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjango/examples/uploadMultiSubj.py" target="blank">Multiple subject</a> job
         is also provided. This is as an example of how to process multiple jobs with a single programmatic call.<br/>
 
-        From within a terminal/command line session, it can be used as follows: <strong>python uploadMultiSubj.py http://mrbrain.cs.jhu.edu/disa/upload/YOUR_project/YOUR_site/YOUR_subject/YOUR_session/ s
-        fiber_tract_dirctory roi_dirctory -i cc,tri,ss1,mad,deg,eig.</strong> This call would build graphs for multiple scans and compute all invariants noted in the -i flag.
+        From within a terminal/command line session, it can be used as follows: <br/>
+        <code>python uploadMultiSubj.py http://mrbrain.cs.jhu.edu/disa/upload/YOUR_project/YOUR_site/YOUR_subject/YOUR_session/ s
+        fiber_tract_dirctory roi_dirctory -i cc,tri,ss1,mad,deg,eig</code><br/>
+
+        This call would build graphs for multiple scans and compute all invariants noted in the <code>-i</code> flag.
         The example assumes the following:
 
         <ul>
@@ -90,26 +92,26 @@
 
         <p>
         All fiber tract files  will be treated as a single project with multiple scanIDs derived from the file name.
-        <a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjango/examples/uploadMultiSubj.py">Download the file</a>
-        and help can be obtained by typing the following in a terminal/command line session:
-        <strong>python uploadMultiSubj.py -h </strong>. The same is true for the single scan example, where: <strong>python uploadsubj.py -h</strong> gives help.
+        <a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjango/examples/uploadMultiSubj.py" target="blank">Download the file</a>
+        and help can be obtained by typing the following in a terminal/command line session: <br/>
+        <code>python uploadMultiSubj.py -h</code>. The same is true for the single scan example, where: <code>python uploadsubj.py -h</code> gives help.
       </div>
         </p>
     {% endblock programmatic %}
 
-        <div id="Graph specs">
+        <div id="Graph_specs">
            <h2>Specifications for graphs built</h2>
             <ul>
-              <li> A <a href="http://www.mathworks.com/help/matlab/ref/struct.html"> MATLAB struct </a> with a data element named named
-              <i>fibergraph</i> that is a <a href="http://docs.scipy.org/doc/scipy/reference/generated/scipy.sparse.csc_matrix.html#scipy.sparse.csc_matrix">
+              <li> A <a href="http://www.mathworks.com/help/matlab/ref/struct.html" target="blank"> MATLAB struct </a> with a data element named named
+              <code>fibergraph</code> that is a <a href="http://docs.scipy.org/doc/scipy/reference/generated/scipy.sparse.csc_matrix.html#scipy.sparse.csc_matrix" target="blank">
               numpy CSC (Compressed Sparse Column) matrix</a>. <br/>
-              It is loadable from a python shell using <a href="http://docs.scipy.org/doc/scipy/reference/generated/scipy.io.loadmat.html">scipy.io.loadmat</a>(filename)['fibergraph'].
+              It is loadable from a python shell using <code><a href="http://docs.scipy.org/doc/scipy/reference/generated/scipy.io.loadmat.html" target="blank">scipy.io.loadmat</a>(filename)['fibergraph']</code>
               </li>
 
               <h3>What's the difference between big and small graphs?</h3>
 
               Glad you asked! The terms big/small graph are particularly relevant to fiber streamline graphs. Small graphs are of dimension 70 x 70 vertices. <br/>
-              Big graphs are on the order of > 10 M x 10 M vertices. Big graphs <b>require</b> the largest connected component (LCC) to be computed and used for computing invariants.
+              Big graphs are around 10 M x 10 M vertices.
             </ul>
         </div>
   {% endblock content%}

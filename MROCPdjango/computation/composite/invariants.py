@@ -136,8 +136,8 @@ def compute(inv_dict, sep_save=True, gformat="graphml"):
   print "Total invariant compute time = %.3fsec" % (time() - start)
 
   # Save graph with all new attrs
-  inv_dict["out_graph_fn"] = os.path.join(inv_dict["save_dir"], getBaseName(inv_dict["graph_fn"]))
-  if os.path.splitext(inv_dict["out_graph_fn"])[1] != ".graphml": inv_dict["out_graph_fn"] += "."+gformat
+  inv_dict["out_graph_fn"] = os.path.join(inv_dict["save_dir"], os.path.splitext(os.path.basename(inv_dict["graph_fn"]))[0])
+  if os.path.splitext(inv_dict["out_graph_fn"])[1][1:] != gformat: inv_dict["out_graph_fn"] += "."+gformat
   r_igraph_write(G, inv_dict["out_graph_fn"], gformat)
 
   return G, inv_dict

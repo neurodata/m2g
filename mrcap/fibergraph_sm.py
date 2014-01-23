@@ -10,6 +10,7 @@ import itertools
 import igraph
 from collections import defaultdict
 from fibergraph import _FiberGraph
+from computation.utils.desikan import des_map
 
 # Class functions documented in fibergraph.py
 
@@ -65,3 +66,8 @@ class FiberGraph(_FiberGraph):
 
     for list_item in roi_edges:
       self.edge_dict[tuple(sorted(list_item))] += 1
+
+
+  def complete(self, ):
+    super(FiberGraph, self).complete()
+    self.spcscmat.vs["region"] = des_map.values()

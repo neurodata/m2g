@@ -74,3 +74,7 @@ class FiberGraph(_FiberGraph):
 
     for list_item in voxel_edges:
       self.edge_dict[tuple(sorted(list_item))] += 1
+
+  def complete(self, ):
+    super(FiberGraph, self).complete()
+    # TODO: Add desikan labels for each vertex
