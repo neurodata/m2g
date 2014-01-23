@@ -52,12 +52,12 @@ def defDataDirs(projectDir):
   @param projectDir: the fully qualified path of the project directory
   '''
   derivatives = os.path.join(projectDir, 'derivatives')
-  rawdata = os.path.join(projectDir, 'rawdata')
+  #rawdata = os.path.join(projectDir, 'rawdata')
   graphs = os.path.join(projectDir, 'graphs')
   graphInvariants = os.path.join(projectDir, 'graphInvariants')
-  images = os.path.join(projectDir, 'images')
+  #images = os.path.join(projectDir, 'images')
 
-  return [derivatives, rawdata, graphs, graphInvariants, images]
+  return [derivatives, graphs, graphInvariants]
 
 ################################################################################
 

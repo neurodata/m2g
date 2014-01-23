@@ -15,7 +15,8 @@
 		padding-bottom: 40px;
 	}
 
-	p,code,ul, ol {padding-bottom: 1.2em; line-height: 180%;}
+	/*p,code,ul, ol {padding-bottom: 1.2em; line-height: 180%;}*/
+        p ,ul, pre, ol {padding-bottom: 1.2em; line-height: 180%;}
 
 	/*li {list-style: none;}*/
 
@@ -24,18 +25,24 @@
 		margin-bottom: 4px;
 	}
 
-	code {
+	pre {
 		background: #FFF;
 		border: 1px solid #EEE;
 		border-left: 6px solid #C1CAD3;
 		color: #666;
 		display: block;
-		font: normal 1em Tahoma,sans-serif;
+		font: bold 1em Tahoma,sans-serif;
 		line-height: 1.6em;
 		margin-bottom: 12px;
 		padding: 8px 10px;
 		white-space: pre;
 	}
+
+        code {
+          background:  #bbbbbb;
+          font: large monospace;
+        }
+
 
 
 	h1,h2,h3 {padding-top: 6px;}

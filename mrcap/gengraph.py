@@ -86,23 +86,14 @@ def genGraph(infname, outfname, roixmlname=None, roirawname=None, bigGraph=False
     if count % 10000 == 0:
       print ("Processed {0} fibers".format(count) )
 
-  print "Deleting the reader"
+    if count == 20000: # TODO: RM
+      break
 
   del reader
-
-  print "Completing the graph"
   # Done adding edges
   fbrgraph.complete()
 
-  #**print "Saving matlab file"
-  # Save a version of this graph to file
-  #**fbrgraph.saveToMatlab ( "fibergraph", outfname )
-
-  print "Saving graph to file"
   fbrgraph.saveToIgraph(outfname, gformat=outformat)
-
-  # Load a version of this graph from
-#  fbrgraph.loadFromMatlab ( "fibergraph", outfname )
 
   del fbrgraph
   print "\nGraph building complete in %.3f secs" % (time() - start)

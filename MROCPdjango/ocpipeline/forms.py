@@ -82,13 +82,9 @@ class BuildGraphForm(forms.Form):
 
   INVARIANT_CHOICES = (('ss1', 'Scan Statistic 1',), ('tri', 'Triangle Count',), \
   ('cc', 'Clustering co-efficient',), ('mad', 'Maximum Average Degree',) \
-  ,('deg', 'Vertex Degree',), ('eig', 'Top 100 (or max possible) Eigenvalues and Eigenvectors',))
-  #, \
-  #('ss2', 'Scan Statistic 2 [Not yet available]',), ('apl', 'Average Path Length [Not yet available]',),\
-  #('gdia', 'Graph Diameter [Not yet available]',))
+  ,('deg', 'Vertex Degree',), ('eig', 'Top-k Eigenvalues and Eigenvectors',))
 
-  # Select size of graph
-  Select_graph_size = forms.ChoiceField(choices=[('small','Small graph [~30 min processing time]'), ('big','Big graph [~1.5 hr] processing time')]\
+  Select_graph_size = forms.ChoiceField(choices=[('small','Small graph [~7 min]'), ('big','Big graph [~20 min]')]\
                                         , widget=RadioSelect, required = True, error_messages={'required': 'You must choose a graph size'})
 
   Email = forms.EmailField(widget=TextInput(), help_text= " ", required=False)
@@ -150,21 +146,10 @@ class GraphUploadForm(forms.Form):
 
 class DownloadForm(forms.Form):
   '''
-  Used on confirmdownload page to choose whether to convert any invariant formats
-  and how the user would like the result back i.e download as zip or see directory
+  Used on confirmdownload page to choose whether to see results i.e download
+  as zip or see directory
   '''
 
-  INVARIANT_CONVERSION_CHOICES = (('.mat', 'Matlab format (.mat)',), ('.csv', '(Excel) Comma separated values (.csv) [LCC and SVD Not available yet]',))
-
-  GRAPH_CONVERSION_CHOICES = (('.npy', 'Numpy format (.npy)',), ('.csv', '(Excel) Comma separated values (.csv) [Not yet available]',))
-
   OUPUT_TYPES = [('dz','Download all data as zip'), ('vd','View directory with all data')]
-
-
-  Select_Invariant_conversion_format = forms.MultipleChoiceField(required=False, \
-  widget=CheckboxSelectMultiple, choices=INVARIANT_CONVERSION_CHOICES)
-
-  Select_Graph_conversion_format = forms.MultipleChoiceField(required=False, \
-  widget=CheckboxSelectMultiple, choices=GRAPH_CONVERSION_CHOICES)
 
   Select_output_type = forms.ChoiceField(choices=OUPUT_TYPES, widget=RadioSelect, required=True)

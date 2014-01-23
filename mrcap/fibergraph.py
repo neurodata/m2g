@@ -13,7 +13,7 @@ class _FiberGraph(object):
     """
     Unimplemented constructor for the abstract class for reading and creating
     fibergraphs.
-    
+
     Positional arguments:
     =====================
     matrixdim - number of nodes in the graph
@@ -30,11 +30,11 @@ class _FiberGraph(object):
     ====================
     fiber - the fiber read fiber tract .dat file
     """
-    raise NotImplementedError("Subclasses should implement this!") 
+    raise NotImplementedError("Subclasses should implement this!")
 
   def complete (self):
-    """ 
-    Done adding fibers. Add edges and edge weights to the igraph 
+    """
+    Done adding fibers. Add edges and edge weights to the igraph
     """
     start = time()
     print "Adding %d edges to the graph ..." % len(self.edge_dict)
@@ -47,25 +47,30 @@ class _FiberGraph(object):
     print "Completed adding edge weight in %.3f sec" % (time() - start)
 
   def saveToIgraph(self, filename, gformat="graphml"):
-    """ 
-    Save igraph to disk in specified format 
-    
+    """
+    Save igraph to disk in specified format
+
     Positional arguments:
     ====================
     filename - the file name/path to where you want to save the graph
     gformat - the format which you want to use to save the graph. Choices:
     "graphml", "dot", "pajek" and those found at: http://igraph.sourceforge.net/doc/python/index.html
     """
+    from os.path import splitext
+    if not splitext(filename)[1][1:] == gformat:
+      filename+=("."+gformat)
+      print "Graph name adapted to '%s' ..." % filename
+
+    print "Saving graph '%s' to disk ... "
     self.spcscmat.save(filename, format=gformat)
 
   def loadFromIgraph(self, filename, gformat="graphml"):
-    """ 
-    Load a sparse matrix from igraph as a numpy pickle 
+    """
+    Load a sparse matrix from igraph as a numpy pickle
 
     Positional arguments:
     ====================
     filename - the file name/path to where you want to save the graph
     gformat - the format which you want to use to save the graph. Choices:
     """
-
     self.spcscmat = igraph.load(filename, format=gformat)
