@@ -66,35 +66,35 @@ class BuildGraphForm(forms.Form):
   '''
 
   # Public or private Project
-  Project_Type = forms.ChoiceField([('public', 'public'), ('private','private')],  required=False)
+  Project_Type = forms.ChoiceField([('public', 'public'), ('private','private')], widget=Select, required=False)
 
   # Name project
-  UserDefprojectName  = forms.CharField(label='Project name', max_length=255, required = True, help_text= " ", error_messages={'required': 'You must enter a Project name'})
-  site = forms.CharField(label='Enter Site', max_length=255, required = True, help_text= " ", error_messages={'required': 'You must enter a site'})
-  subject = forms.CharField(label='Enter Subject ID', max_length=255, required = True , help_text= " ", error_messages={'required': 'You must enter a Subject ID'})
-  session = forms.CharField(label='Enter Session ID', max_length=255, required = True, help_text= " ", error_messages={'required': 'You must enter a Session ID'})
-  scanId = forms.CharField(label='Scan ID', max_length=255, required = True, help_text= " ", error_messages={'required': 'You must enter a Scan ID'})
+  UserDefprojectName  = forms.CharField(label='Project name', max_length=255, required = True, error_messages={'required': 'You must enter a Project name'})
+  site = forms.CharField(label='Enter Site', max_length=255, required = True, error_messages={'required': 'You must enter a site'})
+  subject = forms.CharField(label='Enter Subject ID', max_length=255, required = True , error_messages={'required': 'You must enter a Subject ID'})
+  session = forms.CharField(label='Enter Session ID', max_length=255, required = True, error_messages={'required': 'You must enter a Session ID'})
+  scanId = forms.CharField(label='Scan ID', max_length=255, required = True, error_messages={'required': 'You must enter a Scan ID'})
 
   # Upload project files
-  fiber_file = forms.FileField(label='Select fiber.dat file', required = True, help_text= "<br/> ", error_messages={'required': 'You must upload a fiber tract file'})
-  roi_raw_file = forms.FileField(label='Select roi.raw file', required = True, help_text= " ", error_messages={'required': 'You must upload ROIs'})
-  roi_xml_file = forms.FileField(label='Select roi.xml file', required = True, help_text= " ", error_messages={'required': 'You must upload ROIs'})
+  fiber_file = forms.FileField(label='Select fiber.dat file', required = True, error_messages={'required': 'You must upload a fiber tract file'})
+  roi_raw_file = forms.FileField(label='Select roi.raw file', required = True, error_messages={'required': 'You must upload ROIs'})
+  roi_xml_file = forms.FileField(label='Select roi.xml file', required = True, error_messages={'required': 'You must upload ROIs'})
 
   INVARIANT_CHOICES = (('ss1', 'Scan Statistic 1',), ('tri', 'Triangle Count',), \
   ('cc', 'Clustering co-efficient',), ('mad', 'Maximum Average Degree',) \
   ,('deg', 'Vertex Degree',), ('eig', 'Top-k Eigenvalues and Eigenvectors',))
 
-  Select_graph_size = forms.ChoiceField(choices=[('small','Small graph [~7 min]'), ('big','Big graph [~20 min]')]\
-                                        , widget=RadioSelect, required = True, error_messages={'required': 'You must choose a graph size'})
+  Select_graph_size = forms.ChoiceField(choices=(('small','Small graph [~7 min]'), ('big','Big graph [~20 min]'))
+                                  , widget=RadioSelect, required = True, error_messages={'required': 'You must choose a graph size'})
 
-  Email = forms.EmailField(widget=TextInput(), help_text= " ", required=False)
+  Email = forms.EmailField(widget=TextInput(), required=False)
 
   Select_Invariants_you_want_computed = forms.MultipleChoiceField(required=False,
   widget=CheckboxSelectMultiple, choices=INVARIANT_CHOICES)
 
   def __init__(self, *args, **kwargs):
     super(BuildGraphForm, self).__init__(*args, **kwargs)
-    self.fields['Project_Type'].widget.attrs['disabled'] = True # radio / checkbox
+    self.fields['Project_Type'].widget.attrs['disabled'] = "disabled" # radio / checkbox
 
 
 class ConvertForm(forms.Form):
@@ -107,7 +107,7 @@ class ConvertForm(forms.Form):
   @var fileObj: The file to be uploaded
   @type fileObj: file or zip file
   '''
-  fileObj = forms.FileField(label='Upload data', help_text=' ', required = True)
+  fileObj = forms.FileField(label='Upload data', required = True)
 
   FORMAT_CHOICES = ( ('graphml', 'graphml'), ('pajek', 'pajek'), ('ncol','ncol'),
             ('lgl','lgl'), ('dimacs', 'dimacs'), ('gml', 'gml'), ('dot', 'dot'),

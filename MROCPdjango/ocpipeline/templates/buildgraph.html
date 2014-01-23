@@ -11,20 +11,17 @@
   {% block content %}
 
   <p>Please complete the entire form below, upload data derivative files and optionally select any invariants to be computed.
-
-  <b><FONT COLOR='#ff0000'>{{error_msg}}</FONT></b> <br/>
+<b><font color='#ff0000'>{{error_msg}}</font></b> <br/>
 
   You must supply an Email address for big graph processing so as to receive the job completion email with result url.<br/>
-  <FONT COLOR='#2373ff'>
-  We will never share or use your email address for any other purpose.</FONT>
-
-      <form action="" class="nostyle" method="post" enctype="multipart/form-data" name="loadForm" onsubmit="return Validate(this,['.xml','.dat','.raw'] );" class="forms">
+  <font color='#2373ff'> We will never share or use your email address for any other purpose.</font>
+  </p>
+      <form action="" class="nostyle" method="post" enctype="multipart/form-data" name="loadForm" onsubmit="return Validate(this,['.xml','.dat','.raw'] );">
         {% csrf_token %}
-        <p>{{ buildGraphform }}</p>
-        <input name = "Derivatives"  type="submit" value="Submit All & Process" class="button" onclick="showSpinner();"/>
+        <ul>{{ buildGraphform.as_ul }}</ul>
+        <input name = "Derivatives"  type="submit" value="Submit All and Process" class="button" onclick="showSpinner();"/>
         <input type="reset" value="Reset" class="button" name="clearForm" />
       </form>
-  </p>
 
     <div style="position:absolute; left:153px; top: 600px;">
       <img id="loadingImage" src="{{STATIC_URL}}images/loading.gif" border="0" alt="loading" style="visibility:hidden;opacity:0.5"/>
@@ -90,7 +87,6 @@
           </li>
         </ul>
 
-        <p>
         All fiber tract files  will be treated as a single project with multiple scanIDs derived from the file name.
         <a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjango/examples/uploadMultiSubj.py" target="blank">Download the file</a>
         and help can be obtained by typing the following in a terminal/command line session: <br/>
