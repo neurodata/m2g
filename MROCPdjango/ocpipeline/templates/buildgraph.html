@@ -18,7 +18,7 @@
   <FONT COLOR='#2373ff'>
   We will never share or use your email address for any other purpose.</FONT>
 
-      <form action="" method="post" enctype="multipart/form-data" name="loadForm" onsubmit="return Validate(this,['.xml','.dat','.raw'] );" class="forms">
+      <form action="" class="nostyle" method="post" enctype="multipart/form-data" name="loadForm" onsubmit="return Validate(this,['.xml','.dat','.raw'] );" class="forms">
         {% csrf_token %}
         <p>{{ buildGraphform }}</p>
         <input name = "Derivatives"  type="submit" value="Submit All & Process" class="button" onclick="showSpinner();"/>
@@ -61,7 +61,7 @@
           <li> <code>cc</code> for the Clustering Coefficient</li>
           <li> <code>mad</code> for the Maximum Average Degree</li>
           <li> <code>deg</code> for The Local Degree Count</li>
-          <li> <code>eig</code> for the Top-k eigenvectors and eigenvalues</li>
+          <li> <code>eig</code> for the Top-k (50 or maximum available/computable) eigenvectors and eigenvalues</li>
         </ul>
 
         <h3> Multiple graphs </h3>

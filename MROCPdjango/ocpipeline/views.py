@@ -585,7 +585,6 @@ If you do not see an email in your INBOX check the SPAM folder and add jhmrocp@c
 
 def convert(request, webargs=None):
   ''' Form '''
-  # request.session.clear() # NEW
 
   if (request.method == 'POST' and not webargs):
     form = ConvertForm(request.POST, request.FILES) # instantiating form
