@@ -1,5 +1,7 @@
 *MR OCP TODO list Disa
 ===========================
+1. Find all occurences of loadAnyMat and make sure the import is file_util
+
 * Viewer: http://cmtk.org/viewer/ visualization tool
 * Refactor views with programmatic access to shorten views.py
 * Add feedback for graph too big & estimated time to completion
