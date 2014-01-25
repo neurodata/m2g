@@ -61,7 +61,7 @@ class _FiberGraph(object):
       filename+=("."+gformat)
       print "Graph name adapted to '%s' ..." % filename
 
-    print "Saving graph '%s' to disk ... "
+    print "Saving graph '%s' to disk ... " % filename
     self.spcscmat.save(filename, format=gformat)
 
   def loadFromIgraph(self, filename, gformat="graphml"):

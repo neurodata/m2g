@@ -26,7 +26,7 @@ def csc_to_igraph(g, save=False, save_fn=None, save_format=None):
   nodes_from, nodes_to = g.nonzero()
   all_edges = zip(nodes_from, nodes_to)
 
-  print "Adding edges to igraph"
+  print "Adding edges to igraph ..."
   ig += all_edges
 
   # TODO - use save etc ...
@@ -37,8 +37,9 @@ def csc_to_r_igraph(g, save=False, save_fn=None):
   Somewhat of a hack to get a GNU R representation of an igraph object from a
   python representation by reading and writing to/from a temp file
 
-  Faster on SSD
-  @TODO: Document
+  @param g: the CSC matrix
+  @param save: boolean on whether to save or not
+  @param save_fn: the filename to use to save
   """
   import tempfile
   from r_utils import r_igraph_load_graph

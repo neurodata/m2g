@@ -178,7 +178,7 @@ def r_igraph_scan1(g, save_fn=None):
   scanstat1 = robjects.r("""
   require(igraph)
   fn <- function(g){
-  igraph::scan1(g)
+  igraph::local.scan(g)
   }
   """)
   ss1vector = scanstat1(g)
