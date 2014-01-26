@@ -109,15 +109,17 @@ class ConvertForm(forms.Form):
   '''
   fileObj = forms.FileField(label='Upload data', required = True)
 
-  FORMAT_CHOICES = ( ('graphml', 'graphml'), ('pajek', 'pajek'), ('ncol','ncol'),
-            ('lgl','lgl'), ('dimacs', 'dimacs'), ('gml', 'gml'), ('dot', 'dot'),
-            ('leda', 'leda'), ('npy', 'numpy format (.npy)'), ('mat', 'MATLAB format (.mat)')
-            )
+  IN_FORMATS = [('graphml', 'graphml'), ('ncol','ncol'), ('edgelist', 'edgelist'),
+            ('lgl','lgl'),('pajek', 'pajek'), ('graphdb', 'graphdb'),
+            ('npy', 'numpy format (npy)'), ('mat', 'MATLAB format (mat)')]
 
-  input_format = forms.ChoiceField(choices=FORMAT_CHOICES, widget=Select, label="Select input file type")
+  input_format = forms.ChoiceField(required=True, widget=Select, choices=IN_FORMATS, label="Input format")
 
-  Select_conversion_format = forms.MultipleChoiceField(required=True, \
-  widget=SelectMultiple, choices=FORMAT_CHOICES, label="Select output file type")
+  OUT_FORMATS = IN_FORMATS[:-3]
+  OUT_FORMATS.extend([('dot', 'dot'), ('gml', 'gml'), ('leda', 'leda')])
+
+  output_format = forms.MultipleChoiceField(required=True, \
+  widget=SelectMultiple, choices=OUT_FORMATS, label="Output file format")
 
 class GraphUploadForm(forms.Form):
   '''

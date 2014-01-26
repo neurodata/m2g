@@ -47,7 +47,7 @@ import mrcap.lcc as lcc
 import filesorter as filesorter
 import zipper as zipper
 import createDirStruct as createDirStruct
-import computation.utils.convertTo as convertTo
+from computation.utils.convertTo import convert_graph
 
 from django.core.servers.basehttp import FileWrapper
 
@@ -611,22 +611,25 @@ def convert(request, webargs=None):
       else:
         uploadedFiles = [savedFile]
 
-      isCorrectFileFormat, isCorrectFileType = convertFiles(uploadedFiles, form.cleaned_data['Select_file_type'], \
-                                                      form.cleaned_data['Select_conversion_format'], convertFileSaveLoc)
-
-      if not (isCorrectFileFormat):
-        err_msg = "You did not upload any files with the correct extension for conversion!"
-        return render_to_response(
-        'convertupload.html',
-        {'convertForm': form, 'err_msg': err_msg},
-        context_instance=RequestContext(request))
-
+      err_msg=""
+      for fn in uploadedFiles:
+        res = convert_graph(fn, form.cleaned_data['input_format'],
+                        convertFileSaveLoc, *form.cleaned_data['output_format'])
+        if isinstance(res, str): err_msg+=(res+"\n")
 
       baseurl = request.META['HTTP_HOST']
       host = request.META['wsgi.url_scheme']
       rooturl = host + '://' + baseurl # Originally was: 'http://mrbrain.cs.jhu.edu' # Done for http & https
+      dwnldLoc = rooturl + convertFileSaveLoc.replace(' ','%20')
 
-      dwnldLoc = rooturl + convertFileSaveLoc.replace(' ','%20') # TODO: Verify this works
+      
+      if (err_msg):
+        err_msg = "Your job completed with errors. The result can be found at %s\n. Here are the errors:%s" % (dwnldLoc, err_msg)
+        return render_to_response(
+        'convertupload.html',
+        {'convertForm': form, 'err_msg': err_msg},
+        context_instance=RequestContext(request))
+      #else
       return HttpResponseRedirect(dwnldLoc)
 
   # Programmtic API

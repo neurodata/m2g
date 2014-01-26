@@ -12,9 +12,9 @@
 
     <b>Select the file type of the graph to be converted. File type will also  be checked before conversion is attempted</b>
     <p>
-    This interface currently only supports conversion between the following formats:
+    This interface currently only supports conversion between a set of the following formats as available:
     </p>
-    <div id="formats"> <code>graphml, pajek, ncol, lgl, dimacs, gml, dot, leda, npy, mat</code> </div>
+    <div id="formats"> <code>graphml, ncol, edgelist, lgl, pajek, graphdb, dot, gml, leda, npy, mat</code> </div>
 
     <p>
     Note that any graph attribute that is not representable in the format of conversion will be ignored during conversion.
@@ -25,10 +25,10 @@
 
     <font color='#ff0000'>{{err_msg}} </font>
 
-    <form action="" class="nostyle" method="post" enctype="multipart/form-data" name="loadForm"
-          onsubmit="return Validate(this,['.zip','.npy','.mat','.graphml','.pajek','.ncol','.lgl','.graphml','.dimacs','.gml','.dot','.leda']);">
+    <form class="nostyle" method="post" enctype="multipart/form-data" name="loadForm"
+          onsubmit="return Validate(this,['.zip','.npy','.mat','.graphml','.ncol','.edge', '.edgelist','.lgl','.pajek','.graphdb', '', '.xml']);">
       {% csrf_token %}
-      {{ convertForm.as_ul}}
+      <p>{{convertForm}}</p>
       <input name = "Convert button"  type="submit" value="Convert All" class="button" onclick="showSpinner();"/>
       <input type="reset" value="Reset" class="button" name="clearForm"/>
     </form>
@@ -47,7 +47,7 @@
       conversion examples are available in the <a href="https://github.com/openconnectome/MR-connectome/tree/master/MROCPdjango/examples" target="blank">examples</a> directory. <br/>
       </p>
 
-    <div id="single prog">
+    <div id="single_prog">
       <h3> Single file conversion </h3>
         <p>
         An example of executing the sample code from the command line is <code>python singleConvert.py filename.graphml http://mrbrain.cs.jhu.edu/disa/convert/graphml/pajek,dot</code> <br/>
@@ -57,7 +57,7 @@
 
       <a href="#formats">The following</a> are the ONLY accepted file types.
 
-    <div id="multi prog">
+    <div id="multi_prog">
       <h3> Multiple file conversion</h3>
         <p>
         <a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjango/examples/multiConvert.py" target="blank">The example</a> converts a directory of files of one type from one format to another. It assumes you have this

@@ -10,7 +10,7 @@
 import argparse
 from scipy.sparse.csc import csc_matrix
 import igraph
-from loadAdjMatrix import loadAnyMat
+from file_util import loadAnyMat
 from time import time
 import os
 
@@ -49,7 +49,7 @@ def csc_to_r_igraph(g, save=False, save_fn=None):
   py_ig.write(t.name , format="edgelist")
   r_ig = r_igraph_load_graph(t.name, gformat="edgelist")
   t.close()
-  return r_ig 
+  return r_ig
 
 def main():
   parser = argparse.ArgumentParser(description="Convert an igraph to a csc object")

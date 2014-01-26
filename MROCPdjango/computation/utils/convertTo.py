@@ -29,24 +29,24 @@ def convert_graph(gfn, informat, save_dir, *outformats):
   @param outformat: a list of output formats
   """
   try:
-    if informat in ["edgelist", "pajek", "ncol", "lgl", "graphml", "dimacs", "gml", "dot", "leda"]:
-      g = igraph.read(gfn, format=informat)
+    if informat in ["graphml", "ncol", "edgelist", "lgl", "pajek", "graphdb"]:
+      g = igraph.read(gfn, None)
     elif informat == "mat":
       g = csc_to_igraph(loadAnyMat(gfn))
-    elif informat == ".npy":
-      g = csc_to_igraph(np.load(g))
+    elif informat == "npy":
+      g = csc_to_igraph(np.load(gfn).item())
     else:
       err_msg = "[ERROR]: Unknown format '%s'. Please check format and re-try!" % informat
       print err_msg
       return err_msg
   except Exception, err_msg:
     print err_msg
-    return err_msg
+    return "[ERROR]: "+str(err_msg)
 
   for fmt in outformats:
     fn = os.path.join(save_dir, os.path.splitext(os.path.basename(gfn))[0]+"."+fmt)
     print "Writing converted file %s ..." % fn
-    g.write(g, fn, format=fmt)
+    g.write(fn, format=fmt)
 
 
 def convertLCCNpyToMat(lcc_fn):
