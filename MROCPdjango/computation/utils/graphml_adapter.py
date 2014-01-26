@@ -265,7 +265,7 @@ def main():
     exit(1)
 
   from time import time
-  from loadAdjMatrix import loadAnyMat
+  from file_util import loadAnyMat
 
   st = time()
   g = loadAnyMat(result.graph_fn, result.data_elem)

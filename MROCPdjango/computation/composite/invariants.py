@@ -62,7 +62,7 @@ def compute(inv_dict, sep_save=True, gformat="graphml"):
       G = inv_dict["G"]
   else:
     try:
-      if gformat in ["edgelist", "pajek", "ncol", "lgl", "graphml", "dimacs", "gml", "dot", "leda"]: #  All igraph supported formats
+      if gformat in ["edgelist", "pajek", "ncol", "lgl", "graphml", "gml", "dot", "leda"]: #  All igraph supported formats
         G = r_igraph_load_graph(inv_dict["graph_fn"], gformat)
       elif gformat == "mat":
         G = csc_to_r_igraph(loadAnyMat(inv_dict['graph_fn']))
@@ -72,7 +72,7 @@ def compute(inv_dict, sep_save=True, gformat="graphml"):
       if isinstance(G, str):
         return G # There was a loading error
     except Exception, err_msg:
-      return err_msg
+      return str(err_msg)
 
   #============================ Call to invariants ============================#
   start = time()
