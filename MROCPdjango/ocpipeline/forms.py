@@ -131,8 +131,9 @@ class GraphUploadForm(forms.Form):
   fileObj = forms.FileField(label='Upload data', required=True)
 
   graph_format = forms.ChoiceField(required=True, widget=Select,
-          choices=(('mat', 'MAT'), ('graphml', 'GRAPHML')), label="Graph format",
-          error_messages={"required":"You must specify graph type"})
+      choices=(('graphml', 'graphml'), ('ncol','ncol'), ('edgelist', 'edgelist'),
+      ('lgl','lgl'),('pajek', 'pajek'), ('graphdb', 'graphdb'), ('mat', 'MATLAB'),
+      ('npy', 'numpy')), label="Graph format", error_messages={"required":"You must specify graph type"})
 
   # Select size of graph
   email = forms.EmailField(widget=TextInput(), required=True)
