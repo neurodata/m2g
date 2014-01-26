@@ -1,6 +1,14 @@
 *MR OCP TODO list Disa
 ===========================
-1. Find all occurences of loadAnyMat and make sure the import is file_util
+1. Click handler buildgraph to show email address if given big-graph, else not.
+3. Fix all programmatic for igraph intergration
+
+Add Dependencies
+================
+- [GNU R >= 3.0.2](http://www.r-project.org/)
+- [igraph](http://igraph.sourceforge.net/) >= version 7.0
+  - C, R, Python 
+- python Rpy2
 
 * Viewer: http://cmtk.org/viewer/ visualization tool
 * Refactor views with programmatic access to shorten views.py
@@ -19,19 +27,12 @@ html:
 - Add projects page for users
 - Create sharing tokens
 
-Invariants
-===========
-- Fix parallel processing of ss
-
-Invariants still to compute
-=============================
-
-*SS2
-*APL
-*GDia
-
 *Recently completed*
 =====================
+- Change anywhere with download links of http://mrbrain to generic from headers
+- Fix all zip browser uploads
+- Allow Graphupload for all informat formats
+- Find all occurences of loadAnyMat and make sure the import is file_util
 - Alter views to use clean for Email verification
 * Alter url to: openconnecto.me/graph-services
 - Finish work on convert fibergraph, lcc, svd to csv

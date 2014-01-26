@@ -30,18 +30,22 @@ def build_graph(fiber_fn, roi_raw_fn, roi_xml_fn, is_big, save_dir, graph_fn):
   is_big - boolean for if graph should be big or small
   save_dir - directory where to save graph file produced. Does not have to exist.
   graph_fn - the name of the graph file that will be the product of the graph building exercise
+
+  Returns:
+  ========
+  The name of the graph written to disk
   """
   if not graph_fn:
     # Constants
-    SM_GRAPH_FN_SFX = '_70_smgr' # 70 will change to something dynamic
+    SM_GRAPH_FN_SFX = '_smgr' # 70 will change to something dynamic
     BG_GRAPH_FN_SFX = '_bggr'
 
     suffix = BG_GRAPH_FN_SFX if is_big else SM_GRAPH_FN_SFX
-    graph_fn = os.path.join(save_dir, os.path.splitext(getPathLeaf(fiber_fn))[0] + suffix + '.mat')
+    graph_fn = os.path.join(save_dir, os.path.splitext(getPathLeaf(fiber_fn))[0] + suffix + '.graphml')
 
   else:
-    if not os.path.splitext(graph_fn) == '.mat':
-      graph_fn = os.path.splitext(graph_fn)[0] + '.mat'
+    if not os.path.splitext(graph_fn) == '.graphml':
+      graph_fn = os.path.splitext(graph_fn)[0] + '.graphml'
 
     graph_fn = os.path.join(save_dir, graph_fn)
 

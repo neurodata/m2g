@@ -47,6 +47,8 @@ def compute(inv_dict, sep_save=True, gformat="graphml"):
     - inv_dict["k]: the  number of eigenvalues to compute
     - inv_dict["save_dir"]: the base path where all invariants will create sub-dirs & be should be saved
 
+  gformat - INPUT format of the graph
+
   optional arguments:
   ===================
   sep_save: boolean for auto save or not
@@ -67,8 +69,6 @@ def compute(inv_dict, sep_save=True, gformat="graphml"):
       elif gformat == "mat":
         G = csc_to_r_igraph(loadAnyMat(inv_dict['graph_fn']))
 
-        gformat = "graphml" # change graph format to something igraph can write
-
       if isinstance(G, str):
         return G # There was a loading error
     except Exception, err_msg:
@@ -77,7 +77,7 @@ def compute(inv_dict, sep_save=True, gformat="graphml"):
   #============================ Call to invariants ============================#
   start = time()
 
-  if inv_dict.get("eig", None) is not None:
+  if inv_dict.get("eig", False) != False:
     inv_dict["k"] = max(50, r_igraph_vcount(G, False)-3) # Max of 50 eigenvalues
     print "Computing eigen decompositon ..."
     if sep_save:
@@ -85,38 +85,39 @@ def compute(inv_dict, sep_save=True, gformat="graphml"):
                                 getBaseName(inv_dict["graph_fn"]) + "_eigvl.npy")
       inv_dict["eigvect_fn"] = os.path.join(inv_dict["save_dir"], "Eigen", \
                                 getBaseName(inv_dict["graph_fn"]) + "_eigvect.npy")
+
       G = r_igraph_eigs(G, inv_dict['k'], save_fn=(inv_dict["eigvl_fn"], inv_dict["eigvect_fn"]))
     else: G = r_igraph_eigs(G, inv_dict['k'], save_fn=None)
 
-  if inv_dict.get("mad", None) is not None:
+  if inv_dict.get("mad", False) != False:
     if sep_save:
       inv_dict["mad_fn"] = os.path.join(inv_dict["save_dir"], "MAD", \
                                 getBaseName(inv_dict["graph_fn"]) + "_mad.npy")
     print "Computing MAD ..."
     G = r_igraph_max_ave_degree(G)
 
-  if inv_dict.get("ss1", None) is not None:
+  if inv_dict.get("ss1", False) != False:
     print "Computing Scan 1 ..."
     if sep_save:
       inv_dict["ss1_fn"] = os.path.join(inv_dict["save_dir"], "SS1", \
                                 getBaseName(inv_dict["graph_fn"]) + "_scanstat1.npy")
     G = r_igraph_scan1(G, inv_dict.get("ss1_fn", None))
 
-  if inv_dict.get("tri", None) is not None:
+  if inv_dict.get("tri", False) != False:
     print "Computring triangle count ..."
     if sep_save:
       inv_dict["tri_fn"] = os.path.join(inv_dict["save_dir"], "Triangle", \
                                 getBaseName(inv_dict["graph_fn"]) + "_triangles.npy")
     G = r_igraph_triangles(G, inv_dict.get("tri_fn", None))
 
-  if inv_dict.get("cc", None) is not None:
+  if inv_dict.get("cc", False) != False:
     print "Computing clustering coefficient .."
     if sep_save:
       inv_dict["cc_fn"] = os.path.join(inv_dict["save_dir"], "ClustCoeff",\
                                 getBaseName(inv_dict["graph_fn"]) + "_clustcoeff.npy")
     G = r_igraph_clust_coeff(G, inv_dict.get("cc_fn", None))
 
-  if inv_dict.get("deg", None) is not None:
+  if inv_dict.get("deg", False) != False:
     print "Computing degree ..."
     if sep_save:
       inv_dict["deg_fn"] = os.path.join(inv_dict["save_dir"], "Degree",\
@@ -124,12 +125,12 @@ def compute(inv_dict, sep_save=True, gformat="graphml"):
     G = r_igraph_degree(G, inv_dict.get("deg_fn", None))
 
   # num edges
-  if inv_dict.get("edge", None) is not None:
+  if inv_dict.get("edge", False) != False:
     print "Computing global edge count ..."
     G = r_igraph_ecount(G, True)
 
   # num vertices
-  if inv_dict.get("ver", None) is not None:
+  if inv_dict.get("ver", False) != False:
     print "Computing global vertex count ..."
     G = r_igraph_vcount(G, True)
 
@@ -137,8 +138,8 @@ def compute(inv_dict, sep_save=True, gformat="graphml"):
 
   # Save graph with all new attrs
   inv_dict["out_graph_fn"] = os.path.join(inv_dict["save_dir"], os.path.splitext(os.path.basename(inv_dict["graph_fn"]))[0])
-  if os.path.splitext(inv_dict["out_graph_fn"])[1][1:] != gformat: inv_dict["out_graph_fn"] += "."+gformat
-  r_igraph_write(G, inv_dict["out_graph_fn"], gformat)
+  if os.path.splitext(inv_dict["out_graph_fn"])[1][1:] != ".graphml": inv_dict["out_graph_fn"] += ".graphml"
+  r_igraph_write(G, inv_dict["out_graph_fn"]) # ALL GRAPHS SAVED AS GRAPHML!
 
   return G, inv_dict
 

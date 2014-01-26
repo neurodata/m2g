@@ -13,12 +13,7 @@ import argparse
 import sys
 import os
 
-from computation.utils import loadAdjMatrix
-
 import computation.composite.invariants as invariants
-
-import mrcap.lcc as lcc
-import mrcap.svd as svd
 from  mrcap.gengraph import genGraph
 from computation.utils.getBaseName import getBaseName
 
@@ -40,15 +35,8 @@ def compute_inv(inv_dict):
   # they will compute it & populate the file name. If they see a file name,
   # they won't recompute it.
 
-  inv_fns = ['deg_fn', 'eigvl_fn', 'eigvect_fn', 'tri_fn', 'mad_fn',
-          'cc_fn', 'ver_fn', 'ss1_fn', 'edge_fn']
-
-  for fn in inv_fns:
-    if not inv_dict.has_key(fn):
-      inv_dict[fn] = None
-
   print 'Computing invariants for graph %s...' % inv_dict['graph_fn']
-  invariants.compute(inv_dict)
+  invariants.compute(inv_dict, sep_save=False, gformat=inv_dict['format'])
   print 'Invariant computation complete'
 
 
@@ -58,9 +46,6 @@ def main():
   what data is passed in. This is the meat of the script
   """
   # Constants
-  SM_GRAPH_FN_SFX = '_70_smgr' # 70 may change
-  BG_GRAPH_FN_SFX = '_bggr'
-
   mr_data_dir = os.path.join(os.path.dirname(__file__), 'mrdata')
 
   parser = argparse.ArgumentParser(description='A script run selected/all invariants on a graph\
@@ -74,13 +59,12 @@ def main():
   parser.add_argument('graph_fn', action='store',help='the full filename of the  \
                       CSC matrix representing a graph (.mat format) to have *NOTE DO NOT USE UNDERSCORES (_)\
                       in path leaf. eg. /foo/bar_bar/foo.mat is OK but /foo/bar/foo_bar.mat is NOT. [TODO fix]')
-  #parser.add_argument('graphsize', action='store', help='graphsize [s|b]. s is for small and b is for big.')
 
+  parser.add_argument('-f', '--format', action='store', default='graphml', help='input format of the graph. Default is \'graphml\'')
   parser.add_argument('-D', '--data_elem', action='store', default=None, help='the name of the data element within the .mat matrix.')
   parser.add_argument('-S', '--save_dir', action='store', default= mr_data_dir, help='the directory where the invariants \
                       are to be stored (each invariant will create its own subdirectory within this). \
                       The defualt is %s' % mr_data_dir)
-
 
   # Invariant options
   parser.add_argument('-A', '--all', action='store_true', help='pass to compute ALL invariants')
@@ -93,29 +77,9 @@ def main():
   parser.add_argument('-g', '--edge', action='store_true', help='pass to compute global egde count')
   parser.add_argument('-v', '--ver', action='store_true', help='pass to compute global vertex count')
 
-  parser.add_argument('-ef', '--eigvl_fn', action='store', help='If the eigenvalue file \
-                      already exists pass it in to avoid recomputing. Used for -m, -t, -c, -A')
-  parser.add_argument('-tf', '--tri_fn', action='store', help='If triangle count file\
-                      already exists, pass it in to avoid recomputing. Used for -c')
-  parser.add_argument('-df', '--deg_fn', action='store', help='If degree count file\
-                      already exists, pass it in to avoid recomputing. Used for -c')
-  parser.add_argument('-lf', '--lcc_fn', action='store', help='If you have a pre-computed largest connected component (.npy format) file add full file name of it here')
-  parser.add_argument('-l', '--lcc', action='store_true', help='Compute the largest connected component for the graph and use it in computations. [No need to select if you already have it pre-computed i.e used `-lf`]')
-
-  parser.add_argument('-k', action='store', type = int, help='The number of eigenvalues to compute. Max is 100')
+  parser.add_argument('-k', action='store', type = int, help='The number of eigenvalues to compute. Max is 50')
 
   result = parser.parse_args()
-
-  # Legacy naming
-  result.graphsize = 'big' if (result.lcc or result.lcc_fn) else 'small' # A big graph is a graph that requires an lcc for processing in a `reasonable` amount of time
-
-  if (result.lcc):
-    if result.lcc_fn:
-      if os.path.exists(result.lcc_fn):
-        print "LCC exists so it will not be recomputed..."
-    else:
-      result.lcc_fn = os.path.join(result.save_dir, os.path.splitext(os.path.basename(result.graph_fn))[0] + '_concomp.npy')
-      lcc.process_single_brain(result.graph_fn, result.lcc_fn)
 
   if result.all:
     for key in result.__dict__:

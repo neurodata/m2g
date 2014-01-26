@@ -124,7 +124,7 @@ def buildGraph(request):
 
            error_msg = "The scanID you requested to create already exists in this project path. Please change any of the form values."
         """
-      # TODO DM: Many unaccounted for scenarios here!
+      # TODO DM: Some unaccounted for scenarios here!
 
       if error_msg:
         return render_to_response(
@@ -143,7 +143,7 @@ def buildGraph(request):
       userDefProjectName = adaptProjNameIfReq(os.path.join(settings.MEDIA_ROOT, userDefProjectName)) # Fully qualify AND handle identical projects
 
       request.session["usrDefProjDir"] = os.path.join(userDefProjectName, site, subject, session, scanId)
-      request.session["scanId"] = scanId # TODO: Check me
+      request.session["scanId"] = scanId
 
       """ Define data directory paths """
       request.session["derivatives"], request.session["graphs"],\
@@ -202,13 +202,14 @@ def buildGraph(request):
 
       if request.session["graphsize"] == "big":
         # Launch thread for big graphs & email user
+        #processInputData(request)
         sendJobBeginEmail(request.session["email"], request.session["invariants"])
         thr = threading.Thread(target=processInputData, args=(request,))
         thr.start()
         request.session["success_msg"] =\
 """
 Your job was successfully launched. You should receive an email when your
-job begins and another one when it completes. The process may take ~5hrs if you selected to compute all invariants
+job begins and another one when it completes. The process may take several if you selected to compute all invariants
 """
         return HttpResponseRedirect(get_script_prefix()+"success")
 
@@ -257,7 +258,9 @@ def processInputData(request):
                                 request.session['Gfn'], request.session['graphInvariants'])
 
   if request.session['graphsize'] == 'big':
-    sendJobCompleteEmail(request.session['email'], 'http://mrbrain.cs.jhu.edu' + request.session['usrDefProjDir'].replace(' ','%20'))
+    dwnldLoc = request.META['wsgi.url_scheme'] + '://' + \
+                    request.META['HTTP_HOST'] + request.session['usrDefProjDir'].replace(' ','%20')
+    sendJobCompleteEmail(request.session['email'], dwnldLoc)
 
   return HttpResponseRedirect(get_script_prefix()+'confirmdownload')
 
@@ -272,11 +275,11 @@ def confirmDownload(request):
       if dataReturn == 'vd': # View data directory
         dataUrlTail = request.session['usrDefProjDir']
 
-        # baseurl = request.META['HTTP_HOST']
-        # host = request.META['wsgi.url_scheme']
-        # rooturl = host + '://' + baseurl # Originally was: 'http://mrbrain.cs.jhu.edu' # Done for http & https
+        dwnldLoc = request.META['wsgi.url_scheme'] + '://' + \
+                    request.META['HTTP_HOST'] + dataUrlTail.replace(' ','%20')
 
-        return HttpResponseRedirect('http://mrbrain.cs.jhu.edu' + dataUrlTail.replace(' ','%20'))
+        return HttpResponseRedirect(dwnldLoc)
+
       elif dataReturn == 'dz': #Download all as zip
         return HttpResponseRedirect(get_script_prefix()+'zipoutput')
   else:
@@ -285,6 +288,9 @@ def confirmDownload(request):
                   context_instance=RequestContext(request))
 
 #################################################################################
+
+def getRootUrl(request):
+  return request.META['wsgi.url_scheme'] + '://' + request.META['HTTP_HOST']
 
 @login_required
 def showdir(request):
@@ -389,8 +395,9 @@ def upload(request, webargs=None):
     #ret = rzfile.printdir()
     #ret = rzfile.testzip()
     #ret = rzfile.namelist()
+    dwnldLoc = request.META['wsgi.url_scheme'] + '://' + \
+                    request.META['HTTP_HOST'] + userDefProjectDir.replace(' ','%20')
 
-    dwnldLoc = "http://mrbrain.cs.jhu.edu" + userDefProjectDir.replace(' ','%20')
     return HttpResponse ( "Files available for download at " + dwnldLoc) # change to render of a page with a link to data result
 
   elif(not webargs):
@@ -408,6 +415,9 @@ def download(request, webargs=None):
 
 def asyncInvCompute(request):
 
+  dwnldLoc = request.META['wsgi.url_scheme'] + '://' + \
+                    request.META['HTTP_HOST'] + request.session['dataDir'].replace(' ','%20')
+
   for graph_fn in request.session['uploaded_graphs']:
     try:
       invariant_fns = runInvariants(request.session['invariants'], graph_fn,
@@ -416,14 +426,16 @@ def asyncInvCompute(request):
       print 'Invariants for annoymous project %s complete...' % graph_fn
 
     except Exception, msg:
-      msg = "Hello,\n\nYour most recent job failed possibly because:%s\n" % (" "*randint(0,10))
-      msg += "- the graph '%s' you uploaded does not match any accepted type. %s\n\n" % (os.path.basename(graph_fn)," "*randint(0,10))
-      msg += "You may have some partially completed data here: %s" % ("http://mrbrain.cs.jhu.edu"+ request.session['dataDir'].replace(' ','%20'))
-      msg += "\n.Please check these and try again. %s\n\n" % (" "*randint(0,10))
+      msg = """
+Hello,\n\nYour most recent job failed possibly because:\n- the graph '%s' you
+uploaded does not match any accepted type.\n\n"You may have some partially
+completed data here: %s.\nPlease check these and try again.\n\n
+""" % (os.path.basename(graph_fn), dwnldLoc)
+
       sendJobFailureEmail(request.session['email'], msg)
 
   # Email user of job finished
-  sendJobCompleteEmail(request.session['email'], "http://mrbrain.cs.jhu.edu"+ request.session['dataDir'].replace(' ','%20'))
+  sendJobCompleteEmail(request.session['email'], dwnldLoc)
 
 ############################################################
 
@@ -490,7 +502,7 @@ def graphLoadInv(request, webargs=None):
       # We got a zip
       if os.path.splitext(data.name)[1] == '.zip':
         writeBodyToDisk(data.read(), dataDir)
-        graphs = glob(os.path.join(dataDir,'*.mat')) # TODO: better way to make sure we are actually collecting graphs here
+        graphs = glob(os.path.join(dataDir,'*')) # TODO: better way to make sure we are actually collecting graphs here
 
       else: # View only accepts .mat & zip as regulated by template
         graphs = [os.path.join(dataDir, data.name)]
@@ -507,6 +519,7 @@ def graphLoadInv(request, webargs=None):
       thr = threading.Thread(target=asyncInvCompute, args=(request,))
       thr.start()
 
+      #asyncInvCompute(request)
       request.session['success_msg'] = \
 """
 Your job was successfully launched. You should receive an email when your  job begins and another one when it completes.
@@ -564,8 +577,8 @@ If you do not see an email in your INBOX check the SPAM folder and add jhmrocp@c
       except Exception:
         print "No conversion of invariants done ..."
 
-    # request.session.clear()
-    dwnldLoc = "http://mrbrain.cs.jhu.edu"+ dataDir.replace(' ','%20')
+    dwnldLoc = request.META['wsgi.url_scheme'] + '://' + \
+                    request.META['HTTP_HOST'] + dataDir.replace(' ','%20')
     return HttpResponse("View Data at: " + dwnldLoc)
 
   else:
@@ -604,10 +617,10 @@ def convert(request, webargs=None):
       # If zip is uploaded
       if os.path.splitext(request.FILES['fileObj'].name)[1].strip() == '.zip':
         zipper.unzip(savedFile, saveDir)
+        # Delete zip so its not included in the graphs we uploaded
+        os.remove(savedFile)
         uploadedFiles = glob(os.path.join(saveDir, "*")) # get the uploaded file names
 
-        # Delete zip
-        os.remove(savedFile)
       else:
         uploadedFiles = [savedFile]
 
@@ -622,7 +635,6 @@ def convert(request, webargs=None):
       rooturl = host + '://' + baseurl # Originally was: 'http://mrbrain.cs.jhu.edu' # Done for http & https
       dwnldLoc = rooturl + convertFileSaveLoc.replace(' ','%20')
 
-      
       if (err_msg):
         err_msg = "Your job completed with errors. The result can be found at %s\n. Here are the errors:%s" % (dwnldLoc, err_msg)
         return render_to_response(
@@ -668,7 +680,9 @@ def convert(request, webargs=None):
     if not (isCorrectFileFormat):
       return HttpResponse("[ERROR]: You do not have any files with the correct extension for conversion")
 
-    dwnldLoc = "http://mrbrain.cs.jhu.edu"+ convertFileSaveLoc.replace(' ','%20')
+    dwnldLoc = request.META['wsgi.url_scheme'] + '://' + \
+                    request.META['HTTP_HOST'] + convertFileSaveLoc.replace(' ','%20')
+
     return HttpResponse ( "Converted files available for download at " + dwnldLoc + " . The directory " +
             "may be empty if you try to convert to the same format the file is already in.") # change to render of a page with a link to data result
 
@@ -712,7 +726,7 @@ def call_gengraph(fiber_fn, roi_xml_fn, roi_raw_fn, graphs, graphInvariants, gra
     elif(graphsize == 'big'):
       print("\nRunning Big gengraph ...")
       Gfn+="bggr.graphml"
-      gengraph.genGraph(fiber_fn, Gfn+"bggr", roi_xml_fn, roi_raw_fn, bigGraph=True)
+      gengraph.genGraph(fiber_fn, Gfn, roi_xml_fn, roi_raw_fn, bigGraph=True)
     else:
       print '[ERROR]: Graphsize Unkwown' # should never happen
   return Gfn
@@ -729,7 +743,7 @@ def runInvariants(inv_list, graph_fn, save_dir, graph_format="graphml", sep_save
   @param graph_fn: the graph filename on disk
   @param save_dir: the directory where to save resultant data
 
-  TODO: Use these:
+  @param graph_format: the format of the graph
   @param sep_save: boolean on whether to save invariants in separate files
   '''
   inv_dict = {'graph_fn':graph_fn, 'save_dir':save_dir}
