@@ -78,23 +78,31 @@ def compute(inv_dict, sep_save=True, gformat="graphml"):
   start = time()
 
   if inv_dict.get("eig", False) != False:
-    inv_dict["k"] = max(50, r_igraph_vcount(G, False)-3) # Max of 50 eigenvalues
-    print "Computing eigen decompositon ..."
-    if sep_save:
-      inv_dict["eigvl_fn"] = os.path.join(inv_dict["save_dir"], "Eigen", \
-                                getBaseName(inv_dict["graph_fn"]) + "_eigvl.npy")
-      inv_dict["eigvect_fn"] = os.path.join(inv_dict["save_dir"], "Eigen", \
-                                getBaseName(inv_dict["graph_fn"]) + "_eigvect.npy")
 
-      G = r_igraph_eigs(G, inv_dict['k'], save_fn=(inv_dict["eigvl_fn"], inv_dict["eigvect_fn"]))
-    else: G = r_igraph_eigs(G, inv_dict['k'], save_fn=None)
+    # Test if graph is too big for invariants
+    if r_igraph_ecount(G, False) < 1000000: # Cannot compute eigs on very big graphs
+      inv_dict["k"] = max(50, r_igraph_vcount(G, False)-3) # Max of 50 eigenvalues
+      print "Computing eigen decompositon ..."
+      if sep_save:
+        inv_dict["eigvl_fn"] = os.path.join(inv_dict["save_dir"], "Eigen", \
+                                  getBaseName(inv_dict["graph_fn"]) + "_eigvl.npy")
+        inv_dict["eigvect_fn"] = os.path.join(inv_dict["save_dir"], "Eigen", \
+                                  getBaseName(inv_dict["graph_fn"]) + "_eigvect.npy")
+
+        G = r_igraph_eigs(G, inv_dict['k'], save_fn=(inv_dict["eigvl_fn"], inv_dict["eigvect_fn"]))
+      else: G = r_igraph_eigs(G, inv_dict['k'], save_fn=None)
+    else:
+      print "Graph too big to compute spectral embedding"
 
   if inv_dict.get("mad", False) != False:
-    if sep_save:
-      inv_dict["mad_fn"] = os.path.join(inv_dict["save_dir"], "MAD", \
-                                getBaseName(inv_dict["graph_fn"]) + "_mad.npy")
-    print "Computing MAD ..."
-    G = r_igraph_max_ave_degree(G)
+    if r_igraph_ecount(G, False) < 1000000: # Cannot compute eigs on very big graphs
+      if sep_save:
+        inv_dict["mad_fn"] = os.path.join(inv_dict["save_dir"], "MAD", \
+                                  getBaseName(inv_dict["graph_fn"]) + "_mad.npy")
+      print "Computing MAD ..."
+      G = r_igraph_max_ave_degree(G)
+    else:
+      print "Graph too big to compute spectral embedding"
 
   if inv_dict.get("ss1", False) != False:
     print "Computing Scan 1 ..."
