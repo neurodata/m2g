@@ -11,8 +11,9 @@ import scipy.io as sio
 import numpy as np
 from mrcap.zindex import MortonXYZ
 import os
+from glob import glob
 
-def check_graph(g_fn):
+def check_graph(g_fn, savedir):
   limits = (182, 218, 182) # HARD-CODED BOUNDS
   g = loadAnyMat(g_fn)
 
@@ -39,12 +40,12 @@ def check_graph(g_fn):
       print "Vertex %d has fibers and is outside the label mask ..." % vertex
       fset.add(vertex)
 
-    if cnt%100000==0:
+    if cnt%300000==0:
       print "Processed %d/%d ..." % (cnt, len(vset))
 
   if fset:
-    print "Writing vertices to disk ..."
-    f = open(os.path.splitext(os.path.basename(g_fn))[0]+".json", "wb")
+    print "Writing %d ill-placed vertices to disk as json..." % len(fset)
+    f = open( os.path.join(savedir, os.path.splitext(os.path.basename(g_fn))[0]+".json"), "wb" )
     f.write(str(list(fset)))
     f.close()
 
@@ -54,10 +55,14 @@ def check_graph(g_fn):
 
 def main():
   parser = argparse.ArgumentParser(description="Check if a MAT file has fibers (edges) outside the 'label' mask")
-  parser.add_argument("graphfn", action="store", help="MATLAB matrix - adjacency matrix i.e. .mat format")
+  parser.add_argument("gdir", action="store", help="Directory with MATLAB matrix - adjacency matrix i.e. .mat format")
+  parser.add_argument("savedir", action="store", help="Directory where to save the ill-placed vertices")
+  
   result = parser.parse_args()
-
-  check_graph(result.graphfn)
+  
+  for gfn in glob(os.path.join(result.gdir,"*")):
+    print "Processing %s ..." % gfn 
+    check_graph(gfn, result.savedir)
 
 if __name__ == "__main__":
   main()
