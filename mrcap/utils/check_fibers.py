@@ -6,7 +6,7 @@
 # Copyright (c) 2014. All rights reserved.
 
 import argparse
-from computation.utils.loadAdjMatrix import loadAnyMat
+from computation.utils.file_util import loadAnyMat
 import scipy.io as sio
 import numpy as np
 from mrcap.zindex import MortonXYZ
