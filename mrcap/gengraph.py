@@ -86,8 +86,8 @@ def genGraph(infname, outfname, roixmlname=None, roirawname=None, bigGraph=False
     if count % 10000 == 0:
       print ("Processed {0} fibers".format(count) )
 
-      if count == 20000:
-        break
+      #if count == 20000:
+        #break
 
   del reader
   # Done adding edges

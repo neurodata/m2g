@@ -80,7 +80,7 @@ def compute(inv_dict, sep_save=True, gformat="graphml"):
   if inv_dict.get("eig", False) != False:
 
     # Test if graph is too big for invariants
-    if r_igraph_ecount(G, False) < 1000000: # Cannot compute eigs on very big graphs
+    if r_igraph_vcount(G, False) < 100000: # Cannot compute eigs on very big graphs
       inv_dict["k"] = max(50, r_igraph_vcount(G, False)-3) # Max of 50 eigenvalues
       print "Computing eigen decompositon ..."
       if sep_save:
@@ -95,7 +95,7 @@ def compute(inv_dict, sep_save=True, gformat="graphml"):
       print "Graph too big to compute spectral embedding"
 
   if inv_dict.get("mad", False) != False:
-    if r_igraph_ecount(G, False) < 1000000: # Cannot compute eigs on very big graphs
+    if r_igraph_vcount(G, False) < 100000: # Cannot compute eigs on very big graphs
       if sep_save:
         inv_dict["mad_fn"] = os.path.join(inv_dict["save_dir"], "MAD", \
                                   getBaseName(inv_dict["graph_fn"]) + "_mad.npy")
