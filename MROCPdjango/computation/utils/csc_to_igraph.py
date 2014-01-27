@@ -14,12 +14,18 @@ from file_util import loadAnyMat
 from time import time
 import os
 
-def csc_to_igraph(g, save=False, save_fn=None, save_format=None):
+def csc_to_igraph(g):
   """
   Get an igraph python representation of an adjacency matrix given
   by a sparse csc matrix
 
-  @TODO: Document
+  Positional arguments:
+  ====================
+  g - the CSC graph
+
+  Returns:
+  =======
+  A python igraph
   """
   assert isinstance(g, csc_matrix), "Arg1 'g' must be a Scipy Sparse CSC Matrix"
   ig = igraph.Graph(g.shape[0], directed=True) # Always assume directed
@@ -32,14 +38,18 @@ def csc_to_igraph(g, save=False, save_fn=None, save_format=None):
   # TODO - use save etc ...
   return ig
 
-def csc_to_r_igraph(g, save=False, save_fn=None):
+def csc_to_r_igraph(g):
   """
   Somewhat of a hack to get a GNU R representation of an igraph object from a
   python representation by reading and writing to/from a temp file
 
-  @param g: the CSC matrix
-  @param save: boolean on whether to save or not
-  @param save_fn: the filename to use to save
+  Positional arguments:
+  ====================
+  g - the CSC matrix
+
+  Returns:
+  ========
+  An R igraph
   """
   import tempfile
   from r_utils import r_igraph_load_graph
@@ -53,23 +63,11 @@ def csc_to_r_igraph(g, save=False, save_fn=None):
 
 def main():
   parser = argparse.ArgumentParser(description="Convert an igraph to a csc object")
-  parser.add_argument("graph_fn", action="store", help="The name of the igraph to read from disk. *Must be graphml format!")
-  parser.add_argument("-s", "--save", action="store_true", help="Save conversion to disk")
-  parser.add_argument("-f", "--save_fn", action="store", default="csc_matlab", help="Save file name")
-  parser.add_argument("-d", "--data_elem", action="store", default=None, help="The name of the data element key in the dict.")
-  parser.add_argument("-n", "--num_procs", action="store", default=None, help="The number of processors to use when converting")
-
-  parser.add_argument("-t", "--test", action="store_true", help="Run test only!")
+  
   result = parser.parse_args()
 
-  if result.test:
-    test()
-    exit(1)
-
   st = time()
-  g = loadAnyMat(result.graph_fn, result.data_elem)
-  csc_to_igraph(g, result.save, result.save_fn, result.num_procs)
-
+  test()
   print "Total time for conversion %.4f sec" % (time()-st)
 
 def test():

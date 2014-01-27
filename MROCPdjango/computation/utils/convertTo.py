@@ -16,17 +16,20 @@ import csv
 from time import time
 from django.conf import settings
 import igraph
-from csc_to_igraph import csc_to_igraph
-from file_util import loadAnyMat
+from computation.utils.csc_to_igraph import csc_to_igraph
+from computation.utils.file_util import loadAnyMat
 
 def convert_graph(gfn, informat, save_dir, *outformats):
   """
   Convert between igraph supported formats. No conversion to MAT or NPY available.
 
-  @param gfn: the graph file name
-  @param informat: the input format of the graph
-  @param save_dir: the directory where we save result to
-  @param outformat: a list of output formats
+  Positional arguments:
+  ====================
+
+  gfn - the graph file name
+  informat - the input format of the graph
+  save_dir - the directory where we save result to
+  outformat - a list of output formats
   """
   try:
     if informat in ["graphml", "ncol", "edgelist", "lgl", "pajek", "graphdb"]:
@@ -51,6 +54,7 @@ def convert_graph(gfn, informat, save_dir, *outformats):
 
 def convertLCCNpyToMat(lcc_fn):
   '''
+  * Deprecated
   Convert a npy largest connected components file to an equivalent .mat file.
 
   positional args:
@@ -64,6 +68,7 @@ def convertLCCNpyToMat(lcc_fn):
 
 def convertSVDNpyToMat(svd_fn):
   '''
+  * Deprecated
   Convert a npy sigular value decomposition file to an equivalent .mat file
   svd_fn - sigular value decomposition full file name which should be a .npy
 
@@ -76,6 +81,7 @@ def convertSVDNpyToMat(svd_fn):
 
 def convertAndSave(fn, toFormat, saveLoc, fileType):
   '''
+  * Deprecated
   Convert invariant array between .npy, .csv, .mat.
 
   positional args:
@@ -141,6 +147,7 @@ def writeMultiRowCSV(data, saveLoc, fnBase):
 
 def convertGraph(G_fn, toFormat, saveLoc=None):
   '''
+  * Deprecated
   Convert a graph from mat format to npy format
 
   positional args:
@@ -173,6 +180,7 @@ def convertGraph(G_fn, toFormat, saveLoc=None):
 
 def convertGraphToCSV(G_fn, G=None, saveLoc=None):
   '''
+  * Deprecated
   Convert a graph .mat format to a dense comma separated value file (.csv)
 
   positional args:
@@ -210,6 +218,7 @@ def convertGraphToCSV(G_fn, G=None, saveLoc=None):
 
 def loadFile(file_fn, fileType):
   '''
+  * Deprecated
   Determine how to load a file based on the extension &
   the fileType
 

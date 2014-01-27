@@ -9,7 +9,7 @@ import math
 import itertools
 import igraph
 from collections import defaultdict
-from fibergraph import _FiberGraph
+from mrcap.fibergraph import _FiberGraph
 from time import time
 
 # Class functions documented in fibergraph.py
