@@ -9,7 +9,7 @@ import math
 import itertools
 import igraph
 from collections import defaultdict
-from fibergraph import _FiberGraph
+from mrcap.fibergraph import _FiberGraph
 from computation.utils.desikan import des_map
 
 # Class functions documented in fibergraph.py
