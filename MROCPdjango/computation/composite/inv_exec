@@ -50,21 +50,18 @@ def main():
 
   parser = argparse.ArgumentParser(description='A script run selected/all invariants on a graph\
                                    connected component of a graph. Pass minimally only graph_fn \
-                                   [s|b] [-A|-d|-e|-c|-t|-s|-m|-g|-v]')
+                                   [-A|-d|-e|-c|-t|-s|-m|-g|-v]')
 
   # If fiber_fn is passed the assumption is that you don't have a
   # graph & want it made under the default name or G_fn if provided
 
   # Files and storage
   parser.add_argument('graph_fn', action='store',help='the full filename of the  \
-                      CSC matrix representing a graph (.mat format) to have *NOTE DO NOT USE UNDERSCORES (_)\
-                      in path leaf. eg. /foo/bar_bar/foo.mat is OK but /foo/bar/foo_bar.mat is NOT. [TODO fix]')
+                       graph (.graphml format) to have run invariants on.')
 
   parser.add_argument('-f', '--format', action='store', default='graphml', help='input format of the graph. Default is \'graphml\'')
-  parser.add_argument('-D', '--data_elem', action='store', default=None, help='the name of the data element within the .mat matrix.')
-  parser.add_argument('-S', '--save_dir', action='store', default= mr_data_dir, help='the directory where the invariants \
-                      are to be stored (each invariant will create its own subdirectory within this). \
-                      The defualt is %s' % mr_data_dir)
+  parser.add_argument('-S', '--save_dir', action='store', default= mr_data_dir, help='the directory where the invariant-holding\
+                      graph will be stored  The defualt is %s' % mr_data_dir)
 
   # Invariant options
   parser.add_argument('-A', '--all', action='store_true', help='pass to compute ALL invariants')
@@ -77,7 +74,7 @@ def main():
   parser.add_argument('-g', '--edge', action='store_true', help='pass to compute global egde count')
   parser.add_argument('-v', '--ver', action='store_true', help='pass to compute global vertex count')
 
-  parser.add_argument('-k', action='store', type = int, help='The number of eigenvalues to compute. Max is 50')
+  parser.add_argument('-k', action='store', type = int, help='The number of eigenvalues to compute. Max is 50.')
 
   result = parser.parse_args()
 
