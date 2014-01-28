@@ -45,7 +45,7 @@ def csc_to_graphml(g, is_weighted=True, desikan=False, is_directed=False, save_f
 
   # Do we have desikan labels ?
   if desikan:
-    import desikan
+    from mrcap import desikan
 
     src += "  "*2+"<key id=\"v_region\" for=\"node\" attr.name=\"region\" attr.type=\"string\"/>\n" # Desikan vertex attr called v_region
     tabs = 3

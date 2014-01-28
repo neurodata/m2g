@@ -8,7 +8,7 @@ import mrcap.roi as roi
 from mrcap.fiber import FiberReader
 from time import time
 
-def genGraph(infname, outfname, roixmlname=None, roirawname=None, bigGraph=False, outformat="graphml", numfibers=0, read_shape=False):
+def genGraph(infname, outfname, roixmlname=None, roirawname=None, bigGraph=False, outformat="graphml", numfibers=0):
   """
   Generate a sparse igraph from an MRI file based on input and output names.
   Outputs a graphml formatted graph by default
@@ -72,10 +72,7 @@ def genGraph(infname, outfname, roixmlname=None, roirawname=None, bigGraph=False
 
   # Create the graph object
   # get dims from reader
-  if read_shape:
-    fbrgraph = FiberGraph ( reader.shape, rois, None )
-  else:
-    fbrgraph = FiberGraph ( (182,218,182), rois, None )
+  fbrgraph = FiberGraph ( reader.shape, rois, None )
 
   print "Parsing MRI studio file {0}".format ( infname )
 
@@ -94,8 +91,8 @@ def genGraph(infname, outfname, roixmlname=None, roirawname=None, bigGraph=False
     if count % 10000 == 0:
       print ("Processed {0} fibers".format(count) )
 
-      #if count == 20000:
-        #break
+      if count == 10000:
+        break
 
   del reader
   # Done adding edges
