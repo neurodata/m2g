@@ -10,7 +10,7 @@ import itertools
 import igraph
 from collections import defaultdict
 from mrcap.fibergraph import _FiberGraph
-from computation.utils.desikan import des_map
+from mrcap.desikan import des_map
 
 # Class functions documented in fibergraph.py
 

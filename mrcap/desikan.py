@@ -33,3 +33,24 @@ des_map = {
 65:"rh-superiortemporal", 66:"rh-supramarginal", 67:"rh-frontalpole",
 68:"rh-temporalpole", 69:"rh-transversetemporal"
 }
+
+from zindex import MortonXYZ
+import scipy.io as sio
+
+class DesMap():
+  def __init__(self, label_fn):
+    self.labels = sio.loadmat(label_fn)["labels"]
+
+  def get_mapping(self, vertex):
+    x,y,z = MortonXYZ(vertex)
+    return ( des_map[self.labels[x, y, z]] )
+
+  def get_all_mappings(self, numverts):
+    regions = []
+    for vertex in xrange(numverts):
+      #try:
+        regions.append(self.get_mapping(vertex))
+      #except:
+      #  import pdb; pdb.set_trace()
+
+    return regions

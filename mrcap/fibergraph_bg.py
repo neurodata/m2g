@@ -11,7 +11,8 @@ import igraph
 from collections import defaultdict
 from mrcap.fibergraph import _FiberGraph
 from time import time
-
+import os
+from mrcap.desikan import DesMap
 # Class functions documented in fibergraph.py
 
 class FiberGraph(_FiberGraph):
@@ -77,4 +78,7 @@ class FiberGraph(_FiberGraph):
 
   def complete(self, ):
     super(FiberGraph, self).complete()
-    # TODO: Add desikan labels for each vertex
+    print "Adding desikan labels ..."
+    #self_maxval = 182*218*182 # FIXME STUB FOR FIX
+    #lf = os.path.join(os.path.dirname(__file__),"utils/MNI_labels.mat")
+    #self.spcscmat.vs["region"] = DesMap(label_fn=lf).get_all_mappings(self._maxval)

@@ -139,7 +139,7 @@ class Fiber:
 
     def __str__(self):
         return self.header.__str__() + "\n" + self.path.__str__()
-    
+
     #
     #  Return a list of voxels in this Fiber.  As tuples by zindex
     #
@@ -150,10 +150,9 @@ class Fiber:
 
       #  This is corrected to match the logic of MRCAP
       # extract a path of vertices
-      for fbrpt in self.path: 
-        
+      for fbrpt in self.path:
+
           voxels.append ( zindex.XYZMorton ( [ int(fbrpt[0]), int(fbrpt[1]), int(fbrpt[2]) ] ))
 
       # eliminate duplicates
       return set ( voxels )
-
