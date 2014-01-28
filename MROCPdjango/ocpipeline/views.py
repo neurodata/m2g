@@ -13,8 +13,6 @@ from glob import glob
 import threading
 from random import randint
 os.environ["MPLCONFIGDIR"] = "/tmp/"
-#import matplotlib
-#matplotlib.use( "Agg" )
 
 import zipfile
 import tempfile
@@ -353,7 +351,7 @@ def upload(request, webargs=None):
     derivatives, rawdata,  graphs, request.session['graphInvariants'], images = defDataDirs(userDefProjectDir)
 
     ''' Make appropriate dirs if they dont already exist '''
-    createDirStruct.createDirStruct([derivatives, rawdata, graphs, request.session['graphInvariants'], images])
+    createDirStruct.createDirStruct([derivatives, graphs,request.session["graphInvariants"]])
     print 'Directory structure created...'
 
     uploadFiles =  writeBodyToDisk(request.body, derivatives)
@@ -362,35 +360,20 @@ def upload(request, webargs=None):
     roi_xml_fn, fiber_fn, roi_raw_fn = filesorter.checkFileExtGengraph(uploadFiles) # Check & sort files
 
     ''' Data Processing '''
-    if (re.match(re.compile('(b|big)', re.IGNORECASE), graphsize)):
-      request.session['graphsize'] = 'big'
-      request.session['smGrfn'], request.session['bgGrfn'], lccfn, SVDfn \
-        = call_gengraph(fiber_fn, roi_xml_fn, roi_raw_fn,graphs,\
-                      request.session['graphInvariants'],\
-                      request.session['graphsize'],True)
-
-    elif(re.match(re.compile('(s|small)', re.IGNORECASE), graphsize)):
-      request.session['graphsize'] = 'small'
-      request.session['smGrfn'], request.session['bgGrfn'], lccfn, SVDfn \
-        = call_gengraph(fiber_fn, roi_xml_fn, roi_raw_fn,graphs, request.session['graphInvariants'], request.session['graphsize'],True)
+    if graphsize:
+      request.session['Gfn']= call_gengraph(fiber_fn, roi_xml_fn, roi_raw_fn, \
+                              graphs, request.session['graphInvariants'],\
+                              graphsize, run=True)
 
     else:
-      return django.http.HttpResponseBadRequest ("Missing graph size. Specify big or small")
+      return django.http.HttpResponseBadRequest ("Missing graph size. You must specify big or small")
 
     # Run invariants
     if len(request.session['invariants']) > 0:
-      print "Computing invariants"
-      if (request.session['graphsize'] == 'big'):
-        graph_fn = request.session['bgGrfn']
-        lcc_fn = request.session['lccfn']
-
-      elif (request.session['graphsize'] == 'small'):
-        graph_fn = request.session['smGrfn']
-        lcc_fn = None
+      print "Computing invariants ..."
 
       invariant_fns = runInvariants(request.session['invariants'],\
-                                          graph_fn, request.session['graphInvariants'],\
-                                          lcc_fn, request.session['graphsize'])
+                      request.session['Gfn'], request.session['graphInvariants'])
 
     #ret = rzfile.printdir()
     #ret = rzfile.testzip()
@@ -718,12 +701,12 @@ def call_gengraph(fiber_fn, roi_xml_fn, roi_raw_fn, graphs, graphInvariants, gra
   Gfn = os.path.join(graphs, baseName) # partial name
 
   if (run):
-    if (graphsize == 'small'):
+    if graphsize.lower().startswith("s"):
       print("Running Small gengraph ...")
       Gfn+="smgr.graphml"
       gengraph.genGraph(fiber_fn, Gfn, roi_xml_fn, roi_raw_fn, bigGraph=False)
 
-    elif(graphsize == 'big'):
+    elif graphsize.graphsize.lower().startswith("b"):
       print("\nRunning Big gengraph ...")
       Gfn+="bggr.graphml"
       gengraph.genGraph(fiber_fn, Gfn, roi_xml_fn, roi_raw_fn, bigGraph=True)
