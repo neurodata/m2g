@@ -8,7 +8,7 @@ import mrcap.roi as roi
 from mrcap.fiber import FiberReader
 from time import time
 
-def genGraph(infname, outfname, roixmlname=None, roirawname=None, bigGraph=False, outformat="graphml", numfibers=0): # Edit
+def genGraph(infname, outfname, roixmlname=None, roirawname=None, bigGraph=False, outformat="graphml", numfibers=0, read_shape=False):
   """
   Generate a sparse igraph from an MRI file based on input and output names.
   Outputs a graphml formatted graph by default
@@ -17,10 +17,16 @@ def genGraph(infname, outfname, roixmlname=None, roirawname=None, bigGraph=False
   ================
   infname - file name of _fiber.dat file
   outfname - Dir+fileName of output .mat file
+
+  optional args:
+  ==============
   roixmlname - file name of _roi.xml file
   roirawname - file name of _roi.raw file
   bigGraph - boolean True or False on whether to process a bigraph=True or smallgraph=False
   numfibers - the number of fibers
+
+  read_shape - **NOTE** Temp arg used compensate for incorrect reading of the adj mat dims
+  from the xml. Will disappear in future releases.
   """
 
   start = time()
@@ -66,8 +72,10 @@ def genGraph(infname, outfname, roixmlname=None, roirawname=None, bigGraph=False
 
   # Create the graph object
   # get dims from reader
-# fbrgraph = FiberGraph ( reader.shape, rois, masks )
-  fbrgraph = FiberGraph ( reader.shape, rois, None )
+  if read_shape:
+    fbrgraph = FiberGraph ( reader.shape, rois, None )
+  else:
+    fbrgraph = FiberGraph ( (182,218,182), rois, None )
 
   print "Parsing MRI studio file {0}".format ( infname )
 
