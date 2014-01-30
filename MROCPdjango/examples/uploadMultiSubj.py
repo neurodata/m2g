@@ -25,9 +25,7 @@ def getFiberID(fiberfn):
 
 def main():
 
-  parser = argparse.ArgumentParser(description='Upload a multiple subjects to MROCP via a single dir that must match bg1/MRN\
-		   . Base url -> http://www.mrbrain.cs.jhu.edu/disa/upload')
-
+  parser = argparse.ArgumentParser(description='Upload a multiple subjects to MROCP via a single dir that must match bg1/MRN. Base url -> http://www.mrbrain.cs.jhu.edu/disa/upload')
   parser.add_argument('url', action="store", help='url must be http://mrbrain.cs.jhu.edu/disa/upload/{projectName}/{site}/{subject}/{session}')
   parser.add_argument('graphsize', action="store", help= 'size of the graph. s OR b where s= smallgraph OR b = biggraph')
   parser.add_argument('fiberDir', action="store", help = 'the path of the directory containing fiber tract files')
@@ -39,24 +37,12 @@ def main():
 
   result = parser.parse_args()
 
-  # Sanity checks to ensure the args SEEM valid
-  result.url = result.url if result.url.endswith('/') else result.url + '/' #
-  result.graphsize = result.graphsize if result.graphsize.endswith('/') else result.graphsize + '/'
-
-  if len(result.url.split('/')) != 9:
-    print "[ERROR]: Check the number of terms separated by a '/' in the to url argument"
-    sys.exit(-1)
-
-  if len(result.graphsize.split('/')) != 2:
-    print "[ERROR]: Check the graphsize argument"
-    sys.exit(-1)
-
   for fiber_fn in os.listdir(result.fiberDir):
     if not fiber_fn.startswith('.'): # get rid of meta files & hidden ones
       fiber_fn = os.path.join(result.fiberDir,fiber_fn)
 
       if not (os.path.exists(fiber_fn)):
-        print "[ERROR]: fiber_fn not found!"
+        print "[ERROR]: fiber_fn '%s' not found!" % fiber_fn
         sys.exit(0)
 
       roi_xml_fn = os.path.join(result.roiDir, getFiberID(fiber_fn) + 'roi.xml') # Edit appropriately for file naming convention
@@ -86,6 +72,9 @@ def main():
   #    ret = rzfile.namelist()
   #    import pdb; pdb.set_trace()
 
+      result.url = result.url if result.url.endswith('/') else result.url + '/' #
+      result.graphsize = result.graphsize if result.graphsize.endswith('/') else result.graphsize + '/'
+
       ''' VERY IMPORTANT TO NOTE HOW TO BUILD THE URL '''
       if result.invariants:
         callUrl = result.url + getFiberID(fiber_fn)[:-1]+ '/' + result.graphsize + result.invariants
@@ -103,7 +92,7 @@ def main():
         sys.exit(0)
 
   the_page = response.read()
-  print "Hit parent directory t\n" + the_page
+  print "Here is parent directory:\n====> " + the_page
 
   if result.auto:
     ''' Optional: Open up a tab/window in your browser to view results'''

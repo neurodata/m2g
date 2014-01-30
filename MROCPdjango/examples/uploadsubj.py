@@ -13,7 +13,7 @@ import webbrowser
 def main():
 
   parser = argparse.ArgumentParser(description='Upload a subject to MROCP. Base url -> http://mrbrain.cs.jhu.edu/disa/upload')
-  parser.add_argument('url', action="store", help='url must have NO SPACES & must be in the form  http://mrbrain.cs.jhu.edu/disa/upload/{projectName}/{site}/{subject}/{session}/{scanID}/{s|b} where s= smallgraph OR b = biggraph')
+  parser.add_argument('url', action="store", help='url must have NO SPACES & must be in the form  http://mrbrain.cs.jhu.edu/disa/upload/{projectName}/{site}/{subject}/{session}/{scanID}/{s|b}, where s= smallgraph OR b = biggraph')
   parser.add_argument('-i', '--invariants', action="store", help='OPTIONAL: comma separated list of invariant types. E.g cc,tri,deg,mad for \
                       clustering coefficient, triangle count, degree & maximum average degree')
 
@@ -33,9 +33,9 @@ def main():
     tmpfile = tempfile.NamedTemporaryFile()
     zfile = zipfile.ZipFile ( tmpfile.name, "w" )
 
-    zfile.write ( result.fiberfile)
-    zfile.write ( result.roixmlfile )
-    zfile.write ( result.roirawfile)
+    zfile.write(result.fiberfile)
+    zfile.write(result.roixmlfile)
+    zfile.write(result.roirawfile)
     zfile.close()
 
     tmpfile.flush()
@@ -54,19 +54,18 @@ def main():
     sys.exit(0)
 
   try:
-    if (result.invariants is not None):
-      req = urllib2.Request ( result.url + result.invariants , tmpfile.read() ) # Important to concatenate these in this order
-    else:
-      req = urllib2.Request ( result.url, tmpfile.read() )
-
+    call_url = result.url if result.invariants is None else result.url + result.invariants
+    print "Calling url: %s" % call_url
+    req = urllib2.Request ( call_url , tmpfile.read() ) # Important to concatenate these in this order
     response = urllib2.urlopen(req)
+
   except urllib2.URLError, e:
     print "Failed URL", result.url
     print "Error %s" % (e.read())
     sys.exit(0)
 
   the_page = response.read()
-  print '/n' +  the_page
+  print '\n====> ' + the_page
 
   if result.auto:
     ''' Optional: Open up a tab/window in your browser to view results'''
