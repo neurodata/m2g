@@ -73,7 +73,7 @@
 
         <ul>
           <li>There is a directory containing all fiber tract files you wish to be processed with no other sub-directories or files you do not wish to process.</li>
-          <li>There is a directory containing all corresponding roi files (i.e both an xml and raw file for each fiber tract file) with file names in accordance with the convention noted below.
+          <li>There is a directory containing all corresponding roi files (i.e both an xml and raw file for each fiber tract file) with file names in accordance with the convention noted below.</li>
           <strong>Note the root of each roi file name should:</strong>
             <ol>
               <li>End in <strong> _roi</strong> E.g filename_roi.xml and filename_roi.raw.</li>
@@ -82,7 +82,6 @@
                 then there must be a <strong>sample1_roi.raw</strong> AND a <strong> sample1_roi.xml</strong>. Thus the root is <strong>sample1</strong> in this example.
               </li>
             </ol>
-          </li>
         </ul>
 
         All fiber tract files  will be treated as a single project with multiple scanIDs derived from the file name.
@@ -94,16 +93,16 @@
     {% endblock programmatic %}
 
         <div id="Graph_specs">
-           <h2>Specifications for graphs built</h2>
+           <h3>Specifications for graphs built</h3>
             <ul>
-              <li> A <a href="http://graphml.graphdrawing.org/" target="blank">graphML</a> file formated graph. The format is readable by any xml-parser. <br/> 
-              It is also natively supported by the <a href="http://igraph.sourceforge.net/" targe="blank">igraph</a> graph analysis framework in C, R and Python. <br/>
-              <b>NOTE: </b>Iterable data items are represented as <a href="http://en.wikipedia.org/wiki/JSON">JSON</a> encoded strings as an extension to the graphML file format. 
+              <li> A <a href="http://graphml.graphdrawing.org/" target="blank">graphML</a> file formated graph. The format is readable by any xml-parser. </li>
+              <li>It is also natively supported by the <a href="http://igraph.sourceforge.net/" target="blank">igraph</a> graph analysis framework in C, R and Python.</li>
+              <li><b>NOTE: </b>Iterable data items are represented as <a href="http://en.wikipedia.org/wiki/JSON">JSON</a> encoded strings as an extension to the graphML file format.</li>
+            </ul>
 
           <h3>What's the difference between big and small graphs?</h3>
-
-              Glad you asked! The terms big/small graph are particularly relevant to fiber streamline graphs. Small graphs are of dimension 70 x 70 vertices. <br/>
+              The terms big/small graph are particularly relevant to fiber streamline graphs. Small graphs are of dimension 70 x 70 vertices. <br/>
               Big graphs can be in the <b>millions</b> of vertices.
-            </ul>
+
         </div>
   {% endblock content%}
