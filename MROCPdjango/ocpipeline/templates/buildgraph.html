@@ -96,13 +96,11 @@
         <div id="Graph_specs">
            <h2>Specifications for graphs built</h2>
             <ul>
-              <li> A <a href="http://www.mathworks.com/help/matlab/ref/struct.html" target="blank"> MATLAB struct </a> with a data element named named
-              <code>fibergraph</code> that is a <a href="http://docs.scipy.org/doc/scipy/reference/generated/scipy.sparse.csc_matrix.html#scipy.sparse.csc_matrix" target="blank">
-              numpy CSC (Compressed Sparse Column) matrix</a>. <br/>
-              It is loadable from a python shell using <code><a href="http://docs.scipy.org/doc/scipy/reference/generated/scipy.io.loadmat.html" target="blank">scipy.io.loadmat</a>(filename)['fibergraph']</code>
-              </li>
+              <li> A <a href="http://graphml.graphdrawing.org/" target="blank">graphML</a> file formated graph. The format is readable by any xml-parser. <br/> 
+              It is also natively supported by the <a href="http://igraph.sourceforge.net/" targe="blank">igraph</a> graph analysis framework in C, R and Python. <br/>
+              <b>NOTE: </b>Iterable data items are represented as <a href="http://en.wikipedia.org/wiki/JSON">JSON</a> encoded strings as an extension to the graphML file format. 
 
-              <h3>What's the difference between big and small graphs?</h3>
+          <h3>What's the difference between big and small graphs?</h3>
 
               Glad you asked! The terms big/small graph are particularly relevant to fiber streamline graphs. Small graphs are of dimension 70 x 70 vertices. <br/>
               Big graphs can be in the <b>millions</b> of vertices.
