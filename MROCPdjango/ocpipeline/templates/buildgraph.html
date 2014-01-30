@@ -37,9 +37,7 @@
         The example <a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjango/examples/uploadsubj.py"
         target="blank"> uploadsubj.py</a> can be used as follows from a terminal session:
         </p>
-
-        <code>python uploadsubj.py http://mrbrain.cs.jhu.edu/disa/upload/YOUR_project/YOUR_site/YOUR_subject/YOUR_session/YOUR_scanID/s fiber_tract_file roi_raw_file roi_xml_file -i cc,tri,ss1,mad,deg,eig</code>
-
+        <code>python uploadsubj.py http://mrbrain.cs.jhu.edu/disa/upload/progmatic/site/subj/sess/scan/s YOUR_FIBER.dat YOUR_ROI.xml YOUR_ROI.raw -i cc,tri,ss1,mad,deg,eig</code>
         <p>
          The parameter after YOUR_scan can either be <code>s</code> or <code>b</code>, but not both. Using <code>s</code> or <code>small</code> builds a small graph
          (70 x 70 vertices) while <code>b</code> or <code>big</code> builds a big graph on the order of 10 M x 10 M vertices. <br/>
@@ -67,8 +65,8 @@
         is also provided. This is as an example of how to process multiple jobs with a single programmatic call.<br/>
 
         From within a terminal/command line session, it can be used as follows: <br/>
-        <code>python uploadMultiSubj.py http://mrbrain.cs.jhu.edu/disa/upload/YOUR_project/YOUR_site/YOUR_subject/YOUR_session/ s
-        fiber_tract_dirctory roi_dirctory -i cc,tri,ss1,mad,deg,eig</code><br/>
+
+        <code>python uploadMultiSubj.py http://mrbrain.cs.jhu.edu/disa/upload/YOUR_project/YOUR_site/YOUR_subject/YOUR_session/s fiber_tract_dirctory roi_dirctory -i cc,tri,ss1,mad,deg,eig</code><br/>
 
         This call would build graphs for multiple scans and compute all invariants noted in the <code>-i</code> flag.
         The example assumes the following:
@@ -107,7 +105,7 @@
               <h3>What's the difference between big and small graphs?</h3>
 
               Glad you asked! The terms big/small graph are particularly relevant to fiber streamline graphs. Small graphs are of dimension 70 x 70 vertices. <br/>
-              Big graphs are around 10 M x 10 M vertices.
+              Big graphs can be in the <b>millions</b> of vertices.
             </ul>
         </div>
   {% endblock content%}

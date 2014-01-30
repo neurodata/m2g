@@ -17,8 +17,8 @@ des_map = {
 21:"lh-pericalcarine", 22:"lh-postcentral", 23:"lh-posteriorcingulate",
 24:"lh-precentral", 25:"lh-precuneus", 26:"lh-rostralanteriorcingulate",
 27:"lh-rostralmiddlefrontal", 28:"lh-superiorfrontal", 29:"lh-superiorparietal",
-30:"lh-superiortemporal", 31:"lh-supramarginal",
-32:"lh-frontalpole", 33:"lh-temporalpole", 34:"lh-transversetemporal",
+30:"lh-superiortemporal", 31:"lh-supramarginal", 32:"lh-frontalpole",
+33:"lh-temporalpole", 34:"lh-transversetemporal",
 
 35:"rh-unknown", 36:"rh-bankssts", 37:"rh-caudalanteriorcingulate",
 38:"rh-caudalmiddlefrontal", 39:"rh-corpuscallosum", 40:"rh-cuneus",
@@ -34,6 +34,10 @@ des_map = {
 68:"rh-temporalpole", 69:"rh-transversetemporal"
 }
 
+# Note following for desikan labels
+# [0-34] -> [0-34] # left hemisphere
+# [101-135] -> [35 - 69] # right hemisphere
+
 from zindex import MortonXYZ
 import scipy.io as sio
 
@@ -43,14 +47,12 @@ class DesMap():
 
   def get_mapping(self, vertex):
     x,y,z = MortonXYZ(vertex)
-    return ( des_map[self.labels[x, y, z]] )
+    des_val = self.labels[x, y, z]
+    if des_val > 100: des_val -= 66
+    return ( des_map[des_val] )
 
-  def get_all_mappings(self, numverts):
+  def get_all_mappings(self, vertices):
     regions = []
-    for vertex in xrange(numverts):
-      #try:
-        regions.append(self.get_mapping(vertex))
-      #except:
-      #  import pdb; pdb.set_trace()
-
+    for vertex in vertices:
+      regions.append(self.get_mapping(vertex))
     return regions

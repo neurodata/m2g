@@ -321,7 +321,6 @@ def zipProcessedData(request):
   ''' Send it '''
   return response
 
-# TODO - FIXME Programmatic
 def upload(request, webargs=None):
   """
   Programmatic interface for uploading data
@@ -335,20 +334,19 @@ def upload(request, webargs=None):
     webargs = webargs[:-1] if webargs.endswith('/') else webargs
 
     if len(webargs.split('/')) == 7:
-      [userDefProjectName, site, subject, session, scanId, graphsize, request.session['invariants'] ] = webargs.split('/')
+      [userDefProjectName, site, subject, session, scanId, graphsize, request.session['invariants']] = webargs.split('/')
 
       request.session['invariants'] = request.session['invariants'].split(',')
     elif len(webargs.split('/')) == 6:
       [userDefProjectName, site, subject, session, scanId, graphsize] = webargs.split('/')
     else:
       # Some sort of error
-      return django.http.HttpResponseBadRequest ("Malformatted programmatic \
-          request. Check format of url and data requests")
+      return HttpResponseBadRequest ("Malformatted programmatic request. Check format of url and data requests")
 
     userDefProjectDir = adaptProjNameIfReq(os.path.join(settings.MEDIA_ROOT, 'public', userDefProjectName, site, subject, session, scanId))
 
     ''' Define data directory paths '''
-    derivatives, rawdata,  graphs, request.session['graphInvariants'], images = defDataDirs(userDefProjectDir)
+    derivatives, graphs, request.session['graphInvariants'] = defDataDirs(userDefProjectDir)
 
     ''' Make appropriate dirs if they dont already exist '''
     createDirStruct.createDirStruct([derivatives, graphs,request.session["graphInvariants"]])
@@ -366,28 +364,26 @@ def upload(request, webargs=None):
                               graphsize, run=True)
 
     else:
-      return django.http.HttpResponseBadRequest ("Missing graph size. You must specify big or small")
+      return HttpResponseBadRequest ("Missing graph size. You must specify big or small")
+
 
     # Run invariants
-    if len(request.session['invariants']) > 0:
+    if request.session.has_key('invariants'):
       print "Computing invariants ..."
 
       invariant_fns = runInvariants(request.session['invariants'],\
                       request.session['Gfn'], request.session['graphInvariants'])
 
-    #ret = rzfile.printdir()
-    #ret = rzfile.testzip()
-    #ret = rzfile.namelist()
     dwnldLoc = request.META['wsgi.url_scheme'] + '://' + \
                     request.META['HTTP_HOST'] + userDefProjectDir.replace(' ','%20')
 
     return HttpResponse ( "Files available for download at " + dwnldLoc) # change to render of a page with a link to data result
 
   elif(not webargs):
-    return django.http.HttpResponseBadRequest ("Expected web arguments to direct project correctly")
+    return HttpResponseBadRequest ("Expected web arguments to direct project correctly")
 
   else:
-    return django.http.HttpResponseBadRequest ("Expected POST data, but none given")
+    return HttpResponseBadRequest ("Expected POST data, but none given")
 
 ################## TO DOs ########################
 def download(request, webargs=None):
@@ -706,7 +702,7 @@ def call_gengraph(fiber_fn, roi_xml_fn, roi_raw_fn, graphs, graphInvariants, gra
       Gfn+="smgr.graphml"
       gengraph.genGraph(fiber_fn, Gfn, roi_xml_fn, roi_raw_fn, bigGraph=False)
 
-    elif graphsize.graphsize.lower().startswith("b"):
+    elif graphsize.lower().startswith("b"):
       print("\nRunning Big gengraph ...")
       Gfn+="bggr.graphml"
       gengraph.genGraph(fiber_fn, Gfn, roi_xml_fn, roi_raw_fn, bigGraph=True)
