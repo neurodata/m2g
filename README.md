@@ -1,7 +1,7 @@
 Magnetic Resonance (MR-) Connectome
 ====================================
 
-This project contains several tools to play with fiber data in
+This project contains several tools to play with fiber data in:
 [MRI Studio format](http://www.mristudio.org/).
 
 MRCAP
