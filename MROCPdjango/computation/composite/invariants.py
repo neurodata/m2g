@@ -80,7 +80,7 @@ def compute(inv_dict, sep_save=True, gformat="graphml"):
   if inv_dict.get("eig", False) != False:
 
     # Test if graph is too big for invariants
-    if r_igraph_vcount(G, False) < 100000: # Cannot compute eigs on very big graphs
+    if r_igraph_vcount(G, False) < 1000000: # Cannot compute eigs on very big graphs
       inv_dict["k"] = max(50, r_igraph_vcount(G, False)-3) # Max of 50 eigenvalues
       print "Computing eigen decompositon ..."
       if sep_save:
@@ -95,7 +95,7 @@ def compute(inv_dict, sep_save=True, gformat="graphml"):
       print "Graph too big to compute spectral embedding"
 
   if inv_dict.get("mad", False) != False:
-    if r_igraph_vcount(G, False) < 100000: # Cannot compute eigs on very big graphs
+    if r_igraph_vcount(G, False) < 1000000: # Cannot compute eigs on very big graphs
       if sep_save:
         inv_dict["mad_fn"] = os.path.join(inv_dict["save_dir"], "MAD", \
                                   getBaseName(inv_dict["graph_fn"]) + "_mad.npy")
@@ -323,7 +323,7 @@ def r_igraph_eigs(g, k, return_eigs=False, save_fn=None, real=True):
     mv_mult <- function(x, extra=NULL) {
       as.vector(M %*% x) }
 
-    eig <- arpack(mv_mult, options=list(n=vcount(g), nev=nev, ncv=ncv,  which="LM", maxiter=500))
+    eig <- arpack(mv_mult, options=list(n=vcount(g), nev=nev, ncv=ncv,  which="LM", maxiter=100))
     lapply(list(eig$values, t(eig$vectors)), Re) # return [eigvals, eigvects] real parts only
   }
   """) # A list with [0]=eigenvalues and [1]=eigenvectors. If an eigensolver error occurs then None
