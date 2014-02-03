@@ -46,38 +46,16 @@ def convert_graph(gfn, informat, save_dir, *outformats):
     print err_msg
     return "[ERROR]: "+str(err_msg)
 
+  out_err_msg = ""
   for fmt in outformats:
-    fn = os.path.join(save_dir, os.path.splitext(os.path.basename(gfn))[0]+"."+fmt)
-    print "Writing converted file %s ..." % fn
-    g.write(fn, format=fmt)
+    if fmt in ["graphml", "ncol", "edgelist", "lgl", "pajek", "dot", "gml", "leda"]:
+      fn = os.path.join(save_dir, os.path.splitext(os.path.basename(gfn))[0]+"."+fmt)
+      print "Writing converted file %s ..." % fn
+      g.write(fn, format=fmt)
+    else:
+      out_err_msg += "File conversion format '%s' unknown and omitted ...\n" % fmt
 
-
-def convertLCCNpyToMat(lcc_fn):
-  '''
-  * Deprecated
-  Convert a npy largest connected components file to an equivalent .mat file.
-
-  positional args:
-  ================
-  lcc_fn - largest connected components full file name which should be a .npy
-  '''
-  start  = time()
-  lcc = np.load(lcc_fn).item().toarray()
-  sio.savemat(os.path.splitext(lcc_fn)[0],{'lcc': lcc}, appendmat = True)
-  print ('Lcc sucessfully converted from .npy to .mat in  %.2f secs') % (time()-start)
-
-def convertSVDNpyToMat(svd_fn):
-  '''
-  * Deprecated
-  Convert a npy sigular value decomposition file to an equivalent .mat file
-  svd_fn - sigular value decomposition full file name which should be a .npy
-
-  positional args:
-  ================
-  svd_fn - the full filename of the svd file
-  '''
-  sio.savemat(os.path.splitext(svd_fn)[0],{'svd': np.load(svd_fn)}, appendmat = True)
-
+  return out_err_msg
 
 def convertAndSave(fn, toFormat, saveLoc, fileType):
   '''

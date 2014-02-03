@@ -416,47 +416,6 @@ completed data here: %s.\nPlease check these and try again.\n\n
   # Email user of job finished
   sendJobCompleteEmail(request.session['email'], dwnldLoc)
 
-############################################################
-
-def convertInvariants(invConvertToFormats, invariant_fns):
-  '''
-  Convert a bunch of invariants to a format requested
-  @param invConvertToFormats - mat, npy list [soon csv]
-  @param invariant_fns - dict with key -> invariant name & value -> invariant file name
-  '''
-
-  for fileFormat in invConvertToFormats:
-    # Conversion of all files
-    for inv in invariant_fns.keys():
-      if isinstance(invariant_fns[inv], list): # Case of eigs
-        for fn in invariant_fns[inv]:
-          convertTo.convertAndSave(fn, invConvertToFormats, os.path.dirname(fn), inv)
-      else: # case of all other invariants
-        convertTo.convertAndSave(invariant_fns[inv], invConvertToFormats, \
-                            os.path.dirname(invariant_fns[inv]), inv)
-
-##############################################################
-
-def getLCCfn(graph_fn):
-  '''
-  Look for LCC corresponding to graph file name in accordance with website naming rules
-  @param graphfn - the full file name of the graph
-  '''
-  lcc_fn = None
-  poss_lcc_fn = [] # possible names for lcc_fn
-  poss_lcc_fn.append(os.path.join(os.path.dirname(graph_fn), (os.path.basename(graph_fn).split('_')[0]+ '_concomp.npy'))) # legacy MRCAP
-  poss_lcc_fn.append(os.path.splitext(graph_fn)[0] + '_concomp.npy')
-
-  print "Looking for possible LCCs..."
-  for fn in poss_lcc_fn:
-    if os.path.exists(fn):
-      lcc_fn = fn
-      print "LCC %s uploaded found ..." % fn
-      break
-    else:
-      print "Print possible LCC %s not found ..." % fn
-  return lcc_fn
-
 #########################################
 #	*******************		#
 #	   GRAPH LOAD VIEW		#
@@ -498,7 +457,6 @@ def graphLoadInv(request, webargs=None):
       thr = threading.Thread(target=asyncInvCompute, args=(request,))
       thr.start()
 
-      #asyncInvCompute(request)
       request.session['success_msg'] = \
 """
 Your job was successfully launched. You should receive an email when your  job begins and another one when it completes.
@@ -509,57 +467,39 @@ If you do not see an email in your INBOX check the SPAM folder and add jhmrocp@c
 
   # Programmatic RESTful API
   elif request.method == 'POST' and webargs:
-    if (re.match(re.compile('(l|lcc)', re.IGNORECASE), webargs.split('/')[0])):
-      request.session['graphsize'] = 'big'
-    else:
-      request.session['graphsize'] = 'small'
-
     dataDir = os.path.join(settings.MEDIA_ROOT, 'tmp', strftime("projectStamp%a%d%b%Y_%H.%M.%S/", localtime()))
     makeDirIfNone([dataDir])
 
-    uploadedZip = writeBodyToDisk(request.body, dataDir)[0]
+    uploadedZip = writeBodyToDisk(request.body, dataDir)[0] # Not necessarily a zip
 
     try: # Assume its a zip first
       zipper.unzip(uploadedZip, dataDir) # Unzip the zip
       os.remove(uploadedZip) # Delete the zip
     except:
       print "Non-zip file uploaded ..."
-    graphs = glob(os.path.join(dataDir,'*.mat'))
+    graphs = glob(os.path.join(dataDir,'*'))
 
-    idx = 1 if request.session['graphsize'] ==  'big' else 0
-    request.session['invariants'] = webargs.split('/')[idx].split(',')
-
+    request.session['invariants'] = webargs.split('/')[0].split(',')
     request.session['graphInvariants'] = os.path.join(dataDir, 'graphInvariants')
 
     for graph_fn in graphs:
-      lcc_fn = None
-      if request.session['graphsize'] == 'big':
-        lcc_fn = getLCCfn(graph_fn)
-
-        if not lcc_fn:
-          lcc_fn = os.path.splitext(graph_fn)[0] + '_concomp.npy'
-          print "No precomputed LCC found. Computing LCC %s" % lcc_fn
-          try:
-            lcc.process_single_brain(graph_fn, lcc_fn)
-          except:
-            return HttpResponseBadRequest("Computing the LCC for your graph failed! Check that your graph is binarized and symmetric!")
-
       invariant_fns = runInvariants(request.session['invariants'], graph_fn,
-                        request.session['graphInvariants'], lcc_fn,
-                        request.session['graphsize'])
+                        request.session['graphInvariants'])
       print 'Computing Invariants for annoymous project %s complete...' % graph_fn
 
-      try:
-        idx = 2 if request.session['graphsize'] ==  'big' else 1
-        invConvertToFormats = webargs.split('/')[idx].split(',') # could be mat,npy,csv
-        convertInvariants(invConvertToFormats, invariant_fns)
-      except Exception:
-        print "No conversion of invariants done ..."
+      if len(webargs.split('/')) > 1:
+        err_msg = "" # __init__
+        err_msg = convert_graph(invariant_fns["out_graph_fn"], "graphml",
+                request.session['graphInvariants'], *webargs.split('/')[1].split(','))
 
-    dwnldLoc = request.META['wsgi.url_scheme'] + '://' + \
+      dwnldLoc = request.META['wsgi.url_scheme'] + '://' + \
                     request.META['HTTP_HOST'] + dataDir.replace(' ','%20')
-    return HttpResponse("View Data at: " + dwnldLoc)
+      if (err_msg):
+        err_msg = "Completed with errors. View Data at: %s\n. Here are the errors:%s" % (dwnldLoc, err_msg)
+        return HttpResponse(err_msg)
 
+    return HttpResponse("View Data at: " + dwnldLoc)
+  # Browser
   else:
     form = GraphUploadForm() # An empty, unbound form
 
@@ -605,9 +545,8 @@ def convert(request, webargs=None):
 
       err_msg=""
       for fn in uploadedFiles:
-        res = convert_graph(fn, form.cleaned_data['input_format'],
+        err_msg = convert_graph(fn, form.cleaned_data['input_format'],
                         convertFileSaveLoc, *form.cleaned_data['output_format'])
-        if isinstance(res, str): err_msg+=(res+"\n")
 
       baseurl = request.META['HTTP_HOST']
       host = request.META['wsgi.url_scheme']
@@ -618,12 +557,12 @@ def convert(request, webargs=None):
         err_msg = "Your job completed with errors. The result can be found at %s\n. Here are the errors:%s" % (dwnldLoc, err_msg)
         return render_to_response(
         'convertupload.html',
-        {'convertForm': form, 'err_msg': err_msg},
+        {'convertForm': form, 'err_msg': err_msg+"\n"},
         context_instance=RequestContext(request))
       #else
       return HttpResponseRedirect(dwnldLoc)
 
-  # Programmtic API
+  # Programmtic API # FIXME
   elif(request.method == 'POST' and webargs):
     # webargs is {fileType}/{toFormat}
     fileType = webargs.split('/')[0] # E.g 'cc', 'deg', 'triangle'
