@@ -479,22 +479,28 @@ If you do not see an email in your INBOX check the SPAM folder and add jhmrocp@c
       print "Non-zip file uploaded ..."
     graphs = glob(os.path.join(dataDir,'*'))
 
-    request.session['invariants'] = webargs.split('/')[0].split(',')
+    try:
+      request.session['invariants'] = webargs.split('/')[0].split(',')
+      inGraphFormat = webargs.split('/')[1]
+    except:
+      return HttpResponse("Malformated input invariants list or graph format")
+
     request.session['graphInvariants'] = os.path.join(dataDir, 'graphInvariants')
 
     for graph_fn in graphs:
       invariant_fns = runInvariants(request.session['invariants'], graph_fn,
-                        request.session['graphInvariants'])
+                        request.session['graphInvariants'], inGraphFormat)
       print 'Computing Invariants for annoymous project %s complete...' % graph_fn
 
-      if len(webargs.split('/')) > 1:
+      err_msg=""
+      if len(webargs.split('/')) > 2:
         err_msg = "" # __init__
         err_msg = convert_graph(invariant_fns["out_graph_fn"], "graphml",
-                request.session['graphInvariants'], *webargs.split('/')[1].split(','))
+                request.session['graphInvariants'], *webargs.split('/')[2].split(','))
 
       dwnldLoc = request.META['wsgi.url_scheme'] + '://' + \
                     request.META['HTTP_HOST'] + dataDir.replace(' ','%20')
-      if (err_msg):
+      if err_msg:
         err_msg = "Completed with errors. View Data at: %s\n. Here are the errors:%s" % (dwnldLoc, err_msg)
         return HttpResponse(err_msg)
 
@@ -548,10 +554,8 @@ def convert(request, webargs=None):
         err_msg = convert_graph(fn, form.cleaned_data['input_format'],
                         convertFileSaveLoc, *form.cleaned_data['output_format'])
 
-      baseurl = request.META['HTTP_HOST']
-      host = request.META['wsgi.url_scheme']
-      rooturl = host + '://' + baseurl # Originally was: 'http://mrbrain.cs.jhu.edu' # Done for http & https
-      dwnldLoc = rooturl + convertFileSaveLoc.replace(' ','%20')
+      dwnldLoc = request.META['wsgi.url_scheme'] + '://' + \
+                    request.META['HTTP_HOST'] + convertFileSaveLoc.replace(' ','%20')
 
       if (err_msg):
         err_msg = "Your job completed with errors. The result can be found at %s\n. Here are the errors:%s" % (dwnldLoc, err_msg)
@@ -562,47 +566,43 @@ def convert(request, webargs=None):
       #else
       return HttpResponseRedirect(dwnldLoc)
 
-  # Programmtic API # FIXME
   elif(request.method == 'POST' and webargs):
-    # webargs is {fileType}/{toFormat}
-    fileType = webargs.split('/')[0] # E.g 'cc', 'deg', 'triangle'
-    toFormat =  (webargs.split('/')[1]).split(',')   # E.g 'mat', 'npy' or 'mat,csv'
+    # webargs is {inFormat}/{outFormat}
+    inFormat = webargs.split('/')[0] # E.g 'graphml'| 'dot' | 'leda'
+    outFormat =  webargs.split('/')[1].split(',')
 
-    toFormat = list(set(toFormat)) # Eliminate duplicates if any exist
-
-    # Make sure filetype is valid before doing any work
-    if (fileType not in settings.VALID_FILE_TYPES.keys() and fileType not in settings.VALID_FILE_TYPES.values()):
-      return HttpResponse('Invalid conversion type. Make sure toFormat is a valid type')
-
-    # In case to format does not start with a '.'. Add if not
-    for idx in range (len(toFormat)):
-      if not toFormat[idx].startswith('.'):
-        toFormat[idx] = '.'+toFormat[idx]
+    outFormat = list(set(outFormat)) # Eliminate duplicates if any exist
 
     baseDir = os.path.join(settings.MEDIA_ROOT, 'tmp', strftime('progUpload%a%d%b%Y_%H.%M.%S/', localtime()))
     saveDir = os.path.join(baseDir,'upload') # Save location of original uploads
     convertFileSaveLoc = os.path.join(baseDir,'converted') # Save location of converted data
 
-    if not os.path.exists(saveDir):
-      os.makedirs(saveDir)
+    if not os.path.exists(saveDir): os.makedirs(saveDir)
+    if not os.path.exists(convertFileSaveLoc): os.makedirs(convertFileSaveLoc)
 
-    if not os.path.exists(convertFileSaveLoc):
-      os.makedirs(convertFileSaveLoc)
+    uploadedFiles = writeBodyToDisk(request.body, saveDir)# can only be one file # TODO: Check me
 
-    uploadedFiles = writeBodyToDisk(request.body, saveDir)
+    # Check for zip
+    if os.path.splitext(uploadedFiles[0])[1].strip() == '.zip':
+        zipper.unzip(uploadedFiles[0], saveDir)
+        # Delete zip so its not included in the graphs we uploaded
+        os.remove(uploadedFiles[0])
+        uploadedFiles = glob(os.path.join(saveDir, "*")) # get the uploaded file names
 
-    isCorrectFileFormat, isCorrectFileType = convertFiles(uploadedFiles, fileType, toFormat, convertFileSaveLoc)
-
-    if not (isCorrectFileType):
-      return HttpResponse("[ERROR]: You did not enter a valid FileType.")
-    if not (isCorrectFileFormat):
-      return HttpResponse("[ERROR]: You do not have any files with the correct extension for conversion")
+    err_msg = ""
+    for fn in uploadedFiles:
+      err_msg = convert_graph(fn, inFormat,
+                        convertFileSaveLoc, *outFormat)
 
     dwnldLoc = request.META['wsgi.url_scheme'] + '://' + \
                     request.META['HTTP_HOST'] + convertFileSaveLoc.replace(' ','%20')
 
+    if err_msg:
+      err_msg = "Completed with errors. View Data at: %s\n. Here are the errors:%s" % (dwnldLoc, err_msg)
+      return HttpResponse(err_msg)
+
     return HttpResponse ( "Converted files available for download at " + dwnldLoc + " . The directory " +
-            "may be empty if you try to convert to the same format the file is already in.") # change to render of a page with a link to data result
+            "may be empty if you try to convert from, and to the same format.") # change to render of a page with a link to data result
 
   else:
     form = ConvertForm() # An empty, unbound form

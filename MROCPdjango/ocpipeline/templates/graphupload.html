@@ -79,10 +79,10 @@
 
         <h3 id="single_graph"> Single graph </h3>
         <p>
-        Assume we have a single graph located in the same directory as the example script named <code>data.graphml</code>.
-        Typing <code>python computeInvariants.py http://www.mrbrain.cs.jhu.edu/disa/graphupload/ cc,tri,ss1 data.graphml -f graphml</code> will
-        upload your <code>data.graphml</code> file and compute: clustering coefficient, local triangle count, and scan statistic-1. <code>-f</code> flag specifies the format of the graph.
-        If the <code>-f</code> flag is not used then we infer type based on file extension. All legal formats are noted <a href="#graph_format_opts">here</a>.
+        Assume we have a single graph located in the same directory as the example script named <code>YOUR_GRAPH_FILE_NAME</code>.
+        Typing <code>python computeInvariants.py http://www.mrbrain.cs.jhu.edu/disa/graphupload/ cc,tri,ss1 YOUR_GRAPH_FILE_NAME GRAPH_FORMAT -c gml,dot,pajek</code> will
+        upload your <code>YOUR_GRAPH_FILE_NAME</code> file, in <code>GRAPH_FORMAT</code> format; compute: clustering coefficient, local triangle count, and scan statistic-1; then convert the invariant-attributed
+        graphs to <code>gml</code>,<code>dot</code>, and <code>pajek</code> format.
 
         Here is a breakdown of the command line call arguments:
         <ol>
@@ -102,7 +102,7 @@
 
         <li>
         <div id="graph_format_opts">
-          The <code>-f</code> flag allows you to pass the format of the graph(s) being uploaded. Current available options for graph format are:<br/>
+          The second argument allows you to pass the input format of the graph(s) being uploaded. Current available options for graph format are:<br/>
           <code>graphml, ncol, edgelist, lgl, pajek, graphdb, mat, npy</code>
         </div>
         </li>
