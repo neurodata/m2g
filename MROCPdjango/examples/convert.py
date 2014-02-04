@@ -13,11 +13,12 @@ import webbrowser
 
 def main():
 
-  parser = argparse.ArgumentParser(description='Upload and convert a file between .mat, .npy, .csv bject. Base url -> http://mrbrain.cs.jhu.edu/disa/convert')
-  parser.add_argument('fileToConvert', action="store", help="The full file name of the file to be converted")
-  parser.add_argument('url', action="store", help='url must be in the form http://mrbrain.cs.jhu.edu/disa/convert/{fileType}/{toFormat}. Example {fileType} values fg|[fibergraph], cc|[clustCoeff] \
-                      {toFormat} can be a comma separated list e.g mat,npy,csv')
+  parser = argparse.ArgumentParser(description='Upload and convert a graph from graphml,ncol,edgelist,lgl,pajek,graphdb,numpy,mat to graphml,ncol,edgelist,lgl,pajek,dot,gml,leda object. Base url -> http://mrbrain.cs.jhu.edu/disa/convert')
 
+  parser.add_argument('url', action="store", help='url must be in the form http://mrbrain.cs.jhu.edu/disa/convert/{inFormat}/{outFormat}. Example {inFormat}: graphml | ncol | edgelist | lgl | pajek | graphdb | numpy | mat \
+                      .{outFormat} can be a comma separated list of the following e.g graphml,ncol,edgelist,lgl,pajek,dot,gml,leda')
+
+  parser.add_argument('fileToConvert', action="store", help="The file you want to convert. Can to single graph of zip file with multiple graphs. Zip graphs not folders!")
   parser.add_argument('-a', '--auto', action="store_true", help="Use this flag if you want a browser session to open up with the result automatically")
 
   result = parser.parse_args()

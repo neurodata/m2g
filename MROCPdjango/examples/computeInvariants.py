@@ -21,6 +21,7 @@ def main():
                       clustering coefficient, triangle count, degree, maximum average degree, eigen-pairs & scan statistic')
   parser.add_argument('file', action="store", help ='Single .mat graph or a Zipped directory with one or more graphs')
 
+  parser.add_argument('inputFormat', action='store', help='Input format of the graph i.e. One of: graphml | ncol | edgelist | lgl | pajek | graphdb | numpy | mat')
   parser.add_argument('--convertToFormat', '-c', action='store', help='comma separated list of convert to formats. Currently choices: mat (result is npy)')
 
   parser.add_argument('-a', '--auto', action="store_true", help="Use this flag if you want a browser session to open up with the result automatically")
@@ -53,15 +54,17 @@ def main():
 #    import pdb; pdb.set_trace()
 
   result.url = result.url if result.url.endswith('/') else result.url + '/' #
+  result.webargs = result.webargs if result.webargs.endswith('/') else result.webargs + '/'
 
   if result.convertToFormat:
-    result.webargs = result.webargs if result.webargs.endswith('/') else result.webargs + '/'
+    result.inputFormat = result.inputFormat if result.inputFormat.endswith('/') else result.inputFormat + '/'
 
   result.convertToFormat = "" if not result.convertToFormat else result.convertToFormat
 
+
   try:
     ''' **IMPORTANT: THIS IS HOW TO BUILD THE URL** '''
-    req = urllib2.Request ( result.url + result.webargs + result.convertToFormat, tmpfile.read() )
+    req = urllib2.Request ( result.url + result.webargs + result.inputFormat + result.convertToFormat, tmpfile.read() )
     print "Calling url ..."
     response = urllib2.urlopen(req)
   except urllib2.URLError, e:
