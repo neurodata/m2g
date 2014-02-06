@@ -18,7 +18,7 @@ def main():
   parser.add_argument('url', action="store", help='url must be in the form http://mrbrain.cs.jhu.edu/disa/convert/{inFormat}/{outFormat}. Example {inFormat}: graphml | ncol | edgelist | lgl | pajek | graphdb | numpy | mat \
                       .{outFormat} can be a comma separated list of the following e.g graphml,ncol,edgelist,lgl,pajek,dot,gml,leda')
 
-  parser.add_argument('fileToConvert', action="store", help="The file you want to convert. Can to single graph of zip file with multiple graphs. Zip graphs not folders!")
+  parser.add_argument('fileToConvert', action="store", help="The file you want to convert. Can be a single graph or a zip file with multiple graphs. Zip graphs and not folders or failure will occur!")
   parser.add_argument('-a', '--auto', action="store_true", help="Use this flag if you want a browser session to open up with the result automatically")
 
   result = parser.parse_args()

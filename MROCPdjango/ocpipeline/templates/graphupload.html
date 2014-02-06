@@ -68,19 +68,19 @@
       <div id="programmatic">
       <h2> Programmatic use </h2>
       <p> This is can be accessed using the base url <pre>http://www.mrbrain.cs.jhu.edu/disa/graphupload/</pre>
-      The example python script can be found <a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjango/examples/computeInvariants.py" target="blank">here</a>.
+      The example python script can be found <a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjango/examples/compute.py" target="blank">here</a>.
       </p>
 
         <h3> How to use the example </h3>
-        <p>After downlaoding the <a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjango/examples/computeInvariants.py" target="blank">example</a>,
-         start a terminal session. Assuming you are in the same directory as the example. Typing <code>python computeInvariants.py -h</code> will give help on how to use the
-         example and what options are available to you. Below are examples of <a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjango/examples/computeInvariants.py" target="blank">its</a> use.<br/>
+        <p>After downlaoding the <a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjango/examples/compute.py" target="blank">example</a>,
+         start a terminal session. Assuming you are in the same directory as the example. Typing <code>python compute.py -h</code> will give help on how to use the
+         example and what options are available to you. Below are examples of <a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjango/examples/compute.py" target="blank">its</a> use.<br/>
         </p>
 
         <h3 id="single_graph"> Single graph </h3>
         <p>
         Assume we have a single graph located in the same directory as the example script named <code>YOUR_GRAPH_FILE_NAME</code>.
-        Typing <code>python computeInvariants.py http://www.mrbrain.cs.jhu.edu/disa/graphupload/ cc,tri,ss1 YOUR_GRAPH_FILE_NAME GRAPH_FORMAT -c gml,dot,pajek</code> will
+        Typing <code>python compute.py http://www.mrbrain.cs.jhu.edu/disa/graphupload/ cc,tri,ss1 YOUR_GRAPH_FILE_NAME GRAPH_FORMAT -c gml,dot,pajek</code> will
         upload your <code>YOUR_GRAPH_FILE_NAME</code> file, in <code>GRAPH_FORMAT</code> format; compute: clustering coefficient, local triangle count, and scan statistic-1; then convert the invariant-attributed
         graphs to <code>gml</code>,<code>dot</code>, and <code>pajek</code> format.
 
@@ -115,7 +115,7 @@
 
         <h3> Multiple graphs </h3>
         <p>
-          The same <a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjango/examples/computeInvariants.py" target="blank">example</a> script can be used for multiple
+          The same <a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjango/examples/compute.py" target="blank">example</a> script can be used for multiple
           graphs. Simply zip all graphs into a single zipfile. Other than zipping graphs together the functionality is identical to <a href="#single_graph">single graph programmatic use</a>.
 
       </p>

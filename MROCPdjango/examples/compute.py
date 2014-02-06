@@ -22,7 +22,8 @@ def main():
   parser.add_argument('file', action="store", help ='Single .mat graph or a Zipped directory with one or more graphs')
 
   parser.add_argument('inputFormat', action='store', help='Input format of the graph i.e. One of: graphml | ncol | edgelist | lgl | pajek | graphdb | numpy | mat')
-  parser.add_argument('--convertToFormat', '-c', action='store', help='comma separated list of convert to formats. Currently choices: mat (result is npy)')
+  parser.add_argument('--convertToFormat', '-c', action='store', help='Convert the resulting annotated graph to other formats. This is a comma separated list (no spaces) of \
+      convert formats. Format graphml is produced by default, but you can convert to: ncol | edgelist | lgl | pajek | dot | gml | leda)')
 
   parser.add_argument('-a', '--auto', action="store_true", help="Use this flag if you want a browser session to open up with the result automatically")
 
