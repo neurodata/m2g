@@ -61,12 +61,12 @@
 
         <h3> Multiple graphs </h3>
         <p>
-        An example of a <a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjango/examples/uploadMultiSubj.py" target="blank">Multiple subject</a> job
+        An example of a <a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjango/examples/upload_multi.py" target="blank">Multiple subject</a> job
         is also provided. This is as an example of how to process multiple jobs with a single programmatic call.<br/>
 
         From within a terminal/command line session, it can be used as follows: <br/>
 
-        <code>python uploadMultiSubj.py http://mrbrain.cs.jhu.edu/disa/upload/YOUR_project/YOUR_site/YOUR_subject/YOUR_session s fiber_tract_dirctory roi_dirctory -i cc,tri,ss1,mad,deg,eig</code><br/>
+        <code>python upload_multi.py http://mrbrain.cs.jhu.edu/disa/upload/YOUR_project/YOUR_site/YOUR_subject/YOUR_session s fiber_tract_dirctory roi_dirctory -i cc,tri,ss1,mad,deg,eig</code><br/>
 
         This call would build graphs for multiple scans and compute all invariants noted in the <code>-i</code> flag.
         The example assumes the following:
@@ -85,9 +85,9 @@
         </ul>
 
         All fiber tract files  will be treated as a single project with multiple scanIDs derived from the file name.
-        <a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjango/examples/uploadMultiSubj.py" target="blank">Download the file</a>
+        <a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjango/examples/upload_multi.py" target="blank">Download the file</a>
         and help can be obtained by typing the following in a terminal/command line session: <br/>
-        <code>python uploadMultiSubj.py -h</code>. The same is true for the single scan example, where: <code>python uploadsubj.py -h</code> gives help.
+        <code>python upload_multi.py -h</code>. The same is true for the single scan example, where: <code>python uploadsubj.py -h</code> gives help.
       </div>
         </p>
     {% endblock programmatic %}
