@@ -3,7 +3,7 @@
 
 from mrcap.fiber import Fiber
 import mrcap.roi as roi
-#import mrcap.mask as mask
+import scipy.io as sio
 import zindex
 import math
 import itertools
@@ -88,6 +88,16 @@ class FiberGraph(_FiberGraph):
 
     print "Adding desikan labels ..."
     lf = os.path.join(os.path.dirname(__file__),"utils/MNI_labels.mat")
-    self.spcscmat.vs["region"] = DesMap(label_fn=lf).get_all_mappings( self.spcscmat.vs["position"] )
+    des_map = DesMap(label_fn=lf)
+    region = des_map.get_all_mappings(self.spcscmat.vs["position"])
+    self.spcscmat.vs["region"] = region
 
+    print "Adding centroids ..."
+    cent_map = sio.loadmat("utils/centroids.mat")["centroids"]
+    keys = des_map.get_desikan_keys(self.spcscmat.vs["position"])
+    centroids = []
+    for key in keys:
+       centroids.append(str(list(cent_map[key])))
+
+    self.spcscmat.vs["centroid"] = centroids
 
