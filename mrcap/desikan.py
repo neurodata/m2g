@@ -56,3 +56,12 @@ class DesMap():
     for vertex in vertices:
       regions.append(self.get_mapping(vertex))
     return regions
+
+  def get_desikan_keys(self, vertices):
+    keys = []
+    for vertex in vertices:
+      x,y,z = MortonXYZ(vertex)
+      des_key = self.labels[x, y, z]
+      if des_key > 100: des_key -= 66
+      keys.append(des_key)
+    return keys 
