@@ -45,6 +45,9 @@ class _FiberGraph(object):
     print "Adding edge weight to the graph ..."
     self.spcscmat.es["weight"] = self.edge_dict.values()
     print "Completed adding edge weight in %.3f sec" % (time() - start)
+    self.spcscmat["region"] = "brain"
+    self.spcscmat["sensor"] = "MR"
+    self.spcscmat["source"] = "http://openconnecto.me/graph-services/welcome/"
 
   def saveToIgraph(self, filename, gformat="graphml"):
     """
