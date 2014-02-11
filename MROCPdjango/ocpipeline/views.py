@@ -43,8 +43,8 @@ import mrcap.svd as svd
 import mrcap.lcc as lcc
 
 import filesorter as filesorter
-import zipper as zipper
-import createDirStruct as createDirStruct
+import utils.zipper as zipper
+from utils.createDirStruct import createDirStruct
 from computation.utils.convertTo import convert_graph
 
 from django.core.servers.basehttp import FileWrapper
@@ -71,7 +71,7 @@ import scipy.io as sio
 from django.contrib.auth import authenticate, login, logout
 
 # Helpers
-from util import *
+from utils.util import *
 
 """ Base url just redirects to welcome """
 def default(request):
@@ -195,7 +195,7 @@ def buildGraph(request):
       print "\nSaving all files complete..."
 
       """ Make appropriate dirs if they dont already exist """
-      createDirStruct.createDirStruct([request.session["derivatives"],\
+      createDirStruct([request.session["derivatives"],\
           request.session["graphs"], request.session["graphInvariants"]])
 
       if request.session["graphsize"] == "big":
@@ -349,7 +349,7 @@ def upload(request, webargs=None):
     derivatives, graphs, request.session['graphInvariants'] = defDataDirs(userDefProjectDir)
 
     ''' Make appropriate dirs if they dont already exist '''
-    createDirStruct.createDirStruct([derivatives, graphs,request.session["graphInvariants"]])
+    createDirStruct([derivatives, graphs,request.session["graphInvariants"]])
     print 'Directory structure created...'
 
     uploadFiles =  writeBodyToDisk(request.body, derivatives)
@@ -387,8 +387,8 @@ def upload(request, webargs=None):
 
 ################## TO DOs ########################
 def download(request, webargs=None):
-  # DM: TODO - Allow for data to be downloaded by the directory name/filename/projectName
-  pass
+  base_dir = "/data/projects/disa/OCPprojects/tmp/graphs"
+  mouse_dir = os.path.join(base_dir, )
 
 ###################################################
 
