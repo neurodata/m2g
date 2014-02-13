@@ -11,7 +11,7 @@ import os
 import argparse
 from shutil import move # For moving files
 
-def createDirStruct(resultDirs, derivFiles = None):
+def create_dir_struct(resultDirs, derivFiles = None):
     '''
     @param resultDirs: Directories to hold results
     @type resultDirs: string
@@ -71,7 +71,7 @@ def main():
 
     result = parser.parse_args()
 
-    createDirStruct(result.resultDir, result.derivFiles)
+    create_dir_struct(result.resultDir, result.derivFiles)
 
 if __name__ == '__main__':
     main()

@@ -44,7 +44,7 @@ import mrcap.lcc as lcc
 
 import filesorter as filesorter
 import utils.zipper as zipper
-from utils.createDirStruct import createDirStruct
+from utils.create_dir_struct import create_dir_struct
 from computation.utils.convertTo import convert_graph
 
 from django.core.servers.basehttp import FileWrapper
@@ -195,7 +195,7 @@ def buildGraph(request):
       print "\nSaving all files complete..."
 
       """ Make appropriate dirs if they dont already exist """
-      createDirStruct([request.session["derivatives"],\
+      create_dir_struct([request.session["derivatives"],\
           request.session["graphs"], request.session["graphInvariants"]])
 
       if request.session["graphsize"] == "big":
@@ -349,7 +349,7 @@ def upload(request, webargs=None):
     derivatives, graphs, request.session['graphInvariants'] = defDataDirs(userDefProjectDir)
 
     ''' Make appropriate dirs if they dont already exist '''
-    createDirStruct([derivatives, graphs,request.session["graphInvariants"]])
+    create_dir_struct([derivatives, graphs,request.session["graphInvariants"]])
     print 'Directory structure created...'
 
     uploadFiles =  writeBodyToDisk(request.body, derivatives)
@@ -385,11 +385,36 @@ def upload(request, webargs=None):
   else:
     return HttpResponseBadRequest ("Expected POST data, but none given")
 
-################## TO DOs ########################
+####################################################
 def download(request, webargs=None):
-  base_dir = "/data/projects/disa/OCPprojects/tmp/graphs"
-  mouse_dir = os.path.join(base_dir, )
+  import MySQLdb
+  from contextlib import closing
+  db_args = settings.DATABASES["default"]
+    
+  print "Connecting to database %s ..." % db_args["NAME"]
+  db = MySQLdb.connect(host=db_args["HOST"], user=db_args["USER"], 
+     passwd=db_args["PASSWORD"], db=db_args["NAME"])
+  db.autocommit(True)
 
+  qry_stmt = "select g.filepath, g.genus, g.region, g.numvertex, g.numedge, g.graphattr,\
+      g.vertexattr, g.edgeattr, g.sensor from %s.graphs as g;" % (db_args["NAME"] )
+  with closing(db.cursor()) as cursor:
+    cursor.connection.autocommit(True)
+    cursor.execute(qry_stmt)
+    result = cursor.fetchall()
+  
+  # TODO: Use result to populate html and/or form
+
+  if request.method == 'POST':
+    #form = DownloadGraphForm(request.POST) # instantiating form
+    #if form.is_valid():
+      pass
+
+  else:
+    #import pdb; pdb.set_trace()
+    #return render_to_response('downloadGraph.html',{'downloadGraphForm': form},\
+    return render_to_response('downloadGraph.html', \
+                  context_instance=RequestContext(request))
 ###################################################
 
 def asyncInvCompute(request):

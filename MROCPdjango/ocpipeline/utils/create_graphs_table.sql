@@ -6,14 +6,15 @@
 
 drop table if exists graphs;
 create table graphs(
-filepath text not null,
+filepath varchar(1024) not null,
 genus varchar(128),
 region varchar(128),
 numvertex bigint not null,
 numedge bigint not null,
-graphattrs text, -- I will use JSON encoded string to store
+graphattr text, -- I will use JSON encoded string to store
 vertexattr text, 
 edgeattr text,
 sensor varchar(64),
-source varchar(256)
+source varchar(256),
+mtime double -- Modification time
 );
