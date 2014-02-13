@@ -17,11 +17,7 @@ from views import convert
 from views import showdir
 from views import contact
 from views import jobfailure
-
-#from django.contrib import auth
-#########################################
-from ocpipeline.views import buildGraph
-#########################################
+from views import download
 
 # Uncomment the next two lines to enable the admin:
 from django.contrib import admin
@@ -36,6 +32,7 @@ urlpatterns = patterns('ocpipeline.views',
     url(r'^zipoutput/$','zipProcessedData', name = 'zip-processed-data'), # 2nd param function is view, 3rd param - anything
     url(r'^upload/(.*$)', 'upload', name= 'prog-upload'),
     url(r'^graphupload/(.*$)', 'graphLoadInv', name= 'graph-upload-invariant-processing'),
+    url(r'^download/(.*$)', 'download', name= 'download-graphs'),
     url(r'^convert/(.*$)', 'convert', name= 'convert-to-format'),
     url(r'^buildgraph/$', 'buildGraph', name= 'build-graph'),
     url(r'^showdir/$', 'showdir', name='serve-dir'),
