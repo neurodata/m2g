@@ -45,20 +45,21 @@ def _ingest_files(fns, genus, db_args, tb_name):
       test_qry ="select g.mtime from %s.%s as g where g.filepath = \"%s\";" % (db_args["default"]["NAME"], tb_name, graph_fn)
 
       if cursor.execute(test_qry): # Means graph already in DB
-        if cursor.fetchall()[0][0] == os.stat(graph_fn).st_mtime:
+        if cursor.fetchall()[0][0] == os.stat(graph_fn).st_mtime: # Means graphs hasn't changed since ingest
           g_changed = False
           print "Ignoring %s ..." % graph_fn
         else:
           print "Updating %s ..." % graph_fn
 
-      if g_changed:
+      if g_changed: # Means graph has changed since ingest OR was never in DB to start with
+        # Collect all the attributes etc ..
         g = igraph.read(graph_fn, format="graphml")
         vertex_attrs = g.vs.attribute_names()
         edge_attrs = g.es.attribute_names()
         graph_attrs = g.attributes()
         vcount = g.vcount()
         ecount = g.ecount()
-        
+        # Give some default values if none exist
         if "sensor" in graph_attrs: sensor = g["sensor"]
         else: sensor = "N/A"
         if "source" in graph_attrs: source = g["source"]
@@ -68,9 +69,11 @@ def _ingest_files(fns, genus, db_args, tb_name):
 
         url = "http://mrbrain.cs.jhu.edu/data/projects/disa/OCPprojects/tmp/graphs/"+("/".join(graph_fn.replace("\\", "/").split('/')[-2:]))
        
+        # This statement puts each graph into the DB
         qry_stmt = "insert into %s.%s values (NULL,\"%s\",\"%s\",\"%s\",%d,%d,\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",%f,\"%s\");" \
              % (db_args["default"]["NAME"], tb_name, os.path.abspath(graph_fn), genus, region, int(vcount), 
-               int(ecount), str(graph_attrs), str(vertex_attrs), str(edge_attrs), sensor, source, mtime, url)
+                 int(ecount), str(graph_attrs)[1:-1].replace("'",""), str(vertex_attrs)[1:-1].replace("'",""),
+                 str(edge_attrs)[1:-1].replace("'",""), sensor, source, mtime, url)
 
         cursor.execute(qry_stmt)
 

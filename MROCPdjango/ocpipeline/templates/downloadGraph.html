@@ -1,15 +1,30 @@
 {% extends "base.html" %}
 {% load render_table from django_tables2 %}
+{% load getScriptPrefix %}
+{% load static %}
 
   {% block title %}
     Download Graph | MROCP
   {% endblock title %}
 
   {% block medheading %}
-  Don't freak out, this page is still under contruction!
+  Download biologically derived graphs
+
+  <img src="{% static 'images/graph_sm.png' %}" border="0" alt="small graph" align="middle"/>
   {% endblock medheading %}
   {% block content %}
+  <p>Many thanks to all those who provided the raw data from which we derived these graphs. Every graph
+    is annotated with a <code> source</code> attribute that denotes its origin.<br/>
+    All graphs are provided in <a href="http://graphml.graphdrawing.org/" target="blank">graphML</a> file
+    format. If this is not suitable for your purposes, consder our
+    <a href="{{"convert"|getScriptPrefix}}">conversion api</a>.
 
-  {% render_table people %} 
-    
+  </p>
+  {% for genus in genera %}
+    </p>
+    <h3> {{ genus.html_name }} Graphs </h3>
+    {% render_table genus %}
+    <p>
+  {%endfor%}
+
   {% endblock content%}
