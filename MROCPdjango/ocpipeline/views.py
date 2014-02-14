@@ -29,6 +29,10 @@ from django.core.files import File        # For programmatic file upload
 # Model & Form imports
 from models import BuildGraphModel
 from models import OwnedProjects
+from models import GraphDownloadModel
+from models import Person # TODO: rm
+
+
 from forms import DownloadForm
 from forms import GraphUploadForm
 from forms import ConvertForm
@@ -387,12 +391,13 @@ def upload(request, webargs=None):
 
 ####################################################
 def download(request, webargs=None):
+  """
   import MySQLdb
   from contextlib import closing
   db_args = settings.DATABASES["default"]
-    
+
   print "Connecting to database %s ..." % db_args["NAME"]
-  db = MySQLdb.connect(host=db_args["HOST"], user=db_args["USER"], 
+  db = MySQLdb.connect(host=db_args["HOST"], user=db_args["USER"],
      passwd=db_args["PASSWORD"], db=db_args["NAME"])
   db.autocommit(True)
 
@@ -402,7 +407,7 @@ def download(request, webargs=None):
     cursor.connection.autocommit(True)
     cursor.execute(qry_stmt)
     result = cursor.fetchall()
-  
+  """
   # TODO: Use result to populate html and/or form
 
   if request.method == 'POST':
@@ -411,10 +416,15 @@ def download(request, webargs=None):
       pass
 
   else:
+    #return render_to_response('downloadgraph.html',{'downloadGraphForm': form},\
+
+    for genus in settings.GENERA:
+      pass # get each genus
+
     #import pdb; pdb.set_trace()
-    #return render_to_response('downloadGraph.html',{'downloadGraphForm': form},\
-    return render_to_response('downloadGraph.html', \
-                  context_instance=RequestContext(request))
+    return render(request, "downloadgraph.html", {"people": GraphDownloadModel.objects.all()})
+    #return render_to_response('downloadGraph.html', \
+    #              context_instance=RequestContext(request))
 ###################################################
 
 def asyncInvCompute(request):

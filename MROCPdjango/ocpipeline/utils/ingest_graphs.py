@@ -13,7 +13,7 @@ from contextlib import closing
 import igraph
 from ocpipeline.settings_secret import DATABASES as db_args
 
-def ingest(genera, base_dir=None, files=None):
+def ingest(genera, tb_name, base_dir=None, files=None):
   if files:
     print "Running specific file(s) ..."
     assert len(genera) < 2, "Can only specify single genus as '-g [--genera] arg. You provided %s'" % genera 
@@ -23,11 +23,11 @@ def ingest(genera, base_dir=None, files=None):
     print "Running entire dataset ..."
     for genus in genera:
       graphs = glob(os.path.join(base_dir, genus, "*")) # Get all graphs in dir
-      _ingest_files(graphs, genus, db_args)
+      _ingest_files(graphs, genus, db_args, tb_name)
 
   print "\nMission complete ..."
 
-def _ingest_files(fns, genus, db_args):
+def _ingest_files(fns, genus, db_args, tb_name):
 
   print "Connecting to database %s ..." % db_args["default"]["NAME"]
   db = MySQLdb.connect(host=db_args["default"]["HOST"], user=db_args["default"]["USER"], 
@@ -42,12 +42,14 @@ def _ingest_files(fns, genus, db_args):
       mtime = os.stat(graph_fn).st_mtime # get modification time
       g_changed = True
       # In DB and modified
-      test_qry ="select g.mtime from %s.graphs as g where g.filepath = \"%s\";" % (db_args["default"]["NAME"], graph_fn)
+      test_qry ="select g.mtime from %s.%s as g where g.filepath = \"%s\";" % (db_args["default"]["NAME"], tb_name, graph_fn)
 
       if cursor.execute(test_qry): # Means graph already in DB
         if cursor.fetchall()[0][0] == os.stat(graph_fn).st_mtime:
           g_changed = False
           print "Ignoring %s ..." % graph_fn
+        else:
+          print "Updating %s ..." % graph_fn
 
       if g_changed:
         g = igraph.read(graph_fn, format="graphml")
@@ -58,15 +60,17 @@ def _ingest_files(fns, genus, db_args):
         ecount = g.ecount()
         
         if "sensor" in graph_attrs: sensor = g["sensor"]
-        else: sensor = "NULL"
+        else: sensor = "N/A"
         if "source" in graph_attrs: source = g["source"]
-        else: source = "NULL"
+        else: source = "N/A"
         if "region" in graph_attrs: region = g["region"]
-        else: region = "NULL"
+        else: region = "N/A"
+
+        url = "http://mrbrain.cs.jhu.edu/data/projects/disa/OCPprojects/tmp/graphs/"+("/".join(graph_fn.replace("\\", "/").split('/')[-2:]))
        
-        qry_stmt = "insert into %s.graphs values (\"%s\",\"%s\",\"%s\",%d,%d,\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",%f);" \
-             % (db_args["default"]["NAME"], os.path.abspath(graph_fn), genus, region, int(vcount), 
-               int(ecount), str(graph_attrs), str(vertex_attrs), str(edge_attrs), sensor, source, mtime)
+        qry_stmt = "insert into %s.%s values (NULL,\"%s\",\"%s\",\"%s\",%d,%d,\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",%f,\"%s\");" \
+             % (db_args["default"]["NAME"], tb_name, os.path.abspath(graph_fn), genus, region, int(vcount), 
+               int(ecount), str(graph_attrs), str(vertex_attrs), str(edge_attrs), sensor, source, mtime, url)
 
         cursor.execute(qry_stmt)
 
@@ -78,11 +82,12 @@ def main():
             The directories where to look for file(s) default is : human macaque cat fly mouse rat worm")
   parser.add_argument("-f", "--file_names", action="store", default=None, nargs="+", help="If you only want to ingest \
             specific files only use this")
+  parser.add_argument("-t", "--table_name", action="store", default="ocpipeline_graphdownloadmodel", help="Table name in db")
   
   result = parser.parse_args()
   
   print "Ingesting graph(s) ..."
-  ingest(result.genera, result.base_dir, result.file_names)
+  ingest(result.genera, result.table_name, result.base_dir, result.file_names)
 
 if __name__ == "__main__":
   main()
