@@ -63,6 +63,27 @@ class SharingTokens(models.Model):
   issue_date = models.DateTimeField(auto_now_add=True)
   expire_date = models.DateField(null=True)
 
+class GraphDownloadModel(models.Model):
+
+  filepath = models.CharField(max_length=1024, null=False)
+  genus = models.CharField(max_length=128)
+  region = models.CharField(max_length=128)
+  numvertex = models.BigIntegerField(null=False)
+  numedge = models.BigIntegerField(null=False)
+  graphattr = models.TextField() # I will use JSON encoded string to store
+  vertexattr = models.TextField()
+  edgeattr = models.TextField()
+  sensor = models.CharField(max_length=128)
+  source = models.CharField(max_length=256)
+  mtime = models.FloatField() # Modification Time
+  url = models.URLField(max_length=2048)
+
+
+class Person(models.Model):
+  # For tutorial
+  name = models.CharField(verbose_name="full name", max_length=256)
+
+
 admin.site.register(BuildGraphModel)
 admin.site.register(OwnedProjects)
 admin.site.register(SharingTokens)
