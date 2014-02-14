@@ -30,8 +30,8 @@ from django.core.files import File        # For programmatic file upload
 from models import BuildGraphModel
 from models import OwnedProjects
 from models import GraphDownloadModel
-from models import Person # TODO: rm
-
+from django_tables2 import RequestConfig
+from graph_table import GraphTable
 
 from forms import DownloadForm
 from forms import GraphUploadForm
@@ -391,40 +391,18 @@ def upload(request, webargs=None):
 
 ####################################################
 def download(request, webargs=None):
-  """
-  import MySQLdb
-  from contextlib import closing
-  db_args = settings.DATABASES["default"]
 
-  print "Connecting to database %s ..." % db_args["NAME"]
-  db = MySQLdb.connect(host=db_args["HOST"], user=db_args["USER"],
-     passwd=db_args["PASSWORD"], db=db_args["NAME"])
-  db.autocommit(True)
+  tbls = []
+  for genus in settings.GENERA:
+    table = GraphTable(GraphDownloadModel.objects.filter(genus=genus))
+    table.set_html_name(genus.capitalize()) # Set the html __repr__
+    # TODO: Alter per_page limit to +25
+    RequestConfig(request, paginate={"per_page":5}).configure(table) # Let each table re-render given a request
+    #table.columns["url"].header = "Download Link"
+    tbls.append(table)
 
-  qry_stmt = "select g.filepath, g.genus, g.region, g.numvertex, g.numedge, g.graphattr,\
-      g.vertexattr, g.edgeattr, g.sensor from %s.graphs as g;" % (db_args["NAME"] )
-  with closing(db.cursor()) as cursor:
-    cursor.connection.autocommit(True)
-    cursor.execute(qry_stmt)
-    result = cursor.fetchall()
-  """
-  # TODO: Use result to populate html and/or form
-
-  if request.method == 'POST':
-    #form = DownloadGraphForm(request.POST) # instantiating form
-    #if form.is_valid():
-      pass
-
-  else:
-    #return render_to_response('downloadgraph.html',{'downloadGraphForm': form},\
-
-    for genus in settings.GENERA:
-      pass # get each genus
-
-    #import pdb; pdb.set_trace()
-    return render(request, "downloadgraph.html", {"people": GraphDownloadModel.objects.all()})
-    #return render_to_response('downloadGraph.html', \
-    #              context_instance=RequestContext(request))
+  #import pdb; pdb.set_trace()
+  return render(request, "downloadgraph.html", {"genera":tbls})
 ###################################################
 
 def asyncInvCompute(request):
