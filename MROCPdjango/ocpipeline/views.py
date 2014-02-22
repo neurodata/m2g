@@ -401,7 +401,6 @@ def download(request, webargs=None):
     #table.columns["url"].header = "Download Link"
     tbls.append(table)
 
-  #import pdb; pdb.set_trace()
   return render(request, "downloadgraph.html", {"genera":tbls})
 ###################################################
 

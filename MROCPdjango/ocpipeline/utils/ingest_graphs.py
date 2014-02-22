@@ -17,17 +17,20 @@ def ingest(genera, tb_name, base_dir=None, files=None):
   if files:
     print "Running specific file(s) ..."
     assert len(genera) < 2, "Can only specify single genus as '-g [--genera] arg. You provided %s'" % genera 
-    _ingest_files(files, genera[0], db_args)
+    _ingest_files(files, genera[0])
   
   else:
     print "Running entire dataset ..."
     for genus in genera:
       graphs = glob(os.path.join(base_dir, genus, "*")) # Get all graphs in dir
-      _ingest_files(graphs, genus, db_args, tb_name)
+      _ingest_files(graphs, genus, tb_name)
+
+  print "Checking for stale entries ..."
+  clean_stale_graphs(tb_name)
 
   print "\nMission complete ..."
 
-def _ingest_files(fns, genus, db_args, tb_name):
+def _ingest_files(fns, genus, tb_name):
 
   print "Connecting to database %s ..." % db_args["default"]["NAME"]
   db = MySQLdb.connect(host=db_args["default"]["HOST"], user=db_args["default"]["USER"], 
@@ -49,6 +52,7 @@ def _ingest_files(fns, genus, db_args, tb_name):
           g_changed = False
           print "Ignoring %s ..." % graph_fn
         else:
+          cursor.execute("delete from %s.%s where filepath = \"%s\";" % (db_args["default"]["NAME"], tb_name, graph_fn))
           print "Updating %s ..." % graph_fn
 
       if g_changed: # Means graph has changed since ingest OR was never in DB to start with
@@ -67,15 +71,35 @@ def _ingest_files(fns, genus, db_args, tb_name):
         if "region" in graph_attrs: region = g["region"]
         else: region = "N/A"
 
-        url = "http://mrbrain.cs.jhu.edu/data/projects/disa/OCPprojects/tmp/graphs/"+("/".join(graph_fn.replace("\\", "/").split('/')[-2:]))
+        url = "http://openconnecto.me/data/public/graphs/"+("/".join(graph_fn.replace("\\", "/").split('/')[-2:]))
        
         # This statement puts each graph into the DB
-        qry_stmt = "insert into %s.%s values (NULL,\"%s\",\"%s\",\"%s\",%d,%d,\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",%f,\"%s\");" \
+        qry_stmt = "insert into %s.%s values (\"%s\",\"%s\",\"%s\",%d,%d,\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",%f,\"%s\");" \
              % (db_args["default"]["NAME"], tb_name, os.path.abspath(graph_fn), genus, region, int(vcount), 
                  int(ecount), str(graph_attrs)[1:-1].replace("'",""), str(vertex_attrs)[1:-1].replace("'",""),
                  str(edge_attrs)[1:-1].replace("'",""), sensor, source, mtime, url)
 
         cursor.execute(qry_stmt)
+
+def clean_stale_graphs(tb_name):
+  """ If we have any graphs that have been deleted we should also clean them from db """
+
+  print "Connecting to database %s ..." % db_args["default"]["NAME"]
+  db = MySQLdb.connect(host=db_args["default"]["HOST"], user=db_args["default"]["USER"], 
+     passwd=db_args["default"]["PASSWORD"], db=db_args["default"]["NAME"])
+  db.autocommit(True)
+
+  with closing(db.cursor()) as cursor:
+    cursor.connection.autocommit(True)
+    cursor.execute("select filepath from %s.%s;" % (db_args["default"]["NAME"], tb_name))
+
+    all_files = cursor.fetchall()
+
+    if all_files:
+      for fn in all_files:
+        if not os.path.exists(fn[0]):
+          print "\t Deleting entry with filepath %s from database ..." % fn[0]
+          cursor.execute("delete from %s.%s where filepath = \"%s\"" % (db_args["default"]["NAME"], tb_name, fn[0]))
 
 def main():
   parser = argparse.ArgumentParser(description="Ingest the graphs within the dirs specified by 'genera' list.")

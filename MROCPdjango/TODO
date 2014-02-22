@@ -1,9 +1,6 @@
 *MR OCP TODO list Disa
 ===========================
-- Install django-table2 on mrbrain:
-  - sudo easy_install -Z django-tables2
-  - python manage.py syncdb collectstatic
-
+- get settings for mbp
 1. Click handler buildgraph to show email address if given big-graph, else not.
 
 Add Dependencies
@@ -33,6 +30,9 @@ html:
 
 *Recently completed*
 =====================
+- Install django-table2 on mrbrain:
+  - sudo easy_install -Z django-tables2
+  - python manage.py syncdb collectstatic
 - Change anywhere with download links of http://mrbrain to generic from headers
 - Fix all zip browser uploads
 - Allow Graphupload for all informat formats
