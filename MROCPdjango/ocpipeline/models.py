@@ -65,7 +65,7 @@ class SharingTokens(models.Model):
 
 class GraphDownloadModel(models.Model):
 
-  filepath = models.CharField(max_length=1024, null=False)
+  filepath = models.CharField(max_length=255, null=False, primary_key=True, unique=True)
   genus = models.CharField(max_length=128)
   region = models.CharField(max_length=128)
   # verbose name is what is rendered in the html
