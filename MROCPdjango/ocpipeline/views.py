@@ -391,15 +391,32 @@ def upload(request, webargs=None):
 
 ####################################################
 def download(request, webargs=None):
+  from forms import DownloadGraphs
 
   tbls = []
+  #tbls = {}
+
   for genus in settings.GENERA:
     table = GraphTable(GraphDownloadModel.objects.filter(genus=genus))
     table.set_html_name(genus.capitalize()) # Set the html __repr__
     # TODO: Alter per_page limit to +25
     RequestConfig(request, paginate={"per_page":5}).configure(table) # Let each table re-render given a request
     #table.columns["url"].header = "Download Link"
-    tbls.append(table)
+
+    dl_form = DownloadGraphs()
+    dl_form.set_name(genus)
+
+    #tbls[genus] = [ table, dl_form ]
+    tbls.append((table, dl_form))
+
+
+  #import pdb;pdb.set_trace()
+
+
+  if request.method == "POST":
+    pass
+
+
 
   return render(request, "downloadgraph.html", {"genera":tbls})
 ###################################################

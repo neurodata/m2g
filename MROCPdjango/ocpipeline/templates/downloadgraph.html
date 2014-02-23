@@ -18,13 +18,64 @@ is annotated with a <code> source</code> attribute that denotes its origin.<br/>
 All graphs are provided in <a href="http://graphml.graphdrawing.org/" target="blank">graphML</a> file
 format. If this is not suitable for your purposes, consider using our
 <a href="{{"convert"|getScriptPrefix}}">graph conversion api</a>.
+</p>
 
-</p>
-{% for genus in genera %}
-</p>
-<h3> {{ genus.html_name }} Graphs </h3>
-{% render_table genus %}
-<p>
-{%endfor%}
+<div id="igraph">
+  <p>
+    All graphs can be inspected, used in analysis and even visualized via <a href="http://igraph.sourceforge.net/" target="blank">igraph</a>'s C, R or Python interface.
+  </p>
+  <h2><a href="http://igraph.sourceforge.net/" target="blank">igraph</a> Examples</h2>
+
+      To load the graph into R:
+      <pre>
+        require(igraph)
+        graph <- read.graph("path_of_graph.graphml", format="graphml")
+      </pre>
+
+      To load the graph into Python:
+      <pre>
+        import igraph
+        g = igraph.read("./path_of_graph.graphml", format="graphml")
+      </pre>
+
+      To load a graph using C:
+      <pre class="Plain">
+
+        #include &lt;igraph.h&gt;
+        #include &lt;stdio.h&gt;
+        #include &lt;unistd.h&gt;
+
+        int main(int argc, char **argv) {
+          igraph_t g;
+          FILE *ifile, *ofile;
+
+          ifile=fopen("path_of_graph.graphml", "r");
+          if (ifile==0) {
+            return 10;
+          }
+
+          igraph_read_graph_graphml(&g, ifile, 0)
+          fclose(ifile);
+          igraph_destroy(&g)
+          return 0;
+        }
+      </pre>
+
+</div>
+
+<div id="data_tables">
+  <h2> Data </h2>
+  {% for genus in genera %}
+    </p>
+      <h3> {{ genus.0.html_name }} Graphs </h3>
+      {% render_table genus.0 %}
+
+      <form action="" method="post" enctype="multipart/form-data" name="">
+        <input name ="{{ genus.1.form_name }}"  type="submit" value="Download all" class="button" />
+        {{ genus.1 }}
+      </form>
+    <p>
+  {%endfor%}
+</div>
 
 {% endblock content%}

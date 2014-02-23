@@ -134,11 +134,9 @@
         <!-- Tell me who is logged in -->
         <div id="loginStatus">
           {% if user.is_authenticated %}
-            <FONT COLOR='#00f5ff'>Hi, {{ user.username }} </FONT>
+            <font color='#00f5ff'>Hi, {{ user.username }} </font>
 
 	    <form action= {{"accounts/logout/"|getScriptPrefix}} method="post" enctype="multipart/form-data" name="logoutForm">
-	      {% csrf_token %}
-	      {{ form }}
 	      <input name = "logout"  type="submit" value="Log out" class="button" />
    	   </form>
 
