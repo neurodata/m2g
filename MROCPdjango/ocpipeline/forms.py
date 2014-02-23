@@ -154,3 +154,13 @@ class DownloadForm(forms.Form):
   OUPUT_TYPES = [('dz','Download all data as zip'), ('vd','View directory with all data')]
 
   Select_output_type = forms.ChoiceField(choices=OUPUT_TYPES, widget=RadioSelect, required=True)
+
+class DownloadGraphs(forms.Form):
+  """
+  Form for download in
+  """
+
+  def set_name(self, name):
+    self.form_name = name
+
+

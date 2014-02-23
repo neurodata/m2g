@@ -6,7 +6,7 @@
   {% if form.errors %}
     <div id="errors">
       <p>Sorry, your username and password didn't match our records. Please try again.</p>
-      <p>If you don't have an account yet, you should <a href="{% url registration_register %}">register one</a>.</p>
+      <p>If you don't have an account yet, you should <a href="{% url "registration_register" %}">register one</a>.</p>
     </div>
   {% endif %}
 
@@ -14,20 +14,20 @@
   	<div id="content">
   	  <form method="post" action=".">{% csrf_token %}
     		<p class="form">
-    		  {{ form.username.label_tag }}: {{ form.username }} <br />
-    		  {{ form.password.label_tag }}: {{ form.password }}
+    		  {{ form.username.label_tag }} {{ form.username }} <br />
+    		  {{ form.password.label_tag }} {{ form.password }}
     		</p>
 
     		<p class="submit">
     		  <input type="submit" value="Log In" class="button"/>
-		  <input type="hidden" name="next" value="/disa/"/> {#TEMPORARY - FIX THIS#}
+		  <input type="hidden" name="next" value="/welcome/"/> {#TEMPORARY - FIX ACCOUNTS PROFILE#}
     		  {#<input type="hidden" name="next" value="{{ next }}" /> #}
     		</p>
   	</form>
 
   		<p class="register">
-		Don't have an account? <a href="{% url registration_register %}">Register!</a><br/>
-                {# Forgot your password? <a href="{% url password_reset %}">Set a new one</a>. #}
+		Don't have an account? <a href="{% url "registration_register" %}">Register!</a><br/>
+                {# Forgot your password? <a href="{% url "password_reset" %}">Set a new one</a>. #}
   		</p>
 
   	</div>
