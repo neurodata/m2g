@@ -29,22 +29,21 @@ format. If this is not suitable for your purposes, consider using our
       To load the graph into R:
       <pre>
         require(igraph)
-        graph <- read.graph("path_of_graph.graphml", format="graphml")
+        graph &lt;- read.graph("path_of_graph.graphml", format="graphml")
       </pre>
 
       To load the graph into Python:
       <pre>
         import igraph
-        g = igraph.read("./path_of_graph.graphml", format="graphml")
+        g = igraph.read("path_of_graph.graphml", format="graphml")
       </pre>
 
       To load a graph using C:
-      <pre class="Plain">
+      <pre>
 
         #include &lt;igraph.h&gt;
         #include &lt;stdio.h&gt;
-        #include &lt;unistd.h&gt;
-
+        {% comment %} #include &lt;unistd.h&gt; {% endcomment %}
         int main(int argc, char **argv) {
           igraph_t g;
           FILE *ifile, *ofile;
@@ -55,6 +54,7 @@ format. If this is not suitable for your purposes, consider using our
           }
 
           igraph_read_graph_graphml(&g, ifile, 0)
+          // Do something with the graph. see http://igraph.sourceforge.net/doc/html/index.html
           fclose(ifile);
           igraph_destroy(&g)
           return 0;
@@ -64,14 +64,14 @@ format. If this is not suitable for your purposes, consider using our
 </div>
 
 <div id="data_tables">
-  <h2> Data </h2>
+  <h2> Graphs </h2>
   {% for genus in genera %}
     </p>
-      <h3> {{ genus.0.html_name }} Graphs </h3>
+      <h3> {{ genus.0.html_name }} </h3>
       {% render_table genus.0 %}
 
       <form action="" method="post" enctype="multipart/form-data" name="">
-        <input name ="{{ genus.1.form_name }}"  type="submit" value="Download all" class="button" />
+        <input name ="{{ genus.1.form_name }}"  type="submit" value="Download all {{ genus.1.form_name }}" class="button" />
         {{ genus.1 }}
       </form>
     <p>

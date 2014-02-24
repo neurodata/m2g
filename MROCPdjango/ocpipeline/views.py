@@ -38,6 +38,8 @@ from forms import GraphUploadForm
 from forms import ConvertForm
 from forms import BuildGraphForm
 from forms import PasswordResetForm
+from forms import DownloadGraphs
+
 
 import mrpaths
 
@@ -314,7 +316,7 @@ def zipProcessedData(request):
 
   ''' Zip it '''
   #temp = zipper.zipFilesFromFolders(dirName = request.session['usrDefProjDir'])
-  temp = zipper.zipper(request.session['usrDefProjDir'], zip_file = request.session['usrDefProjDir'] + '.zip')
+  temp = zipper.zipup(request.session['usrDefProjDir'], zip_file = request.session['usrDefProjDir'] + '.zip')
   ''' Wrap it '''
   wrapper = FileWrapper(temp)
   response = HttpResponse(wrapper, content_type='application/zip')
@@ -391,34 +393,54 @@ def upload(request, webargs=None):
 
 ####################################################
 def download(request, webargs=None):
-  from forms import DownloadGraphs
-
-  tbls = []
-  #tbls = {}
-
-  for genus in settings.GENERA:
-    table = GraphTable(GraphDownloadModel.objects.filter(genus=genus))
-    table.set_html_name(genus.capitalize()) # Set the html __repr__
-    # TODO: Alter per_page limit to +25
-    RequestConfig(request, paginate={"per_page":5}).configure(table) # Let each table re-render given a request
-    #table.columns["url"].header = "Download Link"
-
-    dl_form = DownloadGraphs()
-    dl_form.set_name(genus)
-
-    #tbls[genus] = [ table, dl_form ]
-    tbls.append((table, dl_form))
-
-
-  #import pdb;pdb.set_trace()
-
 
   if request.method == "POST":
-    pass
+    form = DownloadGraphs(request)
+    if form.is_valid:
+      genus = form.data.POST.keys()[0] # holds the genus
+      
+      zip_fn = os.path.join(settings.ZGRAPH_DIR, genus+".zip")
+      if not os.path.exists(zip_fn):
+        # No zip ? make it : return it
+        # TODO: Fix so it can put the zip on disk
+        print "Creating %s ..." % zip_fn
+        temp = zipper.zipup(os.path.join(settings.GRAPH_DIR, genus), zip_fn)
+        #temp.seek(0)
+        #f = open(zip_fn, "wb")
+        #f.write(temp.read())
+        #f.close()
+        #temp.seek(0)
+      #else:
+        #temp = open(zip_fn, "rb")
 
+      # TODO: Possibly use django.http.StreamingHttpResponse for this
+      wrapper = FileWrapper(temp)
+      response = HttpResponse(wrapper, content_type='application/zip')
+      response['Content-Disposition'] = ('attachment; filename=all_'+genus+'.zip')
+      response['Content-Length'] = temp.tell()
+      temp.seek(0)
 
+      return response
+    else:
+      return HttpResponseRedirect(get_script_prefix()+"download")
 
-  return render(request, "downloadgraph.html", {"genera":tbls})
+  else: 
+    tbls = []
+
+    for genus in settings.GENERA:
+      table = GraphTable(GraphDownloadModel.objects.filter(genus=genus))
+      table.set_html_name(genus.capitalize()) # Set the html __repr__
+      # TODO: Alter per_page limit to +25
+      RequestConfig(request, paginate={"per_page":7}).configure(table) # Let each table re-render given a request
+      #table.columns["url"].header = "Download Link"
+
+      dl_form = DownloadGraphs()
+      dl_form.set_name(genus)
+
+      tbls.append((table, dl_form))
+
+  return render_to_response("downloadgraph.html", {"genera":tbls}, context_instance=RequestContext(request))
+
 ###################################################
 
 def asyncInvCompute(request):
