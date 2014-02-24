@@ -1,10 +1,12 @@
 *MR OCP TODO list Disa
 ===========================
-- get settings for mbp
+- Zips of downloads need to be saved to disk and managed
+- Check fly graph
 1. Click handler buildgraph to show email address if given big-graph, else not.
 
 Add Dependencies
 ================
+- get settings for mbp
 - Fix all programmatic for igraph intergration
 - [GNU R >= 3.0.2](http://www.r-project.org/)
 - [igraph](http://igraph.sourceforge.net/) >= version 7.0

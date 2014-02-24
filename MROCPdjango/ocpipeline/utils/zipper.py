@@ -50,7 +50,7 @@ def zipFilesFromFolders(dirName = None, multiTuple = []):
     myzip.close()
     return temp
 
-def zipper(dir, zip_file):
+def zipup(dir, zip_file, todisk=None):
     '''
     Write a zipfile from a directory
 
@@ -59,6 +59,9 @@ def zipper(dir, zip_file):
 
     @param zip_file: name of zip file
     @type zip_file: string
+
+    @param todisk: specify path if you want the zip written to disk as well
+    @type todisk: string
     '''
     zip_file = tempfile.TemporaryFile()
 
