@@ -1,8 +1,10 @@
 # Author: Disa Mhembere
 # Contact: disa@jhu.edu
 
-# A file to write to csv with the difference between the 
+# A file to write to csv with the difference between the
 #  # of edges & vertices of a graph & its LCC
+from paths import include
+include()
 
 import os
 import numpy as np
@@ -29,19 +31,22 @@ def getDiff(graph_dir, lcc_dir):
     lcc_edge.append(G_lcc.nnz/2)
     print "%s ==> full (n,e)= (%d, %d), lcc (n,e) = (%d, %d)" % (fn, g.shape[0], g.nnz, G_lcc.shape[0], G_lcc.nnz/2) # lcc.view().item().shape[1] , lcc.view().item().nnz)
 
-    csv += "%s, %d, %d, %d, %d\n" % (fn, g.shape[0], G_lcc.shape[0], g.nnz, G_lcc.nnz/2) 
+    csv += "%s, %d, %d, %d, %d\n" % (fn, g.shape[0], G_lcc.shape[0], g.nnz, G_lcc.nnz/2)
 
   f = open('lcc-full_comp', 'w')
   f.write(csv)
   f.close()
-  
+
   np.save('full_vert',full_vert)
   np.save('full_edge', full_edge)
   np.save('lcc_vert', lcc_vert)
   np.save('lcc_edge', lcc_edge)
 
 def main():
-  getDiff(sys.argv[1], sys.argv[2])
+  if len(sys.argv) > 2:
+    getDiff(sys.argv[1], sys.argv[2])
+  else:
+    print "Please provide command line args 1 and 2"
 
 
 if __name__ == "__main__":

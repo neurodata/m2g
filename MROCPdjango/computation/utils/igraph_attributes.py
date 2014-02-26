@@ -81,8 +81,11 @@ def get_latent_pos(g):
   return eigvals
 
 def test():
-  g = igraph.read(sys.argv[1], format="graphml")
-  print get_latent_pos(g)
+  if len(sys.argv) > 1 and sys.argv[1] != "-h":
+    g = igraph.read(sys.argv[1], format="graphml")
+    print get_latent_pos(g)
+  #else
+  print "Provide command line arg 1"
 
 if __name__ == "__main__":
   import sys
