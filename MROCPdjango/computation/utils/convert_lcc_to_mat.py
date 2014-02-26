@@ -1,3 +1,6 @@
+from paths import include
+include()
+
 from computation.utils.loadAdjMatrix import loadAdjMat
 from glob import glob
 import os
@@ -44,4 +47,8 @@ def load_and_store(dirg):
 
   print "** Done with %s ** \n\n" % dirg
 
-load_and_store(sys.argv[1])
+if __name__ == '__main__':
+  if len(sys.argv) > 1:
+    load_and_store(sys.argv[1])
+  else:
+    print "Please provide the name of the directory with LCC's to convert as the first arg!"
