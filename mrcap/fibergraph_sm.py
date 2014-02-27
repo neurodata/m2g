@@ -11,6 +11,7 @@ import igraph
 from collections import defaultdict
 from mrcap.fibergraph import _FiberGraph
 from mrcap.desikan import des_map
+import os
 
 # Class functions documented in fibergraph.py
 
@@ -75,7 +76,7 @@ class FiberGraph(_FiberGraph):
     self.spcscmat.vs["region"] = des_map.values()
     
     print "Adding centroids ..."
-    cent_mat = sio.loadmat("utils/centroids.mat")["centroids"]
+    cent_mat = sio.loadmat(os.path.join(os.path.abspath(os.path.dirname(__file__)),"utils", "centroids.mat"))["centroids"]
     centroids = []
 
     for row in cent_mat:

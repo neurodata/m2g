@@ -87,13 +87,13 @@ class FiberGraph(_FiberGraph):
     self.spcscmat.delete_vertices(zero_deg_nodes)
 
     print "Adding desikan labels ..."
-    lf = os.path.join(os.path.dirname(__file__),"utils/MNI_labels.mat")
+    lf = os.path.join(os.path.abspath(os.path.dirname(__file__)),"utils", "MNI_labels.mat")
     des_map = DesMap(label_fn=lf)
     region = des_map.get_all_mappings(self.spcscmat.vs["position"])
     self.spcscmat.vs["region"] = region
 
     print "Adding centroids ..."
-    cent_map = sio.loadmat("utils/centroids.mat")["centroids"]
+    cent_map = sio.loadmat(os.path.join(os.path.abspath(os.path.dirname(__file__)),"utils", "centroids.mat"))["centroids"]
     keys = des_map.get_desikan_keys(self.spcscmat.vs["position"])
     centroids = []
     for key in keys:
