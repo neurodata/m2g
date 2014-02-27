@@ -2,6 +2,7 @@
 ===========================
 - Zips of downloads need to be saved to disk and managed
 - Check fly graph
+- Delete mrcap/lcc, mrcap/svd, MROCPdjango/loadAdjMatrix and all refs
 1. Click handler buildgraph to show email address if given big-graph, else not.
 
 Add Dependencies
