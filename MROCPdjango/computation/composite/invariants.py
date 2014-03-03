@@ -80,19 +80,21 @@ def compute(inv_dict, sep_save=True, gformat="graphml"):
   if inv_dict.get("eig", False) != False:
 
     # Test if graph is too big for invariants
-    if r_igraph_vcount(G, False) < 1000000: # Cannot compute eigs on very big graphs
-      inv_dict["k"] = max(50, r_igraph_vcount(G, False)-3) # Max of 50 eigenvalues
-      print "Computing eigen decompositon ..."
-      if sep_save:
-        inv_dict["eigvl_fn"] = os.path.join(inv_dict["save_dir"], "Eigen", \
-                                  getBaseName(inv_dict["graph_fn"]) + "_eigvl.npy")
-        inv_dict["eigvect_fn"] = os.path.join(inv_dict["save_dir"], "Eigen", \
-                                  getBaseName(inv_dict["graph_fn"]) + "_eigvect.npy")
+    if inv_dict["k"] is None:
+      inv_dict["k"] = max(100, r_igraph_vcount(G, False)-3) # Max of 100 eigenvalues
 
-        G = r_igraph_eigs(G, inv_dict['k'], save_fn=(inv_dict["eigvl_fn"], inv_dict["eigvect_fn"]))
-      else: G = r_igraph_eigs(G, inv_dict['k'], save_fn=None)
-    else:
-      print "Graph too big to compute spectral embedding"
+    print "Computing eigen decompositon ..."
+    
+    lcc = True if r_igraph_ecount(G, False) > 500000 else False
+    if sep_save:
+      inv_dict["eigvl_fn"] = os.path.join(inv_dict["save_dir"], "Eigen", \
+                                getBaseName(inv_dict["graph_fn"]) + "_eigvl.npy")
+      inv_dict["eigvect_fn"] = os.path.join(inv_dict["save_dir"], "Eigen", \
+                                getBaseName(inv_dict["graph_fn"]) + "_eigvect.npy")
+      G = r_igraph_eigs(G, inv_dict['k'], save_fn=(inv_dict["eigvl_fn"], inv_dict["eigvect_fn"]), lcc=lcc)
+
+    else: G = r_igraph_eigs(G, inv_dict['k'], save_fn=None, lcc=lcc)
+    #else: G = r_igraph_eigs(G, 4, save_fn=None, lcc=True)
 
   if inv_dict.get("mad", False) != False:
     if r_igraph_vcount(G, False) < 1000000: # Cannot compute eigs on very big graphs
@@ -294,7 +296,7 @@ def r_igraph_triangles(g, save_fn=None):
 
   return g # return so we can use for other attributes
 
-def r_igraph_eigs(g, k, return_eigs=False, save_fn=None, real=True):
+def r_igraph_eigs(g, k, return_eigs=False, save_fn=None, real=True, lcc=False):
   """
   Eigen spectral decomposition. Compute the top-k eigen pairs.
 
@@ -307,34 +309,43 @@ def r_igraph_eigs(g, k, return_eigs=False, save_fn=None, real=True):
   ==================
   save_fn - must an 2 item list/tuple with 2 names OR None
   return_eigs - boolean on whether to just return the eigenpairs or the whole graph
+  real - Compute only the real part
+  lcc - use the largest connected component only
 
   Returns
   =======
-
   A graph with eigs as graph attributes OR actual eigenpairs
   """
 
   esd = robjects.r("""
   require(igraph)
   options(digits=2) # 3 decimal places
-  fn <- function(g, nev, ncv, real=FALSE){
+  fn <- function(g, nev, real=FALSE, lcc=FALSE){
+    
+    eig.vs <- 1:vcount(g) # at beginning
+    if (lcc) {
+    cl <- clusters(g) # Get clustering
+    eig.vs <- which(cl$membership == which.max(cl$csize)) # get lcc vertices
+    g <- induced.subgraph(g, eig.vs)
+    }
+
+    ncv <- if (nev + 50 < vcount(g)) (nev + 50) else vcount(g)  
     M <- get.adjacency(g, sparse=TRUE)
 
     mv_mult <- function(x, extra=NULL) {
       as.vector(M %*% x) }
 
     eig <- arpack(mv_mult, options=list(n=vcount(g), nev=nev, ncv=ncv,  which="LM", maxiter=100))
-    lapply(list(eig$values, t(eig$vectors)), Re) # return [eigvals, eigvects] real parts only
+    list((lapply(list(eig$values, t(eig$vectors)), Re)), eig.vs)# return [eigvals, eigvects, vertex.indicies] real parts only
   }
   """) # A list with [0]=eigenvalues and [1]=eigenvectors. If an eigensolver error occurs then None
 
   eigs = None
   vcount = r_igraph_vcount(g, False)
   nev = k if k < (vcount - 2) else (vcount-3)
-  ncv = nev + 20 if (nev + 20) < vcount else vcount
 
   try:
-    eigs = esd(g, nev, ncv, real)
+    eigs = esd(g, nev, real, lcc)
   except Exception, msg:
     print msg
     return g # *Note premature exit*
@@ -343,22 +354,21 @@ def r_igraph_eigs(g, k, return_eigs=False, save_fn=None, real=True):
 
   if save_fn:
     save_fn = os.path.abspath(save_fn)
-    createSave(save_fn[0], eigs[0]) # eigenvalues
-    createSave(save_fn[1], eigs[1]) # eigenvectors
+    createSave(save_fn[0], eigs[0][0]) # eigenvalues
+    createSave(save_fn[1], eigs[0][1]) # eigenvectors
     print "Eigenvalues saved as %s ..." % save_fn[0]
     print "eigenvectors ssaved as %s ..." % save_fn[1]
   else:
 
     global gl_eigvects
-    gl_eigvects = eigs[1]
+    gl_eigvects = eigs[0][1]
 
-    eigvects = map(get_str_eigvects, [(idx, idx+nev) for idx in xrange(0, (vcount*nev), nev)])
-    g = r_igraph_set_graph_attribute(g, "eigvals", str(list(eigs[0]))) # Return a comma separated string
+    eigvects = map(get_str_eigvects, [(idx, idx+nev) for idx in xrange(0, ((len(eigs[1]))*nev), nev)])
+    g = r_igraph_set_graph_attribute(g, "eigvals", str(list(eigs[0][0]))) # Return a comma separated string
 
     #g = r_igraph_set_vertex_attr(g, "latent_pos", value=eigvects) # Could not create char sequences only lists :-/
-
-    for node in xrange(vcount):
-      g = r_igraph_set_vertex_attr(g, "latent_pos", value=eigvects[node], index="c(%d)"%(node+1)) # ** +1 for R 1-based indexing **
+    for idx, node_id in enumerate(eigs[1]):
+      g = r_igraph_set_vertex_attr(g, "latent_pos", value=eigvects[idx], index="c(%d)"%(node_id))
     print "Eigenvalue computation not saved to disk. Eigen-pairs added as graph attributes ...."
 
   return g
