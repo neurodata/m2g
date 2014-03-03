@@ -74,7 +74,7 @@ def main():
   parser.add_argument('-g', '--edge', action='store_true', help='pass to compute global egde count')
   parser.add_argument('-v', '--ver', action='store_true', help='pass to compute global vertex count')
 
-  parser.add_argument('-k', action='store', type = int, help='The number of eigenvalues to compute. Max is 50.')
+  parser.add_argument('-k', action='store', type = int, help='The number of eigenvalues to compute. Max is 100.')
 
   result = parser.parse_args()
 
