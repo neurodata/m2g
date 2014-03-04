@@ -79,10 +79,10 @@ def compute(inv_dict, sep_save=True, gformat="graphml"):
 
   if inv_dict.get("eig", False) != False:
 
-    # Test if graph is too big for invariants
     if inv_dict["k"] is None:
-      inv_dict["k"] = max(100, r_igraph_vcount(G, False)-3) # Max of 100 eigenvalues
+      inv_dict["k"] = min(100, r_igraph_vcount(G, False)-3) # Max of 100 eigenvalues
 
+    # Test if graph is too big for invariants
     print "Computing eigen decompositon ..."
     
     lcc = True if r_igraph_ecount(G, False) > 500000 else False
@@ -378,13 +378,6 @@ def r_igraph_eigs(g, k, return_eigs=False, save_fn=None, real=True, lcc=False):
 
     print "Setting eigenvectors as vertex attr ..."
     g = r_igraph_set_vertex_attr(g, "latent_pos", value=eigvects, index=eig_idx, is_str=True) # Could not create char sequences only lists :-/
-    #for idx, node_id in enumerate(eig_idx):
-    #  print "Annotating node %d ..." % node_id
-    #  if node_id == 205:
-    #    break
-    # import pdb; pdb.set_trace()
-    #  g = r_igraph_set_vertex_attr(g, "latent_pos", value=eigvects[idx], index="c(%d)"%(node_id))
-    #g = r_igraph_set_vertex_attr(g, "latent_pos", value=eigvects[0], index="c(%d)"%(205))
     print "Eigenvalue computation not saved to disk. Eigen-pairs added as graph attributes ...."
 
   return g
