@@ -324,8 +324,10 @@ def r_igraph_eigs(g, k, return_eigs=False, save_fn=None, real=True, lcc=False):
     
     eig.vs <- 1:vcount(g) # at beginning
     if (lcc) {
+    cat("Computing clusters ...\n")
     cl <- clusters(g) # Get clustering
     eig.vs <- which(cl$membership == which.max(cl$csize)) # get lcc vertices
+    cat("Building LCC with", length(eig.vs), "vertices...\n")
     g <- induced.subgraph(g, eig.vs)
     }
 
@@ -335,7 +337,10 @@ def r_igraph_eigs(g, k, return_eigs=False, save_fn=None, real=True, lcc=False):
     mv_mult <- function(x, extra=NULL) {
       as.vector(M %*% x) }
 
+    cat("Computing eigs ...\n")
     eig <- arpack(mv_mult, options=list(n=vcount(g), nev=nev, ncv=ncv,  which="LM", maxiter=100))
+    rm(g, M)
+    cat("Taking the real parts\n")
     list((lapply(list(eig$values, t(eig$vectors)), Re)), eig.vs)# return [eigvals, eigvects, vertex.indicies] real parts only
   }
   """) # A list with [0]=eigenvalues and [1]=eigenvectors. If an eigensolver error occurs then None
@@ -363,12 +368,23 @@ def r_igraph_eigs(g, k, return_eigs=False, save_fn=None, real=True, lcc=False):
     global gl_eigvects
     gl_eigvects = eigs[0][1]
 
-    eigvects = map(get_str_eigvects, [(idx, idx+nev) for idx in xrange(0, ((len(eigs[1]))*nev), nev)])
-    g = r_igraph_set_graph_attribute(g, "eigvals", str(list(eigs[0][0]))) # Return a comma separated string
+    print "Setting eigenvalues as graph attr ..."
+    g = r_igraph_set_graph_attribute(g, "eigvals", "["+", ".join(map(cut, (eigs[0][0])))+"]") # Return a comma separated string
 
-    #g = r_igraph_set_vertex_attr(g, "latent_pos", value=eigvects) # Could not create char sequences only lists :-/
-    for idx, node_id in enumerate(eigs[1]):
-      g = r_igraph_set_vertex_attr(g, "latent_pos", value=eigvects[idx], index="c(%d)"%(node_id))
+    eig_idx = eigs[1]
+    print "Mapping eigenvectors ..."
+    eigvects = map(get_str_eigvects, [(idx, idx+nev) for idx in xrange(0, ((len(eigs[1]))*nev), nev)])
+    del eigs
+
+    print "Setting eigenvectors as vertex attr ..."
+    g = r_igraph_set_vertex_attr(g, "latent_pos", value=eigvects, index=eig_idx, is_str=True) # Could not create char sequences only lists :-/
+    #for idx, node_id in enumerate(eig_idx):
+    #  print "Annotating node %d ..." % node_id
+    #  if node_id == 205:
+    #    break
+    # import pdb; pdb.set_trace()
+    #  g = r_igraph_set_vertex_attr(g, "latent_pos", value=eigvects[idx], index="c(%d)"%(node_id))
+    #g = r_igraph_set_vertex_attr(g, "latent_pos", value=eigvects[0], index="c(%d)"%(205))
     print "Eigenvalue computation not saved to disk. Eigen-pairs added as graph attributes ...."
 
   return g
@@ -387,8 +403,18 @@ def get_str_eigvects(idx):
   A vector i.e the eigenvector (latent position) for that vertex cast to a string
   """
   global gl_eigvects
-  return str(list(gl_eigvects[idx[0]:idx[1]]))
+  return "["+", ".join(map(cut, (gl_eigvects[idx[0]:idx[1]])))+"]"
+  #return str(list(gl_eigvects[idx[0]:idx[1]]))
 
+def cut(num):
+  """
+  Shorten the format of a number to 2 decimal places plus exponent
+  
+  Positional arguments
+  ====================
+  num - the number to be shorten
+  """
+  return "{0:.2e}".format(num)
 
 def r_igraph_max_ave_degree(g):
   """
@@ -476,7 +502,7 @@ def r_igraph_ecount(g, set_attr=True):
     return int(ec)
 
     # =========== Graph, Node, Attr ============= #
-def r_igraph_set_vertex_attr(g, attr_name, value, index="V(g)"):
+def r_igraph_set_vertex_attr(g, attr_name, value, index=NULL, is_str=False):
   """
   Set/Add an R vertex attribute to an R igraph object.
   The vertex length must equal the number of nodes.
@@ -487,16 +513,22 @@ def r_igraph_set_vertex_attr(g, attr_name, value, index="V(g)"):
   attr_name - the name of the vetex attribute I want to add. Type: string
   value - the R FloatVector containing the values to be added as attribute
   """
-
   set_vert_attr = robjects.r("""
-  require(igraph)
-  fn <- function(g, attr_name, value){
-  set.vertex.attribute(g, attr_name, index=%s, value=value)
-  }
-  """ % index)
+    require(igraph)
+    fn <- function(g, value, index){
+      if (!is.null(index)) {
+        V(g)[index]$%s <- value
+      } else {
+        V(g)$%s <- value
+      }
+      g
+    }
+    """ % (attr_name, attr_name))
+  if is_str:
+    return set_vert_attr(g, robjects.vectors.StrVector(value), index)
+  return set_vert_attr(g, value, index)
 
-  return set_vert_attr(g, attr_name, value)
-
+  
 def r_igraph_set_graph_attribute(g, attr_name, value):
   """
   Set/Add an igraph graph attribute in R.
@@ -508,11 +540,13 @@ def r_igraph_set_graph_attribute(g, attr_name, value):
 
   set_graph_attr = robjects.r("""
   require(igraph)
-  fn <- function(g, attr_name, value){
-  set.graph.attribute(g, attr_name, value=value)
+  fn <- function(g, value){
+  g$%s <- value
+  g
   }
-  """)
-  return set_graph_attr(g, attr_name, value)
+  """ % attr_name)
+
+  return set_graph_attr(g, value)
 
 def r_create_test_graph(nodes=5, edges=7):
 
@@ -543,4 +577,3 @@ if __name__ == "__main__":
   inv_dict["ver"] =  True; inv_dict["edge"] = True; inv_dict["deg"] = True
 
   g = compute(inv_dict, sep_save=False)
-  #python -m cProfile -o profile.pstats invariants.py
