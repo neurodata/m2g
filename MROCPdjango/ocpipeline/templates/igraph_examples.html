@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+  {% block title %}
+    igraph examples | MROCP
+  {% endblock title %}
+
+  {% block medheading %}
+  {% endblock medheading %}
+  {% block content %}
+  <div id="igraph">
+    <p>
+      All graphs can be inspected, used in analysis and even visualized via <a href="http://igraph.sourceforge.net/" target="blank">igraph</a>'s C, R or Python interface.
+      Please read the <a href="http://igraph.sourceforge.net/documentation.html" target="blank">igraph documentation</a> for detailed igraph usage information.
+    </p>
+  <h2><a href="http://igraph.sourceforge.net/" target="blank">igraph</a> Examples</h2>
+
+    To load the graph into R:
+    <pre>
+      require(igraph)
+      graph &lt;- read.graph("path_of_graph.graphml", format="graphml")
+    </pre>
+
+    To load the graph into Python:
+    <pre>
+      import igraph
+      g = igraph.read("path_of_graph.graphml", format="graphml")
+    </pre>
+
+    To load a graph using C:
+    <pre>
+
+      #include &lt;igraph.h&gt;
+      #include &lt;stdio.h&gt;
+      {% comment %} #include &lt;unistd.h&gt; {% endcomment %}
+      int main(int argc, char **argv) {
+        igraph_t g;
+        FILE *ifile, *ofile;
+
+        ifile=fopen("path_of_graph.graphml", "r");
+        if (ifile==0) {
+          return 10;
+        }
+
+        igraph_read_graph_graphml(&g, ifile, 0)
+        // Do something with the graph. see http://igraph.sourceforge.net/doc/html/index.html
+        fclose(ifile);
+        igraph_destroy(&g)
+        return 0;
+      }
+    </pre>
+
+  </div>
+  {% endblock content%}
