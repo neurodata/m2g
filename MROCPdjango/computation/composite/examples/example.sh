@@ -2,6 +2,9 @@
 echo "Example downloads ./testdata directory from http://mrbrain.cs.jhu.edu/data/projects/disa/OCPprojects/testdata/ ..."
 echo "Example script running ..."
 
+# Exit script on first error
+set -e 
+
 # VAR DECL
 TEST_DATA=./testdata
 FIBER=$TEST_DATA/test_fiber.dat
@@ -47,16 +50,20 @@ fi
 # Graph generation:
 echo "../graph_exec -h. For help"
 # Build a small graph given fiber streamline: test_fiber, fiber ROI's: test_roi.xml and test_roi.raw
-../graph_exec $FIBER $ROI_XML $ROI_RAW -S $SMALL_DIR -g $SMALL_GR_FN
+python ../graph_exec $FIBER $ROI_XML $ROI_RAW -S $SMALL_DIR -g $SMALL_GR_FN
 
 # Invariants:
 echo "./inv_exec -h. For help"
-../inv_exec $SMALL_DIR/$SMALL_GR_FN -A -S $SMALL_DIR 
+python ../inv_exec $SMALL_DIR/$SMALL_GR_FN -A -S $SMALL_DIR 
 
 # BIG
-# Uncomment to Build big graph WARNING: Can take up to 6 hours to complete
-../graph_exec $FIBER $ROI_XML $ROI_RAW -S $BIG_DIR -b -g $BIG_GR_FN
+# Uncomment to Build big graph WARNING: Can take up to 2 hours to complete
+if [[ $1 == "-b" ]]; then
+  python ../graph_exec $FIBER $ROI_XML $ROI_RAW -S $BIG_DIR -b -g $BIG_GR_FN
 
-# Invariants:
-echo "./inv_exec -h. For help"
-.././inv_exec $BIG_DIR/$BIG_GR_FN -A -S $BIG_DIR 
+  # Invariants:
+  echo "./inv_exec -h. For help"
+  python .././inv_exec $BIG_DIR/$BIG_GR_FN -A -S $BIG_DIR 
+else
+  echo 'To build a big graph pass -b as the 1 argument to the example script'
+fi
