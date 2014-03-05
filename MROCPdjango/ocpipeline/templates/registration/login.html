@@ -1,4 +1,5 @@
 {% extends "registration/base.html" %}
+{% load getScriptPrefix %}
 
 {% block title %}Log In | MROCP {% endblock %}
 
@@ -20,7 +21,7 @@
 
     		<p class="submit">
     		  <input type="submit" value="Log In" class="button"/>
-		  <input type="hidden" name="next" value="/welcome/"/> {#TEMPORARY - FIX ACCOUNTS PROFILE#}
+		  <input type="hidden" name="next" value="{{ "welcome" | getScriptPrefix }}"/> {#TEMPORARY - FIX ACCOUNTS PROFILE#}
     		  {#<input type="hidden" name="next" value="{{ next }}" /> #}
     		</p>
   	</form>
