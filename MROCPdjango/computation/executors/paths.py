@@ -1,9 +1,13 @@
-#
-# Code to load necessary paths
-#
+"""
+Code to load project paths
+"""
 
-import os, sys
+import os
 
-COMPUTATION_BASE_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "/.." ))
-sys.path += [COMPUTATION_BASE_PATH]
+MR_BASE_PATH = os.path.abspath("../../.." )
+MR_DJANGO_PATH = os.path.join(MR_BASE_PATH, "MROCPdjango")
+PATHS = [ MR_BASE_PATH, MR_DJANGO_PATH ]
 
+def include():
+  for path in PATHS:
+    if path not in os.sys.path: os.sys.path.append(path)

@@ -48,7 +48,7 @@ from mrcap import gengraph as gengraph
 import mrcap.svd as svd
 import mrcap.lcc as lcc
 
-import filesorter as filesorter
+from  utils.filesorter import checkFileExtGengraph
 import utils.zipper as zipper
 from utils.create_dir_struct import create_dir_struct
 from computation.utils.convertTo import convert_graph
@@ -236,7 +236,7 @@ def processInputData(request):
   '''
   filesInUploadDir = os.listdir(request.session['derivatives'])
 
-  roi_xml_fn, fiber_fn, roi_raw_fn = filesorter.checkFileExtGengraph(filesInUploadDir) # Check & sort files
+  roi_xml_fn, fiber_fn, roi_raw_fn = checkFileExtGengraph(filesInUploadDir) # Check & sort files
 
   ''' Fully qualify file names '''
   fiber_fn = os.path.join(request.session['derivatives'], fiber_fn)
@@ -364,7 +364,7 @@ def upload(request, webargs=None):
     uploadFiles =  writeBodyToDisk(request.body, derivatives)
 
     # Check which file is which
-    roi_xml_fn, fiber_fn, roi_raw_fn = filesorter.checkFileExtGengraph(uploadFiles) # Check & sort files
+    roi_xml_fn, fiber_fn, roi_raw_fn = checkFileExtGengraph(uploadFiles) # Check & sort files
 
     ''' Data Processing '''
     if graphsize:

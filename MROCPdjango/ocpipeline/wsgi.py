@@ -14,9 +14,9 @@ framework.
 
 """
 import os
-import sys
 
-sys.path += [  os.path.abspath(os.path.join(os.path.dirname(__file__), ".." ))]
+from paths import include
+include()
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "ocpipeline.settings")
 os.environ['HOME'] = "/tmp"
