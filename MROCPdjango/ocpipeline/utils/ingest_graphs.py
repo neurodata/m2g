@@ -5,6 +5,9 @@
 # Email: disa@jhu.edu
 # Copyright (c) 2014. All rights reserved.
 
+from paths import include
+include()
+
 import argparse
 import os
 from glob import glob
