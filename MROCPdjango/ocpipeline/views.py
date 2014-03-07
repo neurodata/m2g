@@ -302,7 +302,10 @@ def showdir(request):
   return render('STUB')
 
 def contact(request):
-  return render_to_response('contact.html')
+  return render_to_response('contact.html', context_instance=RequestContext(request))
+
+def igraph_examples(request):
+  return render_to_response("igraph_examples.html", context_instance=RequestContext(request))
 
 
 #################################################################################
@@ -398,7 +401,7 @@ def download(request, webargs=None):
     form = DownloadGraphs(request)
     if form.is_valid:
       genus = form.data.POST.keys()[0] # holds the genus
-      
+
       zip_fn = os.path.join(settings.ZGRAPH_DIR, genus+".zip")
       if not os.path.exists(zip_fn):
         # No zip ? make it : return it
@@ -424,7 +427,7 @@ def download(request, webargs=None):
     else:
       return HttpResponseRedirect(get_script_prefix()+"download")
 
-  else: 
+  else:
     tbls = []
 
     for genus in settings.GENERA:

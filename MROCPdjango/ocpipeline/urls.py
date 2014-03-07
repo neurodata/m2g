@@ -18,6 +18,7 @@ from views import showdir
 from views import contact
 from views import jobfailure
 from views import download
+from views import igraph_examples
 
 # Uncomment the next two lines to enable the admin:
 from django.contrib import admin
@@ -38,6 +39,7 @@ urlpatterns = patterns('ocpipeline.views',
     url(r'^showdir/$', 'showdir', name='serve-dir'),
     url(r'^contact/$', 'contact', name='contact'),
     url(r'^jobfailure/$', 'jobfailure', name='failure-page'),
+    url(r'^igraph/$', 'igraph_examples', name='igraph-examples'),
     (r'^accounts/', include('registration.backends.default.urls')),
     # Examples
     # url(r'^$', 'myapp.views.home', name='home'),

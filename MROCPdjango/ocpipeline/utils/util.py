@@ -11,7 +11,6 @@ import zipfile
 import tempfile
 import re
 from random import randint
-import computation.utils.convertTo as convertTo
 from django.conf import settings
 from django.core.mail import send_mail
 
@@ -120,44 +119,6 @@ def getDirFromFilename(filename):
   for part in filename.split('/')[:-1]:
     path += part + '/'
   return path
-
-################################################################################
-
-def convertFiles(uploadedFiles, fileType , toFormat, convertFileSaveLoc):
-  '''
-  Helper method to call convertTo module for invariant and graph format conversion
-
-  @param uploadedFiles: array with all file names of uploaded files
-  @param fileType
-  @param toFormat -
-  @param convertFileSaveLoc -
-  @return isCorrectFileFormat - check if at least one file has the correct format
-  @return isCorrectFileType - check if file type is legal
-  '''
-  isCorrectFileFormat = False # Guilty until proven innocent
-  isCorrectFileType = False # Guilty until proven innocent
-
-  for file_fn in uploadedFiles:
-    # determine type of the file
-    if (os.path.splitext(file_fn)[1] in ['.mat','.csv','.npy']):
-      isCorrectFileFormat = True
-      #if (fileType == 'fg' or fileType == 'fibergraph'):
-      #  isCorrectFileType = True
-      #  pass # TODO : DM
-      #elif( fileType == 'lcc' or fileType == 'lrgstConnComp'):
-      #  isCorrectFileType = True
-      #  pass # TODO : DM
-      if (fileType in settings.VALID_FILE_TYPES.keys() or fileType in settings.VALID_FILE_TYPES.values()):
-        isCorrectFileType = True
-
-        # Check if file format is the same as the toFormat
-        if (os.path.splitext(file_fn)[1] in toFormat):
-          toFormat.remove(os.path.splitext(file_fn)[1])
-        if (len(toFormat) == 0):
-          pass # No work to be done here
-        else:
-          convertTo.convertAndSave(file_fn, toFormat, convertFileSaveLoc, fileType) # toFormat is a list
-  return isCorrectFileFormat, isCorrectFileType
 
 ################################################################################
 
