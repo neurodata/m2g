@@ -7,6 +7,8 @@
 
 @summary: Module to hold the views of a Django one-click MR-connectome pipeline
 """
+from paths import include
+include()
 
 import os, sys, re
 from glob import glob
@@ -39,9 +41,6 @@ from forms import ConvertForm
 from forms import BuildGraphForm
 from forms import PasswordResetForm
 from forms import DownloadGraphs
-
-
-import mrpaths
 
 """ Data Processing imports"""
 from mrcap import gengraph as gengraph
