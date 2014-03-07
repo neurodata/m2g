@@ -16,7 +16,7 @@
 	}
 
 	/*p,code,ul, ol {padding-bottom: 1.2em; line-height: 180%;}*/
-        p ,ul, pre, ol {padding-bottom: 1.2em; line-height: 180%;}
+        p ,ul, pre, ol {padding-bottom: 0.5em; line-height: 180%;}
 
 	/*li {list-style: none;}*/
 
@@ -47,7 +47,7 @@
     font: normal monospace;
   }
 
-	h1,h2,h3 {padding-top: 6px;}
+	/*h1,h2,h3 {padding-top: 2px;}*/
 
 	/* structure */
 	.container {
@@ -134,4 +134,10 @@
         .forms {
           list-style: none;
           line-height: 30px;
+        }
+
+        /*Login*/
+        .login{
+          color: #7591EF;
+          font-weight: bold;
         }

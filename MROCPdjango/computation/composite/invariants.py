@@ -79,20 +79,22 @@ def compute(inv_dict, sep_save=True, gformat="graphml"):
 
   if inv_dict.get("eig", False) != False:
 
-    # Test if graph is too big for invariants
-    if r_igraph_vcount(G, False) < 1000000: # Cannot compute eigs on very big graphs
-      inv_dict["k"] = max(50, r_igraph_vcount(G, False)-3) # Max of 50 eigenvalues
-      print "Computing eigen decompositon ..."
-      if sep_save:
-        inv_dict["eigvl_fn"] = os.path.join(inv_dict["save_dir"], "Eigen", \
-                                  getBaseName(inv_dict["graph_fn"]) + "_eigvl.npy")
-        inv_dict["eigvect_fn"] = os.path.join(inv_dict["save_dir"], "Eigen", \
-                                  getBaseName(inv_dict["graph_fn"]) + "_eigvect.npy")
+    if inv_dict["k"] is None:
+      inv_dict["k"] = min(100, r_igraph_vcount(G, False)-3) # Max of 100 eigenvalues
 
-        G = r_igraph_eigs(G, inv_dict['k'], save_fn=(inv_dict["eigvl_fn"], inv_dict["eigvect_fn"]))
-      else: G = r_igraph_eigs(G, inv_dict['k'], save_fn=None)
-    else:
-      print "Graph too big to compute spectral embedding"
+    # Test if graph is too big for invariants
+    print "Computing eigen decompositon ..."
+    
+    lcc = True if r_igraph_ecount(G, False) > 500000 else False
+    if sep_save:
+      inv_dict["eigvl_fn"] = os.path.join(inv_dict["save_dir"], "Eigen", \
+                                getBaseName(inv_dict["graph_fn"]) + "_eigvl.npy")
+      inv_dict["eigvect_fn"] = os.path.join(inv_dict["save_dir"], "Eigen", \
+                                getBaseName(inv_dict["graph_fn"]) + "_eigvect.npy")
+      G = r_igraph_eigs(G, inv_dict['k'], save_fn=(inv_dict["eigvl_fn"], inv_dict["eigvect_fn"]), lcc=lcc)
+
+    else: G = r_igraph_eigs(G, inv_dict['k'], save_fn=None, lcc=lcc)
+    #else: G = r_igraph_eigs(G, 4, save_fn=None, lcc=True)
 
   if inv_dict.get("mad", False) != False:
     if r_igraph_vcount(G, False) < 1000000: # Cannot compute eigs on very big graphs
@@ -294,7 +296,7 @@ def r_igraph_triangles(g, save_fn=None):
 
   return g # return so we can use for other attributes
 
-def r_igraph_eigs(g, k, return_eigs=False, save_fn=None, real=True):
+def r_igraph_eigs(g, k, return_eigs=False, save_fn=None, real=True, lcc=False):
   """
   Eigen spectral decomposition. Compute the top-k eigen pairs.
 
@@ -307,34 +309,48 @@ def r_igraph_eigs(g, k, return_eigs=False, save_fn=None, real=True):
   ==================
   save_fn - must an 2 item list/tuple with 2 names OR None
   return_eigs - boolean on whether to just return the eigenpairs or the whole graph
+  real - Compute only the real part
+  lcc - use the largest connected component only
 
   Returns
   =======
-
   A graph with eigs as graph attributes OR actual eigenpairs
   """
 
   esd = robjects.r("""
   require(igraph)
   options(digits=2) # 3 decimal places
-  fn <- function(g, nev, ncv, real=FALSE){
+  fn <- function(g, nev, real=FALSE, lcc=FALSE){
+    
+    eig.vs <- 1:vcount(g) # at beginning
+    if (lcc) {
+    cat("Computing clusters ...\n")
+    cl <- clusters(g) # Get clustering
+    eig.vs <- which(cl$membership == which.max(cl$csize)) # get lcc vertices
+    cat("Building LCC with", length(eig.vs), "vertices...\n")
+    g <- induced.subgraph(g, eig.vs)
+    }
+
+    ncv <- if (nev + 50 < vcount(g)) (nev + 50) else vcount(g)  
     M <- get.adjacency(g, sparse=TRUE)
 
     mv_mult <- function(x, extra=NULL) {
       as.vector(M %*% x) }
 
+    cat("Computing eigs ...\n")
     eig <- arpack(mv_mult, options=list(n=vcount(g), nev=nev, ncv=ncv,  which="LM", maxiter=100))
-    lapply(list(eig$values, t(eig$vectors)), Re) # return [eigvals, eigvects] real parts only
+    rm(g, M)
+    cat("Taking the real parts\n")
+    list((lapply(list(eig$values, t(eig$vectors)), Re)), eig.vs)# return [eigvals, eigvects, vertex.indicies] real parts only
   }
   """) # A list with [0]=eigenvalues and [1]=eigenvectors. If an eigensolver error occurs then None
 
   eigs = None
   vcount = r_igraph_vcount(g, False)
   nev = k if k < (vcount - 2) else (vcount-3)
-  ncv = nev + 20 if (nev + 20) < vcount else vcount
 
   try:
-    eigs = esd(g, nev, ncv, real)
+    eigs = esd(g, nev, real, lcc)
   except Exception, msg:
     print msg
     return g # *Note premature exit*
@@ -343,22 +359,25 @@ def r_igraph_eigs(g, k, return_eigs=False, save_fn=None, real=True):
 
   if save_fn:
     save_fn = os.path.abspath(save_fn)
-    createSave(save_fn[0], eigs[0]) # eigenvalues
-    createSave(save_fn[1], eigs[1]) # eigenvectors
+    createSave(save_fn[0], eigs[0][0]) # eigenvalues
+    createSave(save_fn[1], eigs[0][1]) # eigenvectors
     print "Eigenvalues saved as %s ..." % save_fn[0]
     print "eigenvectors ssaved as %s ..." % save_fn[1]
   else:
 
     global gl_eigvects
-    gl_eigvects = eigs[1]
+    gl_eigvects = eigs[0][1]
 
-    eigvects = map(get_str_eigvects, [(idx, idx+nev) for idx in xrange(0, (vcount*nev), nev)])
-    g = r_igraph_set_graph_attribute(g, "eigvals", str(list(eigs[0]))) # Return a comma separated string
+    print "Setting eigenvalues as graph attr ..."
+    g = r_igraph_set_graph_attribute(g, "eigvals", "["+", ".join(map(cut, (eigs[0][0])))+"]") # Return a comma separated string
 
-    #g = r_igraph_set_vertex_attr(g, "latent_pos", value=eigvects) # Could not create char sequences only lists :-/
+    eig_idx = eigs[1]
+    print "Mapping eigenvectors ..."
+    eigvects = map(get_str_eigvects, [(idx, idx+nev) for idx in xrange(0, ((len(eigs[1]))*nev), nev)])
+    del eigs
 
-    for node in xrange(vcount):
-      g = r_igraph_set_vertex_attr(g, "latent_pos", value=eigvects[node], index="c(%d)"%(node+1)) # ** +1 for R 1-based indexing **
+    print "Setting eigenvectors as vertex attr ..."
+    g = r_igraph_set_vertex_attr(g, "latent_pos", value=eigvects, index=eig_idx, is_str=True) # Could not create char sequences only lists :-/
     print "Eigenvalue computation not saved to disk. Eigen-pairs added as graph attributes ...."
 
   return g
@@ -377,8 +396,18 @@ def get_str_eigvects(idx):
   A vector i.e the eigenvector (latent position) for that vertex cast to a string
   """
   global gl_eigvects
-  return str(list(gl_eigvects[idx[0]:idx[1]]))
+  return "["+", ".join(map(cut, (gl_eigvects[idx[0]:idx[1]])))+"]"
+  #return str(list(gl_eigvects[idx[0]:idx[1]]))
 
+def cut(num):
+  """
+  Shorten the format of a number to 2 decimal places plus exponent
+  
+  Positional arguments
+  ====================
+  num - the number to be shorten
+  """
+  return "{0:.2e}".format(num)
 
 def r_igraph_max_ave_degree(g):
   """
@@ -466,7 +495,7 @@ def r_igraph_ecount(g, set_attr=True):
     return int(ec)
 
     # =========== Graph, Node, Attr ============= #
-def r_igraph_set_vertex_attr(g, attr_name, value, index="V(g)"):
+def r_igraph_set_vertex_attr(g, attr_name, value, index=NULL, is_str=False):
   """
   Set/Add an R vertex attribute to an R igraph object.
   The vertex length must equal the number of nodes.
@@ -477,16 +506,22 @@ def r_igraph_set_vertex_attr(g, attr_name, value, index="V(g)"):
   attr_name - the name of the vetex attribute I want to add. Type: string
   value - the R FloatVector containing the values to be added as attribute
   """
-
   set_vert_attr = robjects.r("""
-  require(igraph)
-  fn <- function(g, attr_name, value){
-  set.vertex.attribute(g, attr_name, index=%s, value=value)
-  }
-  """ % index)
+    require(igraph)
+    fn <- function(g, value, index){
+      if (!is.null(index)) {
+        V(g)[index]$%s <- value
+      } else {
+        V(g)$%s <- value
+      }
+      g
+    }
+    """ % (attr_name, attr_name))
+  if is_str:
+    return set_vert_attr(g, robjects.vectors.StrVector(value), index)
+  return set_vert_attr(g, value, index)
 
-  return set_vert_attr(g, attr_name, value)
-
+  
 def r_igraph_set_graph_attribute(g, attr_name, value):
   """
   Set/Add an igraph graph attribute in R.
@@ -498,11 +533,13 @@ def r_igraph_set_graph_attribute(g, attr_name, value):
 
   set_graph_attr = robjects.r("""
   require(igraph)
-  fn <- function(g, attr_name, value){
-  set.graph.attribute(g, attr_name, value=value)
+  fn <- function(g, value){
+  g$%s <- value
+  g
   }
-  """)
-  return set_graph_attr(g, attr_name, value)
+  """ % attr_name)
+
+  return set_graph_attr(g, value)
 
 def r_create_test_graph(nodes=5, edges=7):
 
@@ -533,4 +570,3 @@ if __name__ == "__main__":
   inv_dict["ver"] =  True; inv_dict["edge"] = True; inv_dict["deg"] = True
 
   g = compute(inv_dict, sep_save=False)
-  #python -m cProfile -o profile.pstats invariants.py
