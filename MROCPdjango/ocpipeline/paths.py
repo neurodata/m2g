@@ -4,7 +4,7 @@ Code to load project paths
 
 import os
 
-MR_BASE_PATH = os.path.abspath("../../.." )
+MR_BASE_PATH = os.path.abspath("../.." )
 MR_DJANGO_PATH = os.path.join(MR_BASE_PATH, "MROCPdjango")
 PATHS = [ MR_BASE_PATH, MR_DJANGO_PATH ]
 
