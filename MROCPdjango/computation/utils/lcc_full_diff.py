@@ -3,8 +3,6 @@
 
 # A file to write to csv with the difference between the
 #  # of edges & vertices of a graph & its LCC
-from paths import include
-include()
 
 import os
 import numpy as np

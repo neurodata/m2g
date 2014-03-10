@@ -5,9 +5,6 @@
 # Email: disa@jhu.edu
 # Copyright (c) 2013. All rights reserved.
 
-from paths import include
-include()
-
 import argparse
 from computation.utils.loadAdjMatrix import loadAnyMat
 from computation.composite.invariants import compute

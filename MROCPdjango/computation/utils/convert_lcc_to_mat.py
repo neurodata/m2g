@@ -1,5 +1,3 @@
-from paths import include
-include()
 
 from computation.utils.loadAdjMatrix import loadAdjMat
 from glob import glob

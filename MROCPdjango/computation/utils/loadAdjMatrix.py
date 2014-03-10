@@ -7,9 +7,6 @@
 """
 Load up an adjacency matrix given G_fn, lcc & roiRoot
 """
-from paths import include
-include()
-
 import os
 import argparse
 import mrcap.lcc as lcc

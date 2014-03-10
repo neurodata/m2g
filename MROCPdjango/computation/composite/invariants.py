@@ -5,9 +5,6 @@
 # Email: dmhembe1@jhu.edu
 # Copyright (c) 2013. All rights reserved.
 
-from paths import include
-include()
-
 import os
 from math import ceil
 import numpy as np

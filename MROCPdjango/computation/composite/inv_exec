@@ -8,9 +8,6 @@
 """
 A python script to run invariants on a file based on CL flag
 """
-from paths import include
-include()
-
 import argparse
 import sys
 import os

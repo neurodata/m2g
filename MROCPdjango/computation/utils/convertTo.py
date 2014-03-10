@@ -8,8 +8,6 @@
 """
 A module to load and convert graphs and invariant data between mat, npy and csv format
 """
-from paths import include
-include()
 
 import numpy as np
 import os

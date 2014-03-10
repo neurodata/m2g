@@ -8,9 +8,6 @@
 '''
 Script to provide CL interface to build graphs
 '''
-from paths import include
-include()
-
 import argparse
 import os
 
