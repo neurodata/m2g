@@ -461,6 +461,7 @@ completed data here: %s.\nPlease check these and try again.\n\n
 """ % (os.path.basename(graph_fn), dwnldLoc)
 
       sendJobFailureEmail(request.session['email'], msg)
+      return
 
   # Email user of job finished
   sendJobCompleteEmail(request.session['email'], dwnldLoc)
@@ -503,6 +504,7 @@ def graphLoadInv(request, webargs=None):
       # Launch thread for graphs & email user
       sendJobBeginEmail(request.session['email'], request.session['invariants'], genGraph=False)
 
+      #asyncInvCompute(request)
       thr = threading.Thread(target=asyncInvCompute, args=(request,))
       thr.start()
 

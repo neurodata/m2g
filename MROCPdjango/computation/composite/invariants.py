@@ -79,7 +79,7 @@ def compute(inv_dict, sep_save=True, gformat="graphml"):
 
   if inv_dict.get("eig", False) != False:
 
-    if inv_dict["k"] is None:
+    if inv_dict.get("k") is None:
       inv_dict["k"] = min(100, r_igraph_vcount(G, False)-3) # Max of 100 eigenvalues
 
     # Test if graph is too big for invariants
