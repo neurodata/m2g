@@ -5,9 +5,6 @@
 # Email: disa@jhu.edu
 # Copyright (c) 2014. All rights reserved.
 
-from paths import include
-include()
-
 import argparse
 from computation.utils import graphml_adapter
 from computation.utils.file_util import loadAnyMat

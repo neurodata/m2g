@@ -3,8 +3,6 @@
 # Author: Disa Mhembere
 # New version now compatible with composite refactored code to compute graph invariants and compare vs gold std as a unittest.
 # Date: 3 December 2013
-from paths import include
-include()
 
 import argparse
 import unittesting

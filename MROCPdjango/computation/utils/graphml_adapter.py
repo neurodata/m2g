@@ -6,8 +6,6 @@
 # Copyright (c) 2014. All rights reserved.
 
 # File performs conversion to and from scipy.sparse matrices to graphml and back
-from paths import include
-include()
 
 import argparse
 import os
