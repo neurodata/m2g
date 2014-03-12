@@ -56,7 +56,7 @@ def _ingest_files(fns, genus, tb_name):
           print "Ignoring %s ..." % graph_fn
         else:
           cursor.execute("delete from %s.%s where filepath = \"%s\";" % (db_args["default"]["NAME"], tb_name, graph_fn))
-          print "Updating %s ..." % graph_fn
+          print "  ===> Updating %s ..." % graph_fn
 
       if g_changed: # Means graph has changed since ingest OR was never in DB to start with
         # Collect all the attributes etc ..
@@ -101,7 +101,7 @@ def clean_stale_graphs(tb_name):
     if all_files:
       for fn in all_files:
         if not os.path.exists(fn[0]):
-          print "\t Deleting entry with filepath %s from database ..." % fn[0]
+          print "  ===> Deleting entry with filepath %s from database ..." % fn[0]
           cursor.execute("delete from %s.%s where filepath = \"%s\"" % (db_args["default"]["NAME"], tb_name, fn[0]))
 
 def main():
