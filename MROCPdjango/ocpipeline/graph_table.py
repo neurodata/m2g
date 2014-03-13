@@ -16,7 +16,7 @@ class GraphTable(tables.Table):
     model = GraphDownloadModel
     attrs = {"class" : "paleblue"} # Set table class in html to paleblue
     # Specify which fields to display in table
-    fields = ("url", "genus", "region", "numvertex", "numedge", 
+    fields = ("url", "region", "numvertex", "numedge", 
         "graphattr", "vertexattr", "edgeattr", "sensor", "source")
     order_by = ("url")
 
