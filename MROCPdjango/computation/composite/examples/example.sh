@@ -46,6 +46,19 @@ else
   wget --output-document=$ROI_XML http://mrbrain.cs.jhu.edu/data/projects/disa/OCPprojects/testdata/test_roi.xml
 fi
 
+# BIG
+# Uncomment to Build big graph WARNING: Can take up to 2 hours to complete
+if [[ $1 == "-b" ]]; then
+  python ../graph_exec $FIBER $ROI_XML $ROI_RAW -S $BIG_DIR -b -g $BIG_GR_FN
+
+  # Invariants:
+  echo "./inv_exec -h. For help"
+  python .././inv_exec $BIG_DIR/$BIG_GR_FN -A -S $BIG_DIR 
+  exit
+else
+  echo 'To build a big graph pass -b as the 1 argument to the example script'
+fi
+
 # SMALL
 # Graph generation:
 echo "../graph_exec -h. For help"
@@ -56,14 +69,3 @@ python ../graph_exec $FIBER $ROI_XML $ROI_RAW -S $SMALL_DIR -g $SMALL_GR_FN
 echo "./inv_exec -h. For help"
 python ../inv_exec $SMALL_DIR/$SMALL_GR_FN -A -S $SMALL_DIR 
 
-# BIG
-# Uncomment to Build big graph WARNING: Can take up to 2 hours to complete
-if [[ $1 == "-b" ]]; then
-  python ../graph_exec $FIBER $ROI_XML $ROI_RAW -S $BIG_DIR -b -g $BIG_GR_FN
-
-  # Invariants:
-  echo "./inv_exec -h. For help"
-  python .././inv_exec $BIG_DIR/$BIG_GR_FN -A -S $BIG_DIR 
-else
-  echo 'To build a big graph pass -b as the 1 argument to the example script'
-fi
