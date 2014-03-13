@@ -60,7 +60,15 @@ def _ingest_files(fns, genus, tb_name):
 
       if g_changed: # Means graph has changed since ingest OR was never in DB to start with
         # Collect all the attributes etc ..
-        g = igraph.read(graph_fn, format="graphml")
+        try:
+          g = igraph.read(graph_fn, format="graphml")
+        except:
+          "Attempting unzip and read ..."
+          f = zipfile.ZipFile(graph_fn, "r")
+          tmpfile = tempfile.NamedTemporaryFile("w")
+          tmpfile.write(f.read(f.namelist()[0])) # read into mem
+          g = igraph.read(tmpfile.name, format="graphml")
+
         vertex_attrs = g.vs.attribute_names()
         edge_attrs = g.es.attribute_names()
         graph_attrs = g.attributes()
