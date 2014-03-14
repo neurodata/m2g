@@ -14,6 +14,9 @@ from glob import glob
 import MySQLdb
 from contextlib import closing
 import igraph
+import tempfile
+import zipfile
+from time import time
 from ocpipeline.settings_secret import DATABASES as db_args
 
 def ingest(genera, tb_name, base_dir=None, files=None):
@@ -64,10 +67,14 @@ def _ingest_files(fns, genus, tb_name):
           g = igraph.read(graph_fn, format="graphml")
         except:
           "Attempting unzip and read ..."
+          start = time()
           f = zipfile.ZipFile(graph_fn, "r")
-          tmpfile = tempfile.NamedTemporaryFile("w")
+          tmpfile = tempfile.NamedTemporaryFile("w", delete=False)
           tmpfile.write(f.read(f.namelist()[0])) # read into mem
+          tmpfile.close()
           g = igraph.read(tmpfile.name, format="graphml")
+          os.remove(tmpfile.name)
+          print "  Read zip %s ..." % graph_fn
 
         vertex_attrs = g.vs.attribute_names()
         edge_attrs = g.es.attribute_names()
