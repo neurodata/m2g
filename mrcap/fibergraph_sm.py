@@ -1,17 +1,20 @@
 # Class holding small fibergraphs
 # @author Randal Burns, Disa Mhembere
 
+import math
+import itertools
+import os
+from collections import defaultdict
+
+import igraph
+import nibabel as nib
+
+from mrcap.atlas import Atlas
+from mrcap.fibergraph import _FiberGraph
 from mrcap.fiber import Fiber
 import mrcap.roi as roi
 import scipy.io as sio
 import zindex
-import math
-import itertools
-import igraph
-from collections import defaultdict
-from mrcap.fibergraph import _FiberGraph
-from mrcap.desikan import des_map
-import os
 
 # Class functions documented in fibergraph.py
 
@@ -69,17 +72,25 @@ class FiberGraph(_FiberGraph):
       self.edge_dict[tuple(sorted(list_item))] += 1
 
 
-  def complete(self, ):
+  def complete(self, add_centroids=True, atlas={}):
     super(FiberGraph, self).complete()
-
-    print "Adding desikan labels ..."
-    self.spcscmat.vs["region"] = des_map.values()
     
-    print "Adding centroids ..."
-    cent_mat = sio.loadmat(os.path.join(os.path.abspath(os.path.dirname(__file__)),"utils", "centroids.mat"))["centroids"]
-    centroids = []
+    assert atlas, "One Atlas must exist for any small graph!"
+    # since only 1 atlas
+    atlas_name = atlas.keys()[0]
+    atlas_regions = atlas[atlas.keys()[0]]
 
-    for row in cent_mat:
-      centroids.append(str(list(row)))
+    print "Attempting to add atlas labels ..."
+    if atlas_regions is not None:
+      f_regions = open(atlas_regions, "rb")
+      self.spcscmat.vs["region_name"] = f_regions.read().splitlines()
+    
+    if add_centroids:
+      print "Adding centroids ..."
+      cent_mat = sio.loadmat(os.path.join(os.path.abspath(os.path.dirname(__file__)),"utils", "centroids.mat"))["centroids"]
+      centroids = []
 
-    self.spcscmat.vs["centroid"] = centroids
+      for row in cent_mat:
+        centroids.append(str(list(row)))
+
+      self.spcscmat.vs["centroid"] = centroids

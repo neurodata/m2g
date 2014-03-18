@@ -48,6 +48,7 @@ class _FiberGraph(object):
     self.spcscmat["region"] = "brain"
     self.spcscmat["sensor"] = "Magnetic Resonance"
     self.spcscmat["source"] = "http://openconnecto.me/graph-services"
+    self.spcscmat["DOI"] = "10.1109/GlobalSIP.2013.6736878" # Migraine paper
 
   def saveToIgraph(self, filename, gformat="graphml"):
     """

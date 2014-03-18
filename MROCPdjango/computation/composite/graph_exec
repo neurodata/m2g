@@ -18,7 +18,7 @@ from computation.utils.file_util import getPathLeaf, makeDirIfNone
 #                             GRAPH BUILDER                                    #
 ################################################################################
 
-def build_graph(fiber_fn, roi_raw_fn, roi_xml_fn, is_big, save_dir, graph_fn):
+def build_graph(fiber_fn, roi_raw_fn, roi_xml_fn, is_big, save_dir, graph_fn, atlas):
   """
   Function to envoke graph generation code.
 
@@ -30,6 +30,7 @@ def build_graph(fiber_fn, roi_raw_fn, roi_xml_fn, is_big, save_dir, graph_fn):
   is_big - boolean for if graph should be big or small
   save_dir - directory where to save graph file produced. Does not have to exist.
   graph_fn - the name of the graph file that will be the product of the graph building exercise
+  atlas - the file name(s) or atlas and optionally region name files as list. 
 
   Returns:
   ========
@@ -51,9 +52,17 @@ def build_graph(fiber_fn, roi_raw_fn, roi_xml_fn, is_big, save_dir, graph_fn):
 
   stmt = "Building " + graph_fn + ( " BIG" if is_big else " SMALL") + " graph ..."
   makeDirIfNone(os.path.dirname(graph_fn))
-
+  
+  # Add atlases to a dict
+  atlas_d = {}
+  for atl in atlas:
+    sp_atl = atl.split(",")
+    if len(sp_atl) == 2: atlas_d[sp_atl[0]] = atlas_d[sp_atl[1]]
+    elif len(sp_atl) == 1: atlas_d[sp_atl[0]] = None
+    else: assert False, "Cannot understand command line atlas name/region pair '%s'. Must be in format 'atlas,atlas_region_names'." % atl
+  
   print stmt
-  genGraph(fiber_fn, graph_fn, roi_xml_fn, roi_raw_fn, is_big)
+  genGraph(fiber_fn, graph_fn, roi_xml_fn, roi_raw_fn, is_big, **atlas_d)
 
   return graph_fn
 
@@ -69,6 +78,8 @@ def main():
   parser.add_argument('roixml_fn', action='store', help='the full file name of the ROI.xml file (.xml format expected)')
   parser.add_argument('roiraw_fn', action='store', help='the full file name of the ROI.xml file (.raw format expected)')
   parser.add_argument('-b', '--is_big', action='store_true', help ='[TO BE ALTERED] big graph? Pass the flag. If no flag assumed to be small.')
+  parser.add_argument('-a', '--atlas', nargs='*', action='store', help ='Pass atlas filename(s). If regions are named then pass region \
+      naming file as well in the format: \'-a atlas0 atlas1,atlas1_region_names atlas2 atlas3,atlas3_region_names\' etc.')
   parser.add_argument('-S', '--save_dir', action='store', help='the directory where the invariants \
                       are to stored (each invariant will create its own subdirectory within this). \
                       The default is %s' % default_save_dir)
@@ -79,7 +90,7 @@ def main():
   if result.save_dir is None:
     result.save_dir = default_save_dir
 
-  build_graph(result.fiber_fn, result.roiraw_fn, result.roixml_fn, result.is_big, result.save_dir, result.graph_fn)
+  build_graph(result.fiber_fn, result.roiraw_fn, result.roixml_fn, result.is_big, result.save_dir, result.graph_fn, result.atlas)
 
 if __name__ == '__main__':
   main()

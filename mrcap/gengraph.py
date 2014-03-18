@@ -8,7 +8,7 @@ import mrcap.roi as roi
 from mrcap.fiber import FiberReader
 from time import time
 
-def genGraph(infname, outfname, roixmlname=None, roirawname=None, bigGraph=False, outformat="graphml", numfibers=0):
+def genGraph(infname, outfname, roixmlname=None, roirawname=None, bigGraph=False, outformat="graphml", numfibers=0, centroids=True, **atlases):
   """
   Generate a sparse igraph from an MRI file based on input and output names.
   Outputs a graphml formatted graph by default
@@ -31,10 +31,8 @@ def genGraph(infname, outfname, roixmlname=None, roirawname=None, bigGraph=False
 
   start = time()
   # Determine size of graph to be processed i.e pick a fibergraph module to import
-  if bigGraph:
-    from fibergraph_bg import FiberGraph
-  else:
-    from fibergraph_sm import FiberGraph
+  if bigGraph: from fibergraph_bg import FiberGraph
+  else: from fibergraph_sm import FiberGraph
 
   # If these filenames are undefined then,
   # assume that there are ROI files in ../roi
@@ -42,14 +40,14 @@ def genGraph(infname, outfname, roixmlname=None, roirawname=None, bigGraph=False
   if not(roixmlname and roirawname):
     [ inpathname, inbasename ] = os.path.split ( infname )
     inbasename = str(inbasename).rpartition ( "_" )[0]
-    roifp = os.path.normpath ( inpathname + '/../roi/' + inbasename )
-    roixmlname = roifp + '_roi.xml'
-    roirawname = roifp + '_roi.raw'
+    roifp = os.path.normpath ( inpathname + "/../roi/" + inbasename )
+    roixmlname = roifp + "_roi.xml"
+    roirawname = roifp + "_roi.raw"
 
 #  # Assume that there are mask files in ../mask
-#  maskfp = os.path.normpath ( inpathname + '/../mask/' + inbasename )
-#  maskxmlname = maskfp + '_mask.xml'
-#  maskrawname = maskfp + '_mask.raw'
+#  maskfp = os.path.normpath ( inpathname + "/../mask/" + inbasename )
+#  maskxmlname = maskfp + "_mask.xml"
+#  maskrawname = maskfp + "_mask.raw"
 
   # Get the ROIs
 
@@ -91,11 +89,11 @@ def genGraph(infname, outfname, roixmlname=None, roirawname=None, bigGraph=False
     if count % 10000 == 0:
       print ("Processed {0} fibers".format(count) )
 
-      #if count == 10000:
-       #break
+      if count == 10000:
+        break
   del reader
   # Done adding edges
-  fbrgraph.complete()
+  fbrgraph.complete(centroids, atlases)
 
   fbrgraph.saveToIgraph(outfname, gformat=outformat)
 
@@ -113,11 +111,21 @@ def main ():
   parser.add_argument( "--isbig", "-b", action="store_true", default=False, help="Is the graph big? If so use this flag" )
   parser.add_argument( "--roixml", "-x", action="store", default=None, help="The full file name of roi xml file" )
   parser.add_argument( "--roiraw", "-w", action="store", default=None, help="The full file name of roi raw file" )
-  parser.add_argument( "--numfib", "-n", action="store", type=int, default=-1, help="The number of fibers ..." )
+  parser.add_argument( "--numfib", "-n", action="store", type=int, default=-1, help="The number of fibers" )
+  parser.add_argument("-a", "--atlas", nargs="*", action="store", help ="Pass atlas filename(s). If regions are named then pass region \
+      naming file as well in the format: '-a atlas0 atlas1,atlas1_region_names atlas2 atlas3,atlas3_region_names' etc.")
+  parser.add_argument( "--centroids", "-C", action="store_true", help="Pass to *NOT* include centroids" )
 
   result = parser.parse_args()
 
-  genGraph ( result.fbrfile, result.output, result.roixml, result.roiraw, result.isbig, result.outformat, result.numfib )
+  # Add atlases to a dict
+  atlas_d = {}
+  for atl in result.atlas:
+    sp_atl = atl.split(",")
+    if len(sp_atl) == 2: atlas_d[sp_atl[0]] = sp_atl[1]
+    elif len(sp_atl) == 1: atlas_d[sp_atl[0]] = None
+
+  genGraph ( result.fbrfile, result.output, result.roixml, result.roiraw, result.isbig, result.outformat, result.numfib, not result.centroids, **atlas_d)
 
 if __name__ == "__main__":
   main()
