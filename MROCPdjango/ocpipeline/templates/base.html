@@ -137,7 +137,7 @@
 
 
         <!-- Tell me who is logged in -->
-        <div id="loginStatus">
+        <div id="loginStatus" class="container">
           {% if user.is_authenticated %}
           <div id=li class=login> Hi, {{ user.username | capfirst }} </div>
 
