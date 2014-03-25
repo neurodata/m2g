@@ -690,12 +690,14 @@ def call_gengraph(fiber_fn, roi_xml_fn, roi_raw_fn, graphs, graphInvariants, gra
     if graphsize.lower().startswith("s"):
       print("Running Small gengraph ...")
       Gfn+="smgr.graphml"
-      gengraph.genGraph(fiber_fn, Gfn, roi_xml_fn, roi_raw_fn, bigGraph=False)
+
+      # Note: Some included atlases are present
+      gengraph.genGraph(fiber_fn, Gfn, roi_xml_fn, roi_raw_fn, bigGraph=False, **settings.ATLASES)
 
     elif graphsize.lower().startswith("b"):
       print("\nRunning Big gengraph ...")
       Gfn+="bggr.graphml"
-      gengraph.genGraph(fiber_fn, Gfn, roi_xml_fn, roi_raw_fn, bigGraph=True)
+      gengraph.genGraph(fiber_fn, Gfn, roi_xml_fn, roi_raw_fn, bigGraph=True, **settings.ATLASES)
     else:
       print '[ERROR]: Graphsize Unkwown' # should never happen
   return Gfn

@@ -57,7 +57,7 @@ def build_graph(fiber_fn, roi_raw_fn, roi_xml_fn, is_big, save_dir, graph_fn, at
   atlas_d = {}
   for atl in atlas:
     sp_atl = atl.split(",")
-    if len(sp_atl) == 2: atlas_d[sp_atl[0]] = atlas_d[sp_atl[1]]
+    if len(sp_atl) == 2: atlas_d[sp_atl[0]] = sp_atl[1]
     elif len(sp_atl) == 1: atlas_d[sp_atl[0]] = None
     else: assert False, "Cannot understand command line atlas name/region pair '%s'. Must be in format 'atlas,atlas_region_names'." % atl
   
