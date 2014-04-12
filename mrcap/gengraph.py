@@ -112,7 +112,7 @@ def main ():
   parser.add_argument( "--roixml", "-x", action="store", default=None, help="The full file name of roi xml file" )
   parser.add_argument( "--roiraw", "-w", action="store", default=None, help="The full file name of roi raw file" )
   parser.add_argument( "--numfib", "-n", action="store", type=int, default=-1, help="The number of fibers" )
-  parser.add_argument("-a", "--atlas", nargs="*", action="store", help ="Pass atlas filename(s). If regions are named then pass region \
+  parser.add_argument("-a", "--atlas", nargs="*", action="store", default=[], help ="Pass atlas filename(s). If regions are named then pass region \
       naming file as well in the format: '-a atlas0 atlas1,atlas1_region_names atlas2 atlas3,atlas3_region_names' etc.")
   parser.add_argument( "--centroids", "-C", action="store_true", help="Pass to *NOT* include centroids" )
 
