@@ -13,47 +13,64 @@ import argparse
 import mrcap.roi as roi
 import nibabel as nib
 import numpy as np
+from math import ceil
+from copy import copy
 
-def create(roixmlfn, roirawfn, baseatlasfn):
+def create(roixmlfn, roirawfn, outfn):
   #nifti_base = nib.load(baseatlasfn)
 
   print "Loading rois as base ..."
-  #roix = roi.ROIXML(roixmlfn) # Create object of type ROIXML
   base = roi.ROIData (roirawfn, roi.ROIXML(roixmlfn).getShape()).data
-  new = np.zeros_like(base)
-  
+  base = copy(base) # shallow
+  #base = np.ones((182, 218, 182), dtype=int)
+  true_dim = base.shape
+
   # Labelling new 
   label_used = False
   print "Labeling new ..."
   region_num = 1
-  for z in xrange(1, base.shape[2]-1, 3):
-    for y in xrange(1, base.shape[1]-1, 3):
-      for x in xrange(1, base.shape[0]-1, 3):
 
-        if True: #label_used: 
+  start = 3
+  step = 1+(start*2)
+  mstart = -start
+  mend = (-mstart)+1 
+  
+  # Align to scale factor
+  xdim, ydim, zdim = map(ceil, np.array(base.shape)/float(step)) 
+  base.resize(xdim*step, ydim*step, zdim*step)
+
+  # Create new matrix
+  new = np.zeros_like(base) # poke my finger in the eye of malloc
+
+  for z in xrange(start, base.shape[2]-start, step):
+    for y in xrange(start, base.shape[1]-start, step):
+      for x in xrange(start, base.shape[0]-start, step):
+
+        if label_used: 
           region_num += 1 # only increase counter when a label was used
           label_used = False
 
-        # set other (3*3)-1 around me to same region
-        for zz in xrange(-1,2):
-          for yy in xrange(-1,2):
-            for xx in xrange(-1,2):
-            #try:
+        # set other (step*step)-1 around me to same region
+        for zz in xrange(mstart,mend):
+          for yy in xrange(mstart,mend):
+            for xx in xrange(mstart,mend):
               if (base[x+xx,y+yy,z+zz]): # Masking
                 label_used = True
                 new[x+xx,y+yy,z+zz] = region_num
-            #except Exception as e:
-              #print "Failed to add index: [%d,%d,%d] with value %d" % (x+xx,y+yy,z+zz, region_num)
 
-  import pdb; pdb.set_trace()
+  new = np.resize(new, true_dim)
+  img = nib.Nifti1Image(new, nib.load("./desikan_atlas.nii").get_affine()) # FIXME: Ask
+  nib.save(img, outfn)
+
 def main():
   parser = argparse.ArgumentParser(description="")
   parser.add_argument("roixmlfn", action="store", help="")
   parser.add_argument("roirawfn", action="store", help="")
-  parser.add_argument("baseatlasfn", action="store", help="")
+  parser.add_argument("-o","--outfn",  action="store", default="atlas.nii", help="")
+  parser.add_argument("-s", "--scale_factor", action="store", help="")
   result = parser.parse_args()
 
-  create(result.roixmlfn, result.roirawfn, result.baseatlasfn)
+  create(result.roixmlfn, result.roirawfn, result.outfn)
 
 if __name__ == "__main__":
   main()
