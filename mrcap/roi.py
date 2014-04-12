@@ -34,9 +34,7 @@ class ROIData:
 
     self._filename = filename
     self._fileobj = open(self._filename, mode='rb')
-
     self.data = np.fromfile(self._fileobj, dtype='>i4', count=dim[0]*dim[1]*dim[2])
-
     self.data = np.reshape ( self.data, dim, order='F' )
     print self.data.shape
 
