@@ -16,7 +16,7 @@ import numpy as np
 from math import ceil
 from copy import copy
 
-def create(roixmlfn, roirawfn, outfn):
+def create(roixmlfn, roirawfn, outfn, start=2):
   #nifti_base = nib.load(baseatlasfn)
 
   print "Loading rois as base ..."
@@ -30,7 +30,6 @@ def create(roixmlfn, roirawfn, outfn):
   print "Labeling new ..."
   region_num = 1
 
-  start = 3
   step = 1+(start*2)
   mstart = -start
   mend = (-mstart)+1 
@@ -57,20 +56,20 @@ def create(roixmlfn, roirawfn, outfn):
               if (base[x+xx,y+yy,z+zz]): # Masking
                 label_used = True
                 new[x+xx,y+yy,z+zz] = region_num
-
+  
   new = np.resize(new, true_dim)
-  img = nib.Nifti1Image(new, nib.load("./desikan_atlas.nii").get_affine()) # FIXME: Ask
+  img = nib.Nifti1Image(new, np.identity(4))
   nib.save(img, outfn)
 
 def main():
-  parser = argparse.ArgumentParser(description="")
-  parser.add_argument("roixmlfn", action="store", help="")
-  parser.add_argument("roirawfn", action="store", help="")
-  parser.add_argument("-o","--outfn",  action="store", default="atlas.nii", help="")
-  parser.add_argument("-s", "--scale_factor", action="store", help="")
+  parser = argparse.ArgumentParser(description="Downsample a fibergraph")
+  parser.add_argument("roixmlfn", action="store", help="XML mask")
+  parser.add_argument("roirawfn", action="store", help="RAW mask")
+  parser.add_argument("-o","--outfn",  action="store", default="atlas.nii", help="Nifti outfile name")
+  parser.add_argument("-s", "--start", default=2, action="store", help="Start index")
   result = parser.parse_args()
 
-  create(result.roixmlfn, result.roirawfn, result.outfn)
+  create(result.roixmlfn, result.roirawfn, result.outfn, result.start)
 
 if __name__ == "__main__":
   main()
