@@ -78,7 +78,7 @@ def main():
   parser.add_argument('roixml_fn', action='store', help='the full file name of the ROI.xml file (.xml format expected)')
   parser.add_argument('roiraw_fn', action='store', help='the full file name of the ROI.xml file (.raw format expected)')
   parser.add_argument('-b', '--is_big', action='store_true', help ='[TO BE ALTERED] big graph? Pass the flag. If no flag assumed to be small.')
-  parser.add_argument('-a', '--atlas', nargs='*', action='store', help ='Pass atlas filename(s). If regions are named then pass region \
+  parser.add_argument('-a', '--atlas', nargs='*', default=[], action='store', help ='Pass atlas filename(s). If regions are named then pass region \
       naming file as well in the format: \'-a atlas0 atlas1,atlas1_region_names atlas2 atlas3,atlas3_region_names\' etc.')
   parser.add_argument('-S', '--save_dir', action='store', help='the directory where the invariants \
                       are to stored (each invariant will create its own subdirectory within this). \
