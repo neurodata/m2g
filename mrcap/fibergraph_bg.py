@@ -88,7 +88,8 @@ class FiberGraph(_FiberGraph):
     print "Deleting zero-degree nodes..."
     zero_deg_nodes = np.where( np.array(self.spcscmat.degree()) == 0 )[0]
     self.spcscmat.delete_vertices(zero_deg_nodes)
-  
+    
+    atlas = None
     for idx, atlas_name in enumerate(atlases.keys()):
       self.spcscmat["Atlas_"+ os.path.splitext(os.path.basename(atlas_name))[0]+"_index"] = idx
       print "Adding '%s' region numbers (and names) ..." % atlas_name
@@ -98,7 +99,7 @@ class FiberGraph(_FiberGraph):
 
       if region[1]: self.spcscmat.vs["atlas_%d_region_name" % idx] = region[1]
     
-    if add_centroids:
+    if atlas and add_centroids:
       print "Adding centroids ..."
       cent_map = sio.loadmat(os.path.join(os.path.abspath(os.path.dirname(__file__)),"utils", "centroids.mat"))["centroids"]
 

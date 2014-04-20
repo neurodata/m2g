@@ -63,7 +63,7 @@ fi
 # Graph generation:
 echo "../graph_exec -h. For help"
 # Build a small graph given fiber streamline: test_fiber, fiber ROI's: test_roi.xml and test_roi.raw
-python ../graph_exec $FIBER $ROI_XML $ROI_RAW -S $SMALL_DIR -g $SMALL_GR_FN -a ../../../mrcap/utils/desikan_atlas.nii
+python ../graph_exec $FIBER $ROI_XML $ROI_RAW -S $SMALL_DIR -g $SMALL_GR_FN -a ../../../../mrcap/utils/desikan_atlas.nii
 
 # Invariants:
 echo "./inv_exec -h. For help"
