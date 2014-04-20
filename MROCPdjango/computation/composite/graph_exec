@@ -18,7 +18,7 @@ from computation.utils.file_util import getPathLeaf, makeDirIfNone
 #                             GRAPH BUILDER                                    #
 ################################################################################
 
-def build_graph(fiber_fn, roi_raw_fn, roi_xml_fn, is_big, save_dir, graph_fn, atlas):
+def build_graph(fiber_fn, roi_raw_fn, roi_xml_fn, is_big, save_dir, graph_fn, centroids, atlas):
   """
   Function to envoke graph generation code.
 
@@ -62,7 +62,7 @@ def build_graph(fiber_fn, roi_raw_fn, roi_xml_fn, is_big, save_dir, graph_fn, at
     else: assert False, "Cannot understand command line atlas name/region pair '%s'. Must be in format 'atlas,atlas_region_names'." % atl
   
   print stmt
-  genGraph(fiber_fn, graph_fn, roi_xml_fn, roi_raw_fn, is_big, **atlas_d)
+  genGraph(fiber_fn, graph_fn, roi_xml_fn, roi_raw_fn, is_big, centroids=centroids, **atlas_d)
 
   return graph_fn
 
@@ -80,6 +80,7 @@ def main():
   parser.add_argument('-b', '--is_big', action='store_true', help ='[TO BE ALTERED] big graph? Pass the flag. If no flag assumed to be small.')
   parser.add_argument('-a', '--atlas', nargs='*', default=[], action='store', help ='Pass atlas filename(s). If regions are named then pass region \
       naming file as well in the format: \'-a atlas0 atlas1,atlas1_region_names atlas2 atlas3,atlas3_region_names\' etc.')
+  parser.add_argument( "--centroids", "-C", action="store_true", help="Pass to *NOT* include centroids" )
   parser.add_argument('-S', '--save_dir', action='store', help='the directory where the invariants \
                       are to stored (each invariant will create its own subdirectory within this). \
                       The default is %s' % default_save_dir)
@@ -90,7 +91,7 @@ def main():
   if result.save_dir is None:
     result.save_dir = default_save_dir
 
-  build_graph(result.fiber_fn, result.roiraw_fn, result.roixml_fn, result.is_big, result.save_dir, result.graph_fn, result.atlas)
+  build_graph(result.fiber_fn, result.roiraw_fn, result.roixml_fn, result.is_big, result.save_dir, result.graph_fn, not result.centroids, result.atlas)
 
 if __name__ == '__main__':
   main()

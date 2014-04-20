@@ -36,3 +36,12 @@ class Atlas(object):
       if self.region_names: region_names.append(self.get_region_name(region_num))
     
     return region_nums, region_names
+
+  def get_region_nums(self, vertices):
+    """
+    Get a bunch of region numbers given vertex index
+    """
+    keys = []
+    for vertex in vertices:
+      keys.append(self.get_region_num(vertex))
+    return keys 

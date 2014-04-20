@@ -89,8 +89,8 @@ def genGraph(infname, outfname, roixmlname=None, roirawname=None, bigGraph=False
     if count % 10000 == 0:
       print ("Processed {0} fibers".format(count) )
 
-      #if count == 10000:
-        #break
+      if count == 10000:
+        break
   del reader
   # Done adding edges
   fbrgraph.complete(centroids, atlases)
@@ -103,7 +103,7 @@ def genGraph(infname, outfname, roixmlname=None, roirawname=None, bigGraph=False
 
 def main ():
 
-  parser = argparse.ArgumentParser( description="Read the contents of MRI Studio file and generate a sparse connectivity graph in SciDB." )
+  parser = argparse.ArgumentParser( description="Read the contents of MRI Studio file and generate a sparse connectivity graph using igraph with default output format 'graphML'" )
   parser.add_argument( "fbrfile", action="store" )
   parser.add_argument( "output", action="store", help="resulting name of graph")
 

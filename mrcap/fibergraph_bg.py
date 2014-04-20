@@ -98,15 +98,13 @@ class FiberGraph(_FiberGraph):
 
       if region[1]: self.spcscmat.vs["atlas_%d_region_name" % idx] = region[1]
     
-    # FIXME: The problem is these centroids are associated with the desikan label ONLY.
-    """
     if add_centroids:
       print "Adding centroids ..."
       cent_map = sio.loadmat(os.path.join(os.path.abspath(os.path.dirname(__file__)),"utils", "centroids.mat"))["centroids"]
-      keys = des_map.get_desikan_keys(self.spcscmat.vs["position"])
+
+      keys = atlas.get_region_nums(self.spcscmat.vs["position"])
       centroids = []
       for key in keys:
          centroids.append(str(list(cent_map[key])))
 
       self.spcscmat.vs["centroid"] = centroids
-    """
