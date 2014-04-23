@@ -5,8 +5,8 @@
 # Copyright (c) 2014. All rights reserved.
 
 # This simply takes a (182, 218, 182) atlas and creates
-# a ~20k region atlas by relabelling each
-# FIXME: 3x3x3 region with a new label then masking
+# a ~30-non-zero k region atlas by relabelling each
+#   3x3x3 region with a new label then masking
 # using a base atlas
 
 import argparse
@@ -17,12 +17,18 @@ from math import ceil
 from copy import copy
 
 def create(roixmlfn, roirawfn, outfn, start=2):
-  #nifti_base = nib.load(baseatlasfn)
+  """
+  Create a new atlas given some scaling factor determined by the 
+  start index. Opaque doc, but best I can do.
+
+  @param roixmlfn: xml mask file name
+  @param roirawfn: raw mask file name
+  @param outfn: the name of the new atlas file you want to create
+  @param start: the x,y,z start position which determines the scaling
+  """
 
   print "Loading rois as base ..."
   base = roi.ROIData (roirawfn, roi.ROIXML(roixmlfn).getShape()).data
-  base = copy(base) # shallow
-  #base = np.ones((182, 218, 182), dtype=int)
   true_dim = base.shape
 
   # Labelling new 
@@ -32,11 +38,14 @@ def create(roixmlfn, roirawfn, outfn, start=2):
 
   step = 1+(start*2)
   mstart = -start
-  mend = (-mstart)+1 
-  
-  # Align to scale factor
+  mend = start+1
+
+  # Align new to scale factor
   xdim, ydim, zdim = map(ceil, np.array(base.shape)/float(step)) 
-  base.resize(xdim*step, ydim*step, zdim*step)
+  resized_base = np.zeros((xdim*step, ydim*step, zdim*step), dtype=int)
+  resized_base[:base.shape[0], :base.shape[1], :base.shape[2]] = base
+  base = resized_base
+  del resized_base
 
   # Create new matrix
   new = np.zeros_like(base) # poke my finger in the eye of malloc
@@ -57,19 +66,50 @@ def create(roixmlfn, roirawfn, outfn, start=2):
                 label_used = True
                 new[x+xx,y+yy,z+zz] = region_num
   
-  new = np.resize(new, true_dim)
+  new = new[:true_dim[0], :true_dim[1], :true_dim[2]] # shrink new to correct size
+  print "Your atlas has %d regions ..." % new.max()
   img = nib.Nifti1Image(new, np.identity(4))
   nib.save(img, outfn)
+
+def validate(atlas_fn, roixmlfn, roirawfn):
+  """
+  Validate that an atlas you've created is a valid based on the
+  masking you have
+
+  @param atlas_fn: the new atlas you've created
+  @param roixmlfn: xml mask file name
+  @param roirawfn: raw mask file name
+  """
+  from operator import xor
+
+  base = roi.ROIData (roirawfn, roi.ROIXML(roixmlfn).getShape()).data
+  new = nib.load(atlas_fn).get_data()
+
+  for i in xrange(new.shape[2]):
+    for ii in xrange(new.shape[1]):
+      for iii in xrange(new.shape[0]):
+        if (xor(bool(new[i,ii,iii]), bool(base[i,ii,iii])) and base[i,ii,iii]==0):
+          print "Created [%d,%d,%d] != 0 as it should be ..." % (i, ii, iii)
+
+  print "Validation complete. If you saw no other messages then you atlas is valid!"
+
 
 def main():
   parser = argparse.ArgumentParser(description="Downsample a fibergraph")
   parser.add_argument("roixmlfn", action="store", help="XML mask")
   parser.add_argument("roirawfn", action="store", help="RAW mask")
-  parser.add_argument("-o","--outfn",  action="store", default="atlas.nii", help="Nifti outfile name")
-  parser.add_argument("-s", "--start", default=2, action="store", help="Start index")
-  result = parser.parse_args()
+  parser.add_argument("-n","--niftifn",  action="store", default="atlas.nii", \
+          help="Nifti outfile name if creating else the infile name if validation")
+  parser.add_argument("-s", "--start", default=2, action="store", type=int, help="Start index")
+  parser.add_argument("-v", "--validate", action="store_true", help="Perform validation")
 
-  create(result.roixmlfn, result.roirawfn, result.outfn, result.start)
+  result = parser.parse_args()
+  if result.validate:
+    print "Validating %s..." % result.niftifn
+    validate(result.niftifn, result.roixmlfn, result.roirawfn)
+    exit(1)
+  
+  create(result.roixmlfn, result.roirawfn, result.niftifn, result.start)
 
 if __name__ == "__main__":
   main()
