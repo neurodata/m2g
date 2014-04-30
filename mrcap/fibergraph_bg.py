@@ -84,12 +84,12 @@ class FiberGraph(_FiberGraph):
     super(FiberGraph, self).complete()
     print "Annotating vertices with spatial position .."
     self.spcscmat.vs["position"] = range(self._maxval) # Use position for
+    centroids_added = False
 
     print "Deleting zero-degree nodes..."
     zero_deg_nodes = np.where( np.array(self.spcscmat.degree()) == 0 )[0]
     self.spcscmat.delete_vertices(zero_deg_nodes)
     
-    atlas = None
     for idx, atlas_name in enumerate(atlases.keys()):
       self.spcscmat["Atlas_"+ os.path.splitext(os.path.basename(atlas_name))[0]+"_index"] = idx
       print "Adding '%s' region numbers (and names) ..." % atlas_name
@@ -99,13 +99,15 @@ class FiberGraph(_FiberGraph):
 
       if region[1]: self.spcscmat.vs["atlas_%d_region_name" % idx] = region[1]
     
-    if atlas and add_centroids:
-      print "Adding centroids ..."
-      cent_map = sio.loadmat(os.path.join(os.path.abspath(os.path.dirname(__file__)),"utils", "centroids.mat"))["centroids"]
+      if add_centroids and (not centroids_added):
+        if (atlas.data.max() == 70): #FIXME: Hard coded Desikan small dimensions
+          centroids_added = True
+          print "Adding centroids ..."
+          cent_map = sio.loadmat(os.path.join(os.path.abspath(os.path.dirname(__file__)),"utils", "centroids.mat"))["centroids"]
 
-      keys = atlas.get_region_nums(self.spcscmat.vs["position"])
-      centroids = []
-      for key in keys:
-         centroids.append(str(list(cent_map[key])))
+          keys = atlas.get_region_nums(self.spcscmat.vs["position"])
+          centroids = []
+          for key in keys:
+             centroids.append(str(list(cent_map[key])))
 
-      self.spcscmat.vs["centroid"] = centroids
+          self.spcscmat.vs["centroid"] = centroids
