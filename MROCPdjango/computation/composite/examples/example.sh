@@ -49,7 +49,7 @@ fi
 # BIG
 # Uncomment to Build big graph WARNING: Can take up to 2 hours to complete
 if [[ $1 == "-b" ]]; then
-  python ../graph_exec $FIBER $ROI_XML $ROI_RAW -S $BIG_DIR -b -g $BIG_GR_FN
+  python ../graph_exec $FIBER $ROI_XML $ROI_RAW -S $BIG_DIR -b -g $BIG_GR_FN -a ../../../../mrcap/utils/desikan_atlas.nii,$(readlink -f $(pwd)/../../../..)/mrcap/utils/desikan_atlas.txt ../../../../mrcap/utils/20k_atlas.nii
 
   # Invariants:
   echo "./inv_exec -h. For help"
