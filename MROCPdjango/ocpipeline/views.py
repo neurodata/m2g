@@ -38,6 +38,7 @@ from forms import ConvertForm
 from forms import BuildGraphForm
 from forms import PasswordResetForm
 from forms import DownloadGraphs
+from forms import DownloadQueryForm
 
 """ Data Processing imports"""
 import paths
@@ -74,22 +75,22 @@ from django.contrib.auth import authenticate, login, logout
 # Helpers
 from utils.util import *
 
-""" Base url just redirects to welcome """
 def default(request):
+  """ Base url just redirects to welcome """
   return redirect(get_script_prefix()+"welcome", {"user":request.user})
 
-""" Little welcome message """
 def welcome(request):
+  """ Little welcome message """
   return render_to_response("welcome.html", {"user":request.user},
                             context_instance=RequestContext(request))
 
-""" Successful completion of task"""
 def success(request):
+  """ Successful completion of task"""
   return render_to_response("success.html", {"msg": request.session["success_msg"]}
                             ,context_instance=RequestContext(request))
 
-""" Job failure """
 def jobfailure(request):
+  """ Job failure """
   return render_to_response("job_failure.html", {"msg": "Please check that your fiber streamline file and ROI's are correctly formatted"}
                             ,context_instance=RequestContext(request))
 
@@ -393,38 +394,91 @@ def upload(request, webargs=None):
 def download(request, webargs=None):
 
   if request.method == "POST":
-    form = DownloadGraphs(request)
-    if form.is_valid:
-      genus = form.data.POST.keys()[0] # holds the genus
+    if request.POST.keys()[0] == "query_type": # Means we are doing a search
+      form = DownloadQueryForm(request.POST)
+      if form.is_valid():
+        gdmof = GraphDownloadModel.objects.filter # typedef
+        st = str(".*"+ form.cleaned_data["query"]+".*") # Search Term
 
-      zip_fn = os.path.join(settings.ZGRAPH_DIR, genus+".zip")
-      if not os.path.exists(zip_fn):
-        # No zip ? make it : return it
-        # TODO: Fix so it can put the zip on disk
-        print "Creating %s ..." % zip_fn
-        temp = zipper.zipup(os.path.join(settings.GRAPH_DIR, genus), zip_fn)
-        #temp.seek(0)
-        #f = open(zip_fn, "wb")
-        #f.write(temp.read())
-        #f.close()
-        #temp.seek(0)
-      #else:
-        #temp = open(zip_fn, "rb")
+        if form.cleaned_data["query_type"] == "all":
+          table = GraphTable(
+              gdmof(genus__iregex=st)      | gdmof(filepath__iregex=st) |
+              gdmof(region__iregex=st)     | gdmof(numvertex__iregex=st)|
+              gdmof(numedge__iregex=st)    | gdmof(graphattr__iregex=st)|
+              gdmof(vertexattr__iregex=st) |  gdmof(edgeattr__iregex=st)|
+              gdmof(sensor__iregex=st)     | gdmof(source__iregex=st)
+           )
+        elif form.cleaned_data["query_type"] == "attribute":
+          table = GraphTable(
+              gdmof(graphattr__iregex=st)| gdmof(vertexattr__iregex=st)|
+              gdmof(edgeattr__iregex=st)
+           )
+        elif form.cleaned_data["query_type"] == "name":
+          table = GraphTable( gdmof(filepath__iregex=st) )
+        elif form.cleaned_data["query_type"] == "genus":
+          table = GraphTable( gdmof(genus__iregex=st) )
+        elif form.cleaned_data["query_type"] == "region":
+          table = GraphTable( gdmof(region__iregex=st) )
 
-      # TODO: Possibly use django.http.StreamingHttpResponse for this
-      wrapper = FileWrapper(temp)
-      response = HttpResponse(wrapper, content_type='application/zip')
-      response['Content-Disposition'] = ('attachment; filename=all_'+genus+'.zip')
-      response['Content-Length'] = temp.tell()
-      temp.seek(0)
+        # NOTE: Or equal to as well
+        elif form.cleaned_data["query_type"] == "numvertex_gt":
+          table = GraphTable( gdmof(numvertex__gte=int(form.cleaned_data["query"])) )
+        elif form.cleaned_data["query_type"] == "numedge_gt":
+          table = GraphTable( gdmof(numedge__gte=int(form.cleaned_data["query"])) )
 
-      return response
-    else:
-      return HttpResponseRedirect(get_script_prefix()+"download")
+        elif form.cleaned_data["query_type"] == "numvertex_lt":
+          table = GraphTable( gdmof(numvertex__lte=int(form.cleaned_data["query"])) )
+        elif form.cleaned_data["query_type"] == "numedge_lt":
+          table = GraphTable( gdmof(numedge__lte=int(form.cleaned_data["query"])) )
+
+        elif form.cleaned_data["query_type"] == "sensor":
+          table = GraphTable( gdmof(sensor__iregex=st) )
+        elif form.cleaned_data["query_type"] == "source":
+          table = GraphTable( gdmof(source__iregex=st) )
+
+        if (len(table.rows) == 0):
+          table = None # Get the no results message to show up
+        else:
+          table.set_html_name("Search Results")
+          #RequestConfig(request, paginate={"per_page":7}).configure(table)
+
+        return render_to_response("downloadgraph.html", {"genera":[],
+          "query":DownloadQueryForm(), "query_result":table}, context_instance=RequestContext(request))
+      else:
+        return HttpResponseRedirect(get_script_prefix()+"download")
+
+    else: # We just want to download an entire dataset
+      form = DownloadGraphs(request)
+      if form.is_valid():
+        genus = form.data.POST.keys()[0] # holds the genus
+
+        zip_fn = os.path.join(settings.ZGRAPH_DIR, genus+".zip")
+        if not os.path.exists(zip_fn):
+          # No zip ? make it : return it
+          # TODO: Fix so it can put the zip on disk
+          print "Creating %s ..." % zip_fn
+          temp = zipper.zipup(os.path.join(settings.GRAPH_DIR, genus), zip_fn)
+          #temp.seek(0)
+          #f = open(zip_fn, "wb")
+          #f.write(temp.read())
+          #f.close()
+          #temp.seek(0)
+        #else:
+          #temp = open(zip_fn, "rb")
+
+        # TODO: Possibly use django.http.StreamingHttpResponse for this
+        wrapper = FileWrapper(temp)
+        response = HttpResponse(wrapper, content_type='application/zip')
+        response['Content-Disposition'] = ('attachment; filename=all_'+genus+'.zip')
+        response['Content-Length'] = temp.tell()
+        temp.seek(0)
+
+        return response
+      else:
+        return HttpResponseRedirect(get_script_prefix()+"download")
 
   else:
     tbls = []
-
     for genus in settings.GENERA:
       table = GraphTable(GraphDownloadModel.objects.filter(genus=genus))
       table.set_html_name(genus.capitalize()) # Set the html __repr__
@@ -437,7 +491,8 @@ def download(request, webargs=None):
 
       tbls.append((table, dl_form))
 
-  return render_to_response("downloadgraph.html", {"genera":tbls}, context_instance=RequestContext(request))
+  return render_to_response("downloadgraph.html", {"genera":tbls, "query":DownloadQueryForm()},
+                            context_instance=RequestContext(request))
 
 ###################################################
 

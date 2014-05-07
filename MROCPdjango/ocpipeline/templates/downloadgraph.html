@@ -21,6 +21,13 @@ format. If this is not suitable for your purposes, consider using our
 be found <a href="{{"igraph"|getScriptPrefix}}">here</a>.
 </p>
 
+<form action="" class="nostyle" method="post" enctype="multipart/form-data" name="queryForm">
+  {% csrf_token %}
+  {{ query }}
+  <input name = "search"  type="submit" value="Search" class="button" onclick="showSpinner();"/>
+</form>
+
+{% if genera %}
 <div id="data_tables">
   {% for genus in genera %}
     <div id="{{ genus.0.html_name }}">
@@ -34,5 +41,18 @@ be found <a href="{{"igraph"|getScriptPrefix}}">here</a>.
     </div>
   {%endfor%}
 </div>
+
+{%  elif query_result %}
+  <div id="query_table">
+    <h3> {{ query_result.html_name }}</h3>
+    {% render_table query_result %}
+  </div>
+
+{% else %}
+  <p class="errormsg"> Sorry, no results matched your search! Please try again </p>
+  <input onclick="location.href='{{"download"|getScriptPrefix}}'" type="button" value="Reset search" class="button"/>
+{% endif %}
+
+<br/><br/>
 
 {% endblock content%}

@@ -1,143 +1,149 @@
 /* standard elements */
-	html {min-height: 100%;}
+html {min-height: 100%;}
 
-	* {
-		margin: 20;
-		padding: 10;
-	}
+* {
+        margin: 20;
+        padding: 10;
+}
 
-	a {color: #963;}
-	a:hover {color: #f17b0d;}
+a {color: #963;}
+a:hover {color: #f17b0d;}
 
-	body {
-		color: #444;
-		font: normal 95% Tahoma,sans-serif;
-		padding-bottom: 40px;
-	}
+body {
+        color: #444;
+        font: normal 95% Tahoma,sans-serif;
+        padding-bottom: 40px;
+}
 
-	/*p,code,ul, ol {padding-bottom: 1.2em; line-height: 180%;}*/
-        p ,ul, pre, ol {padding-bottom: 0.5em; line-height: 180%;}
+/*p,code,ul, ol {padding-bottom: 1.2em; line-height: 180%;}*/
+p ,ul, pre, ol {padding-bottom: 0.5em; line-height: 180%;}
 
-	/*li {list-style: none;}*/
+/*li {list-style: none;}*/
 
-        .nostyle li{
-          list-style-type: none;
-        }
+.nostyle li{
+  list-style-type: none;
+}
 
-	h1 {
-		font: normal 1.8em Tahoma,sans-serif;
-		margin-bottom: 4px;
-	}
+h1 {
+        font: normal 1.8em Tahoma,sans-serif;
+        margin-bottom: 4px;
+}
 
-	pre {
-		background: #FFF;
-		border: 1px solid #EEE;
-		border-left: 6px solid #C1CAD3;
-		color: #666;
-		display: block;
-		/*font: bold 1em Tahoma,sans-serif;*/
-		line-height: 1.6em;
-		margin-bottom: 12px;
-		padding: 8px 10px;
-		white-space: pre;
-	}
+pre {
+        background: #FFF;
+        border: 1px solid #EEE;
+        border-left: 6px solid #C1CAD3;
+        color: #666;
+        display: block;
+        /*font: bold 1em Tahoma,sans-serif;*/
+        line-height: 1.6em;
+        margin-bottom: 12px;
+        padding: 8px 10px;
+        white-space: pre;
+}
 
-  code {
-    background:  #bbbbbb;
-    font: normal monospace;
-  }
+code {
+background:  #bbbbbb;
+font: normal monospace;
+}
 
-	/*h1,h2,h3 {padding-top: 2px;}*/
+/*h1,h2,h3 {padding-top: 2px;}*/
 
-	/* structure */
-	.container {
-		background: #FFF;
-		font-size: 1.4em;
-		margin: 0 auto;
-		padding: 0 10px 10px;
-                width: 1080px;
-	}
+/* structure */
+.container {
+        background: #FFF;
+        font-size: 1.4em;
+        margin: 0 auto;
+        padding: 0 10px 10px;
+        width: 1080px;
+}
 
-        .errorlist{
-          color: #fa1426;
-        }
+.errorlist{
+  color: #fa1426;
+}
 
-        /* Navigation panel */
-        .navigation ul {
-                margin: 0;
-                padding: 0;
-                list-style: none;
-        }
+/* Navigation panel */
+.navigation ul {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+}
 
-        .navigation ul li {
-                display: block;
-                position: relative;
-                float: left;
-        }
+.navigation ul li {
+        display: block;
+        position: relative;
+        float: left;
+}
 
-        .navigation li ul {
-                display: none;
-        }
+.navigation li ul {
+        display: none;
+}
 
-        .navigation  ul li a {
-                display: block;
-                text-decoration: none;
-                color: #ffffff;
-                border-top: 1px solid #ffffff;
-                padding: 5px 15px 5px 15px;
-                background: #06aaac;
-                margin-left: 1px;
-                white-space: nowrap;
-        }
+.navigation  ul li a {
+        display: block;
+        text-decoration: none;
+        color: #ffffff;
+        border-top: 1px solid #ffffff;
+        padding: 5px 15px 5px 15px;
+        background: #06aaac;
+        margin-left: 1px;
+        white-space: nowrap;
+}
 
-        .navigation  ul li a:hover {
-            background: #3b3b3b;
-        }
+.navigation  ul li a:hover {
+    background: #3b3b3b;
+}
 
-        .navigation  li:hover ul {
-                display: block;
-                position: absolute;
-        }
+.navigation  li:hover ul {
+        display: block;
+        position: absolute;
+}
 
-        .navigation li:hover li {
-                float: none;
-                font-size: 14px;
-        }
+.navigation li:hover li {
+        float: none;
+        font-size: 14px;
+}
 
-        .navigation li:hover a { background: #3b3b3b; }
+.navigation li:hover a { background: #3b3b3b; }
 
-        .navigation li:hover li a:hover {
-                background: #1e7c9a;
-        }
+.navigation li:hover li a:hover {
+        background: #1e7c9a;
+}
 
-	/* footer */
-	.footer {
-		background: url(/disa/static/images/bgfooter.gif) repeat-x;
-		color: #456;
-		font: bold 1em sans-serif;
-		line-height: 39px;
-		padding: 0 12px;
-		text-align: center;
-	}
+/* footer */
+.footer {
+        background: url(/disa/static/images/bgfooter.gif) repeat-x;
+        color: #456;
+        font: bold 1em sans-serif;
+        line-height: 39px;
+        padding: 0 12px;
+        text-align: center;
+}
 
-	.footer a, .footer a:hover {color: #444;}
+.footer a, .footer a:hover {color: #444;}
 
-	/*Button*/
+/*Button*/
 
-	.button {
-	  color: #444;
-	  border: 1px solid #3da7f5;
-	  font-weight: bold;
-	}
+.button {
+  color: #444;
+  border: 1px solid #3da7f5;
+  font-weight: bold;
+}
 
-        /*Forms*/
-        .forms {
-          list-style: none;
-          line-height: 30px;
-        }
+/*Forms*/
+.forms {
+  list-style: none;
+  line-height: 30px;
+}
 
-        /*Login*/
-        .login{
-          color: #7591EF;
-          font-weight: bold;
-        }
+/*Login*/
+.login {
+  color: #7591EF;
+  font-weight: bold;
+}
+
+/*Error msgs*/
+.errormsg {
+  color: #ef8d13;
+  font-weight: bold;
+}

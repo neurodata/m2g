@@ -151,16 +151,30 @@ class DownloadForm(forms.Form):
   as zip or see directory
   '''
 
-  OUPUT_TYPES = [('dz','Download all data as zip'), ('vd','View directory with all data')]
+  OUTPUT_TYPES = [('dz','Download all data as zip'), ('vd','View directory with all data')]
 
-  Select_output_type = forms.ChoiceField(choices=OUPUT_TYPES, widget=RadioSelect, required=True)
+  Select_output_type = forms.ChoiceField(choices=OUTPUT_TYPES, widget=RadioSelect, required=True)
 
 class DownloadGraphs(forms.Form):
   """
   Form for download in
   """
-
   def set_name(self, name):
     self.form_name = name
 
 
+class DownloadQueryForm(forms.Form):
+  '''
+  This form is used for querying the DB for graphs available for download.
+
+  @cvar QUERY_ATTR: The field you want to query from
+  '''
+  query_type = forms.ChoiceField(required=True, widget=Select,
+      choices=(('all', 'All'), ('name', 'Graph name'), ('genus','Genus'), ('region', 'Region'),
+      ('numedge_gt', 'Edge count greater than'), ('numedge_lt', 'Edge count less than'),
+      ('numvertex_gt','Vertex count greater than'), ('numvertex_lt','Vertex count less than'),
+      ('attribute', 'Graph/Vertex/Edge Attribute'), ('sensor', 'Sensor'), ('source', 'Source'),),
+      label="Search type", error_messages={"required":"You must specify search type"})
+
+  # Select size of graph
+  query = forms.CharField(max_length=512, widget=TextInput(), required=True)
