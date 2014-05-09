@@ -11,6 +11,7 @@
 import os
 import tempfile, zipfile
 import argparse
+from util import get_genus
 
 def zipFilesFromFolders(dirName = None, multiTuple = []):
     '''
@@ -50,7 +51,7 @@ def zipFilesFromFolders(dirName = None, multiTuple = []):
     myzip.close()
     return temp
 
-def zipup(dir, zip_file, todisk=None):
+def zipup(directory, zip_file, todisk=None):
     '''
     Write a zipfile from a directory
 
@@ -65,16 +66,42 @@ def zipup(dir, zip_file, todisk=None):
     '''
     zip_file = tempfile.TemporaryFile()
 
-    zip = zipfile.ZipFile(zip_file, 'w', compression=zipfile.ZIP_DEFLATED)
-    root_len = len(os.path.abspath(dir))
-    for root, dirs, files in os.walk(dir):
-        archive_root = os.path.abspath(root)[root_len:]
+    zipf = zipfile.ZipFile(zip_file, 'w', compression=zipfile.ZIP_DEFLATED)
+    root_len = len(os.path.abspath(directory))
+    for root, dirs, files in os.walk(directory):
+        archive_root = os.path.abspath(root)[root_len:] # = archive_root = os.path.basename(root)
         for f in files:
             fullpath = os.path.join(root, f)
             archive_name = os.path.join(archive_root, f)
             print "Compressing: " + f
-            zip.write(fullpath, archive_name, zipfile.ZIP_DEFLATED)
-    zip.close()
+            zipf.write(fullpath, archive_name, zipfile.ZIP_DEFLATED) # (from, to_in_archive, format)
+    zipf.close()
+    return zip_file
+
+def zipfiles(files, zip_out_fn, use_genus, todisk=None):
+    '''
+    Write a zipfile from a list of files
+
+    @param zip_out_fn: the output file name
+    @type dir: string
+
+    @param zip_file: name of zip file
+    @type zip_file: string
+
+    @param use_genus: use the genus at the zipfile directory name
+    @type use_genus: bool
+
+    @param todisk: specify path if you want the zip written to disk as well
+    @type todisk: string
+    '''
+    zip_file = tempfile.TemporaryFile()
+
+    zipf = zipfile.ZipFile(zip_file, 'w', compression=zipfile.ZIP_DEFLATED)
+    for fn in files:
+      print "Compressing %s ..." % fn
+      archive_name = fn if not use_genus else fn[fn.rfind(get_genus(fn)):]
+      zipf.write(os.path.abspath(fn), archive_name, zipfile.ZIP_DEFLATED)
+    zipf.close()
     return zip_file
 
 def unzip( zfilename, saveToDir ):

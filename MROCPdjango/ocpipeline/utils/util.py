@@ -210,3 +210,21 @@ def sendJobCompleteEmail(email_addr, dataLoc):
 
   send_mail("MROCP: Graph job COMPLETE!",
             msg, settings.SERVER_EMAIL, [email_addr], fail_silently=False)
+
+#####################################################################################
+
+def get_genus(fn):
+  """
+  Get the genus given a file path
+
+  @param fn: the genus directory name
+  """
+
+  sep = "/"
+  genera = os.listdir(settings.GRAPH_DIR)
+  for idx, name in enumerate(fn.split(sep)):
+    if name in genera: 
+      return name
+
+  print "No genus found!"
+  return "" # Unknown
