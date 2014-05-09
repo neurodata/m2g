@@ -448,32 +448,26 @@ def download(request, webargs=None):
         return HttpResponseRedirect(get_script_prefix()+"download")
 
     else: # We just want to download an entire dataset
+      # TODO: Add code to handle arbitrary selection of graphs
+
       form = DownloadGraphs(request)
+
       if form.is_valid():
-        genus = form.data.POST.keys()[0] # holds the genus
+        files_to_zip = request.POST.getlist("selection")
+        if not files_to_zip:
+          return render_to_response("downloadgraph.html", {"genera":tbls, "query":DownloadQueryForm()},
+                            context_instance=RequestContext(request))
+        else:
+          temp = zipper.zipfiles(files_to_zip, "archive.zip", use_genus=True)
 
-        zip_fn = os.path.join(settings.ZGRAPH_DIR, genus+".zip")
-        if not os.path.exists(zip_fn):
-          # No zip ? make it : return it
-          # TODO: Fix so it can put the zip on disk
-          print "Creating %s ..." % zip_fn
-          temp = zipper.zipup(os.path.join(settings.GRAPH_DIR, genus), zip_fn)
-          #temp.seek(0)
-          #f = open(zip_fn, "wb")
-          #f.write(temp.read())
-          #f.close()
-          #temp.seek(0)
-        #else:
-          #temp = open(zip_fn, "rb")
+          # TODO: Possibly use django.http.StreamingHttpResponse for this
+          wrapper = FileWrapper(temp)
+          response = HttpResponse(wrapper, content_type='application/zip')
+          response['Content-Disposition'] = ('attachment; filename=archive.zip')
+          response['Content-Length'] = temp.tell()
+          temp.seek(0)
 
-        # TODO: Possibly use django.http.StreamingHttpResponse for this
-        wrapper = FileWrapper(temp)
-        response = HttpResponse(wrapper, content_type='application/zip')
-        response['Content-Disposition'] = ('attachment; filename=all_'+genus+'.zip')
-        response['Content-Length'] = temp.tell()
-        temp.seek(0)
-
-        return response
+          return response
       else:
         return HttpResponseRedirect(get_script_prefix()+"download")
 

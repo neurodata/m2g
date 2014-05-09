@@ -75,9 +75,9 @@ class GraphDownloadModel(models.Model):
   vertexattr = models.TextField(verbose_name="Node Attrs") # CSVs here
   edgeattr = models.TextField(verbose_name="Edge Attrs") #CSVs here
   sensor = models.CharField(max_length=128)
-  source = models.CharField(max_length=256)
+  source = models.CharField(max_length=256, verbose_name="Source host url")
   mtime = models.FloatField() # Modification Time
-  url = models.URLField(max_length=2048)
+  url = models.URLField(max_length=2048, verbose_name="Download url")
 
 admin.site.register(BuildGraphModel)
 admin.site.register(OwnedProjects)
