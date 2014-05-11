@@ -14,7 +14,8 @@ from urlparse import urlparse
 
 class GraphTable(tables.Table):
 
-  selection = tables.CheckBoxColumn(accessor="pk", orderable=False, visible=True)
+  selection = tables.CheckBoxColumn(accessor="pk", orderable=False, visible=True,
+                                    attrs={"th":{"OnClick":"toggleOthers(this.form)"}})
 
   class Meta:
     #self.selection.visible = True

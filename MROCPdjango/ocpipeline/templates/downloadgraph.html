@@ -3,19 +3,32 @@
 {% load getScriptPrefix %}
 {% load static %}
 
-<script language="JavaScript">
-  function toggle(source) {
-  checkboxes = document.getElementsByName('foo');
-  for(var i=0, n=checkboxes.length;i<n;i++) {
-    checkboxes[i].checked = source.checked;
-  }
-}
-</script>
-
-
 {% block title %}
 Download Graph | MROCP
 {% endblock title %}
+
+{% comment %}
+<head>
+<script type="text/javascript">
+  function toggleOthers(form)
+  {
+    var checkboxes = new Array();
+    checkboxes = form.getElementsByTagName('input');
+
+    for (var i = 0; i < checkboxes.length; i++) {
+      if (checkboxes[i].type === 'checkbox') {
+        if (checkboxes[i].checked == true) {
+          checkboxes[i].checked = false;
+        }
+        else {
+          checkboxes[i].checked = true;
+        }
+      }
+    }
+  }
+</script>
+</head>
+{% endcomment %}
 
 {% block medheading %}
 Download biologically derived graphs

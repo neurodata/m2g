@@ -20,6 +20,7 @@
         {% endblock title %}
         </title>
 
+        {% block js %}
           <script type="text/javascript">
             // Function to add a spinner during upload and processing
             function showSpinner( show )
@@ -66,30 +67,24 @@
         </script>
 
         <script type="text/javascript">
-          function checkLcc() {
+          function toggleOthers(form)
+          {
+            var checkboxes = new Array();
+            checkboxes = form.getElementsByTagName('input');
 
-            var emailValue = document.getElementById("id_email").value;
-            var fileObjName = document.getElementById("id_fileObj").value;
-            var sCurExtension = ".zip";
-
-           // Case where we are using lcc and no zip
-            if ( (document.getElementById("id_lcc").checked && !emailValue) )
-            {
-              alert( "You must input an Email address if you use the LCC" );
-              showSpinner(false);
-              return false;
+            for (var i = 0; i < checkboxes.length; i++) {
+              if (checkboxes[i].type === 'checkbox') {
+                if (checkboxes[i].checked == true) {
+                  checkboxes[i].checked = false;
+                }
+                else {
+                  checkboxes[i].checked = true;
+                }
+              }
             }
-            // Case where we have a zip but no email
-            else if ( fileObjName.substr(fileObjName.length - sCurExtension.length, sCurExtension.length).toLowerCase()
-                     == sCurExtension.toLowerCase() && !emailValue)
-            {
-              alert( "You must enter an email address for multiple file computations" );
-              showSpinner(false);
-              return false;
-            }
-            return true;
           }
         </script>
+        {% endblock js %}
 
       </head>
     <body>
