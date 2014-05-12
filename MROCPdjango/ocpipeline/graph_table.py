@@ -14,8 +14,10 @@ from urlparse import urlparse
 
 class GraphTable(tables.Table):
 
+  # FIXME: Hacky
   selection = tables.CheckBoxColumn(accessor="pk", orderable=False, visible=True,
-                                    attrs={"th":{"OnClick":"toggleOthers(this.form)"}})
+                  attrs={"th":{"OnClick":"toggleOthers(this.parentNode.parentNode.\
+                               parentNode.parentNode.parentNode)"}})
 
   class Meta:
     #self.selection.visible = True

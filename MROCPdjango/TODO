@@ -1,7 +1,6 @@
 *MR OCP TODO list Disa
 ===========================
 - complete manage_zips.py
-- remove checkbox from heading:
 
 - Zips of downloads need to be saved to disk and managed
 1. Click handler buildgraph to show email address if given big-graph, else not.
@@ -25,6 +24,7 @@ html:
 
 *recently completed*
 =====================
+- remove checkbox from heading: --> Used as checkall
 - handle checkbox selection of graphs to download
 - Delete mrcap/lcc, mrcap/svd, MROCPdjango/loadAdjMatrix and all refs
 - fix all programmatic for igraph intergration
