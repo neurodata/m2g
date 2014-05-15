@@ -108,6 +108,6 @@ class FiberGraph(_FiberGraph):
           keys = atlas.get_region_nums(self.spcscmat.vs["position"])
           centroids = []
           for key in keys:
-             centroids.append(str(list(cent_map[key])))
+            centroids.append(str(list(cent_map[key-1]))) # -1 accounts for 1-based indexing
 
           self.spcscmat.vs["centroid"] = centroids
