@@ -97,13 +97,13 @@ def _ingest_files(fns, genus, tb_name):
         ecount = g.ecount()
         # Give some default values if none exist
         if "sensor" in graph_attrs: sensor = g["sensor"]
-        else: sensor = "N/A"
+        else: sensor = ""
         if "source" in graph_attrs: source = g["source"]
-        else: source = "N/A"
+        else: source = ""
         if "region" in graph_attrs: region = g["region"]
-        else: region = "N/A"
+        else: region = ""
         if "project" in graph_attrs: project = g["project"]
-        else: project = "N/A"
+        else: project = ""
 
         url = "http://openconnecto.me/data/public/graphs/"+("/".join(graph_fn.replace("\\", "/").split('/')[-2:]))
        
