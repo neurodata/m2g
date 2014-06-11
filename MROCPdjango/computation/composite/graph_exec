@@ -27,12 +27,13 @@ import os
 
 from mrcap.gengraph import genGraph
 from computation.utils.file_util import getPathLeaf, makeDirIfNone
+from computation.utils.cmdline import parse_dict
 
 ################################################################################
 #                             GRAPH BUILDER                                    #
 ################################################################################
 
-def build_graph(fiber_fn, roi_raw_fn, roi_xml_fn, is_big, save_dir, graph_fn, centroids, atlas):
+def build_graph(fiber_fn, roi_raw_fn, roi_xml_fn, is_big, save_dir, graph_fn, centroids, atlas, graph_attrs):
   """
   Function to envoke graph generation code.
 
@@ -76,7 +77,7 @@ def build_graph(fiber_fn, roi_raw_fn, roi_xml_fn, is_big, save_dir, graph_fn, ce
     else: assert False, "Cannot understand command line atlas name/region pair '%s'. Must be in format 'atlas,atlas_region_names'." % atl
   
   print stmt
-  genGraph(fiber_fn, graph_fn, roi_xml_fn, roi_raw_fn, is_big, centroids=centroids, **atlas_d)
+  genGraph(fiber_fn, graph_fn, roi_xml_fn, roi_raw_fn, is_big, centroids=centroids, graph_attrs=graph_attrs, **atlas_d)
 
   return graph_fn
 
@@ -99,13 +100,18 @@ def main():
                       are to stored (each invariant will create its own subdirectory within this). \
                       The default is %s' % default_save_dir)
   parser.add_argument('-g', '--graph_fn', action='store', help='the full file name you would like the resulting graph to have')
+  parser.add_argument( "-G", "--graph_attrs", nargs="*", default=[], action="store", help="Add (a) graph attribute(s). Quote, use colon for key:value and spaces for multiple \
+      e.g 'attr1:value1' 'attr2:value2'")
 
   result = parser.parse_args()
 
   if result.save_dir is None:
     result.save_dir = default_save_dir
 
-  build_graph(result.fiber_fn, result.roiraw_fn, result.roixml_fn, result.is_big, result.save_dir, result.graph_fn, not result.centroids, result.atlas)
+  # Parse dict
+  result.graph_attrs = parse_dict(result.graph_attrs) 
+
+  build_graph(result.fiber_fn, result.roiraw_fn, result.roixml_fn, result.is_big, result.save_dir, result.graph_fn, not result.centroids, result.atlas, result.graph_attrs)
 
 if __name__ == '__main__':
   main()

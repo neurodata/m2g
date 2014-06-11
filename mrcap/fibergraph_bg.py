@@ -96,7 +96,7 @@ class FiberGraph(_FiberGraph):
     for list_item in voxel_edges:
       self.edge_dict[tuple(sorted(list_item))] += 1
 
-  def complete(self, add_centroids=True, atlases={}):
+  def complete(self, add_centroids=True, graph_attrs={}, atlases={}):
     super(FiberGraph, self).complete()
     print "Annotating vertices with spatial position .."
     self.spcscmat.vs["position"] = range(self._maxval) # Use position for
@@ -127,3 +127,6 @@ class FiberGraph(_FiberGraph):
             centroids.append(str(list(cent_map[key-1]))) # -1 accounts for 1-based indexing
 
           self.spcscmat.vs["centroid"] = centroids
+
+    for key in graph_attrs.keys():
+      self.spcscmat[key] = graph_attrs[key]
