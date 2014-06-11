@@ -41,7 +41,7 @@ class GraphTable(tables.Table):
     # Specify which fields to display in table
     fields = ("selection", "url", "region", "numvertex", "numedge",
         "graphattr", "vertexattr", "edgeattr", "sensor", "project", "source")
-    order_by = ("url")
+    order_by = ("project")
 
   def set_html_name(self, name):
     self.html_name = name
