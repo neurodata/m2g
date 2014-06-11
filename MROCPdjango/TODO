@@ -1,5 +1,13 @@
 *MR OCP TODO list Disa
 ===========================
+- Unpack zips
+- Rename incorrectly named ones
+- Add project name attribute to graphs
+
+- Alter ingest to account for project name
+- Alter models ||   ||    ||    ||    ||
+- Alter table rendering to account for project name
+
 - complete manage_zips.py
 
 - Zips of downloads need to be saved to disk and managed

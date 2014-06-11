@@ -88,7 +88,7 @@ class FiberGraph(_FiberGraph):
       self.edge_dict[tuple(sorted(list_item))] += 1
 
 
-  def complete(self, add_centroids=True, atlas={}):
+  def complete(self, add_centroids=True, graph_attrs={}, atlas={}):
     super(FiberGraph, self).complete()
     
     assert atlas, "One Atlas must exist for any small graph!"
@@ -110,3 +110,6 @@ class FiberGraph(_FiberGraph):
         centroids.append(str(list(row)))
 
       self.spcscmat.vs["centroid"] = centroids
+    
+    for key in graph_attrs.keys():
+      self.spcscmat[key] = graph_attrs[key]

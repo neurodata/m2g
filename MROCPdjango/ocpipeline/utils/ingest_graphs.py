@@ -102,13 +102,16 @@ def _ingest_files(fns, genus, tb_name):
         else: source = "N/A"
         if "region" in graph_attrs: region = g["region"]
         else: region = "N/A"
+        if "project" in graph_attrs: project = g["project"]
+        else: project = "N/A"
 
         url = "http://openconnecto.me/data/public/graphs/"+("/".join(graph_fn.replace("\\", "/").split('/')[-2:]))
        
         # This statement puts each graph into the DB
-        qry_stmt = "insert into %s.%s values (\"%s\",\"%s\",\"%s\",%d,%d,\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",%f,\"%s\");" \
-             % (db_args["default"]["NAME"], tb_name, os.path.abspath(graph_fn), genus, region, int(vcount), 
-                 int(ecount), str(graph_attrs)[1:-1].replace("'",""), str(vertex_attrs)[1:-1].replace("'",""),
+        qry_stmt = "insert into %s.%s values (\"%s\",\"%s\",\"%s\",\"%s\",%d,%d,\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",%f,\"%s\");" \
+             % (db_args["default"]["NAME"], tb_name, os.path.abspath(graph_fn), genus, region, project, 
+                 int(vcount), int(ecount), str(graph_attrs)[1:-1].replace("'",""), 
+                 str(vertex_attrs)[1:-1].replace("'",""),
                  str(edge_attrs)[1:-1].replace("'",""), sensor, source, mtime, url)
 
         cursor.execute(qry_stmt)
@@ -142,11 +145,10 @@ def main():
   parser.add_argument("-f", "--file_names", action="store", default=None, nargs="+", help="If you only want to ingest \
             specific files only use this")
   parser.add_argument("-t", "--table_name", action="store", default="ocpipeline_graphdownloadmodel", help="Table name in db")
-  
   result = parser.parse_args()
   
   print "Ingesting graph(s) ..."
-  ingest(result.genera, result.table_name, result.base_dir, result.file_names)
+  ingest(result.genera, result.table_name, result.base_dir, result.file_names, result.project)
 
 if __name__ == "__main__":
   main()

@@ -23,8 +23,9 @@ import os
 import mrcap.roi as roi
 from mrcap.fiber import FiberReader
 from time import time
+from computation.utils.cmdline import parse_dict
 
-def genGraph(infname, outfname, roixmlname=None, roirawname=None, bigGraph=False, outformat="graphml", numfibers=0, centroids=True, **atlases):
+def genGraph(infname, outfname, roixmlname=None, roirawname=None, bigGraph=False, outformat="graphml", numfibers=0, centroids=True, graph_attrs={}, **atlases):
   """
   Generate a sparse igraph from an MRI file based on input and output names.
   Outputs a graphml formatted graph by default
@@ -105,11 +106,11 @@ def genGraph(infname, outfname, roixmlname=None, roirawname=None, bigGraph=False
     if count % 10000 == 0:
       print ("Processed {0} fibers".format(count) )
 
-      #if count == 10000:
-        #break
+      if count == 10000:
+        break
   del reader
   # Done adding edges
-  fbrgraph.complete(centroids, atlases)
+  fbrgraph.complete(centroids, graph_attrs, atlases)
 
   fbrgraph.saveToIgraph(outfname, gformat=outformat)
 
@@ -131,6 +132,8 @@ def main ():
   parser.add_argument("-a", "--atlas", nargs="*", action="store", default=[], help ="Pass atlas filename(s). If regions are named then pass region \
       naming file as well in the format: '-a atlas0 atlas1,atlas1_region_names atlas2 atlas3,atlas3_region_names' etc.")
   parser.add_argument( "--centroids", "-C", action="store_true", help="Pass to *NOT* include centroids" )
+  parser.add_argument( "-G", "--graph_attrs", nargs="*", default=[], action="store", help="Add (a) graph attribute(s). Quote, use colon for key:value and spaces for multiple \
+      e.g 'attr1:value1' 'attr2:value2'")
 
   result = parser.parse_args()
 
@@ -141,7 +144,10 @@ def main ():
     if len(sp_atl) == 2: atlas_d[sp_atl[0]] = sp_atl[1]
     elif len(sp_atl) == 1: atlas_d[sp_atl[0]] = None
 
-  genGraph ( result.fbrfile, result.output, result.roixml, result.roiraw, result.isbig, result.outformat, result.numfib, not result.centroids, **atlas_d)
+  # Parse dict
+  result.graph_attrs = parse_dict(result.graph_attrs)
+
+  genGraph ( result.fbrfile, result.output, result.roixml, result.roiraw, result.isbig, result.outformat, result.numfib, not result.centroids, result.graph_attrs, **atlas_d)
 
 if __name__ == "__main__":
   main()

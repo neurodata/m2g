@@ -85,6 +85,7 @@ class GraphDownloadModel(models.Model):
   genus = models.CharField(max_length=128)
   region = models.CharField(max_length=128)
   # verbose name is what is rendered in the html
+  project = models.CharField(max_length=255) # This is only relevant to big graphs
   numvertex = models.BigIntegerField(null=False, verbose_name="# Nodes")
   numedge = models.BigIntegerField(null=False, verbose_name="# Edges")
   graphattr = models.TextField(verbose_name="Graph Attrs") # CSVs here
