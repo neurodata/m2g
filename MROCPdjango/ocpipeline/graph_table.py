@@ -40,7 +40,7 @@ class GraphTable(tables.Table):
     #td__input
     # Specify which fields to display in table
     fields = ("selection", "url", "region", "numvertex", "numedge",
-        "graphattr", "vertexattr", "edgeattr", "sensor", "source")
+        "graphattr", "vertexattr", "edgeattr", "sensor", "project", "source")
     order_by = ("url")
 
   def set_html_name(self, name):
