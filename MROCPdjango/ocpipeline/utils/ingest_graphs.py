@@ -33,7 +33,7 @@ import zipfile
 from time import time
 from ocpipeline.settings_secret import DATABASES as db_args
 
-def ingest(genera, tb_name, base_dir=None, files=None):
+def ingest(genera, tb_name, base_dir=None, files=None, project=None):
   if files:
     print "Running specific file(s) ..."
     assert len(genera) < 2, "Can only specify single genus as '-g [--genera] arg. You provided %s'" % genera 
@@ -145,6 +145,8 @@ def main():
   parser.add_argument("-f", "--file_names", action="store", default=None, nargs="+", help="If you only want to ingest \
             specific files only use this")
   parser.add_argument("-t", "--table_name", action="store", default="ocpipeline_graphdownloadmodel", help="Table name in db")
+
+  parser.add_argument("-p", "--project", action="store", help="Project the graph belongs to")
   result = parser.parse_args()
   
   print "Ingesting graph(s) ..."

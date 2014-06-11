@@ -414,7 +414,7 @@ def download(request, webargs=None):
       form = DownloadQueryForm(request.POST)
       if form.is_valid():
         gdmof = GraphDownloadModel.objects.filter # typedef
-        st = str(".*"+ form.cleaned_data["query"]+".*") # Search Term
+        st = str(".*"+ ".*".join(form.cleaned_data["query"].strip().split()) +".*") # Search Term
 
         if form.cleaned_data["query_type"] == "all":
           table = GraphTable(
@@ -422,7 +422,8 @@ def download(request, webargs=None):
               gdmof(region__iregex=st)     | gdmof(numvertex__iregex=st)|
               gdmof(numedge__iregex=st)    | gdmof(graphattr__iregex=st)|
               gdmof(vertexattr__iregex=st) |  gdmof(edgeattr__iregex=st)|
-              gdmof(sensor__iregex=st)     | gdmof(source__iregex=st)
+              gdmof(sensor__iregex=st)     | gdmof(source__iregex=st)   |
+              gdmof(project__iregex=st)
            )
         elif form.cleaned_data["query_type"] == "attribute":
           table = GraphTable(
@@ -435,6 +436,8 @@ def download(request, webargs=None):
           table = GraphTable( gdmof(genus__iregex=st) )
         elif form.cleaned_data["query_type"] == "region":
           table = GraphTable( gdmof(region__iregex=st) )
+        elif form.cleaned_data["query_type"] == "project":
+          table = GraphTable( gdmof(project__iregex=st) )
 
         # NOTE: Or equal to as well
         elif form.cleaned_data["query_type"] == "numvertex_gt":
@@ -493,7 +496,7 @@ def download(request, webargs=None):
       table = GraphTable(GraphDownloadModel.objects.filter(genus=genus))
       table.set_html_name(genus.capitalize()) # Set the html __repr__
       # TODO: Alter per_page limit to +25
-      RequestConfig(request, paginate={"per_page":7}).configure(table) # Let each table re-render given a request
+      RequestConfig(request, paginate={"per_page":25}).configure(table) # Let each table re-render given a request
       #table.columns["url"].header = "Download Link"
 
       dl_form = DownloadGraphs()
