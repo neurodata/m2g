@@ -22,7 +22,7 @@
 import argparse
 import tempfile
 import zipfile
-import multiprocessing
+from subprocess import call
 import os
 from time import time
 import igraph
@@ -31,57 +31,43 @@ from glob import glob
 def attribute_graph(graph_fns, attrs, overwrite):
   for graph_fn in graph_fns:
     start = time()
-    try:
-      g = igraph.read(graph_fn, format="graphml")
-      print "Read %s as graphml format ..." % graph_fn
-      
-    except:
-      "Attempting unzip and read ..."
-      f = zipfile.ZipFile(graph_fn, "r")
-      tmpfile = tempfile.NamedTemporaryFile("w", delete=False)
-      tmpfile.write(f.read(f.namelist()[0])) # read into mem
-      tmpfile.close()
-      g = igraph.read(tmpfile.name, format="graphml")
-      os.remove(tmpfile.name)
-      print "  Read zip %s ..." % graph_fn  
+    print "Attempting unzip ..."
+    f = zipfile.ZipFile(graph_fn, "r")
+    print "Attempting read and split ..."
+    uncompressed_fn = f.namelist()[0]
+    text = f.read(uncompressed_fn).splitlines()
+    f.close()
 
+    print "Inserting headers ... "
     for key in attrs: 
-      g[key] = attrs[key]
-    
-    # Case I have a zip file
-    if os.path.splitext(graph_fn)[1] ==  ".zip":
-      tmpfile = tempfile.NamedTemporaryFile("w", delete=False)
-      print "Writing tempfile %s ..." % tmpfile.name
-      g.write_graphml(tmpfile.name)
-    
-      if overwrite:
-        out_fn = graph_fn
-      else:
-         out_fn = os.path.splitext(graph_fn)[0] + "_attr.zip" 
+      text.insert(6, '  <key id="g_%s" for="graph" attr.name="%s" attr.type="string"/>' % (key, key))
 
-      print "Writing %s back to disk ...." % out_fn
-      with zipfile.ZipFile(out_fn, "w") as graph_zip:
-        graph_zip.write(tmpfile.name, f.namelist()[0]) # TODO: verify 2nd param
+    # Insert values
+    for key in attrs: 
+      text.insert( 31 + len(attrs), '    <data key="g_%s">%s</data>' % (key, attrs[key]))
 
-      f.close()
-
-      tmpfile.close()
-      os.remove(tmpfile.name)
-
-    # Not a zipfile
+    if overwrite:
+      out_fn = graph_fn
     else:
-      _format = os.path.splitext(graph_fn)[1][1:] 
+       out_fn = os.path.splitext(graph_fn)[0] + "_attr.zip" 
 
-      if overwrite:
-        out_fn = graph_fn
-      else:
-         out_fn = os.path.splitext(graph_fn)[0] + "_attr." + _format 
-      try:
-        print "Writing %s back to disk ..." % out_fn
-        g.write(out_fn, format=_format)
+    print "Writing %s back to disk ...." % out_fn
+    
+    tmpfile = tempfile.NamedTemporaryFile("w", delete=False)
+    tmpfile.write("\n".join(text)) # read into mem
+    tmpfile.close()
 
-      except:
-        sys.stderr.write("Unknown format %s ...\n" % _format )
+    rename =  os.path.join(os.path.dirname(tmpfile.name), os.path.basename(uncompressed_fn))
+    
+    call(["mv", tmpfile.name, rename])
+    call(["zip", "-jv", out_fn, rename])
+    print "Deleting %s ..." % rename
+    os.remove(rename)
+
+    #with zipfile.ZipFile(out_fn, "w", allowZip64=True) as graph_zip:
+    #  graph_zip.writestr(f.namelist()[0], "\n".join(text)) 
+
+    #graph_zip.close()
 
     print "Time taken = %.3f sec" % (time()-start)
 
