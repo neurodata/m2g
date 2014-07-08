@@ -33,6 +33,10 @@ def unpack(base_dir):
     print out
     os.remove(_file_) # remove old zip
     graph_fn = out.splitlines()[1].split(":")[1].strip()
+    if base_dir == "/mnt/bg1publicdata/graphs/.migraine-v2/NKI-TRT_MIGRAINE_v1_0_2_2014-05-31/big_graphs/":
+      print "Adapting file name ..."
+      graph_fn = "NKI-TRT"+graph_fn[6:] 
+
     subprocess.call(["zip","-j", "-v", _file_, graph_fn])
     shutil.rmtree(graph_fn.split("/")[0]) # remove uncompressed graph file
 

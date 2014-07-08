@@ -40,11 +40,11 @@ def attribute_graph(graph_fns, attrs, overwrite):
 
     print "Inserting headers ... "
     for key in attrs: 
-      text.insert(6, '  <key id="g_%s" for="graph" attr.name="%s" attr.type="string"/>' % (key, key))
+      text.insert(6, '  <key id="g_%s" for="graph" attr.name="%s" attr.type="string"/>\n' % (key, key))
 
     # Insert values
     for key in attrs: 
-      text.insert( 31 + len(attrs), '    <data key="g_%s">%s</data>' % (key, attrs[key]))
+      text.insert( 31 + len(attrs), '    <data key="g_%s">%s</data>\n' % (key, attrs[key]))
 
     if overwrite:
       out_fn = graph_fn
