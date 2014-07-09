@@ -25,13 +25,28 @@ import nibabel as nib
 import os
 
 class Atlas(object):
-  def __init__(self, atlas_fn, label_fn=None):
-    self.data = nib.load(os.path.abspath(atlas_fn)).get_data()
+  def __init__(self, atlas, label_fn=None):
+    """
+    The use of this ctor is such that the `atlas` arg can either
+    be 3D numpy memmap or the filename to a nifti image from which
+    I may obtain this memmap.
+    
+    @param atlas: The atlas filename or 3D memmap object
+    @param label_fn: If there is a atlas region label file
+    """
+    if isinstance(atlas, str):
+      self.data = nib.load(os.path.abspath(atlas)).get_data()
+    else:
+      self.data = atlas.get_data()
+
     if label_fn: 
       label_file = open(label_fn, "rb")
       self.region_names = label_file.read().splitlines()
     else:
       self.region_names = None
+
+  def max(self):
+    return self.data.max()
 
   def get_region_num(self, vertex):
     x,y,z = MortonXYZ(vertex)

@@ -31,18 +31,21 @@ import nibabel as nib
 import numpy as np
 from math import ceil
 from copy import copy
+import sys
+from time import time
 
-def create(roixmlfn, roirawfn, outfn, start=2):
+def create(roixmlfn="NI152_T1_1mm_brain_mask_integer.xml", 
+          roirawfn="MNI152_T1_1mm_brain_mask_integer.raw", start=2):
   """
   Create a new atlas given some scaling factor determined by the 
   start index. Opaque doc, but best I can do.
 
   @param roixmlfn: xml mask file name
   @param roirawfn: raw mask file name
-  @param outfn: the name of the new atlas file you want to create
   @param start: the x,y,z start position which determines the scaling
   """
 
+  start_time = time()
   print "Loading rois as base ..."
   base = roi.ROIData (roirawfn, roi.ROIXML(roixmlfn).getShape()).data
   true_dim = base.shape
@@ -85,7 +88,9 @@ def create(roixmlfn, roirawfn, outfn, start=2):
   new = new[:true_dim[0], :true_dim[1], :true_dim[2]] # shrink new to correct size
   print "Your atlas has %d regions ..." % new.max()
   img = nib.Nifti1Image(new, np.identity(4))
-  nib.save(img, outfn)
+  
+  print "Building atlas took %.3f sec ..." % (time()-start_time)
+  return img
 
 def validate(atlas_fn, roixmlfn, roirawfn):
   """
@@ -99,7 +104,11 @@ def validate(atlas_fn, roixmlfn, roirawfn):
   from operator import xor
 
   base = roi.ROIData (roirawfn, roi.ROIXML(roixmlfn).getShape()).data
-  new = nib.load(atlas_fn).get_data()
+  try:
+    new = nib.load(atlas_fn).get_data()
+  except:
+    sys.stderr.write("[Error]: Loading file %s failed!\n" % atlas_fn);
+    exit(-1)
 
   for i in xrange(new.shape[2]):
     for ii in xrange(new.shape[1]):
@@ -125,7 +134,8 @@ def main():
     validate(result.niftifn, result.roixmlfn, result.roirawfn)
     exit(1)
   
-  create(result.roixmlfn, result.roirawfn, result.niftifn, result.start)
+  img = create(result.roixmlfn, result.roirawfn, result.start)
+  nib.save(img, result.niftifn)
 
 if __name__ == "__main__":
   main()
