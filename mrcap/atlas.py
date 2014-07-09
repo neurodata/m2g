@@ -28,8 +28,8 @@ class Atlas(object):
   def __init__(self, atlas, label_fn=None):
     """
     The use of this ctor is such that the `atlas` arg can either
-    be 3D numpy memmap or the filename to a nifti image from which
-    I may obtain this memmap.
+    be a nifti image or the path to a nifti image from which
+    I may obtain the nifti image and associated metadata.
     
     @param atlas: The atlas filename or 3D memmap object
     @param label_fn: If there is a atlas region label file
