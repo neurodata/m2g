@@ -34,7 +34,7 @@ from copy import copy
 import sys
 from time import time
 
-def create(roixmlfn="NI152_T1_1mm_brain_mask_integer.xml", 
+def create(roixmlfn="MNI152_T1_1mm_brain_mask_integer.xml", 
           roirawfn="MNI152_T1_1mm_brain_mask_integer.raw", start=2):
   """
   Create a new atlas given some scaling factor determined by the 
