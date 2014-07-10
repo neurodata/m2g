@@ -26,22 +26,26 @@ import igraph
 from mrcap.atlas import Atlas 
 from time import time
 import create_atlas
+import nibabel as nib
 
-def downsample(g, factor):
+def downsample(g, factor=0, atlas=None):
   """
   Downsample a graph by collapsing regions using an dynamically
   generated downsampled atlas. Rebuilding the graph takes O(m).
 
   @param g: A full sized **big graph**
   @param factor: The downsampling factor
+  @param atlas: A prebuilt nifti atlas with which to downsample
   """
 
   start = time()
   edge_dict = defaultdict(int) # key=(v1, v2), value=weight
 
-  print "Generating atlas ..." # TODO: Cythonize
-
-  atlas = Atlas(create_atlas.create(start=factor)) # Dynamically create atlas
+  if factor:
+    print "Generating atlas ..." # TODO: Cythonize
+    atlas = Atlas(create_atlas.create(start=factor)) # Dynamically create atlas
+  else:
+    atlas = Atlas(atlas)
   
   vertex = {}
   # This takes O(m)
@@ -62,7 +66,8 @@ def downsample(g, factor):
 def main():
   parser = argparse.ArgumentParser(description="")
   parser.add_argument("infn", action="store", help="Input file name")
-  parser.add_argument("factor", action="store", type=int, help="Downsampling factor")
+  parser.add_argument("-f", "--factor", action="store", type=int, help="Downsampling factor")
+  parser.add_argument("-a", "--atlas", action="store", help="Downsampling atlas file name")
   parser.add_argument("outfn", action="store", help="Output file name")
   parser.add_argument("--informat", "-i", action="store", default="graphml", help="Input format of the graph")
   parser.add_argument("--outformat", "-o", action="store", default="graphml", help="Output format of the graph")
@@ -81,7 +86,14 @@ def main():
     os.remove(tmpfile.name)
     print "  Read zip %s ..." % graph_fn 
 
-  new_graph = downsample(g, result.factor)
+  if result.factor:
+    new_graph = downsample(g, factor=result.factor)
+  elif result.atlas:
+    new_graph = downsample(g, atlas=nib.load(result.atlas))
+  else:
+    sys.stderr.write("[ERROR]: either -f or -a flag must be specified\n")
+    exit(-1)
+
   new_graph.write(result.outfn, format=result.outformat)
 
 if __name__ == "__main__":

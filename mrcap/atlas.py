@@ -31,7 +31,7 @@ class Atlas(object):
     be a nifti image or the path to a nifti image from which
     I may obtain the nifti image and associated metadata.
     
-    @param atlas: The atlas filename or 3D memmap object
+    @param atlas: The atlas filename or nibabel nifti object
     @param label_fn: If there is a atlas region label file
     """
     if isinstance(atlas, str):
