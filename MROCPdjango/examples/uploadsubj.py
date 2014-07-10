@@ -48,7 +48,7 @@ def main():
 
     # Create a temporary file to store zip contents in memory
     tmpfile = tempfile.NamedTemporaryFile()
-    zfile = zipfile.ZipFile ( tmpfile.name, "w" )
+    zfile = zipfile.ZipFile(tmpfile.name, "w", allowZip64=True)
 
     zfile.write(result.fiberfile)
     zfile.write(result.roixmlfile)
@@ -60,7 +60,7 @@ def main():
 
 #  Testing only: check the contents of a zip file.
 #
-#    rzfile = zipfile.ZipFile ( tmpfile.name, "r" )
+#    rzfile = zipfile.ZipFile(tmpfile.name, "r", allowZip64=True)
 #    ret = rzfile.printdir()
 #    ret = rzfile.testzip()
 #    ret = rzfile.namelist()

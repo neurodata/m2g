@@ -32,7 +32,7 @@ def attribute_graph(graph_fns, attrs, overwrite):
   for graph_fn in graph_fns:
     start = time()
     print "Attempting unzip ..."
-    f = zipfile.ZipFile(graph_fn, "r")
+    f = zipfile.ZipFile(graph_fn, "r", allowZip64=True)
     print "Attempting read and split ..."
     uncompressed_fn = f.namelist()[0]
     text = f.read(uncompressed_fn).splitlines()

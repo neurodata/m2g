@@ -82,7 +82,7 @@ def _ingest_files(fns, genus, tb_name):
         except:
           "Attempting unzip and read ..."
           start = time()
-          f = zipfile.ZipFile(graph_fn, "r")
+          f = zipfile.ZipFile(graph_fn, "r", allowZip64=True)
           tmpfile = tempfile.NamedTemporaryFile("w", delete=False)
           tmpfile.write(f.read(f.namelist()[0])) # read into mem
           tmpfile.close()
