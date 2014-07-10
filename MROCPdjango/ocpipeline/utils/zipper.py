@@ -35,7 +35,7 @@ def zipFilesFromFolders(dirName = None, multiTuple = []):
     @param dirName: any folder
     '''
     temp = tempfile.TemporaryFile()
-    myzip = zipfile.ZipFile(temp ,'w', zipfile.ZIP_DEFLATED)
+    myzip = zipfile.ZipFile(temp ,'w', zipfile.ZIP_DEFLATED, allowZip64=True)
 
     if (multiTuple):
         for dirName in multiTuple:
@@ -82,7 +82,7 @@ def zipup(directory, zip_file, todisk=None):
     '''
     zip_file = tempfile.TemporaryFile()
 
-    zipf = zipfile.ZipFile(zip_file, 'w', compression=zipfile.ZIP_DEFLATED)
+    zipf = zipfile.ZipFile(zip_file, 'w', compression=zipfile.ZIP_DEFLATED, allowZip64=True)
     root_len = len(os.path.abspath(directory))
     for root, dirs, files in os.walk(directory):
         archive_root = os.path.abspath(root)[root_len:] # = archive_root = os.path.basename(root)
@@ -112,7 +112,7 @@ def zipfiles(files, zip_out_fn, use_genus, todisk=None):
     '''
     zip_file = tempfile.TemporaryFile()
 
-    zipf = zipfile.ZipFile(zip_file, 'w', compression=zipfile.ZIP_DEFLATED)
+    zipf = zipfile.ZipFile(zip_file, 'w', compression=zipfile.ZIP_DEFLATED, allowZip64=True)
     for fn in files:
       print "Compressing %s ..." % fn
       archive_name = fn if not use_genus else fn[fn.rfind(get_genus(fn)):]
@@ -131,7 +131,7 @@ def unzip( zfilename, saveToDir ):
     @type saveToDir: string
     '''
     # open the zipped file
-    zfile = zipfile.ZipFile( zfilename, "r" )
+    zfile = zipfile.ZipFile(zfilename, "r", allowZip64=True)
 
     # get each archived file and process the decompressed data
     for info in zfile.infolist():

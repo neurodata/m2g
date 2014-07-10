@@ -47,16 +47,16 @@ def main():
     print "Loading file into memory.."
 
   tmpfile = tempfile.NamedTemporaryFile()
-  zfile = zipfile.ZipFile ( tmpfile.name, "w" )
+  zfile = zipfile.ZipFile(tmpfile.name, "w", allowZip64=True)
 
-  zfile.write ( result.fileToConvert)
+  zfile.write(result.fileToConvert)
   zfile.close()
 
   tmpfile.flush()
   tmpfile.seek(0)
 
   try:
-    req = urllib2.Request ( result.url, tmpfile.read())
+    req = urllib2.Request(result.url, tmpfile.read())
     response = urllib2.urlopen(req)
   except urllib2.URLError, e:
     print "Failed URL", result.url

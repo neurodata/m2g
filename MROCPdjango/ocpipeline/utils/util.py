@@ -102,10 +102,10 @@ def writeBodyToDisk(data, saveDir):
   @return a list with the names of the uplaoded files
   '''
   tmpfile = tempfile.NamedTemporaryFile()
-  tmpfile.write ( data )
+  tmpfile.write(data)
   tmpfile.flush()
   tmpfile.seek(0)
-  rzfile = zipfile.ZipFile ( tmpfile.name, "r" )
+  rzfile = zipfile.ZipFile(tmpfile.name, "r", allowZip64=True)
 
   print 'Temporary file created...'
 
