@@ -50,7 +50,7 @@ int main(int argc, char* argv[])
 
   for (eid = 0; eid < (long int) igraph_ecount(&g); eid++) {
     igraph_edge(&g, eid, &from, &to);
-    weight = igraph_cattribute_EAN(&g, "weight",eid);
+    weight = igraph_cattribute_EAN(&g, "weight",eid); // TODO: time
     fprintf(ofile, "%i %i %f\n", from, to, weight);
 
     //printf("Edge %i => %i --> %i\n", eid, from, to);
@@ -58,6 +58,7 @@ int main(int argc, char* argv[])
   }
 
   // For all. TODO: time
+#if 0
   igraph_es_t eids;
   igraph_es_all(&eids, IGRAPH_EDGEORDER_ID); // Order edges 
 
@@ -68,7 +69,8 @@ int main(int argc, char* argv[])
   igraph_integer_t i;
   for (i = 0; i < (int long) igraph_ecount(&g); i++)
      printf("Edge %i value: %f\n", i, VECTOR(result)[i]);
-  
+#endif
+
   // Free memory
   igraph_es_destroy(&eids);
   igraph_vector_destroy(&result);
