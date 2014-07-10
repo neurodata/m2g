@@ -27,6 +27,8 @@ from mrcap.atlas import Atlas
 from time import time
 import create_atlas
 import nibabel as nib
+import zipfile
+import tempfile
 
 def downsample(g, factor=0, atlas=None):
   """
@@ -61,6 +63,7 @@ def downsample(g, factor=0, atlas=None):
   new_graph.es["weight"] = edge_dict.values()
 
   print "Completed building graph in %.3f sec ... " % (time() - start)
+  print new_graph.summary()
   return new_graph
 
 def main():
@@ -78,13 +81,13 @@ def main():
     g = igraph.read(result.infn, format=result.informat)
   except:
     start = time()
-    f = zipfile.ZipFile(graph_fn, "r", allowZip64=True)
+    f = zipfile.ZipFile(result.infn, "r", allowZip64=True)
     tmpfile = tempfile.NamedTemporaryFile("w", delete=False)
     tmpfile.write(f.read(f.namelist()[0])) # read into mem
     tmpfile.close()
     g = igraph.read(tmpfile.name, format="graphml")
     os.remove(tmpfile.name)
-    print "  Read zip %s ..." % graph_fn 
+    print "  Read zip %s ..." % result.infn 
 
   if result.factor:
     new_graph = downsample(g, factor=result.factor)
