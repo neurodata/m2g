@@ -86,7 +86,7 @@ from django.contrib.auth.decorators import login_required
 ####################
 import computation.composite.invariants as cci
 import scipy.io as sio
-
+from nibabel import load as nib_load
 # Registration
 from django.contrib.auth import authenticate, login, logout
 
@@ -474,7 +474,14 @@ def download(request, webargs=None):
 
       if form.is_valid():
         selected_files = request.POST.getlist("selection")
-        ds_factor = int(request.POST.getlist("ds_factor")[0])
+        ds_factor = request.POST.getlist("ds_factor")[0]
+      
+        ATLASES = {"desikan": os.path.join(settings.ATLAS_DIR, "desikan_atlas.nii") , 
+              "slab": os.path.join(settings.ATLAS_DIR, "slab_atlas.nii")}
+
+        if ds_factor not in ATLASES.keys():
+          ds_factor = int(ds_factor)
+
         dl_format = request.POST.getlist("dl_format")[0]
 
         if not selected_files:
@@ -500,7 +507,10 @@ def download(request, webargs=None):
               # TODO: Add atlas slab and desikan atlas do downsample
 
               if ds_factor and get_genus(fn) == "human":
-                g = downsample(igraph_io.read_arbitrary(fn, "graphml"), ds_factor)
+                if isinstance(ds_factor, int):
+                  g = downsample(igraph_io.read_arbitrary(fn, "graphml"), ds_factor)
+                else:
+                  g = downsample(igraph_io.read_arbitrary(fn, "graphml"), atlas=nib_load(ATLASES[ds_factor]))
               else:
                 g = igraph_io.read_arbitrary(fn, "graphml")
               
