@@ -94,9 +94,11 @@ def zipup(directory, zip_file, todisk=None):
     zipf.close()
     return zip_file
 
-def zipfiles(files, zip_out_fn, use_genus, todisk=None):
+def zipfiles(files, zip_out_fn, use_genus, gformat=None, todisk=None):
     '''
     Write a zipfile from a list of files
+    NOTE: Internal use only do not use as stand-alone! Will produce
+    unexpected results.
 
     @param zip_out_fn: the output file name
     @type dir: string
@@ -116,6 +118,11 @@ def zipfiles(files, zip_out_fn, use_genus, todisk=None):
     for fn in files:
       print "Compressing %s ..." % fn
       archive_name = fn if not use_genus else fn[fn.rfind(get_genus(fn)):]
+
+      if isinstance(files, dict):
+        archive_name = os.path.splitext(archive_name)[0]+"."+gformat
+        fn = files[fn] 
+
       zipf.write(os.path.abspath(fn), archive_name, zipfile.ZIP_DEFLATED)
     zipf.close()
     return zip_file

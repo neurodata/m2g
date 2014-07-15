@@ -25,19 +25,27 @@ import os
 from django.utils.safestring import mark_safe
 from urlparse import urlparse
 
-
 class GraphTable(tables.Table):
+  # temp = """
+  # {% load mkrange %}
+  # {% mkrange 0 31 as ds_factor_scales %}
+  # <select id="id{{ sc }}">
+  #   {% for sc in ds_factor_scales %}
+  #     <option value="{{ sc }}"> {{ sc }} </option>
+  #   {% endfor %}
+  # </select>
+  # """
 
-  # FIXME: Hacky
   selection = tables.CheckBoxColumn(accessor="pk", orderable=False, visible=True,
                   attrs={"th":{"OnClick":"toggleOthers(this.parentNode.parentNode.\
                                parentNode.parentNode.parentNode)"}})
 
+  #factor = tables.TemplateColumn(temp, "factor_template", orderable=False, visible=True, accessor="pk",)
+
   class Meta:
-    #self.selection.visible = True
     model = GraphDownloadModel
     attrs = {"class" : "paleblue"} # Set table class in html to paleblue
-    #td__input
+
     # Specify which fields to display in table
     fields = ("selection", "url", "region", "numvertex", "numedge",
         "graphattr", "vertexattr", "edgeattr", "sensor", "project", "source")
@@ -49,6 +57,7 @@ class GraphTable(tables.Table):
   def render_url(self, value):
     # TODO: Figure out how to better alter the rendered html than mark_safe
     txt = os.path.splitext(os.path.basename(value))[0].capitalize() # Shorten what I see
+    if txt[-24:] == "_big_graph_w_inv.graphml": txt = txt[:-24]
     return mark_safe("<a href=\"%s\">%s</a>" %(value, txt))
 
   def render_source(self, value):

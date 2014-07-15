@@ -32,6 +32,7 @@ import tempfile
 import zipfile
 from time import time
 from ocpipeline.settings_secret import DATABASES as db_args
+from mrcap.utils import igraph_io
 
 def ingest(genera, tb_name, base_dir=None, files=None, project=None):
   if files:
@@ -77,18 +78,7 @@ def _ingest_files(fns, genus, tb_name):
 
       if g_changed: # Means graph has changed since ingest OR was never in DB to start with
         # Collect all the attributes etc ..
-        try:
-          g = igraph.read(graph_fn, format="graphml")
-        except:
-          "Attempting unzip and read ..."
-          start = time()
-          f = zipfile.ZipFile(graph_fn, "r", allowZip64=True)
-          tmpfile = tempfile.NamedTemporaryFile("w", delete=False)
-          tmpfile.write(f.read(f.namelist()[0])) # read into mem
-          tmpfile.close()
-          g = igraph.read(tmpfile.name, format="graphml")
-          os.remove(tmpfile.name)
-          print "  Read zip %s ..." % graph_fn
+        g = igraph_io.read_arbitrary(graph_fn, informat="graphml")
 
         vertex_attrs = g.vs.attribute_names()
         edge_attrs = g.es.attribute_names()

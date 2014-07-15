@@ -24,6 +24,7 @@ from collections import defaultdict
 import os
 import igraph
 from mrcap.atlas import Atlas 
+from mrcap.utils import igraph_io
 from time import time
 import create_atlas
 import nibabel as nib
@@ -77,17 +78,7 @@ def main():
 
   result = parser.parse_args()
   
-  try:
-    g = igraph.read(result.infn, format=result.informat)
-  except:
-    start = time()
-    f = zipfile.ZipFile(result.infn, "r", allowZip64=True)
-    tmpfile = tempfile.NamedTemporaryFile("w", delete=False)
-    tmpfile.write(f.read(f.namelist()[0])) # read into mem
-    tmpfile.close()
-    g = igraph.read(tmpfile.name, format="graphml")
-    os.remove(tmpfile.name)
-    print "  Read zip %s ..." % result.infn 
+  g = igraph_io.read_arbitrary(result.infn, informat=result.informat)
 
   if result.factor:
     new_graph = downsample(g, factor=result.factor)
