@@ -179,7 +179,8 @@ class DownloadGraphs(forms.Form):
     self.form_name = name
 
   FORMATS = [('graphml', 'graphml'), ('ncol','ncol'), ('edgelist', 'edgelist'),
-            ('lgl','lgl'),('pajek', 'pajek'), ('graphdb', 'graphdb'), ('mm', 'Market Matrix')]
+            ('lgl','lgl'),('pajek', 'pajek'), ('dot', 'dot'), ('gml', 'gml'), 
+            ('leda', 'leda'), ('mm', 'Market Matrix')]
 
   dl_format = forms.ChoiceField(required=True, widget=Select(attrs={"title":"Only graphml will contain all vertex, edge and graph attributes"}), choices=FORMATS, label="Format")
 

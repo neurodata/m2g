@@ -87,10 +87,12 @@ Examples of how to load graphs using igraph can be found <a href="{{"igraph"|get
     <div id="{{ genus.0.html_name }}">
       <h3> {{ genus.0.html_name }} </h3>
 
-      <form action="" method="post" enctype="multipart/form-data" name="">
+      <form action="" method="post" enctype="multipart/form-data" name=""">
         {% render_table genus.0 %}
         <br/>
-        <input name ="{{ genus.1.form_name }}"  type="submit" value="Download selected {{ genus.1.form_name }}" class="button"/>
+        <input name ="{{ genus.1.form_name }}"  type="submit" value="Download selected {{ genus.1.form_name }}"
+               class="button" onclick="showSpinner();"/>
+
         {{ genus.1 }}
 
         {% if genus.1.form_name == "human" %}
@@ -110,12 +112,16 @@ Examples of how to load graphs using igraph can be found <a href="{{"igraph"|get
   {%endfor%}
 </div>
 
+    <div style="position:absolute; left:153px; top: 1000px;">
+      <img id="loadingImage" src="{{STATIC_URL}}images/loading.gif" border="0" alt="loading" style="visibility:hidden;opacity:0.5"/>
+    </div>
+
 {%  elif query_result %}
   <div id="query_table">
     <h3> {{ query_result.html_name }}</h3>
       <form action="" method="post" enctype="multipart/form-data" name="">
         {% render_table query_result %}
-        <input name ="search results"  type="submit" value="Download selected" class="button" />
+        <input name ="search results"  type="submit" value="Download selected" class="button" onclick="showSpinner();"/>
 
         Downsample factor:
         {% mkrange 0 26 as ds_factor_scales %}

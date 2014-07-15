@@ -474,9 +474,9 @@ def download(request, webargs=None):
 
       if form.is_valid():
         selected_files = request.POST.getlist("selection")
-        ds_factor = request.POST.getlist("ds_factor")[0]
-      
-        ATLASES = {"desikan": os.path.join(settings.ATLAS_DIR, "desikan_atlas.nii") , 
+        ds_factor = 0 if not request.POST.getlist("ds_factor") else request.POST.getlist("ds_factor")[0]
+
+        ATLASES = {"desikan": os.path.join(settings.ATLAS_DIR, "desikan_atlas.nii") ,
               "slab": os.path.join(settings.ATLAS_DIR, "slab_atlas.nii")}
 
         if ds_factor not in ATLASES.keys():
@@ -485,8 +485,8 @@ def download(request, webargs=None):
         dl_format = request.POST.getlist("dl_format")[0]
 
         if not selected_files:
-          return render_to_response("downloadgraph.html", {"genera":tbls, "query":DownloadQueryForm()},
-                            context_instance=RequestContext(request))
+          return HttpResponseRedirect(get_script_prefix()+"download")
+
         else:
           if dl_format == "graphml" and ds_factor  == 0:
             temp = zipper.zipfiles(selected_files, "archive.zip", use_genus=True)
@@ -505,7 +505,6 @@ def download(request, webargs=None):
               # *NOTE: If smallgraphs are ingested this will break
 
               # TODO: Add atlas slab and desikan atlas do downsample
-
               if ds_factor and get_genus(fn) == "human":
                 if isinstance(ds_factor, int):
                   g = downsample(igraph_io.read_arbitrary(fn, "graphml"), ds_factor)
@@ -513,7 +512,7 @@ def download(request, webargs=None):
                   g = downsample(igraph_io.read_arbitrary(fn, "graphml"), atlas=nib_load(ATLASES[ds_factor]))
               else:
                 g = igraph_io.read_arbitrary(fn, "graphml")
-              
+
               # Write to `some` format
               if dl_format == "mm":
                 igraph_io.write_mm(g, tmpfile.name)
