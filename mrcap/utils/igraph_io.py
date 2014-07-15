@@ -39,17 +39,39 @@ def write_mm(g, fn):
 
   f.close()
 
+def unzip_file(fn):
+  start = time()
+  f = zipfile.ZipFile(fn, "r", allowZip64=True)
+  tmpfile = tempfile.NamedTemporaryFile("w", delete=False)
+  tmpfile.write(f.read(f.namelist()[0])) # read into mem
+  tmpfile.close()
+  print "Unzip of %s too %f sec ..." % (fn, (time()-start))
+  return tmpfile.name
+
+
 def read_arbitrary(fn, informat="graphml"):
-  try:
-    g = igraph_read(fn, format=informat)
-  except:
-    start = time()
-    f = zipfile.ZipFile(fn, "r", allowZip64=True)
-    tmpfile = tempfile.NamedTemporaryFile("w", delete=False)
-    tmpfile.write(f.read(f.namelist()[0])) # read into mem
-    tmpfile.close()
-    g = igraph_read(tmpfile.name, format=informat)
-    os.remove(tmpfile.name)
-    print "  Read zip %s in %f sec ..." % (fn, (time()-start))
-  
+  tmpfile_name = ""
+  if os.path.splitext(fn)[1] == ".zip":
+    try:
+      tmpfile_name = unzip_file(fn)
+      start = time()
+      g = igraph_read(tmpfile_name, format=informat)
+      print "  Read took %f sec ..." % ((time()-start))
+    except:
+      g = igraph_read(fn, format=informat)
+    finally:
+      print "Deleting temp %s" % tmpfile_name
+      os.remove(tmpfile_name)
+  else:
+    try:
+      g = igraph_read(fn, format=informat)
+    except:
+      tmpfile_name = unzip_file(fn)
+      start = time()
+      g = igraph_read(tmpfile_name, format=informat)
+      print "  Read took %f sec ..." % ((time()-start))
+    finally:
+      if os.path.exists(tmpfile_name):
+        print "Deleting temp %s" % tmpfile_name
+        os.remove(tmpfile_name)
   return g
