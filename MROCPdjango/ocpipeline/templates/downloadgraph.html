@@ -1,4 +1,4 @@
-<!-- 
+<!--
  Copyright 2014 Open Connectome Project (http://openconnecto.me)
 
  Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,6 +19,7 @@
 {% load render_table from django_tables2 %}
 {% load getScriptPrefix %}
 {% load static %}
+{% load mkrange%}
 
 {% block title %}
 Download Graph | MROCP
@@ -55,15 +56,19 @@ Download biologically derived graphs
 {% block content %}
 <p>Thanks to all who provided the raw data from which we derived these graphs. Every graph
 is annotated with a <code> source</code> attribute that denotes its origin.<br/>
-All graphs are provided in <a href="http://graphml.graphdrawing.org/" target="blank">graphML</a> file
-format. If this is not suitable for your purposes, consider using our
-<a href="{{"convert"|getScriptPrefix}}">graph conversion api</a>. Examples of how to load graphs using igraph can
-be found <a href="{{"igraph"|getScriptPrefix}}">here</a>.
+Graphs are provided by default in <a href="http://graphml.graphdrawing.org/" target="blank">graphML
+</a> format. <i>This is the only format that supports attributes.</i><br>
+
+Consider using the <a href="{{"convert"|getScriptPrefix}}">graph conversion api</a> for post-download conversion.
+Examples of how to load graphs using igraph can be found <a href="{{"igraph"|getScriptPrefix}}">here</a>. <br>
+
+<b>Downloaded zip files must be unzipped using Linux/Mac unzip.</b>
+
 </p>
 
 <p>
-  All data here can be acquired directly from <a href="http://openconnecto.me/data/public/graphs/" target="blank">
-  http://openconnecto.me/data/public/graphs/</a>. If scripting downloads this may be more convenient.
+  All data here can also be acquired directly from <a href="http://openconnecto.me/data/public/graphs/" target="blank">
+  http://openconnecto.me/data/public/graphs/</a>.
 </p>
 
 {% if err_msg %}
@@ -85,8 +90,19 @@ be found <a href="{{"igraph"|getScriptPrefix}}">here</a>.
       <form action="" method="post" enctype="multipart/form-data" name="">
         {% render_table genus.0 %}
         <br/>
-        <input name ="{{ genus.1.form_name }}"  type="submit" value="Download selected {{ genus.1.form_name }}" class="button" />
+        <input name ="{{ genus.1.form_name }}"  type="submit" value="Download selected {{ genus.1.form_name }}" class="button"/>
         {{ genus.1 }}
+
+        {% if genus.1.form_name == "human" %}
+          Downsample factor:
+          {% mkrange 0 31 as ds_factor_scales %}
+            <select name="ds_factor" title="This downsamples the graph with each 3D entry in MORTON Z-index space sampled down at ratio 3*factor^3:1">
+            {% for sc in ds_factor_scales %}
+              <option value="{{ sc }}"> {{ sc }} </option>
+            {% endfor %}
+          </select>
+        {% endif %}
+
       </form>
     </div>
   {%endfor%}
@@ -96,8 +112,16 @@ be found <a href="{{"igraph"|getScriptPrefix}}">here</a>.
   <div id="query_table">
     <h3> {{ query_result.html_name }}</h3>
       <form action="" method="post" enctype="multipart/form-data" name="">
-      {% render_table query_result %}
-      <input name ="search results"  type="submit" value="Download selected" class="button" />
+        {% render_table query_result %}
+        <input name ="search results"  type="submit" value="Download selected" class="button" />
+
+        Downsample factor:
+        {% mkrange 0 31 as ds_factor_scales %}
+          <select name="ds_factor" title="Applicable to human brains only. This downsamples the graph with each 3D entry in MORTON Z-index space sampled down at ratio 3*factor^3:1">
+          {% for sc in ds_factor_scales %}
+            <option value="{{ sc }}"> {{ sc }} </option>
+          {% endfor %}
+        </select>
       </form>
   </div>
 

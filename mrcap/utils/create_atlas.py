@@ -33,9 +33,10 @@ from math import ceil
 from copy import copy
 import sys
 from time import time
+import os
 
-def create(roixmlfn="MNI152_T1_1mm_brain_mask_integer.xml", 
-          roirawfn="MNI152_T1_1mm_brain_mask_integer.raw", start=2):
+def create(roixmlfn=os.path.join(os.path.dirname(__file__), "MNI152_T1_1mm_brain_mask_integer.xml"), 
+        roirawfn=os.path.join(os.path.dirname(__file__), "MNI152_T1_1mm_brain_mask_integer.raw"), start=2):
   """
   Create a new atlas given some scaling factor determined by the 
   start index. Opaque doc, but best I can do.

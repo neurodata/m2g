@@ -59,6 +59,8 @@ from forms import DownloadQueryForm
 """ Data Processing imports"""
 import paths
 from mrcap import gengraph as gengraph
+from mrcap.utils.downsample import downsample
+from mrcap.utils import igraph_io
 
 from  utils.filesorter import checkFileExtGengraph
 import utils.zipper as zipper
@@ -466,18 +468,55 @@ def download(request, webargs=None):
       else:
         return HttpResponseRedirect(get_script_prefix()+"download")
 
-    else: # We just want to download an entire dataset
-      # TODO: Add code to handle arbitrary selection of graphs
+    else: # We just want to download specific files
 
-      form = DownloadGraphs(request)
+      form = DownloadGraphs(request.POST)
 
       if form.is_valid():
-        files_to_zip = request.POST.getlist("selection")
-        if not files_to_zip:
+        selected_files = request.POST.getlist("selection")
+        ds_factor = int(request.POST.getlist("ds_factor")[0])
+        dl_format = request.POST.getlist("dl_format")[0]
+
+        if not selected_files:
           return render_to_response("downloadgraph.html", {"genera":tbls, "query":DownloadQueryForm()},
                             context_instance=RequestContext(request))
         else:
-          temp = zipper.zipfiles(files_to_zip, "archive.zip", use_genus=True)
+          if dl_format == "graphml" and ds_factor  == 0:
+            temp = zipper.zipfiles(selected_files, "archive.zip", use_genus=True)
+          else:
+            files_to_zip = {}
+            del_tmps = False
+
+            # TODO %Dopar%
+            for fn in selected_files:
+              # No matter what we need a temp file
+              tmpfile = tempfile.NamedTemporaryFile("w", delete=False)
+              tmpfile.close()
+
+              del_tmps = True
+              # Downsample only valid for *BIG* human brains!
+              # *NOTE: If smallgraphs are ingested this will break
+
+              # TODO: Add atlas slab and desikan atlas do downsample
+
+              if ds_factor and get_genus(fn) == "human":
+                g = downsample(igraph_io.read_arbitrary(fn, "graphml"), ds_factor)
+              else:
+                g = igraph_io.read_arbitrary(fn, "graphml")
+              
+              # Write to `some` format
+              if dl_format == "mm":
+                igraph_io.write_mm(g, tmpfile.name)
+              else:
+                g.write(tmpfile.name, format=dl_format)
+
+              files_to_zip[fn] = tmpfile.name
+
+            temp = zipper.zipfiles(files_to_zip, "archive.zip", gformat=dl_format, use_genus=True)
+            # Del temp files
+            for tmpfn in files_to_zip.values():
+              print "Deleting %s ..." % tmpfn
+              os.remove(tmpfn)
 
           # TODO: Possibly use django.http.StreamingHttpResponse for this
           wrapper = FileWrapper(temp)
