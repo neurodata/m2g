@@ -95,11 +95,13 @@ Examples of how to load graphs using igraph can be found <a href="{{"igraph"|get
 
         {% if genus.1.form_name == "human" %}
           Downsample factor:
-          {% mkrange 0 31 as ds_factor_scales %}
-            <select name="ds_factor" title="This downsamples the graph with each 3D entry in MORTON Z-index space sampled down at ratio 3*factor^3:1">
+          {% mkrange 0 26 as ds_factor_scales %}
+            <select name="ds_factor" title="This downsamples the graph with each 3D entry in MORTON Z-index space sampled down at ratio 3*factor^3:1. Or use prebuilt atlases.">
             {% for sc in ds_factor_scales %}
               <option value="{{ sc }}"> {{ sc }} </option>
             {% endfor %}
+            <option value="desikan"> Desikan Atlas</option>
+            <option value="slab"> slab Atlas</option>
           </select>
         {% endif %}
 
@@ -116,10 +118,12 @@ Examples of how to load graphs using igraph can be found <a href="{{"igraph"|get
         <input name ="search results"  type="submit" value="Download selected" class="button" />
 
         Downsample factor:
-        {% mkrange 0 31 as ds_factor_scales %}
+        {% mkrange 0 26 as ds_factor_scales %}
           <select name="ds_factor" title="Applicable to human brains only. This downsamples the graph with each 3D entry in MORTON Z-index space sampled down at ratio 3*factor^3:1">
           {% for sc in ds_factor_scales %}
             <option value="{{ sc }}"> {{ sc }} </option>
+            <option value="desikan"> Desikan Atlas</option>
+            <option value="slab"> slab Atlas</option>
           {% endfor %}
         </select>
       </form>
