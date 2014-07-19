@@ -85,11 +85,16 @@ class BuildGraphForm(forms.Form):
   Project_Type = forms.ChoiceField([('public', 'public'), ('private','private')], widget=Select, required=False)
 
   # Name project
-  UserDefprojectName  = forms.CharField(label='Project name', max_length=255, required = True, error_messages={'required': 'You must enter a Project name'})
-  site = forms.CharField(label='Enter Site', max_length=255, required = True, error_messages={'required': 'You must enter a site'})
-  subject = forms.CharField(label='Enter Subject ID', max_length=255, required = True , error_messages={'required': 'You must enter a Subject ID'})
-  session = forms.CharField(label='Enter Session ID', max_length=255, required = True, error_messages={'required': 'You must enter a Session ID'})
-  scanId = forms.CharField(label='Scan ID', max_length=255, required = True, error_messages={'required': 'You must enter a Scan ID'})
+  UserDefprojectName  = forms.CharField(label='Project name', max_length=255, widget=TextInput(attrs={"class":"tb"}),
+                                        required = True, error_messages={'required': 'You must enter a Project name'})
+  site = forms.CharField(label='Enter Site', max_length=255, widget=TextInput(attrs={"class":"tb"}),
+                         required = True, error_messages={'required': 'You must enter a site'})
+  subject = forms.CharField(label='Enter Subject ID', max_length=255, widget=TextInput(attrs={"class":"tb"}),
+                            required = True , error_messages={'required': 'You must enter a Subject ID'})
+  session = forms.CharField(label='Enter Session ID', max_length=255, widget=TextInput(attrs={"class":"tb"}),
+                            required = True, error_messages={'required': 'You must enter a Session ID'})
+  scanId = forms.CharField(label='Scan ID', max_length=255, widget=TextInput(attrs={"class":"tb"}),
+                           required = True, error_messages={'required': 'You must enter a Scan ID'})
 
   # Upload project files
   fiber_file = forms.FileField(label='Select fiber.dat file', required = True, error_messages={'required': 'You must upload a fiber tract file'})
@@ -101,9 +106,9 @@ class BuildGraphForm(forms.Form):
   ,('deg', 'Vertex Degree',), ('eig', 'Top-k Eigenvalues and Eigenvectors',))
 
   Select_graph_size = forms.ChoiceField(choices=(('small','Small graph [~7 min]'), ('big','Big graph [~20 min]'))
-                                  , widget=RadioSelect, required = True, error_messages={'required': 'You must choose a graph size'})
+                                  , widget=RadioSelect(), required = True, error_messages={'required': 'You must choose a graph size'})
 
-  Email = forms.EmailField(widget=TextInput(), required=False)
+  Email = forms.EmailField(widget=TextInput(attrs={"class":"tb"}), required=False)
 
   Select_Invariants_you_want_computed = forms.MultipleChoiceField(required=False,
   widget=CheckboxSelectMultiple, choices=INVARIANT_CHOICES)
@@ -135,7 +140,7 @@ class ConvertForm(forms.Form):
   OUT_FORMATS.extend([('dot', 'dot'), ('gml', 'gml'), ('leda', 'leda')])
 
   output_format = forms.MultipleChoiceField(required=True, \
-  widget=SelectMultiple, choices=OUT_FORMATS, label="Output file format")
+  widget=SelectMultiple(attrs={"class":"tb"}), choices=OUT_FORMATS, label="Output file format")
 
 class GraphUploadForm(forms.Form):
   '''
@@ -152,7 +157,7 @@ class GraphUploadForm(forms.Form):
       ('npy', 'numpy')), label="Graph format", error_messages={"required":"You must specify graph type"})
 
   # Select size of graph
-  email = forms.EmailField(widget=TextInput(), required=True)
+  email = forms.EmailField(widget=TextInput(attrs={"class":"tb"}), required=True)
 
   INVARIANT_CHOICES = (('ss1', 'Scan Statistic 1',), ('tri', 'Triangle Count',), \
       ('cc', 'Clustering co-efficient',), ('mad', 'Maximum Average Degree',) \
@@ -171,7 +176,7 @@ class DownloadForm(forms.Form):
 
   Select_output_type = forms.ChoiceField(choices=OUTPUT_TYPES, widget=RadioSelect, required=True)
 
-class DownloadGraphs(forms.Form):
+class DownloadGraphsForm(forms.Form):
   """
   Form for download in
   """
@@ -179,11 +184,10 @@ class DownloadGraphs(forms.Form):
     self.form_name = name
 
   FORMATS = [('graphml', 'graphml'), ('ncol','ncol'), ('edgelist', 'edgelist'),
-            ('lgl','lgl'),('pajek', 'pajek'), ('dot', 'dot'), ('gml', 'gml'), 
+            ('lgl','lgl'),('pajek', 'pajek'), ('dot', 'dot'), ('gml', 'gml'),
             ('leda', 'leda'), ('mm', 'Market Matrix')]
 
   dl_format = forms.ChoiceField(required=True, widget=Select(attrs={"title":"Only graphml will contain all vertex, edge and graph attributes"}), choices=FORMATS, label="Format")
-
 
 class DownloadQueryForm(forms.Form):
   '''
@@ -199,4 +203,4 @@ class DownloadQueryForm(forms.Form):
       label="Search type", error_messages={"required":"You must specify search type"})
 
   # Select size of graph
-  query = forms.CharField(max_length=512, widget=TextInput(), required=True)
+  query = forms.CharField(max_length=512, required=True, widget=forms.TextInput(attrs={"class":"tb"}))
