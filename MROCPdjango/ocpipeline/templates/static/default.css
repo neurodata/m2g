@@ -50,6 +50,7 @@ font: normal monospace;
 /*h1,h2,h3 {padding-top: 2px;}*/
 
 /* structure */
+
 .container {
         background: #FFF;
         font-size: 1.4em;
@@ -146,4 +147,11 @@ font: normal monospace;
 .errormsg {
   color: #ef8d13;
   font-weight: bold;
+}
+
+/* Rounding corners */
+.tb {
+  -webkit-border-radius: 7px;
+  -moz-border-radius: 7px;
+  border-radius: 7px;
 }

@@ -1,16 +1,5 @@
 *MR OCP TODO list Disa
 ===========================
-- Unpack zips
-- Rename incorrectly named ones
-- Add project name attribute to graphs
-
-- Alter ingest to account for project name
-- Alter models ||   ||    ||    ||    ||
-- Alter table rendering to account for project name
-
-- complete manage_zips.py
-
-- Zips of downloads need to be saved to disk and managed
 1. Click handler buildgraph to show email address if given big-graph, else not.
 
 * viewer: http://cmtk.org/viewer/ visualization tool
@@ -32,6 +21,14 @@ html:
 
 *recently completed*
 =====================
+- Zips of downloads need to be saved to disk and managed
+- Unpack zips
+- Rename incorrectly named ones
+- Add project name attribute to graphs
+- Alter ingest to account for project name
+- Alter models ||   ||    ||    ||    ||
+- Alter table rendering to account for project name
+
 - remove checkbox from heading: --> Used as checkall
 - handle checkbox selection of graphs to download
 - Delete mrcap/lcc, mrcap/svd, MROCPdjango/loadAdjMatrix and all refs

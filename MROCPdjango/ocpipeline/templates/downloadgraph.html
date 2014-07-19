@@ -15,6 +15,7 @@
 
  Created by Disa Mhembere
  Email: disa@jhu.edu -->
+
 {% extends "base.html" %}
 {% load render_table from django_tables2 %}
 {% load getScriptPrefix %}
@@ -25,35 +26,53 @@
 Download Graph | MROCP
 {% endblock title %}
 
-{% comment %}
-<head>
-<script type="text/javascript">
-  function toggleOthers(form)
-  {
-    var checkboxes = new Array();
-    checkboxes = form.getElementsByTagName('input');
-
-    for (var i = 0; i < checkboxes.length; i++) {
-      if (checkboxes[i].type === 'checkbox') {
-        if (checkboxes[i].checked == true) {
-          checkboxes[i].checked = false;
-        }
-        else {
-          checkboxes[i].checked = true;
-        }
-      }
-    }
-  }
-</script>
-</head>
-{% endcomment %}
-
 {% block medheading %}
 Download biologically derived graphs
 <img src="{% static 'images/graph_sm.png' %}"alt="small graph" align="middle"  height="80" width="80"/>
 {% endblock medheading %}
 
 {% block content %}
+
+<script type="text/javascript">
+  // Function make the email field on human graphs visible
+  function showEmailField(show)
+  {
+    if (show) {
+      document.getElementById('emailBoxID').style.visibility='visible';
+      document.getElementById('emailLabelBoxID').style.visibility='visible';
+    }
+    else {
+      document.getElementById('emailBoxID').style.visibility='hidden';
+      document.getElementById('emailLabelBoxID').style.visibility='hidden';
+    }
+  }
+</script>
+
+<script type="text/javascript">
+  // Used to tell me if more than some number of checkboxes
+  //  have been checked
+function moreThanChecked(form, num)
+{
+  var checkboxes = new Array();
+  var count = 0;
+
+  checkboxes = form.getElementsByTagName('input');
+  for (var i = 0; i < checkboxes.length; i++) {
+    if (checkboxes[i].type === 'checkbox') {
+      if (checkboxes[i].checked == true) {
+        count++;
+      }
+      if (count > num) { // breaks loop
+        showEmailField(true);
+        return true;
+      }
+    }
+  }
+  showEmailField(false);
+  return false;
+}
+</script>
+
 <p>Thanks to all who provided the raw data from which we derived these graphs. Every graph
 is annotated with a <code> source</code> attribute that denotes its origin.<br/>
 Graphs are provided by default in <a href="http://graphml.graphdrawing.org/" target="blank">graphML
@@ -87,7 +106,11 @@ Examples of how to load graphs using igraph can be found <a href="{{"igraph"|get
     <div id="{{ genus.0.html_name }}">
       <h3> {{ genus.0.html_name }} </h3>
 
-      <form action="" method="post" enctype="multipart/form-data" name=""">
+      {% if genus.1.form_name == "human" %}
+        <form action="" method="post" enctype="multipart/form-data" name="" onchange="moreThanChecked(this, 1);">
+      {% else %}
+        <form action="" method="post" enctype="multipart/form-data" name="">
+      {% endif %}
         {% render_table genus.0 %}
         <br/>
         <input name ="{{ genus.1.form_name }}"  type="submit" value="Download selected {{ genus.1.form_name }}"
@@ -105,6 +128,13 @@ Examples of how to load graphs using igraph can be found <a href="{{"igraph"|get
             <option value="desikan"> Desikan Atlas</option>
             <option value="slab"> slab Atlas</option>
           </select>
+
+          {# Email field for long running jobs #}
+
+          <label for="email" id="emailLabelBoxID" style=visibility:hidden >Email:</label>
+          <input type="email" name="email" id="emailBoxID" style=visibility:hidden class="tb"
+            title="If you select more than one graph or select a format other than graphml you must enter an email address.">
+
         {% endif %}
 
       </form>

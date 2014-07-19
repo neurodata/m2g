@@ -53,7 +53,7 @@ from forms import GraphUploadForm
 from forms import ConvertForm
 from forms import BuildGraphForm
 from forms import PasswordResetForm
-from forms import DownloadGraphs
+from forms import DownloadGraphsForm
 from forms import DownloadQueryForm
 
 """ Data Processing imports"""
@@ -470,7 +470,7 @@ def download(request, webargs=None):
 
     else: # We just want to download specific files
 
-      form = DownloadGraphs(request.POST)
+      form = DownloadGraphsForm(request.POST)
 
       if form.is_valid():
         selected_files = request.POST.getlist("selection")
@@ -547,7 +547,7 @@ def download(request, webargs=None):
       RequestConfig(request, paginate={"per_page":25}).configure(table) # Let each table re-render given a request
       #table.columns["url"].header = "Download Link"
 
-      dl_form = DownloadGraphs()
+      dl_form = DownloadGraphsForm()
       dl_form.set_name(genus)
 
       tbls.append((table, dl_form))
