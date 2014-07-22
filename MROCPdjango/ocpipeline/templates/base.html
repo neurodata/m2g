@@ -54,53 +54,7 @@
             }
           </script>
 
-        <script type="text/javascript">
-          function Validate(oForm, _validFileExtensions) {
-            var arrInputs = oForm.getElementsByTagName("input");
-            for (var i = 0; i < arrInputs.length; i++) {
-              var oInput = arrInputs[i];
-              if (oInput.type == "file") {
-                var sFileName = oInput.value;
-                if (sFileName.length > 0) {
-                  var blnValid = false;
-                  for (var j = 0; j < _validFileExtensions.length; j++) {
-                    var sCurExtension = _validFileExtensions[j];
-                    if (sFileName.substr(sFileName.length - sCurExtension.length, sCurExtension.length).toLowerCase() == sCurExtension.toLowerCase()) {
-                      blnValid = true;
-                      break;
-                        }
-                      }
-
-                if (!blnValid) {
-                    showSpinner(false);
-                    alert("Sorry, " + sFileName.split("\\").pop() + " is invalid, allowed extensions are: " + _validFileExtensions.join(", "));
-                    return false;
-                  }
-                }
-              }
-            }
-            return true;
-          }
-        </script>
-
-        <script type="text/javascript">
-          function toggleOthers(form)
-          {
-            var checkboxes = new Array();
-            checkboxes = form.getElementsByTagName('input');
-
-            for (var i = 0; i < checkboxes.length; i++) {
-              if (checkboxes[i].type === 'checkbox') {
-                if (checkboxes[i].checked == true) {
-                  checkboxes[i].checked = false;
-                }
-                else {
-                  checkboxes[i].checked = true;
-                }
-              }
-            }
-          }
-        </script>
+        <script type="text/javascript" src="{% static 'scripts/validator.js' %}"> </script>
 
         {% endblock js %}
 

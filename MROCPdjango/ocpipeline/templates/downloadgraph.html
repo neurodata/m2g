@@ -20,7 +20,7 @@
 {% load render_table from django_tables2 %}
 {% load getScriptPrefix %}
 {% load static %}
-{% load mkrange%}
+{% load mkrange %}
 
 {% block title %}
 Download Graph | MROCP
@@ -33,45 +33,9 @@ Download biologically derived graphs
 
 {% block content %}
 
-<script type="text/javascript">
-  // Function make the email field on human graphs visible
-  function showEmailField(show)
-  {
-    if (show) {
-      document.getElementById('emailBoxID').style.visibility='visible';
-      document.getElementById('emailLabelBoxID').style.visibility='visible';
-    }
-    else {
-      document.getElementById('emailBoxID').style.visibility='hidden';
-      document.getElementById('emailLabelBoxID').style.visibility='hidden';
-    }
-  }
-</script>
+<script type="text/javascript" src="{% static 'scripts/fader.js' %}"> </script>
 
-<script type="text/javascript">
-  // Used to tell me if more than some number of checkboxes
-  //  have been checked
-function moreThanChecked(form, num)
-{
-  var checkboxes = new Array();
-  var count = 0;
-
-  checkboxes = form.getElementsByTagName('input');
-  for (var i = 0; i < checkboxes.length; i++) {
-    if (checkboxes[i].type === 'checkbox') {
-      if (checkboxes[i].checked == true) {
-        count++;
-      }
-      if (count > num) { // breaks loop
-        showEmailField(true);
-        return true;
-      }
-    }
-  }
-  showEmailField(false);
-  return false;
-}
-</script>
+<script type="text/javascript" src="{% static 'scripts/checkbox.js' %}"> </script>
 
 <p>Thanks to all who provided the raw data from which we derived these graphs. Every graph
 is annotated with a <code> source</code> attribute that denotes its origin.<br/>
@@ -100,6 +64,15 @@ Examples of how to load graphs using igraph can be found <a href="{{"igraph"|get
   <input name = "search"  type="submit" value="Search" class="button" onclick="showSpinner();"/>
 </form>
 
+
+<script type="text/javascript">
+  function verifyEmail(form, num) {
+    if (moreThanChecked(form, num))
+      return checkEmail(document.getElementById('emailBoxID'));
+    return true;
+  }
+</script>
+
 {% if genera %}
 <div id="data_tables">
   {% for genus in genera %}
@@ -107,14 +80,16 @@ Examples of how to load graphs using igraph can be found <a href="{{"igraph"|get
       <h3> {{ genus.0.html_name }} </h3>
 
       {% if genus.1.form_name == "human" %}
-        <form action="" method="post" enctype="multipart/form-data" name="" onchange="moreThanChecked(this, 1);">
+        <form action="" method="post" enctype="multipart/form-data" name="" onchange="moreThanChecked(this, 1);"
+              onsubmit="return verifyEmail(this, 1);">
       {% else %}
         <form action="" method="post" enctype="multipart/form-data" name="">
       {% endif %}
-        {% render_table genus.0 %}
-        <br/>
-        <input name ="{{ genus.1.form_name }}"  type="submit" value="Download selected {{ genus.1.form_name }}"
-               class="button" onclick="showSpinner();"/>
+      {% csrf_token %}
+      {% render_table genus.0 %}
+      <br/>
+      <input name ="{{ genus.1.form_name }}"  type="submit" value="Download selected {{ genus.1.form_name }}"
+             class="button" onsubmit="showSpinner();"/>
 
         {{ genus.1 }}
 
@@ -130,10 +105,11 @@ Examples of how to load graphs using igraph can be found <a href="{{"igraph"|get
           </select>
 
           {# Email field for long running jobs #}
-
-          <label for="email" id="emailLabelBoxID" style=visibility:hidden >Email:</label>
-          <input type="email" name="email" id="emailBoxID" style=visibility:hidden class="tb"
-            title="If you select more than one graph or select a format other than graphml you must enter an email address.">
+          <div id="emailID"  class="errormsg" style="opacity: 0;" hidden="hidden">
+          <label for="email" id="emailLabelID"><b>Email:</b></label>
+          <input type="email" id="emailBoxID" name="email" class="tb" size="35">
+            You must enter an email address for quantity of graphs you would like to download.
+          </div>
 
         {% endif %}
 
@@ -150,6 +126,7 @@ Examples of how to load graphs using igraph can be found <a href="{{"igraph"|get
   <div id="query_table">
     <h3> {{ query_result.html_name }}</h3>
       <form action="" method="post" enctype="multipart/form-data" name="">
+        {% csrf_token %}
         {% render_table query_result %}
         <input name ="search results"  type="submit" value="Download selected" class="button" onclick="showSpinner();"/>
 

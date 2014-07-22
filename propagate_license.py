@@ -41,7 +41,6 @@ comm = {".py":"#", ".pyx":"#", "": "#", ".html":"", ".sh":"#", ".r":"#", ".m":"%
 
 import argparse
 import os
-import pdb
 
 def add(files):
   global __license_header__
