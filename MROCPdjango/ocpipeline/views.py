@@ -226,8 +226,9 @@ def buildGraph(request):
         thr.start()
         request.session["success_msg"] =\
 """
-Your job was successfully launched. You should receive an email when your
-job begins and another one when it completes. The process may take several if you selected to compute all invariants
+Your job successfully launched. You should receive an email to confirm launch
+and another when it upon job completion. <br/>
+<i>The process may take several hours<\i> if you selected to compute all invariants.
 """
         return HttpResponseRedirect(get_script_prefix()+"success")
 
@@ -332,7 +333,6 @@ def zipProcessedData(request):
   # Take dir with multiple scans, compress it & send it off
 
   ''' Zip it '''
-  #temp = zipper.zipFilesFromFolders(dirName = request.session['usrDefProjDir'])
   temp = zipper.zipup(request.session['usrDefProjDir'], zip_file = request.session['usrDefProjDir'] + '.zip')
   ''' Wrap it '''
   wrapper = FileWrapper(temp)
@@ -411,6 +411,11 @@ def upload(request, webargs=None):
 ####################################################
 def download(request, webargs=None):
 
+  MAX_NUM_GRAPH_DLS = 1
+  ATLASES = {"desikan": os.path.join(settings.ATLAS_DIR, "desikan_atlas.nii") ,
+              "slab": os.path.join(settings.ATLAS_DIR, "slab_atlas.nii")}
+
+
   if request.method == "POST":
     if request.POST.keys()[0] == "query_type": # Means we are doing a search
       form = DownloadQueryForm(request.POST)
@@ -461,7 +466,6 @@ def download(request, webargs=None):
           table = None # Get the no results message to show up
         else:
           table.set_html_name("Search Results")
-          #RequestConfig(request, paginate={"per_page":7}).configure(table)
 
         return render_to_response("downloadgraph.html", {"genera":[],
           "query":DownloadQueryForm(), "query_result":table}, context_instance=RequestContext(request))
@@ -474,67 +478,53 @@ def download(request, webargs=None):
 
       if form.is_valid():
         selected_files = request.POST.getlist("selection")
-        ds_factor = 0 if not request.POST.getlist("ds_factor") else request.POST.getlist("ds_factor")[0]
-
-        ATLASES = {"desikan": os.path.join(settings.ATLAS_DIR, "desikan_atlas.nii") ,
-              "slab": os.path.join(settings.ATLAS_DIR, "slab_atlas.nii")}
+        ds_factor = 0 if not request.POST.get("ds_factor") else request.POST.get("ds_factor")
 
         if ds_factor not in ATLASES.keys():
           ds_factor = int(ds_factor)
 
-        dl_format = request.POST.getlist("dl_format")[0]
+        dl_format = request.POST.get("dl_format")
 
         if not selected_files:
           return HttpResponseRedirect(get_script_prefix()+"download")
 
+        # Something selected for dl/Convert+dl
         else:
-          if dl_format == "graphml" and ds_factor  == 0:
-            temp = zipper.zipfiles(selected_files, "archive.zip", use_genus=True)
+          if (len(selected_files) > MAX_NUM_GRAPH_DLS and request.POST.has_key("human")):
+            data_dir = os.path.join(settings.MEDIA_ROOT, "tmp",
+                                   strftime("download_%a%d%b%Y_%H.%M.%S/", localtime()))
+            dwnld_loc = request.META['wsgi.url_scheme'] + "://" + \
+                    request.META["HTTP_HOST"] + data_dir.replace(" ","%20")
+
+            sendEmail(request.POST.get("email"), "Job launch notification",
+                      "Your download request was received. You will receive an email when it completes.\n\n")
+
+            # Testing only
+            #scale_convert(selected_files, dl_format, ds_factor, ATLASES,
+            #              request.POST.get("email"), dwnld_loc, os.path.join(data_dir, "archive.zip")) # Testing only
+            thr = threading.Thread(target=scale_convert, args=(selected_files, dl_format, ds_factor, ATLASES,
+                                      request.POST.get("email"), dwnld_loc, os.path.join(data_dir, "archive.zip")))
+            thr.start()
+
+            request.session['success_msg'] = \
+"""
+Your job successfully launched. You should receive an email when your job begins and another one when it completes.<br/>
+The process may take several hours (dependent on graph size). If your job fails you will receive an email notification as well.<br/>
+If you do not see an email in your <i>Inbox</i> check the <i>Spam</i> folder and add <code>jhmrocp@cs.jhu.edu</code> to your safe list.
+"""
+            return HttpResponseRedirect(get_script_prefix()+'success')
+
           else:
-            files_to_zip = {}
-            del_tmps = False
 
-            # TODO %Dopar%
-            for fn in selected_files:
-              # No matter what we need a temp file
-              tmpfile = tempfile.NamedTemporaryFile("w", delete=False)
-              tmpfile.close()
+            temp = scale_convert(selected_files, dl_format, ds_factor, ATLASES)
+            # TODO: Possibly use django.http.StreamingHttpResponse for this
+            wrapper = FileWrapper(temp)
+            response = HttpResponse(wrapper, content_type='application/zip')
+            response['Content-Disposition'] = ('attachment; filename=archive.zip')
+            response['Content-Length'] = temp.tell()
+            temp.seek(0)
 
-              del_tmps = True
-              # Downsample only valid for *BIG* human brains!
-              # *NOTE: If smallgraphs are ingested this will break
-
-              # TODO: Add atlas slab and desikan atlas do downsample
-              if ds_factor and get_genus(fn) == "human":
-                if isinstance(ds_factor, int):
-                  g = downsample(igraph_io.read_arbitrary(fn, "graphml"), ds_factor)
-                else:
-                  g = downsample(igraph_io.read_arbitrary(fn, "graphml"), atlas=nib_load(ATLASES[ds_factor]))
-              else:
-                g = igraph_io.read_arbitrary(fn, "graphml")
-
-              # Write to `some` format
-              if dl_format == "mm":
-                igraph_io.write_mm(g, tmpfile.name)
-              else:
-                g.write(tmpfile.name, format=dl_format)
-
-              files_to_zip[fn] = tmpfile.name
-
-            temp = zipper.zipfiles(files_to_zip, "archive.zip", gformat=dl_format, use_genus=True)
-            # Del temp files
-            for tmpfn in files_to_zip.values():
-              print "Deleting %s ..." % tmpfn
-              os.remove(tmpfn)
-
-          # TODO: Possibly use django.http.StreamingHttpResponse for this
-          wrapper = FileWrapper(temp)
-          response = HttpResponse(wrapper, content_type='application/zip')
-          response['Content-Disposition'] = ('attachment; filename=archive.zip')
-          response['Content-Length'] = temp.tell()
-          temp.seek(0)
-
-          return response
+            return response
       else:
         return HttpResponseRedirect(get_script_prefix()+"download")
 
@@ -556,6 +546,8 @@ def download(request, webargs=None):
                             context_instance=RequestContext(request))
 
 ###################################################
+#           Asynchronous methods                  #
+###################################################
 
 def asyncInvCompute(request):
 
@@ -567,7 +559,10 @@ def asyncInvCompute(request):
       invariant_fns = runInvariants(request.session['invariants'], graph_fn,
                       request.session['graphInvariants'], graph_format=request.session['graph_format'])
 
-      print 'Invariants for annoymous project %s complete...' % graph_fn
+      if isinstance(invariant_fns, str):
+        raise Exception
+      else:
+        print 'Invariants for annoymous project %s complete...' % graph_fn
 
     except Exception, msg:
       msg = """
@@ -581,6 +576,63 @@ completed data here: %s.\nPlease check these and try again.\n\n
 
   # Email user of job finished
   sendJobCompleteEmail(request.session['email'], dwnldLoc)
+
+######################################################
+
+def scale_convert(selected_files, dl_format, ds_factor, ATLASES, email=None, dwnld_loc=None, zip_fn=None):
+  try:
+    if dl_format == "graphml" and ds_factor == 0:
+      temp = zipper.zipfiles(selected_files, use_genus=True, zip_out_fn=zip_fn)
+
+    else:
+      files_to_zip = {}
+
+      for fn in selected_files:
+        # No matter what we need a temp file
+        tmpfile = tempfile.NamedTemporaryFile("w", delete=False)
+        tmpfile.close()
+
+        # Downsample only valid for *BIG* human brains!
+        # *NOTE: If smallgraphs are ingested this will break
+
+        if ds_factor and get_genus(fn) == "human":
+          if isinstance(ds_factor, int):
+            g = downsample(igraph_io.read_arbitrary(fn, "graphml"), ds_factor)
+          else:
+            g = downsample(igraph_io.read_arbitrary(fn, "graphml"), atlas=nib_load(ATLASES[ds_factor]))
+        else:
+          g = igraph_io.read_arbitrary(fn, "graphml")
+
+        # Write to `some` format
+        if dl_format == "mm":
+          igraph_io.write_mm(g, tmpfile.nklame)
+        else:
+          g.write(tmpfile.name, format=dl_format)
+
+        files_to_zip[fn] = tmpfile.name
+
+      temp = zipper.zipfiles(files_to_zip, use_genus=True, zip_out_fn=zip_fn, gformat=dl_format)
+      # Del temp files
+      for tmpfn in files_to_zip.values():
+        print "Deleting %s ..." % tmpfn
+        os.remove(tmpfn)
+
+  except Exception, msg:
+    if email:
+      msg = """
+Hello,\n\nYour most recent job failed to complete.
+\n"You may have some partially completed data here: %s.\n\n
+""" % dwnld_loc
+
+      sendJobFailureEmail(email, msg)
+      return
+
+  if email:
+    # Email user of job finished
+    sendJobCompleteEmail(email, dwnld_loc)
+    return
+
+  return temp # Case where no its an iteractive download
 
 #########################################
 #	*******************		#
@@ -608,7 +660,7 @@ def graphLoadInv(request, webargs=None):
         writeBodyToDisk(data.read(), dataDir)
         graphs = glob(os.path.join(dataDir,'*')) # TODO: better way to make sure we are actually collecting graphs here
 
-      else: # View only accepts .mat & zip as regulated by template
+      else: # View only accepts sa subset of file formats as regulated by template Validate func
         graphs = [os.path.join(dataDir, data.name)]
         saveFileToDisk(data, graphs[0])
 
@@ -620,15 +672,15 @@ def graphLoadInv(request, webargs=None):
       # Launch thread for graphs & email user
       sendJobBeginEmail(request.session['email'], request.session['invariants'], genGraph=False)
 
-      #asyncInvCompute(request)
-      thr = threading.Thread(target=asyncInvCompute, args=(request,))
-      thr.start()
+      asyncInvCompute(request) # Used when testing only
+      #thr = threading.Thread(target=asyncInvCompute, args=(request,))
+      #thr.start()
 
       request.session['success_msg'] = \
 """
-Your job was successfully launched. You should receive an email when your  job begins and another one when it completes.
-The process may take several hours per graph (dependent on graph size) if you selected to compute all invariants.
-If you do not see an email in your INBOX check the SPAM folder and add jhmrocp@cs.jhu.edu to your safe list.
+Your job successfully launched. You should receive an email when your job begins and another one when it completes.<br/>
+The process may take several hours (dependent on graph size) if you selected to compute all invariants.<br/>
+If you do not see an email in your <i>Inbox</i> check the <i>Spam</i> folder and add <code>jhmrocp@cs.jhu.edu</code> to your safe list.
 """
       return HttpResponseRedirect(get_script_prefix()+'success')
 
@@ -689,8 +741,7 @@ If you do not see an email in your INBOX check the SPAM folder and add jhmrocp@c
 #########################################
 
 def convert(request, webargs=None):
-  ''' Form '''
-
+  """ Browser """
   if (request.method == 'POST' and not webargs):
     form = ConvertForm(request.POST, request.FILES) # instantiating form
     if form.is_valid():

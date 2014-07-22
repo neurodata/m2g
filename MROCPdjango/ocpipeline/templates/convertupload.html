@@ -1,4 +1,4 @@
-<!-- 
+<!--
  Copyright 2014 Open Connectome Project (http://openconnecto.me)
 
  Licensed under the Apache License, Version 2.0 (the "License");
@@ -43,7 +43,7 @@
     <font color='#ff0000'>{{err_msg}} </font>
 
     <form class="nostyle" method="post" enctype="multipart/form-data" name="loadForm"
-          onsubmit="return Validate(this,['.zip','.npy','.mat','.graphml','.ncol','.edge', '.edgelist','.lgl','.pajek','.graphdb', '', '.xml']);">
+          onsubmit="return Validate(this,['zip','npy','mat','graphml','ncol','edge', 'edgelist','lgl','pajek','graphdb', '', 'xml']);">
       {% csrf_token %}
       <p>{{convertForm}}</p>
       <input name = "Convert button"  type="submit" value="Convert All" class="button" onclick="showSpinner();"/>

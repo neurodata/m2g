@@ -227,6 +227,12 @@ def sendJobCompleteEmail(email_addr, dataLoc):
   send_mail("MROCP: Graph job COMPLETE!",
             msg, settings.SERVER_EMAIL, [email_addr], fail_silently=False)
 
+def sendEmail(email_addr, title, msg):
+  msg += "Thanks for using MROCP,\nThe MROCP team"
+
+  send_mail("MROCP: " + title,
+            msg, settings.SERVER_EMAIL, [email_addr], fail_silently=False)
+
 #####################################################################################
 
 def get_genus(fn):
@@ -239,7 +245,7 @@ def get_genus(fn):
   sep = "/"
   genera = os.listdir(settings.GRAPH_DIR)
   for idx, name in enumerate(fn.split(sep)):
-    if name in genera: 
+    if name in genera:
       return name
 
   print "No genus found!"

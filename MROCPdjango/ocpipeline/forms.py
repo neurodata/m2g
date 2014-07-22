@@ -25,7 +25,7 @@
 
 from django import forms
 from django.forms.fields import MultipleChoiceField, BooleanField, ChoiceField
-from django.forms.widgets import RadioSelect, CheckboxSelectMultiple, Select, SelectMultiple, TextInput
+from django.forms.widgets import RadioSelect, CheckboxSelectMultiple, Select, SelectMultiple, TextInput, EmailInput
 
 #
 #class LoginForm(forms.Form):
@@ -97,18 +97,22 @@ class BuildGraphForm(forms.Form):
                            required = True, error_messages={'required': 'You must enter a Scan ID'})
 
   # Upload project files
-  fiber_file = forms.FileField(label='Select fiber.dat file', required = True, error_messages={'required': 'You must upload a fiber tract file'})
-  roi_raw_file = forms.FileField(label='Select roi.raw file', required = True, error_messages={'required': 'You must upload ROIs'})
-  roi_xml_file = forms.FileField(label='Select roi.xml file', required = True, error_messages={'required': 'You must upload ROIs'})
+  fiber_file = forms.FileField(label='Select fiber.dat file',
+                               required = True, error_messages={'required': 'You must upload a fiber tract file'})
+  roi_raw_file = forms.FileField(label='Select roi.raw file',
+                                 required = True, error_messages={'required': 'You must upload ROIs'})
+  roi_xml_file = forms.FileField(label='Select roi.xml file', required = True,
+                                 error_messages={'required': 'You must upload ROIs'})
 
   INVARIANT_CHOICES = (('ss1', 'Scan Statistic 1',), ('tri', 'Triangle Count',), \
   ('cc', 'Clustering co-efficient',), ('mad', 'Maximum Average Degree',) \
   ,('deg', 'Vertex Degree',), ('eig', 'Top-k Eigenvalues and Eigenvectors',))
 
   Select_graph_size = forms.ChoiceField(choices=(('small','Small graph [~7 min]'), ('big','Big graph [~20 min]'))
-                                  , widget=RadioSelect(), required = True, error_messages={'required': 'You must choose a graph size'})
+                                  , widget=RadioSelect(attrs={"onclick":"emailFieldActivity();"}),
+                                  required = True, error_messages={'required': 'You must choose a graph size'})
 
-  Email = forms.EmailField(widget=TextInput(attrs={"class":"tb"}), required=False)
+  Email = forms.EmailField(widget=EmailInput(attrs={"class":"tb", "size":35, "disabled": "disabled"}), required=False)
 
   Select_Invariants_you_want_computed = forms.MultipleChoiceField(required=False,
   widget=CheckboxSelectMultiple, choices=INVARIANT_CHOICES)
@@ -157,7 +161,7 @@ class GraphUploadForm(forms.Form):
       ('npy', 'numpy')), label="Graph format", error_messages={"required":"You must specify graph type"})
 
   # Select size of graph
-  email = forms.EmailField(widget=TextInput(attrs={"class":"tb"}), required=True)
+  email = forms.EmailField(widget=EmailInput(attrs={"class":"tb", "size":35}), required=True)
 
   INVARIANT_CHOICES = (('ss1', 'Scan Statistic 1',), ('tri', 'Triangle Count',), \
       ('cc', 'Clustering co-efficient',), ('mad', 'Maximum Average Degree',) \

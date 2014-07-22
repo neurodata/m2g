@@ -1,4 +1,4 @@
-<!-- 
+<!--
  Copyright 2014 Open Connectome Project (http://openconnecto.me)
 
  Licensed under the Apache License, Version 2.0 (the "License");
@@ -70,7 +70,10 @@
     </font>
     <p></p>
 
-      <form action="" method="post" class="nostyle" enctype="multipart/form-data" name="loadForm" onsubmit="return (Validate(this,['.zip','.npy','.mat','.graphml','.ncol','.edge', '.edgelist','.lgl','.pajek','.graphdb', '', '.xml'] ))" class="forms" id="id_loadForm">
+      <form action="" method="post" class="nostyle" enctype="multipart/form-data" name="loadForm"
+            onsubmit="return Validate(this,['zip','npy','mat','graphml','ncol','edge', 'edgelist','lgl','pajek','graphdb', '', 'xml'] );"
+            class="forms" id="id_loadForm">
+        
           {% csrf_token %}
           {{ graphUploadForm.as_ul }}
           <input name = "Derivatives"  type="submit" value="Upload Graph(s)" class="button" onclick="showSpinner();"/>
