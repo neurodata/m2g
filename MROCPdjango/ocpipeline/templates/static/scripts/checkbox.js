@@ -33,11 +33,14 @@ function moreThanChecked(form, num)
       }
       if (count > num) { // breaks loop
         fadeEffect.init('emailID', 1); // In fader.js
-        document.getElementById("emailID").hidden = "";
+        document.getElementById("emailID").disabled = "";
+        document.getElementById("emailBoxID").disabled = "";
         return true;
       }
     }
   }
+  document.getElementById("emailID").disabled = "disabled";
+  document.getElementById("emailBoxID").disabled = "disabled";
   fadeEffect.init('emailID', 0);
   return false;
 }

@@ -33,7 +33,11 @@ Download biologically derived graphs
 
 {% block content %}
 
-<script type="text/javascript" src="{% static 'scripts/fader.js' %}"> </script>
+<script type="text/javascript" src="{% static 'scripts/fader.js' %}">
+
+
+  
+</script>
 
 <script type="text/javascript" src="{% static 'scripts/checkbox.js' %}"> </script>
 
@@ -105,9 +109,9 @@ Examples of how to load graphs using igraph can be found <a href="{{"igraph"|get
           </select>
 
           {# Email field for long running jobs #}
-          <div id="emailID"  class="errormsg" style="opacity: 0;" hidden="hidden">
+          <div id="emailID" class="errormsg" style="opacity: 0;" disabled="disabled">
           <label for="email" id="emailLabelID"><b>Email:</b></label>
-          <input type="email" id="emailBoxID" name="email" class="tb" size="35">
+          <input type="email" id="emailBoxID" name="email" class="tb" size="35" disabled="disabled">
             You must enter an email address for quantity of graphs you would like to download.
           </div>
 
