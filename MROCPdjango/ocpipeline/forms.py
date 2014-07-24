@@ -119,7 +119,7 @@ class BuildGraphForm(forms.Form):
 
   def __init__(self, *args, **kwargs):
     super(BuildGraphForm, self).__init__(*args, **kwargs)
-    self.fields['Project_Type'].widget.attrs['disabled'] = 'disabled' # radio / checkbox
+    self.fields["Project_Type"].widget.attrs["disabled"] = "disabled" # radio / checkbox
 
 
 class ConvertForm(forms.Form):

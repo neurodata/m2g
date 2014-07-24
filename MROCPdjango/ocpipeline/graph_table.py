@@ -13,7 +13,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
 
 # graph_table.py
 # Created by Disa Mhembere on 2014-02-13.
@@ -26,19 +25,10 @@ from django.utils.safestring import mark_safe
 from urlparse import urlparse
 
 class GraphTable(tables.Table):
-  # temp = """
-  # {% load mkrange %}
-  # {% mkrange 0 31 as ds_factor_scales %}
-  # <select id="id{{ sc }}">
-  #   {% for sc in ds_factor_scales %}
-  #     <option value="{{ sc }}"> {{ sc }} </option>
-  #   {% endfor %}
-  # </select>
-  # """
-
   selection = tables.CheckBoxColumn(accessor="pk", orderable=False, visible=True,
-                  attrs={"th":{"OnClick":"toggleOthers(this.parentNode.parentNode.\
-                               parentNode.parentNode.parentNode)"}})
+                  attrs={"th":{"OnClick":"toggleOthers(this.parentNode.parentNode.parentNode.\
+                      parentNode.parentNode); moreThanChecked(document.\
+                      getElementById('Human').getElementsByTagName('form')[0], 1);"}})
 
   #factor = tables.TemplateColumn(temp, "factor_template", orderable=False, visible=True, accessor="pk",)
 
