@@ -57,6 +57,8 @@ urlpatterns = patterns('ocpipeline.views',
     url(r'^contact/$', 'contact', name='contact'),
     url(r'^jobfailure/$', 'jobfailure', name='failure-page'),
     url(r'^igraph/$', 'igraph_examples', name='igraph-examples'),
+
+    url(r'^data/human/$', 'human_data_descrip', name='human-data-descrip'),
     (r'^accounts/', include('registration.backends.default.urls')),
     # Examples
     # url(r'^$', 'myapp.views.home', name='home'),
