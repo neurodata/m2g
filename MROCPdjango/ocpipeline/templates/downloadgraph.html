@@ -33,11 +33,7 @@ Download biologically derived graphs
 
 {% block content %}
 
-<script type="text/javascript" src="{% static 'scripts/fader.js' %}">
-
-
-  
-</script>
+<script type="text/javascript" src="{% static 'scripts/fader.js' %}"></script>
 
 <script type="text/javascript" src="{% static 'scripts/checkbox.js' %}"> </script>
 
@@ -84,6 +80,10 @@ Examples of how to load graphs using igraph can be found <a href="{{"igraph"|get
       <h3> {{ genus.0.html_name }} </h3>
 
       {% if genus.1.form_name == "human" %}
+        <p>
+          <b>For a data description of the brain graph attributes click <a href="{{"data/human"|getScriptPrefix}}">here</a>.</b>
+        </p>
+
         <form action="" method="post" enctype="multipart/form-data" name="" onchange="moreThanChecked(this, 1);"
               onsubmit="return verifyEmail(this, 1);">
       {% else %}

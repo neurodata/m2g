@@ -322,6 +322,8 @@ def contact(request):
 def igraph_examples(request):
   return render_to_response("igraph_examples.html", context_instance=RequestContext(request))
 
+def human_data_descrip(request):
+  return render_to_response("human_data_descrip.html", context_instance=RequestContext(request))
 
 #################################################################################
 def zipProcessedData(request):
