@@ -26,7 +26,7 @@ from urlparse import urlparse
 
 class GraphTable(tables.Table):
   selection = tables.CheckBoxColumn(accessor="pk", orderable=False, visible=True,
-                  attrs={"th":{"OnClick":"toggleOthers(this.parentNode.parentNode.parentNode.\
+                  attrs={"th":{"onclick":"toggleOthers(this.parentNode.parentNode.parentNode.\
                       parentNode.parentNode); moreThanChecked(document.\
                       getElementById('Human').getElementsByTagName('form')[0], 1);"}})
 
