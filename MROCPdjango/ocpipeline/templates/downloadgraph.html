@@ -40,10 +40,10 @@ Download biologically derived graphs
 <p>Thanks to all who provided the raw data from which we derived these graphs. Every graph
 is annotated with a <code> source</code> attribute that denotes its origin.<br/>
 Graphs are provided by default in <a href="http://graphml.graphdrawing.org/" target="blank">graphML
-</a> format. <i>This is the only format that supports attributes.</i><br>
+</a> format. <i>This is the only format that supports attributes.</i><br/>
 
 Consider using the <a href="{{"convert"|getScriptPrefix}}">graph conversion api</a> for post-download conversion.
-Examples of how to load graphs using igraph can be found <a href="{{"igraph"|getScriptPrefix}}">here</a>. <br>
+Examples of how to load graphs using igraph can be found <a href="{{"igraph"|getScriptPrefix}}">here</a>. <br/>
 
 <b>Downloaded zip files must be unzipped using Linux/Mac unzip.</b>
 
@@ -110,13 +110,11 @@ Examples of how to load graphs using igraph can be found <a href="{{"igraph"|get
 
           {# Email field for long running jobs #}
           <div id="emailID" class="errormsg" style="opacity: 0;" disabled="disabled">
-          <label for="email" id="emailLabelID"><b>Email:</b></label>
-          <input type="email" id="emailBoxID" name="email" class="tb" size="35" disabled="disabled">
-            You must enter an email address for quantity of graphs you would like to download.
+            <label for="emailBoxID" id="emailLabelID"><b>Email:</b></label>
+            <input type="email" id="emailBoxID" name="email" class="tb" size="35" disabled="disabled">
+              You must enter an email address for quantity of graphs you would like to download.
           </div>
-
         {% endif %}
-
       </form>
     </div>
   {%endfor%}
