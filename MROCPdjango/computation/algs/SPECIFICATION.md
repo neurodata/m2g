@@ -24,7 +24,7 @@ Document the file
 3. Format your code in as readable as manner as possible. For example:
   - Good code formatting:
   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.c}
-  main(int riguing,char**acters)
+  main(int riguing, char** acters)
   {
     int mod1 = 4796;
     int mod2 = 275;
