@@ -46,8 +46,15 @@ Submission checklist
 FAQ
 ===
 - Q: What languages are accepted?
-- A: We accept all languages. *Caveat:* We do prefer, languages like `python`, `java, `C`, `C++`, `R` as they are ubiquitous and free.
+- A: We accept all languages. *Caveat:* We do prefer, languages like `python, java, C, C++, R` as they are ubiquitous and free.
 
 - Q: My code is written in a framework like [FlashGraph](https://github.com/icoming/FlashGraph), [PowerGraph](http://graphlab.org/projects/source.html), [Giraph](http://giraph.apache.org/) -- can I still contribute?
 - A: Yes, we do accept common no-cost parallel code.
 
+Implemented algorithms
+======================
+- Degree
+- Triangle count
+- Clustering coefficient/Transitivity
+- Eigenvalue decomposition
+- Scan 1 statistic
