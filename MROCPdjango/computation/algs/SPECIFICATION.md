@@ -3,7 +3,15 @@ Collaboration specification for code contribution to MROCP
 
 This document specifies standards to ensure code contributed to the repository is integrated with ease into the pipeline and attributed to all graphs produced in [graphML](http://graphml.graphdrawing.org/) format. Any derivative work by others that uses your algorithm must in turn cite you as you specify as shown in the `Code Spec` section.
 
-Simply create a folder within this directory that includes your file(s). **NOTE**: If your code is licensed with a license incompatible with the [Apache version 2.0 license](http://www.apache.org/licenses/LICENSE-2.0) then your code cannot be included in MROCP. Once you complete **and test** your algorithm please submit a [pull request](https://help.github.com/articles/using-pull-requests).
+Simply create a folder within this directory that includes your file(s). **NOTE**: If your code is licensed with a license incompatible with the [Apache version 2.0 license](http://www.apache.org/licenses/LICENSE-2.0) then your code cannot be included in MROCP. Once you complete **and test** your algorithm please submit a [pull request](https://help.github.com/articles/using-pull-requests). <br>
+
+**NOTE:** The [graphML](http://graphml.graphdrawing.org/) format will only accepte attributes of type:
+(a) string e.g. "val1"
+(b) numerical e.g 1, 3.32, 4E-2
+(c) boolean e.g True, False
+(d) lists/vectors of type *a, b, c* 
+
+No other formats are permitted.
 
 An example of an algorithm written in `C++` is provided in the `example_alg` directory. Please see this example if confused about any of the instructioins provided below.
 
