@@ -5,15 +5,15 @@ This document specifies standards to ensure code contributed to the repository i
 
 Simply create a folder within this directory that includes your file(s). **NOTE**: If your code is licensed with a license incompatible with the [Apache version 2.0 license](http://www.apache.org/licenses/LICENSE-2.0) then your code cannot be included in MROCP. Once you complete **and test** your algorithm please submit a [pull request](https://help.github.com/articles/using-pull-requests). <br>
 
-**NOTE:** The [graphML](http://graphml.graphdrawing.org/) format will only accepte attributes of type:
-(a) string e.g. "val1"
-(b) numerical e.g 1, 3.32, 4E-2
-(c) boolean e.g True, False
-(d) lists/vectors of type *a, b, c* 
+**NOTE:** The [graphML](http://graphml.graphdrawing.org/) format will only accepte attributes of type: <br>
+(a) string e.g. "val1" <br>
+(b) numerical e.g 1, 3.32, 4E-2 <br>
+(c) boolean e.g True, False <br>
+(d) lists/vectors of type *a, b, c* <br>
 
 No other formats are permitted.
 
-An example of an algorithm written in `C++` is provided in the `example_alg` directory. Please see this example if confused about any of the instructioins provided below.
+An example of an algorithm written in `C++` is provided in the `./example_alg` directory. Please see this example if confused about any of the instructioins provided below.
 
 Code Spec
 =========
@@ -54,10 +54,10 @@ Submission checklist
 FAQ
 ===
 - Q: What languages are accepted?
-- A: We accept all languages. *Caveat:* We do prefer, languages like `python, java, C, C++, R` as they are ubiquitous and free.
+  * A: We accept all languages. *Caveat:* We do prefer, languages like `python, java, C, C++, R` as they are ubiquitous and free.
 
 - Q: My code is written in a framework like [FlashGraph](https://github.com/icoming/FlashGraph), [PowerGraph](http://graphlab.org/projects/source.html), [Giraph](http://giraph.apache.org/) -- can I still contribute?
-- A: Yes, we do accept common no-cost parallel code.
+  * A: Yes, we do accept common no-cost parallel code.
 
 Implemented algorithms
 ======================
