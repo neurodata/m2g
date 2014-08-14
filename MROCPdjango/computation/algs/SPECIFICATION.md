@@ -3,7 +3,7 @@ Collaboration specification for code contribution to MROCP
 
 This document specifies standards to ensure code contributed to the repository is integrated with ease into the pipeline and attributed to all graphs produced in [graphML](http://graphml.graphdrawing.org/) format. Any derivative work by others that uses your algorithm must in turn cite you as you specify as shown in the `Code Spec` section.
 
-Simply create a folder within this directory that includes your file(s). **NOTE**: If your code is licensed with a license incompatible with the [Apache version 2.0 license](http://www.apache.org/licenses/LICENSE-2.0) then your code cannot be included in MROCP. Once you complete **and test** your algorithm please submit a [pull request](https://help.github.com/articles/using-pull-requests). <br>
+Simply (i)`fork`/`clone`this repository , then (ii) create a folder within this directory that includes your file(s). **NOTE**: If your code is licensed with a license incompatible with the [Apache version 2.0 license](http://www.apache.org/licenses/LICENSE-2.0) then your code cannot be included in MROCP. Once you complete **and test** your algorithm please submit a [pull request](https://help.github.com/articles/using-pull-requests). <br>
 
 **NOTE:** The [graphML](http://graphml.graphdrawing.org/) format will only accepte attributes of type: <br>
 (a) string e.g. "val1" <br>
@@ -13,7 +13,7 @@ Simply create a folder within this directory that includes your file(s). **NOTE*
 
 No other formats are permitted.
 
-An example of an algorithm written in `C++` is provided in the `./example_alg` directory. Please see this example if confused about any of the instructioins provided below.
+An example of an algorithm written in `C++` is provided in the [./example_alg](https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjango/computation/algs/example_alg/example.cpp) directory. Please see this example if confused about any of the instructioins provided below.
 
 Code Spec
 =========
@@ -44,6 +44,11 @@ Document the file
   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.c}
   main(int riguing,char**acters){puts(1[acters-~!(*(int*)1[acters]%4796%275%riguing)]);} 
   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Submission
+==========
+
+Currently the only way to submit code is to `fork`/`clone` the repository. Add your code and sumbit a `pull request`. We may change this in the future if need be.
 
 Submission checklist
 --------------------
