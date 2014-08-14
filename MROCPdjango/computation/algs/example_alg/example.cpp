@@ -57,9 +57,6 @@ std::vector<size_t> compute_out_degree(std::string graph_file_name) {
   ret.resize(deg_map.size());
   for (std::map<size_t, size_t>::iterator it = deg_map.begin(); it!=deg_map.end(); ++it) {
     ret[it->first] = it->second; 
-#if 0
-    std::cout << it->first << " => " << it->second << '\n';
-#endif 
   }
   return ret;
 }
@@ -71,5 +68,12 @@ int main(int argc, char** argv)
     fprintf(stderr, "**NOTE:** The format of `graph_file_name` must be in edge list format\n");
     exit(0);
   }
-  compute_out_degree(argv[1]);
+  std::vector<size_t> v = compute_out_degree(argv[1]);
+
+  // Its nice to see some visual evidence the algorithm test succeeded
+  uint32_t MAX_PRINT_VAL = v.size() < 20 ? v.size() : 20; 
+    printf("Printing (partial) degree vector: \n");
+    for (size_t i = 0; i < MAX_PRINT_VAL; i++) {
+      printf("Vertex: %lu => %lu\n", i, v[i]);
+    } 
 }
