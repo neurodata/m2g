@@ -32,7 +32,7 @@ Document the file
 3. Format your code in as readable as manner as possible. For example:
   - Good code formatting:
   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.c}
-  main(int riguing,char**acters)
+  main(int riguing, char** acters)
   {
     int mod1 = 4796;
     int mod2 = 275;
@@ -53,9 +53,16 @@ Submission checklist
 
 FAQ
 ===
-Q: What languages are accepted?
-A: We accept all languages. *Caveat:* We do prefer, languages like `python`, `java, `C/C++`, `R` as they are ubiquitous and free.
+- Q: What languages are accepted?
+- A: We accept all languages. *Caveat:* We do prefer, languages like `python, java, C, C++, R` as they are ubiquitous and free.
 
-Q: My code is written in a framework like FlashGraph, PowerGraph, Giraph -- can I still contribute?
-A: Yes, we do accept common no-cost parallel code.
+- Q: My code is written in a framework like [FlashGraph](https://github.com/icoming/FlashGraph), [PowerGraph](http://graphlab.org/projects/source.html), [Giraph](http://giraph.apache.org/) -- can I still contribute?
+- A: Yes, we do accept common no-cost parallel code.
 
+Implemented algorithms
+======================
+- Degree
+- Triangle count
+- Clustering coefficient/Transitivity
+- Eigenvalue decomposition
+- Scan 1 statistic
