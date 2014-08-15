@@ -1,4 +1,4 @@
-<!-- 
+<!--
  Copyright 2014 Open Connectome Project (http://openconnecto.me)
 
  Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,8 +24,8 @@
   {% block bigheading %} <FONT COLOR='#ff0000'>JOB FAILURE!</FONT> {% endblock bigheading %}
 
   {% block content %}
-    <p>
-      <b><FONT COLOR='#ff0000'>{{msg}}</FONT></b>
+    <p class=errormsg>
+      <b>{{msg | safe}}</b>
     </p>
 
   {% endblock content%}

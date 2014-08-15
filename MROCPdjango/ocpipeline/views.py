@@ -513,10 +513,13 @@ The process may take several hours (dependent on graph size). If your job fails 
 If you do not see an email in your <i>Inbox</i> check the <i>Spam</i> folder and add <code>jhmrocp@cs.jhu.edu</code> to your safe list.
 """
             return HttpResponseRedirect(get_script_prefix()+'success')
-
           else:
-
+            print "Beginning interactive download ..."
             temp = scale_convert(selected_files, dl_format, ds_factor, ATLASES)
+            if isinstance(temp, str):
+              return render_to_response("job_failure.html",
+                  {"msg":temp}, context_instance=RequestContext(request))
+
             # TODO: Possibly use django.http.StreamingHttpResponse for this
             wrapper = FileWrapper(temp)
             response = HttpResponse(wrapper, content_type='application/zip')
@@ -590,6 +593,7 @@ def scale_convert(selected_files, dl_format, ds_factor, ATLASES, email=None, dwn
       for fn in selected_files:
         # No matter what we need a temp file
         tmpfile = tempfile.NamedTemporaryFile("w", delete=False)
+        print "Creating temp file %s ..." % tmpfile.name
         tmpfile.close()
 
         # Downsample only valid for *BIG* human brains!
@@ -605,7 +609,7 @@ def scale_convert(selected_files, dl_format, ds_factor, ATLASES, email=None, dwn
 
         # Write to `some` format
         if dl_format == "mm":
-          igraph_io.write_mm(g, tmpfile.nklame)
+          igraph_io.write_mm(g, tmpfile.name)
         else:
           g.write(tmpfile.name, format=dl_format)
 
@@ -626,6 +630,9 @@ Hello,\n\nYour most recent job failed to complete.
 
       sendJobFailureEmail(email, msg)
       return
+    else:
+      return 'An error has occured while processing your request. Please send an email to \
+              <a href="mailto:jhu.mrocp@cs.jhu.edu">jhu.mrocp@cs.jhu.edu</a> with the details of your request.'
 
   if email:
     # Email user of job finished
