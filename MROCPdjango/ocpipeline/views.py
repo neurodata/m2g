@@ -15,7 +15,6 @@
 # limitations under the License.
 #
 
-
 """
 @author : Disa Mhembere
 @organization: Johns Hopkins University
@@ -56,7 +55,7 @@ from forms import PasswordResetForm
 from forms import DownloadGraphsForm
 from forms import DownloadQueryForm
 
-""" Data Processing imports"""
+## Data Processing imports ##
 import paths
 from mrcap import gengraph as gengraph
 from mrcap.utils.downsample import downsample
@@ -78,15 +77,14 @@ from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 from django.shortcuts import redirect
 
-""" Auth imports """
-from django.contrib.auth.decorators import login_required
-
-####################
-## Graph Analysis ##
-####################
+## Graph Analysis imports ##
 import computation.composite.invariants as cci
 import scipy.io as sio
 from nibabel import load as nib_load
+
+## Auth imports ##
+from django.contrib.auth.decorators import login_required
+
 # Registration
 from django.contrib.auth import authenticate, login, logout
 
@@ -634,7 +632,7 @@ Hello,\n\nYour most recent job failed to complete.
     sendJobCompleteEmail(email, dwnld_loc)
     return
 
-  return temp # Case where no its an iteractive download
+  return temp # Case where its an iteractive download
 
 #########################################
 #	*******************		#
