@@ -826,7 +826,7 @@ def convert(request, webargs=None):
       err_msg = "Completed with errors. View Data at: %s\n. Here are the errors:%s" % (dwnldLoc, err_msg)
       return HttpResponse(err_msg)
 
-    return HttpResponse ( "Converted files available for download at " + dwnldLoc + " . The directory " +
+    return HttpResponse ("Converted files available for download at " + dwnldLoc + " . The directory " +
             "may be empty if you try to convert from, and to the same format.") # change to render of a page with a link to data result
 
   else:
