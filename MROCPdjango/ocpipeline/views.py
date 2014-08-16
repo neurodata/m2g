@@ -185,7 +185,7 @@ def buildGraph(request):
       if request.session["graphsize"] == "big" and not request.session["email"]:
         return render_to_response(
           "buildgraph.html",
-          {"buildGraphform": form, "error_msg": "Email address must be provided when processing big graphs due to http timeout's possibly occuring."},
+          {"buildGraphform": form, "error_msg": "Email address must be provided when processing big graphs due to http timeout's possibly occurring."},
           context_instance=RequestContext(request)
           )
 
@@ -631,8 +631,8 @@ Hello,\n\nYour most recent job failed to complete.
       sendJobFailureEmail(email, msg)
       return
     else:
-      return 'An error has occured while processing your request. Please send an email to \
-              <a href="mailto:jhu.mrocp@cs.jhu.edu">jhu.mrocp@cs.jhu.edu</a> with the details of your request.'
+      return 'An error occurred while processing your request. Please send an email to \
+              <a href="mailto:jhmrocp@cs.jhu.edu">jhmrocp@cs.jhu.edu</a> with the details of your request.'
 
   if email:
     # Email user of job finished
