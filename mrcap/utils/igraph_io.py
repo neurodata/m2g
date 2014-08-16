@@ -34,8 +34,12 @@ def write_mm(g, fn):
   f = open(fn, "w")
   f.write("%d %d %d\n" % (g.vcount(), g.vcount(), g.ecount()))
 
-  for e in g.es():
-    f.write("%d %d %.4f\n" % (e.source, e.target, e["weight"]))
+  if g.is_weighted():
+    for e in g.es():
+      f.write("%d %d %.4f\n" % (e.source, e.target, e["weight"]))
+  else:
+    for e in g.es():
+      f.write("%d %d 1\n" % (e.source, e.target))
 
   f.close()
 
