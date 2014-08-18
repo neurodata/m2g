@@ -275,8 +275,8 @@ def processInputData(request):
                                 request.session['Gfn'], request.session['graphInvariants'])
 
   if request.session['graphsize'] == 'big':
-    dwnldLoc = request.META['wsgi.url_scheme'] + '://' + \
-                    request.META['HTTP_HOST'] + request.session['usrDefProjDir'].replace(' ','%20')
+    dwnldLoc = "http://mrbrain.cs.jhu.edu" + \
+                    + request.session['usrDefProjDir'].replace(' ','%20')
     sendJobCompleteEmail(request.session['email'], dwnldLoc)
 
   return HttpResponseRedirect(get_script_prefix()+'confirmdownload')
@@ -292,9 +292,10 @@ def confirmDownload(request):
       if dataReturn == 'vd': # View data directory
         dataUrlTail = request.session['usrDefProjDir']
 
-        dwnldLoc = request.META['wsgi.url_scheme'] + '://' + \
-                    request.META['HTTP_HOST'] + dataUrlTail.replace(' ','%20')
+        #dwnldLoc = request.META['wsgi.url_scheme'] + '://' + \
+                    #request.META['HTTP_HOST'] + dataUrlTail.replace(' ','%20')
 
+        dwnldLoc = "http://mrbrain.cs.jhu.edu" + dataUrlTail.replace(' ','%20')
         return HttpResponseRedirect(dwnldLoc)
 
       elif dataReturn == 'dz': #Download all as zip
@@ -397,8 +398,9 @@ def upload(request, webargs=None):
       invariant_fns = runInvariants(request.session['invariants'],\
                       request.session['Gfn'], request.session['graphInvariants'])
 
-    dwnldLoc = request.META['wsgi.url_scheme'] + '://' + \
-                    request.META['HTTP_HOST'] + userDefProjectDir.replace(' ','%20')
+    #dwnldLoc = request.META['wsgi.url_scheme'] + '://' + \
+                    #request.META['HTTP_HOST'] + userDefProjectDir.replace(' ','%20')
+    dwnldLoc = "http://mrbrain.cs.jhu.edu" + userDefProjectDir.replace(' ','%20')
 
     return HttpResponse ( "Files available for download at " + dwnldLoc) # change to render of a page with a link to data result
 
@@ -493,8 +495,8 @@ def download(request, webargs=None):
           if (len(selected_files) > MAX_NUM_GRAPH_DLS and request.POST.has_key("human")):
             data_dir = os.path.join(settings.MEDIA_ROOT, "tmp",
                                    strftime("download_%a%d%b%Y_%H.%M.%S/", localtime()))
-            dwnld_loc = request.META['wsgi.url_scheme'] + "://" + \
-                    request.META["HTTP_HOST"] + data_dir.replace(" ","%20")
+            dwnld_loc = "http://mrbrain.cs.jhu.edu" + data_dir.replace(" ","%20")
+            #dwnld_loc = request.META['wsgi.url_scheme'] + "://" + request.META["HTTP_HOST"] + data_dir.replace(" ","%20")
 
             sendEmail(request.POST.get("email"), "Job launch notification",
                       "Your download request was received. You will receive an email when it completes.\n\n")
@@ -554,8 +556,9 @@ If you do not see an email in your <i>Inbox</i> check the <i>Spam</i> folder and
 
 def asyncInvCompute(request):
 
-  dwnldLoc = request.META['wsgi.url_scheme'] + '://' + \
-                    request.META['HTTP_HOST'] + request.session['dataDir'].replace(' ','%20')
+  #dwnldLoc = request.META['wsgi.url_scheme'] + '://' +  request.META['HTTP_HOST'] 
+  dwnldLoc = "http://mrbrain.cs.jhu.edu" + \
+                    request.session['dataDir'].replace(' ','%20')
 
   for graph_fn in request.session['uploaded_graphs']:
     try:
@@ -724,8 +727,10 @@ If you do not see an email in your <i>Inbox</i> check the <i>Spam</i> folder and
         err_msg = convert_graph(invariant_fns["out_graph_fn"], "graphml",
                 request.session['graphInvariants'], *webargs.split('/')[2].split(','))
 
-      dwnldLoc = request.META['wsgi.url_scheme'] + '://' + \
-                    request.META['HTTP_HOST'] + dataDir.replace(' ','%20')
+      #dwnldLoc = request.META['wsgi.url_scheme'] + '://' + \
+       #             request.META['HTTP_HOST'] + dataDir.replace(' ','%20')
+
+      dwnldLoc =  "http://mrbrain.cs.jhu.edu" + dataDir.replace(' ','%20')
       if err_msg:
         err_msg = "Completed with errors. View Data at: %s\n. Here are the errors:%s" % (dwnldLoc, err_msg)
         return HttpResponse(err_msg)
@@ -779,8 +784,10 @@ def convert(request, webargs=None):
         err_msg = convert_graph(fn, form.cleaned_data['input_format'],
                         convertFileSaveLoc, *form.cleaned_data['output_format'])
 
-      dwnldLoc = request.META['wsgi.url_scheme'] + '://' + \
-                    request.META['HTTP_HOST'] + convertFileSaveLoc.replace(' ','%20')
+      #dwnldLoc = request.META['wsgi.url_scheme'] + '://' + \
+      #              request.META['HTTP_HOST'] + convertFileSaveLoc.replace(' ','%20')
+
+      dwnldLoc = "http://mrbrain.cs.jhu.edu" + convertFileSaveLoc.replace(' ','%20')
 
       if (err_msg):
         err_msg = "Your job completed with errors. The result can be found at %s\n. Here are the errors:%s" % (dwnldLoc, err_msg)
@@ -819,8 +826,10 @@ def convert(request, webargs=None):
       err_msg = convert_graph(fn, inFormat,
                         convertFileSaveLoc, *outFormat)
 
-    dwnldLoc = request.META['wsgi.url_scheme'] + '://' + \
-                    request.META['HTTP_HOST'] + convertFileSaveLoc.replace(' ','%20')
+    #dwnldLoc = request.META['wsgi.url_scheme'] + '://' + \
+    #                request.META['HTTP_HOST'] + convertFileSaveLoc.replace(' ','%20')
+
+    dwnldLoc = "http://mrbrain.cs.jhu.edu" + convertFileSaveLoc.replace(' ','%20') 
 
     if err_msg:
       err_msg = "Completed with errors. View Data at: %s\n. Here are the errors:%s" % (dwnldLoc, err_msg)
