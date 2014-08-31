@@ -49,7 +49,7 @@ def unzip_file(fn):
   tmpfile = tempfile.NamedTemporaryFile("w", delete=False)
   tmpfile.write(f.read(f.namelist()[0])) # read into mem
   tmpfile.close()
-  print "Unzip of %s too %f sec ..." % (fn, (time()-start))
+  print "Unzip of %s took %f sec ..." % (fn, (time()-start))
   return tmpfile.name
 
 
