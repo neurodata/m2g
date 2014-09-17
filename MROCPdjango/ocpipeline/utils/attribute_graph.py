@@ -53,7 +53,7 @@ def attribute_graph(graph_fns, attrs, overwrite):
 
     print "Writing %s back to disk ...." % out_fn
     
-    tmpfile = tempfile.NamedTemporaryFile("w", delete=False)
+    tmpfile = tempfile.NamedTemporaryFile("w", delete=False, dir="/data/pytmp")
     tmpfile.write("\n".join(text)) # read into mem
     tmpfile.close()
 

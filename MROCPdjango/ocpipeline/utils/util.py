@@ -101,7 +101,7 @@ def writeBodyToDisk(data, saveDir):
 
   @return a list with the names of the uplaoded files
   '''
-  tmpfile = tempfile.NamedTemporaryFile()
+  tmpfile = tempfile.NamedTemporaryFile(dir="/data/pytmp")
   tmpfile.write(data)
   tmpfile.flush()
   tmpfile.seek(0)

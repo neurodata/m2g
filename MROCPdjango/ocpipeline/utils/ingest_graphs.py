@@ -28,7 +28,6 @@ from glob import glob
 import MySQLdb
 from contextlib import closing
 import igraph
-import tempfile
 import zipfile
 from time import time
 from ocpipeline.settings_secret import DATABASES as db_args

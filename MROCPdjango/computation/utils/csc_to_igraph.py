@@ -68,7 +68,7 @@ def csc_to_r_igraph(g):
   import tempfile
   from r_utils import r_igraph_load_graph
 
-  t = tempfile.NamedTemporaryFile()
+  t = tempfile.NamedTemporaryFile(dir="/data/pytmp")
   py_ig = csc_to_igraph(g)
   py_ig.write(t.name , format="edgelist")
   r_ig = r_igraph_load_graph(t.name, gformat="edgelist")
