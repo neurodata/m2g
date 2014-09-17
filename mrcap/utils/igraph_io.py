@@ -24,6 +24,7 @@ import zipfile
 import tempfile
 import os
 from igraph import read as igraph_read
+from django.conf import settings
 
 def write_mm(g, fn):
   """
@@ -46,7 +47,7 @@ def write_mm(g, fn):
 def unzip_file(fn):
   start = time()
   f = zipfile.ZipFile(fn, "r", allowZip64=True)
-  tmpfile = tempfile.NamedTemporaryFile("w", delete=False)
+  tmpfile = tempfile.NamedTemporaryFile("w", delete=False, dir="/data/pytmp")
   tmpfile.write(f.read(f.namelist()[0])) # read into mem
   tmpfile.close()
   print "Unzip of %s took %f sec ..." % (fn, (time()-start))
@@ -55,6 +56,7 @@ def unzip_file(fn):
 
 def read_arbitrary(fn, informat="graphml"):
   tmpfile_name = ""
+  print "Attempting igraph arbirary read of : %s ..." % fn
   if os.path.splitext(fn)[1] == ".zip":
     try:
       tmpfile_name = unzip_file(fn)

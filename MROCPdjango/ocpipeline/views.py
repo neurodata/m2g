@@ -586,6 +586,8 @@ completed data here: %s.\nPlease check these and try again.\n\n
 ######################################################
 
 def scale_convert(selected_files, dl_format, ds_factor, ATLASES, email=None, dwnld_loc=None, zip_fn=None):
+  # Debug
+  print "Entering scale function ..."
   try:
     if dl_format == "graphml" and ds_factor == 0:
       temp = zipper.zipfiles(selected_files, use_genus=True, zip_out_fn=zip_fn)
@@ -595,8 +597,9 @@ def scale_convert(selected_files, dl_format, ds_factor, ATLASES, email=None, dwn
 
       for fn in selected_files:
         # No matter what we need a temp file
-        tmpfile = tempfile.NamedTemporaryFile("w", delete=False)
-        print "Creating temp file %s ..." % tmpfile.name
+        print "Creating temp file ..."
+        tmpfile = tempfile.NamedTemporaryFile("w", delete=False, dir="/data/pytmp")
+        print "Temp file %s created ..." % tmpfile.name
         tmpfile.close()
 
         # Downsample only valid for *BIG* human brains!
@@ -604,7 +607,9 @@ def scale_convert(selected_files, dl_format, ds_factor, ATLASES, email=None, dwn
 
         if ds_factor and get_genus(fn) == "human":
           if isinstance(ds_factor, int):
+            print "downsampling to factor %d" % ds_factor
             g = downsample(igraph_io.read_arbitrary(fn, "graphml"), ds_factor)
+            print "downsample complete"
           else:
             g = downsample(igraph_io.read_arbitrary(fn, "graphml"), atlas=nib_load(ATLASES[ds_factor]))
         else:
@@ -625,6 +630,7 @@ def scale_convert(selected_files, dl_format, ds_factor, ATLASES, email=None, dwn
         os.remove(tmpfn)
 
   except Exception, msg:
+    print "An exception was thrown and caught with message %s!" % msg
     if email:
       msg = """
 Hello,\n\nYour most recent job failed to complete.

@@ -29,7 +29,6 @@ from time import time
 import create_atlas
 import nibabel as nib
 import zipfile
-import tempfile
 
 def downsample(g, factor=0, atlas=None):
   """

@@ -34,7 +34,7 @@ def zipFilesFromFolders(dirName = None, multiTuple = []):
   @deprecated
   @param dirName: any folder
   '''
-  temp = tempfile.TemporaryFile()
+  temp = tempfile.TemporaryFile(dir="/data/pytmp")
   myzip = zipfile.ZipFile(temp ,'w', zipfile.ZIP_DEFLATED, allowZip64=True)
 
   if (multiTuple):
@@ -80,7 +80,7 @@ def zipup(directory, zip_file, todisk=None):
   @param todisk: specify path if you want the zip written to disk as well
   @type todisk: string
   '''
-  zip_file = tempfile.TemporaryFile()
+  zip_file = tempfile.TemporaryFile(dir="/data/pytmp")
 
   zipf = zipfile.ZipFile(zip_file, 'w', compression=zipfile.ZIP_DEFLATED, allowZip64=True)
   root_len = len(os.path.abspath(directory))
@@ -121,7 +121,7 @@ def zipfiles(files, use_genus, zip_out_fn=None, gformat=None, todisk=None):
     if not os.path.exists(zip_file):
       os.makedirs(os.path.dirname(zip_file))
   else:
-    zip_file = tempfile.TemporaryFile() # Don't close before done since auto delete
+    zip_file = tempfile.TemporaryFile(dir="/data/pytmp") # Don't close before done since auto delete
 
   zipf = zipfile.ZipFile(zip_file, 'w', compression=zipfile.ZIP_DEFLATED, allowZip64=True)
   for fn in files:
