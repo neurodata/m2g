@@ -191,7 +191,9 @@ class DownloadGraphsForm(forms.Form):
             ('lgl','lgl'),('pajek', 'pajek'), ('dot', 'dot'), ('gml', 'gml'),
             ('leda', 'leda'), ('mm', 'Market Matrix')]
 
-  dl_format = forms.ChoiceField(required=True, widget=Select(attrs={"title":"Only graphml will contain all vertex, edge and graph attributes"}), choices=FORMATS, label="Format")
+  dl_format = forms.ChoiceField(required=True, widget=Select(
+    attrs={"title":"Only graphml will contain all vertex, edge and graph attributes"}),
+                                choices=FORMATS, label="Format")
 
 class DownloadQueryForm(forms.Form):
   '''
@@ -203,8 +205,8 @@ class DownloadQueryForm(forms.Form):
       choices=(('all', 'All'), ('name', 'Graph name'), ('genus','Genus'), ('region', 'Region'),
       ('numedge_gt', 'Edge count greater than'), ('numedge_lt', 'Edge count less than'),
       ('numvertex_gt','Vertex count greater than'), ('numvertex_lt','Vertex count less than'),
-      ('attribute', 'Graph/Vertex/Edge Attribute'), ('sensor', 'Sensor'), ('project', 'Project'), ('source', 'Source'),),
-      label="Search type", error_messages={"required":"You must specify search type"})
+      ('attribute', 'Graph/Vertex/Edge Attribute'), ('sensor', 'Sensor'), ('project', 'Project'),
+      ('source', 'Source'),), label="Search type", error_messages={"required":"You must specify search type"})
 
   # Select size of graph
   query = forms.CharField(max_length=512, required=True, widget=forms.TextInput(attrs={"class":"tb", "size":"100"}))
