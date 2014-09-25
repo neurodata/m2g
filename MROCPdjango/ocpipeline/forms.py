@@ -207,4 +207,4 @@ class DownloadQueryForm(forms.Form):
       label="Search type", error_messages={"required":"You must specify search type"})
 
   # Select size of graph
-  query = forms.CharField(max_length=512, required=True, widget=forms.TextInput(attrs={"class":"tb"}))
+  query = forms.CharField(max_length=512, required=True, widget=forms.TextInput(attrs={"class":"tb", "size":"100"}))

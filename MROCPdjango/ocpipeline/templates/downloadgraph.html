@@ -45,7 +45,7 @@ Graphs are provided by default in <a href="http://graphml.graphdrawing.org/" tar
 Consider using the <a href="{{"convert"|getScriptPrefix}}">graph conversion api</a> for post-download conversion.
 Examples of how to load graphs using igraph can be found <a href="{{"igraph"|getScriptPrefix}}">here</a>. <br/>
 
-<b>Downloaded zip files must be unzipped using Linux/Mac unzip.</b>
+<b>Downloaded zip files must be unzipped using Linux unzip.</b>
 
 </p>
 
@@ -132,15 +132,9 @@ Examples of how to load graphs using igraph can be found <a href="{{"igraph"|get
         {% render_table query_result %}
         <input name ="search results"  type="submit" value="Download selected" class="button" onclick="showSpinner();"/>
 
-        Downsample factor:
-        {% mkrange 0 26 as ds_factor_scales %}
-          <select name="ds_factor" title="Applicable to human brains only. This downsamples the graph with each 3D entry in MORTON Z-index space sampled down at ratio 3*factor^3:1">
-          {% for sc in ds_factor_scales %}
-            <option value="{{ sc }}"> {{ sc }} </option>
-            <option value="desikan"> Desikan Atlas</option>
-            <option value="slab"> slab Atlas</option>
-          {% endfor %}
-        </select>
+
+
+
       </form>
   </div>
 
