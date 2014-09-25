@@ -132,15 +132,9 @@ Examples of how to load graphs using igraph can be found <a href="{{"igraph"|get
         {% render_table query_result %}
         <input name ="search results"  type="submit" value="Download selected" class="button" onclick="showSpinner();"/>
 
-
-    
-
+            {# TODO: Bug somewhere that necessitates me doing the manually #}
             <label for="id_dl_format">Format:</label>
-
-
-
             <select id="id_dl_format" name="dl_format" title="Only graphml will contain all vertex, edge and graph attributes">
-
               <option value="graphml">graphml</option>
               <option value="ncol">ncol</option>
               <option value="edgelist">edgelist</option>
@@ -151,11 +145,6 @@ Examples of how to load graphs using igraph can be found <a href="{{"igraph"|get
               <option value="leda">leda</option>
               <option value="mm">Market Matrix</option>
             </select>
-
-
-
-
-
       </form>
   </div>
 
