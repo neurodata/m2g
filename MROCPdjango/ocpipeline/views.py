@@ -417,7 +417,6 @@ def download(request, webargs=None):
   ATLASES = {"desikan": os.path.join(settings.ATLAS_DIR, "desikan_atlas.nii") ,
               "slab": os.path.join(settings.ATLAS_DIR, "slab_atlas.nii")}
 
-
   if request.method == "POST":
     if request.POST.keys()[0] == "query_type": # Means we are doing a search
       form = DownloadQueryForm(request.POST)
@@ -470,14 +469,14 @@ def download(request, webargs=None):
           table.set_html_name("Search Results")
 
         return render_to_response("downloadgraph.html", {"genera":[],
-          "query":DownloadQueryForm(), "query_result":table}, context_instance=RequestContext(request))
+          "query_result":table}, context_instance=RequestContext(request))
       else:
         return HttpResponseRedirect(get_script_prefix()+"download")
 
     else: # We just want to download specific files
 
       form = DownloadGraphsForm(request.POST)
-
+      
       if form.is_valid():
         selected_files = request.POST.getlist("selection")
         ds_factor = 0 if not request.POST.get("ds_factor") else request.POST.get("ds_factor")
@@ -556,7 +555,7 @@ If you do not see an email in your <i>Inbox</i> check the <i>Spam</i> folder and
 
 def asyncInvCompute(request):
 
-  #dwnldLoc = request.META['wsgi.url_scheme'] + '://' +  request.META['HTTP_HOST'] 
+  #dwnldLoc = request.META['wsgi.url_scheme'] + '://' +  request.META['HTTP_HOST']
   dwnldLoc = "http://mrbrain.cs.jhu.edu" + \
                     request.session['dataDir'].replace(' ','%20')
 
@@ -835,7 +834,7 @@ def convert(request, webargs=None):
     #dwnldLoc = request.META['wsgi.url_scheme'] + '://' + \
     #                request.META['HTTP_HOST'] + convertFileSaveLoc.replace(' ','%20')
 
-    dwnldLoc = "http://mrbrain.cs.jhu.edu" + convertFileSaveLoc.replace(' ','%20') 
+    dwnldLoc = "http://mrbrain.cs.jhu.edu" + convertFileSaveLoc.replace(' ','%20')
 
     if err_msg:
       err_msg = "Completed with errors. View Data at: %s\n. Here are the errors:%s" % (dwnldLoc, err_msg)
