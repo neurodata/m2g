@@ -69,14 +69,14 @@
     {% block programmatic %}
       <div id="programmatic">
         <h2> Graphs may also be built programmatically </h2>
-        The base url for building graphs is <pre>http://mrbrain.cs.jhu.edu/disa/upload/</pre>
+        The base url for building graphs is <pre>http://mrbrain.cs.jhu.edu/graph-services/upload/</pre>
 
         <h3> Single graph </h3>
         <p>
         The example <a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjango/examples/uploadsubj.py"
         target="blank"> uploadsubj.py</a> can be used as follows from a terminal session:
         </p>
-        <code>python uploadsubj.py http://mrbrain.cs.jhu.edu/disa/upload/progmatic/site/subj/sess/scan/s YOUR_FIBER.dat YOUR_ROI.xml YOUR_ROI.raw -i cc,tri,ss1,mad,deg,eig</code>
+        <code>python uploadsubj.py http://mrbrain.cs.jhu.edu/graph-services/upload/progmatic/site/subj/sess/scan/s YOUR_FIBER.dat YOUR_ROI.xml YOUR_ROI.raw -i cc,tri,ss1,mad,deg,eig</code>
         <p>
          The parameter after YOUR_scan can either be <code>s</code> or <code>b</code>, but not both. Using <code>s</code> or <code>small</code> builds a small graph
          (70 x 70 vertices) while <code>b</code> or <code>big</code> builds a big graph on the order of 10 M x 10 M vertices. <br/>
@@ -105,7 +105,7 @@
 
         From within a terminal/command line session, it can be used as follows: <br/>
 
-        <code>python upload_multi.py http://mrbrain.cs.jhu.edu/disa/upload/YOUR_project/YOUR_site/YOUR_subject/YOUR_session s fiber_tract_dirctory roi_dirctory -i cc,tri,ss1,mad,deg,eig</code><br/>
+        <code>python upload_multi.py http://mrbrain.cs.jhu.edu/graph-services/upload/YOUR_project/YOUR_site/YOUR_subject/YOUR_session s fiber_tract_dirctory roi_dirctory -i cc,tri,ss1,mad,deg,eig</code><br/>
 
         This call would build graphs for multiple scans and compute all invariants noted in the <code>-i</code> flag.
         The example assumes the following:
