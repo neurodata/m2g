@@ -32,8 +32,8 @@ import webbrowser
 def main():
 
   parser = argparse.ArgumentParser(description='Upload a single or multiple graphs. If multiple please zip into a single dir. \
-                                  Base url -> http://www.mrbrain.cs.jhu.edu/disa/graphupload/')
-  parser.add_argument('url', action="store", help='url is http://mrbrain.cs.jhu.edu/disa/graphupload/')
+                                  Base url -> http://mrbrain.cs.jhu.edu/graph-services/graphupload/')
+  parser.add_argument('url', action="store", help='url is http://mrbrain.cs.jhu.edu/graph-services/graphupload/')
   parser.add_argument('webargs', action="store", help='comma separated list (no spaces) of invariant types. E.g cc,tri,deg,mad,eig,ss1 for \
                       clustering coefficient, triangle count, degree, maximum average degree, eigen-pairs & scan statistic')
   parser.add_argument('file', action="store", help ='Single .mat graph or a Zipped directory with one or more graphs')

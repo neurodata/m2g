@@ -16,7 +16,7 @@
 # Created by Disa Mhembere
 # Email: disa@jhu.edu
 #!/bin/bash
-echo "Example downloads ./testdata directory from http://mrbrain.cs.jhu.edu/data/projects/disa/OCPprojects/testdata/ ..."
+echo "Example downloads ./testdata directory from http://mrbrain.cs.jhu.edu/data/ocp/perm/testdata/ ..."
 echo "Example script running ..."
 
 # Exit script on first error
@@ -44,7 +44,7 @@ then
   echo "$FIBER exists ..."
 else
   echo "Downloading $FIBER file..."
-  wget --output-document=$FIBER http://mrbrain.cs.jhu.edu/data/projects/disa/OCPprojects/testdata/test_fiber.dat
+  wget --output-document=$FIBER http://mrbrain.cs.jhu.edu/data/ocp/perm/testdata/test_fiber.dat 
 fi
 
 if [ -f $ROI_RAW ]
@@ -52,7 +52,7 @@ then
   echo "$ROI_RAW exists ..."
 else
   echo "Downloading $ROI_RAW file..."
-  wget --output-document=$ROI_RAW http://mrbrain.cs.jhu.edu/data/projects/disa/OCPprojects/testdata/test_roi.raw
+  wget --output-document=$ROI_RAW http://mrbrain.cs.jhu.edu/data/ocp/perm/testdata/test_roi.raw 
 fi
 
 if [ -f $ROI_XML ]
@@ -60,7 +60,7 @@ then
   echo "$ROI_XML exists ..."
 else
   echo "Downloading $ROI_XML file..."
-  wget --output-document=$ROI_XML http://mrbrain.cs.jhu.edu/data/projects/disa/OCPprojects/testdata/test_roi.xml
+  wget --output-document=$ROI_XML http://mrbrain.cs.jhu.edu/data/ocp/perm/testdata/test_roi.xml 
 fi
 
 # BIG
