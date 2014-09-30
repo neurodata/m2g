@@ -42,8 +42,8 @@ def getFiberID(fiberfn):
 
 def main():
 
-  parser = argparse.ArgumentParser(description='Upload a multiple subjects to MROCP via a single dir that must match bg1/MRN. Base url -> http://www.mrbrain.cs.jhu.edu/disa/upload')
-  parser.add_argument('url', action="store", help='url must be http://mrbrain.cs.jhu.edu/disa/upload/{projectName}/{site}/{subject}/{session}')
+  parser = argparse.ArgumentParser(description='Upload a multiple subjects to MROCP via a single dir that must match bg1/MRN. Base url -> http://mrbrain.cs.jhu.edu/graph-services/upload')
+  parser.add_argument('url', action="store", help='url must be http://mrbrain.cs.jhu.edu/graph-services/upload/{projectName}/{site}/{subject}/{session}')
   parser.add_argument('graphsize', action="store", help= 'size of the graph. s OR b where s= smallgraph OR b = biggraph')
   parser.add_argument('fiberDir', action="store", help = 'the path of the directory containing fiber tract files')
   parser.add_argument('roiDir', action="store", help = 'the path of the directory containing ROI files')

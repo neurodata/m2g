@@ -30,9 +30,9 @@ import webbrowser
 
 def main():
 
-  parser = argparse.ArgumentParser(description='Upload and convert a graph from graphml,ncol,edgelist,lgl,pajek,graphdb,numpy,mat to graphml,ncol,edgelist,lgl,pajek,dot,gml,leda object. Base url -> http://mrbrain.cs.jhu.edu/disa/convert')
+  parser = argparse.ArgumentParser(description='Upload and convert a graph from graphml,ncol,edgelist,lgl,pajek,graphdb,numpy,mat to graphml,ncol,edgelist,lgl,pajek,dot,gml,leda object. Base url -> http://mrbrain.cs.jhu.edu/graph-services/convert')
 
-  parser.add_argument('url', action="store", help='url must be in the form http://mrbrain.cs.jhu.edu/disa/convert/{inFormat}/{outFormat}. Example {inFormat}: graphml | ncol | edgelist | lgl | pajek | graphdb | numpy | mat \
+  parser.add_argument('url', action="store", help='url must be in the form http://mrbrain.cs.jhu.edu/graph-services/convert/{inFormat}/{outFormat}. Example {inFormat}: graphml | ncol | edgelist | lgl | pajek | graphdb | numpy | mat \
                       .{outFormat} can be a comma separated list of the following e.g graphml,ncol,edgelist,lgl,pajek,dot,gml,leda')
 
   parser.add_argument('fileToConvert', action="store", help="The file you want to convert. Can be a single graph or a zip file with multiple graphs. Zip graphs and not folders or failure will occur!")

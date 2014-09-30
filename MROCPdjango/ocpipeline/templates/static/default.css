@@ -113,7 +113,7 @@ font: normal monospace;
 
 /* footer */
 .footer {
-        background: url(/disa/static/images/bgfooter.gif) repeat-x;
+        background: url(/graph-services/static/images/bgfooter.gif) repeat-x;
         color: #456;
         font: bold 1em sans-serif;
         line-height: 39px;
