@@ -48,6 +48,8 @@ def convert_graph(gfn, informat, save_dir, *outformats):
       g = csc_to_igraph(loadAnyMat(gfn))
     elif informat == "npy":
       g = csc_to_igraph(np.load(gfn).item())
+    elif informat == "attredge":
+      g = attr_edge_to_igraph(gfn) # TODO
     else:
       err_msg = "[ERROR]: Unknown format '%s'. Please check format and re-try!" % informat
       print err_msg
