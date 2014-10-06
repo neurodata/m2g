@@ -31,7 +31,7 @@
     <p>
     This interface currently only supports conversion between a set of the following formats as available:
     </p>
-    <div id="formats"> <code>graphml, ncol, edgelist, lgl, pajek, graphdb, dot, gml, leda, npy, mat</code> </div>
+    <div id="formats"> <code>graphml, ncol, edgelist, lgl, pajek, graphdb, dot, gml, leda, npy, mat, attredge</code> </div>
 
     <p>
     Note that any graph attribute that is not representable in the format of conversion will be ignored during conversion.
@@ -40,10 +40,12 @@
     <strong> <font color='#2373ff'> DO NOT zip a directory </font>, instead zip the files themselves into an archive.</strong>
     </p>
 
-    <font color='#ff0000'>{{err_msg}} </font>
+    <div class=errormsg>
+      {{err_msg | safe}}
+    </div>
 
     <form class="nostyle" method="post" enctype="multipart/form-data" name="loadForm"
-          onsubmit="return Validate(this,['zip','npy','mat','graphml','ncol','edge', 'edgelist','lgl','pajek','graphdb', '', 'xml']);">
+          onsubmit="return Validate(this,['zip','npy','mat','graphml','ncol','edge', 'edgelist','lgl','pajek','graphdb', '', 'xml', 'attredge']);">
       {% csrf_token %}
       <p>{{convertForm}}</p>
       <input name = "Convert button"  type="submit" value="Convert All" class="button" onclick="showSpinner();"/>

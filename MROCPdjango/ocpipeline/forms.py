@@ -136,11 +136,12 @@ class ConvertForm(forms.Form):
 
   IN_FORMATS = [('graphml', 'graphml'), ('ncol','ncol'), ('edgelist', 'edgelist'),
             ('lgl','lgl'),('pajek', 'pajek'), ('graphdb', 'graphdb'),
-            ('npy', 'numpy format (npy)'), ('mat', 'MATLAB format (mat)')]
+            ('npy', 'numpy format (npy)'), ('mat', 'MATLAB format (mat)'), 
+            ('attredge', 'Attributed edgelist')]
 
   input_format = forms.ChoiceField(required=True, widget=Select, choices=IN_FORMATS, label="Input format")
 
-  OUT_FORMATS = IN_FORMATS[:-3]
+  OUT_FORMATS = IN_FORMATS[:-4]
   OUT_FORMATS.extend([('dot', 'dot'), ('gml', 'gml'), ('leda', 'leda')])
 
   output_format = forms.MultipleChoiceField(required=True, \

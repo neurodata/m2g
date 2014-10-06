@@ -28,6 +28,7 @@ import os
 import igraph
 from computation.utils.csc_to_igraph import csc_to_igraph
 from computation.utils.file_util import loadAnyMat
+from computation.utils.attredge_adapter import attredge_to_igraph
 
 def convert_graph(gfn, informat, save_dir, *outformats):
   """
@@ -49,9 +50,9 @@ def convert_graph(gfn, informat, save_dir, *outformats):
     elif informat == "npy":
       g = csc_to_igraph(np.load(gfn).item())
     elif informat == "attredge":
-      g = attr_edge_to_igraph(gfn) # TODO
+      g = attredge_to_igraph(gfn)
     else:
-      err_msg = "[ERROR]: Unknown format '%s'. Please check format and re-try!" % informat
+      err_msg = "[ERROR]: Unknown format '%s'. Please check format and retry!" % informat
       print err_msg
       return err_msg
   except Exception, err_msg:
