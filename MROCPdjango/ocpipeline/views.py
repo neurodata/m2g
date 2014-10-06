@@ -476,7 +476,7 @@ def download(request, webargs=None):
     else: # We just want to download specific files
 
       form = DownloadGraphsForm(request.POST)
-      
+
       if form.is_valid():
         selected_files = request.POST.getlist("selection")
         ds_factor = 0 if not request.POST.get("ds_factor") else request.POST.get("ds_factor")
@@ -795,7 +795,7 @@ def convert(request, webargs=None):
       dwnldLoc = "http://mrbrain.cs.jhu.edu" + convertFileSaveLoc.replace(' ','%20')
 
       if (err_msg):
-        err_msg = "Your job completed with errors. The result can be found at %s\n. Here are the errors:%s" % (dwnldLoc, err_msg)
+        err_msg = "Your job completed with errors. The result can be found <a href=\"%s\" target=\"blank\">here</a>.<br> Message %s" % (dwnldLoc, err_msg)
         return render_to_response(
         'convertupload.html',
         {'convertForm': form, 'err_msg': err_msg+"\n"},
