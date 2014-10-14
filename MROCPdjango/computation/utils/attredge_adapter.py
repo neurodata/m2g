@@ -57,8 +57,8 @@ def attredge_to_igraph(gfn):
   f = open(gfn, "rb")
   line = f.readline()
   comm = line[:1]
-  header = map(strip_string,line[1:].split(","))
-  assert comm == "#", "First line must be comment with attr description .."
+  header = map(strip_string, line[1:].split(","))
+  assert comm == "#", "First line must be a comment with attribute description .."
   
   attributes = map(strip_string, header[2:])
   print "There are %d attributes in the graph: %s" % (len(attributes), attributes)
