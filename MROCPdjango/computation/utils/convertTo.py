@@ -50,16 +50,18 @@ def convert_graph(gfn, informat, save_dir, *outformats):
     elif informat == "npy":
       g = csc_to_igraph(np.load(gfn).item())
     elif informat == "attredge":
+      #import pdb; pdb.set_trace()
       g = attredge_to_igraph(gfn)
     else:
       err_msg = "[ERROR]: Unknown format '%s'. Please check format and retry!" % informat
       print err_msg
-      return err_msg
+      return (None, err_msg)
   except Exception, err_msg:
     print err_msg
-    return "[ERROR]: "+str(err_msg)
+    return (None, "[ERROR]: "+str(err_msg))
 
   out_err_msg = ""
+  fn = ""
   for fmt in outformats:
     if fmt in ["graphml", "ncol", "edgelist", "lgl", "pajek", "dot", "gml", "leda"]:
       fn = os.path.join(save_dir, os.path.splitext(os.path.basename(gfn))[0]+"."+fmt)
@@ -68,4 +70,4 @@ def convert_graph(gfn, informat, save_dir, *outformats):
     else:
       out_err_msg += "File conversion format '%s' unknown and omitted ...\n" % fmt
 
-  return out_err_msg
+  return (fn, out_err_msg)
