@@ -51,15 +51,15 @@ def get_edge(line, edge_dir=None):
     line[1] = int(line[1])
   #else:
   #  print "No idea how to deal with undirected right now"
-  return line 
+  return line
 
-def attredge_to_igraph(gfn): 
+def attredge_to_igraph(gfn):
   f = open(gfn, "rb")
   line = f.readline()
   comm = line[:1]
   header = map(strip_string, line[1:].split(","))
   assert comm == "#", "First line must be a comment with attribute description .."
-  
+
   attributes = map(strip_string, header[2:])
   print "There are %d attributes in the graph: %s" % (len(attributes), attributes)
   try:
@@ -76,9 +76,15 @@ def attredge_to_igraph(gfn):
 
   max_node = 0
 
+  #import pdb; pdb.set_trace() # TODO
+  #if not line.lstrip().startswith("#"):
   while (True):
     line = f.readline()
     if not line: break
+
+    #if line.lstrip().startswith("#"):
+
+
     if not line.isspace():
       edge = get_edge(line, directed)
       gnode = max(edge[0],edge[1])
@@ -110,7 +116,7 @@ def attredge_to_graphml(gfn):
 def main():
   parser = argparse.ArgumentParser(description="Convert an attributed \
       edgelist to an igraph object")
-  
+
   parser.add_argument("fn", action="store", help="Edgelist filename")
   result = parser.parse_args()
   ig = attredge_to_igraph(result.fn)

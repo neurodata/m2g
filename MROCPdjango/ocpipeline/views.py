@@ -726,10 +726,10 @@ If you do not see an email in your <i>Inbox</i> check the <i>Spam</i> folder and
                         request.session['graphInvariants'], inGraphFormat)
       print 'Computing Invariants for annoymous project %s complete...' % graph_fn
 
-      err_msg=""
+      err_msg = ""
+      out_fn = ""
       if len(webargs.split('/')) > 2:
-        err_msg = "" # __init__
-        err_msg = convert_graph(invariant_fns["out_graph_fn"], "graphml",
+        out_fn, err_msg = convert_graph(invariant_fns["out_graph_fn"], "graphml",
                 request.session['graphInvariants'], *webargs.split('/')[2].split(','))
 
       #dwnldLoc = request.META['wsgi.url_scheme'] + '://' + \
@@ -784,9 +784,10 @@ def convert(request, webargs=None):
       else:
         uploadedFiles = [savedFile]
 
-      err_msg=""
+      err_msg = ""
+      outfn = ""
       for fn in uploadedFiles:
-        err_msg = convert_graph(fn, form.cleaned_data['input_format'],
+        outfn, err_msg = convert_graph(fn, form.cleaned_data['input_format'],
                         convertFileSaveLoc, *form.cleaned_data['output_format'])
 
       #dwnldLoc = request.META['wsgi.url_scheme'] + '://' + \
@@ -827,18 +828,22 @@ def convert(request, webargs=None):
         uploadedFiles = glob(os.path.join(saveDir, "*")) # get the uploaded file names
 
     err_msg = ""
+    outfn = ""
     for fn in uploadedFiles:
-      err_msg = convert_graph(fn, inFormat,
+      outfn, err_msg = convert_graph(fn, inFormat,
                         convertFileSaveLoc, *outFormat)
-
-    #dwnldLoc = request.META['wsgi.url_scheme'] + '://' + \
-    #                request.META['HTTP_HOST'] + convertFileSaveLoc.replace(' ','%20')
 
     dwnldLoc = "http://mrbrain.cs.jhu.edu" + convertFileSaveLoc.replace(' ','%20')
 
     if err_msg:
       err_msg = "Completed with errors. View Data at: %s\n. Here are the errors:%s" % (dwnldLoc, err_msg)
       return HttpResponse(err_msg)
+
+    elif len(webargs.split("/")) > 2:
+      if (outfn and len(outFormat) == 1):
+        return HttpResponse(dwnldLoc + "/" + outfn.split("/")[-1])
+      else:
+        return HttpResponse(dwnldLoc)
 
     return HttpResponse ("Converted files available for download at " + dwnldLoc + " . The directory " +
             "may be empty if you try to convert from, and to the same format.") # change to render of a page with a link to data result
