@@ -99,6 +99,7 @@ class FiberReader:
         fiberHeader = numpy.fromfile(self._fileobj, dtype=self.fiberHeaderFormat, count=1)
         fiberLength = fiberHeader['nFiberLength']
         path = numpy.fromfile(self._fileobj, dtype=self.fiberDataFormat, count=fiberLength)
+        import pdb; pdb.set_trace()
         self.currentFiber += 1
         return Fiber(fiberHeader, path)
 
