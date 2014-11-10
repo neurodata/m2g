@@ -28,14 +28,12 @@ def r_igraph_triangles(g, save_fn=None):
   """
   Compute local triangle count of graph g and save as necessary
 
-  Positional arguments
-  ====================
-  g - The igraph loaded via Rpy2 so an R object
-
-  Optional arguments
-  ==================
-  save_fn - the filename you want to use to save it. If not provided
+  @param g: The igraph loaded via Rpy2 so an R object
+  
+  @param save_fn: the filename you want to use to save it. If not provided
   the graph adds a tri count attribute to all nodes and returns.
+
+  @return: The graph with the tri vertex attribute appended
   """
 
   triangles = robjects.r("""

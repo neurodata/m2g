@@ -25,16 +25,14 @@ from computation.utils.r_utils import r_igraph_set_vertex_attr
 
 def r_igraph_clust_coeff(g, save_fn=None):
   """
-  Compute clustering coefficient of graph g and save as necessary
+  Compute clustering coefficient/transitivity of graph g 
+  and save as necessary
 
-  Positional arguments
-  ====================
-  g - The igraph loaded via Rpy2 so an R object
+  @param g: The igraph loaded via Rpy2 so an R object
 
-  Optional arguments
-  ==================
-  save_fn - the filename you want to use to save it. If not provided
+  @param save_fn: the filename you want to use to save it. If not provided
   the graph adds a clustcoeff attribute to all nodes and returns.
+  @return: the graph with the clustcoeff attribute appended
   """
 
   clustcoeff = robjects.r("""

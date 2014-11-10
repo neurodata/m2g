@@ -33,19 +33,15 @@ def r_igraph_eigs(g, k, return_eigs=False, save_fn=None, real=True, lcc=False):
 
   Positional arguments
   ====================
-  g - The igraph graph loaded via Rpy2 i.e. an R object
-  k - the number of eigenpairs to compute. Must be < # nodes - 2
+  @param g: The igraph graph loaded via Rpy2 i.e. an R object
+  @param k: the number of eigenpairs to compute. Must be < # nodes - 2
 
-  Optional arguments
-  ==================
-  save_fn - must an 2 item list/tuple with 2 names OR None
-  return_eigs - boolean on whether to just return the eigenpairs or the whole graph
-  real - Compute only the real part
-  lcc - use the largest connected component only
+  @param return_eigs:  boolean on whether to just return the eigenpairs or the whole graph
+  @param save_fn:  must an 2 item list/tuple with 2 names OR None
+  @param real: Compute only the real part
+  @param lcc: use the largest connected component only
 
-  Returns
-  =======
-  A graph with eigs as graph attributes OR actual eigenpairs
+  @return: A graph with eigs as graph attributes OR actual eigenpairs
   """
 
   esd = robjects.r("""
@@ -117,14 +113,10 @@ def get_str_eigvects(idx):
   """
   Used for mapping to get eigenvectors that correspond to each vertex of the graph
 
-  Positional arguments
-  ====================
-  idx - a 2-tuple that gives the indexes of the eigenvector 1-d flattened matrix that correspond
+  @param idx: a 2-tuple that gives the indexes of the eigenvector 1-d flattened matrix that correspond
   to the particular vertex
 
-  Returns
-  =======
-  A vector i.e the eigenvector (latent position) for that vertex cast to a string
+  @return: A vector i.e the eigenvector (latent position) for that vertex cast to a string
   """
   global gl_eigvects
   return "["+", ".join(map(cut, (gl_eigvects[idx[0]:idx[1]])))+"]"
@@ -133,8 +125,6 @@ def cut(num):
   """
   Shorten the format of a number to 2 decimal places plus exponent
 
-  Positional arguments
-  ====================
-  num - the number to be shorten
+  @param num: the number to be shorten
   """
   return "{0:.2e}".format(num)

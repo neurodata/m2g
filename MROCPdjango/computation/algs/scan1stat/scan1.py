@@ -27,14 +27,12 @@ def r_igraph_scan1(g, save_fn=None):
   """
   Compute the scan statistic 1 of graph g and save as necessary
 
-  Positional arguments
-  ====================
-  g - The igraph loaded via Rpy2 so an R object
+  @param g: The igraph loaded via Rpy2 so an R object
 
-  Optional arguments
-  ==================
-  save_fn - the filename you want to use to save it. If not provided
+  @param save_fn:  the filename you want to use to save it. If not provided
   the graph adds a scan1 attribute to all nodes and returns.
+
+  @return: The graph with the scan1 attribute appended
   """
   scanstat1 = robjects.r("""
   require(igraph)
