@@ -27,15 +27,13 @@ def r_igraph_degree(g, mode="total", save_fn=None):
   """
   Compute degree of graph g and save as necessary
 
-  Positional arguments
-  ====================
-  g - The igraph loaded via Rpy2 so an R object
+  @param g: The igraph loaded via Rpy2 so an R object
 
-  Optional arguments
-  ==================
-  mode - the type of degree. Default is an undirected i.e. in-degree + out degree
-  save_fn - the filename you want to use to save it. If not provided
-  the graph adds a degree attribute to all nodes and returns.
+  @param mode: the type of degree. Default is an undirected i.e. in-degree + out degree
+  @param save_fn: the filename you want to use to save it. If not provided
+      the graph adds a degree attribute to all nodes and returns.
+
+  @return: the graph with the degree attribute set.
   """
 
   deg = robjects.r("""

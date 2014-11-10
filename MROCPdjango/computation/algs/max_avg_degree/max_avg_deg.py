@@ -28,17 +28,9 @@ def r_igraph_max_ave_degree(g):
   Compute local triangle count of graph g and save as necessary
   *Global graph attributes can only be stored in the graph*
 
-  Positional arguments
-  ====================
-  g - The igraph graph loaded via Rpy2 i.e. an R object
+  @param g: The igraph graph loaded via Rpy2 i.e. an R object
 
-  Optional arguments
-  ==================
-  save_fn - the filename you want to use to save it. If not provided
-
-  Returns
-  =======
-  g - Same graph an input but with added invariant as an attribute
+  @return: Same graph an input but with added invariant as an attribute
   """
 
   mad = r_igraph_get_attr(g, "eigvals", "g") # See if we already have computed eigenvalues for the graph
