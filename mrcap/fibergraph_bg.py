@@ -14,119 +14,138 @@
 # limitations under the License.
 #
 
-# Class holding big fibergraphs
+# Read a fiber file and generate the corresponding sparse graph
 # @author Randal Burns, Disa Mhembere
 
-import math
-import itertools
-from time import time
+import argparse
+import sys
 import os
-from collections import defaultdict
-
-import numpy as np
-import igraph
-import scipy.io as sio
-
-from mrcap.fiber import Fiber
 import mrcap.roi as roi
-from mrcap.fibergraph import _FiberGraph
-from mrcap.atlas import Atlas
-import zindex
+from mrcap.fiber import FiberReader
+from time import time
+from computation.utils.cmdline import parse_dict
 
-# Class functions documented in fibergraph.py
+def genGraph(infname, outfname, roixmlname=None, roirawname=None, bigGraph=False, outformat="graphml", numfibers=0, centroids=True, graph_attrs={}, **atlases):
+  """
+  Generate a sparse igraph from an MRI file based on input and output names.
+  Outputs a graphml formatted graph by default
 
-class FiberGraph(_FiberGraph):
-  def __init__(self, matrixdim, rois, mask):
+  positional args:
+  ================
+  infname - file name of _fiber.dat file
+  outfname - Dir+fileName of output .mat file
 
-    # Regions of interest
-    self.rois = rois
-    self.edge_dict = defaultdict(int) # Will have key=(v1,v2), value=weight
+  optional args:
+  ==============
+  roixmlname - file name of _roi.xml file
+  roirawname - file name of _roi.raw file
+  bigGraph - boolean True or False on whether to process a bigraph=True or smallgraph=False
+  numfibers - the number of fibers
 
-    # Brainmask
-#    self.mask = mask
+  read_shape - **NOTE** Temp arg used compensate for incorrect reading of the adj mat dims
+  from the xml. Will disappear in future releases.
+  """
 
-    # Round up to the nearest power of 2
-    xdim = int(math.pow(2,math.ceil(math.log(matrixdim[0],2))))
-    ydim = int(math.pow(2,math.ceil(math.log(matrixdim[1],2))))
-    zdim = int(math.pow(2,math.ceil(math.log(matrixdim[2],2))))
+  start = time()
+  # Determine size of graph to be processed i.e pick a fibergraph module to import
+  if bigGraph: from fibergraph_bg import FiberGraph
+  else: from fibergraph_sm import FiberGraph
 
-    # Need the dimensions to be the same shape for zindex
-    xdim = ydim = zdim = max(xdim, ydim, zdim)
+  # If these filenames are undefined then,
+  # assume that there are ROI files in ../roi
 
-    # largest value is -1 in each dimension, then plus one because range(10) is 0..9
-    self._maxval = zindex.XYZMorton([xdim-1,ydim-1,zdim-1]) + 1
+  if not(roixmlname and roirawname):
+    [ inpathname, inbasename ] = os.path.split ( infname )
+    inbasename = str(inbasename).rpartition ( "_" )[0]
+    roifp = os.path.normpath ( inpathname + "/../roi/" + inbasename )
+    roixmlname = roifp + "_roi.xml"
+    roirawname = roifp + "_roi.raw"
 
-    # ======================================================================== #
-    self.spcscmat = igraph.Graph(n=self._maxval, directed=False) # make new igraph with adjacency matrix to be (maxval X maxval)
-    self.edge_dict = defaultdict(int) # Will have key=(v1,v2), value=weight
-    # ======================================================================== #
+#  # Assume that there are mask files in ../mask
+#  maskfp = os.path.normpath ( inpathname + "/../mask/" + inbasename )
+#  maskxmlname = maskfp + "_mask.xml"
+#  maskrawname = maskfp + "_mask.raw"
 
-  #
-  # Destructor
-  #
-  def __del__(self):
-    pass
+  # Get the ROIs
 
-  def add (self, fiber):
-    """
-    Add edges associated with a single fiber of the graph
+  try:
+    roix = roi.ROIXML( roixmlname ) # Create object of type ROIXML
+    rois = roi.ROIData ( roirawname, roix.getShape() )
+  except:
+    raise Exception("ROI files not found at: %s, %s" % (roixmlname, roirawname))
 
-    positonal args:
-    ==============
-    fiber: the fiber whose edges you want to add
-    """
+  # Get the mask
+#  try:
+#    maskx = mask.MaskXML( maskxmlname )
+#    masks = mask.MaskData ( maskrawname, maskx.getShape() )
+#  except:
+#    print "Mask files not found at: ", maskxmlname, maskrawname
+#    sys.exit (-1)
 
-    # Get the set of voxels in the fiber
-    allvoxels = fiber.getVoxels()
+  # Create fiber reader
+  reader = FiberReader( infname )
 
-    # Voxels for the big graph
-    voxels = []
+  # Create the graph object
+  # get dims from reader
+  fbrgraph = FiberGraph ( reader.shape, rois, None )
 
-    for i in allvoxels:
-      xyz = zindex.MortonXYZ(i)
+  print "Parsing MRI studio file {0}".format ( infname )
 
-      # Use only the important voxels
-      roival = self.rois.get(xyz)
-      # if it's an roi and in the brain
-      if roival:
-        voxels.append(i)
+  # Print the high-level fiber information
+  print(reader)
 
-    voxel_edges = itertools.combinations((voxels), 2)
+  count = 0
 
-    for list_item in voxel_edges:
-      self.edge_dict[tuple(sorted(list_item))] += 1
+  # iterate over all fibers
+  for fiber in reader:
+    count += 1
+    # add the contribution of this fiber to the
+    fbrgraph.add(fiber)
+    if numfibers > 0 and count >= numfibers:
+      break
+    if count % 10000 == 0:
+      print ("Processed {0} fibers".format(count) )
 
-  def complete(self, add_centroids=True, graph_attrs={}, atlases={}):
-    super(FiberGraph, self).complete()
-    print "Annotating vertices with spatial position .."
-    self.spcscmat.vs["position"] = range(self._maxval) # Use position for
-    centroids_added = False
+  del reader
+  # Done adding edges
+  fbrgraph.complete(centroids, graph_attrs, atlases)
 
-    print "Deleting zero-degree nodes..."
-    zero_deg_nodes = np.where( np.array(self.spcscmat.degree()) == 0 )[0]
-    self.spcscmat.delete_vertices(zero_deg_nodes)
-    
-    for idx, atlas_name in enumerate(atlases.keys()):
-      self.spcscmat["Atlas_"+ os.path.splitext(os.path.basename(atlas_name))[0]+"_index"] = idx
-      print "Adding '%s' region numbers (and names) ..." % atlas_name
-      atlas = Atlas(atlas_name, atlases[atlas_name])
-      region = atlas.get_all_mappings(self.spcscmat.vs["position"])
-      self.spcscmat.vs["atlas_%d_region_num" % idx] = region[0]
+  fbrgraph.saveToIgraph(outfname, gformat=outformat)
 
-      if region[1]: self.spcscmat.vs["atlas_%d_region_name" % idx] = region[1]
-    
-      if add_centroids and (not centroids_added):
-        if (atlas.data.max() == 70): #FIXME: Hard coded Desikan small dimensions
-          centroids_added = True
-          print "Adding centroids ..."
-          cent_map = sio.loadmat(os.path.join(os.path.abspath(os.path.dirname(__file__)),"utils", "centroids.mat"))["centroids"]
+  del fbrgraph
+  print "\nGraph building complete in %.3f secs" % (time() - start)
+  return
 
-          keys = atlas.get_region_nums(self.spcscmat.vs["position"])
-          centroids = []
-          for key in keys:
-            centroids.append(str(list(cent_map[key-1]))) # -1 accounts for 1-based indexing
+def main ():
 
-          self.spcscmat.vs["centroid"] = centroids
+  parser = argparse.ArgumentParser( description="Read the contents of MRI Studio file and generate a sparse connectivity graph using igraph with default output format 'graphML'" )
+  parser.add_argument( "fbrfile", action="store" )
+  parser.add_argument( "output", action="store", help="resulting name of graph")
 
-    for key in graph_attrs.keys():
-      self.spcscmat[key] = graph_attrs[key]
+  parser.add_argument( "--outformat", "-f", action="store", default="graphml", help="The output graph format i.e. graphml, gml, dot, pajek etc..")
+  parser.add_argument( "--isbig", "-b", action="store_true", default=False, help="Is the graph big? If so use this flag" )
+  parser.add_argument( "--roixml", "-x", action="store", default=None, help="The full file name of roi xml file" )
+  parser.add_argument( "--roiraw", "-w", action="store", default=None, help="The full file name of roi raw file" )
+  parser.add_argument( "--numfib", "-n", action="store", type=int, default=-1, help="The number of fibers" )
+  parser.add_argument("-a", "--atlas", nargs="*", action="store", default=[], help ="Pass atlas filename(s). If regions are named then pass region \
+      naming file as well in the format: '-a atlas0 atlas1,atlas1_region_names atlas2 atlas3,atlas3_region_names' etc.")
+  parser.add_argument( "--centroids", "-C", action="store_true", help="Pass to *NOT* include centroids" )
+  parser.add_argument( "-G", "--graph_attrs", nargs="*", default=[], action="store", help="Add (a) graph attribute(s). Quote, use colon for key:value and spaces for multiple \
+      e.g 'attr1:value1' 'attr2:value2'")
+
+  result = parser.parse_args()
+
+  # Add atlases to a dict
+  atlas_d = {}
+  for atl in result.atlas:
+    sp_atl = atl.split(",")
+    if len(sp_atl) == 2: atlas_d[sp_atl[0]] = sp_atl[1]
+    elif len(sp_atl) == 1: atlas_d[sp_atl[0]] = None
+
+  # Parse dict
+  result.graph_attrs = parse_dict(result.graph_attrs)
+
+  genGraph ( result.fbrfile, result.output, result.roixml, result.roiraw, result.isbig, result.outformat, result.numfib, not result.centroids, result.graph_attrs, **atlas_d)
+
+if __name__ == "__main__":
+  main()
