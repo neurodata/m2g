@@ -23,12 +23,10 @@ import os
 from collections import defaultdict
 
 import igraph
-import nibabel as nib
 
 from mrcap.atlas import Atlas
 from mrcap.fibergraph import _FiberGraph
 from mrcap.fiber import Fiber
-import mrcap.roi as roi
 import scipy.io as sio
 import zindex
 
@@ -46,47 +44,10 @@ class FiberGraph(_FiberGraph):
     self.edge_dict = defaultdict(int) # Will have key=(v1,v2), value=weight
 
     # Get the maxval from the number of rois
-#    self._maxval = rois.maxval()
-    self._maxval = 70 # FIXME: Hardcoded
+    self._maxval = int(self.rois.data.max())+1 
 
     # list of list matrix for one by one insertion
     self.spcscmat = igraph.Graph(n=self._maxval, directed=False) # make new igraph with adjacency matrix to be (maxval X maxval)
-
-  def __del__(self):
-    """
-      Destructor
-    """
-    pass
-
-  def add (self, fiber):
-    """
-    Add edges associated with a single fiber of the graph
-
-    positonal args:
-    ==============
-    fiber: the fiber whose edges you want to add
-    """
-
-    # Get the set of voxels in the fiber
-    allvoxels = fiber.getVoxels()
-
-    roilist = []
-    # Use only the important voxels
-    for i in allvoxels:
-
-    # this is for the small graph version
-       xyz = zindex.MortonXYZ(i)
-       roival = self.rois.get(xyz)
-       # if it's an roi and in the brain
-       if roival:
-         roilist.append(roi.translate(roival))
-
-    roilist = set(roilist)
-    roi_edges = itertools.combinations((roilist),2)
-
-    for list_item in roi_edges:
-      self.edge_dict[tuple(sorted(list_item))] += 1
-
 
   def complete(self, add_centroids=True, graph_attrs={}, atlas={}):
     super(FiberGraph, self).complete()
