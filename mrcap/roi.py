@@ -52,7 +52,7 @@ class ROIData:
     self._fileobj = open(self._filename, mode='rb')
     self.data = np.fromfile(self._fileobj, dtype='>i4', count=dim[0]*dim[1]*dim[2])
     self.data = np.reshape ( self.data, dim, order='F' )
-    print self.data.shape
+    print "Data shape: ", self.data.shape
 
   def get ( self, index ):
     """Returns the ROI associated with a voxel.
@@ -82,8 +82,3 @@ def translate ( index ):
   else:
     return index - 1
 
-#   degraded.  Used to translate ROIs here.  Just give back the value.
-#    if ( self.data [ index[0], index[1], index[2] ] > 100 ):
-#      return self.data [ index[0], index[1], index[2] ] - 65
-#    else:
-#      return self.data [ index[0], index[1], index[2] ]
