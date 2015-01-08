@@ -77,7 +77,6 @@ class FiberReader:
 
         # Position at first fiber
         self._rewind()
-
         self.nextFiber()
 
     #
@@ -85,7 +84,7 @@ class FiberReader:
     #
     def _rewind(self):
         """Skip (or rewind to) the first fiber."""
-        # The first fiber is always at byte 128
+        # The first fiber is always at byte 128 # TODO: DM Verify still true
         self._fileobj.seek(128, os.SEEK_SET)
         self.currentFiber = 0
 
@@ -99,7 +98,6 @@ class FiberReader:
         fiberHeader = numpy.fromfile(self._fileobj, dtype=self.fiberHeaderFormat, count=1)
         fiberLength = fiberHeader['nFiberLength']
         path = numpy.fromfile(self._fileobj, dtype=self.fiberDataFormat, count=fiberLength)
-        import pdb; pdb.set_trace()
         self.currentFiber += 1
         return Fiber(fiberHeader, path)
 
@@ -120,8 +118,6 @@ class FiberReader:
     #
     def __del__(self):
         self._fileobj.close()
-        return;
-
 
 #
 #  Iterator class to support FiberReader
@@ -140,8 +136,6 @@ class FiberIterator:
             return fiber
         else:
             raise StopIteration
-
-
 
 #
 #  Fiber abstraction
@@ -168,7 +162,7 @@ class Fiber:
       #  This is corrected to match the logic of MRCAP
       # extract a path of vertices
       for fbrpt in self.path:
-
+          # DM : 2015 Necessary. The fiber gives us the exact voxel but we need a Vertex ID
           voxels.append ( zindex.XYZMorton ( [ int(fbrpt[0]), int(fbrpt[1]), int(fbrpt[2]) ] ))
 
       # eliminate duplicates
