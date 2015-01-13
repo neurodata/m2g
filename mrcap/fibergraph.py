@@ -14,13 +14,15 @@
 # limitations under the License.
 #
 
+from time import time
+import math
+import itertools
+
+import igraph
+
 from mrcap.fiber import Fiber
 import mrcap.roi as roi
 import zindex
-import math
-import itertools
-import igraph
-from time import time
 
 # Abstract class for big and small fibergraphs
 
