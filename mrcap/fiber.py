@@ -175,7 +175,7 @@ class Fiber:
           if vid:
               # The fiber gives us the exact voxel but we need a Vertex ID
               if g_is_full:
-                vidx.add(zindex.XYZMorton(voxel))
+                vids.add(zindex.XYZMorton(voxel))
               else:
                 vids.add(vid)
 

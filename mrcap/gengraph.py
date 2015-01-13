@@ -18,8 +18,6 @@
 # @author Randal Burns, Disa Mhembere
 
 import argparse
-import sys
-import os
 from mrcap.fiber import FiberReader
 import mrcap.roi as roi
 from time import time
@@ -34,31 +32,34 @@ def genGraph(infname, data_atlas_fn, outfname, bigGraph=False, \
   positional args:
   ================
   infname - file name of _fiber.dat file
-  outfname - Dir+fileName of output .mat file
+  data_atlas_fn - atlas defining the values contained at each voxel index
+  outfname - the name of the output graph
 
   optional args:
   ==============
-  roixmlname - file name of _roi.xml file
-  roirawname - file name of _roi.raw file
   bigGraph - boolean True or False on whether to process a bigraph=True or smallgraph=False
+  outformat - the graph format requested
   numfibers - the number of fibers to read/process
-
-  read_shape - **NOTE** Temp arg used compensate for incorrect reading of the adj mat dims
-  from the xml. Will disappear in future releases.
+  centroids - the centroids for the graph
+  graph_attrs - Dict with graph attributes to be added with key=attr_name, value=attr_value
+  atlases - a dict with key=atlas_fn, value=region_name_fn
   """
 
   start = time()
   # Determine size of graph to be processed i.e pick a fibergraph module to import
-  if bigGraph: from fibergraph_bg2 import FiberGraph
-  else: from fibergraph_sm2 import FiberGraph
+  if bigGraph: from fibergraph_bg import FiberGraph
+  else: from fibergraph_sm import FiberGraph
 
-  #try:
+  # This ensures there is at least one atlas by default now
+  if data_atlas_fn not in atlases:
+    print "Adding default atlas"
+    atlases[data_atlas_fn] = None
+
   rois = roi.ROIData(data_atlas_fn)
-  #except:
-    #raise Exception("Data atlas file not found at: %s" % data_atlas_fn)
 
   # Create fiber reader
   reader = FiberReader( infname )
+  if bigGraph: reader.set_full() # Tells the reader.getVids() to translate VIDs to Morton index
 
   # DM FIXME: Hacky -- we no longer read shape from fiber file so this happens :-/
   reader.shape = rois.data.shape
@@ -131,7 +132,7 @@ def main ():
   # Parse dict
   result.graph_attrs = parse_dict(result.graph_attrs)
 
-  genGraph (result.fbrfile, result.data_atlas, result.output, result.isbig, 
+  genGraph(result.fbrfile, result.data_atlas, result.output, result.isbig, 
       result.outformat, result.numfib, not result.centroids, result.graph_attrs, **atlas_d)
 
 if __name__ == "__main__":
