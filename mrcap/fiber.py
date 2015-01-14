@@ -21,6 +21,8 @@ import zindex
 
 import numpy
 
+DEBUG = False
+
 g_is_full = False # Are we making a full graph where 1 voxel == 1 vertex?
 
 class FiberReader:
@@ -102,8 +104,15 @@ class FiberReader:
         if self.currentFiber == self.fiberCount:
             return None
         fiberHeader = numpy.fromfile(self._fileobj, dtype=self.fiberHeaderFormat, count=1)
+        if DEBUG:
+          print "[Debug]: fiberHeader: ", fiberHeader
+
         fiberLength = fiberHeader['nFiberLength']
+        if DEBUG:
+          print "[Debug]: fiberLength:", fiberLength
+
         path = numpy.fromfile(self._fileobj, dtype=self.fiberDataFormat, count=fiberLength)
+
         self.currentFiber += 1
         return Fiber(fiberHeader, path)
 

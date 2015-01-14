@@ -15,7 +15,7 @@
 #
 
 import nibabel as nib
-
+DEBUG = False
 #  Makes a ton of assumptions about the XML data.  
 #  Totally customize for MRCAP data.  Needs to be checked with 
 #  anything that's not the original 109 data files on braingraph1
@@ -43,7 +43,8 @@ class ROIData:
        index[1] >= self.data.shape[1] or \
        index[2] >= self.data.shape[2]: 
 
-      print "[Debug]: Fiber at index", index , "not in roi"
+      if DEBUG:
+        print "[Debug]: Fiber at index", index , "not in roi"
       return 0
     else:
       return self.data[ index[0], index[1], index[2] ]
