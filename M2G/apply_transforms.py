@@ -24,38 +24,52 @@ import argparse
 import scipy.io as sio
 import numpy as np
 import sys
-import pdb
 import struct
+import os
 
+from contextlib import closing
 import camino_to_mristudio as ctm
+DEBUG = False
 
-fiberHeaderFormat = np.dtype([('nFiberLength','>f4'), ('nSelectFiberStartPoint','>f4')])
-fiberDataFormat = np.dtype(">3f4")
+fiber_header_fmt = np.dtype([('nFiberLength','>f4'), ('nSelectFiberStartPoint','>f4')])
+fiber_data_fmt = np.dtype(">3f4")
 
 def offset(fiber_fn, transforms, mristudio_obj):
   assert transforms, "Where are the tranforms?"
 
-  fiber_f = open(fiber_fn, "rb")
 
-  for trans_fn in transforms:
-    trans = sio.loadmat(trans_fn)["AffineTransform_double_3_3"]
-    trans = np.reshape(trans, (3,4), order="F")
-    
-    count = 0
-    while (fiber_f):
-      fiberHeader = np.fromfile(fiber_f, dtype=fiberHeaderFormat, count=1)
-      if fiberHeader[0][0] > 1:
-        path = np.fromfile(fiber_f, dtype=fiberDataFormat, count=fiberHeader[0][0])
-        path = np.dot(path, trans[:3,:3])
+  with closing(open(fiber_fn, "rb")) as fiber_f:
+    file_size = os.fstat(fiber_f.fileno()).st_size
+
+    for trans_fn in transforms:
+      trans = sio.loadmat(trans_fn)["AffineTransform_double_3_3"]
+      trans = np.reshape(trans, (3,4), order="F")
       
-        # GK FIXME: Do better
-        for i in xrange(3):
-          path[:,i] = path[:,i] + trans[i,3]
+      count = 0
+      while (fiber_f.tell() < file_size):
+        fiber_header = np.fromfile(fiber_f, dtype=fiber_header_fmt, count=1)
+        if DEBUG:
+          print "Fiber: ", count, ":", fiber_header
 
-        mristudio_obj.write_path(path)
+        if fiber_header[0][0] == 1:
+          fiber_f.seek(fiber_f.tell()+12) # Just skip ahead to account for 1-length 
 
-        count += 1
-        if count % 10000 == 0: print "%d fibers transformed ..." % count
+        elif fiber_header[0][0] > 1:
+          path = np.fromfile(fiber_f, dtype=fiber_data_fmt, count=fiber_header[0][0])
+          path = np.dot(path, trans[:3,:3])
+        
+          # GK FIXME: Do better
+          for i in xrange(3):
+            path[:,i] = path[:,i] + trans[i,3]
+
+          mristudio_obj.write_path(path)
+          count += 1
+          if count % 10000 == 0: print "%d fibers transformed ..." % count
+        else:
+          assert False, "Unknown fiber header format"
+
+    print "Found %d fiber(s) of length > 1" % count
+    mristudio_obj.set_num_fibers(count) # For fiber header
 
 def main():
   parser = argparse.ArgumentParser(description="")

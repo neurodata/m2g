@@ -35,7 +35,36 @@ class MRIstudio(object):
     """
     self.fhandle = open(filename, "wb")
 
-    # GK FIXME: Need to add headers
+
+    # ('sFiberFileTag','a8'), ('nFiberNr','i4'), ('nFiberLenMax','i4'), 
+    # ('fFiberLenMean','f4'), ('nImgWidth','i4'), ('nImgHeight','i4'), 
+    # ('nImgSlices', 'i4'), ('fPixelSizeWidth','f4'), 
+    # ('fPixelSizeHeight','f4'), ('fSliceThickness','f4'),
+    # ('enumSliceOrientation','i1'), ('enumSliceSequencing','i1'), ('sVersion','a8')
+
+    # GK FIXME: Need to add real headers
+    self.fhandle.write(struct.pack("c"*8, *"FiberDat"))
+
+    file_header_fmt = "iifiiifffcc"+"c"*8
+    self.fhandle.write(struct.pack(file_header_fmt,-1,-1, -1.0, -1, -1, -1, 
+      -1.0, -1.0, -1.0, chr(0), chr(0), *"        "))
+    
+
+    self.fiber_header_fmt = "<ic"+"c"*3+"ii" # Each fiber starts with thi
+    self._rewind()
+
+  def set_num_fibers(self, count):
+    """
+    Set the number of fibers within the file so that the
+    graph generation script does throw a hissy
+
+    @param count: The number of fibers in the 
+    """
+    self.fhandle.seek(8)
+    self.fhandle.write(struct.pack("i", count))
+
+  # Thank RB for this nomecleture. Who knows ...?
+  def _rewind(self, ):
     self.fhandle.seek(128)
 
   def write_path(self, path):
@@ -45,8 +74,8 @@ class MRIstudio(object):
     @param path we want to write
     """
 
-    fmt = "<ic"+"c"*3+"ii"
-    _bin = struct.pack(fmt, len(path), chr(0), chr(255), chr(0), chr(0), 0, (len(path)-1))
+    _bin = struct.pack(self.fiber_header_fmt, len(path), chr(0), 
+        chr(255), chr(0), chr(0), 0, (len(path)-1))
     self.fhandle.write(_bin)
     
     # GK FIXME: Figure out how to not loop too many I/O accesses
