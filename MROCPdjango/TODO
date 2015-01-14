@@ -1,12 +1,9 @@
 *MR OCP TODO list Disa
 ===========================
-* viewer: http://cmtk.org/viewer/ visualization tool
-* refactor views with programmatic access to shorten views.py
+* Remove xml & raw ROIs and fix all interfaces using them
+
 * add feedback for graph too big & estimated time to completion
 
-- add sql queries to ...
-- programmatic options
-- sample case of enforcing visibility of project on disk
 html:
   - display all projects for a user in a drop downlist
   - then use selection to determine what must be displayed at lower levels

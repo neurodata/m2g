@@ -71,7 +71,7 @@ def genGraph(infname, data_atlas_fn, outfname, bigGraph=False, \
   print "Parsing MRI studio file {0}".format ( infname )
 
   # Print the high-level fiber information
-  print reader
+  print "Reader Header", reader
 
   count = 0
 
