@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<pipeline version=".2">
+        <moduleGroup id="Untitled_1" name="Untitled" posX="0" posY="0" sourceCode="">
+                <module id="OptimizedAutomaticRegistration_1" name="Optimized Automatic Registration" package="migraine-jist" version="1.01" posX="193" posY="141" sourceCode="" location="pipeline://darkhelmet.jhuapl.edu//{shareP}/mipav/jre/bin/java" executableVersion="1.01" envVariables="DISPLAY=localhost:99.0">
+                        <authors>
+                                <author fullName="Zachary Koterba" email="Zachary.Koterba@jhuapl.edu" website="" />
+                        </authors>
+                        <tag />
+                        <metadata>
+                                <data key="__creationDateKey" value="Wed Dec 05 09:06:29 EST 2012" />
+                        </metadata>
+                        <input id="OptimizedAutomaticRegistration_1.-xFile" name="-xFile" required="true" enabled="true" order="8" prefix="-xFile" prefixSpaced="true" prefixAllArgs="false">
+                                <format type="String" cardinality="1" />
+                        </input>
+                        <input id="OptimizedAutomaticRegistration_1.edu.jhu.ece.iacl.jist.cli.run" name="edu.jhu.ece.iacl.jist.cli.run" required="true" enabled="true" order="1" prefix="edu.jhu.ece.iacl.jist.cli.run" prefixSpaced="true" prefixAllArgs="false">
+                                <format type="String" cardinality="1" />
+                                <values>
+                                        <value>edu.jhu.ece.iacl.plugins.registration.MedicAlgorithmEfficientFileCollectionRegistration</value>
+                                </values>
+                        </input>
+                        <input id="OptimizedAutomaticRegistration_1.-classpath" name="-classpath" required="true" enabled="true" order="0" prefix="-classpath" prefixSpaced="true" prefixAllArgs="false">
+                                <format type="String" cardinality="1" />
+                                <values>
+                                        <value>{classP}</value>
+                                </values>
+                        </input>
+                        <input id="OptimizedAutomaticRegistration_1.SourceVolumes" name="Source Volumes" required="false" enabled="true" order="2" prefix="-inSource" prefixSpaced="true" prefixAllArgs="false">
+                                <format type="String" cardinality="1" />
+                        </input>
+                        <input id="OptimizedAutomaticRegistration_1.TargetVolume" name="Target Volume" required="false" enabled="true" order="3" prefix="-inTarget" prefixSpaced="true" prefixAllArgs="false">
+                                <format type="String" cardinality="1" />
+                        </input>
+                        <input id="OptimizedAutomaticRegistration_1.CostFunction" name="Cost Function" required="true" enabled="true" order="4" prefix="-inCost" prefixSpaced="true" prefixAllArgs="false">
+                                <format type="String" cardinality="1" />
+                                <values>
+                                        <value>Normalized mutual information</value>
+                                </values>
+                        </input>
+                        <input id="OptimizedAutomaticRegistration_1.DegreesofFreedom" name="Degrees of Freedom" required="false" enabled="true" order="5" prefix="-inDegrees" prefixSpaced="true" prefixAllArgs="false">
+                                <format type="String" cardinality="1" />
+                                <values>
+                                        <value>Rigid - 6</value>
+                                </values>
+                        </input>
+                        <input id="OptimizedAutomaticRegistration_1.-xDir" name="-xDir" required="true" enabled="true" order="7" prefix="-xDir" prefixSpaced="true" prefixAllArgs="false">
+                                <format type="String" cardinality="1" />
+                        </input>
+                        <output id="OptimizedAutomaticRegistration_1.-outExecution" name="-outExecution" required="false" enabled="true" order="9">
+                                <format type="String" cardinality="1" />
+                        </output>
+                        <input id="OptimizedAutomaticRegistration_1.RegistrationInterpolation" name="Registration Interpolation" required="false" enabled="true" order="6" prefix="-inRegistration" prefixSpaced="true" prefixAllArgs="false">
+                                <format type="String" cardinality="1" />
+                                <values>
+                                        <value>Windowed sinc</value>
+                                </values>
+                        </input>
+                        <executableAuthors>
+                                <author fullName="Zachary Koterba" email="Zachary.Koterba@jhuapl.edu" website="" />
+                        </executableAuthors>
+                </module>
+                <variables>
+                        <variable name="classP">/usr/local/mipav:/usr/local/mipav/lib/*:/usr/local/mipav/lib/*/*:/usr/local/mipav/InsightToolkit/lib/InsightToolkit/InsightToolkit.jar:/usr/local/JIST/library/*:/usr/local/JIST</variable>
+                        <variable name="shareP">mnt/pipelineShare/tools/mrconn/</variable>
+                </variables>
+        </moduleGroup>
+</pipeline>
+

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<pipeline version=".2">
+        <moduleGroup id="Untitled_1" name="Untitled" posX="0" posY="0" sourceCode="">
+                <module id="SetupOutputDirectory_1" name="Setup Output Directory" package="migraine-utils" version="1.01" description="makes a directory in provided root directory and creates a output file name in that directory" posX="407" posY="292" sourceCode="" location="pipeline://darkhelmet.jhuapl.edu//{shareP}/utilities/setupOutputDir.py" executableVersion="1.01">
+                        <authors>
+                                <author fullName="Zachary Koterba" email="" website="" />
+                        </authors>
+                        <tag>output</tag>
+                        <tag>mkOutputFile</tag>
+                        <tag>file out</tag>
+                        <metadata>
+                                <data key="__creationDateKey" value="Mon Nov 12 15:43:59 EST 2012" />
+                        </metadata>
+                        <input id="SetupOutputDirectory_1.rootDir" name="rootDir" required="true" enabled="true" order="0">
+                                <format type="String" cardinality="1" />
+                        </input>
+                        <output id="SetupOutputDirectory_1.createdOutputDirPath" name="createdOutputDirPath" required="true" enabled="true" order="3">
+                                <format type="String" cardinality="1" />
+                                <stringExtract source="stdout" rule="stringMatch" startString="#@@# " endString=" #@@#" caseSensitive="true" />
+                        </output>
+                        <input id="SetupOutputDirectory_1.outputDir" name="outputDir" required="true" enabled="true" order="1">
+                                <format type="String" cardinality="1" />
+                        </input>
+                        <input id="SetupOutputDirectory_1.outputFileName" name="outputFileName" required="true" enabled="true" order="2">
+                                <format type="String" cardinality="1" />
+                        </input>
+                        <output id="SetupOutputDirectory_1.createdOutputFilePath" name="createdOutputFilePath" required="true" enabled="true" order="4">
+                                <format type="String" cardinality="1" />
+                                <stringExtract source="stdout" rule="stringMatch" startString="#@@@# " endString=" #@@@#" caseSensitive="false" />
+                        </output>
+                        <executableAuthors>
+                                <author fullName="Zachary Koterba" email="" website="" />
+                        </executableAuthors>
+                </module>
+                <variables>
+                        <variable name="classP">/usr/local/mipav:/usr/local/mipav/lib/*:/usr/local/mipav/lib/*/*:/usr/local/mipav/InsightToolkit/lib/InsightToolkit/InsightToolkit.jar:/usr/local/JIST/library/*:/usr/local/JIST</variable>
+                        <variable name="shareP">mnt/pipelineShare/tools/mrconn/</variable>
+                </variables>
+        </moduleGroup>
+</pipeline>
+

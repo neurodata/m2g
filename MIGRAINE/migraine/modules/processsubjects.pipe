@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<pipeline version=".2">
+        <moduleGroup id="Untitled_1" name="Untitled" posX="0" posY="0" sourceCode="">
+                <module id="ProcessSubjects_1" name="Process Subjects" package="migraine-utils" version="1.01" posX="428" posY="318" sourceCode="" location="pipeline://darkhelmet.jhuapl.edu//{shareP}/utilities/processSubjects.py">
+                        <authors>
+                                <author fullName="Zachary Koterba" email="Zachary.Koterba@jhuapl.edu" website="" />
+                        </authors>
+                        <tag />
+                        <metadata>
+                                <data key="__creationDateKey" value="Tue Feb 05 09:54:53 EST 2013" />
+                        </metadata>
+                        <input id="ProcessSubjects_1.SubjectDirectory" name="Subject Directory" required="true" enabled="true" order="0">
+                                <format type="Directory" cardinality="1" />
+                        </input>
+                        <output id="ProcessSubjects_1.GradientFile" name="Gradient File" required="false" enabled="true" order="2">
+                                <format type="String" cardinality="1" />
+                                <stringExtract source="stdout" rule="stringMatch" startString="#GRAD# " endString=" #GRAD#" caseSensitive="false" />
+                        </output>
+                        <output id="ProcessSubjects_1.BValueFile" name="B Value File" required="false" enabled="true" order="3">
+                                <format type="String" cardinality="1" />
+                                <stringExtract source="stdout" rule="stringMatch" startString="#B# " endString=" #B#" caseSensitive="false" />
+                        </output>
+                        <output id="ProcessSubjects_1.DTIFile" name="DTI File" required="false" enabled="true" order="4">
+                                <format type="String" cardinality="1" />
+                                <stringExtract source="stdout" rule="stringMatch" startString="#DTI# " endString=" #DTI#" caseSensitive="false" />
+                        </output>
+                        <output id="ProcessSubjects_1.MPRAGEFile" name="MPRAGE File" required="false" enabled="true" order="5">
+                                <format type="String" cardinality="1" />
+                                <stringExtract source="stdout" rule="stringMatch" startString="#MPRAGE# " endString=" #MPRAGE#" caseSensitive="false" />
+                        </output>
+                        <output id="ProcessSubjects_1.OutputDirectory" name="Output Directory" required="false" enabled="true" order="6">
+                                <format type="String" cardinality="1" />
+                                <stringExtract source="stdout" rule="stringMatch" startString="#@@@# " endString=" #@@@#" caseSensitive="false" />
+                        </output>
+                        <input id="ProcessSubjects_1.OutputLocation" name="Output Location" required="true" enabled="true" order="1">
+                                <format type="String" cardinality="1" />
+                        </input>
+                        <executableAuthors>
+                                <author fullName="Zachary Koterba" email="Zachary.Koterba@jhuapl.edu" website="" />
+                        </executableAuthors>
+                </module>
+                <variables>
+                        <variable name="classP">/usr/local/mipav:/usr/local/mipav/lib/*:/usr/local/mipav/lib/*/*:/usr/local/mipav/InsightToolkit/lib/InsightToolkit/InsightToolkit.jar:/usr/local/JIST/library/*:/usr/local/JIST</variable>
+                        <variable name="shareP">mnt/pipelineShare/tools/mrconn/</variable>
+                </variables>
+        </moduleGroup>
+</pipeline>
+
