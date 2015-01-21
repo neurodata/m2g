@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<pipeline version=".2">
+        <moduleGroup id="Untitled_1" name="Untitled" posX="0" posY="0" sourceCode="">
+                <module id="SmallGraph_1" name="Small Graph" package="migraine-graph" version="1.01" posX="54" posY="147" sourceCode="" location="pipeline://darkhelmet.jhuapl.edu//{shareP}/utilities/MR-connectome/MROCPdjango/computation/composite/graph_exec" executableVersion="1.01">
+                        <tag />
+                        <metadata>
+                                <data key="__creationDateKey" value="Mon Apr 15 08:14:20 EDT 2013" />
+                        </metadata>
+                        <input id="SmallGraph_1.fiberIn" name="fiberIn" required="true" enabled="true" order="0">
+                                <format type="String" cardinality="1" />
+                        </input>
+                        <input id="SmallGraph_1.roiXmlIn" name="roiXmlIn" required="true" enabled="true" order="1">
+                                <format type="String" cardinality="1" />
+                        </input>
+                        <input id="SmallGraph_1.roiRawIn" name="roiRawIn" required="true" enabled="true" order="2">
+                                <format type="String" cardinality="1" />
+                        </input>
+                        <input id="SmallGraph_1.input1" name="input1" required="true" enabled="true" order="3">
+                                <format type="String" cardinality="1" />
+                                <values>
+                                        <value>-S</value>
+                                </values>
+                        </input>
+                        <input id="SmallGraph_1.outputDir" name="outputDir" required="true" enabled="true" order="4">
+                                <format type="String" cardinality="1" />
+                        </input>
+                        <input id="SmallGraph_1.input2" name="input2" required="false" enabled="false" order="5">
+                                <format type="String" cardinality="1" />
+                        </input>
+                        <input id="SmallGraph_1.input3" name="input3" required="false" enabled="false" order="6">
+                                <format type="String" cardinality="1" />
+                        </input>
+                        <input id="SmallGraph_1.outputFile" name="outputFile" required="false" enabled="false" order="7">
+                                <format type="String" cardinality="1" />
+                        </input>
+                        <output id="SmallGraph_1.output" name="output" required="false" enabled="true" order="8">
+                                <format type="String" cardinality="1" />
+                                <stringExtract source="stdout" rule="stringMatch" startString="#@@# " endString=" #@@#" caseSensitive="false" />
+                        </output>
+                </module>
+                <variables>
+                        <variable name="classP">/usr/local/mipav:/usr/local/mipav/lib/*:/usr/local/mipav/lib/*/*:/usr/local/mipav/InsightToolkit/lib/InsightToolkit/InsightToolkit.jar:/usr/local/JIST/library/*:/usr/local/JIST</variable>
+                        <variable name="shareP">mnt/pipelineShare/tools/mrconn/</variable>
+                </variables>
+        </moduleGroup>
+</pipeline>
+
