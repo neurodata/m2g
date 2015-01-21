@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<pipeline version=".2">
+        <moduleGroup id="tens2fibers_1" name="tens2fibers" posX="0" posY="0" sourceCode="">
+                <module id="tens2fibers_2" name="tens2fibers" package="mrimages" posX="109" posY="70" sourceCode="" location="pipeline://localhost//home/gkiar/vbox/loni_scripts/tens2fibs.py">
+                        <tag />
+                        <metadata>
+                                <data key="__creationDateKey" value="Fri Jan 09 13:07:20 EST 2015" />
+                        </metadata>
+                        <input id="tens2fibers_2.DTITensors" name="DTI Tensors" required="true" enabled="true" order="0">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="Camino Bdouble" extension="Bdouble" description="" />
+                                        </fileTypes>
+                                </format>
+                                <values>
+                                        <value>pipeline://localhost//home/gkiar/vbox/testretest/outputs/intermediate/KKI2009-09-DTI_tensors.Bdouble</value>
+                                </values>
+                        </input>
+                        <input id="tens2fibers_2.BrainMask" name="Brain Mask" required="false" enabled="true" order="1">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="niftii2" extension="nii.gz" description="" />
+                                        </fileTypes>
+                                </format>
+                                <values>
+                                        <value>pipeline://localhost//home/gkiar/vbox/testretest/outputs/intermediate/KKI2009-09-DTI_mask.nii.gz</value>
+                                </values>
+                        </input>
+                        <input id="tens2fibers_2.Anisotropicvoxelthreshold" name="Anisotropic voxel threshold" required="false" enabled="true" order="2">
+                                <format type="Number" cardinality="1" />
+                                <values>
+                                        <value>0.2</value>
+                                </values>
+                        </input>
+                        <input id="tens2fibers_2.Curvaturethreshold" name="Curvature threshold" required="false" enabled="true" order="3">
+                                <format type="Number" cardinality="1" />
+                                <values>
+                                        <value>60</value>
+                                </values>
+                        </input>
+                        <output id="tens2fibers_2.DTIfibers" name="DTI fibers" required="false" enabled="true" order="4">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="Camino Bfloat" extension="Bfloat" description="" />
+                                        </fileTypes>
+                                </format>
+                                <values>
+                                        <value>pipeline://localhost//home/gkiar/Downloads/KKI2009-09-DTI_fibers.Bfloat</value>
+                                </values>
+                        </output>
+                        <output id="tens2fibers_2.VTKfibers" name="VTK fibers" required="false" enabled="true" order="5">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="Visualizable fibers" extension="vtk" description="" />
+                                        </fileTypes>
+                                </format>
+                                <values>
+                                        <value>pipeline://localhost//home/gkiar/Downloads/KKI2009-09-DTI_fibers.vtk</value>
+                                </values>
+                        </output>
+                </module>
+        </moduleGroup>
+</pipeline>
+

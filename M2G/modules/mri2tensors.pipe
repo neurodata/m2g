@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<pipeline version=".2">
+        <moduleGroup id="mri2tensors_1" name="mri2tensors" posX="0" posY="0" sourceCode="">
+                <module id="mri2tensors_2" name="mri2tensors" package="mrimages" posX="233" posY="88" sourceCode="" location="pipeline://localhost//home/gkiar/vbox/loni_scripts/dti2tens.py">
+                        <tag />
+                        <metadata>
+                                <data key="__creationDateKey" value="Fri Jan 09 11:38:39 EST 2015" />
+                        </metadata>
+                        <input id="mri2tensors_2.DTIImage" name="DTI Image" required="true" enabled="true" order="0">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="nifti" extension="nii" description="" />
+                                                <filetype name="niftii2" extension="nii.gz" description="" />
+                                        </fileTypes>
+                                </format>
+                                <values>
+                                        <value>pipeline://localhost//home/gkiar/vbox/testretest/inputs/KKI2009-09/KKI2009-09-DTI.nii</value>
+                                </values>
+                        </input>
+                        <input id="mri2tensors_2.DTIGradients" name="DTI Gradients" required="true" enabled="true" order="1">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="gradients" extension="grad" description="" />
+                                        </fileTypes>
+                                </format>
+                                <values>
+                                        <value>pipeline://localhost//home/gkiar/vbox/testretest/inputs/KKI2009-09/KKI2009-09-DTI.grad</value>
+                                </values>
+                        </input>
+                        <input id="mri2tensors_2.DTIBvalue" name="DTI Bvalue" required="false" enabled="true" order="2">
+                                <format type="Number" cardinality="1" />
+                                <values>
+                                        <value>700</value>
+                                </values>
+                        </input>
+                        <input id="mri2tensors_2.DTIBrainMask" name="DTI Brain Mask" required="false" enabled="true" order="3">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="niftii2" extension="nii.gz" description="" />
+                                        </fileTypes>
+                                </format>
+                                <values>
+                                        <value>pipeline://localhost//home/gkiar/vbox/testretest/outputs/intermediate/KKI2009-09-DTI_mask.nii.gz</value>
+                                </values>
+                        </input>
+                        <output id="mri2tensors_2.DTIscheme" name="DTI scheme" required="false" enabled="true" order="4">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="scheme file" extension="scheme" description="" />
+                                        </fileTypes>
+                                </format>
+                                <values>
+                                        <value>pipeline://localhost//home/gkiar/vbox/testretest/outputs/intermediate/KKI2009-09-DTI_scheme.scheme</value>
+                                </values>
+                        </output>
+                        <output id="mri2tensors_2.DTIimageasBfloat" name="DTI image as Bfloat" required="false" enabled="true" order="5">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="Camino Bfloat" extension="Bfloat" description="" />
+                                        </fileTypes>
+                                </format>
+                                <values>
+                                        <value>pipeline://localhost//home/gkiar/vbox/testretest/outputs/intermediate/KKI2009-09-DTI_brain.Bfloat</value>
+                                </values>
+                        </output>
+                        <output id="mri2tensors_2.DTItensors" name="DTI tensors" required="true" enabled="true" order="6">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="Camino Bdouble" extension="Bdouble" description="" />
+                                        </fileTypes>
+                                </format>
+                                <values>
+                                        <value>pipeline://localhost//home/gkiar/vbox/testretest/outputs/intermediate/KKI2009-09-DTI_tensors.Bdouble</value>
+                                </values>
+                        </output>
+                        <output id="mri2tensors_2.FractionalAnisotropy" name="Fractional Anisotropy" required="false" enabled="true" order="7">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="nifti" extension="nii" description="" />
+                                                <filetype name="niftii2" extension="nii.gz" description="" />
+                                        </fileTypes>
+                                </format>
+                                <values>
+                                        <value>pipeline://localhost//home/gkiar/vbox/testretest/outputs/intermediate/KKI2009-09-DTI_fa.nii</value>
+                                </values>
+                        </output>
+                        <output id="mri2tensors_2.MeanDiffusivity" name="Mean Diffusivity" required="false" enabled="true" order="8">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="nifti" extension="nii" description="" />
+                                                <filetype name="niftii2" extension="nii.gz" description="" />
+                                        </fileTypes>
+                                </format>
+                                <values>
+                                        <value>pipeline://localhost//home/gkiar/vbox/testretest/outputs/intermediate/KKI2009-09-DTI_md.nii</value>
+                                </values>
+                        </output>
+                        <output id="mri2tensors_2.DTIEigenvalues" name="DTI Eigen values" required="false" enabled="true" order="9">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="Camino Bdouble" extension="Bdouble" description="" />
+                                        </fileTypes>
+                                </format>
+                                <values>
+                                        <value>pipeline://localhost//home/gkiar/vbox/testretest/outputs/intermediate/KKI2009-09-DTI_eigs.Bdouble</value>
+                                </values>
+                        </output>
+                </module>
+        </moduleGroup>
+</pipeline>
+
