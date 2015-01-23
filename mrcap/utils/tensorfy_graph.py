@@ -70,7 +70,7 @@ def make_mm_tensor_graphs(graphs, output):
 
   f = open(output, "wb")
   for idx, g_fn in enumerate(graphs):
-    f.write("# %d:%s\n" % (idx, os.path.splitext(os.path.basename(g_fn))[0]))
+    f.write("# %d:%s\n" % (idx, os.path.basename(g_fn)))
 
   f.write("\n")
 
