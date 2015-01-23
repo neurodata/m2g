@@ -21,6 +21,9 @@ import zindex
 
 import numpy
 
+DEBUG = False
+
+g_is_full = False # Are we making a full graph where 1 voxel == 1 vertex?
 
 class FiberReader:
     """Class to read data file stored in MRI Studio format.
@@ -79,6 +82,11 @@ class FiberReader:
         self._rewind()
         self.nextFiber()
 
+    def set_full(self):
+      """ We need to know whether we are making a full graph or not """
+      global g_is_full
+      g_is_full = True
+
     #
     #  Go the first fiber location.  Not part of the iterator abstraction
     #
@@ -96,8 +104,15 @@ class FiberReader:
         if self.currentFiber == self.fiberCount:
             return None
         fiberHeader = numpy.fromfile(self._fileobj, dtype=self.fiberHeaderFormat, count=1)
+        if DEBUG:
+          print "[Debug]: fiberHeader: ", fiberHeader
+
         fiberLength = fiberHeader['nFiberLength']
+        if DEBUG:
+          print "[Debug]: fiberLength:", fiberLength
+
         path = numpy.fromfile(self._fileobj, dtype=self.fiberDataFormat, count=fiberLength)
+
         self.currentFiber += 1
         return Fiber(fiberHeader, path)
 
@@ -146,7 +161,6 @@ class Fiber:
         self.header = header
         self.path = path
         self.length = int(self.header['nFiberLength'])
-        return
 
     def __str__(self):
         return self.header.__str__() + "\n" + self.path.__str__()
@@ -154,16 +168,25 @@ class Fiber:
     #
     #  Return a list of voxels in this Fiber.  As tuples by zindex
     #
-    def getVoxels (self):
+    def getVids (self, rois):
       """Return the list of edges in this fiber. As tuples."""
 
-      voxels = []
+      vids = set()
 
       #  This is corrected to match the logic of MRCAP
       # extract a path of vertices
       for fbrpt in self.path:
-          # DM : 2015 Necessary. The fiber gives us the exact voxel but we need a Vertex ID
-          voxels.append ( zindex.XYZMorton ( [ int(fbrpt[0]), int(fbrpt[1]), int(fbrpt[2]) ] ))
+          # Check if point on path is within the atlas 
+          voxel = map(int, fbrpt) 
+          vid = rois.get(voxel) # NOTE: This may be outside the atlas. If so 0 is returned
+          
+          # DM TODO: Verify with someone that vid 0 never should have edges 
+          if vid:
+              # The fiber gives us the exact voxel but we need a Vertex ID
+              if g_is_full:
+                vids.add(zindex.XYZMorton(voxel))
+              else:
+                vids.add(vid)
 
-      # eliminate duplicates
-      return set ( voxels )
+      # Duplicates eliminated
+      return vids

@@ -15,23 +15,21 @@
 # limitations under the License.
 #
 
-# getScriptPrefix.py
-# Created by Disa Mhembere on 2013-03-17.
+# test_camino_to_mristudio.py
+# Created by Disa Mhembere on 2015-01-13.
 # Email: disa@jhu.edu
+# Copyright (c) 2015. All rights reserved.
 
-from django import template
-from django.template.defaultfilters import stringfilter
-from django.core.urlresolvers import get_script_prefix
+# Mini-test
+from mrcap.fiber import FiberReader
+import sys
+import os
 
-register = template.Library()
+reader = FiberReader(sys.argv[1])
+reader.shape = (182, 218, 182)
+reader.fiberCount = 30000
 
+print "Reader Header", reader
 
-@register.filter(name='getScriptPrefix', is_safe=True)
-@stringfilter
-def getScriptPrefix(tailurl):
-  '''
-  Custom filter used to get the script prefix of a certain url
-  @param tailurl: the tail of the url
-  @return str: the fully built url
-  '''
-  return get_script_prefix() + tailurl
+for fiber in reader:
+  print fiber

@@ -1,4 +1,3 @@
-
 # Copyright 2014 Open Connectome Project (http://openconnecto.me)
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,8 +17,6 @@
 # @author Randal Burns, Disa Mhembere
 
 import math
-import itertools
-from time import time
 import os
 from collections import defaultdict
 
@@ -60,41 +57,6 @@ class FiberGraph(_FiberGraph):
     self.spcscmat = igraph.Graph(n=self._maxval, directed=False) # make new igraph with adjacency matrix to be (maxval X maxval)
     self.edge_dict = defaultdict(int) # Will have key=(v1,v2), value=weight
     # ======================================================================== #
-
-  #
-  # Destructor
-  #
-  def __del__(self):
-    pass
-
-  def add (self, fiber):
-    """
-    Add edges associated with a single fiber of the graph
-
-    positonal args:
-    ==============
-    fiber: the fiber whose edges you want to add
-    """
-
-    # Get the set of voxels in the fiber
-    allvoxels = fiber.getVoxels()
-
-    # Voxels for the big graph
-    voxels = []
-
-    for i in allvoxels:
-      xyz = zindex.MortonXYZ(i)
-
-      # Use only the important voxels
-      roival = self.rois.get(xyz)
-      # if it's an roi and in the brain
-      if roival:
-        voxels.append(i)
-
-    voxel_edges = itertools.combinations((voxels), 2)
-
-    for list_item in voxel_edges:
-      self.edge_dict[tuple(sorted(list_item))] += 1
 
   def complete(self, add_centroids=True, graph_attrs={}, atlases={}):
     super(FiberGraph, self).complete()
