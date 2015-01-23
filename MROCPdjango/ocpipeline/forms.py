@@ -26,7 +26,6 @@
 from django import forms
 from django.forms.fields import MultipleChoiceField, BooleanField, ChoiceField
 from django.forms.widgets import RadioSelect, CheckboxSelectMultiple, Select, SelectMultiple, TextInput, EmailInput
-import form_validators as fv
 
 #
 #class LoginForm(forms.Form):
