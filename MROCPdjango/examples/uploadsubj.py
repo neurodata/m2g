@@ -29,16 +29,20 @@ import webbrowser
 
 def main():
 
-  parser = argparse.ArgumentParser(description='Upload a subject to MROCP. Base url -> http://mrbrain.cs.jhu.edu/graph-services/upload')
-  parser.add_argument('url', action="store", help='url must have NO SPACES & must be in the form  http://mrbrain.cs.jhu.edu/graph-services/upload/{projectName}/{site}/{subject}/{session}/{scanID}/{s|b}, where s= smallgraph OR b = biggraph')
-  parser.add_argument('-i', '--invariants', action="store", help='OPTIONAL: comma separated list of invariant types. E.g cc,tri,deg,mad for \
-                      clustering coefficient, triangle count, degree & maximum average degree')
+  parser = argparse.ArgumentParser(description='Upload a subject to MROCP. \
+      Base url -> http://mrbrain.cs.jhu.edu/graph-services/upload')
+  parser.add_argument('url', action="store", help='url must have NO SPACES & \
+      must be in the form  http://mrbrain.cs.jhu.edu/graph-services/upload/\
+      {projectName}/{site}/{subject}/{session}/{scanID}/{s|b}, where s= smallgraph OR b = biggraph')
+  parser.add_argument('-i', '--invariants', action="store", \
+      help='OPTIONAL: comma separated list of invariant types. E.g cc,tri,deg,mad for \
+      clustering coefficient, triangle count, degree & maximum average degree')
 
-  parser.add_argument('fiberfile', action="store")
-  parser.add_argument('roixmlfile', action="store")
-  parser.add_argument('roirawfile', action="store")
+  parser.add_argument('fiberfile', action="store", help="MRI studio fiber file")
+  parser.add_argument('-a','--atlas', action="store", help="NIFTI format atlas")
 
-  parser.add_argument('-a', '--auto', action="store_true", help="Use this flag if you want a browser session to open up with the result automatically")
+  parser.add_argument('-u', '--auto', action="store_true", 
+      help="Use this flag if you want a browser session to open up with the result automatically")
 
   result = parser.parse_args()
 
@@ -51,8 +55,9 @@ def main():
     zfile = zipfile.ZipFile(tmpfile.name, "w", allowZip64=True)
 
     zfile.write(result.fiberfile)
-    zfile.write(result.roixmlfile)
-    zfile.write(result.roirawfile)
+    if result.atlas:
+      zfile.write(result.atlas)
+
     zfile.close()
 
     tmpfile.flush()
@@ -67,7 +72,10 @@ def main():
 #    import pdb; pdb.set_trace()
 
   except:
-    print "Invalid file name. Check the filenames: " + result.fiberfile,  result.roixmlfile,  result.roirawfile
+    print "Check the filenames: fiber:", result.fiberfile
+    if (result.atlas):
+      print "atlas:", result.atlas
+
     sys.exit(0)
 
   try:

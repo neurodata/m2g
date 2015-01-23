@@ -353,7 +353,8 @@ def upload(request, webargs=None):
   Programmatic interface for uploading data
   @param request: the request object
 
-  @param webargs: POST data with userDefProjectName, site, subject, session, scanId, graphsize, [list of invariants to compute] info
+  @param webargs: POST data with userDefProjectName, site, subject, session,
+        scanId, graphsize, [list of invariants to compute] info
   """
   if (webargs and request.method == 'POST'):
     # Check for malformatted input
@@ -386,7 +387,7 @@ def upload(request, webargs=None):
     if not data_atlas_fn:
       data_atlas_fn = settings.ATLASES.keys()[0]
     else:
-      data_atlas_fn = os.path.join(request.session['derivatives'], data_atlas_fn)
+      data_atlas_fn = os.path.join(derivatives, data_atlas_fn)
 
     ''' Data Processing '''
     if graphsize:
