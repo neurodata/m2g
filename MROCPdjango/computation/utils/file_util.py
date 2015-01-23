@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 # Copyright 2014 Open Connectome Project (http://openconnecto.me)
 #

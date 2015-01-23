@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 # tensorfy_graph.py
 # Created by Disa Mhembere on 2014-11-25.
