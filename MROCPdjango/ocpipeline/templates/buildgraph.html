@@ -80,10 +80,10 @@
         </p>
         
         <pre>python uploadsubj.py \
-http://mrbrain.cs.jhu.edu/graph-services/upload/progmatic/site/subj/sess/scan/s \
+http://mrbrain.cs.jhu.edu/graph-services/upload/YOUR_project/YOUR_site/YOUR_subject/YOUR_session/YOUR_scanID/s \
 YOUR_FIBER.dat -a YOUR_ATLAS.nii -i cc,tri,ss1,mad,deg,eig</pre>
         <p>
-          The parameter after YOUR_scan can either be <code>s</code> or <code>b</code>, but not both.
+          The parameter after YOUR_scanID can either be <code>s</code> or <code>b</code>, but not both.
           The <code>-a</code> atlas is optional. If not selected the 
           <a href="http://www.sciencedirect.com/science/article/pii/S1053811906000437" target ="blank">
           Desikan atlas</a>  is used by default.
@@ -121,9 +121,8 @@ YOUR_FIBER.dat -a YOUR_ATLAS.nii -i cc,tri,ss1,mad,deg,eig</pre>
         </p>
 
         <pre>python upload_multi.py \
-http://mrbrain.cs.jhu.edu/graph-services/upload/YOUR_project/YOUR_site/YOUR_subject/YOUR_session \
-s fiber_tract_dirctory -a YOUR_ATLAS -i cc,tri,ss1,mad,deg,eig</pre>
-
+http://mrbrain.cs.jhu.edu/graph-services/upload/YOUR_project/YOUR_site/YOUR_subject/YOUR_session/s \
+fiber_tract_dirctory -a YOUR_ATLAS -i cc,tri,ss1,mad,deg,eig</pre>
         <p>
           This call would build graphs for multiple scans and compute all 
           invariants noted in the <code>-i</code> flag.
