@@ -191,7 +191,6 @@ def buildGraph(request):
 
       """ Acquire fileNames """
       fiber_fn = form.cleaned_data["fiber_file"].name # get the name of the file input by user
-      #import pdb; pdb.set_trace()
       if form.cleaned_data["data_atlas_file"]:
         data_atlas_fn = form.cleaned_data["data_atlas_file"].name
         print "Storing data atlas ..."
@@ -260,18 +259,16 @@ def processInputData(request):
 
   print "data_atlas_fn %s ..." % data_atlas_fn
 
-#try:
-  request.session['Gfn']= call_gengraph(fiber_fn, data_atlas_fn, \
+  try:
+    request.session['Gfn']= call_gengraph(fiber_fn, data_atlas_fn, \
                             request.session['graphs'], request.session['graphInvariants'],\
                             request.session['graphsize'], True)
-  """
   except:
     if request.session['graphsize'] == 'big':
       msg = "Hello,\n\nYour most recent job failed either because your fiber streamline file or ROI mask was incorrectly formatted."
       msg += " Please check both and try again.%s\n\n" % (" "*randint(0,10))
       sendJobFailureEmail(request.session['email'], msg)
     return HttpResponseRedirect(get_script_prefix()+"jobfailure")
-  """
 
   # Run ivariants here
   if len(request.session['invariants']) > 0:
@@ -282,7 +279,7 @@ def processInputData(request):
 
   if request.session['graphsize'] == 'big':
     dwnldLoc = "http://mrbrain.cs.jhu.edu" + \
-                    + request.session['usrDefProjDir'].replace(' ','%20')
+                    request.session['usrDefProjDir'].replace(' ','%20')
     sendJobCompleteEmail(request.session['email'], dwnldLoc)
 
   return HttpResponseRedirect(get_script_prefix()+'confirmdownload')
