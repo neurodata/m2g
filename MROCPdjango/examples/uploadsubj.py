@@ -49,7 +49,6 @@ def main():
   result.url = result.url if result.url.endswith('/') else result.url + '/' #
 
   try:
-
     # Create a temporary file to store zip contents in memory
     tmpfile = tempfile.NamedTemporaryFile()
     zfile = zipfile.ZipFile(tmpfile.name, "w", allowZip64=True)
