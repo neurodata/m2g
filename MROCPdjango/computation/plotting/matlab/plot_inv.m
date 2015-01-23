@@ -21,6 +21,7 @@
 
 %% Get the eigenvalues
 clear; clc
+FONTSIZE = 14;
 subplot(2,3,1); 
 inv = load('F:mrdata\eigs_data.mat');
 
@@ -31,7 +32,7 @@ shading interp
 colormap(copper);
 zlim([0 12]);
 grid off;
-set(gca, 'fontsize', 14);
+set(gca, 'fontsize', FONTSIZE);
 set(gca, 'FontWeight', 'bold');
 set(gca,'FontName', 'Times');
 xlabel('Eigenvalue Rank');
@@ -50,7 +51,7 @@ inv = load_inv('F:mrdata\ClustCoeffinterp_data.mat');
 m = get_mat_from_cell(inv);
 % create a nice 3d image of the invariant
 %figure('Name', 'Clustering Coefficient');
-plot_with_params(m, 14);
+plot_with_params(m,FONTSIZE);
 zlim([0 .04]);
 ylim = ([0 size(m,1)]);
 xlabel('Log Clustering Coefficient Vector');
@@ -69,7 +70,7 @@ inv = load_inv('F:mrdata\ScanStat1interp_data.mat');
 m = get_mat_from_cell(inv);
 % create a nice 3d image of the invariant
 %figure('Name', 'Scan Statistic');
-plot_with_params(m, 14);
+plot_with_params(m, FONTSIZE);
 xlabel('Log Scan Statistic-1 Vector');
 zlabel('Percent'); 
 ylabel('Sample');
@@ -85,7 +86,7 @@ inv = load_inv('F:mrdata\Degreeinterp_data.mat');
 m = get_mat_from_cell(inv);
 % create a nice 3d image of the invariant
 %figure('Name', 'Degree');
-plot_with_params(m, 14);
+plot_with_params(m, FONTSIZE);
 xlabel('Log Degree Vector');
 zlabel('Percent'); 
 ylabel('Sample');
@@ -102,7 +103,7 @@ inv = load_inv('F:mrdata\Triangleinterp_data.mat');
 m = get_mat_from_cell(inv);
 % create a nice 3d image of the invariant
 %figure('Name', 'Degree');
-plot_with_params(m, 14);
+plot_with_params(m, FONTSIZE);
 xlabel('Log Number of Local 3-Cliques Vector');
 zlabel('Percent'); 
 ylabel('Sample');
@@ -127,7 +128,7 @@ surfl(m)
 shading interp
 colormap copper;
 grid off;
-set(gca, 'fontsize', 14);
+set(gca, 'fontsize', FONTSIZE);
 set(gca, 'FontWeight', 'bold');
 set(gca,'FontName', 'Times');
 xlabel('Log Global Edges');
