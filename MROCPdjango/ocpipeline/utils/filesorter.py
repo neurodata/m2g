@@ -35,18 +35,17 @@ def checkFileExtGengraph(files):
   @param files: the files to check
   @type files: string
   '''
+  atlas_fn = None # Occasionally may not exist
+
   for fileName in files:
 
-    if re.match(re.compile( r'.+\.xml'), fileName) != None:
-      xmlFileName = fileName
+    if re.match(re.compile( r'.+\.nii'), fileName) != None:
+      atlas_fn = fileName
 
     if re.match(re.compile( r'.+\.dat'), fileName) != None:
-      datFileName = fileName
+      fiber_fn = fileName
 
-    if re.match( re.compile( r'.+\.raw'), fileName) != None:
-      rawFileName = fileName
-
-  return [xmlFileName, datFileName, rawFileName]
+  return [fiber_fn, atlas_fn]
 
 def checkFileExtSVD(files = 0):
   '''
