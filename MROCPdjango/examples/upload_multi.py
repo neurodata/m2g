@@ -42,15 +42,22 @@ def getFiberID(fiberfn):
 
 def main():
 
-  parser = argparse.ArgumentParser(description='Upload a multiple subjects to MROCP via a single dir that must match bg1/MRN. Base url -> http://mrbrain.cs.jhu.edu/graph-services/upload')
-  parser.add_argument('url', action="store", help='url must be http://mrbrain.cs.jhu.edu/graph-services/upload/{projectName}/{site}/{subject}/{session}')
-  parser.add_argument('graphsize', action="store", help= 'size of the graph. s OR b where s= smallgraph OR b = biggraph')
-  parser.add_argument('fiberDir', action="store", help = 'the path of the directory containing fiber tract files')
-  parser.add_argument('roiDir', action="store", help = 'the path of the directory containing ROI files')
-  parser.add_argument('-i', '--invariants', action="store", help='OPTIONAL: comma separated list of invariant types. E.g cc,tri,deg,mad for \
-                      clustering coefficient, triangle count, degree & maximum average degree')
+  parser = argparse.ArgumentParser(description='Upload a multiple subjects to MROCP via a \
+      single dir that must match bg1/MRN. Base url -> http://mrbrain.cs.jhu.edu/graph-services/upload')
+  parser.add_argument('url', action="store", \
+      help='url must be http://mrbrain.cs.jhu.edu/graph-services/upload/{projectName}/{site}\
+      /{subject}/{session}')
+  parser.add_argument('graphsize', action="store", help= 'size of the graph. s OR b where \
+      s = smallgraph OR b = biggraph')
+  parser.add_argument('fiberDir', action="store", help = 'the path of the directory \
+      containing fiber tract files')
+  parser.add_argument('-i', '--invariants', action="store", help='OPTIONAL: comma \
+      separated list of invariant types. E.g cc,tri,deg,mad for \
+      clustering coefficient, triangle count, degree & maximum average degree')
 
-  parser.add_argument('-a', '--auto', action="store_true", help="Use this flag if you want a browser session to open up with the result automatically")
+  parser.add_argument('-a','--atlas', action="store", help="NIFTI format atlas")
+  parser.add_argument('-u', '--auto', action="store_true", help="Use this flag if \
+      you want a browser session to open up with the result automatically")
 
   result = parser.parse_args()
 
@@ -62,20 +69,14 @@ def main():
         print "[ERROR]: fiber_fn '%s' not found!" % fiber_fn
         sys.exit(0)
 
-      roi_xml_fn = os.path.join(result.roiDir, getFiberID(fiber_fn) + 'roi.xml') # Edit appropriately for file naming convention
-      roi_raw_fn = os.path.join(result.roiDir, getFiberID(fiber_fn) + 'roi.raw') # Edit appropriately for file naming convention
-
-      if not (os.path.exists(roi_xml_fn) or os.path.exists(roi_raw_fn)):
-        print "[ERROR]: Rois not found! Check that filename is in form basename_roi.xml or basename_roi.raw"
-        sys.exit(0)
-
       # Create a temporary file to store zip contents in memory
       tmpfile = tempfile.NamedTemporaryFile()
       zfile = zipfile.ZipFile(tmpfile.name, "w", allowZip64=True)
 
       zfile.write(fiber_fn)
-      zfile.write(roi_xml_fn)
-      zfile.write(roi_raw_fn)
+      if result.atlas:
+        zfile.write(result.atlas)
+
       zfile.close()
 
       tmpfile.flush()
