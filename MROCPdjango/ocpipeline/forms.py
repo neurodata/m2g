@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 # Copyright 2014 Open Connectome Project (http://openconnecto.me)
 #
@@ -59,11 +59,8 @@ class BuildGraphForm(forms.Form):
   @var docfile: Fiber tract file
   @type docfile: string
 
-  @var roi_raw_file: Fiber tract xml file
-  @type roi_raw_file: string
-
-  @var roi_xml_file: Fiber tract roi file
-  @type roi_xml_file: string
+  @var data_atlas_file: Atlas file
+  @type data_atlas_file: string
 
   @var UserDefprojectName: The name of the project
   @type UserDefprojectName: string
@@ -97,12 +94,9 @@ class BuildGraphForm(forms.Form):
                            required = True, error_messages={'required': 'You must enter a Scan ID'})
 
   # Upload project files
-  fiber_file = forms.FileField(label='Select fiber.dat file',
-                               required = True, error_messages={'required': 'You must upload a fiber tract file'})
-  roi_raw_file = forms.FileField(label='Select roi.raw file',
-                                 required = True, error_messages={'required': 'You must upload ROIs'})
-  roi_xml_file = forms.FileField(label='Select roi.xml file', required = True,
-                                 error_messages={'required': 'You must upload ROIs'})
+  fiber_file = forms.FileField(label='Select fiber.dat file', required = True, 
+      error_messages={'required': 'You must upload a fiber tract file'},)
+  data_atlas_file = forms.FileField(label='Data atlas file (Optional)',required = False)
 
   INVARIANT_CHOICES = (('ss1', 'Scan Statistic 1',), ('tri', 'Triangle Count',), \
   ('cc', 'Clustering co-efficient',), ('mad', 'Maximum Average Degree',) \

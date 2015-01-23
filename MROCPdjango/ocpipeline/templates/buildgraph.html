@@ -49,13 +49,15 @@
     }
 </script>
 
-  <p>Please complete the entire form below, upload data derivative files and optionally select any invariants to be computed.
+  <p>Please complete the form below, upload data derivatives files and optionally select any invariants to be computed.
   <b><font color='#ff0000'>{{error_msg}}</font></b> <br/>
 
-  You must supply an Email address for big graph processing so as to receive the job completion email with result url.<br/>
-  <font color='#2373ff'> We will never share or use your email address for any other purpose.</font>
+  You must supply an Email address for big graph processing so as to receive the job completion 
+  email with result url.<br/>
+  The format of the <i>fiber</i> file is <a href="https://www.mristudio.org">MRI Studio</a> and 
+  the format of the atlas file must be <a href="http://nifti.nimh.nih.gov/nifti-1">NIFTI</a>.
   </p>
-      <form action="" class="nostyle" method="post" enctype="multipart/form-data" name="loadForm" onsubmit="return (Validate(this,['xml','dat','raw']) && verifyEmail());">
+      <form action="" class="nostyle" method="post" enctype="multipart/form-data" name="loadForm" onsubmit="return (Validate(this,['dat','nii', '']) && verifyEmail());">
         {% csrf_token %}
         <ul>{{ buildGraphform.as_ul }}</ul>
         <input name = "Derivatives"  type="submit" value="Submit All and Process" class="button" onclick="showSpinner();"/>
@@ -76,16 +78,26 @@
         The example <a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjango/examples/uploadsubj.py"
         target="blank"> uploadsubj.py</a> can be used as follows from a terminal session:
         </p>
-        <code>python uploadsubj.py http://mrbrain.cs.jhu.edu/graph-services/upload/progmatic/site/subj/sess/scan/s YOUR_FIBER.dat YOUR_ROI.xml YOUR_ROI.raw -i cc,tri,ss1,mad,deg,eig</code>
+        
+        <pre>python uploadsubj.py \
+http://mrbrain.cs.jhu.edu/graph-services/upload/YOUR_project/YOUR_site/YOUR_subject/YOUR_session/YOUR_scanID/s \
+YOUR_FIBER.dat -a YOUR_ATLAS.nii -i cc,tri,ss1,mad,deg,eig</pre>
         <p>
-         The parameter after YOUR_scan can either be <code>s</code> or <code>b</code>, but not both. Using <code>s</code> or <code>small</code> builds a small graph
-         (70 x 70 vertices) while <code>b</code> or <code>big</code> builds a big graph on the order of 10 M x 10 M vertices. <br/>
+          The parameter after YOUR_scanID can either be <code>s</code> or <code>b</code>, but not both.
+          The <code>-a</code> atlas is optional. If not selected the 
+          <a href="http://www.sciencedirect.com/science/article/pii/S1053811906000437" target ="blank">
+          Desikan atlas</a>  is used by default.
+          Using <code>s</code> or <code>small</code> builds a small graph 70 vertices while 
+          <code>b</code> or <code>big</code> builds a big graph on the order of 100 milion vertices. 
+          <br/>
 
-         The particular invocation in bold above would build a small graph and compute all invariants currently available. A list of invariant contractions is
-         available below.
-         <strong>The result of uploadsubj.py is a url containing all data produced. Simply wait for the http response and follow the url to download it.</strong>
-         We recommend starting a <a href="http://tmux.sourceforge.net/" target="blank">tmux</a> or <a href="http://linux.die.net/man/1/screen" target="blank"> screen </a> session in case your processing time
-         is lengthy.
+          The particular invocation in bold above would build a small graph and compute all 
+          invariants currently available. A list of invariant contractions is available below.
+          <strong>The result of uploadsubj.py is a url containing all data produced. 
+            Simply wait for the http response and follow the url to download it.</strong>
+          We recommend starting a <a href="http://tmux.sourceforge.net/" target="blank">tmux</a> 
+          or <a href="http://linux.die.net/man/1/screen" target="blank"> screen </a> session in
+          case your processing time is lengthy.
         </p>
 
         The optional arguments given as <code>-i</code> are simply appended to the final url in uploadsubj.py. The options available must be in a comma separated list and are as follows:
@@ -100,49 +112,55 @@
 
         <h3> Multiple graphs </h3>
         <p>
-        An example of a <a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjango/examples/upload_multi.py" target="blank">Multiple subject</a> job
-        is also provided. This is as an example of how to process multiple jobs with a single programmatic call.<br/>
+          An example of a <a href="https://github.com/openconnectome/MR-connectome/blob/master/
+            MROCPdjango/examples/upload_multi.py" target="blank">Multiple subject</a> job
+          is also provided. This is as an example of how to process multiple jobs with a single
+           programmatic call.<br/>
 
-        From within a terminal/command line session, it can be used as follows: <br/>
-
-        <code>python upload_multi.py http://mrbrain.cs.jhu.edu/graph-services/upload/YOUR_project/YOUR_site/YOUR_subject/YOUR_session s fiber_tract_dirctory roi_dirctory -i cc,tri,ss1,mad,deg,eig</code><br/>
-
-        This call would build graphs for multiple scans and compute all invariants noted in the <code>-i</code> flag.
-        The example assumes the following:
-
-        <ul>
-          <li>There is a directory containing all fiber tract files you wish to be processed with no other sub-directories or files you do not wish to process.</li>
-          <li>There is a directory containing all corresponding roi files (i.e both an xml and raw file for each fiber tract file) with file names in accordance with the convention noted below.</li>
-          <strong>Note the root of each roi file name should:</strong>
-            <ol>
-              <li>End in <strong> _roi</strong> E.g filename_roi.xml and filename_roi.raw.</li>
-              <li>
-                Be identical to the root of its corresponding fiber tract file. E.g If the fiber tract file name is <strong> sample1.dat</strong>,
-                then there must be a <strong>sample1_roi.raw</strong> AND a <strong> sample1_roi.xml</strong>. Thus the root is <strong>sample1</strong> in this example.
-              </li>
-            </ol>
-        </ul>
-
-        All fiber tract files  will be treated as a single project with multiple scanIDs derived from the file name.
-        <a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjango/examples/upload_multi.py" target="blank">Download the file</a>
-        and help can be obtained by typing the following in a terminal/command line session: <br/>
-        <code>python upload_multi.py -h</code>. The same is true for the single scan example, where: <code>python uploadsubj.py -h</code> gives help.
-      </div>
+          From within a terminal/command line session, it can be used as follows: <br/>
         </p>
+
+        <pre>python upload_multi.py \
+http://mrbrain.cs.jhu.edu/graph-services/upload/YOUR_project/YOUR_site/YOUR_subject/YOUR_session s \
+fiber_tract_dirctory -a YOUR_ATLAS -i cc,tri,ss1,mad,deg,eig</pre>
+        <p>
+          This call would build graphs for multiple scans and compute all 
+          invariants noted in the <code>-i</code> flag.
+          The example script assumes the following:
+          <ul>
+            <li>There is a directory containing <i>only</i> fiber tract files you wish to be 
+              processed with no other sub-directories.</li>
+          </ul>
+        </p>
+
+        <p>
+          All fiber tract files will be treated as a single project with multiple scanIDs 
+          derived from the file name. <br/>
+          <a href="https://github.com/openconnectome/MR-connectome/blob/master/
+            MROCPdjango/examples/upload_multi.py" target="blank">Download the file</a>
+          and help can be obtained by typing the following in a terminal/command line session: <br/>
+          <code>python upload_multi.py -h</code>. The same is true for the single scan example, 
+          where: <code>python uploadsubj.py -h</code> gives help.
+        </p>
+        </div>
     {% endblock programmatic %}
 
         <div id="Graph_specs">
            <h3>Specifications for graphs built</h3>
             <ul>
               <li> A <a href="http://graphml.graphdrawing.org/" target="blank">graphML</a> file formated graph. The format is readable by any xml-parser. </li>
-              <li>It is also natively supported by the <a href="http://igraph.sourceforge.net/" target="blank">igraph</a> graph analysis framework in C, R and Python.</li>
-              <li><b>NOTE: </b>Iterable data items are represented as <a href="http://en.wikipedia.org/wiki/JSON">JSON</a> encoded strings as an extension to the graphML file format.</li>
+              <li>It is also natively supported by the <a href="http://igraph.sourceforge.net/" 
+                target="blank">igraph</a> graph analysis framework in C, R and Python.</li>
+              <li><b>NOTE: </b>Iterable data items are represented as 
+              <a href="http://en.wikipedia.org/wiki/JSON">JSON</a> encoded strings as an 
+              extension to the graphML file format.</li>
             </ul>
 
           <h3>What's the difference between big and small graphs?</h3>
             <p>
-              The terms big/small graph are particularly relevant to fiber streamline graphs. Small graphs are of dimension 70 x 70 vertices. <br/>
-              Big graphs can be in the <b>millions</b> of vertices.
+            The terms big/small graph are particularly relevant to fiber streamline graphs. <br/>
+            Small graphs have 70 vertices and up to thousands of edges, whereas <br/>
+              Big graphs can be in the <b>millions</b> of vertices and 100s of millions of edges.
             </p>
 
         </div>

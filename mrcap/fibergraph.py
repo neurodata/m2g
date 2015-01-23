@@ -14,13 +14,15 @@
 # limitations under the License.
 #
 
+from time import time
+import math
+import itertools
+
+import igraph
+
 from mrcap.fiber import Fiber
 import mrcap.roi as roi
 import zindex
-import math
-import itertools
-import igraph
-from time import time
 
 # Abstract class for big and small fibergraphs
 
@@ -46,7 +48,10 @@ class _FiberGraph(object):
     ====================
     fiber - the fiber read fiber tract .dat file
     """
-    raise NotImplementedError("Subclasses should implement this!")
+    roi_edges = itertools.combinations((fiber.getVids(self.rois)),2)
+
+    for list_item in roi_edges:
+      self.edge_dict[tuple(sorted(list_item))] += 1
 
   def complete (self):
     """

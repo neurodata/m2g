@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 # Copyright 2014 Open Connectome Project (http://openconnecto.me)
 #
@@ -33,19 +33,20 @@ from computation.utils.cmdline import parse_dict
 #                             GRAPH BUILDER                                    #
 ################################################################################
 
-def build_graph(fiber_fn, roi_raw_fn, roi_xml_fn, is_big, save_dir, graph_fn, centroids, atlas, graph_attrs):
+def build_graph(fiber_fn, data_atlas_fn, is_big, save_dir, graph_fn, centroids,
+    atlas, graph_attrs, numfib):
   """
   Function to envoke graph generation code.
 
   positional args:
   ================
   fiber_fn - the file name of fiber streamline file in .dat format
-  roi_raw_fn - the file name of the mask for regions of interest in .raw format
-  roi_xml_fn - the file name of the mask for regions of interest in .xml format
+  data_atlas_fn - the data atlas containing lookups given a 3-tuple position in voxel-space
   is_big - boolean for if graph should be big or small
   save_dir - directory where to save graph file produced. Does not have to exist.
   graph_fn - the name of the graph file that will be the product of the graph building exercise
   atlas - the file name(s) or atlas and optionally region name files as list. 
+  numfib - number of fibers to process
 
   Returns:
   ========
@@ -77,7 +78,8 @@ def build_graph(fiber_fn, roi_raw_fn, roi_xml_fn, is_big, save_dir, graph_fn, ce
     else: assert False, "Cannot understand command line atlas name/region pair '%s'. Must be in format 'atlas,atlas_region_names'." % atl
   
   print stmt
-  genGraph(fiber_fn, graph_fn, roi_xml_fn, roi_raw_fn, is_big, centroids=centroids, graph_attrs=graph_attrs, **atlas_d)
+  genGraph(fiber_fn, data_atlas_fn, graph_fn, is_big, numfibers=numfib,
+      centroids=centroids, graph_attrs=graph_attrs, **atlas_d)
 
   return graph_fn
 
@@ -90,8 +92,7 @@ def main():
   parser = argparse.ArgumentParser(description='Run graph generation code based on size of graph')
 
   parser.add_argument('fiber_fn', action='store', help ='the full filename of the fiber streamline file (.dat format expected)')
-  parser.add_argument('roixml_fn', action='store', help='the full file name of the ROI.xml file (.xml format expected)')
-  parser.add_argument('roiraw_fn', action='store', help='the full file name of the ROI.xml file (.raw format expected)')
+  parser.add_argument("data_atlas_fn", action="store", help="The atlas with region data")
   parser.add_argument('-b', '--is_big', action='store_true', help ='[TO BE ALTERED] big graph? Pass the flag. If no flag assumed to be small.')
   parser.add_argument('-a', '--atlas', nargs='*', default=[], action='store', help ='Pass atlas filename(s). If regions are named then pass region \
       naming file as well in the format: \'-a atlas0 atlas1,atlas1_region_names atlas2 atlas3,atlas3_region_names\' etc.')
@@ -102,6 +103,8 @@ def main():
   parser.add_argument('-g', '--graph_fn', action='store', help='the full file name you would like the resulting graph to have')
   parser.add_argument( "-G", "--graph_attrs", nargs="*", default=[], action="store", help="Add (a) graph attribute(s). Quote, use colon for key:value and spaces for multiple \
       e.g 'attr1:value1' 'attr2:value2'")
+  parser.add_argument("--numfib", "-n", action="store", type=int, default=0, \
+      help="The number of fibers to process before exit")
 
   result = parser.parse_args()
 
@@ -111,7 +114,7 @@ def main():
   # Parse dict
   result.graph_attrs = parse_dict(result.graph_attrs) 
 
-  build_graph(result.fiber_fn, result.roiraw_fn, result.roixml_fn, result.is_big, result.save_dir, result.graph_fn, not result.centroids, result.atlas, result.graph_attrs)
+  build_graph(result.fiber_fn, result.data_atlas_fn, result.is_big, result.save_dir, result.graph_fn, not result.centroids, result.atlas, result.graph_attrs, result.numfib)
 
 if __name__ == '__main__':
   main()

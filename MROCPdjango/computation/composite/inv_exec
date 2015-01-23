@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 # Copyright 2014 Open Connectome Project (http://openconnecto.me)
 #
@@ -27,7 +27,6 @@ import sys
 import os
 
 import computation.composite.invariants as invariants
-from  mrcap.gengraph import genGraph
 from computation.utils.getBaseName import getBaseName
 
 from computation.utils.file_util import getPathLeaf, makeDirIfNone
