@@ -224,7 +224,7 @@ def buildGraph(request):
 """
 Your job successfully launched. You should receive an email to confirm launch
 and another when it upon job completion. <br/>
-<i>The process may take several hours<\i> if you selected to compute all invariants.
+<i>The process may take several hours</i> if you selected to compute all invariants.
 """
         return HttpResponseRedirect(get_script_prefix()+"success")
 
