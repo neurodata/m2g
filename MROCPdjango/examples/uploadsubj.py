@@ -30,7 +30,7 @@ import webbrowser
 def main():
 
   parser = argparse.ArgumentParser(description='Upload a subject to MROCP. \
-      Base url -> http://mrbrain.cs.jhu.edu/graph-services/upload')
+      Base url -> http://openconnecto.me/graph-services/upload')
   parser.add_argument('url', action="store", help='url must have NO SPACES & \
       must be in the form  http://mrbrain.cs.jhu.edu/graph-services/upload/\
       {projectName}/{site}/{subject}/{session}/{scanID}/{s|b}, where s= smallgraph OR b = biggraph')
