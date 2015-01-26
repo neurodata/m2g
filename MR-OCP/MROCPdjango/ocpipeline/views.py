@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 # Copyright 2014 Open Connectome Project (http://openconnecto.me)
 #
@@ -191,17 +191,15 @@ def buildGraph(request):
 
       """ Acquire fileNames """
       fiber_fn = form.cleaned_data["fiber_file"].name # get the name of the file input by user
-      roi_raw_fn = form.cleaned_data["roi_raw_file"].name
-      roi_xml_fn = form.cleaned_data["roi_xml_file"].name
+      if form.cleaned_data["data_atlas_file"]:
+        data_atlas_fn = form.cleaned_data["data_atlas_file"].name
+        print "Storing data atlas ..."
+        saveFileToDisk(form.cleaned_data["data_atlas_file"], 
+            os.path.join(request.session["derivatives"], data_atlas_fn))
 
-      print "Uploading files..."
-
-
+      print "Storing fibers ..."
       """ Save files in appropriate location """
       saveFileToDisk(form.cleaned_data["fiber_file"], os.path.join(request.session["derivatives"], fiber_fn))
-      saveFileToDisk(form.cleaned_data["roi_raw_file"], os.path.join(request.session["derivatives"], roi_raw_fn))
-      saveFileToDisk(form.cleaned_data["roi_xml_file"], os.path.join(request.session["derivatives"], roi_xml_fn))
-
       grModObj.save() # Save project data to DB after file upload
 
       # add entry to owned project
@@ -226,7 +224,7 @@ def buildGraph(request):
 """
 Your job successfully launched. You should receive an email to confirm launch
 and another when it upon job completion. <br/>
-<i>The process may take several hours<\i> if you selected to compute all invariants.
+<i>The process may take several hours</i> if you selected to compute all invariants.
 """
         return HttpResponseRedirect(get_script_prefix()+"success")
 
@@ -249,17 +247,22 @@ def processInputData(request):
   '''
   filesInUploadDir = os.listdir(request.session['derivatives'])
 
-  roi_xml_fn, fiber_fn, roi_raw_fn = checkFileExtGengraph(filesInUploadDir) # Check & sort files
+  fiber_fn, data_atlas_fn = checkFileExtGengraph(filesInUploadDir) # Check & sort files
 
   ''' Fully qualify file names '''
   fiber_fn = os.path.join(request.session['derivatives'], fiber_fn)
-  roi_raw_fn = os.path.join(request.session['derivatives'], roi_raw_fn)
-  roi_xml_fn = os.path.join(request.session['derivatives'], roi_xml_fn)
+  
+  if not data_atlas_fn:
+    data_atlas_fn = settings.ATLASES.keys()[0]
+  else:
+    data_atlas_fn = os.path.join(request.session['derivatives'], data_atlas_fn)
+
+  print "data_atlas_fn %s ..." % data_atlas_fn
 
   try:
-    request.session['Gfn']= call_gengraph(fiber_fn, roi_xml_fn, roi_raw_fn, \
-                              request.session['graphs'], request.session['graphInvariants'],\
-                              request.session['graphsize'], True)
+    request.session['Gfn']= call_gengraph(fiber_fn, data_atlas_fn, \
+                            request.session['graphs'], request.session['graphInvariants'],\
+                            request.session['graphsize'], True)
   except:
     if request.session['graphsize'] == 'big':
       msg = "Hello,\n\nYour most recent job failed either because your fiber streamline file or ROI mask was incorrectly formatted."
@@ -276,7 +279,7 @@ def processInputData(request):
 
   if request.session['graphsize'] == 'big':
     dwnldLoc = "http://mrbrain.cs.jhu.edu" + \
-                    + request.session['usrDefProjDir'].replace(' ','%20')
+                    request.session['usrDefProjDir'].replace(' ','%20')
     sendJobCompleteEmail(request.session['email'], dwnldLoc)
 
   return HttpResponseRedirect(get_script_prefix()+'confirmdownload')
@@ -350,7 +353,8 @@ def upload(request, webargs=None):
   Programmatic interface for uploading data
   @param request: the request object
 
-  @param webargs: POST data with userDefProjectName, site, subject, session, scanId, graphsize, [list of invariants to compute] info
+  @param webargs: POST data with userDefProjectName, site, subject, session,
+        scanId, graphsize, [list of invariants to compute] info
   """
   if (webargs and request.method == 'POST'):
     # Check for malformatted input
@@ -379,11 +383,15 @@ def upload(request, webargs=None):
     uploadFiles =  writeBodyToDisk(request.body, derivatives)
 
     # Check which file is which
-    roi_xml_fn, fiber_fn, roi_raw_fn = checkFileExtGengraph(uploadFiles) # Check & sort files
+    fiber_fn, data_atlas_fn = checkFileExtGengraph(uploadFiles) # Check & sort files
+    if not data_atlas_fn:
+      data_atlas_fn = settings.ATLASES.keys()[0]
+    else:
+      data_atlas_fn = os.path.join(derivatives, data_atlas_fn)
 
     ''' Data Processing '''
     if graphsize:
-      request.session['Gfn']= call_gengraph(fiber_fn, roi_xml_fn, roi_raw_fn, \
+      request.session['Gfn']= call_gengraph(fiber_fn, data_atlas_fn, \
                               graphs, request.session['graphInvariants'],\
                               graphsize, run=True)
 
@@ -862,12 +870,11 @@ def convert(request, webargs=None):
 #	   PROCESS DATA			#
 #########################################
 
-def call_gengraph(fiber_fn, roi_xml_fn, roi_raw_fn, graphs, graphInvariants, graphsize, run = False):
+def call_gengraph(fiber_fn, data_atlas_fn, graphs, graphInvariants, graphsize, run = False):
   '''
   Run graph building and other related scripts
   @param fiber_fn: fiber tract file
-  @param roi_xml_fn: region of interest xml file
-  @param roi_raw_fn: region of interest raw file
+  @param data_atlas_fn: the data atlas defining ROIs and region
 
   @param graphs: Dir where biggraphs & smallgraphs are saved
   @param graphInvariants:  Dir where graph invariants are saved
@@ -885,12 +892,12 @@ def call_gengraph(fiber_fn, roi_xml_fn, roi_raw_fn, graphs, graphInvariants, gra
       Gfn+="smgr.graphml"
 
       # Note: Some included atlases are present
-      gengraph.genGraph(fiber_fn, Gfn, roi_xml_fn, roi_raw_fn, bigGraph=False, **settings.ATLASES)
+      gengraph.genGraph(fiber_fn, data_atlas_fn, Gfn, bigGraph=False, **settings.ATLASES)
 
     elif graphsize.lower().startswith("b"):
       print("\nRunning Big gengraph ...")
       Gfn+="bggr.graphml"
-      gengraph.genGraph(fiber_fn, Gfn, roi_xml_fn, roi_raw_fn, bigGraph=True, **settings.ATLASES)
+      gengraph.genGraph(fiber_fn, data_atlas_fn, Gfn, bigGraph=True, **settings.ATLASES)
     else:
       print '[ERROR]: Graphsize Unkwown' # should never happen
   return Gfn

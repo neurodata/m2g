@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 # Copyright 2014 Open Connectome Project (http://openconnecto.me)
 #
@@ -30,35 +30,25 @@ import os
 from contextlib import closing
 
 
-def mux(translation1, rigid1, affine1):
+def mux(transforms, outf):
 
-  with closing(open(fiber_fn, "rb")) as fiber_f:
-    file_size = os.fstat(fiber_f.fileno()).st_size
-
-    for trans_fn in transforms:
-      trans = sio.loadmat(trans_fn)["AffineTransform_double_3_3"]
-      trans = np.reshape(trans, (3,4), order="F")
-      
-      count = 0
-      while (fiber_f.tell() < file_size):
-        fiber_header = np.fromfile(fiber_f, dtype=fiber_header_fmt, count=1)
-        
-        count += 1
-        if count % 10000 == 0: print "%d fibers transformed ..." % count
-        else:
-          assert False, "Unknown fiber header format"
-
-    print "Found %d fiber(s) of length > 1" % count
+  h = np.matrix(( (1,0,0,0), (0,1,0,0), (0,0,1,0) ))
+  for trans in transforms:
+    t = np.reshape(sio.loadmat(trans)["AffineTransform_double_3_3"], (3,4), order="F")
+    h = np.dot(np.transpose(t[0:3,0:3]), h) + np.matrix(( (0,0,0,t[0,3]), (0,0,0,t[1,3]), (0,0,0,t[2,3]) ))
+  
+  h = np.reshape(h, (12,1), order="F")
+  mdict = {"AffineTransform_double_3_3": h, "fixed": [0, 0, 0]}
+  sio.savemat(outf, mdict)
+  
 
 def main():
   parser = argparse.ArgumentParser(description="")
-  parser.add_argument("translation1", action="store", help="DTI-MPRAGE translation transform")
-  parser.add_argument("rigid1", action="store", help="DTI-MPRAGE rigid transform")
-  parser.add_argument("affine1", action="store", help="DTI-MPRAGE affine transform")
   parser.add_argument("outf", action="store", help="Output file for combined transform")
+  parser.add_argument("-t", "--transforms", nargs="+", help="Some transform")
   result = parser.parse_args()
 
-  mux(result.translation1, result.rigid1, result.affine1)
+  mux(result.transforms, result.outf)
 
 if __name__ == "__main__":
   main()
