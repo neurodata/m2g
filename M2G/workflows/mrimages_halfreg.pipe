@@ -1,0 +1,547 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<pipeline version=".2">
+        <connections>
+                <connection source="fibbie_1.DTIfibers" sink="mappie_1.fiberinfile" />
+                <connection source="muxie_1.complete" sink="mappie_1.transform" />
+                <connection source="mappie_1.fiberoutfile" sink="graphie_1.fiberfile" />
+                <connection source="Atlas_1.Output" sink="graphie_1.atlas" />
+                <connection source="tensie_1.DTItensors" sink="fibbie_1.DTITensors" />
+                <connection source="skullie_2.BrainMask" sink="fibbie_1.BrainMask" />
+                <connection source="Atlas_2.Output" sink="reggie_1.FixedImage" />
+                <connection source="skullie_1.OutputImage" sink="reggie_1.MovingImage" />
+                <connection source="DTI_1.Output" sink="tensie_1.DTIImage" />
+                <connection source="Gradients_1.Output" sink="tensie_1.DTIGradients" />
+                <connection source="skullie_2.BrainMask" sink="tensie_1.DTIBrainMask" />
+                <connection source="MPRAGE_1.Output" sink="skullie_1.InputImage" />
+                <connection source="skullie_1.OutputImage" sink="reggie_2.FixedImage" />
+                <connection source="skullie_2.OutputImage" sink="reggie_2.MovingImage" />
+                <connection source="DTI_1.Output" sink="skullie_2.InputImage" />
+                <connection source="reggie_2.TransformTranslation" sink="muxie_1.translation1" />
+                <connection source="reggie_2.TransformRigid" sink="muxie_1.rigid1" />
+                <connection source="reggie_2.TransformAffine" sink="muxie_1.affine1" />
+                <connection source="graphie_1.graphfile" sink="Graph_1.Input" />
+        </connections>
+        <moduleGroup id="mrimages_v1_1" name="mrimages_v1" posX="0" posY="0" sourceCode="">
+                <module id="mappie_1" name="mappie" package="mrimages" posX="805" posY="494" rotation="1" sourceCode="" location="pipeline://localhost//Users/gkiar/git/MR-connectome/M2G/apply_transforms.py">
+                        <metadata>
+                                <data key="__creationDateKey" value="Sun Jan 11 21:38:32 EST 2015" />
+                        </metadata>
+                        <input id="mappie_1.fiberinfile" name="fiber infile" required="true" enabled="true" order="0">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="Camino Bfloat" extension="Bfloat" description="" />
+                                        </fileTypes>
+                                </format>
+                        </input>
+                        <output id="mappie_1.fiberoutfile" name="fiber outfile" required="true" enabled="true" order="1">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="Matlab data" extension="dat" description="" />
+                                        </fileTypes>
+                                </format>
+                        </output>
+                        <input id="mappie_1.transform" name="transform" required="true" enabled="true" order="2">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="Matlab file" extension="mat" description="" />
+                                        </fileTypes>
+                                </format>
+                        </input>
+                </module>
+                <module id="graphie_1" name="graphie" package="mrimages" posX="952" posY="510" rotation="1" sourceCode="" location="pipeline://localhost//Users/gkiar/git/MR-connectome/mrcap/gengraph.py">
+                        <metadata>
+                                <data key="__creationDateKey" value="Sun Jan 11 17:53:43 EST 2015" />
+                        </metadata>
+                        <input id="graphie_1.fiberfile" name="fiber file" required="true" enabled="true" order="0">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="Matlab data" extension="dat" description="" />
+                                        </fileTypes>
+                                </format>
+                        </input>
+                        <input id="graphie_1.atlas" name="atlas" required="true" enabled="true" order="1">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="niftii2" extension="nii.gz" description="" />
+                                                <filetype name="nifti" extension="nii" description="" />
+                                        </fileTypes>
+                                </format>
+                        </input>
+                        <output id="graphie_1.graphfile" name="graph file" required="true" enabled="true" order="2">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="Matlab file" extension="mat" description="" />
+                                        </fileTypes>
+                                </format>
+                        </output>
+                </module>
+                <module id="fibbie_1" name="fibbie" package="mrimages" posX="714" posY="393" sourceCode="" location="pipeline://localhost//home/gkiar/vbox/loni_scripts/tens2fibs.py">
+                        <metadata>
+                                <data key="__creationDateKey" value="Fri Jan 09 13:07:20 EST 2015" />
+                        </metadata>
+                        <input id="fibbie_1.DTITensors" name="DTI Tensors" required="true" enabled="true" order="0">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="Camino Bdouble" extension="Bdouble" description="" />
+                                        </fileTypes>
+                                </format>
+                        </input>
+                        <input id="fibbie_1.BrainMask" name="Brain Mask" required="false" enabled="true" order="1">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="niftii2" extension="nii.gz" description="" />
+                                        </fileTypes>
+                                </format>
+                        </input>
+                        <input id="fibbie_1.Anisotropicvoxelthreshold" name="Anisotropic voxel threshold" required="false" enabled="true" order="2">
+                                <format type="Number" cardinality="1" />
+                                <values>
+                                        <value>0.2</value>
+                                </values>
+                        </input>
+                        <input id="fibbie_1.Curvaturethreshold" name="Curvature threshold" required="false" enabled="true" order="3">
+                                <format type="Number" cardinality="1" />
+                                <values>
+                                        <value>60</value>
+                                </values>
+                        </input>
+                        <output id="fibbie_1.DTIfibers" name="DTI fibers" required="false" enabled="true" order="4">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="Camino Bfloat" extension="Bfloat" description="" />
+                                        </fileTypes>
+                                </format>
+                        </output>
+                        <output id="fibbie_1.VTKfibers" name="VTK fibers" required="false" enabled="true" order="5">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="Visualizable fibers" extension="vtk" description="" />
+                                        </fileTypes>
+                                </format>
+                        </output>
+                </module>
+                <module id="reggie_1" name="reggie" package="mrimages" posX="70" posY="231" sourceCode="" location="pipeline://localhost//home/gkiar/vbox/loni_scripts/regi.py">
+                        <metadata>
+                                <data key="__creationDateKey" value="Tue Dec 16 08:42:59 EST 2014" />
+                        </metadata>
+                        <input id="reggie_1.FixedImage" name="Fixed Image" required="true" enabled="true" order="0">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="niftii2" extension="nii.gz" description="" />
+                                                <filetype name="nifti" extension="nii" description="" />
+                                        </fileTypes>
+                                </format>
+                        </input>
+                        <input id="reggie_1.MovingImage" name="Moving Image" required="true" enabled="true" order="1">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="niftii2" extension="nii.gz" description="" />
+                                                <filetype name="nifti" extension="nii" description="" />
+                                        </fileTypes>
+                                </format>
+                        </input>
+                        <input id="reggie_1.Tolerance" name="Tolerance" required="true" enabled="true" order="2">
+                                <format type="Number" cardinality="1" />
+                                <values>
+                                        <value>0.00001</value>
+                                </values>
+                        </input>
+                        <output id="reggie_1.OutputImage" name="Output Image" required="false" enabled="true" order="3">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="nifti" extension="nii" description="" />
+                                                <filetype name="niftii2" extension="nii.gz" description="" />
+                                        </fileTypes>
+                                </format>
+                        </output>
+                        <output id="reggie_1.TransformTranslation" name="Transform: Translation" required="false" enabled="true" order="4">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="Matlab file" extension="mat" description="" />
+                                        </fileTypes>
+                                </format>
+                        </output>
+                        <output id="reggie_1.TransformRigid" name="Transform: Rigid" required="false" enabled="true" order="5">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="Matlab file" extension="mat" description="" />
+                                        </fileTypes>
+                                </format>
+                        </output>
+                        <output id="reggie_1.TransformAffine" name="Transform: Affine" required="false" enabled="true" order="6">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="Matlab file" extension="mat" description="" />
+                                        </fileTypes>
+                                </format>
+                        </output>
+                </module>
+                <module id="tensie_1" name="tensie" package="mrimages" posX="449" posY="290" sourceCode="" location="pipeline://localhost//home/gkiar/vbox/loni_scripts/dti2tens.py">
+                        <metadata>
+                                <data key="__creationDateKey" value="Fri Jan 09 11:38:39 EST 2015" />
+                        </metadata>
+                        <input id="tensie_1.DTIImage" name="DTI Image" required="true" enabled="true" order="0">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="nifti" extension="nii" description="" />
+                                                <filetype name="niftii2" extension="nii.gz" description="" />
+                                        </fileTypes>
+                                </format>
+                        </input>
+                        <input id="tensie_1.DTIGradients" name="DTI Gradients" required="true" enabled="true" order="1">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="gradients" extension="grad" description="" />
+                                        </fileTypes>
+                                </format>
+                        </input>
+                        <input id="tensie_1.DTIBvalue" name="DTI Bvalue" required="true" enabled="true" order="2">
+                                <format type="Number" cardinality="1" />
+                                <values>
+                                        <value>700</value>
+                                </values>
+                        </input>
+                        <input id="tensie_1.DTIBrainMask" name="DTI Brain Mask" required="true" enabled="true" order="3">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="niftii2" extension="nii.gz" description="" />
+                                        </fileTypes>
+                                </format>
+                        </input>
+                        <output id="tensie_1.DTIscheme" name="DTI scheme" required="false" enabled="true" order="4">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="scheme file" extension="scheme" description="" />
+                                        </fileTypes>
+                                </format>
+                        </output>
+                        <output id="tensie_1.DTIimageasBfloat" name="DTI image as Bfloat" required="false" enabled="true" order="5">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="Camino Bfloat" extension="Bfloat" description="" />
+                                        </fileTypes>
+                                </format>
+                        </output>
+                        <output id="tensie_1.DTItensors" name="DTI tensors" required="true" enabled="true" order="6">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="Camino Bdouble" extension="Bdouble" description="" />
+                                        </fileTypes>
+                                </format>
+                        </output>
+                        <output id="tensie_1.FractionalAnisotropy" name="Fractional Anisotropy" required="false" enabled="true" order="7">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="nifti" extension="nii" description="" />
+                                                <filetype name="niftii2" extension="nii.gz" description="" />
+                                        </fileTypes>
+                                </format>
+                        </output>
+                        <output id="tensie_1.MeanDiffusivity" name="Mean Diffusivity" required="false" enabled="true" order="8">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="nifti" extension="nii" description="" />
+                                                <filetype name="niftii2" extension="nii.gz" description="" />
+                                        </fileTypes>
+                                </format>
+                        </output>
+                        <output id="tensie_1.DTIEigenvalues" name="DTI Eigen values" required="false" enabled="true" order="9">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="Camino Bdouble" extension="Bdouble" description="" />
+                                        </fileTypes>
+                                </format>
+                        </output>
+                </module>
+                <module id="skullie_1" name="skullie" package="mrimages" posX="196" posY="78" sourceCode="" location="pipeline://localhost//home/gkiar/vbox/loni_scripts/skullextract.py">
+                        <metadata>
+                                <data key="__creationDateKey" value="Mon Jan 12 11:59:48 EST 2015" />
+                        </metadata>
+                        <input id="skullie_1.InputImage" name="Input Image" required="true" enabled="true" order="0">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="niftii2" extension="nii.gz" description="" />
+                                                <filetype name="nifti" extension="nii" description="" />
+                                        </fileTypes>
+                                </format>
+                        </input>
+                        <input id="skullie_1.FractionalIntensity" name="Fractional Intensity" required="true" enabled="true" order="1">
+                                <format type="Number" cardinality="1" />
+                                <values>
+                                        <value>0.5</value>
+                                </values>
+                        </input>
+                        <input id="skullie_1.Verticalgradient" name="Vertical gradient" required="true" enabled="true" order="2">
+                                <format type="Number" cardinality="1" />
+                                <values>
+                                        <value>0</value>
+                                </values>
+                        </input>
+                        <output id="skullie_1.OutputImage" name="Output Image" required="false" enabled="true" order="3">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="niftii2" extension="nii.gz" description="" />
+                                        </fileTypes>
+                                </format>
+                        </output>
+                        <output id="skullie_1.BrainMask" name="Brain Mask" required="false" enabled="true" order="4">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="niftii2" extension="nii.gz" description="" />
+                                        </fileTypes>
+                                </format>
+                        </output>
+                </module>
+                <module id="reggie_2" name="reggie" package="mrimages" posX="260" posY="232" sourceCode="" location="pipeline://localhost//home/gkiar/vbox/loni_scripts/regi.py">
+                        <metadata>
+                                <data key="__creationDateKey" value="Tue Dec 16 08:42:59 EST 2014" />
+                        </metadata>
+                        <input id="reggie_2.FixedImage" name="Fixed Image" required="false" enabled="true" order="0">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="niftii2" extension="nii.gz" description="" />
+                                                <filetype name="nifti" extension="nii" description="" />
+                                        </fileTypes>
+                                </format>
+                        </input>
+                        <input id="reggie_2.MovingImage" name="Moving Image" required="false" enabled="true" order="1">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="niftii2" extension="nii.gz" description="" />
+                                                <filetype name="nifti" extension="nii" description="" />
+                                        </fileTypes>
+                                </format>
+                        </input>
+                        <input id="reggie_2.Tolerance" name="Tolerance" required="false" enabled="true" order="2">
+                                <format type="Number" cardinality="1" />
+                                <values>
+                                        <value>0.00001</value>
+                                </values>
+                        </input>
+                        <output id="reggie_2.OutputImage" name="Output Image" required="false" enabled="true" order="3">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="nifti" extension="nii" description="" />
+                                                <filetype name="niftii2" extension="nii.gz" description="" />
+                                        </fileTypes>
+                                </format>
+                        </output>
+                        <output id="reggie_2.TransformTranslation" name="Transform: Translation" required="false" enabled="true" order="4">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="Matlab file" extension="mat" description="" />
+                                        </fileTypes>
+                                </format>
+                        </output>
+                        <output id="reggie_2.TransformRigid" name="Transform: Rigid" required="false" enabled="true" order="5">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="Matlab file" extension="mat" description="" />
+                                        </fileTypes>
+                                </format>
+                        </output>
+                        <output id="reggie_2.TransformAffine" name="Transform: Affine" required="false" enabled="true" order="6">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="Matlab file" extension="mat" description="" />
+                                        </fileTypes>
+                                </format>
+                        </output>
+                </module>
+                <module id="skullie_2" name="skullie" package="mrimages" posX="501" posY="77" sourceCode="" location="pipeline://localhost//home/gkiar/vbox/loni_scripts/skullextract.py">
+                        <metadata>
+                                <data key="__creationDateKey" value="Mon Jan 12 11:59:48 EST 2015" />
+                        </metadata>
+                        <input id="skullie_2.InputImage" name="Input Image" required="true" enabled="true" order="0">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="niftii2" extension="nii.gz" description="" />
+                                                <filetype name="nifti" extension="nii" description="" />
+                                        </fileTypes>
+                                </format>
+                        </input>
+                        <input id="skullie_2.FractionalIntensity" name="Fractional Intensity" required="true" enabled="true" order="1">
+                                <format type="Number" cardinality="1" />
+                                <values>
+                                        <value>0.5</value>
+                                </values>
+                        </input>
+                        <input id="skullie_2.Verticalgradient" name="Vertical gradient" required="true" enabled="true" order="2">
+                                <format type="Number" cardinality="1" />
+                                <values>
+                                        <value>0</value>
+                                </values>
+                        </input>
+                        <output id="skullie_2.OutputImage" name="Output Image" required="false" enabled="true" order="3">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="niftii2" extension="nii.gz" description="" />
+                                        </fileTypes>
+                                </format>
+                        </output>
+                        <output id="skullie_2.BrainMask" name="Brain Mask" required="false" enabled="true" order="4">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="niftii2" extension="nii.gz" description="" />
+                                        </fileTypes>
+                                </format>
+                        </output>
+                </module>
+                <dataModule id="DTI_1" name="DTI" package="mrimages" posX="381" posY="14" rotation="1" sourceCode="" type="File" source="true" loopIndex="false">
+                        <metadata>
+                                <data key="__creationDateKey" value="Thu Jan 15 14:03:27 EST 2015" />
+                        </metadata>
+                        <output id="DTI_1.Output" name="Output" required="true" enabled="true" order="-1">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="niftii2" extension="nii.gz" description="" />
+                                                <filetype name="nifti" extension="nii" description="" />
+                                        </fileTypes>
+                                </format>
+                        </output>
+                        <fileTypes>
+                                <filetype name="niftii2" extension="nii.gz" description="" />
+                                <filetype name="nifti" extension="nii" description="" />
+                        </fileTypes>
+                </dataModule>
+                <dataModule id="Atlas_1" name="Atlas" package="mrimages" posX="904" posY="368" sourceCode="" type="File" source="true" loopIndex="false">
+                        <metadata>
+                                <data key="__creationDateKey" value="Thu Jan 15 14:03:27 EST 2015" />
+                        </metadata>
+                        <output id="Atlas_1.Output" name="Output" required="true" enabled="true" order="-1">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="nifti" extension="nii" description="" />
+                                                <filetype name="niftii2" extension="nii.gz" description="" />
+                                        </fileTypes>
+                                </format>
+                        </output>
+                        <fileTypes>
+                                <filetype name="nifti" extension="nii" description="" />
+                                <filetype name="niftii2" extension="nii.gz" description="" />
+                        </fileTypes>
+                </dataModule>
+                <dataModule id="MPRAGE_1" name="MPRAGE" package="mrimages" posX="79" posY="17" rotation="1" sourceCode="" type="File" source="true" loopIndex="false">
+                        <metadata>
+                                <data key="__creationDateKey" value="Thu Jan 15 14:03:27 EST 2015" />
+                        </metadata>
+                        <output id="MPRAGE_1.Output" name="Output" required="true" enabled="true" order="-1">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="nifti" extension="nii" description="" />
+                                                <filetype name="niftii2" extension="nii.gz" description="" />
+                                        </fileTypes>
+                                </format>
+                        </output>
+                        <fileTypes>
+                                <filetype name="nifti" extension="nii" description="" />
+                                <filetype name="niftii2" extension="nii.gz" description="" />
+                        </fileTypes>
+                </dataModule>
+                <dataModule id="Atlas_2" name="Atlas" package="mrimages" posX="15" posY="102" rotation="1" sourceCode="" type="File" source="true" loopIndex="false">
+                        <metadata>
+                                <data key="__creationDateKey" value="Thu Jan 15 14:03:27 EST 2015" />
+                        </metadata>
+                        <output id="Atlas_2.Output" name="Output" required="true" enabled="true" order="-1">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="nifti" extension="nii" description="" />
+                                                <filetype name="niftii2" extension="nii.gz" description="" />
+                                        </fileTypes>
+                                </format>
+                        </output>
+                        <fileTypes>
+                                <filetype name="nifti" extension="nii" description="" />
+                                <filetype name="niftii2" extension="nii.gz" description="" />
+                        </fileTypes>
+                </dataModule>
+                <module id="muxie_1" name="muxie" package="mrimages" posX="406" posY="428" rotation="1" sourceCode="" location="pipeline://localhost/">
+                        <tag />
+                        <metadata>
+                                <data key="__creationDateKey" value="Thu Jan 15 14:07:10 EST 2015" />
+                        </metadata>
+                        <input id="muxie_1.translation1" name="translation1" required="false" enabled="true" order="1" prefix="-t" prefixSpaced="true" prefixAllArgs="false">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="Matlab file" extension="mat" description="" />
+                                        </fileTypes>
+                                </format>
+                        </input>
+                        <input id="muxie_1.rigid1" name="rigid1" required="false" enabled="true" order="2">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="Matlab file" extension="mat" description="" />
+                                        </fileTypes>
+                                </format>
+                        </input>
+                        <input id="muxie_1.affine1" name="affine1" required="false" enabled="true" order="3">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="Matlab file" extension="mat" description="" />
+                                        </fileTypes>
+                                </format>
+                        </input>
+                        <input id="muxie_1.translation2" name="translation2" required="false" enabled="true" order="4">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="Matlab file" extension="mat" description="" />
+                                        </fileTypes>
+                                </format>
+                        </input>
+                        <input id="muxie_1.rigid2" name="rigid2" required="false" enabled="true" order="5">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="Matlab file" extension="mat" description="" />
+                                        </fileTypes>
+                                </format>
+                        </input>
+                        <input id="muxie_1.affine2" name="affine2" required="false" enabled="true" order="6">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="Matlab file" extension="mat" description="" />
+                                        </fileTypes>
+                                </format>
+                        </input>
+                        <output id="muxie_1.complete" name="complete" required="false" enabled="true" order="0">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="Matlab file" extension="mat" description="" />
+                                        </fileTypes>
+                                </format>
+                        </output>
+                </module>
+                <dataModule id="Graph_1" name="Graph" package="mrimages" posX="1109" posY="522" rotation="1" sourceCode="" type="File" source="false" loopIndex="false" dirDump="false">
+                        <metadata>
+                                <data key="__creationDateKey" value="Thu Jan 15 14:09:59 EST 2015" />
+                        </metadata>
+                        <input id="Graph_1.Input" name="Input" required="true" enabled="true" order="-1">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="Matlab file" extension="mat" description="" />
+                                        </fileTypes>
+                                </format>
+                        </input>
+                        <fileTypes>
+                                <filetype name="Matlab file" extension="mat" description="" />
+                        </fileTypes>
+                </dataModule>
+                <dataModule id="Gradients_1" name="Gradients" package="mrimages" posX="655" posY="171" sourceCode="" type="File" source="true" loopIndex="false">
+                        <metadata>
+                                <data key="__creationDateKey" value="Thu Jan 15 14:03:27 EST 2015" />
+                        </metadata>
+                        <output id="Gradients_1.Output" name="Output" required="true" enabled="true" order="-1">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="gradients" extension="grad" description="" />
+                                                <filetype name="niftii2" extension="nii.gz" description="" />
+                                        </fileTypes>
+                                </format>
+                        </output>
+                        <fileTypes>
+                                <filetype name="gradients" extension="grad" description="" />
+                                <filetype name="niftii2" extension="nii.gz" description="" />
+                        </fileTypes>
+                </dataModule>
+        </moduleGroup>
+</pipeline>
+
