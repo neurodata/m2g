@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 # Copyright 2014 Open Connectome Project (http://openconnecto.me)
 #
@@ -34,7 +34,7 @@ class Atlas(object):
     @param atlas: The atlas filename or nibabel nifti object
     @param label_fn: If there is a atlas region label file
     """
-    if isinstance(atlas, str):
+    if isinstance(atlas, str) or isinstance(atlas, unicode):
       self.data = nib.load(os.path.abspath(atlas)).get_data()
     else:
       self.data = atlas.get_data()
