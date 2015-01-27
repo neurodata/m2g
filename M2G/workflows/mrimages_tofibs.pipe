@@ -89,7 +89,8 @@
                                 </format>
                         </output>
                 </module>
-                <module id="tensie_1" name="tensie" package="mrimages" posX="449" posY="290" sourceCode="" location="pipeline://localhost//home/gkiar/vbox/loni_scripts/dti2tens.py">
+                <module id="tensie_1" name="tensie" package="mrimages" posX="449" posY="290" sourceCode="" location="pipeline://localhost//cis/project/migraine/centos6/MR-connectome/M2G/src/dti2tens.py">
+                        <tag />
                         <metadata>
                                 <data key="__creationDateKey" value="Fri Jan 09 11:38:39 EST 2015" />
                         </metadata>
@@ -413,18 +414,19 @@
                         </values>
                 </dataModule>
                 <dataModule id="Gradients_1" name="Gradients" package="mrimages" posX="655" posY="171" sourceCode="" type="File" source="true" loopIndex="false">
+                        <tag />
                         <metadata>
                                 <data key="__creationDateKey" value="Thu Jan 15 14:03:27 EST 2015" />
                         </metadata>
                         <output id="Gradients_1.Output" name="Output" required="true" enabled="true" order="-1">
                                 <format type="File" cardinality="1">
                                         <fileTypes>
-                                                <filetype name="nifti" extension="nii" description="" />
+                                                <filetype name="gradients" extension="grad" description="" />
                                         </fileTypes>
                                 </format>
                         </output>
                         <fileTypes>
-                                <filetype name="nifti" extension="nii" description="" />
+                                <filetype name="gradients" extension="grad" description="" />
                         </fileTypes>
                         <values>
                                 <value>pipeline://localhost//cis/project/migraine/data/KKI2009/KKI2009-01/KKI2009-01-DTI.grad</value>
