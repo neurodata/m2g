@@ -339,6 +339,7 @@
                         </values>
                 </dataModule>
                 <module id="muxie_1" name="muxie" package="mrimages" posX="406" posY="428" rotation="1" sourceCode="" location="pipeline://localhost//cis/project/migraine/centos6/MR-connectome/M2G/src/transform_mux.py">
+                        <tag />
                         <metadata>
                                 <data key="__creationDateKey" value="Thu Jan 15 14:07:10 EST 2015" />
                         </metadata>
@@ -363,21 +364,21 @@
                                         </fileTypes>
                                 </format>
                         </input>
-                        <input id="muxie_1.translation2" name="translation2" required="false" enabled="true" order="4">
+                        <input id="muxie_1.translation2" name="translation2" required="false" enabled="false" order="4">
                                 <format type="File" cardinality="1">
                                         <fileTypes>
                                                 <filetype name="Matlab file" extension="mat" description="" />
                                         </fileTypes>
                                 </format>
                         </input>
-                        <input id="muxie_1.rigid2" name="rigid2" required="false" enabled="true" order="5">
+                        <input id="muxie_1.rigid2" name="rigid2" required="false" enabled="false" order="5">
                                 <format type="File" cardinality="1">
                                         <fileTypes>
                                                 <filetype name="Matlab file" extension="mat" description="" />
                                         </fileTypes>
                                 </format>
                         </input>
-                        <input id="muxie_1.affine2" name="affine2" required="false" enabled="true" order="6">
+                        <input id="muxie_1.affine2" name="affine2" required="false" enabled="false" order="6">
                                 <format type="File" cardinality="1">
                                         <fileTypes>
                                                 <filetype name="Matlab file" extension="mat" description="" />
