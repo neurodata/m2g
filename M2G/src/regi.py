@@ -29,13 +29,14 @@ tempname = 'temp'+ext
 # Apply translation transformation
 os.system('antsRegistration -d 3 -o [t,'+img_out+'] -r ['+img_fixed+', '+img_moving+',1] -m Mattes[ '+img_fixed+', '+img_moving+',1,12] -t Translation[0.75] -c [100x75x50x25, '+tol+', 5] --smoothing-sigmas 9x5x3x1 -f 4x3x2x1')
 os.system('cp '+img_out+' '+tempname)
+os.system('mv t0GenericAffine.mat '+ tran)
+
 # Apply rigid transformation
 os.system('antsRegistration -d 3 -o [r,'+img_out+'] -r ['+img_fixed+', '+tempname+',1] -m Mattes[ '+img_fixed+', '+img_out+',1,12] -t Rigid[0.75] -c [100x75x50x25, '+tol+', 5] --smoothing-sigmas 9x5x3x1 -f 4x3x2x1')
 os.system('cp '+img_out+' '+tempname)
+os.system('mv r0GenericAffine.mat '+ rigi)
+
 # Apply affine transformation
 os.system('antsRegistration -d 3 -o [a,'+img_out+'] -r ['+img_fixed+', '+tempname+',1] -m Mattes[ '+img_fixed+', '+img_out+',1,12] -t Affine[0.75] -c [100x75x50x25, '+tol+', 5] --smoothing-sigmas 9x5x3x1 -f 4x3x2x1')
-
-os.system('mv t0GenericAffine.mat '+ tran)
-os.system('mv r0GenericAffine.mat '+ rigi)
 os.system('mv a0GenericAffine.mat '+ affi)
 #TODOGK: Implement nonl transform
