@@ -229,7 +229,7 @@
                         <input id="reggie_1.Tolerance" name="Tolerance" required="false" enabled="true" order="2">
                                 <format type="Number" cardinality="1" />
                                 <values>
-                                        <value>0.00001</value>
+                                        <value>0.0001</value>
                                 </values>
                         </input>
                         <output id="reggie_1.OutputImage" name="Output Image" required="false" enabled="true" order="3">
