@@ -12,7 +12,7 @@
                                         </fileTypes>
                                 </format>
                                 <values>
-                                        <value>pipeline://localhost//home/gkiar/vbox/loni_scripts/gengraph.m</value>
+                                        <value>pipeline://localhost//cis/project/migraine/centos6/MR-connectome/M2G/src/gengraph.m</value>
                                 </values>
                         </input>
                         <input id="gengraphmatlab_2.Fiberfileindatformat" name="Fiber file in dat format" required="false" enabled="true" order="1">
@@ -21,6 +21,9 @@
                                                 <filetype name="Matlab data" extension="dat" description="" />
                                         </fileTypes>
                                 </format>
+                                <values>
+                                        <value>pipeline://localhost//cis/project/migraine/data/KKI2009/smallgraphs/regi_fibers.dat</value>
+                                </values>
                         </input>
                         <input id="gengraphmatlab_2.Atlas" name="Atlas" required="false" enabled="true" order="2">
                                 <format type="File" cardinality="1">
@@ -29,6 +32,9 @@
                                                 <filetype name="nifti" extension="nii" description="" />
                                         </fileTypes>
                                 </format>
+                                <values>
+                                        <value>pipeline://localhost//cis/project/migraine/data/atlas/desikan_atlas.nii</value>
+                                </values>
                         </input>
                         <output id="gengraphmatlab_2.graph" name="graph" required="false" enabled="true" order="3">
                                 <format type="File" cardinality="1">
@@ -36,6 +42,9 @@
                                                 <filetype name="Matlab file" extension="mat" description="" />
                                         </fileTypes>
                                 </format>
+                                <values>
+                                        <value>pipeline://localhost//cis/project/migraine/data/KKI2009/smallgraphs/KKI2009-01_sm.mat</value>
+                                </values>
                         </output>
                 </module>
         </moduleGroup>
