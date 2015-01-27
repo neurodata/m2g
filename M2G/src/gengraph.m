@@ -4,8 +4,8 @@ function graph = gengraph (fiberfile, atlasfile, outfile)
 % Version 0.2, G. Kiar 01.07.2014
 
 %% Load data - some hardcoding in this prototype
-addpath /cis/project/migraine/centos6/MR-connectome/M2G/src
-addpath /cis/project/migraine/centos6/NIfTI_20140122
+% addpath /cis/project/migraine/centos6/MR-connectome/M2G/src
+% addpath /cis/project/migraine/centos6/NIfTI_20140122
 
 % load fibers
 tic
@@ -51,7 +51,7 @@ for i = 1:length(fiber) %loop over number of fibers
         for j = 1:fiber(i).length
             
             idx = fiber(i).xyzdat(j,:);
-            idx = ceil(idx);  %this is the convention of FACT
+            idx = ceil(idx)+1;  %this is the convention of FACT
             
             if sum(idx) > 0  && idx(1) <= size(roiLabelMask,1) && idx(2) <= size(roiLabelMask,2) ...
                     && idx(3) <= size(roiLabelMask,3)%necessary to prevent out of bound errors
@@ -79,7 +79,7 @@ for i = 1:length(fiber) %loop over number of fibers
     end
 end
 
-%figure, imagesc(log10(fbrCountMtx))
+figure, imagesc(log10(fbrCountMtx))
 edges = sparse(fbCountMtx)
 graph = fbrCountMtx;
 save(outfile, fbrCountMtx, edges)
