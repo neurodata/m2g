@@ -80,6 +80,6 @@ for i = 1:length(fiber) %loop over number of fibers
 end
 
 %figure, imagesc(log10(fbrCountMtx))
-% edges = sparse(fbCountMtx)
+edges = sparse(fbCountMtx)
 graph = fbrCountMtx;
-% save(outfile, fbrCountMtx, edges)
+save(outfile, fbrCountMtx, edges)
