@@ -1,15 +1,16 @@
-function graph = gengraph (fiber, header, atlasfile, outfile)
+function graph = gengraph (fiberfile, atlasfile, outfile)
 % To generate a connectivity matrix, do the following:
 % Version 0.1, W. Gray 02.14.2012
 % Version 0.2, G. Kiar 01.07.2014
 
 %% Load data - some hardcoding in this prototype
-
+addpath /cis/project/migraine/centos6/MR-connectome/M2G/src
+addpath /cis/project/migraine/centos6/NIfTI_20140122
 
 % load fibers
-% tic
-% [fiber, header] = fiberReader(fiberfile);
-% t = toc/60
+tic
+[fiber, header] = fiberReader(fiberfile);
+t = toc/60
 
 % load ROIs
 nn = load_nii(atlasfile);
