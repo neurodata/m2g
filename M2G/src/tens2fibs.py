@@ -25,7 +25,7 @@ import string
 import sys
 import re
 import os
-
+from os.path import basename
 
 def make_fibs(tensors, mask, anis, curve, fibers, vtk):
 
