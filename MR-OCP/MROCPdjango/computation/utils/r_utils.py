@@ -184,6 +184,7 @@ def r_igraph_write(g, fn, gformat="graphml"):
 
   write_graph = robjects.r("""
         require(igraph)
+        options(digits=16)
         fn <- function(g, fn, gformat){
         write.graph(g, fn, format=gformat)
        } """)
