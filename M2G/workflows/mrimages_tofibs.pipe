@@ -18,7 +18,8 @@
                 <connection source="mappie_1.fiberoutfile" sink="Fiber_1.Input" />
         </connections>
         <moduleGroup id="mrimages_v1_1" name="mrimages_v1" posX="0" posY="0" sourceCode="">
-                <module id="mappie_1" name="mappie" package="mrimages" posX="802" posY="494" rotation="1" sourceCode="" location="pipeline://localhost//cis/project/migraine/centos6/MR-connectome/M2G/src/apply_transforms.py">
+                <module id="mappie_1" name="mappie" package="mrimages" posX="802" posY="494" rotation="1" sourceCode="" location="pipeline://localhost//cis/project/migraine/centos6/MR-connectome/M2G/src/apply_transforms.py" gridVariables="-L=2G">
+                        <tag />
                         <metadata>
                                 <data key="__creationDateKey" value="Sun Jan 11 21:38:32 EST 2015" />
                         </metadata>
@@ -44,7 +45,8 @@
                                 </format>
                         </input>
                 </module>
-                <module id="fibbie_1" name="fibbie" package="mrimages" posX="714" posY="393" sourceCode="" location="pipeline://localhost//cis/project/migraine/centos6/MR-connectome/M2G/src/tens2fibs.py">
+                <module id="fibbie_1" name="fibbie" package="mrimages" posX="713" posY="393" sourceCode="" location="pipeline://localhost//cis/project/migraine/centos6/MR-connectome/M2G/src/tens2fibs.py" gridVariables="-L=2G">
+                        <tag />
                         <metadata>
                                 <data key="__creationDateKey" value="Fri Jan 09 13:07:20 EST 2015" />
                         </metadata>
@@ -89,7 +91,8 @@
                                 </format>
                         </output>
                 </module>
-                <module id="tensie_1" name="tensie" package="mrimages" posX="449" posY="290" sourceCode="" location="pipeline://localhost//cis/project/migraine/centos6/MR-connectome/M2G/src/dti2tens.py">
+                <module id="tensie_1" name="tensie" package="mrimages" posX="449" posY="290" sourceCode="" location="pipeline://localhost//cis/project/migraine/centos6/MR-connectome/M2G/src/dti2tens.py" gridVariables="-L=2G">
+                        <tag />
                         <metadata>
                                 <data key="__creationDateKey" value="Fri Jan 09 11:38:39 EST 2015" />
                         </metadata>
@@ -166,7 +169,8 @@
                                 </format>
                         </output>
                 </module>
-                <module id="skullie_1" name="skullie" package="mrimages" posX="196" posY="78" sourceCode="" location="pipeline://localhost//cis/project/migraine/centos6/MR-connectome/M2G/src/skullextract.py">
+                <module id="skullie_1" name="skullie" package="mrimages" posX="196" posY="78" sourceCode="" location="pipeline://localhost//cis/project/migraine/centos6/MR-connectome/M2G/src/skullextract.py" gridVariables="-L=2G">
+                        <tag />
                         <metadata>
                                 <data key="__creationDateKey" value="Mon Jan 12 11:59:48 EST 2015" />
                         </metadata>
@@ -205,7 +209,8 @@
                                 </format>
                         </output>
                 </module>
-                <module id="reggie_1" name="reggie" package="mrimages" posX="260" posY="232" sourceCode="" location="pipeline://localhost//cis/project/migraine/centos6/MR-connectome/M2G/src/regi.py">
+                <module id="reggie_1" name="reggie" package="mrimages" posX="260" posY="232" sourceCode="" location="pipeline://localhost//cis/project/migraine/centos6/MR-connectome/M2G/src/regi.py" gridVariables="-L=4G">
+                        <tag />
                         <metadata>
                                 <data key="__creationDateKey" value="Tue Dec 16 08:42:59 EST 2014" />
                         </metadata>
@@ -261,7 +266,8 @@
                                 </format>
                         </output>
                 </module>
-                <module id="skullie_2" name="skullie" package="mrimages" posX="502" posY="76" sourceCode="" location="pipeline://localhost//cis/project/migraine/centos6/MR-connectome/M2G/src/skullextract.py">
+                <module id="skullie_2" name="skullie" package="mrimages" posX="500" posY="77" sourceCode="" location="pipeline://localhost//cis/project/migraine/centos6/MR-connectome/M2G/src/skullextract.py" gridVariables="-L=2G">
+                        <tag />
                         <metadata>
                                 <data key="__creationDateKey" value="Mon Jan 12 11:59:48 EST 2015" />
                         </metadata>
@@ -418,7 +424,8 @@
                                 <value>pipeline://localhost//cis/project/migraine/data/KKI2009/KKI2009-42/KKI2009-42-MPRAGE.nii</value>
                         </values>
                 </dataModule>
-                <module id="muxie_1" name="muxie" package="mrimages" posX="406" posY="428" rotation="1" sourceCode="" location="pipeline://localhost//cis/project/migraine/centos6/MR-connectome/M2G/src/transform_mux.py">
+                <module id="muxie_1" name="muxie" package="mrimages" posX="406" posY="428" rotation="1" sourceCode="" location="pipeline://localhost//cis/project/migraine/centos6/MR-connectome/M2G/src/transform_mux.py" gridVariables="-L=2G">
+                        <tag />
                         <metadata>
                                 <data key="__creationDateKey" value="Thu Jan 15 14:07:10 EST 2015" />
                         </metadata>
