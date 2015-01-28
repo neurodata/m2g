@@ -7,7 +7,8 @@
                 <connection source="bets_1.BrainMask" sink="mri2tensors_1.DTIBrainMask" />
                 <connection source="mri2tensors_1.DTItensors" sink="tens2fibers_1.DTITensors" />
                 <connection source="bets_1.BrainMask" sink="tens2fibers_1.BrainMask" />
-                <connection source="tens2fibers_1.DTIfibers" sink="Fibers_1.Input" />
+                <connection source="mappie_1.fiberoutfile" sink="Fibers_1.Input" />
+                <connection source="tens2fibers_1.DTIfibers" sink="mappie_1.fiberinfile" />
         </connections>
         <moduleGroup id="mrimages2graphs_1" name="mrimages2graphs" package="mrimages" posX="0" posY="0" sourceCode="">
                 <metadata>
@@ -190,8 +191,48 @@
                                 <filetype name="nifti" extension="nii" description="" />
                         </fileTypes>
                         <values>
-                                <value>pipeline://localhost//Users/gkiar/Dropbox/JHU/Vogelstein/vbox/testretest/inputs/KKI2009-09/KKI2009-09-DTI.nii</value>
-                                <value>pipeline://localhost//Users/gkiar/Dropbox/JHU/Vogelstein/vbox/testretest/inputs/KKI2009-42/KKI2009-42-DTI.nii</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/KKI2009-02/KKI2009-01-DTI.nii</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/KKI2009-02/KKI2009-02-DTI.nii</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/KKI2009-03/KKI2009-03-DTI.nii</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/KKI2009-04/KKI2009-04-DTI.nii</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/KKI2009-05/KKI2009-05-DTI.nii</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/KKI2009-06/KKI2009-06-DTI.nii</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/KKI2009-07/KKI2009-07-DTI.nii</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/KKI2009-08/KKI2009-08-DTI.nii</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/KKI2009-09/KKI2009-09-DTI.nii</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/KKI2009-10/KKI2009-10-DTI.nii</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/KKI2009-11/KKI2009-11-DTI.nii</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/KKI2009-12/KKI2009-12-DTI.nii</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/KKI2009-13/KKI2009-13-DTI.nii</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/KKI2009-14/KKI2009-14-DTI.nii</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/KKI2009-15/KKI2009-15-DTI.nii</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/KKI2009-16/KKI2009-16-DTI.nii</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/KKI2009-17/KKI2009-17-DTI.nii</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/KKI2009-18/KKI2009-18-DTI.nii</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/KKI2009-19/KKI2009-19-DTI.nii</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/KKI2009-20/KKI2009-20-DTI.nii</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/KKI2009-21/KKI2009-21-DTI.nii</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/KKI2009-22/KKI2009-22-DTI.nii</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/KKI2009-23/KKI2009-23-DTI.nii</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/KKI2009-24/KKI2009-24-DTI.nii</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/KKI2009-25/KKI2009-25-DTI.nii</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/KKI2009-26/KKI2009-26-DTI.nii</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/KKI2009-27/KKI2009-27-DTI.nii</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/KKI2009-28/KKI2009-28-DTI.nii</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/KKI2009-29/KKI2009-29-DTI.nii</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/KKI2009-30/KKI2009-30-DTI.nii</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/KKI2009-31/KKI2009-31-DTI.nii</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/KKI2009-32/KKI2009-32-DTI.nii</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/KKI2009-33/KKI2009-33-DTI.nii</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/KKI2009-34/KKI2009-34-DTI.nii</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/KKI2009-35/KKI2009-35-DTI.nii</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/KKI2009-36/KKI2009-36-DTI.nii</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/KKI2009-37/KKI2009-37-DTI.nii</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/KKI2009-38/KKI2009-38-DTI.nii</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/KKI2009-39/KKI2009-39-DTI.nii</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/KKI2009-40/KKI2009-40-DTI.nii</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/KKI2009-41/KKI2009-41-DTI.nii</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/KKI2009-42/KKI2009-42-DTI.nii</value>
                         </values>
                 </dataModule>
                 <dataModule id="Grads_1" name="Grads" package="mrimages" posX="686" posY="173" sourceCode="" type="File" source="true" loopIndex="false">
@@ -210,11 +251,51 @@
                                 <filetype name="gradients" extension="grad" description="" />
                         </fileTypes>
                         <values>
-                                <value>pipeline://localhost//Users/gkiar/Dropbox/JHU/Vogelstein/vbox/testretest/inputs/KKI2009-09/KKI2009-09-DTI.grad</value>
-                                <value>pipeline://localhost//Users/gkiar/Dropbox/JHU/Vogelstein/vbox/testretest/inputs/KKI2009-42/KKI2009-42-DTI.grad</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/KKI2009-01/KKI2009-01-DTI.grad</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/KKI2009-02/KKI2009-02-DTI.grad</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/KKI2009-03/KKI2009-03-DTI.grad</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/KKI2009-04/KKI2009-04-DTI.grad</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/KKI2009-05/KKI2009-05-DTI.grad</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/KKI2009-06/KKI2009-06-DTI.grad</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/KKI2009-07/KKI2009-07-DTI.grad</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/KKI2009-08/KKI2009-08-DTI.grad</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/KKI2009-09/KKI2009-09-DTI.grad</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/KKI2009-10/KKI2009-10-DTI.grad</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/KKI2009-11/KKI2009-11-DTI.grad</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/KKI2009-12/KKI2009-12-DTI.grad</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/KKI2009-13/KKI2009-13-DTI.grad</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/KKI2009-14/KKI2009-14-DTI.grad</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/KKI2009-15/KKI2009-15-DTI.grad</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/KKI2009-16/KKI2009-16-DTI.grad</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/KKI2009-17/KKI2009-17-DTI.grad</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/KKI2009-18/KKI2009-18-DTI.grad</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/KKI2009-19/KKI2009-19-DTI.grad</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/KKI2009-20/KKI2009-20-DTI.grad</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/KKI2009-21/KKI2009-21-DTI.grad</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/KKI2009-22/KKI2009-22-DTI.grad</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/KKI2009-23/KKI2009-23-DTI.grad</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/KKI2009-24/KKI2009-24-DTI.grad</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/KKI2009-25/KKI2009-25-DTI.grad</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/KKI2009-26/KKI2009-26-DTI.grad</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/KKI2009-27/KKI2009-27-DTI.grad</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/KKI2009-28/KKI2009-28-DTI.grad</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/KKI2009-29/KKI2009-29-DTI.grad</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/KKI2009-30/KKI2009-30-DTI.grad</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/KKI2009-31/KKI2009-31-DTI.grad</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/KKI2009-32/KKI2009-32-DTI.grad</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/KKI2009-33/KKI2009-33-DTI.grad</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/KKI2009-34/KKI2009-34-DTI.grad</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/KKI2009-35/KKI2009-35-DTI.grad</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/KKI2009-36/KKI2009-36-DTI.grad</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/KKI2009-37/KKI2009-37-DTI.grad</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/KKI2009-38/KKI2009-38-DTI.grad</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/KKI2009-39/KKI2009-39-DTI.grad</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/KKI2009-40/KKI2009-40-DTI.grad</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/KKI2009-41/KKI2009-41-DTI.grad</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/KKI2009-42/KKI2009-42-DTI.grad</value>
                         </values>
                 </dataModule>
-                <dataModule id="Fibers_1" name="Fibers" package="mrimages" posX="715" posY="541" sourceCode="" type="File" source="false" loopIndex="false" dirDump="false">
+                <dataModule id="Fibers_1" name="Fibers" package="mrimages" posX="955" posY="526" rotation="1" sourceCode="" type="File" source="false" loopIndex="false" dirDump="false">
                         <tag />
                         <metadata>
                                 <data key="__creationDateKey" value="Thu Jan 15 13:31:46 EST 2015" />
@@ -222,18 +303,87 @@
                         <input id="Fibers_1.Input" name="Input" required="true" enabled="true" order="-1">
                                 <format type="File" cardinality="1">
                                         <fileTypes>
-                                                <filetype name="Camino Bfloat" extension="Bfloat" description="" />
+                                                <filetype name="Matlab data" extension="dat" description="" />
                                         </fileTypes>
                                 </format>
                         </input>
                         <fileTypes>
-                                <filetype name="Camino Bfloat" extension="Bfloat" description="" />
+                                <filetype name="Matlab data" extension="dat" description="" />
                         </fileTypes>
                         <values>
-                                <value>pipeline://localhost//Users/gkiar/Dropbox/JHU/Vogelstein/vbox/testretest/outputs/KKI2009-09_fibers.Bfloat</value>
-                                <value>pipeline://localhost//Users/gkiar/Dropbox/JHU/Vogelstein/vbox/testretest/outputs/KKI2009-42_fibers.Bfloat</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/smallgraphs/KKI2009-01_fib.dat</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/smallgraphs/KKI2009-02_fib.dat</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/smallgraphs/KKI2009-03_fib.dat</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/smallgraphs/KKI2009-04_fib.dat</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/smallgraphs/KKI2009-05_fib.dat</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/smallgraphs/KKI2009-06_fib.dat</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/smallgraphs/KKI2009-07_fib.dat</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/smallgraphs/KKI2009-08_fib.dat</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/smallgraphs/KKI2009-09_fib.dat</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/smallgraphs/KKI2009-10_fib.dat</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/smallgraphs/KKI2009-11_fib.dat</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/smallgraphs/KKI2009-12_fib.dat</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/smallgraphs/KKI2009-13_fib.dat</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/smallgraphs/KKI2009-14_fib.dat</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/smallgraphs/KKI2009-15_fib.dat</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/smallgraphs/KKI2009-16_fib.dat</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/smallgraphs/KKI2009-17_fib.dat</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/smallgraphs/KKI2009-18_fib.dat</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/smallgraphs/KKI2009-19_fib.dat</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/smallgraphs/KKI2009-20_fib.dat</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/smallgraphs/KKI2009-21_fib.dat</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/smallgraphs/KKI2009-22_fib.dat</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/smallgraphs/KKI2009-23_fib.dat</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/smallgraphs/KKI2009-24_fib.dat</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/smallgraphs/KKI2009-25_fib.dat</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/smallgraphs/KKI2009-26_fib.dat</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/smallgraphs/KKI2009-27_fib.dat</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/smallgraphs/KKI2009-28_fib.dat</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/smallgraphs/KKI2009-29_fib.dat</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/smallgraphs/KKI2009-30_fib.dat</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/smallgraphs/KKI2009-31_fib.dat</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/smallgraphs/KKI2009-32_fib.dat</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/smallgraphs/KKI2009-33_fib.dat</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/smallgraphs/KKI2009-34_fib.dat</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/smallgraphs/KKI2009-35_fib.dat</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/smallgraphs/KKI2009-36_fib.dat</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/smallgraphs/KKI2009-37_fib.dat</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/smallgraphs/KKI2009-38_fib.dat</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/smallgraphs/KKI2009-39_fib.dat</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/smallgraphs/KKI2009-40_fib.dat</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/smallgraphs/KKI2009-41_fib.dat</value>
+                                <value>pipeline://localhost//cis/project/migraine/data/KKI2009/smallgraphs/KKI2009-42_fib.dat</value>
                         </values>
                 </dataModule>
+                <module id="mappie_1" name="mappie" package="mrimages" posX="815" posY="514" rotation="1" sourceCode="" location="pipeline://localhost//cis/project/migraine/centos6/MR-connectome/M2G/src/apply_transforms.py" gridVariables="-L=2G">
+                        <metadata>
+                                <data key="__creationDateKey" value="Sun Jan 11 21:38:32 EST 2015" />
+                        </metadata>
+                        <input id="mappie_1.fiberinfile" name="fiber infile" required="true" enabled="true" order="0">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="Camino Bfloat" extension="Bfloat" description="" />
+                                        </fileTypes>
+                                </format>
+                        </input>
+                        <output id="mappie_1.fiberoutfile" name="fiber outfile" required="true" enabled="true" order="1">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="Matlab data" extension="dat" description="" />
+                                        </fileTypes>
+                                </format>
+                        </output>
+                        <input id="mappie_1.transform" name="transform" required="true" enabled="true" order="2" prefix="-t" prefixSpaced="true" prefixAllArgs="false">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="Matlab file" extension="mat" description="" />
+                                        </fileTypes>
+                                </format>
+                                <values>
+                                        <value>pipeline://localhost//cis/project/migraine/data/atlas/desikan_atlas.nii</value>
+                                </values>
+                        </input>
+                </module>
         </moduleGroup>
 </pipeline>
 
