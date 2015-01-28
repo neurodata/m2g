@@ -19,13 +19,21 @@
 # Created by Disa Mhembere on 2015-01-26.
 # Email: disa@jhu.edu
 
+set -e
+
 if [ "$#" -ne 1 ]; then
-  echo "Usage: sourceInstallRigraph igraph_root_directory"
+  echo "Usage: sourceInstallRigraph igraph_root_directory [install_location]"
+  exit 1
 fi
 
 cd $1
-./bootstrap
-./configure
+./bootstrap.sh
+
+if [ "$#" -eq 2 ]; then
+  ./configure --prefix $2
+else
+  ./configure
+fi
 make
 
 cd interfaces/R
