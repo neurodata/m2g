@@ -169,7 +169,7 @@
                                 </format>
                         </output>
                 </module>
-                <module id="skullie_1" name="skullie" package="mrimages" posX="196" posY="78" sourceCode="" location="pipeline://localhost//cis/project/migraine/centos6/MR-connectome/M2G/src/skullextract.py" gridVariables="-L=2G">
+                <module id="skullie_1" name="skullie" package="mrimages" posX="196" posY="78" sourceCode="" location="pipeline://localhost//cis/project/migraine/centos6/MR-connectome/M2G/src/skullextract.py" gridVariables="-L=16G">
                         <tag />
                         <metadata>
                                 <data key="__creationDateKey" value="Mon Jan 12 11:59:48 EST 2015" />
@@ -266,7 +266,7 @@
                                 </format>
                         </output>
                 </module>
-                <module id="skullie_2" name="skullie" package="mrimages" posX="500" posY="77" sourceCode="" location="pipeline://localhost//cis/project/migraine/centos6/MR-connectome/M2G/src/skullextract.py" gridVariables="-L=2G">
+                <module id="skullie_2" name="skullie" package="mrimages" posX="500" posY="77" sourceCode="" location="pipeline://localhost//cis/project/migraine/centos6/MR-connectome/M2G/src/skullextract.py" gridVariables="-L=16G">
                         <tag />
                         <metadata>
                                 <data key="__creationDateKey" value="Mon Jan 12 11:59:48 EST 2015" />
