@@ -37,7 +37,7 @@ def r_igraph_degree(g, mode="total", save_fn=None):
   """
 
   deg = robjects.r("""
-  require(igraph)
+  suppressMessages(require(igraph))
   fn <- function(g){
   igraph::degree(g, mode="%s")
   }
