@@ -63,7 +63,7 @@ def load_and_store(dirg):
   print "** Done with %s ** \n\n" % dirg
 
 if __name__ == '__main__':
-  if len(sys.argv) > 1:
+  if len(sys.argv) > 1 sys.argv[1] != "-h":
     load_and_store(sys.argv[1])
   else:
     print "Please provide the name of the directory with LCC's to convert as the first arg!"
