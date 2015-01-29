@@ -35,9 +35,9 @@ def r_igraph_scan1(g, save_fn=None):
   @return: The graph with the scan1 attribute appended
   """
   scanstat1 = robjects.r("""
-  require(igraph)
+  suppressMessages(require(igraph))
   fn <- function(g){
-  igraph::local.scan(g)
+  igraph::local_scan(g)
   }
   """)
   ss1vector = scanstat1(g)
