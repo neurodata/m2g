@@ -1,0 +1,52 @@
+#!/usr/bin/python
+
+# intergrtest
+# Created by Disa Mhembere on 2013-06-03.
+# Email: disa@jhu.edu
+# Copyright (c) 2013. All rights reserved.
+"""
+Test to insure all scripts in the module do not throw
+compile time errrors
+"""
+import os
+import subprocess
+from computation.utils.file_util import recursive_listdir
+import sys
+
+def test():
+  """
+  The testing function traverses all modules for compilation
+  errrors
+  """
+
+  todo = None
+  for dirs in [os.path.join('MROCPdjango', 'computation'), 'mrcap']:
+    for file in recursive_listdir(dirs):
+
+      if os.path.splitext(file)[1] == ".py" or ( os.path.splitext(file)[1] == ""  and not file[-2:] == "cc"):
+        if os.path.basename(file) == "setup.py" or os.path.basename(file) == "README":
+          pass
+        else:
+          print "compiling %s ..." % file
+          v = subprocess.call(["python", file, "-h"])
+          #import pdb; pdb.set_trace()
+          if v == 0:
+            print "=====> %s compile SUCCESS!\n" % file
+          else:
+            print "**[ERROR]: %s compile FAILED!***\n\n" % file
+            print "Continue to run test on remaining scripts ? yes or no ?"
+
+            todo = sys.stdin.readline().strip()
+            if todo == "n" or todo == "no":
+              print "[ERROR message]: Remaining tests not run. Please correct error & rerun the testscript."
+              sys.exit(-1)
+
+  if not todo:
+    print "\n**Congratulations! Your package is fully operational. All tests completed successfully!**\n\n"
+  else:
+    print "\n**[ERROR message]: Tests completed with errors. Please check which scripts failed and rerun the test.**\n\n"
+
+  #subprocess.call["rm", "-f", "int_test.log"]
+
+if __name__ == '__main__':
+  test()
