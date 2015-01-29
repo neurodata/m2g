@@ -38,6 +38,7 @@ fi
 make
 
 cd $2
+git checkout dev
 git submodule init
 git submodule update
 make
