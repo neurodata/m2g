@@ -1,9 +1,24 @@
-#!/usr/bin/python
+#!/usr/bin/env python
+
+# Copyright 2014 Open Connectome Project (http://openconnecto.me)
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
 
 # intergrtest
 # Created by Disa Mhembere on 2013-06-03.
 # Email: disa@jhu.edu
-# Copyright (c) 2013. All rights reserved.
+
 """
 Test to insure all scripts in the module do not throw
 compile time errrors
@@ -13,6 +28,13 @@ import subprocess
 from computation.utils.file_util import recursive_listdir
 import sys
 
+BASE_DIR = os.path.abspath("../") 
+testdirs = [os.path.join(BASE_DIR, "MR-OCP","MROCPdjango"),
+    os.path.join(BASE_DIR, "MR-OCP", "mrcap"),
+    ]
+testignore = ["example-alg", "README", "setup.py", 
+    os.path.join(BASE_DIR, "MR-OCP","MROCPdjango", "ocpipeline"), "check_fibers.py"]
+
 def test():
   """
   The testing function traverses all modules for compilation
@@ -20,16 +42,18 @@ def test():
   """
 
   todo = None
-  for dirs in [os.path.join('MROCPdjango', 'computation'), 'mrcap']:
+  for dirs in testdirs:
     for file in recursive_listdir(dirs):
+        if os.path.basename(file) in testignore or os.path.dirname(file) in testignore:
+          continue
 
-      if os.path.splitext(file)[1] == ".py" or ( os.path.splitext(file)[1] == ""  and not file[-2:] == "cc"):
-        if os.path.basename(file) == "setup.py" or os.path.basename(file) == "README":
-          pass
-        else:
+        if os.path.splitext(file)[1] == ".py" or ( os.path.splitext(file)[1] == ""  and not file[-2:] == "cc"):
           print "compiling %s ..." % file
-          v = subprocess.call(["python", file, "-h"])
-          #import pdb; pdb.set_trace()
+          if os.path.basename(file) in ["makefile", "Makefile"]:
+            v = subprocess.call(["cd", os.path.dirname(file), ";", "make"]) 
+          else:
+            v = subprocess.call(["python", file, "-h"])
+
           if v == 0:
             print "=====> %s compile SUCCESS!\n" % file
           else:
@@ -46,7 +70,6 @@ def test():
   else:
     print "\n**[ERROR message]: Tests completed with errors. Please check which scripts failed and rerun the test.**\n\n"
 
-  #subprocess.call["rm", "-f", "int_test.log"]
 
 if __name__ == '__main__':
   test()
