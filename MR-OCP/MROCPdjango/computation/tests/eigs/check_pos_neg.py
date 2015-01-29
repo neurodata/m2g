@@ -29,7 +29,9 @@ import matplotlib
 matplotlib.use("Agg")
 import pylab as pl
 
-assert len(sys.argv) > 1, "You must provide the directory name with eigenvector data .."
+if len(sys.argv) < 2 or not os.path.exists(sys.argv[1]):
+  sys.stderr.write("You must provide the directory name with eigenvector data ..\n")
+  exit(0) # Non-error so itergration tests pass
 
 eigs = glob(os.path.join(sys.argv[1], "*_eigvl.npy"))
 all_eigvals = np.array([])

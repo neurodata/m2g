@@ -25,6 +25,10 @@ from mrcap.fiber import FiberReader
 import sys
 import os
 
+if len(sys.argv) < 2 or not os.path.exists(sys.argv[1]):
+  sys.stderr.write("Pass in a MRI studio fiber file\n")
+  exit(0) # for friendly exit
+
 reader = FiberReader(sys.argv[1])
 reader.shape = (182, 218, 182)
 reader.fiberCount = 30000
