@@ -21,22 +21,25 @@
 
 set -e
 
-if [ "$#" -ne 1 ]; then
-  echo "Usage: sourceInstallRigraph igraph_root_directory [install_location]"
+if [ "$#" -ne 2 ]; then
+  echo "Usage: sourceInstallRigraph cigraph_root_directory \
+              rigraph_root_directory [install_location]"
   exit 1
 fi
 
 cd $1
 ./bootstrap.sh
 
-if [ "$#" -eq 2 ]; then
-  ./configure --prefix $2
+if [ "$#" -eq 3 ]; then
+  ./configure --prefix $3
 else
   ./configure
 fi
 make
 
-cd interfaces/R
+cd $2
+git submodule init
+git submodule update
 make
 
 # Dependencies: irlba, NMF
