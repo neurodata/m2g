@@ -37,7 +37,7 @@ def main():
   parser.add_argument('webargs', action="store", help='comma separated list (no spaces) of invariant \
       types. E.g cc,tri,deg,mad,eig,ss1 for clustering coefficient, triangle count, degree, maximum \
       average degree, eigen-pairs & scan statistic')
-  parser.add_argument('file', action="store", help ='Single .mat graph or a Zipped directory with one\
+  parser.add_argument('file', action="store", help ='Single graph or a Zipped directory with one\
       or more graphs')
   parser.add_argument('inputFormat', action='store', help='Input format of the graph i.e. One of: \
       graphml | ncol | edgelist | lgl | pajek | graphdb | numpy | mat')
