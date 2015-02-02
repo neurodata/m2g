@@ -30,10 +30,7 @@ from os.path import basename
 
 
 def do_registration(fixed, moving, tol, out, tra, rig, aff):
-
-    a = basename(out)
-    print a
-    [root, ext] = os.path.splitext(a)
+    [root, ext] = os.path.splitext(basename(out))
     
     intermediate = 'temp'+ext
     # Apply translation transformation

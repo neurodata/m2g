@@ -28,10 +28,7 @@ import os
 from os.path import basename
 
 def make_fibs(tensors, mask, anis, curve, fibers, vtk):
-
-  a = basename(fibers)
-  print a
-  [root, ext] = os.path.splitext(a)
+  [root, ext] = os.path.splitext(basename(fibers))
 
   # Perfoms fiber tractography in voxelspace on the given tensors
   os.system('track -inputmodel dt -seedfile '+mask+' -anisthresh '+anis+' -curvethresh '+curve+' -inputfile '+tensors+' > '+fibers+' -outputinvoxelspace 2>/cis/project/migraine/data/KKI2009/log/'+root+'_err.error')

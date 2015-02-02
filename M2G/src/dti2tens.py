@@ -40,13 +40,12 @@ def make_tens(dti, grad, bval, mask, scheme, dti_bfloat, tensors, fa, md, eigs):
   os.system('dtfit '+dti_bfloat+' '+dti_scheme+' -bgmask '+dti_mask+' -outputfile '+dti_tensors)
   
   # In order to visualize, and just 'cause it's fun anyways, we get some stats
-  a = basename(fa)
-  b = basename(md)
-  [fa_base, ext] = os.path.splitext(a)
-  [md_base, ext] = os.path.splitext(b)
+
+  [fa_base, ext] = os.path.splitext(basename(fa))
+  [md_base, ext] = os.path.splitext(basename(md))
   os.system('for PROG in '+fa_base+' '+md_base+'; do cat '+dti_tensors+' | ${PROG} | voxel2image -outputroot ${PROG} -header '+dti_image+'; done')
-  os.system('mv '+a+' '+fa)
-  os.system('mv '+b+' '+md)
+  os.system('mv '+basename(fa)+' '+fa)
+  os.system('mv '+basename(md)+' '+md)
 
   # We also need the eigen system to visualize
   os.system('cat '+dti_tensors+' | dteig > '+dti_eigs)
