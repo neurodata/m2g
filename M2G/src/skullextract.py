@@ -35,11 +35,11 @@ def remove_skull(image, f, g, brain, mask):
 
 def main():
   parser = argparse.ArgumentParser(description="")
-  parser.add_argument("image", action="store", help="The tensors produced from the DTI image (.Bdouble)")
-  parser.add_argument("f", action="store", help="The brain mask of DTI image (.nii, .nii.gz)")
-  parser.add_argument("g", action="store", help="The anisotropic threshold value (default =0.2)")
-  parser.add_argument("brain", action="store", help="The curvature threshold value (default =60)") 
-  parser.add_argument("mask", action="store", help="The produced fiber tracts (.Bfloat)")
+  parser.add_argument("image", action="store", help="The original brain scan (.nii, .nii.gz)")
+  parser.add_argument("f", action="store", help="Fractional Intensity value (default=0.5)")
+  parser.add_argument("g", action="store", help="Vertical Gradient value (default =0)")
+  parser.add_argument("brain", action="store", help="The skull removed brain (.nii.gz)") 
+  parser.add_argument("mask", action="store", help="The binarized brain mask (.nii.gz)")
   
   result = parser.parse_args()
 
