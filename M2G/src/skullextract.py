@@ -26,7 +26,7 @@ import os
 from os.path import basename
 
 def remove_skull(image, f, g, brain, mask):
-  [root, ext1] = os.path.splitext(basename(outf))
+  [root, ext1] = os.path.splitext(basename(brain))
   [root, ext2] = os.path.splitext(root)
   
   os.system('bet '+image+' '+brain+' -f '+f+' -g '+g+' -m')
