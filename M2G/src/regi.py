@@ -1,42 +1,70 @@
-#!/usr/bin/python
+#!/usr/bin/env python
+
+# Copyright 2015 Open Connectome Project (http://openconnecto.me)
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
 
 # regi.py
-# Registers an image to a template image
-# Version 0.1, G. Kiar, 01/09/2015
+# Created by Greg Kiar on 2015-01-09.
+# Email: gkiar@jhu.edu
+# Copyright (c) 2015. All rights reserved.
 
 # Load necessary packages
-from sys import argv
+import argparse
 import string
 import sys
 import re
 import os
+from os.path import basename
 
-# Pull necessary parameters
-params = list(argv)
-img_fixed = params[1] # Image that we are registering to (.nii, .nii.gz)
-img_moving = params[2] # Image that we are transforming (.nii, .nii.gz)
-tol = params[3] # Error tolerance (default 1e-5) (val) 
 
-img_out = params[4] # The transformed output image (.nii, .nii.gz)(output)
-tran = params[5] # Translation transform matrix output (no ext)(output)  <-- For these, ANTs auto-populates the rest of the title and the extension... this ok?
-rigi = params[6] # Rigid transform matrix output (no ext)(output)        <--
-affi = params[7] # Affine transform matrix output (no ext)(output)       <--
-#TODOGK: Implement nonl transform
-#nonl = params[8] # Non-linear transform matrix output (no ext)(output)
+def do_registration(fixed, moving, tol, out, tra, rig, aff):
 
-[root, ext] = os.path.splitext(img_out)
-tempname = 'temp'+ext
-# Apply translation transformation
-os.system('antsRegistration -d 3 -o [t,'+img_out+'] -r ['+img_fixed+', '+img_moving+',1] -m Mattes[ '+img_fixed+', '+img_moving+',1,12] -t Translation[0.75] -c [100x75x50x25, '+tol+', 5] --smoothing-sigmas 9x5x3x1 -f 4x3x2x1')
-os.system('cp '+img_out+' '+tempname)
-os.system('mv t0GenericAffine.mat '+ tran)
+    a = basename(out)
+    print a
+    [root, ext] = os.path.splitext(a)
+    
+    intermediate = 'temp'+ext
+    # Apply translation transformation
+    os.system('antsRegistration -d 3 -o [t,'+out+'] -r ['+fixed+', '+moving+',1] -m Mattes[ '+fixed+', '+moving+',1,12] -t Translation[0.75] -c [100x75x50x25, '+tol+', 5] --smoothing-sigmas 9x5x3x1 -f 4x3x2x1')
+    os.system('cp '+out+' '+intermediate)
+    os.system('mv t0GenericAffine.mat '+ tra)
 
-# Apply rigid transformation
-os.system('antsRegistration -d 3 -o [r,'+img_out+'] -r ['+img_fixed+', '+tempname+',1] -m Mattes[ '+img_fixed+', '+img_out+',1,12] -t Rigid[0.75] -c [100x75x50x25, '+tol+', 5] --smoothing-sigmas 9x5x3x1 -f 4x3x2x1')
-os.system('cp '+img_out+' '+tempname)
-os.system('mv r0GenericAffine.mat '+ rigi)
+    # Apply rigid transformation
+    os.system('antsRegistration -d 3 -o [r,'+out+'] -r ['+fixed+', '+intermediate+',1] -m Mattes[ '+fixed+', '+out+',1,12] -t Rigid[0.75] -c [100x75x50x25, '+tol+', 5] --smoothing-sigmas 9x5x3x1 -f 4x3x2x1')
+    os.system('cp '+out+' '+intermediate)
+    os.system('mv r0GenericAffine.mat '+ rig)
+    
+    # Apply affine transformation
+    os.system('antsRegistration -d 3 -o [a,'+out+'] -r ['+fixed+', '+intermediate+',1] -m Mattes[ '+fixed+', '+out+',1,12] -t Affine[0.75] -c [100x75x50x25, '+tol+', 5] --smoothing-sigmas 9x5x3x1 -f 4x3x2x1')
+    os.system('mv a0GenericAffine.mat '+ aff)
 
-# Apply affine transformation
-os.system('antsRegistration -d 3 -o [a,'+img_out+'] -r ['+img_fixed+', '+tempname+',1] -m Mattes[ '+img_fixed+', '+img_out+',1,12] -t Affine[0.75] -c [100x75x50x25, '+tol+', 5] --smoothing-sigmas 9x5x3x1 -f 4x3x2x1')
-os.system('mv a0GenericAffine.mat '+ affi)
-#TODOGK: Implement nonl transform
+
+def main():
+  parser = argparse.ArgumentParser(description="")
+  parser.add_argument("fixed", action="store", help="Image that we are registering to (.nii, .nii.gz)")
+  parser.add_argument("moving", action="store", help="Image that we are transforming (.nii, .nii.gz)")
+  parser.add_argument("tol", action="store", help="Error tolerance value (default 1e-4)")
+  parser.add_argument("out", action="store", help="The transformed output image (.nii, .nii.gz)") 
+  parser.add_argument("tra", action="store", help="Translation transform matrix output (.mat)")
+  parser.add_argument("rig", action="store", help="Rigid transform matrix output (.mat)")
+  parser.add_argument("aff", action="store", help="Affine transform matrix output (.mat)")
+  
+  result = parser.parse_args()
+
+  do_registration(result.fixed, result.moving, result.tol, result.out, result.tra, result.rig, result.aff)
+
+
+if __name__ == "__main__":
+  main()
