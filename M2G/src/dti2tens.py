@@ -28,19 +28,6 @@ import re
 import os
 from os.path import basename
 
-# Pull necessary parameters
-params = list(argv)
-dti_image = params[1] # The DTI image, not skull stripped (.nii)
-dti_grad = params[2] # The gradient directions corresponding to the DTI image (.grad)
-bval = params[3] # The bvalue corresponding to the DTI image  (default 700) (val)
-dti_mask = params[4] # The brain mask of the DTI image (.nii, .nii.gz)
-
-dti_scheme = params[5] # The scheme file (.scheme)(output)
-dti_bfloat = params[6] # The Bfloat format equivalent of the DTI image (.Bfloat)(output)
-dti_tensors = params[7] # The produced tensors in Bdouble format (.Bdouble)(output)
-fa = params[8] # The fractional anisotropy statistic (.nii)(output)
-md = params[9] # The mean diffusivity statistic (.nii)(output)
-dti_eigs = params[10] # The eigen values of the system (.Bdouble)(output)
 
 def make_tens(dti, grad, bval, mask, scheme, dti_bfloat, tensors, fa, md, eigs):
   # Create scheme file
