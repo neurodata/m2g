@@ -32,7 +32,7 @@ from os.path import basename
 def do_registration(fixed, moving, tol, out, tra, rig, aff):
     [root, ext] = os.path.splitext(basename(out))
     
-    intermediate = 'temp.nii.gz'
+    intermediate = 'temp.nii'
     # Apply translation transformation
     os.system('antsRegistration -d 3 -o [t,'+out+'] -r ['+fixed+', '+moving+',1] -m Mattes[ '+fixed+', '+moving+',1,12] -t Translation[0.75] -c [100x75x50x25, '+tol+', 5] --smoothing-sigmas 9x5x3x1 -f 4x3x2x1')
     os.system('cp '+out+' '+intermediate)

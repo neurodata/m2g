@@ -31,24 +31,24 @@ from os.path import basename
 
 def make_tens(dti, grad, bval, mask, scheme, dti_bfloat, tensors, fa, md, eigs):
   # Create scheme file
-  os.system('pointset2scheme -inputfile '+dti_grad+' -bvalue '+bval+' -outputfile '+dti_scheme)
+  os.system('pointset2scheme -inputfile '+grad+' -bvalue '+bval+' -outputfile '+scheme)
   
   # Maps the DTI image to a Camino compatible Bfloat format
-  os.system('image2voxel -4dimage '+dti_image+' -outputfile '+dti_bfloat)
+  os.system('image2voxel -4dimage '+dti+' -outputfile '+dti_bfloat)
   
   # Produce tensors from image
-  os.system('dtfit '+dti_bfloat+' '+dti_scheme+' -bgmask '+dti_mask+' -outputfile '+dti_tensors)
+  os.system('dtfit '+dti_bfloat+' '+scheme+' -bgmask '+mask+' -outputfile '+tensors)
   
   # In order to visualize, and just 'cause it's fun anyways, we get some stats
 
   [fa_base, ext] = os.path.splitext(basename(fa))
   [md_base, ext] = os.path.splitext(basename(md))
-  os.system('for PROG in '+fa_base+' '+md_base+'; do cat '+dti_tensors+' | ${PROG} | voxel2image -outputroot ${PROG} -header '+dti_image+'; done')
+  os.system('for PROG in '+fa_base+' '+md_base+'; do cat '+tensors+' | ${PROG} | voxel2image -outputroot ${PROG} -header '+dti+'; done')
   os.system('mv '+basename(fa)+' '+fa)
   os.system('mv '+basename(md)+' '+md)
 
   # We also need the eigen system to visualize
-  os.system('cat '+dti_tensors+' | dteig > '+dti_eigs)
+  os.system('cat '+tensors+' | dteig > '+eigs)
 
 def main():
   parser = argparse.ArgumentParser(description="")

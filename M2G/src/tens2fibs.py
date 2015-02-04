@@ -31,7 +31,7 @@ def make_fibs(tensors, mask, anis, curve, fibers, vtk):
   [root, ext] = os.path.splitext(basename(fibers))
 
   # Perfoms fiber tractography in voxelspace on the given tensors
-  os.system('track -inputmodel dt -seedfile '+mask+' -anisthresh '+anis+' -curvethresh '+curve+' -inputfile '+tensors+' > '+fibers+' -outputinvoxelspace 2>/cis/project/migraine/data/KKI2009/log/'+root+'_err.error')
+  os.system('track -inputmodel dt -seedfile '+mask+' -anisthresh '+anis+' -curvethresh '+curve+' -inputfile '+tensors+' > '+fibers+' -outputinvoxelspace 2>/mrimages/data/'+root+'_err.error')
 
   # Converts the fibers to an easy-to-view format
   os.system('vtkstreamlines -colourorient < '+fibers+' > '+vtk)
