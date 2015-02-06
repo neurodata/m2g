@@ -27,11 +27,11 @@ import re
 import os
 from os.path import basename
 
-def make_fibs(tensors, mask, anis, curve, fibers, vtk):
+def make_fibs(tensors, mask, anis, curve, fibers, vtk,log):
   [root, ext] = os.path.splitext(basename(fibers))
 
   # Perfoms fiber tractography in voxelspace on the given tensors
-  os.system('track -inputmodel dt -seedfile '+mask+' -anisthresh '+anis+' -curvethresh '+curve+' -inputfile '+tensors+' > '+fibers+' -outputinvoxelspace 2>/mrimages/data/'+root+'_err.error')
+  os.system('track -inputmodel dt -seedfile '+mask+' -anisthresh '+anis+' -curvethresh '+curve+' -inputfile '+tensors+' > '+fibers+' -outputinvoxelspace 2>'+log)
 
   # Converts the fibers to an easy-to-view format
   os.system('vtkstreamlines -colourorient < '+fibers+' > '+vtk)
@@ -45,10 +45,12 @@ def main():
   parser.add_argument("curve", action="store", help="The curvature threshold value (default =60)") 
   parser.add_argument("fibers", action="store", help="The produced fiber tracts (.Bfloat)")
   parser.add_argument("vtk", action="store", help="The fibers in another format (.vtk)")
+  parser.add_argument("log", action="store", help="The output log file")
+  
   
   result = parser.parse_args()
 
-  make_fibs(result.tensors, result.mask, result.anis, result.curve, result.fibers, result.vtk)
+  make_fibs(result.tensors, result.mask, result.anis, result.curve, result.fibers, result.vtk, result.log)
 
 
 if __name__ == "__main__":
