@@ -12,7 +12,7 @@
                 <connection source="fibbie_1.DTIfibers" sink="mappie_1.fiberinfile" />
         </connections>
         <moduleGroup id="m2g_full_noregi_1" name="m2g_full_noregi" posX="0" posY="0" sourceCode="">
-                <module id="graphie_1" name="graphie" package="mrimages" posX="943" posY="504" rotation="1" sourceCode="" location="pipeline://localhost/{m2g}/gengraph.py">
+                <module id="graphie_1" name="graphie" package="mrimages" posX="943" posY="504" rotation="1" sourceCode="" location="pipeline://localhost//{m2g}/gengraph.py">
                         <tag />
                         <metadata>
                                 <data key="__creationDateKey" value="Sun Jan 11 17:53:43 EST 2015" />
@@ -62,7 +62,7 @@
                                 <value>pipeline://localhost/{data}/KKI2009/outputs/KKI2009-01_small.graphml</value>
                         </values>
                 </dataModule>
-                <module id="tensie_1" name="tensie" package="mrimages" posX="440" posY="284" sourceCode="" location="pipeline://localhost/{m2g}/dti2tens.py">
+                <module id="tensie_1" name="tensie" package="mrimages" posX="440" posY="284" sourceCode="" location="pipeline://localhost//{m2g}/dti2tens.py">
                         <tag />
                         <metadata>
                                 <data key="__creationDateKey" value="Fri Jan 09 11:38:39 EST 2015" />
@@ -140,7 +140,7 @@
                                 </format>
                         </output>
                 </module>
-                <module id="fibbie_1" name="fibbie" package="mrimages" posX="705" posY="387" sourceCode="" location="pipeline://localhost/{m2g}/tens2fibs.py">
+                <module id="fibbie_1" name="fibbie" package="mrimages" posX="705" posY="387" sourceCode="" location="pipeline://localhost//{m2g}/tens2fibs.py">
                         <tag />
                         <metadata>
                                 <data key="__creationDateKey" value="Fri Jan 09 13:07:20 EST 2015" />
@@ -212,7 +212,7 @@
                                 <value>pipeline://localhost/{data}/KKI2009/KKI2009-02/KKI2009-02-DTI.grad</value>
                         </values>
                 </dataModule>
-                <module id="skullie_1" name="skullie" package="mrimages" posX="492" posY="71" sourceCode="" location="pipeline://localhost/{m2g}/skullextract.py">
+                <module id="skullie_1" name="skullie" package="mrimages" posX="490" posY="71" sourceCode="" location="pipeline://localhost//{m2g}/skullextract.py">
                         <tag />
                         <metadata>
                                 <data key="__creationDateKey" value="Mon Jan 12 11:59:48 EST 2015" />
@@ -252,7 +252,7 @@
                                 </format>
                         </output>
                 </module>
-                <module id="mappie_1" name="mappie" package="mrimages" posX="796" posY="488" rotation="1" sourceCode="" location="pipeline://localhost/{m2g}/apply_transforms.py">
+                <module id="mappie_1" name="mappie" package="mrimages" posX="796" posY="488" rotation="1" sourceCode="" location="pipeline://localhost//{m2g}/apply_transforms.py">
                         <tag />
                         <metadata>
                                 <data key="__creationDateKey" value="Sun Jan 11 21:38:32 EST 2015" />
@@ -305,7 +305,7 @@
                 </dataModule>
                 <variables>
                         <variable name="data" order="1">/mrimages/data</variable>
-                        <variable name="m2g" required="true" order="0">/mrimages/src/m2g/M2G/src</variable>
+                        <variable name="m2g" order="0">mrimages/src/m2g/M2G/src</variable>
                 </variables>
         </moduleGroup>
 </pipeline>
