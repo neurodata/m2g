@@ -76,10 +76,10 @@
                                 <filetype name="graphml" extension="graphml" description="" />
                         </fileTypes>
                         <values>
-                                <value>pipeline://localhost/{data}/KKI2009-01/outputs/mygraph.graphml</value>
+                                <value>pipeline://localhost/{data}/KKI2009/outputs/KKI2009-01_small.graphml</value>
                         </values>
                 </dataModule>
-                <module id="tensie_1" name="tensie" package="mrimages" posX="441" posY="284" sourceCode="" location="pipeline://localhost/{m2g}/dti2tens.py">
+                <module id="tensie_1" name="tensie" package="mrimages" posX="440" posY="284" sourceCode="" location="pipeline://localhost/{m2g}/dti2tens.py">
                         <tag />
                         <metadata>
                                 <data key="__creationDateKey" value="Fri Jan 09 11:38:39 EST 2015" />
@@ -218,15 +218,15 @@
                         <output id="Gradients_1.Output" name="Output" required="true" enabled="true" order="-1">
                                 <format type="File" cardinality="1">
                                         <fileTypes>
-                                                <filetype name="nifti" extension="nii" description="" />
+                                                <filetype name="gradients" extension="grad" description="" />
                                         </fileTypes>
                                 </format>
                         </output>
                         <fileTypes>
-                                <filetype name="nifti" extension="nii" description="" />
+                                <filetype name="gradients" extension="grad" description="" />
                         </fileTypes>
                         <values>
-                                <value>pipeline://localhost/{data}/KKI2009-01/KKI2009-01-DTI.grad</value>
+                                <value>pipeline://localhost/{data}/KKI2009/KKI2009-02/KKI2009-02-DTI.grad</value>
                         </values>
                 </dataModule>
                 <module id="skullie_1" name="skullie" package="mrimages" posX="492" posY="71" sourceCode="" location="pipeline://localhost/{m2g}/skullextract.py">
@@ -295,7 +295,7 @@
                                         </fileTypes>
                                 </format>
                                 <values>
-                                        <value>pipeline://localhost//static.mat</value>
+                                        <value>pipeline://localhost/{m2g}/static.mat</value>
                                 </values>
                         </input>
                 </module>
@@ -317,7 +317,7 @@
                                 <filetype name="niftii2" extension="nii.gz" description="" />
                         </fileTypes>
                         <values>
-                                <value>pipeline://localhost/{data}/KKI2009-01/KKI2009-01-DTI.nii</value>
+                                <value>pipeline://localhost/{data}/KKI2009/KKI2009-02/KKI2009-02-DTI.nii</value>
                         </values>
                 </dataModule>
                 <variables>
