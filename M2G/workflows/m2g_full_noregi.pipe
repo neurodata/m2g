@@ -32,13 +32,13 @@
                                         </fileTypes>
                                 </format>
                                 <values>
-                                        <value>pipeline://localhost/{data}/desikan_atlas.nii</value>
+                                        <value>pipeline://localhost//desikan_atlas.nii</value>
                                 </values>
                         </input>
                         <output id="graphie_1.graphfile" name="graph file" required="true" enabled="true" order="2">
                                 <format type="File" cardinality="1">
                                         <fileTypes>
-                                                <filetype name="Matlab file" extension="mat" description="" />
+                                                <filetype name="Graph1" extension="graphml" description="" />
                                         </fileTypes>
                                 </format>
                         </output>
@@ -278,7 +278,7 @@
                                         </fileTypes>
                                 </format>
                                 <values>
-                                        <value>pipeline://localhost/{m2g}/static.mat</value>
+                                        <value>pipeline://localhost//mrimages/src/m2g/M2G/src/static.mat</value>
                                 </values>
                         </input>
                 </module>
