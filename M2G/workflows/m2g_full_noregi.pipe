@@ -2,7 +2,6 @@
 <pipeline version=".2">
         <connections>
                 <connection source="mappie_1.fiberoutfile" sink="graphie_1.fiberfile" />
-                <connection source="graphie_1.graphfile" sink="Graph_1.Input" />
                 <connection source="DTI_1.Output" sink="tensie_1.DTIImage" />
                 <connection source="Gradients_1.Output" sink="tensie_1.DTIGradients" />
                 <connection source="skullie_1.BrainMask" sink="tensie_1.DTIBrainMask" />
@@ -10,9 +9,11 @@
                 <connection source="skullie_1.BrainMask" sink="fibbie_1.BrainMask" />
                 <connection source="DTI_1.Output" sink="skullie_1.InputImage" />
                 <connection source="fibbie_1.DTIfibers" sink="mappie_1.fiberinfile" />
+                <connection source="convertie_1.matgraphfile" sink="Graph_1.Input" />
+                <connection source="graphie_1.graphfile" sink="convertie_1.graphmlfile" />
         </connections>
         <moduleGroup id="m2g_full_noregi_1" name="m2g_full_noregi" posX="0" posY="0" sourceCode="">
-                <module id="graphie_1" name="graphie" package="mrimages" posX="943" posY="504" rotation="1" sourceCode="" location="pipeline://localhost//{m2g}/gengraph.py">
+                <module id="graphie_1" name="graphie" package="mrimages" posX="943" posY="504" rotation="1" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/M2G/src/gengraph.py">
                         <tag />
                         <metadata>
                                 <data key="__creationDateKey" value="Sun Jan 11 17:53:43 EST 2015" />
@@ -32,7 +33,7 @@
                                         </fileTypes>
                                 </format>
                                 <values>
-                                        <value>pipeline://localhost//desikan_atlas.nii</value>
+                                        <value>pipeline://localhost/{data}/desikan_atlas.nii</value>
                                 </values>
                         </input>
                         <output id="graphie_1.graphfile" name="graph file" required="true" enabled="true" order="2">
@@ -43,26 +44,7 @@
                                 </format>
                         </output>
                 </module>
-                <dataModule id="Graph_1" name="Graph" package="mrimages" posX="1100" posY="516" rotation="1" sourceCode="" type="File" source="false" loopIndex="false" dirDump="false">
-                        <tag />
-                        <metadata>
-                                <data key="__creationDateKey" value="Thu Jan 15 14:09:59 EST 2015" />
-                        </metadata>
-                        <input id="Graph_1.Input" name="Input" required="true" enabled="true" order="-1">
-                                <format type="File" cardinality="1">
-                                        <fileTypes>
-                                                <filetype name="graphml" extension="graphml" description="" />
-                                        </fileTypes>
-                                </format>
-                        </input>
-                        <fileTypes>
-                                <filetype name="graphml" extension="graphml" description="" />
-                        </fileTypes>
-                        <values>
-                                <value>pipeline://localhost/{data}/KKI2009/outputs/KKI2009-01_small.graphml</value>
-                        </values>
-                </dataModule>
-                <module id="tensie_1" name="tensie" package="mrimages" posX="440" posY="284" sourceCode="" location="pipeline://localhost//{m2g}/dti2tens.py">
+                <module id="tensie_1" name="tensie" package="mrimages" posX="438" posY="284" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/M2G/src/dti2tens.py">
                         <tag />
                         <metadata>
                                 <data key="__creationDateKey" value="Fri Jan 09 11:38:39 EST 2015" />
@@ -140,7 +122,7 @@
                                 </format>
                         </output>
                 </module>
-                <module id="fibbie_1" name="fibbie" package="mrimages" posX="705" posY="387" sourceCode="" location="pipeline://localhost//{m2g}/tens2fibs.py">
+                <module id="fibbie_1" name="fibbie" package="mrimages" posX="705" posY="387" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/M2G/src/tens2fibs.py">
                         <tag />
                         <metadata>
                                 <data key="__creationDateKey" value="Fri Jan 09 13:07:20 EST 2015" />
@@ -212,7 +194,7 @@
                                 <value>pipeline://localhost/{data}/KKI2009/KKI2009-02/KKI2009-02-DTI.grad</value>
                         </values>
                 </dataModule>
-                <module id="skullie_1" name="skullie" package="mrimages" posX="490" posY="71" sourceCode="" location="pipeline://localhost//{m2g}/skullextract.py">
+                <module id="skullie_1" name="skullie" package="mrimages" posX="490" posY="71" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/M2G/src/skullextract.py">
                         <tag />
                         <metadata>
                                 <data key="__creationDateKey" value="Mon Jan 12 11:59:48 EST 2015" />
@@ -252,7 +234,7 @@
                                 </format>
                         </output>
                 </module>
-                <module id="mappie_1" name="mappie" package="mrimages" posX="796" posY="488" rotation="1" sourceCode="" location="pipeline://localhost//{m2g}/apply_transforms.py">
+                <module id="mappie_1" name="mappie" package="mrimages" posX="796" posY="488" rotation="1" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/M2G/src/apply_transforms.py">
                         <tag />
                         <metadata>
                                 <data key="__creationDateKey" value="Sun Jan 11 21:38:32 EST 2015" />
@@ -278,7 +260,7 @@
                                         </fileTypes>
                                 </format>
                                 <values>
-                                        <value>pipeline://localhost//mrimages/src/m2g/M2G/src/static.mat</value>
+                                        <value>pipeline://localhost//static.mat</value>
                                 </values>
                         </input>
                 </module>
@@ -303,6 +285,45 @@
                                 <value>pipeline://localhost/{data}/KKI2009/KKI2009-02/KKI2009-02-DTI.nii</value>
                         </values>
                 </dataModule>
+                <dataModule id="Graph_1" name="Graph" package="mrimages" posX="1217" posY="516" rotation="1" sourceCode="" type="File" source="false" loopIndex="false" dirDump="false">
+                        <tag />
+                        <metadata>
+                                <data key="__creationDateKey" value="Thu Jan 15 14:09:59 EST 2015" />
+                        </metadata>
+                        <input id="Graph_1.Input" name="Input" required="true" enabled="true" order="-1">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="Matlab file" extension="mat" description="" />
+                                        </fileTypes>
+                                </format>
+                        </input>
+                        <fileTypes>
+                                <filetype name="Matlab file" extension="mat" description="" />
+                        </fileTypes>
+                        <values>
+                                <value>pipeline://localhost/{data}/KKI2009/outputs/KKI2009-01_small.mat</value>
+                        </values>
+                </dataModule>
+                <module id="convertie_1" name="convertie" package="mrimages" posX="1086" posY="504" rotation="1" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/tools/utils/graphml2mat.py">
+                        <tag />
+                        <metadata>
+                                <data key="__creationDateKey" value="Tue Feb 10 10:04:52 EST 2015" />
+                        </metadata>
+                        <input id="convertie_1.graphmlfile" name="graphml file" required="false" enabled="true" order="0">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="Graph1" extension="graphml" description="" />
+                                        </fileTypes>
+                                </format>
+                        </input>
+                        <output id="convertie_1.matgraphfile" name="mat graph file" required="false" enabled="true" order="1">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="Matlab file" extension="mat" description="" />
+                                        </fileTypes>
+                                </format>
+                        </output>
+                </module>
                 <variables>
                         <variable name="data" order="1">/mrimages/data</variable>
                         <variable name="m2g" order="0">mrimages/src/m2g/M2G/src</variable>

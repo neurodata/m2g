@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <pipeline version=".2">
         <moduleGroup id="Untitled_1" name="Untitled" posX="0" posY="0" sourceCode="">
-                <module id="gengraph_1" name="gengraph" package="mrimages" posX="150" posY="125" sourceCode="" location="pipeline://localhost//home/gkiar/ocp/MR-connectome/mrcap/gengraph.py">
+                <module id="gengraph_1" name="gengraph" package="mrimages" posX="150" posY="125" sourceCode="" location="pipeline://localhost//{m2g}/gengraph.py">
                         <tag />
                         <metadata>
                                 <data key="__creationDateKey" value="Tue Jan 13 11:38:50 EST 2015" />
@@ -36,6 +36,9 @@
                                 <format type="String" cardinality="1" />
                         </input>
                 </module>
+                <variables>
+                        <variable name="m2g" order="0">mrimages/src/m2g/M2G/src</variable>
+                </variables>
         </moduleGroup>
 </pipeline>
 
