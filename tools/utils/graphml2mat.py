@@ -32,7 +32,6 @@ def graphconvert(ingraph, outgraph):
   edges = []
   weight = []
   for line in inf:
-    print line
     edges += findall('<edge source="n(\d+)" target="n(\d+)">', line)
     weight += findall('<data key="e_weight">(\d+)</data>', line)
 
@@ -44,6 +43,11 @@ def graphconvert(ingraph, outgraph):
       idx1 -= 65
     if idx2 > 35:
       idx2 -= 65
+
+    if idx2 >= idx1:
+      tmp = idx1
+      idx1 = idx2
+      idx2 = tmp
     graph[idx1, idx2]=int(weight[i])
   
   mdict = {"graph": graph}
