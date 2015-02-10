@@ -187,7 +187,15 @@
                                 <filetype name="gradients" extension="grad" description="" />
                         </fileTypes>
                         <values>
+                                <value>pipeline://localhost/{data}/KKI2009/KKI2009-01/KKI2009-01-DTI.grad</value>
                                 <value>pipeline://localhost/{data}/KKI2009/KKI2009-02/KKI2009-02-DTI.grad</value>
+                                <value>pipeline://localhost/{data}/KKI2009/KKI2009-03/KKI2009-03-DTI.grad</value>
+                                <value>pipeline://localhost/{data}/KKI2009/KKI2009-04/KKI2009-04-DTI.grad</value>
+                                <value>pipeline://localhost/{data}/KKI2009/KKI2009-05/KKI2009-05-DTI.grad</value>
+                                <value>pipeline://localhost/{data}/KKI2009/KKI2009-06/KKI2009-06-DTI.grad</value>
+                                <value>pipeline://localhost/{data}/KKI2009/KKI2009-07/KKI2009-07-DTI.grad</value>
+                                <value>pipeline://localhost/{data}/KKI2009/KKI2009-08/KKI2009-08-DTI.grad</value>
+                                <value>pipeline://localhost/{data}/KKI2009/KKI2009-09/KKI2009-09-DTI.grad</value>
                         </values>
                 </dataModule>
                 <module id="skullie_1" name="skullie" package="mrimages" posX="490" posY="71" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/M2G/src/skullextract.py">
@@ -276,7 +284,15 @@
                                 <filetype name="niftii2" extension="nii.gz" description="" />
                         </fileTypes>
                         <values>
+                                <value>pipeline://localhost/{data}/KKI2009/KKI2009-01/KKI2009-01-DTI.nii</value>
                                 <value>pipeline://localhost/{data}/KKI2009/KKI2009-02/KKI2009-02-DTI.nii</value>
+                                <value>pipeline://localhost/{data}/KKI2009/KKI2009-03/KKI2009-03-DTI.nii</value>
+                                <value>pipeline://localhost/{data}/KKI2009/KKI2009-04/KKI2009-04-DTI.nii</value>
+                                <value>pipeline://localhost/{data}/KKI2009/KKI2009-05/KKI2009-05-DTI.nii</value>
+                                <value>pipeline://localhost/{data}/KKI2009/KKI2009-06/KKI2009-06-DTI.nii</value>
+                                <value>pipeline://localhost/{data}/KKI2009/KKI2009-07/KKI2009-07-DTI.nii</value>
+                                <value>pipeline://localhost/{data}/KKI2009/KKI2009-08/KKI2009-08-DTI.nii</value>
+                                <value>pipeline://localhost/{data}/KKI2009/KKI2009-09/KKI2009-09-DTI.nii</value>
                         </values>
                 </dataModule>
                 <dataModule id="Graph_1" name="Graph" package="mrimages" posX="1217" posY="516" rotation="1" sourceCode="" type="File" source="false" loopIndex="false" dirDump="false">
@@ -295,6 +311,14 @@
                         </fileTypes>
                         <values>
                                 <value>pipeline://localhost/{data}/KKI2009/outputs/KKI2009-01_small.mat</value>
+                                <value>pipeline://localhost/{data}/KKI2009/outputs/KKI2009-02_small.mat</value>
+                                <value>pipeline://localhost/{data}/KKI2009/outputs/KKI2009-03_small.mat</value>
+                                <value>pipeline://localhost/{data}/KKI2009/outputs/KKI2009-04_small.mat</value>
+                                <value>pipeline://localhost/{data}/KKI2009/outputs/KKI2009-05_small.mat</value>
+                                <value>pipeline://localhost/{data}/KKI2009/outputs/KKI2009-06_small.mat</value>
+                                <value>pipeline://localhost/{data}/KKI2009/outputs/KKI2009-07_small.mat</value>
+                                <value>pipeline://localhost/{data}/KKI2009/outputs/KKI2009-08_small.mat</value>
+                                <value>pipeline://localhost/{data}/KKI2009/outputs/KKI2009-09_small.mat</value>
                         </values>
                 </dataModule>
                 <module id="convertie_1" name="convertie" package="mrimages" posX="1086" posY="504" rotation="1" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/tools/utils/graphml2mat.py">
@@ -317,7 +341,7 @@
                         </output>
                 </module>
                 <variables>
-                        <variable name="data" order="1">/mrimages/data</variable>
+                        <variable name="data" order="1">/home/greg/data</variable>
                         <variable name="m2g" order="0">mrimages/src/m2g/M2G/src</variable>
                 </variables>
         </moduleGroup>
