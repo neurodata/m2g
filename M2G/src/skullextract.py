@@ -23,15 +23,14 @@
 
 import argparse
 import os
-from os.path import basename
+from os.path import basename, dirname, splitext
 
 def remove_skull(image, f, g, brain, mask):
-  [root, ext1] = os.path.splitext(basename(brain))
-  [root, ext2] = os.path.splitext(root)
+  [root, ext1] = splitext(basename(brain))
+  [root, ext2] = splitext(root)
   
   os.system('bet '+image+' '+brain+' -f '+f+' -g '+g+' -m')
-
-  os.system('mv '+root+'_mask'+ext2+ext1+' '+mask)
+  os.system('mv '+dirname(brain)+'/'+root+'_mask'+ext2+ext1+' '+mask)
 
 def main():
   parser = argparse.ArgumentParser(description="")
