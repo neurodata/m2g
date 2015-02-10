@@ -14,7 +14,6 @@
         </connections>
         <moduleGroup id="m2g_full_noregi_1" name="m2g_full_noregi" posX="0" posY="0" sourceCode="">
                 <module id="graphie_1" name="graphie" package="mrimages" posX="943" posY="504" rotation="1" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/MR-OCP/mrcap/gengraph.py">
-                        <tag />
                         <metadata>
                                 <data key="__creationDateKey" value="Sun Jan 11 17:53:43 EST 2015" />
                         </metadata>
@@ -45,7 +44,6 @@
                         </output>
                 </module>
                 <module id="tensie_1" name="tensie" package="mrimages" posX="438" posY="284" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/M2G/src/dti2tens.py">
-                        <tag />
                         <metadata>
                                 <data key="__creationDateKey" value="Fri Jan 09 11:38:39 EST 2015" />
                         </metadata>
@@ -123,7 +121,6 @@
                         </output>
                 </module>
                 <module id="fibbie_1" name="fibbie" package="mrimages" posX="705" posY="387" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/M2G/src/tens2fibs.py">
-                        <tag />
                         <metadata>
                                 <data key="__creationDateKey" value="Fri Jan 09 13:07:20 EST 2015" />
                         </metadata>
@@ -176,7 +173,6 @@
                         </output>
                 </module>
                 <dataModule id="Gradients_1" name="Gradients" package="mrimages" posX="646" posY="165" sourceCode="" type="File" source="true" loopIndex="false">
-                        <tag />
                         <metadata>
                                 <data key="__creationDateKey" value="Thu Jan 15 14:03:27 EST 2015" />
                         </metadata>
@@ -195,7 +191,6 @@
                         </values>
                 </dataModule>
                 <module id="skullie_1" name="skullie" package="mrimages" posX="490" posY="71" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/M2G/src/skullextract.py">
-                        <tag />
                         <metadata>
                                 <data key="__creationDateKey" value="Mon Jan 12 11:59:48 EST 2015" />
                         </metadata>
@@ -253,7 +248,7 @@
                                         </fileTypes>
                                 </format>
                         </output>
-                        <input id="mappie_1.transform" name="transform" required="true" enabled="true" order="2">
+                        <input id="mappie_1.transform" name="transform" required="true" enabled="true" order="2" prefix="-t" prefixSpaced="true" prefixAllArgs="false">
                                 <format type="File" cardinality="1">
                                         <fileTypes>
                                                 <filetype name="Matlab file" extension="mat" description="" />
@@ -265,7 +260,6 @@
                         </input>
                 </module>
                 <dataModule id="DTI_1" name="DTI" package="mrimages" posX="372" posY="8" rotation="1" sourceCode="" type="File" source="true" loopIndex="false">
-                        <tag />
                         <metadata>
                                 <data key="__creationDateKey" value="Thu Jan 15 14:03:27 EST 2015" />
                         </metadata>
@@ -286,7 +280,6 @@
                         </values>
                 </dataModule>
                 <dataModule id="Graph_1" name="Graph" package="mrimages" posX="1217" posY="516" rotation="1" sourceCode="" type="File" source="false" loopIndex="false" dirDump="false">
-                        <tag />
                         <metadata>
                                 <data key="__creationDateKey" value="Thu Jan 15 14:09:59 EST 2015" />
                         </metadata>
@@ -305,7 +298,6 @@
                         </values>
                 </dataModule>
                 <module id="convertie_1" name="convertie" package="mrimages" posX="1086" posY="504" rotation="1" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/tools/utils/graphml2mat.py">
-                        <tag />
                         <metadata>
                                 <data key="__creationDateKey" value="Tue Feb 10 10:04:52 EST 2015" />
                         </metadata>
