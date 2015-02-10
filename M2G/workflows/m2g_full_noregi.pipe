@@ -13,7 +13,7 @@
                 <connection source="graphie_1.graphfile" sink="convertie_1.graphmlfile" />
         </connections>
         <moduleGroup id="m2g_full_noregi_1" name="m2g_full_noregi" posX="0" posY="0" sourceCode="">
-                <module id="graphie_1" name="graphie" package="mrimages" posX="943" posY="504" rotation="1" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/M2G/src/gengraph.py">
+                <module id="graphie_1" name="graphie" package="mrimages" posX="943" posY="504" rotation="1" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/MR-OCP/mrcap/gengraph.py">
                         <tag />
                         <metadata>
                                 <data key="__creationDateKey" value="Sun Jan 11 17:53:43 EST 2015" />
@@ -260,7 +260,7 @@
                                         </fileTypes>
                                 </format>
                                 <values>
-                                        <value>pipeline://localhost//static.mat</value>
+                                        <value>pipeline://localhost//mrimages/src/m2g/M2G/src/static.mat</value>
                                 </values>
                         </input>
                 </module>
