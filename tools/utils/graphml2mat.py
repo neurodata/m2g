@@ -39,10 +39,6 @@ def graphconvert(ingraph, outgraph):
   for i in range(len(weight)):
     idx1 = int(edges[i][0])-1
     idx2 = int(edges[i][1])-1
-    if idx1 > 35:
-      idx1 -= 65
-    if idx2 > 35:
-      idx2 -= 65
 
     graph[idx1, idx2]=int(weight[i])
     graph[idx2, idx1]=int(weight[i])
