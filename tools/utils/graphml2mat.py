@@ -23,7 +23,7 @@
 from argparse import ArgumentParser
 import os
 from re import findall
-from scipy.sparse import lil_matrix
+from scipy.sparse import lil_matrix, triu
 from scipy.io import savemat
 
 
@@ -44,12 +44,10 @@ def graphconvert(ingraph, outgraph):
     if idx2 > 35:
       idx2 -= 65
 
-    if idx1 >= idx2:
-      tmp = idx1
-      idx1 = idx2
-      idx2 = tmp
     graph[idx1, idx2]=int(weight[i])
+    graph[idx2, idx1]=int(weight[i])
   
+  graph = triu(graph)
   mdict = {"graph": graph}
   savemat(outgraph, mdict)
   
