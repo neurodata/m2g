@@ -44,7 +44,7 @@ def graphconvert(ingraph, outgraph):
     if idx2 > 35:
       idx2 -= 65
 
-    if idx2 >= idx1:
+    if idx1 >= idx2:
       tmp = idx1
       idx1 = idx2
       idx2 = tmp
