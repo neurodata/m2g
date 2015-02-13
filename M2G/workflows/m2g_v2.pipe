@@ -478,6 +478,7 @@
                         </fileTypes>
                         <values>
                                 <value>pipeline://localhost//{data}/MNI152_T1_1mm_brain.nii</value>
+                                <value>pipeline://localhost//{data}/MNI152_T1_1mm_brain.nii</value>
                         </values>
                 </dataModule>
                 <variables>
