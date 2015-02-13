@@ -34,18 +34,17 @@ def do_registration(fixed, moving, tol, out, tra, rig, aff):
     
     intermediate = 'temp.nii'
     # Apply translation transformation
-    os.system('antsRegistration -d 3 -o [t,'+out+'] -r ['+fixed+', '+moving+',1] -m Mattes[ '+fixed+', '+moving+',1,12] -t Translation[0.75] -c [100x75x50x25, '+tol+', 5] --smoothing-sigmas 9x5x3x1 -f 4x3x2x1')
-    os.system('cp '+out+' '+intermediate)
+    os.system('antsRegistration -d 3 -o [t,'+intermediate+'] -r ['+fixed+', '+moving+',1] -m Mattes[ '+fixed+', '+moving+',1,12] -t Translation[0.75] -c [100x75x50x25, '+tol+', 5] --smoothing-sigmas 9x5x3x1 -f 4x3x2x1')
     os.system('mv t0GenericAffine.mat '+ tra)
 
     # Apply rigid transformation
-    os.system('antsRegistration -d 3 -o [r,'+out+'] -r ['+fixed+', '+intermediate+',1] -m Mattes[ '+fixed+', '+out+',1,12] -t Rigid[0.75] -c [100x75x50x25, '+tol+', 5] --smoothing-sigmas 9x5x3x1 -f 4x3x2x1')
-    os.system('cp '+out+' '+intermediate)
+    os.system('antsRegistration -d 3 -o [r,'+intermediate+'] -r ['+fixed+', '+intermediate+',1] -m Mattes[ '+fixed+', '+intermediate+',1,12] -t Rigid[0.75] -c [100x75x50x25, '+tol+', 5] --smoothing-sigmas 9x5x3x1 -f 4x3x2x1')
     os.system('mv r0GenericAffine.mat '+ rig)
     
     # Apply affine transformation
-    os.system('antsRegistration -d 3 -o [a,'+out+'] -r ['+fixed+', '+intermediate+',1] -m Mattes[ '+fixed+', '+out+',1,12] -t Affine[0.75] -c [100x75x50x25, '+tol+', 5] --smoothing-sigmas 9x5x3x1 -f 4x3x2x1')
+    os.system('antsRegistration -d 3 -o [a,'+out+'] -r ['+fixed+', '+intermediate+',1] -m Mattes[ '+fixed+', '+intermediate+',1,12] -t Affine[0.75] -c [100x75x50x25, '+tol+', 5] --smoothing-sigmas 9x5x3x1 -f 4x3x2x1')
     os.system('mv a0GenericAffine.mat '+ aff)
+    os.system('rm '+intermediate)
 
 
 def main():
