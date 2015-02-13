@@ -15,7 +15,10 @@ end
 c = 1;
 for i = reorderIdx
     temp = load(files(i).name);
-    smg(:,:,c) = full(temp.fibergraph);
+    tgraph = log10(full(temp.graph));
+    tgraph(isinf(tgraph))=0;
+    smg(:,:,c) = tgraph;
+    
     c = c+1;
 end
 
@@ -27,3 +30,14 @@ end
 
 figure, imagesc(gErr), colorbar
 
+first = 0;
+second = 0;
+for i = 1:1:size(gErr,1)
+    temp = sort(gErr(i,:));
+    q = i-1+2*mod(i,2);
+    first = first + (temp(2)==gErr(i,q));
+    second = second + (temp(2)==gErr(i,q)) + (temp(3)==gErr(i,q));
+end
+first
+second
+possible_matches = size(smg,3)
