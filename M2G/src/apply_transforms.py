@@ -26,7 +26,7 @@ import numpy as np
 import sys
 import struct
 import os
-
+from scipy.linalg import inv
 from contextlib import closing
 import camino_to_mristudio as ctm
 DEBUG = False

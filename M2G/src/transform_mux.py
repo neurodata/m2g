@@ -26,7 +26,7 @@ import numpy as np
 import sys
 import struct
 import os
-
+from scipy.linalg import inv
 from contextlib import closing
 
 
@@ -35,7 +35,7 @@ def mux(transforms, outf):
   h = np.matrix(( (1,0,0,0), (0,1,0,0), (0,0,1,0) ))
   for trans in transforms:
     t = np.reshape(sio.loadmat(trans)["AffineTransform_double_3_3"], (3,4), order="F")
-    h = np.dot(np.transpose(t[0:3,0:3]), h) + np.matrix(( (0,0,0,t[0,3]), (0,0,0,t[1,3]), (0,0,0,t[2,3]) ))
+    h = np.dot(inv(np.transpose(t[0:3,0:3])), h - np.matrix(( (0,0,0,t[0,3]), (0,0,0,t[1,3]), (0,0,0,t[2,3]) )) )
   
   h = np.reshape(h, (12,1), order="F")
   mdict = {"AffineTransform_double_3_3": h, "fixed": [0, 0, 0]}
