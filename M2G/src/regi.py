@@ -44,7 +44,11 @@ def do_registration(fixed, moving, tol, out, tra, rig, aff):
     # Apply affine transformation
     os.system('antsRegistration -d 3 -o [a,'+out+'] -r ['+fixed+', '+intermediate+',1] -m Mattes[ '+fixed+', '+intermediate+',1,12] -t Affine[0.75] -c [100x75x50x25, '+tol+', 5] --smoothing-sigmas 9x5x3x1 -f 4x3x2x1')
     os.system('mv a0GenericAffine.mat '+ aff)
-    os.system('rm '+intermediate)
+
+    #TODO GK: implement syn registration in loni modules so can enable here
+    #os.system('antsRegistration -d 3 -o [s,'+out+'] -r ['+fixed+', '+intermediate+',1] -m CC['+fixed+',' +intermediate+',1,2] -t SyN[0.75, 0.1, 1] -c [100x75x50x25, '+tol+', 5] --smoothing-sigmas 9x5x3x1 -f 4x3x2x1')
+    #os.system('mv s0GenericAffine.mat'+ syn)
+    #os.system('rm '+intermediate)
 
 
 def main():
