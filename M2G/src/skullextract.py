@@ -29,13 +29,13 @@ def remove_skull(image, f, g, brain, mask):
   [root, ext1] = splitext(basename(brain))
   [root, ext2] = splitext(root)
   
-  os.system('bet '+image+' '+brain+' -f '+f+' -g '+g+' -m')
+  os.system('bet '+image+' '+brain+' -f '+f+' -g '+g+' -m -R')
   os.system('mv '+dirname(brain)+'/'+root+'_mask'+ext2+ext1+' '+mask)
 
 def main():
   parser = argparse.ArgumentParser(description="")
   parser.add_argument("image", action="store", help="The original brain scan (.nii, .nii.gz)")
-  parser.add_argument("f", action="store", help="Fractional Intensity value (default=0.5)")
+  parser.add_argument("f", action="store", help="Fractional Intensity value (default=0.2)")
   parser.add_argument("g", action="store", help="Vertical Gradient value (default =0)")
   parser.add_argument("brain", action="store", help="The skull removed brain (.nii.gz)") 
   parser.add_argument("mask", action="store", help="The binarized brain mask (.nii.gz)")
