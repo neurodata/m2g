@@ -173,6 +173,7 @@
                         </output>
                 </module>
                 <dataModule id="Gradients_1" name="Gradients" package="mrimages" posX="646" posY="165" sourceCode="" type="File" source="true" loopIndex="false">
+                        <tag />
                         <metadata>
                                 <data key="__creationDateKey" value="Thu Jan 15 14:03:27 EST 2015" />
                         </metadata>
@@ -187,6 +188,15 @@
                                 <filetype name="gradients" extension="grad" description="" />
                         </fileTypes>
                         <values>
+                                <value>pipeline://localhost/{data}/KKI2009/KKI2009-01/KKI2009-01-DTI.grad</value>
+                                <value>pipeline://localhost/{data}/KKI2009/KKI2009-02/KKI2009-02-DTI.grad</value>
+                                <value>pipeline://localhost/{data}/KKI2009/KKI2009-03/KKI2009-03-DTI.grad</value>
+                                <value>pipeline://localhost/{data}/KKI2009/KKI2009-04/KKI2009-04-DTI.grad</value>
+                                <value>pipeline://localhost/{data}/KKI2009/KKI2009-05/KKI2009-05-DTI.grad</value>
+                                <value>pipeline://localhost/{data}/KKI2009/KKI2009-06/KKI2009-06-DTI.grad</value>
+                                <value>pipeline://localhost/{data}/KKI2009/KKI2009-07/KKI2009-07-DTI.grad</value>
+                                <value>pipeline://localhost/{data}/KKI2009/KKI2009-08/KKI2009-08-DTI.grad</value>
+                                <value>pipeline://localhost/{data}/KKI2009/KKI2009-09/KKI2009-09-DTI.grad</value>
                                 <value>pipeline://localhost/{data}/KKI2009/KKI2009-10/KKI2009-10-DTI.grad</value>
                                 <value>pipeline://localhost/{data}/KKI2009/KKI2009-11/KKI2009-11-DTI.grad</value>
                                 <value>pipeline://localhost/{data}/KKI2009/KKI2009-12/KKI2009-12-DTI.grad</value>
@@ -237,7 +247,7 @@
                         <input id="skullie_1.FractionalIntensity" name="Fractional Intensity" required="true" enabled="true" order="1">
                                 <format type="Number" cardinality="1" />
                                 <values>
-                                        <value>0.5</value>
+                                        <value>0.25</value>
                                 </values>
                         </input>
                         <input id="skullie_1.Verticalgradient" name="Vertical gradient" required="true" enabled="true" order="2">
@@ -262,7 +272,6 @@
                         </output>
                 </module>
                 <module id="mappie_1" name="mappie" package="mrimages" posX="796" posY="488" rotation="1" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/M2G/src/apply_transforms.py">
-                        <tag />
                         <metadata>
                                 <data key="__creationDateKey" value="Sun Jan 11 21:38:32 EST 2015" />
                         </metadata>
@@ -292,6 +301,7 @@
                         </input>
                 </module>
                 <dataModule id="DTI_1" name="DTI" package="mrimages" posX="372" posY="8" rotation="1" sourceCode="" type="File" source="true" loopIndex="false">
+                        <tag />
                         <metadata>
                                 <data key="__creationDateKey" value="Thu Jan 15 14:03:27 EST 2015" />
                         </metadata>
@@ -299,15 +309,22 @@
                                 <format type="File" cardinality="1">
                                         <fileTypes>
                                                 <filetype name="nifti" extension="nii" description="" />
-                                                <filetype name="niftii2" extension="nii.gz" description="" />
                                         </fileTypes>
                                 </format>
                         </output>
                         <fileTypes>
                                 <filetype name="nifti" extension="nii" description="" />
-                                <filetype name="niftii2" extension="nii.gz" description="" />
                         </fileTypes>
                         <values>
+                                <value>pipeline://localhost/{data}/KKI2009/KKI2009-01/KKI2009-01-DTI.nii</value>
+                                <value>pipeline://localhost/{data}/KKI2009/KKI2009-02/KKI2009-02-DTI.nii</value>
+                                <value>pipeline://localhost/{data}/KKI2009/KKI2009-03/KKI2009-03-DTI.nii</value>
+                                <value>pipeline://localhost/{data}/KKI2009/KKI2009-04/KKI2009-04-DTI.nii</value>
+                                <value>pipeline://localhost/{data}/KKI2009/KKI2009-05/KKI2009-05-DTI.nii</value>
+                                <value>pipeline://localhost/{data}/KKI2009/KKI2009-06/KKI2009-06-DTI.nii</value>
+                                <value>pipeline://localhost/{data}/KKI2009/KKI2009-07/KKI2009-07-DTI.nii</value>
+                                <value>pipeline://localhost/{data}/KKI2009/KKI2009-08/KKI2009-08-DTI.nii</value>
+                                <value>pipeline://localhost/{data}/KKI2009/KKI2009-09/KKI2009-09-DTI.nii</value>
                                 <value>pipeline://localhost/{data}/KKI2009/KKI2009-10/KKI2009-10-DTI.nii</value>
                                 <value>pipeline://localhost/{data}/KKI2009/KKI2009-11/KKI2009-11-DTI.nii</value>
                                 <value>pipeline://localhost/{data}/KKI2009/KKI2009-12/KKI2009-12-DTI.nii</value>
@@ -344,6 +361,7 @@
                         </values>
                 </dataModule>
                 <dataModule id="Graph_1" name="Graph" package="mrimages" posX="1217" posY="516" rotation="1" sourceCode="" type="File" source="false" loopIndex="false" dirDump="false">
+                        <tag />
                         <metadata>
                                 <data key="__creationDateKey" value="Thu Jan 15 14:09:59 EST 2015" />
                         </metadata>
@@ -358,6 +376,15 @@
                                 <filetype name="Matlab file" extension="mat" description="" />
                         </fileTypes>
                         <values>
+                                <value>pipeline://localhost/{data}/KKI2009/outputs/KKI2009-01_small.mat</value>
+                                <value>pipeline://localhost/{data}/KKI2009/outputs/KKI2009-02_small.mat</value>
+                                <value>pipeline://localhost/{data}/KKI2009/outputs/KKI2009-03_small.mat</value>
+                                <value>pipeline://localhost/{data}/KKI2009/outputs/KKI2009-04_small.mat</value>
+                                <value>pipeline://localhost/{data}/KKI2009/outputs/KKI2009-05_small.mat</value>
+                                <value>pipeline://localhost/{data}/KKI2009/outputs/KKI2009-06_small.mat</value>
+                                <value>pipeline://localhost/{data}/KKI2009/outputs/KKI2009-07_small.mat</value>
+                                <value>pipeline://localhost/{data}/KKI2009/outputs/KKI2009-08_small.mat</value>
+                                <value>pipeline://localhost/{data}/KKI2009/outputs/KKI2009-09_small.mat</value>
                                 <value>pipeline://localhost/{data}/KKI2009/outputs/KKI2009-10_small.mat</value>
                                 <value>pipeline://localhost/{data}/KKI2009/outputs/KKI2009-11_small.mat</value>
                                 <value>pipeline://localhost/{data}/KKI2009/outputs/KKI2009-12_small.mat</value>
