@@ -30,14 +30,11 @@ end
 
 figure, imagesc(gErr), colorbar
 
-first = 0;
-second = 0;
+matches = 0;
 for i = 1:1:size(gErr,1)
     temp = sort(gErr(i,:));
     q = i-1+2*mod(i,2);
-    first = first + (temp(2)==gErr(i,q));
-    second = second + (temp(2)==gErr(i,q)) + (temp(3)==gErr(i,q));
+    matches = matches + (temp(2)==gErr(i,q));
 end
-first
-second
+matches
 possible_matches = size(smg,3)
