@@ -26,7 +26,7 @@ from numpy import where, loadtxt
 
 def extract_vol(dti_img, bvals, b0_vol):
   print "Loading dti data..."
-  d_img = load(data_img)
+  d_img = load(dti_img)
   b0_data = d_img.get_data()
   b0_head = d_img.get_header()
   
