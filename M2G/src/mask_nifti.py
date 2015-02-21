@@ -25,17 +25,35 @@ from nibabel import load, save, Nifti1Image
 from numpy import where
 
 def masking(data_img, mask, output_img):
+  print "Loading data..."
   d_img = load(data_img)
   d_data = d_img.get_data()
   
+  print "Loading mask..."
   m_img = load(mask)
   m_data = m_img.get_data()
-
+  
+  print "Determining data dimensions..."
+  t = d_img.get_header()
+  t = t.get_data_shape()
+  dimension = len(t)
+  
+  #assumes that mask dimension is 3d
   i,j,k= where(m_data == 0)
-  d_data[i,j,k] = 0
+  if dimension == 3:
+    print "Masking 3D Image..."
+    d_data[i,j,k] = 0
+  elif dimension == 4:
+    print "Masking 4D Image..."
+    for q in range(t[3]):
+      print "Applying mask to layer", q+1, " of ", t[3]
+      d_data[i,j,k,q] = 0
+  print "Masking complete!"
 
+  print "Saving..."
   out = Nifti1Image( data=d_data, affine=d_img.get_affine(), header=d_img.get_header() )
   save(out, output_img)
+  print "Complete!"
 
 
 def main():
@@ -43,6 +61,7 @@ def main():
   parser.add_argument("data", action="store", help="The image we want to mask (.nii, .nii.gz)")
   parser.add_argument("mask", action="store", help="The binary mask (.nii, .nii.gz)")
   parser.add_argument("output", action="store", help="masked output image (.nii, .nii.gz)")
+
   result = parser.parse_args()
 
   masking(result.data, result.mask, result.output)
