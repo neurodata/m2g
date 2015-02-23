@@ -21,37 +21,34 @@
 # Copyright (c) 2015. All rights reserved.
 
 # Load necessary packages
-import argparse
-import string
-import sys
-import re
-import os
-from os.path import basename
+from argparse import ArgumentParser
+from os import system
+from os.path import basename, splitext
 
 
 def make_tens(dti, grad, bval, mask, scheme, dti_bfloat, tensors, fa, md, eigs):
   # Create scheme file
-  os.system('pointset2scheme -inputfile '+grad+' -bvalue '+bval+' -outputfile '+scheme)
+  system('pointset2scheme -inputfile '+grad+' -bvalue '+bval+' -outputfile '+scheme)
   
   # Maps the DTI image to a Camino compatible Bfloat format
-  os.system('image2voxel -4dimage '+dti+' -outputfile '+dti_bfloat)
+  system('image2voxel -4dimage '+dti+' -outputfile '+dti_bfloat)
   
   # Produce tensors from image
-  os.system('dtfit '+dti_bfloat+' '+scheme+' -bgmask '+mask+' -outputfile '+tensors)
+  system('dtfit '+dti_bfloat+' '+scheme+' -bgmask '+mask+' -outputfile '+tensors)
   
   # In order to visualize, and just 'cause it's fun anyways, we get some stats
 
-  [fa_base, ext] = os.path.splitext(basename(fa))
-  [md_base, ext] = os.path.splitext(basename(md))
-  os.system('for PROG in '+fa_base+' '+md_base+'; do cat '+tensors+' | ${PROG} | voxel2image -outputroot ${PROG} -header '+dti+'; done')
-  os.system('mv '+basename(fa)+' '+fa)
-  os.system('mv '+basename(md)+' '+md)
+  [fa_base, ext] = splitext(basename(fa))
+  [md_base, ext] = splitext(basename(md))
+  system('for PROG in '+fa_base+' '+md_base+'; do cat '+tensors+' | ${PROG} | voxel2image -outputroot ${PROG} -header '+dti+'; done')
+  system('mv '+basename(fa)+' '+fa)
+  system('mv '+basename(md)+' '+md)
 
   # We also need the eigen system to visualize
-  os.system('cat '+tensors+' | dteig > '+eigs)
+  system('cat '+tensors+' | dteig > '+eigs)
 
 def main():
-  parser = argparse.ArgumentParser(description="")
+  parser = ArgumentParser(description="")
   parser.add_argument("dti", action="store", help="The DTI image, not skull stripped (.nii)")
   parser.add_argument("grad", action="store", help="The gradient directions corresponding to the DTI image (.grad)")
   parser.add_argument("bval", action="store", help="The bvalue corresponding to the DTI image  (default 700)")

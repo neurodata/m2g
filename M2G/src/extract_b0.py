@@ -20,7 +20,7 @@
 # Email: gkiar@jhu.edu
 # Copyright (c) 2015. All rights reserved.
 
-import argparse
+from argparse import ArgumentParser
 from nibabel import load, save, Nifti1Image
 from numpy import where, loadtxt
 
@@ -46,7 +46,7 @@ def extract_vol(dti_img, bvals, b0_vol):
 
 
 def main():
-  parser = argparse.ArgumentParser(description="")
+  parser = ArgumentParser(description="")
   parser.add_argument("dti", action="store", help="The DTI image we want to extract B0 from (.nii, .nii.gz)")
   parser.add_argument("bvals", action="store", help="The b-value file corresponding to the DTI image (.b)")
   parser.add_argument("b0", action="store", help="The output file location of the B0 scan (.nii, .nii.gz)")
