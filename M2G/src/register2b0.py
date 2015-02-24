@@ -52,19 +52,23 @@ def register_vol(dti_img, bvals, aligned_img, b0_img):
   temp_head.set_data_shape(temp_head.get_data_shape()[0:3])
   
   for ii in range(directions):
-    print "Volume ", ii, " of ", directions
+    print "Volume ", ii+1, " of ", directions
     currentvol = aligned_data[:,:,:,ii]
     #print "Writing current volume to disk..."
     out = Nifti1Image( data=currentvol, affine=dti_vol.get_affine(), header=temp_head )
     save(out, temp_in_img)
-    system('antsRegistration -d 3 -o [affine.mat,'+temp_out_img+'] -r ['+b0_img+', '+temp_in_img+',1] -m Mattes[ '+b0_img+', '+temp_in_img+',1,12] -t Affine[0.75] -c [25, 1e-4, 5] --smoothing-sigmas 1 -f 1')
+    system('antsRegistration -d 3 -o [affine,'+temp_out_img+'] -r ['+b0_img+', '+temp_in_img+',1] -m Mattes[ '+b0_img+', '+temp_in_img+',1,12] -t Affine[0.75] -c [25, 1e-4, 5] --smoothing-sigmas 1 -f 1 > /dev/null')
     temp_vol = load(temp_out_img)
     currentvol = temp_vol.get_data()
     aligned_data[:,:,:,ii] = currentvol
-    system('rm -f '+temp_out_img+';rm -f'+temp_in_img)
+    system('rm '+temp_out_img+';rm '+temp_in_img)
     
-  system('rm -f affine0GenerticAffine.mat')
-  out = Nifti1Image( data=aligned_vol, affine=dti_vol.get_affine(), header=dt_vol.get_header() )
+  system('rm  affine0GenericAffine.mat')
+  
+  dims = dti_vol.get_header().get_data_shape()
+  dti_vol.get_header().set_data_shape((dims[0], dims[1], dims[2], directions))
+  out = Nifti1Image( data=aligned_data, affine=dti_vol.get_affine(), header=dti_vol.get_header() )
+  
   save(out, aligned_img)
 
 
@@ -72,11 +76,11 @@ def main():
   parser = ArgumentParser(description="")
   parser.add_argument("DTI", action="store", help="The DTI image we want to extract B0 from (.nii, .nii.gz)")
   parser.add_argument("bvals", action="store", help="The b-value file corresponding to the DTI image (.b)")
-  parser.add_argument("alignedDTI", action="store", help="The output file location of the B0 scan (.nii, .nii.gz)")
-
+  parser.add_argument("alignedDTI", action="store", help="The output file location of the aligned DTI volume  scan (.nii, .nii.gz)")
+  parser.add_argument("B0", action="store", help="The output file location of the B0 scan (.nii, .nii.gz)")
   result = parser.parse_args()
 
-  register_vol(result.DTI, result.bvals, result.alignedDTI)
+  register_vol(result.DTI, result.bvals, result.alignedDTI, result.B0)
   
 if __name__ == "__main__":
     main()
