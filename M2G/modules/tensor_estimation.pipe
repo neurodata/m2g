@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <pipeline version=".2">
-        <moduleGroup id="Untitled_1" name="Untitled" posX="0" posY="0" sourceCode="">
+        <moduleGroup id="tensor_estimation_1" name="tensor_estimation" posX="0" posY="0" sourceCode="">
                 <module id="TensorEstimation_1" name="Tensor Estimation" package="m2g" posX="38" posY="39" sourceCode="" location="pipeline://localhost//home/gkiar/vbox/loni_scripts/dti2tens.py">
                         <tag />
                         <metadata>
@@ -13,9 +13,6 @@
                                                 <filetype name="niftii2" extension="nii.gz" description="" />
                                         </fileTypes>
                                 </format>
-                                <values>
-                                        <value>pipeline://localhost//home/gkiar/vbox/testretest/inputs/KKI2009-09/KKI2009-09-DTI.nii</value>
-                                </values>
                         </input>
                         <input id="TensorEstimation_1.DTIGradients" name="DTI Gradients" required="true" enabled="true" order="1">
                                 <format type="File" cardinality="1">
@@ -23,9 +20,6 @@
                                                 <filetype name="gradients" extension="grad" description="" />
                                         </fileTypes>
                                 </format>
-                                <values>
-                                        <value>pipeline://localhost//home/gkiar/vbox/testretest/inputs/KKI2009-09/KKI2009-09-DTI.grad</value>
-                                </values>
                         </input>
                         <input id="TensorEstimation_1.DTIBvalue" name="DTI Bvalue" required="false" enabled="true" order="2">
                                 <format type="Number" cardinality="1" />
@@ -39,9 +33,6 @@
                                                 <filetype name="niftii2" extension="nii.gz" description="" />
                                         </fileTypes>
                                 </format>
-                                <values>
-                                        <value>pipeline://localhost//home/gkiar/vbox/testretest/outputs/intermediate/KKI2009-09-DTI_mask.nii.gz</value>
-                                </values>
                         </input>
                         <output id="TensorEstimation_1.DTIscheme" name="DTI scheme" required="false" enabled="true" order="4">
                                 <format type="File" cardinality="1">
@@ -49,9 +40,6 @@
                                                 <filetype name="scheme file" extension="scheme" description="" />
                                         </fileTypes>
                                 </format>
-                                <values>
-                                        <value>pipeline://localhost//home/gkiar/vbox/testretest/outputs/intermediate/KKI2009-09-DTI_scheme.scheme</value>
-                                </values>
                         </output>
                         <output id="TensorEstimation_1.DTIimageasBfloat" name="DTI image as Bfloat" required="false" enabled="true" order="5">
                                 <format type="File" cardinality="1">
@@ -59,9 +47,6 @@
                                                 <filetype name="Camino Bfloat" extension="Bfloat" description="" />
                                         </fileTypes>
                                 </format>
-                                <values>
-                                        <value>pipeline://localhost//home/gkiar/vbox/testretest/outputs/intermediate/KKI2009-09-DTI_brain.Bfloat</value>
-                                </values>
                         </output>
                         <output id="TensorEstimation_1.DTItensors" name="DTI tensors" required="true" enabled="true" order="6">
                                 <format type="File" cardinality="1">
@@ -69,9 +54,6 @@
                                                 <filetype name="Camino Bdouble" extension="Bdouble" description="" />
                                         </fileTypes>
                                 </format>
-                                <values>
-                                        <value>pipeline://localhost//home/gkiar/vbox/testretest/outputs/intermediate/KKI2009-09-DTI_tensors.Bdouble</value>
-                                </values>
                         </output>
                         <output id="TensorEstimation_1.FractionalAnisotropy" name="Fractional Anisotropy" required="false" enabled="true" order="7">
                                 <format type="File" cardinality="1">
@@ -80,9 +62,6 @@
                                                 <filetype name="niftii2" extension="nii.gz" description="" />
                                         </fileTypes>
                                 </format>
-                                <values>
-                                        <value>pipeline://localhost//home/gkiar/vbox/testretest/outputs/intermediate/KKI2009-09-DTI_fa.nii</value>
-                                </values>
                         </output>
                         <output id="TensorEstimation_1.MeanDiffusivity" name="Mean Diffusivity" required="false" enabled="true" order="8">
                                 <format type="File" cardinality="1">
@@ -91,9 +70,6 @@
                                                 <filetype name="niftii2" extension="nii.gz" description="" />
                                         </fileTypes>
                                 </format>
-                                <values>
-                                        <value>pipeline://localhost//home/gkiar/vbox/testretest/outputs/intermediate/KKI2009-09-DTI_md.nii</value>
-                                </values>
                         </output>
                         <output id="TensorEstimation_1.DTIEigenvalues" name="DTI Eigen values" required="false" enabled="true" order="9">
                                 <format type="File" cardinality="1">
@@ -101,9 +77,6 @@
                                                 <filetype name="Camino Bdouble" extension="Bdouble" description="" />
                                         </fileTypes>
                                 </format>
-                                <values>
-                                        <value>pipeline://localhost//home/gkiar/vbox/testretest/outputs/intermediate/KKI2009-09-DTI_eigs.Bdouble</value>
-                                </values>
                         </output>
                 </module>
         </moduleGroup>

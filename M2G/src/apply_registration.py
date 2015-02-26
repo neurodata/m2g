@@ -28,7 +28,7 @@ from argparse import ArgumentParser
 def apply_registration(original, warped, ref, tr):
     
     # Apply affine transformation
-    system('antsApplyTransforms -d 3 -e 3 -t '+tr+' -i '+fixed+' -r '+ref+' -o '+warped)
+    system('antsApplyTransforms -d 3 -e 3 -t '+tr+' -i '+original+' -r '+ref+' -o '+warped)
 
 def main():
   parser = ArgumentParser(description="")
