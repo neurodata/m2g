@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<pipeline version=".2">
+        <moduleGroup id="Untitled_1" name="Untitled" posX="0" posY="0" sourceCode="">
+                <module id="B0Registration_1" name="B0 Registration" package="m2g" posX="85" posY="37" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/M2G/src/b0_registration.py">
+                        <tag />
+                        <metadata>
+                                <data key="__creationDateKey" value="Thu Feb 26 11:43:03 EST 2015" />
+                        </metadata>
+                        <input id="B0Registration_1.DTIImage" name="DTI Image" required="false" enabled="true" order="0">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="niftii2" extension="nii.gz" description="" />
+                                                <filetype name="nifti" extension="nii" description="" />
+                                        </fileTypes>
+                                </format>
+                        </input>
+                        <input id="B0Registration_1.B-valuesfile" name="B-values file" required="false" enabled="true" order="1">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="B values" extension="b" description="" />
+                                        </fileTypes>
+                                </format>
+                        </input>
+                        <output id="B0Registration_1.AlignedDTI" name="Aligned DTI" required="false" enabled="true" order="2">
+                                <format type="File" cardinality="-2" cardinalityBase="DTI Image">
+                                        <fileTypes>
+                                                <filetype name="niftii2" extension="nii.gz" description="" />
+                                                <filetype name="nifti" extension="nii" description="" />
+                                        </fileTypes>
+                                </format>
+                        </output>
+                        <output id="B0Registration_1.B0volume" name="B0 volume" required="false" enabled="true" order="3">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="niftii2" extension="nii.gz" description="" />
+                                                <filetype name="nifti" extension="nii" description="" />
+                                        </fileTypes>
+                                </format>
+                        </output>
+                </module>
+        </moduleGroup>
+</pipeline>
+
