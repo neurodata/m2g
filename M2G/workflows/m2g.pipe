@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<pipeline version=".2">
+        <connections>
+                <connection source="DTIImage_1.Output" sink="B0Registration_1.DTIImage" />
+                <connection source="DTIBValues_1.Output" sink="B0Registration_1.B-valuesfile" />
+                <connection source="MPRAGEImage_1.Output" sink="BrainExtraction_1.Inputimage" />
+        </connections>
+        <moduleGroup id="Untitled_1" name="Untitled" posX="0" posY="0" sourceCode="">
+                <dataModule id="DTIImage_1" name="DTI Image" package="m2g" posX="30" posY="105" rotation="1" sourceCode="" type="File" source="true" loopIndex="false">
+                        <tag />
+                        <metadata>
+                                <data key="__creationDateKey" value="Thu Feb 26 11:52:26 EST 2015" />
+                        </metadata>
+                        <output id="DTIImage_1.Output" name="Output" required="true" enabled="true" order="-1">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="nifti" extension="nii" description="" />
+                                                <filetype name="niftii2" extension="nii.gz" description="" />
+                                        </fileTypes>
+                                </format>
+                        </output>
+                        <fileTypes>
+                                <filetype name="nifti" extension="nii" description="" />
+                                <filetype name="niftii2" extension="nii.gz" description="" />
+                        </fileTypes>
+                </dataModule>
+                <dataModule id="DTIBValues_1" name="DTI B Values" package="m2g" posX="29" posY="4" rotation="1" sourceCode="" type="File" source="true" loopIndex="false">
+                        <tag />
+                        <metadata>
+                                <data key="__creationDateKey" value="Thu Feb 26 11:52:52 EST 2015" />
+                        </metadata>
+                        <output id="DTIBValues_1.Output" name="Output" required="true" enabled="true" order="-1">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="B values" extension="b" description="" />
+                                        </fileTypes>
+                                </format>
+                        </output>
+                        <fileTypes>
+                                <filetype name="B values" extension="b" description="" />
+                        </fileTypes>
+                </dataModule>
+                <module id="B0Registration_1" name="B0 Registration" package="m2g" posX="137" posY="213" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/M2G/src/b0_registration.py">
+                        <metadata>
+                                <data key="__creationDateKey" value="Thu Feb 26 11:43:03 EST 2015" />
+                        </metadata>
+                        <input id="B0Registration_1.DTIImage" name="DTI Image" required="false" enabled="true" order="0">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="niftii2" extension="nii.gz" description="" />
+                                                <filetype name="nifti" extension="nii" description="" />
+                                        </fileTypes>
+                                </format>
+                        </input>
+                        <input id="B0Registration_1.B-valuesfile" name="B-values file" required="false" enabled="true" order="1">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="B values" extension="b" description="" />
+                                        </fileTypes>
+                                </format>
+                        </input>
+                        <output id="B0Registration_1.AlignedDTI" name="Aligned DTI" required="false" enabled="true" order="2">
+                                <format type="File" cardinality="-2" cardinalityBase="DTI Image">
+                                        <fileTypes>
+                                                <filetype name="niftii2" extension="nii.gz" description="" />
+                                                <filetype name="nifti" extension="nii" description="" />
+                                        </fileTypes>
+                                </format>
+                        </output>
+                        <output id="B0Registration_1.B0volume" name="B0 volume" required="false" enabled="true" order="3">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="niftii2" extension="nii.gz" description="" />
+                                                <filetype name="nifti" extension="nii" description="" />
+                                        </fileTypes>
+                                </format>
+                        </output>
+                </module>
+                <dataModule id="MPRAGEImage_1" name="MPRAGE Image" package="m2g" posX="381" posY="3" sourceCode="" type="File" source="true" loopIndex="false">
+                        <tag />
+                        <metadata>
+                                <data key="__creationDateKey" value="Thu Feb 26 11:53:46 EST 2015" />
+                        </metadata>
+                        <output id="MPRAGEImage_1.Output" name="Output" required="true" enabled="true" order="-1">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="niftii2" extension="nii.gz" description="" />
+                                                <filetype name="nifti" extension="nii" description="" />
+                                        </fileTypes>
+                                </format>
+                        </output>
+                        <fileTypes>
+                                <filetype name="niftii2" extension="nii.gz" description="" />
+                                <filetype name="nifti" extension="nii" description="" />
+                        </fileTypes>
+                </dataModule>
+                <module id="BrainExtraction_1" name="Brain Extraction" package="m2g" posX="389" posY="216" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/M2G/src/skullextract.py">
+                        <metadata>
+                                <data key="__creationDateKey" value="Thu Feb 26 11:28:32 EST 2015" />
+                        </metadata>
+                        <input id="BrainExtraction_1.Inputimage" name="Input image" required="false" enabled="true" order="0">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="niftii2" extension="nii.gz" description="" />
+                                                <filetype name="nifti" extension="nii" description="" />
+                                        </fileTypes>
+                                </format>
+                        </input>
+                        <input id="BrainExtraction_1.FractionalIntensityThreshold" name="Fractional Intensity Threshold" description="default=0.25 (verified on KKI dataset)" required="false" enabled="true" order="1" prefix="-f" prefixSpaced="true" prefixAllArgs="false">
+                                <format type="Number" cardinality="1" />
+                                <values>
+                                        <value>0.25</value>
+                                </values>
+                        </input>
+                        <input id="BrainExtraction_1.Verticalgradient" name="Vertical gradient" description="0" required="false" enabled="true" order="2" prefix="-g" prefixSpaced="true" prefixAllArgs="false">
+                                <format type="Number" cardinality="1" />
+                                <values>
+                                        <value>0</value>
+                                </values>
+                        </input>
+                        <output id="BrainExtraction_1.Outputbrainimage" name="Output brain image" required="false" enabled="true" order="3">
+                                <format type="File" cardinality="-2" cardinalityBase="Input image">
+                                        <fileTypes>
+                                                <filetype name="niftii2" extension="nii.gz" description="" />
+                                                <filetype name="nifti" extension="nii" description="" />
+                                        </fileTypes>
+                                </format>
+                        </output>
+                        <output id="BrainExtraction_1.Outputbrainmask" name="Output brain mask" required="false" enabled="true" order="4">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="niftii2" extension="nii.gz" description="" />
+                                                <filetype name="nifti" extension="nii" description="" />
+                                        </fileTypes>
+                                </format>
+                        </output>
+                </module>
+        </moduleGroup>
+</pipeline>
+

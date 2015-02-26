@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <pipeline version=".2">
-        <moduleGroup id="affine_registration_1" name="affine_registration" posX="0" posY="0" sourceCode="">
-                <module id="RigidRegistration_1" name="Rigid Registration" package="m2g" posX="334" posY="180" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/M2G/src/register_rigid.py">
+        <moduleGroup id="Untitled_1" name="Untitled" posX="0" posY="0" sourceCode="">
+                <module id="RigidRegistration_1" name="Rigid Registration" package="m2g" posX="136" posY="74" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/M2G/src/register_rigid.py">
                         <tag />
                         <metadata>
                                 <data key="__creationDateKey" value="Thu Feb 26 09:45:13 EST 2015" />
@@ -14,7 +14,7 @@
                                         </fileTypes>
                                 </format>
                                 <values>
-                                        <value>pipeline://localhost//home/greg/atlas/icbm_avg_152_t1_tal_nlin_symmetric_VI.nii</value>
+                                        <value>pipeline://localhost//home/greg/KKI2009-01-MP_brain.nii.gz</value>
                                 </values>
                         </input>
                         <input id="RigidRegistration_1.MovingImage" name="Moving Image" required="false" enabled="true" order="1">
@@ -25,7 +25,7 @@
                                         </fileTypes>
                                 </format>
                                 <values>
-                                        <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-03/KKI2009-03-MPRAGE.nii</value>
+                                        <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-01/KKI2009-01-B0.nii</value>
                                 </values>
                         </input>
                         <input id="RigidRegistration_1.tolerance" name="tolerance" required="false" enabled="true" order="2">
