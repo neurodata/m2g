@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<pipeline version=".2">
+        <connections>
+                <connection source="Fibers_1.Output" sink="graphie_1.fiberfile" />
+                <connection source="convertie_1.matgraphfile" sink="Graph_1.Input" />
+                <connection source="graphie_1.graphfile" sink="convertie_1.graphmlfile" />
+        </connections>
+        <moduleGroup id="m2g_full_noregi_1" name="m2g_full_noregi" posX="0" posY="0" sourceCode="">
+                <module id="graphie_1" name="graphie" package="mrimages" posX="943" posY="504" rotation="1" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/MR-OCP/mrcap/gengraph.py">
+                        <metadata>
+                                <data key="__creationDateKey" value="Sun Jan 11 17:53:43 EST 2015" />
+                        </metadata>
+                        <input id="graphie_1.fiberfile" name="fiber file" required="true" enabled="true" order="0">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="Matlab data" extension="dat" description="" />
+                                        </fileTypes>
+                                </format>
+                        </input>
+                        <input id="graphie_1.atlas" name="atlas" required="true" enabled="true" order="1">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="niftii2" extension="nii.gz" description="" />
+                                                <filetype name="nifti" extension="nii" description="" />
+                                        </fileTypes>
+                                </format>
+                                <values>
+                                        <value>pipeline://localhost/{data}/MNI152_T1_1mm_brain_labels_cropped.nii</value>
+                                </values>
+                        </input>
+			<input id="graphie_1.size" name="Size" required="false" enabled="true" order="3">
+                                <format type="String" cardinality="1" />
+                                <values>
+                                	<value>--isbig</value>
+                                </values>
+                        </input>
+                        <input id="graphie_1.filetype" name="filetype" required="false" enabled="true" order="4" prefix="--outformat" prefixSpaced="true" prefixAllArgs="false">
+                        	<format type="String" cardinality="1" />
+                        	<values>
+                               		<value>edgelist</value>
+                                </values>
+               		</input>
+                        <output id="graphie_1.graphfile" name="graph file" required="true" enabled="true" order="2">
+                        	<format type="File" cardinality="1">
+                                <fileTypes>
+                                	<filetype name="Graph1" extension="graphml" description="" />
+                                        <filetype name="Edgelist" extention="edgelist" description="" />
+                                </fileTypes>
+                                </format>
+                        </output>
+                        <output id="graphie_1.graphfile" name="graph file" required="true" enabled="true" order="2">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="Graph1" extension="graphml" description="" />
+                                        </fileTypes>
+                                </format>
+                        </output>
+                </module>
+                <dataModule id="Fibers_1" name="Fibers" package="mrimages" posX="372" posY="8" rotation="1" sourceCode="" type="File" source="true" loopIndex="false">
+                        <tag />
+                        <metadata>
+                                <data key="__creationDateKey" value="Thu Jan 15 14:03:27 EST 2015" />
+                        </metadata>
+                        <output id="Fibers_1.Output" name="Output" required="true" enabled="true" order="-1">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="Matlab Data" extension="dat" description="" />
+                                        </fileTypes>
+                                </format>
+                        </output>
+                        <fileTypes>
+                                <filetype name="Matlab Data" extension="dat" description="" />
+                        </fileTypes>
+                        <values>
+                                <value>pipeline://localhost//home/greg/data/outputs/migraine/fibs/KKI-21_KKI2009-01_fibers.dat</value>
+                                <value>pipeline://localhost//home/greg/data/outputs/migraine/fibs/KKI-21_KKI2009-02_fibers.dat</value>
+                                <value>pipeline://localhost//home/greg/data/outputs/migraine/fibs/KKI-21_KKI2009-03_fibers.dat</value>
+                                <value>pipeline://localhost//home/greg/data/outputs/migraine/fibs/KKI-21_KKI2009-04_fibers.dat</value>
+                                <value>pipeline://localhost//home/greg/data/outputs/migraine/fibs/KKI-21_KKI2009-05_fibers.dat</value>
+                                <value>pipeline://localhost//home/greg/data/outputs/migraine/fibs/KKI-21_KKI2009-06_fibers.dat</value>
+                                <value>pipeline://localhost//home/greg/data/outputs/migraine/fibs/KKI-21_KKI2009-07_fibers.dat</value>
+                                <value>pipeline://localhost//home/greg/data/outputs/migraine/fibs/KKI-21_KKI2009-08_fibers.dat</value>
+                                <value>pipeline://localhost//home/greg/data/outputs/migraine/fibs/KKI-21_KKI2009-09_fibers.dat</value>
+                                <value>pipeline://localhost//home/greg/data/outputs/migraine/fibs/KKI-21_KKI2009-10_fibers.dat</value>
+                                <value>pipeline://localhost//home/greg/data/outputs/migraine/fibs/KKI-21_KKI2009-11_fibers.dat</value>
+                                <value>pipeline://localhost//home/greg/data/outputs/migraine/fibs/KKI-21_KKI2009-12_fibers.dat</value>
+                                <value>pipeline://localhost//home/greg/data/outputs/migraine/fibs/KKI-21_KKI2009-13_fibers.dat</value>
+                                <value>pipeline://localhost//home/greg/data/outputs/migraine/fibs/KKI-21_KKI2009-14_fibers.dat</value>
+                                <value>pipeline://localhost//home/greg/data/outputs/migraine/fibs/KKI-21_KKI2009-15_fibers.dat</value>
+                                <value>pipeline://localhost//home/greg/data/outputs/migraine/fibs/KKI-21_KKI2009-16_fibers.dat</value>
+                                <value>pipeline://localhost//home/greg/data/outputs/migraine/fibs/KKI-21_KKI2009-17_fibers.dat</value>
+                                <value>pipeline://localhost//home/greg/data/outputs/migraine/fibs/KKI-21_KKI2009-18_fibers.dat</value>
+                                <value>pipeline://localhost//home/greg/data/outputs/migraine/fibs/KKI-21_KKI2009-19_fibers.dat</value>
+                                <value>pipeline://localhost//home/greg/data/outputs/migraine/fibs/KKI-21_KKI2009-20_fibers.dat</value>
+                                <value>pipeline://localhost//home/greg/data/outputs/migraine/fibs/KKI-21_KKI2009-21_fibers.dat</value>
+                                <value>pipeline://localhost//home/greg/data/outputs/migraine/fibs/KKI-21_KKI2009-22_fibers.dat</value>
+                                <value>pipeline://localhost//home/greg/data/outputs/migraine/fibs/KKI-21_KKI2009-23_fibers.dat</value>
+                                <value>pipeline://localhost//home/greg/data/outputs/migraine/fibs/KKI-21_KKI2009-24_fibers.dat</value>
+                                <value>pipeline://localhost//home/greg/data/outputs/migraine/fibs/KKI-21_KKI2009-25_fibers.dat</value>
+                                <value>pipeline://localhost//home/greg/data/outputs/migraine/fibs/KKI-21_KKI2009-26_fibers.dat</value>
+                                <value>pipeline://localhost//home/greg/data/outputs/migraine/fibs/KKI-21_KKI2009-27_fibers.dat</value>
+                                <value>pipeline://localhost//home/greg/data/outputs/migraine/fibs/KKI-21_KKI2009-28_fibers.dat</value>
+                                <value>pipeline://localhost//home/greg/data/outputs/migraine/fibs/KKI-21_KKI2009-29_fibers.dat</value>
+                                <value>pipeline://localhost//home/greg/data/outputs/migraine/fibs/KKI-21_KKI2009-30_fibers.dat</value>
+                                <value>pipeline://localhost//home/greg/data/outputs/migraine/fibs/KKI-21_KKI2009-31_fibers.dat</value>
+                                <value>pipeline://localhost//home/greg/data/outputs/migraine/fibs/KKI-21_KKI2009-32_fibers.dat</value>
+                                <value>pipeline://localhost//home/greg/data/outputs/migraine/fibs/KKI-21_KKI2009-33_fibers.dat</value>
+                                <value>pipeline://localhost//home/greg/data/outputs/migraine/fibs/KKI-21_KKI2009-34_fibers.dat</value>
+                                <value>pipeline://localhost//home/greg/data/outputs/migraine/fibs/KKI-21_KKI2009-35_fibers.dat</value>
+                                <value>pipeline://localhost//home/greg/data/outputs/migraine/fibs/KKI-21_KKI2009-36_fibers.dat</value>
+                                <value>pipeline://localhost//home/greg/data/outputs/migraine/fibs/KKI-21_KKI2009-37_fibers.dat</value>
+                                <value>pipeline://localhost//home/greg/data/outputs/migraine/fibs/KKI-21_KKI2009-38_fibers.dat</value>
+                                <value>pipeline://localhost//home/greg/data/outputs/migraine/fibs/KKI-21_KKI2009-39_fibers.dat</value>
+                                <value>pipeline://localhost//home/greg/data/outputs/migraine/fibs/KKI-21_KKI2009-40_fibers.dat</value>
+                                <value>pipeline://localhost//home/greg/data/outputs/migraine/fibs/KKI-21_KKI2009-41_fibers.dat</value>
+                                <value>pipeline://localhost//home/greg/data/outputs/migraine/fibs/KKI-21_KKI2009-42_fibers.dat</value>
+                        </values>
+                </dataModule>
+                <dataModule id="Graph_1" name="Graph" package="mrimages" posX="1217" posY="516" rotation="1" sourceCode="" type="File" source="false" loopIndex="false" dirDump="false">
+                        <tag />
+                        <metadata>
+                                <data key="__creationDateKey" value="Thu Jan 15 14:09:59 EST 2015" />
+                        </metadata>
+                        <input id="Graph_1.Input" name="Input" required="true" enabled="true" order="-1">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="Matlab file" extension="mat" description="" />
+                                        </fileTypes>
+                                </format>
+                        </input>
+                        <fileTypes>
+                                <filetype name="Matlab file" extension="mat" description="" />
+                        </fileTypes>
+                        <values>
+                        	<value>pipeline://localhost//home/greg/data/outputs/m2g/from_migraine_fibs/smallgraphs/KKI2009-01_small.mat</value>
+                        	<value>pipeline://localhost//home/greg/data/outputs/m2g/from_migraine_fibs/smallgraphs/KKI2009-02_small.mat</value>
+                        	<value>pipeline://localhost//home/greg/data/outputs/m2g/from_migraine_fibs/smallgraphs/KKI2009-03_small.mat</value>
+                        	<value>pipeline://localhost//home/greg/data/outputs/m2g/from_migraine_fibs/smallgraphs/KKI2009-04_small.mat</value>
+                        	<value>pipeline://localhost//home/greg/data/outputs/m2g/from_migraine_fibs/smallgraphs/KKI2009-05_small.mat</value>
+                        	<value>pipeline://localhost//home/greg/data/outputs/m2g/from_migraine_fibs/smallgraphs/KKI2009-06_small.mat</value>
+                        	<value>pipeline://localhost//home/greg/data/outputs/m2g/from_migraine_fibs/smallgraphs/KKI2009-07_small.mat</value>
+                        	<value>pipeline://localhost//home/greg/data/outputs/m2g/from_migraine_fibs/smallgraphs/KKI2009-08_small.mat</value>
+                        	<value>pipeline://localhost//home/greg/data/outputs/m2g/from_migraine_fibs/smallgraphs/KKI2009-09_small.mat</value>
+                        	<value>pipeline://localhost//home/greg/data/outputs/m2g/from_migraine_fibs/smallgraphs/KKI2009-10_small.mat</value>
+                        	<value>pipeline://localhost//home/greg/data/outputs/m2g/from_migraine_fibs/smallgraphs/KKI2009-11_small.mat</value>
+                        	<value>pipeline://localhost//home/greg/data/outputs/m2g/from_migraine_fibs/smallgraphs/KKI2009-12_small.mat</value>
+                        	<value>pipeline://localhost//home/greg/data/outputs/m2g/from_migraine_fibs/smallgraphs/KKI2009-13_small.mat</value>
+                        	<value>pipeline://localhost//home/greg/data/outputs/m2g/from_migraine_fibs/smallgraphs/KKI2009-14_small.mat</value>
+                        	<value>pipeline://localhost//home/greg/data/outputs/m2g/from_migraine_fibs/smallgraphs/KKI2009-15_small.mat</value>
+                        	<value>pipeline://localhost//home/greg/data/outputs/m2g/from_migraine_fibs/smallgraphs/KKI2009-16_small.mat</value>
+                        	<value>pipeline://localhost//home/greg/data/outputs/m2g/from_migraine_fibs/smallgraphs/KKI2009-17_small.mat</value>
+                       		<value>pipeline://localhost//home/greg/data/outputs/m2g/from_migraine_fibs/smallgraphs/KKI2009-18_small.mat</value>
+                        	<value>pipeline://localhost//home/greg/data/outputs/m2g/from_migraine_fibs/smallgraphs/KKI2009-19_small.mat</value>
+                        	<value>pipeline://localhost//home/greg/data/outputs/m2g/from_migraine_fibs/smallgraphs/KKI2009-20_small.mat</value>
+                        	<value>pipeline://localhost//home/greg/data/outputs/m2g/from_migraine_fibs/smallgraphs/KKI2009-21_small.mat</value>
+                        	<value>pipeline://localhost//home/greg/data/outputs/m2g/from_migraine_fibs/smallgraphs/KKI2009-22_small.mat</value>
+                        	<value>pipeline://localhost//home/greg/data/outputs/m2g/from_migraine_fibs/smallgraphs/KKI2009-23_small.mat</value>
+                        	<value>pipeline://localhost//home/greg/data/outputs/m2g/from_migraine_fibs/smallgraphs/KKI2009-24_small.mat</value>
+                        	<value>pipeline://localhost//home/greg/data/outputs/m2g/from_migraine_fibs/smallgraphs/KKI2009-25_small.mat</value>
+                        	<value>pipeline://localhost//home/greg/data/outputs/m2g/from_migraine_fibs/smallgraphs/KKI2009-26_small.mat</value>
+                        	<value>pipeline://localhost//home/greg/data/outputs/m2g/from_migraine_fibs/smallgraphs/KKI2009-27_small.mat</value>
+                        	<value>pipeline://localhost//home/greg/data/outputs/m2g/from_migraine_fibs/smallgraphs/KKI2009-28_small.mat</value>
+                        	<value>pipeline://localhost//home/greg/data/outputs/m2g/from_migraine_fibs/smallgraphs/KKI2009-29_small.mat</value>
+                        	<value>pipeline://localhost//home/greg/data/outputs/m2g/from_migraine_fibs/smallgraphs/KKI2009-30_small.mat</value>
+                        	<value>pipeline://localhost//home/greg/data/outputs/m2g/from_migraine_fibs/smallgraphs/KKI2009-31_small.mat</value>
+                        	<value>pipeline://localhost//home/greg/data/outputs/m2g/from_migraine_fibs/smallgraphs/KKI2009-32_small.mat</value>
+                        	<value>pipeline://localhost//home/greg/data/outputs/m2g/from_migraine_fibs/smallgraphs/KKI2009-33_small.mat</value>
+                        	<value>pipeline://localhost//home/greg/data/outputs/m2g/from_migraine_fibs/smallgraphs/KKI2009-34_small.mat</value>
+                        	<value>pipeline://localhost//home/greg/data/outputs/m2g/from_migraine_fibs/smallgraphs/KKI2009-35_small.mat</value>
+                        	<value>pipeline://localhost//home/greg/data/outputs/m2g/from_migraine_fibs/smallgraphs/KKI2009-36_small.mat</value>
+                        	<value>pipeline://localhost//home/greg/data/outputs/m2g/from_migraine_fibs/smallgraphs/KKI2009-37_small.mat</value>
+                        	<value>pipeline://localhost//home/greg/data/outputs/m2g/from_migraine_fibs/smallgraphs/KKI2009-38_small.mat</value>
+                        	<value>pipeline://localhost//home/greg/data/outputs/m2g/from_migraine_fibs/smallgraphs/KKI2009-39_small.mat</value>
+                        	<value>pipeline://localhost//home/greg/data/outputs/m2g/from_migraine_fibs/smallgraphs/KKI2009-40_small.mat</value>
+                        	<value>pipeline://localhost//home/greg/data/outputs/m2g/from_migraine_fibs/smallgraphs/KKI2009-41_small.mat</value>
+                        	<value>pipeline://localhost//home/greg/data/outputs/m2g/from_migraine_fibs/smallgraphs/KKI2009-42_small.mat</value>
+                        </values>
+                </dataModule>
+                <module id="convertie_1" name="convertie" package="mrimages" posX="1086" posY="504" rotation="1" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/tools/utils/graphml2mat.py">
+                        <metadata>
+                                <data key="__creationDateKey" value="Tue Feb 10 10:04:52 EST 2015" />
+                        </metadata>
+                        <input id="convertie_1.graphmlfile" name="graphml file" required="false" enabled="true" order="0">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="Graph1" extension="graphml" description="" />
+                                        </fileTypes>
+                                </format>
+                        </input>
+                        <output id="convertie_1.matgraphfile" name="mat graph file" required="false" enabled="true" order="1">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="Matlab file" extension="mat" description="" />
+                                        </fileTypes>
+                                </format>
+                        </output>
+                </module>
+                <variables>
+                        <variable name="data" order="1">/home/greg/data</variable>
+                </variables>
+        </moduleGroup>
+</pipeline>
+
