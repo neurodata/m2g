@@ -13,6 +13,7 @@
                 <connection source="Atlas_1.Output" sink="m2g_2.ReferenceImage" />
                 <connection source="BrainExtraction_1.Outputbrainimage" sink="RigidRegistration_1.FixedImage" />
                 <connection source="B0Registration_1.B0volume" sink="RigidRegistration_1.MovingImage" />
+                <connection source="FiberConverter_1.fiberoutfile" sink="SmallGraphGeneration_1.fiberfile" />
                 <connection source="TensorEstimation_1.DTItensors" sink="FiberTractography_1.DTITensors" />
                 <connection source="BrainExtraction_1.Outputbrainimage" sink="AffineRegistration_1.MovingImage" />
                 <connection source="B0Registration_1.AlignedDTI" sink="ApplyRegistrationtoDTI_1.OriginalImage" />
@@ -22,6 +23,7 @@
                 <connection source="ApplyRegistrationtoDTI_1.WarpedImage" sink="ApplyRegistrationtoDTI_2.OriginalImage" />
                 <connection source="AffineRegistration_1.transformation" sink="ApplyRegistrationtoDTI_2.Transformmatrix" />
                 <connection source="SmallGraphGeneration_1.graphfile" sink=".graphmlto.mat_1.graphmlfile" />
+                <connection source="FiberTractography_1.DTIfibers" sink="FiberConverter_1.fiberinfile" />
         </connections>
         <moduleGroup id="m2g_1" name="m2g" package="m2g" posX="0" posY="0" sourceCode="">
                 <tag />
@@ -281,7 +283,7 @@
                                         </format>
                                 </output>
                         </module>
-                        <module id="SmallGraphGeneration_1" name="Small Graph Generation" package="m2g" posX="918" posY="679" rotation="1" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/MR-OCP/mrcap/gengraph.py">
+                        <module id="SmallGraphGeneration_1" name="Small Graph Generation" package="m2g" posX="1017" posY="689" rotation="1" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/MR-OCP/mrcap/gengraph.py">
                                 <metadata>
                                         <data key="__creationDateKey" value="Sun Jan 11 17:53:43 EST 2015" />
                                 </metadata>
@@ -545,7 +547,7 @@
                                         </format>
                                 </input>
                         </module>
-                        <module id=".graphmlto.mat_1" name=".graphml to .mat" package="m2g" description="This is designed for small graphs based on the desikan atlas (i.e. 70 regions labeled 1-35, 101-135)" posX="1065" posY="678" rotation="1" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/tools/utils/graphml2mat.py">
+                        <module id=".graphmlto.mat_1" name=".graphml to .mat" package="m2g" description="This is designed for small graphs based on the desikan atlas (i.e. 70 regions labeled 1-35, 101-135)" posX="1227" posY="690" rotation="1" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/tools/utils/graphml2mat.py">
                                 <metadata>
                                         <data key="__creationDateKey" value="Tue Feb 10 10:04:52 EST 2015" />
                                 </metadata>
@@ -560,6 +562,26 @@
                                         <format type="File" cardinality="1">
                                                 <fileTypes>
                                                         <filetype name="Matlab file" extension="mat" description="" />
+                                                </fileTypes>
+                                        </format>
+                                </output>
+                        </module>
+                        <module id="FiberConverter_1" name="Fiber Converter" package="m2g" posX="855" posY="699" rotation="1" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/M2G/src/fiber_convert.py">
+                                <tag />
+                                <metadata>
+                                        <data key="__creationDateKey" value="Sun Jan 11 21:38:32 EST 2015" />
+                                </metadata>
+                                <input id="FiberConverter_1.fiberinfile" name="fiber infile" required="false" enabled="true" order="0">
+                                        <format type="File" cardinality="1">
+                                                <fileTypes>
+                                                        <filetype name="Camino Bfloat" extension="Bfloat" description="" />
+                                                </fileTypes>
+                                        </format>
+                                </input>
+                                <output id="FiberConverter_1.fiberoutfile" name="fiber outfile" required="false" enabled="true" order="1">
+                                        <format type="File" cardinality="1">
+                                                <fileTypes>
+                                                        <filetype name="Matlab data" extension="dat" description="" />
                                                 </fileTypes>
                                         </format>
                                 </output>
