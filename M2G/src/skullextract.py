@@ -29,7 +29,7 @@ def remove_skull(image, f, g, brain, mask):
   [root, ext1] = splitext(basename(brain))
   [root, ext2] = splitext(root)
   
-  os.system('bet '+image+' '+brain+' -f '+f+' -g '+g+' -m -R')
+  os.system('bet '+image+' '+brain+' -f '+f+' -g '+g+' -m -B')
   os.system('mv '+dirname(brain)+'/'+root+'_mask'+ext2+ext1+' '+mask)
 
 def main():
