@@ -15,8 +15,10 @@
                 <connection source="B0Registration_1.AlignedDTI" sink="ApplyRegistrationtoDTI_1.OriginalImage" />
                 <connection source="RigidRegistration_1.transformation" sink="ApplyRegistrationtoDTI_1.Transformmatrix" />
                 <connection source="BrainExtraction_1.Outputbrainimage" sink="AffineRegistration_1.MovingImage" />
-                <connection source="ApplyRegistrationtoDTI_1.WarpedImage" sink="ApplyRegistrationtoDTI_2.OriginalImage" />
+                <connection source="MaskNifti_1.Maskedimage" sink="ApplyRegistrationtoDTI_2.OriginalImage" />
                 <connection source="AffineRegistration_1.transformation" sink="ApplyRegistrationtoDTI_2.Transformmatrix" />
+                <connection source="ApplyRegistrationtoDTI_1.WarpedImage" sink="MaskNifti_1.Datatomask" />
+                <connection source="BrainExtraction_1.Outputbrainmask" sink="MaskNifti_1.Mask" />
                 <connection source="m2g_1.OutputImage" sink="B0inMPRAGE_1.Input" />
                 <connection source="m2g_1.OutputImage_2" sink="MPRAGEinMNI_1.Input" />
         </connections>
@@ -383,7 +385,7 @@
                                         </format>
                                 </output>
                         </module>
-                        <module id="ApplyRegistrationtoDTI_2" name="Apply Registration to DTI" package="m2g" posX="504" posY="501" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/M2G/src/apply_registration.py">
+                        <module id="ApplyRegistrationtoDTI_2" name="Apply Registration to DTI" package="m2g" posX="633" posY="620" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/M2G/src/apply_registration.py">
                                 <metadata>
                                         <data key="__creationDateKey" value="Thu Feb 26 13:46:28 EST 2015" />
                                 </metadata>
@@ -418,6 +420,36 @@
                                                 </fileTypes>
                                         </format>
                                 </input>
+                        </module>
+                        <module id="MaskNifti_1" name="Mask Nifti" package="m2g" posX="409" posY="503" rotation="1" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/M2G/src/mask_nifti.py">
+                                <tag />
+                                <metadata>
+                                        <data key="__creationDateKey" value="Fri Feb 27 16:35:54 EST 2015" />
+                                </metadata>
+                                <input id="MaskNifti_1.Datatomask" name="Data to mask" required="false" enabled="true" order="0">
+                                        <format type="File" cardinality="1">
+                                                <fileTypes>
+                                                        <filetype name="niftii2" extension="nii.gz" description="" />
+                                                        <filetype name="nifti" extension="nii" description="" />
+                                                </fileTypes>
+                                        </format>
+                                </input>
+                                <input id="MaskNifti_1.Mask" name="Mask" required="false" enabled="true" order="1">
+                                        <format type="File" cardinality="1">
+                                                <fileTypes>
+                                                        <filetype name="niftii2" extension="nii.gz" description="" />
+                                                        <filetype name="nifti" extension="nii" description="" />
+                                                </fileTypes>
+                                        </format>
+                                </input>
+                                <output id="MaskNifti_1.Maskedimage" name="Masked image" required="false" enabled="true" order="2">
+                                        <format type="File" cardinality="1">
+                                                <fileTypes>
+                                                        <filetype name="niftii2" extension="nii.gz" description="" />
+                                                        <filetype name="nifti" extension="nii" description="" />
+                                                </fileTypes>
+                                        </format>
+                                </output>
                         </module>
                 </moduleGroup>
                 <dataModule id="B0inMPRAGE_1" name="B0 in MPRAGE" package="m2g" posX="662" posY="563" sourceCode="" type="File" source="false" loopIndex="false" serverAddress="localhost" dirDump="false">
