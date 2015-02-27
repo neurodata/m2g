@@ -314,7 +314,7 @@
                                 <value>/home/greg/hackathon/dti_registration_test/dti_image_input.txt</value>
                         </values>
                 </dataModule>
-                <dataModule id="DTIinAtlasSpace_1" name="DTI in Atlas Space" package="m2g" posX="493" posY="613" sourceCode="" type="File" source="false" loopIndex="false" dirDump="false">
+                <dataModule id="DTIinAtlasSpace_1" name="DTI in Atlas Space" package="m2g" posX="493" posY="613" sourceCode="" type="File" source="false" loopIndex="false" serverAddress="localhost" dirDump="false">
                         <tag />
                         <metadata>
                                 <data key="__creationDateKey" value="Thu Feb 26 21:56:47 EST 2015" />
@@ -322,17 +322,20 @@
                         <input id="DTIinAtlasSpace_1.Input" name="Input" required="true" enabled="true" order="-1">
                                 <format type="File" cardinality="1">
                                         <fileTypes>
-                                                <filetype name="niftii2" extension="nii.gz" description="" />
                                                 <filetype name="nifti" extension="nii" description="" />
+                                                <filetype name="niftii2" extension="nii.gz" description="" />
                                         </fileTypes>
                                 </format>
                         </input>
                         <fileTypes>
-                                <filetype name="niftii2" extension="nii.gz" description="" />
                                 <filetype name="nifti" extension="nii" description="" />
+                                <filetype name="niftii2" extension="nii.gz" description="" />
                         </fileTypes>
+                        <values>
+                                <value>pipeline://localhost//home/greg/hackathon/dti_registration_test/DTI_in_MNI.nii</value>
+                        </values>
                 </dataModule>
-                <dataModule id="B0Volume_1" name="B0 Volume" package="m2g" posX="524" posY="547" sourceCode="" type="File" source="false" loopIndex="false" dirDump="false">
+                <dataModule id="B0Volume_1" name="B0 Volume" package="m2g" posX="524" posY="547" sourceCode="" type="File" source="false" loopIndex="false" serverAddress="localhost" dirDump="false">
                         <tag />
                         <metadata>
                                 <data key="__creationDateKey" value="Thu Feb 26 22:39:32 EST 2015" />
@@ -340,15 +343,18 @@
                         <input id="B0Volume_1.Input" name="Input" required="true" enabled="true" order="-1">
                                 <format type="File" cardinality="1">
                                         <fileTypes>
-                                                <filetype name="niftii2" extension="nii.gz" description="" />
                                                 <filetype name="nifti" extension="nii" description="" />
+                                                <filetype name="niftii2" extension="nii.gz" description="" />
                                         </fileTypes>
                                 </format>
                         </input>
                         <fileTypes>
-                                <filetype name="niftii2" extension="nii.gz" description="" />
                                 <filetype name="nifti" extension="nii" description="" />
+                                <filetype name="niftii2" extension="nii.gz" description="" />
                         </fileTypes>
+                        <values>
+                                <value>pipeline://localhost//home/greg/hackathon/dti_registration_test/B0_brain.nii</value>
+                        </values>
                 </dataModule>
                 <dataModule id="MPRAGEBrain_1" name="MPRAGE Brain" package="m2g" posX="555" posY="485" sourceCode="" type="File" source="false" loopIndex="false" serverAddress="localhost" dirDump="false">
                         <tag />
@@ -358,17 +364,17 @@
                         <input id="MPRAGEBrain_1.Input" name="Input" required="true" enabled="true" order="-1">
                                 <format type="File" cardinality="1">
                                         <fileTypes>
-                                                <filetype name="niftii2" extension="nii.gz" description="" />
                                                 <filetype name="nifti" extension="nii" description="" />
+                                                <filetype name="niftii2" extension="nii.gz" description="" />
                                         </fileTypes>
                                 </format>
                         </input>
                         <fileTypes>
-                                <filetype name="niftii2" extension="nii.gz" description="" />
                                 <filetype name="nifti" extension="nii" description="" />
+                                <filetype name="niftii2" extension="nii.gz" description="" />
                         </fileTypes>
                         <values>
-                                <value>pipeline://localhost//</value>
+                                <value>pipeline://localhost//home/greg/hackathon/dti_registration_test/MPRAGE_brain.nii</value>
                         </values>
                 </dataModule>
         </moduleGroup>
