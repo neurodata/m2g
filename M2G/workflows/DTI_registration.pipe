@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <pipeline version=".2">
         <connections>
-                <connection source="MPRAGEImage_1.Output" sink="m2g_1.Inputimage" />
-                <connection source="DTIBValues_1.Output" sink="m2g_1.B-valuesfile" />
-                <connection source="DTIImage_1.Output" sink="m2g_1.DTIImage" />
-                <connection source="Atlas_1.Output" sink="m2g_1.FixedImage" />
-                <connection source="Atlas_1.Output" sink="m2g_1.ReferenceImage" />
+                <connection source="MPRAGEImage_1.Output" sink="m2guptoDTIregistration_1.Inputimage" />
+                <connection source="DTIBValues_1.Output" sink="m2guptoDTIregistration_1.B-valuesfile" />
+                <connection source="DTIImage_1.Output" sink="m2guptoDTIregistration_1.DTIImage" />
+                <connection source="Atlas_1.Output" sink="m2guptoDTIregistration_1.FixedImage" />
+                <connection source="Atlas_1.Output" sink="m2guptoDTIregistration_1.ReferenceImage" />
                 <connection source="B0Registration_1.AlignedDTI" sink="ApplyRegistrationtoDTI_1.OriginalImage" />
                 <connection source="BrainExtraction_1.Outputbrainimage" sink="ApplyRegistrationtoDTI_1.ReferenceImage" />
                 <connection source="RigidRegistration_1.transformation" sink="ApplyRegistrationtoDTI_1.Transformmatrix" />
@@ -14,21 +14,24 @@
                 <connection source="AffineRegistration_1.transformation" sink="ApplyRegistrationtoDTI_2.Transformmatrix" />
                 <connection source="BrainExtraction_1.Outputbrainimage" sink="RigidRegistration_1.FixedImage" />
                 <connection source="B0Registration_1.B0volume" sink="RigidRegistration_1.MovingImage" />
-                <connection source="m2g_1.WarpedImage" sink="DTIinAtlasSpace_1.Input" />
+                <connection source="m2guptoDTIregistration_1.WarpedImage" sink="DTIinAtlasSpace_1.Input" />
+                <connection source="m2guptoDTIregistration_1.B0volume" sink="B0Volume_1.Input" />
+                <connection source="m2guptoDTIregistration_1.Outputbrainimage" sink="MPRAGEBrain_1.Input" />
         </connections>
         <moduleGroup id="DTI_registration_1" name="DTI_registration" posX="0" posY="0" sourceCode="">
-                <moduleGroup id="m2g_1" name="m2g" package="m2g" posX="498" posY="380" sourceCode="">
+                <moduleGroup id="m2guptoDTIregistration_1" name="m2g up to DTI registration" package="m2g" posX="498" posY="380" sourceCode="">
+                        <tag />
                         <metadata>
                                 <data key="__creationDateKey" value="Thu Feb 26 16:08:19 EST 2015" />
                         </metadata>
-                        <output link="BrainExtraction_1.Outputbrainimage" id="m2g_1.Outputbrainimage" name="Output brain image" order="14" />
-                        <input link="BrainExtraction_1.Inputimage" id="m2g_1.Inputimage" name="Input image" order="2" />
-                        <input link="B0Registration_1.B-valuesfile" id="m2g_1.B-valuesfile" name="B-values file" order="1" />
-                        <input link="B0Registration_1.DTIImage" id="m2g_1.DTIImage" name="DTI Image" order="0" />
-                        <output link="B0Registration_1.B0volume" id="m2g_1.B0volume" name="B0 volume" order="13" />
-                        <input link="AffineRegistration_1.FixedImage" id="m2g_1.FixedImage" name="Fixed Image" order="5" />
-                        <input description="Image that the transform was computed wrt." link="ApplyRegistrationtoDTI_2.ReferenceImage" id="m2g_1.ReferenceImage" name="Reference Image" order="8" />
-                        <output link="ApplyRegistrationtoDTI_2.WarpedImage" id="m2g_1.WarpedImage" name="Warped Image" order="11" />
+                        <output link="BrainExtraction_1.Outputbrainimage" id="m2guptoDTIregistration_1.Outputbrainimage" name="Output brain image" order="7" />
+                        <input link="BrainExtraction_1.Inputimage" id="m2guptoDTIregistration_1.Inputimage" name="Input image" order="2" />
+                        <input link="B0Registration_1.B-valuesfile" id="m2guptoDTIregistration_1.B-valuesfile" name="B-values file" order="1" />
+                        <input link="B0Registration_1.DTIImage" id="m2guptoDTIregistration_1.DTIImage" name="DTI Image" order="0" />
+                        <output link="B0Registration_1.B0volume" id="m2guptoDTIregistration_1.B0volume" name="B0 volume" order="6" />
+                        <input link="AffineRegistration_1.FixedImage" id="m2guptoDTIregistration_1.FixedImage" name="Fixed Image" order="3" />
+                        <input description="Image that the transform was computed wrt." link="ApplyRegistrationtoDTI_2.ReferenceImage" id="m2guptoDTIregistration_1.ReferenceImage" name="Reference Image" order="4" />
+                        <output link="ApplyRegistrationtoDTI_2.WarpedImage" id="m2guptoDTIregistration_1.WarpedImage" name="Warped Image" order="5" />
                         <module id="BrainExtraction_1" name="Brain Extraction" package="m2g" posX="92" posY="64" rotation="1" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/M2G/src/skullextract.py">
                                 <metadata>
                                         <data key="__creationDateKey" value="Thu Feb 26 11:28:32 EST 2015" />
@@ -271,6 +274,9 @@
                         <output id="MPRAGEImage_1.Output" name="Output" required="true" enabled="true" order="-1">
                                 <format type="String" cardinality="1" />
                         </output>
+                        <values>
+                                <value>/home/greg/hackathon/dti_registration_test/mprage_image_input.txt</value>
+                        </values>
                 </dataModule>
                 <dataModule id="DTIBValues_1" name="DTI B Values" package="m2g" posX="347" posY="185" rotation="1" sourceCode="" type="String" source="true" loopIndex="false">
                         <tag />
@@ -280,6 +286,9 @@
                         <output id="DTIBValues_1.Output" name="Output" required="true" enabled="true" order="-1">
                                 <format type="String" cardinality="1" />
                         </output>
+                        <values>
+                                <value>/home/greg/hackathon/dti_registration_test/dti_bvalues_input.txt</value>
+                        </values>
                 </dataModule>
                 <dataModule id="Atlas_1" name="Atlas" package="m2g" posX="562" posY="211" sourceCode="" type="String" source="true" loopIndex="false">
                         <tag />
@@ -289,6 +298,9 @@
                         <output id="Atlas_1.Output" name="Output" required="true" enabled="true" order="-1">
                                 <format type="String" cardinality="1" />
                         </output>
+                        <values>
+                                <value>/home/greg/hackathon/dti_registration_test/atlas_input.txt</value>
+                        </values>
                 </dataModule>
                 <dataModule id="DTIImage_1" name="DTI Image" package="m2g" posX="345" posY="285" rotation="1" sourceCode="" type="String" source="true" loopIndex="false">
                         <tag />
@@ -298,8 +310,11 @@
                         <output id="DTIImage_1.Output" name="Output" required="true" enabled="true" order="-1">
                                 <format type="String" cardinality="1" />
                         </output>
+                        <values>
+                                <value>/home/greg/hackathon/dti_registration_test/dti_image_input.txt</value>
+                        </values>
                 </dataModule>
-                <dataModule id="DTIinAtlasSpace_1" name="DTI in Atlas Space" package="m2g" posX="493" posY="509" sourceCode="" type="File" source="false" loopIndex="false" dirDump="false">
+                <dataModule id="DTIinAtlasSpace_1" name="DTI in Atlas Space" package="m2g" posX="493" posY="613" sourceCode="" type="File" source="false" loopIndex="false" dirDump="false">
                         <tag />
                         <metadata>
                                 <data key="__creationDateKey" value="Thu Feb 26 21:56:47 EST 2015" />
@@ -307,13 +322,54 @@
                         <input id="DTIinAtlasSpace_1.Input" name="Input" required="true" enabled="true" order="-1">
                                 <format type="File" cardinality="1">
                                         <fileTypes>
-                                                <filetype name="File" extension="" description="Any type of data file" />
+                                                <filetype name="niftii2" extension="nii.gz" description="" />
+                                                <filetype name="nifti" extension="nii" description="" />
                                         </fileTypes>
                                 </format>
                         </input>
                         <fileTypes>
-                                <filetype name="File" extension="" description="Any type of data file" />
+                                <filetype name="niftii2" extension="nii.gz" description="" />
+                                <filetype name="nifti" extension="nii" description="" />
                         </fileTypes>
+                </dataModule>
+                <dataModule id="B0Volume_1" name="B0 Volume" package="m2g" posX="524" posY="547" sourceCode="" type="File" source="false" loopIndex="false" dirDump="false">
+                        <tag />
+                        <metadata>
+                                <data key="__creationDateKey" value="Thu Feb 26 22:39:32 EST 2015" />
+                        </metadata>
+                        <input id="B0Volume_1.Input" name="Input" required="true" enabled="true" order="-1">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="niftii2" extension="nii.gz" description="" />
+                                                <filetype name="nifti" extension="nii" description="" />
+                                        </fileTypes>
+                                </format>
+                        </input>
+                        <fileTypes>
+                                <filetype name="niftii2" extension="nii.gz" description="" />
+                                <filetype name="nifti" extension="nii" description="" />
+                        </fileTypes>
+                </dataModule>
+                <dataModule id="MPRAGEBrain_1" name="MPRAGE Brain" package="m2g" posX="555" posY="485" sourceCode="" type="File" source="false" loopIndex="false" serverAddress="localhost" dirDump="false">
+                        <tag />
+                        <metadata>
+                                <data key="__creationDateKey" value="Thu Feb 26 22:40:19 EST 2015" />
+                        </metadata>
+                        <input id="MPRAGEBrain_1.Input" name="Input" required="true" enabled="true" order="-1">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="niftii2" extension="nii.gz" description="" />
+                                                <filetype name="nifti" extension="nii" description="" />
+                                        </fileTypes>
+                                </format>
+                        </input>
+                        <fileTypes>
+                                <filetype name="niftii2" extension="nii.gz" description="" />
+                                <filetype name="nifti" extension="nii" description="" />
+                        </fileTypes>
+                        <values>
+                                <value>pipeline://localhost//</value>
+                        </values>
                 </dataModule>
         </moduleGroup>
 </pipeline>
