@@ -91,7 +91,12 @@
                                         </format>
                                 </output>
                                 <input id="ApplyRegistrationtoDTI_1.ReferenceImage" name="Reference Image" description="Image that the transform was computed wrt." required="false" enabled="true" order="2">
-                                        <format type="String" cardinality="1" />
+                                        <format type="File" cardinality="1">
+                                                <fileTypes>
+                                                        <filetype name="niftii2" extension="nii.gz" description="" />
+                                                        <filetype name="nifti" extension="nii" description="" />
+                                                </fileTypes>
+                                        </format>
                                 </input>
                                 <input id="ApplyRegistrationtoDTI_1.Transformmatrix" name="Transform matrix" required="false" enabled="true" order="3">
                                         <format type="File" cardinality="1">
