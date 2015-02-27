@@ -53,6 +53,9 @@ def register_vol(dti_img, bvals, aligned_img, b0_img):
   
   for ii in range(directions):
     print "Volume ", ii+1, " of ", directions
+    if ii == int(where(b==0)[0]):
+      print "Skipping self registration for B0 scan..."
+      continue
     currentvol = aligned_data[:,:,:,ii]
     #print "Writing current volume to disk..."
     out = Nifti1Image( data=currentvol, affine=dti_vol.get_affine(), header=temp_head )
