@@ -26,7 +26,6 @@
                 <connection source="FiberTractography_1.DTIfibers" sink="FiberConverter_1.fiberinfile" />
         </connections>
         <moduleGroup id="m2g_1" name="m2g" package="m2g" posX="0" posY="0" sourceCode="">
-                <tag />
                 <metadata>
                         <data key="__creationDateKey" value="Thu Feb 26 15:02:18 EST 2015" />
                 </metadata>
@@ -80,7 +79,6 @@
                         </fileTypes>
                 </dataModule>
                 <dataModule id="Atlas_1" name="Atlas" package="m2g" posX="618" posY="267" sourceCode="" type="File" source="true" loopIndex="false">
-                        <tag />
                         <metadata>
                                 <data key="__creationDateKey" value="Thu Feb 26 15:59:19 EST 2015" />
                         </metadata>
@@ -97,8 +95,7 @@
                                 <filetype name="niftii2" extension="nii.gz" description="" />
                         </fileTypes>
                 </dataModule>
-                <dataModule id="Graphs_1" name="Graphs" package="m2g" posX="477" posY="604" sourceCode="" type="File" source="false" loopIndex="false" dirDump="false">
-                        <tag />
+                <dataModule id="Graphs_1" name="Graphs" package="m2g" posX="467" posY="601" sourceCode="" type="File" source="false" loopIndex="false" dirDump="false">
                         <metadata>
                                 <data key="__creationDateKey" value="Thu Feb 26 16:00:53 EST 2015" />
                         </metadata>
@@ -114,7 +111,6 @@
                         </fileTypes>
                 </dataModule>
                 <dataModule id="DTIGradients_1" name="DTI Gradients" package="m2g" posX="314" posY="61" rotation="1" sourceCode="" type="File" source="true" loopIndex="false">
-                        <tag />
                         <metadata>
                                 <data key="__creationDateKey" value="Thu Feb 26 16:01:30 EST 2015" />
                         </metadata>
@@ -130,7 +126,6 @@
                         </fileTypes>
                 </dataModule>
                 <dataModule id="AtlasMask_1" name="Atlas Mask" package="m2g" posX="731" posY="309" sourceCode="" type="File" source="true" loopIndex="false">
-                        <tag />
                         <metadata>
                                 <data key="__creationDateKey" value="Thu Feb 26 16:02:11 EST 2015" />
                         </metadata>
@@ -148,7 +143,6 @@
                         </fileTypes>
                 </dataModule>
                 <moduleGroup id="m2g_2" name="m2g" package="m2g" posX="461" posY="464" sourceCode="">
-                        <tag />
                         <metadata>
                                 <data key="__creationDateKey" value="Thu Feb 26 16:08:19 EST 2015" />
                         </metadata>
@@ -164,6 +158,9 @@
                         <output link=".graphmlto.mat_1.matgraphfile" id="m2g_2.matgraphfile" name="mat graph file" order="9" />
                         <output link="TensorEstimation_1.DTItensors" id="m2g_2.DTItensors" name="DTI tensors" order="10" />
                         <output link="ApplyRegistrationtoDTI_2.WarpedImage" id="m2g_2.WarpedImage" name="Warped Image" order="11" />
+                        <output link="FiberConverter_1.fiberoutfile" id="m2g_2.fiberoutfile" name="fiber outfile" order="12" />
+                        <output link="B0Registration_1.B0volume" id="m2g_2.B0volume" name="B0 volume" order="13" />
+                        <output link="BrainExtraction_1.Outputbrainimage" id="m2g_2.Outputbrainimage" name="Output brain image" order="14" />
                         <module id="B0Registration_1" name="B0 Registration" package="m2g" posX="93" posY="153" rotation="1" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/M2G/src/b0_registration.py">
                                 <metadata>
                                         <data key="__creationDateKey" value="Thu Feb 26 11:43:03 EST 2015" />
@@ -243,6 +240,7 @@
                                 </output>
                         </module>
                         <module id="BrainExtraction_1" name="Brain Extraction" package="m2g" posX="93" posY="5" rotation="1" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/M2G/src/skullextract.py">
+                                <tag />
                                 <metadata>
                                         <data key="__creationDateKey" value="Thu Feb 26 11:28:32 EST 2015" />
                                 </metadata>
@@ -283,7 +281,7 @@
                                         </format>
                                 </output>
                         </module>
-                        <module id="SmallGraphGeneration_1" name="Small Graph Generation" package="m2g" posX="1017" posY="689" rotation="1" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/MR-OCP/mrcap/gengraph.py">
+                        <module id="SmallGraphGeneration_1" name="Small Graph Generation" package="m2g" posX="1085" posY="714" rotation="1" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/MR-OCP/mrcap/gengraph.py">
                                 <metadata>
                                         <data key="__creationDateKey" value="Sun Jan 11 17:53:43 EST 2015" />
                                 </metadata>
@@ -547,7 +545,7 @@
                                         </format>
                                 </input>
                         </module>
-                        <module id=".graphmlto.mat_1" name=".graphml to .mat" package="m2g" description="This is designed for small graphs based on the desikan atlas (i.e. 70 regions labeled 1-35, 101-135)" posX="1227" posY="690" rotation="1" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/tools/utils/graphml2mat.py">
+                        <module id=".graphmlto.mat_1" name=".graphml to .mat" package="m2g" description="This is designed for small graphs based on the desikan atlas (i.e. 70 regions labeled 1-35, 101-135)" posX="1340" posY="714" rotation="1" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/tools/utils/graphml2mat.py">
                                 <metadata>
                                         <data key="__creationDateKey" value="Tue Feb 10 10:04:52 EST 2015" />
                                 </metadata>
@@ -566,8 +564,7 @@
                                         </format>
                                 </output>
                         </module>
-                        <module id="FiberConverter_1" name="Fiber Converter" package="m2g" posX="855" posY="699" rotation="1" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/M2G/src/fiber_convert.py">
-                                <tag />
+                        <module id="FiberConverter_1" name="Fiber Converter" package="m2g" posX="880" posY="698" rotation="1" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/M2G/src/fiber_convert.py">
                                 <metadata>
                                         <data key="__creationDateKey" value="Sun Jan 11 21:38:32 EST 2015" />
                                 </metadata>
