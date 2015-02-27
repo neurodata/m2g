@@ -20,7 +20,7 @@
                 <connection source="ApplyRegistrationtoDTI_1.WarpedImage" sink="MaskNifti_1.Datatomask" />
                 <connection source="BrainExtraction_1.Outputbrainmask" sink="MaskNifti_1.Mask" />
                 <connection source="m2g_1.OutputImage" sink="B0inMPRAGE_1.Input" />
-                <connection source="m2g_1.OutputImage_2" sink="MPRAGEinMNI_1.Input" />
+                <connection source="m2g_1.OutputImage_2" sink="MPRAGEinAtlasSpace_1.Input" />
         </connections>
         <moduleGroup id="DTIregistration_1" name="DTI registration" package="m2g" posX="0" posY="0" sourceCode="">
                 <metadata>
@@ -473,12 +473,12 @@
                                 <value>pipeline://localhost//home/greg/hackathon/dti_registration_test/B0_in_MPRAGE.nii.gz</value>
                         </values>
                 </dataModule>
-                <dataModule id="MPRAGEinMNI_1" name="MPRAGE in MNI" package="m2g" posX="748" posY="448" rotation="1" sourceCode="" type="File" source="false" loopIndex="false" serverAddress="localhost" dirDump="false">
+                <dataModule id="MPRAGEinAtlasSpace_1" name="MPRAGE in Atlas Space" package="m2g" posX="748" posY="448" rotation="1" sourceCode="" type="File" source="false" loopIndex="false" serverAddress="localhost" dirDump="false">
                         <tag />
                         <metadata>
                                 <data key="__creationDateKey" value="Thu Feb 26 21:56:47 EST 2015" />
                         </metadata>
-                        <input id="MPRAGEinMNI_1.Input" name="Input" required="true" enabled="true" order="-1">
+                        <input id="MPRAGEinAtlasSpace_1.Input" name="Input" required="true" enabled="true" order="-1">
                                 <format type="File" cardinality="1">
                                         <fileTypes>
                                                 <filetype name="nifti" extension="nii" description="" />
