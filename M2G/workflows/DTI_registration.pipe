@@ -18,9 +18,12 @@
                 <connection source="m2guptoDTIregistration_1.B0volume" sink="B0Volume_1.Input" />
                 <connection source="m2guptoDTIregistration_1.Outputbrainimage" sink="MPRAGEBrain_1.Input" />
         </connections>
-        <moduleGroup id="DTI_registration_1" name="DTI_registration" posX="0" posY="0" sourceCode="">
+        <moduleGroup id="DTIregistration_1" name="DTI registration" package="m2g" posX="0" posY="0" sourceCode="">
+                <tag />
+                <metadata>
+                        <data key="__creationDateKey" value="Thu Feb 26 23:51:29 EST 2015" />
+                </metadata>
                 <moduleGroup id="m2guptoDTIregistration_1" name="m2g up to DTI registration" package="m2g" posX="498" posY="380" sourceCode="">
-                        <tag />
                         <metadata>
                                 <data key="__creationDateKey" value="Thu Feb 26 16:08:19 EST 2015" />
                         </metadata>
@@ -38,7 +41,12 @@
                                         <data key="__creationDateKey" value="Thu Feb 26 11:28:32 EST 2015" />
                                 </metadata>
                                 <input id="BrainExtraction_1.Inputimage" name="Input image" required="false" enabled="true" order="0">
-                                        <format type="String" cardinality="1" />
+                                        <format type="File" cardinality="1">
+                                                <fileTypes>
+                                                        <filetype name="niftii2" extension="nii.gz" description="" />
+                                                        <filetype name="nifti" extension="nii" description="" />
+                                                </fileTypes>
+                                        </format>
                                 </input>
                                 <input id="BrainExtraction_1.FractionalIntensityThreshold" name="Fractional Intensity Threshold" description="default=0.25 (verified on KKI dataset)" required="false" enabled="true" order="1">
                                         <format type="Number" cardinality="1" />
@@ -70,7 +78,6 @@
                                 </output>
                         </module>
                         <module id="ApplyRegistrationtoDTI_1" name="Apply Registration to DTI" package="m2g" posX="321" posY="403" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/M2G/src/apply_registration.py">
-                                <tag />
                                 <metadata>
                                         <data key="__creationDateKey" value="Thu Feb 26 13:46:28 EST 2015" />
                                 </metadata>
@@ -112,10 +119,20 @@
                                         <data key="__creationDateKey" value="Thu Feb 26 11:43:03 EST 2015" />
                                 </metadata>
                                 <input id="B0Registration_1.DTIImage" name="DTI Image" required="false" enabled="true" order="0">
-                                        <format type="String" cardinality="1" />
+                                        <format type="File" cardinality="1">
+                                                <fileTypes>
+                                                        <filetype name="niftii2" extension="nii.gz" description="" />
+                                                        <filetype name="nifti" extension="nii" description="" />
+                                                </fileTypes>
+                                        </format>
                                 </input>
                                 <input id="B0Registration_1.B-valuesfile" name="B-values file" required="false" enabled="true" order="1">
-                                        <format type="String" cardinality="1" />
+                                        <format type="File" cardinality="1">
+                                                <fileTypes>
+                                                        <filetype name="niftii2" extension="nii.gz" description="" />
+                                                        <filetype name="nifti" extension="nii" description="" />
+                                                </fileTypes>
+                                        </format>
                                 </input>
                                 <output id="B0Registration_1.AlignedDTI" name="Aligned DTI" required="false" enabled="true" order="2">
                                         <format type="File" cardinality="-2" cardinalityBase="DTI Image">
@@ -140,7 +157,12 @@
                                         <data key="__creationDateKey" value="Thu Feb 26 09:45:13 EST 2015" />
                                 </metadata>
                                 <input id="AffineRegistration_1.FixedImage" name="Fixed Image" required="false" enabled="true" order="0">
-                                        <format type="String" cardinality="1" />
+                                        <format type="File" cardinality="1">
+                                                <fileTypes>
+                                                        <filetype name="niftii2" extension="nii.gz" description="" />
+                                                        <filetype name="nifti" extension="nii" description="" />
+                                                </fileTypes>
+                                        </format>
                                 </input>
                                 <input id="AffineRegistration_1.MovingImage" name="Moving Image" required="false" enabled="true" order="1">
                                         <format type="File" cardinality="1">
@@ -194,7 +216,12 @@
                                         </format>
                                 </output>
                                 <input id="ApplyRegistrationtoDTI_2.ReferenceImage" name="Reference Image" description="Image that the transform was computed wrt." required="false" enabled="true" order="2">
-                                        <format type="String" cardinality="1" />
+                                        <format type="File" cardinality="1">
+                                                <fileTypes>
+                                                        <filetype name="niftii2" extension="nii.gz" description="" />
+                                                        <filetype name="nifti" extension="nii" description="" />
+                                                </fileTypes>
+                                        </format>
                                 </input>
                                 <input id="ApplyRegistrationtoDTI_2.Transformmatrix" name="Transform matrix" required="false" enabled="true" order="3">
                                         <format type="File" cardinality="1">
@@ -246,9 +273,11 @@
                                         </format>
                                 </output>
                         </module>
+                        <variables>
+                                <variable name="test" order="0">will</variable>
+                        </variables>
                 </moduleGroup>
                 <dataModule id="MPRAGEImage_1" name="MPRAGE Image" package="m2g" posX="350" posY="91" rotation="1" sourceCode="" type="String" source="true" loopIndex="false">
-                        <tag />
                         <metadata>
                                 <data key="__creationDateKey" value="Thu Feb 26 11:53:46 EST 2015" />
                         </metadata>
@@ -260,7 +289,6 @@
                         </values>
                 </dataModule>
                 <dataModule id="DTIBValues_1" name="DTI B Values" package="m2g" posX="347" posY="185" rotation="1" sourceCode="" type="String" source="true" loopIndex="false">
-                        <tag />
                         <metadata>
                                 <data key="__creationDateKey" value="Thu Feb 26 11:52:52 EST 2015" />
                         </metadata>
@@ -272,7 +300,6 @@
                         </values>
                 </dataModule>
                 <dataModule id="Atlas_1" name="Atlas" package="m2g" posX="562" posY="211" sourceCode="" type="String" source="true" loopIndex="false">
-                        <tag />
                         <metadata>
                                 <data key="__creationDateKey" value="Thu Feb 26 15:59:19 EST 2015" />
                         </metadata>
@@ -284,7 +311,6 @@
                         </values>
                 </dataModule>
                 <dataModule id="DTIinAtlasSpace_1" name="DTI in Atlas Space" package="m2g" posX="493" posY="613" sourceCode="" type="File" source="false" loopIndex="false" serverAddress="localhost" dirDump="false">
-                        <tag />
                         <metadata>
                                 <data key="__creationDateKey" value="Thu Feb 26 21:56:47 EST 2015" />
                         </metadata>
@@ -305,7 +331,6 @@
                         </values>
                 </dataModule>
                 <dataModule id="B0Volume_1" name="B0 Volume" package="m2g" posX="524" posY="547" sourceCode="" type="File" source="false" loopIndex="false" serverAddress="localhost" dirDump="false">
-                        <tag />
                         <metadata>
                                 <data key="__creationDateKey" value="Thu Feb 26 22:39:32 EST 2015" />
                         </metadata>
@@ -326,7 +351,6 @@
                         </values>
                 </dataModule>
                 <dataModule id="MPRAGEBrain_1" name="MPRAGE Brain" package="m2g" posX="555" posY="485" sourceCode="" type="File" source="false" loopIndex="false" serverAddress="localhost" dirDump="false">
-                        <tag />
                         <metadata>
                                 <data key="__creationDateKey" value="Thu Feb 26 22:40:19 EST 2015" />
                         </metadata>
@@ -347,7 +371,6 @@
                         </values>
                 </dataModule>
                 <dataModule id="DTIImage_1" name="DTI Image" package="m2g" posX="346" posY="281" rotation="1" sourceCode="" type="String" source="true" loopIndex="false">
-                        <tag />
                         <metadata>
                                 <data key="__creationDateKey" value="Thu Feb 26 11:52:52 EST 2015" />
                         </metadata>
