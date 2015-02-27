@@ -33,16 +33,12 @@
                         <input description="Image that the transform was computed wrt." link="ApplyRegistrationtoDTI_2.ReferenceImage" id="m2guptoDTIregistration_1.ReferenceImage" name="Reference Image" order="4" />
                         <output link="ApplyRegistrationtoDTI_2.WarpedImage" id="m2guptoDTIregistration_1.WarpedImage" name="Warped Image" order="5" />
                         <module id="BrainExtraction_1" name="Brain Extraction" package="m2g" posX="92" posY="64" rotation="1" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/M2G/src/skullextract.py">
+                                <tag />
                                 <metadata>
                                         <data key="__creationDateKey" value="Thu Feb 26 11:28:32 EST 2015" />
                                 </metadata>
                                 <input id="BrainExtraction_1.Inputimage" name="Input image" required="false" enabled="true" order="0">
-                                        <format type="File" cardinality="1">
-                                                <fileTypes>
-                                                        <filetype name="niftii2" extension="nii.gz" description="" />
-                                                        <filetype name="nifti" extension="nii" description="" />
-                                                </fileTypes>
-                                        </format>
+                                        <format type="String" cardinality="1" />
                                 </input>
                                 <input id="BrainExtraction_1.FractionalIntensityThreshold" name="Fractional Intensity Threshold" description="default=0.25 (verified on KKI dataset)" required="false" enabled="true" order="1" prefix="-f" prefixSpaced="true" prefixAllArgs="false">
                                         <format type="Number" cardinality="1" />
@@ -110,23 +106,15 @@
                                 </input>
                         </module>
                         <module id="B0Registration_1" name="B0 Registration" package="m2g" posX="93" posY="211" rotation="1" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/M2G/src/b0_registration.py">
+                                <tag />
                                 <metadata>
                                         <data key="__creationDateKey" value="Thu Feb 26 11:43:03 EST 2015" />
                                 </metadata>
                                 <input id="B0Registration_1.DTIImage" name="DTI Image" required="false" enabled="true" order="0">
-                                        <format type="File" cardinality="1">
-                                                <fileTypes>
-                                                        <filetype name="niftii2" extension="nii.gz" description="" />
-                                                        <filetype name="nifti" extension="nii" description="" />
-                                                </fileTypes>
-                                        </format>
+                                        <format type="String" cardinality="1" />
                                 </input>
                                 <input id="B0Registration_1.B-valuesfile" name="B-values file" required="false" enabled="true" order="1">
-                                        <format type="File" cardinality="1">
-                                                <fileTypes>
-                                                        <filetype name="B values" extension="b" description="" />
-                                                </fileTypes>
-                                        </format>
+                                        <format type="String" cardinality="1" />
                                 </input>
                                 <output id="B0Registration_1.AlignedDTI" name="Aligned DTI" required="false" enabled="true" order="2">
                                         <format type="File" cardinality="-2" cardinalityBase="DTI Image">
@@ -146,16 +134,12 @@
                                 </output>
                         </module>
                         <module id="AffineRegistration_1" name="Affine Registration" package="m2g" posX="526" posY="48" rotation="1" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/M2G/src/register_affine.py">
+                                <tag />
                                 <metadata>
                                         <data key="__creationDateKey" value="Thu Feb 26 09:45:13 EST 2015" />
                                 </metadata>
                                 <input id="AffineRegistration_1.FixedImage" name="Fixed Image" required="false" enabled="true" order="0">
-                                        <format type="File" cardinality="1">
-                                                <fileTypes>
-                                                        <filetype name="nifti" extension="nii" description="" />
-                                                        <filetype name="niftii2" extension="nii.gz" description="" />
-                                                </fileTypes>
-                                        </format>
+                                        <format type="String" cardinality="1" />
                                 </input>
                                 <input id="AffineRegistration_1.MovingImage" name="Moving Image" required="false" enabled="true" order="1">
                                         <format type="File" cardinality="1">
@@ -302,18 +286,6 @@
                                 <value>/home/greg/hackathon/dti_registration_test/atlas_input.txt</value>
                         </values>
                 </dataModule>
-                <dataModule id="DTIImage_1" name="DTI Image" package="m2g" posX="345" posY="285" rotation="1" sourceCode="" type="String" source="true" loopIndex="false">
-                        <tag />
-                        <metadata>
-                                <data key="__creationDateKey" value="Thu Feb 26 11:52:26 EST 2015" />
-                        </metadata>
-                        <output id="DTIImage_1.Output" name="Output" required="true" enabled="true" order="-1">
-                                <format type="String" cardinality="1" />
-                        </output>
-                        <values>
-                                <value>/home/greg/hackathon/dti_registration_test/dti_image_input.txt</value>
-                        </values>
-                </dataModule>
                 <dataModule id="DTIinAtlasSpace_1" name="DTI in Atlas Space" package="m2g" posX="493" posY="613" sourceCode="" type="File" source="false" loopIndex="false" serverAddress="localhost" dirDump="false">
                         <tag />
                         <metadata>
@@ -375,6 +347,18 @@
                         </fileTypes>
                         <values>
                                 <value>pipeline://localhost//home/greg/hackathon/dti_registration_test/MPRAGE_brain.nii</value>
+                        </values>
+                </dataModule>
+                <dataModule id="DTIImage_1" name="DTI Image" package="m2g" posX="346" posY="281" rotation="1" sourceCode="" type="String" source="true" loopIndex="false">
+                        <tag />
+                        <metadata>
+                                <data key="__creationDateKey" value="Thu Feb 26 11:52:52 EST 2015" />
+                        </metadata>
+                        <output id="DTIImage_1.Output" name="Output" required="true" enabled="true" order="-1">
+                                <format type="String" cardinality="1" />
+                        </output>
+                        <values>
+                                <value>/home/greg/hackathon/dti_registration_test/dti_image_input.txt</value>
                         </values>
                 </dataModule>
         </moduleGroup>
