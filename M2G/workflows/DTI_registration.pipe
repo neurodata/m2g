@@ -70,6 +70,7 @@
                                 </output>
                         </module>
                         <module id="ApplyRegistrationtoDTI_1" name="Apply Registration to DTI" package="m2g" posX="321" posY="403" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/M2G/src/apply_registration.py">
+                                <tag />
                                 <metadata>
                                         <data key="__creationDateKey" value="Thu Feb 26 13:46:28 EST 2015" />
                                 </metadata>
@@ -90,12 +91,7 @@
                                         </format>
                                 </output>
                                 <input id="ApplyRegistrationtoDTI_1.ReferenceImage" name="Reference Image" description="Image that the transform was computed wrt." required="false" enabled="true" order="2">
-                                        <format type="File" cardinality="1">
-                                                <fileTypes>
-                                                        <filetype name="niftii2" extension="nii.gz" description="" />
-                                                        <filetype name="nifti" extension="nii" description="" />
-                                                </fileTypes>
-                                        </format>
+                                        <format type="String" cardinality="1" />
                                 </input>
                                 <input id="ApplyRegistrationtoDTI_1.Transformmatrix" name="Transform matrix" required="false" enabled="true" order="3">
                                         <format type="File" cardinality="1">
@@ -172,6 +168,7 @@
                                 </output>
                         </module>
                         <module id="ApplyRegistrationtoDTI_2" name="Apply Registration to DTI" package="m2g" posX="531" posY="521" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/M2G/src/apply_registration.py">
+                                <tag />
                                 <metadata>
                                         <data key="__creationDateKey" value="Thu Feb 26 13:46:28 EST 2015" />
                                 </metadata>
@@ -192,12 +189,7 @@
                                         </format>
                                 </output>
                                 <input id="ApplyRegistrationtoDTI_2.ReferenceImage" name="Reference Image" description="Image that the transform was computed wrt." required="false" enabled="true" order="2">
-                                        <format type="File" cardinality="1">
-                                                <fileTypes>
-                                                        <filetype name="niftii2" extension="nii.gz" description="" />
-                                                        <filetype name="nifti" extension="nii" description="" />
-                                                </fileTypes>
-                                        </format>
+                                        <format type="String" cardinality="1" />
                                 </input>
                                 <input id="ApplyRegistrationtoDTI_2.Transformmatrix" name="Transform matrix" required="false" enabled="true" order="3">
                                         <format type="File" cardinality="1">
