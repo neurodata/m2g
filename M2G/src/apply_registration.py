@@ -23,12 +23,19 @@
 # Load necessary packages
 from os import system
 from argparse import ArgumentParser
-
+from nibabel import load
 
 def apply_registration(original, warped, ref, tr):
-    
-    # Apply affine transformation
-    system('antsApplyTransforms -d 3 -e 3 -t '+tr+' -i '+original+' -r '+ref+' -o '+warped)
+  
+  im = load(original)
+  try :
+    if im.get_header().get_data_shape()[3] > 1:
+      # Apply affine transformation
+      system('antsApplyTransforms -d 3 -e 3 -t '+tr+' -i '+original+' -r '+ref+' -o '+warped)
+    else: 
+      system('antsApplyTransforms -d 3 -t '+tr+' -i '+original+' -r '+ref+' -o '+warped)
+  except IndexError: 
+      system('antsApplyTransforms -d 3 -t '+tr+' -i '+original+' -r '+ref+' -o '+warped)
 
 def main():
   parser = ArgumentParser(description="")
