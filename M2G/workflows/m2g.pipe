@@ -20,10 +20,12 @@
                 <connection source="BrainExtraction_1.Outputbrainimage" sink="ApplyRegistrationtoDTI_1.ReferenceImage" />
                 <connection source="RigidRegistration_1.transformation" sink="ApplyRegistrationtoDTI_1.Transformmatrix" />
                 <connection source="ApplyRegistrationtoDTI_2.WarpedImage" sink="TensorEstimation_1.DTIImage" />
-                <connection source="ApplyRegistrationtoDTI_1.WarpedImage" sink="ApplyRegistrationtoDTI_2.OriginalImage" />
+                <connection source="MaskNifti_1.Maskedimage" sink="ApplyRegistrationtoDTI_2.OriginalImage" />
                 <connection source="AffineRegistration_1.transformation" sink="ApplyRegistrationtoDTI_2.Transformmatrix" />
                 <connection source="SmallGraphGeneration_1.graphfile" sink=".graphmlto.mat_1.graphmlfile" />
                 <connection source="FiberTractography_1.DTIfibers" sink="FiberConverter_1.fiberinfile" />
+                <connection source="ApplyRegistrationtoDTI_1.WarpedImage" sink="MaskNifti_1.Datatomask" />
+                <connection source="BrainExtraction_1.Outputbrainmask" sink="MaskNifti_1.Mask" />
         </connections>
         <moduleGroup id="m2g_1" name="m2g" package="m2g" posX="0" posY="0" sourceCode="">
                 <metadata>
@@ -240,7 +242,6 @@
                                 </output>
                         </module>
                         <module id="BrainExtraction_1" name="Brain Extraction" package="m2g" posX="93" posY="5" rotation="1" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/M2G/src/skullextract.py">
-                                <tag />
                                 <metadata>
                                         <data key="__creationDateKey" value="Thu Feb 26 11:28:32 EST 2015" />
                                 </metadata>
@@ -281,7 +282,7 @@
                                         </format>
                                 </output>
                         </module>
-                        <module id="SmallGraphGeneration_1" name="Small Graph Generation" package="m2g" posX="1085" posY="714" rotation="1" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/MR-OCP/mrcap/gengraph.py">
+                        <module id="SmallGraphGeneration_1" name="Small Graph Generation" package="m2g" posX="1184" posY="842" rotation="1" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/MR-OCP/mrcap/gengraph.py">
                                 <metadata>
                                         <data key="__creationDateKey" value="Sun Jan 11 17:53:43 EST 2015" />
                                 </metadata>
@@ -308,7 +309,7 @@
                                         </format>
                                 </output>
                         </module>
-                        <module id="FiberTractography_1" name="Fiber Tractography" package="m2g" posX="667" posY="714" rotation="1" sourceCode="" location="pipeline://localhost//home/gkiar/vbox/loni_scripts/tens2fibs.py">
+                        <module id="FiberTractography_1" name="Fiber Tractography" package="m2g" posX="766" posY="842" rotation="1" sourceCode="" location="pipeline://localhost//home/gkiar/vbox/loni_scripts/tens2fibs.py">
                                 <metadata>
                                         <data key="__creationDateKey" value="Fri Jan 09 13:07:20 EST 2015" />
                                 </metadata>
@@ -432,7 +433,7 @@
                                         </format>
                                 </input>
                         </module>
-                        <module id="TensorEstimation_1" name="Tensor Estimation" package="m2g" posX="550" posY="613" sourceCode="" location="pipeline://localhost//home/gkiar/vbox/loni_scripts/dti2tens.py">
+                        <module id="TensorEstimation_1" name="Tensor Estimation" package="m2g" posX="649" posY="741" sourceCode="" location="pipeline://localhost//home/gkiar/vbox/loni_scripts/dti2tens.py">
                                 <metadata>
                                         <data key="__creationDateKey" value="Fri Jan 09 11:38:39 EST 2015" />
                                 </metadata>
@@ -509,7 +510,7 @@
                                         </format>
                                 </output>
                         </module>
-                        <module id="ApplyRegistrationtoDTI_2" name="Apply Registration to DTI" package="m2g" posX="531" posY="473" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/M2G/src/apply_registration.py">
+                        <module id="ApplyRegistrationtoDTI_2" name="Apply Registration to DTI" package="m2g" posX="630" posY="601" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/M2G/src/apply_registration.py">
                                 <metadata>
                                         <data key="__creationDateKey" value="Thu Feb 26 13:46:28 EST 2015" />
                                 </metadata>
@@ -545,7 +546,7 @@
                                         </format>
                                 </input>
                         </module>
-                        <module id=".graphmlto.mat_1" name=".graphml to .mat" package="m2g" description="This is designed for small graphs based on the desikan atlas (i.e. 70 regions labeled 1-35, 101-135)" posX="1340" posY="714" rotation="1" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/tools/utils/graphml2mat.py">
+                        <module id=".graphmlto.mat_1" name=".graphml to .mat" package="m2g" description="This is designed for small graphs based on the desikan atlas (i.e. 70 regions labeled 1-35, 101-135)" posX="1439" posY="842" rotation="1" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/tools/utils/graphml2mat.py">
                                 <metadata>
                                         <data key="__creationDateKey" value="Tue Feb 10 10:04:52 EST 2015" />
                                 </metadata>
@@ -564,7 +565,7 @@
                                         </format>
                                 </output>
                         </module>
-                        <module id="FiberConverter_1" name="Fiber Converter" package="m2g" posX="880" posY="698" rotation="1" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/M2G/src/fiber_convert.py">
+                        <module id="FiberConverter_1" name="Fiber Converter" package="m2g" posX="979" posY="826" rotation="1" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/M2G/src/fiber_convert.py">
                                 <metadata>
                                         <data key="__creationDateKey" value="Sun Jan 11 21:38:32 EST 2015" />
                                 </metadata>
@@ -579,6 +580,36 @@
                                         <format type="File" cardinality="1">
                                                 <fileTypes>
                                                         <filetype name="Matlab data" extension="dat" description="" />
+                                                </fileTypes>
+                                        </format>
+                                </output>
+                        </module>
+                        <module id="MaskNifti_1" name="Mask Nifti" package="m2g" posX="425" posY="488" rotation="1" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/M2G/src/mask_nifti.py">
+                                <tag />
+                                <metadata>
+                                        <data key="__creationDateKey" value="Fri Feb 27 16:35:54 EST 2015" />
+                                </metadata>
+                                <input id="MaskNifti_1.Datatomask" name="Data to mask" required="false" enabled="true" order="0">
+                                        <format type="File" cardinality="1">
+                                                <fileTypes>
+                                                        <filetype name="niftii2" extension="nii.gz" description="" />
+                                                        <filetype name="nifti" extension="nii" description="" />
+                                                </fileTypes>
+                                        </format>
+                                </input>
+                                <input id="MaskNifti_1.Mask" name="Mask" required="false" enabled="true" order="1">
+                                        <format type="File" cardinality="1">
+                                                <fileTypes>
+                                                        <filetype name="niftii2" extension="nii.gz" description="" />
+                                                        <filetype name="nifti" extension="nii" description="" />
+                                                </fileTypes>
+                                        </format>
+                                </input>
+                                <output id="MaskNifti_1.Maskedimage" name="Masked image" required="false" enabled="true" order="2">
+                                        <format type="File" cardinality="1">
+                                                <fileTypes>
+                                                        <filetype name="niftii2" extension="nii.gz" description="" />
+                                                        <filetype name="nifti" extension="nii" description="" />
                                                 </fileTypes>
                                         </format>
                                 </output>
