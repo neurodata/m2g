@@ -277,37 +277,67 @@
                                 <variable name="test" order="0">will</variable>
                         </variables>
                 </moduleGroup>
-                <dataModule id="MPRAGEImage_1" name="MPRAGE Image" package="m2g" posX="350" posY="91" rotation="1" sourceCode="" type="String" source="true" loopIndex="false">
+                <dataModule id="MPRAGEImage_1" name="MPRAGE Image" package="m2g" posX="350" posY="91" rotation="1" sourceCode="" type="File" source="true" loopIndex="false" serverAddress="localhost">
+                        <tag />
                         <metadata>
                                 <data key="__creationDateKey" value="Thu Feb 26 11:53:46 EST 2015" />
                         </metadata>
                         <output id="MPRAGEImage_1.Output" name="Output" required="true" enabled="true" order="-1">
-                                <format type="String" cardinality="1" />
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="File" extension="" description="Any type of data file" />
+                                                <filetype name="niftii2" extension="nii.gz" description="" />
+                                                <filetype name="nifti" extension="nii" description="" />
+                                        </fileTypes>
+                                </format>
                         </output>
+                        <fileTypes>
+                                <filetype name="File" extension="" description="Any type of data file" />
+                                <filetype name="niftii2" extension="nii.gz" description="" />
+                                <filetype name="nifti" extension="nii" description="" />
+                        </fileTypes>
                         <values>
-                                <value>/home/greg/hackathon/dti_registration_test/mprage_image_input.list</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-01/KKI2009-01-MPRAGE.nii</value>
                         </values>
                 </dataModule>
-                <dataModule id="DTIBValues_1" name="DTI B Values" package="m2g" posX="347" posY="185" rotation="1" sourceCode="" type="String" source="true" loopIndex="false">
+                <dataModule id="DTIBValues_1" name="DTI B Values" package="m2g" posX="347" posY="185" rotation="1" sourceCode="" type="File" source="true" loopIndex="false" serverAddress="localhost">
+                        <tag />
                         <metadata>
                                 <data key="__creationDateKey" value="Thu Feb 26 11:52:52 EST 2015" />
                         </metadata>
                         <output id="DTIBValues_1.Output" name="Output" required="true" enabled="true" order="-1">
-                                <format type="String" cardinality="1" />
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="B values" extension="b" description="" />
+                                        </fileTypes>
+                                </format>
                         </output>
+                        <fileTypes>
+                                <filetype name="B values" extension="b" description="" />
+                        </fileTypes>
                         <values>
-                                <value>/home/greg/hackathon/dti_registration_test/dti_bvalues_input.list</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-01/KKI2009-01-DTI.b</value>
                         </values>
                 </dataModule>
-                <dataModule id="Atlas_1" name="Atlas" package="m2g" posX="562" posY="211" sourceCode="" type="String" source="true" loopIndex="false">
+                <dataModule id="Atlas_1" name="Atlas" package="m2g" posX="562" posY="211" sourceCode="" type="File" source="true" loopIndex="false" serverAddress="localhost">
+                        <tag />
                         <metadata>
                                 <data key="__creationDateKey" value="Thu Feb 26 15:59:19 EST 2015" />
                         </metadata>
                         <output id="Atlas_1.Output" name="Output" required="true" enabled="true" order="-1">
-                                <format type="String" cardinality="1" />
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="niftii2" extension="nii.gz" description="" />
+                                                <filetype name="nifti" extension="nii" description="" />
+                                        </fileTypes>
+                                </format>
                         </output>
+                        <fileTypes>
+                                <filetype name="niftii2" extension="nii.gz" description="" />
+                                <filetype name="nifti" extension="nii" description="" />
+                        </fileTypes>
                         <values>
-                                <value>/home/greg/hackathon/dti_registration_test/atlas_input.list</value>
+                                <value>pipeline://localhost//home/greg/atlas/MNI152_T1_1mm_brain.nii</value>
                         </values>
                 </dataModule>
                 <dataModule id="DTIinAtlasSpace_1" name="DTI in Atlas Space" package="m2g" posX="493" posY="613" sourceCode="" type="File" source="false" loopIndex="false" serverAddress="localhost" dirDump="false">
@@ -370,15 +400,25 @@
                                 <value>pipeline://localhost//home/greg/hackathon/dti_registration_test/MPRAGE_brain.nii</value>
                         </values>
                 </dataModule>
-                <dataModule id="DTIImage_1" name="DTI Image" package="m2g" posX="346" posY="281" rotation="1" sourceCode="" type="String" source="true" loopIndex="false">
+                <dataModule id="DTIImage_1" name="DTI Image" package="m2g" posX="346" posY="281" rotation="1" sourceCode="" type="File" source="true" loopIndex="false" serverAddress="localhost">
+                        <tag />
                         <metadata>
                                 <data key="__creationDateKey" value="Thu Feb 26 11:52:52 EST 2015" />
                         </metadata>
                         <output id="DTIImage_1.Output" name="Output" required="true" enabled="true" order="-1">
-                                <format type="String" cardinality="1" />
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="niftii2" extension="nii.gz" description="" />
+                                                <filetype name="nifti" extension="nii" description="" />
+                                        </fileTypes>
+                                </format>
                         </output>
+                        <fileTypes>
+                                <filetype name="niftii2" extension="nii.gz" description="" />
+                                <filetype name="nifti" extension="nii" description="" />
+                        </fileTypes>
                         <values>
-                                <value>/home/greg/hackathon/dti_registration_test/dti_image_input.list</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-01/KKI2009-01-DTI.nii</value>
                         </values>
                 </dataModule>
         </moduleGroup>
