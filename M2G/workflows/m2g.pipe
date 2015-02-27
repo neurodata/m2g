@@ -1,13 +1,34 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <pipeline version=".2">
         <connections>
+                <connection source="m2g_2.matgraphfile" sink="Graphs_1.Input" />
                 <connection source="DTIImage_1.Output" sink="m2g_2.DTIImage" />
                 <connection source="DTIBValues_1.Output" sink="m2g_2.B-valuesfile" />
                 <connection source="MPRAGEImage_1.Output" sink="m2g_2.Inputimage" />
+                <connection source="Atlas_1.Output" sink="m2g_2.atlas" />
+                <connection source="AtlasMask_1.Output" sink="m2g_2.BrainMask" />
+                <connection source="Atlas_1.Output" sink="m2g_2.FixedImage" />
+                <connection source="DTIGradients_1.Output" sink="m2g_2.DTIGradients" />
+                <connection source="AtlasMask_1.Output" sink="m2g_2.BrainMask_2" />
+                <connection source="Atlas_1.Output" sink="m2g_2.ReferenceImage" />
+                <connection source="BrainExtraction_1.Outputbrainimage" sink="RigidRegistration_1.FixedImage" />
+                <connection source="B0Registration_1.B0volume" sink="RigidRegistration_1.MovingImage" />
+                <connection source="TensorEstimation_1.DTItensors" sink="FiberTractography_1.DTITensors" />
+                <connection source="BrainExtraction_1.Outputbrainimage" sink="AffineRegistration_1.MovingImage" />
+                <connection source="B0Registration_1.AlignedDTI" sink="ApplyRegistrationtoDTI_1.OriginalImage" />
+                <connection source="BrainExtraction_1.Outputbrainimage" sink="ApplyRegistrationtoDTI_1.ReferenceImage" />
+                <connection source="RigidRegistration_1.transformation" sink="ApplyRegistrationtoDTI_1.Transformmatrix" />
+                <connection source="ApplyRegistrationtoDTI_2.WarpedImage" sink="TensorEstimation_1.DTIImage" />
+                <connection source="ApplyRegistrationtoDTI_1.WarpedImage" sink="ApplyRegistrationtoDTI_2.OriginalImage" />
+                <connection source="AffineRegistration_1.transformation" sink="ApplyRegistrationtoDTI_2.Transformmatrix" />
+                <connection source="SmallGraphGeneration_1.graphfile" sink=".graphmlto.mat_1.graphmlfile" />
         </connections>
-        <moduleGroup id="m2g_1" name="m2g" posX="0" posY="0" sourceCode="">
-                <dataModule id="DTIImage_1" name="DTI Image" package="m2g" posX="30" posY="105" rotation="1" sourceCode="" type="File" source="true" loopIndex="false">
-                        <tag />
+        <moduleGroup id="m2g_1" name="m2g" package="m2g" posX="0" posY="0" sourceCode="">
+                <tag />
+                <metadata>
+                        <data key="__creationDateKey" value="Thu Feb 26 15:02:18 EST 2015" />
+                </metadata>
+                <dataModule id="DTIImage_1" name="DTI Image" package="m2g" posX="308" posY="345" rotation="1" sourceCode="" type="File" source="true" loopIndex="false">
                         <metadata>
                                 <data key="__creationDateKey" value="Thu Feb 26 11:52:26 EST 2015" />
                         </metadata>
@@ -24,8 +45,7 @@
                                 <filetype name="niftii2" extension="nii.gz" description="" />
                         </fileTypes>
                 </dataModule>
-                <dataModule id="DTIBValues_1" name="DTI B Values" package="m2g" posX="29" posY="4" rotation="1" sourceCode="" type="File" source="true" loopIndex="false">
-                        <tag />
+                <dataModule id="DTIBValues_1" name="DTI B Values" package="m2g" posX="311" posY="250" rotation="1" sourceCode="" type="File" source="true" loopIndex="false">
                         <metadata>
                                 <data key="__creationDateKey" value="Thu Feb 26 11:52:52 EST 2015" />
                         </metadata>
@@ -40,8 +60,7 @@
                                 <filetype name="B values" extension="b" description="" />
                         </fileTypes>
                 </dataModule>
-                <dataModule id="MPRAGEImage_1" name="MPRAGE Image" package="m2g" posX="381" posY="3" sourceCode="" type="File" source="true" loopIndex="false">
-                        <tag />
+                <dataModule id="MPRAGEImage_1" name="MPRAGE Image" package="m2g" posX="312" posY="155" rotation="1" sourceCode="" type="File" source="true" loopIndex="false">
                         <metadata>
                                 <data key="__creationDateKey" value="Thu Feb 26 11:53:46 EST 2015" />
                         </metadata>
@@ -58,15 +77,284 @@
                                 <filetype name="nifti" extension="nii" description="" />
                         </fileTypes>
                 </dataModule>
-                <moduleGroup id="m2g_2" name="m2g" package="m2g" posX="285" posY="278" sourceCode="">
+                <dataModule id="Atlas_1" name="Atlas" package="m2g" posX="618" posY="267" sourceCode="" type="File" source="true" loopIndex="false">
                         <tag />
                         <metadata>
-                                <data key="__creationDateKey" value="Thu Feb 26 13:54:00 EST 2015" />
+                                <data key="__creationDateKey" value="Thu Feb 26 15:59:19 EST 2015" />
+                        </metadata>
+                        <output id="Atlas_1.Output" name="Output" required="true" enabled="true" order="-1">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="nifti" extension="nii" description="" />
+                                                <filetype name="niftii2" extension="nii.gz" description="" />
+                                        </fileTypes>
+                                </format>
+                        </output>
+                        <fileTypes>
+                                <filetype name="nifti" extension="nii" description="" />
+                                <filetype name="niftii2" extension="nii.gz" description="" />
+                        </fileTypes>
+                </dataModule>
+                <dataModule id="Graphs_1" name="Graphs" package="m2g" posX="477" posY="604" sourceCode="" type="File" source="false" loopIndex="false" dirDump="false">
+                        <tag />
+                        <metadata>
+                                <data key="__creationDateKey" value="Thu Feb 26 16:00:53 EST 2015" />
+                        </metadata>
+                        <input id="Graphs_1.Input" name="Input" required="true" enabled="true" order="-1">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="MAT File" extension="mat" description="Matrix describing transformation of image into standard space (found by first_flirt)." />
+                                        </fileTypes>
+                                </format>
+                        </input>
+                        <fileTypes>
+                                <filetype name="MAT File" extension="mat" description="Matrix describing transformation of image into standard space (found by first_flirt)." />
+                        </fileTypes>
+                </dataModule>
+                <dataModule id="DTIGradients_1" name="DTI Gradients" package="m2g" posX="314" posY="61" rotation="1" sourceCode="" type="File" source="true" loopIndex="false">
+                        <tag />
+                        <metadata>
+                                <data key="__creationDateKey" value="Thu Feb 26 16:01:30 EST 2015" />
+                        </metadata>
+                        <output id="DTIGradients_1.Output" name="Output" required="true" enabled="true" order="-1">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="gradients" extension="grad" description="" />
+                                        </fileTypes>
+                                </format>
+                        </output>
+                        <fileTypes>
+                                <filetype name="gradients" extension="grad" description="" />
+                        </fileTypes>
+                </dataModule>
+                <dataModule id="AtlasMask_1" name="Atlas Mask" package="m2g" posX="731" posY="309" sourceCode="" type="File" source="true" loopIndex="false">
+                        <tag />
+                        <metadata>
+                                <data key="__creationDateKey" value="Thu Feb 26 16:02:11 EST 2015" />
+                        </metadata>
+                        <output id="AtlasMask_1.Output" name="Output" required="true" enabled="true" order="-1">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="niftii2" extension="nii.gz" description="" />
+                                                <filetype name="nifti" extension="nii" description="" />
+                                        </fileTypes>
+                                </format>
+                        </output>
+                        <fileTypes>
+                                <filetype name="niftii2" extension="nii.gz" description="" />
+                                <filetype name="nifti" extension="nii" description="" />
+                        </fileTypes>
+                </dataModule>
+                <moduleGroup id="m2g_2" name="m2g" package="m2g" posX="461" posY="464" sourceCode="">
+                        <tag />
+                        <metadata>
+                                <data key="__creationDateKey" value="Thu Feb 26 16:08:19 EST 2015" />
                         </metadata>
                         <input link="B0Registration_1.DTIImage" id="m2g_2.DTIImage" name="DTI Image" order="0" />
                         <input link="B0Registration_1.B-valuesfile" id="m2g_2.B-valuesfile" name="B-values file" order="1" />
                         <input link="BrainExtraction_1.Inputimage" id="m2g_2.Inputimage" name="Input image" order="2" />
-                        <module id="AffineRegistration_1" name="Affine Registration" package="m2g" posX="497" posY="161" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/M2G/src/register_affine.py">
+                        <input link="SmallGraphGeneration_1.atlas" id="m2g_2.atlas" name="atlas" order="3" />
+                        <input link="FiberTractography_1.BrainMask" id="m2g_2.BrainMask" name="Brain Mask" order="4" />
+                        <input link="AffineRegistration_1.FixedImage" id="m2g_2.FixedImage" name="Fixed Image" order="5" />
+                        <input link="TensorEstimation_1.DTIGradients" id="m2g_2.DTIGradients" name="DTI Gradients" order="6" />
+                        <input link="TensorEstimation_1.BrainMask" id="m2g_2.BrainMask_2" name="Brain Mask" order="7" />
+                        <input description="Image that the transform was computed wrt." link="ApplyRegistrationtoDTI_2.ReferenceImage" id="m2g_2.ReferenceImage" name="Reference Image" order="8" />
+                        <output link=".graphmlto.mat_1.matgraphfile" id="m2g_2.matgraphfile" name="mat graph file" order="9" />
+                        <output link="TensorEstimation_1.DTItensors" id="m2g_2.DTItensors" name="DTI tensors" order="10" />
+                        <output link="ApplyRegistrationtoDTI_2.WarpedImage" id="m2g_2.WarpedImage" name="Warped Image" order="11" />
+                        <module id="B0Registration_1" name="B0 Registration" package="m2g" posX="93" posY="153" rotation="1" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/M2G/src/b0_registration.py">
+                                <metadata>
+                                        <data key="__creationDateKey" value="Thu Feb 26 11:43:03 EST 2015" />
+                                </metadata>
+                                <input id="B0Registration_1.DTIImage" name="DTI Image" required="false" enabled="true" order="0">
+                                        <format type="File" cardinality="1">
+                                                <fileTypes>
+                                                        <filetype name="niftii2" extension="nii.gz" description="" />
+                                                        <filetype name="nifti" extension="nii" description="" />
+                                                </fileTypes>
+                                        </format>
+                                </input>
+                                <input id="B0Registration_1.B-valuesfile" name="B-values file" required="false" enabled="true" order="1">
+                                        <format type="File" cardinality="1">
+                                                <fileTypes>
+                                                        <filetype name="B values" extension="b" description="" />
+                                                </fileTypes>
+                                        </format>
+                                </input>
+                                <output id="B0Registration_1.AlignedDTI" name="Aligned DTI" required="false" enabled="true" order="2">
+                                        <format type="File" cardinality="-2" cardinalityBase="DTI Image">
+                                                <fileTypes>
+                                                        <filetype name="niftii2" extension="nii.gz" description="" />
+                                                        <filetype name="nifti" extension="nii" description="" />
+                                                </fileTypes>
+                                        </format>
+                                </output>
+                                <output id="B0Registration_1.B0volume" name="B0 volume" required="false" enabled="true" order="3">
+                                        <format type="File" cardinality="1">
+                                                <fileTypes>
+                                                        <filetype name="niftii2" extension="nii.gz" description="" />
+                                                        <filetype name="nifti" extension="nii" description="" />
+                                                </fileTypes>
+                                        </format>
+                                </output>
+                        </module>
+                        <module id="RigidRegistration_1" name="Rigid Registration" package="m2g" posX="417" posY="125" rotation="1" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/M2G/src/register_rigid.py">
+                                <metadata>
+                                        <data key="__creationDateKey" value="Thu Feb 26 09:45:13 EST 2015" />
+                                </metadata>
+                                <input id="RigidRegistration_1.FixedImage" name="Fixed Image" required="false" enabled="true" order="0">
+                                        <format type="File" cardinality="1">
+                                                <fileTypes>
+                                                        <filetype name="nifti" extension="nii" description="" />
+                                                        <filetype name="niftii2" extension="nii.gz" description="" />
+                                                </fileTypes>
+                                        </format>
+                                </input>
+                                <input id="RigidRegistration_1.MovingImage" name="Moving Image" required="false" enabled="true" order="1">
+                                        <format type="File" cardinality="1">
+                                                <fileTypes>
+                                                        <filetype name="niftii2" extension="nii.gz" description="" />
+                                                        <filetype name="nifti" extension="nii" description="" />
+                                                </fileTypes>
+                                        </format>
+                                </input>
+                                <input id="RigidRegistration_1.tolerance" name="tolerance" required="false" enabled="true" order="2">
+                                        <format type="Number" cardinality="1" />
+                                        <values>
+                                                <value>1e-4</value>
+                                        </values>
+                                </input>
+                                <output id="RigidRegistration_1.OutputImage" name="Output Image" required="false" enabled="true" order="3">
+                                        <format type="File" cardinality="1">
+                                                <fileTypes>
+                                                        <filetype name="niftii2" extension="nii.gz" description="" />
+                                                        <filetype name="nifti" extension="nii" description="" />
+                                                </fileTypes>
+                                        </format>
+                                </output>
+                                <output id="RigidRegistration_1.transformation" name="transformation" required="false" enabled="true" order="4">
+                                        <format type="File" cardinality="1">
+                                                <fileTypes>
+                                                        <filetype name="Matlab file" extension="mat" description="" />
+                                                </fileTypes>
+                                        </format>
+                                </output>
+                        </module>
+                        <module id="BrainExtraction_1" name="Brain Extraction" package="m2g" posX="93" posY="5" rotation="1" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/M2G/src/skullextract.py">
+                                <metadata>
+                                        <data key="__creationDateKey" value="Thu Feb 26 11:28:32 EST 2015" />
+                                </metadata>
+                                <input id="BrainExtraction_1.Inputimage" name="Input image" required="false" enabled="true" order="0">
+                                        <format type="File" cardinality="1">
+                                                <fileTypes>
+                                                        <filetype name="niftii2" extension="nii.gz" description="" />
+                                                        <filetype name="nifti" extension="nii" description="" />
+                                                </fileTypes>
+                                        </format>
+                                </input>
+                                <input id="BrainExtraction_1.FractionalIntensityThreshold" name="Fractional Intensity Threshold" description="default=0.25 (verified on KKI dataset)" required="false" enabled="true" order="1" prefix="-f" prefixSpaced="true" prefixAllArgs="false">
+                                        <format type="Number" cardinality="1" />
+                                        <values>
+                                                <value>0.25</value>
+                                        </values>
+                                </input>
+                                <input id="BrainExtraction_1.Verticalgradient" name="Vertical gradient" description="0" required="false" enabled="true" order="2" prefix="-g" prefixSpaced="true" prefixAllArgs="false">
+                                        <format type="Number" cardinality="1" />
+                                        <values>
+                                                <value>0</value>
+                                        </values>
+                                </input>
+                                <output id="BrainExtraction_1.Outputbrainimage" name="Output brain image" required="false" enabled="true" order="3">
+                                        <format type="File" cardinality="-2" cardinalityBase="Input image">
+                                                <fileTypes>
+                                                        <filetype name="niftii2" extension="nii.gz" description="" />
+                                                        <filetype name="nifti" extension="nii" description="" />
+                                                </fileTypes>
+                                        </format>
+                                </output>
+                                <output id="BrainExtraction_1.Outputbrainmask" name="Output brain mask" required="false" enabled="true" order="4">
+                                        <format type="File" cardinality="1">
+                                                <fileTypes>
+                                                        <filetype name="niftii2" extension="nii.gz" description="" />
+                                                        <filetype name="nifti" extension="nii" description="" />
+                                                </fileTypes>
+                                        </format>
+                                </output>
+                        </module>
+                        <module id="SmallGraphGeneration_1" name="Small Graph Generation" package="m2g" posX="918" posY="679" rotation="1" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/MR-OCP/mrcap/gengraph.py">
+                                <metadata>
+                                        <data key="__creationDateKey" value="Sun Jan 11 17:53:43 EST 2015" />
+                                </metadata>
+                                <input id="SmallGraphGeneration_1.fiberfile" name="fiber file" required="true" enabled="true" order="0">
+                                        <format type="File" cardinality="1">
+                                                <fileTypes>
+                                                        <filetype name="Matlab data" extension="dat" description="" />
+                                                </fileTypes>
+                                        </format>
+                                </input>
+                                <input id="SmallGraphGeneration_1.atlas" name="atlas" required="true" enabled="true" order="1">
+                                        <format type="File" cardinality="1">
+                                                <fileTypes>
+                                                        <filetype name="niftii2" extension="nii.gz" description="" />
+                                                        <filetype name="nifti" extension="nii" description="" />
+                                                </fileTypes>
+                                        </format>
+                                </input>
+                                <output id="SmallGraphGeneration_1.graphfile" name="graph file" required="true" enabled="true" order="2">
+                                        <format type="File" cardinality="1">
+                                                <fileTypes>
+                                                        <filetype name="Graph1" extension="graphml" description="" />
+                                                </fileTypes>
+                                        </format>
+                                </output>
+                        </module>
+                        <module id="FiberTractography_1" name="Fiber Tractography" package="m2g" posX="667" posY="714" rotation="1" sourceCode="" location="pipeline://localhost//home/gkiar/vbox/loni_scripts/tens2fibs.py">
+                                <metadata>
+                                        <data key="__creationDateKey" value="Fri Jan 09 13:07:20 EST 2015" />
+                                </metadata>
+                                <input id="FiberTractography_1.DTITensors" name="DTI Tensors" required="true" enabled="true" order="0">
+                                        <format type="File" cardinality="1">
+                                                <fileTypes>
+                                                        <filetype name="Camino Bdouble" extension="Bdouble" description="" />
+                                                </fileTypes>
+                                        </format>
+                                </input>
+                                <input id="FiberTractography_1.BrainMask" name="Brain Mask" required="true" enabled="true" order="1">
+                                        <format type="File" cardinality="1">
+                                                <fileTypes>
+                                                        <filetype name="niftii2" extension="nii.gz" description="" />
+                                                        <filetype name="nifti" extension="nii" description="" />
+                                                </fileTypes>
+                                        </format>
+                                </input>
+                                <input id="FiberTractography_1.Anisotropicvoxelthreshold" name="Anisotropic voxel threshold" required="false" enabled="true" order="2">
+                                        <format type="Number" cardinality="1" />
+                                        <values>
+                                                <value>0.2</value>
+                                        </values>
+                                </input>
+                                <input id="FiberTractography_1.Curvaturethreshold" name="Curvature threshold" required="false" enabled="true" order="3">
+                                        <format type="Number" cardinality="1" />
+                                        <values>
+                                                <value>60</value>
+                                        </values>
+                                </input>
+                                <output id="FiberTractography_1.DTIfibers" name="DTI fibers" required="true" enabled="true" order="4">
+                                        <format type="File" cardinality="1">
+                                                <fileTypes>
+                                                        <filetype name="Camino Bfloat" extension="Bfloat" description="" />
+                                                </fileTypes>
+                                        </format>
+                                </output>
+                                <output id="FiberTractography_1.VTKfibers" name="VTK fibers" required="false" enabled="true" order="5">
+                                        <format type="File" cardinality="1">
+                                                <fileTypes>
+                                                        <filetype name="Visualizable fibers" extension="vtk" description="" />
+                                                </fileTypes>
+                                        </format>
+                                </output>
+                        </module>
+                        <module id="AffineRegistration_1" name="Affine Registration" package="m2g" posX="526" posY="0" rotation="1" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/M2G/src/register_affine.py">
                                 <metadata>
                                         <data key="__creationDateKey" value="Thu Feb 26 09:45:13 EST 2015" />
                                 </metadata>
@@ -108,7 +396,43 @@
                                         </format>
                                 </output>
                         </module>
-                        <module id="TensorEstimation_1" name="Tensor Estimation" package="m2g" posX="125" posY="571" rotation="1" sourceCode="" location="pipeline://localhost//home/gkiar/vbox/loni_scripts/dti2tens.py">
+                        <module id="ApplyRegistrationtoDTI_1" name="Apply Registration to DTI" package="m2g" posX="321" posY="355" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/M2G/src/apply_registration.py">
+                                <metadata>
+                                        <data key="__creationDateKey" value="Thu Feb 26 13:46:28 EST 2015" />
+                                </metadata>
+                                <input id="ApplyRegistrationtoDTI_1.OriginalImage" name="Original Image" required="false" enabled="true" order="0">
+                                        <format type="File" cardinality="1">
+                                                <fileTypes>
+                                                        <filetype name="niftii2" extension="nii.gz" description="" />
+                                                        <filetype name="nifti" extension="nii" description="" />
+                                                </fileTypes>
+                                        </format>
+                                </input>
+                                <output id="ApplyRegistrationtoDTI_1.WarpedImage" name="Warped Image" required="false" enabled="true" order="1">
+                                        <format type="File" cardinality="1">
+                                                <fileTypes>
+                                                        <filetype name="niftii2" extension="nii.gz" description="" />
+                                                        <filetype name="nifti" extension="nii" description="" />
+                                                </fileTypes>
+                                        </format>
+                                </output>
+                                <input id="ApplyRegistrationtoDTI_1.ReferenceImage" name="Reference Image" description="Image that the transform was computed wrt." required="false" enabled="true" order="2">
+                                        <format type="File" cardinality="1">
+                                                <fileTypes>
+                                                        <filetype name="niftii2" extension="nii.gz" description="" />
+                                                        <filetype name="nifti" extension="nii" description="" />
+                                                </fileTypes>
+                                        </format>
+                                </input>
+                                <input id="ApplyRegistrationtoDTI_1.Transformmatrix" name="Transform matrix" required="false" enabled="true" order="3">
+                                        <format type="File" cardinality="1">
+                                                <fileTypes>
+                                                        <filetype name="Matlab file" extension="mat" description="" />
+                                                </fileTypes>
+                                        </format>
+                                </input>
+                        </module>
+                        <module id="TensorEstimation_1" name="Tensor Estimation" package="m2g" posX="550" posY="613" sourceCode="" location="pipeline://localhost//home/gkiar/vbox/loni_scripts/dti2tens.py">
                                 <metadata>
                                         <data key="__creationDateKey" value="Fri Jan 09 11:38:39 EST 2015" />
                                 </metadata>
@@ -185,197 +509,7 @@
                                         </format>
                                 </output>
                         </module>
-                        <module id="B0Registration_1" name="B0 Registration" package="m2g" posX="0" posY="20" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/M2G/src/b0_registration.py">
-                                <metadata>
-                                        <data key="__creationDateKey" value="Thu Feb 26 11:43:03 EST 2015" />
-                                </metadata>
-                                <input id="B0Registration_1.DTIImage" name="DTI Image" required="false" enabled="true" order="0">
-                                        <format type="File" cardinality="1">
-                                                <fileTypes>
-                                                        <filetype name="niftii2" extension="nii.gz" description="" />
-                                                        <filetype name="nifti" extension="nii" description="" />
-                                                </fileTypes>
-                                        </format>
-                                </input>
-                                <input id="B0Registration_1.B-valuesfile" name="B-values file" required="false" enabled="true" order="1">
-                                        <format type="File" cardinality="1">
-                                                <fileTypes>
-                                                        <filetype name="B values" extension="b" description="" />
-                                                </fileTypes>
-                                        </format>
-                                </input>
-                                <output id="B0Registration_1.AlignedDTI" name="Aligned DTI" required="false" enabled="true" order="2">
-                                        <format type="File" cardinality="-2" cardinalityBase="DTI Image">
-                                                <fileTypes>
-                                                        <filetype name="niftii2" extension="nii.gz" description="" />
-                                                        <filetype name="nifti" extension="nii" description="" />
-                                                </fileTypes>
-                                        </format>
-                                </output>
-                                <output id="B0Registration_1.B0volume" name="B0 volume" required="false" enabled="true" order="3">
-                                        <format type="File" cardinality="1">
-                                                <fileTypes>
-                                                        <filetype name="niftii2" extension="nii.gz" description="" />
-                                                        <filetype name="nifti" extension="nii" description="" />
-                                                </fileTypes>
-                                        </format>
-                                </output>
-                        </module>
-                        <module id="FiberTractography_1" name="Fiber Tractography" package="m2g" posX="368" posY="599" rotation="1" sourceCode="" location="pipeline://localhost//home/gkiar/vbox/loni_scripts/tens2fibs.py">
-                                <metadata>
-                                        <data key="__creationDateKey" value="Fri Jan 09 13:07:20 EST 2015" />
-                                </metadata>
-                                <input id="FiberTractography_1.DTITensors" name="DTI Tensors" required="true" enabled="true" order="0">
-                                        <format type="File" cardinality="1">
-                                                <fileTypes>
-                                                        <filetype name="Camino Bdouble" extension="Bdouble" description="" />
-                                                </fileTypes>
-                                        </format>
-                                </input>
-                                <input id="FiberTractography_1.BrainMask" name="Brain Mask" required="true" enabled="true" order="1">
-                                        <format type="File" cardinality="1">
-                                                <fileTypes>
-                                                        <filetype name="niftii2" extension="nii.gz" description="" />
-                                                        <filetype name="nifti" extension="nii" description="" />
-                                                </fileTypes>
-                                        </format>
-                                </input>
-                                <input id="FiberTractography_1.Anisotropicvoxelthreshold" name="Anisotropic voxel threshold" required="false" enabled="true" order="2">
-                                        <format type="Number" cardinality="1" />
-                                        <values>
-                                                <value>0.2</value>
-                                        </values>
-                                </input>
-                                <input id="FiberTractography_1.Curvaturethreshold" name="Curvature threshold" required="false" enabled="true" order="3">
-                                        <format type="Number" cardinality="1" />
-                                        <values>
-                                                <value>60</value>
-                                        </values>
-                                </input>
-                                <output id="FiberTractography_1.DTIfibers" name="DTI fibers" required="true" enabled="true" order="4">
-                                        <format type="File" cardinality="1">
-                                                <fileTypes>
-                                                        <filetype name="Camino Bfloat" extension="Bfloat" description="" />
-                                                </fileTypes>
-                                        </format>
-                                </output>
-                                <output id="FiberTractography_1.VTKfibers" name="VTK fibers" required="false" enabled="true" order="5">
-                                        <format type="File" cardinality="1">
-                                                <fileTypes>
-                                                        <filetype name="Visualizable fibers" extension="vtk" description="" />
-                                                </fileTypes>
-                                        </format>
-                                </output>
-                        </module>
-                        <module id="SmallGraphGeneration_1" name="Small Graph Generation" package="m2g" posX="619" posY="599" rotation="1" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/MR-OCP/mrcap/gengraph.py">
-                                <metadata>
-                                        <data key="__creationDateKey" value="Sun Jan 11 17:53:43 EST 2015" />
-                                </metadata>
-                                <input id="SmallGraphGeneration_1.fiberfile" name="fiber file" required="true" enabled="true" order="0">
-                                        <format type="File" cardinality="1">
-                                                <fileTypes>
-                                                        <filetype name="Matlab data" extension="dat" description="" />
-                                                </fileTypes>
-                                        </format>
-                                </input>
-                                <input id="SmallGraphGeneration_1.atlas" name="atlas" required="true" enabled="true" order="1">
-                                        <format type="File" cardinality="1">
-                                                <fileTypes>
-                                                        <filetype name="niftii2" extension="nii.gz" description="" />
-                                                        <filetype name="nifti" extension="nii" description="" />
-                                                </fileTypes>
-                                        </format>
-                                        <values>
-                                                <value>pipeline://localhost/{data}/MNI152_T1_1mm_brain_labels_cropped.nii</value>
-                                        </values>
-                                </input>
-                                <output id="SmallGraphGeneration_1.graphfile" name="graph file" required="true" enabled="true" order="2">
-                                        <format type="File" cardinality="1">
-                                                <fileTypes>
-                                                        <filetype name="Graph1" extension="graphml" description="" />
-                                                </fileTypes>
-                                        </format>
-                                </output>
-                        </module>
-                        <module id="RigidRegistration_1" name="Rigid Registration" package="m2g" posX="122" posY="164" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/M2G/src/register_rigid.py">
-                                <metadata>
-                                        <data key="__creationDateKey" value="Thu Feb 26 09:45:13 EST 2015" />
-                                </metadata>
-                                <input id="RigidRegistration_1.FixedImage" name="Fixed Image" required="false" enabled="true" order="0">
-                                        <format type="File" cardinality="1">
-                                                <fileTypes>
-                                                        <filetype name="nifti" extension="nii" description="" />
-                                                        <filetype name="niftii2" extension="nii.gz" description="" />
-                                                </fileTypes>
-                                        </format>
-                                </input>
-                                <input id="RigidRegistration_1.MovingImage" name="Moving Image" required="false" enabled="true" order="1">
-                                        <format type="File" cardinality="1">
-                                                <fileTypes>
-                                                        <filetype name="niftii2" extension="nii.gz" description="" />
-                                                        <filetype name="nifti" extension="nii" description="" />
-                                                </fileTypes>
-                                        </format>
-                                </input>
-                                <input id="RigidRegistration_1.tolerance" name="tolerance" required="false" enabled="true" order="2">
-                                        <format type="Number" cardinality="1" />
-                                        <values>
-                                                <value>1e-4</value>
-                                        </values>
-                                </input>
-                                <output id="RigidRegistration_1.OutputImage" name="Output Image" required="false" enabled="true" order="3">
-                                        <format type="File" cardinality="1">
-                                                <fileTypes>
-                                                        <filetype name="niftii2" extension="nii.gz" description="" />
-                                                        <filetype name="nifti" extension="nii" description="" />
-                                                </fileTypes>
-                                        </format>
-                                </output>
-                                <output id="RigidRegistration_1.transformation" name="transformation" required="false" enabled="true" order="4">
-                                        <format type="File" cardinality="1">
-                                                <fileTypes>
-                                                        <filetype name="Matlab file" extension="mat" description="" />
-                                                </fileTypes>
-                                        </format>
-                                </output>
-                        </module>
-                        <module id="ApplyRegistrationtoDTI_1" name="Apply Registration to DTI" package="m2g" posX="10" posY="307" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/M2G/src/apply_registration.py">
-                                <metadata>
-                                        <data key="__creationDateKey" value="Thu Feb 26 13:46:28 EST 2015" />
-                                </metadata>
-                                <input id="ApplyRegistrationtoDTI_1.OriginalImage" name="Original Image" required="false" enabled="true" order="0">
-                                        <format type="File" cardinality="1">
-                                                <fileTypes>
-                                                        <filetype name="niftii2" extension="nii.gz" description="" />
-                                                        <filetype name="nifti" extension="nii" description="" />
-                                                </fileTypes>
-                                        </format>
-                                </input>
-                                <output id="ApplyRegistrationtoDTI_1.WarpedImage" name="Warped Image" required="false" enabled="true" order="1">
-                                        <format type="File" cardinality="1">
-                                                <fileTypes>
-                                                        <filetype name="niftii2" extension="nii.gz" description="" />
-                                                        <filetype name="nifti" extension="nii" description="" />
-                                                </fileTypes>
-                                        </format>
-                                </output>
-                                <input id="ApplyRegistrationtoDTI_1.ReferenceImage" name="Reference Image" description="Image that the transform was computed wrt." required="false" enabled="true" order="2">
-                                        <format type="File" cardinality="1">
-                                                <fileTypes>
-                                                        <filetype name="niftii2" extension="nii.gz" description="" />
-                                                        <filetype name="nifti" extension="nii" description="" />
-                                                </fileTypes>
-                                        </format>
-                                </input>
-                                <input id="ApplyRegistrationtoDTI_1.Transformmatrix" name="Transform matrix" required="false" enabled="true" order="3">
-                                        <format type="File" cardinality="1">
-                                                <fileTypes>
-                                                        <filetype name="Matlab file" extension="mat" description="" />
-                                                </fileTypes>
-                                        </format>
-                                </input>
-                        </module>
-                        <module id="ApplyRegistrationtoDTI_2" name="Apply Registration to DTI" package="m2g" posX="12" posY="456" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/M2G/src/apply_registration.py">
+                        <module id="ApplyRegistrationtoDTI_2" name="Apply Registration to DTI" package="m2g" posX="531" posY="473" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/M2G/src/apply_registration.py">
                                 <metadata>
                                         <data key="__creationDateKey" value="Thu Feb 26 13:46:28 EST 2015" />
                                 </metadata>
@@ -411,7 +545,7 @@
                                         </format>
                                 </input>
                         </module>
-                        <module id=".graphmlto.mat_1" name=".graphml to .mat" package="m2g" description="This is designed for small graphs based on the desikan atlas (i.e. 70 regions labeled 1-35, 101-135)" posX="876" posY="602" rotation="1" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/tools/utils/graphml2mat.py">
+                        <module id=".graphmlto.mat_1" name=".graphml to .mat" package="m2g" description="This is designed for small graphs based on the desikan atlas (i.e. 70 regions labeled 1-35, 101-135)" posX="1065" posY="678" rotation="1" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/tools/utils/graphml2mat.py">
                                 <metadata>
                                         <data key="__creationDateKey" value="Tue Feb 10 10:04:52 EST 2015" />
                                 </metadata>
@@ -426,47 +560,6 @@
                                         <format type="File" cardinality="1">
                                                 <fileTypes>
                                                         <filetype name="Matlab file" extension="mat" description="" />
-                                                </fileTypes>
-                                        </format>
-                                </output>
-                        </module>
-                        <module id="BrainExtraction_1" name="Brain Extraction" package="m2g" posX="252" posY="23" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/M2G/src/skullextract.py">
-                                <metadata>
-                                        <data key="__creationDateKey" value="Thu Feb 26 11:28:32 EST 2015" />
-                                </metadata>
-                                <input id="BrainExtraction_1.Inputimage" name="Input image" required="false" enabled="true" order="0">
-                                        <format type="File" cardinality="1">
-                                                <fileTypes>
-                                                        <filetype name="niftii2" extension="nii.gz" description="" />
-                                                        <filetype name="nifti" extension="nii" description="" />
-                                                </fileTypes>
-                                        </format>
-                                </input>
-                                <input id="BrainExtraction_1.FractionalIntensityThreshold" name="Fractional Intensity Threshold" description="default=0.25 (verified on KKI dataset)" required="false" enabled="true" order="1" prefix="-f" prefixSpaced="true" prefixAllArgs="false">
-                                        <format type="Number" cardinality="1" />
-                                        <values>
-                                                <value>0.25</value>
-                                        </values>
-                                </input>
-                                <input id="BrainExtraction_1.Verticalgradient" name="Vertical gradient" description="0" required="false" enabled="true" order="2" prefix="-g" prefixSpaced="true" prefixAllArgs="false">
-                                        <format type="Number" cardinality="1" />
-                                        <values>
-                                                <value>0</value>
-                                        </values>
-                                </input>
-                                <output id="BrainExtraction_1.Outputbrainimage" name="Output brain image" required="false" enabled="true" order="3">
-                                        <format type="File" cardinality="-2" cardinalityBase="Input image">
-                                                <fileTypes>
-                                                        <filetype name="niftii2" extension="nii.gz" description="" />
-                                                        <filetype name="nifti" extension="nii" description="" />
-                                                </fileTypes>
-                                        </format>
-                                </output>
-                                <output id="BrainExtraction_1.Outputbrainmask" name="Output brain mask" required="false" enabled="true" order="4">
-                                        <format type="File" cardinality="1">
-                                                <fileTypes>
-                                                        <filetype name="niftii2" extension="nii.gz" description="" />
-                                                        <filetype name="nifti" extension="nii" description="" />
                                                 </fileTypes>
                                         </format>
                                 </output>

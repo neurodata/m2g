@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<pipeline version=".2">
+        <moduleGroup id="Untitled_1" name="Untitled" posX="0" posY="0" sourceCode="">
+                <module id="FiberConverter_1" name="Fiber Converter" package="m2g" posX="160" posY="52" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/M2G/src/fiber_convert.py">
+                        <tag />
+                        <metadata>
+                                <data key="__creationDateKey" value="Sun Jan 11 21:38:32 EST 2015" />
+                        </metadata>
+                        <input id="FiberConverter_1.fiberinfile" name="fiber infile" required="false" enabled="true" order="0">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="Camino Bfloat" extension="Bfloat" description="" />
+                                        </fileTypes>
+                                </format>
+                        </input>
+                        <output id="FiberConverter_1.fiberoutfile" name="fiber outfile" required="false" enabled="true" order="1">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="Matlab data" extension="dat" description="" />
+                                        </fileTypes>
+                                </format>
+                        </output>
+                </module>
+        </moduleGroup>
+</pipeline>
+
