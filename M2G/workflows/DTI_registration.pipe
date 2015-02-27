@@ -40,13 +40,13 @@
                                 <input id="BrainExtraction_1.Inputimage" name="Input image" required="false" enabled="true" order="0">
                                         <format type="String" cardinality="1" />
                                 </input>
-                                <input id="BrainExtraction_1.FractionalIntensityThreshold" name="Fractional Intensity Threshold" description="default=0.25 (verified on KKI dataset)" required="false" enabled="true" order="1" prefix="-f" prefixSpaced="true" prefixAllArgs="false">
+                                <input id="BrainExtraction_1.FractionalIntensityThreshold" name="Fractional Intensity Threshold" description="default=0.25 (verified on KKI dataset)" required="false" enabled="true" order="1">
                                         <format type="Number" cardinality="1" />
                                         <values>
                                                 <value>0.25</value>
                                         </values>
                                 </input>
-                                <input id="BrainExtraction_1.Verticalgradient" name="Vertical gradient" description="0" required="false" enabled="true" order="2" prefix="-g" prefixSpaced="true" prefixAllArgs="false">
+                                <input id="BrainExtraction_1.Verticalgradient" name="Vertical gradient" description="0" required="false" enabled="true" order="2">
                                         <format type="Number" cardinality="1" />
                                         <values>
                                                 <value>0</value>
@@ -256,7 +256,7 @@
                                 <format type="String" cardinality="1" />
                         </output>
                         <values>
-                                <value>/home/greg/hackathon/dti_registration_test/mprage_image_input.txt</value>
+                                <value>/home/greg/hackathon/dti_registration_test/mprage_image_input.list</value>
                         </values>
                 </dataModule>
                 <dataModule id="DTIBValues_1" name="DTI B Values" package="m2g" posX="347" posY="185" rotation="1" sourceCode="" type="String" source="true" loopIndex="false">
@@ -268,7 +268,7 @@
                                 <format type="String" cardinality="1" />
                         </output>
                         <values>
-                                <value>/home/greg/hackathon/dti_registration_test/dti_bvalues_input.txt</value>
+                                <value>/home/greg/hackathon/dti_registration_test/dti_bvalues_input.list</value>
                         </values>
                 </dataModule>
                 <dataModule id="Atlas_1" name="Atlas" package="m2g" posX="562" posY="211" sourceCode="" type="String" source="true" loopIndex="false">
@@ -280,7 +280,7 @@
                                 <format type="String" cardinality="1" />
                         </output>
                         <values>
-                                <value>/home/greg/hackathon/dti_registration_test/atlas_input.txt</value>
+                                <value>/home/greg/hackathon/dti_registration_test/atlas_input.list</value>
                         </values>
                 </dataModule>
                 <dataModule id="DTIinAtlasSpace_1" name="DTI in Atlas Space" package="m2g" posX="493" posY="613" sourceCode="" type="File" source="false" loopIndex="false" serverAddress="localhost" dirDump="false">
@@ -355,7 +355,7 @@
                                 <format type="String" cardinality="1" />
                         </output>
                         <values>
-                                <value>/home/greg/hackathon/dti_registration_test/dti_image_input.txt</value>
+                                <value>/home/greg/hackathon/dti_registration_test/dti_image_input.list</value>
                         </values>
                 </dataModule>
         </moduleGroup>
