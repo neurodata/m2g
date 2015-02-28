@@ -635,6 +635,13 @@
                                                 </fileTypes>
                                         </format>
                                 </output>
+                                <output id="8.FiberTractography_1.log" name="log" required="false" enabled="true" order="6">
+                                        <format type="File" cardinality="1">
+                                                <fileTypes>
+                                                        <filetype name="File" extension="" description="Any type of data file" />
+                                                </fileTypes>
+                                        </format>
+                                </output>
                         </module>
                         <module id="11.graphmltomat_1" name="11. graphml to mat" package="m2g" description="This is designed for small graphs based on the desikan atlas (i.e. 70 regions labeled 1-35, 101-135)" posX="1287" posY="1009" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/tools/utils/graphml2mat.py">
                                 <tag />
