@@ -102,11 +102,11 @@ class BuildGraphForm(forms.Form):
   ('cc', 'Clustering co-efficient',), ('mad', 'Maximum Average Degree',) \
   ,('deg', 'Vertex Degree',), ('eig', 'Top-k Eigenvalues and Eigenvectors',))
 
-  Select_graph_size = forms.ChoiceField(choices=(('small','Small graph [~7 min]'), ('big','Big graph [~20 min]'))
-                                  , widget=RadioSelect(attrs={"onclick":"emailFieldActivity();"}),
-                                  required = True, error_messages={'required': 'You must choose a graph size'})
+  Select_graph_size = forms.ChoiceField(choices=(('small','Small graph [~7 min]'), \
+      ('big','Big graph [~20 min]')), widget=RadioSelect(), required = True, \
+      error_messages={'required': 'You must choose a graph size'})
 
-  Email = forms.EmailField(widget=EmailInput(attrs={"class":"tb", "size":35, "disabled": "disabled"}), required=False)
+  Email = forms.EmailField(widget=EmailInput(attrs={"class":"tb", "size":35}), required=True)
 
   Select_Invariants_you_want_computed = forms.MultipleChoiceField(required=False,
   widget=CheckboxSelectMultiple, choices=INVARIANT_CHOICES)
