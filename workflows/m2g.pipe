@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <pipeline version=".2">
         <connections>
-                <connection source="NewModuleGroup_1.matgraphfile" sink="Graphs_1.Input" />
-                <connection source="Atlas_1.Output" sink="NewModuleGroup_1.ReferenceImage" />
-                <connection source="AtlasLabels_1.Output" sink="NewModuleGroup_1.atlas" />
-                <connection source="MPRAGEImage_1.Output" sink="NewModuleGroup_1.Inputimage" />
-                <connection source="Atlas_1.Output" sink="NewModuleGroup_1.ReferenceImage_2" />
-                <connection source="Atlas_1.Output" sink="NewModuleGroup_1.FixedImage" />
-                <connection source="DTIGradients_1.Output" sink="NewModuleGroup_1.DTIGradients" />
-                <connection source="DTIImage_1.Output" sink="NewModuleGroup_1.DTIImage" />
-                <connection source="DTIBValues_1.Output" sink="NewModuleGroup_1.B-valuesfile" />
+                <connection source="m2g_2.matgraphfile" sink="Graphs_1.Input" />
+                <connection source="Atlas_1.Output" sink="m2g_2.ReferenceImage" />
+                <connection source="AtlasLabels_1.Output" sink="m2g_2.atlas" />
+                <connection source="MPRAGEImage_1.Output" sink="m2g_2.Inputimage" />
+                <connection source="Atlas_1.Output" sink="m2g_2.ReferenceImage_2" />
+                <connection source="Atlas_1.Output" sink="m2g_2.FixedImage" />
+                <connection source="DTIGradients_1.Output" sink="m2g_2.DTIGradients" />
+                <connection source="DTIImage_1.Output" sink="m2g_2.DTIImage" />
+                <connection source="DTIBValues_1.Output" sink="m2g_2.B-valuesfile" />
                 <connection source="8.FiberTractography_1.DTIfibers" sink="9.FiberConverter_1.fiberinfile" />
                 <connection source="6.ApplyRegistrationtoDTI_2.WarpedImage" sink="6.ApplyRegistrationtoDTI_1.OriginalImage" />
                 <connection source="3.AffineRegistration_1.transformation" sink="6.ApplyRegistrationtoDTI_1.Transformmatrix" />
@@ -216,7 +216,7 @@
                                 <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-42/KKI2009-42-MPRAGE.nii</value>
                         </values>
                 </dataModule>
-                <dataModule id="Atlas_1" name="Atlas" package="m2g" posX="618" posY="267" sourceCode="" type="File" source="true" loopIndex="false" serverAddress="localhost">
+                <dataModule id="Atlas_1" name="Atlas" package="m2g" posX="670" posY="279" sourceCode="" type="File" source="true" loopIndex="false" serverAddress="localhost">
                         <tag />
                         <metadata>
                                 <data key="__creationDateKey" value="Thu Feb 26 15:59:19 EST 2015" />
@@ -357,7 +357,7 @@
                                 <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-42/KKI2009-42-DTI.grad</value>
                         </values>
                 </dataModule>
-                <dataModule id="AtlasLabels_1" name="Atlas Labels" package="m2g" posX="731" posY="311" sourceCode="" type="File" source="true" loopIndex="false" serverAddress="localhost">
+                <dataModule id="AtlasLabels_1" name="Atlas Labels" package="m2g" posX="698" posY="367" sourceCode="" type="File" source="true" loopIndex="false" serverAddress="localhost">
                         <tag />
                         <metadata>
                                 <data key="__creationDateKey" value="Thu Feb 26 16:02:11 EST 2015" />
@@ -378,17 +378,21 @@
                                 <value>pipeline://localhost//home/greg/atlas/MNI152_T1_1mm_brain_labels_cropped.nii</value>
                         </values>
                 </dataModule>
-                <moduleGroup id="NewModuleGroup_1" name="New Module Group" posX="384" posY="484" sourceCode="">
-                        <input description="Image that the transform was computed wrt." link="6.ApplyRegistrationtoDTI_1.ReferenceImage" id="NewModuleGroup_1.ReferenceImage" name="Reference Image" order="0" />
-                        <input link="10.SmallGraphGeneration_1.atlas" id="NewModuleGroup_1.atlas" name="atlas" order="1" />
-                        <input link="1.BrainExtraction_1.Inputimage" id="NewModuleGroup_1.Inputimage" name="Input image" order="2" />
-                        <input description="Image that the transform was computed wrt." link="5.ApplyRegistrationtoMask_1.ReferenceImage" id="NewModuleGroup_1.ReferenceImage_2" name="Reference Image" order="3" />
-                        <output link="11.graphmltomat_1.matgraphfile" id="NewModuleGroup_1.matgraphfile" name="mat graph file" order="4" />
-                        <input link="3.AffineRegistration_1.FixedImage" id="NewModuleGroup_1.FixedImage" name="Fixed Image" order="5" />
-                        <input link="7.TensorEstimation_1.DTIGradients" id="NewModuleGroup_1.DTIGradients" name="DTI Gradients" order="6" />
-                        <input link="2.B0Registration_1.DTIImage" id="NewModuleGroup_1.DTIImage" name="DTI Image" order="7" />
-                        <input link="2.B0Registration_1.B-valuesfile" id="NewModuleGroup_1.B-valuesfile" name="B-values file" order="8" />
-                        <module id="9.FiberConverter_1" name="9. Fiber Converter" package="m2g" posX="982" posY="859" rotation="1" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/src/fiber_convert.py">
+                <moduleGroup id="m2g_2" name="m2g" posX="384" posY="484" sourceCode="">
+                        <tag />
+                        <metadata>
+                                <data key="__creationDateKey" value="Sat Feb 28 11:34:20 EST 2015" />
+                        </metadata>
+                        <input description="Image that the transform was computed wrt." link="6.ApplyRegistrationtoDTI_1.ReferenceImage" id="m2g_2.ReferenceImage" name="Reference Image" order="0" />
+                        <input link="10.SmallGraphGeneration_1.atlas" id="m2g_2.atlas" name="atlas" order="1" />
+                        <input link="1.BrainExtraction_1.Inputimage" id="m2g_2.Inputimage" name="Input image" order="2" />
+                        <input description="Image that the transform was computed wrt." link="5.ApplyRegistrationtoMask_1.ReferenceImage" id="m2g_2.ReferenceImage_2" name="Reference Image" order="3" />
+                        <output link="11.graphmltomat_1.matgraphfile" id="m2g_2.matgraphfile" name="mat graph file" order="4" />
+                        <input link="3.AffineRegistration_1.FixedImage" id="m2g_2.FixedImage" name="Fixed Image" order="5" />
+                        <input link="7.TensorEstimation_1.DTIGradients" id="m2g_2.DTIGradients" name="DTI Gradients" order="6" />
+                        <input link="2.B0Registration_1.DTIImage" id="m2g_2.DTIImage" name="DTI Image" order="7" />
+                        <input link="2.B0Registration_1.B-valuesfile" id="m2g_2.B-valuesfile" name="B-values file" order="8" />
+                        <module id="9.FiberConverter_1" name="9. Fiber Converter" package="m2g" posX="1417" posY="465" rotation="1" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/src/fiber_convert.py">
                                 <tag />
                                 <metadata>
                                         <data key="__creationDateKey" value="Sun Jan 11 21:38:32 EST 2015" />
@@ -408,7 +412,7 @@
                                         </format>
                                 </output>
                         </module>
-                        <module id="6.ApplyRegistrationtoDTI_1" name="6. Apply Registration to DTI" package="m2g" posX="680" posY="610" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/src/apply_registration.py">
+                        <module id="6.ApplyRegistrationtoDTI_1" name="6. Apply Registration to DTI" package="m2g" posX="962" posY="608" rotation="1" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/src/apply_registration.py">
                                 <tag />
                                 <metadata>
                                         <data key="__creationDateKey" value="Thu Feb 26 13:46:28 EST 2015" />
@@ -445,7 +449,7 @@
                                         </format>
                                 </input>
                         </module>
-                        <module id="6.ApplyRegistrationtoDTI_2" name="6. Apply Registration to DTI" package="m2g" posX="116" posY="476" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/src/apply_registration.py">
+                        <module id="6.ApplyRegistrationtoDTI_2" name="6. Apply Registration to DTI" package="m2g" posX="783" posY="528" rotation="1" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/src/apply_registration.py">
                                 <tag />
                                 <metadata>
                                         <data key="__creationDateKey" value="Thu Feb 26 13:46:28 EST 2015" />
@@ -482,7 +486,7 @@
                                         </format>
                                 </input>
                         </module>
-                        <module id="10.SmallGraphGeneration_1" name="10. Small Graph Generation" package="m2g" posX="1175" posY="874" rotation="1" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/MR-OCP/mrcap/gengraph.py">
+                        <module id="10.SmallGraphGeneration_1" name="10. Small Graph Generation" package="m2g" posX="1590" posY="598" rotation="1" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/MR-OCP/mrcap/gengraph.py">
                                 <tag />
                                 <metadata>
                                         <data key="__creationDateKey" value="Sun Jan 11 17:53:43 EST 2015" />
@@ -510,7 +514,7 @@
                                         </format>
                                 </output>
                         </module>
-                        <module id="1.BrainExtraction_1" name="1. Brain Extraction" package="m2g" posX="0" posY="36" rotation="1" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/src/skullextract.py">
+                        <module id="1.BrainExtraction_1" name="1. Brain Extraction" package="m2g" posX="49" posY="195" rotation="1" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/src/skullextract.py">
                                 <tag />
                                 <metadata>
                                         <data key="__creationDateKey" value="Thu Feb 26 11:28:32 EST 2015" />
@@ -552,7 +556,7 @@
                                         </format>
                                 </output>
                         </module>
-                        <module id="5.ApplyRegistrationtoMask_1" name="5. Apply Registration to Mask" package="m2g" posX="514" posY="433" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/src/apply_registration.py">
+                        <module id="5.ApplyRegistrationtoMask_1" name="5. Apply Registration to Mask" package="m2g" posX="633" posY="344" rotation="1" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/src/apply_registration.py">
                                 <tag />
                                 <metadata>
                                         <data key="__creationDateKey" value="Thu Feb 26 13:46:28 EST 2015" />
@@ -589,7 +593,7 @@
                                         </format>
                                 </input>
                         </module>
-                        <module id="8.FiberTractography_1" name="8. Fiber Tractography" package="m2g" posX="746" posY="875" rotation="1" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/src/tens2fibs.py">
+                        <module id="8.FiberTractography_1" name="8. Fiber Tractography" package="m2g" posX="1265" posY="601" rotation="1" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/src/tens2fibs.py">
                                 <tag />
                                 <metadata>
                                         <data key="__creationDateKey" value="Fri Jan 09 13:07:20 EST 2015" />
@@ -643,7 +647,7 @@
                                         </format>
                                 </output>
                         </module>
-                        <module id="11.graphmltomat_1" name="11. graphml to mat" package="m2g" description="This is designed for small graphs based on the desikan atlas (i.e. 70 regions labeled 1-35, 101-135)" posX="1287" posY="1009" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/tools/utils/graphml2mat.py">
+                        <module id="11.graphmltomat_1" name="11. graphml to mat" package="m2g" description="This is designed for small graphs based on the desikan atlas (i.e. 70 regions labeled 1-35, 101-135)" posX="1746" posY="461" rotation="1" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/tools/utils/graphml2mat.py">
                                 <tag />
                                 <metadata>
                                         <data key="__creationDateKey" value="Tue Feb 10 10:04:52 EST 2015" />
@@ -663,7 +667,7 @@
                                         </format>
                                 </output>
                         </module>
-                        <module id="4.RigidRegistration_1" name="4. Rigid Registration" package="m2g" posX="232" posY="203" rotation="1" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/src/register_rigid.py">
+                        <module id="4.RigidRegistration_1" name="4. Rigid Registration" package="m2g" posX="508" posY="455" rotation="1" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/src/register_rigid.py">
                                 <tag />
                                 <metadata>
                                         <data key="__creationDateKey" value="Thu Feb 26 09:45:13 EST 2015" />
@@ -706,7 +710,7 @@
                                         </format>
                                 </output>
                         </module>
-                        <module id="3.AffineRegistration_1" name="3. Affine Registration" package="m2g" posX="426" posY="20" rotation="1" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/src/register_affine.py">
+                        <module id="3.AffineRegistration_1" name="3. Affine Registration" package="m2g" posX="347" posY="204" rotation="1" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/src/register_affine.py">
                                 <tag />
                                 <metadata>
                                         <data key="__creationDateKey" value="Thu Feb 26 09:45:13 EST 2015" />
@@ -749,7 +753,7 @@
                                         </format>
                                 </output>
                         </module>
-                        <module id="7.TensorEstimation_1" name="7. Tensor Estimation" package="m2g" posX="595" posY="756" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/src/dti2tens.py">
+                        <module id="7.TensorEstimation_1" name="7. Tensor Estimation" package="m2g" posX="1125" posY="464" rotation="1" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/src/dti2tens.py">
                                 <tag />
                                 <metadata>
                                         <data key="__creationDateKey" value="Fri Jan 09 11:38:39 EST 2015" />
@@ -827,7 +831,7 @@
                                         </format>
                                 </output>
                         </module>
-                        <module id="2.B0Registration_1" name="2. B0 Registration" package="m2g" posX="0" posY="187" rotation="1" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/src/b0_registration.py">
+                        <module id="2.B0Registration_1" name="2. B0 Registration" package="m2g" posX="196" posY="338" rotation="1" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/src/b0_registration.py">
                                 <tag />
                                 <metadata>
                                         <data key="__creationDateKey" value="Thu Feb 26 11:43:03 EST 2015" />
