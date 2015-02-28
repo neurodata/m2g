@@ -1,39 +1,39 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <pipeline version=".2">
         <connections>
-                <connection source="m2g_2.matgraphfile" sink="Graphs_1.Input" />
-                <connection source="DTIImage_1.Output" sink="m2g_2.DTIImage" />
-                <connection source="DTIBValues_1.Output" sink="m2g_2.B-valuesfile" />
-                <connection source="DTIGradients_1.Output" sink="m2g_2.DTIGradients" />
-                <connection source="AtlasMask_1.Output" sink="m2g_2.BrainMask" />
-                <connection source="Atlas_1.Output" sink="m2g_2.FixedImage" />
-                <connection source="Atlas_1.Output" sink="m2g_2.ReferenceImage" />
-                <connection source="Atlas_1.Output" sink="m2g_2.atlas" />
-                <connection source="MPRAGEImage_1.Output" sink="m2g_2.Inputimage" />
-                <connection source="AtlasMask_1.Output" sink="m2g_2.BrainMask_2" />
-                <connection source="Atlas_1.Output" sink="m2g_2.ReferenceImage_2" />
-                <connection source="6.ApplyRegistrationtoDTI_1.WarpedImage" sink="7.TensorEstimation_1.DTIImage" />
-                <connection source="5.ApplyRegistrationtoMask_1.WarpedImage" sink="7.TensorEstimation_1.BrainMask" />
-                <connection source="1.BrainExtraction_1.Outputbrainimage" sink="3.AffineRegistration_1.MovingImage" />
+                <connection source="NewModuleGroup_1.matgraphfile" sink="Graphs_1.Input" />
+                <connection source="Atlas_1.Output" sink="NewModuleGroup_1.ReferenceImage" />
+                <connection source="AtlasLabels_1.Output" sink="NewModuleGroup_1.atlas" />
+                <connection source="MPRAGEImage_1.Output" sink="NewModuleGroup_1.Inputimage" />
+                <connection source="Atlas_1.Output" sink="NewModuleGroup_1.ReferenceImage_2" />
+                <connection source="Atlas_1.Output" sink="NewModuleGroup_1.FixedImage" />
+                <connection source="DTIGradients_1.Output" sink="NewModuleGroup_1.DTIGradients" />
+                <connection source="DTIImage_1.Output" sink="NewModuleGroup_1.DTIImage" />
+                <connection source="DTIBValues_1.Output" sink="NewModuleGroup_1.B-valuesfile" />
+                <connection source="8.FiberTractography_1.DTIfibers" sink="9.FiberConverter_1.fiberinfile" />
                 <connection source="6.ApplyRegistrationtoDTI_2.WarpedImage" sink="6.ApplyRegistrationtoDTI_1.OriginalImage" />
                 <connection source="3.AffineRegistration_1.transformation" sink="6.ApplyRegistrationtoDTI_1.Transformmatrix" />
                 <connection source="2.B0Registration_1.AlignedDTI" sink="6.ApplyRegistrationtoDTI_2.OriginalImage" />
                 <connection source="1.BrainExtraction_1.Outputbrainimage" sink="6.ApplyRegistrationtoDTI_2.ReferenceImage" />
                 <connection source="4.RigidRegistration_1.transformation" sink="6.ApplyRegistrationtoDTI_2.Transformmatrix" />
-                <connection source="10.SmallGraphGeneration_1.graphfile" sink="11.graphmltomat_1.graphmlfile" />
                 <connection source="9.FiberConverter_1.fiberoutfile" sink="10.SmallGraphGeneration_1.fiberfile" />
-                <connection source="8.FiberTractography_1.DTIfibers" sink="9.FiberConverter_1.fiberinfile" />
-                <connection source="7.TensorEstimation_1.DTItensors" sink="8.FiberTractography_1.DTITensors" />
                 <connection source="1.BrainExtraction_1.Outputbrainmask" sink="5.ApplyRegistrationtoMask_1.OriginalImage" />
                 <connection source="3.AffineRegistration_1.transformation" sink="5.ApplyRegistrationtoMask_1.Transformmatrix" />
+                <connection source="7.TensorEstimation_1.DTItensors" sink="8.FiberTractography_1.DTITensors" />
+                <connection source="5.ApplyRegistrationtoMask_1.WarpedImage" sink="8.FiberTractography_1.BrainMask" />
+                <connection source="10.SmallGraphGeneration_1.graphfile" sink="11.graphmltomat_1.graphmlfile" />
                 <connection source="1.BrainExtraction_1.Outputbrainimage" sink="4.RigidRegistration_1.FixedImage" />
                 <connection source="2.B0Registration_1.B0volume" sink="4.RigidRegistration_1.MovingImage" />
+                <connection source="1.BrainExtraction_1.Outputbrainimage" sink="3.AffineRegistration_1.MovingImage" />
+                <connection source="6.ApplyRegistrationtoDTI_1.WarpedImage" sink="7.TensorEstimation_1.DTIImage" />
+                <connection source="5.ApplyRegistrationtoMask_1.WarpedImage" sink="7.TensorEstimation_1.BrainMask" />
         </connections>
         <moduleGroup id="m2g_1" name="m2g" package="m2g" posX="0" posY="0" sourceCode="">
                 <metadata>
                         <data key="__creationDateKey" value="Thu Feb 26 15:02:18 EST 2015" />
                 </metadata>
-                <dataModule id="DTIImage_1" name="DTI Image" package="m2g" posX="308" posY="345" rotation="1" sourceCode="" type="File" source="true" loopIndex="false">
+                <dataModule id="DTIImage_1" name="DTI Image" package="m2g" posX="308" posY="345" rotation="1" sourceCode="" type="File" source="true" loopIndex="false" serverAddress="localhost">
+                        <tag />
                         <metadata>
                                 <data key="__creationDateKey" value="Thu Feb 26 11:52:26 EST 2015" />
                         </metadata>
@@ -49,8 +49,53 @@
                                 <filetype name="nifti" extension="nii" description="" />
                                 <filetype name="niftii2" extension="nii.gz" description="" />
                         </fileTypes>
+                        <values>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-01/KKI2009-01-DTI.nii</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-02/KKI2009-02-DTI.nii</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-03/KKI2009-03-DTI.nii</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-04/KKI2009-04-DTI.nii</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-05/KKI2009-05-DTI.nii</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-06/KKI2009-06-DTI.nii</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-07/KKI2009-07-DTI.nii</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-08/KKI2009-08-DTI.nii</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-09/KKI2009-09-DTI.nii</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-10/KKI2009-10-DTI.nii</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-11/KKI2009-11-DTI.nii</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-12/KKI2009-12-DTI.nii</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-13/KKI2009-13-DTI.nii</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-14/KKI2009-14-DTI.nii</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-15/KKI2009-15-DTI.nii</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-16/KKI2009-16-DTI.nii</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-17/KKI2009-17-DTI.nii</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-18/KKI2009-18-DTI.nii</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-19/KKI2009-19-DTI.nii</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-20/KKI2009-20-DTI.nii</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-21/KKI2009-21-DTI.nii</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-22/KKI2009-22-DTI.nii</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-23/KKI2009-23-DTI.nii</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-24/KKI2009-24-DTI.nii</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-25/KKI2009-25-DTI.nii</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-26/KKI2009-26-DTI.nii</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-27/KKI2009-27-DTI.nii</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-28/KKI2009-28-DTI.nii</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-29/KKI2009-29-DTI.nii</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-30/KKI2009-30-DTI.nii</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-31/KKI2009-31-DTI.nii</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-32/KKI2009-32-DTI.nii</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-33/KKI2009-33-DTI.nii</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-34/KKI2009-34-DTI.nii</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-35/KKI2009-35-DTI.nii</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-36/KKI2009-36-DTI.nii</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-37/KKI2009-37-DTI.nii</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-38/KKI2009-38-DTI.nii</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-39/KKI2009-39-DTI.nii</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-40/KKI2009-40-DTI.nii</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-41/KKI2009-41-DTI.nii</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-42/KKI2009-42-DTI.nii</value>
+                        </values>
                 </dataModule>
-                <dataModule id="DTIBValues_1" name="DTI B Values" package="m2g" posX="311" posY="250" rotation="1" sourceCode="" type="File" source="true" loopIndex="false">
+                <dataModule id="DTIBValues_1" name="DTI B Values" package="m2g" posX="311" posY="250" rotation="1" sourceCode="" type="File" source="true" loopIndex="false" serverAddress="localhost">
+                        <tag />
                         <metadata>
                                 <data key="__creationDateKey" value="Thu Feb 26 11:52:52 EST 2015" />
                         </metadata>
@@ -64,25 +109,115 @@
                         <fileTypes>
                                 <filetype name="B values" extension="b" description="" />
                         </fileTypes>
+                        <values>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-01/KKI2009-01-DTI.b</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-02/KKI2009-02-DTI.b</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-03/KKI2009-03-DTI.b</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-04/KKI2009-04-DTI.b</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-05/KKI2009-05-DTI.b</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-06/KKI2009-06-DTI.b</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-07/KKI2009-07-DTI.b</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-08/KKI2009-08-DTI.b</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-09/KKI2009-09-DTI.b</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-10/KKI2009-10-DTI.b</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-11/KKI2009-11-DTI.b</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-12/KKI2009-12-DTI.b</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-13/KKI2009-13-DTI.b</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-14/KKI2009-14-DTI.b</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-15/KKI2009-15-DTI.b</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-16/KKI2009-16-DTI.b</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-17/KKI2009-17-DTI.b</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-18/KKI2009-18-DTI.b</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-19/KKI2009-19-DTI.b</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-20/KKI2009-20-DTI.b</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-21/KKI2009-21-DTI.b</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-22/KKI2009-22-DTI.b</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-23/KKI2009-23-DTI.b</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-24/KKI2009-24-DTI.b</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-25/KKI2009-25-DTI.b</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-26/KKI2009-26-DTI.b</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-27/KKI2009-27-DTI.b</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-28/KKI2009-28-DTI.b</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-29/KKI2009-29-DTI.b</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-30/KKI2009-30-DTI.b</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-31/KKI2009-31-DTI.b</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-32/KKI2009-32-DTI.b</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-33/KKI2009-33-DTI.b</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-34/KKI2009-34-DTI.b</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-35/KKI2009-35-DTI.b</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-36/KKI2009-36-DTI.b</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-37/KKI2009-37-DTI.b</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-38/KKI2009-38-DTI.b</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-39/KKI2009-39-DTI.b</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-40/KKI2009-40-DTI.b</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-41/KKI2009-41-DTI.b</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-42/KKI2009-42-DTI.b</value>
+                        </values>
                 </dataModule>
-                <dataModule id="MPRAGEImage_1" name="MPRAGE Image" package="m2g" posX="312" posY="155" rotation="1" sourceCode="" type="File" source="true" loopIndex="false">
+                <dataModule id="MPRAGEImage_1" name="MPRAGE Image" package="m2g" posX="312" posY="155" rotation="1" sourceCode="" type="File" source="true" loopIndex="false" serverAddress="localhost">
+                        <tag />
                         <metadata>
                                 <data key="__creationDateKey" value="Thu Feb 26 11:53:46 EST 2015" />
                         </metadata>
                         <output id="MPRAGEImage_1.Output" name="Output" required="true" enabled="true" order="-1">
                                 <format type="File" cardinality="1">
                                         <fileTypes>
-                                                <filetype name="niftii2" extension="nii.gz" description="" />
                                                 <filetype name="nifti" extension="nii" description="" />
+                                                <filetype name="niftii2" extension="nii.gz" description="" />
                                         </fileTypes>
                                 </format>
                         </output>
                         <fileTypes>
-                                <filetype name="niftii2" extension="nii.gz" description="" />
                                 <filetype name="nifti" extension="nii" description="" />
+                                <filetype name="niftii2" extension="nii.gz" description="" />
                         </fileTypes>
+                        <values>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-01/KKI2009-01-MPRAGE.nii</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-02/KKI2009-02-MPRAGE.nii</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-03/KKI2009-03-MPRAGE.nii</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-04/KKI2009-04-MPRAGE.nii</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-05/KKI2009-05-MPRAGE.nii</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-06/KKI2009-06-MPRAGE.nii</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-07/KKI2009-07-MPRAGE.nii</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-08/KKI2009-08-MPRAGE.nii</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-09/KKI2009-09-MPRAGE.nii</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-10/KKI2009-10-MPRAGE.nii</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-11/KKI2009-11-MPRAGE.nii</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-12/KKI2009-12-MPRAGE.nii</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-13/KKI2009-13-MPRAGE.nii</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-14/KKI2009-14-MPRAGE.nii</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-15/KKI2009-15-MPRAGE.nii</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-16/KKI2009-16-MPRAGE.nii</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-17/KKI2009-17-MPRAGE.nii</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-18/KKI2009-18-MPRAGE.nii</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-19/KKI2009-19-MPRAGE.nii</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-20/KKI2009-20-MPRAGE.nii</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-21/KKI2009-21-MPRAGE.nii</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-22/KKI2009-22-MPRAGE.nii</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-23/KKI2009-23-MPRAGE.nii</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-24/KKI2009-24-MPRAGE.nii</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-25/KKI2009-25-MPRAGE.nii</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-26/KKI2009-26-MPRAGE.nii</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-27/KKI2009-27-MPRAGE.nii</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-28/KKI2009-28-MPRAGE.nii</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-29/KKI2009-29-MPRAGE.nii</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-30/KKI2009-30-MPRAGE.nii</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-31/KKI2009-31-MPRAGE.nii</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-32/KKI2009-32-MPRAGE.nii</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-33/KKI2009-33-MPRAGE.nii</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-34/KKI2009-34-MPRAGE.nii</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-35/KKI2009-35-MPRAGE.nii</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-36/KKI2009-36-MPRAGE.nii</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-37/KKI2009-37-MPRAGE.nii</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-38/KKI2009-38-MPRAGE.nii</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-39/KKI2009-39-MPRAGE.nii</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-40/KKI2009-40-MPRAGE.nii</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-41/KKI2009-41-MPRAGE.nii</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-42/KKI2009-42-MPRAGE.nii</value>
+                        </values>
                 </dataModule>
-                <dataModule id="Atlas_1" name="Atlas" package="m2g" posX="618" posY="267" sourceCode="" type="File" source="true" loopIndex="false">
+                <dataModule id="Atlas_1" name="Atlas" package="m2g" posX="618" posY="267" sourceCode="" type="File" source="true" loopIndex="false" serverAddress="localhost">
+                        <tag />
                         <metadata>
                                 <data key="__creationDateKey" value="Thu Feb 26 15:59:19 EST 2015" />
                         </metadata>
@@ -98,8 +233,12 @@
                                 <filetype name="nifti" extension="nii" description="" />
                                 <filetype name="niftii2" extension="nii.gz" description="" />
                         </fileTypes>
+                        <values>
+                                <value>pipeline://localhost//home/greg/atlas/icbm_avg_152_t1_tal_nlin_symmetric_VI.nii</value>
+                        </values>
                 </dataModule>
-                <dataModule id="Graphs_1" name="Graphs" package="m2g" posX="442" posY="595" sourceCode="" type="File" source="false" loopIndex="false" dirDump="false">
+                <dataModule id="Graphs_1" name="Graphs" package="m2g" posX="442" posY="595" sourceCode="" type="File" source="false" loopIndex="false" serverAddress="localhost" dirDump="false">
+                        <tag />
                         <metadata>
                                 <data key="__creationDateKey" value="Thu Feb 26 16:00:53 EST 2015" />
                         </metadata>
@@ -113,8 +252,53 @@
                         <fileTypes>
                                 <filetype name="MAT File" extension="mat" description="Matrix describing transformation of image into standard space (found by first_flirt)." />
                         </fileTypes>
+                        <values>
+                                <value>pipeline://localhost//home/greg/data/outputs/KKI2009/KKI-01_graphs.mat</value>
+                                <value>pipeline://localhost//home/greg/data/outputs/KKI2009/KKI-02_graphs.mat</value>
+                                <value>pipeline://localhost//home/greg/data/outputs/KKI2009/KKI-03_graphs.mat</value>
+                                <value>pipeline://localhost//home/greg/data/outputs/KKI2009/KKI-04_graphs.mat</value>
+                                <value>pipeline://localhost//home/greg/data/outputs/KKI2009/KKI-05_graphs.mat</value>
+                                <value>pipeline://localhost//home/greg/data/outputs/KKI2009/KKI-06_graphs.mat</value>
+                                <value>pipeline://localhost//home/greg/data/outputs/KKI2009/KKI-07_graphs.mat</value>
+                                <value>pipeline://localhost//home/greg/data/outputs/KKI2009/KKI-08_graphs.mat</value>
+                                <value>pipeline://localhost//home/greg/data/outputs/KKI2009/KKI-09_graphs.mat</value>
+                                <value>pipeline://localhost//home/greg/data/outputs/KKI2009/KKI-10_graphs.mat</value>
+                                <value>pipeline://localhost//home/greg/data/outputs/KKI2009/KKI-11_graphs.mat</value>
+                                <value>pipeline://localhost//home/greg/data/outputs/KKI2009/KKI-12_graphs.mat</value>
+                                <value>pipeline://localhost//home/greg/data/outputs/KKI2009/KKI-13_graphs.mat</value>
+                                <value>pipeline://localhost//home/greg/data/outputs/KKI2009/KKI-14_graphs.mat</value>
+                                <value>pipeline://localhost//home/greg/data/outputs/KKI2009/KKI-15_graphs.mat</value>
+                                <value>pipeline://localhost//home/greg/data/outputs/KKI2009/KKI-16_graphs.mat</value>
+                                <value>pipeline://localhost//home/greg/data/outputs/KKI2009/KKI-17_graphs.mat</value>
+                                <value>pipeline://localhost//home/greg/data/outputs/KKI2009/KKI-18_graphs.mat</value>
+                                <value>pipeline://localhost//home/greg/data/outputs/KKI2009/KKI-19_graphs.mat</value>
+                                <value>pipeline://localhost//home/greg/data/outputs/KKI2009/KKI-20_graphs.mat</value>
+                                <value>pipeline://localhost//home/greg/data/outputs/KKI2009/KKI-21_graphs.mat</value>
+                                <value>pipeline://localhost//home/greg/data/outputs/KKI2009/KKI-22_graphs.mat</value>
+                                <value>pipeline://localhost//home/greg/data/outputs/KKI2009/KKI-23_graphs.mat</value>
+                                <value>pipeline://localhost//home/greg/data/outputs/KKI2009/KKI-24_graphs.mat</value>
+                                <value>pipeline://localhost//home/greg/data/outputs/KKI2009/KKI-25_graphs.mat</value>
+                                <value>pipeline://localhost//home/greg/data/outputs/KKI2009/KKI-26_graphs.mat</value>
+                                <value>pipeline://localhost//home/greg/data/outputs/KKI2009/KKI-27_graphs.mat</value>
+                                <value>pipeline://localhost//home/greg/data/outputs/KKI2009/KKI-28_graphs.mat</value>
+                                <value>pipeline://localhost//home/greg/data/outputs/KKI2009/KKI-29_graphs.mat</value>
+                                <value>pipeline://localhost//home/greg/data/outputs/KKI2009/KKI-30_graphs.mat</value>
+                                <value>pipeline://localhost//home/greg/data/outputs/KKI2009/KKI-31_graphs.mat</value>
+                                <value>pipeline://localhost//home/greg/data/outputs/KKI2009/KKI-32_graphs.mat</value>
+                                <value>pipeline://localhost//home/greg/data/outputs/KKI2009/KKI-33_graphs.mat</value>
+                                <value>pipeline://localhost//home/greg/data/outputs/KKI2009/KKI-34_graphs.mat</value>
+                                <value>pipeline://localhost//home/greg/data/outputs/KKI2009/KKI-35_graphs.mat</value>
+                                <value>pipeline://localhost//home/greg/data/outputs/KKI2009/KKI-36_graphs.mat</value>
+                                <value>pipeline://localhost//home/greg/data/outputs/KKI2009/KKI-37_graphs.mat</value>
+                                <value>pipeline://localhost//home/greg/data/outputs/KKI2009/KKI-38_graphs.mat</value>
+                                <value>pipeline://localhost//home/greg/data/outputs/KKI2009/KKI-39_graphs.mat</value>
+                                <value>pipeline://localhost//home/greg/data/outputs/KKI2009/KKI-40_graphs.mat</value>
+                                <value>pipeline://localhost//home/greg/data/outputs/KKI2009/KKI-41_graphs.mat</value>
+                                <value>pipeline://localhost//home/greg/data/outputs/KKI2009/KKI-42_graphs.mat</value>
+                        </values>
                 </dataModule>
-                <dataModule id="DTIGradients_1" name="DTI Gradients" package="m2g" posX="314" posY="61" rotation="1" sourceCode="" type="File" source="true" loopIndex="false">
+                <dataModule id="DTIGradients_1" name="DTI Gradients" package="m2g" posX="314" posY="61" rotation="1" sourceCode="" type="File" source="true" loopIndex="false" serverAddress="localhost">
+                        <tag />
                         <metadata>
                                 <data key="__creationDateKey" value="Thu Feb 26 16:01:30 EST 2015" />
                         </metadata>
@@ -128,50 +312,108 @@
                         <fileTypes>
                                 <filetype name="gradients" extension="grad" description="" />
                         </fileTypes>
+                        <values>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-01/KKI2009-01-DTI.grad</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-02/KKI2009-02-DTI.grad</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-03/KKI2009-03-DTI.grad</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-04/KKI2009-04-DTI.grad</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-05/KKI2009-05-DTI.grad</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-06/KKI2009-06-DTI.grad</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-07/KKI2009-07-DTI.grad</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-08/KKI2009-08-DTI.grad</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-09/KKI2009-09-DTI.grad</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-10/KKI2009-10-DTI.grad</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-11/KKI2009-11-DTI.grad</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-12/KKI2009-12-DTI.grad</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-13/KKI2009-13-DTI.grad</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-14/KKI2009-14-DTI.grad</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-15/KKI2009-15-DTI.grad</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-16/KKI2009-16-DTI.grad</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-17/KKI2009-17-DTI.grad</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-18/KKI2009-18-DTI.grad</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-19/KKI2009-19-DTI.grad</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-20/KKI2009-20-DTI.grad</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-21/KKI2009-21-DTI.grad</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-22/KKI2009-22-DTI.grad</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-23/KKI2009-23-DTI.grad</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-24/KKI2009-24-DTI.grad</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-25/KKI2009-25-DTI.grad</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-26/KKI2009-26-DTI.grad</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-27/KKI2009-27-DTI.grad</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-28/KKI2009-28-DTI.grad</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-29/KKI2009-29-DTI.grad</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-30/KKI2009-30-DTI.grad</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-31/KKI2009-31-DTI.grad</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-32/KKI2009-32-DTI.grad</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-33/KKI2009-33-DTI.grad</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-34/KKI2009-34-DTI.grad</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-35/KKI2009-35-DTI.grad</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-36/KKI2009-36-DTI.grad</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-37/KKI2009-37-DTI.grad</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-38/KKI2009-38-DTI.grad</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-39/KKI2009-39-DTI.grad</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-40/KKI2009-40-DTI.grad</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-41/KKI2009-41-DTI.grad</value>
+                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-42/KKI2009-42-DTI.grad</value>
+                        </values>
                 </dataModule>
-                <dataModule id="AtlasMask_1" name="Atlas Mask" package="m2g" posX="731" posY="309" sourceCode="" type="File" source="true" loopIndex="false">
+                <dataModule id="AtlasLabels_1" name="Atlas Labels" package="m2g" posX="731" posY="311" sourceCode="" type="File" source="true" loopIndex="false" serverAddress="localhost">
+                        <tag />
                         <metadata>
                                 <data key="__creationDateKey" value="Thu Feb 26 16:02:11 EST 2015" />
                         </metadata>
-                        <output id="AtlasMask_1.Output" name="Output" required="true" enabled="true" order="-1">
+                        <output id="AtlasLabels_1.Output" name="Output" required="true" enabled="true" order="-1">
                                 <format type="File" cardinality="1">
                                         <fileTypes>
-                                                <filetype name="niftii2" extension="nii.gz" description="" />
                                                 <filetype name="nifti" extension="nii" description="" />
+                                                <filetype name="niftii2" extension="nii.gz" description="" />
                                         </fileTypes>
                                 </format>
                         </output>
                         <fileTypes>
-                                <filetype name="niftii2" extension="nii.gz" description="" />
                                 <filetype name="nifti" extension="nii" description="" />
+                                <filetype name="niftii2" extension="nii.gz" description="" />
                         </fileTypes>
+                        <values>
+                                <value>pipeline://localhost//home/greg/atlas/MNI152_T1_1mm_brain_labels_cropped.nii</value>
+                        </values>
                 </dataModule>
-                <moduleGroup id="m2g_2" name="m2g" package="m2g" posX="440" posY="455" sourceCode="">
-                        <tag />
-                        <metadata>
-                                <data key="__creationDateKey" value="Fri Feb 27 22:58:32 EST 2015" />
-                        </metadata>
-                        <input link="2.B0Registration_1.DTIImage" id="m2g_2.DTIImage" name="DTI Image" order="0" />
-                        <input link="2.B0Registration_1.B-valuesfile" id="m2g_2.B-valuesfile" name="B-values file" order="1" />
-                        <input link="7.TensorEstimation_1.DTIGradients" id="m2g_2.DTIGradients" name="DTI Gradients" order="2" />
-                        <input link="7.TensorEstimation_1.BrainMask" id="m2g_2.BrainMask" name="Brain Mask" order="3" />
-                        <input link="3.AffineRegistration_1.FixedImage" id="m2g_2.FixedImage" name="Fixed Image" order="4" />
-                        <input description="Image that the transform was computed wrt." link="6.ApplyRegistrationtoDTI_1.ReferenceImage" id="m2g_2.ReferenceImage" name="Reference Image" order="5" />
-                        <output link="11.graphmltomat_1.matgraphfile" id="m2g_2.matgraphfile" name="mat graph file" order="6" />
-                        <input link="10.SmallGraphGeneration_1.atlas" id="m2g_2.atlas" name="atlas" order="7" />
-                        <input link="1.BrainExtraction_1.Inputimage" id="m2g_2.Inputimage" name="Input image" order="8" />
-                        <input link="8.FiberTractography_1.BrainMask" id="m2g_2.BrainMask_2" name="Brain Mask" order="9" />
-                        <input description="Image that the transform was computed wrt." link="5.ApplyRegistrationtoMask_1.ReferenceImage" id="m2g_2.ReferenceImage_2" name="Reference Image" order="10" />
-                        <output link="2.B0Registration_1.B0volume" id="m2g_2.B0volume" name="B0 volume" order="11" />
-                        <output link="6.ApplyRegistrationtoDTI_1.WarpedImage" id="m2g_2.WarpedImage" name="Warped Image" order="12" />
-                        <output link="7.TensorEstimation_1.DTItensors" id="m2g_2.DTItensors" name="DTI tensors" order="13" />
-                        <output link="9.FiberConverter_1.fiberoutfile" id="m2g_2.fiberoutfile" name="fiber outfile" order="14" />
-                        <module id="2.B0Registration_1" name="2. B0 Registration" package="m2g" posX="32" posY="176" rotation="1" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/src/b0_registration.py">
+                <moduleGroup id="NewModuleGroup_1" name="New Module Group" posX="384" posY="484" sourceCode="">
+                        <input description="Image that the transform was computed wrt." link="6.ApplyRegistrationtoDTI_1.ReferenceImage" id="NewModuleGroup_1.ReferenceImage" name="Reference Image" order="0" />
+                        <input link="10.SmallGraphGeneration_1.atlas" id="NewModuleGroup_1.atlas" name="atlas" order="1" />
+                        <input link="1.BrainExtraction_1.Inputimage" id="NewModuleGroup_1.Inputimage" name="Input image" order="2" />
+                        <input description="Image that the transform was computed wrt." link="5.ApplyRegistrationtoMask_1.ReferenceImage" id="NewModuleGroup_1.ReferenceImage_2" name="Reference Image" order="3" />
+                        <output link="11.graphmltomat_1.matgraphfile" id="NewModuleGroup_1.matgraphfile" name="mat graph file" order="4" />
+                        <input link="3.AffineRegistration_1.FixedImage" id="NewModuleGroup_1.FixedImage" name="Fixed Image" order="5" />
+                        <input link="7.TensorEstimation_1.DTIGradients" id="NewModuleGroup_1.DTIGradients" name="DTI Gradients" order="6" />
+                        <input link="2.B0Registration_1.DTIImage" id="NewModuleGroup_1.DTIImage" name="DTI Image" order="7" />
+                        <input link="2.B0Registration_1.B-valuesfile" id="NewModuleGroup_1.B-valuesfile" name="B-values file" order="8" />
+                        <module id="9.FiberConverter_1" name="9. Fiber Converter" package="m2g" posX="982" posY="859" rotation="1" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/src/fiber_convert.py">
                                 <tag />
                                 <metadata>
-                                        <data key="__creationDateKey" value="Thu Feb 26 11:43:03 EST 2015" />
+                                        <data key="__creationDateKey" value="Sun Jan 11 21:38:32 EST 2015" />
                                 </metadata>
-                                <input id="2.B0Registration_1.DTIImage" name="DTI Image" required="false" enabled="true" order="0">
+                                <input id="9.FiberConverter_1.fiberinfile" name="fiber infile" required="false" enabled="true" order="0">
+                                        <format type="File" cardinality="1">
+                                                <fileTypes>
+                                                        <filetype name="Camino Bfloat" extension="Bfloat" description="" />
+                                                </fileTypes>
+                                        </format>
+                                </input>
+                                <output id="9.FiberConverter_1.fiberoutfile" name="fiber outfile" required="false" enabled="true" order="1">
+                                        <format type="File" cardinality="1">
+                                                <fileTypes>
+                                                        <filetype name="Matlab data" extension="dat" description="" />
+                                                </fileTypes>
+                                        </format>
+                                </output>
+                        </module>
+                        <module id="6.ApplyRegistrationtoDTI_1" name="6. Apply Registration to DTI" package="m2g" posX="680" posY="610" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/src/apply_registration.py">
+                                <tag />
+                                <metadata>
+                                        <data key="__creationDateKey" value="Thu Feb 26 13:46:28 EST 2015" />
+                                </metadata>
+                                <input id="6.ApplyRegistrationtoDTI_1.OriginalImage" name="Original Image" required="false" enabled="true" order="0">
                                         <format type="File" cardinality="1">
                                                 <fileTypes>
                                                         <filetype name="niftii2" extension="nii.gz" description="" />
@@ -179,22 +421,129 @@
                                                 </fileTypes>
                                         </format>
                                 </input>
-                                <input id="2.B0Registration_1.B-valuesfile" name="B-values file" required="false" enabled="true" order="1">
+                                <output id="6.ApplyRegistrationtoDTI_1.WarpedImage" name="Warped Image" required="false" enabled="true" order="1">
                                         <format type="File" cardinality="1">
-                                                <fileTypes>
-                                                        <filetype name="B values" extension="b" description="" />
-                                                </fileTypes>
-                                        </format>
-                                </input>
-                                <output id="2.B0Registration_1.AlignedDTI" name="Aligned DTI" required="false" enabled="true" order="2">
-                                        <format type="File" cardinality="-2" cardinalityBase="DTI Image">
                                                 <fileTypes>
                                                         <filetype name="niftii2" extension="nii.gz" description="" />
                                                         <filetype name="nifti" extension="nii" description="" />
                                                 </fileTypes>
                                         </format>
                                 </output>
-                                <output id="2.B0Registration_1.B0volume" name="B0 volume" required="false" enabled="true" order="3">
+                                <input id="6.ApplyRegistrationtoDTI_1.ReferenceImage" name="Reference Image" description="Image that the transform was computed wrt." required="false" enabled="true" order="2">
+                                        <format type="File" cardinality="1">
+                                                <fileTypes>
+                                                        <filetype name="niftii2" extension="nii.gz" description="" />
+                                                        <filetype name="nifti" extension="nii" description="" />
+                                                </fileTypes>
+                                        </format>
+                                </input>
+                                <input id="6.ApplyRegistrationtoDTI_1.Transformmatrix" name="Transform matrix" required="false" enabled="true" order="3">
+                                        <format type="File" cardinality="1">
+                                                <fileTypes>
+                                                        <filetype name="Matlab file" extension="mat" description="" />
+                                                </fileTypes>
+                                        </format>
+                                </input>
+                        </module>
+                        <module id="6.ApplyRegistrationtoDTI_2" name="6. Apply Registration to DTI" package="m2g" posX="116" posY="476" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/src/apply_registration.py">
+                                <tag />
+                                <metadata>
+                                        <data key="__creationDateKey" value="Thu Feb 26 13:46:28 EST 2015" />
+                                </metadata>
+                                <input id="6.ApplyRegistrationtoDTI_2.OriginalImage" name="Original Image" required="false" enabled="true" order="0">
+                                        <format type="File" cardinality="1">
+                                                <fileTypes>
+                                                        <filetype name="niftii2" extension="nii.gz" description="" />
+                                                        <filetype name="nifti" extension="nii" description="" />
+                                                </fileTypes>
+                                        </format>
+                                </input>
+                                <output id="6.ApplyRegistrationtoDTI_2.WarpedImage" name="Warped Image" required="false" enabled="true" order="1">
+                                        <format type="File" cardinality="1">
+                                                <fileTypes>
+                                                        <filetype name="niftii2" extension="nii.gz" description="" />
+                                                        <filetype name="nifti" extension="nii" description="" />
+                                                </fileTypes>
+                                        </format>
+                                </output>
+                                <input id="6.ApplyRegistrationtoDTI_2.ReferenceImage" name="Reference Image" description="Image that the transform was computed wrt." required="false" enabled="true" order="2">
+                                        <format type="File" cardinality="1">
+                                                <fileTypes>
+                                                        <filetype name="niftii2" extension="nii.gz" description="" />
+                                                        <filetype name="nifti" extension="nii" description="" />
+                                                </fileTypes>
+                                        </format>
+                                </input>
+                                <input id="6.ApplyRegistrationtoDTI_2.Transformmatrix" name="Transform matrix" required="false" enabled="true" order="3">
+                                        <format type="File" cardinality="1">
+                                                <fileTypes>
+                                                        <filetype name="Matlab file" extension="mat" description="" />
+                                                </fileTypes>
+                                        </format>
+                                </input>
+                        </module>
+                        <module id="10.SmallGraphGeneration_1" name="10. Small Graph Generation" package="m2g" posX="1175" posY="874" rotation="1" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/MR-OCP/mrcap/gengraph.py">
+                                <tag />
+                                <metadata>
+                                        <data key="__creationDateKey" value="Sun Jan 11 17:53:43 EST 2015" />
+                                </metadata>
+                                <input id="10.SmallGraphGeneration_1.fiberfile" name="fiber file" required="true" enabled="true" order="0">
+                                        <format type="File" cardinality="1">
+                                                <fileTypes>
+                                                        <filetype name="Matlab data" extension="dat" description="" />
+                                                </fileTypes>
+                                        </format>
+                                </input>
+                                <input id="10.SmallGraphGeneration_1.atlas" name="atlas" required="true" enabled="true" order="1">
+                                        <format type="File" cardinality="1">
+                                                <fileTypes>
+                                                        <filetype name="niftii2" extension="nii.gz" description="" />
+                                                        <filetype name="nifti" extension="nii" description="" />
+                                                </fileTypes>
+                                        </format>
+                                </input>
+                                <output id="10.SmallGraphGeneration_1.graphfile" name="graph file" required="true" enabled="true" order="2">
+                                        <format type="File" cardinality="1">
+                                                <fileTypes>
+                                                        <filetype name="Graph1" extension="graphml" description="" />
+                                                </fileTypes>
+                                        </format>
+                                </output>
+                        </module>
+                        <module id="1.BrainExtraction_1" name="1. Brain Extraction" package="m2g" posX="0" posY="36" rotation="1" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/src/skullextract.py">
+                                <tag />
+                                <metadata>
+                                        <data key="__creationDateKey" value="Thu Feb 26 11:28:32 EST 2015" />
+                                </metadata>
+                                <input id="1.BrainExtraction_1.Inputimage" name="Input image" required="false" enabled="true" order="0">
+                                        <format type="File" cardinality="1">
+                                                <fileTypes>
+                                                        <filetype name="niftii2" extension="nii.gz" description="" />
+                                                        <filetype name="nifti" extension="nii" description="" />
+                                                </fileTypes>
+                                        </format>
+                                </input>
+                                <input id="1.BrainExtraction_1.FractionalIntensityThreshold" name="Fractional Intensity Threshold" description="default=0.25 (verified on KKI dataset)" required="false" enabled="true" order="1" prefix="-f" prefixSpaced="true" prefixAllArgs="false">
+                                        <format type="Number" cardinality="1" />
+                                        <values>
+                                                <value>0.25</value>
+                                        </values>
+                                </input>
+                                <input id="1.BrainExtraction_1.Verticalgradient" name="Vertical gradient" description="0" required="false" enabled="true" order="2" prefix="-g" prefixSpaced="true" prefixAllArgs="false">
+                                        <format type="Number" cardinality="1" />
+                                        <values>
+                                                <value>0</value>
+                                        </values>
+                                </input>
+                                <output id="1.BrainExtraction_1.Outputbrainimage" name="Output brain image" required="false" enabled="true" order="3">
+                                        <format type="File" cardinality="-2" cardinalityBase="Input image">
+                                                <fileTypes>
+                                                        <filetype name="niftii2" extension="nii.gz" description="" />
+                                                        <filetype name="nifti" extension="nii" description="" />
+                                                </fileTypes>
+                                        </format>
+                                </output>
+                                <output id="1.BrainExtraction_1.Outputbrainmask" name="Output brain mask" required="false" enabled="true" order="4">
                                         <format type="File" cardinality="1">
                                                 <fileTypes>
                                                         <filetype name="niftii2" extension="nii.gz" description="" />
@@ -203,7 +552,197 @@
                                         </format>
                                 </output>
                         </module>
-                        <module id="7.TensorEstimation_1" name="7. Tensor Estimation" package="m2g" posX="627" posY="745" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/src/dti2tens.py">
+                        <module id="5.ApplyRegistrationtoMask_1" name="5. Apply Registration to Mask" package="m2g" posX="514" posY="433" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/src/apply_registration.py">
+                                <tag />
+                                <metadata>
+                                        <data key="__creationDateKey" value="Thu Feb 26 13:46:28 EST 2015" />
+                                </metadata>
+                                <input id="5.ApplyRegistrationtoMask_1.OriginalImage" name="Original Image" required="false" enabled="true" order="0">
+                                        <format type="File" cardinality="1">
+                                                <fileTypes>
+                                                        <filetype name="niftii2" extension="nii.gz" description="" />
+                                                        <filetype name="nifti" extension="nii" description="" />
+                                                </fileTypes>
+                                        </format>
+                                </input>
+                                <output id="5.ApplyRegistrationtoMask_1.WarpedImage" name="Warped Image" required="false" enabled="true" order="1">
+                                        <format type="File" cardinality="1">
+                                                <fileTypes>
+                                                        <filetype name="niftii2" extension="nii.gz" description="" />
+                                                        <filetype name="nifti" extension="nii" description="" />
+                                                </fileTypes>
+                                        </format>
+                                </output>
+                                <input id="5.ApplyRegistrationtoMask_1.ReferenceImage" name="Reference Image" description="Image that the transform was computed wrt." required="false" enabled="true" order="2">
+                                        <format type="File" cardinality="1">
+                                                <fileTypes>
+                                                        <filetype name="niftii2" extension="nii.gz" description="" />
+                                                        <filetype name="nifti" extension="nii" description="" />
+                                                </fileTypes>
+                                        </format>
+                                </input>
+                                <input id="5.ApplyRegistrationtoMask_1.Transformmatrix" name="Transform matrix" required="false" enabled="true" order="3">
+                                        <format type="File" cardinality="1">
+                                                <fileTypes>
+                                                        <filetype name="Matlab file" extension="mat" description="" />
+                                                </fileTypes>
+                                        </format>
+                                </input>
+                        </module>
+                        <module id="8.FiberTractography_1" name="8. Fiber Tractography" package="m2g" posX="746" posY="875" rotation="1" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/src/tens2fibs.py">
+                                <tag />
+                                <metadata>
+                                        <data key="__creationDateKey" value="Fri Jan 09 13:07:20 EST 2015" />
+                                </metadata>
+                                <input id="8.FiberTractography_1.DTITensors" name="DTI Tensors" required="true" enabled="true" order="0">
+                                        <format type="File" cardinality="1">
+                                                <fileTypes>
+                                                        <filetype name="Camino Bdouble" extension="Bdouble" description="" />
+                                                </fileTypes>
+                                        </format>
+                                </input>
+                                <input id="8.FiberTractography_1.BrainMask" name="Brain Mask" required="true" enabled="true" order="1">
+                                        <format type="File" cardinality="1">
+                                                <fileTypes>
+                                                        <filetype name="niftii2" extension="nii.gz" description="" />
+                                                        <filetype name="nifti" extension="nii" description="" />
+                                                </fileTypes>
+                                        </format>
+                                </input>
+                                <input id="8.FiberTractography_1.Anisotropicvoxelthreshold" name="Anisotropic voxel threshold" required="false" enabled="true" order="2">
+                                        <format type="Number" cardinality="1" />
+                                        <values>
+                                                <value>0.2</value>
+                                        </values>
+                                </input>
+                                <input id="8.FiberTractography_1.Curvaturethreshold" name="Curvature threshold" required="false" enabled="true" order="3">
+                                        <format type="Number" cardinality="1" />
+                                        <values>
+                                                <value>60</value>
+                                        </values>
+                                </input>
+                                <output id="8.FiberTractography_1.DTIfibers" name="DTI fibers" required="true" enabled="true" order="4">
+                                        <format type="File" cardinality="1">
+                                                <fileTypes>
+                                                        <filetype name="Camino Bfloat" extension="Bfloat" description="" />
+                                                </fileTypes>
+                                        </format>
+                                </output>
+                                <output id="8.FiberTractography_1.VTKfibers" name="VTK fibers" required="false" enabled="true" order="5">
+                                        <format type="File" cardinality="1">
+                                                <fileTypes>
+                                                        <filetype name="Visualizable fibers" extension="vtk" description="" />
+                                                </fileTypes>
+                                        </format>
+                                </output>
+                        </module>
+                        <module id="11.graphmltomat_1" name="11. graphml to mat" package="m2g" description="This is designed for small graphs based on the desikan atlas (i.e. 70 regions labeled 1-35, 101-135)" posX="1287" posY="1009" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/tools/utils/graphml2mat.py">
+                                <tag />
+                                <metadata>
+                                        <data key="__creationDateKey" value="Tue Feb 10 10:04:52 EST 2015" />
+                                </metadata>
+                                <input id="11.graphmltomat_1.graphmlfile" name="graphml file" required="false" enabled="true" order="0">
+                                        <format type="File" cardinality="1">
+                                                <fileTypes>
+                                                        <filetype name="Graph1" extension="graphml" description="" />
+                                                </fileTypes>
+                                        </format>
+                                </input>
+                                <output id="11.graphmltomat_1.matgraphfile" name="mat graph file" required="false" enabled="true" order="1">
+                                        <format type="File" cardinality="1">
+                                                <fileTypes>
+                                                        <filetype name="Matlab file" extension="mat" description="" />
+                                                </fileTypes>
+                                        </format>
+                                </output>
+                        </module>
+                        <module id="4.RigidRegistration_1" name="4. Rigid Registration" package="m2g" posX="232" posY="203" rotation="1" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/src/register_rigid.py">
+                                <tag />
+                                <metadata>
+                                        <data key="__creationDateKey" value="Thu Feb 26 09:45:13 EST 2015" />
+                                </metadata>
+                                <input id="4.RigidRegistration_1.FixedImage" name="Fixed Image" required="false" enabled="true" order="0">
+                                        <format type="File" cardinality="1">
+                                                <fileTypes>
+                                                        <filetype name="nifti" extension="nii" description="" />
+                                                        <filetype name="niftii2" extension="nii.gz" description="" />
+                                                </fileTypes>
+                                        </format>
+                                </input>
+                                <input id="4.RigidRegistration_1.MovingImage" name="Moving Image" required="false" enabled="true" order="1">
+                                        <format type="File" cardinality="1">
+                                                <fileTypes>
+                                                        <filetype name="niftii2" extension="nii.gz" description="" />
+                                                        <filetype name="nifti" extension="nii" description="" />
+                                                </fileTypes>
+                                        </format>
+                                </input>
+                                <input id="4.RigidRegistration_1.tolerance" name="tolerance" required="false" enabled="true" order="2">
+                                        <format type="Number" cardinality="1" />
+                                        <values>
+                                                <value>1e-4</value>
+                                        </values>
+                                </input>
+                                <output id="4.RigidRegistration_1.OutputImage" name="Output Image" required="false" enabled="true" order="3">
+                                        <format type="File" cardinality="1">
+                                                <fileTypes>
+                                                        <filetype name="niftii2" extension="nii.gz" description="" />
+                                                        <filetype name="nifti" extension="nii" description="" />
+                                                </fileTypes>
+                                        </format>
+                                </output>
+                                <output id="4.RigidRegistration_1.transformation" name="transformation" required="false" enabled="true" order="4">
+                                        <format type="File" cardinality="1">
+                                                <fileTypes>
+                                                        <filetype name="Matlab file" extension="mat" description="" />
+                                                </fileTypes>
+                                        </format>
+                                </output>
+                        </module>
+                        <module id="3.AffineRegistration_1" name="3. Affine Registration" package="m2g" posX="426" posY="20" rotation="1" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/src/register_affine.py">
+                                <tag />
+                                <metadata>
+                                        <data key="__creationDateKey" value="Thu Feb 26 09:45:13 EST 2015" />
+                                </metadata>
+                                <input id="3.AffineRegistration_1.FixedImage" name="Fixed Image" required="false" enabled="true" order="0">
+                                        <format type="File" cardinality="1">
+                                                <fileTypes>
+                                                        <filetype name="nifti" extension="nii" description="" />
+                                                        <filetype name="niftii2" extension="nii.gz" description="" />
+                                                </fileTypes>
+                                        </format>
+                                </input>
+                                <input id="3.AffineRegistration_1.MovingImage" name="Moving Image" required="false" enabled="true" order="1">
+                                        <format type="File" cardinality="1">
+                                                <fileTypes>
+                                                        <filetype name="niftii2" extension="nii.gz" description="" />
+                                                        <filetype name="nifti" extension="nii" description="" />
+                                                </fileTypes>
+                                        </format>
+                                </input>
+                                <input id="3.AffineRegistration_1.tolerance" name="tolerance" required="false" enabled="true" order="2">
+                                        <format type="Number" cardinality="1" />
+                                        <values>
+                                                <value>1e-4</value>
+                                        </values>
+                                </input>
+                                <output id="3.AffineRegistration_1.OutputImage" name="Output Image" required="false" enabled="true" order="3">
+                                        <format type="File" cardinality="1">
+                                                <fileTypes>
+                                                        <filetype name="niftii2" extension="nii.gz" description="" />
+                                                        <filetype name="nifti" extension="nii" description="" />
+                                                </fileTypes>
+                                        </format>
+                                </output>
+                                <output id="3.AffineRegistration_1.transformation" name="transformation" required="false" enabled="true" order="4">
+                                        <format type="File" cardinality="1">
+                                                <fileTypes>
+                                                        <filetype name="Matlab file" extension="mat" description="" />
+                                                </fileTypes>
+                                        </format>
+                                </output>
+                        </module>
+                        <module id="7.TensorEstimation_1" name="7. Tensor Estimation" package="m2g" posX="595" posY="756" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/src/dti2tens.py">
                                 <tag />
                                 <metadata>
                                         <data key="__creationDateKey" value="Fri Jan 09 11:38:39 EST 2015" />
@@ -281,20 +820,12 @@
                                         </format>
                                 </output>
                         </module>
-                        <module id="3.AffineRegistration_1" name="3. Affine Registration" package="m2g" posX="458" posY="9" rotation="1" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/src/register_affine.py">
+                        <module id="2.B0Registration_1" name="2. B0 Registration" package="m2g" posX="0" posY="187" rotation="1" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/src/b0_registration.py">
                                 <tag />
                                 <metadata>
-                                        <data key="__creationDateKey" value="Thu Feb 26 09:45:13 EST 2015" />
+                                        <data key="__creationDateKey" value="Thu Feb 26 11:43:03 EST 2015" />
                                 </metadata>
-                                <input id="3.AffineRegistration_1.FixedImage" name="Fixed Image" required="false" enabled="true" order="0">
-                                        <format type="File" cardinality="1">
-                                                <fileTypes>
-                                                        <filetype name="nifti" extension="nii" description="" />
-                                                        <filetype name="niftii2" extension="nii.gz" description="" />
-                                                </fileTypes>
-                                        </format>
-                                </input>
-                                <input id="3.AffineRegistration_1.MovingImage" name="Moving Image" required="false" enabled="true" order="1">
+                                <input id="2.B0Registration_1.DTIImage" name="DTI Image" required="false" enabled="true" order="0">
                                         <format type="File" cardinality="1">
                                                 <fileTypes>
                                                         <filetype name="niftii2" extension="nii.gz" description="" />
@@ -302,335 +833,26 @@
                                                 </fileTypes>
                                         </format>
                                 </input>
-                                <input id="3.AffineRegistration_1.tolerance" name="tolerance" required="false" enabled="true" order="2">
-                                        <format type="Number" cardinality="1" />
-                                        <values>
-                                                <value>1e-4</value>
-                                        </values>
-                                </input>
-                                <output id="3.AffineRegistration_1.OutputImage" name="Output Image" required="false" enabled="true" order="3">
+                                <input id="2.B0Registration_1.B-valuesfile" name="B-values file" required="false" enabled="true" order="1">
                                         <format type="File" cardinality="1">
+                                                <fileTypes>
+                                                        <filetype name="B values" extension="b" description="" />
+                                                </fileTypes>
+                                        </format>
+                                </input>
+                                <output id="2.B0Registration_1.AlignedDTI" name="Aligned DTI" required="false" enabled="true" order="2">
+                                        <format type="File" cardinality="-2" cardinalityBase="DTI Image">
                                                 <fileTypes>
                                                         <filetype name="niftii2" extension="nii.gz" description="" />
                                                         <filetype name="nifti" extension="nii" description="" />
                                                 </fileTypes>
                                         </format>
                                 </output>
-                                <output id="3.AffineRegistration_1.transformation" name="transformation" required="false" enabled="true" order="4">
-                                        <format type="File" cardinality="1">
-                                                <fileTypes>
-                                                        <filetype name="Matlab file" extension="mat" description="" />
-                                                </fileTypes>
-                                        </format>
-                                </output>
-                        </module>
-                        <module id="6.ApplyRegistrationtoDTI_1" name="6. Apply Registration to DTI" package="m2g" posX="712" posY="599" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/src/apply_registration.py">
-                                <tag />
-                                <metadata>
-                                        <data key="__creationDateKey" value="Thu Feb 26 13:46:28 EST 2015" />
-                                </metadata>
-                                <input id="6.ApplyRegistrationtoDTI_1.OriginalImage" name="Original Image" required="false" enabled="true" order="0">
+                                <output id="2.B0Registration_1.B0volume" name="B0 volume" required="false" enabled="true" order="3">
                                         <format type="File" cardinality="1">
                                                 <fileTypes>
                                                         <filetype name="niftii2" extension="nii.gz" description="" />
                                                         <filetype name="nifti" extension="nii" description="" />
-                                                </fileTypes>
-                                        </format>
-                                </input>
-                                <output id="6.ApplyRegistrationtoDTI_1.WarpedImage" name="Warped Image" required="false" enabled="true" order="1">
-                                        <format type="File" cardinality="1">
-                                                <fileTypes>
-                                                        <filetype name="niftii2" extension="nii.gz" description="" />
-                                                        <filetype name="nifti" extension="nii" description="" />
-                                                </fileTypes>
-                                        </format>
-                                </output>
-                                <input id="6.ApplyRegistrationtoDTI_1.ReferenceImage" name="Reference Image" description="Image that the transform was computed wrt." required="false" enabled="true" order="2">
-                                        <format type="File" cardinality="1">
-                                                <fileTypes>
-                                                        <filetype name="niftii2" extension="nii.gz" description="" />
-                                                        <filetype name="nifti" extension="nii" description="" />
-                                                </fileTypes>
-                                        </format>
-                                </input>
-                                <input id="6.ApplyRegistrationtoDTI_1.Transformmatrix" name="Transform matrix" required="false" enabled="true" order="3">
-                                        <format type="File" cardinality="1">
-                                                <fileTypes>
-                                                        <filetype name="Matlab file" extension="mat" description="" />
-                                                </fileTypes>
-                                        </format>
-                                </input>
-                        </module>
-                        <module id="6.ApplyRegistrationtoDTI_2" name="6. Apply Registration to DTI" package="m2g" posX="148" posY="465" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/src/apply_registration.py">
-                                <tag />
-                                <metadata>
-                                        <data key="__creationDateKey" value="Thu Feb 26 13:46:28 EST 2015" />
-                                </metadata>
-                                <input id="6.ApplyRegistrationtoDTI_2.OriginalImage" name="Original Image" required="false" enabled="true" order="0">
-                                        <format type="File" cardinality="1">
-                                                <fileTypes>
-                                                        <filetype name="niftii2" extension="nii.gz" description="" />
-                                                        <filetype name="nifti" extension="nii" description="" />
-                                                </fileTypes>
-                                        </format>
-                                </input>
-                                <output id="6.ApplyRegistrationtoDTI_2.WarpedImage" name="Warped Image" required="false" enabled="true" order="1">
-                                        <format type="File" cardinality="1">
-                                                <fileTypes>
-                                                        <filetype name="niftii2" extension="nii.gz" description="" />
-                                                        <filetype name="nifti" extension="nii" description="" />
-                                                </fileTypes>
-                                        </format>
-                                </output>
-                                <input id="6.ApplyRegistrationtoDTI_2.ReferenceImage" name="Reference Image" description="Image that the transform was computed wrt." required="false" enabled="true" order="2">
-                                        <format type="File" cardinality="1">
-                                                <fileTypes>
-                                                        <filetype name="niftii2" extension="nii.gz" description="" />
-                                                        <filetype name="nifti" extension="nii" description="" />
-                                                </fileTypes>
-                                        </format>
-                                </input>
-                                <input id="6.ApplyRegistrationtoDTI_2.Transformmatrix" name="Transform matrix" required="false" enabled="true" order="3">
-                                        <format type="File" cardinality="1">
-                                                <fileTypes>
-                                                        <filetype name="Matlab file" extension="mat" description="" />
-                                                </fileTypes>
-                                        </format>
-                                </input>
-                        </module>
-                        <module id="11.graphmltomat_1" name="11. graphml to mat" package="m2g" description="This is designed for small graphs based on the desikan atlas (i.e. 70 regions labeled 1-35, 101-135)" posX="1319" posY="998" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/tools/utils/graphml2mat.py">
-                                <tag />
-                                <metadata>
-                                        <data key="__creationDateKey" value="Tue Feb 10 10:04:52 EST 2015" />
-                                </metadata>
-                                <input id="11.graphmltomat_1.graphmlfile" name="graphml file" required="false" enabled="true" order="0">
-                                        <format type="File" cardinality="1">
-                                                <fileTypes>
-                                                        <filetype name="Graph1" extension="graphml" description="" />
-                                                </fileTypes>
-                                        </format>
-                                </input>
-                                <output id="11.graphmltomat_1.matgraphfile" name="mat graph file" required="false" enabled="true" order="1">
-                                        <format type="File" cardinality="1">
-                                                <fileTypes>
-                                                        <filetype name="Matlab file" extension="mat" description="" />
-                                                </fileTypes>
-                                        </format>
-                                </output>
-                        </module>
-                        <module id="10.SmallGraphGeneration_1" name="10. Small Graph Generation" package="m2g" posX="1207" posY="863" rotation="1" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/MR-OCP/mrcap/gengraph.py">
-                                <tag />
-                                <metadata>
-                                        <data key="__creationDateKey" value="Sun Jan 11 17:53:43 EST 2015" />
-                                </metadata>
-                                <input id="10.SmallGraphGeneration_1.fiberfile" name="fiber file" required="true" enabled="true" order="0">
-                                        <format type="File" cardinality="1">
-                                                <fileTypes>
-                                                        <filetype name="Matlab data" extension="dat" description="" />
-                                                </fileTypes>
-                                        </format>
-                                </input>
-                                <input id="10.SmallGraphGeneration_1.atlas" name="atlas" required="true" enabled="true" order="1">
-                                        <format type="File" cardinality="1">
-                                                <fileTypes>
-                                                        <filetype name="niftii2" extension="nii.gz" description="" />
-                                                        <filetype name="nifti" extension="nii" description="" />
-                                                </fileTypes>
-                                        </format>
-                                </input>
-                                <output id="10.SmallGraphGeneration_1.graphfile" name="graph file" required="true" enabled="true" order="2">
-                                        <format type="File" cardinality="1">
-                                                <fileTypes>
-                                                        <filetype name="Graph1" extension="graphml" description="" />
-                                                </fileTypes>
-                                        </format>
-                                </output>
-                        </module>
-                        <module id="9.FiberConverter_1" name="9. Fiber Converter" package="m2g" posX="1014" posY="848" rotation="1" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/src/fiber_convert.py">
-                                <tag />
-                                <metadata>
-                                        <data key="__creationDateKey" value="Sun Jan 11 21:38:32 EST 2015" />
-                                </metadata>
-                                <input id="9.FiberConverter_1.fiberinfile" name="fiber infile" required="false" enabled="true" order="0">
-                                        <format type="File" cardinality="1">
-                                                <fileTypes>
-                                                        <filetype name="Camino Bfloat" extension="Bfloat" description="" />
-                                                </fileTypes>
-                                        </format>
-                                </input>
-                                <output id="9.FiberConverter_1.fiberoutfile" name="fiber outfile" required="false" enabled="true" order="1">
-                                        <format type="File" cardinality="1">
-                                                <fileTypes>
-                                                        <filetype name="Matlab data" extension="dat" description="" />
-                                                </fileTypes>
-                                        </format>
-                                </output>
-                        </module>
-                        <module id="1.BrainExtraction_1" name="1. Brain Extraction" package="m2g" posX="32" posY="25" rotation="1" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/src/skullextract.py">
-                                <tag />
-                                <metadata>
-                                        <data key="__creationDateKey" value="Thu Feb 26 11:28:32 EST 2015" />
-                                </metadata>
-                                <input id="1.BrainExtraction_1.Inputimage" name="Input image" required="false" enabled="true" order="0">
-                                        <format type="File" cardinality="1">
-                                                <fileTypes>
-                                                        <filetype name="niftii2" extension="nii.gz" description="" />
-                                                        <filetype name="nifti" extension="nii" description="" />
-                                                </fileTypes>
-                                        </format>
-                                </input>
-                                <input id="1.BrainExtraction_1.FractionalIntensityThreshold" name="Fractional Intensity Threshold" description="default=0.25 (verified on KKI dataset)" required="false" enabled="true" order="1" prefix="-f" prefixSpaced="true" prefixAllArgs="false">
-                                        <format type="Number" cardinality="1" />
-                                        <values>
-                                                <value>0.25</value>
-                                        </values>
-                                </input>
-                                <input id="1.BrainExtraction_1.Verticalgradient" name="Vertical gradient" description="0" required="false" enabled="true" order="2" prefix="-g" prefixSpaced="true" prefixAllArgs="false">
-                                        <format type="Number" cardinality="1" />
-                                        <values>
-                                                <value>0</value>
-                                        </values>
-                                </input>
-                                <output id="1.BrainExtraction_1.Outputbrainimage" name="Output brain image" required="false" enabled="true" order="3">
-                                        <format type="File" cardinality="-2" cardinalityBase="Input image">
-                                                <fileTypes>
-                                                        <filetype name="niftii2" extension="nii.gz" description="" />
-                                                        <filetype name="nifti" extension="nii" description="" />
-                                                </fileTypes>
-                                        </format>
-                                </output>
-                                <output id="1.BrainExtraction_1.Outputbrainmask" name="Output brain mask" required="false" enabled="true" order="4">
-                                        <format type="File" cardinality="1">
-                                                <fileTypes>
-                                                        <filetype name="niftii2" extension="nii.gz" description="" />
-                                                        <filetype name="nifti" extension="nii" description="" />
-                                                </fileTypes>
-                                        </format>
-                                </output>
-                        </module>
-                        <module id="8.FiberTractography_1" name="8. Fiber Tractography" package="m2g" posX="778" posY="864" rotation="1" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/src/tens2fibs.py">
-                                <tag />
-                                <metadata>
-                                        <data key="__creationDateKey" value="Fri Jan 09 13:07:20 EST 2015" />
-                                </metadata>
-                                <input id="8.FiberTractography_1.DTITensors" name="DTI Tensors" required="true" enabled="true" order="0">
-                                        <format type="File" cardinality="1">
-                                                <fileTypes>
-                                                        <filetype name="Camino Bdouble" extension="Bdouble" description="" />
-                                                </fileTypes>
-                                        </format>
-                                </input>
-                                <input id="8.FiberTractography_1.BrainMask" name="Brain Mask" required="true" enabled="true" order="1">
-                                        <format type="File" cardinality="1">
-                                                <fileTypes>
-                                                        <filetype name="niftii2" extension="nii.gz" description="" />
-                                                        <filetype name="nifti" extension="nii" description="" />
-                                                </fileTypes>
-                                        </format>
-                                </input>
-                                <input id="8.FiberTractography_1.Anisotropicvoxelthreshold" name="Anisotropic voxel threshold" required="false" enabled="true" order="2">
-                                        <format type="Number" cardinality="1" />
-                                        <values>
-                                                <value>0.2</value>
-                                        </values>
-                                </input>
-                                <input id="8.FiberTractography_1.Curvaturethreshold" name="Curvature threshold" required="false" enabled="true" order="3">
-                                        <format type="Number" cardinality="1" />
-                                        <values>
-                                                <value>60</value>
-                                        </values>
-                                </input>
-                                <output id="8.FiberTractography_1.DTIfibers" name="DTI fibers" required="true" enabled="true" order="4">
-                                        <format type="File" cardinality="1">
-                                                <fileTypes>
-                                                        <filetype name="Camino Bfloat" extension="Bfloat" description="" />
-                                                </fileTypes>
-                                        </format>
-                                </output>
-                                <output id="8.FiberTractography_1.VTKfibers" name="VTK fibers" required="false" enabled="true" order="5">
-                                        <format type="File" cardinality="1">
-                                                <fileTypes>
-                                                        <filetype name="Visualizable fibers" extension="vtk" description="" />
-                                                </fileTypes>
-                                        </format>
-                                </output>
-                        </module>
-                        <module id="5.ApplyRegistrationtoMask_1" name="5. Apply Registration to Mask" package="m2g" posX="546" posY="422" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/src/apply_registration.py">
-                                <tag />
-                                <metadata>
-                                        <data key="__creationDateKey" value="Thu Feb 26 13:46:28 EST 2015" />
-                                </metadata>
-                                <input id="5.ApplyRegistrationtoMask_1.OriginalImage" name="Original Image" required="false" enabled="true" order="0">
-                                        <format type="File" cardinality="1">
-                                                <fileTypes>
-                                                        <filetype name="niftii2" extension="nii.gz" description="" />
-                                                        <filetype name="nifti" extension="nii" description="" />
-                                                </fileTypes>
-                                        </format>
-                                </input>
-                                <output id="5.ApplyRegistrationtoMask_1.WarpedImage" name="Warped Image" required="false" enabled="true" order="1">
-                                        <format type="File" cardinality="1">
-                                                <fileTypes>
-                                                        <filetype name="niftii2" extension="nii.gz" description="" />
-                                                        <filetype name="nifti" extension="nii" description="" />
-                                                </fileTypes>
-                                        </format>
-                                </output>
-                                <input id="5.ApplyRegistrationtoMask_1.ReferenceImage" name="Reference Image" description="Image that the transform was computed wrt." required="false" enabled="true" order="2">
-                                        <format type="File" cardinality="1">
-                                                <fileTypes>
-                                                        <filetype name="niftii2" extension="nii.gz" description="" />
-                                                        <filetype name="nifti" extension="nii" description="" />
-                                                </fileTypes>
-                                        </format>
-                                </input>
-                                <input id="5.ApplyRegistrationtoMask_1.Transformmatrix" name="Transform matrix" required="false" enabled="true" order="3">
-                                        <format type="File" cardinality="1">
-                                                <fileTypes>
-                                                        <filetype name="Matlab file" extension="mat" description="" />
-                                                </fileTypes>
-                                        </format>
-                                </input>
-                        </module>
-                        <module id="4.RigidRegistration_1" name="4. Rigid Registration" package="m2g" posX="264" posY="192" rotation="1" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/src/register_rigid.py">
-                                <tag />
-                                <metadata>
-                                        <data key="__creationDateKey" value="Thu Feb 26 09:45:13 EST 2015" />
-                                </metadata>
-                                <input id="4.RigidRegistration_1.FixedImage" name="Fixed Image" required="false" enabled="true" order="0">
-                                        <format type="File" cardinality="1">
-                                                <fileTypes>
-                                                        <filetype name="nifti" extension="nii" description="" />
-                                                        <filetype name="niftii2" extension="nii.gz" description="" />
-                                                </fileTypes>
-                                        </format>
-                                </input>
-                                <input id="4.RigidRegistration_1.MovingImage" name="Moving Image" required="false" enabled="true" order="1">
-                                        <format type="File" cardinality="1">
-                                                <fileTypes>
-                                                        <filetype name="niftii2" extension="nii.gz" description="" />
-                                                        <filetype name="nifti" extension="nii" description="" />
-                                                </fileTypes>
-                                        </format>
-                                </input>
-                                <input id="4.RigidRegistration_1.tolerance" name="tolerance" required="false" enabled="true" order="2">
-                                        <format type="Number" cardinality="1" />
-                                        <values>
-                                                <value>1e-4</value>
-                                        </values>
-                                </input>
-                                <output id="4.RigidRegistration_1.OutputImage" name="Output Image" required="false" enabled="true" order="3">
-                                        <format type="File" cardinality="1">
-                                                <fileTypes>
-                                                        <filetype name="niftii2" extension="nii.gz" description="" />
-                                                        <filetype name="nifti" extension="nii" description="" />
-                                                </fileTypes>
-                                        </format>
-                                </output>
-                                <output id="4.RigidRegistration_1.transformation" name="transformation" required="false" enabled="true" order="4">
-                                        <format type="File" cardinality="1">
-                                                <fileTypes>
-                                                        <filetype name="Matlab file" extension="mat" description="" />
                                                 </fileTypes>
                                         </format>
                                 </output>
