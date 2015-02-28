@@ -27,5 +27,5 @@ The `MROCPdjango` directory contains code developed for hosted Web-services for 
 
 More info?
 ----------
-See our project [web page ](http://w.ocp.me/m2g:home).
+See our project [web page ](http://openconnectome.github.io/m2g/).
 This is part of the bigger **Johns Hopkins University** Open Connectome project found [here](http://www.ocp.me/).
