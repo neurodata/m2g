@@ -1,8 +1,9 @@
-Magnetic Resonance (MR-) Connectome
+MRImages to Graphs (M2G)
 ====================================
 
-This project contains several tools to play with fiber data in:
-[MRI Studio format](http://www.mristudio.org/).
+M2G is a pipeline which takes as input Diffusion Weighted MRI (DTI) data, and produced structural connectomes (brain graphs) as a result.
+
+This project also contains several tools to play with fiber data in: [MRI Studio format](http://www.mristudio.org/).
 
 MRCAP
 -----
@@ -24,5 +25,5 @@ The `MROCPdjango` directory contains code developed for hosted Web-services for 
 
 More info?
 ----------
-See our project [web page ](http://openconnectome.github.com/MR-connectome/).
-This is part of the bigger **Johns Hopkins University** Open Connectome project found [here](http://www.openconnectomeproject.org/).
+See our project [web page ](http://w.ocp.me/m2g:home).
+This is part of the bigger **Johns Hopkins University** Open Connectome project found [here](http://www.ocp.me/).
