@@ -36,7 +36,7 @@ def r_igraph_clust_coeff(g, save_fn=None):
   """
 
   clustcoeff = robjects.r("""
-  require(igraph)
+  suppressMessages(require(igraph))
   fn <- function(g){
   igraph::transitivity(g, "local")
   }

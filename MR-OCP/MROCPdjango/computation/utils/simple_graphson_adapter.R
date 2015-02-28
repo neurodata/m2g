@@ -22,7 +22,7 @@
 # Copyright (c) 2014. All rights reserved.
 
 require(argparse)
-require(igraph)
+suppressMessages(require(igraph))
 
 IgraphToGraphson <- function(g, save_fn){
   # Simple function to write and igraph graph to GraphSON format as described

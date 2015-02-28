@@ -41,7 +41,7 @@ def r_igraph_get_attr(g, attr_name, which):
   attr_dict = {"g":"graph", "e":"edge", "v":"vertex"}
 
   get = robjects.r("""
-  require(igraph)
+  suppressMessages(require(igraph))
   fn <- function(g, attr_name){
   get.%s.attribute(g, attr_name)
   }

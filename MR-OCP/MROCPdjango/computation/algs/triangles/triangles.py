@@ -37,7 +37,7 @@ def r_igraph_triangles(g, save_fn=None):
   """
 
   triangles = robjects.r("""
-  require(igraph)
+  suppressMessages(require(igraph))
   fn <- function(g){
   igraph::adjacent.triangles(g)
   }
