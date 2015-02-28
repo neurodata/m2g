@@ -3,6 +3,9 @@ MRImages to Graphs (M2G)
 
 M2G is a pipeline which takes as input Diffusion Weighted MRI (DTI) data, and produced structural connectomes (brain graphs) as a result.
 
+The pipeline makes use of FSL brain extraction, ANTs image registration, Camino tensor estimation and tractography, and igraph graph generation.
+
+
 This project also contains several tools to play with fiber data in: [MRI Studio format](http://www.mristudio.org/).
 
 MRCAP
