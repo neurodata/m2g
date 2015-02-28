@@ -24,16 +24,17 @@ from argparse import ArgumentParser
 from nibabel import load, save, Nifti1Image
 from numpy import where, loadtxt
 from os import system
+from os.path import basename, splitext
 
 def register_vol(dti_img, bvals, aligned_img, b0_img):
-  print "Loading dti data..."
+  system('Loading dti data...')
   dti_vol = load(dti_img)
   dti_data = dti_vol.get_data()
   
-  print "Loading bvals file..."
+  system('Loading bvals file...')
   b = loadtxt(bvals)
   
-  print "Extracting B0 volume..."
+  system('Extracting B0 volume...')
   b0_vol=dti_data[:,:,:,int(where(b==0)[0])]
   b0_head = dti_vol.get_header()
   b0_head.set_data_shape(b0_head.get_data_shape()[0:3])
@@ -41,20 +42,22 @@ def register_vol(dti_img, bvals, aligned_img, b0_img):
   save(b0_out, b0_img)
   
   directions = dti_vol.get_shape()[3]
-  print "Number of 3D volumes:", directions
+  system('Number of 3D volumes: '+ directions)
   
   aligned_vol = dti_vol
   aligned_data = aligned_vol.get_data()
-  print "Beginning registration..."
-  temp_in_img = 'temp_in.nii'
-  temp_out_img = 'temp_out.nii'
+  system('Beginning registration...')
+  [root, ext] = splitext(dti_img)
+  temp_in_img = root+'temp_in.nii'
+  temp_out_img = root+'temp_out.nii'
+  system('temp files: ' + temp_in_img + ' ' + temp_out_img)
   temp_head = dti_vol.get_header()
   temp_head.set_data_shape(temp_head.get_data_shape()[0:3])
   
   for ii in range(directions):
-    print "Volume ", ii+1, " of ", directions
+    system('Volume ' + ii+1 + ' of ' + directions)
     if ii == int(where(b==0)[0]):
-      print "Skipping self registration for B0 scan..."
+      system('Skipping self registration for B0 scan...')
       continue
     currentvol = aligned_data[:,:,:,ii]
     #print "Writing current volume to disk..."
