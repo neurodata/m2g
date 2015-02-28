@@ -26,7 +26,6 @@
 # using a base atlas
 
 import argparse
-import mrcap.roi as roi
 import nibabel as nib
 import numpy as np
 from math import ceil
@@ -35,20 +34,19 @@ import sys
 from time import time
 import os
 
-def create(roixmlfn=os.path.join(os.path.dirname(__file__), "MNI152_T1_1mm_brain_mask_integer.xml"), 
-        roirawfn=os.path.join(os.path.dirname(__file__), "MNI152_T1_1mm_brain_mask_integer.raw"), start=2):
+def create(roifn=os.path.join(os.path.dirname(__file__), 
+          "MNI152_T1_1mm_brain_mask_integer.nii"), start=2):
   """
   Create a new atlas given some scaling factor determined by the 
   start index. Opaque doc, but best I can do.
 
-  @param roixmlfn: xml mask file name
-  @param roirawfn: raw mask file name
+  @param roifn: nifti roi mask file name
   @param start: the x,y,z start position which determines the scaling
   """
 
   start_time = time()
   print "Loading rois as base ..."
-  base = roi.ROIData (roirawfn, roi.ROIXML(roixmlfn).getShape()).data
+  base = nib.load(roifn).get_data()
   true_dim = base.shape
 
   # Labelling new 
@@ -93,18 +91,17 @@ def create(roixmlfn=os.path.join(os.path.dirname(__file__), "MNI152_T1_1mm_brain
   print "Building atlas took %.3f sec ..." % (time()-start_time)
   return img
 
-def validate(atlas_fn, roixmlfn, roirawfn):
+def validate(atlas_fn, roifn):
   """
   Validate that an atlas you've created is a valid based on the
   masking you have
 
   @param atlas_fn: the new atlas you've created
-  @param roixmlfn: xml mask file name
-  @param roirawfn: raw mask file name
+  @param roifn: nifti roi file name
   """
   from operator import xor
 
-  base = roi.ROIData (roirawfn, roi.ROIXML(roixmlfn).getShape()).data
+  base = nib.load(roifn).get_data()
   try:
     new = nib.load(atlas_fn).get_data()
   except:
@@ -122,8 +119,7 @@ def validate(atlas_fn, roixmlfn, roirawfn):
 
 def main():
   parser = argparse.ArgumentParser(description="Downsample a fibergraph")
-  parser.add_argument("roixmlfn", action="store", help="XML mask")
-  parser.add_argument("roirawfn", action="store", help="RAW mask")
+  parser.add_argument("roifn", action="store", help="NIFTI roi")
   parser.add_argument("-n","--niftifn",  action="store", default="atlas.nii", \
           help="Nifti outfile name if creating else the infile name if validation")
   parser.add_argument("-s", "--start", default=2, action="store", type=int, help="Start index")
@@ -132,10 +128,10 @@ def main():
   result = parser.parse_args()
   if result.validate:
     print "Validating %s..." % result.niftifn
-    validate(result.niftifn, result.roixmlfn, result.roirawfn)
+    validate(result.niftifn, result.roifn)
     exit(1)
   
-  img = create(result.roixmlfn, result.roirawfn, result.start)
+  img = create(result.roifn, result.start)
   nib.save(img, result.niftifn)
 
 if __name__ == "__main__":

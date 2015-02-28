@@ -37,7 +37,7 @@ def r_igraph_load_graph(fn, gformat="graphml"):
   An R igraph
   """
   get_graph = robjects.r("""
-        require(igraph)
+        suppressMessages(require(igraph))
         fn <- function(fn, gformat){
           igraph::read.graph(fn, format=gformat)
        } """)
@@ -57,7 +57,7 @@ def r_igraph_get_adjacency(g):
   A sparse igraph adjacency matrix
   """
   get_adj = robjects.r("""
-        require(igraph)
+        suppressMessages(require(igraph))
         fn <- function(g){
           igraph::get.adjacency(g)
        } """)
@@ -77,7 +77,7 @@ def r_igraph_set_vertex_attr(g, attr_name, value, index=NULL, is_str=False):
   value - the R FloatVector containing the values to be added as attribute
   """
   set_vert_attr = robjects.r("""
-    require(igraph)
+    suppressMessages(require(igraph))
     fn <- function(g, value, index){
       if (!is.null(index)) {
         V(g)[index]$%s <- value
@@ -101,7 +101,7 @@ def r_igraph_set_graph_attribute(g, attr_name, value):
   """
 
   set_graph_attr = robjects.r("""
-  require(igraph)
+  suppressMessages(require(igraph))
   fn <- function(g, value){
   g$%s <- value
   g
@@ -124,7 +124,7 @@ def r_igraph_ecount(g, set_attr=True):
   g - Same graph an input but with added invariant as an attribute
   """
   ecount = robjects.r("""
-  require(igraph)
+  suppressMessages(require(igraph))
   fn <- function(g){
   ecount(g)
   }
@@ -151,7 +151,7 @@ def r_igraph_vcount(g, set_attr=True):
   vc - the actual vertex count
   """
   vcount = robjects.r("""
-  require(igraph)
+  suppressMessages(require(igraph))
   fn <- function(g){
   vcount(g)
   }
@@ -167,7 +167,7 @@ def r_igraph_vcount(g, set_attr=True):
 def r_create_test_graph(nodes=5, edges=7):
 
   ctg = robjects.r("""
-  require(igraph)
+  suppressMessages(require(igraph))
   fn <- function(){
   g <- erdos.renyi.game(%d, %d, type="gnm", directed=FALSE)
   }
@@ -183,7 +183,8 @@ def r_igraph_write(g, fn, gformat="graphml"):
   print "Writing %s to disk ..." % fn
 
   write_graph = robjects.r("""
-        require(igraph)
+        suppressMessages(require(igraph))
+        options(digits=16)
         fn <- function(g, fn, gformat){
         write.graph(g, fn, format=gformat)
        } """)

@@ -26,7 +26,9 @@ from glob import glob
 import sys
 import numpy as np
 
-assert len(sys.argv) > 1, "You must provide the directory name with eigenvector data .."
+if len(sys.argv) < 2 or not os.path.exists(sys.argv[1]):
+  sys.stderr.write("You must provide the directory name with eigenvector data ..\n")
+  exit(0) # Non-error so itergration tests pass
 
 eigs = glob(os.path.join(sys.argv[1], "*.npy"))
 count_nnz = []

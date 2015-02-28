@@ -45,7 +45,7 @@ def r_igraph_eigs(g, k, return_eigs=False, save_fn=None, real=True, lcc=False):
   """
 
   esd = robjects.r("""
-  require(igraph)
+  suppressMessages(require(igraph))
   options(digits=2) # 3 decimal places
   fn <- function(g, nev, real=FALSE, lcc=FALSE){
 
