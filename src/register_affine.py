@@ -27,9 +27,10 @@ from argparse import ArgumentParser
 
 def do_registration(fixed, moving, tol, out, aff):
     
-    # Apply affine transformation
-    system('antsRegistration -d 3 -o [a,'+out+'] -r ['+fixed+', '+moving+',1] -m Mattes[ '+fixed+', '+moving+',1,12] -t Affine[0.75] -c [25, '+tol+', 5] --smoothing-sigmas 1 -f 1')
-    system('mv a0GenericAffine.mat '+ aff)
+  # Apply affine transformation
+  system('antsRegistration -d 3 -o [a,'+out+'] -r ['+fixed+', '+moving+',1] -m Mattes[ '+fixed+', '+moving+',1,12] -t Affine[0.75] -c [25, '+tol+', 5] --smoothing-sigmas 1 -f 1')
+  system('ls -al a0GenericAffine.mat')
+  system('cp a0GenericAffine.mat '+ aff)
 
 
 def main():
