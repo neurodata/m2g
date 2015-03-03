@@ -55,7 +55,6 @@ def register_vol(dti_img, bvals, aligned_img, b0_img):
   temp_head.set_data_shape(temp_head.get_data_shape()[0:3])
   
   for ii in range(directions):
-    system('echo Volume ' + str(ii+1) + ' of ' + str(directions))
     if ii == int(where(b==0)[0]):
       system('echo Skipping self registration for B0 scan...')
       continue  
@@ -64,7 +63,7 @@ def register_vol(dti_img, bvals, aligned_img, b0_img):
     #print "Writing current volume to disk..."
     out = Nifti1Image( data=currentvol, affine=dti_vol.get_affine(), header=temp_head )
     save(out, temp_in_img)
-    system('antsRegistration -d 3 -o [affine,'+temp_out_img+'] -r ['+b0_img+', '+temp_in_img+',1] -m Mattes[ '+b0_img+', '+temp_in_img+',1,12] -t Affine[0.75] -c [25, 1e-4, 5] --smoothing-sigmas 1 -f 1 > /dev/null')
+    system('antsRegistration -d 3 -o [affine,'+temp_out_img+'] -r ['+b0_img+', '+temp_in_img+',1] -m Mattes[ '+b0_img+', '+temp_in_img+',1,12] -t Affine[0.75] -c [25, 5e-4, 5] --smoothing-sigmas 1 -f 1 > /dev/null')
     temp_vol = load(temp_out_img)
     currentvol = temp_vol.get_data()
     aligned_data[:,:,:,ii] = currentvol
