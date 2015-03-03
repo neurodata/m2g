@@ -63,7 +63,7 @@ def register_vol(dti_img, bvals, aligned_img, b0_img):
     #print "Writing current volume to disk..."
     out = Nifti1Image( data=currentvol, affine=dti_vol.get_affine(), header=temp_head )
     save(out, temp_in_img)
-    system('antsRegistration -d 3 -o [affine,'+temp_out_img+'] -r ['+b0_img+', '+temp_in_img+',1] -m Mattes[ '+b0_img+', '+temp_in_img+',1,12] -t Affine[0.75] -c [25, 5e-4, 5] --smoothing-sigmas 1 -f 1 > /dev/null')
+    system('antsRegistration -d 3 -o [affine,'+temp_out_img+'] -r ['+b0_img+', '+temp_in_img+',1] -m Mattes[ '+b0_img+', '+temp_in_img+',1,12] -t Affine[0.75] -c [25, 1e-3, 5] --smoothing-sigmas 1 -f 1 > /dev/null')
     temp_vol = load(temp_out_img)
     currentvol = temp_vol.get_data()
     aligned_data[:,:,:,ii] = currentvol
