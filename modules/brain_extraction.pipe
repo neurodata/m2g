@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <pipeline version=".2">
         <moduleGroup id="Untitled_1" name="Untitled" posX="0" posY="0" sourceCode="">
-                <module id="BrainExtraction_1" name="Brain Extraction" package="m2g" posX="106" posY="79" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/M2G/src/skullextract.py">
+                <module id="BrainExtraction_1" name="Brain Extraction" package="m2g" posX="106" posY="79" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/src/brain_extract.py">
                         <tag />
                         <metadata>
                                 <data key="__creationDateKey" value="Thu Feb 26 11:28:32 EST 2015" />
