@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <pipeline version=".2">
         <moduleGroup id="tensor_estimation_1" name="tensor_estimation" posX="0" posY="0" sourceCode="">
-                <module id="TensorEstimation_1" name="Tensor Estimation" package="m2g" posX="38" posY="39" sourceCode="" location="pipeline://localhost//home/gkiar/vbox/loni_scripts/dti2tens.py">
+                <module id="TensorEstimation_1" name="Tensor Estimation" package="m2g" posX="38" posY="39" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/src/tensor_gen.py">
                         <tag />
                         <metadata>
                                 <data key="__creationDateKey" value="Fri Jan 09 11:38:39 EST 2015" />
