@@ -5,8 +5,28 @@ M2G is a pipeline which takes as input Diffusion Weighted MRI (DTI) data, and pr
 
 The pipeline makes use of FSL brain extraction, ANTs image registration, Camino tensor estimation and tractography, and igraph graph generation.
 
-
 This project also contains several tools to play with fiber data in: [MRI Studio format](http://www.mristudio.org/).
+
+Running M2G from EC2
+--------------------
+
+(This service has yet to be fully implemented)
+In order to make use of our services and begin uploading and processing your data, you must do the following:
+
+* Go to our webpage and request an account
+* Upload your data to an Amazon S3 Bucket
+* When your account is granted, you will receive an email with account and server information
+* Download and Install the [LONI client](http://pipeline.loni.usc.edu)
+* Connect to the server in LONI using your credentials
+* Select the workflow you wish to run from the server library
+* (tbd) link the S3 bucket to our server
+* In your workflow, set the input and output requirements paths to locations in your bucket
+* Validate workflow to ensure paths exist and files are found
+* Begin running workflow, you will receive an email containing a link to your QC page once the job has completed
+
+MROCP
+=====
+This section of the repository consists of processing and publishing tools which allow for interfacing between the tools presented here and the OCP web services.
 
 MRCAP
 -----
@@ -28,5 +48,5 @@ The `MROCPdjango` directory contains code developed for hosted Web-services for 
 
 More info?
 ----------
-See our project [web page ](http://w.ocp.me/m2g:home).
+See our project [web page ](http://openconnectome.github.io/m2g/).
 This is part of the bigger **Johns Hopkins University** Open Connectome project found [here](http://www.ocp.me/).
