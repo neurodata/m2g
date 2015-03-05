@@ -29,7 +29,7 @@ def do_registration(fixed, moving, tol, out, rig):
     
     # Apply affine transformation
     system('antsRegistration -d 3 -o [r,'+out+'] -r ['+fixed+', '+moving+',1] -m Mattes[ '+fixed+', '+moving+',1,12] -t Rigid[0.75] -c [25, '+tol+', 5] --smoothing-sigmas 1 -f 1')
-    system('mv r0GenericAffine.mat '+ rig)
+    system('cp r0GenericAffine.mat '+ rig)
 
 
 def main():

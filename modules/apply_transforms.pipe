@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <pipeline version=".2">
         <moduleGroup id="Untitled_1" name="Untitled" posX="0" posY="0" sourceCode="">
-                <module id="ApplyRegistrationtoDTI_1" name="Apply Registration to DTI" package="m2g" posX="45" posY="34" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/M2G/src/apply_registration.py">
+                <module id="ApplyRegistrationtoDTI_1" name="Apply Registration to DTI" package="m2g" posX="45" posY="34" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/src/apply_registration.py">
                         <tag />
                         <metadata>
                                 <data key="__creationDateKey" value="Thu Feb 26 13:46:28 EST 2015" />

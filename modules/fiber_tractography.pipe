@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <pipeline version=".2">
         <moduleGroup id="fiber_tractography_1" name="fiber_tractography" posX="0" posY="0" sourceCode="">
-                <module id="FiberTractography_1" name="Fiber Tractography" package="m2g" posX="40" posY="45" sourceCode="" location="pipeline://localhost//home/gkiar/vbox/loni_scripts/tens2fibs.py">
+                <module id="FiberTractography_1" name="Fiber Tractography" package="m2g" posX="40" posY="45" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/src/fiber_gen.py">
                         <tag />
                         <metadata>
                                 <data key="__creationDateKey" value="Fri Jan 09 13:07:20 EST 2015" />
