@@ -26,7 +26,7 @@ from os import system
 from os.path import basename, splitext
 
 
-def make_tens(dti, grad, bval, mask, scheme, dti_bfloat, tensors, fa, md, eigs):
+def make_tens(dti, grad, bval, mask, scheme, dti_bfloat, tensors): #, fa, md, eigs):
   # Create scheme file
   system('pointset2scheme -inputfile '+grad+' -bvalue '+bval+' -outputfile '+scheme)
   
@@ -38,14 +38,12 @@ def make_tens(dti, grad, bval, mask, scheme, dti_bfloat, tensors, fa, md, eigs):
   
   # In order to visualize, and just 'cause it's fun anyways, we get some stats
 
-  [fa_base, ext] = splitext(basename(fa))
-  [md_base, ext] = splitext(basename(md))
-  system('for PROG in '+fa_base+' '+md_base+'; do cat '+tensors+' | ${PROG} | voxel2image -outputroot ${PROG} -header '+dti+'; done')
-  system('mv '+basename(fa)+' '+fa)
-  system('mv '+basename(md)+' '+md)
+  #[fa_base, ext] = splitext(basename(fa))
+  #[md_base, ext] = splitext(basename(md))
+  #system('for PROG in '+fa+' '+md+'; do cat '+tensors+' | ${PROG} | voxel2image -outputroot ${PROG} -header '+dti+'; done')
 
   # We also need the eigen system to visualize
-  system('cat '+tensors+' | dteig > '+eigs)
+  #system('cat '+tensors+' | dteig > '+eigs)
 
 def main():
   parser = ArgumentParser(description="")
@@ -56,13 +54,13 @@ def main():
   parser.add_argument("scheme", action="store", help="The scheme file (.scheme)")
   parser.add_argument("dti_bfloat", action="store", help="The Bfloat format equivalent of the DTI image (.Bfloat)")
   parser.add_argument("tensors", action="store", help="The produced tensors in Bdouble format (.Bdouble)")
-  parser.add_argument("fa", action="store", help="The fractional anisotropy statistic (.nii)")
-  parser.add_argument("md", action="store", help="The mean diffusivity statistic (.nii)")
-  parser.add_argument("eigs", action="store", help="The eigen values of the system (.Bdouble)")
+  #parser.add_argument("fa", action="store", help="The fractional anisotropy statistic (.nii)")
+  #parser.add_argument("md", action="store", help="The mean diffusivity statistic (.nii)")
+  #parser.add_argument("eigs", action="store", help="The eigen values of the system (.Bdouble)")
 
   result = parser.parse_args()
 
-  make_tens(result.dti, result.grad, result.bval, result.mask, result.scheme, result.dti_bfloat, result.tensors, result.fa, result.md, result.eigs)
+  make_tens(result.dti, result.grad, result.bval, result.mask, result.scheme, result.dti_bfloat, result.tensors)#, result.fa, result.md, result.eigs)
 
 
 if __name__ == '__main__':
