@@ -16,8 +16,8 @@ In order to make use of our services and begin uploading and processing your dat
 * Go to our webpage and request an account
 * Upload your data to an Amazon S3 Bucket
 * When your account is granted, you will receive an email with account and server information
-* Download the [LONI client](http://pipeline.loni.usc.edu)
-* Connect to the server using your credentials
+* Download and Install the [LONI client](http://pipeline.loni.usc.edu)
+* Connect to the server in LONI using your credentials
 * Select the workflow you wish to run from the server library
 * (tbd) link the S3 bucket to our server
 * In your workflow, set the input and output requirements paths to locations in your bucket
