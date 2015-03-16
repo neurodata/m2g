@@ -189,6 +189,7 @@ class DownloadGraphsForm(forms.Form):
   dl_format = forms.ChoiceField(required=True, widget=Select(
     attrs={"title":"Only graphml will contain all vertex, edge and graph attributes"}),
                                 choices=FORMATS, label="Format")
+  #Email = forms.EmailField(widget=EmailInput(attrs={"class":"tb", "size":40}), required=True)
 
 class DownloadQueryForm(forms.Form):
   '''

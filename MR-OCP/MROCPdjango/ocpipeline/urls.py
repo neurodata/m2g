@@ -29,7 +29,6 @@ from views import convert
 from views import showdir
 from views import contact
 from views import jobfailure
-from views import download
 from views import igraph_examples
 
 # Uncomment the next two lines to enable the admin:
@@ -41,7 +40,6 @@ urlpatterns = patterns('ocpipeline.views',
     url(r'^welcome/$', 'welcome', name= 'welcome'),
     url(r'^success/$', 'success', name='success-page'),
     url(r'^upload/(.*$)', 'upload', name= 'prog-upload'),
-    url(r'^download/(.*$)', 'download', name= 'download-graphs'),
     url(r'^convert/(.*$)', 'convert', name= 'convert-to-format'),
     url(r'^showdir/$', 'showdir', name='serve-dir'),
     url(r'^contact/$', 'contact', name='contact'),
@@ -69,6 +67,11 @@ urlpatterns += patterns('ocpipeline.proc_views.buildgraph',
 from ocpipeline.proc_views.graphupload import graphLoadInv
 urlpatterns += patterns('ocpipeline.proc_views.graphupload',
     url(r'^graphupload/(.*$)', 'graphLoadInv', name='graph-upload-invariant-processing'),
+    )
+
+from ocpipeline.proc_views.download import download
+urlpatterns += patterns('ocpipeline.proc_views.download',
+    url(r'^download/$', 'download', name= 'download-graphs'),
     )
 
 from ocpipeline.accounts.views import projects

@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 
 # Copyright 2014 Open Connectome Project (http://openconnecto.me)
 #
@@ -12,9 +13,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
-
-#!/usr/bin/env python
 
 # download.py
 # Created by Disa Mhembere on 2015-03-15.
@@ -23,6 +21,7 @@
 
 import argparse
 import os
+from time import strftime, localtime
 
 from django.http import HttpResponseRedirect, HttpResponse
 from django.core.urlresolvers import get_script_prefix
@@ -36,6 +35,8 @@ from ocpipeline.graph_table import GraphTable
 from ocpipeline.models import GraphDownloadModel
 from ocpipeline.forms import DownloadGraphsForm
 from ocpipeline.forms import DownloadQueryForm
+from ocpipeline.utils.util import sendEmail
+from ocpipeline.procs.scale_convert import scale_convert
 
 def download(request):
 
@@ -117,21 +118,26 @@ def download(request):
 
         # Something selected for dl/Convert+dl
         else:
-          if (len(selected_files) > MAX_NUM_GRAPH_DLS and request.POST.has_key("human")):
             data_dir = os.path.join(settings.MEDIA_ROOT, "tmp",
                                    strftime("download_%a%d%b%Y_%H.%M.%S/", localtime()))
             dwnld_loc = "http://mrbrain.cs.jhu.edu" + data_dir.replace(" ","%20")
             #dwnld_loc = request.META['wsgi.url_scheme'] + "://" + request.META["HTTP_HOST"] + data_dir.replace(" ","%20")
 
+            """
             sendEmail(request.POST.get("email"), "Job launch notification",
-                      "Your download request was received. You will receive an email when it completes.\n\n")
+                    "Your download request was received. You will receive an email when it completes.\n\n")
 
+            """
             # Testing only
-            #scale_convert(selected_files, dl_format, ds_factor, ATLASES,
-            #              request.POST.get("email"), dwnld_loc, os.path.join(data_dir, "archive.zip")) # Testing only
-            thr = threading.Thread(target=scale_convert, args=(selected_files, dl_format, ds_factor, ATLASES,
-                                      request.POST.get("email"), dwnld_loc, os.path.join(data_dir, "archive.zip")))
+            scale_convert(selected_files, dl_format, ds_factor, ATLASES, request.POST.get("email"), 
+            dwnld_loc, os.path.join(data_dir, "archive.zip")) # Testing only
+
+            """
+            thr = threading.Thread(target=scale_convert, args=(selected_files, dl_format, 
+              ds_factor, ATLASES, request.POST.get("email"), dwnld_loc, 
+              os.path.join(data_dir, "archive.zip")))
             thr.start()
+            """
 
             request.session['success_msg'] = \
 """
@@ -140,21 +146,6 @@ The process may take several hours (dependent on graph size). If your job fails 
 If you do not see an email in your <i>Inbox</i> check the <i>Spam</i> folder and add <code>jhmrocp@cs.jhu.edu</code> to your safe list.
 """
             return HttpResponseRedirect(get_script_prefix()+'success')
-          else:
-            print "Beginning interactive download ..."
-            temp = scale_convert(selected_files, dl_format, ds_factor, ATLASES)
-            if isinstance(temp, str):
-              return render_to_response("job_failure.html",
-                  {"msg":temp}, context_instance=RequestContext(request))
-
-            # TODO: Possibly use django.http.StreamingHttpResponse for this
-            wrapper = FileWrapper(temp)
-            response = HttpResponse(wrapper, content_type='application/zip')
-            response['Content-Disposition'] = ('attachment; filename=archive.zip')
-            response['Content-Length'] = temp.tell()
-            temp.seek(0)
-
-            return response
       else:
         return HttpResponseRedirect(get_script_prefix()+"download")
 
