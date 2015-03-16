@@ -21,6 +21,7 @@
 
 import argparse
 import os
+import threading
 from time import strftime, localtime
 
 from django.http import HttpResponseRedirect, HttpResponse
@@ -111,41 +112,39 @@ def download(request):
         if ds_factor not in ATLASES.keys():
           ds_factor = int(ds_factor)
 
-        dl_format = request.POST.get("dl_format")
+        dl_format = form.cleaned_data["dl_format"]
 
         if not selected_files:
           return HttpResponseRedirect(get_script_prefix()+"download")
 
         # Something selected for dl/Convert+dl
         else:
-            data_dir = os.path.join(settings.MEDIA_ROOT, "tmp",
-                                   strftime("download_%a%d%b%Y_%H.%M.%S/", localtime()))
-            dwnld_loc = "http://mrbrain.cs.jhu.edu" + data_dir.replace(" ","%20")
-            #dwnld_loc = request.META['wsgi.url_scheme'] + "://" + request.META["HTTP_HOST"] + data_dir.replace(" ","%20")
+          data_dir = os.path.join(settings.MEDIA_ROOT, "tmp",
+                                 strftime("download_%a%d%b%Y_%H.%M.%S/", localtime()))
+          dwnld_loc = "http://mrbrain.cs.jhu.edu" + data_dir.replace(" ","%20")
+          #dwnld_loc = request.META['wsgi.url_scheme'] + "://" + request.META["HTTP_HOST"] + data_dir.replace(" ","%20")
 
-            """
-            sendEmail(request.POST.get("email"), "Job launch notification",
-                    "Your download request was received. You will receive an email when it completes.\n\n")
+          sendEmail(form.cleaned_data["Email"], "Job launch notification",
+                  "Your download request was received. You will receive an email when it completes.\n\n")
 
-            """
-            # Testing only
-            scale_convert(selected_files, dl_format, ds_factor, ATLASES, request.POST.get("email"), 
-            dwnld_loc, os.path.join(data_dir, "archive.zip")) # Testing only
+          """
+          # Testing only
+          scale_convert(selected_files, dl_format, ds_factor, ATLASES, form.cleaned_data["Email"], 
+          dwnld_loc, os.path.join(data_dir, "archive.zip")) # Testing only
 
-            """
-            thr = threading.Thread(target=scale_convert, args=(selected_files, dl_format, 
-              ds_factor, ATLASES, request.POST.get("email"), dwnld_loc, 
-              os.path.join(data_dir, "archive.zip")))
-            thr.start()
-            """
+          """
+          thr = threading.Thread(target=scale_convert, args=(selected_files, dl_format, 
+            ds_factor, ATLASES, form.cleaned_data["Email"], dwnld_loc, 
+            os.path.join(data_dir, "archive.zip")))
+          thr.start()
 
-            request.session['success_msg'] = \
+          request.session['success_msg'] = \
 """
 Your job successfully launched. You should receive an email when your job begins and another one when it completes.<br/>
 The process may take several hours (dependent on graph size). If your job fails you will receive an email notification as well.<br/>
 If you do not see an email in your <i>Inbox</i> check the <i>Spam</i> folder and add <code>jhmrocp@cs.jhu.edu</code> to your safe list.
 """
-            return HttpResponseRedirect(get_script_prefix()+'success')
+          return HttpResponseRedirect(get_script_prefix()+'success')
       else:
         return HttpResponseRedirect(get_script_prefix()+"download")
 

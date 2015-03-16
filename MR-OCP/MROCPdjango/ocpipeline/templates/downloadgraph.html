@@ -65,14 +65,6 @@ Examples of how to load graphs using igraph can be found <a href="{{"igraph"|get
 </form>
 
 
-<script type="text/javascript">
-  function verifyEmail(form, num) {
-    if (moreThanChecked(form, num))
-      return checkEmail(document.getElementById('emailBoxID'));
-    return true;
-  }
-</script>
-
 {% if genera %}
 <div id="data_tables">
   {% for genus in genera %}
@@ -83,12 +75,10 @@ Examples of how to load graphs using igraph can be found <a href="{{"igraph"|get
         <p>
           <b>For a data description of the brain graph attributes click <a href="{{"data/human"|getScriptPrefix}}">here</a>.</b>
         </p>
-
-        <form action="" method="post" enctype="multipart/form-data" name="" onchange="moreThanChecked(this, 1);"
-              onsubmit="return verifyEmail(this, 1);">
-      {% else %}
-        <form action="" method="post" enctype="multipart/form-data" name="">
       {% endif %}
+
+        <form action="" method="post" enctype="multipart/form-data" name="">
+
       {% csrf_token %}
       {% render_table genus.0 %}
       <br/>
@@ -107,13 +97,6 @@ Examples of how to load graphs using igraph can be found <a href="{{"igraph"|get
             <option value="desikan"> Desikan Atlas</option>
             <option value="slab"> slab Atlas</option>
           </select>
-
-          {# Email field for long running jobs #}
-          <div id="emailID" class="errormsg" style="opacity: 0;" disabled="disabled">
-            <label for="emailBoxID" id="emailLabelID"><b>Email:</b></label>
-            <input type="email" id="emailBoxID" name="email" class="tb" size="35" disabled="disabled">
-              You must enter an email address for quantity of graphs you would like to download.
-          </div>
         {% endif %}
       </form>
     </div>
