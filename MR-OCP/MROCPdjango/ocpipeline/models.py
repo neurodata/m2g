@@ -31,7 +31,6 @@ from django.db import models
 from django.contrib import admin
 from django.contrib.auth.models import User
 import os
-from time import strftime, localtime
 
 class BuildGraphModel(models.Model):
   '''
