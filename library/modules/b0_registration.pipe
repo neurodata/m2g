@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <pipeline version=".2">
         <moduleGroup id="Untitled_1" name="Untitled" posX="0" posY="0" sourceCode="">
-                <module id="B0Registration_1" name="B0 Registration" package="m2g" posX="85" posY="37" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/src/b0_registration.py">
+                <module id="B0Registration_1" name="B0 Registration" package="m2g" posX="85" posY="37" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/packages/dtipreproc/b0_registration.py">
                         <tag />
                         <metadata>
                                 <data key="__creationDateKey" value="Thu Feb 26 11:43:03 EST 2015" />

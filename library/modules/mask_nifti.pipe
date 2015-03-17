@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <pipeline version=".2">
         <moduleGroup id="Untitled_1" name="Untitled" posX="0" posY="0" sourceCode="">
-                <module id="MaskNifti_1" name="Mask Nifti" package="m2g" posX="308" posY="164" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/src/mask_nifti.py">
+                <module id="MaskNifti_1" name="Mask Nifti" package="m2g" posX="308" posY="164" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/packages/utils/mask_nifti.py">
                         <tag />
                         <metadata>
                                 <data key="__creationDateKey" value="Fri Feb 27 16:35:54 EST 2015" />

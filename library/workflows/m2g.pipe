@@ -389,7 +389,8 @@
                         <output link="D1.B0Registration_1.B0volume" id="m2g_2.B0volume" name="B0 volume" order="11" />
                         <output link="C2.ApplyRegistrationtoDTI_1.WarpedImage" id="m2g_2.WarpedImage" name="Warped Image" order="12" />
                         <output link="D4.FiberConverter_1.fiberoutfile" id="m2g_2.fiberoutfile" name="fiber outfile" order="13" />
-                        <module id="C2.ApplyRegistrationtoDTI_1" name="C2. Apply Registration to DTI" package="m2g" posX="188" posY="2119" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/src/apply_registration.py">
+                        <module id="C2.ApplyRegistrationtoDTI_1" name="C2. Apply Registration to DTI" package="m2g" posX="188" posY="2118" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/packages/registration/apply_registration.py">
+                                <tag />
                                 <metadata>
                                         <data key="__creationDateKey" value="Thu Feb 26 13:46:28 EST 2015" />
                                 </metadata>
@@ -425,7 +426,8 @@
                                         </format>
                                 </input>
                         </module>
-                        <module id="D2.TensorEstimation_1" name="D2. Tensor Estimation" package="m2g" posX="0" posY="2517" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/src/tensor_gen.py">
+                        <module id="D2.TensorEstimation_1" name="D2. Tensor Estimation" package="m2g" posX="0" posY="2517" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/packages/tractography/tensor_gen.py">
+                                <tag />
                                 <metadata>
                                         <data key="__creationDateKey" value="Fri Jan 09 11:38:39 EST 2015" />
                                 </metadata>
@@ -502,7 +504,7 @@
                                         </format>
                                 </output>
                         </module>
-                        <module id="D6.graphmltomat_1" name="D6. graphml to mat" package="m2g" description="This is designed for small graphs based on the desikan atlas (i.e. 70 regions labeled 1-35, 101-135)" posX="0" posY="3981" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/tools/utils/graphml2mat.py">
+                        <module id="D6.graphmltomat_1" name="D6. graphml to mat" package="m2g" description="This is designed for small graphs based on the desikan atlas (i.e. 70 regions labeled 1-35, 101-135)" posX="0" posY="3981" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/packages/utils/graphml2mat.py">
                                 <metadata>
                                         <data key="__creationDateKey" value="Tue Feb 10 10:04:52 EST 2015" />
                                 </metadata>
@@ -521,7 +523,8 @@
                                         </format>
                                 </output>
                         </module>
-                        <module id="D3.FiberTractography_1" name="D3. Fiber Tractography" package="m2g" posX="0" posY="2887" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/src/fiber_gen.py">
+                        <module id="D3.FiberTractography_1" name="D3. Fiber Tractography" package="m2g" posX="0" posY="2887" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/packages/tractography/fiber_gen.py">
+                                <tag />
                                 <metadata>
                                         <data key="__creationDateKey" value="Fri Jan 09 13:07:20 EST 2015" />
                                 </metadata>
@@ -574,7 +577,8 @@
                                         </format>
                                 </output>
                         </module>
-                        <module id="S2.ComputeAffineRegistration_1" name="S2. Compute Affine Registration" package="m2g" posX="379" posY="698" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/src/register_affine.py">
+                        <module id="S2.ComputeAffineRegistration_1" name="S2. Compute Affine Registration" package="m2g" posX="379" posY="698" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/packages/registration/register_affine.py">
+                                <tag />
                                 <metadata>
                                         <data key="__creationDateKey" value="Thu Feb 26 09:45:13 EST 2015" />
                                 </metadata>
@@ -643,7 +647,8 @@
                                         </format>
                                 </output>
                         </module>
-                        <module id="C2.ApplyRegistrationtoDTI_2" name="C2. Apply Registration to DTI" package="m2g" posX="193" posY="1876" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/src/apply_registration.py">
+                        <module id="C2.ApplyRegistrationtoDTI_2" name="C2. Apply Registration to DTI" package="m2g" posX="193" posY="1876" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/packages/registration/apply_registration.py">
+                                <tag />
                                 <metadata>
                                         <data key="__creationDateKey" value="Thu Feb 26 13:46:28 EST 2015" />
                                 </metadata>
@@ -679,7 +684,8 @@
                                         </format>
                                 </input>
                         </module>
-                        <module id="S1.BrainExtraction_1" name="S1. Brain Extraction" package="m2g" posX="382" posY="51" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/src/brain_extract.py">
+                        <module id="S1.BrainExtraction_1" name="S1. Brain Extraction" package="m2g" posX="381" posY="51" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/packages/mpragepreproc/brain_extract.py">
+                                <tag />
                                 <metadata>
                                         <data key="__creationDateKey" value="Thu Feb 26 11:28:32 EST 2015" />
                                 </metadata>
@@ -720,7 +726,8 @@
                                         </format>
                                 </output>
                         </module>
-                        <module id="D1.B0Registration_1" name="D1. B0 Registration" package="m2g" posX="0" posY="333" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/src/b0_registration.py">
+                        <module id="D1.B0Registration_1" name="D1. B0 Registration" package="m2g" posX="0" posY="333" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/packages/dtipreproc/b0_registration.py">
+                                <tag />
                                 <metadata>
                                         <data key="__creationDateKey" value="Thu Feb 26 11:43:03 EST 2015" />
                                 </metadata>
@@ -756,7 +763,7 @@
                                         </format>
                                 </output>
                         </module>
-                        <module id="C1.ComputeRigidRegistration_1" name="C1. Compute Rigid Registration" package="m2g" posX="192" posY="1128" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/src/register_rigid.py">
+                        <module id="C1.ComputeRigidRegistration_1" name="C1. Compute Rigid Registration" package="m2g" posX="192" posY="1128" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/packages/registration/register_rigid.py">
                                 <tag />
                                 <metadata>
                                         <data key="__creationDateKey" value="Thu Feb 26 09:45:13 EST 2015" />
@@ -799,7 +806,8 @@
                                         </format>
                                 </output>
                         </module>
-                        <module id="S3.ApplyRegistrationtoMask_1" name="S3. Apply Registration to Mask" package="m2g" posX="378" posY="1519" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/src/apply_registration.py">
+                        <module id="S3.ApplyRegistrationtoMask_1" name="S3. Apply Registration to Mask" package="m2g" posX="378" posY="1519" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/packages/registration/apply_registration.py">
+                                <tag />
                                 <metadata>
                                         <data key="__creationDateKey" value="Thu Feb 26 13:46:28 EST 2015" />
                                 </metadata>
@@ -835,7 +843,8 @@
                                         </format>
                                 </input>
                         </module>
-                        <module id="D4.FiberConverter_1" name="D4. Fiber Converter" package="m2g" posX="0" posY="3281" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/src/fiber_convert.py">
+                        <module id="D4.FiberConverter_1" name="D4. Fiber Converter" package="m2g" posX="0" posY="3281" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/packages/utils/fiber_convert.py">
+                                <tag />
                                 <metadata>
                                         <data key="__creationDateKey" value="Sun Jan 11 21:38:32 EST 2015" />
                                 </metadata>

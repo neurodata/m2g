@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <pipeline version=".2">
         <moduleGroup id="rigid_registration_1" name="rigid_registration" posX="0" posY="0" sourceCode="">
-                <module id="RigidRegistration_1" name="Rigid Registration" package="m2g" posX="136" posY="74" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/src/register_rigid.py">
+                <module id="RigidRegistration_1" name="Rigid Registration" package="m2g" posX="136" posY="74" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/packages/registration/register_rigid.py">
                         <tag />
                         <metadata>
                                 <data key="__creationDateKey" value="Thu Feb 26 09:45:13 EST 2015" />

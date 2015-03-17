@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <pipeline version=".2">
         <moduleGroup id="affine_registration_1" name="affine_registration" posX="0" posY="0" sourceCode="">
-                <module id="AffineRegistration_1" name="Affine Registration" package="m2g" posX="160" posY="92" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/src/register_affine.py">
+                <module id="AffineRegistration_1" name="Affine Registration" package="m2g" posX="159" posY="92" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/packages/registration/register_affine.py">
                         <tag />
                         <metadata>
                                 <data key="__creationDateKey" value="Thu Feb 26 09:45:13 EST 2015" />
