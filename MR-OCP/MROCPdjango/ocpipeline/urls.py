@@ -25,7 +25,6 @@
 
 from django.conf.urls import patterns, include, url
 from views import success
-from views import convert
 from views import showdir
 from views import contact
 from views import jobfailure
@@ -40,7 +39,6 @@ urlpatterns = patterns('ocpipeline.views',
     url(r'^welcome/$', 'welcome', name= 'welcome'),
     url(r'^success/$', 'success', name='success-page'),
     url(r'^upload/(.*$)', 'upload', name= 'prog-upload'),
-    url(r'^convert/(.*$)', 'convert', name= 'convert-to-format'),
     url(r'^showdir/$', 'showdir', name='serve-dir'),
     url(r'^contact/$', 'contact', name='contact'),
     url(r'^jobfailure/$', 'jobfailure', name='failure-page'),
@@ -72,6 +70,11 @@ urlpatterns += patterns('ocpipeline.proc_views.graphupload',
 from ocpipeline.proc_views.download import download
 urlpatterns += patterns('ocpipeline.proc_views.download',
     url(r'^download/$', 'download', name= 'download-graphs'),
+    )
+
+from ocpipeline.proc_views.convert_graph import convert_graph
+urlpatterns += patterns('ocpipeline.proc_views.convert_graph',
+    url(r'^convert/(.*$)', 'convert_graph', name= 'convert-to-format'),
     )
 
 from ocpipeline.accounts.views import projects

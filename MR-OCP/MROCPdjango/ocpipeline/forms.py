@@ -139,7 +139,8 @@ class ConvertForm(forms.Form):
   OUT_FORMATS.extend([('dot', 'dot'), ('gml', 'gml'), ('leda', 'leda')])
 
   output_format = forms.MultipleChoiceField(required=True, \
-  widget=SelectMultiple(attrs={"class":"tb"}), choices=OUT_FORMATS, label="Output file format")
+      widget=SelectMultiple(attrs={"class":"tb", "style":"width: 100px;"}), choices=OUT_FORMATS, label="Output file format")
+  Email = forms.EmailField(widget=EmailInput(attrs={"class":"tb", "size":40}), required=True)
 
 class GraphUploadForm(forms.Form):
   '''
