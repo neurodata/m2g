@@ -29,6 +29,8 @@ from time import time
 import create_atlas
 import nibabel as nib
 import zipfile
+sys.path += [os.path.abspath("../")]
+from zindex import MortonXYZ
 
 def downsample(g, factor=0, atlas=None):
   """
@@ -51,8 +53,20 @@ def downsample(g, factor=0, atlas=None):
   
   vertex = {}
   # This takes O(m)
-  for e in g.es:
+  for idx, e in enumerate (g.es):
+
+    # Uncomment me for some debug help
+    """
     edge_dict[(atlas.get_region_num(e.source), atlas.get_region_num(e.target))] += e["weight"]
+    s = MortonXYZ(e.source)
+    t = MortonXYZ(e.target)
+    print "Old Edge: %d (%d,%d,%d) => %d (%d,%d,%d), New Edge: %d => %d" % (e.source, 
+        s[0], s[1], s[2], e.target, t[0], t[1], t[2], atlas.get_region_num(e.source), 
+        atlas.get_region_num(e.target))
+
+    if idx % 100 == 0 and idx != 0: print
+    if idx % 1000 == 0 and idx != 0: import pdb; pdb.set_trace()
+    """
 
   del g # free me
   new_graph = igraph.Graph(n=atlas.max(), directed=False)

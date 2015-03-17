@@ -35,7 +35,7 @@ from time import time
 import os
 
 def create(roifn=os.path.join(os.path.dirname(__file__), 
-          "MNI152_T1_1mm_brain_mask_integer.nii"), start=2):
+          "MNI152_T1_1mm_brain.nii"), start=2):
   """
   Create a new atlas given some scaling factor determined by the 
   start index. Opaque doc, but best I can do.
@@ -66,7 +66,7 @@ def create(roifn=os.path.join(os.path.dirname(__file__),
   del resized_base
 
   # Create new matrix
-  new = np.zeros_like(base) # poke my finger in the eye of malloc
+  new = np.zeros_like(base) # poke my finger in the eye of bjarne
 
   for z in xrange(start, base.shape[2]-start, step):
     for y in xrange(start, base.shape[1]-start, step):
