@@ -26,6 +26,8 @@ import os, sys, re
 from glob import glob
 import threading
 from random import randint
+import subprocess
+from time import strftime, localtime
 os.environ["MPLCONFIGDIR"] = "/tmp/"
 
 from django.shortcuts import render_to_response
@@ -34,50 +36,25 @@ from django.http import HttpResponseRedirect
 from django.http import HttpResponse
 from django.http import HttpResponseBadRequest
 from django.shortcuts import render
+from django.core.urlresolvers import get_script_prefix
+from django.conf import settings
+from django.core.files.storage import default_storage
+from django.core.files.base import ContentFile
+from django.shortcuts import redirect
+## Auth imports ##
+from django.contrib.auth.decorators import login_required
+# Registration
+from django.contrib.auth import authenticate, login, logout
 
-from django.core.files import File        # For programmatic file upload
 
 # Model & Form imports
-#from models import BuildGraphModel
 from models import OwnedProjects
-
-from forms import DownloadForm
-from forms import GraphUploadForm
-from forms import ConvertForm
-from forms import PasswordResetForm
 
 ## Data Processing imports ##
 import paths
 from mrcap import gengraph as gengraph
-from mrcap.utils import igraph_io
-
 from  utils.filesorter import checkFileExtGengraph
-import utils.zipper as zipper
 from utils.create_dir_struct import create_dir_struct
-from computation.utils.convertTo import convert_graph
-
-from django.core.servers.basehttp import FileWrapper
-
-import subprocess
-from django.core.urlresolvers import get_script_prefix
-from django.conf import settings
-
-from time import strftime, localtime
-from django.core.files.storage import default_storage
-from django.core.files.base import ContentFile
-from django.shortcuts import redirect
-
-## Graph Analysis imports ##
-import computation.composite.invariants as cci
-import scipy.io as sio
-from nibabel import load as nib_load
-
-## Auth imports ##
-from django.contrib.auth.decorators import login_required
-
-# Registration
-from django.contrib.auth import authenticate, login, logout
-
 # Helpers
 from utils.util import *
 
@@ -186,115 +163,6 @@ def upload(request, webargs=None):
 
   else:
     return HttpResponseBadRequest ("Expected POST data, but none given")
-
-
-######################################################
-
-
-#########################################
-#	*******************		#
-#	  CONVERT GRAPH FORMAT		#
-#########################################
-
-def convert(request, webargs=None):
-  """ Browser """
-  if (request.method == 'POST' and not webargs):
-    form = ConvertForm(request.POST, request.FILES) # instantiating form
-    if form.is_valid():
-
-      baseDir = os.path.join(settings.MEDIA_ROOT, 'tmp', strftime('formUpload%a%d%b%Y_%H.%M.%S/', localtime()))
-      saveDir = os.path.join(baseDir,'upload') # Save location of original uploads
-      convertFileSaveLoc = os.path.join(baseDir,'converted') # Save location of converted data
-
-      if not (os.path.exists(convertFileSaveLoc)):
-        os.makedirs(convertFileSaveLoc)
-
-      savedFile = os.path.join(saveDir, request.FILES['fileObj'].name)
-
-      saveFileToDisk(request.FILES['fileObj'], savedFile)
-
-      # If zip is uploaded
-      if os.path.splitext(request.FILES['fileObj'].name)[1].strip() == '.zip':
-        zipper.unzip(savedFile, saveDir)
-        # Delete zip so its not included in the graphs we uploaded
-        os.remove(savedFile)
-        uploadedFiles = glob(os.path.join(saveDir, "*")) # get the uploaded file names
-
-      else:
-        uploadedFiles = [savedFile]
-
-      err_msg = ""
-      outfn = ""
-      for fn in uploadedFiles:
-        outfn, err_msg = convert_graph(fn, form.cleaned_data['input_format'],
-                        convertFileSaveLoc, *form.cleaned_data['output_format'])
-
-      #dwnldLoc = request.META['wsgi.url_scheme'] + '://' + \
-      #              request.META['HTTP_HOST'] + convertFileSaveLoc.replace(' ','%20')
-
-      dwnldLoc = "http://mrbrain.cs.jhu.edu" + convertFileSaveLoc.replace(' ','%20')
-
-      if (err_msg):
-        err_msg = "Your job completed with errors. The result can be found <a href=\"%s\" target=\"blank\">here</a>.<br> Message %s" % (dwnldLoc, err_msg)
-        return render_to_response(
-        'convertupload.html',
-        {'convertForm': form, 'err_msg': err_msg+"\n"},
-        context_instance=RequestContext(request))
-      #else
-      return HttpResponseRedirect(dwnldLoc)
-
-  elif(request.method == 'POST' and webargs):
-    # webargs is {inFormat}/{outFormat}
-    inFormat = webargs.split('/')[0] # E.g 'graphml'| 'dot' | 'leda'
-    outFormat =  webargs.split('/')[1].split(',')
-
-    outFormat = list(set(outFormat)) # Eliminate duplicates if any exist
-
-    baseDir = os.path.join(settings.MEDIA_ROOT, 'tmp', strftime('progUpload%a%d%b%Y_%H.%M.%S/', localtime()))
-    saveDir = os.path.join(baseDir,'upload') # Save location of original uploads
-    convertFileSaveLoc = os.path.join(baseDir,'converted') # Save location of converted data
-
-    if not os.path.exists(saveDir): os.makedirs(saveDir)
-    if not os.path.exists(convertFileSaveLoc): os.makedirs(convertFileSaveLoc)
-
-    uploadedFiles = writeBodyToDisk(request.body, saveDir)# can only be one file # TODO: Check me
-
-    # Check for zip
-    if os.path.splitext(uploadedFiles[0])[1].strip() == '.zip':
-        zipper.unzip(uploadedFiles[0], saveDir)
-        # Delete zip so its not included in the graphs we uploaded
-        os.remove(uploadedFiles[0])
-        uploadedFiles = glob(os.path.join(saveDir, "*")) # get the uploaded file names
-
-    err_msg = ""
-    outfn = ""
-    for fn in uploadedFiles:
-      outfn, err_msg = convert_graph(fn, inFormat,
-                        convertFileSaveLoc, *outFormat)
-
-    dwnldLoc = "http://mrbrain.cs.jhu.edu" + convertFileSaveLoc.replace(' ','%20')
-
-    if err_msg:
-      err_msg = "Completed with errors. View Data at: %s\n. Here are the errors:%s" % (dwnldLoc, err_msg)
-      return HttpResponse(err_msg)
-
-    elif len(webargs.split("/")) > 2:
-      if (outfn and len(outFormat) == 1):
-        return HttpResponse(dwnldLoc + "/" + outfn.split("/")[-1])
-      else:
-        return HttpResponse(dwnldLoc)
-
-    return HttpResponse ("Converted files available for download at " + dwnldLoc + " . The directory " +
-            "may be empty if you try to convert from, and to the same format.") # change to render of a page with a link to data result
-
-  else:
-    form = ConvertForm() # An empty, unbound form
-
-  # Render the form
-  return render_to_response(
-      'convertupload.html',
-      {'convertForm': form},
-      context_instance=RequestContext(request))
 
 #########################################
 #	*******************		#
