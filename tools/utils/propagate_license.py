@@ -55,7 +55,7 @@ def add(files):
     # Exception for html
 
     comment_style = comm[os.path.splitext(full_fn)[1].lower()]
-    if lines[0] == "#!/usr/bin/python":
+    if lines[0].startswith("#!/usr/bin"):
       if lines[5].startswith("# Copyright"): # get rid of copyright year
         del lines[5], lines[1]
 
