@@ -27,12 +27,14 @@
                 <connection source="S1.BrainExtraction_1.Outputbrainmask" sink="S3.ApplyRegistrationtoMask_1.OriginalImage" />
                 <connection source="S2.ComputeAffineRegistration_1.transformation" sink="S3.ApplyRegistrationtoMask_1.Transformmatrix" />
                 <connection source="D3.FiberTractography_1.DTIfibers" sink="D4.FiberConverter_1.fiberinfile" />
+                <connection source="m2g_2.Outputbrainimage" sink="RegisteredMPRAGE_1.Input" />
         </connections>
         <moduleGroup id="m2g_1" name="m2g" package="m2g" posX="0" posY="0" sourceCode="">
                 <metadata>
                         <data key="__creationDateKey" value="Thu Feb 26 15:02:18 EST 2015" />
                 </metadata>
                 <dataModule id="DTIImage_1" name="DTI Image" package="m2g" posX="98" posY="195" rotation="1" sourceCode="" type="File" source="true" loopIndex="false" serverAddress="localhost">
+                        <tag />
                         <metadata>
                                 <data key="__creationDateKey" value="Thu Feb 26 11:52:26 EST 2015" />
                         </metadata>
@@ -49,51 +51,20 @@
                                 <filetype name="niftii2" extension="nii.gz" description="" />
                         </fileTypes>
                         <values>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-01/KKI2009-01-DTI.nii</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-02/KKI2009-02-DTI.nii</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-03/KKI2009-03-DTI.nii</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-04/KKI2009-04-DTI.nii</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-05/KKI2009-05-DTI.nii</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-06/KKI2009-06-DTI.nii</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-07/KKI2009-07-DTI.nii</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-08/KKI2009-08-DTI.nii</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-09/KKI2009-09-DTI.nii</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-10/KKI2009-10-DTI.nii</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-11/KKI2009-11-DTI.nii</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-12/KKI2009-12-DTI.nii</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-13/KKI2009-13-DTI.nii</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-14/KKI2009-14-DTI.nii</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-15/KKI2009-15-DTI.nii</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-16/KKI2009-16-DTI.nii</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-17/KKI2009-17-DTI.nii</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-18/KKI2009-18-DTI.nii</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-19/KKI2009-19-DTI.nii</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-20/KKI2009-20-DTI.nii</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-21/KKI2009-21-DTI.nii</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-22/KKI2009-22-DTI.nii</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-23/KKI2009-23-DTI.nii</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-24/KKI2009-24-DTI.nii</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-25/KKI2009-25-DTI.nii</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-26/KKI2009-26-DTI.nii</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-27/KKI2009-27-DTI.nii</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-28/KKI2009-28-DTI.nii</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-29/KKI2009-29-DTI.nii</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-30/KKI2009-30-DTI.nii</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-31/KKI2009-31-DTI.nii</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-32/KKI2009-32-DTI.nii</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-33/KKI2009-33-DTI.nii</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-34/KKI2009-34-DTI.nii</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-35/KKI2009-35-DTI.nii</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-36/KKI2009-36-DTI.nii</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-37/KKI2009-37-DTI.nii</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-38/KKI2009-38-DTI.nii</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-39/KKI2009-39-DTI.nii</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-40/KKI2009-40-DTI.nii</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-41/KKI2009-41-DTI.nii</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-42/KKI2009-42-DTI.nii</value>
+                                <value>pipeline://localhost//mnt/ssd1/data/inputs/KKI2009/KKI2009-01/KKI2009-01-DTI.nii</value>
+                                <value>pipeline://localhost//mnt/ssd1/data/inputs/KKI2009/KKI2009-02/KKI2009-02-DTI.nii</value>
+                                <value>pipeline://localhost//mnt/ssd1/data/inputs/KKI2009/KKI2009-03/KKI2009-03-DTI.nii</value>
+                                <value>pipeline://localhost//mnt/ssd1/data/inputs/KKI2009/KKI2009-04/KKI2009-04-DTI.nii</value>
+                                <value>pipeline://localhost//mnt/ssd1/data/inputs/KKI2009/KKI2009-05/KKI2009-05-DTI.nii</value>
+                                <value>pipeline://localhost//mnt/ssd1/data/inputs/KKI2009/KKI2009-06/KKI2009-06-DTI.nii</value>
+                                <value>pipeline://localhost//mnt/ssd1/data/inputs/KKI2009/KKI2009-07/KKI2009-07-DTI.nii</value>
+                                <value>pipeline://localhost//mnt/ssd1/data/inputs/KKI2009/KKI2009-08/KKI2009-08-DTI.nii</value>
+                                <value>pipeline://localhost//mnt/ssd1/data/inputs/KKI2009/KKI2009-09/KKI2009-09-DTI.nii</value>
+                                <value>pipeline://localhost//mnt/ssd1/data/inputs/KKI2009/KKI2009-10/KKI2009-10-DTI.nii</value>
                         </values>
                 </dataModule>
                 <dataModule id="DTIBValues_1" name="DTI B Values" package="m2g" posX="55" posY="45" rotation="1" sourceCode="" type="File" source="true" loopIndex="false" serverAddress="localhost">
+                        <tag />
                         <metadata>
                                 <data key="__creationDateKey" value="Thu Feb 26 11:52:52 EST 2015" />
                         </metadata>
@@ -108,51 +79,20 @@
                                 <filetype name="B values" extension="b" description="" />
                         </fileTypes>
                         <values>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-01/KKI2009-01-DTI.b</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-02/KKI2009-02-DTI.b</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-03/KKI2009-03-DTI.b</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-04/KKI2009-04-DTI.b</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-05/KKI2009-05-DTI.b</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-06/KKI2009-06-DTI.b</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-07/KKI2009-07-DTI.b</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-08/KKI2009-08-DTI.b</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-09/KKI2009-09-DTI.b</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-10/KKI2009-10-DTI.b</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-11/KKI2009-11-DTI.b</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-12/KKI2009-12-DTI.b</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-13/KKI2009-13-DTI.b</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-14/KKI2009-14-DTI.b</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-15/KKI2009-15-DTI.b</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-16/KKI2009-16-DTI.b</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-17/KKI2009-17-DTI.b</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-18/KKI2009-18-DTI.b</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-19/KKI2009-19-DTI.b</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-20/KKI2009-20-DTI.b</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-21/KKI2009-21-DTI.b</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-22/KKI2009-22-DTI.b</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-23/KKI2009-23-DTI.b</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-24/KKI2009-24-DTI.b</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-25/KKI2009-25-DTI.b</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-26/KKI2009-26-DTI.b</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-27/KKI2009-27-DTI.b</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-28/KKI2009-28-DTI.b</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-29/KKI2009-29-DTI.b</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-30/KKI2009-30-DTI.b</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-31/KKI2009-31-DTI.b</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-32/KKI2009-32-DTI.b</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-33/KKI2009-33-DTI.b</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-34/KKI2009-34-DTI.b</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-35/KKI2009-35-DTI.b</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-36/KKI2009-36-DTI.b</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-37/KKI2009-37-DTI.b</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-38/KKI2009-38-DTI.b</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-39/KKI2009-39-DTI.b</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-40/KKI2009-40-DTI.b</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-41/KKI2009-41-DTI.b</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-42/KKI2009-42-DTI.b</value>
+                                <value>pipeline://localhost//mnt/ssd1/data/inputs/KKI2009/KKI2009-01/KKI2009-01-DTI.b</value>
+                                <value>pipeline://localhost//mnt/ssd1/data/inputs/KKI2009/KKI2009-02/KKI2009-02-DTI.b</value>
+                                <value>pipeline://localhost//mnt/ssd1/data/inputs/KKI2009/KKI2009-03/KKI2009-03-DTI.b</value>
+                                <value>pipeline://localhost//mnt/ssd1/data/inputs/KKI2009/KKI2009-04/KKI2009-04-DTI.b</value>
+                                <value>pipeline://localhost//mnt/ssd1/data/inputs/KKI2009/KKI2009-05/KKI2009-05-DTI.b</value>
+                                <value>pipeline://localhost//mnt/ssd1/data/inputs/KKI2009/KKI2009-06/KKI2009-06-DTI.b</value>
+                                <value>pipeline://localhost//mnt/ssd1/data/inputs/KKI2009/KKI2009-07/KKI2009-07-DTI.b</value>
+                                <value>pipeline://localhost//mnt/ssd1/data/inputs/KKI2009/KKI2009-08/KKI2009-08-DTI.b</value>
+                                <value>pipeline://localhost//mnt/ssd1/data/inputs/KKI2009/KKI2009-09/KKI2009-09-DTI.b</value>
+                                <value>pipeline://localhost//mnt/ssd1/data/inputs/KKI2009/KKI2009-10/KKI2009-10-DTI.b</value>
                         </values>
                 </dataModule>
                 <dataModule id="MPRAGEImage_1" name="MPRAGE Image" package="m2g" posX="179" posY="107" rotation="1" sourceCode="" type="File" source="true" loopIndex="false" serverAddress="localhost">
+                        <tag />
                         <metadata>
                                 <data key="__creationDateKey" value="Thu Feb 26 11:53:46 EST 2015" />
                         </metadata>
@@ -169,51 +109,20 @@
                                 <filetype name="niftii2" extension="nii.gz" description="" />
                         </fileTypes>
                         <values>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-01/KKI2009-01-MPRAGE.nii</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-02/KKI2009-02-MPRAGE.nii</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-03/KKI2009-03-MPRAGE.nii</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-04/KKI2009-04-MPRAGE.nii</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-05/KKI2009-05-MPRAGE.nii</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-06/KKI2009-06-MPRAGE.nii</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-07/KKI2009-07-MPRAGE.nii</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-08/KKI2009-08-MPRAGE.nii</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-09/KKI2009-09-MPRAGE.nii</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-10/KKI2009-10-MPRAGE.nii</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-11/KKI2009-11-MPRAGE.nii</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-12/KKI2009-12-MPRAGE.nii</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-13/KKI2009-13-MPRAGE.nii</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-14/KKI2009-14-MPRAGE.nii</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-15/KKI2009-15-MPRAGE.nii</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-16/KKI2009-16-MPRAGE.nii</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-17/KKI2009-17-MPRAGE.nii</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-18/KKI2009-18-MPRAGE.nii</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-19/KKI2009-19-MPRAGE.nii</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-20/KKI2009-20-MPRAGE.nii</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-21/KKI2009-21-MPRAGE.nii</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-22/KKI2009-22-MPRAGE.nii</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-23/KKI2009-23-MPRAGE.nii</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-24/KKI2009-24-MPRAGE.nii</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-25/KKI2009-25-MPRAGE.nii</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-26/KKI2009-26-MPRAGE.nii</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-27/KKI2009-27-MPRAGE.nii</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-28/KKI2009-28-MPRAGE.nii</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-29/KKI2009-29-MPRAGE.nii</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-30/KKI2009-30-MPRAGE.nii</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-31/KKI2009-31-MPRAGE.nii</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-32/KKI2009-32-MPRAGE.nii</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-33/KKI2009-33-MPRAGE.nii</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-34/KKI2009-34-MPRAGE.nii</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-35/KKI2009-35-MPRAGE.nii</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-36/KKI2009-36-MPRAGE.nii</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-37/KKI2009-37-MPRAGE.nii</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-38/KKI2009-38-MPRAGE.nii</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-39/KKI2009-39-MPRAGE.nii</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-40/KKI2009-40-MPRAGE.nii</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-41/KKI2009-41-MPRAGE.nii</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-42/KKI2009-42-MPRAGE.nii</value>
+                                <value>pipeline://localhost//mnt/ssd1/data/inputs/KKI2009/KKI2009-01/KKI2009-01-MPRAGE.nii</value>
+                                <value>pipeline://localhost//mnt/ssd1/data/inputs/KKI2009/KKI2009-02/KKI2009-02-MPRAGE.nii</value>
+                                <value>pipeline://localhost//mnt/ssd1/data/inputs/KKI2009/KKI2009-03/KKI2009-03-MPRAGE.nii</value>
+                                <value>pipeline://localhost//mnt/ssd1/data/inputs/KKI2009/KKI2009-04/KKI2009-04-MPRAGE.nii</value>
+                                <value>pipeline://localhost//mnt/ssd1/data/inputs/KKI2009/KKI2009-05/KKI2009-05-MPRAGE.nii</value>
+                                <value>pipeline://localhost//mnt/ssd1/data/inputs/KKI2009/KKI2009-06/KKI2009-06-MPRAGE.nii</value>
+                                <value>pipeline://localhost//mnt/ssd1/data/inputs/KKI2009/KKI2009-07/KKI2009-07-MPRAGE.nii</value>
+                                <value>pipeline://localhost//mnt/ssd1/data/inputs/KKI2009/KKI2009-08/KKI2009-08-MPRAGE.nii</value>
+                                <value>pipeline://localhost//mnt/ssd1/data/inputs/KKI2009/KKI2009-09/KKI2009-09-MPRAGE.nii</value>
+                                <value>pipeline://localhost//mnt/ssd1/data/inputs/KKI2009/KKI2009-10/KKI2009-10-MPRAGE.nii</value>
                         </values>
                 </dataModule>
                 <dataModule id="Atlas_1" name="Atlas" package="m2g" posX="528" posY="160" sourceCode="" type="File" source="true" loopIndex="false" serverAddress="localhost">
+                        <tag />
                         <metadata>
                                 <data key="__creationDateKey" value="Thu Feb 26 15:59:19 EST 2015" />
                         </metadata>
@@ -230,10 +139,11 @@
                                 <filetype name="niftii2" extension="nii.gz" description="" />
                         </fileTypes>
                         <values>
-                                <value>pipeline://localhost//home/greg/atlas/icbm_avg_152_t1_tal_nlin_symmetric_VI.nii</value>
+                                <value>pipeline://localhost//mnt/ssd1/atlas/MNI152_T1_1mm_brain.nii</value>
                         </values>
                 </dataModule>
-                <dataModule id="Graphs_1" name="Graphs" package="m2g" posX="286" posY="520" sourceCode="" type="File" source="false" loopIndex="false" serverAddress="localhost" dirDump="false">
+                <dataModule id="Graphs_1" name="Graphs" package="m2g" posX="192" posY="561" sourceCode="" type="File" source="false" loopIndex="false" serverAddress="localhost" dirDump="false">
+                        <tag />
                         <metadata>
                                 <data key="__creationDateKey" value="Thu Feb 26 16:00:53 EST 2015" />
                         </metadata>
@@ -258,41 +168,10 @@
                                 <value>pipeline://localhost//home/greg/data/outputs/KKI2009/smallgraphs/KKI2009-08-sg.mat</value>
                                 <value>pipeline://localhost//home/greg/data/outputs/KKI2009/smallgraphs/KKI2009-09-sg.mat</value>
                                 <value>pipeline://localhost//home/greg/data/outputs/KKI2009/smallgraphs/KKI2009-10-sg.mat</value>
-                                <value>pipeline://localhost//home/greg/data/outputs/KKI2009/smallgraphs/KKI2009-11-sg.mat</value>
-                                <value>pipeline://localhost//home/greg/data/outputs/KKI2009/smallgraphs/KKI2009-12-sg.mat</value>
-                                <value>pipeline://localhost//home/greg/data/outputs/KKI2009/smallgraphs/KKI2009-13-sg.mat</value>
-                                <value>pipeline://localhost//home/greg/data/outputs/KKI2009/smallgraphs/KKI2009-14-sg.mat</value>
-                                <value>pipeline://localhost//home/greg/data/outputs/KKI2009/smallgraphs/KKI2009-15-sg.mat</value>
-                                <value>pipeline://localhost//home/greg/data/outputs/KKI2009/smallgraphs/KKI2009-16-sg.mat</value>
-                                <value>pipeline://localhost//home/greg/data/outputs/KKI2009/smallgraphs/KKI2009-17-sg.mat</value>
-                                <value>pipeline://localhost//home/greg/data/outputs/KKI2009/smallgraphs/KKI2009-18-sg.mat</value>
-                                <value>pipeline://localhost//home/greg/data/outputs/KKI2009/smallgraphs/KKI2009-19-sg.mat</value>
-                                <value>pipeline://localhost//home/greg/data/outputs/KKI2009/smallgraphs/KKI2009-20-sg.mat</value>
-                                <value>pipeline://localhost//home/greg/data/outputs/KKI2009/smallgraphs/KKI2009-21-sg.mat</value>
-                                <value>pipeline://localhost//home/greg/data/outputs/KKI2009/smallgraphs/KKI2009-22-sg.mat</value>
-                                <value>pipeline://localhost//home/greg/data/outputs/KKI2009/smallgraphs/KKI2009-23-sg.mat</value>
-                                <value>pipeline://localhost//home/greg/data/outputs/KKI2009/smallgraphs/KKI2009-24-sg.mat</value>
-                                <value>pipeline://localhost//home/greg/data/outputs/KKI2009/smallgraphs/KKI2009-25-sg.mat</value>
-                                <value>pipeline://localhost//home/greg/data/outputs/KKI2009/smallgraphs/KKI2009-26-sg.mat</value>
-                                <value>pipeline://localhost//home/greg/data/outputs/KKI2009/smallgraphs/KKI2009-27-sg.mat</value>
-                                <value>pipeline://localhost//home/greg/data/outputs/KKI2009/smallgraphs/KKI2009-28-sg.mat</value>
-                                <value>pipeline://localhost//home/greg/data/outputs/KKI2009/smallgraphs/KKI2009-29-sg.mat</value>
-                                <value>pipeline://localhost//home/greg/data/outputs/KKI2009/smallgraphs/KKI2009-30-sg.mat</value>
-                                <value>pipeline://localhost//home/greg/data/outputs/KKI2009/smallgraphs/KKI2009-31-sg.mat</value>
-                                <value>pipeline://localhost//home/greg/data/outputs/KKI2009/smallgraphs/KKI2009-32-sg.mat</value>
-                                <value>pipeline://localhost//home/greg/data/outputs/KKI2009/smallgraphs/KKI2009-33-sg.mat</value>
-                                <value>pipeline://localhost//home/greg/data/outputs/KKI2009/smallgraphs/KKI2009-34-sg.mat</value>
-                                <value>pipeline://localhost//home/greg/data/outputs/KKI2009/smallgraphs/KKI2009-35-sg.mat</value>
-                                <value>pipeline://localhost//home/greg/data/outputs/KKI2009/smallgraphs/KKI2009-36-sg.mat</value>
-                                <value>pipeline://localhost//home/greg/data/outputs/KKI2009/smallgraphs/KKI2009-37-sg.mat</value>
-                                <value>pipeline://localhost//home/greg/data/outputs/KKI2009/smallgraphs/KKI2009-38-sg.mat</value>
-                                <value>pipeline://localhost//home/greg/data/outputs/KKI2009/smallgraphs/KKI2009-39-sg.mat</value>
-                                <value>pipeline://localhost//home/greg/data/outputs/KKI2009/smallgraphs/KKI2009-40-sg.mat</value>
-                                <value>pipeline://localhost//home/greg/data/outputs/KKI2009/smallgraphs/KKI2009-41-sg.mat</value>
-                                <value>pipeline://localhost//home/greg/data/outputs/KKI2009/smallgraphs/KKI2009-42-sg.mat</value>
                         </values>
                 </dataModule>
                 <dataModule id="DTIGradients_1" name="DTI Gradients" package="m2g" posX="219" posY="227" rotation="1" sourceCode="" type="File" source="true" loopIndex="false" serverAddress="localhost">
+                        <tag />
                         <metadata>
                                 <data key="__creationDateKey" value="Thu Feb 26 16:01:30 EST 2015" />
                         </metadata>
@@ -307,51 +186,20 @@
                                 <filetype name="gradients" extension="grad" description="" />
                         </fileTypes>
                         <values>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-01/KKI2009-01-DTI.grad</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-02/KKI2009-02-DTI.grad</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-03/KKI2009-03-DTI.grad</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-04/KKI2009-04-DTI.grad</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-05/KKI2009-05-DTI.grad</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-06/KKI2009-06-DTI.grad</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-07/KKI2009-07-DTI.grad</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-08/KKI2009-08-DTI.grad</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-09/KKI2009-09-DTI.grad</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-10/KKI2009-10-DTI.grad</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-11/KKI2009-11-DTI.grad</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-12/KKI2009-12-DTI.grad</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-13/KKI2009-13-DTI.grad</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-14/KKI2009-14-DTI.grad</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-15/KKI2009-15-DTI.grad</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-16/KKI2009-16-DTI.grad</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-17/KKI2009-17-DTI.grad</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-18/KKI2009-18-DTI.grad</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-19/KKI2009-19-DTI.grad</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-20/KKI2009-20-DTI.grad</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-21/KKI2009-21-DTI.grad</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-22/KKI2009-22-DTI.grad</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-23/KKI2009-23-DTI.grad</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-24/KKI2009-24-DTI.grad</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-25/KKI2009-25-DTI.grad</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-26/KKI2009-26-DTI.grad</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-27/KKI2009-27-DTI.grad</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-28/KKI2009-28-DTI.grad</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-29/KKI2009-29-DTI.grad</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-30/KKI2009-30-DTI.grad</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-31/KKI2009-31-DTI.grad</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-32/KKI2009-32-DTI.grad</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-33/KKI2009-33-DTI.grad</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-34/KKI2009-34-DTI.grad</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-35/KKI2009-35-DTI.grad</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-36/KKI2009-36-DTI.grad</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-37/KKI2009-37-DTI.grad</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-38/KKI2009-38-DTI.grad</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-39/KKI2009-39-DTI.grad</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-40/KKI2009-40-DTI.grad</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-41/KKI2009-41-DTI.grad</value>
-                                <value>pipeline://localhost//home/greg/data/inputs/KKI2009/KKI2009-42/KKI2009-42-DTI.grad</value>
+                                <value>pipeline://localhost//mnt/ssd1/data/inputs/KKI2009/KKI2009-01/KKI2009-01-DTI.grad</value>
+                                <value>pipeline://localhost//mnt/ssd1/data/inputs/KKI2009/KKI2009-02/KKI2009-02-DTI.grad</value>
+                                <value>pipeline://localhost//mnt/ssd1/data/inputs/KKI2009/KKI2009-03/KKI2009-03-DTI.grad</value>
+                                <value>pipeline://localhost//mnt/ssd1/data/inputs/KKI2009/KKI2009-04/KKI2009-04-DTI.grad</value>
+                                <value>pipeline://localhost//mnt/ssd1/data/inputs/KKI2009/KKI2009-05/KKI2009-05-DTI.grad</value>
+                                <value>pipeline://localhost//mnt/ssd1/data/inputs/KKI2009/KKI2009-06/KKI2009-06-DTI.grad</value>
+                                <value>pipeline://localhost//mnt/ssd1/data/inputs/KKI2009/KKI2009-07/KKI2009-07-DTI.grad</value>
+                                <value>pipeline://localhost//mnt/ssd1/data/inputs/KKI2009/KKI2009-08/KKI2009-08-DTI.grad</value>
+                                <value>pipeline://localhost//mnt/ssd1/data/inputs/KKI2009/KKI2009-09/KKI2009-09-DTI.grad</value>
+                                <value>pipeline://localhost//mnt/ssd1/data/inputs/KKI2009/KKI2009-10/KKI2009-10-DTI.grad</value>
                         </values>
                 </dataModule>
                 <dataModule id="AtlasLabels_1" name="Atlas Labels" package="m2g" posX="568" posY="227" sourceCode="" type="File" source="true" loopIndex="false" serverAddress="localhost">
+                        <tag />
                         <metadata>
                                 <data key="__creationDateKey" value="Thu Feb 26 16:02:11 EST 2015" />
                         </metadata>
@@ -368,7 +216,7 @@
                                 <filetype name="niftii2" extension="nii.gz" description="" />
                         </fileTypes>
                         <values>
-                                <value>pipeline://localhost//home/greg/atlas/MNI152_T1_1mm_brain_labels_cropped.nii</value>
+                                <value>pipeline://localhost//mnt/ssd1/atlas/MNI152_T1_1mm_brain_labels_cropped.nii</value>
                         </values>
                 </dataModule>
                 <moduleGroup id="m2g_2" name="m2g" package="m2g" posX="295" posY="369" sourceCode="">
@@ -390,7 +238,6 @@
                         <output link="C2.ApplyRegistrationtoDTI_1.WarpedImage" id="m2g_2.WarpedImage" name="Warped Image" order="12" />
                         <output link="D4.FiberConverter_1.fiberoutfile" id="m2g_2.fiberoutfile" name="fiber outfile" order="13" />
                         <module id="C2.ApplyRegistrationtoDTI_1" name="C2. Apply Registration to DTI" package="m2g" posX="188" posY="2118" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/packages/registration/apply_registration.py">
-                                <tag />
                                 <metadata>
                                         <data key="__creationDateKey" value="Thu Feb 26 13:46:28 EST 2015" />
                                 </metadata>
@@ -427,7 +274,6 @@
                                 </input>
                         </module>
                         <module id="D2.TensorEstimation_1" name="D2. Tensor Estimation" package="m2g" posX="0" posY="2517" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/packages/tractography/tensor_gen.py">
-                                <tag />
                                 <metadata>
                                         <data key="__creationDateKey" value="Fri Jan 09 11:38:39 EST 2015" />
                                 </metadata>
@@ -524,7 +370,6 @@
                                 </output>
                         </module>
                         <module id="D3.FiberTractography_1" name="D3. Fiber Tractography" package="m2g" posX="0" posY="2887" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/packages/tractography/fiber_gen.py">
-                                <tag />
                                 <metadata>
                                         <data key="__creationDateKey" value="Fri Jan 09 13:07:20 EST 2015" />
                                 </metadata>
@@ -578,7 +423,6 @@
                                 </output>
                         </module>
                         <module id="S2.ComputeAffineRegistration_1" name="S2. Compute Affine Registration" package="m2g" posX="379" posY="698" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/packages/registration/register_affine.py">
-                                <tag />
                                 <metadata>
                                         <data key="__creationDateKey" value="Thu Feb 26 09:45:13 EST 2015" />
                                 </metadata>
@@ -648,7 +492,6 @@
                                 </output>
                         </module>
                         <module id="C2.ApplyRegistrationtoDTI_2" name="C2. Apply Registration to DTI" package="m2g" posX="193" posY="1876" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/packages/registration/apply_registration.py">
-                                <tag />
                                 <metadata>
                                         <data key="__creationDateKey" value="Thu Feb 26 13:46:28 EST 2015" />
                                 </metadata>
@@ -685,7 +528,6 @@
                                 </input>
                         </module>
                         <module id="S1.BrainExtraction_1" name="S1. Brain Extraction" package="m2g" posX="381" posY="51" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/packages/mpragepreproc/brain_extract.py">
-                                <tag />
                                 <metadata>
                                         <data key="__creationDateKey" value="Thu Feb 26 11:28:32 EST 2015" />
                                 </metadata>
@@ -727,7 +569,6 @@
                                 </output>
                         </module>
                         <module id="D1.B0Registration_1" name="D1. B0 Registration" package="m2g" posX="0" posY="333" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/packages/dtipreproc/b0_registration.py">
-                                <tag />
                                 <metadata>
                                         <data key="__creationDateKey" value="Thu Feb 26 11:43:03 EST 2015" />
                                 </metadata>
@@ -764,7 +605,6 @@
                                 </output>
                         </module>
                         <module id="C1.ComputeRigidRegistration_1" name="C1. Compute Rigid Registration" package="m2g" posX="192" posY="1128" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/packages/registration/register_rigid.py">
-                                <tag />
                                 <metadata>
                                         <data key="__creationDateKey" value="Thu Feb 26 09:45:13 EST 2015" />
                                 </metadata>
@@ -807,7 +647,6 @@
                                 </output>
                         </module>
                         <module id="S3.ApplyRegistrationtoMask_1" name="S3. Apply Registration to Mask" package="m2g" posX="378" posY="1519" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/packages/registration/apply_registration.py">
-                                <tag />
                                 <metadata>
                                         <data key="__creationDateKey" value="Thu Feb 26 13:46:28 EST 2015" />
                                 </metadata>
@@ -844,7 +683,6 @@
                                 </input>
                         </module>
                         <module id="D4.FiberConverter_1" name="D4. Fiber Converter" package="m2g" posX="0" posY="3281" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/packages/utils/fiber_convert.py">
-                                <tag />
                                 <metadata>
                                         <data key="__creationDateKey" value="Sun Jan 11 21:38:32 EST 2015" />
                                 </metadata>
@@ -864,6 +702,36 @@
                                 </output>
                         </module>
                 </moduleGroup>
+                <dataModule id="RegisteredMPRAGE_1" name="Registered MPRAGE" package="m2g" posX="345" posY="554" sourceCode="" type="File" source="false" loopIndex="false" serverAddress="localhost" dirDump="false">
+                        <tag />
+                        <metadata>
+                                <data key="__creationDateKey" value="Tue Mar 17 11:42:06 EDT 2015" />
+                        </metadata>
+                        <input id="RegisteredMPRAGE_1.Input" name="Input" required="true" enabled="true" order="-1">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="nifti" extension="nii" description="" />
+                                                <filetype name="niftii2" extension="nii.gz" description="" />
+                                        </fileTypes>
+                                </format>
+                        </input>
+                        <fileTypes>
+                                <filetype name="nifti" extension="nii" description="" />
+                                <filetype name="niftii2" extension="nii.gz" description="" />
+                        </fileTypes>
+                        <values>
+                                <value>pipeline://localhost//home/greg/data/outputs/KKI2009/registered_mprage/KKI2009-01-MPRAGE_in_MNI.nii.gz</value>
+                                <value>pipeline://localhost//home/greg/data/outputs/KKI2009/registered_mprage/KKI2009-02-MPRAGE_in_MNI.nii.gz</value>
+                                <value>pipeline://localhost//home/greg/data/outputs/KKI2009/registered_mprage/KKI2009-03-MPRAGE_in_MNI.nii.gz</value>
+                                <value>pipeline://localhost//home/greg/data/outputs/KKI2009/registered_mprage/KKI2009-04-MPRAGE_in_MNI.nii.gz</value>
+                                <value>pipeline://localhost//home/greg/data/outputs/KKI2009/registered_mprage/KKI2009-05-MPRAGE_in_MNI.nii.gz</value>
+                                <value>pipeline://localhost//home/greg/data/outputs/KKI2009/registered_mprage/KKI2009-06-MPRAGE_in_MNI.nii.gz</value>
+                                <value>pipeline://localhost//home/greg/data/outputs/KKI2009/registered_mprage/KKI2009-07-MPRAGE_in_MNI.nii.gz</value>
+                                <value>pipeline://localhost//home/greg/data/outputs/KKI2009/registered_mprage/KKI2009-08-MPRAGE_in_MNI.nii.gz</value>
+                                <value>pipeline://localhost//home/greg/data/outputs/KKI2009/registered_mprage/KKI2009-09-MPRAGE_in_MNI.nii.gz</value>
+                                <value>pipeline://localhost//home/greg/data/outputs/KKI2009/registered_mprage/KKI2009-10-MPRAGE_in_MNI.nii.gz</value>
+                        </values>
+                </dataModule>
         </moduleGroup>
 </pipeline>
 
