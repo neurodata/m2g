@@ -24,7 +24,6 @@ import zipfile
 import tempfile
 import os
 from igraph import read as igraph_read
-from django.conf import settings
 
 def write_mm(g, fn):
   """
