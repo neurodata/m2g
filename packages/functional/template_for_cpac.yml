@@ -1,0 +1,11 @@
+-
+    subject_id: '3154996'
+    unique_id: 'session_1'
+    anat: 
+    rest: 
+    scan_parameters:
+        tr: '2.5'
+        acquisition: 'seq+z'
+        reference: '24'
+        first_tr: ''
+        last_tr: ''
