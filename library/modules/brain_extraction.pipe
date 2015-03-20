@@ -14,10 +14,10 @@
                                         </fileTypes>
                                 </format>
                         </input>
-                        <input id="BrainExtraction_1.FractionalIntensityThreshold" name="Fractional Intensity Threshold" description="default=0.25 (verified on KKI dataset)" required="false" enabled="true" order="1" prefix="-f" prefixSpaced="true" prefixAllArgs="false">
+                        <input id="BrainExtraction_1.FractionalIntensityThreshold" name="Fractional Intensity Threshold" description="default=0.25 (verified on KKI dataset)" required="false" enabled="true" order="1">
                                 <format type="Number" cardinality="1" />
                         </input>
-                        <input id="BrainExtraction_1.Verticalgradient" name="Vertical gradient" description="0" required="false" enabled="true" order="2" prefix="-g" prefixSpaced="true" prefixAllArgs="false">
+                        <input id="BrainExtraction_1.Verticalgradient" name="Vertical gradient" description="0" required="false" enabled="true" order="2">
                                 <format type="Number" cardinality="1" />
                         </input>
                         <output id="BrainExtraction_1.Outputbrainimage" name="Output brain image" required="false" enabled="true" order="3">
