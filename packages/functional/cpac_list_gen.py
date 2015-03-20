@@ -21,43 +21,52 @@
 # Copyright (c) 2015. All rights reserved.
 
 from argparse import ArgumentParser
-import os
-from re import findall
-from scipy.sparse import lil_matrix, triu
-from scipy.io import savemat
+from os import listdir
+from os.path import isdir, join
+from re import compile, sub
+from random import random
+from numpy import floor
 
-
-def graphconvert(ingraph, outgraph):
-  inf = open(ingraph, 'r')
-  edges = []
-  weight = []
-  for line in inf:
-    edges += findall('<edge source="n(\d+)" target="n(\d+)">', line)
-    weight += findall('<data key="e_weight">(\d+)</data>', line)
-
-  graph = lil_matrix((70,70))
-  for i in range(len(weight)):
-    idx1 = int(edges[i][0])-1
-    idx2 = int(edges[i][1])-1
-    if idx1 > 70:
-      idx1 = idx1-65
-    if idx2 > 70:
-      idx2 = idx2-65
-    graph[idx1, idx2]=int(weight[i])
-    graph[idx2, idx1]=int(weight[i])
+def make_list(datadir, template, outlist):
   
-  graph = triu(graph)
-  mdict = {"graph": graph}
-  savemat(outgraph, mdict)
+  inf = open(template, 'r')
+  content = inf.readlines()
+  inf.close()
+
+  p = compile('num|path')
+  dirs = [f for f in listdir(datadir) if isdir(join(datadir,f))]
+  out_data = list()
+  for i in range(0, len(dirs)):
+    temp_sub =  content[:]
+    
+    subj_id = i+1
+    unique_id = floor(random()*pow(2,32))
+    mprage_path = join(datadir, dirs[i]+'/'+dirs[i]+'-MPRAGE.nii')
+    fmri_path = join(datadir, dirs[i]+'/'+dirs[i]+'-fMRI.nii')
+
+    temp_sub[1] = p.sub("'"+str(subj_id)+"'", temp_sub[1])
+    temp_sub[2] = p.sub("'"+str(int(unique_id))+"'", temp_sub[2])
+    temp_sub[3] = p.sub("'"+mprage_path+"'", temp_sub[3])
+    temp_sub[4] = p.sub("'"+fmri_path+"'", temp_sub[4])
+    out_data.append(temp_sub)
   
+  ouf = open(outlist, 'w')
+  for subj in out_data:
+    for val in subj:
+      ouf.write(val)
+  ouf.close()
+
 def main():
   parser = ArgumentParser(description="")
-  parser.add_argument("ingraph", action="store", help="input graph in graphml format")
-  parser.add_argument("outgraph", action="store", help="output graph in mat format")
- 
+  parser.add_argument("data_dir", action="store", help="base data directory (contains directories for all subjects")
+  parser.add_argument("outlist", action="store", help="output list file")
+  parser.add_argument("-t","--template", nargs="+", help="template for cpac format")
+
   result = parser.parse_args()
-  
-  graphconvert(result.ingraph, result.outgraph)
+  if result.template:
+    make_list(result.data_dir, result.template, result.outlist)
+  else:
+    make_list(result.data_dir, 'template_for_cpac.yml', result.outlist)
 
 if __name__=='__main__':
   main()
