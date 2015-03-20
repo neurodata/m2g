@@ -1,8 +1,8 @@
 -
-    subject_id: '3154996'
-    unique_id: 'session_1'
-    anat: 
-    rest: 
+    subject_id: num
+    unique_id: num
+    anat: path
+    rest: path
     scan_parameters:
         tr: '2.5'
         acquisition: 'seq+z'
