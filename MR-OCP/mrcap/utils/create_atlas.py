@@ -46,7 +46,9 @@ def create(roifn=os.path.join(os.path.dirname(__file__),
 
   start_time = time()
   print "Loading rois as base ..."
-  base = nib.load(roifn).get_data()
+  img = nib.load(roifn)
+  base = img.get_data()[:]
+  aff = img.get_affine()[:]
   true_dim = base.shape
 
   # Labelling new 
@@ -60,6 +62,8 @@ def create(roifn=os.path.join(os.path.dirname(__file__),
 
   # Align new to scale factor
   xdim, ydim, zdim = map(ceil, np.array(base.shape)/float(step)) 
+  if step == 1:
+    assert xdim == base.shape[0] and ydim == base.shape[1] and zdim == base.shape[2]
   resized_base = np.zeros((xdim*step, ydim*step, zdim*step), dtype=int)
   resized_base[:base.shape[0], :base.shape[1], :base.shape[2]] = base
   base = resized_base
@@ -86,7 +90,7 @@ def create(roifn=os.path.join(os.path.dirname(__file__),
   
   new = new[:true_dim[0], :true_dim[1], :true_dim[2]] # shrink new to correct size
   print "Your atlas has %d regions ..." % new.max()
-  img = nib.Nifti1Image(new, np.identity(4))
+  img = nib.Nifti1Image(new, affine=aff, header=nib.load(roifn).get_header())
   
   print "Building atlas took %.3f sec ..." % (time()-start_time)
   return img
