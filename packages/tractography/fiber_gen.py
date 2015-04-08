@@ -32,10 +32,12 @@ def make_fibs(tensors, mask, anis, curve, fibers, vtk,log):
 
   # Perfoms fiber tractography in voxelspace on the given tensors
   os.system('track -inputmodel dt -seedfile '+mask+' -anisthresh '+anis+' -curvethresh '+curve+' -inputfile '+tensors+' > '+fibers+' -outputinvoxelspace 2>'+log)
-
-  # Converts the fibers to an easy-to-view format
+	
+	#Removes small fibers
+	#os.system('procstreamlines -mintractlength')
+  
+	# Converts the fibers to an easy-to-view format
   os.system('vtkstreamlines -colourorient < '+fibers+' > '+vtk)
-
 
 def main():
   parser = argparse.ArgumentParser(description="")
