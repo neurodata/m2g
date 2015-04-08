@@ -37,6 +37,8 @@ def make_fibs(tensors, mask, anis, curve, fibers, vtk,log):
 	#os.system('procstreamlines -mintractlength')
   
 	# Converts the fibers to an easy-to-view format
+
+  # Converts the fibers to an easy-to-view format
   os.system('vtkstreamlines -colourorient < '+fibers+' > '+vtk)
 
 def main():
