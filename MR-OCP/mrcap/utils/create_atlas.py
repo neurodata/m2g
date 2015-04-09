@@ -30,12 +30,12 @@ import nibabel as nib
 import numpy as np
 from math import ceil
 from copy import copy
-import sys
+import sys, pdb
 from time import time
 import os
 
 def create(roifn=os.path.join(os.path.dirname(__file__), 
-          "MNI152_T1_1mm_brain.nii"), start=2):
+            "MNI152_T1_1mm_brain.nii"), start=2):
   """
   Create a new atlas given some scaling factor determined by the 
   start index. Opaque doc, but best I can do.
@@ -46,7 +46,11 @@ def create(roifn=os.path.join(os.path.dirname(__file__),
 
   start_time = time()
   print "Loading rois as base ..."
-  base = nib.load(roifn).get_data()
+  img = nib.load(roifn)
+  base = img.get_data()
+  aff = img.get_affine()
+  fm = img.file_map
+
   true_dim = base.shape
 
   # Labelling new 
@@ -60,6 +64,8 @@ def create(roifn=os.path.join(os.path.dirname(__file__),
 
   # Align new to scale factor
   xdim, ydim, zdim = map(ceil, np.array(base.shape)/float(step)) 
+  if step == 1:
+    assert xdim == base.shape[0] and ydim == base.shape[1] and zdim == base.shape[2]
   resized_base = np.zeros((xdim*step, ydim*step, zdim*step), dtype=int)
   resized_base[:base.shape[0], :base.shape[1], :base.shape[2]] = base
   base = resized_base
@@ -86,7 +92,7 @@ def create(roifn=os.path.join(os.path.dirname(__file__),
   
   new = new[:true_dim[0], :true_dim[1], :true_dim[2]] # shrink new to correct size
   print "Your atlas has %d regions ..." % new.max()
-  img = nib.Nifti1Image(new, np.identity(4))
+  img = nib.Nifti1Image(new, affine=aff, header=nib.load(roifn).get_header(), file_map=fm)
   
   print "Building atlas took %.3f sec ..." % (time()-start_time)
   return img
@@ -118,7 +124,8 @@ def validate(atlas_fn, roifn):
 
 
 def main():
-  parser = argparse.ArgumentParser(description="Downsample a fibergraph")
+  parser = argparse.ArgumentParser(description="Create an atlas for the purposes of \
+                                                      downsampling a fibergraph")
   parser.add_argument("roifn", action="store", help="NIFTI roi")
   parser.add_argument("-n","--niftifn",  action="store", default="atlas.nii", \
           help="Nifti outfile name if creating else the infile name if validation")
