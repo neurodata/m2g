@@ -93,7 +93,7 @@ def main():
   
   g = igraph_io.read_arbitrary(result.infn, informat=result.informat)
 
-  if result.factor:
+  if result.factor < 0:
     new_graph = downsample(g, factor=result.factor)
   elif result.atlas:
     new_graph = downsample(g, atlas=nib.load(result.atlas))
