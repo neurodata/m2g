@@ -57,16 +57,7 @@ def create_dir_struct(resultDirs, derivFiles = None):
     for f in derivFiles:
       if not os.path.exists(os.path.join(resultDirs,'derivatives', f.split('/')[-1])):
         move(f, os.path.join(resultDirs, 'derivatives'))
-
-      # Unqulify file names for processing
-      if (f[-4:] == '.dat'):
-        fiber_fn = f.split('/')[-1]
-      elif (f[-4:] == '.xml'):
-        roi_xml_fn = f.split('/')[-1]
-      elif (f[-4:] == '.raw'):
-        roi_raw_fn = f.split('/')[-1]
-
-    return [fiber_fn, roi_xml_fn, roi_raw_fn]
+    return
 
   for folder in resultDirs:
     if not os.path.exists(folder):

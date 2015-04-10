@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<pipeline version=".2">
+        <connections>
+                <connection source="MPRAGEImage_1.Output" sink="BrainExtraction_1.Inputimage" />
+                <connection source="BrainExtraction_1.Outputbrainimage" sink="AffineRegistration_1.MovingImage" />
+                <connection source="AffineRegistration_1.OutputImage" sink="RegisteredMPRAGE_1.Input" />
+        </connections>
+        <moduleGroup id="register_mprage_1" name="register_mprage" package="m2g" posX="0" posY="0" sourceCode="">
+                <tag />
+                <metadata>
+                        <data key="__creationDateKey" value="Tue Mar 17 12:05:04 EDT 2015" />
+                </metadata>
+                <module id="BrainExtraction_1" name="Brain Extraction" package="m2g" posX="362" posY="187" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/packages/mpragepreproc/brain_extract.py">
+                        <tag />
+                        <metadata>
+                                <data key="__creationDateKey" value="Thu Feb 26 11:28:32 EST 2015" />
+                        </metadata>
+                        <input id="BrainExtraction_1.Inputimage" name="Input image" required="false" enabled="true" order="0">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="niftii2" extension="nii.gz" description="" />
+                                                <filetype name="nifti" extension="nii" description="" />
+                                        </fileTypes>
+                                </format>
+                        </input>
+                        <input id="BrainExtraction_1.FractionalIntensityThreshold" name="Fractional Intensity Threshold" description="default=0.25 (verified on KKI dataset)" required="false" enabled="true" order="1">
+                                <format type="Number" cardinality="1" />
+                                <values>
+                                        <value>0.25</value>
+                                </values>
+                        </input>
+                        <input id="BrainExtraction_1.Verticalgradient" name="Vertical gradient" description="0" required="false" enabled="true" order="2">
+                                <format type="Number" cardinality="1" />
+                                <values>
+                                        <value>0</value>
+                                </values>
+                        </input>
+                        <output id="BrainExtraction_1.Outputbrainimage" name="Output brain image" required="false" enabled="true" order="3">
+                                <format type="File" cardinality="-2" cardinalityBase="Input image">
+                                        <fileTypes>
+                                                <filetype name="niftii2" extension="nii.gz" description="" />
+                                                <filetype name="nifti" extension="nii" description="" />
+                                        </fileTypes>
+                                </format>
+                        </output>
+                        <output id="BrainExtraction_1.Outputbrainmask" name="Output brain mask" required="false" enabled="true" order="4">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="niftii2" extension="nii.gz" description="" />
+                                                <filetype name="nifti" extension="nii" description="" />
+                                        </fileTypes>
+                                </format>
+                        </output>
+                </module>
+                <module id="AffineRegistration_1" name="Affine Registration" package="m2g" posX="346" posY="389" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/packages/registration/register_affine.py">
+                        <metadata>
+                                <data key="__creationDateKey" value="Thu Feb 26 09:45:13 EST 2015" />
+                        </metadata>
+                        <input id="AffineRegistration_1.FixedImage" name="Fixed Image" required="false" enabled="true" order="0">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="nifti" extension="nii" description="" />
+                                                <filetype name="niftii2" extension="nii.gz" description="" />
+                                        </fileTypes>
+                                </format>
+                                <values>
+                                        <value>pipeline://localhost//mnt/ssd1/atlas/MNI152_T1_1mm_brain.nii</value>
+                                </values>
+                        </input>
+                        <input id="AffineRegistration_1.MovingImage" name="Moving Image" required="false" enabled="true" order="1">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="niftii2" extension="nii.gz" description="" />
+                                                <filetype name="nifti" extension="nii" description="" />
+                                        </fileTypes>
+                                </format>
+                        </input>
+                        <input id="AffineRegistration_1.tolerance" name="tolerance" required="false" enabled="true" order="2">
+                                <format type="Number" cardinality="1" />
+                                <values>
+                                        <value>1e-4</value>
+                                </values>
+                        </input>
+                        <output id="AffineRegistration_1.OutputImage" name="Output Image" required="false" enabled="true" order="3">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="niftii2" extension="nii.gz" description="" />
+                                                <filetype name="nifti" extension="nii" description="" />
+                                        </fileTypes>
+                                </format>
+                        </output>
+                        <output id="AffineRegistration_1.transformation" name="transformation" required="false" enabled="true" order="4">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="Matlab file" extension="mat" description="" />
+                                        </fileTypes>
+                                </format>
+                        </output>
+                </module>
+                <dataModule id="MPRAGEImage_1" name="MPRAGE Image" package="m2g" posX="354" posY="26" sourceCode="" type="File" source="true" loopIndex="false" serverAddress="localhost">
+                        <tag />
+                        <metadata>
+                                <data key="__creationDateKey" value="Thu Feb 26 11:53:46 EST 2015" />
+                        </metadata>
+                        <output id="MPRAGEImage_1.Output" name="Output" required="true" enabled="true" order="-1">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="nifti" extension="nii" description="" />
+                                                <filetype name="niftii2" extension="nii.gz" description="" />
+                                        </fileTypes>
+                                </format>
+                        </output>
+                        <fileTypes>
+                                <filetype name="nifti" extension="nii" description="" />
+                                <filetype name="niftii2" extension="nii.gz" description="" />
+                        </fileTypes>
+                        <values>
+                                <value>pipeline://localhost//mnt/ssd1/data/inputs/KKI2009/KKI2009-31/KKI2009-31-MPRAGE.nii</value>
+                                <value>pipeline://localhost//mnt/ssd1/data/inputs/KKI2009/KKI2009-32/KKI2009-32-MPRAGE.nii</value>
+                                <value>pipeline://localhost//mnt/ssd1/data/inputs/KKI2009/KKI2009-33/KKI2009-33-MPRAGE.nii</value>
+                                <value>pipeline://localhost//mnt/ssd1/data/inputs/KKI2009/KKI2009-34/KKI2009-34-MPRAGE.nii</value>
+                                <value>pipeline://localhost//mnt/ssd1/data/inputs/KKI2009/KKI2009-35/KKI2009-35-MPRAGE.nii</value>
+                                <value>pipeline://localhost//mnt/ssd1/data/inputs/KKI2009/KKI2009-36/KKI2009-36-MPRAGE.nii</value>
+                                <value>pipeline://localhost//mnt/ssd1/data/inputs/KKI2009/KKI2009-37/KKI2009-37-MPRAGE.nii</value>
+                                <value>pipeline://localhost//mnt/ssd1/data/inputs/KKI2009/KKI2009-38/KKI2009-38-MPRAGE.nii</value>
+                                <value>pipeline://localhost//mnt/ssd1/data/inputs/KKI2009/KKI2009-39/KKI2009-39-MPRAGE.nii</value>
+                                <value>pipeline://localhost//mnt/ssd1/data/inputs/KKI2009/KKI2009-40/KKI2009-40-MPRAGE.nii</value>
+                                <value>pipeline://localhost//mnt/ssd1/data/inputs/KKI2009/KKI2009-41/KKI2009-41-MPRAGE.nii</value>
+                                <value>pipeline://localhost//mnt/ssd1/data/inputs/KKI2009/KKI2009-42/KKI2009-42-MPRAGE.nii</value>
+                        </values>
+                </dataModule>
+                <dataModule id="RegisteredMPRAGE_1" name="Registered MPRAGE" package="m2g" posX="342" posY="551" sourceCode="" type="File" source="false" loopIndex="false" serverAddress="localhost" dirDump="false">
+                        <tag />
+                        <metadata>
+                                <data key="__creationDateKey" value="Tue Mar 17 11:42:06 EDT 2015" />
+                        </metadata>
+                        <input id="RegisteredMPRAGE_1.Input" name="Input" required="true" enabled="true" order="-1">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="nifti" extension="nii" description="" />
+                                                <filetype name="niftii2" extension="nii.gz" description="" />
+                                        </fileTypes>
+                                </format>
+                        </input>
+                        <fileTypes>
+                                <filetype name="nifti" extension="nii" description="" />
+                                <filetype name="niftii2" extension="nii.gz" description="" />
+                        </fileTypes>
+                        <values>
+                                <value>pipeline://localhost//mnt/ssd1/data/outputs/KKI2009/registered_mprage/KKI2009-31-MPRAGE_in_MNI.nii.gz</value>
+                                <value>pipeline://localhost//mnt/ssd1/data/outputs/KKI2009/registered_mprage/KKI2009-32-MPRAGE_in_MNI.nii.gz</value>
+                                <value>pipeline://localhost//mnt/ssd1/data/outputs/KKI2009/registered_mprage/KKI2009-33-MPRAGE_in_MNI.nii.gz</value>
+                                <value>pipeline://localhost//mnt/ssd1/data/outputs/KKI2009/registered_mprage/KKI2009-34-MPRAGE_in_MNI.nii.gz</value>
+                                <value>pipeline://localhost//mnt/ssd1/data/outputs/KKI2009/registered_mprage/KKI2009-35-MPRAGE_in_MNI.nii.gz</value>
+                                <value>pipeline://localhost//mnt/ssd1/data/outputs/KKI2009/registered_mprage/KKI2009-36-MPRAGE_in_MNI.nii.gz</value>
+                                <value>pipeline://localhost//mnt/ssd1/data/outputs/KKI2009/registered_mprage/KKI2009-37-MPRAGE_in_MNI.nii.gz</value>
+                                <value>pipeline://localhost//mnt/ssd1/data/outputs/KKI2009/registered_mprage/KKI2009-38-MPRAGE_in_MNI.nii.gz</value>
+                                <value>pipeline://localhost//mnt/ssd1/data/outputs/KKI2009/registered_mprage/KKI2009-39-MPRAGE_in_MNI.nii.gz</value>
+                                <value>pipeline://localhost//mnt/ssd1/data/outputs/KKI2009/registered_mprage/KKI2009-40-MPRAGE_in_MNI.nii.gz</value>
+                                <value>pipeline://localhost//mnt/ssd1/data/outputs/KKI2009/registered_mprage/KKI2009-41-MPRAGE_in_MNI.nii.gz</value>
+                                <value>pipeline://localhost//mnt/ssd1/data/outputs/KKI2009/registered_mprage/KKI2009-42-MPRAGE_in_MNI.nii.gz</value>
+                        </values>
+                </dataModule>
+        </moduleGroup>
+</pipeline>
+

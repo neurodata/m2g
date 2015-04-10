@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<pipeline version=".2">
+        <moduleGroup id="Untitled_1" name="Untitled" posX="0" posY="0" sourceCode="">
+                <module id=".graphmlto.mat_1" name=".graphml to .mat" package="m2g" description="This is designed for small graphs based on the desikan atlas (i.e. 70 regions labeled 1-35, 101-135)" posX="52" posY="49" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/packages/utils/graphml2mat.py">
+                        <tag />
+                        <metadata>
+                                <data key="__creationDateKey" value="Tue Feb 10 10:04:52 EST 2015" />
+                        </metadata>
+                        <input id=".graphmlto.mat_1.graphmlfile" name="graphml file" required="false" enabled="true" order="0">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="Graph1" extension="graphml" description="" />
+                                        </fileTypes>
+                                </format>
+                        </input>
+                        <output id=".graphmlto.mat_1.matgraphfile" name="mat graph file" required="false" enabled="true" order="1">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="Matlab file" extension="mat" description="" />
+                                        </fileTypes>
+                                </format>
+                        </output>
+                </module>
+        </moduleGroup>
+</pipeline>
+

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<pipeline version=".2">
+        <moduleGroup id="affine_registration_1" name="affine_registration" posX="0" posY="0" sourceCode="">
+                <module id="AffineRegistration_1" name="Affine Registration" package="m2g" posX="159" posY="92" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/packages/registration/register_affine.py">
+                        <tag />
+                        <metadata>
+                                <data key="__creationDateKey" value="Thu Feb 26 09:45:13 EST 2015" />
+                        </metadata>
+                        <input id="AffineRegistration_1.FixedImage" name="Fixed Image" required="false" enabled="true" order="0">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="nifti" extension="nii" description="" />
+                                                <filetype name="niftii2" extension="nii.gz" description="" />
+                                        </fileTypes>
+                                </format>
+                        </input>
+                        <input id="AffineRegistration_1.MovingImage" name="Moving Image" required="false" enabled="true" order="1">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="niftii2" extension="nii.gz" description="" />
+                                                <filetype name="nifti" extension="nii" description="" />
+                                        </fileTypes>
+                                </format>
+                        </input>
+                        <input id="AffineRegistration_1.tolerance" name="tolerance" required="false" enabled="true" order="2">
+                                <format type="Number" cardinality="1" />
+                                <values>
+                                        <value>1e-4</value>
+                                </values>
+                        </input>
+                        <output id="AffineRegistration_1.OutputImage" name="Output Image" required="false" enabled="true" order="3">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="niftii2" extension="nii.gz" description="" />
+                                                <filetype name="nifti" extension="nii" description="" />
+                                        </fileTypes>
+                                </format>
+                        </output>
+                        <output id="AffineRegistration_1.transformation" name="transformation" required="false" enabled="true" order="4">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="Matlab file" extension="mat" description="" />
+                                        </fileTypes>
+                                </format>
+                        </output>
+                </module>
+        </moduleGroup>
+</pipeline>
+

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<pipeline version=".2">
+        <moduleGroup id="fiber_tractography_1" name="fiber_tractography" posX="0" posY="0" sourceCode="">
+                <module id="FiberTractography_1" name="Fiber Tractography" package="m2g" posX="39" posY="45" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/packages/tractography/fiber_gen.py">
+                        <tag />
+                        <metadata>
+                                <data key="__creationDateKey" value="Fri Jan 09 13:07:20 EST 2015" />
+                        </metadata>
+                        <input id="FiberTractography_1.DTITensors" name="DTI Tensors" required="true" enabled="true" order="0">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="Camino Bdouble" extension="Bdouble" description="" />
+                                        </fileTypes>
+                                </format>
+                        </input>
+                        <input id="FiberTractography_1.BrainMask" name="Brain Mask" required="true" enabled="true" order="1">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="niftii2" extension="nii.gz" description="" />
+                                                <filetype name="nifti" extension="nii" description="" />
+                                        </fileTypes>
+                                </format>
+                        </input>
+                        <input id="FiberTractography_1.Anisotropicvoxelthreshold" name="Anisotropic voxel threshold" required="false" enabled="true" order="2">
+                                <format type="Number" cardinality="1" />
+                                <values>
+                                        <value>0.2</value>
+                                </values>
+                        </input>
+                        <input id="FiberTractography_1.Curvaturethreshold" name="Curvature threshold" required="false" enabled="true" order="3">
+                                <format type="Number" cardinality="1" />
+                                <values>
+                                        <value>60</value>
+                                </values>
+                        </input>
+                        <output id="FiberTractography_1.DTIfibers" name="DTI fibers" required="true" enabled="true" order="4">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="Camino Bfloat" extension="Bfloat" description="" />
+                                        </fileTypes>
+                                </format>
+                        </output>
+                        <output id="FiberTractography_1.VTKfibers" name="VTK fibers" required="false" enabled="true" order="5">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="Visualizable fibers" extension="vtk" description="" />
+                                        </fileTypes>
+                                </format>
+                        </output>
+                </module>
+        </moduleGroup>
+</pipeline>
+
