@@ -30,6 +30,10 @@ from random import randint
 from django.conf import settings
 from django.core.mail import send_mail
 
+import smtplib
+from email.mime.text import MIMEText
+from email.utils import formataddr
+
 def makeDirIfNone(dirPathList):
   '''
   Create a dir specified by dirPathList. Failure usual due to permissions issues.
@@ -212,6 +216,29 @@ def sendJobBeginEmail(email_addr, invariants, genGraph=True):
 
   send_mail("MROCP: Graph job request",
             msg, settings.SERVER_EMAIL, [email_addr], fail_silently=False)
+"""
+def sendMail(msg, recipients):
+  try:
+    s = smtplib.SMTP(settings.EMAIL_HOST) 
+    s.set_debuglevel(1)
+    s.ehlo()
+    s.starttls()
+    s.ehlo()
+    s.login(settings.SERVER_USERNAME, settings.EMAIL_HOST_PASSWORD)  
+    s.sendmail(msg['From'],recipients, msg.as_string())
+    s.quit()
+  except: 
+    print "Error: Sending of message failed. Message text printed below:"
+    print sys.exc_info()[0]
+    print msg
+
+def sendEmail(to_email, subject, content):
+  msg = MIMEText(content)
+  msg['Subject'] = subject
+  msg['From'] = formataddr(('MR Open Connectome', settings.SERVER_EMAIL))
+  msg['To'] = to_email 
+  sendMail(msg, [to_email, settings.SERVER_EMAIL])
+"""
 
 def sendJobFailureEmail(email_addr, msg):
   msg += "Thanks for using MROCP,\nThe MROCP team"
