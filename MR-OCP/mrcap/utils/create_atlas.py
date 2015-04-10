@@ -35,7 +35,7 @@ from time import time
 import os
 
 def create(roifn=os.path.join(os.path.dirname(__file__), 
-            "MNI152_T1_1mm_brain.nii"), start=2):
+          "MNI152_T1_1mm_brain.nii"), start=2):
   """
   Create a new atlas given some scaling factor determined by the 
   start index. Opaque doc, but best I can do.
@@ -124,8 +124,7 @@ def validate(atlas_fn, roifn):
 
 
 def main():
-  parser = argparse.ArgumentParser(description="Create an atlas for the purposes of \
-                                                      downsampling a fibergraph")
+  parser = argparse.ArgumentParser(description="Downsample a fibergraph")
   parser.add_argument("roifn", action="store", help="NIFTI roi")
   parser.add_argument("-n","--niftifn",  action="store", default="atlas.nii", \
           help="Nifti outfile name if creating else the infile name if validation")
