@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<pipeline version=".2">
+        <moduleGroup id="Untitled_1" name="Untitled" posX="0" posY="0" sourceCode="">
+                <module id="BrainExtraction_1" name="Brain Extraction" package="m2g" posX="106" posY="79" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/packages/mpragepreproc/brain_extract.py">
+                        <tag />
+                        <metadata>
+                                <data key="__creationDateKey" value="Thu Feb 26 11:28:32 EST 2015" />
+                        </metadata>
+                        <input id="BrainExtraction_1.Inputimage" name="Input image" required="false" enabled="true" order="0">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="niftii2" extension="nii.gz" description="" />
+                                                <filetype name="nifti" extension="nii" description="" />
+                                        </fileTypes>
+                                </format>
+                        </input>
+                        <input id="BrainExtraction_1.FractionalIntensityThreshold" name="Fractional Intensity Threshold" description="default=0.25 (verified on KKI dataset)" required="false" enabled="true" order="1">
+                                <format type="Number" cardinality="1" />
+                        </input>
+                        <input id="BrainExtraction_1.Verticalgradient" name="Vertical gradient" description="0" required="false" enabled="true" order="2">
+                                <format type="Number" cardinality="1" />
+                        </input>
+                        <output id="BrainExtraction_1.Outputbrainimage" name="Output brain image" required="false" enabled="true" order="3">
+                                <format type="File" cardinality="-2" cardinalityBase="Input image">
+                                        <fileTypes>
+                                                <filetype name="niftii2" extension="nii.gz" description="" />
+                                                <filetype name="nifti" extension="nii" description="" />
+                                        </fileTypes>
+                                </format>
+                        </output>
+                        <output id="BrainExtraction_1.Outputbrainmask" name="Output brain mask" required="false" enabled="true" order="4">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="niftii2" extension="nii.gz" description="" />
+                                                <filetype name="nifti" extension="nii" description="" />
+                                        </fileTypes>
+                                </format>
+                        </output>
+                </module>
+        </moduleGroup>
+</pipeline>
+

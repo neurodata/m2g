@@ -50,7 +50,6 @@ def create(roifn=os.path.join(os.path.dirname(__file__),
   base = img.get_data()
   aff = img.get_affine()
   fm = img.file_map
-
   true_dim = base.shape
 
   # Labelling new 
