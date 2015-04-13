@@ -71,7 +71,7 @@ def create(roifn=os.path.join(os.path.dirname(__file__),
   del resized_base
 
   # Create new matrix
-  new = np.zeros_like(base) # poke my finger in the eye of bjarne
+  new = np.zeros_like(base, dtype=np.int) # poke my finger in the eye of bjarne
 
   for z in xrange(start, base.shape[2]-start, step):
     for y in xrange(start, base.shape[1]-start, step):
