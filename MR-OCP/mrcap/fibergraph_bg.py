@@ -28,19 +28,16 @@ from mrcap.fiber import Fiber
 import mrcap.roi as roi
 from mrcap.fibergraph import _FiberGraph
 from mrcap.atlas import Atlas
-import zindex
+from zindex import XYZMorton
 
 # Class functions documented in fibergraph.py
 
 class FiberGraph(_FiberGraph):
-  def __init__(self, matrixdim, rois, mask):
+  def __init__(self, matrixdim, rois, atlases={}):
 
     # Regions of interest
     self.rois = rois
     self.edge_dict = defaultdict(int) # Will have key=(v1,v2), value=weight
-
-    # Brainmask
-#    self.mask = mask
 
     # Round up to the nearest power of 2
     xdim = int(math.pow(2,math.ceil(math.log(matrixdim[0],2))))
@@ -49,19 +46,28 @@ class FiberGraph(_FiberGraph):
 
     # Need the dimensions to be the same shape for zindex
     xdim = ydim = zdim = max(xdim, ydim, zdim)
-
     # largest value is -1 in each dimension, then plus one because range(10) is 0..9
-    self._maxval = zindex.XYZMorton([xdim-1,ydim-1,zdim-1]) + 1
+
+    position = [] # This is the original (true) vertex/voxel id before vertex deletion
+    # FIXME DM: Assumption is voxels are row-ordered -- confirm with GK.
+    for x in xrange(matrixdim[0]):
+      for y in xrange(matrixdim[1]):
+        for z in xrange(matrixdim[2]):
+          position.append(XYZMorton([x,y,z]))
+
+    self._maxval = XYZMorton([xdim-1,ydim-1,zdim-1]) + 1
 
     # ======================================================================== #
-    self.spcscmat = igraph.Graph(n=self._maxval, directed=False) # make new igraph with adjacency matrix to be (maxval X maxval)
+    # make new igraph with adjacency matrix to be (maxval X maxval)
+    self.spcscmat = igraph.Graph(n=self._maxval, directed=False)
+    # The original vertex ID is maintained using the  position field
+    self.spcscmat.vs["position"] = position
     self.edge_dict = defaultdict(int) # Will have key=(v1,v2), value=weight
     # ======================================================================== #
 
   def complete(self, add_centroids=True, graph_attrs={}, atlases={}):
     super(FiberGraph, self).complete()
     print "Annotating vertices with spatial position .."
-    self.spcscmat.vs["position"] = range(self._maxval) # Use position for
     centroids_added = False
 
     print "Deleting zero-degree nodes..."
@@ -72,10 +78,9 @@ class FiberGraph(_FiberGraph):
       self.spcscmat["Atlas_"+ os.path.splitext(os.path.basename(atlas_name))[0]+"_index"] = idx
       print "Adding '%s' region numbers (and names) ..." % atlas_name
       atlas = Atlas(atlas_name, atlases[atlas_name])
-      region = atlas.get_all_mappings(self.spcscmat.vs["position"])
-      self.spcscmat.vs["atlas_%d_region_num" % idx] = region[0]
-
-      if region[1]: self.spcscmat.vs["atlas_%d_region_name" % idx] = region[1]
+      #region = atlas.get_all_mappings(self.spcscmat.vs["position"])
+      #self.spcscmat.vs["atlas_%d_region_num" % idx] = region[0]
+      #if region[1]: self.spcscmat.vs["atlas_%d_region_name" % idx] = region[1]
     
       if add_centroids and (not centroids_added):
         if (atlas.data.max() == 70): #FIXME: Hard coded Desikan small dimensions
