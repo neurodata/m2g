@@ -15,6 +15,7 @@
 #
 
 import nibabel as nib
+
 DEBUG = False
 #  Makes a ton of assumptions about the XML data.  
 #  Totally customize for MRCAP data.  Needs to be checked with 
@@ -26,18 +27,17 @@ class ROIData:
   # Get the dimension
   def __init__(self, filename):
 
-    self._filename = filename
     self.data = nib.load(filename).get_data()
     print "Data shape: ", self.data.shape
 
   def get ( self, index ):
-    """Returns the ROI associated with a voxel.
-      Either returns 0 if out of the data space or 
-      returns ROI from 1 to 35 or 101 to 135.
-      Caller must translate so that the weirdness is not
-      hidden inside this function.
     """
-
+    Returns the ROI associated with a voxel.
+    Either returns 0 if out of the data space or 
+    returns ROI from 1 to 35 or 101 to 135.
+    Caller must translate so that the weirdness is not
+    hidden inside this function.
+    """
 # RBTODO experiment with -1 on index
     if index[0] >= self.data.shape[0] or \
        index[1] >= self.data.shape[1] or \

@@ -33,7 +33,7 @@ import zindex
 # Class functions documented in fibergraph.py
 
 class FiberGraph(_FiberGraph):
-  def __init__(self, matrixdim, rois, mask):
+  def __init__(self, matrixdim, rois):
     """
      Constructor: number of nodes in the graph
        convert it to a maximum element
