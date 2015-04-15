@@ -33,6 +33,7 @@ from copy import copy
 import sys, pdb
 from time import time
 import os
+from webget import wget
 
 def create(roifn=os.path.join(os.path.dirname(__file__), 
           "MNI152_T1_1mm_brain.nii"), start=2):
@@ -46,6 +47,8 @@ def create(roifn=os.path.join(os.path.dirname(__file__),
 
   start_time = time()
   print "Loading rois as base ..."
+  if not os.path.exists(roifn):
+    wget(roifn, "http://openconnecto.me/data/public/MR-data/Atlas/m2g/MNI152_T1_1mm_brain.nii")
   img = nib.load(roifn)
   base = img.get_data()
   aff = img.get_affine()
