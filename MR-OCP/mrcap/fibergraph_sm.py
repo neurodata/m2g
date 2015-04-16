@@ -28,7 +28,8 @@ from mrcap.atlas import Atlas
 from mrcap.fibergraph import _FiberGraph
 from mrcap.fiber import Fiber
 import scipy.io as sio
-import zindex
+from subprocess import call
+from packages.utils.setup import get_files
 
 # Class functions documented in fibergraph.py
 
@@ -64,7 +65,11 @@ class FiberGraph(_FiberGraph):
     
     if add_centroids:
       print "Adding centroids ..."
-      cent_mat = sio.loadmat(os.path.join(os.path.abspath(os.path.dirname(__file__)),"utils", "centroids.mat"))["centroids"]
+      cent_loc = os.path.join("../../", "data", "Centroids", "centroids.mat")
+      if not os.path.exists(cent_loc):
+        get_files()
+
+      cent_mat = sio.loadmat(cent_loc)["centroids"]
       centroids = []
 
       for row in cent_mat:
