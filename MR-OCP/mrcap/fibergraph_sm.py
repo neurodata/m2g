@@ -29,7 +29,7 @@ from mrcap.fibergraph import _FiberGraph
 from mrcap.fiber import Fiber
 import scipy.io as sio
 from subprocess import call
-from utils.webget import wget
+from packages.utils.setup import get_files
 
 # Class functions documented in fibergraph.py
 
@@ -65,9 +65,9 @@ class FiberGraph(_FiberGraph):
     
     if add_centroids:
       print "Adding centroids ..."
-      cent_loc = os.path.join(os.path.abspath(os.path.dirname(__file__)),"utils", "centroids.mat")
+      cent_loc = os.path.join("../../", "data", "Centroids", "centroids.mat")
       if not os.path.exists(cent_loc):
-        wget("./utils/centroids.mat", "http://openconnecto.me/data/public/MR-data/Centroids/centroids.mat")
+        get_files()
 
       cent_mat = sio.loadmat(cent_loc)["centroids"]
       centroids = []

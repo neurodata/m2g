@@ -29,7 +29,7 @@ import mrcap.roi as roi
 from mrcap.fibergraph import _FiberGraph
 from mrcap.atlas import Atlas
 import zindex
-from utils.webget import wget
+from packages.utils.setup import get_files
 
 # Class functions documented in fibergraph.py
 
@@ -82,10 +82,9 @@ class FiberGraph(_FiberGraph):
         if (atlas.data.max() == 70): #FIXME: Hard coded Desikan small dimensions
           centroids_added = True
           print "Adding centroids ..."
-
-          cent_loc = os.path.join(os.path.abspath(os.path.dirname(__file__)),"utils", "centroids.mat")
+          cent_loc = os.path.join("../../", "data", "Centroids", "centroids.mat")
           if not os.path.exists(cent_loc):
-            wget("./utils/centroids.mat", "http://openconnecto.me/data/public/MR-data/Centroids/centroids.mat")
+            get_files()
 
           cent_mat = sio.loadmat(cent_loc)["centroids"]
 
