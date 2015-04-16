@@ -20,10 +20,15 @@
 # Email: disa@jhu.edu
 # Copyright (c) 2014. All rights reserved.
 
+set -e
 echo "Testing invariants ..."
+mkdir -p ./mrdata/graphs
 GRAPH_FN="./mrdata/graphs/test.graphml"
 
-set -e
+if  [ ! -f $GRAPH_FN ]; then
+  echo "Downloading the graph"
+  wget -O $GRAPH_FN "http://openconnecto.me/data/public/MR-data/Graphs/test.graphml"
+fi
 
 ./inv_exec -h
 echo "Testing All ..."
