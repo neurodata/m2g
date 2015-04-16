@@ -40,7 +40,6 @@ class FiberGraph(_FiberGraph):
     self.rois = rois
     self.edge_dict = defaultdict(int) # Will have key=(v1,v2), value=weight
 
-
     position = [] # This is the original (true) vertex/voxel id before vertex deletion
     # FIXME DM: Assumption is voxels are row-ordered -- confirm with GK.
     for x in xrange(matrixdim[0]):
