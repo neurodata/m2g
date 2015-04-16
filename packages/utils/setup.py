@@ -24,34 +24,31 @@ import os
 from subprocess import call
 from webget import wget
 
-__data_dir__ = os.path.join("./", ".data/")
+__data_dir__ = os.path.abspath(os.path.join("../../", "data/"))
 weburl = "http://openconnecto.me/data/public/MR-data/"
 __files__ = {
   "Atlas":[
   "desikan_in_mni_space/MNI152_T1_1mm_brain_incremented.nii",
   "desikan_in_mni_space/MNI152_T1_1mm_brain_labels_cropped.nii", 
   "desikan_in_mni_space/MNI152_T1_1mm_brain_mask.nii",
-  "MNI152_T1_1mm_brain_labels.niiMNI152_T1_1mm_brain.nii",
-  "m2g/MNI152_T1_1mm_brain.nii", "m2g/slab_atlas.nii", 
-  "m2g/MNI152_T1_1mm_brain_incremented.nii"
+  "desikan_in_mni_space/MNI152_T1_1mm_brain_labels.nii", 
+  "desikan_in_mni_space/MNI152_T1_1mm_brain.nii",
+  "m2g/slab_atlas.nii", 
   ], 
-  "Centroids":["centroids.mat"], "Graphs": ["test.graphml"]
+  "Centroids":["centroids.mat"]
     }
 
 def get_local_fn(fn, _type):
-  os.path.join(os.path.join(__data_dir__, _type, os.path.basename(fn)))
+  return os.path.join(os.path.join(__data_dir__, _type, os.path.basename(fn)))
 
 def get_files():
   atlas_dir = os.path.join(__data_dir__, "Atlas")
   centroid_dir = os.path.join(__data_dir__, "Centroids")
-  graphs_dir = os.path.join(__data_dir__, "Graphs")
 
   if not os.path.exists(atlas_dir):
-    os.mkdir(atlas_dir)
+    os.makedirs(atlas_dir)
   if not os.path.exists(centroid_dir):
-    os.mkdir(centroid_dir)
-  if not os.path.exists(graphs_dir):
-    os.mkdir(graphs_dir)
+    os.makedirs(centroid_dir)
 
   for k in __files__.keys():
     for v in __files__[k]:
@@ -60,12 +57,17 @@ def get_files():
 
 def compile_cython():
   os.chdir("../../MR-OCP/mrcap/")
-  call(["python", "setup.py", "install"])
+  ret = call(["python", "setup.py", "install"])
+  assert not ret, "Failed to run setup.py in 'mrcap' directory. Perhaps running this script with 'sudo' will help"
 
 def main():
-  parser = argparse.ArgumentParser(description="Compiles")
+  parser = argparse.ArgumentParser(description="Gets data files that graph gen and verification code needs. Also can build zindex")
+  parser.add_argument("-c", "--compile", action="store_true", help="Compile the zindex cython module")
   result = parser.parse_args()
 
+  get_files()
+  if result.compile:
+    compile_cython
 
 if __name__ == "__main__":
   main()
