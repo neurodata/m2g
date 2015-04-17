@@ -49,7 +49,7 @@ class FiberGraph(_FiberGraph):
 
     # ======================================================================== #
     # make new igraph with adjacency matrix to be (maxval X maxval)
-    self.spcscmat = igraph.Graph(n=len(position), directed=False)
+    self.spcscmat = igraph.Graph(n=max(position), directed=False)
     # The original vertex ID is maintained using the  position field
     self.spcscmat.vs["position"] = position
     self.edge_dict = defaultdict(int) # Will have key=(v1,v2), value=weight
