@@ -17,6 +17,7 @@ for i = reorderIdx
     temp = load(files(i).name);
     tgraph = log10(full(temp.graph));
     tgraph(isinf(tgraph))=0;
+%     tgraph=full(temp.graph);
     smg(:,:,c) = tgraph;
     
     c = c+1;
@@ -24,7 +25,9 @@ end
 
 for i = 1:size(smg,3)
     for j = 1:size(smg,3)
-        gErr(i,j) = norm(smg(:,:,i)-smg(:,:,j),'fro');
+%         gErr(i,j) = norm(smg(:,:,i)-smg(:,:,j),'fro');
+        gErr(i,j) = sum(sum(abs(smg(:,:,i)-smg(:,:,j))));
+
     end
 end
 
