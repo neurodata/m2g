@@ -25,25 +25,28 @@ from nibabel import load, save, Nifti1Image
 from numpy import where, loadtxt
 
 def extract_vol(dti_img, bvals, b0_vol):
-  print "Loading dti data..."
-  d_img = load(dti_img)
-  b0_data = d_img.get_data()
-  b0_head = d_img.get_header()
+	print "Loading dti data..."
+	d_img = load(dti_img)
+	b0_data = d_img.get_data()
+	b0_head = d_img.get_header()
   
-  print "Loading bvals file..."
-  b = loadtxt(bvals)
-  
-  print "Extracting B0 volume..."
-  b0_data=b0_data[:,:,:,int(where(b==0)[0])]
-  
-  print "Updating image header..."
-  b0_head.set_data_shape(b0_head.get_data_shape()[0:3])
+	print "Loading bvals file..."
+	b = loadtxt(bvals)
+	 
+	b = int(where(b==0)[0])
+	print "B0 Index: ((",b, "##"
+	
+	print "Extracting B0 volume..."
+	b0_data=b0_data[:,:,:,b]
+	
+	print "Updating image header..."
+	b0_head.set_data_shape(b0_head.get_data_shape()[0:3])
 
-  print "Saving..."
-  out = Nifti1Image( data=b0_data, affine=d_img.get_affine(), header=b0_head )
-  save(out, b0_vol)
-  print "Complete!"
-
+	print "Saving..."
+	out = Nifti1Image( data=b0_data, affine=d_img.get_affine(), header=b0_head )
+	out.update_header()
+	save(out, b0_vol)
+	print "Complete!"
 
 def main():
   parser = ArgumentParser(description="")
