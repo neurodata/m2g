@@ -67,7 +67,7 @@ def genGraph(infname, data_atlas_fn, outfname, bigGraph=False, \
 
   # Create the graph object
   # get dims from reader
-  fbrgraph = FiberGraph ( reader.shape, rois, None )
+  fbrgraph = FiberGraph ( reader.shape, rois)
 
   print "Parsing MRI studio file {0}".format ( infname )
 
