@@ -33,6 +33,7 @@ __files__ = {
   "desikan_in_mni_space/MNI152_T1_1mm_brain_mask.nii",
   "desikan_in_mni_space/MNI152_T1_1mm_brain_labels.nii", 
   "desikan_in_mni_space/MNI152_T1_1mm_brain.nii",
+  "desikan_in_mni_space/MNI152_T1_1mm.nii.gz",
   "m2g/slab_atlas.nii", 
   ], 
   "Centroids":["centroids.mat"]
