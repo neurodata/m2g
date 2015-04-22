@@ -93,7 +93,7 @@ def create(roifn=os.path.join("../../..","data","Atlas",
                 new[x+xx,y+yy,z+zz] = region_num
   
   new = new[:true_dim[0], :true_dim[1], :true_dim[2]] # shrink new to correct size
-  print "Your atlas has %d regions ..." % new.max()
+  print "Your atlas has %d regions ..." % len(np.unique(new))
   img = nib.Nifti1Image(new, affine=aff, header=nib.load(roifn).get_header(), file_map=fm)
   
   print "Building atlas took %.3f sec ..." % (time()-start_time)
@@ -116,17 +116,25 @@ def validate(atlas_fn, roifn):
     sys.stderr.write("[Error]: Loading file %s failed!\n" % atlas_fn);
     exit(-1)
 
+  # This is a mapping from base to new where if we get any conflicting regions we failed to make a valid atlas
+  old_to_new = {}
+
   for i in xrange(new.shape[2]):
     for ii in xrange(new.shape[1]):
       for iii in xrange(new.shape[0]):
-        if (xor(bool(new[i,ii,iii]), bool(base[i,ii,iii])) and base[i,ii,iii]==0):
-          print "Created [%d,%d,%d] != 0 as it should be ..." % (i, ii, iii)
+        if old_to_new.has_key(base[i,ii,iii]):
+          if old_to_new[base[i,ii,iii]] != new[i,ii,iii]:
+            print "[Error]; Index [%d,%d,%d] Should be: {0}, but is {1}".format(i, ii, iii, 
+                  old_to_new[base[i,ii,iii]], new[i,ii,iii])
+            exit(0)
+        else:
+          old_to_new[base[i,ii,iii]] = new[i,i,iii]
 
-  print "Validation complete. If you saw no other messages then you atlas is valid!"
+  print "Sucess! Validation complete."
 
 
 def main():
-  parser = argparse.ArgumentParser(description="Downsample a fibergraph")
+  parser = argparse.ArgumentParser(description="Create a downsampled atlas for a fibergraph")
   parser.add_argument("roifn", action="store", help="NIFTI roi")
   parser.add_argument("-n","--niftifn",  action="store", default="atlas.nii", \
           help="Nifti outfile name if creating else the infile name if validation")
