@@ -41,7 +41,7 @@
                 <metadata>
                         <data key="__creationDateKey" value="Thu Feb 26 15:02:18 EST 2015" />
                 </metadata>
-                <dataModule id="DTIImage_1" name="DTI Image" package="m2g" posX="187" posY="159" sourceCode="" type="File" source="true" loopIndex="false">
+                <dataModule id="DTIImage_1" name="DTI Image" package="m2g" posX="187" posY="159" sourceCode="" type="File" source="true" loopIndex="false" serverAddress="localhost">
                         <metadata>
                                 <data key="__creationDateKey" value="Thu Feb 26 11:52:26 EST 2015" />
                         </metadata>
@@ -80,7 +80,7 @@
                                 <value>pipeline://localhost//mnt/ssd1/data/inputs/KKI2009/KKI2009-20/KKI2009-20-DTI.nii</value>
                         </values>
                 </dataModule>
-                <dataModule id="DTIBValues_1" name="DTI B Values" package="m2g" posX="350" posY="164" sourceCode="" type="File" source="true" loopIndex="false">
+                <dataModule id="DTIBValues_1" name="DTI B Values" package="m2g" posX="350" posY="164" sourceCode="" type="File" source="true" loopIndex="false" serverAddress="localhost">
                         <metadata>
                                 <data key="__creationDateKey" value="Thu Feb 26 11:52:52 EST 2015" />
                         </metadata>
@@ -117,7 +117,7 @@
                                 <value>pipeline://localhost//mnt/ssd1/data/inputs/KKI2009/KKI2009-20/KKI2009-20-DTI.b</value>
                         </values>
                 </dataModule>
-                <dataModule id="MPRAGEImage_1" name="MPRAGE Image" package="m2g" posX="536" posY="116" sourceCode="" type="File" source="true" loopIndex="false">
+                <dataModule id="MPRAGEImage_1" name="MPRAGE Image" package="m2g" posX="536" posY="116" sourceCode="" type="File" source="true" loopIndex="false" serverAddress="localhost">
                         <metadata>
                                 <data key="__creationDateKey" value="Thu Feb 26 11:53:46 EST 2015" />
                         </metadata>
@@ -156,7 +156,7 @@
                                 <value>pipeline://localhost//mnt/ssd1/data/inputs/KKI2009/KKI2009-20/KKI2009-20-MPRAGE.nii</value>
                         </values>
                 </dataModule>
-                <dataModule id="Atlas_1" name="Atlas" package="m2g" posX="86" posY="278" rotation="1" sourceCode="" type="File" source="true" loopIndex="false">
+                <dataModule id="Atlas_1" name="Atlas" package="m2g" posX="86" posY="278" rotation="1" sourceCode="" type="File" source="true" loopIndex="false" serverAddress="localhost">
                         <metadata>
                                 <data key="__creationDateKey" value="Thu Feb 26 15:59:19 EST 2015" />
                         </metadata>
@@ -176,7 +176,7 @@
                                 <value>pipeline://localhost//mnt/ssd1/atlas/MNI152_T1_1mm_brain.nii</value>
                         </values>
                 </dataModule>
-                <dataModule id="Graphs_1" name="Graphs" package="m2g" posX="167" posY="570" sourceCode="" type="File" source="false" loopIndex="false" dirDump="false">
+                <dataModule id="Graphs_1" name="Graphs" package="m2g" posX="167" posY="570" sourceCode="" type="File" source="false" loopIndex="false" serverAddress="localhost" dirDump="false">
                         <metadata>
                                 <data key="__creationDateKey" value="Thu Feb 26 16:00:53 EST 2015" />
                         </metadata>
@@ -213,7 +213,7 @@
                                 <value>pipeline://localhost//mnt/ssd1/data/outputs/KKI2009/smallgraphs/KKI2009-20-sg.mat</value>
                         </values>
                 </dataModule>
-                <dataModule id="DTIGradients_1" name="DTI Gradients" package="m2g" posX="656" posY="166" sourceCode="" type="File" source="true" loopIndex="false">
+                <dataModule id="DTIGradients_1" name="DTI Gradients" package="m2g" posX="656" posY="166" sourceCode="" type="File" source="true" loopIndex="false" serverAddress="localhost">
                         <metadata>
                                 <data key="__creationDateKey" value="Thu Feb 26 16:01:30 EST 2015" />
                         </metadata>
@@ -250,7 +250,7 @@
                                 <value>pipeline://localhost//mnt/ssd1/data/inputs/KKI2009/KKI2009-20/KKI2009-20-DTI.grad</value>
                         </values>
                 </dataModule>
-                <dataModule id="AtlasLabels_1" name="Atlas Labels" package="m2g" posX="171" posY="306" rotation="1" sourceCode="" type="File" source="true" loopIndex="false">
+                <dataModule id="AtlasLabels_1" name="Atlas Labels" package="m2g" posX="171" posY="306" rotation="1" sourceCode="" type="File" source="true" loopIndex="false" serverAddress="localhost">
                         <metadata>
                                 <data key="__creationDateKey" value="Thu Feb 26 16:02:11 EST 2015" />
                         </metadata>
@@ -270,7 +270,7 @@
                                 <value>pipeline://localhost//mnt/ssd1/atlas/MNI152_T1_1mm_brain_labels_cropped.nii</value>
                         </values>
                 </dataModule>
-                <dataModule id="RegisteredMPRAGE_1" name="Registered MPRAGE" package="m2g" posX="583" posY="585" sourceCode="" type="File" source="false" loopIndex="false" dirDump="false">
+                <dataModule id="RegisteredMPRAGE_1" name="Registered MPRAGE" package="m2g" posX="583" posY="585" sourceCode="" type="File" source="false" loopIndex="false" serverAddress="localhost" dirDump="false">
                         <metadata>
                                 <data key="__creationDateKey" value="Tue Mar 17 11:42:06 EDT 2015" />
                         </metadata>
@@ -309,7 +309,7 @@
                                 <value>pipeline://localhost//mnt/ssd1/data/outputs/KKI2009/registered_mprage/KKI2009-20-MPRAGE_in_MNI.nii.gz</value>
                         </values>
                 </dataModule>
-                <dataModule id="AlignedDTI_1" name="Aligned DTI" package="m2g" posX="315" posY="624" sourceCode="" type="File" source="false" loopIndex="false" dirDump="false">
+                <dataModule id="AlignedDTI_1" name="Aligned DTI" package="m2g" posX="315" posY="624" sourceCode="" type="File" source="false" loopIndex="false" serverAddress="localhost" dirDump="false">
                         <metadata>
                                 <data key="__creationDateKey" value="Tue Mar 17 11:42:06 EDT 2015" />
                         </metadata>
@@ -348,7 +348,7 @@
                                 <value>pipeline://localhost//mnt/ssd1/data/outputs/KKI2009/aligned_dti/KKI2009-20-DTI_aligned.nii.gz</value>
                         </values>
                 </dataModule>
-                <dataModule id="B0Volume_1" name="B0 Volume" package="m2g" posX="385" posY="566" sourceCode="" type="File" source="false" loopIndex="false" dirDump="false">
+                <dataModule id="B0Volume_1" name="B0 Volume" package="m2g" posX="385" posY="566" sourceCode="" type="File" source="false" loopIndex="false" serverAddress="localhost" dirDump="false">
                         <metadata>
                                 <data key="__creationDateKey" value="Tue Mar 17 11:42:06 EDT 2015" />
                         </metadata>
@@ -387,7 +387,7 @@
                                 <value>pipeline://localhost//mnt/ssd1/data/outputs/KKI2009/b0/KKI2009-20-B0.nii.gz</value>
                         </values>
                 </dataModule>
-                <dataModule id="RegisteredDTI_1" name="Registered DTI" package="m2g" posX="232" posY="680" sourceCode="" type="File" source="false" loopIndex="false" dirDump="false">
+                <dataModule id="RegisteredDTI_1" name="Registered DTI" package="m2g" posX="232" posY="680" sourceCode="" type="File" source="false" loopIndex="false" serverAddress="localhost" dirDump="false">
                         <metadata>
                                 <data key="__creationDateKey" value="Tue Mar 17 11:42:06 EDT 2015" />
                         </metadata>
@@ -426,7 +426,7 @@
                                 <value>pipeline://localhost//mnt/ssd1/data/outputs/KKI2009/registered_dti/KKI2009-20-DTI_in_MNI.nii.gz</value>
                         </values>
                 </dataModule>
-                <dataModule id="Fibers_1" name="Fibers" package="m2g" posX="523" posY="649" sourceCode="" type="File" source="false" loopIndex="false" dirDump="false">
+                <dataModule id="Fibers_1" name="Fibers" package="m2g" posX="523" posY="649" sourceCode="" type="File" source="false" loopIndex="false" serverAddress="localhost" dirDump="false">
                         <metadata>
                                 <data key="__creationDateKey" value="Tue Mar 17 11:42:06 EDT 2015" />
                         </metadata>
@@ -464,7 +464,6 @@
                         </values>
                 </dataModule>
                 <moduleGroup id="m2g_2" name="m2g" package="m2g" icon="0" posX="329" posY="377" sourceCode="">
-                        <tag />
                         <metadata>
                                 <data key="__creationDateKey" value="Tue Mar 17 17:14:04 EDT 2015" />
                         </metadata>
@@ -484,7 +483,6 @@
                         <input link="D2.TensorEstimation_1.DTIGradients" id="m2g_2.DTIGradients" name="DTI Gradients" order="13" />
                         <output link="S2.ComputeAffineRegistration_1.OutputImage" id="m2g_2.OutputImage" name="Output Image" order="14" />
                         <module id="D3.FiberTractography_1" name="D3. Fiber Tractography" package="m2g" icon="0" posX="0" posY="2856" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/packages/tractography/fiber_gen.py">
-                                <tag />
                                 <metadata>
                                         <data key="__creationDateKey" value="Fri Jan 09 13:07:20 EST 2015" />
                                 </metadata>
@@ -538,7 +536,6 @@
                                 </output>
                         </module>
                         <module id="D5.SmallGraphGeneration_1" name="D5. Small Graph Generation" package="m2g" icon="0" posX="0" posY="3627" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/MR-OCP/mrcap/gengraph.py">
-                                <tag />
                                 <metadata>
                                         <data key="__creationDateKey" value="Sun Jan 11 17:53:43 EST 2015" />
                                 </metadata>
@@ -566,7 +563,6 @@
                                 </output>
                         </module>
                         <module id="S2.ComputeAffineRegistration_1" name="S2. Compute Affine Registration" package="m2g" icon="0" posX="379" posY="667" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/packages/registration/register_affine.py">
-                                <tag />
                                 <metadata>
                                         <data key="__creationDateKey" value="Thu Feb 26 09:45:13 EST 2015" />
                                 </metadata>
@@ -609,7 +605,6 @@
                                 </output>
                         </module>
                         <module id="S3.ApplyRegistrationtoMask_1" name="S3. Apply Registration to Mask" package="m2g" icon="0" posX="378" posY="1488" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/packages/registration/apply_registration.py">
-                                <tag />
                                 <metadata>
                                         <data key="__creationDateKey" value="Thu Feb 26 13:46:28 EST 2015" />
                                 </metadata>
@@ -646,7 +641,6 @@
                                 </input>
                         </module>
                         <module id="D6.graphmltomat_1" name="D6. graphml to mat" package="m2g" description="This is designed for small graphs based on the desikan atlas (i.e. 70 regions labeled 1-35, 101-135)" icon="0" posX="0" posY="3950" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/packages/utils/graphml2mat.py">
-                                <tag />
                                 <metadata>
                                         <data key="__creationDateKey" value="Tue Feb 10 10:04:52 EST 2015" />
                                 </metadata>
@@ -666,7 +660,6 @@
                                 </output>
                         </module>
                         <module id="C2.ApplyRegistrationtoDTI_1" name="C2. Apply Registration to DTI" package="m2g" icon="0" posX="188" posY="2087" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/packages/registration/apply_registration.py">
-                                <tag />
                                 <metadata>
                                         <data key="__creationDateKey" value="Thu Feb 26 13:46:28 EST 2015" />
                                 </metadata>
@@ -703,7 +696,6 @@
                                 </input>
                         </module>
                         <module id="C1.ComputeRigidRegistration_1" name="C1. Compute Rigid Registration" package="m2g" icon="0" posX="192" posY="1097" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/packages/registration/register_rigid.py">
-                                <tag />
                                 <metadata>
                                         <data key="__creationDateKey" value="Thu Feb 26 09:45:13 EST 2015" />
                                 </metadata>
@@ -746,7 +738,6 @@
                                 </output>
                         </module>
                         <module id="C2.ApplyRegistrationtoDTI_2" name="C2. Apply Registration to DTI" package="m2g" icon="0" posX="193" posY="1845" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/packages/registration/apply_registration.py">
-                                <tag />
                                 <metadata>
                                         <data key="__creationDateKey" value="Thu Feb 26 13:46:28 EST 2015" />
                                 </metadata>
@@ -783,7 +774,6 @@
                                 </input>
                         </module>
                         <module id="D1.B0Registration_1" name="D1. B0 Registration" package="m2g" icon="0" posX="0" posY="302" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/packages/dtipreproc/b0_registration.py">
-                                <tag />
                                 <metadata>
                                         <data key="__creationDateKey" value="Thu Feb 26 11:43:03 EST 2015" />
                                 </metadata>
@@ -820,7 +810,6 @@
                                 </output>
                         </module>
                         <module id="S1.BrainExtraction_1" name="S1. Brain Extraction" package="m2g" icon="0" posX="381" posY="20" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/packages/mpragepreproc/brain_extract.py">
-                                <tag />
                                 <metadata>
                                         <data key="__creationDateKey" value="Thu Feb 26 11:28:32 EST 2015" />
                                 </metadata>
@@ -861,7 +850,7 @@
                                         </format>
                                 </output>
                         </module>
-                        <module id="D4.FiberConverter_1" name="D4. Fiber Converter" package="m2g" icon="0" posX="0" posY="3250" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/packages/utils/fiber_convert.py">
+                        <module id="D4.FiberConverter_1" name="D4. Fiber Converter" package="m2g" icon="0" posX="0" posY="3250" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/packages/tractography/fiber_convert.py">
                                 <tag />
                                 <metadata>
                                         <data key="__creationDateKey" value="Sun Jan 11 21:38:32 EST 2015" />
@@ -882,7 +871,6 @@
                                 </output>
                         </module>
                         <module id="D2.TensorEstimation_1" name="D2. Tensor Estimation" package="m2g" icon="0" posX="0" posY="2486" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/packages/tractography/tensor_gen.py">
-                                <tag />
                                 <metadata>
                                         <data key="__creationDateKey" value="Fri Jan 09 11:38:39 EST 2015" />
                                 </metadata>
@@ -960,7 +948,7 @@
                                 </output>
                         </module>
                 </moduleGroup>
-                <dataModule id="MPRAGEbrain_1" name="MPRAGE brain" package="m2g" posX="458" posY="722" sourceCode="" type="File" source="false" loopIndex="false" dirDump="false">
+                <dataModule id="MPRAGEbrain_1" name="MPRAGE brain" package="m2g" posX="458" posY="722" sourceCode="" type="File" source="false" loopIndex="false" serverAddress="localhost" dirDump="false">
                         <metadata>
                                 <data key="__creationDateKey" value="Tue Mar 17 11:42:06 EDT 2015" />
                         </metadata>
