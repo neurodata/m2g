@@ -27,7 +27,7 @@ import zindex
 # Abstract class for big and small fibergraphs
 
 class _FiberGraph(object):
-  def __init__(self, matrixdim, rois, mask):
+  def __init__(self, matrixdim, rois):
     """
     Unimplemented constructor for the abstract class for reading and creating
     fibergraphs.
