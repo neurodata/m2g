@@ -31,6 +31,7 @@ import nibabel as nib
 import zipfile
 sys.path += [os.path.abspath("../")]
 from zindex import MortonXYZ
+import numpy as np
 
 def downsample(g, factor=-1, atlas=None):
   """
@@ -51,12 +52,11 @@ def downsample(g, factor=-1, atlas=None):
   else:
     atlas = Atlas(atlas)
   
-  vertex = {}
   # This takes O(m)
   for e in g.es:
   # Uncomment me for some debug help
     edge_dict[(atlas.get_region_num( g.vs[e.source]["position"] ), 
-      atlas.get_region_num( g.vs[e.target]["position"] ))] += e["weight"]
+      atlas.get_region_num(g.vs[e.target]["position"]))] += e["weight"]
 
   del g # free me
   new_graph = igraph.Graph(n=atlas.max(), directed=False)
@@ -65,6 +65,10 @@ def downsample(g, factor=-1, atlas=None):
 
   print "Adding edge weight to graph ..."
   new_graph.es["weight"] = edge_dict.values()
+
+  print "Deleting zero-degree nodes..."
+  zero_deg_nodes = np.where(np.array(new_graph.degree()) == 0 )[0]
+  new_graph.delete_vertices(zero_deg_nodes)
 
   print "Completed building graph in %.3f sec ... " % (time() - start)
   print new_graph.summary()
