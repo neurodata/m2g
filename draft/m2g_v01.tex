@@ -1,0 +1,50 @@
+\documentclass[12pt]{article}
+\usepackage[margin=1in]{geometry}
+\geometry{letterpaper}                  
+\usepackage{graphicx}
+\usepackage[hyphens]{url}
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\usepackage{fixltx2e}
+\usepackage{amsmath,amsfonts,amsthm,amssymb}
+\usepackage{graphicx}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\usepackage{url}
+\usepackage[normalem]{ulem}
+\usepackage[pdftex]{color}
+\usepackage{varioref}
+\usepackage{mathrsfs}
+\usepackage{amsmath}
+\labelformat{equation}{\textup{(#1)}}
+\usepackage[sort&compress,colon,square,numbers]{natbib}
+%\usepackage{cite}
+
+
+\usepackage{color}
+\newcommand{\todo}[1]{{\color{red}{\it TODO: #1}}}
+\newcommand{\jovo}[1]{{\color{green}{\it jovo: #1}}}
+\newcommand{\will}[1]{{\color{blue}{\it will: #1}}}
+\newcommand{\greg}[1]{{\color{cyan}{\it greg: #1}}}
+
+\begin{document}
+
+\begin{center}\Large \bf MR ConnectomICs As a Software Service (MR. CICASS) \end{center}
+\begin{center} Greg Kiar $\cdot$  \today \end{center}
+\bigskip
+
+\paragraph{Opportunity}
+As a current state of the art, human connectomes can be estimated from Diffusion Weighted MR imaging (DWI, dMRI, DTI), Functional MR imaging (fMRI), and structural MR imaging (sMRI, MPRAGE). Pipelines exist which process this raw data, register it to a familiar template, and compute downstream data derivatives which can be used as summary statistics for the imaged brain. Much work has gone into the development and refinement of these algorithms.
+\paragraph{Challenge}
+Despite tools being available for MR processing, minimal solutions currently exist which process this data at scale or with ease for the user. The computational time of producing a braingraph for a single subject from raw MR data is on the order of hours using state of the art hardware. With an overhwleming amount of MR data available, a need exists for there to be a processing environment which users can easily and quickly upload their data to for reliable results, without the burden of computational complexity.
+\paragraph{Action}
+As a part of the Open Connectome Project (www.openconnecto.me), we built a scalable and reliable one-click MRImages-to-Graphs (M2G) pipeline in the cloud. The open source pipeline developed leverages state of the art processing techniques from FSL, Camino, and ANTs, in the cluster computing environmentLONI Pipeline. A web service was developed which allows users to upload and process their data on the cloud using M2G.
+\paragraph{Resolution}
+The M2G pipeline allows users to reliably and easily upload their MRI data to the cloud for data processing. Upon completion, the user recieves a report of quality control results of their data, the and the requested data derivatives. The M2G software service is freely available and functions as a one-click solution to the user, allowing research efforts to be focused on subsequent inference tasks.
+\paragraph{Future Work}
+The M2G pipeline will maintain up-to-date processing algorithms, as well as further cloud integration with the OCP spatial database and LIMS infrastructure. Both raw and derivative data will be made publicly available and hosted through our web service, to further lower the barrier of entry into this field.
+
+%\bibliography{m2g.bib}
+%\bibliographystyle{plain}
+
+\end{document}  
