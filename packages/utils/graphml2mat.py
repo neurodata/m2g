@@ -16,47 +16,45 @@
 #
 
 # graphmltomat.py
-# Created by Greg Kiar on 2015-02-04.
+# Created by Greg Kiar on 2015-04-29.
 # Email: gkiar@jhu.edu
 # Copyright (c) 2015. All rights reserved.
 
 from argparse import ArgumentParser
-import os
-from re import findall
 from scipy.sparse import lil_matrix, triu
 from scipy.io import savemat
-
+from igraph import Graph
+from copy import copy
 
 def graphconvert(ingraph, outgraph):
-  inf = open(ingraph, 'r')
-  edges = []
-  weight = []
-  for line in inf:
-    edges += findall('<edge source="n(\d+)" target="n(\d+)">', line)
-    weight += findall('<data key="e_weight">(\d+)</data>', line)
+	ing = Graph.Read_GraphML(ingraph)
 
-  graph = lil_matrix((70,70))
-  for i in range(len(weight)):
-    idx1 = int(edges[i][0])-1
-    idx2 = int(edges[i][1])-1
-    if idx1 > 70:
-      idx1 = idx1-65
-    if idx2 > 70:
-      idx2 = idx2-65
-    graph[idx1, idx2]=int(weight[i])
-    graph[idx2, idx1]=int(weight[i])
-  
-  graph = triu(graph)
-  mdict = {"graph": graph}
-  savemat(outgraph, mdict)
-  
+	#delete zero degree nodes
+	#GK TODO: be smarter
+	i = list()
+	for n, v in enumerate(ing.vs):
+		if v.degree() == 0:
+			i.append(n)
+	ing.vs[i].delete()
+	
+	outg = lil_matrix((ing.vcount(), ing.vcount()))
+
+	for e in ing.es:
+		outg[e.source, e.target] = e['weight']
+		outg[e.target, e.source] = e['weight'] #since edges are undirected add both ways
+
+	outg = triu(outg)
+	mat_dict = {"graph": outg}
+	savemat(outgraph, mat_dict)
+
+
 def main():
   parser = ArgumentParser(description="")
   parser.add_argument("ingraph", action="store", help="input graph in graphml format")
   parser.add_argument("outgraph", action="store", help="output graph in mat format")
- 
+
   result = parser.parse_args()
-  
+
   graphconvert(result.ingraph, result.outgraph)
 
 if __name__=='__main__':
