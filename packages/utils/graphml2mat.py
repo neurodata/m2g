@@ -15,7 +15,7 @@
 # limitations under the License.
 #
 
-# graphmltomat.py
+# graphml2mat.py
 # Created by Greg Kiar on 2015-04-29.
 # Email: gkiar@jhu.edu
 # Copyright (c) 2015. All rights reserved.
@@ -26,16 +26,17 @@ from scipy.io import savemat
 from igraph import Graph
 from copy import copy
 
-def graphconvert(ingraph, outgraph):
+def graphconvert(ingraph, outgraph, prune=False):
 	ing = Graph.Read_GraphML(ingraph)
 
-	#delete zero degree nodes
-	#GK TODO: be smarter
-	i = list()
-	for n, v in enumerate(ing.vs):
-		if v.degree() == 0:
-			i.append(n)
-	ing.vs[i].delete()
+	if prune:
+		#delete zero degree nodes
+		#GK TODO: be smarter
+		i = list()
+		for n, v in enumerate(ing.vs):
+			if v.degree() == 0:
+				i.append(n)
+		ing.vs[i].delete()
 	
 	outg = lil_matrix((ing.vcount(), ing.vcount()))
 
@@ -49,13 +50,13 @@ def graphconvert(ingraph, outgraph):
 
 
 def main():
-  parser = ArgumentParser(description="")
-  parser.add_argument("ingraph", action="store", help="input graph in graphml format")
-  parser.add_argument("outgraph", action="store", help="output graph in mat format")
+	parser = ArgumentParser(description="")
+	parser.add_argument("ingraph", action="store", help="input graph in graphml format")
+	parser.add_argument("outgraph", action="store", help="output graph in mat format")
+	parser.add_argument("--prune", "-p", action="store", help="if you want to delete zero degree nodes", default=False, type=bool)
+	result = parser.parse_args()
 
-  result = parser.parse_args()
-
-  graphconvert(result.ingraph, result.outgraph)
+	graphconvert(result.ingraph, result.outgraph, result.prune)
 
 if __name__=='__main__':
   main()
