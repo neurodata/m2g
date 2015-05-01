@@ -40,18 +40,11 @@ class FiberGraph(_FiberGraph):
     self.rois = rois
     self.edge_dict = defaultdict(int) # Will have key=(v1,v2), value=weight
 
-    position = [] # This is the original (true) vertex/voxel id before vertex deletion
-    # FIXME DM: Assumption is voxels are row-ordered -- confirm with GK.
-    for x in xrange(matrixdim[0]):
-      for y in xrange(matrixdim[1]):
-        for z in xrange(matrixdim[2]):
-          position.append(XYZMorton([x,y,z]))
-
     # ======================================================================== #
     # make new igraph with adjacency matrix to be (maxval X maxval)
-    self.spcscmat = igraph.Graph(n=max(position), directed=False)
+    self.spcscmat = igraph.Graph(n=self.rois.data.max().take(0), directed=False)
     # The original vertex ID is maintained using the  position field
-    self.spcscmat.vs["position"] = position
+    self.spcscmat.vs["position"] = range(self.spcscmat.vcount())
     self.edge_dict = defaultdict(int) # Will have key=(v1,v2), value=weight
     # ======================================================================== #
 
