@@ -36,7 +36,7 @@ import os
 from packages.utils.setup import get_files
 
 def create(roifn=os.path.join("../../..","data","Atlas", 
-          "MNI152_T1_1mm_brain.nii"), start=2):
+          "MNI152_T1_1mm_brain.nii"), start=2, get_map=False):
   """
   Create a new atlas given some scaling factor determined by the 
   start index. Opaque doc, but best I can do.
@@ -46,6 +46,7 @@ def create(roifn=os.path.join("../../..","data","Atlas",
   """
 
   start_time = time()
+  atlmap = None
   print "Loading rois as base ..."
   if not os.path.exists(roifn):
     get_files()
@@ -76,6 +77,7 @@ def create(roifn=os.path.join("../../..","data","Atlas",
   # Create new matrix
   new = np.zeros_like(base, dtype=np.int) # poke my finger in the eye of bjarne
 
+  # TODO: Cythonize
   for z in xrange(start, base.shape[2]-start, step):
     for y in xrange(start, base.shape[1]-start, step):
       for x in xrange(start, base.shape[0]-start, step):
@@ -94,10 +96,16 @@ def create(roifn=os.path.join("../../..","data","Atlas",
   
   new = new[:true_dim[0], :true_dim[1], :true_dim[2]] # shrink new to correct size
   print "Your atlas has %d regions ..." % len(np.unique(new))
-  img = nib.Nifti1Image(new, affine=aff, header=nib.load(roifn).get_header(), file_map=fm)
+
+  img = nib.Nifti1Image(new, affine=img.get_affine(), header=img.get_header(), file_map=img.file_map)
   
+  del new
   print "Building atlas took %.3f sec ..." % (time()-start_time)
-  return img
+
+  if get_map:
+    import atlas_map
+    atlmap = atlas_map.create(img.get_data())
+  return img, atlmap
 
 def validate(atlas_fn, roifn):
   """
@@ -107,7 +115,6 @@ def validate(atlas_fn, roifn):
   @param atlas_fn: the new atlas you've created
   @param roifn: nifti roi file name
   """
-  from operator import xor
 
   base = nib.load(roifn).get_data()
   try:
@@ -126,29 +133,37 @@ def validate(atlas_fn, roifn):
           if old_to_new[base[i,ii,iii]] != new[i,ii,iii]:
             print "[Error]; Index [%d,%d,%d] Should be: {0}, but is {1}".format(i, ii, iii, 
                   old_to_new[base[i,ii,iii]], new[i,ii,iii])
-            exit(0)
+            exit(911)
         else:
+          if start == 0 and new[i,i,iii] in old_to_new.values(): import pdb; pdb.set_trace()
           old_to_new[base[i,ii,iii]] = new[i,i,iii]
 
-  print "Sucess! Validation complete."
-
+  print "Success! Validation complete."
 
 def main():
   parser = argparse.ArgumentParser(description="Create a downsampled atlas for a fibergraph")
-  parser.add_argument("roifn", action="store", help="NIFTI roi")
+  parser.add_argument("baseatlas", action="store", help="NIFTI roi")
   parser.add_argument("-n","--niftifn",  action="store", default="atlas.nii", \
-          help="Nifti outfile name if creating else the infile name if validation")
-  parser.add_argument("-s", "--start", default=2, action="store", type=int, help="Start index")
+          help="Nifti output file name if creating else the input file name if validation")
+  parser.add_argument("-m", "--atlas_map", action="store_true", help="Atlas mapping from region -> XYZ filename")
+  parser.add_argument("-f", "--factor", default=2, action="store", type=int, \
+      help="Downsample factor/Start index")
   parser.add_argument("-v", "--validate", action="store_true", help="Perform validation")
 
   result = parser.parse_args()
   if result.validate:
     print "Validating %s..." % result.niftifn
-    validate(result.niftifn, result.roifn)
+    validate(result.niftifn, result.baseatlas)
     exit(1)
   
-  img = create(result.roifn, result.start)
+  img, atlmap = create(result.baseatlas, result.factor, result.atlas_map)
   nib.save(img, result.niftifn)
+  if atlmap:
+    import cPickle as pickle
+    atlmap_fn = os.path.join(os.path.dirname(result.niftifn), os.path.splitext(result.niftifn)[0]+"_map.cpickle")
+    with open(atlmap_fn, "wb") as f:
+      print "Dumping atlmap as '{0}'".format(atlmap_fn)
+      pickle.dump(atlmap, f)
 
 if __name__ == "__main__":
   main()

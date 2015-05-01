@@ -168,7 +168,7 @@ class Fiber:
     #
     #  Return a list of voxels in this Fiber.  As tuples by zindex
     #
-    def getVids (self, rois):
+    def get_vids (self, rois):
       """Return the list of edges in this fiber. As tuples."""
 
       vids = set()
@@ -183,9 +183,9 @@ class Fiber:
           # DM TODO: Verify with someone that vid 0 never should have edges 
           if vid:
               # The fiber gives us the exact voxel but we need a Vertex ID
-              if g_is_full:
-                vids.add(zindex.XYZMorton(voxel))
-              else:
+              #if g_is_full:
+                #vids.add(zindex.XYZMorton(voxel))
+              #else:
                 vids.add(vid)
 
       # Duplicates eliminated

@@ -48,7 +48,7 @@ class _FiberGraph(object):
     ====================
     fiber - the fiber read fiber tract .dat file
     """
-    roi_edges = itertools.combinations((fiber.getVids(self.rois)),2)
+    roi_edges = itertools.combinations((fiber.get_vids(self.rois)),2)
 
     for list_item in roi_edges:
       self.edge_dict[tuple(sorted(list_item))] += 1
@@ -59,6 +59,7 @@ class _FiberGraph(object):
     """
     start = time()
     print "Adding %d edges to the graph ..." % len(self.edge_dict)
+
     self.spcscmat += self.edge_dict.keys()
     print "Completed adding edges in %.3f sec" % (time() - start)
 
