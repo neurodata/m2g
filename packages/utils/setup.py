@@ -24,7 +24,7 @@ import os
 from subprocess import call
 from webget import wget
 
-__data_dir__ = os.path.abspath(os.path.join("../../", "data/"))
+__data_dir__ = os.path.abspath(os.path.join(os.environ['M2G_HOME'], "data/"))
 weburl = "http://openconnecto.me/data/public/MR-data/"
 __files__ = {
   "Atlas":[
@@ -57,7 +57,7 @@ def get_files():
         wget(get_local_fn(v, k), weburl+k+"/"+v)
 
 def compile_cython():
-  os.chdir("../../MR-OCP/mrcap/")
+  os.chdir(os.path.join(os.environ['M2G_HOME'],"/MR-OCP/mrcap/"))
   ret = call(["python", "setup.py", "install"])
   assert not ret, "Failed to run setup.py in 'mrcap' directory. Perhaps running this script with 'sudo' will help"
 
