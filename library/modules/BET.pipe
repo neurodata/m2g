@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<pipeline version=".2">
+        <icons>
+                <icon id="0" value="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&#xA;rkJggg==" />
+        </icons>
+        <moduleGroup id="BET_1" name="BET" package="FSL" posX="0" posY="0" sourceCode="">
+                <tag />
+                <metadata>
+                        <data key="__creationDateKey" value="Fri May 01 11:50:52 EDT 2015" />
+                </metadata>
+                <module id="BETnii.gz_1" name="BET (nii.gz)" package="FSL" version="4.1.4" description="BET (Brain Extraction Tool) deletes non-brain tissue from an image of the whole head. It can also estimate the external skull surface." icon="0" posX="0" posY="68" sourceCode="" location="pipeline://localhost/bet" executableVersion="4.1.4">
+                        <authors>
+                                <author fullName="D. Cornelius Hojatkashani" email="cornelius.hojatkashani@loni.ucla.edu " website="http://loni.ucla.edu " />
+                        </authors>
+                        <citations>
+                                <citation>S.M. Smith, M. Jenkinson, M.W. Woolrich, C.F. Beckmann, T.E.J. Behrens, H. Johansen-Berg, P.R. Bannister, M. De Luca, I. Drobnjak, D.E. Flitney, R. Niazy, J. Saunders, J. Vickers, Y. Zhang, N. De Stefano, J.M. Brady, and P.M. Matthews. Advances in functional and structural MR image analysis and implementation as FSL. NeuroImage, 23(S1):208-219, 2004
+
+PMID: 15501092</citation>
+                        </citations>
+                        <tag>skull stripping</tag>
+                        <uri>http://www.fmrib.ox.ac.uk/fsl/bet2/index.html</uri>
+                        <metadata>
+                                <data key="__creationDateKey" value="Mon Sep 18 19:22:04 PDT 2006" />
+                        </metadata>
+                        <input id="BETnii.gz_1.InputFile" name="Input File" description="Specifies the input file." required="true" enabled="true" order="0">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="Nii Gz" extension="nii.gz" description="Compressed Nifti" />
+                                                <filetype name="Analyze Image" extension="img" description="Analyze Image file">
+                                                        <need>hdr</need>
+                                                </filetype>
+                                        </fileTypes>
+                                </format>
+                        </input>
+                        <output id="BETnii.gz_1.OutputFile" name="Output File" description="Specifies the output file." required="true" enabled="true" order="1">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="Nii Gz" extension="nii.gz" description="Compressed Nifti" />
+                                        </fileTypes>
+                                </format>
+                        </output>
+                        <input id="BETnii.gz_1.OutlineBrainsurface" name="Outline Brainsurface" description="Generates brain surface outline overlaid onto original image." required="false" enabled="false" order="2" prefix="-o" prefixSpaced="true" prefixAllArgs="false">
+                                <format type="String" cardinality="0" />
+                        </input>
+                        <output id="BETnii.gz_1.CreateBinaryMask" name="Create Binary Mask" description="Generates binary brain mask." required="false" enabled="false" order="3" prefix="-m " prefixSpaced="true" prefixAllArgs="false" includeTransformedParameter="false">
+                                <format type="File" cardinality="1" transformationBase="Output File">
+                                        <fileTypes>
+                                                <filetype name="Nii Gz" extension="nii.gz" description="Compressed Nifti" />
+                                        </fileTypes>
+                                        <transform order="0" operation="Subtract">.nii.gz</transform>
+                                        <transform order="1" operation="Append">_mask.nii.gz</transform>
+                                </format>
+                        </output>
+                        <output id="BETnii.gz_1.GenerateSkullImage" name="Generate Skull Image" description="Generates approximate skull image." required="false" enabled="false" order="4" prefix="-s" prefixSpaced="true" prefixAllArgs="false" includeTransformedParameter="false">
+                                <format type="File" cardinality="1" transformationBase="Output File">
+                                        <fileTypes>
+                                                <filetype name="Nii Gz" extension="nii.gz" description="Compressed Nifti" />
+                                        </fileTypes>
+                                        <transform order="0" operation="Subtract">.img</transform>
+                                        <transform order="1" operation="Subtract">.hdr</transform>
+                                        <transform order="2" operation="Append">_skull.img</transform>
+                                </format>
+                        </output>
+                        <input id="BETnii.gz_1.DontSegmentOutput" name="Don't Segment Output" description="Don't generate segmented brain image output." required="false" enabled="false" order="5" prefix="-n" prefixSpaced="true" prefixAllArgs="false">
+                                <format type="String" cardinality="0" />
+                        </input>
+                        <input id="BETnii.gz_1.FractionalIntensityThreshold" name="Fractional Intensity Threshold" description="Specifies fractional intensity threshold (0-&gt;1); default=0.5; smaller values give larger brain outline estimates" required="false" enabled="true" order="6" prefix="-f" prefixSpaced="true" prefixAllArgs="false">
+                                <format type="Number" cardinality="1" />
+                                <values>
+                                        <value>0.4</value>
+                                </values>
+                        </input>
+                        <input id="BETnii.gz_1.VerticalGradientThreshold" name="Vertical Gradient Threshold" description="Specifies vertical gradient in fractional intensity threshold (-1-&gt;1). &#xA;(Default=0)&#xA;Note: Positive values give larger brain outline at bottom, smaller at top." required="false" enabled="false" order="7" prefix="-g" prefixSpaced="true" prefixAllArgs="false">
+                                <format type="Number" cardinality="1" />
+                        </input>
+                        <input id="BETnii.gz_1.HeadRadius" name="Head Radius" description="Specifies head radius (mm not voxels)&#xA;Note: Initial surface sphere is set to half of this." required="false" enabled="false" order="9" prefix="-r" prefixSpaced="true" prefixAllArgs="false">
+                                <format type="Number" cardinality="1" />
+                        </input>
+                        <input id="BETnii.gz_1.CenterofGravity" name="Center of Gravity" description="Specifies center-of-gravity (mm not voxels) of initial mesh surface." required="false" enabled="false" order="10" prefix="-c" prefixSpaced="true" prefixAllArgs="false">
+                                <format type="Number" cardinality="3" />
+                        </input>
+                        <input id="BETnii.gz_1.ApplyThresholding" name="Apply Thresholding" description="Apply thresholding to segmented brain image and mask." required="false" enabled="false" order="11" prefix="-t" prefixSpaced="true" prefixAllArgs="false">
+                                <format type="String" cardinality="0" />
+                        </input>
+                        <input id="BETnii.gz_1.Verbose" name="Verbose" description="Enables verbose text output." required="false" enabled="true" order="8" prefix="-v" prefixSpaced="true" prefixAllArgs="false">
+                                <format type="String" cardinality="0" />
+                        </input>
+                        <input id="BETnii.gz_1.Robust" name="Robust" required="false" enabled="true" order="12" prefix="-R" prefixSpaced="true" prefixAllArgs="false">
+                                <format type="String" cardinality="0" />
+                        </input>
+                        <executableAuthors>
+                                <author fullName="Steve Smith" email="steve@fmrib.ox.ac.uk" website="http://www.fmrib.ox.ac.uk/Members/steve" />
+                                <author fullName="Mark Jenkinson" email="mark@fmrib.ox.ac.uk" website="http://users.fmrib.ox.ac.uk/~mark/ " />
+                        </executableAuthors>
+                        <license>http://www.fmrib.ox.ac.uk/fsl/fsl/licence.html
+
+LICENCE
+
+FMRIB Software Library, Release 4.1 (c) 2008, The University of Oxford
+(the "Software")
+
+The Software remains the property of the University of Oxford ("the
+University").
+
+The Software is distributed "AS IS" under this Licence solely for
+non-commercial use in the hope that it will be useful, but in order
+that the University as a charitable foundation protects its assets for
+the benefit of its educational and research purposes, the University
+makes clear that no condition is made or to be implied, nor is any
+warranty given or to be implied, as to the accuracy of the Software,
+or that it will be suitable for any particular purpose or for use
+under any specific conditions. Furthermore, the University disclaims
+all responsibility for the use which is made of the Software. It
+further disclaims any liability for the outcomes arising from using
+the Software.
+
+The Licensee agrees to indemnify the University and hold the
+University harmless from and against any and all claims, damages and
+liabilities asserted by third parties (including claims for
+negligence) which arise directly or indirectly from the use of the
+Software or the sale of any products based on the Software.
+
+No part of the Software may be reproduced, modified, transmitted or
+transferred in any form or by any means, electronic or mechanical,
+without the express permission of the University. The permission of
+the University is not required if the said reproduction, modification,
+transmission or transference is done without financial return, the
+conditions of this Licence are imposed upon the receiver of the
+product, and all original and amended source code is included in any
+transmitted product. You may be held legally responsible for any
+copyright infringement that is caused or encouraged by your failure to
+abide by these terms and conditions.
+
+You are not permitted under this Licence to use this Software
+commercially. Use for which any financial return is received shall be
+defined as commercial use, and includes (1) integration of all or part
+of the source code or the Software into a product for sale or license
+by or on behalf of Licensee to third parties or (2) use of the
+Software or any derivative of it for research with the final aim of
+developing software products for sale or license to a third party or
+(3) use of the Software or any derivative of it for research with the
+final aim of developing non-software products for sale or license to a
+third party, or (4) use of the Software to provide any service to an
+external organisation for which payment is received. If you are
+interested in using the Software commercially, please contact Isis
+Innovation Limited ("Isis"), the technology transfer company of the
+University, to negotiate a licence. Contact details are:
+innovation@isis.ox.ac.uk quoting reference BS/3497.</license>
+                </module>
+        </moduleGroup>
+</pipeline>
+
