@@ -36,7 +36,7 @@ import os
 from packages.utils.setup import get_files
 
 def create(roifn=os.path.join("../../..","data","Atlas", 
-          "MNI152_T1_1mm_brain.nii"), start=2, get_map=False):
+          "MNI152_T1_1mm_brain.nii"), start=2):
   """
   Create a new atlas given some scaling factor determined by the 
   start index. Opaque doc, but best I can do.
@@ -102,10 +102,7 @@ def create(roifn=os.path.join("../../..","data","Atlas",
   del new
   print "Building atlas took %.3f sec ..." % (time()-start_time)
 
-  if get_map:
-    import atlas_map
-    atlmap = atlas_map.create(img.get_data())
-  return img, atlmap
+  return img
 
 def validate(atlas_fn, roifn):
   """
@@ -145,7 +142,6 @@ def main():
   parser.add_argument("baseatlas", action="store", help="NIFTI roi")
   parser.add_argument("-n","--niftifn",  action="store", default="atlas.nii", \
           help="Nifti output file name if creating else the input file name if validation")
-  parser.add_argument("-m", "--atlas_map", action="store_true", help="Atlas mapping from region -> XYZ filename")
   parser.add_argument("-f", "--factor", default=2, action="store", type=int, \
       help="Downsample factor/Start index")
   parser.add_argument("-v", "--validate", action="store_true", help="Perform validation")
@@ -156,14 +152,8 @@ def main():
     validate(result.niftifn, result.baseatlas)
     exit(1)
   
-  img, atlmap = create(result.baseatlas, result.factor, result.atlas_map)
+  img = create(result.baseatlas, result.factor)
   nib.save(img, result.niftifn)
-  if atlmap:
-    import cPickle as pickle
-    atlmap_fn = os.path.join(os.path.dirname(result.niftifn), os.path.splitext(result.niftifn)[0]+"_map.cpickle")
-    with open(atlmap_fn, "wb") as f:
-      print "Dumping atlmap as '{0}'".format(atlmap_fn)
-      pickle.dump(atlmap, f)
 
 if __name__ == "__main__":
   main()

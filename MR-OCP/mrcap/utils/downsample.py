@@ -35,7 +35,7 @@ import numpy as np
 import cPickle as pickle
 
 DEBUG = False
-def downsample(g, factor=-1, ds_atlas=None, orig_atlmap=None):
+def downsample(g, factor=-1, ds_atlas=None):
   """
   Downsample a graph by collapsing regions using an dynamically
   generated downsampled atlas. Rebuilding the graph takes O(m).
@@ -50,15 +50,17 @@ def downsample(g, factor=-1, ds_atlas=None, orig_atlmap=None):
 
   if factor >= 0:
     print "Generating downsampled atlas ..." # TODO: Cythonize
-    ds_atlas, orig_atlmap = create_atlas.create(start=factor) # Create ds atlas and an atlas map for the original atlas
+    ds_atlas = create_atlas.create(start=factor) # Create ds atlas and an atlas map for the original atlas
   
   ds_atlas = ds_atlas.get_data() # don't care about other atlas data
 
   # This takes O(m)
   for e in g.es:
-    #import pdb; pdb.set_trace()
-    src = ds_atlas[orig_atlmap[ (g.vs[e.source]["position"]) ]]
-    tgt = ds_atlas[orig_atlmap[ (g.vs[e.target]["position"]) ]]
+    src_x, src_y, src_z = MortonXYZ(g.vs[e.source]["spatial_id"])
+    tgt_x, tgt_y, tgt_z = MortonXYZ(g.vs[e.target]["spatial_id"])
+
+    src = ds_atlas[src_x, src_y, src_z]
+    tgt = ds_atlas[tgt_x, tgt_y, tgt_z]
 
     edge_dict[(src, tgt)] += e["weight"]
 
@@ -83,7 +85,6 @@ def main():
   parser.add_argument("infn", action="store", help="Input file name")
   parser.add_argument("-f", "--factor", action="store", type=int, help="Downsampling factor")
   parser.add_argument("-a", "--ds_atlas", action="store", help="Pre-Downsampled atlas file name")
-  parser.add_argument("-m", "--atlas_map", action="store", help="Downsampling atlas map file name")
   parser.add_argument("outfn", action="store", help="Output file name")
   parser.add_argument("--informat", "-i", action="store", default="graphml", help="Input format of the graph")
   parser.add_argument("--outformat", "-o", action="store", default="graphml", help="Output format of the graph")
@@ -94,11 +95,8 @@ def main():
     g = igraph_io.read_arbitrary(result.infn, informat=result.informat)
     new_graph = downsample(g, factor=result.factor)
   elif result.ds_atlas:
-    with open(result.atlas_map, "rb") as f:
-      orig_atlmap = pickle.load(f)
-
     g = igraph_io.read_arbitrary(result.infn, informat=result.informat)
-    new_graph = downsample(g, ds_atlas=nib.load(result.ds_atlas), orig_atlmap=orig_atlmap)
+    new_graph = downsample(g, ds_atlas=nib.load(result.ds_atlas))
   else:
     sys.stderr.write("[ERROR]: either -f or -a flag must be specified\n")
     exit(-1)
