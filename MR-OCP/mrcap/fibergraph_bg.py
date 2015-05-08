@@ -43,8 +43,19 @@ class FiberGraph(_FiberGraph):
     # ======================================================================== #
     # make new igraph with adjacency matrix to be (maxval X maxval)
     self.spcscmat = igraph.Graph(n=self.rois.data.max().take(0), directed=False)
-    # The original vertex ID is maintained using the  position field
-    self.spcscmat.vs["position"] = range(self.spcscmat.vcount())
+    
+    # Keep track of the original vertex ID = region ID before deletion deg zero vertices
+    #self.spcscmat.vs["orig_region_id"] = range(self.spcscmat.vcount())
+    
+    spatial_map = [0]*(self.spcscmat.vcount()+1)
+    nnz = np.where(self.rois.data != 0)
+    for idx in xrange(nnz[0].shape[0]):
+      x,y,z = nnz[0][idx], nnz[1][idx], nnz[2][idx]
+      region_id = self.rois.data[x,y,z]
+      spatial_map[region_id] = XYZMorton([x,y,z]) # Use to get the spatial position of a vertex
+
+    self.spcscmat.vs["spatial_id"] = spatial_map
+    
     self.edge_dict = defaultdict(int) # Will have key=(v1,v2), value=weight
     # ======================================================================== #
 
