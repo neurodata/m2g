@@ -29,7 +29,7 @@ weburl = "http://openconnecto.me/data/public/MR-data/"
 __files__ = {
   "Atlas":[
   "desikan_in_mni_space/MNI152_T1_1mm_brain_incremented.nii",
-  "desikan_in_mni_space/MNI152_T1_1mm_brain_labels_cropped.nii", 
+  "desikan_in_mni_space/MNI152_T1_1mm_desikan_adjusted.nii", 
   "desikan_in_mni_space/MNI152_T1_1mm_brain_mask.nii",
   "desikan_in_mni_space/MNI152_T1_1mm_brain_labels.nii", 
   "desikan_in_mni_space/MNI152_T1_1mm_brain.nii",
