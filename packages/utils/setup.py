@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-
 # Copyright 2014 Open Connectome Project (http://openconnecto.me)
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,6 +18,15 @@
 # Created by Disa Mhembere on 2015-04-15.
 # Email: disa@jhu.edu
 
+"""
+Initial script for setting up m2g
+
+	Requirements
+			$M2G_HOME: system variable to be set to the base directory of the cloned m2g repo.
+	Returns
+			data directory containing atlas labels and niftii template images
+"""
+
 import argparse
 import os
 from subprocess import call
@@ -29,7 +37,7 @@ weburl = "http://openconnecto.me/data/public/MR-data/"
 __files__ = {
   "Atlas":[
   "desikan_in_mni_space/MNI152_T1_1mm_brain_incremented.nii",
-  "desikan_in_mni_space/MNI152_T1_1mm_brain_labels_cropped.nii", 
+  "desikan_in_mni_space/MNI152_T1_1mm_desikan_adjusted.nii", 
   "desikan_in_mni_space/MNI152_T1_1mm_brain_mask.nii",
   "desikan_in_mni_space/MNI152_T1_1mm_brain_labels.nii", 
   "desikan_in_mni_space/MNI152_T1_1mm_brain.nii",
@@ -43,6 +51,7 @@ def get_local_fn(fn, _type):
   return os.path.join(os.path.join(__data_dir__, _type, os.path.basename(fn)))
 
 def get_files():
+  """this is a test"""
   atlas_dir = os.path.join(__data_dir__, "Atlas")
   centroid_dir = os.path.join(__data_dir__, "Centroids")
 
@@ -57,11 +66,25 @@ def get_files():
         wget(get_local_fn(v, k), weburl+k+"/"+v)
 
 def compile_cython():
+  """
+	this compiles cython stuff in m2g
+  """
   os.chdir(os.path.join(os.environ['M2G_HOME'],"/MR-OCP/mrcap/"))
   ret = call(["python", "setup.py", "install"])
   assert not ret, "Failed to run setup.py in 'mrcap' directory. Perhaps running this script with 'sudo' will help"
 
 def main():
+  """
+  Predict the cluster that all data points belong to.
+  Parameters
+  ----------
+  data : Series or subclass (e.g. RowMatrix), a list of arrays, or a single array
+  The data to predict cluster assignments on
+  Returns
+  -------
+	closest : Series, list of arrays, or a single array
+	For each data point, ggives the closest center to that point
+  """
   parser = argparse.ArgumentParser(description="Gets data files that graph gen and verification code needs. Also can build zindex")
   parser.add_argument("-c", "--compile", action="store_true", help="Compile the zindex cython module")
   result = parser.parse_args()
