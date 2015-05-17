@@ -1,6 +1,11 @@
 Functions
-********
+*********
+
+.. raw:: html
 
 
+	<h2>Setup Scripts</h2>
 
-.. autofunction:: packages.utils.setup
+..	toctree:: 
+	
+	setup

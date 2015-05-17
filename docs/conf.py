@@ -25,7 +25,7 @@ import shlex
 
 # If your documentation needs a minimal Sphinx version, state it here.
 #needs_sphinx = '1.0'
-
+import packages.utils.setup
 
 #import pdb; pdb.set_trace()
 # Add any Sphinx extension module names here, as strings. They can be
