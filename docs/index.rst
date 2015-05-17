@@ -20,6 +20,9 @@
 
   <p> M2G has been developed in the LONI pipelining environment. This environment enforces that the pipeline be modular in construction, and all created workflows and modules are command-line executable. This makes M2G efficient and allows users or researchers to modify algorithms for their specific requirements. </p>
 
+  <p><a class="zip_download_link" href="https://github.com/openconnectome/i2g/zipball/master">Download this project as a .zip file</a></p>
+  
+  <p><a class="tar_download_link" href="https://github.com/openconnectome/i2g/tarball/master">Download this project as a tar.gz file</a></p>
 
 .. raw:: html
 
@@ -71,7 +74,6 @@
    Project page <https://openconnectome.github.io/m2g/>
 
 .. raw:: html
-
    </div>
    </div>
    </div>
