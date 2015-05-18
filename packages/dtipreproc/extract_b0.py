@@ -24,26 +24,20 @@ from argparse import ArgumentParser
 from nibabel import load, save, Nifti1Image
 from numpy import where, loadtxt
 
-def extract_vol(dti_img, bvals, b0_vol):
+def extract_vol(dti_img, b0, b0_vol):
 	print "Loading dti data..."
 	d_img = load(dti_img)
 	b0_data = d_img.get_data()
 	b0_head = d_img.get_header()
   
-	print "Loading bvals file..."
-	b = loadtxt(bvals)
-	 
-	b = int(where(b==0)[0])
-	print "B0 Index: ((",b, "##"
-	
 	print "Extracting B0 volume..."
-	b0_data=b0_data[:,:,:,b]
+	b0_data=b0_data[:,:,:,b0]
 	
 	print "Updating image header..."
 	b0_head.set_data_shape(b0_head.get_data_shape()[0:3])
 
 	print "Saving..."
-	out = Nifti1Image( data=b0_data, affine=d_img.get_affine(), header=b0_head )
+	out = Nifti1Image( b0_data, affine=d_img.get_affine(), header=b0_head )
 	out.update_header()
 	save(out, b0_vol)
 	print "Complete!"
@@ -51,12 +45,12 @@ def extract_vol(dti_img, bvals, b0_vol):
 def main():
   parser = ArgumentParser(description="")
   parser.add_argument("dti", action="store", help="The DTI image we want to extract B0 from (.nii, .nii.gz)")
-  parser.add_argument("bvals", action="store", help="The b-value file corresponding to the DTI image (.b)")
-  parser.add_argument("b0", action="store", help="The output file location of the B0 scan (.nii, .nii.gz)")
+  parser.add_argument("b0", action="store", help="The index of the b-value corresponding to the B0 scan")
+  parser.add_argument("b0_vol", action="store", help="The output file location of the B0 scan (.nii, .nii.gz)")
 
   result = parser.parse_args()
 
-  extract_vol(result.dti, result.bvals, result.b0)
+  extract_vol(result.dti, result.b0, result.b0_vol)
   
 if __name__ == "__main__":
     main()
