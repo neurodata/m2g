@@ -34,13 +34,13 @@
 .. toctree::
    :maxdepth: 1
 
-   docs/introduction
-   docs/local_config
-   docs/cluster_config
-   docs/cloud_computing
-   docs/contributing
-   docs/style
-   docs/faq
+   sphinx/introduction
+   sphinx/local_config
+   sphinx/cluster_config
+   sphinx/cloud_computing
+   sphinx/contributing
+   sphinx/style
+   sphinx/faq
    Release Notes <https://github.com/openconnectome/m2g/releases/>
 
 .. raw:: html
@@ -67,14 +67,9 @@
 .. toctree::
    :maxdepth: 1
    
-   docs/functions
+   sphinx/modules
+   sphinx/functions
    Gitter chatroom <https://gitter.im/openconnectome/m2g>
    Mailing list <https://groups.google.com/forum/#!forum/ocp-support/>
    Github repo <https://github.com/openconnectome/m2g>
    Project page <https://openconnectome.github.io/m2g/>
-
-.. raw:: html
-   </div>
-   </div>
-   </div>
-
