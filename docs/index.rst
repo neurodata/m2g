@@ -67,8 +67,8 @@
 .. toctree::
    :maxdepth: 1
    
-   sphinx/modules
-   sphinx/functions
+   api/modules
+   api/functions
    Gitter chatroom <https://gitter.im/openconnectome/m2g>
    Mailing list <https://groups.google.com/forum/#!forum/ocp-support/>
    Github repo <https://github.com/openconnectome/m2g>
