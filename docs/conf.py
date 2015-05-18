@@ -23,8 +23,12 @@ import shlex
 sys.path.insert(0, os.getenv('M2G_HOME'))
 import packages.utils.setup
 import packages.dtipreproc.extract_b0
-#import packages.utils.graphml2mat
+import packages.dtipreproc.parse_b
+import packages.tractography.tensor_gen
+import packages.tractography.fiber_gen
+import packages.tractography.fiber_convert
 
+#import packages.utils.graphml2mat
 
 # -- General configuration ------------------------------------------------
 
