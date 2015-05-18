@@ -20,6 +20,22 @@
 # Email: gkiar@jhu.edu
 # Copyright (c) 2015. All rights reserved.
 
+
+"""
+Computes fiber streamlines from diffusion tensor data.
+
+Using Camino's implementation of the FACT algorithm, published by Mori et al. (2001), we compute fiber tracts throughout the brain from the previously calculated tensors for a given brain.
+
+  Inputs
+      - Tensors: The Camino formatted file containing voxel diffusion tensor information.
+      - Brain mask: Binary mask of the brain which will be used to limiting tractography to brain-occupied regions of the image.
+      - Anisotropy threshold (0.2): Stopping threshold for fiber tractography.
+      - Curve threshold (70): Angular stopping threshold for fiber tractography.
+  Outputs
+      - Fibers: Camino formatted fiber streamlines
+"""
+
+
 import argparse
 import string
 import sys

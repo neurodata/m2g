@@ -30,7 +30,7 @@ B-vectors and b-values can be provided in slightly different formats from differ
       - B-vectors: Gradient directions of scanner corresponding to the b-values
   Outputs
       - B0 Index: Location of the first B0 volume in the DTI image stack
-			- Gradients: Reformatted B-vectors file which is compatible with downstream processing algorithms
+      - Gradients: Reformatted B-vectors file which is compatible with downstream processing algorithms
 """
 
 

@@ -22,6 +22,19 @@
 # Email: gkiar@jhu.edu
 # Copyright (c) 2015. All rights reserved.
 
+
+"""
+Converts fibers from Camino format to MRIStudio format
+
+Fibers produced by Camino are in a format which is incompatible with developed graph generation code, and thus are converted to the legacy MRIStudio format.
+
+  Inputs
+      - Camino fibers: File generated containing fiber tracts computed from the diffusion tensors
+  Outputs
+      - MRIStudio fibers: File containing the reformated fibers in a data format consistent with MRIStudio's generated fibers.
+"""
+
+
 from argparse import ArgumentParser
 import scipy.io as sio
 import numpy as np
