@@ -22,6 +22,7 @@
                 <connection source="MNIbrainmask_1.Output" sink="DiffusionProcessing_1.BrainMask" />
                 <connection source="MNIbrainmask_1.Output" sink="DiffusionProcessing_1.BrainMask_2" />
                 <connection source="MNIlabels_1.Output" sink="DiffusionProcessing_1.atlas" />
+                <connection source="Registration_1.BValue" sink="DiffusionProcessing_1.DTIBvalue" />
                 <connection source="D2.TensorEstimation_1.DTItensors" sink="D3.FiberTractography_1.DTITensors" />
                 <connection source="D5.SmallGraphGeneration_1.graphfile" sink="D6.graphmltomat_1.graphmlfile" />
                 <connection source="D3.FiberTractography_1.DTIfibers" sink="D4.FiberConverter_1.fiberinfile" />
@@ -33,11 +34,10 @@
                 <icon id="1" value="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&#xA;rkJggg==" />
         </icons>
         <moduleGroup id="m2g_1" name="m2g" package="m2g" version="1.1.0" posX="0" posY="0" sourceCode="">
-                <tag />
                 <metadata>
                         <data key="__creationDateKey" value="Wed Apr 22 10:36:20 EDT 2015" />
                 </metadata>
-                <dataModule id="DTIbvals_1" name="DTI bvals" package="m2g" posX="0" posY="100" rotation="1" sourceCode="" type="File" source="true" loopIndex="false" serverAddress="localhost">
+                <dataModule id="DTIbvals_1" name="DTI bvals" package="m2g" posX="0" posY="100" rotation="1" sourceCode="" type="File" source="true" loopIndex="false">
                         <metadata>
                                 <data key="__creationDateKey" value="Mon Apr 20 19:08:15 EDT 2015" />
                         </metadata>
@@ -55,7 +55,7 @@
                                 <value>pipeline://localhost//mnt/ssd1/data/inputs/KKI2009/KKI2009-22/KKI2009-22-DTI.b</value>
                         </values>
                 </dataModule>
-                <dataModule id="MNIimage_1" name="MNI image" package="m2g" posX="562" posY="105" sourceCode="" type="File" source="true" loopIndex="false" serverAddress="localhost">
+                <dataModule id="MNIimage_1" name="MNI image" package="m2g" posX="562" posY="105" sourceCode="" type="File" source="true" loopIndex="false">
                         <metadata>
                                 <data key="__creationDateKey" value="Mon Apr 20 19:08:15 EDT 2015" />
                         </metadata>
@@ -75,7 +75,7 @@
                                 <value>pipeline://localhost//mrimages/src/m2g/data/Atlas/MNI152_T1_1mm.nii.gz</value>
                         </values>
                 </dataModule>
-                <dataModule id="MPRAGEImage_1" name="MPRAGE Image" package="m2g" posX="0" posY="0" rotation="1" sourceCode="" type="File" source="true" loopIndex="false" serverAddress="localhost">
+                <dataModule id="MPRAGEImage_1" name="MPRAGE Image" package="m2g" posX="0" posY="0" rotation="1" sourceCode="" type="File" source="true" loopIndex="false">
                         <metadata>
                                 <data key="__creationDateKey" value="Mon Apr 20 19:08:15 EDT 2015" />
                         </metadata>
@@ -95,7 +95,7 @@
                                 <value>pipeline://localhost//mnt/ssd1/data/inputs/KKI2009/KKI2009-22/KKI2009-22-MPRAGE.nii</value>
                         </values>
                 </dataModule>
-                <dataModule id="DTIImage_1" name="DTI Image" package="m2g" posX="0" posY="207" rotation="1" sourceCode="" type="File" source="true" loopIndex="false" serverAddress="localhost">
+                <dataModule id="DTIImage_1" name="DTI Image" package="m2g" posX="0" posY="207" rotation="1" sourceCode="" type="File" source="true" loopIndex="false">
                         <metadata>
                                 <data key="__creationDateKey" value="Mon Apr 20 19:08:15 EDT 2015" />
                         </metadata>
@@ -116,7 +116,6 @@
                         </values>
                 </dataModule>
                 <moduleGroup id="Registration_1" name="Registration" package="m2g" icon="0" posX="221" posY="304" sourceCode="">
-                        <tag />
                         <metadata>
                                 <data key="__creationDateKey" value="Mon Apr 20 19:29:15 EDT 2015" />
                         </metadata>
@@ -129,7 +128,9 @@
                         <input description="Specifies the input volume file path." link="EddyCorrect_1.Input" id="Registration_1.Input" name="Input" order="6" />
                         <input description="Specifies the input reference image." link="FLIRTApplyxfm_2.Reference" id="Registration_1.Reference_4" name="Reference" order="7" />
                         <input description="Specifies the input volume file path." link="FLIRT_1.Input" id="Registration_1.Input_2" name="Input" order="8" />
+                        <output link="ExtractB0_1.BValue" id="Registration_1.BValue" name="B Value" order="9" />
                         <module id="ExtractB0_1" name="Extract B0" package="m2g" icon="0" posX="308" posY="30" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/packages/dtipreproc/extract_b0.py">
+                                <tag />
                                 <metadata>
                                         <data key="__creationDateKey" value="Mon Apr 20 18:09:36 EDT 2015" />
                                 </metadata>
@@ -157,11 +158,15 @@
                                         </format>
                                 </output>
                                 <output id="ExtractB0_1.B0Index" name="B0 Index" required="false" enabled="true" order="3">
-                                        <format type="String" cardinality="1" />
+                                        <format type="Number" cardinality="1" />
                                         <stringExtract source="both" rule="stringMatch" startString="((" endString="##" caseSensitive="false" />
                                 </output>
-                                <output id="ExtractB0_1.Flow" name="Flow" required="false" enabled="true" order="4">
+                                <output id="ExtractB0_1.Flow" name="Flow" required="false" enabled="true" order="5">
                                         <format type="Flow Control" cardinality="1" />
+                                </output>
+                                <output id="ExtractB0_1.BValue" name="B Value" required="false" enabled="true" order="4">
+                                        <format type="Number" cardinality="1" />
+                                        <stringExtract source="both" rule="stringMatch" startString="##" endString="))" caseSensitive="false" />
                                 </output>
                         </module>
                         <module id="FLIRT_1" name="FLIRT" package="FSL" version="4.1.4" description="FLIRT (FMRIB's Linear Image Registration Tool) is a fully automated robust and accurate tool for linear (affine) intra- and inter-modal brain image registration. " icon="1" posX="639" posY="305" sourceCode="" location="pipeline://localhost/flirt" executableVersion="4.1.4">
@@ -1064,7 +1069,7 @@ PMID: 15501092</citation>
                                         </format>
                                 </output>
                                 <input id="EddyCorrect_1.Referencevolume" name="Reference volume" description="Specifies the Input 4x4 affine matrix - autodetects format ascii/medx.  Must specify &lt;matrix-filename&gt;." required="false" enabled="true" order="2">
-                                        <format type="String" cardinality="1" />
+                                        <format type="Number" cardinality="1" />
                                 </input>
                                 <input id="EddyCorrect_1.Interpolation" name="Interpolation" required="false" enabled="false" order="3">
                                         <format type="Enumerated" cardinality="1">
@@ -1419,7 +1424,7 @@ University, to negotiate a licence. Contact details are:
 innovation@isis.ox.ac.uk quoting reference BS/3497.</license>
                         </module>
                 </moduleGroup>
-                <dataModule id="MNIbrainmask_1" name="MNI brain mask" package="m2g" posX="683" posY="156" sourceCode="" type="File" source="true" loopIndex="false" serverAddress="localhost">
+                <dataModule id="MNIbrainmask_1" name="MNI brain mask" package="m2g" posX="683" posY="156" sourceCode="" type="File" source="true" loopIndex="false">
                         <metadata>
                                 <data key="__creationDateKey" value="Thu Feb 26 16:02:11 EST 2015" />
                         </metadata>
@@ -1449,6 +1454,7 @@ innovation@isis.ox.ac.uk quoting reference BS/3497.</license>
                         <input link="D3.FiberTractography_1.BrainMask" id="DiffusionProcessing_1.BrainMask_2" name="Brain Mask" order="3" />
                         <output link="D6.graphmltomat_1.matgraphfile" id="DiffusionProcessing_1.matgraphfile" name="mat graph file" order="4" />
                         <input link="D5.SmallGraphGeneration_1.atlas" id="DiffusionProcessing_1.atlas" name="atlas" order="5" />
+                        <input link="D2.TensorEstimation_1.DTIBvalue" id="DiffusionProcessing_1.DTIBvalue" name="DTI Bvalue" order="6" />
                         <module id="D2.TensorEstimation_1" name="D2. Tensor Estimation" package="m2g" icon="0" posX="0" posY="20" sourceCode="" location="pipeline://localhost//mrimages/src/m2g/packages/tractography/tensor_gen.py">
                                 <tag />
                                 <metadata>
@@ -1471,9 +1477,6 @@ innovation@isis.ox.ac.uk quoting reference BS/3497.</license>
                                 </input>
                                 <input id="D2.TensorEstimation_1.DTIBvalue" name="DTI Bvalue" required="false" enabled="true" order="2">
                                         <format type="Number" cardinality="1" />
-                                        <values>
-                                                <value>700</value>
-                                        </values>
                                 </input>
                                 <input id="D2.TensorEstimation_1.BrainMask" name="Brain Mask" required="false" enabled="true" order="3">
                                         <format type="File" cardinality="1">
@@ -1646,7 +1649,7 @@ innovation@isis.ox.ac.uk quoting reference BS/3497.</license>
                                 </output>
                         </module>
                 </moduleGroup>
-                <dataModule id="DTIGradients_1" name="DTI Gradients" package="m2g" posX="0" posY="406" rotation="1" sourceCode="" type="File" source="true" loopIndex="false" serverAddress="localhost">
+                <dataModule id="DTIGradients_1" name="DTI Gradients" package="m2g" posX="0" posY="406" rotation="1" sourceCode="" type="File" source="true" loopIndex="false">
                         <metadata>
                                 <data key="__creationDateKey" value="Thu Feb 26 16:01:30 EST 2015" />
                         </metadata>
@@ -1664,7 +1667,7 @@ innovation@isis.ox.ac.uk quoting reference BS/3497.</license>
                                 <value>pipeline://localhost//mnt/ssd1/data/inputs/KKI2009/KKI2009-22/KKI2009-22-DTI.grad</value>
                         </values>
                 </dataModule>
-                <dataModule id="MNIlabels_1" name="MNI labels" package="m2g" posX="746" posY="230" sourceCode="" type="File" source="true" loopIndex="false" serverAddress="localhost">
+                <dataModule id="MNIlabels_1" name="MNI labels" package="m2g" posX="746" posY="230" sourceCode="" type="File" source="true" loopIndex="false">
                         <metadata>
                                 <data key="__creationDateKey" value="Thu Feb 26 15:59:19 EST 2015" />
                         </metadata>
@@ -1684,7 +1687,7 @@ innovation@isis.ox.ac.uk quoting reference BS/3497.</license>
                                 <value>pipeline://localhost//mnt/ssd1/atlas/MNI152_T1_1mm_brain_labels_cropped.nii</value>
                         </values>
                 </dataModule>
-                <dataModule id="Graphs_1" name="Graphs" package="m2g" posX="268" posY="744" sourceCode="" type="File" source="false" loopIndex="false" serverAddress="localhost" dirDump="false">
+                <dataModule id="Graphs_1" name="Graphs" package="m2g" posX="268" posY="744" sourceCode="" type="File" source="false" loopIndex="false" dirDump="false">
                         <metadata>
                                 <data key="__creationDateKey" value="Thu Feb 26 16:00:53 EST 2015" />
                         </metadata>
