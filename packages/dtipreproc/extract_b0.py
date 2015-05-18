@@ -24,7 +24,19 @@ from argparse import ArgumentParser
 from nibabel import load, save, Nifti1Image
 from numpy import where, loadtxt
 
-def extract_vol(dti_img, bvals, b0_vol):
+"""
+Extracts and saves the B0 volume from a DTI volume stack.
+
+When performing DTI registration, eddy correction, and multi-modal registration, the B0 scan of a DTI volume is often needed. Given the set of b-values used by the scanner and the DTI volume set, we can extract the B0 volume and save it as a niftii image for easier access in further processing.
+
+  Inputs
+      - DTI Image: Original X x Y x Z x D volume from scanner
+      - B0 Index: Location of b=0 volume in the DTI stack
+  Outputs
+      - B0 Volume: X x Y x Z volume containing the DTI volume corresponding to a b0 index
+"""
+
+def extract_vol(dti_img, b0, b0_vol):
 	print "Loading dti data..."
 	d_img = load(dti_img)
 	b0_data = d_img.get_data()
