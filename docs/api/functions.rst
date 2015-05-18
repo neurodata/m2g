@@ -12,6 +12,11 @@ Functions
 	fiber_convert
 
 .. toctree::
+	:caption: Graph Processing
+
+	gengraph
+
+.. toctree::
 	:caption: Utilities
 	
 	setup
