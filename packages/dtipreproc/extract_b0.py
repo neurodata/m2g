@@ -28,9 +28,9 @@ When performing DTI registration, eddy correction, and multi-modal registration,
 
   Inputs
 			- DTI Image: Original X x Y x Z x D volume from scanner
-			- B-values: List of b-values used to each volume in  [D]
+			- B0 Index: Location of b=0 volume in the DTI stack
   Outputs
-			- B0 Volume: X x Y x Z volume containing the DTI volume corresponding to a b-value of 0.
+			- B0 Volume: X x Y x Z volume containing the DTI volume corresponding to a b0 index
 """
 
 from argparse import ArgumentParser
