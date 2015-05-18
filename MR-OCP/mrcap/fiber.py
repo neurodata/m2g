@@ -23,8 +23,6 @@ import numpy
 
 DEBUG = False
 
-g_is_full = False # Are we making a full graph where 1 voxel == 1 vertex?
-
 class FiberReader:
     """Class to read data file stored in MRI Studio format.
        The file format is documented at https://www.mristudio.org/wiki/faq
@@ -81,11 +79,6 @@ class FiberReader:
         # Position at first fiber
         self._rewind()
         self.nextFiber()
-
-    def set_full(self):
-      """ We need to know whether we are making a full graph or not """
-      global g_is_full
-      g_is_full = True
 
     #
     #  Go the first fiber location.  Not part of the iterator abstraction
@@ -182,11 +175,7 @@ class Fiber:
           
           # DM TODO: Verify with someone that vid 0 never should have edges 
           if vid:
-              # The fiber gives us the exact voxel but we need a Vertex ID
-              #if g_is_full:
-                #vids.add(zindex.XYZMorton(voxel))
-              #else:
-                vids.add(vid)
+              vids.add(vid)
 
       # Duplicates eliminated
       return vids

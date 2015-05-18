@@ -60,7 +60,6 @@ def genGraph(infname, data_atlas_fn, outfname, bigGraph=False, \
 
   # Create fiber reader
   reader = FiberReader( infname )
-  if bigGraph: reader.set_full() # Tells the reader.getVids() to translate VIDs to Morton index
 
   # DM FIXME: Hacky -- we no longer read shape from fiber file so this happens :-/
   reader.shape = rois.data.shape
