@@ -24,15 +24,14 @@
   
   <p><a class="tar_download_link" href="https://github.com/openconnectome/m2g/tarball/master">Download this project as a tar.gz file</a></p>
 
-.. raw:: html
 
-   <div class="container-fluid">
-   <div class="row">
-   <div class="col-md-4">
-   <h2>Documentation</h2>
+.. sidebar:: M2G Contact Us 
+   
+   If you have questions about M2G, or have data to process, let us know:  ocp-support@googlegroups.com
 
 .. toctree::
    :maxdepth: 1
+   :caption: Documentation
 
    sphinx/introduction
    sphinx/local_config
@@ -43,30 +42,20 @@
    sphinx/faq
    Release Notes <https://github.com/openconnectome/m2g/releases/>
 
-.. raw:: html
-
-  </div>
-  <div class="col-md-4">
-  <h2>Tutorials</h2>
-  
 .. toctree::
    :maxdepth: 1
-
+   :caption: Tutorials
+   
    tutorials/basic_usage
    tutorials/data
    tutorials/algorithms
    tutorials/validation
    tutorials/analysis
 
-.. raw:: html
-
-   </div>
-   <div class="col-md-4">
-   <h2>Further reading</h2>
-   
 .. toctree::
    :maxdepth: 1
-   
+   :caption: Further Reading
+
    sphinx/modules
    sphinx/functions
    Gitter chatroom <https://gitter.im/openconnectome/m2g>
