@@ -1,2 +1,5 @@
 Cloud Computing
 ***************
+
+Coming soon.  This will be integrated with `MROCP <http://mrbrain.cs.jhu.edu/graph-services/welcome/>`_.
+By mid-2015, we will provide the functionality to process structural MR connectomes as a black-box to the user, with functional processing to follow.
