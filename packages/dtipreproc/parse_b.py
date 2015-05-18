@@ -20,6 +20,20 @@
 # Email: gkiar@jhu.edu
 # Copyright (c) 2015. All rights reserved.
 
+"""
+Parses b-vectors (or, gradient direction) and b-values files provided by the scanner.
+
+B-vectors and b-values can be provided in slightly different formats from different scanners, and this module parses them to ensure that downstream functions correctly perceive the information provided.
+
+  Inputs
+      - B-values: Ordered list of b-values from the scanner
+      - B-vectors: Gradient directions of scanner corresponding to the b-values
+  Outputs
+      - B0 Index: Location of the first B0 volume in the DTI image stack
+			- Gradients: Reformatted B-vectors file which is compatible with downstream processing algorithms
+"""
+
+
 from argparse import ArgumentParser
 from numpy import where, loadtxt, savetxt
 from os import system
