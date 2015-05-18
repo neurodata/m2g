@@ -54,18 +54,28 @@ def downsample(g, factor=-1, ds_atlas=None):
   
   ds_atlas = ds_atlas.get_data() # don't care about other atlas data
 
+  spatial_map = [0]*(ds_atlas.max().take(0) + 1) 
   # This takes O(m)
   for e in g.es:
-    src_x, src_y, src_z = MortonXYZ(g.vs[e.source]["spatial_id"])
-    tgt_x, tgt_y, tgt_z = MortonXYZ(g.vs[e.target]["spatial_id"])
+    src_spatial_id = g.vs[e.source]["spatial_id"]
+    tgt_spatial_id = g.vs[e.target]["spatial_id"]
+
+    src_x, src_y, src_z = MortonXYZ(src_spatial_id)
+    tgt_x, tgt_y, tgt_z = MortonXYZ(tgt_spatial_id)
 
     src = ds_atlas[src_x, src_y, src_z]
     tgt = ds_atlas[tgt_x, tgt_y, tgt_z]
 
+    if not spatial_map[src]: spatial_map[src] = src_spatial_id 
+    if not spatial_map[tgt]: spatial_map[tgt] = tgt_spatial_id 
+
     edge_dict[(src, tgt)] += e["weight"]
 
+  #import pdb; pdb.set_trace()
   del g # free me
   new_graph = igraph.Graph(n=ds_atlas.max().take(0), directed=False)
+  new_graph.vs["spatial_id"] = spatial_map
+  
   print "Adding edges to graph ..."
   new_graph += edge_dict.keys()
 
