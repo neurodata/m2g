@@ -11,4 +11,4 @@ Functions
 	:caption: Utilities
 	
 	setup
-	graphml2mat
+..	graphml2mat

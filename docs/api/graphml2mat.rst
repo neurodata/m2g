@@ -1,5 +1,5 @@
 Graphml to Mat Converter
 ************************
 
-.. autofunction:: packages.utils.graphml2mat
+.. .. autofunction:: packages.utils.graphml2mat
 	

@@ -38,7 +38,7 @@ from copy import copy
 
 def graphml2mat(ingraph, outgraph, prune=False):
 	ing = Graph.Read_GraphML(ingraph)
-
+	
 	if prune:
 		#delete zero degree nodes
 		#GK TODO: be smarter
@@ -69,4 +69,4 @@ def main():
 	graphml2mat(result.ingraph, result.outgraph, result.prune)
 
 if __name__=='__main__':
-  main()
+	main()
