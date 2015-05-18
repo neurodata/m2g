@@ -51,7 +51,6 @@ def get_local_fn(fn, _type):
   return os.path.join(os.path.join(__data_dir__, _type, os.path.basename(fn)))
 
 def get_files():
-  """this is a test"""
   atlas_dir = os.path.join(__data_dir__, "Atlas")
   centroid_dir = os.path.join(__data_dir__, "Centroids")
 
@@ -66,25 +65,11 @@ def get_files():
         wget(get_local_fn(v, k), weburl+k+"/"+v)
 
 def compile_cython():
-  """
-	this compiles cython stuff in m2g
-  """
   os.chdir(os.path.join(os.environ['M2G_HOME'],"/MR-OCP/mrcap/"))
   ret = call(["python", "setup.py", "install"])
   assert not ret, "Failed to run setup.py in 'mrcap' directory. Perhaps running this script with 'sudo' will help"
 
 def main():
-  """
-  Predict the cluster that all data points belong to.
-  Parameters
-  ----------
-  data : Series or subclass (e.g. RowMatrix), a list of arrays, or a single array
-  The data to predict cluster assignments on
-  Returns
-  -------
-	closest : Series, list of arrays, or a single array
-	For each data point, ggives the closest center to that point
-  """
   parser = argparse.ArgumentParser(description="Gets data files that graph gen and verification code needs. Also can build zindex")
   parser.add_argument("-c", "--compile", action="store_true", help="Compile the zindex cython module")
   result = parser.parse_args()
