@@ -21,7 +21,6 @@ Functions
 	:caption: Graph Processing
 
 	gengraph
-	invariants
 .. graphml2mat
 
 .. toctree::
