@@ -18,6 +18,20 @@
 # Read a fiber file and generate the corresponding sparse graph
 # @author Randal Burns, Disa Mhembere
 
+"""
+Generates graphs from fiber tracts
+
+We traverse fiber streamlines and map the voxels which they pass through to a brain region, as determined by an atlas. Big graphs have ROIs which are single voxels, whereas small graphs' ROIs are much larger and can be determined either by size, function, or any other method.
+
+  Inputs
+      - Fibers: MRIStudio format fiber streamlines.
+      - ROI Atlas: Region labels which will be used to parcellate the fibers.
+      - Format (graphml): Requested output format of graph. 
+  Outputs
+      - Graph: Generated graph from fiber tracts
+"""
+
+
 import argparse
 from mrcap.fiber import FiberReader
 import mrcap.roi as roi
