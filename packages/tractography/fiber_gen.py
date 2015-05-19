@@ -26,6 +26,9 @@ Computes fiber streamlines from diffusion tensor data.
 
 Using Camino's implementation of the FACT algorithm, published by Mori et al. (2001), we compute fiber tracts throughout the brain from the previously calculated tensors for a given brain.
 
+
+Camino's track documentation: http://cmic.cs.ucl.ac.uk/camino/index.php?n=Man.Track
+
   Inputs
       - Tensors: The Camino formatted file containing voxel diffusion tensor information.
       - Brain mask: Binary mask of the brain which will be used to limiting tractography to brain-occupied regions of the image.
