@@ -27,7 +27,10 @@ import packages.dtipreproc.parse_b
 import packages.tractography.tensor_gen
 import packages.tractography.fiber_gen
 import packages.tractography.fiber_convert
-import packages.MR-OCP.mrcap.gengraph
+import mrcap.gengraph
+import docs.scripts.bet
+import docs.scripts.eddycorrect
+import docs.scripts.flirt
 #import packages.utils.graphml2mat
 
 # -- General configuration ------------------------------------------------

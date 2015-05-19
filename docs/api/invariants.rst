@@ -1,4 +1,4 @@
-Graph Generation
+Graph Invariants
 ****************
 
 .. autofunction:: mrcap.gengraph
