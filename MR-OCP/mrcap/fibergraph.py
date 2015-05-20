@@ -45,7 +45,7 @@ class _FiberGraph(object):
 
     # ======================================================================== #
     # make new igraph with adjacency matrix to be (maxval X maxval)
-    self.spcscmat = igraph.Graph(n=(int(self.rois.data.max()) + 1), directed=False)
+    self.graph = igraph.Graph(n=(int(self.rois.data.max()) + 1), directed=False)
 
   def add (self, fiber):
     """
@@ -67,25 +67,25 @@ class _FiberGraph(object):
     start = time()
     print "Adding %d edges to the graph ..." % len(self.edge_dict)
 
-    self.spcscmat += self.edge_dict.keys()
+    self.graph += self.edge_dict.keys()
     print "Completed adding edges in %.3f sec" % (time() - start)
 
     start = time()
     print "Adding edge weight to the graph ..."
-    self.spcscmat.es["weight"] = self.edge_dict.values()
+    self.graph.es["weight"] = self.edge_dict.values()
     print "Completed adding edge weight in %.3f sec" % (time() - start)
-    self.spcscmat["region"] = "brain"
-    self.spcscmat["sensor"] = "Magnetic Resonance"
-    self.spcscmat["source"] = "http://openconnecto.me/graph-services"
-    self.spcscmat["DOI"] = "10.1109/GlobalSIP.2013.6736878" # Migraine paper
+    self.graph["region"] = "brain"
+    self.graph["sensor"] = "Magnetic Resonance"
+    self.graph["source"] = "http://openconnecto.me/graph-services"
+    self.graph["DOI"] = "10.1109/GlobalSIP.2013.6736878" # Migraine paper
 
     print "Deleting zero-degree nodes..."
-    zero_deg_nodes = np.where( np.array(self.spcscmat.degree()) == 0 )[0]
+    zero_deg_nodes = np.where( np.array(self.graph.degree()) == 0 )[0]
     #import pdb; pdb.set_trace()
-    self.spcscmat.delete_vertices(zero_deg_nodes)
+    self.graph.delete_vertices(zero_deg_nodes)
 
     print "Graph summary:"
-    print self.spcscmat.summary()
+    print self.graph.summary()
     print
 
   def saveToIgraph(self, filename, gformat="graphml"):
@@ -104,7 +104,7 @@ class _FiberGraph(object):
       print "Graph name adapted to '%s' ..." % filename
 
     print "Saving graph '%s' to disk ... " % filename
-    self.spcscmat.save(filename, format=gformat)
+    self.graph.save(filename, format=gformat)
 
   def loadFromIgraph(self, filename, gformat="graphml"):
     """
@@ -115,4 +115,4 @@ class _FiberGraph(object):
     filename - the file name/path to where you want to save the graph
     gformat - the format which you want to use to save the graph. Choices:
     """
-    self.spcscmat = igraph.load(filename, format=gformat)
+    self.graph = igraph.load(filename, format=gformat)

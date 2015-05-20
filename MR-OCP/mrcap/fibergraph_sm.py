@@ -46,7 +46,7 @@ class FiberGraph(_FiberGraph):
     print "Attempting to add atlas labels ..."
     if atlas_regions is not None:
       f_regions = open(atlas_regions, "rb")
-      self.spcscmat.vs["region_name"] = f_regions.read().splitlines()
+      self.graph.vs["region_name"] = f_regions.read().splitlines()
     
     if add_centroids:
       print "Adding centroids ..."
@@ -60,7 +60,7 @@ class FiberGraph(_FiberGraph):
       for row in cent_mat:
         centroids.append(str(list(row)))
 
-      self.spcscmat.vs["centroid"] = centroids
+      self.graph.vs["centroid"] = centroids
     
     for key in graph_attrs.keys():
-      self.spcscmat[key] = graph_attrs[key]
+      self.graph[key] = graph_attrs[key]
