@@ -17,7 +17,9 @@
 from time import time
 import math
 import itertools
+from collections import defaultdict
 
+import numpy as np
 import igraph
 
 from mrcap.fiber import Fiber
@@ -36,9 +38,14 @@ class _FiberGraph(object):
     =====================
     matrixdim - number of nodes in the graph
     rois - the region of interest of the brain masking
-    mask - TODO: Unused
     """
-    raise NotImplementedError("Constructor should be implemented!")
+    # Regions of interest
+    self.rois = rois
+    self.edge_dict = defaultdict(int) # Will have key=(v1,v2), value=weight
+
+    # ======================================================================== #
+    # make new igraph with adjacency matrix to be (maxval X maxval)
+    self.spcscmat = igraph.Graph(n=(int(self.rois.data.max()) + 1), directed=False)
 
   def add (self, fiber):
     """
@@ -71,6 +78,15 @@ class _FiberGraph(object):
     self.spcscmat["sensor"] = "Magnetic Resonance"
     self.spcscmat["source"] = "http://openconnecto.me/graph-services"
     self.spcscmat["DOI"] = "10.1109/GlobalSIP.2013.6736878" # Migraine paper
+
+    print "Deleting zero-degree nodes..."
+    zero_deg_nodes = np.where( np.array(self.spcscmat.degree()) == 0 )[0]
+    #import pdb; pdb.set_trace()
+    self.spcscmat.delete_vertices(zero_deg_nodes)
+
+    print "Graph summary:"
+    print self.spcscmat.summary()
+    print
 
   def saveToIgraph(self, filename, gformat="graphml"):
     """
