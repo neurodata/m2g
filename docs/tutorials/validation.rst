@@ -1,2 +1,4 @@
 Validation
 **********
+
+- TRT stuff [Greg]

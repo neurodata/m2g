@@ -28,3 +28,9 @@ Functions
 	
 	setup
 	
+
+- Add pseudocode, intuition, references.  This means at least add section placeholders where appropriate so that we can scope and populate [Greg]
+
+- Utilities documented [Greg]
+
+= Figure out MATLAB doc [Will]

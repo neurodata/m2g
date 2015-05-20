@@ -35,20 +35,28 @@
     <br>
 
 .. raw:: html
+
   <hr>
-  <p>This page describes how brain graphs are generated in our service from Diffusion Weighted MRI (dMRI), and structural MRI (sMRI) images of human brains. The MRImages to Graphs (M2G) pipeline is the successor of MRCAP and MIGRAINE. M2G combines dMRI and sMRI data from a single subject to estimate a high-level connectome. The connectomes returned describe regions of connectivity within the brain at multiple levels of resolution - from a single voxel scale ~1 mm<sup>3</sup> to large cortical regions ~20 cm<sup>3</sup>.</p>
+  <p>This page describes how brain graphs are generated in our service from Diffusion Weighted MRI (dMRI), and structural MRI (sMRI) images of human brains. The MRImages to Graphs (m2g) pipeline is the successor of MRCAP and MIGRAINE. m2g combines dMRI and sMRI data from a single subject to estimate a high-level connectome. The connectomes returned describe regions of connectivity within the brain at multiple levels of resolution - from a single voxel scale ~1 mm<sup>3</sup> to large cortical regions ~20 cm<sup>3</sup>. The estimation of functional connectomes is currently under development and will be added in a subsequent release.</p>
 
-  <p> M2G has been developed in the LONI pipelining environment. This environment enforces that the pipeline be modular in construction, and all created workflows and modules are command-line executable. This makes M2G efficient and allows users or researchers to modify algorithms for their specific requirements. </p>
-
-  <p><a class="zip_download_link" href="https://github.com/openconnectome/m2g/zipball/master">Download this project as a .zip file</a></p>
+  <p> m2g has been developed in the LONI pipelining environment. This environment facilitates modular construction, and all workflows and modules are command-line executable. This makes m2g efficient and allows users or researchers to modify algorithms for their specific requirements. </p>
   
-  <p><a class="tar_download_link" href="https://github.com/openconnectome/m2g/tarball/master">Download this project as a tar.gz file</a></p>
+  <p>We are currently processing available scans, and make the resulting graphs available to the community. </p>
+
+.. raw:: html
+ 
+  <div>
+    <img style="width:30px;height:30px;vertical-align:middle">
+    <span style=""></span>
+    <IMG SRC="_static/GitHub.png" height="50" width="50"> <a ref="https://github.com/openconnectome/m2g/zipball/master"> [ZIP]   </a>  
+    <a image="_static/GitHub.png" href="https://github.com/openconnectome/m2g/tarball/master">[TAR.GZ] </a></p>
+  </div>
 
 
-.. sidebar:: M2G Contact Us 
+.. sidebar:: m2g Contact Us 
    
-   If you have questions about M2G, or have data to process, let us know:  ocp-support@googlegroups.com
-
+   If you have questions about m2g, or have data to process, let us know:  ocp-support@googlegroups.com
+   
 .. toctree::
    :maxdepth: 1
    :caption: Documentation
@@ -65,10 +73,11 @@
 .. toctree::
    :maxdepth: 1
    :caption: Tutorials
-   
+
+   tutorials/input_data
+   tutorials/available_data
    tutorials/basic_usage
-   tutorials/data
-   tutorials/algorithms
+   tutorials/advanced_usage
    tutorials/validation
    tutorials/analysis
 
@@ -79,6 +88,9 @@
    api/modules
    api/functions
    Gitter chatroom <https://gitter.im/openconnectome/m2g>
-   Mailing list <https://groups.google.com/forum/#!forum/ocp-support/>
+   Support <https://groups.google.com/forum/#!forum/ocp-support/>
+   Mailing List <https://TBD> 
    Github repo <https://github.com/openconnectome/m2g>
    Project page <https://openconnectome.github.io/m2g/>
+
+  
