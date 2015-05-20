@@ -12,3 +12,7 @@ The ability to ''classify'' an individual's connectome further allows for inferr
 The primary contribution of our efforts is the creation of a robust, high-throughput pipeline for estimating connectomes, beginning with diffusion MR images and MPRAGE structural data and ending with both small (70 vertex) , and big (1 million) vertex brain graphs.  Further, we have made enhancements to the pipeline that include validation and analysis algorithms (e.g. graph embedding) to enable high-throughput, end-to-end solutions.
 
 .. image:: ../images/m2g.png
+
+TODO
+- read and update (see asana comments) [G]
+- simplify and explain picture [G]
