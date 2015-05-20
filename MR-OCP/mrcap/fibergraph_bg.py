@@ -16,13 +16,12 @@
 # Class holding big fibergraphs
 # @author Randal Burns, Disa Mhembere
 
-import math
 import os
 from collections import defaultdict
 
-import numpy as np
 import igraph
 import scipy.io as sio
+import numpy as np
 
 from mrcap.fiber import Fiber
 import mrcap.roi as roi
@@ -35,7 +34,9 @@ from packages.utils.setup import get_files
 
 class FiberGraph(_FiberGraph):
   def __init__(self, matrixdim, rois, atlases={}):
+    super(FiberGraph, self).__init__(matrixdim, rois)
 
+    """
     # Regions of interest
     self.rois = rois
     self.edge_dict = defaultdict(int) # Will have key=(v1,v2), value=weight
@@ -43,10 +44,10 @@ class FiberGraph(_FiberGraph):
     # ======================================================================== #
     # make new igraph with adjacency matrix to be (maxval X maxval)
     self.spcscmat = igraph.Graph(n=self.rois.data.max().take(0), directed=False)
+    """
     
     # Keep track of the original vertex ID = region ID before deletion deg zero vertices
-    #self.spcscmat.vs["orig_region_id"] = range(self.spcscmat.vcount())
-    
+    print "Annotating vertices with spatial position .."
     spatial_map = [0]*(self.spcscmat.vcount()+1)
     nnz = np.where(self.rois.data != 0)
     for idx in xrange(nnz[0].shape[0]):
@@ -61,12 +62,13 @@ class FiberGraph(_FiberGraph):
 
   def complete(self, add_centroids=True, graph_attrs={}, atlases={}):
     super(FiberGraph, self).complete()
-    print "Annotating vertices with spatial position .."
     centroids_added = False
 
+    """
     print "Deleting zero-degree nodes..."
     zero_deg_nodes = np.where( np.array(self.spcscmat.degree()) == 0 )[0]
     self.spcscmat.delete_vertices(zero_deg_nodes)
+    """
     
     for idx, atlas_name in enumerate(atlases.keys()):
       self.spcscmat["Atlas_"+ os.path.splitext(os.path.basename(atlas_name))[0]+"_index"] = idx

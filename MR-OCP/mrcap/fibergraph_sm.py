@@ -34,21 +34,6 @@ from packages.utils.setup import get_files
 # Class functions documented in fibergraph.py
 
 class FiberGraph(_FiberGraph):
-  def __init__(self, matrixdim, rois):
-    """
-     Constructor: number of nodes in the graph
-       convert it to a maximum element
-    """
-    # Regions of interest
-    self.rois = rois
-    # Edges
-    self.edge_dict = defaultdict(int) # Will have key=(v1,v2), value=weight
-
-    # Get the maxval from the number of rois
-    self._maxval = int(self.rois.data.max())+1 
-
-    # list of list matrix for one by one insertion
-    self.spcscmat = igraph.Graph(n=self._maxval, directed=False) # make new igraph with adjacency matrix to be (maxval X maxval)
 
   def complete(self, add_centroids=True, graph_attrs={}, atlas={}):
     super(FiberGraph, self).complete()

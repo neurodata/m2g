@@ -48,17 +48,3 @@ class ROIData:
       return 0
     else:
       return self.data[ index[0], index[1], index[2] ]
-
-# DM: Still a necessary function
-# Use the crazy numbering system
-def translate ( index ):
-  """Turn ROIs from labels into 70 values from 0 to 69.
-     Return 0-34 for 1-35.
-     Return 35-69 for 101-135.
-  """
-  assert index > 0 and ( index <= 35 or index > 100 )
-  if index > 100: 
-    return index - 66
-  else:
-    return index - 1
-

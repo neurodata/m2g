@@ -173,7 +173,7 @@ class Fiber:
           voxel = map(int, fbrpt) 
           vid = rois.get(voxel) # NOTE: This may be outside the atlas. If so 0 is returned
           
-          # DM TODO: Verify with someone that vid 0 never should have edges 
+          # NOTE: vid 0 never should have edges 
           if vid:
               vids.add(vid)
 
