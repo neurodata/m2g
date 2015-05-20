@@ -1,4 +1,6 @@
 Cluster Configuration
 *********************
 
-Coming soon.
+Coming soon. 
+
+- To document [Alex, Greg]
