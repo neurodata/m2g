@@ -43,19 +43,19 @@ class FiberGraph(_FiberGraph):
 
     # ======================================================================== #
     # make new igraph with adjacency matrix to be (maxval X maxval)
-    self.spcscmat = igraph.Graph(n=self.rois.data.max().take(0), directed=False)
+    self.graph = igraph.Graph(n=self.rois.data.max().take(0), directed=False)
     """
     
     # Keep track of the original vertex ID = region ID before deletion deg zero vertices
     print "Annotating vertices with spatial position .."
-    spatial_map = [0]*(self.spcscmat.vcount()+1)
+    spatial_map = [0]*(self.graph.vcount()+1)
     nnz = np.where(self.rois.data != 0)
     for idx in xrange(nnz[0].shape[0]):
       x,y,z = nnz[0][idx], nnz[1][idx], nnz[2][idx]
       region_id = self.rois.data[x,y,z]
       spatial_map[region_id] = XYZMorton([x,y,z]) # Use to get the spatial position of a vertex
 
-    self.spcscmat.vs["spatial_id"] = spatial_map
+    self.graph.vs["spatial_id"] = spatial_map
     
     self.edge_dict = defaultdict(int) # Will have key=(v1,v2), value=weight
     # ======================================================================== #
@@ -66,17 +66,17 @@ class FiberGraph(_FiberGraph):
 
     """
     print "Deleting zero-degree nodes..."
-    zero_deg_nodes = np.where( np.array(self.spcscmat.degree()) == 0 )[0]
-    self.spcscmat.delete_vertices(zero_deg_nodes)
+    zero_deg_nodes = np.where( np.array(self.graph.degree()) == 0 )[0]
+    self.graph.delete_vertices(zero_deg_nodes)
     """
     
     for idx, atlas_name in enumerate(atlases.keys()):
-      self.spcscmat["Atlas_"+ os.path.splitext(os.path.basename(atlas_name))[0]+"_index"] = idx
+      self.graph["Atlas_"+ os.path.splitext(os.path.basename(atlas_name))[0]+"_index"] = idx
       print "Adding '%s' region numbers (and names) ..." % atlas_name
       atlas = Atlas(atlas_name, atlases[atlas_name])
-      #region = atlas.get_all_mappings(self.spcscmat.vs["position"])
-      #self.spcscmat.vs["atlas_%d_region_num" % idx] = region[0]
-      #if region[1]: self.spcscmat.vs["atlas_%d_region_name" % idx] = region[1]
+      #region = atlas.get_all_mappings(self.graph.vs["position"])
+      #self.graph.vs["atlas_%d_region_num" % idx] = region[0]
+      #if region[1]: self.graph.vs["atlas_%d_region_name" % idx] = region[1]
     
       if add_centroids and (not centroids_added):
         if (atlas.data.max() == 70): #FIXME: Hard coded Desikan small dimensions
@@ -88,12 +88,12 @@ class FiberGraph(_FiberGraph):
 
           cent_mat = sio.loadmat(cent_loc)["centroids"]
 
-          keys = atlas.get_region_nums(self.spcscmat.vs["position"])
+          keys = atlas.get_region_nums(self.graph.vs["position"])
           centroids = []
           for key in keys:
             centroids.append(str(list(cent_mat[key-1]))) # -1 accounts for 1-based indexing
 
-          self.spcscmat.vs["centroid"] = centroids
+          self.graph.vs["centroid"] = centroids
 
     for key in graph_attrs.keys():
-      self.spcscmat[key] = graph_attrs[key]
+      self.graph[key] = graph_attrs[key]

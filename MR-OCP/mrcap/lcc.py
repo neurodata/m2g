@@ -153,7 +153,7 @@ def cc_for_each_brain(graphDir, roiDir, ccDir, figDir):
 
 
         print 'Processing connected components'
-        vcc = ConnectedComponent(fg.spcscmat)
+        vcc = ConnectedComponent(fg.graph)
         vcc.save(ccDir+brainFn)
 
         print 'ncc='+repr(vcc.ncc)
@@ -343,7 +343,7 @@ def main ():
     fg = fibergraph.FiberGraph(roix.getShape(),rois,[])
     fg.loadFromMatlab('fibergraph', result.fibergraphfile)
 
-    vcc = ConnectedComponent(G=fg.spcscmat)
+    vcc = ConnectedComponent(G=fg.graph)
     vcc.save(results.ccfile)
 
 
