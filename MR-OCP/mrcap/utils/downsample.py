@@ -35,7 +35,7 @@ import numpy as np
 import cPickle as pickle
 
 DEBUG = False
-def downsample(g, factor=-1, ds_atlas=None):
+def downsample(g, factor=-1, ds_atlas=None, ignore_zero=True):
   """
   Downsample a graph by collapsing regions using an dynamically
   generated downsampled atlas. Rebuilding the graph takes O(m).
@@ -43,6 +43,7 @@ def downsample(g, factor=-1, ds_atlas=None):
   @param g: A full sized **big graph**
   @param factor: The downsampling factor
   @param ds_atlas: A prebuilt downsampled nifti atlas with which to downsample
+  @param ignore_zero: Should we ignore the zeroth label as being outside the brain?
   """
 
   start = time()
@@ -66,14 +67,22 @@ def downsample(g, factor=-1, ds_atlas=None):
     src = ds_atlas[src_x, src_y, src_z]
     tgt = ds_atlas[tgt_x, tgt_y, tgt_z]
 
-    if not spatial_map[src]: spatial_map[src] = src_spatial_id 
-    if not spatial_map[tgt]: spatial_map[tgt] = tgt_spatial_id 
+    # FIXME: We will skip all region zeros for all atlases which is not really true!
+    if ignore_zero:
+      if src and tgt:
+        if not spatial_map[src]: spatial_map[src] = src_spatial_id 
+        if not spatial_map[tgt]: spatial_map[tgt] = tgt_spatial_id 
 
-    edge_dict[(src, tgt)] += e["weight"]
+        edge_dict[(src, tgt)] += e["weight"]
+    else:
+      if not spatial_map[src]: spatial_map[src] = src_spatial_id 
+      if not spatial_map[tgt]: spatial_map[tgt] = tgt_spatial_id 
+
+      edge_dict[(src, tgt)] += e["weight"]
 
   #import pdb; pdb.set_trace()
   del g # free me
-  new_graph = igraph.Graph(n=ds_atlas.max().take(0), directed=False)
+  new_graph = igraph.Graph(n=len(spatial_map), directed=False) # len spatial_map is the # of vertices
   new_graph.vs["spatial_id"] = spatial_map
   
   print "Adding edges to graph ..."
