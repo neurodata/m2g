@@ -10,11 +10,31 @@
 	<h1>m2g:  Framework for robust, reliable MR connectome estimation</h1>
 	<br>
 
-.. image:: images/m2g.png
+.. raw:: html
 
+    <div style="clear: both"></div>
+    <div class="container-fluid hidden-xs hidden-sm">
+      <div class="row">
+        <a>
+            <img class="mythumbnail" src="_static/mprage.png" height="125" width="125">
+        </a>
+        <a>
+            <img class="mythumbnail" src="_static/fmri.png" height="125" width="125">
+        </a>
+        <a>
+            <img class="mythumbnail" src="_static/dti.png" height="125" width="125">
+        </a>
+        <a>
+            <img class="mythumbnail" src="_static/fibers.png" height="125" width="125">
+        </a>
+        <a>
+            <img class="mythumbnail" src="_static/graph.png" height="125" width="125">
+        </a>
+      </div>
+    </div>
+    <br>
 
 .. raw:: html
-  
   <hr>
   <p>This page describes how brain graphs are generated in our service from Diffusion Weighted MRI (dMRI), and structural MRI (sMRI) images of human brains. The MRImages to Graphs (M2G) pipeline is the successor of MRCAP and MIGRAINE. M2G combines dMRI and sMRI data from a single subject to estimate a high-level connectome. The connectomes returned describe regions of connectivity within the brain at multiple levels of resolution - from a single voxel scale ~1 mm<sup>3</sup> to large cortical regions ~20 cm<sup>3</sup>.</p>
 
