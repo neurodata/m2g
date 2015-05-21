@@ -31,22 +31,19 @@ framework.
 
 """
 import os
-
-os.sys.path += [  os.path.abspath(os.path.join(os.path.dirname(__file__), ".." ))]
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "ocpipeline.settings")
-os.environ['HOME'] = "/tmp"
-
-
+import sys
 
 # This application object is used by any WSGI server configured to use this
 # file. This includes Django's development server, if the WSGI_APPLICATION
 # setting points here.
 from django.core.wsgi import get_wsgi_application
-application = get_wsgi_application()
 
-# Apply WSGI middleware here.
-# from helloworld.wsgi import HelloWorldApplication
-# application = HelloWorldApplication(application)
+os.sys.path += [  os.path.abspath(os.path.join(os.path.dirname(__file__), ".." ))]
+os.environ["DJANGO_SETTINGS_MODULE"] = "ocpipeline.settings"
+os.environ["HOME"] = "/tmp"
+#os.environ.setdefault("DJANGO_SETTINGS_MODULE", "ocpipeline.settings")
+
+application = get_wsgi_application()
 
 # Http add on
 #os.environ['HTTPS'] = "on" # DM 03/24/2013
