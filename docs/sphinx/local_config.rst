@@ -1,5 +1,218 @@
 Single Node Configuration
 *************************
 
-- add once we have ec2 working [W]
-- refactor to explain ec2 and `cortex` [W]
+m2g requires a number of standard packages, principally python2.7, igraph, numpy, scipy, Oracle Java, R, LONI Pipeline, FSL, and Camino.  Specific installation instructions are provided here for Centos 6.X.  
+
+This was tested using a Centos 6 AMI (CentOS 6 x86_64 (2014_09_29) (ami-bc8131d4)).  We recommend attaching external storage using Elastic Block Storage.  The configuration details of an EC2 instance are beyond the scope of this tutorial; more information can be found at aws.amazon.com.  This installation guide should work equally well on a standalone machine.  Many of the dependencies can be satisfied with Anaconda as an alternative.
+
+We recommend Centos6.x for its compatibility with LONI Pipeline.
+
+Basic Package Update and Install
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: bash
+
+  export m2g=/mrimages #root directory
+  yum update -y
+  yum install -y wget gcc elfutils-libelf-devel libstdc++-devel glibc-devel libaio-devel gcc-c++
+  yum groupinstall -y "Development tools" "X Window System" "Fonts"
+  yum install -y zlib-devel bzip2-devel openssl-devel ncurses-devel sqlite-devel readline-devel tk-devel gdbm-devel xz-devel
+
+
+Install and Configure Python 27 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: bash
+
+  	wget http://python.org/ftp/python/2.7.6/Python-2.7.6.tar.xz
+	tar xf Python-2.7.6.tar.xz
+	cd Python-2.7.6
+	./configure --prefix=/usr/local --enable-unicode=ucs4 --enable-shared LDFLAGS="-Wl,-rpath /usr/local/lib"
+	make && make altinstall
+
+	# Make python 2.7 default 
+	export PATH='/usr/local/bin':${PATH}
+	ln -s /usr/local/bin/python2.7 /usr/local/bin/python
+	# First get the setup script for Setuptools:
+	wget https://bitbucket.org/pypa/setuptools/raw/bootstrap/ez_setup.py
+	# Then install it for Python 2.7 and/or Python 3.3:
+	python2.7 ez_setup.py
+	easy_install-2.7 pip
+
+Basics for Development
+~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: bash
+
+	#Basics for development
+	yum install -y java-1.6.0-openjdk-devel cmake vim screen
+	yum install -y bc
+	yum install -y epel-release
+	yum install -y R nibabel
+	pip2.7 install numpy
+	pip2.7 install ipython
+	pip2.7 install scipy #This seems to not work with 2.7 and yum
+
+	easy_install-2.7 argparse
+	easy_install-2.7 -U distribute
+	yum -y install libpng-devel
+	pip2.7 install scikit-image
+	pip2.7 install nibabel
+	pip2.7 install Cython #Make sure we are at 0.22+
+
+Oracle Java Install
+~~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: bash
+
+	# Oracle Java Install
+	mkdir -p $m2g/src/java
+	cd $m2g/src/java
+	wget --no-cookies --no-check-certificate --header "Cookie: gpw_e24=http%3A%2F%2Fwww.oracle.com%2F; oraclelicense=accept-securebackup-cookie" "http://download.oracle.com/otn-pub/java/jdk/7u71-b14/jdk-7u71-linux-x64.tar.gz"
+	tar xzf jdk-7u71-linux-x64.tar.gz
+    
+	cd $m2g/src/java/jdk1.7.0_71/
+	alternatives --install /usr/bin/java java $m2g/src/java/jdk1.7.0_71/bin/java 2 
+	alternatives --config java #MANUAL STEP:  type 2
+
+Java Setup
+~~~~~~~~~~~~~~
+
+.. code-block:: bash
+
+	alternatives --install /usr/bin/javac javac $m2g/src/java/jdk1.7.0_71/bin/javac 2
+	alternatives --set javac $m2g/src/java/jdk1.7.0_71/bin/javac
+	alternatives --install /usr/bin/jar jar $m2g/src/java/jdk1.7.0_71/bin/jar 2
+	alternatives --set jar $m2g/src/java/jdk1.7.0_71/bin/jar
+
+Camino and FSL 
+~~~~~~~~~~~~~~
+
+.. code-block:: bash
+
+	#Camino
+	cd $m2g/src
+	git clone git://git.code.sf.net/p/camino/code camino
+	cd camino
+	make
+	git checkout voxelSpaceStreamlines
+	make clean
+	make
+
+	#FSL
+	# - Due to the form required for fsl, this is completed after
+	# scp-ing the fslinstaller.py file to the ~/src directory.
+	# : http://fsl.fmrib.ox.ac.uk/fsldownloads/
+	cd $m2g/src/
+	wget --no-check-certificate https://www.dropbox.com/s/z78p3jzczrv31ci/fsl-5.0.8-centos6_64.tar.gz
+	tar zxvf fsl-5.0.8-centos6_64.tar.gz
+	#Delete raw targz if space is tight
+
+igraph
+~~~~~~~~
+
+.. code-block:: bash
+
+	# igraph
+
+	yum -y install xml2 libxml2-devel
+	cd ${m2g}/src
+	wget http://igraph.org/nightly/get/c/igraph-0.7.1.tar.gz
+	tar xvfz igraph-0.7.1.tar.gz
+	cd igraph-0.7.1
+	./configure --prefix=/mrimages/src/igraph
+	make
+	make install
+	sudo R #MANUAL STEP had to type 90
+	install.packages('igraph') #'http://ftp.ussg.iu.edu/CRAN/src/contrib/igraph_0.7.1.tar.gz'
+	q() # MANUAL STEP saved image
+
+m2g setup
+~~~~~~~~~
+
+.. code-block:: bash
+
+	easy_install-2.7 python-igraph
+
+	# Need to actually clone repo and install LONI
+	# Also need to SCP data 
+	cd ${m2g}/src
+	git clone https://github.com/openconnectome/m2g.git
+	cd m2g
+	git checkout master #TODO
+
+	export M2G_HOME=/mrimages/src/m2g
+
+	cd $M2G_HOME/MR-OCP/mrcap
+	python setup.py install #for z-index
+
+	python $M2G_HOME/packages/utils/setup.py
+
+	mkdir $m2g/data
+	cd $m2g/data
+	scp will@cortex.cs.jhu.edu:/mnt/ssd1/data/inputs/KKI2009/KKI2009-22/* . #needs login
+
+	cd $m2g/src
+	scp will@cortex.cs.jhu.edu:/home/will/Pipeline-6.0.1-unix.tar.bz2 . #needs login
+	mkdir loni
+	tar -xvf Pipeline-6.0.1-unix.tar.bz2 -C loni
+
+	#Get workflow
+	cd /mrimages/src/m2g/library/workflows/
+	wget  --no-check-certificate https://www.dropbox.com/s/o562326mnjipllz/m2g_for_cloud.pipe
+
+	mkdir $HOME/.pipeline
+	cd $HOME/.pipeline
+	wget --no-check-certificate https://www.dropbox.com/s/effz8dgikp76s88/preferences.xml
+
+Export Paths and Setup Environment
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: bash
+
+	#TODO this will REPLACE your ~/.bashrc file
+	echo "export m2g=/mrimages
+	export M2G_HOME=${m2g}/src/m2g
+	# Path to FSL
+	FSLDIR=${m2g}/src/fsl
+	. ${FSLDIR}/etc/fslconf/fsl.sh
+	PATH=${FSLDIR}/bin:${PATH}
+	export FSLDIR PATH
+
+	# JAVA
+	export PATH=${m2g}/src/java/jdk1.7.0_71/bin:$PATH
+	export JAVA_HOME=${m2g}/src/java/jdk1.7.0_71
+
+	#M2G
+	export PATH='/usr/local/bin':${PATH}:${m2g}/src/m2g/MR-OCP/mrcap
+	export PATH=${PATH}:${m2g}/src/m2g/packages/*
+	export PYTHONPATH=${m2g}/src/m2g/MR-OCP
+	export PYTHONPATH=${PYTHONPATH}:${m2g}/src/m2g/MR-OCP/MROCPdjango:${M2G_HOME}/MR-OCP/mrcap:${M2G_HOME}
+
+	# Camino
+	export PATH=${m2g}/src/camino/bin:$PATH
+	export CAMINO_HEAP_SIZE=4000" > ~/.bashrc
+	. ~/.bashrc
+
+Possibly Helpful Commands at Runtime
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: bash
+
+	# NEED TO MOUNT DRIVE (EBS)
+	mkdir /mnt/loni
+	lsblk
+	mkfs -t ext4 /dev/xvdj
+	mount /dev/xvdj /mnt/loni/
+	cd /mrimages/src/loni
+	./PipelineCLI.sh --validate /mrimages/src/m2g/library/workflows/m2g_for_cloud.pipe
+	./PipelineCLI.sh --execute /mrimages/src/m2g/library/workflows/m2g_for_cloud.pipe
+
+	# We are refactoring our code to avoid these manual installation steps
+	# Manual steps:  Write .bashrc
+	# Manual steps:  igraph R install
+	# Manual steps: alternatives --config java #2 #type 2
+	# Manual steps: logging into cortex for data
+	# Manual steps: logging into cortex for loni binary
+	# Manual steps:  Hardcoded centroid path
+	# Hardcoded paths in m2g setup
