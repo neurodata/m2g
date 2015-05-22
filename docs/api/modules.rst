@@ -1,7 +1,7 @@
 Modules
 *******
 
-This is a high level mapping of LONI Pipeline module -> function.  Each module has a one-to-one correspondence with its associated function, following the linkage below.
+This is a high level mapping of module -> function.  In LONI, a module calls a single executable/commandline function, and workflows are a series of modules. Modules are documented here to identify what script they call and links are provided back to the documentation of those functions.
 
 .. raw:: html
 
@@ -23,41 +23,53 @@ This is a high level mapping of LONI Pipeline module -> function.  Each module h
   <tr>
     <th class="tg-9qne">LONI Module Name</th>
     <th class="tg-ts7t">Underlying Function</th>
-  
   </tr>
+
+	<tr>
+		<td class="tg-rd2y">BET</td>
+		<td class="tg-rd2y"><a href=bet.html>FSL Brain Extraction Tool</td>
+	</tr>
+
+	<tr>
+    <td class="tg-rd2y">FLIRT</td>
+    <td class="tg-rd2y"><a href=flirt.html>FSL Linear Registration</td>
+	</tr>
   
-  <tr>
-    <td class="tg-rd2y">TBD</td>
+	<tr>
+    <td class="tg-rd2y">Parse B</td>
     <td class="tg-rd2y"><a href=parse_b.html>Parse B-values/vectors</td>
-  
-  </tr>
-  
+	</tr>
+
   <tr>
-    <td class="tg-rd2y">TBD</td>
+    <td class="tg-rd2y">Exract B0</td>
     <td class="tg-rd2y"><a href=extract_b0.html>Extract B0 Volume</td>
-  
   </tr>
-  
+ 
+	<tr>
+    <td class="tg-rd2y">Eddy Correct</td>
+    <td class="tg-rd2y"><a href=eddycorrect.html>FSL Eddy Correction</td>
+	</tr>
+ 
   <tr>
-    <td class="tg-rd2y">TBD</td>
+    <td class="tg-rd2y">Tensor Gen</td>
     <td class="tg-rd2y"><a href=tensor_gen.html>DTI Tensor Estimation</td>
-  
   </tr>
 
   <tr>
-    <td class="tg-rd2y">TBD</td>
+    <td class="tg-rd2y">Fiber Gen</td>
     <td class="tg-rd2y"><a href=fiber_gen.html>Fiber Tractography</td>
-  
   </tr>  
 
   <tr>
-    <td class="tg-rd2y">TBD</td>
+    <td class="tg-rd2y">Fiber Convert</td>
     <td class="tg-rd2y"><a href=fiber_convert.html>Fiber Converter</td>
-  
   </tr>  
+
+	<tr>
+    <td class="tg-rd2y">gengraph</td>
+    <td class="tg-rd2y"><a href=gengraph.html>Graph Generation</td>
+	</tr>
 
   </table>
 
-- Greg to populate modules
-- Greg to add intro paragraph
 .. http://www.tablesgenerator.com/html_tables#
