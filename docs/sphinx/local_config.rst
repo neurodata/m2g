@@ -141,7 +141,7 @@ m2g setup
 	cd m2g
 	git checkout master #TODO
 
-	export M2G_HOME=/mrimages/src/m2g
+	export M2G_HOME=${m2g}/src/m2g
 
 	cd $M2G_HOME/MR-OCP/mrcap
 	python setup.py install #for z-index
@@ -158,7 +158,7 @@ m2g setup
 	tar -xvf Pipeline-6.0.1-unix.tar.bz2 -C loni
 
 	#Get workflow
-	cd /mrimages/src/m2g/library/workflows/
+	cd $m2g/src/m2g/library/workflows/
 	wget  --no-check-certificate https://www.dropbox.com/s/o562326mnjipllz/m2g_for_cloud.pipe
 
 	mkdir $HOME/.pipeline
@@ -204,15 +204,14 @@ Possibly Helpful Commands at Runtime
 	lsblk
 	mkfs -t ext4 /dev/xvdj
 	mount /dev/xvdj /mnt/loni/
-	cd /mrimages/src/loni
-	./PipelineCLI.sh --validate /mrimages/src/m2g/library/workflows/m2g_for_cloud.pipe
-	./PipelineCLI.sh --execute /mrimages/src/m2g/library/workflows/m2g_for_cloud.pipe
+	cd ${m2g}/src/loni
+	./PipelineCLI.sh --validate ${m2g}/src/m2g/library/workflows/m2g_for_cloud.pipe
+	./PipelineCLI.sh --execute ${m2g}/src/m2g/library/workflows/m2g_for_cloud.pipe
 
 	# We are refactoring our code to avoid these manual installation steps
-	# Manual steps:  Write .bashrc
 	# Manual steps:  igraph R install
 	# Manual steps: alternatives --config java #2 #type 2
 	# Manual steps: logging into cortex for data
 	# Manual steps: logging into cortex for loni binary
-	# Manual steps:  Hardcoded centroid path, Patch in B0
+	# Manual steps:  Hardcoded centroid patch, Patch in B0
 	# Hardcoded paths in m2g setup
