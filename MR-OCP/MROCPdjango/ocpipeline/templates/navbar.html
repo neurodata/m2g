@@ -13,86 +13,97 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 
- navbar.js
+ navbar.html
  Created by Disa Mhembere on 2015-05-20.
  Email: disa@jhu.edu
  Copyright (c) 2015. All rights reserved. -->
 
-	<nav class="navbar navbar-default ocp-nav">
-	  <div class="container-fluid">
-	    
-	    <div class="collapse navbar-collapse" id="ocp-menubar">
-	      <ul class="nav navbar-nav">
-	      	<!-- Home -->
-	        <li><a href="#">Home<span class="sr-only">(current)</span></a></li>
-	        
-	        <!-- Build Graph -->
-	        <li class="dropdown">
-	          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Build Graph</a>
-	          <ul class="dropdown-menu ocp-nav" role="menu" id="ocp-dropdown">
+{% load getScriptPrefix %}
 
-	          	<li class="divider" id="ocp-divider"></li>
-	            <li><a href="#">Sample Data</a></li>
+<nav class="navbar navbar-default ocp-nav">
+  <div class="container-fluid">
+    
+    <div class="collapse navbar-collapse" id="ocp-menubar">
+      <ul class="nav navbar-nav">
+      	<!-- Home -->
+        <li><a href="{{"welcome"|getScriptPrefix}}">Home<span class="sr-only">(current)</span></a></li>
+        
+        <!-- Build Graph -->
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Build Graph</a>
+          <ul class="dropdown-menu ocp-nav" role="menu" id="ocp-dropdown">
 
-	            <li class="divider" id="ocp-divider"></li>
-	            <li><a href="#">Programmatic Build</a></li>
-	          </ul>
-	        </li>
+			<li class="divider" id="ocp-divider"></li>
+            <li><a href="{{"buildgraph"|getScriptPrefix}}">Build Now</a></li>
 
-	        <!-- Compute Invariants -->
-	        <li class="dropdown">
-	          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Compute Invariants</a>
-	          <ul class="dropdown-menu ocp-nav" role="menu" id="ocp-dropdown">
+          	<li class="divider" id="ocp-divider"></li>
+            <li><a href="http://mrbrain.cs.jhu.edu/data/ocp/perm/testdata/derivatives_testdata.zip">Sample Data</a></li>
 
-	          	<li class="divider" id="ocp-divider"></li>
-	            <li><a href="#">Sample Data</a></li>
+            <li class="divider" id="ocp-divider"></li>
+            <li><a href="{{"buildgraph"|getScriptPrefix}}#programmatic">Programmatic Build</a></li>
+          </ul>
+        </li>
 
-	            <li class="divider" id="ocp-divider"></li>
-	            <li><a href="#">Programmatic</a></li>
+        <!-- Compute Invariants -->
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Compute Invariants</a>
+          <ul class="dropdown-menu ocp-nav" role="menu" id="ocp-dropdown">
 
-	            <li class="divider" id="ocp-divider"></li>
-	            <li><a href="#">Documentation</a></li>
+          	<li class="divider" id="ocp-divider"></li>
+            <li><a href="{{"graphupload"|getScriptPrefix}}">Compute Now</a></li>
 
-	            <li class="divider" id="ocp-divider"></li>
-	            <li><a href="#">Manual</a></li>
-	          </ul>
-	        </li>
+          	<li class="divider" id="ocp-divider"></li>
+            <li><a href="http://mrbrain.cs.jhu.edu/data/ocp/perm/testdata/graphs_testdata.zip">Sample Data</a></li>
 
-	        <!-- Convert format -->
-	        <li class="dropdown">
-	          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Convert Format</a>
-	          <ul class="dropdown-menu ocp-nav" role="menu" id="ocp-dropdown">
+            <li class="divider" id="ocp-divider"></li>
+            <li><a href="{{"graphupload"|getScriptPrefix}}#programmatic">Programmatic</a></li>
 
-	          	<li class="divider" id="ocp-divider"></li>
-	            <li><a href="#">Sample Data</a></li>
+            <li class="divider" id="ocp-divider"></li>
+            <li><a href="http://mrbrain.cs.jhu.edu/data/ocp/perm/invariant_docs/doc/">Documentation</a></li>
 
-	            <li class="divider" id="ocp-divider"></li>
-	            <li><a href="#">Programmatic</a></li>
+            <li class="divider" id="ocp-divider"></li>
+            <li><a href="http://mrbrain.cs.jhu.edu/data/ocp/perm/invariant_docs/api.pdf">Manual</a></li>
+          </ul>
+        </li>
 
-	          </ul>
-	        </li>
+        <!-- Convert format -->
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Convert Format</a>
+          <ul class="dropdown-menu ocp-nav" role="menu" id="ocp-dropdown">
+          	
+          	<li class="divider" id="ocp-divider"></li>
+            <li><a href="{{"convert"|getScriptPrefix}}">Convert Now</a></li>
 
-	        <!-- Code Examples -->
-	        <li class="dropdown">
-	          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Code Examples</a>
-	          <ul class="dropdown-menu ocp-nav" role="menu" id="ocp-dropdown">
+          	<li class="divider" id="ocp-divider"></li>
+            <li><a href="http://mrbrain.cs.jhu.edu/data/ocp/perm/testdata/convert_testdata.zip">Sample Data</a></li>
 
-	          	<li class="divider" id="ocp-divider"></li>
-	            <li><a href="#">Programmatic Examples</a></li>
+            <li class="divider" id="ocp-divider"></li>
+            <li><a href="{{"convert"|getScriptPrefix}}#programmatic">Programmatic</a></li>
 
-	            <li class="divider" id="ocp-divider"></li>
-	            <li><a href="#">igraph Examples</a></li>
+          </ul>
+        </li>
 
-	          </ul>
-	        </li>
+        <!-- Code Examples -->
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Code Examples</a>
+          <ul class="dropdown-menu ocp-nav" role="menu" id="ocp-dropdown">
 
-	        <!-- Downloads -->
-	        <li><a href="#">Downloads<span class="sr-only">(current)</span></a></li>
+          	<li class="divider" id="ocp-divider"></li>
+            <li><a href="https://github.com/openconnectome/MR-connectome/tree/master/MROCPdjango/examples">Programmatic Examples</a></li>
 
-	        <!-- Contact -->
-	        <li><a href="#">Contact<span class="sr-only">(current)</span></a></li>
+            <li class="divider" id="ocp-divider"></li>
+            <li><a href="{{"igraph"|getScriptPrefix}}">igraph Examples</a></li>
 
-	      </ul>
-	    </div><!-- /.navbar-collapse -->
-	  </div><!-- /.container-fluid -->
-	</nav>
+          </ul>
+        </li>
+
+        <!-- Downloads -->
+        <li><a href="{{"download"|getScriptPrefix}}">Downloads<span class="sr-only">(current)</span></a></li>
+
+        <!-- Contact -->
+        <li><a href="{{"contact"|getScriptPrefix}}">Contact<span class="sr-only">(current)</span></a></li>
+
+      </ul>
+    </div><!-- /.navbar-collapse -->
+  </div><!-- /.container-fluid -->
+</nav>
