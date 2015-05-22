@@ -104,7 +104,7 @@ Camino and FSL
 	# scp-ing the fslinstaller.py file to the ~/src directory.
 	# : http://fsl.fmrib.ox.ac.uk/fsldownloads/
 	cd $m2g/src/
-	wget --no-check-certificate https://www.dropbox.com/s/z78p3jzczrv31ci/fsl-5.0.8-centos6_64.tar.gz
+	wget http://openconnecto.me/data/public/MR/startup_m2g/fsl-5.0.8-centos6_64.tar.gz
 	tar zxvf fsl-5.0.8-centos6_64.tar.gz
 	#Delete raw targz if space is tight
 
@@ -150,27 +150,27 @@ m2g setup
 
 	mkdir $m2g/data
 	cd $m2g/data
-	scp will@cortex.cs.jhu.edu:/mnt/ssd1/data/inputs/KKI2009/KKI2009-22/* . #needs login
+	wget http://openconnecto.me/data/public/MR/startup_m2g/KKI2009-22.tar.gz
+  tar zxvf KKI2009-22.tar.gz
 
 	cd $m2g/src
-	scp will@cortex.cs.jhu.edu:/home/will/Pipeline-6.0.1-unix.tar.bz2 . #needs login
+	wget http://openconnecto.me/data/public/MR/startup_m2g/Pipeline-6.0.1-unix.tar.bz2
 	mkdir loni
 	tar -xvf Pipeline-6.0.1-unix.tar.bz2 -C loni
 
 	#Get workflow
 	cd $m2g/src/m2g/library/workflows/
-	wget  --no-check-certificate https://www.dropbox.com/s/o562326mnjipllz/m2g_for_cloud.pipe
+	wget http://openconnecto.me/data/public/MR/startup_m2g/m2g_test.pipe
 
 	mkdir $HOME/.pipeline
 	cd $HOME/.pipeline
-	wget --no-check-certificate https://www.dropbox.com/s/effz8dgikp76s88/preferences.xml
+	wget --no-check-certificate http://openconnecto.me/data/public/MR/startup_m2g/preferences.xml
 
 Export Paths and Setup Environment
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: bash
 
-	#TODO this will REPLACE your ~/.bashrc file
 	echo "export m2g=/mrimages
 	export M2G_HOME=${m2g}/src/m2g
 	# Path to FSL
@@ -191,8 +191,8 @@ Export Paths and Setup Environment
 
 	# Camino
 	export PATH=${m2g}/src/camino/bin:$PATH
-	export CAMINO_HEAP_SIZE=4000" > ~/.bashrc
-	. ~/.bashrc
+	export CAMINO_HEAP_SIZE=4000" > $m2g/.bashrc
+	. $m2g/.bashrc
 
 Possibly Helpful Commands at Runtime
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -211,7 +211,4 @@ Possibly Helpful Commands at Runtime
 	# We are refactoring our code to avoid these manual installation steps
 	# Manual steps:  igraph R install
 	# Manual steps: alternatives --config java #2 #type 2
-	# Manual steps: logging into cortex for data
-	# Manual steps: logging into cortex for loni binary
 	# Manual steps:  Hardcoded centroid patch, Patch in B0
-	# Hardcoded paths in m2g setup
