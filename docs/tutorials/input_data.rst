@@ -11,7 +11,9 @@ Data to process must be organized in the following hierarchical format, by datas
 **Dataset (series)**
 
 - Subject
+
    - Scan
+
       - dti [Diffusion Tensor Imaging]
       - dsi [Diffusion Spectrum Imaging]
       - rest [Resting State functional scan]
