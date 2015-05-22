@@ -92,5 +92,9 @@
    Mailing List <https://TBD> 
    Github repo <https://github.com/openconnectome/m2g>
    Project page <https://openconnectome.github.io/m2g/>
+   sphinx/references
+
+If you use m2g or its data derivatives, please cite:
+W Gray Roncal, ZH Koterba, D Mhembere, DM Kleissas, JT Vogelstein, R Burns, AR Bowles, DK Donavos, S Ryman, RE Jung, L Wu, V Calhoun, RJ Vogelstein. MIGRAINE: MRI Graph Reliability Analysis and Inference for Connectomics. GlobalSIP, 2013 `arXiv <http://arxiv.org/abs/1312.4875>`_
 
   

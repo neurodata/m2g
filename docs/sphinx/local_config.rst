@@ -19,7 +19,7 @@ Basic Package Update and Install
   yum install -y zlib-devel bzip2-devel openssl-devel ncurses-devel sqlite-devel readline-devel tk-devel gdbm-devel xz-devel
 
 
-Install and Configure Python 27 
+Install and Configure Python 2.7 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: bash
@@ -214,5 +214,5 @@ Possibly Helpful Commands at Runtime
 	# Manual steps: alternatives --config java #2 #type 2
 	# Manual steps: logging into cortex for data
 	# Manual steps: logging into cortex for loni binary
-	# Manual steps:  Hardcoded centroid path
+	# Manual steps:  Hardcoded centroid path, Patch in B0
 	# Hardcoded paths in m2g setup
