@@ -101,7 +101,7 @@ Camino and FSL
 
 	#FSL
 	# - Due to the form required for fsl, this is completed after
-	# scp-ing the fslinstaller.py file to the ~/src directory.
+	# downloading the fsl compressed file and storing it on a server.
 	# : http://fsl.fmrib.ox.ac.uk/fsldownloads/
 	cd $m2g/src/
 	wget http://openconnecto.me/data/public/MR/startup_m2g/fsl-5.0.8-centos6_64.tar.gz
@@ -120,13 +120,15 @@ igraph
 	wget http://igraph.org/nightly/get/c/igraph-0.7.1.tar.gz
 	tar xvfz igraph-0.7.1.tar.gz
 	cd igraph-0.7.1
-	./configure --prefix=/mrimages/src/igraph
+	./configure --prefix=${m2g}/src/igraph
 	make
 	make install
-	sudo R #MANUAL STEP had to type 90
-	install.packages('igraph') #'http://ftp.ussg.iu.edu/CRAN/src/contrib/igraph_0.7.1.tar.gz'
-	q() # MANUAL STEP saved image
 
+	git clone https://gist.github.com/15015a9485d87d8c22e6.git
+	cd 15015a9485d87d8c22e6
+	Rscript installRigraph.R # using mirror: 'http://ftp.ussg.iu.edu/CRAN/src/contrib/igraph_0.7.1.tar.gz'
+	cd ..
+	rm -rf 15015a9485d87d8c22e6
 m2g setup
 ~~~~~~~~~
 
