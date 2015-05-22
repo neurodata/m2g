@@ -43,7 +43,7 @@ def extract_vol(dti_img, bvals, b0_vol):
 	b0_head.set_data_shape(b0_head.get_data_shape()[0:3])
 
 	print "Saving..."
-	out = Nifti1Image( data=b0_data, affine=d_img.get_affine(), header=b0_head )
+	out = Nifti1Image( b0_data, affine=d_img.get_affine(), header=b0_head )
 	out.update_header()
 	save(out, b0_vol)
 	print "Complete!"
