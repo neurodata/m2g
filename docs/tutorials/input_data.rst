@@ -10,17 +10,18 @@ This is a draft input/output specfication for discussion.  Open questions:
 Input Data
 ~~~~~~~~~~
 
-Data to process must be organized in the following format:
+Data to process must be organized in the following hierarchical format, by dataset or series:
 
-- Dataset
-- Series [Often all together, but accomodates multiple releases or revisions]
+**Dataset (series)**
+
 - Subject
-- Scan
-- dti [Diffusion Tensor Imaging]
-- dsi [Diffusion Spectrum Imaging]
-- rest [Resting State functional scan]
-- anat [Anatomical Scan, e.g., MPRAGE]
-- params [b vals, gradients]
+   - Scan
+      - dti [Diffusion Tensor Imaging]
+      - dsi [Diffusion Spectrum Imaging]
+      - rest [Resting State functional scan]
+      - anat [Anatomical Scan, e.g., MPRAGE]
+      - params [b vals, gradients]
+
 
 Output Data
 ~~~~~~~~~~~
