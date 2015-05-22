@@ -1,7 +1,7 @@
 Modules
 *******
 
-This is a high level mapping of module -> function.  Description of modules should be in functions.
+This is a high level mapping of LONI Pipeline module -> function.  Each module has a one-to-one correspondence with its associated function, following the linkage below.
 
 .. raw:: html
 

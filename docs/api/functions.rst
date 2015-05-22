@@ -1,5 +1,5 @@
-Functions
-*********
+Function Reference
+******************
 
 .. toctree::
 	:caption: MPRAGE Processing
