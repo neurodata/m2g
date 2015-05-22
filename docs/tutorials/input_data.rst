@@ -1,11 +1,7 @@
 Data Formats
 *************
 
-This is a draft input/output specfication for discussion.  Open questions:
-
-- Do we want to organize by subject or derivative?  Subject is clearer, but almost all analysis prefers derivative ordering (e.g., an entire folder of small graphs)
-- How much data conversion should we do for the end user automatically (graphML vs. MAT vs. edgelist...)
-- How can we track different versions?
+This is a draft input/output specfication for processing MR data.
 
 Input Data
 ~~~~~~~~~~
@@ -26,25 +22,10 @@ Data to process must be organized in the following hierarchical format, by datas
 Output Data
 ~~~~~~~~~~~
 
-Data derivatives for processed brains include the following data:
+Data derivatives for processed brains include the following data, tagged with its quarterly release.  For each data product, users select the product, the atlas (parcellation scheme) and data format:
 
-**Graphs**
+1) graphs + atlas + format
+2) derivative + atlas + format
+3) subject covariates
 
-- Small Graphs
-- Big Graphs
-- Graphs based on other parcellations
-
-**Derivative and Intemediate Products**
-
-- Big Invariants
-- Big LCC
-- Big LCC Graphs
-- Small Graphs GraphML
-- Small Invariants
-- Small LCC
-
-- Embeddings
-- Fibers
-- Subject Covariates
-- MNI Data
-- Tensors
+Graphs range in size from O(10^1) to O(10^6), and intermediate products include graph invariants and processing artifacts (e.g., fibers, tensors).
