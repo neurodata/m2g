@@ -82,15 +82,15 @@ class BuildGraphForm(forms.Form):
   Project_Type = forms.ChoiceField([('public', 'public'), ('private','private')], widget=Select, required=False)
 
   # Name project
-  UserDefprojectName  = forms.CharField(label='Project name', max_length=255, widget=TextInput(attrs={"class":"tb"}),
+  UserDefprojectName  = forms.CharField(label='Project name', max_length=255, widget=TextInput(),
                                         required = True, error_messages={'required': 'You must enter a Project name'})
-  site = forms.CharField(label='Enter Site', max_length=255, widget=TextInput(attrs={"class":"tb"}),
+  site = forms.CharField(label='Enter Site', max_length=255, widget=TextInput(),
                          required = True, error_messages={'required': 'You must enter a site'})
-  subject = forms.CharField(label='Enter Subject ID', max_length=255, widget=TextInput(attrs={"class":"tb"}),
+  subject = forms.CharField(label='Enter Subject ID', max_length=255, widget=TextInput(),
                             required = True , error_messages={'required': 'You must enter a Subject ID'})
-  session = forms.CharField(label='Enter Session ID', max_length=255, widget=TextInput(attrs={"class":"tb"}),
+  session = forms.CharField(label='Enter Session ID', max_length=255, widget=TextInput(),
                             required = True, error_messages={'required': 'You must enter a Session ID'})
-  scanId = forms.CharField(label='Scan ID', max_length=255, widget=TextInput(attrs={"class":"tb"}),
+  scanId = forms.CharField(label='Scan ID', max_length=255, widget=TextInput(),
                            required = True, error_messages={'required': 'You must enter a Scan ID'})
 
   # Upload project files
