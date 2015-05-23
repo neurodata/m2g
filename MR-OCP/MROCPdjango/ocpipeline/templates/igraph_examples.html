@@ -24,6 +24,8 @@
   {% block medheading %}
   <a href="http://igraph.org/" target="blank">igraph</a> Examples
   {% endblock medheading %}
+
+  
   {% block content %}
   <div id="igraph">
     <p>
@@ -32,19 +34,21 @@
     </p>
 
     To load the graph into R:
-    <pre style='color:#000000;background:#ffffff;'><html><body style='color:#000000; background:#ffffff; '>
+
+    
+    <pre>
     require<span style='color:#808030; '>(</span>igraph<span style='color:#808030; '>)</span>
     graph <span style='color:#808030; '>&lt;</span><span style='color:#808030; '>-</span> read<span style='color:#808030; '>.</span>graph<span style='color:#808030; '>(</span><span style='color:#800000; '>"</span><span style='color:#0000e6; '>path_of_graph.graphml</span><span style='color:#800000; '>"</span><span style='color:#808030; '>,</span> format<span style='color:#808030; '>=</span><span style='color:#800000; '>"</span><span style='color:#0000e6; '>graphml</span><span style='color:#800000; '>"</span><span style='color:#808030; '>)</span>
     </pre>
 
     To load the graph into Python:
-    <pre style='color:#000000;background:#ffffff;'><html><body style='color:#000000; background:#ffffff; '>
-<span style='color:#800000; font-weight:bold; '>import</span> igraph
-g <span style='color:#808030; '>=</span> igraph<span style='color:#808030; '>.</span>read<span style='color:#808030; '>(</span><span style='color:#800000; '>"</span><span style='color:#0000e6; '>path_of_graph.graphml</span><span style='color:#800000; '>"</span><span style='color:#808030; '>,</span> format<span style='color:#808030; '>=</span><span style='color:#800000; '>"</span><span style='color:#0000e6; '>graphml</span><span style='color:#800000; '>"</span><span style='color:#808030; '>)</span>
-</pre>
+    <pre>
+    <span style='color:#800000; font-weight:bold; '>import</span> igraph
+    g <span style='color:#808030; '>=</span> igraph<span style='color:#808030; '>.</span>read<span style='color:#808030; '>(</span><span style='color:#800000; '>"</span><span style='color:#0000e6; '>path_of_graph.graphml</span><span style='color:#800000; '>"</span><span style='color:#808030; '>,</span> format<span style='color:#808030; '>=</span><span style='color:#800000; '>"</span><span style='color:#0000e6; '>graphml</span><span style='color:#800000; '>"</span><span style='color:#808030; '>)</span>
+    </pre>
 
     To load a graph using C:
-    <pre style='color:#000000;background:#ffffff;'><html><body style='color:#000000; background:#ffffff; '>
+    <pre>
     <span style='color:#004a43; '>#</span><span style='color:#004a43; '>include </span><span style='color:#800000; '>&lt;</span><span style='color:#40015a; '>igraph.h</span><span style='color:#800000; '>></span>
     <span style='color:#004a43; '>#</span><span style='color:#004a43; '>include </span><span style='color:#800000; '>&lt;</span><span style='color:#40015a; '>stdio.h</span><span style='color:#800000; '>></span>
 
@@ -63,4 +67,6 @@ g <span style='color:#808030; '>=</span> igraph<span style='color:#808030; '>.</
     </pre>
 
   </div>
+
   {% endblock content%}
+  

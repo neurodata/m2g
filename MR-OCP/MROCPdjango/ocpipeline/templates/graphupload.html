@@ -102,34 +102,36 @@
         Assume we have a single graph located in the same directory as the example script named <code>YOUR_GRAPH_FILE_NAME</code>.
         Typing <code>python compute.py http://mrbrain.cs.jhu.edu/graph-services/graphupload/ cc,tri,ss1 YOUR_GRAPH_FILE_NAME GRAPH_FORMAT -c gml,dot,pajek</code> will
         upload your <code>YOUR_GRAPH_FILE_NAME</code> file, in <code>GRAPH_FORMAT</code> format; compute: clustering coefficient, local triangle count, and scan statistic-1; then convert the invariant-attributed
-        graphs to <code>gml</code>,<code>dot</code>, and <code>pajek</code> format.
+        graphs to <code>gml</code>,<code>dot</code>, and <code>pajek</code> format. 
+        </p>
 
-        Here is a breakdown of the command line call arguments:
-        <ol>
-          <li><pre>http://mrbrain.cs.jhu.edu/graph-services/graphupload/</pre> is the base url for uploading graphs for invariants to be computed.</li>
-          <li><code>cc,tri,ss1</code> is a comma separated (no spaces) list of the invariants you want computed.</li>
-            <div id="inv_opts">
-            The only available options for invariants are:
-            <ul>
-              <li> <code>ss1</code> for the Scan Statistic 1.</li>
-              <li> <code>tri</code> for the Triangle Count.</li>
-              <li> <code>cc</code> for the Clustering Coefficient.</li>
-              <li> <code>mad</code> for the Maximum Average Degree.</li>
-              <li> <code>deg</code> for The Local Degree Count.</li>
-              <li> <code>eig</code> for the Top-k (100 or maximum available/computable) eigenvalues and eigenvectors.</li>
-            </ul>
+        <p>
+          Here is a breakdown of the command line call arguments:
+          <ul>
+            <li><pre>http://mrbrain.cs.jhu.edu/graph-services/graphupload/</pre> is the base url for uploading graphs for invariants to be computed.</li>
+            <li><code>cc,tri,ss1</code> is a comma separated (no spaces) list of the invariants you want computed.</li>
+              <div id="inv_opts">
+              The only available options for invariants are:
+              <ul>
+                <li> <code>ss1</code> for the Scan Statistic 1.</li>
+                <li> <code>tri</code> for the Triangle Count.</li>
+                <li> <code>cc</code> for the Clustering Coefficient.</li>
+                <li> <code>mad</code> for the Maximum Average Degree.</li>
+                <li> <code>deg</code> for The Local Degree Count.</li>
+                <li> <code>eig</code> for the Top-k (100 or maximum available/computable) eigenvalues and eigenvectors.</li>
+              </ul>
+            </div>
+
+          <li>
+          <div id="graph_format_opts">
+            The second argument allows you to pass the input format of the graph(s) being uploaded. Current available options for graph format are:<br/>
+            <code>graphml, ncol, edgelist, lgl, pajek, graphdb, mat, npy</code>
           </div>
+          </li>
+          </ul>
 
-        <li>
-        <div id="graph_format_opts">
-          The second argument allows you to pass the input format of the graph(s) being uploaded. Current available options for graph format are:<br/>
-          <code>graphml, ncol, edgelist, lgl, pajek, graphdb, mat, npy</code>
-        </div>
-        </li>
-        </ol>
-
-          Starting a <a href="http://tmux.sourceforge.net/ target="blank">tmux</a> or <a href="http://linux.die.net/man/1/screen" target="blank"> screen </a> session is recommended as you must wait for
-          the http response to otbain a url containing the result.
+            Starting a <a href="http://tmux.sourceforge.net/" target="blank">tmux</a> or <a href="http://linux.die.net/man/1/screen" target="blank"> screen </a> session is recommended as you must wait for
+            the http response to otbain a url containing the result.
         </p>
 
 
