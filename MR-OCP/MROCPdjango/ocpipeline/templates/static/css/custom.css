@@ -24,14 +24,50 @@
   font-family: Helvetica, Arial, sans-serif;
   color: white;
   max-width: 1000px;
-  white-space: nowrap;
+  /*white-space: nowrap;*/
   margin: 0 auto;
+  line-height: 2;
+  list-style: none;
 }
 
-  .ocp-nav {
-    background-color:rgba(0, 0, 0, 0.6);
-    border: 0;
-  }
+/* No bullets on all lists */
+ul {
+  list-style-type: none;
+}
+
+
+/* So we can see the text on textareas, emails, select*/
+input[type="text"], textarea {
+  background-color : gray; 
+  color: white;
+  border-radius: 5px;
+}
+
+input[type="email"], textarea {
+  background-color : gray; 
+  color: white;
+  border-radius: 5px;
+}
+
+option {
+    background-color: gray;
+}
+
+/*Button*/
+
+.button {
+  color: #444;
+  border: 1px solid #3da7f5;
+  font-weight: bold;
+  border-radius: 5px;
+}
+
+
+.ocp-nav {
+  background-color:rgba(0, 0, 0, 0.6);
+  border: 0;
+  /*min-width: 900px;*/
+}
 
 #ocp-menubar ul li a { 
   color: red;
@@ -62,6 +98,11 @@
   background-color: red;
 }
 
+/* So the ocp header banner has no effect when hovered */
+#header_id a:hover {
+ text-decoration:none;
+}
+
 /* Center the navbar on the page*/
 .navbar .navbar-nav {
   display: inline-block;
@@ -70,8 +111,4 @@
 
 .navbar .navbar-collapse {
   text-align: center;
-}
-
-.bar {
-    border-left: thick solid #ff0000;
 }
