@@ -153,7 +153,7 @@ m2g setup
 	mkdir $m2g/data
 	cd $m2g/data
 	wget http://openconnecto.me/data/public/MR/startup_m2g/KKI2009-22.tar.gz
-  tar zxvf KKI2009-22.tar.gz
+	tar zxvf KKI2009-22.tar.gz
 
 	cd $m2g/src
 	wget http://openconnecto.me/data/public/MR/startup_m2g/Pipeline-6.0.1-unix.tar.bz2
