@@ -3,11 +3,11 @@ Analysis
  
 First steps after processing your data
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-All data derivatives computed throughout the pipeline are made available. Analysis can be performed to assess the quality of intermediate steps of the pipeline, such as dice overlap for assessing image registration quality. This type of analysis can be useful when tuning parameters and ensuring that you are obtaining brain-graphs that are meaningful for your data. For more information on analysis of each step of m2g see our quality control pages (coming soon).
+All data derivatives computed throughout the pipeline are made available. Analysis can be performed to assess the quality of intermediate steps of the pipeline, such as dice overlap for assessing image registration quality. This type of analysis can be useful when tuning parameters and ensuring that you are obtaining brain graphs that are meaningful for your data.
 
 Basic Graph Statistics
 ~~~~~~~~~~~~~~~~~~~~~~
-As was mentioned previously, we validate our pipelines using test-retest reliability. However, a perfect TRT score does not mean that the pipeline cannot further improve. Therefore, we needed to devise a better metric for assessing the quality and distributions of our graphs. Knowing the true subject/scan associations, we can leverage our graph difference as computed in our TRT calculation to form a distribution of inter- and intra-subject connectome differences. We are then able to estimate the kernel density of these distributions and compute the distance between them as well as the significance of our discrimination. In v1.1.0 of m2g, we measured a highly significant discrimination between same and different subject scans (< 1e-4) on the KKI2009 dataset.
+As was mentioned previously, we validate our pipelines using test-retest reliability. However, a perfect TRT score does not mean that the pipeline cannot further improve. Therefore, we needed to devise a better metric for assessing the quality and distributions of our graphs. Knowing the true subject/scan associations, we can leverage our graph difference as computed in our TRT calculation to form a distribution of inter- and intra-subject connectome differences. We are then able to compute the kernel density estimate of these distributions and compute the distance between them as well as the significance of our discrimination. In v1.1.0 of m2g, we measured a highly significant discrimination between same and different subject scans (< 1e-4) on the KKI2009 dataset.
 
 Graph Analysis: Clustering
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
