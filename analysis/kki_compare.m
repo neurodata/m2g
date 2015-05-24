@@ -7,6 +7,32 @@
 % Data (covariates and small graphs are from the public ftp site)
 % openconnecto.me/data/public/MR/MIGRAINE_v1_0/KKI-42/
 
+%% Download data
+%have I downloaded my zip file
+fname = 'KKI2009_graphs_m2g_v1_1_0.zip';
+files = dir();
+
+clear found
+for i=1:length(files) %silly but your directory should be almost empty
+    if strcmp(fname, files(i).name)
+        found = 1;
+        break;
+    end
+end
+
+%if no, download it
+if ~exist('found', 'var')
+    %craft and run command
+    addr = ' http://openconnecto.me/data/public/MR/m2g_v1_1_0/KKI2009_graphs_m2g_v1_1_0.zip';
+    opts = ' --no-check-certificate';
+    cmd = strcat('wget', addr, opts);
+    system(cmd, '-echo');
+end
+
+%regardless, unzip it
+unzip(fname);
+cd('./run1');
+
 %% Load files
 files = dir('*.mat');
 temp = importdata('kki42_subjectinformation.csv');

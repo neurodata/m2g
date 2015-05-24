@@ -35,7 +35,7 @@ Install and Configure Python 2.7
 	ln -s /usr/local/bin/python2.7 /usr/local/bin/python
 	# First get the setup script for Setuptools:
 	wget https://bitbucket.org/pypa/setuptools/raw/bootstrap/ez_setup.py
-	# Then install it for Python 2.7 and/or Python 3.3:
+	# Then install it for Python 2.7:
 	python2.7 ez_setup.py
 	easy_install-2.7 pip
 
@@ -48,17 +48,17 @@ Basics for Development
 	yum install -y java-1.6.0-openjdk-devel cmake vim screen
 	yum install -y bc
 	yum install -y epel-release
-	yum install -y R nibabel
+	yum install -y R
 	pip2.7 install numpy
 	pip2.7 install ipython
-	pip2.7 install scipy #This seems to not work with 2.7 and yum
+	pip2.7 install scipy
 
 	easy_install-2.7 argparse
 	easy_install-2.7 -U distribute
 	yum -y install libpng-devel
 	pip2.7 install scikit-image
 	pip2.7 install nibabel
-	pip2.7 install Cython #Make sure we are at 0.22+
+	pip2.7 install Cython # requires >= v0.22 
 
 Oracle Java Install
 ~~~~~~~~~~~~~~~~~~~~~
@@ -100,9 +100,10 @@ Camino and FSL
 	make
 
 	#FSL
-	# - Due to the form required for fsl, this is completed after
-	# downloading the fsl compressed file and storing it on a server.
-	# : http://fsl.fmrib.ox.ac.uk/fsldownloads/
+	# Requires completing a form on the FSL website, running 
+	# fslinstaller.py. We've stored the obtained binary on
+	# a server for convenience.
+	# FSL website: http://fsl.fmrib.ox.ac.uk/fsldownloads/
 	cd $m2g/src/
 	wget http://openconnecto.me/data/public/MR/startup_m2g/fsl-5.0.8-centos6_64.tar.gz
 	tar zxvf fsl-5.0.8-centos6_64.tar.gz
@@ -114,7 +115,6 @@ igraph
 .. code-block:: bash
 
 	# igraph
-
 	yum -y install xml2 libxml2-devel
 	cd ${m2g}/src
 	wget http://igraph.org/nightly/get/c/igraph-0.7.1.tar.gz
@@ -196,12 +196,12 @@ Export Paths and Setup Environment
 	export CAMINO_HEAP_SIZE=4000" > $m2g/.bashrc
 	. $m2g/.bashrc
 
-Possibly Helpful Commands at Runtime
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. Possibly Helpful Commands at Runtime
+.. ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. code-block:: bash
+.. .. code-block:: bash
 
-	# NEED TO MOUNT DRIVE (EBS)
+..	# NEED TO MOUNT DRIVE (EBS)
 	mkdir /mnt/loni
 	lsblk
 	mkfs -t ext4 /dev/xvdj
@@ -210,7 +210,5 @@ Possibly Helpful Commands at Runtime
 	./PipelineCLI.sh --validate ${m2g}/src/m2g/library/workflows/m2g_for_cloud.pipe
 	./PipelineCLI.sh --execute ${m2g}/src/m2g/library/workflows/m2g_for_cloud.pipe
 
-	# We are refactoring our code to avoid these manual installation steps
-	# Manual steps:  igraph R install
+..	# We are refactoring our code to avoid these manual installation steps
 	# Manual steps: alternatives --config java #2 #type 2
-	# Manual steps:  Hardcoded centroid patch, Patch in B0

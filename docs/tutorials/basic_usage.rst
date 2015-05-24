@@ -2,13 +2,13 @@ Basic Usage
 ***********
 
 
-The overall workflow for the diffusion portion of M2G is shown in the image below.  
+The overall workflow for the diffusion portion of m2g is shown in the image below.  
  
 .. figure:: ../images/m2g_loni_overall.png
     :width: 800px
     :align: center
     
-    LONI Overall Workflow
+    m2g Overall Workflow
 
 Inputs:
 
@@ -33,7 +33,7 @@ In the registration workflow, images are preprocessed (e.g, skull-stripped and d
     :width: 800px
     :align: center
     
-    LONI Registration Workflow
+    m2g Registration Workflow
 
 Finally, in the diffusion processing workflow, tensors are estimated for each voxel, indicating the primary direction of water diffusion at that location in the brain.  It has been shown that this corresponds to the principal direction of travel for major white matter (axonal) connections in the brain.  From the tensors, fiber streamlines, or tracks, are created using deterministic and probabilistic algorithms.  From the fibers and the atlas paracellations, we are able to estimate a graph.  
 
@@ -41,7 +41,7 @@ Finally, in the diffusion processing workflow, tensors are estimated for each vo
     :width: 800px
     :align: center
     
-    LONI Diffusion Workflow
+    m2g Diffusion Workflow
 
 To generate a graph, we first form an empty graph (A), with rows and columns corresponding to nodes (atlas regions).  For each fiber streamline, we find all connected regions; for each pair of regions (i,j) in the streamline, we increment the A(i,j).  Because these connections are undirected, we also increment A(j,i) - or equivalently store only the upper triangular matrix. 
 
@@ -51,4 +51,3 @@ To generate a graph, we first form an empty graph (A), with rows and columns cor
     
     Graph Construction Example
 
-TODO:  Do we want more cartoon pictures or less? Not sure what the right balance is between LONI and cartoon.  We can do both!

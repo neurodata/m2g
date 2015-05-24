@@ -37,7 +37,7 @@
 .. raw:: html
 
   <hr>
-  <p>This page describes how brain graphs are generated in our service from Diffusion Weighted MRI (dMRI), and structural MRI (sMRI) images of human brains. The MRImages to Graphs (m2g) pipeline is the successor of MRCAP and MIGRAINE. m2g combines dMRI and sMRI data from a single subject to estimate a high-level connectome. The connectomes returned describe regions of connectivity within the brain at multiple levels of resolution - from a single voxel scale ~1 mm<sup>3</sup> to large cortical regions ~20 cm<sup>3</sup>. The estimation of functional connectomes is currently under development and will be added in a subsequent release.</p>
+  <p>This page describes how brain graphs are generated in our service from Diffusion Weighted MRI (dMRI), and structural MRI (sMRI) images of human brains, as well as a template atlas (MNI152, for instance). The MRImages to Graphs (m2g) pipeline is the successor of MRCAP and MIGRAINE. m2g combines dMRI and sMRI data from a single subject to estimate a high-level connectome. The connectomes returned describe regions of connectivity within the brain at multiple levels of resolution - from a single voxel scale ~1 mm<sup>3</sup> to large cortical regions ~20 cm<sup>3</sup></p>
 
   <p> m2g has been developed in the LONI pipelining environment. This environment facilitates modular construction, and all workflows and modules are command-line executable. This makes m2g efficient and allows users or researchers to modify algorithms for their specific requirements. </p>
   
@@ -63,7 +63,6 @@
 
    sphinx/introduction
    sphinx/local_config
-   sphinx/cluster_config
    sphinx/cloud_computing
    sphinx/contributing
    sphinx/style
@@ -79,7 +78,6 @@
    tutorials/basic_usage
    tutorials/advanced_usage
    tutorials/validation
-   tutorials/analysis
 
 .. toctree::
    :maxdepth: 1
@@ -89,12 +87,12 @@
    api/functions
    Gitter chatroom <https://gitter.im/openconnectome/m2g>
    Support <https://groups.google.com/forum/#!forum/ocp-support/>
-   Mailing List <https://TBD> 
+   Mailing List <https://groups.google.com/forum/#!forum/ocp-support/> 
    Github repo <https://github.com/openconnectome/m2g>
    Project page <https://openconnectome.github.io/m2g/>
-   sphinx/references
+   Contributors <https://github.com/openconnectome/m2g/graphs/contributors>
 
 If you use m2g or its data derivatives, please cite:
-W Gray Roncal, ZH Koterba, D Mhembere, DM Kleissas, JT Vogelstein, R Burns, AR Bowles, DK Donavos, S Ryman, RE Jung, L Wu, V Calhoun, RJ Vogelstein. MIGRAINE: MRI Graph Reliability Analysis and Inference for Connectomics. GlobalSIP, 2013 `arXiv <http://arxiv.org/abs/1312.4875>`_
+   W Gray Roncal, ZH Koterba, D Mhembere, DM Kleissas, JT Vogelstein, R Burns, AR Bowles, DK Donavos, S Ryman, RE Jung, L Wu, V Calhoun, RJ Vogelstein. MIGRAINE: MRI Graph Reliability Analysis and Inference for Connectomics. GlobalSIP, 2013 `arXiv <http://arxiv.org/abs/1312.4875>`_
 
   

@@ -66,7 +66,7 @@ This is a high level mapping of module -> function.  In LONI, a module calls a s
   </tr>  
 
 	<tr>
-    <td class="tg-rd2y">gengraph</td>
+    <td class="tg-rd2y">Graph Gen</td>
     <td class="tg-rd2y"><a href=gengraph.html>Graph Generation</td>
 	</tr>
 
