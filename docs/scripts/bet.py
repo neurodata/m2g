@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 """
-Extracts brain content from whole head image
+Extracts brain content from whole head image.
 
 Using FSL's BET, we extract the brain of the MPRAGE scans from the entirity of the image. The reason for this extraction is to aid in registration, as well as provide a mask which allows algorithm to identify voxels of interest further down the pipeline.
 

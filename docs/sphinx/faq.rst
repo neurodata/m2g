@@ -1,9 +1,9 @@
 Frequently Asked Questions (FAQ)
 ********************************
 
-This page will be updated to reflect commonly asked questions to provide a common reference point for questions and answers.  Users may also wish to search for answers on the general OCP Support mailing list archives:  https://groups.google.com/forum/#!forum/ocp-support
+This page will be updated to reflect commonly asked questions to provide a common reference point for questions and answers.  Users may also wish to search for answers on the general `OCP Support mailing list <https://groups.google.com/forum/#!forum/ocp-support>`_ archives.
 
-New questions should be asked to:  ocp-support@googlegroups.com
+New questions should be asked on  `our support pages <ocp-support@googlegroups.com>`_.
 
 **How do I run the m2g pipeline?**
 
@@ -15,8 +15,8 @@ We assess the performance of the pipeline after each algorithm implemented throu
 
 **How often is m2g updated?**
 
-m2g undergoes regular development, and releases will be published quarterly. If you have a feature suggestion of bug fix, please let us know using the issues section of our Github repository and we'll do our best to roll it out as soon as we can.
+m2g undergoes regular updates. If you have a feature suggestion of bug fix, please let us know using the issues section of our Github repository and we'll do our best to roll it out as soon as we can.
 
-**If I don't have computing resources, can I still use this tool?**
+.. **If I don't have computing resources, can I still use this tool?**
 
-Absolutely. We have cloud services available in which you can upload your data and process it using  m2g on our cluster for free. Details on this service can be found on the cloud computing page.
+.. Absolutely. We have cloud services available in which you can upload your data and process it using  m2g on our cluster for free. Details on this service can be found on the cloud computing page.
