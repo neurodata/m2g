@@ -31,6 +31,9 @@ import mrcap.gengraph
 import docs.scripts.bet
 import docs.scripts.eddycorrect
 import docs.scripts.flirt
+import docs.scripts.m2g
+import docs.scripts.m2g_registration
+import docs.scripts.m2g_diffusion
 #import packages.utils.graphml2mat
 
 # -- General configuration ------------------------------------------------
