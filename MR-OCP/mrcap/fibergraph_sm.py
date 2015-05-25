@@ -50,7 +50,7 @@ class FiberGraph(_FiberGraph):
     
     if add_centroids:
       print "Adding centroids ..."
-      cent_loc = os.path.join("../../", "data", "Centroids", "centroids.mat")
+      cent_loc = os.path.join(os.environ['M2G_HOME'], "data", "Centroids", "centroids.mat")
       if not os.path.exists(cent_loc):
         get_files()
 

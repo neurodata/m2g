@@ -59,16 +59,16 @@ def genGraph(infname, data_atlas_fn, outfname, bigGraph=False, \
   rois = roi.ROIData(data_atlas_fn)
 
   # Create fiber reader
-  reader = FiberReader( infname )
+  reader = FiberReader(infname)
 
   # DM FIXME: Hacky -- we no longer read shape from fiber file so this happens :-/
   reader.shape = rois.data.shape
 
   # Create the graph object
   # get dims from reader
-  fbrgraph = FiberGraph ( reader.shape, rois)
+  fbrgraph = FiberGraph (reader.shape, rois)
 
-  print "Parsing MRI studio file {0}".format ( infname )
+  print "Parsing MRI studio file {0}".format (infname)
 
   # Print the high-level fiber information
   print "Reader Header", reader
@@ -83,7 +83,7 @@ def genGraph(infname, data_atlas_fn, outfname, bigGraph=False, \
     if numfibers > 0 and count >= numfibers:
       break
     if count % 10000 == 0:
-      print ("Processed {0} fibers".format(count) )
+      print ("Processed {0} fibers".format(count))
 
   del reader
   # Done adding edges
@@ -97,9 +97,9 @@ def genGraph(infname, data_atlas_fn, outfname, bigGraph=False, \
 
 def main ():
 
-  parser = argparse.ArgumentParser( description="Read the contents of MRI Studio file \
+  parser = argparse.ArgumentParser(description="Read the contents of MRI Studio file \
       and generate a sparse connectivity graph using igraph with default \
-      output format 'graphML'" )
+      output format 'graphML'")
   parser.add_argument("fbrfile", action="store", help="The fiber file name")
   parser.add_argument("data_atlas", action="store", help="The atlas with region data")
   parser.add_argument("output", action="store", help="resulting name of graph")
