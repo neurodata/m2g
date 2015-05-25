@@ -134,5 +134,5 @@ If you prefer to work with graphs in the matlab compatible mat format, then run 
 .. code-block:: bash
 
 	GRAPH_NEW=${DATA}/graph.mat
-	python2.7 ${M2G_HOM}/packages/utils/graphml2mat.py ${GRAPH} ${GRAPH_NEW}
+	python2.7 ${M2G_HOME}/packages/utils/graphml2mat.py ${GRAPH} ${GRAPH_NEW}
 
