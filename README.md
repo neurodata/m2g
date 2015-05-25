@@ -7,6 +7,8 @@ The pipeline makes use of FSL brain extraction, ANTs image registration, Camino 
 
 This project also contains several tools to play with fiber data in: [MRI Studio format](http://www.mristudio.org/).
 
+Before getting started, run the **setup.py** script, found in **/packages/utils/**
+
 Running M2G from EC2
 --------------------
 

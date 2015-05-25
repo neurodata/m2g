@@ -35,7 +35,7 @@ from time import time
 import os
 from packages.utils.setup import get_files
 
-def create(roifn=os.path.join("../../..","data","Atlas", 
+def create(roifn=os.path.join(os.environ["M2G_HOME"],"data","Atlas", 
           "MNI152_T1_1mm_brain.nii"), start=2):
   """
   Create a new atlas given some scaling factor determined by the 
