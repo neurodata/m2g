@@ -29,11 +29,26 @@ from computation.utils.file_util import recursive_listdir
 import sys
 
 BASE_DIR = os.path.abspath("../") 
-testdirs = [os.path.join(BASE_DIR, "MR-OCP","MROCPdjango"),
-    os.path.join(BASE_DIR, "MR-OCP", "mrcap"),
+testdirs = [os.path.join(BASE_DIR, "MROCPdjango"),
+    os.path.join(BASE_DIR, "mrcap"),
     ]
 testignore = ["example-alg", "README", "setup.py", 
-    os.path.join(BASE_DIR, "MR-OCP","MROCPdjango", "ocpipeline"), "check_fibers.py"]
+    os.path.join(BASE_DIR, "MROCPdjango", "ocpipeline"), "check_fibers.py"]
+
+
+def _in_(path):
+  fsp_path = path.split(os.sep) # split the files path
+  for cur_dir in testignore:
+    dir_sppath = cur_dir.split(os.sep) # split the dirs path
+    for idx, dsp in enumerate(dir_sppath):
+      if dsp == fsp_path[idx]:
+        if idx == len(fsp_path)-1 or idx == len(dir_sppath)-1:
+          print "Ignoring: '{0}'".format(path)
+          return True
+      else:
+        break # out of inner loop
+        
+  return False
 
 def test():
   """
@@ -44,7 +59,7 @@ def test():
   todo = None
   for dirs in testdirs:
     for file in recursive_listdir(dirs):
-        if os.path.basename(file) in testignore or os.path.dirname(file) in testignore:
+        if _in_(os.path.basename(file)) or _in_(os.path.dirname(file)):
           continue
 
         if os.path.splitext(file)[1] == ".py" or ( os.path.splitext(file)[1] == ""  and not file[-2:] == "cc"):
