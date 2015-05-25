@@ -23,7 +23,7 @@ set -e
 
 DATA_DIR=./data
 EXAMPLE_DIR=..
-DJANGO_TOP=~/MR-connectome/MR-OCP/MROCPdjango
+DJANGO_TOP=~/m2g/MR-OCP/MROCPdjango
 
 echo "Starting django dev server ..."
 python $DJANGO_TOP/manage.py runserver 8080 &
