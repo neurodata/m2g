@@ -11,6 +11,9 @@ m2g Complete Pipeline
 
 .. autofunction:: docs.scripts.m2g
 
+.. raw:: html
+	
+	<hr/>
 
 m2g Registration Pipeline
 ~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -20,6 +23,10 @@ m2g Registration Pipeline
 
 .. autofunction:: docs.scripts.m2g_registration
 
+.. raw:: html
+
+  <hr/>
+
 m2g Diffusion Processing Pipeline
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 .. figure:: ../images/m2g_loni_diffusion.png
@@ -28,6 +35,9 @@ m2g Diffusion Processing Pipeline
 
 .. autofunction:: docs.scripts.m2g_diffusion
 
+.. raw:: html
+
+  <hr/>
 
 Intuition Behind Graph Generation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

@@ -1,7 +1,7 @@
 Modules
 *******
 
-This is a high level mapping of module -> function.  In LONI, a module calls a single executable/commandline function, and workflows are a series of modules. Modules are documented here to identify what script they call and links are provided back to the documentation of those functions.
+This is a high level mapping of modules to functions.  In LONI, a module calls a single executable/commandline function, and workflows are a series of modules. Modules are documented here to identify what script they call and links are provided back to the documentation of those functions.
 
 .. raw:: html
 
