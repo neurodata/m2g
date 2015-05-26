@@ -8,6 +8,7 @@
 % openconnecto.me/data/public/MR/MIGRAINE_v1_0/KKI-42/
 
 %% Download data
+%{
 %have I downloaded my zip file
 fname = 'KKI2009_graphs_m2g_v1_1_0.zip';
 files = dir();
@@ -32,7 +33,7 @@ end
 %regardless, unzip it
 unzip(fname);
 cd('./run1');
-
+%}
 %% Load files
 files = dir('*.mat');
 temp = importdata('kki42_subjectinformation.csv');
@@ -44,7 +45,8 @@ end
 c = 1;
 for i = reorderIdx
     temp = load(files(i).name);
-    tgraph = (full(temp.graph)); % log10
+    tgraph = log10(full(temp.graph));% log10
+    tgraph = tgraph(1:70, 1:70);
     tgraph(isinf(tgraph))=0;
     %     tgraph=full(temp.graph);
     smg(:,:,c) = tgraph;
@@ -61,7 +63,7 @@ for i = 1:size(smg,3)
 end
 
 %% Compute TRT
-figure(1), imagesc(gErr), colorbar
+figure(1), subplot(121); imagesc(gErr), colorbar
 matches = 0;
 intra = 0; inter = 0;
 intravec = [];
@@ -93,7 +95,7 @@ inter = inter/42;
 title(strcat('correct matches=', num2str(matches),'/', num2str(size(smg,3))));
 
 %% Compute Hellinger Distance
-figure(3)
+figure(1); subplot(122);
 [~, x_intra] = ksdensity(intravec);
 [~, x_inter] = ksdensity(intervec);
 lims = [min([x_intra,x_inter]), max([x_intra, x_inter])]; %innefficient but works...
@@ -107,6 +109,8 @@ H = norm(sqrt(f_intra)- sqrt(f_inter),2)/sqrt(2);
 plot(xrange, f_intra, xrange, f_inter);
 legend('Intra Subject Kernel Esimate', 'Inter Subject Kernel Estimate');
 title(strcat('Hellinger Distance=', num2str(H)));
+
+[MNR, stdMNR] = compute_mnr(gErr, id)
 
 %% Compute Null Distribution and Hellinger
 %{
