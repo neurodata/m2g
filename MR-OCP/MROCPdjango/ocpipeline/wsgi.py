@@ -43,7 +43,11 @@ os.environ["DJANGO_SETTINGS_MODULE"] = "ocpipeline.settings"
 os.environ["HOME"] = "/tmp"
 #os.environ.setdefault("DJANGO_SETTINGS_MODULE", "ocpipeline.settings")
 
-application = get_wsgi_application()
+_application = get_wsgi_application()
 
-# Http add on
-#os.environ['HTTPS'] = "on" # DM 03/24/2013
+env_variables_to_pass = ['M2G_HOME']
+def application(environ, start_response):
+  # pass the WSGI environment variables on through to os.environ
+  for var in env_variables_to_pass:
+      os.environ[var] = environ.get(var, '')
+  return _application(environ, start_response)
