@@ -20,7 +20,7 @@
 @organization: Johns Hopkins University
 @contact: disa@jhu.edu
 
-@summary: A module to hold url patterns for one-click MR-connectome pipeline
+@summary: A module to hold url patterns for one-click m2g pipeline
 """
 
 from django.conf.urls import patterns, include, url

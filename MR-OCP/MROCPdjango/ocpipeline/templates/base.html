@@ -15,151 +15,112 @@
 
  Created by Disa Mhembere
  Email: disa@jhu.edu -->
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 {% load static %}
 {% load getScriptPrefix %}
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
-    <head>
-        <!--meta data-->
-        <meta property="og:title" content="connectome"/>
-        <meta property="og:type" content="website"/>
-        <meta property="og:site_name" content="mr connectome"/>
-        <!-- Style sheet and logo image -->
-	<link  rel="shortcut icon" type="image/x-icon" href= "{% static 'images/favicon.ico' %}"/>
-	<link rel="stylesheet" type="text/css" href="{% static 'default.css' %}"/>
+  <head>
 
-  <link rel="stylesheet" href="{{ STATIC_URL }}django_tables2/themes/paleblue/css/screen.css" />
+    <!-- Basic Page Needs
+    –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+    <meta charset="utf-8">
+    <meta name="description" content="Open connectome graphs">
+    <meta name="author" content="Disa Mhembere">
 
-        <title>
-        {% block title %}
-          {# Title here!#}
-        {% endblock title %}
-        </title>
+    <!-- Mobile Specific Metas
+    –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        {% block js %}
-          <script type="text/javascript">
-            // Function to add a spinner during upload and processing
-            function showSpinner( show )
-            {
-              show = typeof show !== 'undefined' ? show : true;
-              if ( show == true )
-              {
-                document.getElementById('loadingImage').style.visibility='visible';
-              }
-              else
-              {
-                document.getElementById('loadingImage').style.visibility='hidden';
-              }
-            }
-          </script>
-        <script type="text/javascript" src="{% static 'scripts/validator.js' %}"> </script>
+    <!-- FONT
+    –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+    <link href="//fonts.googleapis.com/css?family=Raleway:400,300,600" rel="stylesheet" type="text/css">
 
-        {# Google Analytics #}
-        <script>
-          (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-              (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-            m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-          })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+    <!-- CSS
+    –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+    <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap.css' %}"/>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/custom.css' %}"/>
+      <!-- Django tables -->
+    <link rel="stylesheet" type="text/css" href="{% static 'css/tables.css' %}"/>
 
-          ga('create', 'UA-56427002-1', 'auto');
-          ga('send', 'pageview');
-        </script>
+    <!--<link rel="stylesheet" href="{{ STATIC_URL }}django_tables2/themes/paleblue/css/screen.css" />-->
 
-        {% endblock js %}
+  <!-- Favicon
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <link rel="shortcut icon" type="image/png" href="{% static 'img/favicon.ico' %}">
 
-      </head>
-    <body>
-      <a href="http://openconnecto.me" target="blank">
-      <img src="{% static 'images/openconnectome_brain_logo.png' %}" border="0" alt="open connectome logo"/></a>
+  <title>
+    {% block title %}
+      {# Title here!#}
+    {% endblock title %}
+  </title>
 
-    <div class="container">
-      <div class="navigation">
-        <ul id="menu">
-          <li><a href="{{"welcome"|getScriptPrefix}}">Home</a></li>
-          <li><a href="{{"buildgraph"|getScriptPrefix}}">Build Graph</a>
-              <ul>
-                  <li><a href="http://mrbrain.cs.jhu.edu/data/ocp/perm/testdata/derivatives_testdata.zip">Sample Data</a></li>
-                  <li><a href="{{"buildgraph"|getScriptPrefix}}#programmatic">Programmatic Build</a></li>
-              </ul>
-          </li>
-          <li><a href="{{"graphupload"|getScriptPrefix}}">Compute Invariants</a>
-              <ul>
-                  <li><a href="http://mrbrain.cs.jhu.edu/data/ocp/perm/testdata/graphs_testdata.zip">Sample Data</a></li>
-                  <li><a href="{{"graphupload"|getScriptPrefix}}#programmatic">Programmatic</a></li>
-                  <li><a href="http://mrbrain.cs.jhu.edu/data/ocp/perm/invariant_docs/doc/">Documentation</a></li>
-                  <li><a href="http://mrbrain.cs.jhu.edu/data/ocp/perm/invariant_docs/api.pdf">Manual</a></li>
-              </ul>
-          </li>
+  {% block js %}
+  <script type="text/javascript" src="{% static 'js/spinner.js' %}"> </script>
+  <script type="text/javascript" src="{% static 'js/validator.js' %}"> </script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+  <script src="{% static 'js/bootstrap.js' %}"></script>
 
-        <li><a href="{{"convert"|getScriptPrefix}}">Convert Format</a>
-            <ul>
-                <li><a href="http://mrbrain.cs.jhu.edu/data/ocp/perm/testdata/convert_testdata.zip">Sample Data</a></li>
-                <li><a href="{{"convert"|getScriptPrefix}}#programmatic">Programmatic</a></li>
-            </ul>
-        </li>
+  {# Google Analytics #}
+  <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
 
-        <li><a href="">Code Examples</a>
-          <ul>
-            <li><a href="https://github.com/openconnectome/MR-connectome/tree/master/MROCPdjango/examples">Programmatic Examples</a></li>
-            <li><a href="{{"igraph"|getScriptPrefix}}">igraph Examples</a></li>
-          </ul>
-        </li>
+    ga('create', 'UA-56427002-1', 'auto');
+    ga('send', 'pageview');
+    </script>
 
-        {# <li><a href="{{"accounts/projects"|getScriptPrefix}}">Projects</a></li> #}
-        <li><a href="{{"download"|getScriptPrefix}}">Downloads</a></li>
-        <li><a href="{{"contact"|getScriptPrefix}}">Contact</a></li>
+    {% endblock js %}
+  </head>
+<body class="black">
+  <!-- Primary Page Layout
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+    {% include "header.html" %}
+    {% include "navbar.html" %}
+    
+      {% comment %}
+      <!-- Tell me who is logged in -->
+      <div id="loginStatus">
+        {% if user.is_authenticated %}
+        <div id=li class="login"> Hi, {{ user.username | capfirst }} </div>
 
-      </ul>
+
+          <form action= {{"accounts/logout/"|getScriptPrefix}} method="post" enctype="multipart/form-data" name="logoutForm">
+            <input name = "logout"  type="submit" value="Log out" class="button" />
+         </form>
+
+        {% else %}
+
+          <input type="submit" class="button" onclick="location.href='{{"accounts/login"|getScriptPrefix}}'" value="Log in"/>
+
+        {% endif %}
       </div>
-    </div>
 
 
-        <!-- Tell me who is logged in -->
-        <div id="loginStatus" class="container">
-          {% if user.is_authenticated %}
-          <div id=li class=login> Hi, {{ user.username | capfirst }} </div>
+
+      <div id="maint" class="errormsg">
+        <p>
+          Note: The website will be taken down on Day Month Year 11.59pm for scheduled maintenance.<br/>
+          We apologize for any inconvenience caused in advance.
+        </p>
+      </div>
+      {% endcomment %}
+
+      <h1><b> {% block bigheading %}{% endblock bigheading %}</b></h1>
+      <h2>{% block medheading %}{% endblock medheading %}</h2>
 
 
-	    <form action= {{"accounts/logout/"|getScriptPrefix}} method="post" enctype="multipart/form-data" name="logoutForm">
-	      <input name = "logout"  type="submit" value="Log out" class="button" />
-   	   </form>
-
-          {% else %}
-
-	    <input type="submit" class="button" onclick="location.href='{{"accounts/login"|getScriptPrefix}}'" value="Log in"/>
-
-	  {% endif %}
+      {% block content %}
+        <div class="black">
+        <!-- Programmatic instructions -->
+        {% block programmatic %}
+        {% endblock programmatic %}
         </div>
-
-        {% comment %}
-        <div id="maint" class="errormsg">
-          <p>
-            Note: The website will be taken down on Day Month Year 11.59pm for scheduled maintenance.<br/> 
-            We apologize for any inconvenience caused in advance.
-          </p>
-        </div>
-        {% endcomment %}
-
-        <h1><b> {% block bigheading %}{% endblock bigheading %}</b></h1>
-        <h2>{% block medheading %}{% endblock medheading %}</h2>
-
-
-        {% block content %}
-          <!-- Programmatic instructions -->
-          {% block programmatic %}
-          {% endblock programmatic %}
-        {% endblock content%}
-
-
-        {% block footer %}
-          <div class="footer">
-              Property of the Johns Hopkins University (HSSL) | All rights reserved &copy; {% now "YEAR_MONTH_FORMAT" %}
-         </div>
-        {% endblock footer %}
-	{% block author %}
-         {# Disa Mhembere #}
-	{% endblock author%}
-
-      </body>
+      {% endblock content%}
+<!-- End Document
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+</body>
 </html>

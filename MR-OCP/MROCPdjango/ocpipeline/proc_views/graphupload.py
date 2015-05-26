@@ -35,6 +35,7 @@ from ocpipeline.utils.util import makeDirIfNone, writeBodyToDisk, saveFileToDisk
 from ocpipeline.utils.util import sendJobBeginEmail
 from ocpipeline.procs.inv_compute import invariant_compute
 from ocpipeline.utils.zipper import unzip 
+from ocpipeline.procs.run_invariants import run_invariants
 
 def graphLoadInv(request, webargs=None):
   ''' Form '''

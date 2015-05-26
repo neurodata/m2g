@@ -31,22 +31,21 @@ framework.
 
 """
 import os
-
-os.sys.path += [  os.path.abspath(os.path.join(os.path.dirname(__file__), ".." ))]
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "ocpipeline.settings")
-os.environ['HOME'] = "/tmp"
-
-
+import sys
 
 # This application object is used by any WSGI server configured to use this
 # file. This includes Django's development server, if the WSGI_APPLICATION
 # setting points here.
 from django.core.wsgi import get_wsgi_application
-application = get_wsgi_application()
 
-# Apply WSGI middleware here.
-# from helloworld.wsgi import HelloWorldApplication
-# application = HelloWorldApplication(application)
+os.sys.path += [ os.path.abspath(os.path.join(os.path.dirname(__file__), ".." )),  os.path.abspath(os.path.join(os.path.dirname(__file__), "../../..")) ]
+os.environ["DJANGO_SETTINGS_MODULE"] = "ocpipeline.settings"
+os.environ["HOME"] = "/tmp"
 
-# Http add on
-#os.environ['HTTPS'] = "on" # DM 03/24/2013
+
+env_variables_to_pass = ["M2G_HOME"]
+def application(environ, start_response):
+  # pass the WSGI environment variables on through to os.environ
+  for var in env_variables_to_pass:
+      os.environ[var] = environ.get(var, '')
+  return get_wsgi_application()(environ, start_response)

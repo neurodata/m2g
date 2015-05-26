@@ -53,7 +53,7 @@
     </form>
 
     <div style="position:absolute; left:153px; top: 212px;">
-      <img id="loadingImage" src="{{STATIC_URL}}images/loading.gif" border="0" alt="loading" style="visibility:hidden;opacity:0.5"/>
+      <img id="loadingImage" src="{{STATIC_URL}}img/loading.gif" border="0" alt="loading" style="visibility:hidden;opacity:0.5"/>
     </div>
 
     {% block programmatic %}
@@ -61,8 +61,8 @@
       <h2> File conversions may also be done programmatically</h2>
       <p>
       The use is similar to building a graph programmatically. The base url is <pre>http://mrbrain.cs.jhu.edu/graph-services/convert/</pre>
-      <a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjango/examples/convert.py" target="blank">Single</a> is a
-      conversion example  available in the <a href="https://github.com/openconnectome/MR-connectome/tree/master/MROCPdjango/examples" target="blank">examples</a> directory. <br/>
+      <a href="https://github.com/openconnectome/m2g/blob/master/MR-OCP/MROCPdjango/examples/convert.py" target="blank">Single</a> is a
+      conversion example available in the <a href="https://github.com/openconnectome/m2g/blob/master/MR-OCP/MROCPdjango/examples" target="blank">examples</a> directory. <br/>
       </p>
 
     <div id="single_prog">
@@ -80,7 +80,7 @@
     <div id="multi_prog">
       <h3> Multiple file conversion</h3>
         <p>
-        <a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjango/examples/convert.py" target="blank">The same example</a> script also converts a zipped file containing graphs <b><font color='#2373ff'>(NOT a directory/folder)</font></b> of a single type.
+        <a href="https://github.com/openconnectome/m2g/blob/master/MR-OCP/MROCPdjango/examples/convert.py" target="blank">The same example</a> script also converts a zipped file containing graphs <b><font color='#2373ff'>(NOT a directory/folder)</font></b> of a single type.
         It's use is idential in function to the <a href="#single_prog">single case</a> with the exception that is expects a zipped file as input for <code>YOUR_GRAPH_FILE_NAME</code>.
         </p>
       </div>

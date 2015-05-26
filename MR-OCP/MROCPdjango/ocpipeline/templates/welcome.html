@@ -21,16 +21,11 @@
     Welcome | MROCP
   {% endblock title %}
 
-  {% block bigheading %}<br/> <center>Welcome to the Magnetic Resonance One-Click Pipeline (MROCP) for Connectomes [BETA]</center> {% endblock bigheading %}
+  {% block bigheading %}<br/> <center>Open Connectome Magnetic Resonance [BETA]</center> {% endblock bigheading %}
 
   {% block content %}
     <p> Welcome! This is an open source project that provides Web services to build and perform scientifically
-	interesting computations on <a href="http://en.wikipedia.org/wiki/Connectome" target="blank">Connectome</a> and general graphs.
-	<br/>
-	Services here can either be accessed programmatically or via web forms.
-
-  <a href="https://github.com/openconnectome/MR-connectome/tree/stand-alone" target="blank"> Click here </a> to obtain a recent version of the code for the
-    <b>Stand-alone Package</b> that builds Connectome graphs and computes invariants.
+	interesting computations on <a href="http://en.wikipedia.org/wiki/Connectome" target="blank">Connectome</a> and general graphs. Services here can either be accessed programmatically or via web forms.
     </p>
 
     <div id="Form_use_options">
@@ -69,10 +64,10 @@
                     <h3>Upload derivatives to build a graph</h3>
                     This service's base url is <pre>http://mrbrain.cs.jhu.edu/graph-services/upload/</pre>
 
-                    A single subject graph build example can be found here <a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjango/examples/uploadsubj.py"
+                    A single subject graph build example can be found here <a href="https://github.com/openconnectome/m2g/blob/master/MR-OCP/MROCPdjango/examples/uploadsubj.py"
                     target="blank"> uploadsubj.py</a>.<br/>
 
-                    A <a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjango/examples/uploadMultiSubj.py" target="blank">Multiple subject example</a>
+                    A <a href="https://github.com/openconnectome/m2g/blob/master/MR-OCP/MROCPdjango/examples/upload_multi.py">Multiple subject example</a>
                     is also provided for batch uploading and processing of multiple scans. <br/>
 
                     Go to the <a href="http://mrbrain.cs.jhu.edu/graph-services/buildgraph#programmatic">graph building</a> page for more detailed instructions on programmatic use and example use cases.
@@ -81,7 +76,7 @@
                 <li>
                     <h3> Compute Invariants of built graphs </h3>
                     <p> This can be accessed using the base url <pre>http://mrbrain.cs.jhu.edu/graph-services/graphupload/</pre>
-                    An example of usage can be found <a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjango/examples/computeInvariants.py" target="blank">here</a>.
+                    An example of usage can be found <a href="https://github.com/openconnectome/m2g/blob/master/MR-OCP/MROCPdjango/examples/compute.py" target="blank">here</a>.
                     <br/>
 
                     Go to the <a href="http://mrbrain.cs.jhu.edu/graph-services/graphupload/#programmatic">compute invariants</a> page for more detailed instructions on programmatic use and example use cases.
@@ -92,9 +87,9 @@
                 <li>
                     <h3> Convert data file formats</h3>
                     This can be accessed via the base url <pre>http://mrbrain.cs.jhu.edu/graph-services/convert/</pre>
-                    <a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjango/examples/singleConvert.py" target="blank">Single</a> and
-                    <a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjango/examples/multiConvert.py" target="blank">batch</a>
-                    conversion examples are available in our examples repository. <br/>
+                    <a href="https://github.com/openconnectome/m2g/blob/master/MR-OCP/MROCPdjango/examples/convert.py" target="blank">Single and batch</a>
+                    jobs are possible using this scripts.
+                    Conversion examples are available in our examples repository. <br/>
 
                     Go to the <a href="http://mrbrain.cs.jhu.edu/graph-services/convert/#programmatic">convert file format</a> page for more detailed instructions on programmatic use and example use cases.
                 </li>
