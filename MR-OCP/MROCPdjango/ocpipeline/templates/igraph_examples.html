@@ -35,38 +35,39 @@
 
     To load the graph into R:
 
-    
-    <pre>
-    require<span style='color:#808030; '>(</span>igraph<span style='color:#808030; '>)</span>
-    graph <span style='color:#808030; '>&lt;</span><span style='color:#808030; '>-</span> read<span style='color:#808030; '>.</span>graph<span style='color:#808030; '>(</span><span style='color:#800000; '>"</span><span style='color:#0000e6; '>path_of_graph.graphml</span><span style='color:#800000; '>"</span><span style='color:#808030; '>,</span> format<span style='color:#808030; '>=</span><span style='color:#800000; '>"</span><span style='color:#0000e6; '>graphml</span><span style='color:#800000; '>"</span><span style='color:#808030; '>)</span>
+    <pre style='color:#d1d1d1;background:#000000;'>
+      require<span style='color:#d2cd86; '>(</span>igraph<span style='color:#d2cd86; '>)</span>
+      graph <span style='color:#00dddd; '>&lt;</span><span style='color:#00dddd; '>-</span> read<span style='color:#d2cd86; '>.</span>graph<span style='color:#d2cd86; '>(</span><span style='color:#00c4c4; '>"path_of_graph.graphml"</span><span style='color:#d2cd86; '>,</span> format<span style='color:#d2cd86; '>=</span><span style='color:#00c4c4; '>"graphml"</span><span style='color:#d2cd86; '>)</span>
     </pre>
 
+
     To load the graph into Python:
-    <pre>
-    <span style='color:#800000; font-weight:bold; '>import</span> igraph
-    g <span style='color:#808030; '>=</span> igraph<span style='color:#808030; '>.</span>read<span style='color:#808030; '>(</span><span style='color:#800000; '>"</span><span style='color:#0000e6; '>path_of_graph.graphml</span><span style='color:#800000; '>"</span><span style='color:#808030; '>,</span> format<span style='color:#808030; '>=</span><span style='color:#800000; '>"</span><span style='color:#0000e6; '>graphml</span><span style='color:#800000; '>"</span><span style='color:#808030; '>)</span>
+
+    <pre style='color:#d1d1d1;background:#000000;'>
+    <span style='color:#e66170; font-weight:bold; '>import</span> igraph
+    g <span style='color:#d2cd86; '>=</span> igraph<span style='color:#d2cd86; '>.</span>read<span style='color:#d2cd86; '>(</span><span style='color:#00c4c4; '>"path_of_graph.graphml"</span><span style='color:#d2cd86; '>,</span> format<span style='color:#d2cd86; '>=</span><span style='color:#00c4c4; '>"graphml"</span><span style='color:#d2cd86; '>)</span>
     </pre>
 
     To load a graph using C:
-    <pre>
-    <span style='color:#004a43; '>#</span><span style='color:#004a43; '>include </span><span style='color:#800000; '>&lt;</span><span style='color:#40015a; '>igraph.h</span><span style='color:#800000; '>></span>
-    <span style='color:#004a43; '>#</span><span style='color:#004a43; '>include </span><span style='color:#800000; '>&lt;</span><span style='color:#40015a; '>stdio.h</span><span style='color:#800000; '>></span>
 
-    <span style='color:#800000; font-weight:bold; '>int</span> <span style='color:#400000; '>main</span><span style='color:#808030; '>(</span><span style='color:#800000; font-weight:bold; '>int</span> argc<span style='color:#808030; '>,</span> <span style='color:#800000; font-weight:bold; '>char</span> <span style='color:#808030; '>*</span><span style='color:#808030; '>*</span>argv<span style='color:#808030; '>)</span> <span style='color:#800080; '>{</span>
-      igraph_t g<span style='color:#800080; '>;</span>
-      <span style='color:#603000; '>FILE</span> <span style='color:#808030; '>*</span>ifile<span style='color:#808030; '>,</span> <span style='color:#808030; '>*</span>ofile<span style='color:#800080; '>;</span>
+    <pre style='color:#d1d1d1;background:#000000;'>
+      <span style='color:#9999a9; '>#include &lt;igraph.h></span>
+      <span style='color:#9999a9; '>#include &lt;stdio.h></span>
 
-      ifile<span style='color:#808030; '>=</span><span style='color:#603000; '>fopen</span><span style='color:#808030; '>(</span><span style='color:#800000; '>"</span><span style='color:#0000e6; '>path_of_graph.graphml</span><span style='color:#800000; '>"</span><span style='color:#808030; '>,</span> <span style='color:#800000; '>"</span><span style='color:#0000e6; '>r</span><span style='color:#800000; '>"</span><span style='color:#808030; '>)</span><span style='color:#800080; '>;
+      <span style='color:#e66170; font-weight:bold; '>int</span> main<span style='color:#d2cd86; '>(</span><span style='color:#e66170; font-weight:bold; '>int</span> argc<span style='color:#d2cd86; '>,</span> char <span style='color:#00dddd; '>**</span>argv<span style='color:#d2cd86; '>)</span> <span style='color:#b060b0; '>{</span>
+        igraph_t g<span style='color:#d2cd86; '>;</span>
+        <span style='color:#e66170; font-weight:bold; '>FILE</span> <span style='color:#00dddd; '>*</span>ifile<span style='color:#d2cd86; '>,</span> <span style='color:#00dddd; '>*</span>ofile<span style='color:#d2cd86; '>;</span>
 
-      igraph_read_graph_graphml<span style='color:#808030; '>(</span><span style='color:#808030; '>&amp;</span>g<span style='color:#808030; '>,</span> ifile<span style='color:#808030; '>,</span> <span style='color:#008c00; '>0</span><span style='color:#808030; '>)</span>
-      <span style='color:#696969; '>// Do something with the graph. see </span><span style='color:#5555dd; '>http://igraph.org/c/doc/igraph-tutorial.html</span>
-      <span style='color:#603000; '>fclose</span><span style='color:#808030; '>(</span>ifile<span style='color:#808030; '>)</span><span style='color:#800080; '>;</span>
-      igraph_destroy<span style='color:#808030; '>(</span><span style='color:#808030; '>&amp;</span>g<span style='color:#808030; '>)</span>
-      <span style='color:#800000; font-weight:bold; '>return</span> <span style='color:#008c00; '>0</span><span style='color:#800080; '>;</span>
-    <span style='color:#800080; '>}</span>
+        ifile<span style='color:#d2cd86; '>=</span>fopen<span style='color:#d2cd86; '>(</span><span style='color:#00c4c4; '>"path_of_graph.graphml"</span><span style='color:#d2cd86; '>,</span> <span style='color:#00c4c4; '>"r"</span><span style='color:#d2cd86; '>)</span><span style='color:#d2cd86; '>;</span>
+
+        igraph_read_graph_graphml<span style='color:#d2cd86; '>(</span><span style='color:#00dddd; '>&amp;</span>g<span style='color:#d2cd86; '>,</span> ifile<span style='color:#d2cd86; '>,</span> <span style='color:#00a800; '>0</span><span style='color:#d2cd86; '>)</span>
+        <span style='color:#00dddd; '>//</span> Do something <span style='color:#e66170; font-weight:bold; '>with</span> the graph<span style='color:#d2cd86; '>.</span> see http<span style='color:#d2cd86; '>:</span><span style='color:#00dddd; '>//</span>igraph<span style='color:#d2cd86; '>.</span>org<span style='color:#00dddd; '>/</span>c<span style='color:#00dddd; '>/</span>doc<span style='color:#00dddd; '>/</span>igraph<span style='color:#00dddd; '>-</span>tutorial<span style='color:#d2cd86; '>.</span>html
+        fclose<span style='color:#d2cd86; '>(</span>ifile<span style='color:#d2cd86; '>)</span><span style='color:#d2cd86; '>;</span>
+        igraph_destroy<span style='color:#d2cd86; '>(</span><span style='color:#00dddd; '>&amp;</span>g<span style='color:#d2cd86; '>)</span>
+        <span style='color:#e66170; font-weight:bold; '>return</span> <span style='color:#00a800; '>0</span><span style='color:#d2cd86; '>;</span>
+      <span style='color:#b060b0; '>}</span>
     </pre>
-
-  </div>
+   </div>
 
   {% endblock content%}
   
