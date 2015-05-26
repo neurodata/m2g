@@ -34,21 +34,6 @@ from packages.utils.setup import get_files
 # Class functions documented in fibergraph.py
 
 class FiberGraph(_FiberGraph):
-  def __init__(self, matrixdim, rois):
-    """
-     Constructor: number of nodes in the graph
-       convert it to a maximum element
-    """
-    # Regions of interest
-    self.rois = rois
-    # Edges
-    self.edge_dict = defaultdict(int) # Will have key=(v1,v2), value=weight
-
-    # Get the maxval from the number of rois
-    self._maxval = int(self.rois.data.max())+1 
-
-    # list of list matrix for one by one insertion
-    self.spcscmat = igraph.Graph(n=self._maxval, directed=False) # make new igraph with adjacency matrix to be (maxval X maxval)
 
   def complete(self, add_centroids=True, graph_attrs={}, atlas={}):
     super(FiberGraph, self).complete()
@@ -61,11 +46,11 @@ class FiberGraph(_FiberGraph):
     print "Attempting to add atlas labels ..."
     if atlas_regions is not None:
       f_regions = open(atlas_regions, "rb")
-      self.spcscmat.vs["region_name"] = f_regions.read().splitlines()
+      self.graph.vs["region_name"] = f_regions.read().splitlines()
     
     if add_centroids:
       print "Adding centroids ..."
-      cent_loc = os.path.join("../../", "data", "Centroids", "centroids.mat")
+      cent_loc = os.path.join(os.environ['M2G_HOME'], "data", "Centroids", "centroids.mat")
       if not os.path.exists(cent_loc):
         get_files()
 
@@ -75,7 +60,7 @@ class FiberGraph(_FiberGraph):
       for row in cent_mat:
         centroids.append(str(list(row)))
 
-      self.spcscmat.vs["centroid"] = centroids
+      self.graph.vs["centroid"] = centroids
     
     for key in graph_attrs.keys():
-      self.spcscmat[key] = graph_attrs[key]
+      self.graph[key] = graph_attrs[key]

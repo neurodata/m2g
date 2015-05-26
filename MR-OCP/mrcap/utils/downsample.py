@@ -31,50 +31,69 @@ import nibabel as nib
 import zipfile
 sys.path += [os.path.abspath("../")]
 from zindex import MortonXYZ
+import numpy as np
+import cPickle as pickle
 
-def downsample(g, factor=0, atlas=None):
+DEBUG = False
+def downsample(g, factor=-1, ds_atlas=None, ignore_zero=True):
   """
   Downsample a graph by collapsing regions using an dynamically
   generated downsampled atlas. Rebuilding the graph takes O(m).
 
   @param g: A full sized **big graph**
   @param factor: The downsampling factor
-  @param atlas: A prebuilt nifti atlas with which to downsample
+  @param ds_atlas: A prebuilt downsampled nifti atlas with which to downsample
+  @param ignore_zero: Should we ignore the zeroth label as being outside the brain?
   """
 
   start = time()
   edge_dict = defaultdict(int) # key=(v1, v2), value=weight
 
-  if factor:
-    print "Generating atlas ..." # TODO: Cythonize
-    atlas = Atlas(create_atlas.create(start=factor)) # Dynamically create atlas
-  else:
-    atlas = Atlas(atlas)
+  if factor >= 0:
+    print "Generating downsampled atlas ..." # TODO: Cythonize
+    ds_atlas = create_atlas.create(start=factor) # Create ds atlas and an atlas map for the original atlas
   
-  vertex = {}
+  ds_atlas = ds_atlas.get_data() # don't care about other atlas data
+
+  spatial_map = [0]*(ds_atlas.max().take(0) + 1) 
   # This takes O(m)
-  for idx, e in enumerate (g.es):
+  for e in g.es:
+    src_spatial_id = g.vs[e.source]["spatial_id"]
+    tgt_spatial_id = g.vs[e.target]["spatial_id"]
 
-    # Uncomment me for some debug help
-    """
-    edge_dict[(atlas.get_region_num(e.source), atlas.get_region_num(e.target))] += e["weight"]
-    s = MortonXYZ(e.source)
-    t = MortonXYZ(e.target)
-    print "Old Edge: %d (%d,%d,%d) => %d (%d,%d,%d), New Edge: %d => %d" % (e.source, 
-        s[0], s[1], s[2], e.target, t[0], t[1], t[2], atlas.get_region_num(e.source), 
-        atlas.get_region_num(e.target))
+    src_x, src_y, src_z = MortonXYZ(src_spatial_id)
+    tgt_x, tgt_y, tgt_z = MortonXYZ(tgt_spatial_id)
 
-    if idx % 100 == 0 and idx != 0: print
-    if idx % 1000 == 0 and idx != 0: import pdb; pdb.set_trace()
-    """
+    src = ds_atlas[src_x, src_y, src_z]
+    tgt = ds_atlas[tgt_x, tgt_y, tgt_z]
 
+    # FIXME: We will skip all region zeros for all atlases which is not really true!
+    if ignore_zero:
+      if src and tgt:
+        if not spatial_map[src]: spatial_map[src] = src_spatial_id 
+        if not spatial_map[tgt]: spatial_map[tgt] = tgt_spatial_id 
+
+        edge_dict[(src, tgt)] += e["weight"]
+    else:
+      if not spatial_map[src]: spatial_map[src] = src_spatial_id 
+      if not spatial_map[tgt]: spatial_map[tgt] = tgt_spatial_id 
+
+      edge_dict[(src, tgt)] += e["weight"]
+
+  #import pdb; pdb.set_trace()
   del g # free me
-  new_graph = igraph.Graph(n=atlas.max(), directed=False)
+  new_graph = igraph.Graph(n=len(spatial_map), directed=False) # len spatial_map is the # of vertices
+  new_graph.vs["spatial_id"] = spatial_map
+  
   print "Adding edges to graph ..."
   new_graph += edge_dict.keys()
 
   print "Adding edge weight to graph ..."
   new_graph.es["weight"] = edge_dict.values()
+
+  print "Deleting zero-degree nodes..."
+  zero_deg_nodes = np.where(np.array(new_graph.degree()) == 0 )[0]
+  new_graph.delete_vertices(zero_deg_nodes)
 
   print "Completed building graph in %.3f sec ... " % (time() - start)
   print new_graph.summary()
@@ -84,19 +103,19 @@ def main():
   parser = argparse.ArgumentParser(description="")
   parser.add_argument("infn", action="store", help="Input file name")
   parser.add_argument("-f", "--factor", action="store", type=int, help="Downsampling factor")
-  parser.add_argument("-a", "--atlas", action="store", help="Downsampling atlas file name")
+  parser.add_argument("-a", "--ds_atlas", action="store", help="Pre-Downsampled atlas file name")
   parser.add_argument("outfn", action="store", help="Output file name")
   parser.add_argument("--informat", "-i", action="store", default="graphml", help="Input format of the graph")
   parser.add_argument("--outformat", "-o", action="store", default="graphml", help="Output format of the graph")
 
   result = parser.parse_args()
-  
-  g = igraph_io.read_arbitrary(result.infn, informat=result.informat)
 
-  if result.factor < 0:
+  if result.factor >= 0:
+    g = igraph_io.read_arbitrary(result.infn, informat=result.informat)
     new_graph = downsample(g, factor=result.factor)
-  elif result.atlas:
-    new_graph = downsample(g, atlas=nib.load(result.atlas))
+  elif result.ds_atlas:
+    g = igraph_io.read_arbitrary(result.infn, informat=result.informat)
+    new_graph = downsample(g, ds_atlas=nib.load(result.ds_atlas))
   else:
     sys.stderr.write("[ERROR]: either -f or -a flag must be specified\n")
     exit(-1)

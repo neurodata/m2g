@@ -27,15 +27,14 @@ Download Graph | MROCP
 {% endblock title %}
 
 {% block medheading %}
-Download biologically derived graphs
-<img src="{% static 'images/graph_sm.png' %}"alt="small graph" align="middle"  height="80" width="80"/>
+Biologically derived graphs
 {% endblock medheading %}
 
 {% block content %}
 
-<script type="text/javascript" src="{% static 'scripts/fader.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/fader.js' %}"></script>
 
-<script type="text/javascript" src="{% static 'scripts/checkbox.js' %}"> </script>
+<script type="text/javascript" src="{% static 'js/checkbox.js' %}"> </script>
 
 <p>Thanks to all who provided the raw data from which we derived these graphs. Every graph
 is annotated with a <code> source</code> attribute that denotes its origin.<br/>
@@ -104,7 +103,7 @@ Examples of how to load graphs using igraph can be found <a href="{{"igraph"|get
 </div>
 
     <div style="position:absolute; left:153px; top: 1000px;">
-      <img id="loadingImage" src="{{STATIC_URL}}images/loading.gif" border="0" alt="loading" style="visibility:hidden;opacity:0.5"/>
+      <img id="loadingImage" src="{{STATIC_URL}}img/loading.gif" border="0" alt="loading" style="visibility:hidden;opacity:0.5"/>
     </div>
 
 {%  elif query_result %}

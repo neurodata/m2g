@@ -27,10 +27,11 @@
 FileField stores files e.g. to media/documents based MEDIA_ROOT
 Generally, each model maps to a single database table.
 '''
+
 from django.db import models
 from django.contrib import admin
+from django.conf import settings
 from django.contrib.auth.models import User
-import os
 
 class BuildGraphModel(models.Model):
   '''
@@ -62,19 +63,15 @@ class OwnedProjects(models.Model):
   integrity constraints & sharing
   '''
   project_name = models.CharField(max_length=255)
-  owner = models.ForeignKey(User, 'username') # Many-to-one .Many here, other in auth_user
+  owner = models.ForeignKey(settings.AUTH_USER_MODEL) # Many-to-one .Many here, other in auth_user
   is_private = models.BooleanField(null=False)
   owner_group = models.CharField(max_length=255, null=True) # Will reference other table soon
   # Really should be --> owner_groups = models.ForeignKey(to=User, to_field='groups')
 
 class SharingTokens(models.Model):
-  '''
-  Class to allow you to create a project sharing token
-  that allows a user to let others see a private project.
-  '''
   token = models.CharField(max_length=64)
   issued_by = models.ForeignKey(User, 'username') # Many-to-one . Many here, other in auth_user
-  project_name = models.ManyToManyRel(to=BuildGraphModel, related_name='project_name')
+  project_name = models.ManyToManyField(to=BuildGraphModel, related_name='st_project_name')
   issue_date = models.DateTimeField(auto_now_add=True)
   expire_date = models.DateField(null=True)
 

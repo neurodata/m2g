@@ -39,6 +39,7 @@ __files__ = {
   "Atlas":[
   "desikan_in_mni_space/MNI152_T1_1mm_brain_incremented.nii",
   "desikan_in_mni_space/MNI152_T1_1mm_desikan_adjusted.nii", 
+  "desikan_in_mni_space/MNI152_T1_1mm_desikan_adjusted.txt", 
   "desikan_in_mni_space/MNI152_T1_1mm_brain_mask.nii",
   "desikan_in_mni_space/MNI152_T1_1mm_brain_labels.nii", 
   "desikan_in_mni_space/MNI152_T1_1mm_brain.nii",
@@ -51,7 +52,12 @@ __files__ = {
 def get_local_fn(fn, _type):
   return os.path.join(os.path.join(__data_dir__, _type, os.path.basename(fn)))
 
-def get_files():
+def get_files(force):
+  """
+  Get static files from the web
+
+  @param force: Even if the file exists -- fetch a new copy
+  """
   atlas_dir = os.path.join(__data_dir__, "Atlas")
   centroid_dir = os.path.join(__data_dir__, "Centroids")
 
@@ -62,7 +68,7 @@ def get_files():
 
   for k in __files__.keys():
     for v in __files__[k]:
-      if not os.path.exists(get_local_fn(v, k)):
+      if not os.path.exists(get_local_fn(v, k)) or force:
         wget(get_local_fn(v, k), weburl+k+"/"+v)
 
 def compile_cython():
@@ -71,13 +77,18 @@ def compile_cython():
   assert not ret, "Failed to run setup.py in 'mrcap' directory. Perhaps running this script with 'sudo' will help"
 
 def main():
-  parser = argparse.ArgumentParser(description="Gets data files that graph gen and verification code needs. Also can build zindex")
+  """
+  Fetch static data from the web and / compile zindex cython module
+  """
+  parser = argparse.ArgumentParser(description="Gets data files that graph gen and \
+      verification code needs. Also can build zindex")
   parser.add_argument("-c", "--compile", action="store_true", help="Compile the zindex cython module")
+  parser.add_argument("-f", "--force", action="store_true", help="Force the download of data even if we have it")
   result = parser.parse_args()
 
-  get_files()
+  get_files(result.force)
   if result.compile:
-    compile_cython
+    compile_cython()
 
 if __name__ == "__main__":
   main()

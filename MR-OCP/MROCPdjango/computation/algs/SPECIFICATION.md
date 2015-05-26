@@ -13,7 +13,7 @@ Simply (i)`fork`/`clone`this repository , then (ii) create a folder within this 
 
 No other formats are permitted.
 
-An example of an algorithm written in `C++` is provided in the [./example_alg](https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjango/computation/algs/example_alg/example.cpp) directory. Please see this example if confused about any of the instructioins provided below.
+An example of an algorithm written in `C++` is provided in the [./example_alg](https://github.com/openconnectome/m2g/blob/master/MR-OCP/MROCPdjango/computation/algs/example_alg/example.cpp) directory. Please see this example if confused about any of the instructioins provided below.
 
 Code Spec
 =========

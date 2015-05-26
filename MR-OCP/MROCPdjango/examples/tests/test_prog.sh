@@ -23,7 +23,7 @@ set -e
 
 DATA_DIR=./data
 EXAMPLE_DIR=..
-DJANGO_TOP=~/MR-connectome/MR-OCP/MROCPdjango
+DJANGO_TOP=~/m2g/MR-OCP/MROCPdjango
 
 echo "Starting django dev server ..."
 python $DJANGO_TOP/manage.py runserver 8080 &
@@ -38,11 +38,11 @@ fi
 echo "Running programmatic compute ..."
 python $EXAMPLE_DIR/compute.py http://localhost:8080/graphupload \
   cc,tri,deg,mad,eig,ss1 $DATA_DIR/test_graph.graphml graphml
-printf "\nSUCCESS!! Passed compute Test!!\n"
+printf "\n Completed compute Test. If failed -- html source will print\n"
 
 echo "Converting graph programmatically ..."
 python $EXAMPLE_DIR/convert.py http://localhost:8080/convert/graphml/ncol,edgelist,lgl,pajek,dot,gml,leda $DATA_DIR/test_graph.graphml -l
-printf "\nSUCCESS!! Passed compute Test!!\n"
+printf "\n Completed convert Test. If failed -- html source will print\n"
 
 echo "Building graph programmatically ..."
 python $EXAMPLE_DIR/uploadsubj.py http://localhost:8080/upload/testproj/testsite/testsubj/testsesss/testscanID/s /data/MR.new/fiber/M87102806_fiber.dat 
