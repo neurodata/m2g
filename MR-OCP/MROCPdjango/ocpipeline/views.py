@@ -20,7 +20,7 @@
 @organization: Johns Hopkins University
 @contact: disa@jhu.edu
 
-@summary: Module to hold the views of a Django one-click MR-connectome pipeline
+@summary: Module to hold the views of a Django one-click m2g pipeline
 """
 import os, sys, re
 from glob import glob

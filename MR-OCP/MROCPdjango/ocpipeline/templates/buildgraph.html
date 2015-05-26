@@ -28,10 +28,9 @@
 
   {% block content %}
 
-  <script type="text/javascript" src="{% static 'scripts/fader.js' %}"> </script>
-  <script type="text/javascript" src="{% static 'scripts/radioselect.js' %}"> </script>
-  <script type="text/javascript" src="{% static 'scripts/validator.js' %}"> </script>
-
+  <script type="text/javascript" src="{% static 'js/fader.js' %}"> </script>
+  <script type="text/javascript" src="{% static 'js/radioselect.js' %}"> </script>
+  <script type="text/javascript" src="{% static 'js/validator.js' %}"> </script> 
   <script type="text/javascript">
   function verifyEmail(form) {
     if (checkBigGraphSelected())
@@ -50,12 +49,14 @@
 </script>
 
   <p>Please complete the form below, upload data derivatives files and optionally select any invariants to be computed.
-  <b><font color='#ff0000'>{{error_msg}}</font></b> <br/>
+  <div style="color:#ff0000; font-weight:bold"> 
+    {{error_msg}}
+  </div> 
 
   You must supply an Email address for big graph processing so as to receive the job completion 
   email with result url.<br/>
-  The format of the <i>fiber</i> file is <a href="https://www.mristudio.org">MRI Studio</a> and 
-  the format of the atlas file must be <a href="http://nifti.nimh.nih.gov/nifti-1">NIFTI</a>.
+  The format of the <i>fiber</i> file is <a href="https://www.mristudio.org" target="blank">MRI Studio</a> and 
+  the format of the atlas file must be <a href="http://nifti.nimh.nih.gov/nifti-1" target="blank">NIFTI</a>.
   </p>
       <form action="" class="nostyle" method="post" enctype="multipart/form-data" name="loadForm" onsubmit="return (Validate(this,['dat','nii', '']) && verifyEmail());">
         {% csrf_token %}
@@ -65,7 +66,7 @@
       </form>
 
     <div style="position:absolute; left:153px; top: 600px;">
-      <img id="loadingImage" src="{{STATIC_URL}}images/loading.gif" border="0" alt="loading" style="visibility:hidden;opacity:0.5"/>
+      <img id="loadingImage" src="{{STATIC_URL}}img/loading.gif" border="0" alt="loading" style="visibility:hidden;opacity:0.5"/>
     </div>
 
     {% block programmatic %}
@@ -75,7 +76,7 @@
 
         <h3> Single graph </h3>
         <p>
-        The example <a href="https://github.com/openconnectome/MR-connectome/blob/master/MROCPdjango/examples/uploadsubj.py"
+        The example <a href="https://github.com/openconnectome/m2g/blob/master/MR-OCP/MROCPdjango/examples/uploadsubj.py"
         target="blank"> uploadsubj.py</a> can be used as follows from a terminal session:
         </p>
         
@@ -112,8 +113,7 @@ YOUR_FIBER.dat -a YOUR_ATLAS.nii -i cc,tri,ss1,mad,deg,eig</pre>
 
         <h3> Multiple graphs </h3>
         <p>
-          An example of a <a href="https://github.com/openconnectome/MR-connectome/blob/master/
-            MROCPdjango/examples/upload_multi.py" target="blank">Multiple subject</a> job
+          An example of a <a href="https://github.com/openconnectome/m2g/blob/master/MR-OCP/MROCPdjango/examples/upload_multi.py" target="blank">Multiple subject</a> job
           is also provided. This is as an example of how to process multiple jobs with a single
            programmatic call.<br/>
 
@@ -136,9 +136,7 @@ fiber_tract_dirctory -a YOUR_ATLAS -i cc,tri,ss1,mad,deg,eig</pre>
         <p>
           All fiber tract files will be treated as a single project with multiple scanIDs 
           derived from the file name. <br/>
-          <a href="https://github.com/openconnectome/MR-connectome/blob/master/
-            MROCPdjango/examples/upload_multi.py" target="blank">Download the file</a>
-          and help can be obtained by typing the following in a terminal/command line session: <br/>
+          Download the example script above and help can be obtained by typing the following in a terminal/command line session: <br/>
           <code>python upload_multi.py -h</code>. The same is true for the single scan example, 
           where: <code>python uploadsubj.py -h</code> gives help.
         </p>
@@ -152,7 +150,7 @@ fiber_tract_dirctory -a YOUR_ATLAS -i cc,tri,ss1,mad,deg,eig</pre>
               <li>It is also natively supported by the <a href="http://igraph.sourceforge.net/" 
                 target="blank">igraph</a> graph analysis framework in C, R and Python.</li>
               <li><b>NOTE: </b>Iterable data items are represented as 
-              <a href="http://en.wikipedia.org/wiki/JSON">JSON</a> encoded strings as an 
+              <a href="http://en.wikipedia.org/wiki/JSON" target="blank">JSON</a> encoded strings as an 
               extension to the graphML file format.</li>
             </ul>
 

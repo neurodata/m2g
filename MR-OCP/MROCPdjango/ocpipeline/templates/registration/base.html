@@ -20,14 +20,14 @@
 
 {% load static %}
 {% load getScriptPrefix %}
-<html lang="en">
+<html lang="en">,f
     <head>
       <!--meta data-->
       <meta property="og:title" content="connectome"/>
       <meta property="og:type" content="website"/>
       <meta property="og:site_name" content="mr connectome"/>
       <!-- Style sheet and logo image -->
-      <link  rel="shortcut icon" type="image/x-icon" href= "{% static 'images/favicon.ico' %}"/>
+      <link  rel="shortcut icon" type="image/x-icon" href= "{% static 'img/favicon.ico' %}"/>
       <link rel="stylesheet" type="text/css" href="{% static 'default.css' %}"/>
 
       <title>
@@ -60,7 +60,7 @@
 
   <body>
     <a href="http://openconnecto.me" target="blank">
-      <img src="{% static 'images/openconnectome_brain_logo.png' %}" border="0"/></a>
+      <img src="{% static 'img/openconnectome_brain_logo.png' %}" border="0"/></a>
 
     <div class="container">
       <div class="navigation">
@@ -86,7 +86,7 @@
             </ul>
         </li>
 
-        <li><a href="https://github.com/openconnectome/MR-connectome/tree/master/MROCPdjango/examples">Code Examples</a></li>
+        <li><a href="https://github.com/openconnectome/m2g/tree/master/MR-OCP/MROCPdjango/examples">Code Examples</a></li>
         <li><a href={{"accounts/projects"|getScriptPrefix}}>Projects</a></li>
         <li><a href={{"contact"|getScriptPrefix}}>Contact</a></li>
       </ul>

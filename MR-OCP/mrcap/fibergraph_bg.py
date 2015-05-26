@@ -16,84 +16,85 @@
 # Class holding big fibergraphs
 # @author Randal Burns, Disa Mhembere
 
-import math
 import os
 from collections import defaultdict
 
-import numpy as np
 import igraph
 import scipy.io as sio
+import numpy as np
 
 from mrcap.fiber import Fiber
 import mrcap.roi as roi
 from mrcap.fibergraph import _FiberGraph
 from mrcap.atlas import Atlas
-import zindex
+from zindex import XYZMorton
 from packages.utils.setup import get_files
 
 # Class functions documented in fibergraph.py
 
 class FiberGraph(_FiberGraph):
-  def __init__(self, matrixdim, rois, mask):
+  def __init__(self, matrixdim, rois, atlases={}):
+    super(FiberGraph, self).__init__(matrixdim, rois)
 
+    """
     # Regions of interest
     self.rois = rois
     self.edge_dict = defaultdict(int) # Will have key=(v1,v2), value=weight
 
-    # Brainmask
-#    self.mask = mask
-
-    # Round up to the nearest power of 2
-    xdim = int(math.pow(2,math.ceil(math.log(matrixdim[0],2))))
-    ydim = int(math.pow(2,math.ceil(math.log(matrixdim[1],2))))
-    zdim = int(math.pow(2,math.ceil(math.log(matrixdim[2],2))))
-
-    # Need the dimensions to be the same shape for zindex
-    xdim = ydim = zdim = max(xdim, ydim, zdim)
-
-    # largest value is -1 in each dimension, then plus one because range(10) is 0..9
-    self._maxval = zindex.XYZMorton([xdim-1,ydim-1,zdim-1]) + 1
-
     # ======================================================================== #
-    self.spcscmat = igraph.Graph(n=self._maxval, directed=False) # make new igraph with adjacency matrix to be (maxval X maxval)
+    # make new igraph with adjacency matrix to be (maxval X maxval)
+    self.graph = igraph.Graph(n=self.rois.data.max().take(0), directed=False)
+    """
+    
+    # Keep track of the original vertex ID = region ID before deletion deg zero vertices
+    print "Annotating vertices with spatial position .."
+    spatial_map = [0]*(self.graph.vcount()+1)
+    nnz = np.where(self.rois.data != 0)
+    for idx in xrange(nnz[0].shape[0]):
+      x,y,z = nnz[0][idx], nnz[1][idx], nnz[2][idx]
+      region_id = self.rois.data[x,y,z]
+      spatial_map[region_id] = XYZMorton([x,y,z]) # Use to get the spatial position of a vertex
+
+    self.graph.vs["spatial_id"] = spatial_map
+    
     self.edge_dict = defaultdict(int) # Will have key=(v1,v2), value=weight
     # ======================================================================== #
 
   def complete(self, add_centroids=True, graph_attrs={}, atlases={}):
     super(FiberGraph, self).complete()
-    print "Annotating vertices with spatial position .."
-    self.spcscmat.vs["position"] = range(self._maxval) # Use position for
     centroids_added = False
 
+    """
     print "Deleting zero-degree nodes..."
-    zero_deg_nodes = np.where( np.array(self.spcscmat.degree()) == 0 )[0]
-    self.spcscmat.delete_vertices(zero_deg_nodes)
+    zero_deg_nodes = np.where( np.array(self.graph.degree()) == 0 )[0]
+    self.graph.delete_vertices(zero_deg_nodes)
+    """
     
     for idx, atlas_name in enumerate(atlases.keys()):
-      self.spcscmat["Atlas_"+ os.path.splitext(os.path.basename(atlas_name))[0]+"_index"] = idx
+      self.graph["Atlas_"+ os.path.splitext(os.path.basename(atlas_name))[0]+"_index"] = idx
       print "Adding '%s' region numbers (and names) ..." % atlas_name
       atlas = Atlas(atlas_name, atlases[atlas_name])
-      region = atlas.get_all_mappings(self.spcscmat.vs["position"])
-      self.spcscmat.vs["atlas_%d_region_num" % idx] = region[0]
-
-      if region[1]: self.spcscmat.vs["atlas_%d_region_name" % idx] = region[1]
+      #region = atlas.get_all_mappings(self.graph.vs["position"])
+      #self.graph.vs["atlas_%d_region_num" % idx] = region[0]
+      #if region[1]: self.graph.vs["atlas_%d_region_name" % idx] = region[1]
     
       if add_centroids and (not centroids_added):
         if (atlas.data.max() == 70): #FIXME: Hard coded Desikan small dimensions
           centroids_added = True
           print "Adding centroids ..."
-          cent_loc = os.path.join("../../", "data", "Centroids", "centroids.mat")
+          
+          cent_loc = os.path.join(os.environ['M2G_HOME'], "data", "Centroids", "centroids.mat")
           if not os.path.exists(cent_loc):
             get_files()
 
           cent_mat = sio.loadmat(cent_loc)["centroids"]
 
-          keys = atlas.get_region_nums(self.spcscmat.vs["position"])
+          keys = atlas.get_region_nums(self.graph.vs["position"])
           centroids = []
           for key in keys:
             centroids.append(str(list(cent_mat[key-1]))) # -1 accounts for 1-based indexing
 
-          self.spcscmat.vs["centroid"] = centroids
+          self.graph.vs["centroid"] = centroids
 
     for key in graph_attrs.keys():
-      self.spcscmat[key] = graph_attrs[key]
+      self.graph[key] = graph_attrs[key]

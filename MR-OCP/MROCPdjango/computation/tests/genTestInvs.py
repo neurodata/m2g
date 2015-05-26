@@ -38,7 +38,7 @@ def testing(inv_dict):
 
   num_nodes = np.load(inv_dict["ver_fn"]).item()
 
-  benchdir = "/Users/disa/MR-connectome/MROCPdjango/computation/tests/bench" # TODO DM: Alter Dynamically
+  benchdir = "/Users/disa/m2g/MROCPdjango/computation/tests/bench" # TODO DM: Alter Dynamically
   testObj = unittesting.test(inv_dict["graph_fn"], inv_dict["save_dir"], num_nodes, inv_dict["ss1_fn"]\
       , inv_dict["deg_fn"], inv_dict["tri_fn"], inv_dict["cc_fn"], inv_dict["mad_fn"], benchdir) # Create unittest object
 

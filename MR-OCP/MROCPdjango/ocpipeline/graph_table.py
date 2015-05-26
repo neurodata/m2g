@@ -34,7 +34,7 @@ class GraphTable(tables.Table):
 
   class Meta:
     model = GraphDownloadModel
-    attrs = {"class" : "paleblue"} # Set table class in html to paleblue
+    attrs = {"class" : "dark"} # Set table class in html to paleblue
 
     # Specify which fields to display in table
     fields = ("selection", "url", "region", "numvertex", "numedge",
