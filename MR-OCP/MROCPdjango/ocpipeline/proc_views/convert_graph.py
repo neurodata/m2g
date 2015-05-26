@@ -34,7 +34,7 @@ from django.core.urlresolvers import get_script_prefix
 
 from ocpipeline.forms import ConvertForm
 from ocpipeline.utils.zipper import unzip
-from computation.utils.convertTo import convert_graph
+from computation.utils import convertTo
 from ocpipeline.utils.util import writeBodyToDisk
 from ocpipeline.procs.convert import convert
 
@@ -90,7 +90,7 @@ If you do not see an email in your <i>Inbox</i> check the <i>Spam</i> folder and
     err_msg = ""
     outfn = ""
     for fn in uploadedFiles:
-      outfn, err_msg = convert_graph(fn, inFormat,
+      outfn, err_msg = convertTo.convert_graph(fn, inFormat,
                         convertFileSaveLoc, *outFormat)
 
     dwnldLoc = "http://mrbrain.cs.jhu.edu" + convertFileSaveLoc.replace(' ','%20')
