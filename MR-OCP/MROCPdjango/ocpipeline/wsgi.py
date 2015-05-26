@@ -41,13 +41,11 @@ from django.core.wsgi import get_wsgi_application
 os.sys.path += [ os.path.abspath(os.path.join(os.path.dirname(__file__), ".." )),  os.path.abspath(os.path.join(os.path.dirname(__file__), "../../..")) ]
 os.environ["DJANGO_SETTINGS_MODULE"] = "ocpipeline.settings"
 os.environ["HOME"] = "/tmp"
-#os.environ.setdefault("DJANGO_SETTINGS_MODULE", "ocpipeline.settings")
 
-_application = get_wsgi_application()
 
-env_variables_to_pass = ['M2G_HOME']
+env_variables_to_pass = ["M2G_HOME"]
 def application(environ, start_response):
   # pass the WSGI environment variables on through to os.environ
   for var in env_variables_to_pass:
       os.environ[var] = environ.get(var, '')
-  return _application(environ, start_response)
+  return get_wsgi_application()(environ, start_response)
