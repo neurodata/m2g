@@ -81,7 +81,6 @@ class _FiberGraph(object):
 
     print "Deleting zero-degree nodes..."
     zero_deg_nodes = np.where( np.array(self.graph.degree()) == 0 )[0]
-    #import pdb; pdb.set_trace()
     self.graph.delete_vertices(zero_deg_nodes)
 
     print "Graph summary:"
