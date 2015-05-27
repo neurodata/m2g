@@ -55,11 +55,11 @@ def downsample(g, factor=-1, ds_atlas=None, ignore_zero=True):
   
   ds_atlas = ds_atlas.get_data() # don't care about other atlas data
 
-  spatial_map = [0]*(ds_atlas.max().take(0) + 1) 
+  spatial_map = [0]*(int(ds_atlas.max())+1) 
   # This takes O(m)
   for e in g.es:
-    src_spatial_id = g.vs[e.source]["spatial_id"]
-    tgt_spatial_id = g.vs[e.target]["spatial_id"]
+    src_spatial_id = long(g.vs[e.source]["spatial_id"])
+    tgt_spatial_id = long(g.vs[e.target]["spatial_id"])
 
     src_x, src_y, src_z = MortonXYZ(src_spatial_id)
     tgt_x, tgt_y, tgt_z = MortonXYZ(tgt_spatial_id)
@@ -69,14 +69,15 @@ def downsample(g, factor=-1, ds_atlas=None, ignore_zero=True):
 
     # FIXME: We will skip all region zeros for all atlases which is not really true!
     if ignore_zero:
-      if src and tgt:
-        if not spatial_map[src]: spatial_map[src] = src_spatial_id 
-        if not spatial_map[tgt]: spatial_map[tgt] = tgt_spatial_id 
+      if (src and tgt) and (src != tgt):
+        if not spatial_map[srsc]: spatial_map[src] = `src_spatial_id` 
+        if not spatial_map[tgt]: spatial_map[tgt] = `tgt_spatial_id` 
 
         edge_dict[(src, tgt)] += e["weight"]
     else:
-      if not spatial_map[src]: spatial_map[src] = src_spatial_id 
-      if not spatial_map[tgt]: spatial_map[tgt] = tgt_spatial_id 
+      print "Never should get here"
+      if not spatial_map[src]: spatial_map[src] = `src_spatial_id`
+      if not spatial_map[tgt]: spatial_map[tgt] = `tgt_spatial_id` 
 
       edge_dict[(src, tgt)] += e["weight"]
 
