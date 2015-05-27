@@ -29,13 +29,21 @@ Using Camino's implementation of the FACT algorithm, published by Mori et al. (2
 
 Camino's track documentation: http://cmic.cs.ucl.ac.uk/camino/index.php?n=Man.Track
 
-  Inputs
-      - Tensors: The Camino formatted file containing voxel diffusion tensor information.
-      - Brain mask: Binary mask of the brain which will be used to limiting tractography to brain-occupied regions of the image.
-      - Anisotropy threshold (0.2): Stopping threshold for fiber tractography.
-      - Curve threshold (70): Angular stopping threshold for fiber tractography.
-  Outputs
-      - Fibers: Camino formatted fiber streamlines
+**Inputs**
+
+		Tensors: [BDouble]
+				- The Camino formatted file containing voxel diffusion tensor information.
+		Brain mask: [nifti]
+				- Binary mask of the brain which will be used to limiting tractography to brain-occupied regions of the image.
+		Anisotropy threshold: [float] (default = 0.2)
+				- Stopping threshold for fiber tractography.
+		Curve threshold: [float] (default = 70)
+				- Angular stopping threshold for fiber tractography.
+
+**Outputs**
+
+		Fibers: [Bfloat]
+				- Camino formatted fiber streamlines
 """
 
 

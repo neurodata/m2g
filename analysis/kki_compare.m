@@ -110,6 +110,7 @@ plot(xrange, f_intra, xrange, f_inter);
 legend('Intra Subject Kernel Esimate', 'Inter Subject Kernel Estimate');
 title(strcat('Hellinger Distance=', num2str(H)));
 
+id = ceil(0.5:0.5:21);
 [MNR, stdMNR] = compute_mnr(gErr, id)
 
 %% Compute Null Distribution and Hellinger

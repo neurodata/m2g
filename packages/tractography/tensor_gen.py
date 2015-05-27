@@ -27,13 +27,21 @@ We leverage Camino's tensor estimation tool to compute the tensors at each voxel
 
 Camino's dtfit documentation: http://cmic.cs.ucl.ac.uk/camino/index.php?n=Man.Dtfit
 
-  Inputs
-      - DTI Image: Corrected DTI X x Y x Z x D volume
-      - B-vectors: Field direction vectors for each volume in DTI image.
-      - B-values: List of b-values corresponding to the b-vectors.
-      - Brain mask: Binary labels identifying region of the image which contains brain tissue.
-  Outputs
-      - Tensors: List of tensors for each voxel in the source DTI image.
+**Inputs**
+
+		DTI Image: [nifti]
+				- Corrected DTI X x Y x Z x D volume
+		B-vectors: [ASCII]
+				- Field direction vectors for each volume in DTI image.
+		B-values: [ASCII]
+				- List of b-values corresponding to the b-vectors.
+		Brain mask: [nifti]
+				- Binary labels identifying region of the image which contains brain tissue.
+
+**Outputs**
+
+		Tensors: [Bdouble]
+				- List of tensors for each voxel in the source DTI image.
 """
 
 

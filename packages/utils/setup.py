@@ -21,11 +21,17 @@
 """
 Initial script for setting up m2g
 
-	Inputs
-			- (Indirect) $M2G_HOME: system variable needs to be set to the base directory of the cloned m2g repo.
-	Outputs
-			- data/: directory containing atlas labels and template images.
-			- zindex.c: compiled cython script used in the framework.
+**Inputs**
+
+		(Indirect) $M2G_HOME: [string]
+				- System variable needs to be set to the base directory of the cloned m2g repo.
+
+**Outputs**
+
+		data/: [directory]
+				- Directory containing atlas labels and template images.
+		zindex.c: [c]
+				- Compiled cython script used in the framework.
 """
 
 import argparse

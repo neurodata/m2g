@@ -105,7 +105,7 @@ Camino and FSL
 	# a server for convenience.
 	# FSL website: http://fsl.fmrib.ox.ac.uk/fsldownloads/
 	cd $m2g/src/
-	wget http://openconnecto.me/data/public/MR/startup_m2g/fsl-5.0.8-centos6_64.tar.gz
+	wget http://openconnecto.me/data/public/MR/m2g_v1_1_0/devs/fsl-5.0.8-centos6_64.tar.gz
 	tar zxvf fsl-5.0.8-centos6_64.tar.gz
 	#Delete raw targz if space is tight
 
@@ -152,21 +152,21 @@ m2g setup
 
 	mkdir $m2g/data
 	cd $m2g/data
-	wget http://openconnecto.me/data/public/MR/startup_m2g/KKI2009-22.tar.gz
+	wget http://openconnecto.me/data/public/MR/m2g_v1_1_0/devs/KKI2009-22.tar.gz
 	tar zxvf KKI2009-22.tar.gz
 
 	cd $m2g/src
-	wget http://openconnecto.me/data/public/MR/startup_m2g/Pipeline-6.0.1-unix.tar.bz2
+	wget http://openconnecto.me/data/public/MR/m2g_v1_1_0/devs/Pipeline-6.0.1-unix.tar.bz2
 	mkdir loni
 	tar -xvf Pipeline-6.0.1-unix.tar.bz2 -C loni
 
-	#Get workflow
+	#Get demo workflow
 	cd $m2g/src/m2g/library/workflows/
-	wget http://openconnecto.me/data/public/MR/startup_m2g/m2g_test.pipe
+	wget http://openconnecto.me/data/public/MR/m2g_v1_1_0/devs/m2g_test.pipe
 
 	mkdir $HOME/.pipeline
 	cd $HOME/.pipeline
-	wget --no-check-certificate http://openconnecto.me/data/public/MR/startup_m2g/preferences.xml
+	wget http://openconnecto.me/data/public/MR/m2g_v1_1_0/devs/preferences.xml
 
 Export Paths and Setup Environment
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
