@@ -35,25 +35,15 @@ from packages.utils.setup import get_files
 class FiberGraph(_FiberGraph):
   def __init__(self, matrixdim, rois, atlases={}):
     super(FiberGraph, self).__init__(matrixdim, rois)
-
-    """
-    # Regions of interest
-    self.rois = rois
-    self.edge_dict = defaultdict(int) # Will have key=(v1,v2), value=weight
-
-    # ======================================================================== #
-    # make new igraph with adjacency matrix to be (maxval X maxval)
-    self.graph = igraph.Graph(n=self.rois.data.max().take(0), directed=False)
-    """
     
     # Keep track of the original vertex ID = region ID before deletion deg zero vertices
     print "Annotating vertices with spatial position .."
-    spatial_map = [0]*(self.graph.vcount()+1)
+    spatial_map = [`0`]*(self.graph.vcount()+1)
     nnz = np.where(self.rois.data != 0)
     for idx in xrange(nnz[0].shape[0]):
       x,y,z = nnz[0][idx], nnz[1][idx], nnz[2][idx]
       region_id = self.rois.data[x,y,z]
-      spatial_map[region_id] = XYZMorton([x,y,z]) # Use to get the spatial position of a vertex
+      spatial_map[region_id] = `XYZMorton([x,y,z])` # Use to get the spatial position of a vertex
 
     self.graph.vs["spatial_id"] = spatial_map
     
@@ -64,12 +54,6 @@ class FiberGraph(_FiberGraph):
     super(FiberGraph, self).complete()
     centroids_added = False
 
-    """
-    print "Deleting zero-degree nodes..."
-    zero_deg_nodes = np.where( np.array(self.graph.degree()) == 0 )[0]
-    self.graph.delete_vertices(zero_deg_nodes)
-    """
-    
     for idx, atlas_name in enumerate(atlases.keys()):
       self.graph["Atlas_"+ os.path.splitext(os.path.basename(atlas_name))[0]+"_index"] = idx
       print "Adding '%s' region numbers (and names) ..." % atlas_name
