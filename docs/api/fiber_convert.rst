@@ -1,5 +1,5 @@
 Fiber Converter
 ***************
 
-.. autofunction:: packages.tractography.fiber_convert
+.. autofunction:: packages.tractography.fiber_convert.offset
 	

@@ -23,23 +23,6 @@
 # Copyright (c) 2015. All rights reserved.
 
 
-"""
-Converts fibers from Camino format to MRIStudio format
-
-Fibers produced by Camino are in a format which is incompatible with developed graph generation code, and thus are converted to the legacy MRIStudio format.
-
-**Inputs**
-
-		Camino fibers: [Bfloat]
-				- File generated containing fiber tracts computed from the diffusion tensors
-
-**Outputs**
-
-		MRIStudio fibers: [dat]
-				- File containing the reformated fibers in a data format consistent with MRIStudio's generated fibers.
-"""
-
-
 from argparse import ArgumentParser
 import scipy.io as sio
 import numpy as np
@@ -55,23 +38,35 @@ fiber_header_fmt = dtype([('nFiberLength','>f4'), ('nSelectFiberStartPoint','>f4
 fiber_data_fmt = dtype(">3f4")
 
 def offset(fiber_fn, mristudio_obj):
+	"""
+	Converts fibers from Camino format to MRIStudio format
+	
+	Fibers produced by Camino are in a format which is incompatible with developed graph generation code, and thus are converted to the legacy MRIStudio format.
+	
+	**Positional Arguments**
+	
+			Camino fibers: [Bfloat]
+					- File generated containing fiber tracts computed from the diffusion tensors
+			MRIStudio fibers: [dat]
+					- Output file containing the reformated fibers in a data format consistent with MRIStudio's generated fibers.
+	"""
+	with closing(open(fiber_fn, "rb")) as fiber_f:
 
-  with closing(open(fiber_fn, "rb")) as fiber_f:
-    file_size = fstat(fiber_f.fileno()).st_size
-    count = 0
-    while (fiber_f.tell() < file_size):
-      fiber_header = fromfile(fiber_f, dtype=fiber_header_fmt, count=1)
-      if fiber_header[0][0] == 1:
-        fiber_f.seek(fiber_f.tell()+12) # Just skip ahead to account for 1-length 
-      elif fiber_header[0][0] > 1:
-        path = fromfile(fiber_f, dtype=fiber_data_fmt, count=fiber_header[0][0])
-        mristudio_obj.write_path(path)
-        count += 1
-        if count % 10000 == 0: print "%d fibers transformed ..." % count
-      else:
-        assert False, "Unknown fiber header format"
-    print "Found %d fiber(s) of length > 1" % count
-    mristudio_obj.set_num_fibers(count) # For fiber header
+		file_size = fstat(fiber_f.fileno()).st_size
+		count = 0
+		while (fiber_f.tell() < file_size):
+			fiber_header = fromfile(fiber_f, dtype=fiber_header_fmt, count=1)
+			if fiber_header[0][0] == 1:
+				fiber_f.seek(fiber_f.tell()+12) # Just skip ahead to account for 1-length 
+			elif fiber_header[0][0] > 1:
+				path = fromfile(fiber_f, dtype=fiber_data_fmt, count=fiber_header[0][0])
+				mristudio_obj.write_path(path)
+				count += 1
+				if count % 10000 == 0: print "%d fibers transformed ..." % count
+			else:
+				assert False, "Unknown fiber header format"
+		print "Found %d fiber(s) of length > 1" % count
+		mristudio_obj.set_num_fibers(count) # For fiber header
 
 def main():
   parser = ArgumentParser(description="")
