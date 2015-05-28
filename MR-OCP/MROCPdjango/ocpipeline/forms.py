@@ -208,3 +208,10 @@ class DownloadQueryForm(forms.Form):
 
   # Select size of graph
   query = forms.CharField(max_length=512, required=True, widget=forms.TextInput(attrs={"class":"tb", "size":"100"}))
+
+class RawUploadForm(forms.Form):
+  """
+  TODO: Document me
+  """
+  fileObj = forms.FileField(label='Upload data', required = True)
+  #TODO: Complete me
