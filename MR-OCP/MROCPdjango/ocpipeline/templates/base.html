@@ -16,8 +16,7 @@
  Created by Disa Mhembere
  Email: disa@jhu.edu -->
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 {% load static %}
 {% load getScriptPrefix %}
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
@@ -39,10 +38,10 @@
 
     <!-- CSS
     –––––––––––––––––––––––––––––––––––––––––––––––––– -->
-    <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap.css' %}"/>
-    <link rel="stylesheet" type="text/css" href="{% static 'css/custom.css' %}"/>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/custom.css' %}">
       <!-- Django tables -->
-    <link rel="stylesheet" type="text/css" href="{% static 'css/tables.css' %}"/>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/tables.css' %}">
 
     <!--<link rel="stylesheet" href="{{ STATIC_URL }}django_tables2/themes/paleblue/css/screen.css" />-->
 
@@ -59,8 +58,8 @@
   {% block js %}
   <script type="text/javascript" src="{% static 'js/spinner.js' %}"> </script>
   <script type="text/javascript" src="{% static 'js/validator.js' %}"> </script>
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
-  <script src="{% static 'js/bootstrap.js' %}"></script>
+  <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+  <script type="text/javascript" src="{% static 'js/bootstrap.js' %}"></script>
 
   {# Google Analytics #}
   <script>
