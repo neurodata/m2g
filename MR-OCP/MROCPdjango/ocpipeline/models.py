@@ -92,6 +92,14 @@ class GraphDownloadModel(models.Model):
   mtime = models.FloatField() # Modification Time
   url = models.URLField(max_length=2048, verbose_name="Download url")
 
+class RawUploadModel(models.Model):
+  mpragepath = models.CharField(max_length=255)
+  dtipath = models.CharField(max_length=255)
+  fmripath = models.CharField(max_length=255)
+  atlas = models.CharField(max_length=255, null=False)
+  graphsize = models.CharField(max_length=8, null=False)
+  email = models.EmailField(null=False)
+  
 admin.site.register(BuildGraphModel)
 admin.site.register(OwnedProjects)
 admin.site.register(SharingTokens)
