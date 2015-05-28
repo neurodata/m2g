@@ -77,6 +77,11 @@ urlpatterns += patterns('ocpipeline.proc_views.convert_graph',
     url(r'^convert/(.*$)', 'convert_graph', name= 'convert-to-format'),
     )
 
+from ocpipeline.proc_views.raw_upload import raw_upload
+urlpatterns += patterns('ocpipeline.proc_views.raw_upload',
+    url(r'^c4/$', 'raw_upload', name='c4'),
+    )
+
 from ocpipeline.accounts.views import projects
 urlpatterns +=patterns('ocpipeline.accounts.views',
     url(r'^accounts/projects/$', 'projects', name='project-accounts'),
