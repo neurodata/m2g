@@ -21,30 +21,6 @@
 # Copyright (c) 2015. All rights reserved.
 
 
-"""
-Computes fiber streamlines from diffusion tensor data.
-
-Using Camino's implementation of the FACT algorithm, published by Mori et al. (2001), we compute fiber tracts throughout the brain from the previously calculated tensors for a given brain.
-
-
-Camino's track documentation: http://cmic.cs.ucl.ac.uk/camino/index.php?n=Man.Track
-
-**Inputs**
-
-		Tensors: [BDouble]
-				- The Camino formatted file containing voxel diffusion tensor information.
-		Brain mask: [nifti]
-				- Binary mask of the brain which will be used to limiting tractography to brain-occupied regions of the image.
-		Anisotropy threshold: [float] (default = 0.2)
-				- Stopping threshold for fiber tractography.
-		Curve threshold: [float] (default = 70)
-				- Angular stopping threshold for fiber tractography.
-
-**Outputs**
-
-		Fibers: [Bfloat]
-				- Camino formatted fiber streamlines
-"""
 
 
 import argparse
@@ -55,18 +31,37 @@ import os
 from os.path import basename
 
 def make_fibs(tensors, mask, anis, curve, fibers, vtk,log):
-  [root, ext] = os.path.splitext(basename(fibers))
-
-  # Perfoms fiber tractography in voxelspace on the given tensors
-  os.system('track -inputmodel dt -seedfile '+mask+' -anisthresh '+anis+' -curvethresh '+curve+' -inputfile '+tensors+' > '+fibers+' -outputinvoxelspace 2>'+log)
+	"""
+	Computes fiber streamlines from diffusion tensor data.
+	
+	Using Camino's implementation of the FACT algorithm, published by Mori et al. (2001), we compute fiber tracts throughout the brain from the previously calculated tensors for a given brain.
+	
+	
+	Camino's track documentation: http://cmic.cs.ucl.ac.uk/camino/index.php?n=Man.Track
+	
+	**Positional Arguments**
+	
+			Tensors: [BDouble]
+					- The Camino formatted file containing voxel diffusion tensor information.
+			Brain mask: [nifti]
+					- Binary mask of the brain which will be used to limiting tractography to brain-occupied regions of the image.
+			Anisotropy threshold: [float] (default = 0.2)
+					- Stopping threshold for fiber tractography.
+			Curve threshold: [float] (default = 70)
+					- Angular stopping threshold for fiber tractography.
+			Fibers: [Bfloat]
+					- Camino formatted fiber streamlines
+	"""
+	[root, ext] = os.path.splitext(basename(fibers))
+	
+	# Perfoms fiber tractography in voxelspace on the given tensors
+	os.system('track -inputmodel dt -seedfile '+mask+' -anisthresh '+anis+' -curvethresh '+curve+' -inputfile '+tensors+' > '+fibers+' -outputinvoxelspace 2>'+log)
 	
 	#Removes small fibers
 	#os.system('procstreamlines -mintractlength')
-  
+	
 	# Converts the fibers to an easy-to-view format
-
-  # Converts the fibers to an easy-to-view format
-  os.system('vtkstreamlines -colourorient < '+fibers+' > '+vtk)
+	os.system('vtkstreamlines -colourorient < '+fibers+' > '+vtk)
 
 def main():
   parser = argparse.ArgumentParser(description="")

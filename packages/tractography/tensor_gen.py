@@ -20,29 +20,6 @@
 # Email: gkiar@jhu.edu
 # Copyright (c) 2015. All rights reserved.
 
-"""
-Computes tensors from DTI image
-
-We leverage Camino's tensor estimation tool to compute the tensors at each voxel within the DTI volumes. The tensors are computed using standard methods of estimation: performing multiple linear regression on the equation relating the diffusion direction matrix of the voxel, the b-vectors, and the voxel intensities across different imposed b-fields.
-
-Camino's dtfit documentation: http://cmic.cs.ucl.ac.uk/camino/index.php?n=Man.Dtfit
-
-**Inputs**
-
-		DTI Image: [nifti]
-				- Corrected DTI X x Y x Z x D volume
-		B-vectors: [ASCII]
-				- Field direction vectors for each volume in DTI image.
-		B-values: [ASCII]
-				- List of b-values corresponding to the b-vectors.
-		Brain mask: [nifti]
-				- Binary labels identifying region of the image which contains brain tissue.
-
-**Outputs**
-
-		Tensors: [Bdouble]
-				- List of tensors for each voxel in the source DTI image.
-"""
 
 
 
@@ -61,19 +38,16 @@ def make_tens(dti, grad, bval, mask, scheme, dti_bfloat, tensors): #, fa, md, ei
 	
 	Camino's dtfit documentation: http://cmic.cs.ucl.ac.uk/camino/index.php?n=Man.Dtfit
 	
-	**Inputs**
+	**Positional Arguments**
 	
 			DTI Image: [nifti]
-					- Corrected DTI X x Y x Z x D volume
+					- Corrected DTI volume.
 			B-vectors: [ASCII]
 					- Field direction vectors for each volume in DTI image.
 			B-values: [ASCII]
 					- List of b-values corresponding to the b-vectors.
 			Brain mask: [nifti]
 					- Binary labels identifying region of the image which contains brain tissue.
-	
-	**Outputs**
-	
 			Tensors: [Bdouble]
 					- List of tensors for each voxel in the source DTI image.
 	"""
