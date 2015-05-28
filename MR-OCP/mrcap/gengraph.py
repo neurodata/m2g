@@ -18,25 +18,6 @@
 # Read a fiber file and generate the corresponding sparse graph
 # @author Randal Burns, Disa Mhembere
 
-"""
-Generates graphs from fiber tracts
-
-We traverse fiber streamlines and map the voxels which they pass through to a brain region, as determined by an atlas. Big graphs have ROIs which are single voxels, whereas small graphs' ROIs are much larger and can be determined either by size, function, or any other method.
-
-**Inputs**
-
-		Fibers: [dat]
-				- MRIStudio format fiber streamlines.
-		ROI Atlas: [nifti]
-				- Region labels which will be used to parcellate the fibers.
-		Format: [graphml, edgelist, pajek, gml, dot] (default = graphml)
-				- Requested output format of graph. 
-
-**Outputs**
-
-		Graph: [graphml, edgelist, pajek, gml, dot] (default = graphml)
-				- Generated graph from fiber tracts
-"""
 
 import argparse
 from mrcap.fiber import FiberReader
@@ -48,22 +29,32 @@ def genGraph(infname, data_atlas_fn, outfname, bigGraph=False, \
     outformat="graphml", numfibers=0, centroids=True, graph_attrs={}, **atlases):
   """
   Generate a sparse igraph from an MRI file based on input and output names.
-  Outputs a graphml formatted graph by default
+  
+	We traverse fiber streamlines and map the voxels which they pass through to a brain region, as determined by an atlas. Big graphs have ROIs which are single voxels, whereas small graphs' ROIs are much larger and can be determined either by size, function, or any other method. Outputs a graphml formatted graph by default.
 
-  positional args:
-  ================
-  infname - file name of _fiber.dat file
-  data_atlas_fn - atlas defining the values contained at each voxel index
-  outfname - the name of the output graph
+	**Positional Arguments**
 
-  optional args:
-  ==============
-  bigGraph - boolean True or False on whether to process a bigraph=True or smallgraph=False
-  outformat - the graph format requested
-  numfibers - the number of fibers to read/process
-  centroids - the centroids for the graph
-  graph_attrs - Dict with graph attributes to be added with key=attr_name, value=attr_value
-  atlases - a dict with key=atlas_fn, value=region_name_fn
+			infname: [dat]
+					- MRIStudio format fiber streamlines.
+			data_atlas_fn: [nifti]
+					- Region labels which will be used to parcellate the fibers.
+			outfname: [file] (default = graphml)
+					- Generated graph from fiber tracts.
+
+	**Optional Arguments**
+	
+			bigGraph: [boolean] (default = False)
+					- Flag indicating where to process a bigGraph=True or smallGraph=False.
+			outformat: [string] (default = graphml)
+					- Requested output format of graph. 	
+			numfibers: [int] (default = 0)
+					- The number of fibers to read/process. If 0, process all fibers.
+			centroids: [boolean] (default = True)
+					- Flag indicating whether to add centroids for the graph.
+			graph_attrs: [dict] (default = {})
+					- Dict with graph attributes to be added with key=attr_name, value=attr_value.
+			atlases: [dict] (default = {})
+					- Dict with key=atlas_fn, value=region_name_fn
   """
 
   start = time()
