@@ -32,7 +32,7 @@
      <form action="" class="nostyle" method="post" enctype="multipart/form-data" name="rawUploadForm"> <!-- TODO: onsubmit="validator"-->
         {% csrf_token %}
         <ul>{{ RawUploadForm.as_ul }}</ul>
-        <input name = type="submit" value="Submit and Process" class="button" onclick="showSpinner();"/>
+        <input name = "submit-button" type="submit" value="Submit and Process" class="button" onclick="showSpinner();"/>
         <input type="reset" value="Reset" class="button" name="clearForm" />
       </form>
     </p>
