@@ -209,9 +209,25 @@ class DownloadQueryForm(forms.Form):
   # Select size of graph
   query = forms.CharField(max_length=512, required=True, widget=forms.TextInput(attrs={"class":"tb", "size":"100"}))
 
+from fields import MultiFileField
+
 class RawUploadForm(forms.Form):
   """
-  TODO: Document me
+  A form for uploading raw images to be processed in to graphs
+  
+  @cvar niftis: The image(s) in nifti format
+  @cvar bs: The b value and b vector files
+  @cvar atlas: The atlas with which to build the graph
   """
-  fileObj = forms.FileField(label='Upload data', required = True)
-  #TODO: Complete me
+  niftis = MultiFileField(min_num=1, max_num=3)
+  bs = MultiFileField(min_num=2, max_num=2, label="B value and vector")
+
+  graph_size = forms.ChoiceField(required=True, \
+      widget=Select, choices=((True,"Big"), (False,"Small")), label="Graph size")
+
+  atlas = forms.ChoiceField(required=True, \
+      widget=Select, choices=(("MNI","MNI"),))
+
+  email = forms.EmailField(widget=EmailInput(attrs={"class":"tb", "size":40}), 
+      required=True, error_messages={"required":"You must supply an email address"})
+
