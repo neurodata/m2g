@@ -20,25 +20,6 @@
 # Email: gkiar@jhu.edu
 # Copyright (c) 2015. All rights reserved.
 
-"""
-Parses b-vectors (or, gradient direction) and b-values files provided by the scanner.
-
-B-vectors and b-values can be provided in slightly different formats from different scanners, and this module parses them to ensure that downstream functions correctly perceive the information provided.
-
-**Inputs**
-
-		B-values: [ASCII]
-				- Ordered list of b-values from the scanner
-		B-vectors: [ASCII]
-				- Gradient directions of scanner corresponding to the b-values
-
-**Outputs**
-
-		B0 Index: [int]
-				- Location of the first B0 volume in the DTI image stack
-		Gradients: [ASCII]
-				- Reformatted B-vectors file which is compatible with downstream processing algorithms
-"""
 
 
 from argparse import ArgumentParser
@@ -46,7 +27,16 @@ from numpy import where, loadtxt, savetxt
 from os import system
 
 def read_bvals(b_in):
+	"""
+	Parses b-values files provided by the scanner.
 	
+	The b-values received from the scanner indicate both the field intensity during the DTI scanning process as well as the index of the B0 volume. This function identifies both of these values.
+	
+	**Positional Arguments**
+	
+			B-values: [ASCII]
+					- Ordered list of b-values from the scanner
+	"""
 	b = loadtxt(b_in)
 	b0 = int(where(b==0)[0][0])
 	bvalue = int(b[where(b!=0)[0][0]])
@@ -54,8 +44,19 @@ def read_bvals(b_in):
 	system("echo 'b0=("+str(b0)+")'")
 	system("echo 'bvalue=("+str(bvalue)+")'")
 
-def format_bvec(b_in, b_out):
+def format_bvec(b_in, b_out):	
+	"""
+	Parses b-vectors (or, gradient direction)  provided by the scanner.
 	
+	B-vectors can be provided in slightly different formats from different scanners, and this module parses them to ensure that downstream functions correctly perceive the information provided.
+	
+	**Positional Arguments**
+	
+			B-vectors: [ASCII]
+					- Gradient directions of scanner corresponding to the b-values
+			Gradients: [ASCII]
+					- Reformatted B-vectors file which is compatible with downstream processing algorithms
+	"""
 	b = loadtxt(b_in)
 	if b.shape[0] < b.shape[1]:
 		b = b.T

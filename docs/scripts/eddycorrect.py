@@ -7,17 +7,16 @@ The eddy correct tool in FSL both aligns DTI volumes to the B0 scan, as well as 
 
 FSL's eddy correct documentation: http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/EDDY
 
-**Inputs**
+**Positional Arguments**
 
 		DTI volume: [nifti]
-				- X x Y x Z x D, DTI image stack from scanner.
-		B0 index: [int]
-				- Location of the B0 scan in the DTI volume.
-
-**Outputs**
-
+				- DTI image stack from scanner.
 		Corrected DTI: [nifti]
-				- X x Y x Z x D, DTI image stack which has been image aligned as well as eddy correction.
+				- DTI image which has been image aligned and undergone eddy correction.
+
+**Optional Arguments**
+		B0 index: [int] (default = 0)
+				- Location of the B0 scan in the DTI volume.
 """
 
 import os

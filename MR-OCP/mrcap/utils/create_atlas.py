@@ -38,11 +38,16 @@ from packages.utils.setup import get_files
 def create(roifn=os.path.join(os.environ["M2G_HOME"],"data","Atlas", 
           "MNI152_T1_1mm_brain.nii"), start=2):
   """
-  Create a new atlas given some scaling factor determined by the 
-  start index. Opaque doc, but best I can do.
+	Creates an Atlas from a template brain.
 
-  @param roifn: nifti roi mask file name
-  @param start: the x,y,z start position which determines the scaling
+  Create a new atlas given some scaling factor determined by the start index. Can be useful if looking for parcellation of certain scale for graph generation.
+
+	**Positional Arguments**
+	
+  		roifn: [nifti] (default = MNI152)
+					- nifti roi mask file name
+			start: [int] (default = 2)
+					- the x,y,z start position which determines the scaling. 
   """
 
   start_time = time()

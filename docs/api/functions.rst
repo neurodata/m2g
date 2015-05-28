@@ -21,10 +21,5 @@ Function Reference
 	:caption: Graph Processing
 
 	gengraph
-.. graphml2mat
-
-.. toctree::
-	:caption: Utilities
-	
-	setup
-	
+	create_atlas
+	downsample

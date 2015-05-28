@@ -12,5 +12,3 @@ To generate a graph, we first form an empty graph (A), with rows and columns cor
     :width: 800px
     :align: center
 
-Pseudocode
-~~~~~~~~~~
