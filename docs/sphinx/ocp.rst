@@ -1,7 +1,7 @@
 OCP
 ***
 
-This project is part of the `Open Connectome Project <openconnecto.me/>`_.  Here are links to information that applies across our projects.
+This project is part of the `Open Connectome Project <openconnecto.me/>`_.  The following information that applies across our projects.
 
 Contributing
 ~~~~~~~~~~~~
