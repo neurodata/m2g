@@ -41,7 +41,7 @@
 
   <p> m2g has been developed in the LONI pipelining environment. This environment facilitates modular construction, and all workflows and modules are command-line executable. This makes m2g efficient and allows users or researchers to modify algorithms for their specific requirements. </p>
   
-  <p>We are currently processing available scans, and make the resulting graphs available to the community. </p>
+  <p>We are currently processing brain scans, and the resulting graphs are made available to the community on an ongoing basis. </p>
 
 .. raw:: html
  
@@ -64,10 +64,8 @@
    sphinx/introduction
    sphinx/local_config
    sphinx/cloud_computing
-   sphinx/contributing
-   sphinx/style
+   sphinx/ocp
    sphinx/faq
-   Release Notes <https://github.com/openconnectome/m2g/releases/>
 
 .. toctree::
    :maxdepth: 1
@@ -86,11 +84,9 @@
    api/modules
    api/functions
    Gitter chatroom <https://gitter.im/openconnectome/m2g>
-   Support <https://groups.google.com/forum/#!forum/ocp-support/>
    Mailing List <https://groups.google.com/forum/#!forum/ocp-support/> 
    Github repo <https://github.com/openconnectome/m2g>
-   Project page <https://openconnectome.github.io/m2g/>
-   Contributors <https://github.com/openconnectome/m2g/graphs/contributors>
+   Release Notes <https://github.com/openconnectome/m2g/releases/>
 
 If you use m2g or its data derivatives, please cite:
    W Gray Roncal, ZH Koterba, D Mhembere, DM Kleissas, JT Vogelstein, R Burns, AR Bowles, DK Donavos, S Ryman, RE Jung, L Wu, V Calhoun, RJ Vogelstein. MIGRAINE: MRI Graph Reliability Analysis and Inference for Connectomics. GlobalSIP, 2013 `arXiv <http://arxiv.org/abs/1312.4875>`_ `bibtex <http://openconnecto.me/data/public/MR/MIGRAINE_v1_0/migraine.bib>`_
