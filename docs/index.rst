@@ -89,6 +89,8 @@
    Release Notes <https://github.com/openconnectome/m2g/releases/>
 
 If you use m2g or its data derivatives, please cite:
+   G Kiar, W R Gray Roncal, D Mhembere, R Burns, JT Vogelstein (2015). m2g v1.1.1. Zenodo. 10.5281/zenodo.18066 `zenodo <https://zenodo.org/record/18066#.VWaPfFxViko>`_ `bibtex <http://openconnecto.me/data/public/MR/m2g_v1_1_0/m2gv111.bib>`_
+
    W Gray Roncal, ZH Koterba, D Mhembere, DM Kleissas, JT Vogelstein, R Burns, AR Bowles, DK Donavos, S Ryman, RE Jung, L Wu, V Calhoun, RJ Vogelstein. MIGRAINE: MRI Graph Reliability Analysis and Inference for Connectomics. GlobalSIP, 2013 `arXiv <http://arxiv.org/abs/1312.4875>`_ `bibtex <http://openconnecto.me/data/public/MR/MIGRAINE_v1_0/migraine.bib>`_
 
   
