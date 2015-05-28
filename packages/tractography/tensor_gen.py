@@ -53,23 +53,47 @@ from os.path import basename, splitext
 
 
 def make_tens(dti, grad, bval, mask, scheme, dti_bfloat, tensors): #, fa, md, eigs):
-  # Create scheme file
-  system('pointset2scheme -inputfile '+grad+' -bvalue '+bval+' -outputfile '+scheme)
-  
-  # Maps the DTI image to a Camino compatible Bfloat format
-  system('image2voxel -4dimage '+dti+' -outputfile '+dti_bfloat)
-  
-  # Produce tensors from image
-  system('dtfit '+dti_bfloat+' '+scheme+' -bgmask '+mask+' -outputfile '+tensors)
-  
-  # In order to visualize, and just 'cause it's fun anyways, we get some stats
 
-  #[fa_base, ext] = splitext(basename(fa))
-  #[md_base, ext] = splitext(basename(md))
-  #system('for PROG in '+fa+' '+md+'; do cat '+tensors+' | ${PROG} | voxel2image -outputroot ${PROG} -header '+dti+'; done')
+	"""
+	Computes tensors from DTI image
+	
+	We leverage Camino's tensor estimation tool to compute the tensors at each voxel within the DTI volumes. The tensors are computed using standard methods of estimation: performing multiple linear regression on the equation relating the diffusion direction matrix of the voxel, the b-vectors, and the voxel intensities across different imposed b-fields.
+	
+	Camino's dtfit documentation: http://cmic.cs.ucl.ac.uk/camino/index.php?n=Man.Dtfit
+	
+	**Inputs**
+	
+			DTI Image: [nifti]
+					- Corrected DTI X x Y x Z x D volume
+			B-vectors: [ASCII]
+					- Field direction vectors for each volume in DTI image.
+			B-values: [ASCII]
+					- List of b-values corresponding to the b-vectors.
+			Brain mask: [nifti]
+					- Binary labels identifying region of the image which contains brain tissue.
+	
+	**Outputs**
+	
+			Tensors: [Bdouble]
+					- List of tensors for each voxel in the source DTI image.
+	"""
+	# Create scheme file
+	system('pointset2scheme -inputfile '+grad+' -bvalue '+bval+' -outputfile '+scheme)
+	
+	# Maps the DTI image to a Camino compatible Bfloat format
+	system('image2voxel -4dimage '+dti+' -outputfile '+dti_bfloat)
+	
+	# Produce tensors from image
+	system('dtfit '+dti_bfloat+' '+scheme+' -bgmask '+mask+' -outputfile '+tensors)
+	
+	# In order to visualize, and just 'cause it's fun anyways, we get some stats
 
-  # We also need the eigen system to visualize
-  #system('cat '+tensors+' | dteig > '+eigs)
+	#[fa_base, ext] = splitext(basename(fa))
+	#[md_base, ext] = splitext(basename(md))
+	#system('for PROG in '+fa+' '+md+'; do cat '+tensors+' | ${PROG} | voxel2image -outputroot ${PROG} -header '+dti+'; done')
+
+	# We also need the eigen system to visualize
+	#system('cat '+tensors+' | dteig > '+eigs)
 
 def main():
   parser = ArgumentParser(description="")
