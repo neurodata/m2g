@@ -93,10 +93,6 @@ def attredge_to_igraph(gfn):
         nodes[edge[1]] = max_node
         max_node += 1
 
-      # Do the substitution
-      #edge[0] = nodes[edge[0]]
-      #edge[1] = nodes[edge[1]]
-
       edges[0].append((nodes[edge[0]], nodes[edge[1]]))
 
       for attr_idx in xrange(len(attributes)):
@@ -133,8 +129,6 @@ def main():
 
   ig = attredge_to_igraph(result.fn)
   print ig.summary()
-
-  ig.write("t.graphml", format="graphml")
 
 def test():
   pass
