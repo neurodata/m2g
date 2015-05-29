@@ -39,7 +39,7 @@ def downsample(g, factor=-1, ds_atlas=None, ignore_zero=True):
   """
 	Downsample a graph by a scale factor.
 
-	Downsamples by collapsing regions using an dynamically generated downsampled atlas. Rebuilding the graph takes on the order of a few minutes.
+	Downsamples by collapsing regions using an dynamically generated downsampled atlas. Rebuilding the graph takes on the order of a few minutes on a standard desktop computer with > 4GB of RAM.
 	
 	**Positional Arguments**
 
