@@ -36,6 +36,13 @@ def read_bvals(b_in):
 	
 			B-values: [ASCII]
 					- Ordered list of b-values from the scanner
+	
+	**Returns**
+	
+			B0 Index: [int]
+					- Location of the first B0 volume
+			B: [int]
+					- Field intensity
 	"""
 	b = loadtxt(b_in)
 	b0 = int(where(b==0)[0][0])
@@ -54,6 +61,9 @@ def format_bvec(b_in, b_out):
 	
 			B-vectors: [ASCII]
 					- Gradient directions of scanner corresponding to the b-values
+
+	**Returns**
+
 			Gradients: [ASCII]
 					- Reformatted B-vectors file which is compatible with downstream processing algorithms
 	"""

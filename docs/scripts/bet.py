@@ -11,6 +11,9 @@ FSL's BET documentation: http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/BET
 
 		Input image: [nifti]
 				- Structural T1 (MPRAGE) image from the MRI scanner.
+
+**Returns**
+
 		Output image: [nifti]
 				- Structural T1 (MPRAGE) image in which all voxels not in the brain have been set to an intensity of zero.
 		Output mask: [nifti]

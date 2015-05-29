@@ -20,9 +20,6 @@
 # Email: gkiar@jhu.edu
 # Copyright (c) 2015. All rights reserved.
 
-
-
-
 import argparse
 import string
 import sys
@@ -49,6 +46,9 @@ def make_fibs(tensors, mask, anis, curve, fibers, vtk,log):
 					- Stopping threshold for fiber tractography.
 			Curve threshold: [float] (default = 70)
 					- Angular stopping threshold for fiber tractography.
+	
+	**Returns**
+	
 			Fibers: [Bfloat]
 					- Camino formatted fiber streamlines
 	"""

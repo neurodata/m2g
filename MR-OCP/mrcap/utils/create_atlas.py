@@ -40,14 +40,19 @@ def create(roifn=os.path.join(os.environ["M2G_HOME"],"data","Atlas",
   """
 	Creates an Atlas from a template brain.
 
-  Create a new atlas given some scaling factor determined by the start index. Can be useful if looking for parcellation of certain scale for graph generation.
+	Create a new atlas given some scaling factor determined by the start index. Can be useful if looking for parcellation of certain scale for graph generation.
 
 	**Positional Arguments**
 	
   		roifn: [nifti] (default = MNI152)
-					- nifti roi mask file name
+					- Nifti roi mask file name
 			start: [int] (default = 2)
-					- the x,y,z start position which determines the scaling. 
+					- The x,y,z start position which determines the scaling. 
+	
+	**Returns**
+	
+			atlas: [nifti]
+					- Atlas labels in MNI space.
   """
 
   start_time = time()

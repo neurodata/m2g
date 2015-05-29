@@ -13,8 +13,11 @@ FSL's FLIRT documentation: http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FLIRT
 				- The 3D image which is to be transformed.
 		Reference image: [nifti]
 				- The 3D image which will be the target of the transformation.
+
+**Returns**
+
 		Output image: [nifti]
-				- The input image aligned to the reference image space.
+				- The name of the output image, which is the input image aligned to the reference image space.
 
 **Optional Arguments**
 
