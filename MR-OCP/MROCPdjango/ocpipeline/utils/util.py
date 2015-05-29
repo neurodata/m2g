@@ -190,10 +190,11 @@ def saveFileToDisk(fileData, fullFileName):
     os.makedirs(os.path.dirname(fullFileName))
     print "Making directory: %s ..." % os.path.dirname(fullFileName)
 
-  destination = open(fullFileName, 'wb+') # Consider try: except for this
-  for chunk in fileData.chunks():
+  with open(fullFileName, 'wb+') as destination:
+  #destination = open(fullFileName, 'wb+') # Consider try: except for this
+    for chunk in fileData.chunks():
       destination.write(chunk)
-  destination.close()
+  #destination.close()
 
   print "Saving file: %s " % fullFileName
 
