@@ -24,7 +24,7 @@ from collections import defaultdict
 import os, sys
 import igraph
 from mrcap.atlas import Atlas 
-from mrcap.utils import igraph_io #deprecated; fix?
+from mrcap.utils import igraph_io
 from time import time
 import create_atlas
 import nibabel as nib
@@ -37,7 +37,7 @@ import cPickle as pickle
 DEBUG = False
 def downsample(g, factor=-1, ds_atlas=None, ignore_zero=True):
   """
-  Downsample a graph by a scale factor.
+	Downsample a graph by a scale factor.
 
 	Downsamples by collapsing regions using an dynamically generated downsampled atlas. Rebuilding the graph takes on the order of a few minutes.
 	
@@ -51,6 +51,11 @@ def downsample(g, factor=-1, ds_atlas=None, ignore_zero=True):
 					- A prebuilt downsampled nifti atlas with which to downsample.
 			ignore_zero: [boolean] (default = True)
 					- We assume the zeroth label is outside the brain.
+	
+	**Returns**
+	
+			new graph: [graphml]
+					- The input graph downsampled to the scale of the input atlas.
   """
 
   start = time()
