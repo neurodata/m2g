@@ -26,7 +26,7 @@ import igraph
 from mrcap.atlas import Atlas 
 from mrcap.utils import igraph_io
 from time import time
-import create_atlas
+import downsample_atlas
 import nibabel as nib
 import zipfile
 sys.path += [os.path.abspath("../")]
@@ -63,7 +63,7 @@ def downsample(g, factor=-1, ds_atlas=None, ignore_zero=True):
 
   if factor >= 0:
     print "Generating downsampled atlas ..." # TODO: Cythonize
-    ds_atlas = create_atlas.create(start=factor) # Create ds atlas and an atlas map for the original atlas
+    ds_atlas = downsample_atlas.create(start=factor) # Create ds atlas and an atlas map for the original atlas
   
   ds_atlas = ds_atlas.get_data() # don't care about other atlas data
 
