@@ -222,7 +222,7 @@ class RawUploadForm(forms.Form):
   niftis = MultiFileField(min_num=1, max_num=3)
   bs = MultiFileField(min_num=2, max_num=2, label="B value and vector")
 
-  graph_size = forms.ChoiceField(required=True, \
+  graphsize = forms.ChoiceField(required=True, \
       widget=Select, choices=((True,"Big"), (False,"Small")), label="Graph size")
 
   atlas = forms.ChoiceField(required=True, \
