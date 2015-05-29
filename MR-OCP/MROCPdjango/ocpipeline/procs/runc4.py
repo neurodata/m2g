@@ -24,3 +24,13 @@ import argparse
 def runc4(nifti_paths, b_paths, opts, email):
   print "I'm running!"
   pass # TODO GK
+  # parse inputs
+  #forge list files
+  #call m2g using qsub and list files as commandline args
+
+def main():
+  
+  #runc4(niftis, bs, opts, email)
+
+if __name__ == '__main__':
+  main()
