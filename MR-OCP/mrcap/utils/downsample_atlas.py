@@ -38,7 +38,7 @@ from packages.utils.setup import get_files
 def create(roifn=os.path.join(os.environ["M2G_HOME"],"data","Atlas", 
           "MNI152_T1_1mm_brain.nii"), start=2):
   """
-	Creates an Atlas from a template brain.
+	Downsamples an atlas from a template brain.
 
 	Create a new atlas given some scaling factor determined by the start index. Can be useful if looking for parcellation of certain scale for graph generation.
 
