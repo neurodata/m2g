@@ -48,6 +48,9 @@ def make_tens(dti, grad, bval, mask, scheme, dti_bfloat, tensors): #, fa, md, ei
 					- List of b-values corresponding to the b-vectors.
 			Brain mask: [nifti]
 					- Binary labels identifying region of the image which contains brain tissue.
+
+	**Returns**
+
 			Tensors: [Bdouble]
 					- List of tensors for each voxel in the source DTI image.
 	"""

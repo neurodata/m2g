@@ -47,6 +47,9 @@ def offset(fiber_fn, mristudio_obj):
 	
 			Camino fibers: [Bfloat]
 					- File generated containing fiber tracts computed from the diffusion tensors
+	
+	**Returns**
+	
 			MRIStudio fibers: [dat]
 					- Output file containing the reformated fibers in a data format consistent with MRIStudio's generated fibers.
 	"""

@@ -28,7 +28,7 @@ from computation.utils.cmdline import parse_dict
 def genGraph(infname, data_atlas_fn, outfname, bigGraph=False, \
     outformat="graphml", numfibers=0, centroids=True, graph_attrs={}, **atlases):
   """
-  Generate a sparse igraph from an MRI file based on input and output names.
+	Generate a sparse igraph from an MRI file based on input and output names.
   
 	We traverse fiber streamlines and map the voxels which they pass through to a brain region, as determined by an atlas. Big graphs have ROIs which are single voxels, whereas small graphs' ROIs are much larger and can be determined either by size, function, or any other method. Outputs a graphml formatted graph by default.
 
@@ -38,6 +38,9 @@ def genGraph(infname, data_atlas_fn, outfname, bigGraph=False, \
 					- MRIStudio format fiber streamlines.
 			data_atlas_fn: [nifti]
 					- Region labels which will be used to parcellate the fibers.
+	
+	**Returns**
+	
 			outfname: [file] (default = graphml)
 					- Generated graph from fiber tracts.
 
