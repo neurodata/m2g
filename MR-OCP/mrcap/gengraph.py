@@ -54,9 +54,9 @@ def genGraph(infname, data_atlas_fn, outfname, bigGraph=False, \
 					- The number of fibers to read/process. If 0, process all fibers.
 			centroids: [boolean] (default = True)
 					- Flag indicating whether to add centroids for the graph.
-			graph_attrs: [dict] (default = {})
+			graph_attrs: [dictionary] (default = {})
 					- Dict with graph attributes to be added with key=attr_name, value=attr_value.
-			atlases: [dict] (default = {})
+			atlases: [dictionary] (default = {})
 					- Dict with key=atlas_fn, value=region_name_fn
   """
 
