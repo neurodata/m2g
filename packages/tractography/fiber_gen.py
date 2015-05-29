@@ -31,8 +31,7 @@ def make_fibs(tensors, mask, anis, curve, fibers, vtk,log):
 	"""
 	Computes fiber streamlines from diffusion tensor data.
 	
-	Using Camino's implementation of the FACT algorithm, published by Mori et al. (2001), we compute fiber tracts throughout the brain from the previously calculated tensors for a given brain.
-	
+	Using Camino's implementation of the FACT algorithm, published by Mori et al. (2001), we compute fiber tracts throughout the brain from the previously calculated tensors for a given brain. The Bdouble and Bfloat formats are Camino outputs which are a big-endian stored 8-byte double, and 4-byte float, respectively.
 	
 	Camino's track documentation: http://cmic.cs.ucl.ac.uk/camino/index.php?n=Man.Track
 	
