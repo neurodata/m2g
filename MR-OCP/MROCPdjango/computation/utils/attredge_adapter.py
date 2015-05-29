@@ -15,18 +15,18 @@
 # limitations under the License.
 #
 
-# csc_to_igraph.py
+# attredge_adapter.py
 # Created by Disa Mhembere on 2013-12-31.
 # Email: disa@jhu.edu
 
-# Provide ability to convert a csc matrix in MAT format to an igraph.Graph object and save
+# Provide ability to convert an attributed edgelist to graphml
 
 import argparse
 import igraph
 import os
 from time import time
 from collections import defaultdict
-import pdb
+from collections import OrderedDict
 
 def strip_string(word):
   return word.strip()
@@ -70,10 +70,11 @@ def attredge_to_igraph(gfn):
 
   # idx = 0 => edge, idx = 1 => synapse_id, idx = 2 => direction
   # Can't shortcut ([]*value) this becuase it does a deep copy
-  edges = [[]]
+  edges = [[]] # [[edges], [attr1], ..., [atrrn]]
   for attr_idx in xrange(len(attributes)):
     edges.append([])
 
+  nodes = OrderedDict() # key = real (ocp) vid, value = igraph_vid. This becomes a vertex attr
   max_node = 0
 
   while (True):
@@ -81,17 +82,29 @@ def attredge_to_igraph(gfn):
     if not line: break
     if not line.isspace():
       edge = get_edge(line, directed)
-      gnode = max(edge[0],edge[1])
-      if gnode > max_node: max_node = gnode
 
-      edges[0].append((edge[0], edge[1]))
+      # replace src id with sequential id
+      if not nodes.has_key(edge[0]):
+        nodes[edge[0]] = max_node
+        max_node += 1
+
+      # replace tgt id with sequential id
+      if not nodes.has_key(edge[1]):
+        nodes[edge[1]] = max_node
+        max_node += 1
+
+      edges[0].append((nodes[edge[0]], nodes[edge[1]]))
 
       for attr_idx in xrange(len(attributes)):
         edges[1+attr_idx].append(edge[2+attr_idx])
 
-  ig = igraph.Graph(max_node+1, directed=True) # Always assume directed
+  ig = igraph.Graph(max_node, directed=True) # Always assume directed
 
   start = time()
+  print "Adding true vids ..."
+  ig.vs["vid"] = nodes.keys()
+  assert sorted(nodes.values()) == range(max_node)  # TODO: RM
+
   print "Adding %d edges to the graph ..." % len(edges[0])
   ig += edges[0]
   print "Completed adding edges in %.3f sec" % (time() - start)
@@ -113,6 +126,7 @@ def main():
   
   parser.add_argument("fn", action="store", help="Edgelist filename")
   result = parser.parse_args()
+
   ig = attredge_to_igraph(result.fn)
   print ig.summary()
 
