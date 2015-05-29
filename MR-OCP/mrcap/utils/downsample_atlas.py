@@ -44,7 +44,7 @@ def create(roifn=os.path.join(os.environ["M2G_HOME"],"data","Atlas",
 
 	**Positional Arguments**
 	
-  		roifn: [nifti] (default = MNI152)
+			roifn: [nifti] (default = MNI152)
 					- Nifti roi mask file name
 			start: [int] (default = 2)
 					- The x,y,z start position which determines the scaling. 
