@@ -9,18 +9,21 @@ FSL's FLIRT documentation: http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FLIRT
 
 **Positional Arguments**
 
-		Input image: [nifti]
+		Input image: [.nii; nifti image]
 				- The 3D image which is to be transformed.
-		Reference image: [nifti]
+		Reference image: [.nii; nifti image]
 				- The 3D image which will be the target of the transformation.
-		Output image: [nifti]
-				- The input image aligned to the reference image space.
+
+**Returns**
+
+		Output image: [.nii; nifti image]
+				- The name of the output image, which is the input image aligned to the reference image space.
 
 **Optional Arguments**
 
 		Search range: [2x float] (default = -180 180)
 				- Orientation angles to search when aligning images.
-		Transform matrix: [xfm] 
+		Transform matrix: [.xfm, .mat; binary file] 
 				- Using different flags, this can be either an input or an output parameter which maps the input image without recomputing the transform, or stores the transform, respectively.
 """
 

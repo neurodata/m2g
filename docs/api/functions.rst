@@ -21,5 +21,5 @@ Function Reference
 	:caption: Graph Processing
 
 	gengraph
-	create_atlas
+	downsample_atlas
 	downsample

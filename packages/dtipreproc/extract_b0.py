@@ -35,11 +35,14 @@ def extract_vol(dti_img, b0, b0_vol):
 	
 	**Positional Arguments**
 	
-			DTI Image: [nifti]
+			DTI Image: [.nii; nifti image]
 					- Original DTI volume stack from scanner
 			B0 Index: [int] (default = 0)
 					- Location of b=0 volume in the DTI stack
-			B0 Volume: [nifti]
+	
+	**Returns**
+	
+			B0 Volume: [.nii; nifti image]
 					- Output volume containing the DTI volume corresponding to a b0 index
 	"""
 	print "Loading dti data..."

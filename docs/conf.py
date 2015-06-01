@@ -33,7 +33,7 @@ import docs.scripts.flirt
 import docs.scripts.m2g
 import docs.scripts.m2g_registration
 import docs.scripts.m2g_diffusion
-import mrcap.utils.create_atlas
+import mrcap.utils.downsample_atlas
 import mrcap.utils.downsample
 
 # -- General configuration ------------------------------------------------

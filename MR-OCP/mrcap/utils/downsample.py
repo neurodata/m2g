@@ -24,9 +24,9 @@ from collections import defaultdict
 import os, sys
 import igraph
 from mrcap.atlas import Atlas 
-from mrcap.utils import igraph_io #deprecated; fix?
+from mrcap.utils import igraph_io
 from time import time
-import create_atlas
+import downsample_atlas
 import nibabel as nib
 import zipfile
 sys.path += [os.path.abspath("../")]
@@ -37,20 +37,25 @@ import cPickle as pickle
 DEBUG = False
 def downsample(g, factor=-1, ds_atlas=None, ignore_zero=True):
   """
-  Downsample a graph by a scale factor.
+	Downsample a graph by a scale factor.
 
-	Downsamples by collapsing regions using an dynamically generated downsampled atlas. Rebuilding the graph takes on the order of a few minutes.
+	Downsamples by collapsing regions using an dynamically generated downsampled atlas. Rebuilding the graph takes on the order of a few minutes on a standard desktop computer with more than 4GB of RAM.
 	
 	**Positional Arguments**
 
-			g: [graphml]
+			g: [.graphml; XML file]
 					- A full sized big graph.
 			factor: [int] (default = 1)
 					- The downsampling factor.
-			ds_atlas: [nifti] (default = MNI152)
+			ds_atlas: [.nii; nifti image] (default = MNI152)
 					- A prebuilt downsampled nifti atlas with which to downsample.
 			ignore_zero: [boolean] (default = True)
 					- We assume the zeroth label is outside the brain.
+	
+	**Returns**
+	
+			new graph: [.graphml; XML file]
+					- The input graph downsampled to the scale of the input atlas.
   """
 
   start = time()
@@ -58,7 +63,7 @@ def downsample(g, factor=-1, ds_atlas=None, ignore_zero=True):
 
   if factor >= 0:
     print "Generating downsampled atlas ..." # TODO: Cythonize
-    ds_atlas = create_atlas.create(start=factor) # Create ds atlas and an atlas map for the original atlas
+    ds_atlas = downsample_atlas.create(start=factor) # Create ds atlas and an atlas map for the original atlas
   
   ds_atlas = ds_atlas.get_data() # don't care about other atlas data
 
