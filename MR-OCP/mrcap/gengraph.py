@@ -28,17 +28,20 @@ from computation.utils.cmdline import parse_dict
 def genGraph(infname, data_atlas_fn, outfname, bigGraph=False, \
     outformat="graphml", numfibers=0, centroids=True, graph_attrs={}, **atlases):
   """
-  Generate a sparse igraph from an MRI file based on input and output names.
+	Generate a sparse igraph from an MRI file based on input and output names.
   
 	We traverse fiber streamlines and map the voxels which they pass through to a brain region, as determined by an atlas. Big graphs have ROIs which are single voxels, whereas small graphs' ROIs are much larger and can be determined either by size, function, or any other method. Outputs a graphml formatted graph by default.
 
 	**Positional Arguments**
 
-			infname: [dat]
+			infname: [.dat; binary file]
 					- MRIStudio format fiber streamlines.
-			data_atlas_fn: [nifti]
+			data_atlas_fn: [.nii; nifti image]
 					- Region labels which will be used to parcellate the fibers.
-			outfname: [file] (default = graphml)
+	
+	**Returns**
+	
+			outfname: [.graphml; XML file]
 					- Generated graph from fiber tracts.
 
 	**Optional Arguments**
@@ -51,9 +54,9 @@ def genGraph(infname, data_atlas_fn, outfname, bigGraph=False, \
 					- The number of fibers to read/process. If 0, process all fibers.
 			centroids: [boolean] (default = True)
 					- Flag indicating whether to add centroids for the graph.
-			graph_attrs: [dict] (default = {})
+			graph_attrs: [dictionary] (default = {})
 					- Dict with graph attributes to be added with key=attr_name, value=attr_value.
-			atlases: [dict] (default = {})
+			atlases: [dictionary] (default = {})
 					- Dict with key=atlas_fn, value=region_name_fn
   """
 

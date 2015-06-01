@@ -81,8 +81,8 @@
    :maxdepth: 1
    :caption: Further Reading
 
-   api/modules
    api/functions
+   api/modules
    Gitter chatroom <https://gitter.im/openconnectome/m2g>
    Mailing List <https://groups.google.com/forum/#!forum/ocp-support/> 
    Github repo <https://github.com/openconnectome/m2g>
