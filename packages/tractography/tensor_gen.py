@@ -20,9 +20,6 @@
 # Email: gkiar@jhu.edu
 # Copyright (c) 2015. All rights reserved.
 
-
-
-
 # Load necessary packages
 from argparse import ArgumentParser
 from os import system
@@ -34,24 +31,24 @@ def make_tens(dti, grad, bval, mask, scheme, dti_bfloat, tensors): #, fa, md, ei
 	"""
 	Computes tensors from DTI image
 	
-	We leverage Camino's tensor estimation tool to compute the tensors at each voxel within the DTI volumes. The tensors are computed using standard methods of estimation: performing multiple linear regression on the equation relating the diffusion direction matrix of the voxel, the b-vectors, and the voxel intensities across different imposed b-fields. The Bdouble format is a Camino output which is a big-endian stored 8-byte double.
+	We leverage Camino's tensor estimation tool to compute the tensors at each voxel within the DTI volumes. The tensors are computed using standard methods of estimation: performing multiple linear regression on the equation relating the diffusion direction matrix of the voxel, the b-vectors, and the voxel intensities across different imposed b-fields.
 	
 	Camino's dtfit documentation: http://cmic.cs.ucl.ac.uk/camino/index.php?n=Man.Dtfit
 	
 	**Positional Arguments**
 	
-			DTI Image: [nifti]
+			DTI Image: [.nii; nifti image]
 					- Corrected DTI volume.
-			B-vectors: [ASCII]
+			B-vectors: [.grad; ASCII file]
 					- Field direction vectors for each volume in DTI image.
-			B-values: [ASCII]
+			B-values: [.b; ASCII file]
 					- List of b-values corresponding to the b-vectors.
-			Brain mask: [nifti]
+			Brain mask: [.nii; nifti image]
 					- Binary labels identifying region of the image which contains brain tissue.
 
 	**Returns**
 
-			Tensors: [Bdouble]
+			Tensors: [.Bdouble; big-endian double]
 					- List of tensors for each voxel in the source DTI image.
 	"""
 	# Create scheme file

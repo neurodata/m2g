@@ -34,14 +34,14 @@ def genGraph(infname, data_atlas_fn, outfname, bigGraph=False, \
 
 	**Positional Arguments**
 
-			infname: [dat]
+			infname: [.dat; binary file]
 					- MRIStudio format fiber streamlines.
-			data_atlas_fn: [nifti]
+			data_atlas_fn: [.nii; nifti image]
 					- Region labels which will be used to parcellate the fibers.
 	
 	**Returns**
 	
-			outfname: [file] (default = graphml)
+			outfname: [.graphml; XML file]
 					- Generated graph from fiber tracts.
 
 	**Optional Arguments**
