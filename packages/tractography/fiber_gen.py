@@ -31,15 +31,15 @@ def make_fibs(tensors, mask, anis, curve, fibers, vtk,log):
 	"""
 	Computes fiber streamlines from diffusion tensor data.
 	
-	Using Camino's implementation of the FACT algorithm, published by Mori et al. (2001), we compute fiber tracts throughout the brain from the previously calculated tensors for a given brain. The Bdouble and Bfloat formats are Camino outputs which are a big-endian stored 8-byte double, and 4-byte float, respectively.
+	Using Camino's implementation of the FACT algorithm, published by Mori et al. (2001), we compute fiber tracts throughout the brain from the previously calculated tensors for a given brain.
 	
 	Camino's track documentation: http://cmic.cs.ucl.ac.uk/camino/index.php?n=Man.Track
 	
 	**Positional Arguments**
 	
-			Tensors: [BDouble]
+			Tensors: [.Bdouble; big-endian double]
 					- The Camino formatted file containing voxel diffusion tensor information.
-			Brain mask: [nifti]
+			Brain mask: [.nii; nifti image]
 					- Binary mask of the brain which will be used to limiting tractography to brain-occupied regions of the image.
 			Anisotropy threshold: [float] (default = 0.2)
 					- Stopping threshold for fiber tractography.
@@ -48,7 +48,7 @@ def make_fibs(tensors, mask, anis, curve, fibers, vtk,log):
 	
 	**Returns**
 	
-			Fibers: [Bfloat]
+			Fibers: [.Bfloat; big-endian float]
 					- Camino formatted fiber streamlines
 	"""
 	[root, ext] = os.path.splitext(basename(fibers))

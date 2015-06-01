@@ -34,7 +34,7 @@ def read_bvals(b_in):
 	
 	**Positional Arguments**
 	
-			B-values: [ASCII]
+			B-values: [.b; ASCII file]
 					- Ordered list of b-values from the scanner
 	
 	**Returns**
@@ -59,12 +59,12 @@ def format_bvec(b_in, b_out):
 	
 	**Positional Arguments**
 	
-			B-vectors: [ASCII]
+			B-vectors: [.bvec, .grad; ASCII file]
 					- Gradient directions of scanner corresponding to the b-values
 
 	**Returns**
 
-			Gradients: [ASCII]
+			Gradients: [.grad; ASCII file]
 					- Reformatted B-vectors file which is compatible with downstream processing algorithms
 	"""
 	b = loadtxt(b_in)

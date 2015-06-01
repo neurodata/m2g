@@ -43,18 +43,18 @@ def downsample(g, factor=-1, ds_atlas=None, ignore_zero=True):
 	
 	**Positional Arguments**
 
-			g: [graphml]
+			g: [.graphml; XML file]
 					- A full sized big graph.
 			factor: [int] (default = 1)
 					- The downsampling factor.
-			ds_atlas: [nifti] (default = MNI152)
+			ds_atlas: [.nii; nifti image] (default = MNI152)
 					- A prebuilt downsampled nifti atlas with which to downsample.
 			ignore_zero: [boolean] (default = True)
 					- We assume the zeroth label is outside the brain.
 	
 	**Returns**
 	
-			new graph: [graphml]
+			new graph: [.graphml; XML file]
 					- The input graph downsampled to the scale of the input atlas.
   """
 

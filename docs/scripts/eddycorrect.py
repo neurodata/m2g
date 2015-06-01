@@ -9,12 +9,12 @@ FSL's eddy correct documentation: http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/EDDY
 
 **Positional Arguments**
 
-		DTI volume: [nifti]
+		DTI volume: [.nii; nifti image]
 				- DTI image stack from scanner.
 
 **Returns**
 
-		Corrected DTI: [nifti]
+		Corrected DTI: [.nii; nifti image]
 				- DTI image which has been image aligned and undergone eddy correction.
 
 **Optional Arguments**
