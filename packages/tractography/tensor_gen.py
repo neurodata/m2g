@@ -20,9 +20,6 @@
 # Email: gkiar@jhu.edu
 # Copyright (c) 2015. All rights reserved.
 
-
-
-
 # Load necessary packages
 from argparse import ArgumentParser
 from os import system
@@ -40,15 +37,18 @@ def make_tens(dti, grad, bval, mask, scheme, dti_bfloat, tensors): #, fa, md, ei
 	
 	**Positional Arguments**
 	
-			DTI Image: [nifti]
+			DTI Image: [.nii; nifti image]
 					- Corrected DTI volume.
-			B-vectors: [ASCII]
+			B-vectors: [.grad; ASCII file]
 					- Field direction vectors for each volume in DTI image.
-			B-values: [ASCII]
+			B-values: [.b; ASCII file]
 					- List of b-values corresponding to the b-vectors.
-			Brain mask: [nifti]
+			Brain mask: [.nii; nifti image]
 					- Binary labels identifying region of the image which contains brain tissue.
-			Tensors: [Bdouble]
+
+	**Returns**
+
+			Tensors: [.Bdouble; big-endian double]
 					- List of tensors for each voxel in the source DTI image.
 	"""
 	# Create scheme file

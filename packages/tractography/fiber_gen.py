@@ -20,9 +20,6 @@
 # Email: gkiar@jhu.edu
 # Copyright (c) 2015. All rights reserved.
 
-
-
-
 import argparse
 import string
 import sys
@@ -36,20 +33,22 @@ def make_fibs(tensors, mask, anis, curve, fibers, vtk,log):
 	
 	Using Camino's implementation of the FACT algorithm, published by Mori et al. (2001), we compute fiber tracts throughout the brain from the previously calculated tensors for a given brain.
 	
-	
 	Camino's track documentation: http://cmic.cs.ucl.ac.uk/camino/index.php?n=Man.Track
 	
 	**Positional Arguments**
 	
-			Tensors: [BDouble]
+			Tensors: [.Bdouble; big-endian double]
 					- The Camino formatted file containing voxel diffusion tensor information.
-			Brain mask: [nifti]
+			Brain mask: [.nii; nifti image]
 					- Binary mask of the brain which will be used to limiting tractography to brain-occupied regions of the image.
 			Anisotropy threshold: [float] (default = 0.2)
 					- Stopping threshold for fiber tractography.
 			Curve threshold: [float] (default = 70)
 					- Angular stopping threshold for fiber tractography.
-			Fibers: [Bfloat]
+	
+	**Returns**
+	
+			Fibers: [.Bfloat; big-endian float]
 					- Camino formatted fiber streamlines
 	"""
 	[root, ext] = os.path.splitext(basename(fibers))
