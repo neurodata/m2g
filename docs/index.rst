@@ -55,7 +55,7 @@
 
 .. sidebar:: m2g Contact Us 
    
-   If you have questions about m2g, or have data to process, let us know:  ocp-support@googlegroups.com
+   If you have questions about m2g, or have data to process, let us know:  m2g-support@ocp.me
    
 .. toctree::
    :maxdepth: 1
@@ -84,7 +84,7 @@
    api/functions
    api/modules
    Gitter chatroom <https://gitter.im/openconnectome/m2g>
-   Mailing List <https://groups.google.com/forum/#!forum/ocp-support/> 
+   Mailing List <https://groups.google.com/a/ocp.me/forum/#!forum/m2g> 
    Github repo <https://github.com/openconnectome/m2g>
    Release Notes <https://github.com/openconnectome/m2g/releases/>
 
