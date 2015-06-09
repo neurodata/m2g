@@ -21,6 +21,6 @@
 
 import argparse
 
-def runc4(nifti_paths, b_paths, opts, email):
+def runc4(dti_path, mprage_path, bvalue_path, bvector_path, graph_size, atlas, email):
   print "I'm running!"
   pass # TODO GK
