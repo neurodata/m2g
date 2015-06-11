@@ -79,10 +79,10 @@ def downsample(g, factor=-1, ds_atlas=None, ignore_zero=True):
     src = ds_atlas[src_x, src_y, src_z]
     tgt = ds_atlas[tgt_x, tgt_y, tgt_z]
 
-    # FIXME: We will skip all region zeros for all atlases which is not really true!
+    # FIXME GK: We will skip all region zeros for all atlases which is not really true!
     if ignore_zero:
       if (src and tgt) and (src != tgt):
-        if not spatial_map[srsc]: spatial_map[src] = `src_spatial_id` 
+        if not spatial_map[src]: spatial_map[src] = `src_spatial_id` 
         if not spatial_map[tgt]: spatial_map[tgt] = `tgt_spatial_id` 
 
         edge_dict[(src, tgt)] += e["weight"]
