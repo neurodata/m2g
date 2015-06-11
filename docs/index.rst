@@ -55,7 +55,7 @@
 
 .. sidebar:: m2g Contact Us 
    
-   If you have questions about m2g, or have data to process, let us know:  m2g-support@ocp.me
+   If you have questions about m2g, or have data to process, let us know:  m2g-support@openconnecto.me
    
 .. toctree::
    :maxdepth: 1
@@ -83,6 +83,7 @@
 
    api/functions
    api/modules
+   Web service <http://ocp.me/graph-services/c4/>
    Gitter chatroom <https://gitter.im/openconnectome/m2g>
    Mailing List <https://groups.google.com/a/ocp.me/forum/#!forum/m2g> 
    Github repo <https://github.com/openconnectome/m2g>
