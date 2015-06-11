@@ -18,15 +18,19 @@
 {% extends "base.html" %}
 
   {% block title %}
-    Images Build Graph | MROCP
+    m2g | MROCP
   {% endblock title %}
 
-  {% block medheading %} Raw MR images to graphs pipeline {% endblock medheading %}
+  {% block medheading %} Multi-modal MRImages to graphs {% endblock medheading %}
 
   {% block content %}
     
 
-    TODO GK: Instruction for what everything in the form means <br>
+  The form below takes in raw structural MRI, diffusion MRI, and diffusion scan parameters to estimate brain graphs. 
+  The data requirements of this pipeline can be found on 
+  <a href="http://m2g.io/tutorials/basic_usage.html#m2g-complete-pipeline">our product page</a>. The atlas image can
+  be selected from a drop-down menu, for which the brain mask and corresponding labels are also defined. You may 
+  also select to use no region labels and generate a big graph, where each voxel represents a node in the graph.<br>
 
     <p>
      <form action="" class="nostyle" method="post" enctype="multipart/form-data" name="rawUploadForm"> <!-- TODO: onsubmit="validator"-->

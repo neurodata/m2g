@@ -219,8 +219,11 @@ class RawUploadForm(forms.Form):
   @cvar bs: The b value and b vector files
   @cvar atlas: The atlas with which to build the graph
   """
-  niftis = MultiFileField(min_num=1, max_num=3)
-  bs = MultiFileField(min_num=2, max_num=2, label="B value and vector")
+
+  dti = forms.FileField(required=True, label="DTI")
+  mprage  = forms.FileField(required=True, label="MPRAGE")
+  bvalue =  forms.FileField(required=True)
+  bvector = forms.FileField(required=True)
 
   graphsize = forms.ChoiceField(required=True, \
       widget=Select, choices=((True,"Big"), (False,"Small")), label="Graph size")

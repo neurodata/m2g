@@ -40,42 +40,40 @@ def raw_upload(request):
     form = RawUploadForm(request.POST, request.FILES) # instantiating form
     if form.is_valid():
       # TODO: Alter save path
-      data_dir = os.path.join(settings.MEDIA_ROOT, 'tmp', strftime("rawUpload%a%d%b%Y_%H.%M.%S/", localtime()))
+      data_dir = os.path.join(settings.MEDIA_ROOT, "c4", 
+                strftime("%a%d%b%Y_%H.%M.%S/", localtime()), "derivatives")
 
-      nifti_paths = [] # paths the nifti images
-      b_paths = [] # paths to b vals and vects
+      dti = form.cleaned_data["dti"]
+      mprage = form.cleaned_data["mprage"]
+      bvalue = form.cleaned_data["bvalue"]
+      bvector = form.cleaned_data["bvector"]
 
-      # Save niftis
-      for _file in form.cleaned_data["niftis"]:
-        nifti_paths.append(os.path.join(data_dir, _file.name))
-        saveFileToDisk(_file, nifti_paths[len(nifti_paths)-1])
-      # Save b's
-      for _file in form.cleaned_data["bs"]:
+      # Save all derivatives
+      for _file in dti, mprage, bvalue, bvector:
         saveFileToDisk(_file, os.path.join(data_dir, _file.name))
 
       ru_model = RawUploadModel()
-      ru_model.mpragepath = nifti_paths[0] if len(nifti_paths) > 0 else ""
-      ru_model.dtipath = nifti_paths[1] if len(nifti_paths) > 0 else ""
-      ru_model.fmripath = nifti_paths[2] if len(nifti_paths) > 0 else ""
+      ru_model.dtipath = os.path.join(data_dir, dti.name)
+      ru_model.mpragepath = os.path.join(data_dir, mprage.name)
       ru_model.atlas = form.cleaned_data["atlas"]
       ru_model.graphsize = "big" if form.cleaned_data["graphsize"] == True else "small"
       ru_model.email = form.cleaned_data["email"] 
       ru_model.save() # Sync to Db
+      #"""
 
-      thr = threading.Thread(target=runc4, args=(nifti_paths, b_paths, 
-            (form.cleaned_data["graphsize"], form.cleaned_data["atlas"]), 
-            form.cleaned_data["email"],))
+      thr = threading.Thread(target=runc4, args=(ru_model.dtipath, ru_model.mpragepath,
+          os.path.join(data_dir, bvalue.name), os.path.join(data_dir, bvector.name), 
+          form.cleaned_data["graphsize"], ru_model.atlas, form.cleaned_data["email"],))
       thr.start()
 
       """
-      runc4(nifti_paths, b_paths, opts=(form.cleaned_data["graphsize"], \
-                  form.cleaned_data["atlas"]), email=form.cleaned_data["email"])
+      runc4(ru_model.dtipath, ru_model.mpragepath,
+          os.path.join(data_dir, bvalue.name), os.path.join(data_dir, bvector.name), 
+          form.cleaned_data["graphsize"], ru_model.atlas, form.cleaned_data["email"])
       """
-
 
       sendEmail(form.cleaned_data["email"], "MR Images to graphs job started", 
               "Hello,\n\nYour job launched successfully. You will receive another email upon completion.\n\n")
-
 
       request.session["success_msg"] =\
 """
