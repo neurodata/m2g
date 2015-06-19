@@ -49,6 +49,13 @@ python ingest_graphs.py /data/ocp/bg1publicdata/graphs/
 
 You'll need to create the file $M2G_HOME/MR-OCP/MROCPdjango/ocpipeline/settings_secret.py and add the missing variables to it
 
+Add a python tmp dir bigger than /tmp and give yourself & the app rights:
+mkdir /data/pytmp
+
+Get the static files in place:
+cd $M2G_HOME/packages/utils
+python setup.py 
+
 Now you can:
 pyton manage.py runserver 8080
 
