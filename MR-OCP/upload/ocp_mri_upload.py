@@ -19,62 +19,94 @@
 # Created by Greg Kiar on 2015-07-01.
 # Email: gkiar@jhu.edu
 
+import numpy as np
+import urllib, urllib2
+import cStringIO
+import sys
+import tempfile
+import zlib
+
 from argparse import ArgumentParser
 
 def nifti_upload(infname, token):
-	from nibabel import load
-	from numpy import array
+  from nibabel import load
+  from numpy import array
 
-	print "Parsing nifti file..."
-	nifti_img = load(infname)
-	nifti_data = array(nifti_img.get_data())
+  print "Parsing nifti file..."
+  nifti_img = load(infname)
+  nifti_data = array(nifti_img.get_data())
 
-	#RB TODO: upload data
-	import pdb; pdb.set_trace()
-	
+  #RB TODO: upload data
+  import pdb; pdb.set_trace()
+
+  # build a URL
+  url = "{}/ocp/ocpca/{}/{}/npz/".format('http://rio.cs.jhu.edu','mniatlas','ssb')
+
+  # add dimensional arguments
+  url += "{}/{},{}/{},{}/{},{}/".format(0,0,182,0,218,0,182)
+
+  # encode numpy pick
+  fileobj = cStringIO.StringIO ()
+  np.save ( fileobj, nifti_data )
+  cdz = zlib.compress (fileobj.getvalue())
+
+  # Upload to server
+  try:
+    # Build the post request
+    req = urllib2.Request(url, cdz)
+    response = urllib2.urlopen(req)
+    the_page = response.read()
+  except urllib2.URLError, e:
+    print "Failed %s.  Exception %s." % (url,e)
+    sys.exit(-1)
+
+
+  
 def swc_upload(infname, token):
-	from contextlib import closing
+  from contextlib import closing
 
-	print "Parsing skeleton file..."
-	with closing(open(infname, mode="rb")) as fiber_f:
-		fdata = fiber_f.read()
-	lines = fdata.split("\n")
-	count = 0
-	for line in lines: #GK TODO: speed up; isn't huge deal because headers are short
-		if line[0] == "#":
-			count += 1
-		else:
-			break #this assumes no comments after header
+  print "Parsing skeleton file..."
+  with closing(open(infname, mode="rb")) as fiber_f:
+    fdata = fiber_f.read()
+  lines = fdata.split("\n")
+  count = 0
+  for line in lines: #GK TODO: speed up; isn't huge deal because headers are short
+    if line[0] == "#":
+      count += 1
+    else:
+      break #this assumes no comments after header
 
-	head = lines[:count]
-	skel = lines[count:]
+  head = lines[:count]
+  skel = lines[count:]
 
-	#Displaying shit to happy users :)
-	print "Header:"
-	for elem in head:
-		print elem
-	if len(skel) <= 2:
-		print "\nData: \n", skel[0], "\n..."
-	else:
-		print "\nData: \n", skel[0], "\n", skel[1], "\n..."
+  #Displaying shit to happy users :)
+  print "Header:"
+  for elem in head:
+    print elem
+  if len(skel) <= 2:
+    print "\nData: \n", skel[0], "\n..."
+  else:
+    print "\nData: \n", skel[0], "\n", skel[1], "\n..."
 
-	#RB TODO: upload data
-	import pdb; pdb.set_trace()
+  #RB TODO: upload data
+  import pdb; pdb.set_trace()
 
 def main():
-	parser = ArgumentParser(description="Allows users to upload nifti images to OCP")
-	parser.add_argument("data", action="store", help="Data which is to be uploaded")
-	parser.add_argument("token", action="store", help="token for the project which you're uploading to")
-	parser.add_argument("--formats", "-f", action="store", default="nifti", help="format: nifti, swc")
-	result = parser.parse_args()
-	
-	if result.formats == "nifti":
-		nifti_upload(result.data, result.token)
-	elif result.formats == "swc":
-		swc_upload(result.data, result.token)
-	else:
-		print 'Error: unknown format'
-		return -1
+  parser = ArgumentParser(description="Allows users to upload nifti images to OCP")
+  parser.add_argument("server", action="store", help="server http://...")
+  parser.add_argument("token", action="store", help="token for the project which you're uploading to")
+  parser.add_argument("channel", action="store", help="channel to which you're uploading")
+  parser.add_argument("data", action="store", help="Data which is to be uploaded")
+  parser.add_argument("--formats", "-f", action="store", default="nifti", help="format: nifti, swc")
+  result = parser.parse_args()
+  
+  if result.formats == "nifti":
+    nifti_upload(result.data, result.token)
+  elif result.formats == "swc":
+    swc_upload(result.data, result.token)
+  else:
+    print 'Error: unknown format'
+    return -1
 
 if __name__ == "__main__":
-	main()
+  main()
