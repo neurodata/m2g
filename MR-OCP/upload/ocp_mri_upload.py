@@ -36,14 +36,15 @@ def nifti_upload(infname, token):
   nifti_img = load(infname)
   nifti_data = array(nifti_img.get_data())
 
-  #RB TODO: upload data
-  import pdb; pdb.set_trace()
-
+  # GKTODO use actual command line parameters
   # build a URL
   url = "{}/ocp/ocpca/{}/{}/npz/".format('http://rio.cs.jhu.edu','mniatlas','ssb')
 
   # add dimensional arguments
   url += "{}/{},{}/{},{}/{},{}/".format(0,0,182,0,218,0,182)
+
+  # reshape the nifti data to include a channel dimension
+  nifti_data = np.uint16(nifti_data.reshape([1]+list(nifti_data.shape)))
 
   # encode numpy pick
   fileobj = cStringIO.StringIO ()
@@ -64,6 +65,24 @@ def nifti_upload(infname, token):
   
 def swc_upload(infname, token):
   from contextlib import closing
+
+  # GKTODO use actual command line parameters
+  # build a URL
+  url = "{}/ocpca/{}/{}/swc/".format('http://rio.cs.jhu.edu:8000','mniatlas','fibers')
+
+  with closing ( open(infname) ) as ifile:
+
+    # Upload to server
+    try:
+      # Build the post request
+      req = urllib2.Request(url, ifile.read())
+      response = urllib2.urlopen(req)
+      the_page = response.read()
+    except urllib2.URLError, e:
+      print "Failed %s.  Exception %s." % (url,e)
+      sys.exit(-1)
+
+  return
 
   print "Parsing skeleton file..."
   with closing(open(infname, mode="rb")) as fiber_f:
@@ -88,8 +107,6 @@ def swc_upload(infname, token):
   else:
     print "\nData: \n", skel[0], "\n", skel[1], "\n..."
 
-  #RB TODO: upload data
-  import pdb; pdb.set_trace()
 
 def main():
   parser = ArgumentParser(description="Allows users to upload nifti images to OCP")
