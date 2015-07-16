@@ -28,7 +28,7 @@ import zlib
 
 from argparse import ArgumentParser
 
-def nifti_upload(infname, token):
+def nifti_upload(infname, server, token, channel):
   from nibabel import load
   from numpy import array
 
@@ -38,13 +38,14 @@ def nifti_upload(infname, token):
 
   # GKTODO use actual command line parameters
   # build a URL
-  url = "{}/ocp/ocpca/{}/{}/npz/".format('http://rio.cs.jhu.edu','mniatlas','ssb')
+  #url = "{}/ocp/ocpca/{}/{}/npz/".format('http://rio.cs.jhu.edu',token,channel)
+  url = "{}/ocp/ocpca/{}/{}/npz/".format(server,token,channel)
 
   # add dimensional arguments
   url += "{}/{},{}/{},{}/{},{}/".format(0,0,182,0,218,0,182)
 
   # reshape the nifti data to include a channel dimension
-  nifti_data = np.uint16(nifti_data.reshape([1]+list(nifti_data.shape)))
+  nifti_data = np.transpose(np.uint16(nifti_data.reshape([1]+list(nifti_data.shape))))
 
   # encode numpy pick
   fileobj = cStringIO.StringIO ()
@@ -52,6 +53,7 @@ def nifti_upload(infname, token):
   cdz = zlib.compress (fileobj.getvalue())
 
   # Upload to server
+  print "Uploading data..."
   try:
     # Build the post request
     req = urllib2.Request(url, cdz)
@@ -118,7 +120,7 @@ def main():
   result = parser.parse_args()
   
   if result.formats == "nifti":
-    nifti_upload(result.data, result.token)
+    nifti_upload(result.data, result.server, result.token, result.channel)
   elif result.formats == "swc":
     swc_upload(result.data, result.token)
   else:
