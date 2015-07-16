@@ -34,7 +34,7 @@ def nifti_upload(infname, server, token, channel):
 
   print "Parsing nifti file..."
   nifti_img = load(infname)
-  nifti_data = array(nifti_img.get_data())
+  nifti_data = np.transpose(np.array(nifti_img.get_data()))
 
   # GKTODO use actual command line parameters
   # build a URL
@@ -45,8 +45,8 @@ def nifti_upload(infname, server, token, channel):
   url += "{}/{},{}/{},{}/{},{}/".format(0,0,182,0,218,0,182)
 
   # reshape the nifti data to include a channel dimension
-  nifti_data = np.transpose(np.uint16(nifti_data.reshape([1]+list(nifti_data.shape))))
-
+  nifti_data = np.uint16(nifti_data.reshape([1]+list(nifti_data.shape)))
+  
   # encode numpy pick
   fileobj = cStringIO.StringIO ()
   np.save ( fileobj, nifti_data )
