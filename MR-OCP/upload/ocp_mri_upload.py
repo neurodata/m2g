@@ -28,14 +28,13 @@ import zlib
 
 from argparse import ArgumentParser
 
-def nifti_upload(infname, server, token, channel):
+def nifti_upload(infname, server, token, channel, anno=False):
   from nibabel import load
-  from numpy import array
 
   print "Parsing nifti file..."
   nifti_img = load(infname)
-  nifti_data = np.transpose(np.array(nifti_img.get_data()))
-
+  nifti_data = np.array(nifti_img.get_data())
+  print nifti_img.get_affine()
   # GKTODO use actual command line parameters
   # build a URL
   #url = "{}/ocp/ocpca/{}/{}/npz/".format('http://rio.cs.jhu.edu',token,channel)
@@ -45,7 +44,12 @@ def nifti_upload(infname, server, token, channel):
   url += "{}/{},{}/{},{}/{},{}/".format(0,0,182,0,218,0,182)
 
   # reshape the nifti data to include a channel dimension
-  nifti_data = np.uint16(nifti_data.reshape([1]+list(nifti_data.shape)))
+  if anno :
+    print "Prepping annotation data..."
+    nifti_data = np.uint32(np.transpose(nifti_data).reshape([1]+list(nifti_data.shape)))
+  else :
+    print "Prepping image data..."
+    nifti_data = np.uint16(np.transpose(nifti_data).reshape([1]+list(nifti_data.shape)))
   
   # encode numpy pick
   fileobj = cStringIO.StringIO ()
@@ -65,18 +69,19 @@ def nifti_upload(infname, server, token, channel):
 
 
   
-def swc_upload(infname, token):
+def swc_upload(infname, server, token, channel):
   from contextlib import closing
-
+  print "Parsing swc fiber file..."
   # GKTODO use actual command line parameters
   # build a URL
-  url = "{}/ocpca/{}/{}/swc/".format('http://rio.cs.jhu.edu:8000','mniatlas','fibers')
+  url = "{}/ocpca/{}/{}/swc/".format(server,token,channel)
 
   with closing ( open(infname) ) as ifile:
 
     # Upload to server
     try:
       # Build the post request
+      import pdb; pdb.set_trace()
       req = urllib2.Request(url, ifile.read())
       response = urllib2.urlopen(req)
       the_page = response.read()
@@ -86,29 +91,6 @@ def swc_upload(infname, token):
 
   return
 
-  print "Parsing skeleton file..."
-  with closing(open(infname, mode="rb")) as fiber_f:
-    fdata = fiber_f.read()
-  lines = fdata.split("\n")
-  count = 0
-  for line in lines: #GK TODO: speed up; isn't huge deal because headers are short
-    if line[0] == "#":
-      count += 1
-    else:
-      break #this assumes no comments after header
-
-  head = lines[:count]
-  skel = lines[count:]
-
-  #Displaying shit to happy users :)
-  print "Header:"
-  for elem in head:
-    print elem
-  if len(skel) <= 2:
-    print "\nData: \n", skel[0], "\n..."
-  else:
-    print "\nData: \n", skel[0], "\n", skel[1], "\n..."
-
 
 def main():
   parser = ArgumentParser(description="Allows users to upload nifti images to OCP")
@@ -117,12 +99,16 @@ def main():
   parser.add_argument("channel", action="store", help="channel to which you're uploading")
   parser.add_argument("data", action="store", help="Data which is to be uploaded")
   parser.add_argument("--formats", "-f", action="store", default="nifti", help="format: nifti, swc")
+  parser.add_argument("--anno", "-a", action="store", default=False, help="image or annotation data")
   result = parser.parse_args()
   
+  if result.anno is not False:
+    result.anno = True
+
   if result.formats == "nifti":
-    nifti_upload(result.data, result.server, result.token, result.channel)
+    nifti_upload(result.data, result.server, result.token, result.channel, result.anno)
   elif result.formats == "swc":
-    swc_upload(result.data, result.token)
+    swc_upload(result.data, result.server, result.token, result.channel)
   else:
     print 'Error: unknown format'
     return -1
