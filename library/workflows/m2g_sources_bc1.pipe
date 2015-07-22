@@ -23,13 +23,13 @@
                 <connection source="FLIRTApplyxfm_1.Output" sink="FLIRTApplyxfm_2.Input" />
                 <connection source="FLIRT_2.OutputMatrixFile" sink="FLIRTApplyxfm_2.InitialMatrixFile" />
                 <connection source="Registration_1.Output" sink="DiffusionProcessing_1.DTIImage" />
-                <connection source="DiffusionPre-Processing_1.FormattedBvectors" sink="DiffusionProcessing_1.DTIGradients" />
                 <connection source="MNIbrainmask_1.Output" sink="DiffusionProcessing_1.BrainMask" />
                 <connection source="MNIbrainmask_1.Output" sink="DiffusionProcessing_1.BrainMask_2" />
                 <connection source="MNISmallGraphLabels_1.Output" sink="DiffusionProcessing_1.atlas" />
                 <connection source="MNIBigGraphLabels_1.Output" sink="DiffusionProcessing_1.atlas_2" />
-                <connection source="DiffusionPre-Processing_1.Bvalue" sink="DiffusionProcessing_1.DTIBvalue" />
                 <connection source="Registration_1.Flow_3" sink="DiffusionProcessing_1.flow" />
+                <connection source="DiffusionPre-Processing_1.OutputBvectors" sink="DiffusionProcessing_1.Bvectors" />
+                <connection source="DTIbvals_1.Output" sink="DiffusionProcessing_1.Bvalues" />
                 <connection source="TensorEstimation_1.DTItensors" sink="FiberTractography_1.DTITensors" />
                 <connection source="FiberTractography_1.DTIfibers" sink="FiberConvert_1.fiberinfile" />
                 <connection source="FiberConvert_1.fiberoutfile" sink="SmallGraphGeneration_1.fiberfile" />
@@ -192,13 +192,13 @@
                                 </metadata>
                                 <output link="ExtractB0_1.B0Volume" id="DiffusionPre-Processing_1.B0Volume" name="B0 Volume" order="0" />
                                 <output link="ExtractB0_1.Flow" id="DiffusionPre-Processing_1.Flow" name="Flow" order="1" />
-                                <output link="ParseB_1.FormattedBvectors" id="DiffusionPre-Processing_1.FormattedBvectors" name="Formatted B vectors" order="2" />
-                                <output link="ParseB_1.Bvalue" id="DiffusionPre-Processing_1.Bvalue" name="B value" order="3" />
                                 <output description="Specifies the output volume file path." link="EddyCorrect_1.Output" id="DiffusionPre-Processing_1.Output" name="Output" order="4" />
                                 <input link="ParseB_1.Bvalues" id="DiffusionPre-Processing_1.Bvalues" name="B values" order="5" />
                                 <input description="Specifies the input volume file path." link="EddyCorrect_1.Input" id="DiffusionPre-Processing_1.Input" name="Input" order="7" />
                                 <input link="ExtractB0_1.DTIVolumes" id="DiffusionPre-Processing_1.DTIVolumes" name="DTI Volumes" order="8" />
                                 <input link="ParseB_1.Bvectors" id="DiffusionPre-Processing_1.Bvectors" name="B vectors" order="8" />
+                                <output link="ParseB_1.OutputBvectors" id="DiffusionPre-Processing_1.OutputBvectors" name="Output B vectors" order="8" />
+                                <output link="ParseB_1.NumberofB0s" id="DiffusionPre-Processing_1.NumberofB0s" name="Number of B0s" order="9" />
                                 <module id="ExtractB0_1" name="Extract B0" package="m2g" icon="0" posX="386" posY="154" sourceCode="" location="pipeline://braincloud1.cs.jhu.edu//share0/m2g/src/m2g/packages/dtipreproc/extract_b0.py">
                                         <metadata>
                                                 <data key="__creationDateKey" value="Mon Apr 20 18:09:36 EDT 2015" />
@@ -226,6 +226,7 @@
                                         </output>
                                 </module>
                                 <module id="ParseB_1" name="Parse B" package="m2g" icon="0" posX="173" posY="61" rotation="1" sourceCode="" location="pipeline://braincloud1.cs.jhu.edu//share0/m2g/src/m2g/packages/dtipreproc/parse_b.py">
+                                        <tag />
                                         <metadata>
                                                 <data key="__creationDateKey" value="Fri May 08 09:13:39 EDT 2015" />
                                         </metadata>
@@ -236,16 +237,9 @@
                                                         </fileTypes>
                                                 </format>
                                         </input>
-                                        <output id="ParseB_1.FormattedBvectors" name="Formatted B vectors" required="false" enabled="true" order="2">
-                                                <format type="File" cardinality="1">
-                                                        <fileTypes>
-                                                                <filetype name="gradients" extension="grad" description="" />
-                                                        </fileTypes>
-                                                </format>
-                                        </output>
-                                        <output id="ParseB_1.Bvalue" name="B value" required="false" enabled="true" order="4">
+                                        <output id="ParseB_1.Bvalue" name="B value" required="false" enabled="false" order="4">
                                                 <format type="Number" cardinality="1" />
-                                                <stringExtract source="both" rule="stringMatch" startString="bvalue=(" endString=")" caseSensitive="false" />
+                                                <stringExtract source="both" rule="stringMatch" startString="First bvalue=(" endString=")" caseSensitive="false" />
                                         </output>
                                         <output id="ParseB_1.B0location" name="B0 location" required="false" enabled="true" order="3">
                                                 <format type="Number" cardinality="1" />
@@ -258,6 +252,17 @@
                                                         </fileTypes>
                                                 </format>
                                         </input>
+                                        <output id="ParseB_1.OutputBvectors" name="Output B vectors" required="false" enabled="true" order="2">
+                                                <format type="File" cardinality="1">
+                                                        <fileTypes>
+                                                                <filetype name="File" extension="" description="Any type of data file" />
+                                                        </fileTypes>
+                                                </format>
+                                        </output>
+                                        <output id="ParseB_1.NumberofB0s" name="Number of B0s" required="false" enabled="true" order="5">
+                                                <format type="Number" cardinality="1" />
+                                                <stringExtract source="both" rule="stringMatch" startString="Multiple B0s (1=no; 2=yes)=(" endString=")" caseSensitive="false" />
+                                        </output>
                                 </module>
                                 <module id="EddyCorrect_1" name="Eddy Correct" package="FSL" version="4.1.4" icon="1" posX="81" posY="354" sourceCode="" location="pipeline://braincloud1.cs.jhu.edu//share0/m2g/src/fsl/bin/eddy_correct" executableVersion="4.1.4">
                                         <authors>
@@ -1880,17 +1885,18 @@ innovation@isis.ox.ac.uk quoting reference BS/3497.</license>
                                         <data key="__creationDateKey" value="Wed Apr 22 09:19:06 EDT 2015" />
                                 </metadata>
                                 <input link="TensorEstimation_1.DTIImage" id="DiffusionProcessing_1.DTIImage" name="DTI Image" order="0" />
-                                <input link="TensorEstimation_1.DTIGradients" id="DiffusionProcessing_1.DTIGradients" name="DTI Gradients" order="1" />
                                 <input link="TensorEstimation_1.BrainMask" id="DiffusionProcessing_1.BrainMask" name="Brain Mask" order="2" />
                                 <input link="FiberTractography_1.BrainMask" id="DiffusionProcessing_1.BrainMask_2" name="Brain Mask" order="3" />
                                 <input link="SmallGraphGeneration_1.atlas" id="DiffusionProcessing_1.atlas" name="atlas" order="5" />
                                 <input link="BigGraphGeneration_1.atlas" id="DiffusionProcessing_1.atlas_2" name="atlas" order="5" />
-                                <input link="TensorEstimation_1.DTIBvalue" id="DiffusionProcessing_1.DTIBvalue" name="DTI Bvalue" order="6" />
                                 <output link="FiberConvert_1.fiberoutfile" id="DiffusionProcessing_1.fiberoutfile" name="fiber outfile" order="7" />
                                 <output link="SmallGraphGeneration_1.graphfile" id="DiffusionProcessing_1.graphfile" name="graph file" order="8" />
                                 <output link="BigGraphGeneration_1.graphfile" id="DiffusionProcessing_1.graphfile_2" name="graph file" order="8" />
                                 <input link="TensorEstimation_1.flow" id="DiffusionProcessing_1.flow" name="flow" order="10" />
+                                <input link="TensorEstimation_1.Bvectors" id="DiffusionProcessing_1.Bvectors" name="B vectors" order="10" />
+                                <input link="TensorEstimation_1.Bvalues" id="DiffusionProcessing_1.Bvalues" name="B values" order="10" />
                                 <module id="TensorEstimation_1" name="Tensor Estimation" package="m2g" icon="0" posX="63" posY="101" sourceCode="" location="pipeline://braincloud1.cs.jhu.edu//share0/m2g/src/m2g/packages/tractography/tensor_gen.py">
+                                        <tag />
                                         <metadata>
                                                 <data key="__creationDateKey" value="Fri Jan 09 11:38:39 EST 2015" />
                                         </metadata>
@@ -1901,16 +1907,6 @@ innovation@isis.ox.ac.uk quoting reference BS/3497.</license>
                                                                 <filetype name="nifti" extension="nii" description="" />
                                                         </fileTypes>
                                                 </format>
-                                        </input>
-                                        <input id="TensorEstimation_1.DTIGradients" name="DTI Gradients" required="true" enabled="true" order="1">
-                                                <format type="File" cardinality="1">
-                                                        <fileTypes>
-                                                                <filetype name="gradients" extension="grad" description="" />
-                                                        </fileTypes>
-                                                </format>
-                                        </input>
-                                        <input id="TensorEstimation_1.DTIBvalue" name="DTI Bvalue" required="false" enabled="true" order="2">
-                                                <format type="Number" cardinality="1" />
                                         </input>
                                         <input id="TensorEstimation_1.BrainMask" name="Brain Mask" required="false" enabled="true" order="3">
                                                 <format type="File" cardinality="1">
@@ -1966,6 +1962,20 @@ innovation@isis.ox.ac.uk quoting reference BS/3497.</license>
                                         </output>
                                         <input id="TensorEstimation_1.flow" name="flow" required="false" enabled="true" order="10">
                                                 <format type="Flow Control" cardinality="1" />
+                                        </input>
+                                        <input id="TensorEstimation_1.Bvectors" name="B vectors" required="true" enabled="true" order="1">
+                                                <format type="File" cardinality="1">
+                                                        <fileTypes>
+                                                                <filetype name="File" extension="" description="Any type of data file" />
+                                                        </fileTypes>
+                                                </format>
+                                        </input>
+                                        <input id="TensorEstimation_1.Bvalues" name="B values" required="false" enabled="true" order="2">
+                                                <format type="File" cardinality="1">
+                                                        <fileTypes>
+                                                                <filetype name="File" extension="" description="Any type of data file" />
+                                                        </fileTypes>
+                                                </format>
                                         </input>
                                 </module>
                                 <module id="FiberTractography_1" name="Fiber Tractography" package="m2g" icon="0" posX="230" posY="221" rotation="1" sourceCode="" location="pipeline://braincloud1.cs.jhu.edu//share0/m2g/src/m2g/packages/tractography/fiber_gen.py">
@@ -2193,7 +2203,6 @@ innovation@isis.ox.ac.uk quoting reference BS/3497.</license>
                                 </values>
                         </dataModule>
                         <dataModule id="MPRAGEinMNIspace_1" name="MPRAGE in MNI space" package="m2g" posX="671" posY="581" rotation="1" sourceCode="" type="File" source="false" loopIndex="false" serverAddress="braincloud1.cs.jhu.edu" dirDump="false">
-                                <tag />
                                 <metadata>
                                         <data key="__creationDateKey" value="Mon May 25 14:51:00 EDT 2015" />
                                 </metadata>
@@ -2258,12 +2267,12 @@ innovation@isis.ox.ac.uk quoting reference BS/3497.</license>
                         </dataModule>
                 </moduleGroup>
                 <variables>
-                        <variable name="MNI">/share0/m2g/src/m2g/data/Atlas/MNI152_T1_1mm.nii.gz</variable>
                         <variable name="bval">/share0/m2g/KKI2009/listfiles/b.list</variable>
-                        <variable name="grad">/share0/m2g/KKI2009/listfiles/grad.list</variable>
+                        <variable name="MNI">/share0/m2g/src/m2g/data/Atlas/MNI152_T1_1mm.nii.gz</variable>
                         <variable name="fibers">/share0/m2g/KKI2009/listfiles/fibers.list</variable>
-                        <variable name="dti">/share0/m2g/KKI2009/listfiles/dti.list</variable>
+                        <variable name="grad">/share0/m2g/KKI2009/listfiles/grad.list</variable>
                         <variable name="aligned">/share0/m2g/KKI2009/listfiles/aligned_dti.list</variable>
+                        <variable name="dti">/share0/m2g/KKI2009/listfiles/dti.list</variable>
                         <variable name="sglabels">/share0/m2g/src/m2g/data/Atlas/MNI152_T1_1mm_desikan_adjusted.nii</variable>
                         <variable name="bg">/share0/m2g/KKI2009/listfiles/bg.list</variable>
                         <variable name="MNImask">/share0/m2g/src/m2g/data/Atlas/MNI152_T1_1mm_brain_mask.nii</variable>
