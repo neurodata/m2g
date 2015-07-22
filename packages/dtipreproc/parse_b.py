@@ -43,13 +43,21 @@ def read_bvals(b_in):
 					- Location of the first B0 volume
 			B: [int]
 					- Field intensity
+			Multiple B0s: [int]
+					- Acts as a flag indicating whether multiple B0 scans exist within the set.
 	"""
 	b = loadtxt(b_in)
 	b0 = int(where(b==0)[0][0])
 	bvalue = int(b[where(b!=0)[0][0]])
-	
+	lenb =  len(where(b==0)[0])
+	if lenb > 1:
+		lenb = 2
+	else :
+		lenb = 1
+
 	system("echo 'b0=("+str(b0)+")'")
-	system("echo 'bvalue=("+str(bvalue)+")'")
+	system("echo 'First bvalue=("+str(bvalue)+")'")
+	system("echo 'Multiple B0s (1=no; 2=yes)=("+str(lenb)+")'")
 
 def format_bvec(b_in, b_out):	
 	"""
@@ -59,16 +67,16 @@ def format_bvec(b_in, b_out):
 	
 	**Positional Arguments**
 	
-			B-vectors: [.bvec, .grad; ASCII file]
+			B-vectors: [(bvec), .grad; ASCII file]
 					- Gradient directions of scanner corresponding to the b-values
 
 	**Returns**
 
-			Gradients: [.grad; ASCII file]
+			Gradients: [(bvec); ASCII file]
 					- Reformatted B-vectors file which is compatible with downstream processing algorithms
 	"""
 	b = loadtxt(b_in)
-	if b.shape[0] < b.shape[1]:
+	if b.shape[1] < b.shape[0]:
 		b = b.T
 	savetxt(b_out, b,  fmt='%.18f')
 
