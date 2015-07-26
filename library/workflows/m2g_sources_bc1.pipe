@@ -226,7 +226,6 @@
                                         </output>
                                 </module>
                                 <module id="ParseB_1" name="Parse B" package="m2g" icon="0" posX="173" posY="61" rotation="1" sourceCode="" location="pipeline://braincloud1.cs.jhu.edu//share0/m2g/src/m2g/packages/dtipreproc/parse_b.py">
-                                        <tag />
                                         <metadata>
                                                 <data key="__creationDateKey" value="Fri May 08 09:13:39 EDT 2015" />
                                         </metadata>
@@ -1896,7 +1895,6 @@ innovation@isis.ox.ac.uk quoting reference BS/3497.</license>
                                 <input link="TensorEstimation_1.Bvectors" id="DiffusionProcessing_1.Bvectors" name="B vectors" order="10" />
                                 <input link="TensorEstimation_1.Bvalues" id="DiffusionProcessing_1.Bvalues" name="B values" order="10" />
                                 <module id="TensorEstimation_1" name="Tensor Estimation" package="m2g" icon="0" posX="63" posY="101" sourceCode="" location="pipeline://braincloud1.cs.jhu.edu//share0/m2g/src/m2g/packages/tractography/tensor_gen.py">
-                                        <tag />
                                         <metadata>
                                                 <data key="__creationDateKey" value="Fri Jan 09 11:38:39 EST 2015" />
                                         </metadata>
@@ -2083,7 +2081,8 @@ innovation@isis.ox.ac.uk quoting reference BS/3497.</license>
                                                 <format type="Flow Control" cardinality="1" />
                                         </input>
                                 </module>
-                                <module id="BigGraphGeneration_1" name="Big Graph Generation" package="m2g" icon="0" posX="828" posY="393" rotation="1" sourceCode="" location="pipeline://braincloud1.cs.jhu.edu//share0/m2g/src/m2g/MR-OCP/mrcap/gengraph.py">
+                                <module id="BigGraphGeneration_1" name="Big Graph Generation" package="m2g" icon="0" posX="828" posY="393" rotation="1" sourceCode="" location="pipeline://braincloud1.cs.jhu.edu//share0/m2g/src/m2g/MR-OCP/mrcap/gengraph.py" gridVariables="-l virtual_free=16G">
+                                        <tag />
                                         <metadata>
                                                 <data key="__creationDateKey" value="Sun Jan 11 17:53:43 EST 2015" />
                                         </metadata>
@@ -2267,12 +2266,12 @@ innovation@isis.ox.ac.uk quoting reference BS/3497.</license>
                         </dataModule>
                 </moduleGroup>
                 <variables>
-                        <variable name="bval">/share0/m2g/KKI2009/listfiles/b.list</variable>
                         <variable name="MNI">/share0/m2g/src/m2g/data/Atlas/MNI152_T1_1mm.nii.gz</variable>
-                        <variable name="fibers">/share0/m2g/KKI2009/listfiles/fibers.list</variable>
+                        <variable name="bval">/share0/m2g/KKI2009/listfiles/b.list</variable>
                         <variable name="grad">/share0/m2g/KKI2009/listfiles/grad.list</variable>
-                        <variable name="aligned">/share0/m2g/KKI2009/listfiles/aligned_dti.list</variable>
+                        <variable name="fibers">/share0/m2g/KKI2009/listfiles/fibers.list</variable>
                         <variable name="dti">/share0/m2g/KKI2009/listfiles/dti.list</variable>
+                        <variable name="aligned">/share0/m2g/KKI2009/listfiles/aligned_dti.list</variable>
                         <variable name="sglabels">/share0/m2g/src/m2g/data/Atlas/MNI152_T1_1mm_desikan_adjusted.nii</variable>
                         <variable name="bg">/share0/m2g/KKI2009/listfiles/bg.list</variable>
                         <variable name="MNImask">/share0/m2g/src/m2g/data/Atlas/MNI152_T1_1mm_brain_mask.nii</variable>
