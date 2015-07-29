@@ -1,0 +1,653 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<pipeline version=".2">
+        <connections>
+                <connection source="echo_2.output" sink="antsRegistration_3.initialtransformfixedimage" />
+                <connection source="echo_1.output" sink="antsRegistration_3.initialtransformmovingimage" />
+                <connection source="echo_2.output" sink="antsRegistration_3.mattes_tfixedimage" />
+                <connection source="echo_1.output" sink="antsRegistration_3.mattes_tmovingimage" />
+                <connection source="echo_2.output" sink="antsRegistration_3.mattes_rfixedimage" />
+                <connection source="echo_1.output" sink="antsRegistration_3.mattes_rmovingimage" />
+                <connection source="echo_2.output" sink="antsRegistration_3.mattes_afixedimage" />
+                <connection source="echo_1.output" sink="antsRegistration_3.mattes_amovingimage" />
+                <connection source="echo_2.output" sink="antsRegistration_3.mattes_synfixedimage" />
+                <connection source="echo_1.output" sink="antsRegistration_3.mattes_synmovingimage" />
+                <connection source="echo_2.output" sink="antsRegistration_3.cc_synfixedimage" />
+                <connection source="echo_1.output" sink="antsRegistration_3.cc_synmovingimage" />
+                <connection source="echo_3.output" sink="antsApplyTransforms_1.inputimage" />
+                <connection source="echo_2.output" sink="antsApplyTransforms_1.referenceimage" />
+                <connection source="antsRegistration_3.outputtransform" sink="antsApplyTransforms_1.transform" />
+                <connection source="antsRegistration_3.outputalignedimage" sink="antsApplyTransforms_1.outputimage" />
+        </connections>
+        <moduleGroup id="antsRegistration_1" name="antsRegistration" package="ANTS" posX="0" posY="0" sourceCode="">
+                <tag />
+                <metadata>
+                        <data key="__creationDateKey" value="Wed Jul 29 15:34:44 EDT 2015" />
+                </metadata>
+                <moduleGroup id="antsRegistration_2" name="antsRegistration" package="ANTS" version="2.1.0-1.c0c854" posX="286" posY="264" sourceCode="">
+                        <tag />
+                        <metadata>
+                                <data key="__creationDateKey" value="Wed Jul 29 15:21:46 EDT 2015" />
+                        </metadata>
+                        <input link="echo_2.input" id="antsRegistration_2.input" name="input" order="0" />
+                        <input link="echo_1.input" id="antsRegistration_2.input_2" name="input" order="1" />
+                        <output link="antsRegistration_3.outputtransform" id="antsRegistration_2.outputtransform" name="output transform" order="2" />
+                        <output link="antsRegistration_3.outputalignedimage" id="antsRegistration_2.outputalignedimage" name="output aligned image" order="3" />
+                        <input description="scalar/vector/tensor/time-series" link="antsApplyTransforms_1.imagetype" id="antsRegistration_2.imagetype" name="image type" order="5" />
+                        <input link="echo_3.input" id="antsRegistration_2.input_3" name="input" order="1" />
+                        <module id="echo_1" name="echo" package="sys" posX="623" posY="20" sourceCode="" location="pipeline://localhost/echo">
+                                <metadata>
+                                        <data key="__creationDateKey" value="Wed Jul 29 13:07:26 EDT 2015" />
+                                </metadata>
+                                <input id="echo_1.input" name="input" required="false" enabled="true" order="0" includeTransformedParameter="true">
+                                        <format type="String" cardinality="1">
+                                                <transform order="1" operation="Append">*1*</transform>
+                                                <transform order="2" operation="Prepend">*0*</transform>
+                                        </format>
+                                        <values>
+                                                <value>b0</value>
+                                        </values>
+                                </input>
+                                <output id="echo_1.output" name="output" required="false" enabled="true" order="1">
+                                        <format type="String" cardinality="1" />
+                                        <stringExtract source="stdout" rule="stringMatch" startString="*0*" endString="*1*" caseSensitive="false" />
+                                </output>
+                        </module>
+                        <module id="antsRegistration_3" name="antsRegistration" package="ANTS" version="2.1.0-1.c0c854" posX="0" posY="400" sourceCode="" location="pipeline://localhost/echo">
+                                <tag />
+                                <metadata>
+                                        <data key="__creationDateKey" value="Wed Jul 29 09:53:16 EDT 2015" />
+                                </metadata>
+                                <input id="antsRegistration_3.dimensionality" name="dimensionality" description="(default=3)" required="false" enabled="true" order="1" prefix="-d" prefixSpaced="true" prefixAllArgs="false">
+                                        <format type="Enumerated" cardinality="1">
+                                                <enumeration>2</enumeration>
+                                                <enumeration>3</enumeration>
+                                        </format>
+                                        <values>
+                                                <value>3</value>
+                                        </values>
+                                </input>
+                                <input id="antsRegistration_3.initialtransformfixedimage" name="initial transform fixed image" required="false" enabled="true" order="2" prefix="-r" prefixSpaced="true" prefixAllArgs="false" includeTransformedParameter="true">
+                                        <format type="String" cardinality="1">
+                                                <transform order="0" operation="Append">,</transform>
+                                                <transform order="1" operation="Prepend">[</transform>
+                                        </format>
+                                        <dependencies>
+                                                <dependent>mattes_t fixed image</dependent>
+                                        </dependencies>
+                                </input>
+                                <input id="antsRegistration_3.initialtransformmovingimage" name="initial transform moving image" required="false" enabled="true" order="3" includeTransformedParameter="true">
+                                        <format type="String" cardinality="1">
+                                                <transform order="0" operation="Append">,</transform>
+                                        </format>
+                                        <dependencies>
+                                                <dependent>mattes_t moving image</dependent>
+                                        </dependencies>
+                                </input>
+                                <input id="antsRegistration_3.initialtransforminitializationfeature" name="initial transform initialization feature" description="(default=1)" required="false" enabled="true" order="4" includeTransformedParameter="true">
+                                        <format type="Number" cardinality="1">
+                                                <transform order="0" operation="Append">]</transform>
+                                        </format>
+                                        <values>
+                                                <value>1</value>
+                                        </values>
+                                </input>
+                                <input id="antsRegistration_3.mattes_tfixedimage" name="mattes_t fixed image" required="false" enabled="true" order="5" prefix="-m" prefixSpaced="true" prefixAllArgs="false" includeTransformedParameter="true">
+                                        <format type="String" cardinality="1">
+                                                <transform order="0" operation="Prepend">mattes[</transform>
+                                                <transform order="1" operation="Append">,</transform>
+                                        </format>
+                                        <dependencies>
+                                                <dependsOn>initial transform fixed image</dependsOn>
+                                        </dependencies>
+                                </input>
+                                <input id="antsRegistration_3.mattes_tmovingimage" name="mattes_t moving image" required="false" enabled="true" order="6" includeTransformedParameter="true">
+                                        <format type="String" cardinality="1">
+                                                <transform order="1" operation="Append">,</transform>
+                                        </format>
+                                        <dependencies>
+                                                <dependsOn>initial transform moving image</dependsOn>
+                                        </dependencies>
+                                </input>
+                                <input id="antsRegistration_3.mattes_tmetricweight" name="mattes_t metric weight" description="(default=1)" required="false" enabled="true" order="7" includeTransformedParameter="true">
+                                        <format type="Number" cardinality="1">
+                                                <transform order="1" operation="Append">,</transform>
+                                        </format>
+                                        <values>
+                                                <value>1</value>
+                                        </values>
+                                </input>
+                                <input id="antsRegistration_3.DELETEME" name="DELETEME" required="false" enabled="true" order="0">
+                                        <format type="String" cardinality="1" />
+                                        <values>
+                                                <value>antsRegistration</value>
+                                        </values>
+                                </input>
+                                <input id="antsRegistration_3.mattes_tnumberofbins" name="mattes_t number of bins" description="(default=32)" required="false" enabled="true" order="8" includeTransformedParameter="true">
+                                        <format type="Number" cardinality="1">
+                                                <transform order="1" operation="Append">,</transform>
+                                        </format>
+                                        <values>
+                                                <value>32</value>
+                                        </values>
+                                </input>
+                                <input id="antsRegistration_3.mattes_tsamplingstragegy" name="mattes_t sampling stragegy" description="(default=32)" required="false" enabled="true" order="9" includeTransformedParameter="true">
+                                        <format type="Enumerated" cardinality="1">
+                                                <enumeration>regular</enumeration>
+                                                <enumeration>none</enumeration>
+                                                <enumeration>random</enumeration>
+                                                <transform order="1" operation="Append">,</transform>
+                                        </format>
+                                        <values>
+                                                <value>regular</value>
+                                        </values>
+                                </input>
+                                <input id="antsRegistration_3.mattes_tsamplingpercentage" name="mattes_t sampling percentage" description="(default=0.1)" required="false" enabled="true" order="10" includeTransformedParameter="true">
+                                        <format type="Number" cardinality="1">
+                                                <transform order="0" operation="Append">]</transform>
+                                        </format>
+                                        <values>
+                                                <value>0.1</value>
+                                        </values>
+                                </input>
+                                <input id="antsRegistration_3.gradientstep_t" name="gradient step_t" description="(default=0.1)" required="false" enabled="true" order="11" prefix="-t" prefixSpaced="true" prefixAllArgs="false" includeTransformedParameter="true">
+                                        <format type="Number" cardinality="1">
+                                                <transform order="0" operation="Prepend">translation[</transform>
+                                                <transform order="1" operation="Append">]</transform>
+                                        </format>
+                                        <values>
+                                                <value>0.1</value>
+                                        </values>
+                                </input>
+                                <input id="antsRegistration_3.convergence_tMxNxO" name="convergence_t MxNxO" description="(default=10000x0x0)" required="false" enabled="true" order="12" prefix="-c" prefixSpaced="true" prefixAllArgs="false" includeTransformedParameter="true">
+                                        <format type="String" cardinality="1">
+                                                <transform order="0" operation="Prepend">[</transform>
+                                                <transform order="1" operation="Append">,</transform>
+                                        </format>
+                                        <values>
+                                                <value>10000x0x0</value>
+                                        </values>
+                                </input>
+                                <input id="antsRegistration_3.convergence_tthreshold" name="convergence_t threshold" description="(default=1.e-8)" required="false" enabled="true" order="13" includeTransformedParameter="false">
+                                        <format type="String" cardinality="1">
+                                                <transform order="0" operation="Append">,</transform>
+                                        </format>
+                                        <values>
+                                                <value>1.e-8</value>
+                                        </values>
+                                </input>
+                                <input id="antsRegistration_3.convergence_twindowsize" name="convergence_t window size" description="(default=20)" required="false" enabled="true" order="14" includeTransformedParameter="true">
+                                        <format type="Number" cardinality="1">
+                                                <transform order="0" operation="Append">]</transform>
+                                        </format>
+                                        <values>
+                                                <value>20</value>
+                                        </values>
+                                </input>
+                                <output id="antsRegistration_3.printthisall" name="printthisall" required="false" enabled="true" order="66">
+                                        <format type="String" cardinality="1" />
+                                        <stringExtract source="stdout" rule="stringMatch" startString="" endString="" caseSensitive="false" />
+                                </output>
+                                <input id="antsRegistration_3.smoothingsigmas_tMxNxO" name="smoothing sigmas_t MxNxO" description="(default=4x2x1vox)" required="false" enabled="true" order="15" prefix="-s" prefixSpaced="true" prefixAllArgs="false">
+                                        <format type="String" cardinality="1" />
+                                        <values>
+                                                <value>4x2x1vox</value>
+                                        </values>
+                                </input>
+                                <input id="antsRegistration_3.shrinkfactors_tMxNxO" name="shrink factors_t MxNxO" description="(default=6x4x2)" required="false" enabled="true" order="16" prefix="-f" prefixSpaced="true" prefixAllArgs="false">
+                                        <format type="String" cardinality="1" />
+                                        <values>
+                                                <value>6x4x2</value>
+                                        </values>
+                                </input>
+                                <input id="antsRegistration_3.learningrate_t" name="learning rate_t" description="(default=1)" required="false" enabled="true" order="17" prefix="-l" prefixSpaced="true" prefixAllArgs="false">
+                                        <format type="Number" cardinality="1" />
+                                        <values>
+                                                <value>1</value>
+                                        </values>
+                                </input>
+                                <input id="antsRegistration_3.mattes_rfixedimage" name="mattes_r fixed image" required="false" enabled="true" order="18" prefix="-m" prefixSpaced="true" prefixAllArgs="false" includeTransformedParameter="true">
+                                        <format type="String" cardinality="1">
+                                                <transform order="0" operation="Prepend">mattes[</transform>
+                                                <transform order="1" operation="Append">,</transform>
+                                        </format>
+                                </input>
+                                <input id="antsRegistration_3.mattes_rmovingimage" name="mattes_r moving image" required="false" enabled="true" order="19" includeTransformedParameter="true">
+                                        <format type="String" cardinality="1">
+                                                <transform order="1" operation="Append">,</transform>
+                                        </format>
+                                </input>
+                                <input id="antsRegistration_3.mattes_rmetricweight" name="mattes_r metric weight" description="(default=1)" required="false" enabled="true" order="20" includeTransformedParameter="true">
+                                        <format type="Number" cardinality="1">
+                                                <transform order="1" operation="Append">,</transform>
+                                        </format>
+                                        <values>
+                                                <value>1</value>
+                                        </values>
+                                </input>
+                                <input id="antsRegistration_3.mattes_rnumberofbins" name="mattes_r number of bins" description="(default=32)" required="false" enabled="true" order="21" includeTransformedParameter="true">
+                                        <format type="Number" cardinality="1">
+                                                <transform order="1" operation="Append">,</transform>
+                                        </format>
+                                        <values>
+                                                <value>32</value>
+                                        </values>
+                                </input>
+                                <input id="antsRegistration_3.mattes_rsamplingstragegy" name="mattes_r sampling stragegy" description="(default=32)" required="false" enabled="true" order="22" includeTransformedParameter="true">
+                                        <format type="Enumerated" cardinality="1">
+                                                <enumeration>regular</enumeration>
+                                                <enumeration>none</enumeration>
+                                                <enumeration>random</enumeration>
+                                                <transform order="1" operation="Append">,</transform>
+                                        </format>
+                                        <values>
+                                                <value>regular</value>
+                                        </values>
+                                </input>
+                                <input id="antsRegistration_3.mattes_rsamplingpercentage" name="mattes_r sampling percentage" description="(default=0.1)" required="false" enabled="true" order="23" includeTransformedParameter="true">
+                                        <format type="Number" cardinality="1">
+                                                <transform order="0" operation="Append">]</transform>
+                                        </format>
+                                        <values>
+                                                <value>0.1</value>
+                                        </values>
+                                </input>
+                                <input id="antsRegistration_3.gradientstep_r" name="gradient step_r" description="(default=0.1)" required="false" enabled="true" order="24" prefix="-t" prefixSpaced="true" prefixAllArgs="false" includeTransformedParameter="true">
+                                        <format type="Number" cardinality="1">
+                                                <transform order="1" operation="Append">]</transform>
+                                                <transform order="2" operation="Prepend">rigid[</transform>
+                                        </format>
+                                        <values>
+                                                <value>0.1</value>
+                                        </values>
+                                </input>
+                                <input id="antsRegistration_3.convergence_rMxNxO" name="convergence_r MxNxO" description="(default=10000x0x0)" required="false" enabled="true" order="25" prefix="-c" prefixSpaced="true" prefixAllArgs="false" includeTransformedParameter="true">
+                                        <format type="String" cardinality="1">
+                                                <transform order="0" operation="Prepend">[</transform>
+                                                <transform order="1" operation="Append">,</transform>
+                                        </format>
+                                        <values>
+                                                <value>10000x0x0</value>
+                                        </values>
+                                </input>
+                                <input id="antsRegistration_3.convergence_rthreshold" name="convergence_r threshold" description="(default=1.e-8)" required="false" enabled="true" order="26" includeTransformedParameter="false">
+                                        <format type="String" cardinality="1">
+                                                <transform order="0" operation="Append">,</transform>
+                                        </format>
+                                        <values>
+                                                <value>1.e-8</value>
+                                        </values>
+                                </input>
+                                <input id="antsRegistration_3.convergence_rwindowsize" name="convergence_r window size" description="(default=20)" required="false" enabled="true" order="27" includeTransformedParameter="true">
+                                        <format type="Number" cardinality="1">
+                                                <transform order="0" operation="Append">]</transform>
+                                        </format>
+                                        <values>
+                                                <value>20</value>
+                                        </values>
+                                </input>
+                                <input id="antsRegistration_3.smoothingsigmas_rMxNxO" name="smoothing sigmas_r MxNxO" description="(default=4x2x1vox)" required="false" enabled="true" order="28" prefix="-s" prefixSpaced="true" prefixAllArgs="false">
+                                        <format type="String" cardinality="1" />
+                                        <values>
+                                                <value>4x2x1vox</value>
+                                        </values>
+                                </input>
+                                <input id="antsRegistration_3.shrinkfactors_rMxNxO" name="shrink factors_r MxNxO" description="(default=3x2x1)" required="false" enabled="true" order="29" prefix="-f" prefixSpaced="true" prefixAllArgs="false">
+                                        <format type="String" cardinality="1" />
+                                        <values>
+                                                <value>3x2x1</value>
+                                        </values>
+                                </input>
+                                <input id="antsRegistration_3.learningrate_r" name="learning rate_r" description="(default=1)" required="false" enabled="true" order="30" prefix="-l" prefixSpaced="true" prefixAllArgs="false">
+                                        <format type="Number" cardinality="1" />
+                                        <values>
+                                                <value>1</value>
+                                        </values>
+                                </input>
+                                <input id="antsRegistration_3.mattes_afixedimage" name="mattes_a fixed image" required="false" enabled="true" order="31" prefix="-m" prefixSpaced="true" prefixAllArgs="false" includeTransformedParameter="true">
+                                        <format type="String" cardinality="1">
+                                                <transform order="0" operation="Prepend">mattes[</transform>
+                                                <transform order="1" operation="Append">,</transform>
+                                        </format>
+                                </input>
+                                <input id="antsRegistration_3.mattes_amovingimage" name="mattes_a moving image" required="false" enabled="true" order="32" includeTransformedParameter="true">
+                                        <format type="String" cardinality="1">
+                                                <transform order="1" operation="Append">,</transform>
+                                        </format>
+                                </input>
+                                <input id="antsRegistration_3.mattes_ametricweight" name="mattes_a metric weight" description="(default=1)" required="false" enabled="true" order="33" includeTransformedParameter="true">
+                                        <format type="Number" cardinality="1">
+                                                <transform order="1" operation="Append">,</transform>
+                                        </format>
+                                        <values>
+                                                <value>1</value>
+                                        </values>
+                                </input>
+                                <input id="antsRegistration_3.mattes_anumberofbins" name="mattes_a number of bins" description="(default=32)" required="false" enabled="true" order="34" includeTransformedParameter="true">
+                                        <format type="Number" cardinality="1">
+                                                <transform order="1" operation="Append">,</transform>
+                                        </format>
+                                        <values>
+                                                <value>32</value>
+                                        </values>
+                                </input>
+                                <input id="antsRegistration_3.mattes_asamplingstragegy" name="mattes_a sampling stragegy" description="(default=32)" required="false" enabled="true" order="35" includeTransformedParameter="true">
+                                        <format type="Enumerated" cardinality="1">
+                                                <enumeration>regular</enumeration>
+                                                <enumeration>none</enumeration>
+                                                <enumeration>random</enumeration>
+                                                <transform order="1" operation="Append">,</transform>
+                                        </format>
+                                        <values>
+                                                <value>regular</value>
+                                        </values>
+                                </input>
+                                <input id="antsRegistration_3.mattes_asamplingpercentage" name="mattes_a sampling percentage" description="(default=0.1)" required="false" enabled="true" order="36" includeTransformedParameter="true">
+                                        <format type="Number" cardinality="1">
+                                                <transform order="0" operation="Append">]</transform>
+                                        </format>
+                                        <values>
+                                                <value>0.1</value>
+                                        </values>
+                                </input>
+                                <input id="antsRegistration_3.gradientstep_a" name="gradient step_a" description="(default=0.1)" required="false" enabled="true" order="37" prefix="-t" prefixSpaced="true" prefixAllArgs="false" includeTransformedParameter="true">
+                                        <format type="Number" cardinality="1">
+                                                <transform order="1" operation="Append">]</transform>
+                                                <transform order="2" operation="Prepend">affine[</transform>
+                                        </format>
+                                        <values>
+                                                <value>0.1</value>
+                                        </values>
+                                </input>
+                                <input id="antsRegistration_3.convergence_aMxNxO" name="convergence_a MxNxO" description="(default=10000x0x0)" required="false" enabled="true" order="38" prefix="-c" prefixSpaced="true" prefixAllArgs="false" includeTransformedParameter="true">
+                                        <format type="String" cardinality="1">
+                                                <transform order="0" operation="Prepend">[</transform>
+                                                <transform order="1" operation="Append">,</transform>
+                                        </format>
+                                        <values>
+                                                <value>10000x0x0</value>
+                                        </values>
+                                </input>
+                                <input id="antsRegistration_3.convergence_athreshold" name="convergence_a threshold" description="(default=1.e-8)" required="false" enabled="true" order="39" includeTransformedParameter="false">
+                                        <format type="String" cardinality="1">
+                                                <transform order="0" operation="Append">,</transform>
+                                        </format>
+                                        <values>
+                                                <value>1.e-8</value>
+                                        </values>
+                                </input>
+                                <input id="antsRegistration_3.convergence_awindowsize" name="convergence_a window size" description="(default=20)" required="false" enabled="true" order="40" includeTransformedParameter="true">
+                                        <format type="Number" cardinality="1">
+                                                <transform order="0" operation="Append">]</transform>
+                                        </format>
+                                        <values>
+                                                <value>20</value>
+                                        </values>
+                                </input>
+                                <input id="antsRegistration_3.smoothingsigmas_aMxNxO" name="smoothing sigmas_a MxNxO" description="(default=4x2x1vox)" required="false" enabled="true" order="41" prefix="-s" prefixSpaced="true" prefixAllArgs="false">
+                                        <format type="String" cardinality="1" />
+                                        <values>
+                                                <value>4x2x1vox</value>
+                                        </values>
+                                </input>
+                                <input id="antsRegistration_3.shrinkfactors_aMxNxO" name="shrink factors_a MxNxO" description="(default=3x2x1)" required="false" enabled="true" order="42" prefix="-f" prefixSpaced="true" prefixAllArgs="false">
+                                        <format type="String" cardinality="1" />
+                                        <values>
+                                                <value>3x2x1</value>
+                                        </values>
+                                </input>
+                                <input id="antsRegistration_3.learningrate_a" name="learning rate_a" description="(default=1)" required="false" enabled="true" order="43" prefix="-l" prefixSpaced="true" prefixAllArgs="false">
+                                        <format type="Number" cardinality="1" />
+                                        <values>
+                                                <value>1</value>
+                                        </values>
+                                </input>
+                                <input id="antsRegistration_3.mattes_synfixedimage" name="mattes_syn fixed image" required="false" enabled="true" order="44" prefix="-m" prefixSpaced="true" prefixAllArgs="false" includeTransformedParameter="true">
+                                        <format type="String" cardinality="1">
+                                                <transform order="0" operation="Prepend">mattes[</transform>
+                                                <transform order="1" operation="Append">,</transform>
+                                        </format>
+                                </input>
+                                <input id="antsRegistration_3.mattes_synmovingimage" name="mattes_syn moving image" required="false" enabled="true" order="45" includeTransformedParameter="true">
+                                        <format type="String" cardinality="1">
+                                                <transform order="1" operation="Append">,</transform>
+                                        </format>
+                                </input>
+                                <input id="antsRegistration_3.mattes_synmetricweight" name="mattes_syn metric weight" description="(default=0.5)" required="false" enabled="true" order="46" includeTransformedParameter="true">
+                                        <format type="Number" cardinality="1">
+                                                <transform order="1" operation="Append">,</transform>
+                                        </format>
+                                        <values>
+                                                <value>0.5</value>
+                                        </values>
+                                </input>
+                                <input id="antsRegistration_3.mattes_synnumberofbins" name="mattes_syn number of bins" description="(default=32)" required="false" enabled="true" order="47" includeTransformedParameter="true">
+                                        <format type="Number" cardinality="1">
+                                                <transform order="1" operation="Append">]</transform>
+                                        </format>
+                                        <values>
+                                                <value>32</value>
+                                        </values>
+                                </input>
+                                <input id="antsRegistration_3.cc_synfixedimage" name="cc_syn fixed image" required="false" enabled="true" order="48" prefix="-m" prefixSpaced="true" prefixAllArgs="false" includeTransformedParameter="true">
+                                        <format type="String" cardinality="1">
+                                                <transform order="1" operation="Append">,</transform>
+                                                <transform order="2" operation="Prepend">cc[</transform>
+                                        </format>
+                                </input>
+                                <input id="antsRegistration_3.cc_synmovingimage" name="cc_syn moving image" required="false" enabled="true" order="49" includeTransformedParameter="true">
+                                        <format type="String" cardinality="1">
+                                                <transform order="1" operation="Append">,</transform>
+                                        </format>
+                                </input>
+                                <input id="antsRegistration_3.cc_synmetricweight" name="cc_syn metric weight" description="(default=0.5)" required="false" enabled="true" order="50" includeTransformedParameter="true">
+                                        <format type="Number" cardinality="1">
+                                                <transform order="1" operation="Append">,</transform>
+                                        </format>
+                                        <values>
+                                                <value>0.5</value>
+                                        </values>
+                                </input>
+                                <input id="antsRegistration_3.cc_synnumberofbins" name="cc_syn number of bins" description="(default=4)" required="false" enabled="true" order="51" includeTransformedParameter="true">
+                                        <format type="Number" cardinality="1">
+                                                <transform order="0" operation="Append">]</transform>
+                                        </format>
+                                        <values>
+                                                <value>4</value>
+                                        </values>
+                                </input>
+                                <input id="antsRegistration_3.gradientstep_syn" name="gradient step_syn" description="(default=0.2)" required="false" enabled="true" order="52" prefix="-t" prefixSpaced="true" prefixAllArgs="false" includeTransformedParameter="true">
+                                        <format type="Number" cardinality="1">
+                                                <transform order="2" operation="Prepend">SyN[</transform>
+                                                <transform order="2" operation="Append">,</transform>
+                                        </format>
+                                        <values>
+                                                <value>0.2</value>
+                                        </values>
+                                </input>
+                                <input id="antsRegistration_3.updatevariance_syn" name="update variance_syn" description="(default=3)" required="false" enabled="true" order="53" includeTransformedParameter="true">
+                                        <format type="Number" cardinality="1">
+                                                <transform order="0" operation="Append">,</transform>
+                                        </format>
+                                        <values>
+                                                <value>3</value>
+                                        </values>
+                                </input>
+                                <input id="antsRegistration_3.totalvariance_syn" name="total variance_syn" description="(default=0)" required="false" enabled="true" order="54" includeTransformedParameter="true">
+                                        <format type="Number" cardinality="1">
+                                                <transform order="1" operation="Append">]</transform>
+                                        </format>
+                                        <values>
+                                                <value>0.0</value>
+                                        </values>
+                                </input>
+                                <input id="antsRegistration_3.convergence_synMxNxO" name="convergence_syn MxNxO" description="(default=100x0x0)" required="false" enabled="true" order="55" prefix="-c" prefixSpaced="true" prefixAllArgs="false" includeTransformedParameter="true">
+                                        <format type="String" cardinality="1">
+                                                <transform order="0" operation="Prepend">[</transform>
+                                                <transform order="1" operation="Append">,</transform>
+                                        </format>
+                                        <values>
+                                                <value>100x0x0</value>
+                                        </values>
+                                </input>
+                                <input id="antsRegistration_3.convergence_synthreshold" name="convergence_syn threshold" description="(default=0)" required="false" enabled="true" order="56" includeTransformedParameter="false">
+                                        <format type="String" cardinality="1">
+                                                <transform order="0" operation="Append">,</transform>
+                                        </format>
+                                        <values>
+                                                <value>0</value>
+                                        </values>
+                                </input>
+                                <input id="antsRegistration_3.convergence_synwindowsize" name="convergence_syn window size" description="(default=5)" required="false" enabled="true" order="57" includeTransformedParameter="true">
+                                        <format type="Number" cardinality="1">
+                                                <transform order="0" operation="Append">]</transform>
+                                        </format>
+                                        <values>
+                                                <value>5</value>
+                                        </values>
+                                </input>
+                                <input id="antsRegistration_3.smoothingsigmas_synMxNxO" name="smoothing sigmas_syn MxNxO" description="(default=1x0.5x0vox)" required="false" enabled="true" order="58" prefix="-s" prefixSpaced="true" prefixAllArgs="false">
+                                        <format type="String" cardinality="1" />
+                                        <values>
+                                                <value>1x0.5x0vox</value>
+                                        </values>
+                                </input>
+                                <input id="antsRegistration_3.shrinkfactors_synMxNxO" name="shrink factors_syn MxNxO" description="(default=4x2x1)" required="false" enabled="true" order="59" prefix="-f" prefixSpaced="true" prefixAllArgs="false">
+                                        <format type="String" cardinality="1" />
+                                        <values>
+                                                <value>4x2x1</value>
+                                        </values>
+                                </input>
+                                <input id="antsRegistration_3.learningrate_syn" name="learning rate_syn" description="(default=1)" required="false" enabled="true" order="60" prefix="-l" prefixSpaced="true" prefixAllArgs="false">
+                                        <format type="Number" cardinality="1" />
+                                        <values>
+                                                <value>1</value>
+                                        </values>
+                                </input>
+                                <input id="antsRegistration_3.hisogrammatching_syn" name="hisogram matching_syn" description="(default=1)" required="false" enabled="true" order="61" prefix="-u" prefixSpaced="true" prefixAllArgs="false">
+                                        <format type="Number" cardinality="1" />
+                                        <values>
+                                                <value>1</value>
+                                        </values>
+                                </input>
+                                <input id="antsRegistration_3.collapseoutputtransforms" name="collapse output transforms" description="(default=1)" required="false" enabled="true" order="62" prefix="-z" prefixSpaced="true" prefixAllArgs="false">
+                                        <format type="Number" cardinality="1" />
+                                        <values>
+                                                <value>1</value>
+                                        </values>
+                                </input>
+                                <output id="antsRegistration_3.outputtransform" name="output transform" required="false" enabled="true" order="63" prefix="-o" prefixSpaced="true" prefixAllArgs="false" includeTransformedParameter="true">
+                                        <format type="String" cardinality="1" transformationBase="mattes_t moving image">
+                                                <transform order="0" operation="Prepend">[</transform>
+                                                <transform order="1" operation="Subtract">.gz</transform>
+                                                <transform order="2" operation="Subtract">.nii</transform>
+                                                <transform order="3" operation="Append">_xfm</transform>
+                                                <transform order="4" operation="Append">,</transform>
+                                        </format>
+                                </output>
+                                <output id="antsRegistration_3.outputalignedimage" name="output aligned image" required="false" enabled="true" order="64" includeTransformedParameter="true">
+                                        <format type="String" cardinality="1" transformationBase="mattes_t moving image">
+                                                <transform order="1" operation="Subtract">.gz</transform>
+                                                <transform order="2" operation="Subtract">.nii</transform>
+                                                <transform order="3" operation="Append">_aligned.nii.gz</transform>
+                                                <transform order="3" operation="Append">,</transform>
+                                        </format>
+                                </output>
+                                <output id="antsRegistration_3.outputinvertedfixedimage" name="output inverted fixed image" required="false" enabled="true" order="65" includeTransformedParameter="true">
+                                        <format type="String" cardinality="1" transformationBase="mattes_t fixed image">
+                                                <transform order="1" operation="Subtract">.gz</transform>
+                                                <transform order="2" operation="Subtract">.nii</transform>
+                                                <transform order="3" operation="Append">_inverted.nii.gz</transform>
+                                                <transform order="4" operation="Append">]</transform>
+                                        </format>
+                                </output>
+                        </module>
+                        <module id="echo_2" name="echo" package="sys" posX="428" posY="20" sourceCode="" location="pipeline://localhost/echo">
+                                <metadata>
+                                        <data key="__creationDateKey" value="Wed Jul 29 13:07:26 EDT 2015" />
+                                </metadata>
+                                <input id="echo_2.input" name="input" required="false" enabled="true" order="0" includeTransformedParameter="true">
+                                        <format type="String" cardinality="1">
+                                                <transform order="1" operation="Append">*1*</transform>
+                                                <transform order="2" operation="Prepend">*0*</transform>
+                                        </format>
+                                        <values>
+                                                <value>mprage</value>
+                                        </values>
+                                </input>
+                                <output id="echo_2.output" name="output" required="false" enabled="true" order="1">
+                                        <format type="String" cardinality="1" />
+                                        <stringExtract source="stdout" rule="stringMatch" startString="*0*" endString="*1*" caseSensitive="false" />
+                                </output>
+                        </module>
+                        <module id="antsApplyTransforms_1" name="antsApplyTransforms" package="ANTS" version="2.1.0-1.c0c854" posX="420" posY="560" sourceCode="" location="pipeline://localhost/">
+                                <tag />
+                                <metadata>
+                                        <data key="__creationDateKey" value="Wed Jul 29 15:24:22 EDT 2015" />
+                                </metadata>
+                                <input id="antsApplyTransforms_1.dimensions" name="dimensions" required="false" enabled="true" order="0" prefix="-d" prefixSpaced="true" prefixAllArgs="false">
+                                        <format type="Enumerated" cardinality="1">
+                                                <enumeration>3</enumeration>
+                                                <enumeration>2</enumeration>
+                                        </format>
+                                        <values>
+                                                <value>3</value>
+                                        </values>
+                                </input>
+                                <input id="antsApplyTransforms_1.imagetype" name="image type" description="scalar/vector/tensor/time-series" required="false" enabled="true" order="1" prefix="-e" prefixSpaced="true" prefixAllArgs="false">
+                                        <format type="Enumerated" cardinality="1">
+                                                <enumeration>0</enumeration>
+                                                <enumeration>1</enumeration>
+                                                <enumeration>2</enumeration>
+                                                <enumeration>3</enumeration>
+                                        </format>
+                                        <values>
+                                                <value>3</value>
+                                        </values>
+                                </input>
+                                <input id="antsApplyTransforms_1.inputimage" name="input image" required="false" enabled="true" order="2" prefix="-i" prefixSpaced="true" prefixAllArgs="false">
+                                        <format type="String" cardinality="1" />
+                                </input>
+                                <input id="antsApplyTransforms_1.referenceimage" name="reference image" required="false" enabled="true" order="3" prefix="-r" prefixSpaced="true" prefixAllArgs="false">
+                                        <format type="String" cardinality="1" />
+                                </input>
+                                <input id="antsApplyTransforms_1.interpolation" name="interpolation" required="false" enabled="true" order="4" prefix="-n" prefixSpaced="true" prefixAllArgs="false">
+                                        <format type="Enumerated" cardinality="1">
+                                                <enumeration>linear</enumeration>
+                                                <enumeration>nearestneighbor</enumeration>
+                                                <enumeration>hammingwindowedsinc</enumeration>
+                                                <enumeration>cosinewindowedsinc</enumeration>
+                                                <enumeration>welchwindowedsinc</enumeration>
+                                        </format>
+                                        <values>
+                                                <value>linear</value>
+                                        </values>
+                                </input>
+                                <input id="antsApplyTransforms_1.transform" name="transform" required="false" enabled="true" order="5" prefix="-t" prefixSpaced="true" prefixAllArgs="false">
+                                        <format type="String" cardinality="1" />
+                                </input>
+                                <input id="antsApplyTransforms_1.outputimage" name="output image" required="false" enabled="true" order="6" prefix="-o" prefixSpaced="true" prefixAllArgs="false">
+                                        <format type="String" cardinality="1" />
+                                </input>
+                        </module>
+                        <module id="echo_3" name="echo" package="sys" posX="787" posY="18" sourceCode="" location="pipeline://localhost/echo">
+                                <metadata>
+                                        <data key="__creationDateKey" value="Wed Jul 29 13:07:26 EDT 2015" />
+                                </metadata>
+                                <input id="echo_3.input" name="input" required="false" enabled="true" order="0" includeTransformedParameter="true">
+                                        <format type="String" cardinality="1">
+                                                <transform order="1" operation="Append">*1*</transform>
+                                                <transform order="2" operation="Prepend">*0*</transform>
+                                        </format>
+                                        <values>
+                                                <value>dti</value>
+                                        </values>
+                                </input>
+                                <output id="echo_3.output" name="output" required="false" enabled="true" order="1">
+                                        <format type="String" cardinality="1" />
+                                        <stringExtract source="stdout" rule="stringMatch" startString="*0*" endString="*1*" caseSensitive="false" />
+                                </output>
+                        </module>
+                </moduleGroup>
+        </moduleGroup>
+</pipeline>
+
