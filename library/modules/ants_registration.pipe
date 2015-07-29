@@ -34,7 +34,7 @@
                         <output link="antsRegistration_3.outputalignedimage" id="antsRegistration_2.outputalignedimage" name="output aligned image" order="3" />
                         <input description="scalar/vector/tensor/time-series" link="antsApplyTransforms_1.imagetype" id="antsRegistration_2.imagetype" name="image type" order="5" />
                         <input link="echo_3.input" id="antsRegistration_2.input_3" name="input" order="1" />
-                        <module id="echo_1" name="echo" package="sys" posX="623" posY="20" sourceCode="" location="pipeline://localhost/echo">
+                        <module id="echo_1" name="echo" package="sys" posX="952" posY="286" sourceCode="" location="pipeline://localhost/echo">
                                 <metadata>
                                         <data key="__creationDateKey" value="Wed Jul 29 13:07:26 EDT 2015" />
                                 </metadata>
@@ -52,7 +52,7 @@
                                         <stringExtract source="stdout" rule="stringMatch" startString="*0*" endString="*1*" caseSensitive="false" />
                                 </output>
                         </module>
-                        <module id="antsRegistration_3" name="antsRegistration" package="ANTS" version="2.1.0-1.c0c854" posX="0" posY="400" sourceCode="" location="pipeline://localhost/echo">
+                        <module id="antsRegistration_3" name="antsRegistration" package="ANTS" version="2.1.0-1.c0c854" posX="329" posY="666" sourceCode="" location="pipeline://localhost/echo">
                                 <tag />
                                 <metadata>
                                         <data key="__creationDateKey" value="Wed Jul 29 09:53:16 EDT 2015" />
@@ -561,7 +561,7 @@
                                         </format>
                                 </output>
                         </module>
-                        <module id="echo_2" name="echo" package="sys" posX="428" posY="20" sourceCode="" location="pipeline://localhost/echo">
+                        <module id="echo_2" name="echo" package="sys" posX="757" posY="286" sourceCode="" location="pipeline://localhost/echo">
                                 <metadata>
                                         <data key="__creationDateKey" value="Wed Jul 29 13:07:26 EDT 2015" />
                                 </metadata>
@@ -579,7 +579,7 @@
                                         <stringExtract source="stdout" rule="stringMatch" startString="*0*" endString="*1*" caseSensitive="false" />
                                 </output>
                         </module>
-                        <module id="antsApplyTransforms_1" name="antsApplyTransforms" package="ANTS" version="2.1.0-1.c0c854" posX="420" posY="560" sourceCode="" location="pipeline://localhost/">
+                        <module id="antsApplyTransforms_1" name="antsApplyTransforms" package="ANTS" version="2.1.0-1.c0c854" posX="749" posY="826" sourceCode="" location="pipeline://localhost/echo">
                                 <tag />
                                 <metadata>
                                         <data key="__creationDateKey" value="Wed Jul 29 15:24:22 EDT 2015" />
@@ -629,7 +629,7 @@
                                         <format type="String" cardinality="1" />
                                 </input>
                         </module>
-                        <module id="echo_3" name="echo" package="sys" posX="787" posY="18" sourceCode="" location="pipeline://localhost/echo">
+                        <module id="echo_3" name="echo" package="sys" posX="1116" posY="284" sourceCode="" location="pipeline://localhost/echo">
                                 <metadata>
                                         <data key="__creationDateKey" value="Wed Jul 29 13:07:26 EDT 2015" />
                                 </metadata>
