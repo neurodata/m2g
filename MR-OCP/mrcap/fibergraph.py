@@ -80,8 +80,9 @@ class _FiberGraph(object):
     self.graph["DOI"] = "10.1109/GlobalSIP.2013.6736878" # Migraine paper
 
     print "Deleting zero-degree nodes..."
-    zero_deg_nodes = np.where( np.array(self.graph.degree()) == 0 )[0]
-    self.graph.delete_vertices(zero_deg_nodes)
+    #zero_deg_nodes = np.where( np.array(self.graph.degree()) == 0 )[0]
+    #self.graph.delete_vertices(zero_deg_nodes)
+    self.graph.delete_vertices(0) #delete just 0 region
 
     print "Graph summary:"
     print self.graph.summary()
