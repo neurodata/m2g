@@ -20,27 +20,48 @@
 
 source('/Users/gkiar/code/m2g/analysis/reliability.R') #need to fix hard paths
 source('/Users/gkiar/code/m2g/analysis/load_graphs.R')
-dir = '/Users/gkiar/code/scratch/smg'
 
-format = 'graphml' #graph format
-rois = 70 #number of regions in graphs
-scans = 2 #scans per subject
+dir <- '/Users/gkiar/code/scratch/smg'
+format <- 'graphml' #graph format
+rois <- 70 #number of regions in graphs
+scans <- 2 #scans per subject
 rule <- list('_', 2, 3) #subject id rule in the form of: delimiter, start, end
 
 if (format != 'graphml') {
   stop('Currently support only exists for graphml format. Sorry') 
 }
 
+#get list of graph files
 cur <- getwd()
 setwd(dir)
 format <- paste('\\.', format, '$', sep='')
 graph_files <- list.files(pattern=format, recursive=TRUE)
 
+#load graph and id pairs from files
 pair <- load_graphs(graph_files, rois)
 pair <- remove_nulls(pair[[1]], pair[[2]])
 graphs <- pair[[1]]
 ids <- clean_ids(pair[[2]], rule)
 
+#compute RDF and MNR for raw graphs
 dist <- compute_distance(graphs)
 rdf <- compute_rdf(dist, ids, scans)
 mnr <- compute_mnr(rdf)
+
+#compute RDF and MNR for log graphs
+log_graphs <- log(graphs+array(rep(1, length(graphs)), dim(graphs)), base=10)
+logdist <- compute_distance(log_graphs)
+logrdf <- compute_rdf(logdist, ids, scans)
+logmnr <- compute_mnr(logrdf)
+
+#find nbin* through means of optimizing MNR
+rank_graphs <- rank_matrices(graphs, normalize=TRUE)
+stack <- compute_nbinstar(rank_graphs, ids, scans=2, N=16, spacing="linear", lim=4900)
+
+#compile results
+reliability <- c( mnr, logmnr, stack[[4]] )
+names(reliability) <-c( 'raw', 'log_raw', stack[[5]] )
+
+#plot + compare the results
+qplot(seq_along(reliability), reliability, ylim=range(c(0.9, 1))) + scale_x_discrete(labels = names(reliability)) +
+  ggtitle("MNR of SWU_4 DTI dataset through m2g") + xlab('number of bins')
