@@ -37,18 +37,23 @@ compute_rdf <- function(dist, ids, scans=2) {
   return(rdf)
 }
 
-compute_mnr <- function(rdf, remove_outliers=TRUE, thresh=0.5) {
+compute_mnr <- function(rdf, remove_outliers=TRUE, thresh=0.5, output=FALSE) {
   if (remove_outliers) {
     mnr <- mean(rdf[which(rdf[!is.nan(rdf)] > thresh)])
-    ol = length(which(rdf<thresh))
-    nopair = length(rdf[is.nan(rdf)])
-    print(paste('Graphs with unique ids:',nopair))
-    print(paste('Graphs with mnr <',thresh,'(outliers):', ol))
-    print(paste('Remaining graphs available for processing:', length(rdf)-ol-nopair))
+    ol <- length(which(rdf<thresh))
+    if (output) {
+      print(paste('Graphs with reliability <',thresh,'(outliers):', ol))
+    }
   } else {
+    ol <- 0
     mnr <- mean(rdf[!is.nan(rdf)])
   }
-  print(paste('MNR:', mnr))
+  nopair <- length(rdf[is.nan(rdf)])
+  if (output) {
+    print(paste('Graphs with unique ids:',nopair))
+    print(paste('Graphs available for reliability analysis:', length(rdf)-ol-nopair))
+    print(paste('MNR:', mnr))
+  }
   return(mnr)
 }
 
@@ -62,4 +67,54 @@ compute_distance <- function(graphs, normx='F') {
   }
   dist <- dist + t(dist)
   return(dist)
+}
+
+rank_matrices <- function(graphs, normalize=FALSE) {
+  d <- dim(graphs)
+  rg <- array(rep(NaN, d[1]*d[2]*d[3]), d)
+  for (i in 1:d[3]) {
+    rg[,,i] <- array(rank(graphs[,,i], ties.method="average"), c(d[1], d[2]))
+    if (normalize) {
+      rg[,,i] <- ( rg[,,i] - min(rg[,,i]) ) / (max(rg[,,i]) - min(rg[,,i]))
+    }
+  }
+  return(rg)
+}
+
+compute_nbinstar <- function(graphs, ids, scans=2, N=100, spacing='linear', lim=0) {
+  require(emdbook)
+  if (spacing != 'log' && spacing != 'linear') {
+    stop(paste('Unknown spacing type:', spacing))
+  }
+  d <- dim(graphs)
+  king <- 0
+  if (lim) {
+    set <- unique(round(lseq(2, lim, N)))
+  } else {
+    set <- 2:N
+  }
+  mnrs <- array(rep(NA, length(set)), length(set))
+  print(set)
+  for (i in set) {
+    if (spacing=='log') {
+      bs <- lseq(1/i, 1-1/i, i-1)
+    } else {
+      bs <- seq(1/i, 1-1/i, length.out=i-1)
+    }
+    tempg <- array(rep(0, d[1]*d[2]*d[3]), d)
+    for (j in 1:length(bs)) {
+      tempg <- tempg + (graphs > bs[j])
+    }
+    tempd <- compute_distance(tempg, norm='F')
+    mnrs[i] <- compute_mnr(compute_rdf(tempd, ids, scans))
+    print(mnrs[i])
+    if (mnrs[i] > king) {
+      king <- mnrs[i]
+      kingbins <- bs
+      kingrdf <-compute_rdf(tempd, ids, scans)
+    }
+  }
+  mnrs<-mnrs[which(!is.na(mnrs))]
+  pack <- list(king, kingbins, kingrdf, mnrs, set)
+  return(pack)
 }
