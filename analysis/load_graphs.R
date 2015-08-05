@@ -23,12 +23,14 @@ load_graphs <- function(fnames, rois, thresh=1e6) {
   N <- length(fnames)
   size <- 0
   edges <- 0
+  fail <- 0
   graphs <- array(rep(NaN, rois*rois*N), c(rois, rois, N))
   ids <- array(NaN, N)
   for (i in 1:N) {
     res <- try(tempg <- read.graph(fnames[i], format='graphml'))
     if (inherits(res, 'try-error')) {
-      print(paste('The following graph failed to load:', fnames[i]))
+      # warning(paste('The following graph failed to load:', fnames[i]))
+      fail <- fail + 1
     }
     else {
       tempg <- get.adjacency(tempg, type='upper', attr='weight', sparse=FALSE)
@@ -47,6 +49,7 @@ load_graphs <- function(fnames, rois, thresh=1e6) {
     }
   }
   print(paste('Total number of graphs found:', N))
+  print(paste('Number of graphs which failed to load: ', fail))
   print(paste('Graphs with improper dimensions: ', size))
   print(paste('Graphs with less than', thresh, 'edges:', edges))
   N2 <- N - size - edges
