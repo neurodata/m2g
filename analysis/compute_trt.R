@@ -62,6 +62,13 @@ stack <- compute_nbinstar(rank_graphs, ids, scans=2, N=16, spacing="linear", lim
 reliability <- c( mnr, logmnr, stack[[4]] )
 names(reliability) <-c( 'raw', 'log_raw', stack[[5]] )
 
+hist <- rbind(rdf, logrdf, stack[[3]])
+
 #plot + compare the results
 qplot(seq_along(reliability), reliability, ylim=range(c(0.9, 1))) + scale_x_discrete(labels = names(reliability)) +
   ggtitle("MNR of SWU_4 DTI dataset through m2g") + xlab('number of bins')
+
+plot(stats::density(logrdf[which(!is.nan(logrdf))])) +  title('RDF')
+lines(stats::density(stack[[3]][which(!is.nan(stack[[3]]))]), col=2)
+lines(stats::density(logrdf[which(!is.nan(logrdf))]), col=3)
+legend('topleft', c('raw', 'log_raw', 'nbin*'))
