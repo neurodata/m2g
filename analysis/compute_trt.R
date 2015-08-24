@@ -18,8 +18,8 @@
 # Email: gkiar@jhu.edu
 # Copyright (c) 2015. All rights reserved.
 
-source('/Users/gkiar/code/m2g/analysis/reliability.R') #need to fix hard paths
-source('/Users/gkiar/code/m2g/analysis/load_graphs.R')
+source('/Users/gkiar/code/ocp/FlashR/stats/reliability.R') #need to fix hard paths
+source('/Users/gkiar/code/ocp/m2g/analysis/load_graphs.R')
 
 dir <- '/Users/gkiar/code/scratch/smg'
 format <- 'graphml' #graph format
