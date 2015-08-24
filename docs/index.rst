@@ -37,7 +37,7 @@
 .. raw:: html
 
   <hr>
-  <p>This page describes how brain graphs are generated in our service from Diffusion Weighted MRI (dMRI), and structural MRI (sMRI) images of human brains, as well as a template atlas (MNI152, for instance). The MRImages to Graphs (m2g) pipeline is the successor of MRCAP and MIGRAINE. m2g combines dMRI and sMRI data from a single subject to estimate a high-level connectome. The connectomes returned describe regions of connectivity within the brain at multiple levels of resolution - from a single voxel scale ~1 mm<sup>3</sup> to large cortical regions ~20 cm<sup>3</sup>.</p>
+  <p>This page describes how brain graphs are generated in our service from Diffusion Weighted MRI (dMRI), and structural MRI (sMRI) images of human brains, as well as a template atlas (MNI152, for instance). The MRImages to Graphs (m2g) pipeline is the successor of MRCAP and MIGRAINE. m2g combines dMRI and sMRI data from a single subject to estimate a high-level connectome. The connectomes returned describe regions of connectivity within the brain at multiple levels of resolution in the form of a graph - where a node ranges from a single voxel scale ~1 mm<sup>3</sup> to large cortical regions ~20 cm<sup>3</sup>.</p>
 
   <p> m2g has been developed in the LONI pipelining environment. This environment facilitates modular construction, and all workflows and modules are command-line executable. This makes m2g efficient and allows users or researchers to modify algorithms for their specific requirements. </p>
   
