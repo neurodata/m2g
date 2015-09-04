@@ -83,6 +83,10 @@ class _FiberGraph(object):
     zero_deg_nodes = np.where( np.array(self.graph.degree()) == 0 )[0]
     self.graph.delete_vertices(zero_deg_nodes)
 
+    # Annotate graph with ecount and vcount for ingest speed
+    self.graph["vcount"] = self.graph.vcount()
+    self.graph["ecount"] = self.graph.ecount()
+
     print "Graph summary:"
     print self.graph.summary()
     print
