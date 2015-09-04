@@ -1,0 +1,62 @@
+== This is a clean Ubuntu 15.04 install ==
+
+- get pip installed
+- download git repo to a location which we will call M2G_HOME
+- set the environment variable M2G_HOME to wherever the git repo is
+
+apt-get install -y build-essential python-dev r-base r-base-dev
+Within R install igraph: install.packages("igraph")
+
+apt-get install -y mysql-server mysql-client libmysqlclient-dev sudo libxml2-dev
+
+pip install --upgrade cython numpy scipy rpy2 argparse nibabel django django-registration-redux django-tables2 python-igraph mysql-python
+
+Wihin mysql as the root user:
+create database DB_NAME;
+create user "DB_USER"@"localhost" identified by "DB_PWD";
+grant all on DB_NAME.* to "DB_USER";
+
+clone the repo:
+git clone 
+
+install the zindex package:
+cd $M2G_HOME/MR-OCP/mrcap
+sudo python setup.py install
+
+Create this directory and give yourself ownership:
+/data/ocp/bg1publicdata/graphs
+
+cd $M2G_HOME/MR-OCP/MROCPdjango
+python manage.py collecstatic
+python manage.py syncdb # you'll get an error - just ignore it
+python manage.py syncdb # yes do it again
+
+get some graphs to show up on the downloads page:
+cd /data/ocp/bg1publicdata/graphs
+mkdir human macaque worm
+
+now make & save some dummy graph within R:
+require(igraph)
+g <- erdos.renyi.game(10, .2)
+write.graph(g, "human/test.graphml", format="graphml")
+write.graph(g, "macaque/test.graphml", format="graphml")
+write.graph(g, "worm/test.graphml", format="graphml")
+quit("no")
+
+now get the graphs into the DB:
+cd $M2G_HOME/MR-OCP/MROCPdjango/ocpipeline/utils
+python ingest_graphs.py /data/ocp/bg1publicdata/graphs/
+
+You'll need to create the file $M2G_HOME/MR-OCP/MROCPdjango/ocpipeline/settings_secret.py and add the missing variables to it
+
+Add a python tmp dir bigger than /tmp and give yourself & the app rights:
+mkdir /data/pytmp
+
+Get the static files in place:
+cd $M2G_HOME/packages/utils
+python setup.py 
+
+Now you can:
+pyton manage.py runserver 8080
+
+And open localhost:8080 on a browser
