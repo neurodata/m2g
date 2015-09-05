@@ -7,7 +7,7 @@ Within R install version 3.2+ igraph: install.packages("igraph")
 
 apt-get install -y mysql-server mysql-client libmysqlclient-dev sudo libxml2-dev git
 
-pip install --upgrade cython numpy scipy rpy2 argparse nibabel django django-registration-redux django-tables2 python-igraph mysql-python
+pip install -U cython numpy scipy rpy2 argparse nibabel django django-registration-redux django-tables2 python-igraph mysql-python requests
 
 Wihin mysql as the root user:
 create database DB_NAME;
@@ -59,3 +59,9 @@ Now you can:
 pyton manage.py runserver 8080
 
 And open localhost:8080 on a browser
+
+## For server ##
+
+apt-get install libffi-dev libssl-dev
+apt-get install nginx uwsgi
+pip install -U uwsgi pyopenssl ndg-httpsclient pyasn1
