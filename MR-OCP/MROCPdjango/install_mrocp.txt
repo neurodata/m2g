@@ -26,7 +26,7 @@ Create this directory and give yourself ownership:
 /data/ocp/bg1publicdata/graphs
 
 cd $M2G_HOME/MR-OCP/MROCPdjango
-python manage.py collecstatic
+python manage.py collectstatic
 python manage.py syncdb # you'll get an error - just ignore it
 python manage.py syncdb # yes do it again
 
