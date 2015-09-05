@@ -5,7 +5,7 @@ apt-get install -y build-essential python-dev r-base r-base-dev
 Within R install version 3.2+ igraph: install.packages("igraph")
   - #howto: http://stackoverflow.com/questions/10476713/how-to-upgrade-r-in-ubuntu
 
-apt-get install -y mysql-server mysql-client libmysqlclient-dev sudo libxml2-dev
+apt-get install -y mysql-server mysql-client libmysqlclient-dev sudo libxml2-dev git
 
 pip install --upgrade cython numpy scipy rpy2 argparse nibabel django django-registration-redux django-tables2 python-igraph mysql-python
 
