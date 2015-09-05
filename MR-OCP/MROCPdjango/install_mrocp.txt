@@ -1,9 +1,6 @@
 == This is a clean Ubuntu 15.04 install ==
 
 - get pip installed
-- download git repo to a location which we will call M2G_HOME
-- set the environment variable M2G_HOME to wherever the git repo is
-
 apt-get install -y build-essential python-dev r-base r-base-dev
 Within R install version 3.2+ igraph: install.packages("igraph")
   - #howto: http://stackoverflow.com/questions/10476713/how-to-upgrade-r-in-ubuntu
@@ -18,7 +15,8 @@ create user "DB_USER"@"localhost" identified by "DB_PWD";
 grant all on DB_NAME.* to "DB_USER";
 
 clone the repo:
-git clone 
+- download git repo to a location which we will call M2G_HOME
+- set the environment variable M2G_HOME to wherever the git repo is
 
 install the zindex package:
 cd $M2G_HOME/MR-OCP/mrcap
