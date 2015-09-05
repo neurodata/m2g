@@ -63,5 +63,5 @@ And open localhost:8080 on a browser
 ## For server ##
 
 apt-get install libffi-dev libssl-dev
-apt-get install nginx uwsgi
+apt-get install nginx uwsgi uwsgi-plugin-python
 pip install -U uwsgi pyopenssl ndg-httpsclient pyasn1
