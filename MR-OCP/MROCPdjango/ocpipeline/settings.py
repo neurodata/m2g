@@ -165,6 +165,7 @@ INSTALLED_APPS = (
     # Uncomment the next line to enable admin documentation:
     'django.contrib.admindocs',
     'django_tables2',
+    'djcelery',
 )
 
 # A sample logging configuration. The only tangible logging
@@ -218,3 +219,10 @@ VALID_FILE_TYPES['mad'] = 'maxAvgDeg'
 VALID_FILE_TYPES['fg'] = 'fibergraph'
 VALID_FILE_TYPES['lcc'] = 'lrgstConnComp'
 VALID_FILE_TYPES['gdia'] = 'graphDiam'
+
+# Celery Settings
+BROKER_URL = 'amqp://guest@localhost'
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_ACCEPT_CONTENT=['json', 'pickle']
+CELERYD_PREFETCH_MULTIPLIER = 1

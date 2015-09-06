@@ -58,6 +58,10 @@ from utils.create_dir_struct import create_dir_struct
 # Helpers
 from utils.util import *
 
+def testcelery(request):
+  from tasks import runner
+  runner.delay()
+
 def default(request):
   """ Base url just redirects to welcome """
   return redirect(get_script_prefix()+"welcome", {"user":request.user})
