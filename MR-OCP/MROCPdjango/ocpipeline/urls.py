@@ -37,6 +37,7 @@ admin.autodiscover()
 urlpatterns = patterns('ocpipeline.views',
     url(r'^$', 'default', name= 'default'),
     url(r'^welcome/$', 'welcome', name= 'welcome'),
+    url(r'^testcelery/$', 'testcelery', name= 'testcelery'),
     url(r'^success/$', 'success', name='success-page'),
     url(r'^upload/(.*$)', 'upload', name= 'prog-upload'),
     url(r'^showdir/$', 'showdir', name='serve-dir'),
