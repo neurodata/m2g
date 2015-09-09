@@ -22,6 +22,7 @@
 from django import template
 from django.template.defaultfilters import stringfilter
 from django.core.urlresolvers import get_script_prefix
+from django.conf import settings
 
 register = template.Library()
 
@@ -34,4 +35,4 @@ def getScriptPrefix(tailurl):
   @param tailurl: the tail of the url
   @return str: the fully built url
   '''
-  return get_script_prefix() + tailurl
+  return get_script_prefix() + settings.URL_BASE +tailurl
