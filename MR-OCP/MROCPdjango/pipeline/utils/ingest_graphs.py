@@ -30,7 +30,7 @@ from contextlib import closing
 import igraph
 import zipfile
 from time import time
-from ocpipeline.settings_secret import DATABASES as db_args
+from pipeline.settings_secret import DATABASES as db_args
 from mrcap.utils import igraph_io
 
 def ingest(genera, tb_name, base_dir=None, files=None, project=None):
@@ -133,7 +133,7 @@ def main():
             The directories where to look for file(s) default is : human macaque cat fly mouse rat worm")
   parser.add_argument("-f", "--file_names", action="store", default=None, nargs="+", help="If you only want to ingest \
             specific files only use this")
-  parser.add_argument("-t", "--table_name", action="store", default="ocpipeline_graphdownloadmodel", help="Table name in db")
+  parser.add_argument("-t", "--table_name", action="store", default="pipeline_graphdownloadmodel", help="Table name in db")
 
   parser.add_argument("-p", "--project", action="store", help="Project the graph belongs to")
   result = parser.parse_args()
