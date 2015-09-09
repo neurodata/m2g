@@ -50,8 +50,6 @@ from django.contrib.auth import authenticate, login, logout
 # Model & Form imports
 from models import OwnedProjects
 
-## Data Processing imports ##
-import paths
 from mrcap import gengraph as gengraph
 from  utils.filesorter import checkFileExtGengraph
 from utils.create_dir_struct import create_dir_struct
@@ -59,12 +57,9 @@ from utils.create_dir_struct import create_dir_struct
 from utils.util import *
 
 def testcelery(request):
-  from tasks import runner
-  runner.delay()
-
-def default(request):
-  """ Base url just redirects to welcome """
-  return redirect(get_script_prefix()+"welcome", {"user":request.user})
+  from pipeline.tasks import mrocp
+  mrocp.delay()
+  return render_to_response("success.html", {"msg": "This is a success"})
 
 def welcome(request):
   """ Little welcome message """
