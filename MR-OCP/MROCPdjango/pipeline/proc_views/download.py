@@ -32,12 +32,12 @@ from django.template import RequestContext
 from django.conf import settings
 from django_tables2 import RequestConfig
 
-from ocpipeline.graph_table import GraphTable
-from ocpipeline.models import GraphDownloadModel
-from ocpipeline.forms import DownloadGraphsForm
-from ocpipeline.forms import DownloadQueryForm
-from ocpipeline.utils.util import sendEmail
-from ocpipeline.procs.scale_convert import scale_convert
+from pipeline.graph_table import GraphTable
+from pipeline.models import GraphDownloadModel
+from pipeline.forms import DownloadGraphsForm
+from pipeline.forms import DownloadQueryForm
+from pipeline.utils.util import sendEmail
+from pipeline.procs.scale_convert import scale_convert
 
 def download(request):
 
