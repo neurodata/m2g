@@ -25,10 +25,10 @@ import pickle
 
 from django.conf import settings
 
-from ocpipeline.utils.util import sendJobCompleteEmail, sendJobFailureEmail
-from ocpipeline.utils.filesorter import checkFileExtGengraph
-from ocpipeline.procs.run_invariants import run_invariants
-from ocpipeline.utils.util import getFiberID
+from pipeline.utils.util import sendJobCompleteEmail, sendJobFailureEmail
+from pipeline.utils.filesorter import checkFileExtGengraph
+from pipeline.procs.run_invariants import run_invariants
+from pipeline.utils.util import getFiberID
 
 from mrcap.gengraph import genGraph
 
