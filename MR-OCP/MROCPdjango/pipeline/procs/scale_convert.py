@@ -25,11 +25,11 @@ import argparse
 import tempfile
 import os
 
-from ocpipeline.utils.zipper import zipfiles
-from ocpipeline.utils.util import get_genus
+from pipeline.utils.zipper import zipfiles
+from pipeline.utils.util import get_genus
 from mrcap.utils.downsample import downsample
 from mrcap.utils import igraph_io
-from ocpipeline.utils.util import sendJobFailureEmail, sendJobCompleteEmail
+from pipeline.utils.util import sendJobFailureEmail, sendJobCompleteEmail
 
 def scale_convert(selected_files, dl_format, ds_factor, ATLASES, email=None, dwnld_loc=None, zip_fn=None):
   # Debug

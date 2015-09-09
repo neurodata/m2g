@@ -24,7 +24,7 @@
 import argparse
 import pickle
 
-from ocpipeline.utils.util import sendJobFailureEmail, sendJobCompleteEmail
+from pipeline.utils.util import sendJobFailureEmail, sendJobCompleteEmail
 from run_invariants import run_invariants
 
 def invariant_compute(session):

@@ -24,8 +24,8 @@ import os
 from time import strftime, localtime
 from glob import glob
 
-from ocpipeline.utils.util import saveFileToDisk
-from ocpipeline.utils.util import sendJobCompleteEmail, sendJobFailureEmail, sendEmail
+from pipeline.utils.util import saveFileToDisk
+from pipeline.utils.util import sendJobCompleteEmail, sendJobFailureEmail, sendEmail
 from computation.utils import convertTo
 
 def convert(media_root, upload_fn, upload, input_format, output_format, to_email):
