@@ -30,12 +30,12 @@ from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.conf import settings
 
-from ocpipeline.forms import GraphUploadForm
-from ocpipeline.utils.util import makeDirIfNone, writeBodyToDisk, saveFileToDisk
-from ocpipeline.utils.util import sendJobBeginEmail
-from ocpipeline.procs.inv_compute import invariant_compute
-from ocpipeline.utils.zipper import unzip 
-from ocpipeline.procs.run_invariants import run_invariants
+from pipeline.forms import GraphUploadForm
+from pipeline.utils.util import makeDirIfNone, writeBodyToDisk, saveFileToDisk
+from pipeline.utils.util import sendJobBeginEmail
+from pipeline.procs.inv_compute import invariant_compute
+from pipeline.utils.zipper import unzip 
+from pipeline.procs.run_invariants import run_invariants
 
 def graphLoadInv(request, webargs=None):
   ''' Form '''

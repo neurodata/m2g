@@ -29,10 +29,10 @@ from django.http import HttpResponseRedirect
 from django.core.urlresolvers import get_script_prefix
 from django.conf import settings
 
-from ocpipeline.forms import RawUploadForm
-from ocpipeline.models import RawUploadModel
-from ocpipeline.utils.util import saveFileToDisk, sendEmail
-from ocpipeline.procs.runc4 import runc4
+from pipeline.forms import RawUploadForm
+from pipeline.models import RawUploadModel
+from pipeline.utils.util import saveFileToDisk, sendEmail
+from pipeline.procs.runc4 import runc4
 
 def raw_upload(request):
 

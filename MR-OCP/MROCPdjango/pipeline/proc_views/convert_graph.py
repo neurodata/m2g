@@ -32,11 +32,11 @@ from django.shortcuts import render_to_response
 from django.conf import settings
 from django.core.urlresolvers import get_script_prefix
 
-from ocpipeline.forms import ConvertForm
-from ocpipeline.utils.zipper import unzip
+from pipeline.forms import ConvertForm
+from pipeline.utils.zipper import unzip
 from computation.utils import convertTo
-from ocpipeline.utils.util import writeBodyToDisk
-from ocpipeline.procs.convert import convert
+from pipeline.utils.util import writeBodyToDisk
+from pipeline.procs.convert import convert
 
 
 def convert_graph(request, webargs=None):

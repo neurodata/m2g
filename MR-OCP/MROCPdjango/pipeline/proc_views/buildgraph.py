@@ -30,12 +30,12 @@ from django.conf import settings
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import get_script_prefix
 
-from ocpipeline.forms import BuildGraphForm
-from ocpipeline.utils.util import adaptProjNameIfReq, defDataDirs
-from ocpipeline.utils.util import saveFileToDisk, sendJobBeginEmail
-from ocpipeline.utils.create_dir_struct import create_dir_struct
-from ocpipeline.models import BuildGraphModel
-from ocpipeline.procs.process_ip_data import processInputData
+from pipeline.forms import BuildGraphForm
+from pipeline.utils.util import adaptProjNameIfReq, defDataDirs
+from pipeline.utils.util import saveFileToDisk, sendJobBeginEmail
+from pipeline.utils.create_dir_struct import create_dir_struct
+from pipeline.models import BuildGraphModel
+from pipeline.procs.process_ip_data import processInputData
 
 def buildGraph(request):
 
