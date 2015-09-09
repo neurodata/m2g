@@ -34,9 +34,8 @@ from views import igraph_examples
 from django.contrib import admin
 admin.autodiscover()
 
-urlpatterns = patterns('ocpipeline.views',
-    url(r'^$', 'default', name= 'default'),
-    url(r'^welcome/$', 'welcome', name= 'welcome'),
+urlpatterns = patterns('pipeline.views',
+    url(r'^$', 'welcome', name= 'welcome'),
     url(r'^testcelery/$', 'testcelery', name= 'testcelery'),
     url(r'^success/$', 'success', name='success-page'),
     url(r'^upload/(.*$)', 'upload', name= 'prog-upload'),
@@ -58,33 +57,33 @@ urlpatterns = patterns('ocpipeline.views',
     url(r'^admin/', include(admin.site.urls)),
 )
 
-from ocpipeline.proc_views.buildgraph import buildGraph
-urlpatterns += patterns('ocpipeline.proc_views.buildgraph',
+from proc_views.buildgraph import buildGraph
+urlpatterns += patterns('pipeline.proc_views.buildgraph',
     url(r'^buildgraph/$', 'buildGraph', name= 'build-graph'),
     )
 
-from ocpipeline.proc_views.graphupload import graphLoadInv
-urlpatterns += patterns('ocpipeline.proc_views.graphupload',
+from proc_views.graphupload import graphLoadInv
+urlpatterns += patterns('pipeline.proc_views.graphupload',
     url(r'^graphupload/(.*$)', 'graphLoadInv', name='graph-upload-invariant-processing'),
     )
 
-from ocpipeline.proc_views.download import download
-urlpatterns += patterns('ocpipeline.proc_views.download',
+from proc_views.download import download
+urlpatterns += patterns('pipeline.proc_views.download',
     url(r'^download/$', 'download', name= 'download-graphs'),
     )
 
-from ocpipeline.proc_views.convert_graph import convert_graph
-urlpatterns += patterns('ocpipeline.proc_views.convert_graph',
+from proc_views.convert_graph import convert_graph
+urlpatterns += patterns('pipeline.proc_views.convert_graph',
     url(r'^convert/(.*$)', 'convert_graph', name= 'convert-to-format'),
     )
 
-from ocpipeline.proc_views.raw_upload import raw_upload
-urlpatterns += patterns('ocpipeline.proc_views.raw_upload',
+from proc_views.raw_upload import raw_upload
+urlpatterns += patterns('pipeline.proc_views.raw_upload',
     url(r'^c4/$', 'raw_upload', name='c4'),
     )
 
-from ocpipeline.accounts.views import projects
-urlpatterns +=patterns('ocpipeline.accounts.views',
+from accounts.views import projects
+urlpatterns +=patterns('pipeline.accounts.views',
     url(r'^accounts/projects/$', 'projects', name='project-accounts'),
     )
 
