@@ -209,8 +209,6 @@ class DownloadQueryForm(forms.Form):
   # Select size of graph
   query = forms.CharField(max_length=512, required=True, widget=forms.TextInput(attrs={"class":"tb", "size":"100"}))
 
-from fields import MultiFileField
-
 class RawUploadForm(forms.Form):
   """
   A form for uploading raw images to be processed in to graphs
