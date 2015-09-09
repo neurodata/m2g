@@ -26,7 +26,8 @@ from django.conf import settings
 #import logging
 #logger = logging.getLogger("mrocp")
 
-@task(queue='mrcop')
-def runner ():
+@task(queue='mrocp')
+def mrocp():
   """Propagate the given project for all resolutions"""
   print "I have arrived!!!"
+  return "EXITED CORRECTLY"
