@@ -26,8 +26,14 @@ from django.conf import settings
 #import logging
 #logger = logging.getLogger("mrocp")
 
+
 @task(queue='mrocp')
-def mrocp():
-  """Propagate the given project for all resolutions"""
-  print "I have arrived!!!"
+def mrocp(param):
+  print "The param was {0}!!!".format(param)
   return "EXITED CORRECTLY"
+
+@task(queue="mrocp")
+def celery_task_convert(media_root, upload_fn, convert_file_save_loc, input_format, output_format, to_email):
+  from pipeline.procs.convert import convert
+  convert(media_root, upload_fn,convert_file_save_loc,  input_format, output_format, to_email) 
+  print "Exiting convert task"
