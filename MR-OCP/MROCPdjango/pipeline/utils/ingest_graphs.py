@@ -30,7 +30,7 @@ from contextlib import closing
 import igraph
 import zipfile
 from time import time
-from pipeline.settings_secret import DATABASES as db_args
+from ocpipeline.settings_secret import DATABASES as db_args
 from mrcap.utils import igraph_io
 
 def ingest(genera, tb_name, base_dir=None, files=None, project=None):
