@@ -278,3 +278,14 @@ def get_genus(fn):
 
   print "No genus found!"
   return "" # Unknown
+
+#####################################################################################
+
+def get_script_prefix():
+    from django.core.urlresolvers import get_script_prefix as gsp
+    from ocpipeline.settings import URL_BASE
+
+    return gsp() + URL_BASE
+
+def get_download_path(fspath):
+    return "http://awesome.cs.jhu.edu/outdata/" + ("/".join(fspath.split("/")[4:])).replace(' ','%20')
