@@ -23,14 +23,6 @@ import os
 import argparse
 from time import time
 
-#from math import ceil
-#import numpy as np
-#import igraph
-#import rpy2.robjects as robjects
-#from rpy2.rinterface import NULL
-#from rpy2.robjects.vectors import StrVector
-#import scipy.sparse.linalg.eigen.arpack as arpack
-
 from computation.utils.getBaseName import getBaseName
 from computation.utils.file_util import loadAnyMat
 from computation.utils.csc_to_igraph import csc_to_r_igraph
