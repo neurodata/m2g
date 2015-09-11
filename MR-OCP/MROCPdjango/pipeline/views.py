@@ -58,7 +58,7 @@ from utils.util import *
 
 def testcelery(request):
   from pipeline.tasks import mrocp
-  mrocp.delay()
+  mrocp.delay("I'm serializable")
   return render_to_response("success.html", {"msg": "This is a success"})
 
 def welcome(request):
