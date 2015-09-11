@@ -36,7 +36,7 @@ from pipeline.forms import ConvertForm
 from pipeline.utils.zipper import unzip
 from computation.utils import convertTo
 from pipeline.utils.util import writeBodyToDisk, saveFileToDisk
-from pipeline.tasks import celery_task_convert
+from pipeline.tasks import task_convert
 from django.conf import settings
 
 def getworkdirs():
@@ -66,14 +66,9 @@ def convert_graph(request, webargs=None):
         uploaded_files = [saved_file]
 
       #Browser """
-      celery_task_convert.delay(settings.MEDIA_ROOT, uploaded_files, convert_file_save_loc,
+      task_convert.delay(settings.MEDIA_ROOT, uploaded_files, convert_file_save_loc,
       form.cleaned_data['input_format'], form.cleaned_data['output_format'],
       form.cleaned_data["Email"])
-      """
-      from pipeline.procs.convert import convert
-      convert (settings.MEDIA_ROOT, uploaded_files, convert_file_save_loc, 
-      form.cleaned_data['input_format'], form.cleaned_data['output_format'], form.cleaned_data["Email"])
-      """
       request.session['success_msg'] = \
 """
 Your job successfully launched. You should receive an email when your job begins and another one when it completes.<br/>
