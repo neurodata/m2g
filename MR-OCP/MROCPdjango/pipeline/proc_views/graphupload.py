@@ -24,8 +24,6 @@ import os
 from time import strftime, localtime
 
 from django.http import HttpResponseRedirect, HttpResponse
-from django.core.urlresolvers import get_script_prefix
-
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.conf import settings
@@ -36,6 +34,8 @@ from pipeline.utils.util import sendJobBeginEmail
 from pipeline.procs.inv_compute import invariant_compute
 from pipeline.utils.zipper import unzip 
 from pipeline.procs.run_invariants import run_invariants
+from pipeline.tasks import task_invariant_compute
+from pipeline.utils.util import get_script_prefix
 
 def graphLoadInv(request, webargs=None):
   ''' Form '''
@@ -43,59 +43,56 @@ def graphLoadInv(request, webargs=None):
     form = GraphUploadForm(request.POST, request.FILES) # instantiating form
     if form.is_valid():
 
-      request.session['graphsize'] = 'small' # This accounts for use LCC or not
-      request.session['email'] =  form.cleaned_data['email']
-
       data = form.files['fileObj'] # get data
-      request.session['invariants'] = form.cleaned_data['Select_Invariants_you_want_computed']
+      invariants = form.cleaned_data['Select_Invariants_you_want_computed']
 
-      dataDir = os.path.join(settings.MEDIA_ROOT, 'tmp', strftime("projectStamp%a%d%b%Y_%H.%M.%S/", localtime()))
-      request.session['graphInvariants'] = os.path.join(dataDir, 'graphInvariants')
+      data_dir = os.path.join(settings.MEDIA_ROOT, 'tmp', strftime("projectStamp%a%d%b%Y_%H.%M.%S/", localtime()))
+      invariants_path = os.path.join(data_dir, 'graphInvariants')
 
-      makeDirIfNone([dataDir])
+      makeDirIfNone([data_dir])
 
       # We got a zip
       if os.path.splitext(data.name)[1] == '.zip':
-        writeBodyToDisk(data.read(), dataDir)
-        graphs = glob(os.path.join(dataDir,'*')) # TODO: better way to make sure we are actually collecting graphs here
+        writeBodyToDisk(data.read(), data_dir)
+        graphs = glob(os.path.join(data_dir,'*')) 
 
-      else: # View only accepts sa subset of file formats as regulated by template Validate func
-        graphs = [os.path.join(dataDir, data.name)]
+      else: # View only accepts a subset of file formats as regulated by template Validate func
+        graphs = [os.path.join(data_dir, data.name)]
         saveFileToDisk(data, graphs[0])
 
-      request.session['uploaded_graphs'] = graphs
       request.session['graph_format'] = form.cleaned_data['graph_format']
-      request.session['dataDir'] = dataDir
       request.session['email'] = form.cleaned_data['email']
 
       # Launch thread for graphs & email user
-      sendJobBeginEmail(request.session['email'], request.session['invariants'], genGraph=False)
+      sendJobBeginEmail(request.session['email'], invariants, genGraph=False)
 
-      invariant_compute(request.session) # Used when testing only
-      #thr = threading.Thread(target=asyncInvCompute, args=(request,))
-      #thr.start()
+      for graph_fn in graphs:
+        task_invariant_compute.delay(invariants, graph_fn, invariants_path, 
+                data_dir, form.cleaned_data['graph_format'], request.session['email'])
 
       request.session['success_msg'] = \
 """
 Your job successfully launched. You should receive an email when your job begins and another one when it completes.<br/>
 The process may take several hours (dependent on graph size) if you selected to compute all invariants.<br/>
-If you do not see an email in your <i>Inbox</i> check the <i>Spam</i> folder and add <code>jhmrocp@cs.jhu.edu</code> to your safe list.
+If you do not see an email in your <i>Inbox</i> check the <i>Spam</i> folder and add <code>jhmrocp@cs.jhu.edu</code> 
+to your safe list.
 """
       return HttpResponseRedirect(get_script_prefix()+'success')
-
   # Programmatic RESTful API
   elif request.method == 'POST' and webargs:
-    dataDir = os.path.join(settings.MEDIA_ROOT, 'tmp', strftime("projectStamp%a%d%b%Y_%H.%M.%S/", localtime()))
-    makeDirIfNone([dataDir])
+    pass
+    """
+    data_dir = os.path.join(settings.MEDIA_ROOT, 'tmp', strftime("projectStamp%a%d%b%Y_%H.%M.%S/", localtime()))
+    makeDirIfNone([data_dir])
 
-    uploadedZip = writeBodyToDisk(request.body, dataDir)[0] # Not necessarily a zip
+    uploadedZip = writeBodyToDisk(request.body, data_dir)[0] # Not necessarily a zip
 
     try: # Assume its a zip first
-      unzip(uploadedZip, dataDir) # Unzip the zip
+      unzip(uploadedZip, data_dir) # Unzip the zip
       os.remove(uploadedZip) # Delete the zip
     except:
       print "Non-zip file uploaded ..."
-    graphs = glob(os.path.join(dataDir,'*'))
+    graphs = glob(os.path.join(data_dir,'*'))
 
     try:
       request.session['invariants'] = webargs.split('/')[0].split(',')
@@ -103,7 +100,7 @@ If you do not see an email in your <i>Inbox</i> check the <i>Spam</i> folder and
     except:
       return HttpResponse("Malformated input invariants list or graph format")
 
-    request.session['graphInvariants'] = os.path.join(dataDir, 'graphInvariants')
+    request.session['graphInvariants'] = os.path.join(data_dir, 'graphInvariants')
 
     #############################################################################
     # TODO: This is where the work is done
@@ -120,9 +117,9 @@ If you do not see an email in your <i>Inbox</i> check the <i>Spam</i> folder and
                 request.session['graphInvariants'], *webargs.split('/')[2].split(','))
 
       #dwnldLoc = request.META['wsgi.url_scheme'] + '://' + \
-       #             request.META['HTTP_HOST'] + dataDir.replace(' ','%20')
+       #             request.META['HTTP_HOST'] + data_dir.replace(' ','%20')
 
-      dwnldLoc =  "http://mrbrain.cs.jhu.edu" + dataDir.replace(' ','%20')
+      dwnldLoc =  "http://mrbrain.cs.jhu.edu" + data_dir.replace(' ','%20')
       if err_msg:
         err_msg = "Completed with errors. View Data at: %s\n. Here are the errors:%s" % (dwnldLoc, err_msg)
         return HttpResponse(err_msg)
@@ -132,6 +129,7 @@ If you do not see an email in your <i>Inbox</i> check the <i>Spam</i> folder and
     # END TODO: This is where the work is done
     #############################################################################
   # Browser
+  """
   else:
     form = GraphUploadForm() # An empty, unbound form
 

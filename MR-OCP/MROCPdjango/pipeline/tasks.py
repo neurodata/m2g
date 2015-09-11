@@ -33,7 +33,17 @@ def mrocp(param):
   return "EXITED CORRECTLY"
 
 @task(queue="mrocp")
-def celery_task_convert(media_root, upload_fn, convert_file_save_loc, input_format, output_format, to_email):
+def task_convert(media_root, upload_fn, convert_file_save_loc, 
+                                input_format, output_format, to_email):
   from pipeline.procs.convert import convert
   convert(media_root, upload_fn,convert_file_save_loc,  input_format, output_format, to_email) 
-  print "Exiting convert task"
+  print "Exiting convert task ..."
+
+@task(queue="mrocp")
+def task_invariant_compute(invariants, graph_fn, invariants_path, 
+                                            data_dir, in_graph_format, to_email):
+    print "Entering invariant task ..."
+    from pipeline.procs.inv_compute import invariant_compute
+    invariant_compute(invariants, graph_fn, invariants_path, 
+            data_dir, in_graph_format, to_email)
+    print "Exiting invariant task ..."

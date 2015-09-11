@@ -23,48 +23,39 @@
 
 import argparse
 import pickle
+import os
 
 from pipeline.utils.util import sendJobFailureEmail, sendJobCompleteEmail
 from run_invariants import run_invariants
+from pipeline.utils.util import get_download_path
 
-def invariant_compute(session):
+def invariant_compute(invariants, graph_fn, invariants_path, data_dir, in_graph_format, to_email):
+  """
   if isinstance(session, str) or isinstance(session, unicode):
     f = open(session, "rb")
     session = pickle.load(f)
     f.close()
+  """
+  dwnld_loc = get_download_path(data_dir)
 
-  dwnldLoc = "http://mrbrain.cs.jhu.edu" + \
-                      session['dataDir'].replace(' ','%20')
-  for graph_fn in session['uploaded_graphs']:
-    try:
-      invariant_fns = run_invariants(session['invariants'], graph_fn,
-                      session['graphInvariants'], 
-                      graph_format=session['graph_format'])
+  try:
+    invariant_fns = run_invariants(invariants, graph_fn,
+                invariants_path, 
+                graph_format=in_graph_format)
 
-      if isinstance(invariant_fns, str):
-        raise Exception
-      else:
-        print 'Invariants for annoymous project %s complete...' % graph_fn
+    if isinstance(invariant_fns, str):
+      raise Exception
+    else:
+      print 'Invariants for annoymous project %s complete...' % graph_fn
 
-    except Exception, msg:
-      msg = """
+  except Exception, msg:
+    msg = """
 Hello,\n\nYour most recent job failed possibly because:\n- the graph '%s' you
 uploaded does not match any accepted type.\n\n"You may have some partially
 completed data here: %s.\nPlease check these and try again.\n\n
-""" % (os.path.basename(graph_fn), dwnldLoc)
+""" % (os.path.basename(graph_fn), dwnld_loc)
 
-      sendJobFailureEmail(session['email'], msg)
-      return
-
+    sendJobFailureEmail(to_email, msg)
+    return
   # Email user of job finished
-  sendJobCompleteEmail(session['email'], dwnldLoc)
-
-def main():
-  parser = argparse.ArgumentParser(description="Run invariants given ")
-  parser.add_argument("ARG", action="", help="")
-  parser.add_argument("-O", "--OPT", action="", help="")
-  result = parser.parse_args()
-
-
-if __name__ == "__main__":
-  main()
+  sendJobCompleteEmail(to_email, dwnld_loc)
