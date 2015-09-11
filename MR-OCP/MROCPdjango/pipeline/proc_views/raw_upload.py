@@ -26,13 +26,13 @@ import threading
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.http import HttpResponseRedirect
-from django.core.urlresolvers import get_script_prefix
 from django.conf import settings
 
 from pipeline.forms import RawUploadForm
 from pipeline.models import RawUploadModel
 from pipeline.utils.util import saveFileToDisk, sendEmail
 from pipeline.procs.runc4 import runc4
+from pipeline.utils.util import get_script_prefix
 
 def raw_upload(request):
 
