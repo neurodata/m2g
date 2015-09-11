@@ -36,7 +36,6 @@ from django.http import HttpResponseRedirect
 from django.http import HttpResponse
 from django.http import HttpResponseBadRequest
 from django.shortcuts import render
-from django.core.urlresolvers import get_script_prefix
 from django.conf import settings
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
@@ -53,6 +52,8 @@ from models import OwnedProjects
 from mrcap import gengraph as gengraph
 from  utils.filesorter import checkFileExtGengraph
 from utils.create_dir_struct import create_dir_struct
+from pipeline.utils.util import get_script_prefix
+
 # Helpers
 from utils.util import *
 
