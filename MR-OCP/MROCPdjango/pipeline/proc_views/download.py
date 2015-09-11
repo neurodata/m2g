@@ -25,7 +25,7 @@ import threading
 from time import strftime, localtime
 
 from django.http import HttpResponseRedirect, HttpResponse
-from django.core.urlresolvers import get_script_prefix
+from pipeline.utils.util import get_script_prefix
 
 from django.shortcuts import render_to_response
 from django.template import RequestContext

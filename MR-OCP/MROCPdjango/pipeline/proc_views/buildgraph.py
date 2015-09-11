@@ -28,7 +28,7 @@ from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.conf import settings
 from django.http import HttpResponseRedirect
-from django.core.urlresolvers import get_script_prefix
+from pipeline.utils.util import get_script_prefix
 
 from pipeline.forms import BuildGraphForm
 from pipeline.utils.util import adaptProjNameIfReq, defDataDirs
