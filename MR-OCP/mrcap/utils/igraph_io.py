@@ -24,6 +24,7 @@ import zipfile
 import tempfile
 import os
 from igraph import read as igraph_read
+from graphml_headers import read_graphml_headers
 
 def write_mm(g, fn):
   """
@@ -52,31 +53,23 @@ def unzip_file(fn):
   print "Unzip of %s took %f sec ..." % (fn, (time()-start))
   return tmpfile.name
 
-
 def read_arbitrary(fn, informat="graphml"):
   tmpfile_name = ""
-  print "Attempting igraph arbirary read of : %s ..." % fn
+  print "Attempting arbirary read of : %s ..." % fn
+  do_del = False
   if os.path.splitext(fn)[1] == ".zip":
-    try:
-      tmpfile_name = unzip_file(fn)
-      start = time()
-      g = igraph_read(tmpfile_name, format=informat)
-      print "  Read took %f sec ..." % ((time()-start))
-    except:
-      g = igraph_read(fn, format=informat)
-    finally:
-      print "Deleting temp %s" % tmpfile_name
-      os.remove(tmpfile_name)
-  else:
-    try:
-      g = igraph_read(fn, format=informat)
-    except:
-      tmpfile_name = unzip_file(fn)
-      start = time()
-      g = igraph_read(tmpfile_name, format=informat)
-      print "  Read took %f sec ..." % ((time()-start))
-    finally:
-      if os.path.exists(tmpfile_name):
-        print "Deleting temp %s" % tmpfile_name
-        os.remove(tmpfile_name)
+    fn = unzip_file(fn)
+    do_del = True
+
+  start = time()
+  try:
+    g = read_graphml_headers(fn)
+    print "   Fast read took %.3f sec .." % ((time()-start))
+  except:
+    g = igraph_read(fn, format=informat)
+    print "   Read took %.3f sec ..." % ((time()-start))
+  finally:
+    if do_del: 
+      print "Deleting temp %s" % fn
+      os.remove(fn)
   return g
