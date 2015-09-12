@@ -21,7 +21,6 @@
 
 import argparse
 import os
-import threading
 from time import strftime, localtime
 
 from django.http import HttpResponseRedirect, HttpResponse

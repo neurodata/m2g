@@ -36,6 +36,7 @@ from pipeline.utils.zipper import unzip
 from pipeline.procs.run_invariants import run_invariants
 from pipeline.tasks import task_invariant_compute
 from pipeline.utils.util import get_script_prefix
+from pipeline.utils.util import get_download_path
 
 def graphLoadInv(request, webargs=None):
   ''' Form '''
@@ -119,7 +120,7 @@ to your safe list.
       #dwnldLoc = request.META['wsgi.url_scheme'] + '://' + \
        #             request.META['HTTP_HOST'] + data_dir.replace(' ','%20')
 
-      dwnldLoc =  "http://mrbrain.cs.jhu.edu" + data_dir.replace(' ','%20')
+      dwnldLoc =  get_download_path (data_dir)
       if err_msg:
         err_msg = "Completed with errors. View Data at: %s\n. Here are the errors:%s" % (dwnldLoc, err_msg)
         return HttpResponse(err_msg)
