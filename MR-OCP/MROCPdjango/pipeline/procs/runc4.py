@@ -33,7 +33,8 @@ def runc4(dti_path, mprage_path, bvalue_path, bvector_path, graph_size, atlas, e
   msg += "- graph size: {0}\n".format(graph_size)
   msg += "- atlas: {0}\n".format(atlas)
   msg += "- Requester's email: {0}\n".format(email)
-  send_mail("C4 job request", msg, settings.SERVER_EMAIL, ["gkiar07@gmail.com"], fail_silently=False)
+  #send_mail("C4 job request", msg, settings.SERVER_EMAIL, ["gkiar07@gmail.com"], fail_silently=False)
+  send_mail("C4 job request", msg, settings.SERVER_EMAIL, ["asidom2002@yahoo.com"], fail_silently=False)
 
   print "Sending an email to people so they can process the job"
   #TODO GK: Automate me
