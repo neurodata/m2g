@@ -35,6 +35,7 @@ def mrocp(param):
 @task(queue="mrocp")
 def task_convert(media_root, upload_fn, convert_file_save_loc, 
                                 input_format, output_format, to_email):
+  print "Entering convert task ..."
   from pipeline.procs.convert import convert
   convert(media_root, upload_fn,convert_file_save_loc,  input_format, output_format, to_email) 
   print "Exiting convert task ..."
@@ -42,8 +43,19 @@ def task_convert(media_root, upload_fn, convert_file_save_loc,
 @task(queue="mrocp")
 def task_invariant_compute(invariants, graph_fn, invariants_path, 
                                             data_dir, in_graph_format, to_email):
-    print "Entering invariant task ..."
-    from pipeline.procs.inv_compute import invariant_compute
-    invariant_compute(invariants, graph_fn, invariants_path, 
-            data_dir, in_graph_format, to_email)
-    print "Exiting invariant task ..."
+  print "Entering invariant task ..."
+  from pipeline.procs.inv_compute import invariant_compute
+  invariant_compute(invariants, graph_fn, invariants_path, 
+        data_dir, in_graph_format, to_email)
+  print "Exiting invariant task ..."
+
+@task(queue="mrocp")
+def task_runc4(dti_path, mprage_path, bvalue_path, bvector_path, graph_size, atlas, email):
+  print "Entering c4 task ..."
+  from pipeline.procs.runc4 import runc4
+  runc4(dti_path, mprage_path, bvalue_path, bvector_path, graph_size, atlas, email)
+  print "Exiting c4 task ..."
+
+@task(queue="mrocp")
+def task_build(queue="mrocp"):
+  pass 
