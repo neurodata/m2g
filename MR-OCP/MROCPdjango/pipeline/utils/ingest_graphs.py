@@ -77,7 +77,7 @@ def _ingest_files(fns, genus, tb_name):
 
       if g_changed: # Means graph has changed since ingest OR was never in DB to start with
         # Collect all the attributes etc ..
-        g = igraph_io.read_arbitrary(graph_fn, informat="graphml")
+        g = igraph_io.read_arbitrary(graph_fn, informat="graphml", headers_only=False)
 
         vertex_attrs = g.vs.attribute_names()
         edge_attrs = g.es.attribute_names()
