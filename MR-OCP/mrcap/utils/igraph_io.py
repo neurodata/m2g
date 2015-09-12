@@ -53,7 +53,7 @@ def unzip_file(fn):
   print "Unzip of %s took %f sec ..." % (fn, (time()-start))
   return tmpfile.name
 
-def read_arbitrary(fn, informat="graphml"):
+def read_arbitrary(fn, informat="graphml", headers_only=False):
   tmpfile_name = ""
   print "Attempting arbirary read of : %s ..." % fn
   do_del = False
@@ -63,8 +63,10 @@ def read_arbitrary(fn, informat="graphml"):
 
   start = time()
   try:
-    g = read_graphml_headers(fn)
-    print "   Fast read took %.3f sec .." % ((time()-start))
+    if (headers_only):
+      g = read_graphml_headers(fn)
+      print "   Fast read took %.3f sec .." % ((time()-start))
+    else: assert 0
   except:
     g = igraph_read(fn, format=informat)
     print "   Read took %.3f sec ..." % ((time()-start))
