@@ -26,7 +26,6 @@ from django.conf import settings
 #import logging
 #logger = logging.getLogger("mrocp")
 
-
 @task(queue='mrocp')
 def mrocp(param):
   print "The param was {0}!!!".format(param)
@@ -57,5 +56,14 @@ def task_runc4(dti_path, mprage_path, bvalue_path, bvector_path, graph_size, atl
   print "Exiting c4 task ..."
 
 @task(queue="mrocp")
-def task_build(queue="mrocp"):
-  pass 
+def task_build():
+  print "Entering build task ..."
+  #TODO
+  print "Exiting build task ..."
+
+@task(queue="mrocp")
+def task_scale(selected_files, dl_format, ds_factor, ATLASES, email=None, dwnld_loc=None, zip_fn=None):
+  from pipeline.procs.scale_convert import scale_convert
+  print "Entering download task ..."
+  scale_convert(selected_files, dl_format, ds_factor, ATLASES, email, dwnld_loc, zip_fn)
+  print "Exiting download task ..."
