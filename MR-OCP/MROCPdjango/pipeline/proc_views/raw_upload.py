@@ -21,7 +21,6 @@
 import argparse
 import os
 from time import strftime, localtime
-import threading
 
 from django.shortcuts import render_to_response
 from django.template import RequestContext
