@@ -37,10 +37,10 @@ from pipeline.models import GraphDownloadModel
 from pipeline.forms import DownloadGraphsForm
 from pipeline.forms import DownloadQueryForm
 from pipeline.utils.util import sendEmail
-from pipeline.procs.scale_convert import scale_convert
+from pipeline.tasks import task_scale
+from pipeline.utils.util import get_download_path
 
 def download(request):
-
   MAX_NUM_GRAPH_DLS = 1
   ATLASES = {"desikan": os.path.join(settings.ATLAS_DIR, "desikan_atlas.nii") ,
               "slab": os.path.join(settings.ATLAS_DIR, "slab_atlas.nii")}
@@ -121,28 +121,22 @@ def download(request):
         else:
           data_dir = os.path.join(settings.MEDIA_ROOT, "tmp",
                                  strftime("download_%a%d%b%Y_%H.%M.%S/", localtime()))
-          dwnld_loc = "http://mrbrain.cs.jhu.edu" + data_dir.replace(" ","%20")
-          #dwnld_loc = request.META['wsgi.url_scheme'] + "://" + request.META["HTTP_HOST"] + data_dir.replace(" ","%20")
+          dwnld_loc = get_download_path(data_dir)
 
           sendEmail(form.cleaned_data["Email"], "Job launch notification",
                   "Your download request was received. You will receive an email when it completes.\n\n")
 
-          """
           # Testing only
-          scale_convert(selected_files, dl_format, ds_factor, ATLASES, form.cleaned_data["Email"], 
+          task_scale.delay(selected_files, dl_format, ds_factor, ATLASES, form.cleaned_data["Email"], 
           dwnld_loc, os.path.join(data_dir, "archive.zip")) # Testing only
-
-          """
-          thr = threading.Thread(target=scale_convert, args=(selected_files, dl_format, 
-            ds_factor, ATLASES, form.cleaned_data["Email"], dwnld_loc, 
-            os.path.join(data_dir, "archive.zip")))
-          thr.start()
 
           request.session['success_msg'] = \
 """
-Your job successfully launched. You should receive an email when your job begins and another one when it completes.<br/>
-The process may take several hours (dependent on graph size). If your job fails you will receive an email notification as well.<br/>
-If you do not see an email in your <i>Inbox</i> check the <i>Spam</i> folder and add <code>jhmrocp@cs.jhu.edu</code> to your safe list.
+Your job successfully launched. You should receive an email when your job begins and another 
+one when it completes.<br/> The process may take several hours (dependent on graph size). 
+If your job fails you will receive an email notification as well.<br/>
+If you do not see an email in your <i>Inbox</i> check the <i>Spam</i> folder and add 
+<code>jhmrocp@cs.jhu.edu</code> to your safe list.
 """
           return HttpResponseRedirect(get_script_prefix()+'success')
       else:
@@ -154,7 +148,7 @@ If you do not see an email in your <i>Inbox</i> check the <i>Spam</i> folder and
       table = GraphTable(GraphDownloadModel.objects.filter(genus=genus))
       table.set_html_name(genus.capitalize()) # Set the html __repr__
       # TODO: Alter per_page limit to +25
-      RequestConfig(request, paginate={"per_page":25}).configure(table) # Let each table re-render given a request
+      RequestConfig(request, paginate={"per_page":25}).configure(table) # Each table re-render given a request
       #table.columns["url"].header = "Download Link"
 
       dl_form = DownloadGraphsForm()
@@ -164,13 +158,3 @@ If you do not see an email in your <i>Inbox</i> check the <i>Spam</i> folder and
 
   return render_to_response("downloadgraph.html", {"genera":tbls, "query":DownloadQueryForm()},
                             context_instance=RequestContext(request))
-
-def main():
-  parser = argparse.ArgumentParser(description="")
-  parser.add_argument("ARG", action="", help="")
-  parser.add_argument("-O", "--OPT", action="", help="")
-  result = parser.parse_args()
-
-
-if __name__ == "__main__":
-  main()
