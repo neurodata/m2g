@@ -31,7 +31,8 @@ from django.conf import settings
 from pipeline.forms import RawUploadForm
 from pipeline.models import RawUploadModel
 from pipeline.utils.util import saveFileToDisk, sendEmail
-from pipeline.procs.runc4 import runc4
+from pipeline.tasks import task_runc4
+
 from pipeline.utils.util import get_script_prefix
 
 def raw_upload(request):
@@ -59,18 +60,10 @@ def raw_upload(request):
       ru_model.graphsize = "big" if form.cleaned_data["graphsize"] == True else "small"
       ru_model.email = form.cleaned_data["email"] 
       ru_model.save() # Sync to Db
-      #"""
 
-      thr = threading.Thread(target=runc4, args=(ru_model.dtipath, ru_model.mpragepath,
-          os.path.join(data_dir, bvalue.name), os.path.join(data_dir, bvector.name), 
-          form.cleaned_data["graphsize"], ru_model.atlas, form.cleaned_data["email"],))
-      thr.start()
-
-      """
-      runc4(ru_model.dtipath, ru_model.mpragepath,
+      task_runc4.delay(ru_model.dtipath, ru_model.mpragepath,
           os.path.join(data_dir, bvalue.name), os.path.join(data_dir, bvector.name), 
           form.cleaned_data["graphsize"], ru_model.atlas, form.cleaned_data["email"])
-      """
 
       sendEmail(form.cleaned_data["email"], "MR Images to graphs job started", 
               "Hello,\n\nYour job launched successfully. You will receive another email upon completion.\n\n")
@@ -78,8 +71,7 @@ def raw_upload(request):
       request.session["success_msg"] =\
 """
 Your job successfully launched. You should receive an email to confirm launch
-and another when it upon job completion. <br/>
-<i>The process may take several hours</i> if you selected to compute all invariants.
+and another when it upon job completion. <br/> The process can take <i>several hours</i> in some cases.
 """
       return HttpResponseRedirect(get_script_prefix()+"success")
 
