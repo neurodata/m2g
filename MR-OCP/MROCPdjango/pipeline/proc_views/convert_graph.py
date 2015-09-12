@@ -23,7 +23,6 @@ import argparse
 import os
 from glob import glob
 from time import strftime, localtime
-import threading
 
 from django.template import RequestContext
 from django.http import HttpResponse
@@ -38,6 +37,7 @@ from computation.utils import convertTo
 from pipeline.utils.util import writeBodyToDisk, saveFileToDisk
 from pipeline.tasks import task_convert
 from django.conf import settings
+from pipeline.utils.util import get_download_path
 
 def getworkdirs():
   base_dir = os.path.join(settings.MEDIA_ROOT, 'tmp', strftime('formUpload%a%d%b%Y_%H.%M.%S/', localtime()))
@@ -101,7 +101,7 @@ If you do not see an email in your <i>Inbox</i> check the <i>Spam</i> folder and
       outfn, err_msg = convertTo.convert_graph(fn, inFormat,
                         convert_file_save_loc, *outFormat)
 
-    dwnld_loc = "http://mrbrain.cs.jhu.edu" + convert_file_save_loc.replace(' ','%20')
+    dwnld_loc = get_download_path(convert_file_save_loc)
 
     if err_msg:
       err_msg = "Completed with errors. View Data at: %s\n. Here are the errors:%s" % (dwnld_loc, err_msg)

@@ -24,7 +24,6 @@
 """
 import os, sys, re
 from glob import glob
-import threading
 from random import randint
 import subprocess
 from time import strftime, localtime
@@ -154,7 +153,7 @@ def upload(request, webargs=None):
 
     #dwnldLoc = request.META['wsgi.url_scheme'] + '://' + \
                     #request.META['HTTP_HOST'] + userDefProjectDir.replace(' ','%20')
-    dwnldLoc = "http://mrbrain.cs.jhu.edu" + userDefProjectDir.replace(' ','%20')
+    dwnldLoc = get_download_path(userDefProjectDir)
 
     return HttpResponse ( "Files available for download at " + dwnldLoc) # change to render of a page with a link to data result
 

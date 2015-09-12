@@ -28,7 +28,7 @@ from django.conf import settings
 from pipeline.utils.util import sendJobCompleteEmail, sendJobFailureEmail
 from pipeline.utils.filesorter import checkFileExtGengraph
 from pipeline.procs.run_invariants import run_invariants
-from pipeline.utils.util import getFiberID
+from pipeline.utils.util import getFiberID, get_download_path
 
 from mrcap.gengraph import genGraph
 
@@ -80,8 +80,7 @@ def processInputData(session):
     session['invariant_fns'] = run_invariants(session['invariants'],\
                                 session['Gfn'], session['graphInvariants'])
 
-  dwnldLoc = "http://mrbrain.cs.jhu.edu" + \
-                  session['usrDefProjDir'].replace(' ','%20')
+  dwnldLoc = get_download_path(session['usrDefProjDir'])
   sendJobCompleteEmail(session['email'], dwnldLoc)
 
 def main():
