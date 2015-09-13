@@ -43,7 +43,7 @@ class BuildGraphModel(models.Model):
   session = models.CharField(max_length=255,)
   scanId = models.CharField(max_length=255)
   location = models.TextField()
-  owner = models.ForeignKey(to=User, to_field='username', null=True) # Many-to-one .Many here, other in auth_user
+  owner = models.ForeignKey(to=User, to_field='username', null=True) # Many-to-one. Many here, other in auth_user
 
   def __repr__(self):
     _repr = '\n' + "project_name: " + str(self.project_name) + '\n' + \

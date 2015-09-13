@@ -60,12 +60,12 @@
   </p>
       <form action="" class="nostyle" method="post" enctype="multipart/form-data" name="loadForm" onsubmit="return (Validate(this,['dat','nii', '']) && verifyEmail());">
         {% csrf_token %}
-        <ul>{{ buildGraphform.as_ul }}</ul>
-        <input name = "Derivatives"  type="submit" value="Submit All and Process" class="button" onclick="showSpinner();"/>
-        <input type="reset" value="Reset" class="button" name="clearForm" />
+        <ul> {{ buildGraphform.as_ul }} </ul>
+        <input name = "Derivatives"  type="submit" value="Submit" class="button" onclick="showSpinner();"/>
+        <input type="reset" value="Reset" class="button" name="clearForm"/>
       </form>
 
-    <div style="position:absolute; left:153px; top: 600px;">
+    <div style="position:absolute; left:153px; top: 600px; z-index:-5">
       <img id="loadingImage" src="{{STATIC_URL}}img/loading.gif" alt="loading" style="visibility:hidden;opacity:0.5; border:0"/>
     </div>
 
