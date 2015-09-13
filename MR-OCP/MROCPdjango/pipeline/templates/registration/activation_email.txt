@@ -2,6 +2,6 @@ Thank you creating a Magnetic Resonance One-Click Pipeline account!
 
 To finalize your account, just visit the address below. (If it's not a link, you can copy and paste it into your web browser's address bar.)
 
-http://mrbrain.cs.jhu.edu/graph-services/accounts/activate/{{ activation_key }}/
+http://openconnecto.me/graph-services/accounts/activate/{{ activation_key }}/
 
 If you didn't sign up for an account, please ignore this message; we won't email you again.

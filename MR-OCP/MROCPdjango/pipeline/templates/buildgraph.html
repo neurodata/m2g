@@ -72,7 +72,7 @@
     {% block programmatic %}
       <div id="programmatic">
         <h2> Graphs may also be built programmatically </h2>
-        The base url for building graphs is <pre>http://mrbrain.cs.jhu.edu/graph-services/upload/</pre>
+        The base url for building graphs is <pre>http://openconnecto.me/graph-services/upload/</pre>
 
         <h3> Single graph </h3>
         <p>
@@ -81,7 +81,7 @@
         </p>
         
         <pre>python uploadsubj.py \
-http://mrbrain.cs.jhu.edu/graph-services/upload/YOUR_project/YOUR_site/YOUR_subject/YOUR_session/YOUR_scanID/s \
+http://openconnecto.me/graph-services/upload/YOUR_project/YOUR_site/YOUR_subject/YOUR_session/YOUR_scanID/s \
 YOUR_FIBER.dat -a YOUR_ATLAS.nii -i cc,tri,ss1,mad,deg,eig</pre>
         <p>
           The parameter after YOUR_scanID can either be <code>s</code> or <code>b</code>, but not both.
@@ -121,7 +121,7 @@ YOUR_FIBER.dat -a YOUR_ATLAS.nii -i cc,tri,ss1,mad,deg,eig</pre>
         </p>
 
         <pre>python upload_multi.py \
-http://mrbrain.cs.jhu.edu/graph-services/upload/YOUR_project/YOUR_site/YOUR_subject/YOUR_session s \
+http://openconnecto.me/graph-services/upload/YOUR_project/YOUR_site/YOUR_subject/YOUR_session s \
 fiber_tract_dirctory -a YOUR_ATLAS -i cc,tri,ss1,mad,deg,eig</pre>
         <p>
           This call would build graphs for multiple scans and compute all 
