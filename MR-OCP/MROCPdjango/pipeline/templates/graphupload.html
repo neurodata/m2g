@@ -90,7 +90,7 @@
     {% block programmatic %}
       <div id="programmatic">
       <h2> Programmatic use </h2>
-      <p> This is can be accessed using the base url <pre>http://mrbrain.cs.jhu.edu/graph-services/graphupload/</pre>
+      <p> This is can be accessed using the base url <pre>http://openconnecto.me/graph-services/graphupload/</pre>
       The example python script can be found <a href="https://github.com/openconnectome/m2g/blob/master/MR-OCP/MROCPdjango/examples/compute.py" target="blank">here</a>.
       </p>
 
@@ -103,7 +103,7 @@
         <h3 id="single_graph"> Single graph </h3>
         <p>
         Assume we have a single graph located in the same directory as the example script named <code>YOUR_GRAPH_FILE_NAME</code>.
-        Typing <code>python compute.py http://mrbrain.cs.jhu.edu/graph-services/graphupload/ cc,tri,ss1 YOUR_GRAPH_FILE_NAME GRAPH_FORMAT -c gml,dot,pajek</code> will
+        Typing <code>python compute.py http://openconnecto.me/graph-services/graphupload/ cc,tri,ss1 YOUR_GRAPH_FILE_NAME GRAPH_FORMAT -c gml,dot,pajek</code> will
         upload your <code>YOUR_GRAPH_FILE_NAME</code> file, in <code>GRAPH_FORMAT</code> format; compute: clustering coefficient, local triangle count, and scan statistic-1; then convert the invariant-attributed
         graphs to <code>gml</code>,<code>dot</code>, and <code>pajek</code> format. 
         </p>
@@ -111,7 +111,7 @@
         <p>
           Here is a breakdown of the command line call arguments:
           <ul>
-            <li><pre>http://mrbrain.cs.jhu.edu/graph-services/graphupload/</pre> is the base url for uploading graphs for invariants to be computed.</li>
+            <li><pre>http://openconnecto.me/graph-services/graphupload/</pre> is the base url for uploading graphs for invariants to be computed.</li>
             <li><code>cc,tri,ss1</code> is a comma separated (no spaces) list of the invariants you want computed.
 
               <div id="inv_opts">
