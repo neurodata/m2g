@@ -22,7 +22,6 @@
 import os
 import tempfile
 import pickle
-import threading
 
 from django.shortcuts import render_to_response
 from django.template import RequestContext
@@ -35,7 +34,7 @@ from pipeline.utils.util import adaptProjNameIfReq, defDataDirs
 from pipeline.utils.util import saveFileToDisk, sendJobBeginEmail
 from pipeline.utils.create_dir_struct import create_dir_struct
 from pipeline.models import BuildGraphModel
-from pipeline.procs.process_ip_data import processInputData
+from pipeline.tasks import task_build
 
 def buildGraph(request):
 
@@ -46,29 +45,27 @@ def buildGraph(request):
     if form.is_valid():
 
       # Acquire proj names
-      userDefProjectName = form.cleaned_data["UserDefprojectName"]
+      proj_dir = form.cleaned_data["UserDefprojectName"]
       site = form.cleaned_data["site"]
       subject = form.cleaned_data["subject"]
       session = form.cleaned_data["session"]
       scanId = form.cleaned_data["scanId"]
 
+      """
       # Private project error checking
       if (form.cleaned_data["Project_Type"] == "private"):
         if not request.user.is_authenticated():
           error_msg = "You must be logged in to make/alter a private project! \
               Please Login or make/alter a public project."
 
-        """
         # Untested TODO: Add join to ensure it a private project
         elif BuildGraphModel.objects.filter(owner=request.user, \
-            project_name=userDefProjectName, site=site, subject=subject, \
+            project_name=proj_dir, site=site, subject=subject, \
             session=session, scanId=scanId).exists():
 
            error_msg = "The scanID you requested to create already \
                exists in this project path. Please change any of the form values."
-        """
-      # TODO DM: Some unaccounted for scenarios here!
-
+      """
       if error_msg:
         return render_to_response(
           "buildgraph.html",
@@ -76,42 +73,40 @@ def buildGraph(request):
           context_instance=RequestContext(request)
           )
 
+      """
       # If a user is logged in associate the project with thier directory
       if form.cleaned_data["Project_Type"] == "private":
-        userDefProjectName = os.path.join(request.user.username, userDefProjectName)
+        proj_dir = os.path.join(request.user.username, proj_dir)
       else:
-        userDefProjectName = os.path.join("public", userDefProjectName)
+      """
+      proj_dir = os.path.join("public", proj_dir)
 
       # Adapt project name if necesary on disk
-      userDefProjectName = adaptProjNameIfReq(os.path.join(
-          settings.MEDIA_ROOT, userDefProjectName)) # Fully qualify AND handle identical projects
+      proj_dir = adaptProjNameIfReq(os.path.join(
+          settings.MEDIA_ROOT, proj_dir)) # Fully qualify AND handle identical projects
 
-      request.session["usrDefProjDir"] = os.path.join(userDefProjectName, 
-                                              site, subject, session, scanId)
-      request.session["scanId"] = scanId
-
+      usrDefProjDir = os.path.join(proj_dir, site, subject, session, scanId)
       """ Define data directory paths """
-      request.session["derivatives"], request.session["graphs"], \
-          request.session["graphInvariants"] = defDataDirs(request.session["usrDefProjDir"])
+      derivatives, graphs, invariant_loc = defDataDirs(usrDefProjDir)
 
       # Create a model object to save data to DB
 
       grModObj = BuildGraphModel(project_name = form.cleaned_data["UserDefprojectName"])
-      grModObj.location = request.session["usrDefProjDir"] # The particular scan location
+      grModObj.location = usrDefProjDir # The particular scan location
 
-      grModObj.site = form.cleaned_data["site"]# set the site
-      grModObj.subject = form.cleaned_data["subject"]# set the subject
-      grModObj.session = form.cleaned_data["session"]# set the session
-      grModObj.scanId = form.cleaned_data["scanId"]# set the scanId
+      grModObj.site = site
+      grModObj.subject = subject
+      grModObj.session = session
+      grModObj.scanId = scanId
 
       if request.user.is_authenticated():
         grModObj.owner = request.user # Who created the project
 
-      request.session["invariants"] = form.cleaned_data["Select_Invariants_you_want_computed"]
-      request.session["graphsize"] = form.cleaned_data["Select_graph_size"]
-      request.session["email"] = form.cleaned_data["Email"]
+      invariants = form.cleaned_data["invariants"]
+      graph_size = form.cleaned_data["graph_size"]
+      email = form.cleaned_data["email"]
 
-      if request.session["graphsize"] == "big" and not request.session["email"]:
+      if graph_size == "big" and not email:
         return render_to_response(
           "buildgraph.html",
           {"buildGraphform": form, "error_msg": "Email address must be \
@@ -125,12 +120,12 @@ def buildGraph(request):
         data_atlas_fn = form.cleaned_data["data_atlas_file"].name
         print "Storing data atlas ..."
         saveFileToDisk(form.cleaned_data["data_atlas_file"], 
-            os.path.join(request.session["derivatives"], data_atlas_fn))
+            os.path.join(derivatives, data_atlas_fn))
 
       print "Storing fibers ..."
       """ Save files in appropriate location """
       saveFileToDisk(form.cleaned_data["fiber_file"], 
-          os.path.join(request.session["derivatives"], fiber_fn))
+          os.path.join(derivatives, fiber_fn))
       grModObj.save() # Save project data to DB after file upload
 
       # add entry to owned project
@@ -141,22 +136,20 @@ def buildGraph(request):
 
       print "\nSaving all files complete..."
 
-      """ Make appropriate dirs if they dont already exist """
-      create_dir_struct([request.session["derivatives"],\
-          request.session["graphs"], request.session["graphInvariants"]])
+      # Make appropriate dirs if they dont already exist
+      create_dir_struct([derivatives, graphs, invariant_loc])
 
-      #if request.session["graphsize"] == "big":
-      # Launch thread for big graphs & email user
-      tmp_req = tempfile.NamedTemporaryFile("w", delete=False, dir="/data/pytmp")
-      #pickle.dump(request.session, tmp_req) # TODO: figure 
-      tmp_req.close()
-      os.remove(tmp_req.name) # TODO: rm
-      # TODO: Submit job to SGE then os.remove(tmpfile.name)
-      
-      #processInputData(request.session)
-      sendJobBeginEmail(request.session["email"], request.session["invariants"])
-      thr = threading.Thread(target=processInputData, args=(request.session,))
-      thr.start()
+      # TEST #
+      """
+      derivatives = "/home/disa/test/build_test"
+      graphs = derivatives
+      proj_dir = derivatives
+      invariant_loc = derivatives 
+      # END TEST #
+      """
+
+      sendJobBeginEmail(email, invariants)
+      task_build.delay(derivatives, graphs, graph_size, invariants, proj_dir, invariant_loc, email)
       request.session["success_msg"] =\
 """
 Your job successfully launched. You should receive an email to confirm launch
