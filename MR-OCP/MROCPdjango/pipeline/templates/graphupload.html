@@ -72,9 +72,9 @@
     <p></p>
 
       <form action="" method="post" enctype="multipart/form-data" name="loadForm"
-            onsubmit="return Validate(this,['zip','npy','mat','graphml','ncol','edge', 'edgelist','lgl','pajek','graphdb', '', 'xml'] );"
+            onsubmit="return Validate(this,['zip','npy','mat','graphml','ncol','edge', 
+            'edgelist','lgl','pajek','graphdb', '', 'xml'] );"
             class="forms" id="id_loadForm">
-
           {% csrf_token %}
           <ul>
             {{ graphUploadForm.as_ul }}
@@ -83,7 +83,7 @@
           <input type="reset" value="Reset" class="button" name="clearForm" />
       </form>
 
-    <div style="position:absolute; left:153px; top: 1300px;">
+    <div style="position:absolute; left:153px; top: 1300px; z-index:-5;">
       <img id="loadingImage" src="{{STATIC_URL}}img/loading.gif" alt="loading" style="visibility:hidden; opacity:0.5; border:0;"/>
     </div>
 
