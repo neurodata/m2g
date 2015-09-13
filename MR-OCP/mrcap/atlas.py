@@ -72,5 +72,5 @@ class Atlas(object):
     """
     keys = []
     for vertex in vertices:
-      keys.append(self.get_region_num(vertex))
+      keys.append(self.get_region_num(int(vertex))) # TODO: Verify me
     return keys 
