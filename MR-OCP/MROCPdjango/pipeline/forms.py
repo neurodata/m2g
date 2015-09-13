@@ -39,6 +39,11 @@ from django.forms.widgets import RadioSelect, CheckboxSelectMultiple, Select, Se
 #  password = forms.PasswordInput()
 #  confirmPassword = forms.PasswordInput()
 
+INVARIANT_CHOICES = (('ss1', 'Scan Statistic 1',), ('tri', 'Triangle Count',), \
+('cc', 'Clustering co-efficient',), ('mad', 'Maximum Average Degree',) \
+,('deg', 'Vertex Degree',), ('eig', 'Top-k Eigenvalues and Eigenvectors',))
+
+
 class LogoutForm(forms.Form):
   pass
 
@@ -79,42 +84,48 @@ class BuildGraphForm(forms.Form):
   '''
 
   # Public or private Project
-  Project_Type = forms.ChoiceField([('public', 'public'), ('private','private')], widget=Select, required=False)
+  #Project_Type = forms.ChoiceField([('public', 'public'), ('private','private')], widget=Select, required=False)
 
   # Name project
-  UserDefprojectName  = forms.CharField(label='Project name', max_length=255, widget=TextInput(),
+  UserDefprojectName  = forms.CharField(label='Project', max_length=255, widget=TextInput(),
                                         required = True, error_messages={'required': 'You must enter a Project name'})
-  site = forms.CharField(label='Enter Site', max_length=255, widget=TextInput(),
-                         required = True, error_messages={'required': 'You must enter a site'})
-  subject = forms.CharField(label='Enter Subject ID', max_length=255, widget=TextInput(),
-                            required = True , error_messages={'required': 'You must enter a Subject ID'})
-  session = forms.CharField(label='Enter Session ID', max_length=255, widget=TextInput(),
+  site = forms.CharField(label='Site', max_length=255, widget=TextInput(),
+                         required = True, error_messages={'required': 'You must enter a site'}, help_text="\n")
+  subject = forms.CharField(label='Subject ID', max_length=255, widget=TextInput(),
+                            required = True, error_messages={'required': 'You must enter a Subject ID'})
+  session = forms.CharField(label='Session ID', max_length=255, widget=TextInput(),
                             required = True, error_messages={'required': 'You must enter a Session ID'})
-  scanId = forms.CharField(label='Scan ID', max_length=255, widget=TextInput(),
-                           required = True, error_messages={'required': 'You must enter a Scan ID'})
+  scanId = forms.CharField(label='Scan ID', max_length=255, widget=TextInput(), required = True, 
+          error_messages={'required': 'You must enter a Scan ID'}, help_text="\n")
 
   # Upload project files
   fiber_file = forms.FileField(label='Select fiber.dat file', required = True, 
       error_messages={'required': 'You must upload a fiber tract file'},)
   data_atlas_file = forms.FileField(label='Data atlas file (Optional)',required = False)
 
-  INVARIANT_CHOICES = (('ss1', 'Scan Statistic 1',), ('tri', 'Triangle Count',), \
-  ('cc', 'Clustering co-efficient',), ('mad', 'Maximum Average Degree',) \
-  ,('deg', 'Vertex Degree',), ('eig', 'Top-k Eigenvalues and Eigenvectors',))
+  graph_size = forms.ChoiceField(required=True, \
+      widget=Select, choices=(("small","small",),("big", "big")))
 
-  Select_graph_size = forms.ChoiceField(choices=(('small','Small graph [~7 min]'), \
-      ('big','Big graph [~20 min]')), widget=RadioSelect(), required = True, \
-      error_messages={'required': 'You must choose a graph size'})
+  email = forms.EmailField(widget=EmailInput(attrs={"class":"tb", "size":35}), 
+        required=True, help_text="\n")
 
-  Email = forms.EmailField(widget=EmailInput(attrs={"class":"tb", "size":35}), required=True)
+  invariants = forms.MultipleChoiceField(required=False, widget=SelectMultiple(attrs=
+    {"class":"tb", "style":"width: 300px;"}), choices=INVARIANT_CHOICES, 
+    label="Invariants to compute")
 
-  Select_Invariants_you_want_computed = forms.MultipleChoiceField(required=False,
-  widget=CheckboxSelectMultiple, choices=INVARIANT_CHOICES)
-
+  """
   def __init__(self, *args, **kwargs):
     super(BuildGraphForm, self).__init__(*args, **kwargs)
     self.fields["Project_Type"].widget.attrs["disabled"] = "disabled" # radio / checkbox
+  """
 
+
+IN_FORMATS = [('graphml', 'graphml'), ('ncol','ncol'), ('edgelist', 'edgelist'),
+        ('lgl','lgl'),('pajek', 'pajek'), ('graphdb', 'graphdb'),
+        ('npy', 'numpy format (npy)'), ('mat', 'MATLAB format (mat)'), 
+        ('attredge', 'Attributed edgelist')]
+OUT_FORMATS = IN_FORMATS[:-4]
+OUT_FORMATS.extend([('dot', 'dot'), ('gml', 'gml'), ('leda', 'leda')])
 
 class ConvertForm(forms.Form):
   '''
@@ -128,18 +139,10 @@ class ConvertForm(forms.Form):
   '''
   fileObj = forms.FileField(label='Upload data', required = True)
 
-  IN_FORMATS = [('graphml', 'graphml'), ('ncol','ncol'), ('edgelist', 'edgelist'),
-            ('lgl','lgl'),('pajek', 'pajek'), ('graphdb', 'graphdb'),
-            ('npy', 'numpy format (npy)'), ('mat', 'MATLAB format (mat)'), 
-            ('attredge', 'Attributed edgelist')]
-
-  input_format = forms.ChoiceField(required=True, widget=Select, choices=IN_FORMATS, label="Input format")
-
-  OUT_FORMATS = IN_FORMATS[:-4]
-  OUT_FORMATS.extend([('dot', 'dot'), ('gml', 'gml'), ('leda', 'leda')])
-
-  output_format = forms.MultipleChoiceField(required=True, \
-      widget=SelectMultiple(attrs={"class":"tb", "style":"width: 100px;"}), choices=OUT_FORMATS, label="Output file format")
+  input_format = forms.ChoiceField(required=True, widget=Select(), choices=IN_FORMATS, label="Input format")
+  output_format = forms.MultipleChoiceField(required=True,
+      widget=SelectMultiple(attrs={"class":"tb", "style":"width: 100px;"}), 
+      choices=OUT_FORMATS, label="Output file format")
   Email = forms.EmailField(widget=EmailInput(attrs={"class":"tb", "size":40}), required=True)
 
 class GraphUploadForm(forms.Form):
