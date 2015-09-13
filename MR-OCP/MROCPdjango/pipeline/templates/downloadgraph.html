@@ -82,7 +82,7 @@ Examples of how to load graphs using igraph can be found <a href="{{"igraph"|get
       {% render_table genus.0 %}
       <br/>
       <input name ="{{ genus.1.form_name }}"  type="submit" value="Download selected {{ genus.1.form_name }}"
-             class="button" onsubmit="showSpinner();"/>
+             class="button" onclick="showSpinner();"/>
 
         {{ genus.1 }}
 
@@ -102,8 +102,9 @@ Examples of how to load graphs using igraph can be found <a href="{{"igraph"|get
   {%endfor%}
 </div>
 
-    <div style="position:absolute; left:153px; top: 1000px;">
-      <img id="loadingImage" src="{{STATIC_URL}}img/loading.gif" border="0" alt="loading" style="visibility:hidden;opacity:0.5"/>
+    <div style="position:absolute; left:153px; top: 1000px; z-index:-5;">
+      <img id="loadingImage" src="{{STATIC_URL}}img/loading.gif" border="0" alt="loading" 
+      style="visibility:hidden;opacity:0.5"/>
     </div>
 
 {%  elif query_result %}

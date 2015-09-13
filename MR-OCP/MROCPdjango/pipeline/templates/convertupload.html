@@ -47,14 +47,15 @@
     <form class="nostyle" method="post" enctype="multipart/form-data" name="loadForm"
           onsubmit="return Validate(this,['zip','npy','mat','graphml','ncol','edge', 'edgelist','lgl','pajek','graphdb', '', 'xml', 'attredge']);">
       {% csrf_token %}
-      <p>{{convertForm}}</p>
+      <ul>{{ convertForm.as_ul }}</ul>
       <input name = "Convert button"  type="submit" value="Convert All" class="button" onclick="showSpinner();"/>
       <input type="reset" value="Reset" class="button" name="clearForm"/>
     </form>
 
-    <div style="position:absolute; left:153px; top: 212px;">
+    <!--
+    <div style="position:absolute; left:153px; top: 212px; z-index:-5;">
       <img id="loadingImage" src="{{STATIC_URL}}img/loading.gif" border="0" alt="loading" style="visibility:hidden;opacity:0.5"/>
-    </div>
+    </div> -->
 
     {% block programmatic %}
     <div id="programmatic">
