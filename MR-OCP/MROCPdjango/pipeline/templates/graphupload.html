@@ -63,14 +63,6 @@
       To compute invariants for multiple graphs, with one click &#8212; upload a zipfile <i> (.zip) </i> with all the graphs in a <b>single</b> folder, fill the <a href="#id_loadForm">form</a> below and submit.
     </p>
 
-    <h4> You must supply an <span style="color:#ff0000"> Email address: </span> </h4>
-
-    You will receive an email when your job begins and upon completion, with a url link with the result.<br/>
-    <span style="color:#2373ff">
-      We will never share or use your email address for any other purpose.
-    </span>
-    <p></p>
-
       <form action="" method="post" enctype="multipart/form-data" name="loadForm"
             onsubmit="return Validate(this,['zip','npy','mat','graphml','ncol','edge', 
             'edgelist','lgl','pajek','graphdb', '', 'xml'] );"
@@ -80,11 +72,13 @@
             {{ graphUploadForm.as_ul }}
           </ul>
           <input name = "Derivatives"  type="submit" value="Upload Graph(s)" class="button" onclick="showSpinner();"/>
+          <input type="hidden" id="X-Progress-ID" name="X-Progress-ID" value=""/>
+          <input type="hidden" id="id" name="id" value=""/>
           <input type="reset" value="Reset" class="button" name="clearForm" />
       </form>
 
-    <div style="position:absolute; left:153px; top: 1300px; z-index:-5;">
-      <img id="loadingImage" src="{{STATIC_URL}}img/loading.gif" alt="loading" style="visibility:hidden; opacity:0.5; border:0;"/>
+    <div style="position:absolute; left:200px; top: 500px; z-index:-5;">
+      <img id="loadingImage" src="{{STATIC_URL}}img/loading.gif" alt="loading" style="visibility:hidden; border:0;"/>
     </div>
 
     {% block programmatic %}
