@@ -163,6 +163,7 @@ INSTALLED_APPS = (
     'django.contrib.admindocs',
     'django_tables2',
     'djcelery',
+    'kombu.transport.django'
 )
 
 # A sample logging configuration. The only tangible logging
@@ -221,5 +222,5 @@ VALID_FILE_TYPES['gdia'] = 'graphDiam'
 BROKER_URL = 'amqp://guest@localhost'
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
-CELERY_ACCEPT_CONTENT=['json', 'pickle']
+CELERY_ACCEPT_CONTENT=['json']
 CELERYD_PREFETCH_MULTIPLIER = 1
