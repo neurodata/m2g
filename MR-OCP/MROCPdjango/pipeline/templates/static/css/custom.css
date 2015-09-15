@@ -111,3 +111,10 @@ option {
 .navbar .navbar-collapse {
   text-align: center;
 }
+
+.errorlist{
+  color: #fa1426;
+  font-size:larger;
+  font-weight:bold;
+}
+
