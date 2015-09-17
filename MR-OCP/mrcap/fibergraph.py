@@ -92,7 +92,7 @@ class _FiberGraph(object):
     print self.graph.summary()
     print
 
-  def saveToIgraph(self, filename, gformat="graphml"):
+  def saveToIgraph(self, filename, gformat="graphml", compress=False):
     """
     Save igraph to disk in specified format
 
@@ -109,6 +109,9 @@ class _FiberGraph(object):
 
     print "Saving graph '%s' to disk ... " % filename
     self.graph.save(filename, format=gformat)
+    if compress:
+      from os import system
+      system('zip '+splitext(filename)[0]+' '+filename)
 
   def loadFromIgraph(self, filename, gformat="graphml"):
     """
