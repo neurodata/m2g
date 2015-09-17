@@ -99,8 +99,8 @@ Your job successfully launched. You should receive an email to confirm launch
 and another when it upon job completion. <br/>
 <i>The process may take several hours</i> if you selected to compute all invariants.
 """
-    return HttpResponse("Successful job submission, "\
-                          "please await reception & completion emails")
+    return HttpResponse("Successful job submission, please " \
+                          "await reception & completion emails at {0}".format(email))
   else:
-    return HttpResponse("There was an error! If you believe it" \
+    return HttpResponse("There was an error! If you believe it " \
                           "is on our end please email: jhmrocp@cs.jhu.edu")
