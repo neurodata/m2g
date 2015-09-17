@@ -73,10 +73,10 @@ def defDataDirs(projectDir):
   derivatives = os.path.join(projectDir, 'derivatives')
   #rawdata = os.path.join(projectDir, 'rawdata')
   graphs = os.path.join(projectDir, 'graphs')
-  graphInvariants = os.path.join(projectDir, 'graphInvariants')
+  #graphInvariants = os.path.join(projectDir, 'graphInvariants')
   #images = os.path.join(projectDir, 'images')
 
-  return [derivatives, graphs, graphInvariants]
+  return [derivatives, graphs]
 
 ################################################################################
 
@@ -117,28 +117,16 @@ def writeBodyToDisk(data, saveDir):
   uploadFiles = []
   for name in (rzfile.namelist()):
     try:
-      outfile = open(os.path.join(saveDir, name.split('/')[-1]), 'wb') # strip name of source folders if in file name
+      bname = os.path.basename(name)
+      outfile = open(os.path.join(saveDir, bname), 'wb') # strip name of source folders if in file name
       outfile.write(rzfile.read(name))
       outfile.flush()
       outfile.close()
-      uploadFiles.append(os.path.join(saveDir, name.split('/')[-1])) # add to list of files
-      print name + " written to disk.."
+      uploadFiles.append(os.path.join(saveDir, bname)) # add to list of files
+      print bname + " written to disk.."
     except Exception:
       print "\n[WARNING]: Item %s rejected for file download ...\n" % name
   return uploadFiles
-
-################################################################################
-
-def getDirFromFilename(filename):
-  '''
-  @summary: Get the directort location of a file
-  @param filename: the full filename of the file in question
-  @return: the directory of the file passed in as a param
-  '''
-  path = ''
-  for part in filename.split('/')[:-1]:
-    path += part + '/'
-  return path
 
 ################################################################################
 
