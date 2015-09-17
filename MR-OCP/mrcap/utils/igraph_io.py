@@ -53,12 +53,29 @@ def unzip_file(fn):
   print "Unzip of %s took %f sec ..." % (fn, (time()-start))
   return tmpfile.name
 
+def untar_file(fn):
+  print "Uzing tar!"
+  import tarfile as tar
+  start = time()
+  assert tar.is_tarfile(fn), "Not a tarfile"
+  f = tar.open(fn, mode="r")
+  assert len(f.getnames()) == 1, "Cannot uncompress multiple tars"
+  
+  tfn = f.getnames()[0]
+  f.extract(tfn, path=tempfile.gettempdir())
+  f.close()
+  print "Untar of %s took %f sec ..." % (fn, (time()-start))
+  return os.path.join(tempfile.gettempdir(), tfn)
+
 def read_arbitrary(fn, informat="graphml", headers_only=False):
   tmpfile_name = ""
   print "Attempting arbirary read of : %s ..." % fn
   do_del = False
   if os.path.splitext(fn)[1] == ".zip":
     fn = unzip_file(fn)
+    do_del = True
+  elif os.path.splitext(fn)[1] == ".gz":
+    fn = untar_file(fn)
     do_del = True
 
   start = time()
