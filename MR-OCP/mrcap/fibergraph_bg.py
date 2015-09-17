@@ -37,7 +37,7 @@ class FiberGraph(_FiberGraph):
     super(FiberGraph, self).__init__(matrixdim, rois)
     
     # Keep track of the original vertex ID = region ID before deletion deg zero vertices
-    print "Annotating vertices with spatial position .."
+    print "Annotating vertices with spatial position for big graph.."
     spatial_map = [`0`]*(self.graph.vcount()+1)
     nnz = np.where(self.rois.data != 0)
     for idx in xrange(nnz[0].shape[0]):
@@ -56,29 +56,6 @@ class FiberGraph(_FiberGraph):
 
     for idx, atlas_name in enumerate(atlases.keys()):
       self.graph["Atlas_"+ os.path.splitext(os.path.basename(atlas_name))[0]+"_index"] = idx
-      print "Adding '%s' region numbers (and names) ..." % atlas_name
-      atlas = Atlas(atlas_name, atlases[atlas_name])
-      #region = atlas.get_all_mappings(self.graph.vs["position"])
-      #self.graph.vs["atlas_%d_region_num" % idx] = region[0]
-      #if region[1]: self.graph.vs["atlas_%d_region_name" % idx] = region[1]
-    
-      if add_centroids and (not centroids_added):
-        if (atlas.data.max() == 70): #FIXME: Hard coded Desikan small dimensions
-          centroids_added = True
-          print "Adding centroids ..."
-          
-          cent_loc = os.path.join(os.environ['M2G_HOME'], "data", "Centroids", "centroids.mat")
-          if not os.path.exists(cent_loc):
-            get_files()
-
-          cent_mat = sio.loadmat(cent_loc)["centroids"]
-
-          keys = atlas.get_region_nums(self.graph.vs["position"])
-          centroids = []
-          for key in keys:
-            centroids.append(str(list(cent_mat[key-1]))) # -1 accounts for 1-based indexing
-
-          self.graph.vs["centroid"] = centroids
 
     for key in graph_attrs.keys():
       self.graph[key] = graph_attrs[key]

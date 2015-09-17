@@ -93,7 +93,6 @@ def downsample(g, factor=-1, ds_atlas=None, ignore_zero=True):
 
       edge_dict[(src, tgt)] += e["weight"]
 
-  #import pdb; pdb.set_trace()
   del g # free me
   new_graph = igraph.Graph(n=len(spatial_map), directed=False) # len spatial_map is the # of vertices
   new_graph.vs["spatial_id"] = spatial_map
