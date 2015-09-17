@@ -33,8 +33,8 @@ from pipeline.utils.util import getFiberID, get_download_path
 from mrcap.gengraph import genGraph
 
 # From the object
-def process_input_data(derivatives, graphs, graphsize, invariants, 
-                        proj_dir, invariant_loc, to_email):
+def process_input_data(derivatives, graph_loc, graphsize, invariants, 
+                        proj_dir, to_email):
   '''
   Extract File name & determine what file corresponds to what for gengraph
   @param session: the session dictionary object
@@ -60,7 +60,7 @@ def process_input_data(derivatives, graphs, graphsize, invariants,
 
   print "data_atlas_fn %s ..." % data_atlas_fn
 
-  Gfn = os.path.join(graphs, getFiberID(fiber_fn)) # partial name
+  Gfn = os.path.join(graph_loc, getFiberID(fiber_fn)) # partial name
   if (graphsize).lower().startswith("s"):
     Gfn += "smgr.graphml"
     graphsize = False # False is small graph
@@ -70,7 +70,7 @@ def process_input_data(derivatives, graphs, graphsize, invariants,
   else: print '[ERROR]: Graphsize Unkwown' # should never happen
    
   try:
-    Gfn= genGraph(fiber_fn, data_atlas_fn, Gfn, graphsize, **settings.ATLASES) # numfibers = 20000 for tests
+    genGraph(fiber_fn, data_atlas_fn, Gfn, graphsize, **settings.ATLASES) # FIXME: numfibers = 20000 for tests
   except:
     msg = "Hello,\n\nYour most recent job failed either because your fiber streamline file or ROI mask was incorrectly formatted."
     msg += " Please check both and try again.\n\n"
@@ -78,9 +78,9 @@ def process_input_data(derivatives, graphs, graphsize, invariants,
 
   # Run ivariants here
   if len(invariants) > 0:
-    print "Computing invariants ..."
+    print "Computing invariants {0}".format(invariants)
 
-    invariant_fns = run_invariants(invariants, Gfn, invariant_loc)
+    invariant_fns = run_invariants(invariants, Gfn, graph_loc)
 
   dwnld_loc = get_download_path(proj_dir)
   sendJobCompleteEmail(to_email, dwnld_loc)
