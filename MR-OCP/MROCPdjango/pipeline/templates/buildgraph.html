@@ -80,7 +80,7 @@
         target="blank"> buildsubj.py</a> can be used as follows from a terminal session:
         </p>
         
-        <pre>python uploadsubj.py \
+        <pre>python buildsubj.py \
 http://openconnecto.me/graph-services/buildgraph/PROJECT/SITE/SUBJECT/SESSION/SCAN_ID/s \
 FIBER.dat myemail@domain.com -a ATLAS.nii -i cc tri ss1 mad deg eig</pre>
         <p>
@@ -94,7 +94,7 @@ FIBER.dat myemail@domain.com -a ATLAS.nii -i cc tri ss1 mad deg eig</pre>
 
           The particular invocation above would build a small graph and compute all 
           invariants currently available. A list of invariant contractions is available below.
-          <strong>The result of uploadsubj.py is either an error or success message. 
+          <strong>The result of buildsubj.py is either an error or success message. 
             Simply wait for an email response with the download url.</strong>
           We recommend starting a <a href="http://tmux.sourceforge.net/" target="blank">tmux</a> 
           or <a href="http://linux.die.net/man/1/screen" target="blank"> screen </a> session in
@@ -102,7 +102,7 @@ FIBER.dat myemail@domain.com -a ATLAS.nii -i cc tri ss1 mad deg eig</pre>
         </p>
 
         The optional arguments given as <code>-i</code> are simply appended to the final url in 
-        	uploadsubj.py. The options available must be in a comma separated list and are as follows:
+        	buildsubj.py. The options available must be in a comma separated list and are as follows:
         <ul>
           <li> <code>ss1</code> for the Scan Statistic 1</li>
           <li> <code>tri</code> for the Triangle Count </li>
