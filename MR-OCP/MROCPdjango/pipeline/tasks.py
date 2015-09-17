@@ -56,12 +56,12 @@ def task_runc4(dti_path, mprage_path, bvalue_path, bvector_path, graph_size, atl
   print "Exiting c4 task ..."
 
 @task(queue="mrocp")
-def task_build(derivatives, graphs, graphsize, invariants, 
-                        proj_dir, invariant_loc, to_email):
+def task_build(derivatives, graph_loc, graphsize, invariants, 
+                        proj_dir, to_email):
   print "Entering build task ..."
   from pipeline.procs.process_ip_data import process_input_data 
-  process_input_data(derivatives, graphs, graphsize, invariants, 
-                        proj_dir, invariant_loc, to_email)
+  process_input_data(derivatives, graph_loc, graphsize, invariants, 
+                        proj_dir, to_email)
   print "Exiting build task ..."
 
 @task(queue="mrocp")
