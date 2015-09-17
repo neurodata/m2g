@@ -276,4 +276,4 @@ def get_script_prefix():
     return gsp() + URL_BASE
 
 def get_download_path(fspath):
-    return "http://awesome.cs.jhu.edu/outdata/" + ("/".join(fspath.split("/")[4:])).replace(' ','%20')
+    return "http://awesome.cs.jhu.edu/" + ("/".join(fspath.split("/")[4:])).replace(' ','%20')
