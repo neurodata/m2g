@@ -38,7 +38,6 @@ urlpatterns = patterns('pipeline.views',
     url(r'^$', 'welcome', name= 'welcome'),
     url(r'^testcelery/$', 'testcelery', name= 'testcelery'),
     url(r'^success/$', 'success', name='success-page'),
-    url(r'^upload/(.*$)', 'upload', name= 'prog-upload'),
     url(r'^showdir/$', 'showdir', name='serve-dir'),
     url(r'^contact/$', 'contact', name='contact'),
     url(r'^jobfailure/$', 'jobfailure', name='failure-page'),
@@ -60,6 +59,11 @@ urlpatterns = patterns('pipeline.views',
 from proc_views.buildgraph import buildGraph
 urlpatterns += patterns('pipeline.proc_views.buildgraph',
     url(r'^buildgraph/$', 'buildGraph', name= 'build-graph'),
+    )
+
+from proc_views.buildgraph_prog import build_graph_prog
+urlpatterns += patterns('pipeline.proc_views.buildgraph_prog',
+    url(r'^buildgraph/(.*$)', 'build_graph_prog', name= 'build-graph-prog'),
     )
 
 from proc_views.graphupload import graphLoadInv
@@ -86,4 +90,3 @@ from accounts.views import projects
 urlpatterns +=patterns('pipeline.accounts.views',
     url(r'^accounts/projects/$', 'projects', name='project-accounts'),
     )
-
