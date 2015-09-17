@@ -61,40 +61,37 @@ USE_L10N = True
 # If you set this to False, Django will not use timezone-aware datetimes.
 USE_TZ = True
 
-# Absolute filesystem path to the directory that will hold user-uploaded files.
-# Example: "/home/media/media.lawrence.com/media/"
-MEDIA_ROOT = '/data/ocp'
-
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash.
 # Examples: "http://media.lawrence.com/media/", "http://example.com/media/"
 MEDIA_URL = '/ocp/'
 
-BASE_DIR = os.path.abspath(os.path.dirname(__file__))
+BASE_DIR = os.path.abspath(os.path.join(os.environ["M2G_HOME"], "MR-OCP", "MROCPdjango"))
 
 # Directory containing templates
-TEMPLATE_DIR = os.path.join(BASE_DIR, 'templates/')
-
-
-PROCESSING_SCRIPTS = os.path.join(os.path.dirname(os.path.abspath(os.path.curdir)),'mrcap/')
+TEMPLATE_DIR = os.path.join(BASE_DIR, 'pipeline', 'templates/')
+PROCESSING_SCRIPTS = os.path.join(os.environ["M2G_HOME"], "MR-OCP", "mrcap")
 
 # Absolute path to the directory static files should be collected to.
 # Don't put anything in this directory yourself; store your static files
 # in apps' "static/" subdirectories and in STATICFILES_DIRS.
 # Example: "/home/media/media.lawrence.com/static/"
 
-STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
+STATIC_ROOT = os.path.join(BASE_DIR,'pipeline', 'static/')
 
 # URL prefix for static files.
 # Example: "http://media.lawrence.com/static/"
 STATIC_URL = '/graph-services/static/'
+
+# DM for url resolution *MUST have a trailing slash /*
+URL_BASE = "graph-services/"
 
 # Additional locations of static files
 STATICFILES_DIRS = (
     # Put strings here, like "/home/html/static" or "C:/www/django/static".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
-    os.path.join(BASE_DIR, 'templates/static/'),
+    os.path.join(BASE_DIR, 'pipeline', 'templates/static/'),
 )
 
 # List of finder classes that know how to find static files in
@@ -148,7 +145,7 @@ TEMPLATE_DIRS = (
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
     #os.path.join(os.path.dirname(__file__), 'templates').replace('\\','/'),
-    os.path.join(BASE_DIR, 'templates'),
+    os.path.join(BASE_DIR,'pipeline', 'templates'),
 )
 
 INSTALLED_APPS = (
@@ -158,13 +155,15 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'ocpipeline', # DM
+    'pipeline', # DM
     'registration', # DM
     # Uncomment the next line to enable the admin:
     'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
     'django.contrib.admindocs',
     'django_tables2',
+    'djcelery',
+    'kombu.transport.django'
 )
 
 # A sample logging configuration. The only tangible logging
@@ -218,3 +217,10 @@ VALID_FILE_TYPES['mad'] = 'maxAvgDeg'
 VALID_FILE_TYPES['fg'] = 'fibergraph'
 VALID_FILE_TYPES['lcc'] = 'lrgstConnComp'
 VALID_FILE_TYPES['gdia'] = 'graphDiam'
+
+# Celery Settings
+BROKER_URL = 'amqp://guest@localhost'
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_ACCEPT_CONTENT=['json']
+CELERYD_PREFETCH_MULTIPLIER = 1
