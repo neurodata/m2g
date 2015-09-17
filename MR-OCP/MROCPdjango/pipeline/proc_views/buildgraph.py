@@ -87,7 +87,7 @@ def buildGraph(request):
 
       usrDefProjDir = os.path.join(proj_dir, site, subject, session, scanId)
       """ Define data directory paths """
-      derivatives, graphs, invariant_loc = defDataDirs(usrDefProjDir)
+      derivatives, graphs = defDataDirs(usrDefProjDir)
 
       # Create a model object to save data to DB
 
@@ -137,7 +137,7 @@ def buildGraph(request):
       print "\nSaving all files complete..."
 
       # Make appropriate dirs if they dont already exist
-      create_dir_struct([derivatives, graphs, invariant_loc])
+      create_dir_struct([derivatives, graphs])
 
       # TEST #
       """
@@ -149,7 +149,7 @@ def buildGraph(request):
       """
 
       sendJobBeginEmail(email, invariants)
-      task_build.delay(derivatives, graphs, graph_size, invariants, proj_dir, invariant_loc, email)
+      task_build.delay(derivatives, graphs, graph_size, invariants, derivatives, email)
       request.session["success_msg"] =\
 """
 Your job successfully launched. You should receive an email to confirm launch
