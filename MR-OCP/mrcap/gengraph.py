@@ -26,7 +26,7 @@ from time import time
 from computation.utils.cmdline import parse_dict
 
 def genGraph(infname, data_atlas_fn, outfname, bigGraph=False, \
-    outformat="graphml", numfibers=0, centroids=True, graph_attrs={}, **atlases, compress=False):
+    outformat="graphml", numfibers=0, centroids=True, graph_attrs={}, compress=False, **atlases):
   """
 	Generate a sparse igraph from an MRI file based on input and output names.
   
@@ -105,7 +105,7 @@ def genGraph(infname, data_atlas_fn, outfname, bigGraph=False, \
   # Done adding edges
   fbrgraph.complete(centroids, graph_attrs, atlases)
 
-  fbrgraph.saveToIgraph(outfname, gformat=outformat, compress)
+  fbrgraph.saveToIgraph(outfname, gformat=outformat, compress=compress)
 
   del fbrgraph
   print "\nGraph building complete in %.3f secs" % (time() - start)
@@ -135,7 +135,7 @@ def main ():
       for multiple e.g 'attr1:value1' 'attr2:value2'")
   parser.add_argument("--numfib", "-n", action="store", type=int, default=0, \
       help="The number of fibers to process before exit")
-  parser.add_argument("--compress", "-c", action="store", default=False, \
+  parser.add_argument("--compress", "-c", action="store_true", default=False, \
       help="Indicate if graph compression is desired")
   result = parser.parse_args()
 
@@ -150,7 +150,7 @@ def main ():
   result.graph_attrs = parse_dict(result.graph_attrs)
 
   genGraph(result.fbrfile, result.data_atlas, result.output, result.isbig, 
-      result.outformat, result.numfib, not result.centroids, result.graph_attrs, **atlas_d, result.compress)
+      result.outformat, result.numfib, not result.centroids, result.graph_attrs, result.compress, **atlas_d)
 
 if __name__ == "__main__":
   main()
