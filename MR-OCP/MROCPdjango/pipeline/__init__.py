@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 
 # Copyright 2014 Open Connectome Project (http://openconnecto.me)
 #
@@ -12,16 +13,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
-# Created by Disa Mhembere
-# Email: disa@jhu.edu
 
-from django.conf.urls import patterns, include, url
+import os
 
-# Uncomment the next two lines to enable the admin:
-# from django.contrib import admin
-# admin.autodiscover()
+MR_BASE_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.." ))
+MR_CMAPPER_PATH = os.path.join(MR_BASE_PATH, "cmapper" )
+MR_MRCAP_PATH = os.path.join(MR_BASE_PATH, "mrcap" )
 
-urlpatterns = patterns('',
-            url(r'^graph-services/', include('pipeline.urls')),
-            )
+os.sys.path += [ MR_BASE_PATH, MR_CMAPPER_PATH, MR_MRCAP_PATH ]

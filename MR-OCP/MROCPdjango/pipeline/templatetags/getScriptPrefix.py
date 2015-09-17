@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 
 # Copyright 2014 Open Connectome Project (http://openconnecto.me)
 #
@@ -13,15 +14,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# Created by Disa Mhembere
+
+# getScriptPrefix.py
+# Created by Disa Mhembere on 2013-03-17.
 # Email: disa@jhu.edu
 
-from django.conf.urls import patterns, include, url
+from django import template
+from django.template.defaultfilters import stringfilter
+from django.core.urlresolvers import get_script_prefix
+from django.conf import settings
 
-# Uncomment the next two lines to enable the admin:
-# from django.contrib import admin
-# admin.autodiscover()
+register = template.Library()
 
-urlpatterns = patterns('',
-            url(r'^graph-services/', include('pipeline.urls')),
-            )
+
+@register.filter(name='getScriptPrefix', is_safe=True)
+@stringfilter
+def getScriptPrefix(tailurl):
+  '''
+  Custom filter used to get the script prefix of a certain url
+  @param tailurl: the tail of the url
+  @return str: the fully built url
+  '''
+  return get_script_prefix() + settings.URL_BASE +tailurl
