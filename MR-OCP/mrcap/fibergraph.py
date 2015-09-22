@@ -112,6 +112,7 @@ class _FiberGraph(object):
     if compress:
       from os import system
       system('zip '+splitext(filename)[0]+' '+filename)
+      system('rm -rf '+filename)
 
   def loadFromIgraph(self, filename, gformat="graphml"):
     """
