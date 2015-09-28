@@ -32,6 +32,7 @@ import zipfile
 from time import time
 from ocpipeline.settings_secret import DATABASES as db_args
 from mrcap.utils import igraph_io
+import numpy as np
 
 def ingest(genera, tb_name, base_dir=None, files=None, project=None):
   if files:
@@ -77,7 +78,7 @@ def _ingest_files(fns, genus, tb_name):
 
       if g_changed: # Means graph has changed since ingest OR was never in DB to start with
         # Collect all the attributes etc ..
-        g = igraph_io.read_arbitrary(graph_fn, informat="graphml", headers_only=False)
+        g = igraph_io.read_arbitrary(graph_fn, informat="graphml", headers_only=True)
 
         vertex_attrs = g.vs.attribute_names()
         edge_attrs = g.es.attribute_names()
@@ -94,12 +95,13 @@ def _ingest_files(fns, genus, tb_name):
         if "project" in graph_attrs: project = g["project"]
         else: project = ""
 
-        url = "http://openconnecto.me/data/public/graphs/"+("/".join(graph_fn.replace("\\", "/").split('/')[-2:]))
-       
+        #url = "http://openconnecto.me/data/public/graphs/"+("/".join(graph_fn.replace("\\", "/").split('/')[-2:]))
+        url = "http://awesome.cs.jhu.edu/data/static/graphs/"+("/".join(graph_fn.replace("\\", "/").split('/')[-2:]))
+
         # This statement puts each graph into the DB
         qry_stmt = "insert into %s.%s values (\"%s\",\"%s\",\"%s\",\"%s\",%d,%d,\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",%f,\"%s\");" \
              % (db_args["default"]["NAME"], tb_name, os.path.abspath(graph_fn), genus, region, project, 
-                 int(vcount), int(ecount), str(graph_attrs)[1:-1].replace("'",""), 
+                 np.int64(np.float64(vcount)), np.int64(np.float64(ecount)), str(graph_attrs)[1:-1].replace("'",""), 
                  str(vertex_attrs)[1:-1].replace("'",""),
                  str(edge_attrs)[1:-1].replace("'",""), sensor, source, mtime, url)
 
