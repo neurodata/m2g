@@ -79,58 +79,6 @@ If you do not see an email in your <i>Inbox</i> check the <i>Spam</i> folder and
 to your safe list.
 """
       return HttpResponseRedirect(get_script_prefix()+'success')
-  # Programmatic RESTful API
-  elif request.method == 'POST' and webargs:
-    pass
-    """
-    data_dir = os.path.join(settings.MEDIA_ROOT, 'tmp', strftime("projectStamp%a%d%b%Y_%H.%M.%S/", localtime()))
-    makeDirIfNone([data_dir])
-
-    uploadedZip = writeBodyToDisk(request.body, data_dir)[0] # Not necessarily a zip
-
-    try: # Assume its a zip first
-      unzip(uploadedZip, data_dir) # Unzip the zip
-      os.remove(uploadedZip) # Delete the zip
-    except:
-      print "Non-zip file uploaded ..."
-    graphs = glob(os.path.join(data_dir,'*'))
-
-    try:
-      request.session['invariants'] = webargs.split('/')[0].split(',')
-      inGraphFormat = webargs.split('/')[1]
-    except:
-      return HttpResponse("Malformated input invariants list or graph format")
-
-    request.session['graphInvariants'] = os.path.join(data_dir, 'graphInvariants')
-
-    #############################################################################
-    # TODO: This is where the work is done
-    #############################################################################
-    for graph_fn in graphs:
-      invariant_fns = run_invariants(request.session['invariants'], graph_fn,
-                        request.session['graphInvariants'], inGraphFormat)
-      print 'Computing Invariants for annoymous project %s complete...' % graph_fn
-
-      err_msg = ""
-      out_fn = ""
-      if len(webargs.split('/')) > 2:
-        out_fn, err_msg = convert_graph(invariant_fns["out_graph_fn"], "graphml",
-                request.session['graphInvariants'], *webargs.split('/')[2].split(','))
-
-      #dwnldLoc = request.META['wsgi.url_scheme'] + '://' + \
-       #             request.META['HTTP_HOST'] + data_dir.replace(' ','%20')
-
-      dwnldLoc =  get_download_path (data_dir)
-      if err_msg:
-        err_msg = "Completed with errors. View Data at: %s\n. Here are the errors:%s" % (dwnldLoc, err_msg)
-        return HttpResponse(err_msg)
-
-    return HttpResponse("View Data at: " + dwnldLoc)
-    #############################################################################
-    # END TODO: This is where the work is done
-    #############################################################################
-  # Browser
-  """
   else:
     form = GraphUploadForm() # An empty, unbound form
 
