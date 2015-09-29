@@ -58,12 +58,12 @@ urlpatterns = patterns('pipeline.views',
 
 from proc_views.buildgraph import buildGraph
 urlpatterns += patterns('pipeline.proc_views.buildgraph',
-    url(r'^buildgraph/$', 'buildGraph', name= 'build-graph'),
+    url(r'^buildgraph/$', 'buildGraph', name='build-graph'),
     )
 
 from proc_views.buildgraph_prog import build_graph_prog
 urlpatterns += patterns('pipeline.proc_views.buildgraph_prog',
-    url(r'^buildgraph/(.*$)', 'build_graph_prog', name= 'build-graph-prog'),
+    url(r'^buildgraph/(.*$)', 'build_graph_prog', name='build-graph-prog'),
     )
 
 from proc_views.graphupload import graphLoadInv
@@ -78,12 +78,17 @@ urlpatterns += patterns('pipeline.proc_views.graphupload_prog',
 
 from proc_views.download import download
 urlpatterns += patterns('pipeline.proc_views.download',
-    url(r'^download/$', 'download', name= 'download-graphs'),
+    url(r'^download/$', 'download', name='download-graphs'),
     )
 
 from proc_views.convert_graph import convert_graph
 urlpatterns += patterns('pipeline.proc_views.convert_graph',
-    url(r'^convert/(.*$)', 'convert_graph', name= 'convert-to-format'),
+    url(r'^convert/$', 'convert_graph', name='convert-to-format'),
+    )
+
+from proc_views.convert_graph_prog import convert_graph_prog
+urlpatterns += patterns('pipeline.proc_views.convert_graph_prog',
+    url(r'^convert/(.*$)', 'convert_graph_prog', name='convert-to-format-prog'),
     )
 
 from proc_views.raw_upload import raw_upload
