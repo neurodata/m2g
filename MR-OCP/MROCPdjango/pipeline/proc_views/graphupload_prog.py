@@ -20,31 +20,22 @@
 # Email: disa@jhu.edu
 # Copyright (c) 2015. All rights reserved.
 
-from glob import glob
 import os
 from time import strftime, localtime
 
 from django.http import HttpResponse
-from django.template import RequestContext
 from django.conf import settings
 
 from pipeline.utils.util import makeDirIfNone, writeBodyToDisk, saveFileToDisk
-from pipeline.utils.util import sendJobBeginEmail
+from pipeline.utils.util import sendJobBeginEmail, check_email
 from pipeline.procs.inv_compute import invariant_compute
 from pipeline.utils.zipper import unzip 
 from pipeline.procs.run_invariants import run_invariants
 from pipeline.tasks import task_invariant_compute
 from pipeline.utils.util import get_script_prefix
-import re
 
-# Simple email address test
-def check_email(email):
-  patt = re.compile("[^@]+@[^@]+\.[^@]+")
-  if (re.match(patt, email)):
-    return True
-  return False
 
-def graph_load_inv_prog(request, webargs=None):
+def graph_load_inv_prog(request, webargs):
   if request.method == 'POST' and webargs:
 
     split_webargs = webargs.split("/")
