@@ -20,8 +20,6 @@
 # Copyright (c) 2015. All rights reserved.
 
 import os
-import tempfile
-import pickle
 
 from django.shortcuts import render_to_response
 from django.template import RequestContext
