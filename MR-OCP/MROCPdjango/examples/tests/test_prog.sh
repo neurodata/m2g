@@ -21,6 +21,12 @@
 
 set -e
 
+if [ "$#" -ne 1 ]; then
+  echo "usage: ./test_prog.sh <email_address>"
+  exit 911
+fi
+
+EMAIL=$1
 DATA_DIR=./data
 EXAMPLE_DIR=..
 DJANGO_TOP=~/m2g/MR-OCP/MROCPdjango
@@ -35,19 +41,24 @@ if [ ! -f $DATA_DIR/test_graph.graphml ]; then
   Rscript test_graph.R
 fi
 
+<<COMMENT
 echo "Running programmatic compute ..."
-python $EXAMPLE_DIR/compute.py http://localhost:8080/graphupload \
-  cc,tri,deg,mad,eig,ss1 $DATA_DIR/test_graph.graphml graphml
+python $EXAMPLE_DIR/compute.py http://localhost:8080/graph-services/graphupload \
+  $DATA_DIR/test_graph.graphml $EMAIL graphml -i cc tri deg mad eig ss1
 printf "\n Completed compute Test. If failed -- html source will print\n"
 
 echo "Converting graph programmatically ..."
-python $EXAMPLE_DIR/convert.py http://localhost:8080/convert/graphml/ncol,edgelist,lgl,pajek,dot,gml,leda $DATA_DIR/test_graph.graphml -l
+python $EXAMPLE_DIR/convert.py http://localhost:8080/graph-services/convert \
+  $DATA_DIR/test_graph.graphml $EMAIL -i graphml -o ncol,edgelist,lgl,pajek,dot,gml,leda -l
 printf "\n Completed convert Test. If failed -- html source will print\n"
+COMMENT
 
 echo "Building graph programmatically ..."
-python $EXAMPLE_DIR/uploadsubj.py http://localhost:8080/upload/testproj/testsite/testsubj/testsesss/testscanID/s /data/MR.new/fiber/M87102806_fiber.dat 
+python $EXAMPLE_DIR/buildsubj.py http://localhost:8080/graph-services/buildgraph/testproj/testsite/testsubj/testsesss/testscanID/s \
+  /data/MR.new/fiber/M87102806_fiber.dat $EMAIL -i deg 
 printf "\nSUCCESS!! Passed build graph Test!!\n"
 
 # cleanup
-kill $(pgrep [p]ython)
+kill $(pgrep [p]ython) || true
+kill $(pgrep [P]ython) || true
 rm -rf $DATA_DIR
