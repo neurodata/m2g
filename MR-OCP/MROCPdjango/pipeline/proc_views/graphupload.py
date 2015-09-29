@@ -38,9 +38,9 @@ from pipeline.tasks import task_invariant_compute
 from pipeline.utils.util import get_script_prefix
 from pipeline.utils.util import get_download_path
 
-def graphLoadInv(request, webargs=None):
+def graphLoadInv(request):
   ''' Form '''
-  if request.method == 'POST' and not webargs:
+  if request.method == 'POST':
     form = GraphUploadForm(request.POST, request.FILES) # instantiating form
     if form.is_valid():
 
