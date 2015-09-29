@@ -62,7 +62,7 @@ def graph_load_inv_prog(request, webargs=None):
     except:
       return HttpResponse("ERROR: Error with input graph format OR invariants chosen")
 
-    data_dir = os.path.join(settings.MEDIA_ROOT, 'tmp', strftime("projectStamp%a%d%b%Y_%H.%M.%S/", localtime()))
+    data_dir = os.path.join(settings.MEDIA_ROOT, 'tmp', strftime("UploadGraph%a%d%b%Y_%H.%M.%S/", localtime()))
     makeDirIfNone([data_dir])
     uploadedZip = writeBodyToDisk(request.body, data_dir)[0] # Not necessarily a zip
 
