@@ -27,7 +27,7 @@ from django.http import HttpResponse
 
 from pipeline.utils.util import get_script_prefix
 from pipeline.utils.util import adaptProjNameIfReq, defDataDirs
-from pipeline.utils.util import sendJobBeginEmail
+from pipeline.utils.util import sendJobBeginEmail, check_email
 from pipeline.models import BuildGraphModel
 from pipeline.tasks import task_build
 from pipeline.utils.util import writeBodyToDisk
@@ -44,6 +44,9 @@ def build_graph_prog(request, webargs):
     webargs = webargs.split("/")
     proj_dir, site, subject, session, scanId = webargs[:5]
     email = webargs[6]
+    if (not check_email(email)):
+      return HttpResponse("ERROR: Incorrect email address format")
+
     invariants = webargs[7:]
 
     proj_dir = os.path.join("public", proj_dir)
