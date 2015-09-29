@@ -61,17 +61,23 @@
       <h2> File conversions may also be done programmatically</h2>
       <p>
       The use is similar to building a graph programmatically. The base url is <pre>http://openconnecto.me/graph-services/convert/</pre>
-      <a href="https://github.com/openconnectome/m2g/blob/master/MR-OCP/MROCPdjango/examples/convert.py" target="blank">Single</a> is a
+      <a href="https://github.com/openconnectome/m2g/blob/master/MR-OCP/MROCPdjango/examples/convert.py" target="blank">Convert.py</a> is a
       conversion example available in the <a href="https://github.com/openconnectome/m2g/blob/master/MR-OCP/MROCPdjango/examples" target="blank">examples</a> directory. <br/>
       </p>
 
     <div id="single_prog">
       <h3> Single file conversion </h3>
         <p>
-        An example of executing the sample code from the command line is <code>python convert.py http://openconnecto.me/graph-services/convert/INPUT_FORMAT/OUTPUT_FORMAT1,OUTPUT_FORMAT2,OUTPUT_FORMAT3 YOUR_GRAPH_FILE_NAME</code> <br/>
-        This would convert a graph of file type <code>INPUT_FORMAT</code> format to <code>OUTPUT_FORMAT1</code> and <code>OUTPUT_FORMAT2</code>.<br/>
-        Output formats are a comma-separated list or just a single format entry. <br>
-        The <code>-l</code> argument can also be used it you would only like the data link back as a response. If you choose several output formats you will receive the link to the directory with the results.
+        An example of executing the sample code from the command line is 
+        <pre>
+python convert.py http://openconnecto.me/graph-services/convert/ \
+GRAPH_FILE YOUR_EMAIL -i INPUT_FORMAT \
+-o OUTPUT_FORMAT1,OUTPUT_FORMAT2[...]</pre>
+         <br/>
+        This would convert a graph, <code>GRAPH_FILE</code> of file type <code>INPUT_FORMAT</code>
+         format to <code>OUTPUT_FORMAT1</code> and <code>OUTPUT_FORMAT2</code>.<br/>
+        The <code>-l</code> argument can also be used it you would only like the data link back as a response.
+        If you choose several output formats you will receive the link to the directory with the results.
         </p>
     </div>
 
@@ -80,8 +86,10 @@
     <div id="multi_prog">
       <h3> Multiple file conversion</h3>
         <p>
-        <a href="https://github.com/openconnectome/m2g/blob/master/MR-OCP/MROCPdjango/examples/convert.py" target="blank">The same example</a> script also converts a zipped file containing graphs <b><font color='#2373ff'>(NOT a directory/folder)</font></b> of a single type.
-        It's use is idential in function to the <a href="#single_prog">single case</a> with the exception that is expects a zipped file as input for <code>YOUR_GRAPH_FILE_NAME</code>.
+        <a href="https://github.com/openconnectome/m2g/blob/master/MR-OCP/MROCPdjango/examples/convert.py" target="blank">
+        The same example</a> script also converts a zipped file containing graphs <b><font color='#2373ff'>
+        (NOT a directory/folder)</font></b> of a single type. It's use is idential in function to the <a href="#single_prog">single case</a>
+        with the exception that is expects a zipped file as input for <code>YOUR_GRAPH_FILE_NAME</code>.
         </p>
       </div>
     </div>
