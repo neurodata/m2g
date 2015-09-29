@@ -75,7 +75,7 @@ def graph_load_inv_prog(request, webargs=None):
     graph_invariants_loc = os.path.join(data_dir, 'graphInvariants')
     makeDirIfNone([graph_invariants_loc])
 
-    task_invariant_compute.dela(invariants, uploadedZip, graph_invariants_loc, 
+    task_invariant_compute.delay(invariants, uploadedZip, graph_invariants_loc, 
         data_dir, in_graph_format, to_email)
 
     sendJobBeginEmail(to_email, invariants)
