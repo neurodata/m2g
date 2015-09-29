@@ -20,18 +20,14 @@
 # Copyright (c) 2015. All rights reserved.
 
 import os
-import tempfile
-import pickle
 from time import strftime, localtime
 
 from django.conf import settings
 from django.http import HttpResponse
 
 from pipeline.utils.util import get_script_prefix
-from pipeline.forms import BuildGraphForm
 from pipeline.utils.util import adaptProjNameIfReq, defDataDirs
-from pipeline.utils.util import saveFileToDisk, sendJobBeginEmail
-from pipeline.utils.create_dir_struct import create_dir_struct
+from pipeline.utils.util import sendJobBeginEmail
 from pipeline.models import BuildGraphModel
 from pipeline.tasks import task_build
 from pipeline.utils.util import writeBodyToDisk
@@ -93,14 +89,8 @@ def build_graph_prog(request, webargs):
 
     sendJobBeginEmail(email, invariants)
     task_build.delay(save_dir, graph_loc, graph_size, invariants, save_dir, email)
-    request.session["success_msg"] =\
-"""
-Your job successfully launched. You should receive an email to confirm launch
-and another when it upon job completion. <br/>
-<i>The process may take several hours</i> if you selected to compute all invariants.
-"""
     return HttpResponse("Successful job submission, please " \
                           "await reception & completion emails at {0}".format(email))
   else:
     return HttpResponse("There was an error! If you believe it " \
-                          "is on our end please email: jhmrocp@cs.jhu.edu")
+                          "is on our end please email: {0}".format(settings.DEFAULT_FROM_EMAIL))
