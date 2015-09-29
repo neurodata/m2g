@@ -68,7 +68,12 @@ urlpatterns += patterns('pipeline.proc_views.buildgraph_prog',
 
 from proc_views.graphupload import graphLoadInv
 urlpatterns += patterns('pipeline.proc_views.graphupload',
-    url(r'^graphupload/(.*$)', 'graphLoadInv', name='graph-upload-invariant-processing'),
+    url(r'^graphupload/$', 'graphLoadInv', name='graph-upload-invariant-processing'),
+    )
+
+from proc_views.graphupload_prog import graph_load_inv_prog
+urlpatterns += patterns('pipeline.proc_views.graphupload_prog',
+    url(r'^graphupload/(.*$)', 'graph_load_inv_prog', name='graph-upload-prog'),
     )
 
 from proc_views.download import download
