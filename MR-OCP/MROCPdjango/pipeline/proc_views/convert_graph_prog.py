@@ -74,7 +74,7 @@ def convert_graph_prog(request, webargs):
 
     # Check for zip
     if os.path.splitext(uploaded_files[0])[1].strip() == '.zip':
-      zipper.unzip(uploaded_files[0], save_dir)
+      unzip(uploaded_files[0], save_dir)
       # Delete zip so its not included in the graphs we uploaded
       os.remove(uploaded_files[0])
       uploaded_files = glob(os.path.join(save_dir, "*")) # get the uploaded file names
