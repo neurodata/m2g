@@ -49,7 +49,6 @@ def getworkdirs():
 
 def convert_graph(request):
   if (request.method == 'POST'):
-    import pdb; pdb.set_trace()
     form = ConvertForm(request.POST, request.FILES) # instantiating form
     if form.is_valid():
       upload_fn = form.files['fileObj'].name
