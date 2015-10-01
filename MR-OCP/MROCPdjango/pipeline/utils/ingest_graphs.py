@@ -38,7 +38,7 @@ def ingest(genera, tb_name, base_dir=None, files=None, project=None):
   if files:
     print "Running specific file(s) ..."
     assert len(genera) < 2, "Can only specify single genus as '-g [--genera] arg. You provided %s'" % genera 
-    _ingest_files(files, genera[0])
+    _ingest_files(files, genera[0], tb_name)
   
   else:
     print "Running entire dataset ..."
