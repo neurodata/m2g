@@ -136,9 +136,15 @@ def main():
   parser.add_argument("-f", "--file_names", action="store", default=None, nargs="+", help="If you only want to ingest \
             specific files only use this")
   parser.add_argument("-t", "--table_name", action="store", default="pipeline_graphdownloadmodel", help="Table name in db")
+  parser.add_argument("-c", "--clean_only", action="store_true",  help="Just clean the DB of stale files that don't exist")
 
   parser.add_argument("-p", "--project", action="store", help="Project the graph belongs to")
   result = parser.parse_args()
+
+  if (result.clean_only):
+      print "Running in clean only mode ..."
+      clean_stale_graphs(result.table_name)
+      exit(0);
   
   print "Ingesting graph(s) ..."
   ingest(result.genera, result.table_name, result.base_dir, result.file_names, result.project)
