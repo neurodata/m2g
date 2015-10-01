@@ -48,10 +48,14 @@ def graph_load_inv_prog(request, webargs):
       if in_graph_format not in ("graphml", "ncol", "edgelist", "lgl", "pajek", "graphdb", "numpy", "mat"):
         return HttpResponse("ERROR: Unknown graph input format")
       invariants = split_webargs[2:]
+      for inv in invariants:
+        if inv not in settings.VALID_FILE_TYPES:
+          return HttpResponse("ERROR: Invariant '{0}' unknown!".format(inv))
+
       if not invariants: 
         return HttpResponse("ERROR: No invariants to compute provided")
     except:
-      return HttpResponse("ERROR: Error with input graph format OR invariants chosen")
+      return HttpResponse("ERROR: Opaque Error with input graph format OR invariants chosen")
 
     data_dir = os.path.join(settings.MEDIA_ROOT, 'tmp', strftime("UploadGraph%a%d%b%Y_%H.%M.%S/", localtime()))
     makeDirIfNone([data_dir])
