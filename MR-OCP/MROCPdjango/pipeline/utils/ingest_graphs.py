@@ -95,8 +95,7 @@ def _ingest_files(fns, genus, tb_name):
         if "project" in graph_attrs: project = g["project"]
         else: project = ""
 
-        #url = "http://openconnecto.me/data/public/graphs/"+("/".join(graph_fn.replace("\\", "/").split('/')[-2:]))
-        url = "http://awesome.cs.jhu.edu/data/static/graphs/"+("/".join(graph_fn.replace("\\", "/").split('/')[-2:]))
+        url = "http://openconnecto.me/mrdata/graphs/"+("/".join(graph_fn.replace("\\", "/").split('/')[-2:]))
 
         # This statement puts each graph into the DB
         qry_stmt = "insert into %s.%s values (\"%s\",\"%s\",\"%s\",\"%s\",%d,%d,\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",%f,\"%s\");" \

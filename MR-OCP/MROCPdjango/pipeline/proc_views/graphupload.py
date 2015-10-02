@@ -47,7 +47,8 @@ def graphLoadInv(request):
       data = form.files['fileObj'] # get data
       invariants = form.cleaned_data['Select_Invariants_you_want_computed']
 
-      data_dir = os.path.join(settings.MEDIA_ROOT, 'tmp', strftime("projectStamp%a%d%b%Y_%H.%M.%S/", localtime()))
+      data_dir = os.path.join(settings.MEDIA_ROOT, 'public', 
+              strftime("projectStamp%a%d%b%Y_%H.%M.%S/", localtime()))
       invariants_path = os.path.join(data_dir, 'graphInvariants')
 
       makeDirIfNone([data_dir])
