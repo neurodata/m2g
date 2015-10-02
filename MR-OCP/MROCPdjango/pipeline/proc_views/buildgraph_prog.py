@@ -33,7 +33,7 @@ from pipeline.tasks import task_build
 from pipeline.utils.util import writeBodyToDisk
 
 def getworkdir():
-  base_dir = os.path.join(settings.MEDIA_ROOT, 'tmp', strftime('buildUpload%a%d%b%Y_%H.%M.%S/', localtime()))
+  base_dir = os.path.join(settings.MEDIA_ROOT, 'public', strftime('buildUpload%a%d%b%Y_%H.%M.%S/', localtime()))
   save_dir = os.path.join(base_dir, 'buildupload') # Save location of original uploads
   if not os.path.exists(save_dir): os.makedirs(save_dir)
   return save_dir
