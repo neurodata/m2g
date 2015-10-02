@@ -23,8 +23,8 @@
 A python script to run invariants on a file based on CL flag
 """
 import argparse
-import sys
-import os
+import os, sys
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 
 import computation.composite.invariants as invariants
 from computation.utils.getBaseName import getBaseName

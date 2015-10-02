@@ -19,9 +19,11 @@
 # Created by Disa Mhembere on 2013-03-21.
 # Email: dmhembe1@jhu.edu
 
-import os
+import os, sys
 import argparse
 from time import time
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 
 from computation.utils.getBaseName import getBaseName
 from computation.utils.file_util import loadAnyMat
