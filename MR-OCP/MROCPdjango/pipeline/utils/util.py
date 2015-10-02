@@ -247,14 +247,14 @@ def get_genus(fn):
 #####################################################################################
 
 def get_script_prefix():
-    from django.core.urlresolvers import get_script_prefix as gsp
-    from ocpipeline.settings import URL_BASE
+  from django.core.urlresolvers import get_script_prefix as gsp
+  from ocpipeline.settings import URL_BASE
 
-    return gsp() + URL_BASE
+  return gsp() + URL_BASE
 
 #####################################################################################
 def get_download_path(fspath):
-    return "http://awesome.cs.jhu.edu/" + ("/".join(fspath.split("/")[4:])).replace(' ','%20')
+  return "http://openconnecto.me/mr" + ("/".join(fspath.split("/")[5:])).replace(' ','%20')
 
 #####################################################################################
 # Simple email address test
