@@ -50,7 +50,6 @@ def convert_graph(gfn, informat, save_dir, *outformats):
     elif informat == "npy":
       g = csc_to_igraph(np.load(gfn).item())
     elif informat == "attredge":
-      #import pdb; pdb.set_trace()
       g = attredge_to_igraph(gfn)
     else:
       err_msg = "[ERROR]: Unknown format '%s'. Please check format and retry!" % informat
