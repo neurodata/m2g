@@ -213,9 +213,9 @@ def sendJobFailureEmail(email_addr, msg):
             msg, settings.SERVER_EMAIL, [email_addr], fail_silently=False)
 
 def sendJobCompleteEmail(email_addr, dataLoc):
-  msg = "Congratulations,\n\nThe MROCP job you requested is complete and available for download at %s" % dataLoc
+  msg = "Congratulations,\n\nThe job you requested is complete and available for download at %s" % dataLoc
   msg += " "*randint(0,10)
-  msg += "\n\nThanks for using MROCP,\nThe MROCP team"
+  msg += "\n\nThanks for using the service,\nThe MROCP team"
 
   send_mail("MROCP: Graph job COMPLETE!",
             msg, settings.SERVER_EMAIL, [email_addr], fail_silently=False)
@@ -254,7 +254,13 @@ def get_script_prefix():
 
 #####################################################################################
 def get_download_path(fspath):
-  return "http://openconnecto.me/mr" + ("/".join(fspath.split("/")[5:])).replace(' ','%20')
+  #import pdb; pdb.set_trace()
+  term_char = ""
+  if not fspath.endswith("/"):
+    if os.path.isdir(fspath): term_char = "/"
+
+  #return "http://awesome.cs.jhu.edu/" + ("/".join(fspath.split("/")[4:])).replace(' ','%20') + term_char
+  return "http://openconnecto.me/mr" + ("/".join(fspath.split("/")[4:])).replace(' ','%20') + term_char
 
 #####################################################################################
 # Simple email address test
