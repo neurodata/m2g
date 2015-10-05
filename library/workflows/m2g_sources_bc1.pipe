@@ -81,7 +81,7 @@
                                         <filetype name="niftii2" extension="nii.gz" description="" />
                                 </fileTypes>
                                 <values>
-                                        <value>pipeline://braincloud1.cs.jhu.edu//share0/m2g/scratch/KKI2009-42-DTI-in-MNI.nii.gz</value>
+                                        <value>pipeline://braincloud1.cs.jhu.edu//share0/m2g/scratch/KKI2009_113_1_alignedDTI.nii.gz</value>
                                 </values>
                         </dataModule>
                         <dataModule id="SmallGraphs_1" name="Small Graphs" package="m2g" posX="378" posY="988" rotation="1" sourceCode="" type="File" source="false" loopIndex="false" serverAddress="braincloud1.cs.jhu.edu" dirDump="false">
@@ -102,7 +102,7 @@
                                         <filetype name="Graph1" extension="graphml" description="" />
                                 </fileTypes>
                                 <values>
-                                        <value>pipeline://braincloud1.cs.jhu.edu//share0/m2g/scratch/KKI2009-42-sg.graphml</value>
+                                        <value>pipeline://braincloud1.cs.jhu.edu//share0/m2g/scratch/KKI2009_113_1_sg.graphml</value>
                                 </values>
                         </dataModule>
                         <moduleGroup id="DiffusionPre-Processing_1" name="Diffusion Pre-Processing" package="m2g" version="v1.1.1" icon="0" posX="167" posY="295" sourceCode="">
@@ -297,7 +297,7 @@ innovation@isis.ox.ac.uk quoting reference BS/3497.</license>
                                         <filetype name="B values" extension="b" description="" />
                                 </fileTypes>
                                 <values>
-                                        <value>pipeline://braincloud1.cs.jhu.edu//share0/m2g/KKI2009/inputs/KKI2009-42/KKI2009-42-DTI.b</value>
+                                        <value>pipeline://braincloud1.cs.jhu.edu//brainstore/MR/KKI2009_new/raw/113/113_1/KKI2009_113_1_DTI.b</value>
                                 </values>
                         </dataModule>
                         <dataModule id="DTIGradients_1" name="DTI Gradients" package="m2g" posX="0" posY="0" rotation="1" sourceCode="" type="File" source="true" loopIndex="false" serverAddress="braincloud1.cs.jhu.edu">
@@ -316,7 +316,7 @@ innovation@isis.ox.ac.uk quoting reference BS/3497.</license>
                                         <filetype name="gradients" extension="grad" description="" />
                                 </fileTypes>
                                 <values>
-                                        <value>pipeline://braincloud1.cs.jhu.edu//share0/m2g/KKI2009/inputs/KKI2009-42/KKI2009-42-DTI.grad</value>
+                                        <value>pipeline://braincloud1.cs.jhu.edu//brainstore/MR/KKI2009_new/raw/113/113_1/KKI2009_113_1_DTI.grad</value>
                                 </values>
                         </dataModule>
                         <dataModule id="MNIbrainmask_1" name="MNI brain mask" package="m2g" posX="0" posY="653" rotation="1" sourceCode="" type="File" source="true" loopIndex="false" serverAddress="braincloud1.cs.jhu.edu">
@@ -357,7 +357,7 @@ innovation@isis.ox.ac.uk quoting reference BS/3497.</license>
                                         <filetype name="Graph1" extension="graphml" description="" />
                                 </fileTypes>
                                 <values>
-                                        <value>pipeline://braincloud1.cs.jhu.edu//share0/m2g/scratch/KKI2009-42-bg.graphml</value>
+                                        <value>pipeline://braincloud1.cs.jhu.edu//share0/m2g/scratch/KKI2009_113_1_bg.graphml</value>
                                 </values>
                         </dataModule>
                         <dataModule id="DTIImage_1" name="DTI Image" package="m2g" posX="0" posY="110" rotation="1" sourceCode="" type="File" source="true" loopIndex="false" serverAddress="braincloud1.cs.jhu.edu">
@@ -376,7 +376,7 @@ innovation@isis.ox.ac.uk quoting reference BS/3497.</license>
                                         <filetype name="nifti" extension="nii" description="" />
                                 </fileTypes>
                                 <values>
-                                        <value>pipeline://braincloud1.cs.jhu.edu//share0/m2g/KKI2009/inputs/KKI2009-42/KKI2009-42-DTI.nii</value>
+                                        <value>pipeline://braincloud1.cs.jhu.edu//brainstore/MR/KKI2009_new/raw/113/113_1/KKI2009_113_1_DTI.nii</value>
                                 </values>
                         </dataModule>
                         <dataModule id="MNISmallGraphLabels_1" name="MNI Small Graph Labels" package="m2g" posX="0" posY="541" rotation="1" sourceCode="" type="File" source="true" loopIndex="false" serverAddress="braincloud1.cs.jhu.edu">
@@ -431,7 +431,7 @@ innovation@isis.ox.ac.uk quoting reference BS/3497.</license>
                                         <filetype name="nifti" extension="nii" description="" />
                                 </fileTypes>
                                 <values>
-                                        <value>pipeline://braincloud1.cs.jhu.edu//share0/m2g/KKI2009/inputs/KKI2009-42/KKI2009-42-MPRAGE.nii</value>
+                                        <value>pipeline://braincloud1.cs.jhu.edu//brainstore/MR/KKI2009_new/raw/113/113_1/KKI2009_113_1_MPRAGE.nii</value>
                                 </values>
                         </dataModule>
                         <moduleGroup id="DiffusionProcessing_1" name="Diffusion Processing" package="m2g" icon="0" posX="171" posY="753" sourceCode="">
@@ -450,7 +450,6 @@ innovation@isis.ox.ac.uk quoting reference BS/3497.</license>
                                 <input link="TensorEstimation_1.Bvectors" id="DiffusionProcessing_1.Bvectors" name="B vectors" order="10" />
                                 <input link="TensorEstimation_1.Bvalues" id="DiffusionProcessing_1.Bvalues" name="B values" order="10" />
                                 <module id="TensorEstimation_1" name="Tensor Estimation" package="m2g" icon="0" posX="63" posY="101" sourceCode="" location="pipeline://braincloud1.cs.jhu.edu//share0/m2g/src/m2g/packages/tractography/tensor_gen.py" gridVariables="-l virtual_free=16G">
-                                        <tag />
                                         <metadata>
                                                 <data key="__creationDateKey" value="Fri Jan 09 11:38:39 EST 2015" />
                                         </metadata>
@@ -533,7 +532,6 @@ innovation@isis.ox.ac.uk quoting reference BS/3497.</license>
                                         </input>
                                 </module>
                                 <module id="FiberTractography_1" name="Fiber Tractography" package="m2g" icon="0" posX="230" posY="220" rotation="1" sourceCode="" location="pipeline://braincloud1.cs.jhu.edu//share0/m2g/src/m2g/packages/tractography/fiber_gen.py" gridVariables="-l virtual_free=8G">
-                                        <tag />
                                         <metadata>
                                                 <data key="__creationDateKey" value="Fri Jan 09 13:07:20 EST 2015" />
                                         </metadata>
@@ -609,7 +607,6 @@ innovation@isis.ox.ac.uk quoting reference BS/3497.</license>
                                         </output>
                                 </module>
                                 <module id="SmallGraphGeneration_1" name="Small Graph Generation" package="m2g" icon="0" posX="819" posY="216" rotation="1" sourceCode="" location="pipeline://braincloud1.cs.jhu.edu//share0/m2g/src/m2g/MR-OCP/mrcap/gengraph.py" gridVariables="-l virtual_free=8G">
-                                        <tag />
                                         <metadata>
                                                 <data key="__creationDateKey" value="Sun Jan 11 17:53:43 EST 2015" />
                                         </metadata>
@@ -695,7 +692,7 @@ innovation@isis.ox.ac.uk quoting reference BS/3497.</license>
                                         <filetype name="Matlab Data" extension="dat" description="" />
                                 </fileTypes>
                                 <values>
-                                        <value>pipeline://braincloud1.cs.jhu.edu//share0/m2g/scratch/KKI2009-42-fibers.dat</value>
+                                        <value>pipeline://braincloud1.cs.jhu.edu//share0/m2g/scratch/KKI2009_113_1_fibers.dat</value>
                                 </values>
                         </dataModule>
                         <dataModule id="MNIimage_1" name="MNI image" package="m2g" posX="410" posY="166" rotation="1" sourceCode="" type="File" source="true" loopIndex="false" serverAddress="braincloud1.cs.jhu.edu">
@@ -738,7 +735,7 @@ innovation@isis.ox.ac.uk quoting reference BS/3497.</license>
                                         <filetype name="niftii2" extension="nii.gz" description="" />
                                 </fileTypes>
                                 <values>
-                                        <value>pipeline://braincloud1.cs.jhu.edu//share0/m2g/scratch/KKI2009-42-MPRAGE-in-MNI.nii.gz</value>
+                                        <value>pipeline://braincloud1.cs.jhu.edu//share0/m2g/scratch/KKI2009_113_1_alignedMPRAGE.nii.gz</value>
                                 </values>
                         </dataModule>
                         <moduleGroup id="Registration_1" name="Registration" package="m2g" icon="1" posX="447" posY="460" sourceCode="">
@@ -1740,12 +1737,12 @@ innovation@isis.ox.ac.uk quoting reference BS/3497.</license>
                         </moduleGroup>
                 </moduleGroup>
                 <variables>
-                        <variable name="bval">/share0/m2g/KKI2009/listfiles/b.list</variable>
                         <variable name="MNI">/share0/m2g/src/m2g/data/Atlas/MNI152_T1_1mm.nii.gz</variable>
-                        <variable name="fibers">/share0/m2g/KKI2009/listfiles/fibers.list</variable>
+                        <variable name="bval">/share0/m2g/KKI2009/listfiles/b.list</variable>
                         <variable name="grad">/share0/m2g/KKI2009/listfiles/grad.list</variable>
-                        <variable name="aligned">/share0/m2g/KKI2009/listfiles/aligned_dti.list</variable>
+                        <variable name="fibers">/share0/m2g/KKI2009/listfiles/fibers.list</variable>
                         <variable name="dti">/share0/m2g/KKI2009/listfiles/dti.list</variable>
+                        <variable name="aligned">/share0/m2g/KKI2009/listfiles/aligned_dti.list</variable>
                         <variable name="sglabels">/share0/m2g/src/m2g/data/Atlas/MNI152_T1_1mm_desikan_adjusted.nii</variable>
                         <variable name="bg">/share0/m2g/KKI2009/listfiles/bg.list</variable>
                         <variable name="MNImask">/share0/m2g/src/m2g/data/Atlas/MNI152_T1_1mm_brain_mask.nii</variable>

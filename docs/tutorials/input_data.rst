@@ -6,20 +6,36 @@ This is a draft input/output specfication for processing MR data.
 Input Data
 ~~~~~~~~~~
 
-Data to process must be organized in the following hierarchical format, by dataset or series:
+Data to process must be organized in the following hierarchical format, by dataset. Subject names must also follow the convention highlighted here. For datasets which only have 1 scan collected per subject, the scan id of 1 should be used.
 
-**Dataset (series)**
+**Dataset**
 
-- Subject
+.. code-block:: none
 
-   - Scan
+  ./dataset/
+  ./dataset/raw/
+  ./dataset/raw/{subject_id}/
+  ./dataset/raw/{subject_id}/{scan_id}/
+  ./{dataset}/raw/{subject_id}/{scan_id}/{dataset}_{subject_id}_{scan_id}_{modality}.{extension}
+  ...
 
-      - dti [Diffusion Tensor Imaging]
-      - dsi [Diffusion Spectrum Imaging]
-      - rest [Resting State functional scan]
-      - anat [Anatomical Scan, e.g., MPRAGE]
-      - params [b vals, gradients]
+For instance, this directory structure and naming convention can be seen for the first subject of the KKI2009 dataset as follows:
 
+.. code-block:: none
+
+  ./KKI2009/
+  ./KKI2009/raw/
+  ./KKI2009/raw/113/
+  ./KKI2009/raw/113/113_1/
+  ./KKI2009/raw/113/113_1/KKI2009_113_1_DTI.b
+  ./KKI2009/raw/113/113_1/KKI2009_113_1_DTI.nii
+  ./KKI2009/raw/113/113_1/KKI2009_113_1_MPRAGE.nii
+  ./KKI2009/raw/113/113_1/KKI2009_113_1_DTI.grad
+  ./KKI2009/raw/113/113_2/KKI2009_113_2_DTI.b
+  ./KKI2009/raw/113/113_2/KKI2009_113_2_DTI.nii
+  ./KKI2009/raw/113/113_2/KKI2009_113_2_MPRAGE.nii
+  ./KKI2009/raw/113/113_2/KKI2009_113_2_DTI.grad
+  ...
 
 Output Data
 ~~~~~~~~~~~
