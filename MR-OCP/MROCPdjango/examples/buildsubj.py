@@ -72,7 +72,7 @@ def main():
   try:
     call_url = result.url + result.email + "/" + "/".join(result.invariants)
     print "Calling url: %s" % call_url
-    req = urllib2.Request ( call_url ,tmpfile.read() ) # Important to concatenate these in this order
+    req = urllib2.Request (call_url, tmpfile.read()) # Important to concatenate these in this order
     response = urllib2.urlopen(req)
 
   except urllib2.URLError, e:
