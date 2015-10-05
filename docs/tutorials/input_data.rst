@@ -12,11 +12,11 @@ Data to process must be organized in the following hierarchical format, by datas
 
 .. code-block:: none
 
-  ./dataset/
-  ./dataset/raw/
-  ./dataset/raw/{subject_id}/
-  ./dataset/raw/{subject_id}/{scan_id}/
-  ./{dataset}/raw/{subject_id}/{scan_id}/{dataset}_{subject_id}_{scan_id}_{modality}.{extension}
+  ./{dataset}/
+  ./{dataset}/raw/
+  ./{dataset}/raw/{subject_id}/
+  ./{dataset}/raw/{subject_id}/{subject_id}_{scan_id}/
+  ./{dataset}/raw/{subject_id}/{subject_id}_{scan_id}/{dataset}_{subject_id}_{scan_id}_{modality}.{extension}
   ...
 
 For instance, this directory structure and naming convention can be seen for the first subject of the KKI2009 dataset as follows:
