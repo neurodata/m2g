@@ -41,7 +41,6 @@ if [ ! -f $DATA_DIR/test_graph.graphml ]; then
   Rscript test_graph.R
 fi
 
-<<COMMENT
 echo "Running programmatic compute ..."
 python $EXAMPLE_DIR/compute.py http://localhost:8080/graph-services/graphupload \
   $DATA_DIR/test_graph.graphml $EMAIL graphml -i cc tri deg mad eig ss1
@@ -51,7 +50,6 @@ echo "Converting graph programmatically ..."
 python $EXAMPLE_DIR/convert.py http://localhost:8080/graph-services/convert \
   $DATA_DIR/test_graph.graphml $EMAIL -i graphml -o ncol,edgelist,lgl,pajek,dot,gml,leda -l
 printf "\n Completed convert Test. If failed -- html source will print\n"
-COMMENT
 
 echo "Building graph programmatically ..."
 python $EXAMPLE_DIR/buildsubj.py http://localhost:8080/graph-services/buildgraph/testproj/testsite/testsubj/testsesss/testscanID/s \
