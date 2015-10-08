@@ -80,10 +80,9 @@ def scale_convert(selected_files, dl_format, ds_factor, ATLASES, email=None, dwn
     if email:
       msg = """
 Hello,\n\nYour most recent job failed to complete.
-\n"You may have some partially completed data here: %s.\n\n
-""" % dwnld_loc
-
-      sendJobFailureEmail(email, msg)
+\nYou may have some partially completed data at {}.\n\n
+"""
+      sendJobFailureEmail(email, msg, dwnld_loc)
       return
     else:
       return 'An error occurred while processing your request. Please send an email to \
