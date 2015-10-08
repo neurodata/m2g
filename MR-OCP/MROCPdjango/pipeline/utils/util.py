@@ -118,7 +118,8 @@ def writeBodyToDisk(data, saveDir):
   for name in (rzfile.namelist()):
     try:
       bname = os.path.basename(name)
-      outfile = open(os.path.join(saveDir, bname), 'wb') # strip name of source folders if in file name
+      # strip name of source folders if in file name
+      outfile = open(os.path.join(saveDir, bname), 'wb')
       outfile.write(rzfile.read(name))
       outfile.flush()
       outfile.close()
@@ -188,6 +189,19 @@ def saveFileToDisk(fileData, fullFileName):
 
 ################################################################################
 
+def to_html(string, link):
+  return """
+      <html>
+        <head></head>
+          <body>
+            <p>
+            {}
+            </p>
+        </body>
+      </html>
+  """.format(string.replace("\n", "<br>")).\
+  format("<a href=\"{}\">this link</a>".format(link))
+
 def sendJobBeginEmail(email_addr, invariants, genGraph=True):
 
   msg = "Hello,\n\nThe following actions were requested using %s:\n" % email_addr
@@ -198,32 +212,34 @@ def sendJobBeginEmail(email_addr, invariants, genGraph=True):
   for inv in invariants:
     msg += "- Compute " + settings.VALID_FILE_TYPES[inv] + "\n"
 
-  msg +=  "\nFeel free to close your browser window or start a new job. Your current job will not be affected. You will receive another email when your job completes."
-  msg += " "*randint(0,10)
-  msg += "\n\nThanks for using MROCP,\nThe MROCP team"
-  msg += " "*randint(0,10)
+  msg +=  "\nYou will receive another email when your job completes."
+  msg += "\n\nThanks for using the service,\nThe MROCP team"
 
-  send_mail("MROCP: Graph job request",
+  send_mail("Graph job request",
             msg, settings.SERVER_EMAIL, [email_addr], fail_silently=False)
 
-def sendJobFailureEmail(email_addr, msg):
-  msg += "Thanks for using MROCP,\nThe MROCP team"
+def sendJobFailureEmail(email_addr, txt, data_loc=""):
+  txt += "Thanks for using the service,\nThe MROCP team"
+  msg = txt.format(data_loc)
 
-  send_mail("MROCP: Graph job FAILURE!",
-            msg, settings.SERVER_EMAIL, [email_addr], fail_silently=False)
+  html = to_html(txt, data_loc)
+  send_mail("Graph job FAILURE!",
+            msg, settings.SERVER_EMAIL, [email_addr], fail_silently=False, html_message=html)
 
-def sendJobCompleteEmail(email_addr, dataLoc):
-  msg = "Congratulations,\n\nThe MROCP job you requested is complete and available for download at %s" % dataLoc
-  msg += " "*randint(0,10)
-  msg += "\n\nThanks for using MROCP,\nThe MROCP team"
+def sendJobCompleteEmail(email_addr, data_loc):
+  txt = "Congratulations,\n\nThe job you requested is complete and "\
+      "available for download at {}.\n\nThanks for using the service,"\
+      "\nThe MROCP team"
+  msg = txt.format(data_loc)
 
-  send_mail("MROCP: Graph job COMPLETE!",
-            msg, settings.SERVER_EMAIL, [email_addr], fail_silently=False)
+  html = to_html(txt, data_loc)
+  send_mail("Graph job COMPLETE!",
+            msg, settings.SERVER_EMAIL, [email_addr], fail_silently=False, html_message=html)
 
 def sendEmail(email_addr, title, msg):
-  msg += "Thanks for using MROCP,\nThe MROCP team"
+  msg += "Thanks for using the service,\nThe MROCP team"
 
-  send_mail("MROCP: " + title,
+  send_mail(title,
             msg, settings.SERVER_EMAIL, [email_addr], fail_silently=False)
 
 #####################################################################################
@@ -254,7 +270,14 @@ def get_script_prefix():
 
 #####################################################################################
 def get_download_path(fspath):
-  return "http://openconnecto.me/mr" + ("/".join(fspath.split("/")[5:])).replace(' ','%20')
+  term_char = ""
+  if not fspath.endswith("/"):
+    if os.path.isdir(fspath): term_char = "/"
+
+  #return "http://awesome.cs.jhu.edu/" + \
+  #    ("/".join(fspath.split("/")[4:])).replace(' ','%20') + term_char
+  return "http://openconnecto.me/mr" + \
+      ("/".join(fspath.split("/")[4:])).replace(' ','%20') + term_char
 
 #####################################################################################
 # Simple email address test
@@ -263,4 +286,3 @@ def check_email(email):
   if (re.match(patt, email)):
     return True
   return False
-

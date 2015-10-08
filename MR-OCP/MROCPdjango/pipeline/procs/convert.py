@@ -42,12 +42,12 @@ def convert(media_root, uploadedFiles, convert_file_save_loc, input_format, outp
   for fn in uploadedFiles:
     outfn, err_msg = convertTo.convert_graph(fn, input_format, convert_file_save_loc, *output_format)
 
-  dwnldLoc = get_download_path(convert_file_save_loc)
-  print "Download path: {0}".format(dwnldLoc)
-  
+  dwnld_loc = get_download_path(convert_file_save_loc)
+  print "Download path: {0}".format(dwnld_loc)
+
   if (err_msg):
-    err_msg = "Your job completed with errors. The result can be found at %s\n\n. Message: %s\n\n" \
-              % (dwnldLoc, err_msg)
-    sendJobFailureEmail(to_email, err_msg)
+    err_msg = "Your job completed with errors. The result can be found at {}.\n\n"\
+        "Message: %s\n\n" % err_msg
+    sendJobFailureEmail(to_email, err_msg, dwnld_loc)
   else:
-    sendJobCompleteEmail(to_email,dwnldLoc) 
+    sendJobCompleteEmail(to_email,dwnld_loc) 
