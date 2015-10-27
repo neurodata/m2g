@@ -64,7 +64,7 @@ if (l < 2) {
 	}
 
 	#set delimeter rule for finding ids in file names
-	rule <- list('_', 2, 3)#1, 2) #subject id rule in the form of: delimiter, start, end
+	rule <- list('_', 1, 2)#1, 2) #subject id rule in the form of: delimiter, start, end
 	
 	print("Computing test-retest reliability with the following options:")
 	print(paste("m2g location:", args[1]))
