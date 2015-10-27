@@ -22,6 +22,9 @@
 args <- commandArgs(TRUE)
 l <- length(args)
 
+#pipe outputs to file. must be last argument
+sink(file=args[l])
+
 #we need at least 2: m2g_path and graphs
 if (l < 2) {
 	stop(c('Please provide data and script paths in order to run, as follows:\n',
@@ -82,12 +85,10 @@ if (l < 2) {
 		fh <- file(args[3])
 		graph_files <- readLines(fh)
 		close(fh)
-		print(graph_files[1:3])
 	} else {
 		#no flag means a directory is provided, so load from dir
 		format <- paste('\\.', format, '$', sep='')
 		graph_files <- list.files(path=args[2], pattern=format, recursive=TRUE, full.names=TRUE)
-		print(graph_files[1:3])
 	}
 }
 
