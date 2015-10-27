@@ -13,43 +13,81 @@
 # limitations under the License.
 #
 
-# testretest.R
+# compute_trt.R
 # Created by Greg Kiar on 2015-07-31.
 # Email: gkiar@jhu.edu
 # Copyright (c) 2015. All rights reserved.
 
+#parse commandline args
 args <- commandArgs(TRUE)
 l <- length(args)
+
+#we need at least 2: m2g_path and graphs
 if (l < 2) {
 	stop(c('Please provide data and script paths in order to run, as follows:\n',
-				' Rscript compute_trt.R m2g_path graph_dir [extension rois scans]'))
+				' Rscript compute_trt.R m2g_path graphs [extension rois scans]'))
+} else {
+	#first variable is path to m2g base 
+  scripts <- c(paste(args[1], '/analysis/load_graphs.R', sep=""), paste(args[1],'/analysis/reliability.R', sep=""))
+	source(scripts[1])
+	source(scripts[2])
+
+
+	if (args[2] == "-l"){
+		offset=1
+	} else {
+		offset=0
+	}
+	
+	#set number of rois in graphs
+	if (l >= 3+offset){
+		rois <- strtoi(args[3+offset])
+	} else {
+		rois <- 70
+	}
+	
+	#set graph format
+	if (l >= 4+offset){
+		format <- args[4+offset]
+	} else {
+		format <- 'graphml'
+	}
+
+	#set number of scans per subject
+	if (l >= 5+offset){
+		scans <- strtoi(args[5+offset])
+	} else{
+		scans <- 2
+	}
+
+	#set delimeter rule for finding ids in file names
+	rule <- list('_', 2, 3)#1, 2) #subject id rule in the form of: delimiter, start, end
+	
+	print("Computing test-retest reliability with the following options:")
+	print(paste("m2g location:", args[1]))
+	print(paste("Number of rois:", rois))
+	print(paste("Graph format:", format))
+	print(paste("Number of scans per subject:", scans))
+
+	if (format != 'graphml') {
+  	stop('Currently support only exists for graphml format. Sorry') 
+	}
+
+	#get list of graph files in memory	
+	if (args[2] == "-l" && l < 3) {
+		#raised listfile flag, but no listfile to be found
+		stop("Provided flag for list file, but none provided")
+	} else if (args[2] == "-l") {
+		#load list file
+	 	graph_files <- load(args[2])
+	} else {
+		#no flag means a directory is provided, so load from dir
+		format <- paste('\\.', format, '$', sep='')
+		graph_files <- list.files(path=args[2], pattern=format, recursive=TRUE, full.names=TRUE)
+		print(graph_files[1:3])
+	}
 }
-#sets location of FlashR and m2g analysis code
-m2g <- paste(args[1], '/analysis/load_graphs.R', sep="")
-flashr <- paste(args[1],'/analysis/reliability.R', sep="")
 
-print(m2g)
-print(flashr)
-
-source(m2g) #need to fix hard paths
-source(flashr)
-l <- length(args)
-
-dir <- args[2]
-format <- 'graphml' #graph format
-rois <- 70 #number of regions in graphs
-scans <- 2 #scans per subject
-rule <- list('_', 1, 2) #subject id rule in the form of: delimiter, start, end
-
-if (format != 'graphml') {
-  stop('Currently support only exists for graphml format. Sorry') 
-}
-
-#get list of graph files
-cur <- getwd()
-setwd(dir)
-format <- paste('\\.', format, '$', sep='')
-graph_files <- list.files(pattern=format, recursive=TRUE)
 
 #load graph and id pairs from files
 pair <- load_graphs(graph_files, rois)
@@ -61,6 +99,9 @@ ids <- clean_ids(pair[[2]], rule)
 dist <- compute_distance(graphs)
 rdf <- compute_rdf(dist, ids, scans)
 mnr <- compute_mnr(rdf, output=TRUE)
+
+
+### Suggested alternatives: log distances, nbin, and plotting
 
 #compute RDF and MNR for log graphs
 #log_graphs <- log(graphs+array(rep(1, length(graphs)), dim(graphs)), base=10)
