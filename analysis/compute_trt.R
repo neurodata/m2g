@@ -79,7 +79,10 @@ if (l < 2) {
 		stop("Provided flag for list file, but none provided")
 	} else if (args[2] == "-l") {
 		#load list file
-	 	graph_files <- load(args[2])
+		fh <- file(args[3])
+		graph_files <- readLines(fh)
+		close(fh)
+		print(graph_files[1:3])
 	} else {
 		#no flag means a directory is provided, so load from dir
 		format <- paste('\\.', format, '$', sep='')
