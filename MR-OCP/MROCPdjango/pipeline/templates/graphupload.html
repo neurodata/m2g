@@ -53,8 +53,7 @@
     <div id='single'>
       <h3> Single graph </h3>
         <p>
-          As long as your graph meets one of the above <a href=#graphspecs>specifications</a> you may compute invariants on any graph of your choosing. <br/>
-          Simply upload your file below, fill the <a href="#id_loadForm">form</a> below and you're on your way!<br/>
+          As long as your graph meets one of the above <a href=#graphspecs>specifications</a> you may compute invariants on any graph of your choosing.
         </p>
     </div>
 
@@ -90,16 +89,21 @@
 
         <h3> How to use the example </h3>
         <p>After downlaoding the example above,
-         start a terminal session. Assuming you are in the same directory as the example. Typing <code>python compute.py -h</code> will give help on how to use the
+         start a terminal session. Assuming you are in the same directory as the example. 
+         Typing <code>python compute.py -h</code> will give help on how to use the
          example and what options are available to you.<br/>
         </p>
 
         <h3 id="single_graph"> Single graph </h3>
         <p>
-        Assume we have a single graph located in the same directory as the example script named <code>YOUR_GRAPH_FILE_NAME</code>.
-        Typing <code>python compute.py http://openconnecto.me/graph-services/graphupload/ cc,tri,ss1 YOUR_GRAPH_FILE_NAME GRAPH_FORMAT -c gml,dot,pajek</code> will
-        upload your <code>YOUR_GRAPH_FILE_NAME</code> file, in <code>GRAPH_FORMAT</code> format; compute: clustering coefficient, local triangle count, and scan statistic-1; then convert the invariant-attributed
-        graphs to <code>gml</code>,<code>dot</code>, and <code>pajek</code> format. 
+        Assume we have a single graph located in the same directory as the example script named <code>GRAPH_FILE</code>.
+        Typing 
+        <pre>
+python compute.py http://openconnecto.me/graph-services/graph-services/graphupload \
+GRAPH_FILE email@domain GRAPH_FORMAT \
+-i cc tri ss1</pre> 
+        will upload your <code>GRAPH_FILE</code> file, in <code>GRAPH_FORMAT</code> format;
+         compute: clustering coefficient, local triangle count, and scan statistic-1. 
         </p>
 
         <p>
@@ -124,23 +128,17 @@
 
             <li>
               <div id="graph_format_opts">
-                The second argument allows you to pass the input format of the graph(s) being uploaded. Current available options for graph format are:<br/>
+                The second argument allows you to pass the input format of the graph(s) being uploaded.
+                Current available options for graph format are:<br/>
                 <code>graphml, ncol, edgelist, lgl, pajek, graphdb, mat, npy</code>
               </div>
             </li>
           </ul>
 
-            Starting a <a href="http://tmux.sourceforge.net/" target="blank">tmux</a> or <a href="http://linux.die.net/man/1/screen" target="blank"> screen </a> session is recommended as you must wait for
-            the http response to otbain a url containing the result.
+            Starting a <a href="http://tmux.github.io/" target="blank">tmux</a> or 
+            <a href="http://linux.die.net/man/1/screen" target="blank"> screen </a> session is recommended as you must wait for
+            	the http response to otbain a url containing the result.
         </p>
-
-
-        <h3> Multiple graphs </h3>
-        <p>
-          The same <a href="https://github.com/openconnectome/m2g/blob/master/MR-OCP/MROCPdjango/examples/compute.py" target="blank">example</a> script can be used for multiple
-          graphs. Simply zip all graphs into a single zipfile. Other than zipping graphs together the functionality is identical to <a href="#single_graph">single graph programmatic use</a>.
-
-      </p>
     </div>
     {% endblock programmatic %}
   {% endblock content%}
