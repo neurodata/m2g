@@ -26,22 +26,26 @@ import glob
 # parse input files
 inDir = sys.argv[1]
 outputBaseDir = sys.argv[2]
-atlasIn = sys.argv[3]
 
 # input list files
-dtiListFile = sys.argv[4]
-bvalListFile = sys.argv[5]
-bvecListFile = sys.argv[6]
-mprageListFile = sys.argv[7]
+dtiListFile = sys.argv[3]
+bvalListFile = sys.argv[4]
+bvecListFile = sys.argv[5]
+mprageListFile = sys.argv[6]
 
 # output list files
 #Registred DTI data, registered mprage data, sg, bg, fibers
 
-smgListFile = os.path.join(outputBaseDir,'sgListFile.list') #sys.argv[8]
-rdtiListFile = os.path.join(outputBaseDir,'rdtiListFile.list')#sys.argv[9]
-rmriListFile = os.path.join(outputBaseDir,'rmriListFile.list')#sys.argv[10]
-bgListFile = os.path.join(outputBaseDir,'bgListFile.list')#sys.argv[11]
-fiberListFile = os.path.join(outputBaseDir,'fiberListFile.list')#sys.argv[12]
+smgListFile = sys.argv[7]# os.path.join(outputBaseDir,'sgListFile.list') #
+rdtiListFile = sys.argv[8]#os.path.join(outputBaseDir,'rdtiListFile.list')#sys.argv[9]
+rmriListFile = sys.argv[9]#os.path.join(outputBaseDir,'rmriListFile.list')#sys.argv[10]
+bgListFile = sys.argv[10]#os.path.join(outputBaseDir,'bgListFile.list')#sys.argv[11]
+fiberListFile = sys.argv[11]#os.path.join(outputBaseDir,'fiberListFile.list')#sys.argv[12]
+
+# smg files
+atlasIn = sys.argv[12:] #accomodates all atlases
+
+print atlasIn
 
 #make output directory and subdirectories
 outDirs = ['fibers', 'sg', 'bg', 'reg']
@@ -55,8 +59,9 @@ for f in outDirs:
         os.makedirs(d)
 
 # Read atlas file    
-with open(atlasIn) as f:
-    atlasList = f.read().splitlines()
+#with open(atlasIn) as f:
+#    atlasList = f.read().splitlines()
+atlasList = atlasIn #TODO
     
 #save list of paths as csvs
 
@@ -124,7 +129,7 @@ for s in sub:
     rdtiName.append(os.path.join(outputBaseDir, 'reg', s + 'dti_reg.nii'))
     rmriName.append(os.path.join(outputBaseDir, 'reg', s + 'mprage_reg.nii'))
     bgName.append(os.path.join(outputBaseDir, 'bg', s + 'bg.graphml'))
-    fiberName.append(os.path.join(outputBaseDir, 'fiber', s + 'fiber.dat'))
+    fiberName.append(os.path.join(outputBaseDir, 'fibers', s + 'fiber.dat'))
 
 # registered dti names
 with open(rdtiListFile,'wb') as thefile:
