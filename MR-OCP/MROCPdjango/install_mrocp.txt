@@ -23,7 +23,7 @@ cd $M2G_HOME/MR-OCP/mrcap
 sudo python setup.py install
 
 Create this directory and give yourself ownership:
-/data/ocp/bg1publicdata/graphs
+graphs
 
 cd $M2G_HOME/MR-OCP/MROCPdjango
 python manage.py collectstatic
@@ -31,7 +31,7 @@ python manage.py syncdb # you'll get an error - just ignore it
 python manage.py syncdb # yes do it again
 
 get some graphs to show up on the downloads page:
-cd /data/ocp/bg1publicdata/graphs
+cd graphs
 mkdir human macaque worm
 
 now make & save some dummy graph within R:
@@ -44,7 +44,7 @@ quit("no")
 
 now get the graphs into the DB:
 cd $M2G_HOME/MR-OCP/MROCPdjango/ocpipeline/utils
-python ingest_graphs.py /data/ocp/bg1publicdata/graphs/
+python ingest_graphs.py graphs/
 
 You'll need to create the file $M2G_HOME/MR-OCP/MROCPdjango/ocpipeline/settings_secret.py and add the missing variables to it
 
