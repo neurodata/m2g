@@ -23,6 +23,7 @@
 
 import os, sys
 import glob
+import shutil
 
 # parse input files
 inputNames = sys.argv[1]
@@ -38,4 +39,4 @@ if len(inputFiles) != len(nameList):
 else:
     for i in range(len(inputFiles)):
         print 'renaming file: '+inputFiles[i]+' to: '+nameList[i]
-        os.rename(inputFiles[i],nameList[i])
+        shutil.rename(inputFiles[i],nameList[i])
