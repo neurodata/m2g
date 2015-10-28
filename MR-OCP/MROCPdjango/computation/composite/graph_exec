@@ -23,7 +23,9 @@
 Script to provide CL interface to build graphs
 '''
 import argparse
-import os
+import os, sys
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../..")))
 
 from mrcap.gengraph import genGraph
 from computation.utils.file_util import getPathLeaf, makeDirIfNone

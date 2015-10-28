@@ -47,8 +47,8 @@ def getworkdirs():
   if not os.path.exists(convert_file_save_loc): os.makedirs(convert_file_save_loc)
   return save_dir, convert_file_save_loc
 
-def convert_graph(request, webargs=None):
-  if (request.method == 'POST' and not webargs):
+def convert_graph(request):
+  if (request.method == 'POST'):
     form = ConvertForm(request.POST, request.FILES) # instantiating form
     if form.is_valid():
       upload_fn = form.files['fileObj'].name
@@ -76,47 +76,6 @@ The process may take several hours (dependent on graph size). If your job fails 
 If you do not see an email in your <i>Inbox</i> check the <i>Spam</i> folder and add <code>jhmrocp@cs.jhu.edu</code> to your safe list.
 """
     return HttpResponseRedirect(get_script_prefix()+'success')
-
-  elif(request.method == 'POST' and webargs):
-    pass
-    """
-    # webargs is {inFormat}/{outFormat}
-    inFormat = webargs.split('/')[0] # E.g 'graphml'| 'dot' | 'leda'
-    outFormat =  webargs.split('/')[1].split(',')
-
-    outFormat = list(set(outFormat)) # Eliminate duplicates if any exist
-    save_dir, convert_file_save_loc = getworkdirs()
-    uploaded_files = writeBodyToDisk(request.body, save_dir)# can only be one file # TODO: Check me
-
-    # Check for zip
-    if os.path.splitext(uploaded_files[0])[1].strip() == '.zip':
-      zipper.unzip(uploaded_files[0], save_dir)
-      # Delete zip so its not included in the graphs we uploaded
-      os.remove(uploaded_files[0])
-      uploaded_files = glob(os.path.join(save_dir, "*")) # get the uploaded file names
-
-    err_msg = ""
-    outfn = ""
-    for fn in uploaded_files:
-      outfn, err_msg = convertTo.convert_graph(fn, inFormat,
-                        convert_file_save_loc, *outFormat)
-
-    dwnld_loc = get_download_path(convert_file_save_loc)
-
-    if err_msg:
-      err_msg = "Completed with errors. View Data at: %s\n. Here are the errors:%s" % (dwnld_loc, err_msg)
-      return HttpResponse(err_msg)
-
-    elif len(webargs.split("/")) > 2:
-      if (outfn and len(outFormat) == 1):
-        return HttpResponse(dwnld_loc + "/" + outfn.split("/")[-1])
-      else:
-        return HttpResponse(dwnld_loc)
-
-    return HttpResponse ("Converted files available for download at " + dwnld_loc + " . The directory " +
-            "may be empty if you try to convert from, and to the same format.") # change to render of a page with a link to data result
-    """
-
   else:
     form = ConvertForm() # An empty, unbound form
 

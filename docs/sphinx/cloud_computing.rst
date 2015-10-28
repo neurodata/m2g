@@ -1,8 +1,6 @@
 Cloud Services
 **************
 
-There are several options when using m2g in the cloud. We provide a user-facing preconfigured AMI on the Amazon Community Marketplace for users to access and launch, as well as host graph services users can access for direct data downloads. In the near future, an additional web service which allows users to simply supply an s3 bucket to us and received processed derivatives in return will be available - stay tuned.
-
 Using m2g in an AMI
 -------------------
 Before beginning this guide, please ensure that you have the following:

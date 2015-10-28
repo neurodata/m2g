@@ -22,12 +22,13 @@
 
 set -e
 echo "Testing invariants ..."
-mkdir -p ./mrdata/graphs
-GRAPH_FN="./mrdata/graphs/test.graphml"
+MRDATA=./mrdata/
+mkdir -p $MRDATA/graphs
+GRAPH_FN="$MRDATA/test.graphml"
 
 if  [ ! -f $GRAPH_FN ]; then
   echo "Downloading the graph"
-  wget -O $GRAPH_FN "http://openconnecto.me/data/public/MR-data/Graphs/test.graphml"
+  wget -O $GRAPH_FN "http://openconnecto.me/mrdata/perm/testdata/test.graphml"
 fi
 
 ./inv_exec -h
@@ -44,3 +45,6 @@ echo "Testing individuals ..."
 ./inv_exec $GRAPH_FN -m
 ./inv_exec $GRAPH_FN -g
 ./inv_exec $GRAPH_FN -v
+
+echo "Test successful!"
+rm -rf $MRDATA
