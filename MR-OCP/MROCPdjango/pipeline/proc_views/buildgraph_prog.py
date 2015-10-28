@@ -20,24 +20,20 @@
 # Copyright (c) 2015. All rights reserved.
 
 import os
-import tempfile
-import pickle
 from time import strftime, localtime
 
 from django.conf import settings
 from django.http import HttpResponse
 
 from pipeline.utils.util import get_script_prefix
-from pipeline.forms import BuildGraphForm
 from pipeline.utils.util import adaptProjNameIfReq, defDataDirs
-from pipeline.utils.util import saveFileToDisk, sendJobBeginEmail
-from pipeline.utils.create_dir_struct import create_dir_struct
+from pipeline.utils.util import sendJobBeginEmail, check_email
 from pipeline.models import BuildGraphModel
 from pipeline.tasks import task_build
 from pipeline.utils.util import writeBodyToDisk
 
 def getworkdir():
-  base_dir = os.path.join(settings.MEDIA_ROOT, 'tmp', strftime('buildUpload%a%d%b%Y_%H.%M.%S/', localtime()))
+  base_dir = os.path.join(settings.MEDIA_ROOT, 'public', strftime('buildUpload%a%d%b%Y_%H.%M.%S/', localtime()))
   save_dir = os.path.join(base_dir, 'buildupload') # Save location of original uploads
   if not os.path.exists(save_dir): os.makedirs(save_dir)
   return save_dir
@@ -48,6 +44,9 @@ def build_graph_prog(request, webargs):
     webargs = webargs.split("/")
     proj_dir, site, subject, session, scanId = webargs[:5]
     email = webargs[6]
+    if (not check_email(email)):
+      return HttpResponse("ERROR: Incorrect email address format")
+
     invariants = webargs[7:]
 
     proj_dir = os.path.join("public", proj_dir)
@@ -93,14 +92,8 @@ def build_graph_prog(request, webargs):
 
     sendJobBeginEmail(email, invariants)
     task_build.delay(save_dir, graph_loc, graph_size, invariants, save_dir, email)
-    request.session["success_msg"] =\
-"""
-Your job successfully launched. You should receive an email to confirm launch
-and another when it upon job completion. <br/>
-<i>The process may take several hours</i> if you selected to compute all invariants.
-"""
     return HttpResponse("Successful job submission, please " \
                           "await reception & completion emails at {0}".format(email))
   else:
     return HttpResponse("There was an error! If you believe it " \
-                          "is on our end please email: jhmrocp@cs.jhu.edu")
+                          "is on our end please email: {0}".format(settings.DEFAULT_FROM_EMAIL))

@@ -28,7 +28,7 @@ class Container(object):
     self.attrs = attrs
 
   def attribute_names(self,):
-    return self.attrs.keys()
+    return self.attrs
 
   def __repr__(self):
     return "{0}".format(self.attrs)
@@ -48,18 +48,18 @@ class GraphContainer(object):
     self.es = e_attrs
 
   def __getitem__(self, var):
-    return attrs.__getitem__(var)
+    return self.attrs.__getitem__(var)
 
   def vcount(self,):
-    return attrs["vcount"]
+    return self.attrs["vcount"]
 
   def ecount(self,):
-    return attrs["ecount"]
+    return self.attrs["ecount"]
 
-  def attributes(self):
-    return attrs.keys()
+  def attributes(self,):
+    return self.attrs.keys()
 
-  def __repr__(self):
+  def __repr__(self,):
     return "\nGraph Container:\nGraph: {0}\nVertex: {1}\nEdges: {2}".\
         format(self.attrs, self.vs, self.es)
 

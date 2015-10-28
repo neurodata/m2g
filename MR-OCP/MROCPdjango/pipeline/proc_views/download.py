@@ -118,7 +118,7 @@ def download(request):
 
         # Something selected for dl/Convert+dl
         else:
-          data_dir = os.path.join(settings.MEDIA_ROOT, "tmp",
+          data_dir = os.path.join(settings.MEDIA_ROOT, "public",
                                  strftime("download_%a%d%b%Y_%H.%M.%S/", localtime()))
           dwnld_loc = get_download_path(data_dir)
 
