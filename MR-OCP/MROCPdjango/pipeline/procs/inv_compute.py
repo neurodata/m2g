@@ -51,11 +51,11 @@ def invariant_compute(invariants, graph_fn, invariants_path, data_dir, in_graph_
   except Exception, msg:
     msg = """
 Hello,\n\nYour most recent job for '%s' failed possibly because:\n- '%s'.
-\n\n"You may have some partially completed data here: %s.
+\n\n"You may have some partially completed data at {}.
 \nPlease check these and try again.\n\n
-""" % (os.path.basename(graph_fn), msg, dwnld_loc)
+""" % (os.path.basename(graph_fn), msg)
 
-    sendJobFailureEmail(to_email, msg)
+    sendJobFailureEmail(to_email, msg, dwnld_loc)
     return
   # Email user of job finished
   sendJobCompleteEmail(to_email, dwnld_loc)

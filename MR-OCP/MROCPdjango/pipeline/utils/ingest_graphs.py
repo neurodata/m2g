@@ -26,18 +26,21 @@ import argparse
 import os
 from glob import glob
 import MySQLdb
+import numpy as np
 from contextlib import closing
 import igraph
 import zipfile
 from time import time
+
 from ocpipeline.settings_secret import DATABASES as db_args
 from mrcap.utils import igraph_io
+from pipeline.utils.util import get_download_path
 
 def ingest(genera, tb_name, base_dir=None, files=None, project=None):
   if files:
     print "Running specific file(s) ..."
     assert len(genera) < 2, "Can only specify single genus as '-g [--genera] arg. You provided %s'" % genera 
-    _ingest_files(files, genera[0])
+    _ingest_files(files, genera[0], tb_name)
   
   else:
     print "Running entire dataset ..."
@@ -77,7 +80,7 @@ def _ingest_files(fns, genus, tb_name):
 
       if g_changed: # Means graph has changed since ingest OR was never in DB to start with
         # Collect all the attributes etc ..
-        g = igraph_io.read_arbitrary(graph_fn, informat="graphml", headers_only=False)
+        g = igraph_io.read_arbitrary(graph_fn, informat="graphml", headers_only=True)
 
         vertex_attrs = g.vs.attribute_names()
         edge_attrs = g.es.attribute_names()
@@ -94,12 +97,13 @@ def _ingest_files(fns, genus, tb_name):
         if "project" in graph_attrs: project = g["project"]
         else: project = ""
 
-        url = "http://openconnecto.me/data/public/graphs/"+("/".join(graph_fn.replace("\\", "/").split('/')[-2:]))
-       
+        #url = "http://openconnecto.me/mrdata/graphs/"+("/".join(graph_fn.replace("\\", "/").split('/')[-2:]))
+        url = get_download_path(graph_fn)
+
         # This statement puts each graph into the DB
         qry_stmt = "insert into %s.%s values (\"%s\",\"%s\",\"%s\",\"%s\",%d,%d,\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",%f,\"%s\");" \
              % (db_args["default"]["NAME"], tb_name, os.path.abspath(graph_fn), genus, region, project, 
-                 int(vcount), int(ecount), str(graph_attrs)[1:-1].replace("'",""), 
+                 np.int64(np.float64(vcount)), np.int64(np.float64(ecount)), str(graph_attrs)[1:-1].replace("'",""), 
                  str(vertex_attrs)[1:-1].replace("'",""),
                  str(edge_attrs)[1:-1].replace("'",""), sensor, source, mtime, url)
 
@@ -134,9 +138,15 @@ def main():
   parser.add_argument("-f", "--file_names", action="store", default=None, nargs="+", help="If you only want to ingest \
             specific files only use this")
   parser.add_argument("-t", "--table_name", action="store", default="pipeline_graphdownloadmodel", help="Table name in db")
+  parser.add_argument("-c", "--clean_only", action="store_true",  help="Just clean the DB of stale files that don't exist")
 
   parser.add_argument("-p", "--project", action="store", help="Project the graph belongs to")
   result = parser.parse_args()
+
+  if (result.clean_only):
+      print "Running in clean only mode ..."
+      clean_stale_graphs(result.table_name)
+      exit(0);
   
   print "Ingesting graph(s) ..."
   ingest(result.genera, result.table_name, result.base_dir, result.file_names, result.project)

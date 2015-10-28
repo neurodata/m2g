@@ -36,24 +36,26 @@ def main():
       http://openconnecto.me/graph-services/convert')
 
   parser.add_argument('url', action="store", help='url must be in the form \
-      http://mrbrain.cs.jhu.edu/graph-services/convert/{inFormat}/{outFormat}. \
-      Example {inFormat}: graphml | ncol | edgelist | lgl | pajek | graphdb | numpy \
-      | mat | attredge. {outFormat} can be a comma separated list of the following \
-      e.g graphml,ncol,edgelist,lgl,pajek,dot,gml,leda')
+      http://openconnecto.me/graph-services/convert/.')
 
   parser.add_argument('fileToConvert', action="store", help="The file you want to convert.\
       Can be a single graph or a zip file with multiple graphs. Zip graphs and not folders \
       or failure will occur!")
-  parser.add_argument('-a', '--auto', action="store_true", help="Use this flag if you want a \
-      browser session to open up with the result automatically")
+  parser.add_argument("email", action="store", help="Your email address")
+  parser.add_argument("-i", "--input_format",  action="store", help="Input format of the grpah")
+  parser.add_argument("-o", "--output_format",  action="store", nargs="+", \
+      help="Output format of the grpah e.g graphml,ncol,edgelist,lgl,pajek,dot,gml,leda")
   parser.add_argument('-l', '--link', action="store_true", help="Use this flag if you want to \
       ONLY receive the link to your result. If you request multiple output formats this will be a directory.")
 
   result = parser.parse_args()
 
+  if not result.output_format:
+    print "You must provide an output format!"
+    exit(-1)
   if not (os.path.exists(result.fileToConvert)):
     print "Invalid file name. Check the filename: " + result.fileToConvert
-    sys.exit()
+    exit(-1)
   else:
     print "Loading file into memory.."
 
@@ -66,24 +68,24 @@ def main():
   tmpfile.flush()
   tmpfile.seek(0)
 
+  result.url = result.url if result.url.endswith('/') else result.url + '/' #
+  call_url = result.url + result.email + "/" + result.input_format + "/" + \
+                        ",".join(result.output_format)
+
   try:
     if result.link:
-      req = urllib2.Request(result.url+"/l", tmpfile.read()) # Just return link
+      req = urllib2.Request(call_url+"/l", tmpfile.read()) # Just return link
     else:
-      req = urllib2.Request(result.url, tmpfile.read())
+      req = urllib2.Request(call_url, tmpfile.read())
 
     response = urllib2.urlopen(req)
+
   except urllib2.URLError, e:
     print "Failed URL", result.url
-    print "Error %s" % (e.read())
+    print "Error:", e
     sys.exit(0)
 
-  msg = response.read() # Use this response better
-  print msg
-
-  if result.auto:
-    ''' Open up a tab in your browser to view results'''
-    webbrowser.open(msg.split(' ')[6]) # This would change
+  print "\n====> " + response.read()
 
 if __name__ == "__main__":
   main()
