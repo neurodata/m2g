@@ -75,6 +75,7 @@ def process_input_data(derivatives, graph_loc, graphsize, invariants,
     msg = "Hello,\n\nYour most recent job failed either because your fiber streamline file or ROI mask was incorrectly formatted."
     msg += " Please check both and try again.\n\n"
     sendJobFailureEmail(to_email, msg)
+    return 911
 
   # Run ivariants here
   if len(invariants) > 0:

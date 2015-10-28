@@ -216,7 +216,6 @@ VALID_FILE_TYPES = EQUIV_NP_ARRAYS
 VALID_FILE_TYPES['mad'] = 'maxAvgDeg'
 VALID_FILE_TYPES['fg'] = 'fibergraph'
 VALID_FILE_TYPES['lcc'] = 'lrgstConnComp'
-VALID_FILE_TYPES['gdia'] = 'graphDiam'
 
 # Celery Settings
 BROKER_URL = 'amqp://guest@localhost'
