@@ -28,14 +28,23 @@ inDir = sys.argv[1]
 outputBaseDir = sys.argv[2]
 atlasIn = sys.argv[3]
 
+# input list files
 dtiListFile = sys.argv[4]
 bvalListFile = sys.argv[5]
 bvecListFile = sys.argv[6]
 mprageListFile = sys.argv[7]
-atlasListFile = sys.argv[8]
+
+# output list files
+#Registred DTI data, registered mprage data, sg, bg, fibers
+
+smgListFile = os.path.join(outputBaseDir,'sgListFile.list') #sys.argv[8]
+rdtiListFile = os.path.join(outputBaseDir,'rdtiListFile.list')#sys.argv[9]
+rmriListFile = os.path.join(outputBaseDir,'rmriListFile.list')#sys.argv[10]
+bgListFile = os.path.join(outputBaseDir,'bgListFile.list')#sys.argv[11]
+fiberListFile = os.path.join(outputBaseDir,'fiberListFile.list')#sys.argv[12]
 
 #make output directory and subdirectories
-outDirs = ['fibers', 'graphs', 'registered']
+outDirs = ['fibers', 'sg', 'bg', 'reg']
 
 if not os.path.exists(outputBaseDir):
     os.makedirs(outputBaseDir)
@@ -56,23 +65,27 @@ bvalFiles = [y for x in os.walk(inDir) for y in glob.glob(os.path.join(x[0], '*.
 bvecFiles = [y for x in os.walk(inDir) for y in glob.glob(os.path.join(x[0], '*.grad'))]
 mprageFiles = [y for x in os.walk(inDir) for y in glob.glob(os.path.join(x[0], '*MPRAGE.nii'))]
 
+# DTI in
 with open(dtiListFile,'wb') as thefile:
     for item in dtiFiles:
         thefile.write("%s\n" % item)
-        
+
+# bval in                                
 with open(bvalListFile,'wb') as thefile:
     for item in bvalFiles:
         thefile.write("%s\n" % item)
 
+# bvec in
 with open(bvecListFile,'wb') as thefile:
     for item in bvecFiles:
         thefile.write("%s\n" % item)
 
+# mprage in
 with open(mprageListFile,'wb') as thefile:
     for item in mprageFiles:
         thefile.write("%s\n" % item)
 
-#construct small graph stuff
+#construct small graph filenames - done differently because of combinatorics
 
 atlas = list()
 for a in atlasList:
@@ -86,19 +99,49 @@ for s in dtiFiles:
     [ss, xx]  = os.path.splitext(f)
     sub.append(ss.replace('DTI',''))
 
-print sub
-print atlas    
-
 # output smg names
 
 smg = list()
 for s in sub:
     for a in atlas:
-       smg.append(s+a+'_sg.graphml')
-       
+       smg.append(outputBaseDir + 'sg' + s + a + '_sg.graphml')
+
+print sub
+print atlas    
 print smg
 
-
-with open(atlasListFile,'wb') as thefile:
+with open(smgListFile,'wb') as thefile:
     for item in smg:
+        thefile.write("%s\n" % item)
+        
+# sub is the base subject directory 
+rdtiName = list()
+rmriName = list()
+bgName = list()
+fiberName = list()
+       
+for s in sub:
+    rdtiName.append(os.path.join(outputBaseDir, 'reg', s + 'dti_reg.nii'))
+    rmriName.append(os.path.join(outputBaseDir, 'reg', s + 'mprage_reg.nii'))
+    bgName.append(os.path.join(outputBaseDir, 'bg', s + 'bg.graphml'))
+    fiberName.append(os.path.join(outputBaseDir, 'fiber', s + 'fiber.dat'))
+
+# registered dti names
+with open(rdtiListFile,'wb') as thefile:
+    for item in rdtiName:
+        thefile.write("%s\n" % item)
+
+# registered mprage names
+with open(rmriListFile,'wb') as thefile:
+    for item in rmriName:
+        thefile.write("%s\n" % item)
+
+# bg names
+with open(bgListFile,'wb') as thefile:
+    for item in bgName:
+        thefile.write("%s\n" % item)
+
+# fiber names
+with open(fiberListFile,'wb') as thefile:
+    for item in fiberName:
         thefile.write("%s\n" % item)
