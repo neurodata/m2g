@@ -39,4 +39,4 @@ if len(inputFiles) != len(nameList):
 else:
     for i in range(len(inputFiles)):
         print 'renaming file: '+inputFiles[i]+' to: '+nameList[i]
-        shutil.move(inputFiles[i],nameList[i])
+        shutil.copy(inputFiles[i],nameList[i]) #done to avoid disrupting the workflow
