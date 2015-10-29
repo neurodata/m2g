@@ -8,7 +8,6 @@
                         <authors>
                                 <author fullName="Gregory Kiar" email="gkiar@jhu.edu" website="ocp.me" />
                         </authors>
-                        <tag />
                         <metadata>
                                 <data key="__creationDateKey" value="Mon Oct 26 22:39:19 EDT 2015" />
                         </metadata>
@@ -21,7 +20,7 @@
                         <input id="ComputeTRT_1.m2gdirectory" name="m2g directory" required="true" enabled="true" order="1">
                                 <format type="String" cardinality="1" />
                                 <values>
-                                        <value>/share0/m2g</value>
+                                        <value>{m2g}</value>
                                 </values>
                         </input>
                         <input id="ComputeTRT_1.subjectlistfile" name="subject list file" required="true" enabled="true" order="2" prefix="-l" prefixSpaced="true" prefixAllArgs="false">
@@ -57,6 +56,9 @@
                                 </format>
                         </output>
                 </module>
+                <variables>
+                        <variable name="m2g" order="0">/share0/m2g/src/m2g</variable>
+                </variables>
         </moduleGroup>
 </pipeline>
 
