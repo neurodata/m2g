@@ -109,7 +109,8 @@ for s in dtiFiles:
 smg = list()
 for s in sub:
     for a in atlas:
-       smg.append(outputBaseDir + '/sg/' + s + a + '_sg.graphml')
+       smg.append(os.path.join(outputBaseDir + '/sg/' + s + a + '_sg.graphml'))
+
 
 print sub
 print atlas    
