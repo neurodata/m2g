@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <pipeline version=".2">
         <connections>
-                <connection source="setupm2g_1.bvalListFile" sink="m2g_2.Bvalues" />
                 <connection source="setupm2g_1.dtiListFile" sink="m2g_2.DTIVolumes" />
-                <connection source="setupm2g_1.bvalListFile" sink="m2g_2.Bvalues_2" />
                 <connection source="setupm2g_1.dtiListFile" sink="m2g_2.DTIVolumes_2" />
+                <connection source="setupm2g_1.bvalListFile" sink="m2g_2.Bvalues" />
+                <connection source="setupm2g_1.bvalListFile" sink="m2g_2.Bvalues_2" />
                 <connection source="setupm2g_1.bvecListFile" sink="m2g_2.Bvectors" />
                 <connection source="setupm2g_1.mprageListFile" sink="m2g_2.MPRageImage" />
                 <connection source="setupm2g_1.mprageListFile" sink="m2g_2.MPRageImage_2" />
@@ -50,23 +50,23 @@
                         <metadata>
                                 <data key="__creationDateKey" value="Mon Jun 29 13:32:43 EDT 2015" />
                         </metadata>
-                        <input link="DiffusionPre-Processing_1.Bvalues" id="m2g_2.Bvalues" name="B values" order="2" />
                         <input description="Specifies the input volume file path." link="DiffusionPre-Processing_1.Input" id="m2g_2.DTIVolumes" name="DTI Volumes" order="0" />
+                        <input link="DiffusionPre-Processing_1.DTIVolumes" id="m2g_2.DTIVolumes_2" name="DTI Volumes" order="1" />
+                        <input link="DiffusionPre-Processing_1.Bvalues" id="m2g_2.Bvalues" name="B values" order="2" />
+                        <input link="DiffusionProcessing_1.Bvalues" id="m2g_2.Bvalues_2" name="B values" order="3" />
+                        <input link="DiffusionPre-Processing_1.Bvectors" id="m2g_2.Bvectors" name="B vectors" order="4" />
+                        <input description="Specifies the input reference image." link="Registration_1.Reference_3" id="m2g_2.MPRageImage" name="MPRage Image" order="5" />
+                        <input description="Specifies the input volume file path." link="Registration_1.Input_3" id="m2g_2.MPRageImage_2" name="MPRage Image" order="6" />
                         <output description="Specifies the output volume file path." link="Registration_1.Output" id="m2g_2.Output" name="Output" order="7" />
-                        <input description="Specifies the input reference image." link="Registration_1.Reference" id="m2g_2.ReferenceMNIImage" name="Reference (MNI Image)" order="14" />
-                        <input link="DiffusionProcessing_1.BrainMask" id="m2g_2.BrainMask" name="Brain Mask" order="12" />
-                        <input link="DiffusionProcessing_1.atlas" id="m2g_2.atlasFile" name="atlasFile" order="16" />
                         <output link="DiffusionProcessing_1.fiberoutfile" id="m2g_2.fiberoutfile" name="fiber outfile" order="8" />
                         <output link="DiffusionProcessing_1.graphfile" id="m2g_2.graphfile" name="graph file" order="9" />
                         <output link="DiffusionProcessing_1.graphfile_2" id="m2g_2.graphfile_2" name="graph file" order="10" />
                         <output description="Specifies the output volume file path." link="Registration_1.Output_2" id="m2g_2.Output_2" name="Output" order="11" />
-                        <input link="DiffusionProcessing_1.Bvalues" id="m2g_2.Bvalues_2" name="B values" order="3" />
-                        <input link="DiffusionPre-Processing_1.DTIVolumes" id="m2g_2.DTIVolumes_2" name="DTI Volumes" order="1" />
-                        <input link="DiffusionPre-Processing_1.Bvectors" id="m2g_2.Bvectors" name="B vectors" order="4" />
-                        <input description="Specifies the input reference image." link="Registration_1.Reference_2" id="m2g_2.ReferenceMNIImage_2" name="Reference (MNI Image)" order="15" />
-                        <input description="Specifies the input reference image." link="Registration_1.Reference_3" id="m2g_2.MPRageImage" name="MPRage Image" order="5" />
-                        <input description="Specifies the input volume file path." link="Registration_1.Input_3" id="m2g_2.MPRageImage_2" name="MPRage Image" order="6" />
+                        <input link="DiffusionProcessing_1.BrainMask" id="m2g_2.BrainMask" name="Brain Mask" order="12" />
                         <input link="DiffusionProcessing_1.BrainMask_2" id="m2g_2.BrainMask_2" name="Brain Mask" order="13" />
+                        <input description="Specifies the input reference image." link="Registration_1.Reference" id="m2g_2.ReferenceMNIImage" name="Reference (MNI Image)" order="14" />
+                        <input description="Specifies the input reference image." link="Registration_1.Reference_2" id="m2g_2.ReferenceMNIImage_2" name="Reference (MNI Image)" order="15" />
+                        <input link="DiffusionProcessing_1.atlas" id="m2g_2.atlasFile" name="atlasFile" order="16" />
                         <input link="SmallGraphs_1.dataabsolutepathandname" id="m2g_2.dataabsolutepathandname" name="data absolute path and name" order="17" />
                         <input link="DTIinMNIspace_1.dataabsolutepathandname" id="m2g_2.dataabsolutepathandname_2" name="data absolute path and name" order="18" />
                         <input link="MPRAGEinMNISpace_1.dataabsolutepathandname" id="m2g_2.dataabsolutepathandname_3" name="data absolute path and name" order="19" />
@@ -1698,12 +1698,12 @@ innovation@isis.ox.ac.uk quoting reference BS/3497.</license>
                         </output>
                 </module>
                 <variables>
-                        <variable name="MNI" order="0">/share0/m2g/src/m2g/data/Atlas/MNI152_T1_1mm.nii.gz</variable>
-                        <variable name="outputBaseDir" order="5">/brainstore/MR/KKI2009/derivatives</variable>
-                        <variable name="inputDir" order="4">/brainstore/MR/KKI2009/raw</variable>
-                        <variable name="sglabels" order="1">/brainstore/MR/KKI2009/derivatives/atlases.list</variable>
-                        <variable name="MNImask" order="2">/share0/m2g/src/m2g/data/Atlas/MNI152_T1_1mm_brain_mask.nii</variable>
-                        <variable name="bglabels" order="3">/share0/m2g/src/m2g/data/Atlas/MNI152_T1_1mm_brain_incremented.nii</variable>
+                        <variable name="MNI">/share0/m2g/src/m2g/data/Atlas/MNI152_T1_1mm.nii.gz</variable>
+                        <variable name="outputBaseDir">/brainstore/MR/KKI2009/derivatives</variable>
+                        <variable name="inputDir">/brainstore/MR/KKI2009/raw</variable>
+                        <variable name="sglabels">/brainstore/MR/KKI2009/derivatives/atlases.list</variable>
+                        <variable name="MNImask">/share0/m2g/src/m2g/data/Atlas/MNI152_T1_1mm_brain_mask.nii</variable>
+                        <variable name="bglabels">/share0/m2g/src/m2g/data/Atlas/MNI152_T1_1mm_brain_incremented.nii</variable>
                 </variables>
                 <annotations visible="true">
                         <annotation width="200" height="100" posX="729" posY="54" background="153,255,255,255" foreground="0,0,0,255" expanded="true" type="text" name="Welcome to m2g!&#xA;m2g is a multi-modal mri processing pipeline which estimates macroscale human connectomes from brain image data.&#xA;&#xA;Prior to running...&#xA;Be sure to edit the variables and make sure that the atlas files have properly been set for your system. All of the variables defined contain the location of the described file. In the case of the data variables, all of the files are in fact list files which themselves list the locations of the data.&#xA;&#xA;Data Variables&#xA;Inputs&#xA;dti - raw 4D DTI volume&#xA;mprage - raw MPRAGE volume&#xA;bval - raw bvalues file corresponding to DTI volume&#xA;grad - raw bvectors/gradients file corresponding to DTI volume&#xA;Outputs&#xA;aligned - processed aligned DTI volume to atlas space&#xA;fibers - processed fiber streamlines&#xA;sg - processed small graphs&#xA;bg - processed big graphs&#xA;&#xA;Atlas Variables&#xA;MNI - MNI atlas&#xA;MNImask - MNI brain mask&#xA;sglabels - MNI labels for generating small graphs&#xA;bglabels - MNI labels for generating big graphs">
