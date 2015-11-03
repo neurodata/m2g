@@ -18,7 +18,7 @@
 # Email: gkiar@jhu.edu
 # Copyright (c) 2015. All rights reserved.
 
-load_graphs <- function(fnames, rois, thresh=1e6) {
+load_graphs <- function(fnames, rois, thresh=1e5) {
   require('igraph')
   N <- length(fnames)
   size <- 0
