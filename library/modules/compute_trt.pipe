@@ -24,10 +24,10 @@
                                         <value>{m2g}</value>
                                 </values>
                         </input>
-                        <input id="ComputeTRT_1.subjectlistfile" name="subject list file" required="true" enabled="true" order="2">
+                        <input id="ComputeTRT_1.subjectdirectory" name="subject directory" required="true" enabled="true" order="2">
                                 <format type="String" cardinality="1" />
                                 <values>
-                                        <value>/brainstore/MR/KKI2009/derivatives/sg</value>
+                                        <value>/brainstore/MR/KKI2009/derivatives/sg/MNI152_T1_1mm_desikan_adjusted</value>
                                 </values>
                         </input>
                         <input id="ComputeTRT_1.rois" name="rois" required="false" enabled="true" order="3">
@@ -48,6 +48,16 @@
                                         <value>2</value>
                                 </values>
                         </input>
+                        <output id="ComputeTRT_1.pngoutput" name="png output" required="false" enabled="true" order="6" includeTransformedParameter="true">
+                                <format type="String" cardinality="1" transformationBase="subject directory">
+                                        <transform order="1" operation="Append">_trt.jpeg</transform>
+                                </format>
+                        </output>
+                        <output id="ComputeTRT_1.txtoutput" name="txt output" required="false" enabled="true" order="7" includeTransformedParameter="true">
+                                <format type="String" cardinality="1" transformationBase="subject directory">
+                                        <transform order="0" operation="Append">_trt.txt</transform>
+                                </format>
+                        </output>
                 </module>
                 <variables>
                         <variable name="m2g" order="0">/share0/m2g/src/m2g</variable>

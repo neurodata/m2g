@@ -22,6 +22,8 @@
 args <- commandArgs(TRUE)
 l <- length(args)
 
+sink(args[l])
+
 #we need at least 2: m2g_path and graphs
 if (l < 2) {
 	stop(c('Please provide data and script paths in order to run, as follows:\n',
@@ -102,6 +104,9 @@ rdf <- compute_rdf(dist, ids, scans)
 mnr <- compute_mnr(rdf, output=TRUE)
 
 
+jpeg(filename=args[l-1])
+image(dist)
+dev.off()
 ### Suggested alternatives: log distances, nbin, and plotting
 
 #compute RDF and MNR for log graphs
