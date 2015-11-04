@@ -62,6 +62,7 @@ clean_ids <- function(ids, rule){
   N <- length(ids)
   clean_id <- array(NaN, N)
   for (i in 1:N) {
+		ids[i] <- basename(ids[i])
     if (is.nan(ids[i])){
       clean_id[i] <- NaN
     }
