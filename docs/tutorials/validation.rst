@@ -1,14 +1,20 @@
 Validation
 **********
 
-Since there is no ground truth data or gold standard available when estimating MR connectomes, we validate the effectiveness and quality of our pipeline using test-retest (TRT) reliability. A TRT compatible dataset is one which has had all subjects scanned multiple times. TRT is a metric which compares a derivative estimated from a particular subject on one scan to that of all other scans, and asserts that the most similar result must be from the same subject's other scan. The pipelines which we release have scored a TRT score of 42/42 on the KKI2009 dataset (figured below).
+Since there is no ground truth data or gold standard available when estimating MR connectomes, we validate the effectiveness and quality of our pipeline using test-retest (TRT) reliability. A TRT compatible dataset is one which has had all subjects scanned multiple times. Reliability leverages the assertion that your brain is more like your brain on another day than it is to anyone else's brain on any day. The value returned is a probability that this is true for a random subject in your dataset (i.e. if your dataset has perfect reliability then reliability is 1).
 
-As it is difficult to assess improvements in development past a perfect TRT score, we are also using statistical measures, such as Hellinger Distance, to assess the quality of our pipeline. These methods will be looked at in the analysis section.
+Computing Reliability on your Data
+----------------------------------
 
-.. image:: ../images/m2g_trt.png
+In order to assess the reliability of your data derivates from m2g, you can use the following procedure. Note that this only applies for test retest datasets (i.e. each subject scanned at least twice).
 
-The code and data used to produce this plot are below.
+* Run m2g on your data with atlas(es) of your choosing.
+* Locate the base directory of your small graphs
+* Run the reliability script in the m2g repo like as follows:
 
-.. raw:: html
+.. code-block:: none
+  
+  Rscript ${m2g}/analysis/compute_trt.R ${m2g} ${path_to_graphs} ${rois} ${format} ${scans} ${output_figure} ${output_stats}
 
-	<script src="https://gist.github.com/gkiar/7f3b1b8fc5c7fe3e95c8.js"></script>
+* The returned text file will provide statistics about the outlier graphs in your set as well as the reliability of your data
+* The returned figure is a heat map of the difference between pairs of braingraphs. Lower heat indicates higher similarity

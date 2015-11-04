@@ -25,9 +25,9 @@ Before beginning this guide, please ensure that you have the following:
 
 **Processing your data:**
 
-* Mount an addtional harddrive with sufficient storage capacity for your data.
-* Move all of your data into your new harddrive (either through s3, or scp or equivalent).
-* Create a `temp` directory on this new harddrive, as well.
+* Mount an addtional harddrive with sufficient storage capacity for your data
+* Move all of your data into your new harddrive (either through s3, or scp or equivalent)
+* Create a `temp` directory on this new harddrive, as well
 * Open terminal and type the following:
 
 .. code-block:: none
@@ -37,14 +37,14 @@ Before beginning this guide, please ensure that you have the following:
   cd /share0/src/loni/loni_6.0.1
   ./PipelineGui.sh
   
-* A LONI Pipeline window will open. Decline any prompts to update this client upon load.
+* A LONI Pipeline window will open. Decline any prompts to update this client upon load
 * Open the m2g workflow, located at `/share0/m2g/library/m2g_sources_bc1_v4.pipe`
 * In LONI, open the `Edit > Preferences` menu
-* Change the Pipeline Cache to the `temp` folder you created earlier. Be sure that directory has permissions `777`.
-* Change the number of simultaneous jobs in Local Execution to be approximately 90-95% of the total cores in your instance.
-* Open the variables dialog from the wrench on the top right, and change the variables to point to your data and where you want your derivatives stored.
-* Press run.
-* Find your graphs and other derivatives from the base directory you provided.
+* Change the Pipeline Cache to the `temp` folder you created earlier. Be sure that directory has permissions `777`
+* Change the number of simultaneous jobs in Local Execution to be approximately 90-95% of the total cores in your instance
+* Open the variables dialog from the wrench on the top right, and change the variables to point to your data and where you want your derivatives stored
+* Press run
+* Find your graphs and other derivatives from the base directory you provided
 * Enjoy!
 
 Downloading Graphs
