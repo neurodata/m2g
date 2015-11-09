@@ -1,6 +1,26 @@
 Cloud Services
 **************
 
+Using m2g on captive cluster
+----------------------------
+In order to run m2g on the captive cluster we run in house (braincloud1), we expect you to have the following requirements satisfied:
+1. A LONI client installed on your computer that is the same version as our sever (Currently v6.0.1)
+2. Your data organized in compliance with our `input specification <http://m2g.io/tutorials/input_data.html>`_
+
+**Moving your data:**
+
+* scp/rsync or equivalently move your data to braincloud1:/data/MR/{datasetname}
+* ensure that the data directory is readable and writeable by user pipeline. This is most easily achieved by applying chmod 777 -R to the base of your data directory
+
+**Processing your data:**
+
+* On your computer, open the LONI client and connect to braincloud1
+* Open the m2g workflow in m2g found at `library/workflows/m2g_lists.pipe`
+* Open the variables dialog from the wrench on the top right, and change the variables to point to your data and where you want your derivatives stored
+* Press run
+* Find your graphs and other derivatives from the base directory you provided
+* Enjoy!
+
 Using m2g in an AMI
 -------------------
 Before beginning this guide, please ensure that you have the following:
