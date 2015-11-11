@@ -4,21 +4,32 @@ Cloud Services
 Using m2g on captive cluster
 ----------------------------
 In order to run m2g on the captive cluster we run in house (braincloud1), we expect you to have the following requirements satisfied:
-1. A LONI client installed on your computer that is the same version as our sever (Currently v6.0.1)
+
+1. A LONI client installed on your computer that is the same version as our sever (Currently v6.0.1). If you cannot find this version on `their website <http://www.loni.usc.edu/Software/Pipeline>`_, contact them and `request a copy <http://pipeline.loni.usc.edu/learn/contact/>`_.
+
 2. Your data organized in compliance with our `input specification <http://m2g.io/tutorials/input_data.html>`_
+
+3. An account on the cluster. If you don't have an account and would like one, you can email `support@neurodata.io <mailto:support@neurodata.io>`_ to see if you're eligible.
 
 **Moving your data:**
 
-* scp/rsync or equivalently move your data to braincloud1:/data/MR/{datasetname}
-* ensure that the data directory is readable and writeable by user pipeline. This is most easily achieved by applying chmod 777 -R to the base of your data directory
+* scp/rsync or equivalently move your data to braincloud1:/brainstore/MR/
+* ensure that the data directory is readable and writeable by user pipeline. An example of this is done below
+
+.. code-block:: none
+
+  rsync -rv --progress /path/to/mydata ${user}@braincloud1.cs.jhu.edu:/brainstore/MR/mydata
+  ssh ${user}@braincloud1.cs.jhu.edu
+  cd /brainstore/MR/mydata
+  chmod -R 775 ./
 
 **Processing your data:**
 
 * On your computer, open the LONI client and connect to braincloud1
-* Open the m2g workflow in m2g found at `library/workflows/m2g_lists.pipe`
-* Open the variables dialog from the wrench on the top right, and change the variables to point to your data and where you want your derivatives stored
+* Open the m2g workflow found in your local cloned copy of the m2g repo at subdirectory `library/workflows/m2g_lists.pipe`
+* Open the variables dialog from the wrench on the top right. The `inputDir` variable should be set to the location of your data. The `outputBaseDir` should be the location you would like derivates to be stored. The `sglabels` variable points to a file which contains a list of parcelations to process your data with. You can open this file on braincloud to see the atlases chosen, and if you wish to adjust the atlases used you can create a new file in your data directory containing paths to the atlases you wish to use (if they don't exist in m2g already, you will need to copy them as well like was done above). If you wish to process in a space other than the MNI152 template, then you will also need to provide new paths for the remaining variables to the atlas space you wish to use.
 * Press run
-* Find your graphs and other derivatives from the base directory you provided
+* Find your `graphs and other derivatives <http://m2g.io/tutorials/input_data.html#output-data>`_ from the base directory you provided
 * Enjoy!
 
 Using m2g in an AMI
