@@ -1,5 +1,5 @@
-Cloud Services
-**************
+Services
+********
 
 Using m2g on captive cluster
 ----------------------------
