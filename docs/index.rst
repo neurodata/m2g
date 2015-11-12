@@ -63,7 +63,7 @@
 
    sphinx/introduction
    sphinx/local_config
-   sphinx/cloud_computing
+   sphinx/services
    sphinx/ocp
    sphinx/faq
 
@@ -71,7 +71,7 @@
    :maxdepth: 1
    :caption: Tutorials
 
-   tutorials/input_data
+   tutorials/data
    tutorials/available_data
    tutorials/basic_usage
    tutorials/advanced_usage

@@ -1,5 +1,5 @@
 Data Formats
-*************
+************
 
 This is a draft input/output specfication for processing MR data.
 
