@@ -1,17 +1,17 @@
 Frequently Asked Questions (FAQ)
 ********************************
 
-This page will be updated to reflect commonly asked questions to provide a common reference point for questions and answers.  Users may also wish to search for answers on the general `OCP Support mailing list <https://groups.google.com/forum/#!forum/ocp-support>`_ archives.
+This page will be updated to reflect commonly asked questions to provide a common reference point for questions and answers.  Users may also wish to search for answers on the general `NeuroData Support Forum <https://groups.google.com/a/neurodata.io/forum/#!forum/support>`_.
 
-New questions should be asked on  `our support pages <ocp-support@googlegroups.com>`_.
+New questions should be asked to `support@neurodata.io <mailto:support@neurodata.io>`_.
 
 **How do I run the m2g pipeline?**
 
-Great question! To install the pipeline on your computer see the single node install, and for instructions on how to run it head over to the basic usage page and follow the tutorial there.
+To install the pipeline on your computer see the `single node install page <http://m2g.io/sphinx/local_config.html>`_, and for instructions on how to run it head over to the basic usage page and follow the tutorial there.
 
 **How do you assess the quality of your pipeline?**
 
-We assess the performance of the pipeline after each algorithm implemented through quality assurance measures and report these values after execution. The entire pipeline has been validated through a metric called test-retest (TRT) reliability which ensures that graphs estimated from an individual over multiple scans are more similar to themselves than they are to those estimated from other subjects. Our pipeline has a perfect TRT score on the datasets tested (42/42 matches on the Kennedy Kreiger Institute 2009 dataset).
+We assess the performance of the pipeline after each algorithm implemented through quality assurance measures and report these values after execution. The entire pipeline has been validated through a metric called test-retest (TRT) reliability which ensures that graphs estimated from an individual over multiple scans are more similar to themselves than they are to those estimated from other subjects.
 
 **How often is m2g updated?**
 

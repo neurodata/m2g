@@ -1,7 +1,7 @@
-OCP
-***
+NeuroData
+*********
 
-This project is part of the `Open Connectome Project <openconnecto.me/>`_.  The following information that applies across our projects.
+This project is part of `NeuroData <http://neurodata.io>`_.  The following information that applies across our projects.
 
 Contributing
 ~~~~~~~~~~~~
@@ -16,11 +16,5 @@ Style Guides
 ~~~~~~~~~~~~
 
  - `Python code complies with PEP-8 <http://legacy.python.org/dev/peps/pep-0008/>`_
- - m2g follows the `style guidelines <http://w.ocp.me/style>`_ used by the Open Connectome Project 
-
-OCP Support Forums
-~~~~~~~~~~~~~~~~~~
-
-Information on making a support request and archived questions and answers may be found `here <https://groups.google.com/forum/#!forum/ocp-support/>`_.  
 
   
