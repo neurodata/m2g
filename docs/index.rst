@@ -1,6 +1,6 @@
 .. M2G is kinda good.
 .. meta::
-   :description: Official documentation for M2G:  MR Images to Graphs 
+   :description: Official documentation for m2g:  MR Images to Graphs 
    :keywords: MRI, pipeline, neuroscience, diffusion, resting state
 .. title::
    m2g
@@ -55,7 +55,7 @@
 
 .. sidebar:: m2g Contact Us 
    
-   If you have questions about m2g, or have data to process, let us know:  m2g-support@openconnecto.me
+   If you have questions about m2g, or have data to process, let us know:  support@neurodata.io
    
 .. toctree::
    :maxdepth: 1
@@ -83,9 +83,7 @@
 
    api/functions
    api/modules
-   Web service <http://ocp.me/graph-services/c4/>
-   Gitter chatroom <https://gitter.im/openconnectome/m2g>
-   Mailing List <https://groups.google.com/a/ocp.me/forum/#!forum/m2g> 
+   Web service <http://openconnecto.me/graph-services/c4/>
    Github repo <https://github.com/openconnectome/m2g>
    Release Notes <https://github.com/openconnectome/m2g/releases/>
 

@@ -1,10 +1,6 @@
 Public Data
-***********
+===========
 
-The datasets we have available for download and processing are:
+We process all publicly available data we can find, and put the derivatives in our `graph servies <http://http://openconnecto.me/graph-services/>`_ engine as well as an s3 bucket which you can gain access to by contacting our user `support <mailto:support@neurodata.io>`_.
 
-	- `NKI <https://www.nitrc.org/frs/?group_id=404>`_
-	- `CORR <http://fcon_1000.projects.nitrc.org/indi/CoRR/html/swu_4.html>`_
-	- `KKI <https://www.nitrc.org/frs/?group_id=404>`_
 
-We are always welcoming more data, and would be happy to help you analyze yours.
