@@ -42,9 +42,9 @@ Output Data
 
 Data derivatives for processed brains include the following data, tagged with its quarterly release.  For each data product, users select the product, the atlas (parcellation scheme) and data format:
 
-1. The `reg` directory contains image aligned DTI and MPRAGE volumes to the atlas space (default is MNI152). These are in the compressed nifti format.
-2. The `fibers` directory contains fiber streamlines for the entire brain volume. These are in the MRIStudio format.
-3. The `bg` directory contains big graphs (i.e. voxelwise graphs) in the graphml format.
-4. The `sg` directory contains small graphs (i.e. parcellated by the input atlases) in the graphml format.
+1. The ``reg`` directory contains image aligned DTI and MPRAGE volumes to the atlas space (default is MNI152). These are in the compressed nifti format.
+2. The ``fibers`` directory contains fiber streamlines for the entire brain volume. These are in the MRIStudio format.
+3. The ``bg`` directory contains big graphs (i.e. voxelwise graphs) in the graphml format.
+4. The ``sg`` directory contains small graphs (i.e. parcellated by the input atlases) in the graphml format.
 
 Graphs range in size from O(10^1) to O(10^6), and intermediate products include graph invariants and processing artifacts (e.g., fibers, tensors).
