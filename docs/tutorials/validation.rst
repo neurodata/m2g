@@ -12,12 +12,12 @@ We assess the performance and timing of our pipeline across several datasets ran
 
 The following results are for version 1.1.1 of m2g.
 
-========= ===== ============ ============= ======== =============================
-Dataset   Scans Scans used   Reliability   Atlas    Runtime per subject per core
-========= ===== ============ ============= ======== =============================
-KKI2009   42    42           1.00000       Desikan  6h
-SWU4      454   392          0.97605       Desikan  5h43min
-========= ===== ============ ============= ======== =============================
+========= ===== ======================= ============= ======== =============================
+Dataset   Scans Fraction of scans used  Reliability   Atlas    Runtime per subject per core
+========= ===== ======================= ============= ======== =============================
+KKI2009   42    1.0                     1.00000       Desikan  6h
+SWU4      454   0.863                   0.97605       Desikan  5h43min
+========= ===== ======================= ============= ======== =============================
 
 The KKI2009 dataset performed perfectly under this metric. This is high quality data with 34 diffusion directions.
 
