@@ -40,11 +40,19 @@ For instance, this directory structure and naming convention can be seen for the
 Output Data
 ~~~~~~~~~~~
 
-Data derivatives for processed brains include the following data, tagged with its quarterly release.  For each data product, users select the product, the atlas (parcellation scheme) and data format:
+Data derivatives for processed brains include the following data. They are organized by the following directory structure containing data as explained below:
+
+.. code-block:: none
+
+  ./{dataset}/
+  ./{dataset}/derivatives/
+  ./{dataset}/derivatives/reg/
+  ./{dataset}/derivatives/fibers/
+  ./{dataset}/derivatives/bg/
+  ./{dataset}/derivatives/sg/
 
 1. The ``reg`` directory contains image aligned DTI and MPRAGE volumes to the atlas space (default is MNI152). These are in the compressed nifti format.
 2. The ``fibers`` directory contains fiber streamlines for the entire brain volume. These are in the MRIStudio format.
 3. The ``bg`` directory contains big graphs (i.e. voxelwise graphs) in the graphml format.
 4. The ``sg`` directory contains small graphs (i.e. parcellated by the input atlases) in the graphml format.
 
-Graphs range in size from O(10^1) to O(10^6), and intermediate products include graph invariants and processing artifacts (e.g., fibers, tensors).
