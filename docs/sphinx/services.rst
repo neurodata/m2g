@@ -5,7 +5,7 @@ Using m2g on captive cluster
 ----------------------------
 In order to run m2g on the captive cluster we run in house (braincloud1), we expect you to have the following requirements satisfied:
 
-1. A LONI client installed on your client computer that is the compatible version to our sever (Currently v6.0). Contact LONI and `request a copy <http://pipeline.loni.usc.edu/learn/contact/>`_, as this is not the most recent release and they don't publicly share older versions.
+1. A LONI client installed on your client computer that is the compatible version to our sever (Currently v6.0). Contact LONI and `request a copy <http://pipeline.loni.usc.edu/learn/contact/>`_, as this is not the most recent release and they don't publicly share older versions. If you are using a Mac, see this `faq page <http://pipeline.loni.usc.edu/get-started/faq/#InstallOSX>`_ for common issues.
 
 2. Your data organized in compliance with our `input specification <http://m2g.io/tutorials/data.html>`_
 
