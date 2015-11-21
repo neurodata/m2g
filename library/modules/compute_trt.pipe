@@ -8,7 +8,6 @@
                         <authors>
                                 <author fullName="Gregory Kiar" email="gkiar@jhu.edu" website="ocp.me" />
                         </authors>
-                        <tag />
                         <metadata>
                                 <data key="__creationDateKey" value="Mon Oct 26 22:39:19 EDT 2015" />
                         </metadata>
@@ -27,7 +26,7 @@
                         <input id="ComputeTRT_1.subjectdirectory" name="subject directory" required="true" enabled="true" order="2">
                                 <format type="String" cardinality="1" />
                                 <values>
-                                        <value>/brainstore/MR/KKI2009/derivatives/sg/MNI152_T1_1mm_desikan_adjusted</value>
+                                        <value>/brainstore/MR/m2g_demo/myouts/sg</value>
                                 </values>
                         </input>
                         <input id="ComputeTRT_1.rois" name="rois" required="false" enabled="true" order="3">
