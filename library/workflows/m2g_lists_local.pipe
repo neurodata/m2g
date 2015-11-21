@@ -46,7 +46,7 @@
                 <metadata>
                         <data key="__creationDateKey" value="Wed Apr 22 10:36:20 EDT 2015" />
                 </metadata>
-                <moduleGroup id="m2g_2" name="m2g" package="m2g" version="v1.1.1" icon="0" posX="70" posY="492" sourceCode="">
+                <moduleGroup id="m2g_2" name="m2g" package="m2g" version="v1.1.1" icon="0" posX="61" posY="249" sourceCode="">
                         <metadata>
                                 <data key="__creationDateKey" value="Mon Jun 29 13:32:43 EDT 2015" />
                         </metadata>
@@ -1508,7 +1508,7 @@ University, to negotiate a licence. Contact details are:
 innovation@isis.ox.ac.uk quoting reference BS/3497.</license>
                                 </module>
                         </moduleGroup>
-                        <module id="Fibers_1" name="Fibers" posX="29" posY="767" sourceCode="" location="pipeline://localhost//share0/m2g/packages/utils/batch_rename.py">
+                        <module id="Fibers_1" name="Fibers" icon="0" posX="29" posY="767" sourceCode="" location="pipeline://localhost//share0/m2g/packages/utils/batch_rename.py">
                                 <metadata>
                                         <data key="__creationDateKey" value="Tue Oct 27 20:54:13 EDT 2015" />
                                 </metadata>
@@ -1527,7 +1527,7 @@ innovation@isis.ox.ac.uk quoting reference BS/3497.</license>
                                         </format>
                                 </input>
                         </module>
-                        <module id="BigGraphs_1" name="Big Graphs" posX="194" posY="585" sourceCode="" location="pipeline://localhost//share0/m2g/packages/utils/batch_rename.py">
+                        <module id="BigGraphs_1" name="Big Graphs" icon="0" posX="194" posY="585" sourceCode="" location="pipeline://localhost//share0/m2g/packages/utils/batch_rename.py">
                                 <metadata>
                                         <data key="__creationDateKey" value="Tue Oct 27 20:54:13 EDT 2015" />
                                 </metadata>
@@ -1546,7 +1546,7 @@ innovation@isis.ox.ac.uk quoting reference BS/3497.</license>
                                         </format>
                                 </input>
                         </module>
-                        <module id="DTIinMNIspace_1" name="DTI in MNI space" posX="538" posY="533" rotation="1" sourceCode="" location="pipeline://localhost//share0/m2g/packages/utils/batch_rename.py">
+                        <module id="DTIinMNIspace_1" name="DTI in MNI space" icon="0" posX="538" posY="533" rotation="1" sourceCode="" location="pipeline://localhost//share0/m2g/packages/utils/batch_rename.py">
                                 <metadata>
                                         <data key="__creationDateKey" value="Tue Oct 27 20:54:13 EDT 2015" />
                                 </metadata>
@@ -1565,7 +1565,7 @@ innovation@isis.ox.ac.uk quoting reference BS/3497.</license>
                                         </format>
                                 </input>
                         </module>
-                        <module id="MPRAGEinMNISpace_1" name="MPRAGE in MNI Space" posX="547" posY="374" rotation="1" sourceCode="" location="pipeline://localhost//share0/m2g/packages/utils/batch_rename.py">
+                        <module id="MPRAGEinMNISpace_1" name="MPRAGE in MNI Space" icon="0" posX="547" posY="374" rotation="1" sourceCode="" location="pipeline://localhost//share0/m2g/packages/utils/batch_rename.py">
                                 <metadata>
                                         <data key="__creationDateKey" value="Tue Oct 27 20:54:13 EDT 2015" />
                                 </metadata>
@@ -1584,7 +1584,7 @@ innovation@isis.ox.ac.uk quoting reference BS/3497.</license>
                                         </format>
                                 </input>
                         </module>
-                        <module id="SmallGraphs_1" name="Small Graphs" posX="112" posY="671" sourceCode="" location="pipeline://localhost//share0/m2g/packages/utils/batch_rename.py">
+                        <module id="SmallGraphs_1" name="Small Graphs" icon="0" posX="112" posY="671" sourceCode="" location="pipeline://localhost//share0/m2g/packages/utils/batch_rename.py">
                                 <metadata>
                                         <data key="__creationDateKey" value="Tue Oct 27 20:54:13 EDT 2015" />
                                 </metadata>
@@ -1604,7 +1604,7 @@ innovation@isis.ox.ac.uk quoting reference BS/3497.</license>
                                 </input>
                         </module>
                 </moduleGroup>
-                <module id="setupm2g_1" name="setup m2g" package="m2g" posX="41" posY="287" sourceCode="" location="pipeline://localhost//share0/m2g/packages/utils/m2g_setup.py">
+                <module id="setupm2g_1" name="setup m2g" package="m2g" icon="0" posX="31" posY="44" sourceCode="" location="pipeline://localhost//share0/m2g/packages/utils/m2g_setup.py">
                         <metadata>
                                 <data key="__creationDateKey" value="Thu Oct 22 15:52:26 EDT 2015" />
                         </metadata>
@@ -1706,25 +1706,16 @@ innovation@isis.ox.ac.uk quoting reference BS/3497.</license>
                         <variable name="bglabels" order="3">/share0/m2g/data/Atlas/MNI152_T1_1mm_brain_incremented.nii</variable>
                 </variables>
                 <annotations visible="true">
-                        <annotation width="200" height="100" posX="1131" posY="95" background="153,255,255,255" foreground="0,0,0,255" expanded="true" type="text" name="Welcome to m2g!&#xA;m2g is a multi-modal mri processing pipeline which estimates macroscale human connectomes from brain image data.&#xA;&#xA;Prior to running...&#xA;Be sure to edit the variables and make sure that the atlas files have properly been set for your system. All of the variables defined contain the location of the described file. In the case of the data variables, all of the files are in fact list files which themselves list the locations of the data.&#xA;&#xA;Data Variables&#xA;Inputs&#xA;dti - raw 4D DTI volume&#xA;mprage - raw MPRAGE volume&#xA;bval - raw bvalues file corresponding to DTI volume&#xA;grad - raw bvectors/gradients file corresponding to DTI volume&#xA;Outputs&#xA;aligned - processed aligned DTI volume to atlas space&#xA;fibers - processed fiber streamlines&#xA;sg - processed small graphs&#xA;bg - processed big graphs&#xA;&#xA;Atlas Variables&#xA;MNI - MNI atlas&#xA;MNImask - MNI brain mask&#xA;sglabels - MNI labels for generating small graphs&#xA;bglabels - MNI labels for generating big graphs">
+                        <annotation width="200" height="100" posX="487" posY="33" background="153,255,255,255" foreground="0,0,0,255" expanded="true" type="text" name="Welcome to m2g!&#xA;m2g is a multi-modal mri processing pipeline which estimates mesoscale human connectomes from brain image data.&#xA;&#xA;Prior to running...&#xA;1. Ensure your data is in our input specification.&#xA;2. Edit the variables to point to your data.&#xA;3. Create or modify an atlas listfile for the downsampled parcelations you would like.&#xA;&#xA;Data Variables&#xA;inputDir - Location of your raw image data&#xA;outputBaseDir - Location you wish derivatives to be stored&#xA;&#xA;Atlas Variables&#xA;MNI - MNI atlas&#xA;MNImask - MNI brain mask&#xA;sglabels - MNI labels for generating small graphs&#xA;bglabels - MNI labels for generating big graphs">
                                 <styles>
                                         <style name="Welcome to m2g!&#xA;$0" fontSize="11" isBold="true" />
-                                        <style name="m2g is a multi-modal mri processing pipeline which estimates macroscale human connectomes from brain image data.&#xA;$16" fontSize="11" />
-                                        <style name="&#xA;Prior to running...$129" fontSize="11" isBold="true" />
-                                        <style name="&#xA;Be sure to edit the variables and make sure that the atlas files have properly been set for your system. All of the variables defined contain the location of the described file. In the case of the data variables, all of the files are in fact list files which themselves list the locations of the data.&#xA;&#xA;$149" fontSize="11" />
-                                        <style name="Data Variables&#xA;$453" fontSize="11" isBold="true" />
-                                        <style name="Inputs$468" fontSize="11" isItalic="true" />
-                                        <style name="&#xA;$474" fontSize="11" isBold="true" />
-                                        <style name="dti - raw 4D DTI volume&#xA;mprage - raw MPRAGE volume&#xA;bval - raw bvalues file corresponding to DTI volume&#xA;grad - raw bvectors/gradients file corresponding to DTI volume$475" fontSize="11" />
-                                        <style name="&#xA;Outputs$640" fontSize="11" isItalic="true" />
-                                        <style name="&#xA;aligned - processed aligned DTI volume to atlas space&#xA;fibers - processed fiber streamlines&#xA;sg - processed small graphs&#xA;bg - processed big graphs&#xA;$648" fontSize="11" />
-                                        <style name="&#xA;Atlas Variables&#xA;$794" fontSize="11" isBold="true" />
-                                        <style name="MNI - MNI atlas&#xA;MNImask - MNI brain mask&#xA;sglabels - MNI labels for generating small graphs&#xA;bglabels - MNI labels for generating big graphs$811" fontSize="11" />
-                                </styles>
-                        </annotation>
-                        <annotation width="200" height="100" posX="866" posY="425" background="255,255,153,100" foreground="0,0,0,255" expanded="true" type="text" name="variables to set:&#xA;&#xA;- Big Graph Atlas (bglabels)&#xA;- MNI image (MNI)&#xA;- MNI Brain Mask (MNImask)&#xA;- Atlas File (sglabels)">
-                                <styles>
-                                        <style name="variables to set:&#xA;&#xA;- Big Graph Atlas (bglabels)&#xA;- MNI image (MNI)&#xA;- MNI Brain Mask (MNImask)&#xA;- Atlas File (sglabels)$0" fontSize="11" />
+                                        <style name="m2g is a multi-modal mri processing pipeline which estimates mesoscale human connectomes from brain image data.&#xA;$16" fontSize="11" />
+                                        <style name="&#xA;Prior to running...&#xA;$128" fontSize="11" isBold="true" />
+                                        <style name="1. Ensure your data is in our input specification.&#xA;2. Edit the variables to point to your data.&#xA;3. Create or modify an atlas listfile for the downsampled parcelations you would like.&#xA;&#xA;$149" fontSize="11" />
+                                        <style name="Data Variables&#xA;$333" fontSize="11" isBold="true" />
+                                        <style name="inputDir - Location of your raw image data&#xA;outputBaseDir - Location you wish derivatives to be stored$348" fontSize="11" />
+                                        <style name="&#xA;&#xA;Atlas Variables&#xA;$449" fontSize="11" isBold="true" />
+                                        <style name="MNI - MNI atlas&#xA;MNImask - MNI brain mask&#xA;sglabels - MNI labels for generating small graphs&#xA;bglabels - MNI labels for generating big graphs$467" fontSize="11" />
                                 </styles>
                         </annotation>
                 </annotations>
