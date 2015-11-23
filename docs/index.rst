@@ -62,7 +62,8 @@
    :caption: Documentation
 
    sphinx/introduction
-   sphinx/local_config
+   tutorials/available_data
+   tutorials/sample_data
    sphinx/services
    sphinx/ocp
    sphinx/faq
@@ -72,7 +73,7 @@
    :caption: Tutorials
 
    tutorials/data
-   tutorials/available_data
+   sphinx/install
    tutorials/basic_usage
    tutorials/advanced_usage
    tutorials/validation

@@ -32,7 +32,7 @@ Computing Reliability on your Data
 
 In order to assess the reliability of your data derivates from m2g, you can use the following procedure. Note that this only applies for test retest datasets (i.e. each subject scanned at least twice).
 
-* Run m2g on your data with atlas(es) of your choosing.
+* Clone the m2g repository to your computer
 * Locate the base directory of your small graphs
 * Run the reliability script in the m2g repo like as follows:
 
