@@ -20,6 +20,9 @@
 
 compute_rdf <- function(dist, ids, scans=2) {
   N <- dim(dist)[1]
+  if (dim(dist)[1] != dim(dist)[2]) {
+    stop('Input must be a square matrix.')
+  }
   rdf <- array(NaN, N*(scans-1))
   count <- 1
   for (i in 1:N) {
