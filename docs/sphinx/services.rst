@@ -1,44 +1,6 @@
 Services
 ********
 
-Using m2g on our captive cluster 
-----------------------------
-In order to run m2g on the captive cluster we run in house (braincloud1), we expect you to have the following three requirements satisfied.
-
-1. A LONI client installed on your client computer that is the compatible version to our sever (Currently v6.0). Contact LONI and `request a copy <http://pipeline.loni.usc.edu/learn/contact/>`_, as this is not the most recent release and they don't publicly share older versions. If you are using a Mac, see this `faq page <http://pipeline.loni.usc.edu/get-started/faq/#InstallOSX>`_ for common issues;
-
-2. Your data organized in compliance with our `input specification <http://m2g.io/tutorials/data.html>`_;
-
-3. An account on our cluster. If you don't have an account and would like one, you can email `support@neurodata.io <mailto:support@neurodata.io>`_ to see if you're eligible.
-
-**Moving your data:**
-
-* scp/rsync or equivalently move your data to ``braincloud1:/brainstore/MR/data``.
-* ensure that the data directory is readable and writeable by user pipeline. An example of this is done below.
-
-.. code-block:: none
-
-  rsync -rv --progress /path/to/m2g_demo ${user}@braincloud1.cs.jhu.edu:/brainstore/MR/m2g_demo
-  ssh ${user}@braincloud1.cs.jhu.edu
-  cd /brainstore/MR/m2g_demo
-  chmod -R 775 ./
-
-**Processing your data:**
-
-* On your computer, open the LONI client and connect to ``braincloud1.cs.jhu.edu`` using your server login credentials by clicking on the icon in the bottom right of LONI Pipeline.
-* Use ``File>Open`` to open the m2g workflow found in your local cloned copy of the m2g repo, located at ``library/workflows/m2g_lists.pipe``.
-* Click the wrench in the top right and select variables dialog.
-
-  * The ``inputDir`` variable should be set to the location of your data.
-
-  * The ``outputBaseDir`` should be ``inputDir``, replacing ``raw`` with ``derivatives-yyyymmdd``.
-
-  * The ``sglabels`` variable points to a file which contains a list of parcelations to process your data with. You can open this file on braincloud to see the atlases chosen, and if you wish to adjust the atlases used you can create a new file in your data directory containing paths to the atlases you wish to use (if they don't exist in m2g already, you will need to copy them as well like was done above). If you wish to process in a space other than the MNI152 template, then you will also need to provide new paths for the remaining variables to the atlas space you wish to use.
-* Press run.
-* Find your graphs and other derivatives organized according to our spec in the output base directory you provided.
-* If you used the demo data, compare your results to mine (found at ``/brainstore/MR/m2g_demo/myouts/``) using `graph explorer <http://128.220.176.8/Graph-Explorer/shiny/>`_. For these small graphs, in order (113_1, 113_2, 142_1, 142_2), your edge count should be similar to: 1353508, 1371382, 1068374, and 1115822 weighted edges (i.e. sum of weights for all edges), respectively.
-* Enjoy!
-
 Using m2g in an AMI
 -------------------
 Before beginning this guide, please ensure that you have the following:
@@ -98,7 +60,45 @@ Before beginning this guide, please ensure that you have the following:
   * The ``sglabels`` variable points to a file which contains a list of parcelations to process your data with. You can open this file on braincloud to see the atlases chosen, and if you wish to adjust the atlases used you can create a new file in your data directory containing paths to the atlases you wish to use (if they don't exist in m2g already, you will need to copy them as well like was done above). If you wish to process in a space other than the MNI152 template, then you will also need to provide new paths for the remaining variables to the atlas space you wish to use.
 * Press run.
 * Find your graphs and other derivatives organized according to our spec in the output base directory you provided.
-* If you used the demo data, compare your results to mine (found at ``/brainstore/MR/m2g_demo/myouts/``) using `graph explorer <http://128.220.176.8/Graph-Explorer/shiny/>`_. For these small graphs, in order (113_1, 113_2, 142_1, 142_2), your edge count should be similar to: 1353508, 1371382, 1068374, and 1115822 weighted edges (i.e. sum of weights for all edges), respectively.
+* If you used the demo data, compare your results to `ours <http://m2g.io/tutorials/sample_data.html>`_.
+* Enjoy!
+
+Using m2g on our captive cluster 
+----------------------------
+In order to run m2g on the captive cluster we run in house (braincloud1), we expect you to have the following three requirements satisfied.
+
+1. A LONI client installed on your client computer that is the compatible version to our sever (Currently v6.0). Contact LONI and `request a copy <http://pipeline.loni.usc.edu/learn/contact/>`_, as this is not the most recent release and they don't publicly share older versions. If you are using a Mac, see this `faq page <http://pipeline.loni.usc.edu/get-started/faq/#InstallOSX>`_ for common issues;
+
+2. Your data organized in compliance with our `input specification <http://m2g.io/tutorials/data.html>`_;
+
+3. An account on our cluster. If you don't have an account and would like one, you can email `support@neurodata.io <mailto:support@neurodata.io>`_ to see if you're eligible.
+
+**Moving your data:**
+
+* scp/rsync or equivalently move your data to ``braincloud1:/brainstore/MR/data``.
+* ensure that the data directory is readable and writeable by user pipeline. An example of this is done below.
+
+.. code-block:: none
+
+  rsync -rv --progress /path/to/m2g_demo ${user}@braincloud1.cs.jhu.edu:/brainstore/MR/m2g_demo
+  ssh ${user}@braincloud1.cs.jhu.edu
+  cd /brainstore/MR/m2g_demo
+  chmod -R 775 ./
+
+**Processing your data:**
+
+* On your computer, open the LONI client and connect to ``braincloud1.cs.jhu.edu`` using your server login credentials by clicking on the icon in the bottom right of LONI Pipeline.
+* Use ``File>Open`` to open the m2g workflow found in your local cloned copy of the m2g repo, located at ``library/workflows/m2g_lists.pipe``.
+* Click the wrench in the top right and select variables dialog.
+
+  * The ``inputDir`` variable should be set to the location of your data.
+
+  * The ``outputBaseDir`` should be ``inputDir``, replacing ``raw`` with ``derivatives-yyyymmdd``.
+
+  * The ``sglabels`` variable points to a file which contains a list of parcelations to process your data with. You can open this file on braincloud to see the atlases chosen, and if you wish to adjust the atlases used you can create a new file in your data directory containing paths to the atlases you wish to use (if they don't exist in m2g already, you will need to copy them as well like was done above). If you wish to process in a space other than the MNI152 template, then you will also need to provide new paths for the remaining variables to the atlas space you wish to use.
+* Press run.
+* Find your graphs and other derivatives organized according to our spec in the output base directory you provided.
+* If you used the demo data, compare your results to `ours <http://m2g.io/tutorials/sample_data.html>`_.
 * Enjoy!
 
 Downloading Graphs
