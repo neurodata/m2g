@@ -26,7 +26,7 @@ from time import time
 from computation.utils.cmdline import parse_dict
 
 def genGraph(infname, data_atlas_fn, outfname, bigGraph=False, \
-    outformat="graphml", numfibers=0, centroids=True, graph_attrs={}, **atlases):
+    outformat="graphml", numfibers=0, centroids=True, graph_attrs={}, compress=False, **atlases):
   """
 	Generate a sparse igraph from an MRI file based on input and output names.
   
@@ -58,6 +58,8 @@ def genGraph(infname, data_atlas_fn, outfname, bigGraph=False, \
 					- Dict with graph attributes to be added with key=attr_name, value=attr_value.
 			atlases: [dictionary] (default = {})
 					- Dict with key=atlas_fn, value=region_name_fn
+			compress: [boolean] (default = False)
+					- Flag for compressing graphs (useful for processing large quantities of big graphs)
   """
 
   start = time()
@@ -103,7 +105,7 @@ def genGraph(infname, data_atlas_fn, outfname, bigGraph=False, \
   # Done adding edges
   fbrgraph.complete(centroids, graph_attrs, atlases)
 
-  fbrgraph.saveToIgraph(outfname, gformat=outformat)
+  fbrgraph.saveToIgraph(outfname, gformat=outformat, compress=compress)
 
   del fbrgraph
   print "\nGraph building complete in %.3f secs" % (time() - start)
@@ -133,7 +135,8 @@ def main ():
       for multiple e.g 'attr1:value1' 'attr2:value2'")
   parser.add_argument("--numfib", "-n", action="store", type=int, default=0, \
       help="The number of fibers to process before exit")
-
+  parser.add_argument("--compress", "-c", action="store_true", default=False, \
+      help="Indicate if graph compression is desired")
   result = parser.parse_args()
 
   # Add atlases to a dict
@@ -147,7 +150,7 @@ def main ():
   result.graph_attrs = parse_dict(result.graph_attrs)
 
   genGraph(result.fbrfile, result.data_atlas, result.output, result.isbig, 
-      result.outformat, result.numfib, not result.centroids, result.graph_attrs, **atlas_d)
+      result.outformat, result.numfib, not result.centroids, result.graph_attrs, result.compress, **atlas_d)
 
 if __name__ == "__main__":
   main()

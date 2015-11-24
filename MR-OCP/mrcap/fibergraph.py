@@ -80,8 +80,9 @@ class _FiberGraph(object):
     self.graph["DOI"] = "10.1109/GlobalSIP.2013.6736878" # Migraine paper
 
     print "Deleting zero-degree nodes..."
-    zero_deg_nodes = np.where( np.array(self.graph.degree()) == 0 )[0]
-    self.graph.delete_vertices(zero_deg_nodes)
+    #zero_deg_nodes = np.where( np.array(self.graph.degree()) == 0 )[0]
+    #self.graph.delete_vertices(zero_deg_nodes)
+    self.graph.delete_vertices(0) #delete just 0 region
 
     # Annotate graph with ecount and vcount for ingest speed
     self.graph["vcount"] = self.graph.vcount()
@@ -91,7 +92,7 @@ class _FiberGraph(object):
     print self.graph.summary()
     print
 
-  def saveToIgraph(self, filename, gformat="graphml"):
+  def saveToIgraph(self, filename, gformat="graphml", compress=False):
     """
     Save igraph to disk in specified format
 
@@ -108,6 +109,10 @@ class _FiberGraph(object):
 
     print "Saving graph '%s' to disk ... " % filename
     self.graph.save(filename, format=gformat)
+    if compress:
+      from os import system
+      system('zip '+splitext(filename)[0]+' '+filename)
+      system('rm -rf '+filename)
 
   def loadFromIgraph(self, filename, gformat="graphml"):
     """

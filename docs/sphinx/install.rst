@@ -1,11 +1,7 @@
-Single Node Configuration
-*************************
+Setup
+*****
 
-m2g requires a number of standard packages, principally python2.7, igraph, numpy, scipy, Oracle Java, R, LONI Pipeline, FSL, and Camino.  Specific installation instructions are provided here for Centos 6.X.  
-
-This was tested using a Centos 6 AMI (CentOS 6 x86_64 (2014_09_29) (ami-bc8131d4)).  We recommend attaching external storage using Elastic Block Storage.  The configuration details of an EC2 instance are beyond the scope of this tutorial; more information can be found at aws.amazon.com.  This installation guide should work equally well on a standalone machine.  Many of the dependencies can be satisfied with Anaconda as an alternative.
-
-We recommend Centos6.x for its compatibility with LONI Pipeline.
+m2g requires the following packages:  python2.7, igraph, numpy, scipy, Oracle Java, R, LONI Pipeline, FSL, and Camino. Specific installation instructions are provided here for Centos 6.X. We do not currently provide support for other operating systems.
 
 Basic Package Update and Install
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
