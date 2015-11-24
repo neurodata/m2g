@@ -52,7 +52,7 @@ def make_tens(dti, grad, bval, mask, scheme, dti_bfloat, tensors): #, fa, md, ei
 					- List of tensors for each voxel in the source DTI image.
 	"""
 	# Create scheme file
-	system('pointset2scheme -inputfile '+grad+' -bvalue '+bval+' -outputfile '+scheme)
+	system('fsl2scheme -bvecfile '+grad+' -bvalfile '+bval+' -bscale 1 > '+scheme)
 	
 	# Maps the DTI image to a Camino compatible Bfloat format
 	system('image2voxel -4dimage '+dti+' -outputfile '+dti_bfloat)
@@ -72,8 +72,8 @@ def make_tens(dti, grad, bval, mask, scheme, dti_bfloat, tensors): #, fa, md, ei
 def main():
   parser = ArgumentParser(description="")
   parser.add_argument("dti", action="store", help="The DTI image, not skull stripped (.nii)")
-  parser.add_argument("grad", action="store", help="The gradient directions corresponding to the DTI image (.grad)")
-  parser.add_argument("bval", action="store", help="The bvalue corresponding to the DTI image  (default 700)")
+  parser.add_argument("grad", action="store", help="The gradient directions corresponding to the DTI image (bvec)")
+  parser.add_argument("bval", action="store", help="The bvalue file corresponding to the DTI image  (bval)")
   parser.add_argument("mask", action="store", help="The brain mask of the DTI image (.nii, .nii.gz)") 
   parser.add_argument("scheme", action="store", help="The scheme file (.scheme)")
   parser.add_argument("dti_bfloat", action="store", help="The Bfloat format equivalent of the DTI image (.Bfloat)")
