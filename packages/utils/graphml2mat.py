@@ -39,6 +39,11 @@ from copy import copy
 def graphml2mat(ingraph, outgraph, prune=False):
 	ing = Graph.Read_GraphML(ingraph)
 	
+	if sum(ing.es()[:]['weight']) < 500000:
+		print 'bad graph? ecount= ' , sum(ing.es()[:]['weight'])
+		print 'filename= ', ingraph
+		return;
+
 	#currently being done in graphgen so don't need to delete vertex 0
 	#ing.vs[0].delete() 
 	if prune:
@@ -51,7 +56,7 @@ def graphml2mat(ingraph, outgraph, prune=False):
 		ing.vs[i].delete()
 	
 	outg = lil_matrix((ing.vcount(), ing.vcount()))
-
+	#import pdb; pdb.set_trace()
 	for e in ing.es:
 		outg[e.source, e.target] = e['weight']
 		outg[e.target, e.source] = e['weight'] #since edges are undirected add both ways
