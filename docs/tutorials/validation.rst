@@ -43,4 +43,4 @@ In order to assess the reliability of your data derivates from m2g, you can use 
 * The returned text file will provide statistics about the outlier graphs in your set as well as the reliability of your data
 * The returned figure is a heat map of the difference between pairs of braingraphs. Lower heat indicates higher similarity
 
-Example outputs from this reliability script as well as the graphs used to generate them can be found `here <http://openconnecto.me/data/public/MR/m2g_v1_1_1/KKI2009/derivatives/sg/>`_. Note that more processed graphs can be obtained from our `graph services <http://mrbrain.cs.jhu.edu/graph-services/welcome/>`_, and those linked above are our nightly build.
+Example outputs from this reliability script as well as the graphs used to generate them can be found `here <http://openconnecto.me/data/public/MR/m2g_v1_1_1/KKI2009/derivatives/sg/>`_. Note that more processed graphs can be obtained from our `graph services <http://openconnecto.me/graph-services/welcome/>`_, and those linked above are our nightly build.
