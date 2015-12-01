@@ -64,7 +64,7 @@ Before beginning this guide, please ensure that you have the following:
 * Enjoy!
 
 Using m2g on our captive cluster 
-----------------------------
+--------------------------------
 In order to run m2g on the captive cluster we run in house (braincloud1), we expect you to have the following three requirements satisfied.
 
 1. A LONI client installed on your client computer that is the compatible version to our sever (Currently v6.0). Contact LONI and `request a copy <http://pipeline.loni.usc.edu/learn/contact/>`_, as this is not the most recent release and they don't publicly share older versions. If you are using a Mac, see this `faq page <http://pipeline.loni.usc.edu/get-started/faq/#InstallOSX>`_ for common issues;
@@ -104,5 +104,5 @@ In order to run m2g on the captive cluster we run in house (braincloud1), we exp
 Downloading Graphs
 ------------------
 
-Our graph service engine, `MROCP <http://mrbrain.cs.jhu.edu/graph-services/welcome/>`_, hosts graph data of a variety of species and scales, as well as enables downsampling and type conversion of graphs.
+Our graph service engine, `MROCP <http://openconnecto.me/graph-services/welcome/>`_, hosts graph data of a variety of species and scales, as well as enables downsampling and type conversion of graphs.
 
