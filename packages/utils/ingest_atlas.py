@@ -23,42 +23,57 @@ import nilearn.image as nl
 import nibabel as nb
 import numpy as np
 import os
+import matplotlib.pyplot as plt
 from argparse import ArgumentParser
 
-def ingest(raw, ingested, template, noaff, qc=False):
+def ingest(raw, ingested, template, qc=False):
   
   template_im = nb.load(template)
   raw_im = nb.load(raw)
-  if qc:
-    #TODO print coronal slice in real space, and image space, overlaid on template
-    pass
-
+  
   ingested_im = nl.resample_img(raw_im, target_affine=template_im.get_affine(), target_shape=template_im.get_data().shape, interpolation='nearest')
-  if qc:
-    #TODO print coronal slice in real space, and image space, overlaid on template
-    pass
-
+  
   nb.save(ingested_im, ingested)
-  ingested_noaff = nb.Nifti1Image(ingested_im.get_data(), affine=np.eye(4), header=ingested_im.get_header())
+  
+  print "here"
   if qc:
-    #TODO print coronal slice in real space, and image space, overlaid on template
-    pass
+    print "here 2"
+    t = template_im.get_data()
+    dim1 = t.shape
+    r = raw_im.get_data()
+    dim2 = r.shape
+    i = ingested_im.get_data()
+    dim3 = i.shape
+    name = os.path.splitext(os.path.splitext(ingested)[0])[0]+'_QC.png'
+    print name
+    show_slices([ t[dim1[0]/2,:,:], t[:,dim1[1]/2,:], t[:,:,dim1[2]/2] ],
+                [ r[dim2[0]/2,:,:], r[:,dim2[1]/2,:], r[:,:,dim2[2]/2] ],
+                [ i[dim3[0]/2,:,:], i[:,dim3[1]/2,:], i[:,:,dim3[2]/2] ],
+                name)
 
-  nb.save(ingested_noaff, noaff)
- 
+
+def show_slices(template, raw, ing, name):
+  assert(len(template) == len(raw))
+  assert(len(template) == len(ing))
+  dmax = np.max([raw[0].max(), raw[1].max(), raw[2].max()])
+  fig, axes = plt.subplots(1, len(template))
+  for i, temp in enumerate(template):
+    axes[i].imshow(template[i].T, cmap="Greys", origin="lower")
+    axes[i].hold(True)
+    axes[i].imshow(raw[i].T, cmap="cool", alpha=0.7, origin="lower", vmin=1, vmax=dmax)
+    axes[i].imshow(ing[i].T, cmap="Set1", alpha=0.7, origin="lower", vmin=1, vmax=dmax)
+  fig.savefig(name)
+
 
 def main():
   parser = ArgumentParser(description="Transforms an atlas from original space into template space")
   parser.add_argument("raw", action="store", help="The un-ingested atlas labels")
   parser.add_argument("ingested", action="store", help="The ingested atlas labels output location")
   parser.add_argument("template", action="store", help="The template space to which you are ingesting")
-  parser.add_argument("-q","--qc", action="store", type=bool, help="Flag indicating whether or not you want qc")
+  parser.add_argument("--qc", "-q", action="store_true", default=False, help="Flag indicating whether or not you want QC")
   result = parser.parse_args()
 
-  #Strips extension (twice in case .nii.gz) and creates noaff file name
-  noaff = os.path.splitext(os.path.splitext(result.ingested)[0])[0]+'_noaff.nii.gz'
-
-  ingest(result.raw, result.ingested, result.template, noaff, result.qc)
+  ingest(result.raw, result.ingested, result.template, result.qc)
 
 if __name__ == "__main__":
   main()
