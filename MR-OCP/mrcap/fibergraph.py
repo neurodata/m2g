@@ -58,7 +58,8 @@ class _FiberGraph(object):
     roi_edges = itertools.combinations((fiber.get_vids(self.rois)),2)
 
     for list_item in roi_edges:
-      self.edge_dict[tuple(sorted(list_item))] += 1
+      int_list = tuple([ int(node) for node in list_item ]
+      self.edge_dict[tuple(sorted(int_list))] += 1
 
   def complete (self):
     """
