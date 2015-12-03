@@ -35,9 +35,7 @@ def ingest(raw, ingested, template, qc=False):
   
   nb.save(ingested_im, ingested)
   
-  print "here"
   if qc:
-    print "here 2"
     t = template_im.get_data()
     dim1 = t.shape
     r = raw_im.get_data()
@@ -45,7 +43,6 @@ def ingest(raw, ingested, template, qc=False):
     i = ingested_im.get_data()
     dim3 = i.shape
     name = os.path.splitext(os.path.splitext(ingested)[0])[0]+'_QC.png'
-    print name
     show_slices([ t[dim1[0]/2,:,:], t[:,dim1[1]/2,:], t[:,:,dim1[2]/2] ],
                 [ r[dim2[0]/2,:,:], r[:,dim2[1]/2,:], r[:,:,dim2[2]/2] ],
                 [ i[dim3[0]/2,:,:], i[:,dim3[1]/2,:], i[:,:,dim3[2]/2] ],
@@ -58,10 +55,10 @@ def show_slices(template, raw, ing, name):
   dmax = np.max([raw[0].max(), raw[1].max(), raw[2].max()])
   fig, axes = plt.subplots(1, len(template))
   for i, temp in enumerate(template):
-    axes[i].imshow(template[i].T, cmap="Greys", origin="lower")
+    axes[i].imshow(template[i].T, cmap="gray", origin="lower")
     axes[i].hold(True)
     axes[i].imshow(raw[i].T, cmap="cool", alpha=0.7, origin="lower", vmin=1, vmax=dmax)
-    axes[i].imshow(ing[i].T, cmap="Set1", alpha=0.7, origin="lower", vmin=1, vmax=dmax)
+    axes[i].imshow(ing[i].T, cmap="gist_stern", alpha=0.7, origin="lower", vmin=1, vmax=dmax)
   fig.savefig(name)
 
 
