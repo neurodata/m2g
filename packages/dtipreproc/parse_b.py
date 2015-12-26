@@ -24,6 +24,7 @@
 
 from argparse import ArgumentParser
 from numpy import where, loadtxt, savetxt
+import numpy as np
 from os import system
 
 def read_bvals(b_in):
@@ -47,7 +48,12 @@ def read_bvals(b_in):
 					- Acts as a flag indicating whether multiple B0 scans exist within the set.
 	"""
 	b = loadtxt(b_in)
-	b0 = int(where(b==0)[0][0])
+	loc = where(b==0)
+	if np.array(loc).size:
+		b0 = int(loc[0][0])
+	else:
+		b0 = int(where(b==min(b))[0][0])
+  
 	bvalue = int(b[where(b!=0)[0][0]])
 	lenb =  len(where(b==0)[0])
 	if lenb > 1:
