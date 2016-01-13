@@ -13,6 +13,7 @@
                 <connection source="setupm2g_1.rmriListFile" sink="m2g_2.dataabsolutepathandname_3" />
                 <connection source="setupm2g_1.bgListFile" sink="m2g_2.dataabsolutepathandname_4" />
                 <connection source="setupm2g_1.fiberListFile" sink="m2g_2.dataabsolutepathandname_5" />
+                <connection source="setupm2g_1.tensorListFile" sink="m2g_2.dataabsolutepathandname_6" />
                 <connection source="ParseB_1.B0location" sink="ExtractB0_1.DTIB-values" />
                 <connection source="ParseB_1.B0location" sink="EddyCorrect_1.Referencevolume" />
                 <connection source="Registration_1.Output" sink="DiffusionProcessing_1.DTIImage" />
@@ -36,6 +37,7 @@
                 <connection source="Registration_1.Output" sink="DTIinMNIspace_1.loniin" />
                 <connection source="Registration_1.Output_2" sink="MPRAGEinMNISpace_1.loniin" />
                 <connection source="DiffusionProcessing_1.graphfile" sink="SmallGraphs_1.loniin" />
+                <connection source="DiffusionProcessing_1.DTItensors" sink="Tensors_1.loniin" />
         </connections>
         <icons>
                 <icon id="2" value="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&#xA;AElFTkSuQmCC" />
@@ -46,7 +48,7 @@
                 <metadata>
                         <data key="__creationDateKey" value="Wed Apr 22 10:36:20 EDT 2015" />
                 </metadata>
-                <moduleGroup id="m2g_2" name="m2g" package="m2g" version="v1.1.1" icon="0" posX="76" posY="273" sourceCode="">
+                <moduleGroup id="m2g_2" name="m2g" package="m2g" version="v1.1.1" icon="0" posX="95" posY="312" sourceCode="">
                         <metadata>
                                 <data key="__creationDateKey" value="Mon Jun 29 13:32:43 EDT 2015" />
                         </metadata>
@@ -57,11 +59,6 @@
                         <input link="DiffusionPre-Processing_1.Bvectors" id="m2g_2.Bvectors" name="B vectors" order="4" />
                         <input description="Specifies the input reference image." link="Registration_1.Reference_3" id="m2g_2.MPRageImage" name="MPRage Image" order="5" />
                         <input description="Specifies the input volume file path." link="Registration_1.Input_3" id="m2g_2.MPRageImage_2" name="MPRage Image" order="6" />
-                        <output description="Specifies the output volume file path." link="Registration_1.Output" id="m2g_2.Output" name="Output" order="7" />
-                        <output link="DiffusionProcessing_1.fiberoutfile" id="m2g_2.fiberoutfile" name="fiber outfile" order="8" />
-                        <output link="DiffusionProcessing_1.graphfile" id="m2g_2.graphfile" name="graph file" order="9" />
-                        <output link="DiffusionProcessing_1.graphfile_2" id="m2g_2.graphfile_2" name="graph file" order="10" />
-                        <output description="Specifies the output volume file path." link="Registration_1.Output_2" id="m2g_2.Output_2" name="Output" order="11" />
                         <input link="DiffusionProcessing_1.BrainMask" id="m2g_2.BrainMask" name="Brain Mask" order="12" />
                         <input link="DiffusionProcessing_1.BrainMask_2" id="m2g_2.BrainMask_2" name="Brain Mask" order="13" />
                         <input description="Specifies the input reference image." link="Registration_1.Reference" id="m2g_2.ReferenceMNIImage" name="Reference (MNI Image)" order="14" />
@@ -72,7 +69,8 @@
                         <input link="MPRAGEinMNISpace_1.dataabsolutepathandname" id="m2g_2.dataabsolutepathandname_3" name="data absolute path and name" order="19" />
                         <input link="BigGraphs_1.dataabsolutepathandname" id="m2g_2.dataabsolutepathandname_4" name="data absolute path and name" order="20" />
                         <input link="Fibers_1.dataabsolutepathandname" id="m2g_2.dataabsolutepathandname_5" name="data absolute path and name" order="21" />
-                        <moduleGroup id="DiffusionPre-Processing_1" name="Diffusion Pre-Processing" package="m2g" version="v1.1.1" icon="0" posX="70" posY="46" sourceCode="">
+                        <input link="Tensors_1.dataabsolutepathandname" id="m2g_2.dataabsolutepathandname_6" name="data absolute path and name" order="20" />
+                        <moduleGroup id="DiffusionPre-Processing_1" name="Diffusion Pre-Processing" package="m2g" version="v1.1.1" icon="0" posX="92" posY="40" sourceCode="">
                                 <metadata>
                                         <data key="__creationDateKey" value="Wed Jun 24 11:49:50 EDT 2015" />
                                 </metadata>
@@ -85,7 +83,7 @@
                                 <input link="ParseB_1.Bvectors" id="DiffusionPre-Processing_1.Bvectors" name="B vectors" order="8" />
                                 <output link="ParseB_1.OutputBvectors" id="DiffusionPre-Processing_1.OutputBvectors" name="Output B vectors" order="8" />
                                 <output link="ParseB_1.NumberofB0s" id="DiffusionPre-Processing_1.NumberofB0s" name="Number of B0s" order="9" />
-                                <module id="ExtractB0_1" name="Extract B0" package="m2g" icon="0" posX="386" posY="154" sourceCode="" location="pipeline://braincloud1.cs.jhu.edu//share0/m2g/src/m2g/packages/dtipreproc/extract_b0.py">
+                                <module id="ExtractB0_1" name="Extract B0" package="m2g" icon="0" posX="325" posY="144" sourceCode="" location="pipeline://braincloud1.cs.jhu.edu//share0/m2g/src/m2g/packages/dtipreproc/extract_b0.py">
                                         <metadata>
                                                 <data key="__creationDateKey" value="Mon Apr 20 18:09:36 EDT 2015" />
                                         </metadata>
@@ -111,7 +109,7 @@
                                                 <format type="Flow Control" cardinality="1" />
                                         </output>
                                 </module>
-                                <module id="ParseB_1" name="Parse B" package="m2g" icon="0" posX="173" posY="61" rotation="1" sourceCode="" location="pipeline://braincloud1.cs.jhu.edu//share0/m2g/src/m2g/packages/dtipreproc/parse_b.py">
+                                <module id="ParseB_1" name="Parse B" package="m2g" icon="0" posX="112" posY="51" rotation="1" sourceCode="" location="pipeline://braincloud1.cs.jhu.edu//share0/m2g/src/m2g/packages/dtipreproc/parse_b.py">
                                         <metadata>
                                                 <data key="__creationDateKey" value="Fri May 08 09:13:39 EDT 2015" />
                                         </metadata>
@@ -149,7 +147,7 @@
                                                 <stringExtract source="both" rule="stringMatch" startString="Multiple B0s (1=no; 2=yes)=(" endString=")" caseSensitive="false" />
                                         </output>
                                 </module>
-                                <module id="EddyCorrect_1" name="Eddy Correct" package="FSL" version="4.1.4" icon="1" posX="81" posY="354" sourceCode="" location="pipeline://braincloud1.cs.jhu.edu//share0/m2g/src/fsl/bin/eddy_correct" executableVersion="4.1.4">
+                                <module id="EddyCorrect_1" name="Eddy Correct" package="FSL" version="4.1.4" icon="1" posX="20" posY="344" sourceCode="" location="pipeline://braincloud1.cs.jhu.edu//share0/m2g/src/fsl/bin/eddy_correct" executableVersion="4.1.4">
                                         <authors>
                                                 <author fullName="D. Cornelius Hojatkashani" email="cornelius.hojatkashani@loni.ucla.edu " website="http://loni.ucla.edu " />
                                         </authors>
@@ -248,7 +246,7 @@ University, to negotiate a licence. Contact details are:
 innovation@isis.ox.ac.uk quoting reference BS/3497.</license>
                                 </module>
                         </moduleGroup>
-                        <moduleGroup id="DiffusionProcessing_1" name="Diffusion Processing" package="m2g" icon="0" posX="32" posY="446" sourceCode="">
+                        <moduleGroup id="DiffusionProcessing_1" name="Diffusion Processing" package="m2g" icon="0" posX="54" posY="440" sourceCode="">
                                 <metadata>
                                         <data key="__creationDateKey" value="Wed Apr 22 09:19:06 EDT 2015" />
                                 </metadata>
@@ -263,7 +261,8 @@ innovation@isis.ox.ac.uk quoting reference BS/3497.</license>
                                 <input link="TensorEstimation_1.flow" id="DiffusionProcessing_1.flow" name="flow" order="10" />
                                 <input link="TensorEstimation_1.Bvectors" id="DiffusionProcessing_1.Bvectors" name="B vectors" order="10" />
                                 <input link="TensorEstimation_1.Bvalues" id="DiffusionProcessing_1.Bvalues" name="B values" order="10" />
-                                <module id="TensorEstimation_1" name="Tensor Estimation" package="m2g" icon="0" posX="63" posY="101" sourceCode="" location="pipeline://braincloud1.cs.jhu.edu//share0/m2g/src/m2g/packages/tractography/tensor_gen.py" gridVariables="-l virtual_free=60G">
+                                <output link="TensorEstimation_1.DTItensors" id="DiffusionProcessing_1.DTItensors" name="DTI tensors" order="11" />
+                                <module id="TensorEstimation_1" name="Tensor Estimation" package="m2g" icon="0" posX="51" posY="88" sourceCode="" location="pipeline://braincloud1.cs.jhu.edu//share0/m2g/src/m2g/packages/tractography/tensor_gen.py" gridVariables="-l virtual_free=60G">
                                         <metadata>
                                                 <data key="__creationDateKey" value="Fri Jan 09 11:38:39 EST 2015" />
                                         </metadata>
@@ -348,7 +347,7 @@ innovation@isis.ox.ac.uk quoting reference BS/3497.</license>
                                                 </format>
                                         </input>
                                 </module>
-                                <module id="FiberTractography_1" name="Fiber Tractography" package="m2g" icon="0" posX="230" posY="220" rotation="1" sourceCode="" location="pipeline://braincloud1.cs.jhu.edu//share0/m2g/src/m2g/packages/tractography/fiber_gen.py" gridVariables="-l virtual_free=8G">
+                                <module id="FiberTractography_1" name="Fiber Tractography" package="m2g" icon="0" posX="218" posY="207" rotation="1" sourceCode="" location="pipeline://braincloud1.cs.jhu.edu//share0/m2g/src/m2g/packages/tractography/fiber_gen.py" gridVariables="-l virtual_free=8G">
                                         <metadata>
                                                 <data key="__creationDateKey" value="Fri Jan 09 13:07:20 EST 2015" />
                                         </metadata>
@@ -404,7 +403,7 @@ innovation@isis.ox.ac.uk quoting reference BS/3497.</license>
                                                 </format>
                                         </output>
                                 </module>
-                                <module id="FiberConvert_1" name="Fiber Convert" package="m2g" icon="0" posX="519" posY="219" rotation="1" sourceCode="" location="pipeline://braincloud1.cs.jhu.edu//share0/m2g/src/m2g/packages/tractography/fiber_convert.py">
+                                <module id="FiberConvert_1" name="Fiber Convert" package="m2g" icon="0" posX="507" posY="206" rotation="1" sourceCode="" location="pipeline://braincloud1.cs.jhu.edu//share0/m2g/src/m2g/packages/tractography/fiber_convert.py">
                                         <metadata>
                                                 <data key="__creationDateKey" value="Sun Jan 11 21:38:32 EST 2015" />
                                         </metadata>
@@ -426,7 +425,7 @@ innovation@isis.ox.ac.uk quoting reference BS/3497.</license>
                                                 <format type="Flow Control" cardinality="1" />
                                         </output>
                                 </module>
-                                <module id="SmallGraphGeneration_1" name="Small Graph Generation" package="m2g" icon="0" posX="819" posY="216" rotation="1" sourceCode="" location="pipeline://braincloud1.cs.jhu.edu//share0/m2g/src/m2g/MR-OCP/mrcap/gengraph.py" gridVariables="-l virtual_free=8G">
+                                <module id="SmallGraphGeneration_1" name="Small Graph Generation" package="m2g" icon="0" posX="807" posY="203" rotation="1" sourceCode="" location="pipeline://braincloud1.cs.jhu.edu//share0/m2g/src/m2g/MR-OCP/mrcap/gengraph.py" gridVariables="-l virtual_free=8G">
                                         <metadata>
                                                 <data key="__creationDateKey" value="Sun Jan 11 17:53:43 EST 2015" />
                                         </metadata>
@@ -464,7 +463,7 @@ innovation@isis.ox.ac.uk quoting reference BS/3497.</license>
                                                 <format type="Flow Control" cardinality="1" />
                                         </output>
                                 </module>
-                                <module id="BigGraphGeneration_1" name="Big Graph Generation" package="m2g" icon="0" posX="956" posY="382" rotation="1" sourceCode="" location="pipeline://braincloud1.cs.jhu.edu//share0/m2g/src/m2g/MR-OCP/mrcap/gengraph.py" gridVariables="-l virtual_free=60G">
+                                <module id="BigGraphGeneration_1" name="Big Graph Generation" package="m2g" icon="0" posX="944" posY="369" rotation="1" sourceCode="" location="pipeline://braincloud1.cs.jhu.edu//share0/m2g/src/m2g/MR-OCP/mrcap/gengraph.py" gridVariables="-l virtual_free=60G">
                                         <metadata>
                                                 <data key="__creationDateKey" value="Sun Jan 11 17:53:43 EST 2015" />
                                         </metadata>
@@ -505,7 +504,7 @@ innovation@isis.ox.ac.uk quoting reference BS/3497.</license>
                                         </input>
                                 </module>
                         </moduleGroup>
-                        <moduleGroup id="Registration_1" name="Registration" package="m2g" icon="1" posX="288" posY="261" sourceCode="">
+                        <moduleGroup id="Registration_1" name="Registration" package="m2g" icon="1" posX="310" posY="255" sourceCode="">
                                 <metadata>
                                         <data key="__creationDateKey" value="Wed Jun 24 11:51:06 EDT 2015" />
                                 </metadata>
@@ -520,7 +519,7 @@ innovation@isis.ox.ac.uk quoting reference BS/3497.</license>
                                 <input description="Specifies the input volume file path." link="FLIRTApplyxfm_1.Input" id="Registration_1.Input_2" name="Input" order="9" />
                                 <input description="Specifies the input volume file path." link="FLIRT_2.Input" id="Registration_1.Input_3" name="Input" order="10" />
                                 <output description="Specifies the output volume file path." link="FLIRT_2.Output" id="Registration_1.Output_2" name="Output" order="11" />
-                                <module id="FLIRT_1" name="FLIRT" package="FSL" version="4.1.4" description="FLIRT (FMRIB's Linear Image Registration Tool) is a fully automated robust and accurate tool for linear (affine) intra- and inter-modal brain image registration. " icon="1" posX="69" posY="293" sourceCode="" location="pipeline://braincloud1.cs.jhu.edu//share0/m2g/src/fsl/bin/flirt" executableVersion="4.1.4">
+                                <module id="FLIRT_1" name="FLIRT" package="FSL" version="4.1.4" description="FLIRT (FMRIB's Linear Image Registration Tool) is a fully automated robust and accurate tool for linear (affine) intra- and inter-modal brain image registration. " icon="1" posX="39" posY="109" sourceCode="" location="pipeline://braincloud1.cs.jhu.edu//share0/m2g/src/fsl/bin/flirt" executableVersion="4.1.4">
                                         <authors>
                                                 <author fullName="D. Cornelius Hojatkashani" email="cornelius.hojatkashani@loni.ucla.edu " website="http://loni.ucla.edu " />
                                         </authors>
@@ -812,7 +811,7 @@ Innovation Limited ("Isis"), the technology transfer company of the
 University, to negotiate a licence. Contact details are:
 innovation@isis.ox.ac.uk quoting reference BS/3497.</license>
                                 </module>
-                                <module id="FLIRT_2" name="FLIRT" package="FSL" version="4.1.4" description="FLIRT (FMRIB's Linear Image Registration Tool) is a fully automated robust and accurate tool for linear (affine) intra- and inter-modal brain image registration. " icon="1" posX="433" posY="298" sourceCode="" location="pipeline://braincloud1.cs.jhu.edu//share0/m2g/src/fsl/bin/flirt" executableVersion="4.1.4">
+                                <module id="FLIRT_2" name="FLIRT" package="FSL" version="4.1.4" description="FLIRT (FMRIB's Linear Image Registration Tool) is a fully automated robust and accurate tool for linear (affine) intra- and inter-modal brain image registration. " icon="1" posX="403" posY="114" sourceCode="" location="pipeline://braincloud1.cs.jhu.edu//share0/m2g/src/fsl/bin/flirt" executableVersion="4.1.4">
                                         <authors>
                                                 <author fullName="D. Cornelius Hojatkashani" email="cornelius.hojatkashani@loni.ucla.edu " website="http://loni.ucla.edu " />
                                         </authors>
@@ -1108,7 +1107,7 @@ Innovation Limited ("Isis"), the technology transfer company of the
 University, to negotiate a licence. Contact details are:
 innovation@isis.ox.ac.uk quoting reference BS/3497.</license>
                                 </module>
-                                <module id="FLIRTApplyxfm_1" name="FLIRT Applyxfm" package="FSL" version="4.1.4" description="FLIRT (FMRIB's Linear Image Registration Tool) is a fully automated robust and accurate tool for linear (affine) intra- and inter-modal brain image registration. " icon="1" posX="853" posY="466" rotation="1" sourceCode="" location="pipeline://braincloud1.cs.jhu.edu//share0/m2g/src/fsl/bin/flirt" executableVersion="4.1.4">
+                                <module id="FLIRTApplyxfm_1" name="FLIRT Applyxfm" package="FSL" version="4.1.4" description="FLIRT (FMRIB's Linear Image Registration Tool) is a fully automated robust and accurate tool for linear (affine) intra- and inter-modal brain image registration. " icon="1" posX="823" posY="282" rotation="1" sourceCode="" location="pipeline://braincloud1.cs.jhu.edu//share0/m2g/src/fsl/bin/flirt" executableVersion="4.1.4">
                                         <authors>
                                                 <author fullName="D. Cornelius Hojatkashani" email="cornelius.hojatkashani@loni.ucla.edu " website="http://loni.ucla.edu " />
                                         </authors>
@@ -1404,7 +1403,7 @@ Innovation Limited ("Isis"), the technology transfer company of the
 University, to negotiate a licence. Contact details are:
 innovation@isis.ox.ac.uk quoting reference BS/3497.</license>
                                 </module>
-                                <module id="ConvertXFMnii.gz_1" name="Convert XFM (nii.gz)" package="FSL" version="4.1.4" description="Usage: convert_xfm [options] &lt;input-matrix-filename&gt;&#xA;  e.g. convert_xfm -omat &lt;outmat&gt; -inverse &lt;inmat&gt;&#xA;       convert_xfm -omat &lt;outmat_AtoC&gt; -concat &lt;mat_BtoC&gt; &lt;mat_AtoB&gt;&#xA;&#xA;       convert_xfm -ref &lt;refvol&gt; -in &lt;invol&gt; -omedx &lt;medxmat&gt; &lt;flirtmat&gt;&#xA;&#xA;  Available options are:&#xA;        -ref &lt;refvol&gt;                      (no default)&#xA;        -in &lt;inputvol&gt;                     (no default)&#xA;        -omat &lt;matrix-filename&gt;            (4x4 ascii format)&#xA;        -omedx &lt;matrix-filename&gt;           (MEDx format)&#xA;        -xfmtype {a,m,u,g,s,t}             (Specify MEDx xfm format)&#xA;                      a,m = AlignLinearReslice (default)&#xA;                      u   = UserTransformation&#xA;                      g   = GenericReslice&#xA;                      s   = ShadowTransform&#xA;                      t   = IntoTalairachSpace&#xA;        -concat &lt;second-matrix-filename&gt;&#xA;        -fixscaleskew &lt;second-matrix-filename&gt;&#xA;        -middlevol &lt;intermediary-volume-filename&gt;&#xA;        -inverse                           (Reference image must be the one originally used)&#xA;        -matonly                           (Use no volumes or MEDx support - default)&#xA;        -help&#xA;" icon="2" posX="587" posY="481" rotation="1" sourceCode="" location="pipeline://braincloud1.cs.jhu.edu//share0/m2g/src/fsl/bin/convert_xfm" executableVersion="4.1.4">
+                                <module id="ConvertXFMnii.gz_1" name="Convert XFM (nii.gz)" package="FSL" version="4.1.4" description="Usage: convert_xfm [options] &lt;input-matrix-filename&gt;&#xA;  e.g. convert_xfm -omat &lt;outmat&gt; -inverse &lt;inmat&gt;&#xA;       convert_xfm -omat &lt;outmat_AtoC&gt; -concat &lt;mat_BtoC&gt; &lt;mat_AtoB&gt;&#xA;&#xA;       convert_xfm -ref &lt;refvol&gt; -in &lt;invol&gt; -omedx &lt;medxmat&gt; &lt;flirtmat&gt;&#xA;&#xA;  Available options are:&#xA;        -ref &lt;refvol&gt;                      (no default)&#xA;        -in &lt;inputvol&gt;                     (no default)&#xA;        -omat &lt;matrix-filename&gt;            (4x4 ascii format)&#xA;        -omedx &lt;matrix-filename&gt;           (MEDx format)&#xA;        -xfmtype {a,m,u,g,s,t}             (Specify MEDx xfm format)&#xA;                      a,m = AlignLinearReslice (default)&#xA;                      u   = UserTransformation&#xA;                      g   = GenericReslice&#xA;                      s   = ShadowTransform&#xA;                      t   = IntoTalairachSpace&#xA;        -concat &lt;second-matrix-filename&gt;&#xA;        -fixscaleskew &lt;second-matrix-filename&gt;&#xA;        -middlevol &lt;intermediary-volume-filename&gt;&#xA;        -inverse                           (Reference image must be the one originally used)&#xA;        -matonly                           (Use no volumes or MEDx support - default)&#xA;        -help&#xA;" icon="2" posX="557" posY="297" rotation="1" sourceCode="" location="pipeline://braincloud1.cs.jhu.edu//share0/m2g/src/fsl/bin/convert_xfm" executableVersion="4.1.4">
                                         <authors>
                                                 <author fullName="D. Cornelius Hojatkashani" email="cornelius.hojatkashani@loni.ucla.edu" website="" />
                                         </authors>
@@ -1511,7 +1510,7 @@ University, to negotiate a licence. Contact details are:
 innovation@isis.ox.ac.uk quoting reference BS/3497.</license>
                                 </module>
                         </moduleGroup>
-                        <module id="Fibers_1" name="Fibers" icon="0" posX="29" posY="767" sourceCode="" location="pipeline://braincloud1.cs.jhu.edu//share0/m2g/src/m2g/packages/utils/batch_rename.py">
+                        <module id="Fibers_1" name="Fibers" icon="0" posX="27" posY="778" sourceCode="" location="pipeline://braincloud1.cs.jhu.edu//share0/m2g/src/m2g/packages/utils/batch_rename.py">
                                 <metadata>
                                         <data key="__creationDateKey" value="Tue Oct 27 20:54:13 EDT 2015" />
                                 </metadata>
@@ -1530,7 +1529,7 @@ innovation@isis.ox.ac.uk quoting reference BS/3497.</license>
                                         </format>
                                 </input>
                         </module>
-                        <module id="BigGraphs_1" name="Big Graphs" icon="0" posX="194" posY="585" sourceCode="" location="pipeline://braincloud1.cs.jhu.edu//share0/m2g/src/m2g/packages/utils/batch_rename.py">
+                        <module id="BigGraphs_1" name="Big Graphs" icon="0" posX="233" posY="585" rotation="1" sourceCode="" location="pipeline://braincloud1.cs.jhu.edu//share0/m2g/src/m2g/packages/utils/batch_rename.py">
                                 <metadata>
                                         <data key="__creationDateKey" value="Tue Oct 27 20:54:13 EDT 2015" />
                                 </metadata>
@@ -1549,7 +1548,7 @@ innovation@isis.ox.ac.uk quoting reference BS/3497.</license>
                                         </format>
                                 </input>
                         </module>
-                        <module id="DTIinMNIspace_1" name="DTI in MNI space" icon="0" posX="538" posY="532" rotation="1" sourceCode="" location="pipeline://braincloud1.cs.jhu.edu//share0/m2g/src/m2g/packages/utils/batch_rename.py">
+                        <module id="DTIinMNIspace_1" name="DTI in MNI space" icon="0" posX="560" posY="526" rotation="1" sourceCode="" location="pipeline://braincloud1.cs.jhu.edu//share0/m2g/src/m2g/packages/utils/batch_rename.py">
                                 <metadata>
                                         <data key="__creationDateKey" value="Tue Oct 27 20:54:13 EDT 2015" />
                                 </metadata>
@@ -1568,7 +1567,7 @@ innovation@isis.ox.ac.uk quoting reference BS/3497.</license>
                                         </format>
                                 </input>
                         </module>
-                        <module id="MPRAGEinMNISpace_1" name="MPRAGE in MNI Space" icon="0" posX="547" posY="374" rotation="1" sourceCode="" location="pipeline://braincloud1.cs.jhu.edu//share0/m2g/src/m2g/packages/utils/batch_rename.py">
+                        <module id="MPRAGEinMNISpace_1" name="MPRAGE in MNI Space" icon="0" posX="569" posY="368" rotation="1" sourceCode="" location="pipeline://braincloud1.cs.jhu.edu//share0/m2g/src/m2g/packages/utils/batch_rename.py">
                                 <metadata>
                                         <data key="__creationDateKey" value="Tue Oct 27 20:54:13 EDT 2015" />
                                 </metadata>
@@ -1587,7 +1586,7 @@ innovation@isis.ox.ac.uk quoting reference BS/3497.</license>
                                         </format>
                                 </input>
                         </module>
-                        <module id="SmallGraphs_1" name="Small Graphs" icon="0" posX="112" posY="671" sourceCode="" location="pipeline://braincloud1.cs.jhu.edu//share0/m2g/src/m2g/packages/utils/batch_rename.py">
+                        <module id="SmallGraphs_1" name="Small Graphs" icon="0" posX="153" posY="683" rotation="1" sourceCode="" location="pipeline://braincloud1.cs.jhu.edu//share0/m2g/src/m2g/packages/utils/batch_rename.py">
                                 <metadata>
                                         <data key="__creationDateKey" value="Tue Oct 27 20:54:13 EDT 2015" />
                                 </metadata>
@@ -1606,8 +1605,28 @@ innovation@isis.ox.ac.uk quoting reference BS/3497.</license>
                                         </format>
                                 </input>
                         </module>
+                        <module id="Tensors_1" name="Tensors" icon="0" posX="325" posY="522" rotation="1" sourceCode="" location="pipeline://braincloud1.cs.jhu.edu//share0/m2g/src/m2g/packages/utils/batch_rename.py">
+                                <metadata>
+                                        <data key="__creationDateKey" value="Tue Oct 27 20:54:13 EDT 2015" />
+                                </metadata>
+                                <input id="Tensors_1.dataabsolutepathandname" name="data absolute path and name" required="false" enabled="true" order="0">
+                                        <format type="File" cardinality="1">
+                                                <fileTypes>
+                                                        <filetype name="list file" extension="list" description="list of things to be processed" />
+                                                </fileTypes>
+                                        </format>
+                                </input>
+                                <input id="Tensors_1.loniin" name="loni in" required="false" enabled="true" order="1">
+                                        <format type="File" cardinality="-1">
+                                                <fileTypes>
+                                                        <filetype name="File" extension="" description="Any type of data file" />
+                                                </fileTypes>
+                                        </format>
+                                </input>
+                        </module>
                 </moduleGroup>
-                <module id="setupm2g_1" name="setup m2g" package="m2g" icon="0" posX="47" posY="68" sourceCode="" location="pipeline://braincloud1.cs.jhu.edu//share0/m2g/src/m2g/packages/utils/m2g_setup.py">
+                <module id="setupm2g_1" name="setup m2g" package="m2g" icon="0" posX="66" posY="107" sourceCode="" location="pipeline://braincloud1.cs.jhu.edu//share0/m2g/src/m2g/packages/utils/m2g_setup.py">
+                        <tag />
                         <metadata>
                                 <data key="__creationDateKey" value="Thu Oct 22 15:52:26 EDT 2015" />
                         </metadata>
@@ -1651,7 +1670,7 @@ innovation@isis.ox.ac.uk quoting reference BS/3497.</license>
                                         </fileTypes>
                                 </format>
                         </output>
-                        <input id="setupm2g_1.atlasIn" name="atlasIn" required="false" enabled="true" order="11">
+                        <input id="setupm2g_1.atlasIn" name="atlasIn" required="false" enabled="true" order="12">
                                 <format type="File" cardinality="-1">
                                         <fileTypes>
                                                 <filetype name="list file" extension="list" description="list of things to be processed" />
@@ -1699,17 +1718,24 @@ innovation@isis.ox.ac.uk quoting reference BS/3497.</license>
                                         </fileTypes>
                                 </format>
                         </output>
+                        <output id="setupm2g_1.tensorListFile" name="tensorListFile" required="false" enabled="true" order="11">
+                                <format type="File" cardinality="1">
+                                        <fileTypes>
+                                                <filetype name="list file" extension="list" description="list of things to be processed" />
+                                        </fileTypes>
+                                </format>
+                        </output>
                 </module>
                 <variables>
                         <variable name="MNI">/share0/m2g/src/m2g/data/Atlas/MNI152_T1_1mm.nii.gz</variable>
-                        <variable name="outputBaseDir">/brainstore/MR/m2g_demo/derivatives_yyyymmdd</variable>
+                        <variable name="outputBaseDir">/brainstore/MR/m2g_demo/gk_startup_test_3</variable>
                         <variable name="inputDir">/brainstore/MR/m2g_demo/raw</variable>
-                        <variable name="sglabels">/brainstore/MR/m2g_demo/atlases.list</variable>
+                        <variable name="sglabels">/brainstore/MR/atlases/atlases.list</variable>
                         <variable name="MNImask">/share0/m2g/src/m2g/data/Atlas/MNI152_T1_1mm_brain_mask.nii</variable>
                         <variable name="bglabels">/share0/m2g/src/m2g/data/Atlas/MNI152_T1_1mm_brain_incremented.nii</variable>
                 </variables>
                 <annotations visible="true">
-                        <annotation width="200" height="100" posX="496" posY="21" background="153,255,255,255" foreground="0,0,0,255" expanded="true" type="text" name="Welcome to m2g!&#xA;m2g is a multi-modal mri processing pipeline which estimates mesoscale human connectomes from brain image data.&#xA;&#xA;Prior to running...&#xA;1. Ensure your data is in our input specification.&#xA;2. Edit the variables to point to your data.&#xA;3. Create or modify an atlas listfile for the downsampled parcelations you would like.&#xA;&#xA;Data Variables&#xA;inputDir - Location of your raw image data&#xA;outputBaseDir - Location you wish derivatives to be stored&#xA;&#xA;Atlas Variables&#xA;MNI - MNI atlas&#xA;MNImask - MNI brain mask&#xA;sglabels - MNI labels for generating small graphs&#xA;bglabels - MNI labels for generating big graphs">
+                        <annotation width="328" height="287" posX="527" posY="40" background="153,255,255,255" foreground="0,0,0,255" expanded="true" type="text" name="Welcome to m2g!&#xA;m2g is a multi-modal mri processing pipeline which estimates mesoscale human connectomes from brain image data.&#xA;&#xA;Prior to running...&#xA;1. Ensure your data is in our input specification.&#xA;2. Edit the variables to point to your data.&#xA;3. Create or modify an atlas listfile for the downsampled parcelations you would like.&#xA;&#xA;Data Variables&#xA;inputDir - Location of your raw image data&#xA;outputBaseDir - Location you wish derivatives to be stored&#xA;&#xA;Atlas Variables&#xA;MNI - MNI atlas&#xA;MNImask - MNI brain mask&#xA;sglabels - MNI labels for generating small graphs&#xA;bglabels - MNI labels for generating big graphs">
                                 <styles>
                                         <style name="Welcome to m2g!&#xA;$0" fontSize="11" isBold="true" />
                                         <style name="m2g is a multi-modal mri processing pipeline which estimates mesoscale human connectomes from brain image data.&#xA;$16" fontSize="11" />
