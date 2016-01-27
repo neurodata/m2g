@@ -38,6 +38,7 @@ def main():
                         brain space in the atlas")
     parser.add_argument("labels", action="store", help="Nifti labels of regions
                         in atlas space")
+    parser.add_argument("graph", action="store", help="Produced graphml file")
     result = parser.parse_args()
 
     startup(result.dti, result.bval, result.bvec, result.mprage, result.atlas,
