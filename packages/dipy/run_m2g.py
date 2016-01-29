@@ -27,16 +27,16 @@ def startup():
 
 
 def main():
-    parser = ArgumentParser(description="This is an end-to-end connectome
+    parser = ArgumentParser(description="This is an end-to-end connectome \
                             estimation pipeline from sMRI and DTI images")
     parser.add_argument("dti", action="store", help="Nifti DTI image stack")
     parser.add_argument("bval", action="store", help="DTI scanner b-values")
     parser.add_argument("bvec", action="store", help="DTI scanner b-vectors")
     parser.add_argument("mprage", action="store", help="Nifti T1 MRI image")
     parser.add_argument("atlas", action="store", help="Nifti T1 MRI atlas")
-    parser.add_argument("mask", action="store", help="Nifti binary mask of
+    parser.add_argument("mask", action="store", help="Nifti binary mask of \
                         brain space in the atlas")
-    parser.add_argument("labels", action="store", help="Nifti labels of regions
+    parser.add_argument("labels", action="store", help="Nifti labels of regions \
                         in atlas space")
     parser.add_argument("graph", action="store", help="Produced graphml file")
     result = parser.parse_args()
