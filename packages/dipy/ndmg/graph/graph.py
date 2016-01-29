@@ -97,7 +97,7 @@ class graph(object):
         Returns the graph object created
         """
         try:
-            return self.graph
+            return self.g
         except AttributeError:
             print "Error: the graph has not yet been defined."
             pass
@@ -116,7 +116,7 @@ class graph(object):
                 fmt:
                     - Output graph format
         """
-        self.graph.save(graphname, format=fmt)
+        self.g.save(graphname, format=fmt)
         pass
 
     def summary(self):
@@ -124,16 +124,16 @@ class graph(object):
         User friendly wrapping and display of graph properties
         """
         print "Graph attributes: " +\
-              ("None" if len(self.graph.attributes()) is 0
-               else ", ".join([str(x) for x in self.graph.attributes()]))
+              ("None" if len(self.g.attributes()) is 0
+               else ", ".join([str(x) for x in self.g.attributes()]))
 
-        print "Number of nodes: " + str(self.graph.vcount())
+        print "Number of nodes: " + str(self.g.vcount())
         print "Node attributes: " +\
-              ("None" if len(self.graph.vs.attributes()) is 0
-               else ", ".join([str(x) for x in self.graph.vs.attributes()]))
+              ("None" if len(self.g.vs.attributes()) is 0
+               else ", ".join([str(x) for x in self.g.vs.attributes()]))
 
-        print "Number of edges: " + str(self.graph.ecount())
+        print "Number of edges: " + str(self.g.ecount())
         print "Edge attributes: " +\
-              ("None" if len(self.graph.es.attributes()) is 0
-               else ", ".join([str(x) for x in self.graph.es.attributes()]))
+              ("None" if len(self.g.es.attributes()) is 0
+               else ", ".join([str(x) for x in self.g.es.attributes()]))
         pass
