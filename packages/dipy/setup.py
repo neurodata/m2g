@@ -4,18 +4,26 @@ import ndmg
 VERSION = ndmg.version
 
 setup(
-    name='ndmg',
-    packages=['ndmg'],
-    version=VERSION,
-    description='Neuro Data MRI to Graphs Pipeline',
-    author='Greg Kiar and Will Gray Roncal',
-    author_email='gkiar@jhu.edu, wgr@jhu.edu',
-    url='https://github.com/openconnectome/ndmg',
-    download_url='https://github.com/openconnectome/ndmg/tarball/' + VERSION,
-    keywords=[
+    name = 'ndmg',
+    packages = [
+        'ndmg',
+        'ndmg.preproc',
+        'ndmg.register',
+        'ndmg.track',
+        'ndmg.graph',
+        'ndmg.stats',
+        'ndmg.utils'
+    ],
+    version = VERSION,
+    description = 'Neuro Data MRI to Graphs Pipeline',
+    author = 'Greg Kiar and Will Gray Roncal',
+    author_email = 'gkiar@jhu.edu, wgr@jhu.edu',
+    url = 'https://github.com/openconnectome/ndmg',
+    download_url = 'https://github.com/openconnectome/ndmg/tarball/' + VERSION,
+    keywords = [
         'connectome',
         'mri',
         'pipeline'
     ],
-    classifiers=[],
+    classifiers = [],
 )

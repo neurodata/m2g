@@ -19,7 +19,6 @@
 # Created by Will Gray Roncal on 2016-01-28.
 # Email: wgr@jhu.edu
 
-from argparse import ArgumentParser
 from itertools import combinations
 import numpy as np
 import nibabel as nb
