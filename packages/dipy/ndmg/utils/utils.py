@@ -19,7 +19,6 @@
 # Created by Will Gray Roncal on 2016-01-28.
 # Email: wgr@jhu.edu
 
-from argparse import ArgumentParser
 from itertools import combinations
 from datetime import datetime
 from dipy.io import read_bvals_bvecs, read_bvec_file
@@ -29,14 +28,14 @@ import nibabel as nib
 
 
 class utils(object):
-    def __init__(self, attr=None):
+    def __init__(self):
         """
         Utility functions for m2g
         """
 
         pass
 
-    def load_bval_bvec(self, fbval, fbvec, dti_file, attr=None):
+    def load_bval_bvec(self, fbval, fbvec, dti_file):
         """
         Takes bval and bvec files and produces a structure in dipy format
 
@@ -65,10 +64,9 @@ class utils(object):
         gtab = gradient_table(bvals, bvecs, atol=0.01)
 
         print gtab.info
+        return gtab
 
-        pass
-
-    def get_b0(self, gtab, dti_data, attr=None):
+    def get_b0(self, gtab, dti_data):
         """
         Takes bval and bvec files and produces a structure in dipy format
 
@@ -81,5 +79,4 @@ class utils(object):
 
         b0 = np.where(gtab.b0s_mask)[0]
         b0_vol = np.squeeze(data[:, :, :, b0])  # if more than 1, use first one
-
-        pass
+        return b0_vol
