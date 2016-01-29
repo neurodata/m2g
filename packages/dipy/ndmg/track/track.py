@@ -31,7 +31,7 @@ from dipy.data import get_sphere
 
 
 class track(object):
-    def __init__(self, attr=None):
+    def __init__(self):
         """
         Initializes the graph with nodes corresponding to the number of ROIs
 
@@ -50,7 +50,7 @@ class track(object):
         # WGR:TODO rewrite help text
         pass
 
-    def compute_tensors(self, dti_vol, atlas_file, gtab, attr=None):
+    def compute_tensors(self, dti_vol, atlas_file, gtab):
         # WGR:TODO figure out how to organize tensor options and formats
         # WGR:TODO figure out how to deal with files on disk vs. in workspace
 
@@ -128,11 +128,10 @@ class track(object):
         stopping_values = np.zeros(csd_peaks.peak_values.shape)
         stopping_values[:] = FA[..., None]
         print datetime.now() - startTime
-
         pass
 
     def fibers_eudx(self, stopping_values, peak_indices, seeds,
-                    odf_vertices, cutoff, attr=None):
+                    odf_vertices, cutoff):
         # WGR:TODO figure out how to organize tensor options and formats
         # WGR:TODO figure out how to deal with files on disk vs. in workspace
 
@@ -158,5 +157,3 @@ class track(object):
         streamlines = [streamline for streamline in streamline_generator]
 
         return streamlines
-
-        pass
