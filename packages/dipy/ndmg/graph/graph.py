@@ -102,7 +102,6 @@ class graph(object):
         except AttributeError:
             print "Error: the graph has not yet been defined."
             pass
-        
 
     def save_graph(self, graphname, fmt='graphml'):
         """
