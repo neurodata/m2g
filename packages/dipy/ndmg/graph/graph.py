@@ -19,7 +19,6 @@
 # Created by Greg Kiar on 2016-01-27.
 # Email: gkiar@jhu.edu
 
-from argparse import ArgumentParser
 from itertools import combinations
 import numpy as np
 import igraph as ig
