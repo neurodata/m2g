@@ -99,9 +99,9 @@ class register(object):
         mprage_name = op.splitext(op.splitext(op.basename(mprage))[0])[0]
         atlas_name = op.splitext(op.splitext(op.basename(atlas))[0])[0]
 
-        b0 = "/tmp/"+ dti_name + "_b0.nii.gz"
+        b0 = "/tmp/" + dti_name + "_b0.nii.gz"
         xfm1 = "/tmp/" + dti_name + "_" + mprage_name + "_xfm.mat"
-        xfm2 = "/tmp/" + mprage_name + "_" + atlas_name +  "_xfm.mat"
+        xfm2 = "/tmp/" + mprage_name + "_" + atlas_name + "_xfm.mat"
         xfm3 = "/tmp/" + dti_name + "_" + atlas_name + "_xfm.mat"
 
         # Loads DTI image in as data and extracts B0 volume

@@ -14,7 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
 # track.py
 # Created by Will Gray Roncal on 2016-01-28.
 # Email: wgr@jhu.edu
@@ -22,16 +21,25 @@
 from itertools import combinations
 import numpy as np
 import nibabel as nb
-from dipy.reconst.dti import TensorModel, fractional_anisotropy
+from dipy.reconst.dti import TensorModel, fractional_anisotropy, quantize_evecs
 from dipy.reconst.csdeconv import (ConstrainedSphericalDeconvModel,
                                    auto_response)
 from dipy.direction import peaks_from_model
 from dipy.tracking.eudx import EuDX
-from dipy.data import get_sphere
+from dipy.data import get_sphere, get_data
+from dipy.core.gradients import gradient_table
 
 
-class track(object):
+class track():
+
     def __init__(self):
+        """
+        Tensor and fiber tracking class
+        """
+        # WGR:TODO rewrite help text
+        pass
+
+    def eudx_basic(self, dti_file, mask_file, gtab, seed_num=100000):
         """
         Initializes the graph with nodes corresponding to the number of ROIs
 
@@ -40,15 +48,30 @@ class track(object):
                 N:
                     - Number of rois
                 rois:
-                    - Set of ROIs as either an array or niftii file)
+                    - Set of ROIs as either an array or nifti file)
                 attr:
                     - Node or graph attributes. Can be a list. If 1 dimensional
                       will be interpretted as a graph attribute. If N
                       dimensional will be interpretted as node attributes. If
                       it is any other dimensional, it will be ignored.
         """
-        # WGR:TODO rewrite help text
-        pass
+
+        img = nib.load(dti_file)
+        data = img.get_data()
+
+        img = nib.load(mask_file)
+
+        mask = img.get_data()
+        mask = mask > 0  # to ensure binary mask
+
+        model = TensorModel(gtab)
+        ten = model.fit(data, mask)
+        sphere = get_sphere('symmetric724')
+        ind = quantize_evecs(ten.evecs, sphere.vertices)
+        eu = EuDX(a=ten.fa, ind=ind, seeds=seed_num,
+                  odf_vertices=sphere.vertices, a_low=.2)
+        tracks = [e for e in eu]
+        return tracks
 
     def compute_tensors(self, dti_vol, atlas_file, gtab):
         # WGR:TODO figure out how to organize tensor options and formats
