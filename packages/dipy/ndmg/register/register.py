@@ -27,6 +27,12 @@ import nibabel as nb
 
 class register(object):
     def __init__(self):
+        """
+        Enables registration of single images to one another as well as volumes
+        within multi-volume image stacks. Has options to compute transforms,
+        apply transforms, as well as a built-in method for aligning low
+        resolution dti images to a high resolution atlas.
+        """
         pass
 
     def align(self, inp, ref, xfm):
@@ -36,9 +42,9 @@ class register(object):
         **Positional Arguments:**
 
                 inp:
-                    - Input impage to be aligned
+                    - Input impage to be aligned as a nifti image file
                 ref:
-                    - Image being aligned to
+                    - Image being aligned to as a nifti image file
                 xfm:
                     - Returned transform between two images
         """
@@ -56,13 +62,13 @@ class register(object):
         **Positional Arguments:**
 
                 inp:
-                    - Input impage to be aligned
+                    - Input impage to be aligned as a nifti image file
                 ref:
-                    - Image being aligned to
+                    - Image being aligned to as a nifti image file
                 xfm:
                     - Transform between two images
                 aligned:
-                    - Aligned output image
+                    - Aligned output image as a nifti image file
         """
         cmd = "flirt -in " + inp + " -ref " + ref + " -out " + aligned +\
               " -init " + xfm + " -interp trilinear -applyxfm"
@@ -76,18 +82,27 @@ class register(object):
 
         **Positional Arguments:**
 
-                inp:
-                    - Input impage to be aligned
-                ref:
-                    - Image being aligned to
-                xfm:
-                    - Returned transform between two images
+                dti:
+                    - Input impage to be aligned as a nifti image file
+                gtab:
+                    - Gradient table for the input dti image
+                mprage:
+                    - Intermediate image being aligned to as a nifti image file
+                atlas:
+                    - Terminal image being aligned to as a nifti image file
+                aligned_dti:
+                    - Aligned output dti image as a nifti image file
         """
         # Creates names for all intermediate files used
-        b0 = "/tmp/b0.nii.gz"
-        xfm1 = "/tmp/tfm1.mat"
-        xfm2 = "/tmp/tfm2.mat"
-        xfm3 = "/tmp/tfm3.mat"
+        # GK TODO: come up with smarter way to create these temp file names
+        dti_name = op.splitext(op.splitext(op.basename(dti))[0])[0]
+        mprage_name = op.splitext(op.splitext(op.basename(mprage))[0])[0]
+        atlas_name = op.splitext(op.splitext(op.basename(atlas))[0])[0]
+
+        b0 = "/tmp/"+ dti_name + "_b0.nii.gz"
+        xfm1 = "/tmp/" + dti_name + "_" + mprage_name + "_xfm.mat"
+        xfm2 = "/tmp/" + mprage_name + "_" + atlas_name +  "_xfm.mat"
+        xfm3 = "/tmp/" + dti_name + "_" + atlas_name + "_xfm.mat"
 
         # Loads DTI image in as data and extracts B0 volume
         dti_im = nb.load(dti)
