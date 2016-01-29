@@ -50,9 +50,10 @@ class register(object):
         """
         cmd = "flirt -in " + inp + " -ref " + ref + " -omat " + xfm +\
               " -cost mutualinfo -bins 256 -dof 12 -searchrx -180 180" +\
-              "-searchry -180 180 -searchrz -180 180"
+              " -searchry -180 180 -searchrz -180 180"
+        print "Executing: " + cmd
         p = Popen(cmd, stdout=PIPE, stderr=PIPE, shell=True)
-        p.communicate()
+        print p.communicate()
         pass
 
     def applyxfm(self, inp, ref, xfm, aligned):
@@ -72,8 +73,10 @@ class register(object):
         """
         cmd = "flirt -in " + inp + " -ref " + ref + " -out " + aligned +\
               " -init " + xfm + " -interp trilinear -applyxfm"
+
+        print "Executing: " + cmd
         p = Popen(cmd, stdout=PIPE, stderr=PIPE, shell=True)
-        p.communicate()
+        print p.communicate()
         pass
 
     def dti2atlas(self, dti, gtab, mprage, atlas, aligned_dti):
@@ -106,14 +109,17 @@ class register(object):
 
         # Loads DTI image in as data and extracts B0 volume
         dti_im = nb.load(dti)
-        b0_im = ndu.get_b0(gtab, dti_im.get_data())
+        #GK TODO: why doesn't the import from up top work?
+        import ndmg.utils as ndu
+        b0_im = ndu().get_b0(gtab, dti_im.get_data())
 
         # Wraps B0 volume in new nifti image
         b0_head = dti_im.get_header()
         b0_head.set_data_shape(b0_head.get_data_shape()[0:3])
-        b0_out = Nifti1Image(b0_im, affine=dti_im.get_affine(), header=b0_head)
+        b0_out = nb.Nifti1Image(b0_im, affine=dti_im.get_affine(),
+                                header=b0_head)
         b0_out.update_header()
-        nb.save(out, b0)
+        nb.save(b0_out, b0)
 
         # Algins B0 volume to MPRAGE, and MPRAGE to Atlas
         self.align(b0, mprage, xfm1)
