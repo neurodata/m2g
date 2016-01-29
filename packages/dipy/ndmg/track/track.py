@@ -56,10 +56,10 @@ class track():
                       it is any other dimensional, it will be ignored.
         """
 
-        img = nib.load(dti_file)
+        img = nb.load(dti_file)
         data = img.get_data()
 
-        img = nib.load(mask_file)
+        img = nb.load(mask_file)
 
         mask = img.get_data()
         mask = mask > 0  # to ensure binary mask
@@ -69,7 +69,7 @@ class track():
         sphere = get_sphere('symmetric724')
         ind = quantize_evecs(ten.evecs, sphere.vertices)
         eu = EuDX(a=ten.fa, ind=ind, seeds=seed_num,
-                  odf_vertices=sphere.vertices, a_low=.2)
+                  odf_vertices=sphere.vertices, a_low=.1)
         tracks = [e for e in eu]
         return tracks
 

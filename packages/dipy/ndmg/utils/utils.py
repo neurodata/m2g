@@ -24,10 +24,10 @@ from datetime import datetime
 from dipy.io import read_bvals_bvecs, read_bvec_file
 from dipy.core.gradients import gradient_table
 import numpy as np
-import nibabel as nib
+import nibabel as nb
 
 
-class utils(object):
+class utils():
     def __init__(self):
         """
         Utility functions for m2g
@@ -35,7 +35,7 @@ class utils(object):
 
         pass
 
-    def load_bval_bvec(self, fbval, fbvec, dti_file):
+    def load_bval_bvec(self, fbval, fbvec, dti_file, dti_file_out):
         """
         Takes bval and bvec files and produces a structure in dipy format
 
@@ -49,7 +49,7 @@ class utils(object):
         # Load Data
         startTime = datetime.now()
 
-        img = nib.load(dti_file)
+        img = nb.load(dti_file)
         data = img.get_data()
 
         bvals, bvecs = read_bvals_bvecs(fbval, fbvec)
@@ -61,12 +61,17 @@ class utils(object):
         bvals = np.delete(bvals, idx, axis=0)
         data = np.delete(data, idx, axis=3)
 
+        # Save corrected DTI volume
+        dti_new = nb.Nifti1Image(data, affine=img.get_affine(), header=img.get_header())
+        dti_new.update_header()
+        nb.save(dti_new, dti_file_out)
+
         gtab = gradient_table(bvals, bvecs, atol=0.01)
 
         print gtab.info
         return gtab
 
-    def get_b0(self, gtab, dti_data):
+    def get_b0(self, gtab, data):
         """
         Takes bval and bvec files and produces a structure in dipy format
 
