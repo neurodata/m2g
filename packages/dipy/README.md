@@ -1,8 +1,7 @@
 # ndmg
 DTI Connectome Estimation Using DiPy
 
+Install using:
 
-To import as a module in python you must add the path to this repo to your
-PYTHONPATH environment variable.
+`python setup.py install`
 
-i.e. `export PYTHONPATH=${PYTHONPATH}:/path/to/ndmg/`
