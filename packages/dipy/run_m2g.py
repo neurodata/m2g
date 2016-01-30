@@ -20,9 +20,44 @@
 # Email: gkiar@jhu.edu, wgr@jhu.edu
 
 from argparse import ArgumentParser
+from datetime import datetime
+import ndmg.utils as mgu
+import ndmg.register as mgr
+import ndmg.track as mgt
+import ndmg.graph as mgg
+import numpy as np
+import nibabel as nb
 
 
-def startup():
+def pipeline(dti, bvals, bvecs, mprage, atlas, mask, labels, aligned_dti,
+             tensors, fibers, graph):
+    """
+    Creates a brain graph from MRI data 
+    """
+    startTime = datetime.now()
+    # Align DTI volumes to Atlas
+    print "Aligning volumes..."
+    gtab = mgr().dti2atlas(dti, bvals, bvecs, mprage, atlas, aligned_dti)
+
+    print "Beginning tractography..."
+    # Compute tensors and track fiber streamlines
+    tracks = mgt().eudx_basic(aligned_dti, mask, gtab,
+                                       seed_num=1000000)
+
+    print "Generating graph..."
+    # Create graphs from streamlines
+    labels_im = nb.load(labels)
+    graph = mgg(len(np.unique(labels_im.get_data()))-1, labels)
+    graph.make_graph(tracks)
+    graph.summary()
+
+    print "Saving derivatives..."
+    # Save derivatives to disk
+    np.savez(fibers, tracks)
+    graph.save_graph(graph)
+
+    print "Execution took: " + str(datetime.now() - startTime)
+    print "Complete!"
     pass
 
 
@@ -36,13 +71,18 @@ def main():
     parser.add_argument("atlas", action="store", help="Nifti T1 MRI atlas")
     parser.add_argument("mask", action="store", help="Nifti binary mask of \
                         brain space in the atlas")
-    parser.add_argument("labels", action="store", help="Nifti labels of regions \
-                        in atlas space")
+    parser.add_argument("labels", action="store", help="Nifti labels of \
+                        regions of interest in atlas space")
+    parser.add_argument("aligned_dti", action="store", help="Nifti image of\
+                        aligned dti volume in atlas space")
+    parser.add_argument("tensors", action="store", help="Computed tensors")
+    parser.add_argument("fibers", action="store", help="Fiber streamlines")
     parser.add_argument("graph", action="store", help="Produced graphml file")
     result = parser.parse_args()
 
-    startup(result.dti, result.bval, result.bvec, result.mprage, result.atlas,
-            result.mask, result.labels)
+    pipeline(result.dti, result.bval, result.bvec, result.mprage, result.atlas,
+            result.mask, result.labels, result.aligned_dti, result.tensors,
+            result.fibers, result.graph)
 
 
 if __name__ == "__main__":

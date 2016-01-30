@@ -71,7 +71,7 @@ class track():
         eu = EuDX(a=ten.fa, ind=ind, seeds=seed_num,
                   odf_vertices=sphere.vertices, a_low=.1)
         tracks = [e for e in eu]
-        return tracks
+        return  tracks
 
     def compute_tensors(self, dti_vol, atlas_file, gtab):
         # WGR:TODO figure out how to organize tensor options and formats
