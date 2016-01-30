@@ -25,7 +25,9 @@ import ndmg.utils as ndu
 import nibabel as nb
 import numpy as np
 
+
 class register(object):
+
     def __init__(self):
         """
         Enables registration of single images to one another as well as volumes
@@ -121,7 +123,7 @@ class register(object):
         dti_name = op.splitext(op.splitext(op.basename(dti))[0])[0]
         mprage_name = op.splitext(op.splitext(op.basename(mprage))[0])[0]
         atlas_name = op.splitext(op.splitext(op.basename(atlas))[0])[0]
-        
+
         dti1 = "/tmp/" + dti_name + "_t1.nii.gz"
         dti2 = "/tmp/" + dti_name + "_t2.nii.gz"
         b0 = "/tmp/" + dti_name + "_b0.nii.gz"
@@ -138,7 +140,7 @@ class register(object):
 
         # Loads DTI image in as data and extracts B0 volume
         dti_im = nb.load(dti2)
-        #GK TODO: why doesn't the import from up top work?
+        # GK TODO: why doesn't the import from up top work?
         b0_im = mgu().get_b0(gtab, dti_im.get_data())
 
         # Wraps B0 volume in new nifti image
