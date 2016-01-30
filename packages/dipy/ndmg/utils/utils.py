@@ -62,7 +62,8 @@ class utils():
         data = np.delete(data, idx, axis=3)
 
         # Save corrected DTI volume
-        dti_new = nb.Nifti1Image(data, affine=img.get_affine(), header=img.get_header())
+        dti_new = nb.Nifti1Image(data, affine=img.get_affine(),
+                                 header=img.get_header())
         dti_new.update_header()
         nb.save(dti_new, dti_file_out)
 

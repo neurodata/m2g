@@ -41,19 +41,20 @@ class track():
 
     def eudx_basic(self, dti_file, mask_file, gtab, seed_num=100000):
         """
-        Initializes the graph with nodes corresponding to the number of ROIs
+        Tracking with basic tensors and basic eudx - experimental
 
         **Positional Arguments:**
 
-                N:
-                    - Number of rois
-                rois:
-                    - Set of ROIs as either an array or nifti file)
-                attr:
-                    - Node or graph attributes. Can be a list. If 1 dimensional
-                      will be interpretted as a graph attribute. If N
-                      dimensional will be interpretted as node attributes. If
-                      it is any other dimensional, it will be ignored.
+                dti_file:
+                    - File (registered) to use for tensor/fiber tracking
+                mask_file:
+                    - Brain mask to keep tensors inside the brain
+                gtab:
+                    - dipy formatted bval/bvec Structure
+
+        **Optional Arguments:**
+                seed_num:
+                    - Number of seeds to use for fiber tracking
         """
 
         img = nb.load(dti_file)
@@ -71,12 +72,101 @@ class track():
         eu = EuDX(a=ten.fa, ind=ind, seeds=seed_num,
                   odf_vertices=sphere.vertices, a_low=.1)
         tracks = [e for e in eu]
-        return  tracks
+        return tracks
+
+    def eudx_advanced(self, dti_file, mask_file, gtab,
+                      seed_num=100000, stop_val=0.1):
+        """
+        Tracking with more complex tensors - experimental
+
+        Initializes the graph with nodes corresponding to the number of ROIs
+
+        **Positional Arguments:**
+
+                dti_file:
+                    - File (registered) to use for tensor/fiber tracking
+                mask_file:
+                    - Brain mask to keep tensors inside the brain
+                gtab:
+                    - dipy formatted bval/bvec Structure
+
+        **Optional Arguments:**
+                seed_num:
+                    - Number of seeds to use for fiber tracking
+                stop_val:
+                    - Value to cutoff fiber track
+        """
+
+        img = nb.load(dti_file)
+        data = img.get_data()
+
+        img = nb.load(mask_file)
+
+        mask = img.get_data()
+        mask = mask > 0  # to ensure binary mask
+
+        """
+        For the constrained spherical deconvolution we need to estimate the
+        response function (see :ref:`example_reconst_csd`) and create a model.
+        """
+
+        response, ratio = auto_response(gtab, data, roi_radius=10,
+                                        fa_thr=0.7)
+
+        csd_model = ConstrainedSphericalDeconvModel(gtab, response)
+
+        """
+        Next, we use ``peaks_from_model`` to fit the data and calculated
+        the fiber directions in all voxels.
+        """
+
+        sphere = get_sphere('symmetric724')
+
+        csd_peaks = peaks_from_model(model=csd_model,
+                                     data=data,
+                                     sphere=sphere,
+                                     mask=mask,
+                                     relative_peak_threshold=.5,
+                                     min_separation_angle=25,
+                                     parallel=True)
+
+        """
+        For the tracking part, we will use ``csd_model`` fiber directions
+        but stop tracking where fractional anisotropy (FA) is low (< 0.1).
+        To derive the FA, used as a stopping criterion, we need to fit a
+        tensor model first. Here, we use weighted least squares (WLS).
+        """
+        print 'tensors...'
+
+        tensor_model = TensorModel(gtab, fit_method='WLS')
+        tensor_fit = tensor_model.fit(data, mask)
+
+        FA = fractional_anisotropy(tensor_fit.evals)
+
+        """
+        In order for the stopping values to be used with our tracking
+        algorithm we need to have the same dimensions as the
+        ``csd_peaks.peak_values``. For this reason, we can assign the
+        same FA value to every peak direction in the same voxel in
+        the following way.
+        """
+
+        stopping_values = np.zeros(csd_peaks.peak_values.shape)
+        stopping_values[:] = FA[..., None]
+
+        streamline_generator = EuDX(stopping_values,
+                                    csd_peaks.peak_indices,
+                                    seeds=seed_num,
+                                    odf_vertices=sphere.vertices,
+                                    a_low=stop_val)
+
+        streamlines = [streamline for streamline in streamline_generator]
+
+        return streamlines
 
     def compute_tensors(self, dti_vol, atlas_file, gtab):
         # WGR:TODO figure out how to organize tensor options and formats
         # WGR:TODO figure out how to deal with files on disk vs. in workspace
-
         """
         Takes registered DTI image and produces tensors
 
@@ -157,7 +247,6 @@ class track():
                     odf_vertices, cutoff):
         # WGR:TODO figure out how to organize tensor options and formats
         # WGR:TODO figure out how to deal with files on disk vs. in workspace
-
         """
         Tensors are used to construct fibers
 
