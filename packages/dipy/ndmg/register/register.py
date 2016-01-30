@@ -23,7 +23,7 @@ import os.path as op
 from subprocess import Popen, PIPE
 import ndmg.utils as ndu
 import nibabel as nb
-
+import numpy as np
 
 class register(object):
     def __init__(self):
@@ -53,7 +53,7 @@ class register(object):
               " -searchry -180 180 -searchrz -180 180"
         print "Executing: " + cmd
         p = Popen(cmd, stdout=PIPE, stderr=PIPE, shell=True)
-        print p.communicate()
+        p.communicate()
         pass
 
     def applyxfm(self, inp, ref, xfm, aligned):
@@ -76,10 +76,28 @@ class register(object):
 
         print "Executing: " + cmd
         p = Popen(cmd, stdout=PIPE, stderr=PIPE, shell=True)
-        print p.communicate()
+        p.communicate()
         pass
 
-    def dti2atlas(self, dti, gtab, mprage, atlas, aligned_dti):
+    def align_slices(self, dti, corrected_dti, idx):
+        """
+        Performs eddy-correction (or self-alignment) of a stack of 3D images
+
+        **Positional Arguments:**
+                dti:
+                    - 4D (DTI) image volume as a nifti file
+                corrected_dti:
+                    - Corrected and aligned DTI volume in a nifti file
+                idx:
+                    - Index of the first B0 volume in the stack
+        """
+        cmd = "eddy_correct " + dti + " " + corrected_dti + " " + str(idx)
+        print "Executing: " + cmd
+        p = Popen(cmd, stdout=PIPE, stderr=PIPE, shell=True)
+        p.communicate()
+        pass
+
+    def dti2atlas(self, dti, bvals, bvecs, mprage, atlas, aligned_dti):
         """
         Aligns two images and stores the transform between them
 
@@ -87,8 +105,10 @@ class register(object):
 
                 dti:
                     - Input impage to be aligned as a nifti image file
-                gtab:
-                    - Gradient table for the input dti image
+                bvals:
+                    - File containing list of bvalues for each scan
+                bvecs:
+                    - File containing gradient directions for each scan
                 mprage:
                     - Intermediate image being aligned to as a nifti image file
                 atlas:
@@ -101,17 +121,25 @@ class register(object):
         dti_name = op.splitext(op.splitext(op.basename(dti))[0])[0]
         mprage_name = op.splitext(op.splitext(op.basename(mprage))[0])[0]
         atlas_name = op.splitext(op.splitext(op.basename(atlas))[0])[0]
-
+        
+        dti1 = "/tmp/" + dti_name + "_t1.nii.gz"
+        dti2 = "/tmp/" + dti_name + "_t2.nii.gz"
         b0 = "/tmp/" + dti_name + "_b0.nii.gz"
         xfm1 = "/tmp/" + dti_name + "_" + mprage_name + "_xfm.mat"
         xfm2 = "/tmp/" + mprage_name + "_" + atlas_name + "_xfm.mat"
         xfm3 = "/tmp/" + dti_name + "_" + atlas_name + "_xfm.mat"
 
+        import ndmg.utils as mgu
+        # Creates gradient table from bvalues and bvectors
+        gtab = mgu().load_bval_bvec(bvals, bvecs, dti, dti1)
+
+        # Align DTI volumes to each other
+        self.align_slices(dti1, dti2, np.where(gtab.b0s_mask)[0])
+
         # Loads DTI image in as data and extracts B0 volume
-        dti_im = nb.load(dti)
+        dti_im = nb.load(dti2)
         #GK TODO: why doesn't the import from up top work?
-        import ndmg.utils as ndu
-        b0_im = ndu().get_b0(gtab, dti_im.get_data())
+        b0_im = mgu().get_b0(gtab, dti_im.get_data())
 
         # Wraps B0 volume in new nifti image
         b0_head = dti_im.get_header()
@@ -131,5 +159,7 @@ class register(object):
         p.communicate()
 
         # Applies combined transform to dti image volume
-        self.applyxfm(dti, atlas, xfm3, aligned_dti)
-        pass
+        self.applyxfm(dti2, atlas, xfm3, aligned_dti)
+
+        # GK TODO: do something smarter than returning this
+        return gtab
