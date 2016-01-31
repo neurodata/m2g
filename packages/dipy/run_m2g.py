@@ -21,6 +21,8 @@
 
 from argparse import ArgumentParser
 from datetime import datetime
+from subprocess import Popen, PIPE
+import os.path as op
 import ndmg.utils as mgu
 import ndmg.register as mgr
 import ndmg.track as mgt
@@ -29,32 +31,57 @@ import numpy as np
 import nibabel as nb
 
 
-def pipeline(dti, bvals, bvecs, mprage, atlas, mask, labels, aligned_dti,
-             tensors, fibers, graph):
+def pipeline(dti, bvals, bvecs, mprage, atlas, mask, labels, outdir):
     """
     Creates a brain graph from MRI data 
     """
     startTime = datetime.now()
+   
+    # Create derivative output directories
+    dti_name = op.splitext(op.splitext(op.basename(dti))[0])[0]
+    label_name = op.splitext(op.splitext(op.basename(labels))[0])[0]
+    cmd = "mkdir -p " + outdir + "/reg_dti " + outdir + "/tensors " +\
+          outdir + "/fibers " + outdir + "/graphs"
+    p = Popen(cmd, stdout=PIPE, stderr=PIPE, shell=True)
+    p.communicate()
+
+    # Create derivative output file names
+    aligned_dti = outdir + "/reg_dti/" + dti_name + "_aligned.nii.gz"
+    tensors = outdir + "/tensors/" + dti_name + "_tensors.npz"
+    fibers = outdir + "/fibers/" + dti_name + "_fibers.npz"
+    graph = outdir + "/graphs/" + dti_name + "_" + label_name + ".graphml"
+    print aligned_dti
+    print tensors
+    print fibers
+    print graph
+
+ 
+    # Creates gradient table from bvalues and bvectors
+    print "Generating gradient table..."
+    dti1 = outdir + "/tmp/" + dti_name + "_t1.nii.gz"
+    gtab = mgu().load_bval_bvec(bvals, bvecs, dti, dti1)
+    
     # Align DTI volumes to Atlas
     print "Aligning volumes..."
-    gtab = mgr().dti2atlas(dti, bvals, bvecs, mprage, atlas, aligned_dti)
+    mgr().dti2atlas(dti1, gtab, mprage, atlas, aligned_dti, outdir)
 
     print "Beginning tractography..."
     # Compute tensors and track fiber streamlines
-    tracks = mgt().eudx_basic(aligned_dti, mask, gtab,
+    tens, tracks = mgt().eudx_basic(aligned_dti, mask, gtab,
                                        seed_num=1000000)
 
     print "Generating graph..."
     # Create graphs from streamlines
     labels_im = nb.load(labels)
-    graph = mgg(len(np.unique(labels_im.get_data()))-1, labels)
-    graph.make_graph(tracks)
-    graph.summary()
+    g = mgg(len(np.unique(labels_im.get_data()))-1, labels)
+    g.make_graph(tracks)
+    g.summary()
 
     print "Saving derivatives..."
     # Save derivatives to disk
+    np.savez(tensors, tens)
     np.savez(fibers, tracks)
-    graph.save_graph(graph)
+    g.save_graph(graph)
 
     print "Execution took: " + str(datetime.now() - startTime)
     print "Complete!"
@@ -73,16 +100,19 @@ def main():
                         brain space in the atlas")
     parser.add_argument("labels", action="store", help="Nifti labels of \
                         regions of interest in atlas space")
-    parser.add_argument("aligned_dti", action="store", help="Nifti image of\
-                        aligned dti volume in atlas space")
-    parser.add_argument("tensors", action="store", help="Computed tensors")
-    parser.add_argument("fibers", action="store", help="Fiber streamlines")
-    parser.add_argument("graph", action="store", help="Produced graphml file")
+    parser.add_argument("outdir", action="store", help="Path to which \
+                        derivatives will be stored")
     result = parser.parse_args()
 
+    # Create output directory
+    cmd = "mkdir -p " + result.outdir + " " + result.outdir + "/tmp"
+    print "Creating output directory: " + result.outdir
+    print "Creating output temp directory: " + result.outdir + "/tmp"
+    p = Popen(cmd, stdout=PIPE, stderr=PIPE, shell=True)
+    p.communicate()
+
     pipeline(result.dti, result.bval, result.bvec, result.mprage, result.atlas,
-            result.mask, result.labels, result.aligned_dti, result.tensors,
-            result.fibers, result.graph)
+            result.mask, result.labels, result.outdir)
 
 
 if __name__ == "__main__":
