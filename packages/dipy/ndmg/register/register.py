@@ -136,7 +136,8 @@ class register(object):
         # Loads DTI image in as data and extracts B0 volume
         import ndmg.utils as mgu
         dti_im = nb.load(dti2)
-        b0_im = mgu().get_b0(gtab, dti_im.get_data())  # GK TODO: why doesn't top import work?
+        b0_im = mgu().get_b0(gtab, dti_im.get_data())
+        # GK TODO: why doesn't top import work?
 
         # Wraps B0 volume in new nifti image
         b0_head = dti_im.get_header()

@@ -33,10 +33,10 @@ import nibabel as nb
 
 def pipeline(dti, bvals, bvecs, mprage, atlas, mask, labels, outdir):
     """
-    Creates a brain graph from MRI data 
+    Creates a brain graph from MRI data
     """
     startTime = datetime.now()
-   
+
     # Create derivative output directories
     dti_name = op.splitext(op.splitext(op.basename(dti))[0])[0]
     label_name = op.splitext(op.splitext(op.basename(labels))[0])[0]
@@ -50,25 +50,24 @@ def pipeline(dti, bvals, bvecs, mprage, atlas, mask, labels, outdir):
     tensors = outdir + "/tensors/" + dti_name + "_tensors.npz"
     fibers = outdir + "/fibers/" + dti_name + "_fibers.npz"
     graph = outdir + "/graphs/" + dti_name + "_" + label_name + ".graphml"
-    print aligned_dti
-    print tensors
-    print fibers
-    print graph
+    print "This pipeline will produce the following derivatives..."
+    print "DTI volume resitered to atlas: " + aligned_dti
+    print "Diffusion tensors in atlas space: " + tensors
+    print "Fiber streamlines in atlas space: " + fibers
+    print "Graph of streamlines downsampled to given labels: " graph
 
- 
     # Creates gradient table from bvalues and bvectors
     print "Generating gradient table..."
     dti1 = outdir + "/tmp/" + dti_name + "_t1.nii.gz"
     gtab = mgu().load_bval_bvec(bvals, bvecs, dti, dti1)
-    
+
     # Align DTI volumes to Atlas
     print "Aligning volumes..."
     mgr().dti2atlas(dti1, gtab, mprage, atlas, aligned_dti, outdir)
 
     print "Beginning tractography..."
     # Compute tensors and track fiber streamlines
-    tens, tracks = mgt().eudx_basic(aligned_dti, mask, gtab,
-                                       seed_num=1000000)
+    tens, tracks = mgt().eudx_basic(aligned_dti, mask, gtab, seed_num=1000000)
 
     print "Generating graph..."
     # Create graphs from streamlines
@@ -112,7 +111,7 @@ def main():
     p.communicate()
 
     pipeline(result.dti, result.bval, result.bvec, result.mprage, result.atlas,
-            result.mask, result.labels, result.outdir)
+             result.mask, result.labels, result.outdir)
 
 
 if __name__ == "__main__":
