@@ -99,7 +99,7 @@ class register(object):
         p.communicate()
         pass
 
-    def dti2atlas(self, dti, bvals, bvecs, mprage, atlas, aligned_dti):
+    def dti2atlas(self, dti, gtab, mprage, atlas, aligned_dti, outdir):
         """
         Aligns two images and stores the transform between them
 
@@ -124,24 +124,19 @@ class register(object):
         mprage_name = op.splitext(op.splitext(op.basename(mprage))[0])[0]
         atlas_name = op.splitext(op.splitext(op.basename(atlas))[0])[0]
 
-        dti1 = "/tmp/" + dti_name + "_t1.nii.gz"
-        dti2 = "/tmp/" + dti_name + "_t2.nii.gz"
-        b0 = "/tmp/" + dti_name + "_b0.nii.gz"
-        xfm1 = "/tmp/" + dti_name + "_" + mprage_name + "_xfm.mat"
-        xfm2 = "/tmp/" + mprage_name + "_" + atlas_name + "_xfm.mat"
-        xfm3 = "/tmp/" + dti_name + "_" + atlas_name + "_xfm.mat"
-
-        import ndmg.utils as mgu
-        # Creates gradient table from bvalues and bvectors
-        gtab = mgu().load_bval_bvec(bvals, bvecs, dti, dti1)
+        dti2 = outdir + "/tmp/" + dti_name + "_t2.nii.gz"
+        b0 = outdir + "/tmp/" + dti_name + "_b0.nii.gz"
+        xfm1 = outdir + "/tmp/" + dti_name + "_" + mprage_name + "_xfm.mat"
+        xfm2 = outdir + "/tmp/" + mprage_name + "_" + atlas_name + "_xfm.mat"
+        xfm3 = outdir + "/tmp/" + dti_name + "_" + atlas_name + "_xfm.mat"
 
         # Align DTI volumes to each other
-        self.align_slices(dti1, dti2, np.where(gtab.b0s_mask)[0])
+        self.align_slices(dti, dti2, np.where(gtab.b0s_mask)[0])
 
         # Loads DTI image in as data and extracts B0 volume
+        import ndmg.utils as mgu
         dti_im = nb.load(dti2)
-        # GK TODO: why doesn't the import from up top work?
-        b0_im = mgu().get_b0(gtab, dti_im.get_data())
+        b0_im = mgu().get_b0(gtab, dti_im.get_data())  # GK TODO: why doesn't top import work?
 
         # Wraps B0 volume in new nifti image
         b0_head = dti_im.get_header()
@@ -162,6 +157,3 @@ class register(object):
 
         # Applies combined transform to dti image volume
         self.applyxfm(dti2, atlas, xfm3, aligned_dti)
-
-        # GK TODO: do something smarter than returning this
-        return gtab

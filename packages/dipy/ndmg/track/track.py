@@ -72,7 +72,7 @@ class track():
         eu = EuDX(a=ten.fa, ind=ind, seeds=seed_num,
                   odf_vertices=sphere.vertices, a_low=.1)
         tracks = [e for e in eu]
-        return tracks
+        return (ten, tracks)
 
     def eudx_advanced(self, dti_file, mask_file, gtab,
                       seed_num=100000, stop_val=0.1):
