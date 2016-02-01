@@ -39,7 +39,8 @@ class track():
         # WGR:TODO rewrite help text
         pass
 
-    def eudx_basic(self, dti_file, mask_file, gtab, seed_num=100000):
+    def eudx_basic(self, dti_file, mask_file, gtab,
+                   seed_num=100000, stop_val=0.1):
         """
         Tracking with basic tensors and basic eudx - experimental
 
@@ -55,6 +56,8 @@ class track():
         **Optional Arguments:**
                 seed_num:
                     - Number of seeds to use for fiber tracking
+                stop_val:
+                    - Value to cutoff fiber track
         """
 
         img = nb.load(dti_file)
@@ -70,7 +73,7 @@ class track():
         sphere = get_sphere('symmetric724')
         ind = quantize_evecs(ten.evecs, sphere.vertices)
         eu = EuDX(a=ten.fa, ind=ind, seeds=seed_num,
-                  odf_vertices=sphere.vertices, a_low=.1)
+                  odf_vertices=sphere.vertices, a_low=stop_val)
         tracks = [e for e in eu]
         return tracks
 
