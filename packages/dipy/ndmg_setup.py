@@ -26,23 +26,7 @@ import sys
 import glob
 
 
-def setup(inDir, outputBaseDir, dtiListFile, bvalListFile, bvecListFile,
-          mprageListFile, smgListFile, rdtiListFile, rmriListFile, bgListFile,
-          tensorListFile, fiberListFile, atlasIn):
-
-    # Create output directories
-    outDirs = ['tensors', 'fibers', 'bg', 'graphs', 'reg_mprage', 'reg_dti']
-
-    if not os.path.exists(outputBaseDir):
-        os.makedirs(outputBaseDir)
-
-    for f in outDirs:
-        d = outputBaseDir + '/' + f
-        if not os.path.exists(d):
-            os.makedirs(d)
-
-    atlasList = atlasIn
-
+def setup(inDir, dtiListFile, bvalListFile, bvecListFile, mprageListFile):
     # Create lists of files
     dti_types = ('*DTI.nii', '*DTI.nii.gz')
     dtiFiles = [y for x in os.walk(inDir) for z in dti_types
@@ -74,99 +58,19 @@ def setup(inDir, outputBaseDir, dtiListFile, bvalListFile, bvecListFile,
         for item in mprageFiles:
             thefile.write("%s\n" % item)
 
-    # Create graph list
-    atlas = list()
-    for a in atlasList:
-        [xx, f] = os.path.split(a)
-        [aa, xx] = os.path.splitext(os.path.splitext(f)[0])
-        d = outputBaseDir + '/graphs/' + aa
-        if not os.path.exists(d):
-            os.makedirs(d)
-        atlas.append(aa)
-
-    sub = list()
-    for s in dtiFiles:
-        [xx, f] = os.path.split(s)
-        [ss, xx] = os.path.splitext(os.path.splitext(f)[0])
-        sub.append(ss.replace('DTI', ''))
-
-    for f in outDirs:
-        d = outputBaseDir + '/' + f
-        if not os.path.exists(d):
-            os.makedirs(d)
-
-    # Output smg names
-    smg = list()
-    for s in sub:
-        for a in atlas:
-            smg.append(os.path.join(outputBaseDir + '/graphs/' +
-                       a + '/' + s + a + '.graphml'))
-
-    with open(smgListFile, 'wb') as thefile:
-        for item in smg:
-            thefile.write("%s\n" % item)
-
-    # Create other derivative output lists
-    rdtiName = list()
-    rmriName = list()
-    bgName = list()
-    tensorName = list()
-    fiberName = list()
-
-    for s in sub:
-        rdtiName.append(os.path.join(outputBaseDir, 'reg_dti',
-                                     s + 'DTI_reg.nii.gz'))
-        rmriName.append(os.path.join(outputBaseDir, 'reg_mprage',
-                                     s + 'MPRAGE_reg.nii.gz'))
-        bgName.append(os.path.join(outputBaseDir, 'bg',
-                                   s + 'bg.graphml'))
-        tensorName.append(os.path.join(outputBaseDir, 'tensors',
-                                       s + 'tensors.Bdouble'))
-        fiberName.append(os.path.join(outputBaseDir, 'fibers',
-                                      s + 'fibers.dat'))
-
-    # Save names to disk
-    with open(rdtiListFile, 'wb') as thefile:
-        for item in rdtiName:
-            thefile.write("%s\n" % item)
-    with open(rmriListFile, 'wb') as thefile:
-        for item in rmriName:
-            thefile.write("%s\n" % item)
-    with open(bgListFile, 'wb') as thefile:
-        for item in bgName:
-            thefile.write("%s\n" % item)
-    with open(tensorListFile, 'wb') as thefile:
-        for item in tensorName:
-            thefile.write("%s\n" % item)
-    with open(fiberListFile, 'wb') as thefile:
-        for item in fiberName:
-            thefile.write("%s\n" % item)
-
 
 def main():
     parser = ArgumentParser(description="")
     parser.add_argument("inDir", action="store",
                         help="Input directory for raw data")
-    parser.add_argument("outputBaseDir", action="store",
-                        help="Output base directory for derivatives")
     parser.add_argument("dtiListFile", action="store", help="")
     parser.add_argument("bvalListFile", action="store", help="")
     parser.add_argument("bvecListFile", action="store", help="")
     parser.add_argument("mprageListFile", action="store", help="")
-    parser.add_argument("smgListFile", action="store", help="")
-    parser.add_argument("rdtiListFile", action="store", help="")
-    parser.add_argument("rmriListFile", action="store", help="")
-    parser.add_argument("bgListFile", action="store", help="")
-    parser.add_argument("fiberListFile", action="store", help="")
-    parser.add_argument("tensorListFile", action="store", help="")
-    parser.add_argument("atlasIn", action="store", nargs="+", help="")
     result = parser.parse_args()
 
-    setup(result.inDir, result.outputBaseDir, result.dtiListFile,
-          result.bvalListFile, result.bvecListFile, result.mprageListFile,
-          result.smgListFile, result.rdtiListFile, result.rmriListFile,
-          result.bgListFile, result.tensorListFile, result.fiberListFile,
-          result.atlasIn)
+    setup(result.inDir, result.dtiListFile, result.bvalListFile,
+          result.bvecListFile, result.mprageListFile)
 
 if __name__ == "__main__":
     main()
