@@ -5,7 +5,6 @@ This page describes how brain graphs are generated in our service from Diffusion
 
 Our pipeline has now been rewritten using PEP-8 compliant python and can now be installed using pip!
 
-
 We are currently processing brain scans, and the resulting graphs are made available to the community on an ongoing basis.
 
 This tutorial will lead you through installing the **ndmg** (pronounced "***nutmeg***") package, and lead you all along the way to using one of the pre-made pipelines for connectome estimation from diffusion and structural MRI.
@@ -34,7 +33,6 @@ Now that your data is all set and ready to use, let's put **ndmg** to work! Let'
 
 ~~~
 python ndmg_pipeline.py ~/data/KKI2009_113_1_DTI.nii ~/data/KKI2009_113_1_DTI.bval ~/data/KKI2009_113_1_DTI.bvec ~/data/KKI2009_113_1_MPRAGE.nii ~/atlas/MNI152_T1_1mm.nii.gz ~/atlas/MNI152_T1_1mm_brain_mask.nii.gz ~/data/outputs ~/atlas/desikan.nii.gz
-
 ~~~
 
 To break that down a bit, let's look at the arguments specifically:
