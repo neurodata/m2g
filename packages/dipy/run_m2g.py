@@ -39,22 +39,32 @@ def pipeline(dti, bvals, bvecs, mprage, atlas, mask, labels, outdir):
 
     # Create derivative output directories
     dti_name = op.splitext(op.splitext(op.basename(dti))[0])[0]
-    label_name = op.splitext(op.splitext(op.basename(labels))[0])[0]
     cmd = "mkdir -p " + outdir + "/reg_dti " + outdir + "/tensors " +\
           outdir + "/fibers " + outdir + "/graphs"
     p = Popen(cmd, stdout=PIPE, stderr=PIPE, shell=True)
     p.communicate()
 
+    # Graphs are different because of multiple atlases
+    label_name = [op.splitext(op.splitext(op.basename(x))[0])[0]
+                  for x in labels]
+    for label in label_name:
+        p = Popen("mkdir -p " + outdir + "/graphs/" + label,
+                  stdout=PIPE, stderr=PIPE, shell=True)
+
     # Create derivative output file names
     aligned_dti = outdir + "/reg_dti/" + dti_name + "_aligned.nii.gz"
     tensors = outdir + "/tensors/" + dti_name + "_tensors.npz"
     fibers = outdir + "/fibers/" + dti_name + "_fibers.npz"
-    graph = outdir + "/graphs/" + dti_name + "_" + label_name + ".graphml"
     print "This pipeline will produce the following derivatives..."
     print "DTI volume resitered to atlas: " + aligned_dti
     print "Diffusion tensors in atlas space: " + tensors
     print "Fiber streamlines in atlas space: " + fibers
-    print "Graph of streamlines downsampled to given labels: " graph
+
+    # Again, graphs are different
+    graphs = [outdir + "/graphs/" + x + '/' + dti_name + "_" + x + ".graphml"
+              for x in label_name]
+    print "Graphs of streamlines downsampled to given labels: " +\
+          (", ".join([x for x in graphs]))
 
     # Creates gradient table from bvalues and bvectors
     print "Generating gradient table..."
@@ -69,18 +79,19 @@ def pipeline(dti, bvals, bvecs, mprage, atlas, mask, labels, outdir):
     # Compute tensors and track fiber streamlines
     tens, tracks = mgt().eudx_basic(aligned_dti, mask, gtab, seed_num=1000000)
 
-    print "Generating graph..."
-    # Create graphs from streamlines
-    labels_im = nb.load(labels)
-    g = mgg(len(np.unique(labels_im.get_data()))-1, labels)
-    g.make_graph(tracks)
-    g.summary()
+    # Generate graphs from streamlines for each parcellation
+    for idx, label in enumerate(label_name):
+        print "Generating graph for " + label + " parcellation..."
+        labels_im = nb.load(labels[idx])
+        g = mgg(len(np.unique(labels_im.get_data()))-1, labels[idx])
+        g.make_graph(tracks)
+        g.summary()
+        g.save_graph(graphs[idx])
 
     print "Saving derivatives..."
     # Save derivatives to disk
     np.savez(tensors, tens)
     np.savez(fibers, tracks)
-    g.save_graph(graph)
 
     print "Execution took: " + str(datetime.now() - startTime)
     print "Complete!"
@@ -97,10 +108,10 @@ def main():
     parser.add_argument("atlas", action="store", help="Nifti T1 MRI atlas")
     parser.add_argument("mask", action="store", help="Nifti binary mask of \
                         brain space in the atlas")
-    parser.add_argument("labels", action="store", help="Nifti labels of \
-                        regions of interest in atlas space")
     parser.add_argument("outdir", action="store", help="Path to which \
                         derivatives will be stored")
+    parser.add_argument("labels", action="store", nargs="*", help="Nifti \
+                        labels of regions of interest in atlas space")
     result = parser.parse_args()
 
     # Create output directory
