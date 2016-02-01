@@ -1,4 +1,5 @@
 from distutils.core import setup
+from setuptools import setup
 import ndmg
 
 VERSION = ndmg.version
@@ -26,4 +27,11 @@ setup(
         'pipeline'
     ],
     classifiers=[],
+    install_requires=[
+        'python-igraph',
+        'nibabel',
+        'numpy',
+        'scipy',
+        'dipy'
+    ]
 )
