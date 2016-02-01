@@ -1,13 +1,15 @@
-# Welcome to ndmg!
-DTI Connectome Estimation from structural MR Images (**now on pip!!!**) 
+# ndmg
 
-This page describes how brain graphs are generated in our service from Diffusion Weighted MRI (dMRI), and structural MRI (sMRI) images of human brains, as well as a template atlas (MNI152, for instance). The MRImages to Graphs (m2g) pipeline is the successor of MRCAP, MIGRAINE, and m2g. ndmg combines dMRI and sMRI data from a single subject to estimate a high-level connectome. The connectomes returned describe regions of connectivity within the brain at multiple levels of resolution in the form of a graph - where a node ranges from a single voxel scale ~1 mm^3 to large cortical regions ~20 cm^3.
+[![](https://img.shields.io/pypi/v/ndmg.svg)](https://pypi.python.org/pypi/ndmg)
+![](https://img.shields.io/badge/pep8-0E-green.svg?style=flat)
+[![Neurodata.io](https://img.shields.io/badge/Visit-neurodata.io-ff69b4.svg)](http://neurodata.io/)
 
-Our pipeline has now been rewritten using PEP-8 compliant python and can now be installed using pip!
+NeuroData's MR Graphs package, **ndmg** (pronounced "***nutmeg***"), is the successor of the MRCAP, MIGRAINE, and m2g pipelines. **ndmg** combines dMRI and sMRI data from a single subject to estimate a high-level connectome reliably and scalably.
 
-We are currently processing brain scans, and the resulting graphs are made available to the community on an ongoing basis.
+We are processing brain scans on an ongoing basis, and the resulting graphs are made available to the community through our [graph database](http://openconnecto.me/graph-services/).
 
-This tutorial will lead you through installing the **ndmg** (pronounced "***nutmeg***") package, and lead you all along the way to using one of the pre-made pipelines for connectome estimation from diffusion and structural MRI.
+## Getting Started
+This tutorial will lead you through installing the **ndmg** package and lead you all along the way to using one of the pre-made end-to-end pipelines for connectome estimation from diffusion and structural MRI.
 
 ### Installing ndmg
 Installing **ndmg** is very simple! We have a few dependencies which must be installed, but once that's taken care of you are ready to dive in!
