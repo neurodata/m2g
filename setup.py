@@ -13,7 +13,8 @@ setup(
         'ndmg.track',
         'ndmg.graph',
         'ndmg.stats',
-        'ndmg.utils'
+        'ndmg.utils',
+        'ndmg.scripts'
     ],
     version=VERSION,
     description='Neuro Data MRI to Graphs Pipeline',
