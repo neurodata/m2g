@@ -8,4 +8,4 @@ from .track.track import track as track
 # from .preproc.preproc import preproc as preproc
 from .utils.utils import utils as utils
 
-version = "0.0.1"
+version = "0.0.3"
