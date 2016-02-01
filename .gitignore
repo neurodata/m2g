@@ -7,3 +7,5 @@
 *.nii.gz
 *.so
 *.o
+*.egg*
+build/

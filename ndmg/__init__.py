@@ -7,5 +7,6 @@ from .track.track import track as track
 # from .stats.stats import stats as stats
 # from .preproc.preproc import preproc as preproc
 from .utils.utils import utils as utils
+from .scripts import *
 
-version = "0.0.3"
+version = "0.0.4"
