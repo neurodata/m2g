@@ -78,6 +78,10 @@ def run_ndmg(dti, bvals, bvecs, mprage, atlas, mask, labels, outdir):
     print "Beginning tractography..."
     # Compute tensors and track fiber streamlines
     tens, tracks = mgt().eudx_basic(aligned_dti, mask, gtab, seed_num=1000000)
+    
+    # And save them to disk
+    np.savez(tensors, tens)
+    np.savez(fibers, tracks)
 
     # Generate graphs from streamlines for each parcellation
     for idx, label in enumerate(label_name):
@@ -87,11 +91,6 @@ def run_ndmg(dti, bvals, bvecs, mprage, atlas, mask, labels, outdir):
         g.make_graph(tracks)
         g.summary()
         g.save_graph(graphs[idx])
-
-    print "Saving derivatives..."
-    # Save derivatives to disk
-    np.savez(tensors, tens)
-    np.savez(fibers, tracks)
 
     print "Execution took: " + str(datetime.now() - startTime)
     print "Complete!"
