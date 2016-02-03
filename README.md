@@ -18,6 +18,8 @@ Installing **ndmg** is very simple! We have a few dependencies which must be ins
 
     pip install ndmg
 
+On some systems, python-igraph requires a separate pip install, and may require the separate compilation of the igraph C core.  Please see the igraph website for additional details.
+
 ### Readying your data
 Once **ndmg** is installed, the next thing you need to do is track down your data. If you don't have data readily available, you can [borrow some of ours](http://openconnecto.me/mrdata/share/demo_data.zip). The data you'll need are the following:
 
