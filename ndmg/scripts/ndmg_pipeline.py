@@ -69,7 +69,7 @@ def run_ndmg(dti, bvals, bvecs, mprage, atlas, mask, labels, outdir):
     # Creates gradient table from bvalues and bvectors
     print "Generating gradient table..."
     dti1 = outdir + "/tmp/" + dti_name + "_t1.nii.gz"
-    gtab = mgu().load_bval_bvec(bvals, bvecs, dti, dti1)
+    gtab = mgu().load_bval_bvec_dti(bvals, bvecs, dti, dti1)
 
     # Align DTI volumes to Atlas
     print "Aligning volumes..."
@@ -77,8 +77,8 @@ def run_ndmg(dti, bvals, bvecs, mprage, atlas, mask, labels, outdir):
 
     print "Beginning tractography..."
     # Compute tensors and track fiber streamlines
-    tens, tracks = mgt().eudx_basic(aligned_dti, mask, gtab, seed_num=1000000)
-    
+    tens, tracks = mgt().eudx_basic(aligned_dti, mask, gtab, stop_val=0.2)
+
     # And save them to disk
     np.savez(tensors, tens)
     np.savez(fibers, tracks)

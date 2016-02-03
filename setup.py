@@ -29,7 +29,7 @@ setup(
     ],
     classifiers=[],
     install_requires=[
-        'python-igraph',
+        'networkx',
         'nibabel',
         'numpy',
         'scipy',

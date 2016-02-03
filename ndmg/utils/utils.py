@@ -35,7 +35,7 @@ class utils():
 
         pass
 
-    def load_bval_bvec(self, fbval, fbvec, dti_file, dti_file_out):
+    def load_bval_bvec_dti(self, fbval, fbvec, dti_file, dti_file_out):
         """
         Takes bval and bvec files and produces a structure in dipy format
 
@@ -66,6 +66,24 @@ class utils():
                                  header=img.get_header())
         dti_new.update_header()
         nb.save(dti_new, dti_file_out)
+
+        gtab = gradient_table(bvals, bvecs, atol=0.01)
+
+        print gtab.info
+        return gtab
+
+    def load_bval_bvec(self, fbval, fbvec):
+        """
+        Takes bval and bvec files and produces a structure in dipy format
+
+        **Positional Arguments:**
+
+                streamlines:
+                    - Fiber streamlines either file or array in a dipy EuDX
+                      or compatible format.
+        """
+
+        bvals, bvecs = read_bvals_bvecs(fbval, fbvec)
 
         gtab = gradient_table(bvals, bvecs, atol=0.01)
 

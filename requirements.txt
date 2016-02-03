@@ -2,4 +2,4 @@ numpy
 scipy
 nibabel
 dipy
-python-igraph
+networkx
