@@ -19,11 +19,12 @@
 # Created by Greg Kiar on 2016-01-28.
 # Email: gkiar@jhu.edu
 
-import os.path as op
 from subprocess import Popen, PIPE
+import os.path as op
 import ndmg.utils as ndu
 import nibabel as nb
 import numpy as np
+import nilear.image as nl
 
 
 class register(object):
@@ -99,6 +100,33 @@ class register(object):
         p.communicate()
         pass
 
+    def resample(self, base, target, template):
+        """
+        Resamples the image such that images which have already been aligned
+        in real coordinates also overlap in the image/voxel space.
+
+        **Positional Arguments**
+                base:
+                    - Image to be aligned
+                target:
+                    - Name of image after alignment
+                template:
+                    - Image that is the target of the alignment
+        """
+        # Loads images
+        template_im = nb.load(template)
+        base_im = nb.load(base)
+
+        # Aligns images
+        target_im = nl.resample_img(base_im,
+                                    target_affine=template_im.get_affine(),
+                                    target_shape=template_im.get_data().shape,
+                                    interpolation="nearest")
+
+        # Saves new image
+        nb.save(target_im, ingested)
+        pass
+
     def dti2atlas(self, dti, gtab, mprage, atlas, aligned_dti, outdir):
         """
         Aligns two images and stores the transform between them
@@ -125,6 +153,7 @@ class register(object):
         atlas_name = op.splitext(op.splitext(op.basename(atlas))[0])[0]
 
         dti2 = outdir + "/tmp/" + dti_name + "_t2.nii.gz"
+        temp_aligned = outdir + "/tmp/" + dti_name + "_ta.nii.gz"
         b0 = outdir + "/tmp/" + dti_name + "_b0.nii.gz"
         xfm1 = outdir + "/tmp/" + dti_name + "_" + mprage_name + "_xfm.mat"
         xfm2 = outdir + "/tmp/" + mprage_name + "_" + atlas_name + "_xfm.mat"
@@ -157,4 +186,5 @@ class register(object):
         p.communicate()
 
         # Applies combined transform to dti image volume
-        self.applyxfm(dti2, atlas, xfm3, aligned_dti)
+        self.applyxfm(dti2, atlas, xfm3, temp_aligned)
+        self.resample(temp_aligned, aligned_dti, atlas)
