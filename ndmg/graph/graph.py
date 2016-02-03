@@ -21,7 +21,7 @@
 
 from itertools import combinations
 import numpy as np
-import igraph as ig
+import networkx as nx
 import nibabel as nb
 
 
@@ -62,7 +62,7 @@ class graph(object):
                     - Fiber streamlines either file or array in a dipy EuDX
                       or compatible format.
         """
-        g = np.zeros((self.N, self.N))
+        g = np.zeros([self.N, self.N], dtype='int')
         templabel = nb.load(self.rois)
         label = templabel.get_data()
 
@@ -84,11 +84,12 @@ class graph(object):
             ff = list(combinations(f, 2))
 
             for z in range(np.shape(ff)[0]):
-                g[ff[z][0]-1, ff[z][1]-1] = g[ff[z][0]-1, ff[z][1]-1] + 1
+                g[ff[z][0]-1, ff[z][1]-1] += 1
 
-        self.g = ig.Graph.Weighted_Adjacency(list(g), mode='undirected',
-                                             attr='weight')
-        self.g.vs['ids'] = np.unique(label)[np.unique(label) > 0]
+        self.g = nx.from_numpy_matrix(g)
+
+        # TODO
+        # self.g.vs['ids'] = np.unique(label)[np.unique(label) > 0]
 
         pass
 
@@ -116,12 +117,18 @@ class graph(object):
                 fmt:
                     - Output graph format
         """
-        self.g.save(graphname, format=fmt)
+        if fmt == 'graphml':
+            nx.write_graphml(self.g, graphname)
+        else:
+            Error('graphml is the only format currently supported')
         pass
 
     def summary(self):
         """
         User friendly wrapping and display of graph properties
+        """
+
+        print "not yet implemented with new networkx interface"
         """
         print "Graph attributes: " +\
               ("None" if len(self.g.attributes()) is 0
@@ -136,4 +143,5 @@ class graph(object):
         print "Edge attributes: " +\
               ("None" if len(self.g.es.attributes()) is 0
                else ", ".join([str(x) for x in self.g.es.attributes()]))
+        """
         pass

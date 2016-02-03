@@ -39,11 +39,11 @@ class track():
         # WGR:TODO rewrite help text
         pass
 
-    def eudx_basic(self, dti_file, mask_file, gtab,
-                   seed_num=100000, stop_val=0.1):
+    def eudx_basic(self, dti_file, mask_file, gtab, stop_val=0.1):
         """
         Tracking with basic tensors and basic eudx - experimental
-
+        We now force seeding at every voxel in the provided mask for
+        simplicity.  Future functionality will extend these options.
         **Positional Arguments:**
 
                 dti_file:
@@ -54,8 +54,6 @@ class track():
                     - dipy formatted bval/bvec Structure
 
         **Optional Arguments:**
-                seed_num:
-                    - Number of seeds to use for fiber tracking
                 stop_val:
                     - Value to cutoff fiber track
         """
@@ -68,11 +66,15 @@ class track():
         mask = img.get_data()
         mask = mask > 0  # to ensure binary mask
 
+        # use all points in mask
+        seedIdx = np.where(mask == True)
+        seedIdx = np.transpose(seedIdx)
+
         model = TensorModel(gtab)
         ten = model.fit(data, mask)
         sphere = get_sphere('symmetric724')
         ind = quantize_evecs(ten.evecs, sphere.vertices)
-        eu = EuDX(a=ten.fa, ind=ind, seeds=seed_num,
+        eu = EuDX(a=ten.fa, ind=ind, seeds=seedIdx,
                   odf_vertices=sphere.vertices, a_low=stop_val)
         tracks = [e for e in eu]
         return (ten, tracks)

@@ -14,7 +14,7 @@ This tutorial will lead you through installing the **ndmg** package and lead you
 ### Installing ndmg
 Installing **ndmg** is very simple! We have a few dependencies which must be installed, but once that's taken care of you are ready to dive in!
 
-**ndmg** relies on: [FSL](http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FslInstallation), [DiPy](http://nipy.org/dipy/), [igraph](http://igraph.org/python/), and [nibabel](http://nipy.org/nibabel/) primarily, as well as more standard libraries such as [numpy](http://www.numpy.org/) and [scipy](http://www.scipy.org/). You should install FSL through the instructions on their website. Then, you can install **ndmg** with the following command and it'll handle the rest:
+**ndmg** relies on: [FSL](http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FslInstallation), [DiPy](http://nipy.org/dipy/), [networkx](https://networkx.github.io/), and [nibabel](http://nipy.org/nibabel/), as well as [numpy](http://www.numpy.org/) and [scipy](http://www.scipy.org/). You should install FSL through the instructions on their website. Then, you can install **ndmg** with the following command and it'll handle the rest:
 
     pip install ndmg
 
