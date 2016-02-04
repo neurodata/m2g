@@ -76,7 +76,7 @@ Our v0.0.1 version of ndmg achieved excellent (although not quite perfect) TRT. 
 We provide the ability to exercise our entire end to end pipeline in < 3 minutes on downsampled data.  The connectome produced may not have neurological significance, but this test should ensure that all of the pieces of the code and driver script still execute and is a great interface check.
 
 ~~~
-python ndmg_pipeline.py tests/data/KKI2009_113_1_DTI_s4.nii tests/data/KKI2009_113_1_DTI_s4.bval tests/data/KKI2009_113_1_DTI_s4.bvec tests/data/KKI2009_113_1_MPRAGE_s4.nii tests/data/MNI152_T1_1mm_s4.nii.gz tests/data/MNI152_T1_1mm_brain_mask_s4.nii.gz outputs tests/data/desikan_s4.nii.gz
+python ndmg/scripts/ndmg_pipeline.py tests/data/KKI2009_113_1_DTI_s4.nii tests/data/KKI2009_113_1_DTI_s4.bval tests/data/KKI2009_113_1_DTI_s4.bvec tests/data/KKI2009_113_1_MPRAGE_s4.nii tests/data/MNI152_T1_1mm_s4.nii.gz tests/data/MNI152_T1_1mm_brain_mask_s4.nii.gz tests/data/outputs tests/data/desikan_s4.nii.gz
 ~~~
 
 ## Questions?
