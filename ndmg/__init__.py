@@ -9,4 +9,4 @@ from .track.track import track as track
 from .utils.utils import utils as utils
 from .scripts import *
 
-version = "0.0.5"
+version = "0.0.6"
