@@ -108,7 +108,7 @@ class register(object):
         **Positional Arguments**
                 base:
                     - Image to be aligned
-                target:
+                ingested:
                     - Name of image after alignment
                 template:
                     - Image that is the target of the alignment
@@ -116,13 +116,11 @@ class register(object):
         # Loads images
         template_im = nb.load(template)
         base_im = nb.load(base)
-
         # Aligns images
         target_im = nl.resample_img(base_im,
                                     target_affine=template_im.get_affine(),
                                     target_shape=template_im.get_data().shape,
                                     interpolation="nearest")
-
         # Saves new image
         nb.save(target_im, ingested)
         pass
@@ -161,7 +159,7 @@ class register(object):
 
         # Align DTI volumes to each other
         self.align_slices(dti, dti2, np.where(gtab.b0s_mask)[0])
-
+        dti2=dti
         # Loads DTI image in as data and extracts B0 volume
         import ndmg.utils as mgu
         dti_im = nb.load(dti2)
@@ -186,5 +184,5 @@ class register(object):
         p.communicate()
 
         # Applies combined transform to dti image volume
-        self.applyxfm(dti2, atlas, xfm3, temp_aligned)
+        self.applyxfm(dti2, atlas, xfm3, aligned_dti)
         self.resample(temp_aligned, aligned_dti, atlas)
