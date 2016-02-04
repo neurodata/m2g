@@ -184,5 +184,5 @@ class register(object):
         p.communicate()
 
         # Applies combined transform to dti image volume
-        self.applyxfm(dti2, atlas, xfm3, aligned_dti)
+        self.applyxfm(dti2, atlas, xfm3, temp_aligned)
         self.resample(temp_aligned, aligned_dti, atlas)
