@@ -77,8 +77,12 @@ class graph(object):
             f = []
 
             for x in range(ss.shape[0]):
-                f.append(label[ss[x][0], ss[x][1], ss[x][2]])
-
+                try:
+                    f.append(label[ss[x][0], ss[x][1], ss[x][2]])
+                except:
+                    print [ss[x][0], ss[x][1], ss[x][2]]
+                    pass
+                    
             f = np.unique(f)
             f = f[f != 0]
             ff = list(combinations(f, 2))

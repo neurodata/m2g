@@ -31,8 +31,10 @@ setup(
     install_requires=[
         'networkx',
         'nibabel',
+        'nilearn',
+        'sklearn',
         'numpy',
         'scipy',
-        'dipy'
+        'dipy',
     ]
 )
