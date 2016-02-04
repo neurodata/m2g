@@ -67,7 +67,7 @@ class track():
         mask = mask > 0  # to ensure binary mask
 
         # use all points in mask
-        seedIdx = np.where(mask is True)
+        seedIdx = np.where(mask == 1)
         seedIdx = np.transpose(seedIdx)
 
         model = TensorModel(gtab)
