@@ -101,11 +101,62 @@ ids <- clean_ids(pair[[2]], rule)
 #compute RDF and MNR for raw graphs
 dist <- compute_distance(graphs)
 rdf <- compute_rdf(dist, ids, scans)
+print("Full graph:")
 mnr <- compute_mnr(rdf, output=TRUE)
-
 
 jpeg(filename=args[l-1])
 image(dist)
+
+
+#redo for inter-hemispheric connections only
+#TODO be smarter
+g_inter =  graphs
+for (i in 1:(rois/2)) {
+    for (j in 1:(rois/2)) {
+        for (k in 1:dim(g_inter)[3]) {
+            g_inter[i,j,k] = 0
+        }
+    }
+}
+for (i in (rois/2):(rois)) {
+    for (j in (rois/2):(rois)) {
+        for (k in 1:dim(g_inter)[3]) {
+            g_inter[i,j,k] = 0
+        }
+    }
+}
+dist_inter <- compute_distance(g_inter)
+rdf_inter <- compute_rdf(dist_inter, ids, scans)
+print("Inter-hemisphere:")
+mnr_inter <- compute_mnr(rdf_inter, remove_outliers=FALSE, thresh=0.2, output=TRUE)
+jpeg(filename=paste(args[l-1],'inter.jpeg', sep=''))
+image(dist_inter)
+
+
+#redo for intra-hemispheric connections only
+g_intra = graphs
+for (i in (rois/2):rois) {
+    for (j in 1:(rois/2)) {
+        for (k in 1:dim(g_intra)[3]) {
+            g_intra[i,j,k] = 0
+        }
+    }
+}
+for (i in 1:(rois/2)) {
+    for (j in (rois/2):rois) {
+        for (k in 1:dim(g_intra)[3]) {
+            g_intra[i,j,k] = 0
+        }
+    }
+}
+dist_intra <- compute_distance(g_intra)
+rdf_intra <- compute_rdf(dist_intra, ids, scans)
+print("Intra-hemisphere:")
+mnr_intra <- compute_mnr(rdf_intra, remove_outliers=FALSE, thresh=0.2, output=TRUE)
+jpeg(filename=paste(args[l-1],'intra.jpeg', sep=''))
+image(dist_intra)
+
+
 dev.off()
 ### Suggested alternatives: log distances, nbin, and plotting
 
