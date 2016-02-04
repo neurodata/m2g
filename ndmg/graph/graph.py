@@ -82,7 +82,7 @@ class graph(object):
                 except:
                     print [ss[x][0], ss[x][1], ss[x][2]]
                     pass
-                    
+
             f = np.unique(f)
             f = f[f != 0]
             ff = list(combinations(f, 2))
