@@ -24,7 +24,7 @@ import os.path as op
 import ndmg.utils as ndu
 import nibabel as nb
 import numpy as np
-import nilear.image as nl
+import nilearn.image as nl
 
 
 class register(object):
@@ -100,7 +100,7 @@ class register(object):
         p.communicate()
         pass
 
-    def resample(self, base, target, template):
+    def resample(self, base, ingested, template):
         """
         Resamples the image such that images which have already been aligned
         in real coordinates also overlap in the image/voxel space.

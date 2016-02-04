@@ -1,5 +1,7 @@
 numpy
 scipy
 nibabel
+nilearn
+sklearn
 dipy
 networkx
