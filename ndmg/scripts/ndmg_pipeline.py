@@ -56,7 +56,7 @@ def run_ndmg(dti, bvals, bvecs, mprage, atlas, mask, labels, outdir):
     tensors = outdir + "/tensors/" + dti_name + "_tensors.npz"
     fibers = outdir + "/fibers/" + dti_name + "_fibers.npz"
     print "This pipeline will produce the following derivatives..."
-    print "DTI volume resitered to atlas: " + aligned_dti
+    print "DTI volume registered to atlas: " + aligned_dti
     print "Diffusion tensors in atlas space: " + tensors
     print "Fiber streamlines in atlas space: " + fibers
 
