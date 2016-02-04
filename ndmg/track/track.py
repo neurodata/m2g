@@ -64,10 +64,9 @@ class track():
         img = nb.load(mask_file)
 
         mask = img.get_data()
-        mask = mask > 0  # to ensure binary mask
 
         # use all points in mask
-        seedIdx = np.where(mask == 1)
+        seedIdx = np.where(mask > 0)  # seed everywhere not equal to zero
         seedIdx = np.transpose(seedIdx)
 
         model = TensorModel(gtab)
