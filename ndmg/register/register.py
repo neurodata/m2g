@@ -159,7 +159,7 @@ class register(object):
 
         # Align DTI volumes to each other
         self.align_slices(dti, dti2, np.where(gtab.b0s_mask)[0])
-        dti2=dti
+
         # Loads DTI image in as data and extracts B0 volume
         import ndmg.utils as mgu
         dti_im = nb.load(dti2)
