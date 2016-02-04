@@ -24,7 +24,8 @@ load_graphs <- function(fnames, rois, thresh=1e5) {
   size <- 0
   edges <- 0
   fail <- 0
-  graphs <- array(rep(NaN, rois*rois*N), c(rois, rois, N))
+  version
+  graphs <- array(rep(NaN, as.numeric(rois*rois*N)), c(rois, rois, N))
   ids <- array(NaN, N)
   for (i in 1:N) {
     res <- try(tempg <- read.graph(fnames[i], format='graphml'))
