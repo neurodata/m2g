@@ -62,9 +62,20 @@ class graph(object):
                     - Fiber streamlines either file or array in a dipy EuDX
                       or compatible format.
         """
-        g = np.zeros([self.N, self.N], dtype='int')
+
+        # initialize graph
+        g = nx.Graph
+
+        # identify and add nodes
+
         templabel = nb.load(self.rois)
         label = templabel.get_data()
+        n_ids = np.unique(label)
+        
+        # TODO FIXME
+        # n_ids = n_ids[n_ids != 0]
+
+        g.add_nodes_from(n_ids)
 
         print "# of Streamlines: " + str(np.shape(streamlines)[0])
 
@@ -84,10 +95,13 @@ class graph(object):
             ff = list(combinations(f, 2))
 
             for z in range(np.shape(ff)[0]):
-                g[ff[z][0]-1, ff[z][1]-1] += 1
-
-        self.g = nx.from_numpy_matrix(g)
-
+                # add edges
+                if g.has_edge(ff[z][0], ff[z][1]):
+                    # edge exists, increment
+                    g[ff[z][0]][ff[z][1]]['weight'] += 1
+                else:
+                    # new edge
+                    g.add_edge(ff[z][0], ff[z][1], weight=1)
         # TODO
         # self.g.vs['ids'] = np.unique(label)[np.unique(label) > 0]
 
