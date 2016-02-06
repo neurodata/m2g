@@ -3,12 +3,11 @@ python:
     - "2.7"
 virtualenv:
   system_site_packages: true
-before_install:
- - sudo apt-get install -qq python-numpy python-scipy
 install:
     - sudo apt-get update
     - sudo apt-get install python-dev
     - sudo apt-get install python-setuptools
+    - sudo apt-get install python-numpy python-scipy
     - sudo apt-get install zlib1g-dev
     - sudo apt-get install python-matplotlib python-nose
     - sudo easy_install pip
