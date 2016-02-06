@@ -1,20 +1,21 @@
 language: python
 python:
     - "2.7"
+before_install:
+  - sudo apt-get install libblas-dev
+  - sudo apt-get install liblapack-dev
+  - sudo apt-get install gfortran
 install:
-    - sudo apt-get autoremove
     - sudo apt-get update
     - sudo apt-get install python-dev
     - sudo apt-get install python-setuptools
     - sudo apt-get install python-numpy
     - sudo apt-get install zlib1g-dev
-    - sudo apt-get install libhdf5-serial-dev
     - sudo apt-get install python-scipy python-matplotlib python-nose
     - sudo easy_install pip
     - sudo pip install cython
     - pip install numpy
     - pip install coveralls
-    - pip install json-spec
     - pip install wget
     - pip install nibabel
     - pip install nilearn
