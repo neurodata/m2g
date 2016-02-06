@@ -87,10 +87,10 @@ def run_ndmg(dti, bvals, bvecs, mprage, atlas, mask, labels, outdir):
     for idx, label in enumerate(label_name):
         print "Generating graph for " + label + " parcellation..."
         labels_im = nb.load(labels[idx])
-        g = mgg(len(np.unique(labels_im.get_data()))-1, labels[idx])
-        g.make_graph(tracks)
-        g.summary()
-        g.save_graph(graphs[idx])
+        g1 = mgg(len(np.unique(labels_im.get_data()))-1, labels[idx])
+        g1.make_graph(tracks)
+        g1.summary()
+        g1.save_graph(graphs[idx])
 
     print "Execution took: " + str(datetime.now() - startTime)
     print "Complete!"
