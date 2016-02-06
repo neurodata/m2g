@@ -1,0 +1,27 @@
+language: python
+python:
+    - "2.7"
+install:
+    - sudo apt-get autoremove
+    - sudo apt-get update
+    - sudo apt-get install python-dev
+    - sudo apt-get install python-setuptools
+    - sudo apt-get install python-numpy
+    - sudo apt-get install zlib1g-dev
+    - sudo apt-get install libhdf5-serial-dev
+    - sudo apt-get install python-scipy python-matplotlib python-nose
+    - sudo easy_install pip
+    - sudo pip install cython
+    - pip install .
+    - pip install numpy
+    - pip install coveralls
+    - pip install json-spec
+    - pip install wget
+    - pip install nibabel
+    - pip install nilearn
+    - pip install dipy
+    - pip install sklearn
+    - pip install networkx
+script:
+    - coverage run -m unittest discover
+after_success: coveralls
