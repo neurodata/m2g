@@ -20,8 +20,8 @@ setup(
     description='Neuro Data MRI to Graphs Pipeline',
     author='Greg Kiar and Will Gray Roncal',
     author_email='gkiar@jhu.edu, wgr@jhu.edu',
-    url='https://github.com/openconnectome/ndmg',
-    download_url='https://github.com/openconnectome/ndmg/tarball/' + VERSION,
+    url='https://github.com/neurodata/ndmg',
+    download_url='https://github.com/neurodata/ndmg/tarball/' + VERSION,
     keywords=[
         'connectome',
         'mri',
