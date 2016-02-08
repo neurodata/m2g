@@ -33,8 +33,8 @@ setup(
         'nibabel>=2.0',
         'nilearn>=0.2',
         'sklearn>=0.0',
-        'numpy>=1.1',
-        'scipy>=0.17',
+        'numpy',
+        'scipy',
         'dipy>=0.1',
     ]
 )
