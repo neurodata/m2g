@@ -1,20 +1,19 @@
 language: python
 python:
     - "2.7"
+virtualenv:
+  system_site_packages: true
 install:
-    - sudo apt-get autoremove
     - sudo apt-get update
     - sudo apt-get install python-dev
     - sudo apt-get install python-setuptools
-    - sudo apt-get install python-numpy
+    - sudo apt-get install python-numpy python-scipy
     - sudo apt-get install zlib1g-dev
-    - sudo apt-get install libhdf5-serial-dev
-    - sudo apt-get install python-scipy python-matplotlib python-nose
+    - sudo apt-get install python-matplotlib python-nose
     - sudo easy_install pip
     - sudo pip install cython
     - pip install numpy
     - pip install coveralls
-    - pip install json-spec
     - pip install wget
     - pip install nibabel
     - pip install nilearn

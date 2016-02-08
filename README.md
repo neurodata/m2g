@@ -1,6 +1,7 @@
 # ndmg
 
 [![](https://img.shields.io/pypi/v/ndmg.svg)](https://pypi.python.org/pypi/ndmg)
+![](https://travis-ci.org/neurodata/ndmg.svg?branch=master)
 ![](https://img.shields.io/badge/pep8-0E-green.svg?style=flat)
 [![Neurodata.io](https://img.shields.io/badge/Visit-neurodata.io-ff69b4.svg)](http://neurodata.io/)
 
