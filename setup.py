@@ -29,12 +29,12 @@ setup(
     ],
     classifiers=[],
     install_requires=[
-        'networkx',
-        'nibabel',
-        'nilearn',
-        'sklearn',
-        'numpy',
-        'scipy',
-        'dipy',
+        'networkx>=1.11',
+        'nibabel>=2.0',
+        'nilearn>=0.2',
+        'sklearn>=0.0',
+        'numpy>=1.1',
+        'scipy>=0.17',
+        'dipy>=0.1',
     ]
 )
