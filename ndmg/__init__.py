@@ -7,6 +7,6 @@ from .track.track import track as track
 # from .stats.stats import stats as stats
 # from .preproc.preproc import preproc as preproc
 from .utils.utils import utils as utils
-from .scripts import *
+from .scripts import ndmg_pipeline as ndmg_pipeline
 
-version = "0.0.7"
+version = "0.0.8"
