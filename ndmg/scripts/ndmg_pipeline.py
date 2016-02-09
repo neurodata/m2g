@@ -31,7 +31,8 @@ import numpy as np
 import nibabel as nb
 
 
-def ndmg_pipeline(dti, bvals, bvecs, mprage, atlas, mask, labels, outdir):
+def ndmg_pipeline(dti, bvals, bvecs, mprage, atlas, mask, labels, outdir,
+                  clean=False):
     """
     Creates a brain graph from MRI data
     """
@@ -95,12 +96,11 @@ def ndmg_pipeline(dti, bvals, bvecs, mprage, atlas, mask, labels, outdir):
     print "Execution took: " + str(datetime.now() - startTime)
 
     # Clean temp files
-    print "Cleaning up intermediate files... "
-    cmd = 'rm -rf ' + outdir + '/tensors ' + outdir + '/reg_dti ' + outdir +\
-          '/tmp'
-    print cmd
-    p = Popen(cmd, stdout=PIPE, stderr=PIPE, shell=True)
-    p.communicate()
+    if clean:
+        print "Cleaning up intermediate files... "
+        cmd = 'rm -f ' + tensors + ' ' + dti1 + ' ' + aligned_dti
+        p = Popen(cmd, stdout=PIPE, stderr=PIPE, shell=True)
+        p.communicate()
 
     print "Complete!"
     pass
@@ -120,6 +120,8 @@ def main():
                         derivatives will be stored")
     parser.add_argument("labels", action="store", nargs="*", help="Nifti \
                         labels of regions of interest in atlas space")
+    parser.add_argument("-c", "--clean", action="store_true", default=False,
+                        help="Whether or not to delete intemediates")
     result = parser.parse_args()
 
     # Create output directory
@@ -130,7 +132,8 @@ def main():
     p.communicate()
 
     ndmg_pipeline(result.dti, result.bval, result.bvec, result.mprage,
-                  result.atlas, result.mask, result.labels, result.outdir)
+                  result.atlas, result.mask, result.labels, result.outdir,
+                  result.clean)
 
 
 if __name__ == "__main__":
