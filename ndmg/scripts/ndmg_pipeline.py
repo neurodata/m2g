@@ -15,7 +15,7 @@
 # limitations under the License.
 #
 
-# run_ndmg.py
+# ndmg_pipeline.py
 # Created by Greg Kiar and Will Gray Roncal on 2016-01-27.
 # Email: gkiar@jhu.edu, wgr@jhu.edu
 
@@ -31,7 +31,7 @@ import numpy as np
 import nibabel as nb
 
 
-def run_ndmg(dti, bvals, bvecs, mprage, atlas, mask, labels, outdir):
+def ndmg_pipeline(dti, bvals, bvecs, mprage, atlas, mask, labels, outdir):
     """
     Creates a brain graph from MRI data
     """
@@ -93,6 +93,15 @@ def run_ndmg(dti, bvals, bvecs, mprage, atlas, mask, labels, outdir):
         g1.save_graph(graphs[idx])
 
     print "Execution took: " + str(datetime.now() - startTime)
+
+    # Clean temp files
+    print "Cleaning up intermediate files... "
+    cmd = 'rm -rf ' + outdir + '/tensors ' + outdir + '/reg_dti ' + outdir +\
+          '/tmp'
+    print cmd
+    p = Popen(cmd, stdout=PIPE, stderr=PIPE, shell=True)
+    p.communicate()
+
     print "Complete!"
     pass
 
@@ -120,8 +129,8 @@ def main():
     p = Popen(cmd, stdout=PIPE, stderr=PIPE, shell=True)
     p.communicate()
 
-    run_ndmg(result.dti, result.bval, result.bvec, result.mprage, result.atlas,
-             result.mask, result.labels, result.outdir)
+    ndmg_pipeline(result.dti, result.bval, result.bvec, result.mprage,
+                  result.atlas, result.mask, result.labels, result.outdir)
 
 
 if __name__ == "__main__":

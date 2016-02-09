@@ -28,13 +28,13 @@ setup(
         'pipeline'
     ],
     classifiers=[],
-    install_requires=[
+    install_requires=[  # We didnt put versions for numpy, scipy, b/c travis-ci
         'networkx>=1.11',
         'nibabel>=2.0',
         'nilearn>=0.2',
         'sklearn>=0.0',
-        'numpy',
-        'scipy',
+        'numpy',  # We use nump v1.10.4
+        'scipy',  # We use 0.17.0
         'dipy>=0.1',
     ]
 )
