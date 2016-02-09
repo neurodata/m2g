@@ -186,3 +186,10 @@ class register(object):
         # Applies combined transform to dti image volume
         self.applyxfm(dti2, atlas, xfm3, temp_aligned)
         self.resample(temp_aligned, aligned_dti, atlas)
+
+        # Clean temp files
+        cmd = "rm -f " + dti2 + " " + temp_aligned + " " + b0 + " " +\
+              xfm1 + " " + xfm2 + " " + xfm3
+        print "Cleaning temporary registration files..."
+        p = Popen(cmd, stdout=PIPE, stderr=PIPE, shell=True)
+        p.communicate()
