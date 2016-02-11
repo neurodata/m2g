@@ -55,7 +55,7 @@ Sure, the above gave you a taste of what the **ndmg** package can do, but what i
 ### Validation on KKI42 Dataset
 Our v0.0.1 version of ndmg achieved excellent (although not quite perfect) TRT.  This is in active development.
 
-![](docs/desikan_trt.jpeg)
+![](docs/source/desikan_trt.jpeg)
 
     [1] "Computing test-retest reliability with the following options:"
     [1] "m2g location: /share0/m2g/src/m2g"
