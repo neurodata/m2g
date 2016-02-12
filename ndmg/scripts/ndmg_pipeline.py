@@ -27,6 +27,7 @@ import ndmg.utils as mgu
 import ndmg.register as mgr
 import ndmg.track as mgt
 import ndmg.graph as mgg
+import ndmg.preproc as mgp
 import numpy as np
 import nibabel as nb
 
@@ -70,7 +71,9 @@ def ndmg_pipeline(dti, bvals, bvecs, mprage, atlas, mask, labels, outdir,
     # Creates gradient table from bvalues and bvectors
     print "Generating gradient table..."
     dti1 = outdir + "/tmp/" + dti_name + "_t1.nii.gz"
-    gtab = mgu().load_bval_bvec_dti(bvals, bvecs, dti, dti1)
+    bvecs1 = outdir + "tmp" + dti_name + "_1.bvec"
+    mgp.rescale_bvec(bvecs, bvecs1)
+    gtab = mgu().load_bval_bvec_dti(bvals, bvecs1, dti, dti1)
 
     # Align DTI volumes to Atlas
     print "Aligning volumes..."
