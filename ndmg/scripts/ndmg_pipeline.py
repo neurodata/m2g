@@ -71,7 +71,7 @@ def ndmg_pipeline(dti, bvals, bvecs, mprage, atlas, mask, labels, outdir,
     # Creates gradient table from bvalues and bvectors
     print "Generating gradient table..."
     dti1 = outdir + "/tmp/" + dti_name + "_t1.nii.gz"
-    bvecs1 = outdir + "tmp" + dti_name + "_1.bvec"
+    bvecs1 = outdir + "/tmp/" + dti_name + "_1.bvec"
     mgp.rescale_bvec(bvecs, bvecs1)
     gtab = mgu().load_bval_bvec_dti(bvals, bvecs1, dti, dti1)
 
