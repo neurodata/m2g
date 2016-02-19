@@ -110,7 +110,7 @@ class graph(object):
             print "Error: the graph has not yet been defined."
             pass
 
-    def save_graph(self, graphname, fmt='graphml'):
+    def save_graph(self, graphname, fmt='gpickle'):
         """
         Saves the graph to disk
 
@@ -124,7 +124,9 @@ class graph(object):
                 fmt:
                     - Output graph format
         """
-        if fmt == 'graphml':
+        if fmt == 'gpickle':
+            nx.write_gpickle(self.g, graphname)
+        elif fmt == 'graphml':
             nx.write_graphml(self.g, graphname)
         else:
             Error('graphml is the only format currently supported')
