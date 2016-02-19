@@ -102,7 +102,8 @@ def ndmg_pipeline(dti, bvals, bvecs, mprage, atlas, mask, labels, outdir,
     # Clean temp files
     if clean:
         print "Cleaning up intermediate files... "
-        cmd = 'rm -f ' + tensors + ' ' + dti1 + ' ' + aligned_dti
+        cmd = 'rm -f ' + tensors + ' ' + dti1 + ' ' + aligned_dti + ' ' +\
+              bvecs1
         p = Popen(cmd, stdout=PIPE, stderr=PIPE, shell=True)
         p.communicate()
 
