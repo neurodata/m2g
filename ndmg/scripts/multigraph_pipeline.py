@@ -27,13 +27,14 @@ import nibabel as nb
 import ndmg.graph as mgg
 import numpy as np
 
+
 def multigraphs(fibers, labels, outdir):
     """
     Creates a brain graph from fiber streamlines
     """
     startTime = datetime.now()
     fiber_name = op.splitext(op.splitext(op.basename(fibers))[0])[0]
-    base = fiber_name.split('_fibers',1)[0]
+    base = fiber_name.split('_fibers', 1)[0]
     # Create output directories for graphs
     label_name = [op.splitext(op.splitext(op.basename(x))[0])[0]
                   for x in labels]
