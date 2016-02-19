@@ -36,14 +36,12 @@ def rescale_bvec(bvec, bvec_new):
                     extension `.bvec`
     """
     bv1 = np.array(np.loadtxt(bvec))
-    print bv1
     # Enforce proper dimensions
     bv1 = bv1.T if bv1.shape[0] == 3 else bv1
 
     # Normalize values not close to norm 1
     bv2 = [b/np.linalg.norm(b) if not np.isclose(np.linalg.norm(b), 0)
            else b for b in bv1]
-    print bv2
 
     try:
         assert(op.splitext(bvec_new)[1] == '.bvec')
