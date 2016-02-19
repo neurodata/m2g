@@ -33,11 +33,12 @@ import nibabel as nb
 
 
 def ndmg_pipeline(dti, bvals, bvecs, mprage, atlas, mask, labels, outdir,
-                  clean=False):
+                  clean=False, fmt='gpickle'):
     """
     Creates a brain graph from MRI data
     """
     startTime = datetime.now()
+    print fmt
 
     # Create derivative output directories
     dti_name = op.splitext(op.splitext(op.basename(dti))[0])[0]
@@ -63,7 +64,7 @@ def ndmg_pipeline(dti, bvals, bvecs, mprage, atlas, mask, labels, outdir,
     print "Fiber streamlines in atlas space: " + fibers
 
     # Again, graphs are different
-    graphs = [outdir + "/graphs/" + x + '/' + dti_name + "_" + x + ".graphml"
+    graphs = [outdir + "/graphs/" + x + '/' + dti_name + "_" + x + '.' + fmt
               for x in label_name]
     print "Graphs of streamlines downsampled to given labels: " +\
           (", ".join([x for x in graphs]))
@@ -125,6 +126,8 @@ def main():
                         labels of regions of interest in atlas space")
     parser.add_argument("-c", "--clean", action="store_true", default=False,
                         help="Whether or not to delete intemediates")
+    parser.add_argument("-f", "--fmt", action="store", default='gpickle',
+                        help="Determines graph output format")
     result = parser.parse_args()
 
     # Create output directory
@@ -136,7 +139,7 @@ def main():
 
     ndmg_pipeline(result.dti, result.bval, result.bvec, result.mprage,
                   result.atlas, result.mask, result.labels, result.outdir,
-                  result.clean)
+                  result.clean, result.fmt)
 
 
 if __name__ == "__main__":
