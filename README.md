@@ -24,7 +24,7 @@ We provide the ability to exercise our entire end to end pipeline in < 3 minutes
 
 ### Documentation
 
-Check out our full [documentation](http://docs.neurodata.io/nddocs/ndmg/) on our website, or our [function reference](http://docs.neurodata.io/ndmg/) for more information about **ndmg**.
+Check out our full [documentation](http://docs.neurodata.io/nddocs/mrgraphs/) on our website, or our [function reference](http://docs.neurodata.io/ndmg/) for more information about **ndmg**.
 
 ### Questions?
 If you're having trouble, notice a bug, or want to contribute (such as a fix to the bug you may have just found) feel free to open a git issue or pull request. Enjoy!
