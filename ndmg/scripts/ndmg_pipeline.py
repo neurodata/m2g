@@ -48,12 +48,16 @@ def ndmg_pipeline(dti, bvals, bvecs, mprage, atlas, mask, labels, outdir,
     p.communicate()
 
     # Graphs are different because of multiple atlases
-    label_name = [op.splitext(op.splitext(op.basename(x))[0])[0]
-                  for x in labels]
-    for label in label_name:
-        p = Popen("mkdir -p " + outdir + "/graphs/" + label,
+    if isinstance(labels, list):
+        label_name = [op.splitext(op.splitext(op.basename(x))[0])[0]
+                      for x in labels]
+        for label in label_name:
+            p = Popen("mkdir -p " + outdir + "/graphs/" + label,
+                      stdout=PIPE, stderr=PIPE, shell=True)
+    else:
+        label_name = op.splitext(op.splitext(op.basename(labels))[0])[0]
+        p = Popen("mkdir -p " + outdir + "/graphs/" + label_name,
                   stdout=PIPE, stderr=PIPE, shell=True)
-
     # Create derivative output file names
     aligned_dti = outdir + "/reg_dti/" + dti_name + "_aligned.nii.gz"
     tensors = outdir + "/tensors/" + dti_name + "_tensors.npz"
