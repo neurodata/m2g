@@ -99,7 +99,7 @@ def ndmg_pipeline(dti, bvals, bvecs, mprage, atlas, mask, labels, outdir,
         g1 = mgg(len(np.unique(labels_im.get_data()))-1, labels[idx])
         g1.make_graph(tracks)
         g1.summary()
-        g1.save_graph(graphs[idx])
+        g1.save_graph(graphs[idx], fmt=fmt)
 
     print "Execution took: " + str(datetime.now() - startTime)
 
