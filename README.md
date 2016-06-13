@@ -12,9 +12,17 @@ NeuroData's MR Graphs package, **ndmg** (pronounced "***nutmeg***"), is the succ
 ### Installing ndmg
 Installing **ndmg** is very simple! We have a few dependencies which must be installed, but once that's taken care of you are ready to dive in!
 
-**ndmg** relies on: [FSL](http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FslInstallation), [DiPy](http://nipy.org/dipy/), [networkx](https://networkx.github.io/), and [nibabel](http://nipy.org/nibabel/), as well as [numpy](http://www.numpy.org/) and [scipy](http://www.scipy.org/). You should install FSL through the instructions on their website. Then, you can install **ndmg** with the following command and it'll handle the rest:
+**ndmg** relies on: [FSL](http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FslInstallation), [DiPy](http://nipy.org/dipy/), [networkx](https://networkx.github.io/), and [nibabel](http://nipy.org/nibabel/), as well as [numpy](http://www.numpy.org/) and [scipy](http://www.scipy.org/). You should install FSL through the instructions on their website. Then, you can install **ndmg** with one of the following commands:
+
+#### Install from pip
 
     pip install ndmg
+
+#### Install from Github
+
+    git clone https://github.com/neurodata/ndmg
+    cd ndmg
+    python setup.py install
 
 ### Test your installation
 
