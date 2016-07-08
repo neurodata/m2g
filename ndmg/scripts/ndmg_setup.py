@@ -29,33 +29,33 @@ import glob
 def setup(inDir, dtiListFile, bvalListFile, bvecListFile, mprageListFile):
     # Create lists of files
     dti_types = ('*DTI.nii', '*DTI.nii.gz')
-    dtiFiles = [y for x in os.walk(inDir) for z in dti_types
-                for y in glob.glob(os.path.join(x[0], z))]
+    
+    dtiFiles = get_files(dti_types, inDir)
 
     bval_types = ('*.b', '*.bval')
-    bvalFiles = [y for x in os.walk(inDir) for z in bval_types
-                 for y in glob.glob(os.path.join(x[0], z))]
+    bvalFiles = get_files(bval_types, inDir)
 
     bvec_types = ('*.bvec', '*.grad')
-    bvecFiles = [y for x in os.walk(inDir) for z in bvec_types
-                 for y in glob.glob(os.path.join(x[0], z))]
+    bvecFiles = get_files(bvec_types, inDir)
 
     mprage_types = ('*MPRAGE.nii', '*MPRAGE.nii.gz')
-    mprageFiles = [y for x in os.walk(inDir) for z in mprage_types
-                   for y in glob.glob(os.path.join(x[0], z))]
+    mprageFiles = get_files(mprage_types, inDir) 
 
     # Writes lists to disk
-    with open(dtiListFile, 'wb') as thefile:
-        for item in dtiFiles:
-            thefile.write("%s\n" % item)
-    with open(bvalListFile, 'wb') as thefile:
-        for item in bvalFiles:
-            thefile.write("%s\n" % item)
-    with open(bvecListFile, 'wb') as thefile:
-        for item in bvecFiles:
-            thefile.write("%s\n" % item)
-    with open(mprageListFile, 'wb') as thefile:
-        for item in mprageFiles:
+    write_files(dtiListFile, dtiFiles)
+    write_files(bvalListFile, bvalFiles)
+    write_files(bvecListFile, bvecFiles)
+    write_files(mprageListFile, mprageFiles)
+
+
+def get_files(ftypes, inDir):
+    return [y for x in os.walk(inDir) for z in ftypes
+            for y in glob.glob(os.path.join(x[0], z))]
+
+
+def write_files(outfile, filelist):
+    with open(outfile, 'wb') as thefile:
+        for item in filelist:
             thefile.write("%s\n" % item)
 
 
