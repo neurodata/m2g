@@ -153,6 +153,7 @@ class register(object):
         dti2 = outdir + "/tmp/" + dti_name + "_t2.nii.gz"
         temp_aligned = outdir + "/tmp/" + dti_name + "_ta.nii.gz"
         b0 = outdir + "/tmp/" + dti_name + "_b0.nii.gz"
+        mprage2 = outdir + "/tmp/" + mprage_name + "_ss.nii.gz"
         xfm1 = outdir + "/tmp/" + dti_name + "_" + mprage_name + "_xfm.mat"
         xfm2 = outdir + "/tmp/" + mprage_name + "_" + atlas_name + "_xfm.mat"
         xfm3 = outdir + "/tmp/" + dti_name + "_" + atlas_name + "_xfm.mat"
@@ -174,9 +175,15 @@ class register(object):
         b0_out.update_header()
         nb.save(b0_out, b0)
 
+        # Applies skull stripping to MPRAGE volume
+        cmd = 'bet ' + mprage + ' ' + mprage2
+        print "Executing:", cmd
+        p = Popen(cmd, stdout=PIPE, stderr=PIPE, shell=True)
+        p.communicate()
+
         # Algins B0 volume to MPRAGE, and MPRAGE to Atlas
-        self.align(b0, mprage, xfm1)
-        self.align(mprage, atlas, xfm2)
+        self.align(b0, mprage2, xfm1)
+        self.align(mprage2, atlas, xfm2)
 
         # Combines transforms from previous registrations in proper order
         cmd = "convert_xfm -omat " + xfm3 + " -concat " + xfm2 + " " + xfm1
