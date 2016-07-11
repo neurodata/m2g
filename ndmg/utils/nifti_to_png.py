@@ -55,7 +55,7 @@ def convert(indir, outdir,  verbose=False):
             os.system('mkdir -p ' + outdir + "/" + chan)
 
             for count in range(int(ntime)):
-                dirname = outdir + "/" + chan + "/time" + str(count)
+                dirname = outdir + "/" + chan + "/time%04d"%count
                 if verbose:
                     print "Creating", dirname , "..."
                 os.system('mkdir -p ' + dirname)
@@ -63,7 +63,7 @@ def convert(indir, outdir,  verbose=False):
                     if verbose:
                         print "Saving slice:", slices
                     imsave(dirname + '/%04d.png'%slices,
-                           dat[:,:,slices,count].astype('float32'))
+                           dat[:,:,slices,count].astype('float32').T)
                                 
 def main():
     parser = ArgumentParser(description="")
