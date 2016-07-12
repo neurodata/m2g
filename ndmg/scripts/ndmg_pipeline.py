@@ -38,10 +38,10 @@ def ndmg_pipeline(dti, bvals, bvecs, mprage, atlas, mask, labels, outdir,
     Creates a brain graph from MRI data
     """
     startTime = datetime.now()
-    print fmt
+    print(fmt)
 
     # Create derivative output directories
-    dti_name = op.splitext(op.splitext(op.basename(dti))[0])[0]
+    dti_name = mgu().get_filename(dti)
     cmd = "mkdir -p " + outdir + "/reg_dti " + outdir + "/tensors " +\
           outdir + "/fibers " + outdir + "/graphs"
     p = Popen(cmd, stdout=PIPE, stderr=PIPE, shell=True)
@@ -49,13 +49,12 @@ def ndmg_pipeline(dti, bvals, bvecs, mprage, atlas, mask, labels, outdir,
 
     # Graphs are different because of multiple atlases
     if isinstance(labels, list):
-        label_name = [op.splitext(op.splitext(op.basename(x))[0])[0]
-                      for x in labels]
+        label_name = [mgu().get_filename(x) for x in labels]
         for label in label_name:
             p = Popen("mkdir -p " + outdir + "/graphs/" + label,
                       stdout=PIPE, stderr=PIPE, shell=True)
     else:
-        label_name = op.splitext(op.splitext(op.basename(labels))[0])[0]
+        label_name = mgu().get_filename(labels)
         p = Popen("mkdir -p " + outdir + "/graphs/" + label_name,
                   stdout=PIPE, stderr=PIPE, shell=True)
     # Create derivative output file names
