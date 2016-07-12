@@ -25,6 +25,7 @@ from subprocess import Popen, PIPE
 import os.path as op
 import nibabel as nb
 import ndmg.graph as mgg
+import ndmg.utils as mgu
 import numpy as np
 
 
@@ -33,11 +34,10 @@ def multigraphs(fibers, labels, outdir):
     Creates a brain graph from fiber streamlines
     """
     startTime = datetime.now()
-    fiber_name = op.splitext(op.splitext(op.basename(fibers))[0])[0]
+    fiber_name = mgu().get_filename(fibers)
     base = fiber_name.split('_fibers', 1)[0]
     # Create output directories for graphs
-    label_name = [op.splitext(op.splitext(op.basename(x))[0])[0]
-                  for x in labels]
+    label_name = [mgu().get_filename(x) for x in labels]
     for label in label_name:
         p = Popen("mkdir -p " + outdir + "/graphs/" + label,
                   stdout=PIPE, stderr=PIPE, shell=True)
