@@ -146,9 +146,10 @@ class register(object):
         """
         # Creates names for all intermediate files used
         # GK TODO: come up with smarter way to create these temp file names
-        dti_name = op.splitext(op.splitext(op.basename(dti))[0])[0]
-        mprage_name = op.splitext(op.splitext(op.basename(mprage))[0])[0]
-        atlas_name = op.splitext(op.splitext(op.basename(atlas))[0])[0]
+        import ndmg.utils as mgu
+        dti_name = mgu().get_filename(dti)
+        mprage_name = mgu().get_filename(mprage)
+        atlas_name = mgu().get_filename(atlas)
 
         dti2 = outdir + "/tmp/" + dti_name + "_t2.nii.gz"
         temp_aligned = outdir + "/tmp/" + dti_name + "_ta.nii.gz"
@@ -162,7 +163,6 @@ class register(object):
         self.align_slices(dti, dti2, np.where(gtab.b0s_mask)[0])
 
         # Loads DTI image in as data and extracts B0 volume
-        import ndmg.utils as mgu
         dti_im = nb.load(dti2)
         b0_im = mgu().get_b0(gtab, dti_im.get_data())
         # GK TODO: why doesn't top import work?

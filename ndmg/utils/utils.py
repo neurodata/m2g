@@ -25,6 +25,7 @@ from dipy.io import read_bvals_bvecs, read_bvec_file
 from dipy.core.gradients import gradient_table
 import numpy as np
 import nibabel as nb
+import os.path as op
 
 
 class utils():
@@ -104,3 +105,6 @@ class utils():
         b0 = np.where(gtab.b0s_mask)[0]
         b0_vol = np.squeeze(data[:, :, :, b0])  # if more than 1, use first one
         return b0_vol
+
+    def get_filename(self, label):
+        return op.splitext(op.splitext(op.basename(label))[0])[0]
