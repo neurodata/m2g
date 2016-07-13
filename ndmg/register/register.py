@@ -177,12 +177,18 @@ class register(object):
 
         # Applies skull stripping to MPRAGE volume
         cmd = 'bet ' + mprage + ' ' + mprage2
-        print "Executing:", cmd
+        print("Executing: " + cmd)
         p = Popen(cmd, stdout=PIPE, stderr=PIPE, shell=True)
         p.communicate()
 
         # Algins B0 volume to MPRAGE, and MPRAGE to Atlas
-        self.align(b0, mprage2, xfm1)
+        # self.align(b0, mprage2, xfm1)
+        cmd = 'epi_reg --epi=' + dti2 + ' --t1=' + mprage  + ' --t1brain=' +\
+              mprage2 + ' --out=' + temp_aligned
+        print("Executing: " + cmd)
+        p = Popen(cmd, stdout=PIPE, stderr=PIPE, shell=True)
+        p.communicate()
+
         self.align(mprage2, atlas, xfm2)
 
         # Combines transforms from previous registrations in proper order
@@ -191,7 +197,7 @@ class register(object):
         p.communicate()
 
         # Applies combined transform to dti image volume
-        self.applyxfm(dti2, atlas, xfm3, temp_aligned)
+        self.applyxfm(temp_aligned, atlas, xfm3, temp_aligned)
         self.resample(temp_aligned, aligned_dti, atlas)
 
         # Clean temp files
