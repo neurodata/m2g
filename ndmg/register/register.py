@@ -183,6 +183,7 @@ class register(object):
 
         # Algins B0 volume to MPRAGE, and MPRAGE to Atlas
         # self.align(b0, mprage2, xfm1)
+
         cmd = 'epi_reg --epi=' + dti2 + ' --t1=' + mprage  + ' --t1brain=' +\
               mprage2 + ' --out=' + temp_aligned
         print("Executing: " + cmd)
