@@ -190,7 +190,7 @@ class register(object):
         p = Popen(cmd, stdout=PIPE, stderr=PIPE, shell=True)
         p.communicate()
 
-        self.align(mprage2, atlas, xfm2)
+        self.align(mprage, atlas, xfm2)
 
         # Combines transforms from previous registrations in proper order
         cmd = "convert_xfm -omat " + xfm3 + " -concat " + xfm2 + " " + xfm1
