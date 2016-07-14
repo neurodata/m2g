@@ -21,7 +21,7 @@
 
 from subprocess import Popen, PIPE
 import os.path as op
-import ndmg.utils as ndu
+import ndmg.utils.utils as mgu
 import nibabel as nb
 import numpy as np
 import nilearn.image as nl
@@ -36,6 +36,7 @@ class register(object):
         apply transforms, as well as a built-in method for aligning low
         resolution dti images to a high resolution atlas.
         """
+        import ndmg.utils as mgu
         pass
 
     def align(self, inp, ref, xfm):
@@ -54,9 +55,8 @@ class register(object):
         cmd = "flirt -in " + inp + " -ref " + ref + " -omat " + xfm +\
               " -cost mutualinfo -bins 256 -dof 12 -searchrx -180 180" +\
               " -searchry -180 180 -searchrz -180 180"
-        print "Executing: " + cmd
-        p = Popen(cmd, stdout=PIPE, stderr=PIPE, shell=True)
-        p.communicate()
+        print("Executing: " + cmd)
+        mgu().execute_cmd(cmd)
         pass
 
     def applyxfm(self, inp, ref, xfm, aligned):
@@ -76,10 +76,8 @@ class register(object):
         """
         cmd = "flirt -in " + inp + " -ref " + ref + " -out " + aligned +\
               " -init " + xfm + " -interp trilinear -applyxfm"
-
-        print "Executing: " + cmd
-        p = Popen(cmd, stdout=PIPE, stderr=PIPE, shell=True)
-        p.communicate()
+        print("Executing: " + cmd)
+        mgu().execute_cmd(cmd)
         pass
 
     def align_slices(self, dti, corrected_dti, idx):
@@ -95,9 +93,8 @@ class register(object):
                     - Index of the first B0 volume in the stack
         """
         cmd = "eddy_correct " + dti + " " + corrected_dti + " " + str(idx)
-        print "Executing: " + cmd
-        p = Popen(cmd, stdout=PIPE, stderr=PIPE, shell=True)
-        p.communicate()
+        print("Executing: " + cmd)
+        status = mgu().execute_cmd(cmd)
         pass
 
     def resample(self, base, ingested, template):
@@ -125,6 +122,7 @@ class register(object):
         nb.save(target_im, ingested)
         pass
 
+
     def dti2atlas(self, dti, gtab, mprage, atlas, aligned_dti, outdir):
         """
         Aligns two images and stores the transform between them
@@ -146,7 +144,6 @@ class register(object):
         """
         # Creates names for all intermediate files used
         # GK TODO: come up with smarter way to create these temp file names
-        import ndmg.utils as mgu
         dti_name = mgu().get_filename(dti)
         mprage_name = mgu().get_filename(mprage)
         atlas_name = mgu().get_filename(atlas)
@@ -178,8 +175,7 @@ class register(object):
         # Applies skull stripping to MPRAGE volume
         cmd = 'bet ' + mprage + ' ' + mprage2
         print("Executing: " + cmd)
-        p = Popen(cmd, stdout=PIPE, stderr=PIPE, shell=True)
-        p.communicate()
+        mgu().execute_cmd(cmd)
 
         # Algins B0 volume to MPRAGE, and MPRAGE to Atlas
         # self.align(b0, mprage2, xfm1)
@@ -187,23 +183,20 @@ class register(object):
         cmd = 'epi_reg --epi=' + dti2 + ' --t1=' + mprage  + ' --t1brain=' +\
               mprage2 + ' --out=' + temp_aligned
         print("Executing: " + cmd)
-        p = Popen(cmd, stdout=PIPE, stderr=PIPE, shell=True)
-        p.communicate()
+        mgu().execute_cmd(cmd)
 
         self.align(mprage, atlas, xfm2)
 
         # Combines transforms from previous registrations in proper order
-        cmd = "convert_xfm -omat " + xfm3 + " -concat " + xfm2 + " " + xfm1
-        p = Popen(cmd, stdout=PIPE, stderr=PIPE, shell=True)
-        p.communicate()
+        # cmd = "convert_xfm -omat " + xfm3 + " -concat " + xfm2 + " " + xfm1
+        # mgu().execute_cmd(cmd)
 
         # Applies combined transform to dti image volume
-        self.applyxfm(temp_aligned, atlas, xfm3, temp_aligned)
+        self.applyxfm(temp_aligned, atlas, xfm2, temp_aligned)
         self.resample(temp_aligned, aligned_dti, atlas)
 
         # Clean temp files
         cmd = "rm -f " + dti2 + " " + temp_aligned + " " + b0 + " " +\
               xfm1 + " " + xfm2 + " " + xfm3
-        print "Cleaning temporary registration files..."
-        p = Popen(cmd, stdout=PIPE, stderr=PIPE, shell=True)
-        p.communicate()
+        print("Cleaning temporary registration files...")
+        mgu().execute_cmd(cmd)
