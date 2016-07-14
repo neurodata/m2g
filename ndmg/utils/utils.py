@@ -23,9 +23,11 @@ from itertools import combinations
 from datetime import datetime
 from dipy.io import read_bvals_bvecs, read_bvec_file
 from dipy.core.gradients import gradient_table
+from subprocess import Popen, PIPE
 import numpy as np
 import nibabel as nb
 import os.path as op
+import sys
 
 
 class utils():
@@ -107,4 +109,19 @@ class utils():
         return b0_vol
 
     def get_filename(self, label):
+        """
+        Given a fully qualified path gets just the file name, without extension
+        """
         return op.splitext(op.splitext(op.basename(label))[0])[0]
+
+    def execute_cmd(self, cmd):
+        """
+        Given a bash command, it is executed and the response piped back to the
+        calling script
+        """
+        p = Popen(cmd, stdout=PIPE, stderr=PIPE, shell=True)
+        out, err = p.communicate()
+        code = p.returncode
+        if code: 
+            sys.exit("Error  " + str(code) + ": " + err)
+        return p
