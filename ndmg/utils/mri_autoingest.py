@@ -22,15 +22,15 @@ def main():
     """
     Dataset
     """
-    dataset_name = 'KKI2009'
+    dataset_name = 'MNI152'
     imagesize = (182, 218, 182)
-    voxelres = (1000000, 1000000, 1000000)
+    voxelres = (1000000.0, 1000000.0, 1000000.0)
     offset = (0, 0, 0)
-    timerange = (0, 33)
+    timerange = (0, 199)
     scalinglevels = 0
-    scaling = 0
+    scaling = 1
     public = 1
-    metadata = "Kennedy Kreiger Institute 2009 Dataset"
+    metadata = ""
 
     # Add data set information to ingest object
     ni.add_dataset(dataset_name, imagesize, voxelres, offset,
@@ -40,8 +40,8 @@ def main():
     """
     Project
     """
-    project_name = 'KKI2009'
-    token_name = 'KKI2009'
+    project_name = 'KKI2009dti'
+    token_name = 'KKI2009dti'
 
     # Adds project information to ingest object
     ni.add_project(project_name, token_name, public)
@@ -75,7 +75,7 @@ def main():
                        windowrange, readonly)
 
     # Post the data
-    ni.post_data()
+    ni.post_data(verifytype='Folder')
 
 
 if __name__ == "__main__":
