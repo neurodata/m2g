@@ -143,18 +143,17 @@ class register(object):
                     - Aligned output dti image as a nifti image file
         """
         # Creates names for all intermediate files used
-        # GK TODO: come up with smarter way to create these temp file names
         dti_name = mgu().get_filename(dti)
         mprage_name = mgu().get_filename(mprage)
         atlas_name = mgu().get_filename(atlas)
 
-        dti2 = outdir + "/tmp/" + dti_name + "_t2.nii.gz"
-        temp_aligned = outdir + "/tmp/" + dti_name + "_ta.nii.gz"
-        b0 = outdir + "/tmp/" + dti_name + "_b0.nii.gz"
-        mprage2 = outdir + "/tmp/" + mprage_name + "_ss.nii.gz"
-        xfm1 = outdir + "/tmp/" + dti_name + "_" + mprage_name + "_xfm.mat"
-        xfm2 = outdir + "/tmp/" + mprage_name + "_" + atlas_name + "_xfm.mat"
-        xfm3 = outdir + "/tmp/" + dti_name + "_" + atlas_name + "_xfm.mat"
+        dti2 = mgu().name_tmps(outdir, dti_name, "_t2.nii.gz")
+        temp_aligned = mgu().name_tmps(outdir, dti_name, "_ta.nii.gz")
+        temp_aligned2 = mgu().name_tmps(outdir, dti_name, "_ta2.nii.gz")
+        b0 = mgu().name_tmps(outdir, dti_name, "_b0.nii.gz")
+        mprage2 = mgu().name_tmps(outdir, mprage_name, "_ss.nii.gz")
+        xfm = mgu().name_tmps(outdir, mprage_name,
+                              "_" + atlas_name + "_xfm.mat")
 
         # Align DTI volumes to each other
         self.align_slices(dti, dti2, np.where(gtab.b0s_mask)[0])
@@ -162,7 +161,6 @@ class register(object):
         # Loads DTI image in as data and extracts B0 volume
         dti_im = nb.load(dti2)
         b0_im = mgu().get_b0(gtab, dti_im.get_data())
-        # GK TODO: why doesn't top import work?
 
         # Wraps B0 volume in new nifti image
         b0_head = dti_im.get_header()
@@ -173,7 +171,7 @@ class register(object):
         nb.save(b0_out, b0)
 
         # Applies skull stripping to MPRAGE volume
-        cmd = 'bet ' + mprage + ' ' + mprage2
+        cmd = 'bet ' + mprage + ' ' + mprage2 + ' -B'
         print("Executing: " + cmd)
         mgu().execute_cmd(cmd)
 
@@ -185,18 +183,18 @@ class register(object):
         print("Executing: " + cmd)
         mgu().execute_cmd(cmd)
 
-        self.align(mprage, atlas, xfm2)
+        self.align(mprage, atlas, xfm)
 
         # Combines transforms from previous registrations in proper order
         # cmd = "convert_xfm -omat " + xfm3 + " -concat " + xfm2 + " " + xfm1
         # mgu().execute_cmd(cmd)
 
         # Applies combined transform to dti image volume
-        self.applyxfm(temp_aligned, atlas, xfm2, temp_aligned)
-        self.resample(temp_aligned, aligned_dti, atlas)
+        self.applyxfm(temp_aligned, atlas, xfm, temp_aligned2)
+        self.resample(temp_aligned2, aligned_dti, atlas)
 
         # Clean temp files
-        cmd = "rm -f " + dti2 + " " + temp_aligned + " " + b0 + " " +\
-              xfm1 + " " + xfm2 + " " + xfm3
-        print("Cleaning temporary registration files...")
-        mgu().execute_cmd(cmd)
+        #cmd = "rm -f " + dti2 + " " + temp_aligned + " " + b0 + " " +\
+        #      xfm
+        #print("Cleaning temporary registration files...")
+        #mgu().execute_cmd(cmd)
