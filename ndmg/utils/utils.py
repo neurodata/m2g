@@ -125,3 +125,6 @@ class utils():
         if code: 
             sys.exit("Error  " + str(code) + ": " + err)
         return p
+
+    def name_tmps(self, basedir, basename, extension):
+        return basedir + "/tmp/" + basename + extension
