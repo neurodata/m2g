@@ -38,12 +38,11 @@ def ndmg_pipeline(dti, bvals, bvecs, mprage, atlas, mask, labels, outdir,
     Creates a brain graph from MRI data
     """
     startTime = datetime.now()
-    print(fmt)
 
     # Create derivative output directories
     dti_name = mgu().get_filename(dti)
-    cmd = "mkdir -p " + outdir + "/reg_dti " + outdir + "/tensors " +\
-          outdir + "/fibers " + outdir + "/graphs"
+    cmd = "".join(["mkdir -p ", outdir, "/reg_dti ", outdir, "/tensors ",
+                   outdir, "/fibers ", outdir, "/graphs"])
     p = Popen(cmd, stdout=PIPE, stderr=PIPE, shell=True)
     p.communicate()
 
@@ -58,32 +57,32 @@ def ndmg_pipeline(dti, bvals, bvecs, mprage, atlas, mask, labels, outdir,
         p = Popen("mkdir -p " + outdir + "/graphs/" + label_name,
                   stdout=PIPE, stderr=PIPE, shell=True)
     # Create derivative output file names
-    aligned_dti = outdir + "/reg_dti/" + dti_name + "_aligned.nii.gz"
-    tensors = outdir + "/tensors/" + dti_name + "_tensors.npz"
-    fibers = outdir + "/fibers/" + dti_name + "_fibers.npz"
-    print "This pipeline will produce the following derivatives..."
-    print "DTI volume registered to atlas: " + aligned_dti
-    print "Diffusion tensors in atlas space: " + tensors
-    print "Fiber streamlines in atlas space: " + fibers
+    aligned_dti = "".join([outdir, "/reg_dti/", dti_name, "_aligned.nii.gz"])
+    tensors = "".join([outdir, "/tensors/", dti_name, "_tensors.npz"])
+    fibers = "".join([outdir, "/fibers/", dti_name, "_fibers.npz"])
+    print("This pipeline will produce the following derivatives...")
+    print("DTI volume registered to atlas: " + aligned_dti)
+    print("Diffusion tensors in atlas space: " + tensors)
+    print("Fiber streamlines in atlas space: " + fibers)
 
     # Again, graphs are different
-    graphs = [outdir + "/graphs/" + x + '/' + dti_name + "_" + x + '.' + fmt
+    graphs = ["".join([outdir, "/graphs/", x, '/', dti_name, "_", x, '.', fmt])
               for x in label_name]
-    print "Graphs of streamlines downsampled to given labels: " +\
-          (", ".join([x for x in graphs]))
+    print("Graphs of streamlines downsampled to given labels: " +\
+          (", ".join([x for x in graphs])))
 
     # Creates gradient table from bvalues and bvectors
     print "Generating gradient table..."
-    dti1 = outdir + "/tmp/" + dti_name + "_t1.nii.gz"
-    bvecs1 = outdir + "/tmp/" + dti_name + "_1.bvec"
+    dti1 = "".join([outdir, "/tmp/", dti_name, "_t1.nii.gz"])
+    bvecs1 = "".join([outdir, "/tmp/", dti_name, "_1.bvec"])
     mgp.rescale_bvec(bvecs, bvecs1)
     gtab = mgu().load_bval_bvec_dti(bvals, bvecs1, dti, dti1)
 
     # Align DTI volumes to Atlas
-    print "Aligning volumes..."
-    mgr().dti2atlas(dti1, gtab, mprage, atlas, aligned_dti, outdir)
+    print("Aligning volumes...")
+    mgr().dti2atlas(dti1, gtab, mprage, atlas, aligned_dti, outdir, clean)
 
-    print "Beginning tractography..."
+    print("Beginning tractography...")
     # Compute tensors and track fiber streamlines
     tens, tracks = mgt().eudx_basic(aligned_dti, mask, gtab, stop_val=0.2)
 
@@ -93,24 +92,23 @@ def ndmg_pipeline(dti, bvals, bvecs, mprage, atlas, mask, labels, outdir,
 
     # Generate graphs from streamlines for each parcellation
     for idx, label in enumerate(label_name):
-        print "Generating graph for " + label + " parcellation..."
+        print("Generating graph for " + label + "parcellation...")
         labels_im = nb.load(labels[idx])
         g1 = mgg(len(np.unique(labels_im.get_data()))-1, labels[idx])
         g1.make_graph(tracks)
         g1.summary()
         g1.save_graph(graphs[idx], fmt=fmt)
 
-    print "Execution took: " + str(datetime.now() - startTime)
+    print("Execution took: " + str(datetime.now() - startTime))
 
     # Clean temp files
     if clean:
-        print "Cleaning up intermediate files... "
-        cmd = 'rm -f ' + tensors + ' ' + dti1 + ' ' + aligned_dti + ' ' +\
-              bvecs + ' ' + outdir + '/tmp'
+        print("Cleaning up intermediate files... ")
+        cmd = "".join(['rm -f ', tensors, ' ', outdir, '/tmp/', dti_name, '*'])
         p = Popen(cmd, stdout=PIPE, stderr=PIPE, shell=True)
         p.communicate()
 
-    print "Complete!"
+    print("Complete!")
     pass
 
 

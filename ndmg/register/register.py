@@ -123,7 +123,8 @@ class register(object):
         pass
 
 
-    def dti2atlas(self, dti, gtab, mprage, atlas, aligned_dti, outdir):
+    def dti2atlas(self, dti, gtab, mprage, atlas,
+                  aligned_dti, outdir, clean=False):
         """
         Aligns two images and stores the transform between them
 
@@ -186,3 +187,10 @@ class register(object):
         # Applies combined transform to dti image volume
         self.applyxfm(temp_aligned, atlas, xfm, temp_aligned2)
         self.resample(temp_aligned2, aligned_dti, atlas)
+
+        if clean:
+            cmd = "".join(["rm -f ", dti2, " ", temp_aligned,
+                           " ", b0, " ", xfm, " ", outdir, "/tmp/",
+                           mprage_name, "*"])
+            print("Cleaning temporary registration files...")
+            mgu().execute_cmd(cmd)
