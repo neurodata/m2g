@@ -74,8 +74,8 @@ class register(object):
                 aligned:
                     - Aligned output image as a nifti image file
         """
-        cmd = "flirt -in " + inp + " -ref " + ref + " -out " + aligned +\
-              " -init " + xfm + " -interp trilinear -applyxfm"
+        cmd = "".join(["flirt -in ", inp, " -ref ", ref, " -out ", aligned,
+                       " -init ", xfm, " -interp trilinear -applyxfm"])
         print("Executing: " + cmd)
         mgu().execute_cmd(cmd)
         pass
@@ -123,7 +123,8 @@ class register(object):
         pass
 
 
-    def dti2atlas(self, dti, gtab, mprage, atlas, aligned_dti, outdir):
+    def dti2atlas(self, dti, gtab, mprage, atlas, aligned_dti,
+                  outdir, clean=None):
         """
         Aligns two images and stores the transform between them
 
@@ -176,25 +177,19 @@ class register(object):
         mgu().execute_cmd(cmd)
 
         # Algins B0 volume to MPRAGE, and MPRAGE to Atlas
-        # self.align(b0, mprage2, xfm1)
-
-        cmd = 'epi_reg --epi=' + dti2 + ' --t1=' + mprage  + ' --t1brain=' +\
-              mprage2 + ' --out=' + temp_aligned
+        cmd = "".join(['epi_reg --epi=', dti2, ' --t1=', mprage,
+                       ' --t1brain=', mprage2, ' --out=', temp_aligned])
         print("Executing: " + cmd)
         mgu().execute_cmd(cmd)
 
         self.align(mprage, atlas, xfm)
-
-        # Combines transforms from previous registrations in proper order
-        # cmd = "convert_xfm -omat " + xfm3 + " -concat " + xfm2 + " " + xfm1
-        # mgu().execute_cmd(cmd)
 
         # Applies combined transform to dti image volume
         self.applyxfm(temp_aligned, atlas, xfm, temp_aligned2)
         self.resample(temp_aligned2, aligned_dti, atlas)
 
         # Clean temp files
-        #cmd = "rm -f " + dti2 + " " + temp_aligned + " " + b0 + " " +\
-        #      xfm
-        #print("Cleaning temporary registration files...")
-        #mgu().execute_cmd(cmd)
+        if clean is not None:
+            cmd = "rm -f " + dti2 + " " + temp_aligned + " " + b0 + " " + xfm
+            print("Cleaning temporary registration files...")
+            mgu().execute_cmd(cmd)
