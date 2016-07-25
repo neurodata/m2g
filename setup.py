@@ -16,6 +16,9 @@ setup(
         'ndmg.utils',
         'ndmg.scripts'
     ],
+    scripts = [
+        'ndmg/scripts/ndmg_bids',
+    ],
     version=VERSION,
     description='Neuro Data MRI to Graphs Pipeline',
     author='Greg Kiar and Will Gray Roncal',
