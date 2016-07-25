@@ -26,25 +26,30 @@ import os.path as op
 import os
 import sys
 import ndmg.scripts.ndmg_pipeline as ndmg_pipeline
+from ndmg.scripts.ndmg_setup import get_files
 import numpy as np
 import nibabel as nb
 
-
+# Define organizational variables
 subj_tag = 'sub-'
 sesh_tag = 'ses-'
 anat_tag = 'anat'
 dwi_tag = 'dwi'
+bval_ext = '.bval'
+bvec_ext = '.bvec'
+imgs_ext = ('*.nii', '*.nii.gz')
 
-# Structure:
+# Data structure:
 # sub-<subject id>/
 #   ses-<session id>/
 #     anat/
 #       sub-<subject id>_ses-<session id>_T1w.nii.gz
 #     dwi/
 #       sub-<subject id>_ses-<session id>_dwi.nii.gz
-#       sub-<subject id>_ses-<session id>_dwi.bval
-#       sub-<subject id>_ses-<session id>_dwi.bvec
-
+#   *   sub-<subject id>_ses-<session id>_dwi.bval
+#   *   sub-<subject id>_ses-<session id>_dwi.bvec
+#
+# *these files can be anywhere up stream of the dwi data, and are inherited.
 
 def main():
     parser = ArgumentParser(description="This is an end-to-end connectome \
@@ -71,26 +76,43 @@ def main():
     subj_dir_contents = next(os.walk(op.join(inDir, subj_tag + subj)))[1]
     if any(sesh_tag in item for item in subj_dir_contents):
         if sesh is None:
-            sys.exit("Multiple sessions found, no session provided.\
+            sys.exit("Error: Multiple sessions found, no session provided.\
                      \n Try 'ndmg_bids -h' for help")
-        elif any(sesh_tag + sesh is item for item in subj_dir_contents):
-            print sesh_tag + sesh
-            sys.exit("Session ID provided does not match those found.\
+        elif (sesh_tag + sesh) not in subj_dir_contents:
+            sys.exit("Error: Session ID provided does not match those found.\
                      \nSessions found: " + ", ".join(subj_dir_contents) +\
                      "\n Try 'ndmg_bids -h' for help")
+
     loc = '%s/%s%s/%s%s/' % (inDir, subj_tag, subj, sesh_tag, sesh)
     print(loc)
 
-    # Create output directory
-    #   cmd = "mkdir -p " + result.outdir + " " + result.outdir + "/tmp"
-    #   print "Creating output directory: " + result.outdir
-    #   print "Creating output temp directory: " + result.outdir + "/tmp"
-    #   p = Popen(cmd, stdout=PIPE, stderr=PIPE, shell=True)
-    #   p.communicate()
+    anat =[x[0] for x in os.walk(loc) if anat_tag in x[0]]
+    anat_file = get_files(imgs_ext, anat[0])
 
-    #   ndmg_pipeline(result.dti, result.bval, result.bvec, result.mprage,
-    #                 result.atlas, result.mask, result.labels, result.outdir,
-    #                 result.clean, result.fmt)
+    dwi = [x[0] for x in os.walk(loc) if dwi_tag in x[0]]
+    dwi_file = get_files(imgs_ext, dwi[0])
+    print anat_file
+    print dwi_file
+
+    bvec_file = []
+    bval_file = []
+    dwi_step = dwi[0]
+    while not bval_file or not bvec_file:
+        bval_file = [op.join(dwi_step, f) for f in os.listdir(dwi_step)
+                     if f.endswith(bval_ext)]
+        bvec_file = [op.join(dwi_step, f) for f in os.listdir(dwi_step)
+                     if f.endswith(bvec_ext)]
+        #bvec_file = get_files(bvec_ext, dwi_step)
+        if dwi_step is op.abspath(op.join(inDir, os.pardir)):
+            sys.exit("Error: No b-values or b-vectors found for this subject.\
+                     \nPlease review BIDS spec (bids.neuroimaging.io).")
+        dwi_step = op.abspath(op.join(dwi_step, os.pardir))
+
+    print bval_file
+    print bvec_file
+
+    #   ndmg_pipeline(dti_file, bval_file, bvec_file, anat_file,
+    #                 atlas, mask, labels, outdir, clean, fmt)
 
 
 if __name__ == "__main__":
