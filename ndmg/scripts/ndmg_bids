@@ -20,15 +20,16 @@
 # Email: gkiar@jhu.edu
 
 from argparse import ArgumentParser
-from datetime import datetime
 from subprocess import Popen, PIPE
+from os.path import expanduser
+from ndmg.scripts.ndmg_setup import get_files
+import ndmg.utils as mgu
+import ndmg.scripts.ndmg_pipeline as ndmg_pipeline
 import os.path as op
+
 import os
 import sys
-import ndmg.scripts.ndmg_pipeline as ndmg_pipeline
-from ndmg.scripts.ndmg_setup import get_files
-import numpy as np
-import nibabel as nb
+
 
 # Define organizational variables
 subj_tag = 'sub-'
@@ -38,6 +39,35 @@ dwi_tag = 'dwi'
 bval_ext = '.bval'
 bvec_ext = '.bvec'
 imgs_ext = ('*.nii', '*.nii.gz')
+
+atlas_dir = op.join(expanduser("~"), 'atlases')
+atlas = op.join(atlas_dir, 'atlas/MNI152_T1_1mm.nii.gz')
+atlas_mask = op.join(atlas_dir, 'atlas/MNI152_T1_1mm_brain_mask.nii.gz')
+labels = ['labels/AAL.nii.gz',
+          'labels/desikan.nii.gz',
+          'labels/HarvardOxford.nii.gz',
+          'labels/CPAC200.nii.gz',
+          'labels/Talairach.nii.gz',
+          'labels/JHU.nii.gz',
+          'labels/slab907.nii.gz',
+          'labels/slab1068.nii.gz',
+          'labels/DS00071.nii.gz',
+          'labels/DS00096.nii.gz',
+          'labels/DS00108.nii.gz',
+          'labels/DS00140.nii.gz',
+          'labels/DS00195.nii.gz',
+          'labels/DS00278.nii.gz',
+          'labels/DS00350.nii.gz',
+          'labels/DS00446.nii.gz',
+          'labels/DS00583.nii.gz',
+          'labels/DS00833.nii.gz',
+          'labels/DS01216.nii.gz',
+          'labels/DS01876.nii.gz',
+          'labels/DS03231.nii.gz',
+          'labels/DS06481.nii.gz',
+          'labels/DS16784.nii.gz',
+          'labels/DS72784.nii.gz']
+labels = [op.join(atlas_dir, l) for l in labels]
 
 # Data structure:
 # sub-<subject id>/
@@ -50,6 +80,7 @@ imgs_ext = ('*.nii', '*.nii.gz')
 #   *   sub-<subject id>_ses-<session id>_dwi.bvec
 #
 # *these files can be anywhere up stream of the dwi data, and are inherited.
+
 
 def main():
     parser = ArgumentParser(description="This is an end-to-end connectome \
@@ -74,6 +105,7 @@ def main():
                  \n Try 'ndmg_bids -h' for help")
 
     subj_dir_contents = next(os.walk(op.join(inDir, subj_tag + subj)))[1]
+    loc = '%s/%s%s/' % (inDir, subj_tag, subj)
     if any(sesh_tag in item for item in subj_dir_contents):
         if sesh is None:
             sys.exit("Error: Multiple sessions found, no session provided.\
@@ -82,17 +114,13 @@ def main():
             sys.exit("Error: Session ID provided does not match those found.\
                      \nSessions found: " + ", ".join(subj_dir_contents) +\
                      "\n Try 'ndmg_bids -h' for help")
-
-    loc = '%s/%s%s/%s%s/' % (inDir, subj_tag, subj, sesh_tag, sesh)
-    print(loc)
+        loc = '%s%s%s/' % (loc, sesh_tag, sesh)
 
     anat =[x[0] for x in os.walk(loc) if anat_tag in x[0]]
     anat_file = get_files(imgs_ext, anat[0])
 
     dwi = [x[0] for x in os.walk(loc) if dwi_tag in x[0]]
     dwi_file = get_files(imgs_ext, dwi[0])
-    print anat_file
-    print dwi_file
 
     bvec_file = []
     bval_file = []
@@ -102,14 +130,23 @@ def main():
                      if f.endswith(bval_ext)]
         bvec_file = [op.join(dwi_step, f) for f in os.listdir(dwi_step)
                      if f.endswith(bvec_ext)]
-        #bvec_file = get_files(bvec_ext, dwi_step)
         if dwi_step is op.abspath(op.join(inDir, os.pardir)):
             sys.exit("Error: No b-values or b-vectors found for this subject.\
                      \nPlease review BIDS spec (bids.neuroimaging.io).")
         dwi_step = op.abspath(op.join(dwi_step, os.pardir))
 
-    print bval_file
-    print bvec_file
+    ope = op.exists
+    if any(not ope(l) for l in labels) or not (ope(atlas) and ope(atlas_mask)):
+        print("Cannot find atlas information; downloading...")
+        mgu().execute_cmd('mkdir -p ' + atlas_dir) 
+        cmd = " ".join(['wget -rnH --cut-dirs=3 --no-parent -P ' + atlas_dir,
+                        'http://openconnecto.me/mrdata/share/atlases/'])
+        mgu().execute_cmd(cmd)
+
+    print("T1 file: " + anat_file[0])
+    print("DWI file: " + dwi_file[0])
+    print("Bval file: " + bval_file[0])
+    print("Bvec file: " + bvec_file[0])
 
     #   ndmg_pipeline(dti_file, bval_file, bvec_file, anat_file,
     #                 atlas, mask, labels, outdir, clean, fmt)
