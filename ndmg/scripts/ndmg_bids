@@ -24,7 +24,7 @@ from subprocess import Popen, PIPE
 from os.path import expanduser
 from ndmg.scripts.ndmg_setup import get_files
 import ndmg.utils as mgu
-import ndmg.scripts.ndmg_pipeline as ndmg_pipeline
+from ndmg.scripts.ndmg_pipeline import ndmg_pipeline
 import os.path as op
 
 import os
@@ -82,6 +82,64 @@ labels = [op.join(atlas_dir, l) for l in labels]
 # *these files can be anywhere up stream of the dwi data, and are inherited.
 
 
+def driver(inDir, outDir, subj, sesh):
+    if inDir is None or outDir is None or subj is None:
+        sys.exit("Error: Missing input, output directory or subject id.\
+                 \n Try 'ndmg_bids -h' for help")
+
+    subj_dir_contents = next(os.walk(op.join(inDir, subj_tag + subj)))[1]
+    loc = '%s/%s%s/' % (inDir, subj_tag, subj)
+    if any(sesh_tag in item for item in subj_dir_contents):
+        if sesh is None:
+            sys.exit("Error: Multiple sessions found, no session provided.\
+                     \n Try 'ndmg_bids -h' for help")
+        elif (sesh_tag + sesh) not in subj_dir_contents:
+            sys.exit("Error: Session ID provided does not match those found.\
+                     \nSessions found: " + ", ".join(subj_dir_contents) +\
+                     "\n Try 'ndmg_bids -h' for help")
+        loc = '%s%s%s/' % (loc, sesh_tag, sesh)
+
+    anat =[x[0] for x in os.walk(loc) if anat_tag in x[0]]
+    anat_file = get_files(imgs_ext, anat[0])[0]
+
+    dwi = [x[0] for x in os.walk(loc) if dwi_tag in x[0]]
+    dwi_file = get_files(imgs_ext, dwi[0])[0]
+
+    bvec_file = []
+    bval_file = []
+    dwi_step = dwi[0]
+    while not bval_file or not bvec_file:
+        bval_file = [op.join(dwi_step, f) for f in os.listdir(dwi_step)
+                     if f.endswith(bval_ext)][0]
+        bvec_file = [op.join(dwi_step, f) for f in os.listdir(dwi_step)
+                     if f.endswith(bvec_ext)][0]
+        if dwi_step is op.abspath(op.join(inDir, os.pardir)):
+            sys.exit("Error: No b-values or b-vectors found for this subject.\
+                     \nPlease review BIDS spec (bids.neuroimaging.io).")
+        dwi_step = op.abspath(op.join(dwi_step, os.pardir))
+
+    ope = op.exists
+    if any(not ope(l) for l in labels) or not (ope(atlas) and ope(atlas_mask)):
+        print("Cannot find atlas information; downloading...")
+        mgu().execute_cmd('mkdir -p ' + atlas_dir) 
+        cmd = " ".join(['wget -rnH --cut-dirs=3 --no-parent -P ' + atlas_dir,
+                        'http://openconnecto.me/mrdata/share/atlases/'])
+        mgu().execute_cmd(cmd)
+
+    print("T1 file: " + anat_file)
+    print("DWI file: " + dwi_file)
+    print("Bval file: " + bval_file)
+    print("Bvec file: " + bvec_file)
+    print("Atlas file: " + atlas)
+    print("Mask file: " + atlas_mask)
+    print("Label file(s): " + ", ".join(labels))
+
+
+    mgu().execute_cmd("mkdir -p " + outDir + " " + outDir + "/tmp")
+    ndmg_pipeline(dwi_file, bval_file, bvec_file, anat_file,
+                  atlas, atlas_mask, labels, outDir, clean=False)
+
+
 def main():
     parser = ArgumentParser(description="This is an end-to-end connectome \
                             estimation pipeline from sMRI and DTI images")
@@ -100,57 +158,7 @@ def main():
     subj = result.participant_label
     sesh = result.session_label
 
-    if inDir is None or outDir is None or subj is None:
-        sys.exit("Error: Missing input, output directory or subject id.\
-                 \n Try 'ndmg_bids -h' for help")
-
-    subj_dir_contents = next(os.walk(op.join(inDir, subj_tag + subj)))[1]
-    loc = '%s/%s%s/' % (inDir, subj_tag, subj)
-    if any(sesh_tag in item for item in subj_dir_contents):
-        if sesh is None:
-            sys.exit("Error: Multiple sessions found, no session provided.\
-                     \n Try 'ndmg_bids -h' for help")
-        elif (sesh_tag + sesh) not in subj_dir_contents:
-            sys.exit("Error: Session ID provided does not match those found.\
-                     \nSessions found: " + ", ".join(subj_dir_contents) +\
-                     "\n Try 'ndmg_bids -h' for help")
-        loc = '%s%s%s/' % (loc, sesh_tag, sesh)
-
-    anat =[x[0] for x in os.walk(loc) if anat_tag in x[0]]
-    anat_file = get_files(imgs_ext, anat[0])
-
-    dwi = [x[0] for x in os.walk(loc) if dwi_tag in x[0]]
-    dwi_file = get_files(imgs_ext, dwi[0])
-
-    bvec_file = []
-    bval_file = []
-    dwi_step = dwi[0]
-    while not bval_file or not bvec_file:
-        bval_file = [op.join(dwi_step, f) for f in os.listdir(dwi_step)
-                     if f.endswith(bval_ext)]
-        bvec_file = [op.join(dwi_step, f) for f in os.listdir(dwi_step)
-                     if f.endswith(bvec_ext)]
-        if dwi_step is op.abspath(op.join(inDir, os.pardir)):
-            sys.exit("Error: No b-values or b-vectors found for this subject.\
-                     \nPlease review BIDS spec (bids.neuroimaging.io).")
-        dwi_step = op.abspath(op.join(dwi_step, os.pardir))
-
-    ope = op.exists
-    if any(not ope(l) for l in labels) or not (ope(atlas) and ope(atlas_mask)):
-        print("Cannot find atlas information; downloading...")
-        mgu().execute_cmd('mkdir -p ' + atlas_dir) 
-        cmd = " ".join(['wget -rnH --cut-dirs=3 --no-parent -P ' + atlas_dir,
-                        'http://openconnecto.me/mrdata/share/atlases/'])
-        mgu().execute_cmd(cmd)
-
-    print("T1 file: " + anat_file[0])
-    print("DWI file: " + dwi_file[0])
-    print("Bval file: " + bval_file[0])
-    print("Bvec file: " + bvec_file[0])
-
-    #   ndmg_pipeline(dti_file, bval_file, bvec_file, anat_file,
-    #                 atlas, mask, labels, outdir, clean, fmt)
-
+    driver(inDir, outDir, subj, sesh)
 
 if __name__ == "__main__":
     main()
