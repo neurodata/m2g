@@ -5,4 +5,5 @@ RUN easy_install pip
 RUN pip install cython numpy coveralls wget nibabel nilearn dipy sklearn networkx && pip install ndmg
 ENV FSLDIR=/usr/share/fsl/5.0
 ENV PATH=${FSLDIR}/bin:${PATH}
-ENTRYPOINT ["/bin/bash", "-c", ". ${FSLDIR}/etc/fslconf/fsl.sh && /bin/bash"]
+# ENTRYPOINT ["/bin/bash"]
+ENTRYPOINT ["/bin/bash", "-c", "source ${FSLDIR}/etc/fslconf/fsl.sh && /bin/bash"]
