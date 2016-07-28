@@ -6,4 +6,4 @@ RUN pip install cython numpy coveralls wget nibabel nilearn dipy sklearn network
 ENV FSLDIR=/usr/share/fsl/5.0
 ENV PATH=${FSLDIR}/bin:${PATH}
 # ENTRYPOINT ["/bin/bash"]
-ENTRYPOINT ["/bin/bash", "-c", "source ${FSLDIR}/etc/fslconf/fsl.sh && /bin/bash"]
+ENTRYPOINT ["/bin/bash", "-c", ". ${FSLDIR}/etc/fslconf/fsl.sh && /bin/bash"]
