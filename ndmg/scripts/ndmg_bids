@@ -23,10 +23,10 @@ from argparse import ArgumentParser
 from subprocess import Popen, PIPE
 from os.path import expanduser
 from ndmg.scripts.ndmg_setup import get_files
-import ndmg.utils as mgu
+from ndmg.utils import bids_s3
 from ndmg.scripts.ndmg_pipeline import ndmg_pipeline
+import ndmg.utils as mgu
 import os.path as op
-
 import os
 import sys
 
@@ -151,12 +151,22 @@ def main():
                         help="Subject ID to be analyzed")
     parser.add_argument("-s", "--session-label", action="store",
                         help="Session ID to be analyzed (if multiple exist)")
+    parser.add_argument("-b", "--bucket", action="store",
+                        help="Name of S3 bucket containing data")
+    parser.add_argument("-r", "--remote-path", action="store",
+                        help="Path to downloaded data")
     result = parser.parse_args()
 
     inDir = result.bids_dir
     outDir = result.output_dir
     subj = result.participant_label
     sesh = result.session_label
+    bucket = result.bucket
+    remote = result.remote_path
+
+    if bucket is not None and remote is not None:
+        print("Retrieving data from S3...")
+        bids_s3.get_data(bucket, remote, inDir)
 
     driver(inDir, outDir, subj, sesh)
 
