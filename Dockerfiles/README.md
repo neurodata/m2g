@@ -7,23 +7,35 @@ The [neurodata/ndmg](https://hub.docker.com/r/neurodata/ndmg/) Docker container 
 
 *(A) I do not wish to use S3*:
 
-- In your terminal, type `docker pull neurodata/ndmg`
+- In your terminal, type:
+```{bash}
+$ docker pull neurodata/ndmg
+```
 
 *(B) I wish to use S3*:
 
 - Add your secret key/access id to a file called `credentials.csv` in this directory on your local machine. A dummy file has been provided to make the format we expect clear. (This is how AWS provides credentials)
-- In your terminal, navigate to this directory and type `docker build -t <yourhandle>/ndmg .`
+- In your terminal, navigate to this directory and type:
+```{bash}
+$ docker build -t <yourhandle>/ndmg .
+```
 
 
 **Now we're ready to launch our instances and process some data!**
 
-Like a normal docker container, you can startup your container with a single line. Let's assume I am running this and I wish to use S3, so my container is called `gkiar/ndmg`.
+Like a normal docker container, you can startup your container with a single line. Let's assume I am running this and I wish to use S3, so my container is called `gkiar/ndmg`. If you don't want to use S3, you can replace `gkiar` with `neurodata` and ignore the S3 related flags for the rest of the tutorial.
 
-I can start my container with: `docker run -ti gkiar/ndmg`.
+I can start my container with:
+```{bash}
+$ docker run -ti gkiar/ndmg
+Error: Missing input, output directory or subject id.
+ Try 'ndmg_bids -h' for help
+```
 
-We should've noticed that I got an error back suggesting that I didn't properly provide information to our container. Let's try again, with the help flag 
+We should've noticed that I got an error back suggesting that I didn't properly provide information to our container. Let's try again, with the help flag:
+```{bash}
+$ docker run -ti gkiar/ndmg -h
 
-3. Use
 usage: ndmg_bids [-h] [-i BIDS_DIR] [-o OUTPUT_DIR] [-p PARTICIPANT_LABEL]
                  [-s SESSION_LABEL] [-b BUCKET] [-r REMOTE_PATH]
 
@@ -42,9 +54,10 @@ optional arguments:
   -b BUCKET, --bucket BUCKET
                         Name of S3 bucket containing data
   -r REMOTE_PATH, --remote-path REMOTE_PATH
-                        Path to downloaded data
-
-To run `ndmg_bids`:
+                        Path of data on bucket
 ```
-docker run -ti --name ndmg -v /Users/gkiar/Downloads/ds114/:${HOME}/data neurodata/ndmg -i ${HOME}/data/ -o ${HOME}/data/outputs -p 02 -s test
+
+Cool! That taught us some stuff. So now for the last unintuitive piece of instruction and then just echoing back commands I'm sure you could've figured out from here: in order to share data between our container and the rest of our machine, we need to mount a volume. Docker does this with the `-v` flag. Docker expects its input formatted as: `-v path/to/local/data:/path/in/container`. We'll do this when we launch our container, as well as give it a helpful name so we can locate it later on. Finally:
+```{bash}
+docker run -ti --name ndmg_test -v ./data:${HOME}/data neurodata/ndmg -i ${HOME}/data/ -o ${HOME}/data/outputs -p 01 -s 01 -b mybucket -r path/on/bucket/
 ```
