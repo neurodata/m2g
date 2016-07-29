@@ -19,19 +19,17 @@
 # Created by Greg Kiar on 2016-07-29.
 # Email: gkiar@jhu.edu
 
-from subprocess import Popen, PIPE
-from os.path import expanduser
-from ndmg.scripts.ndmg_setup import get_files
-from ndmg.scripts.ndmg_pipeline import ndmg_pipeline
-
 import ndmg.utils as mgu
-import os.path as op
 
-import os
 import sys
 import boto3
 
-def get_data(bucket, remote_path, inDir):
+
+def get_data(bucket, remote_path, local):
+    """
+    Given an s3 bucket, data location on the bucket, and a download location,
+    crawls the bucket and recursively pulls all data.
+    """
     client = boto3.client('s3')
     bkts = [bk['Name'] for bk in client.list_buckets()['Buckets']]
     if bucket not in bkts:
@@ -39,6 +37,6 @@ def get_data(bucket, remote_path, inDir):
                  ", ".join(bkts))
 
     cmd = "".join(['aws s3 cp --recursive s3://', bucket, '/',
-                   remote_path, ' ', inDir])
+                   remote_path, ' ', local])
     std, err = mgu().execute_cmd(cmd)
     return
