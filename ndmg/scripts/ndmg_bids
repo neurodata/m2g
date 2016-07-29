@@ -154,7 +154,7 @@ def main():
     parser.add_argument("-b", "--bucket", action="store",
                         help="Name of S3 bucket containing data")
     parser.add_argument("-r", "--remote-path", action="store",
-                        help="Path to downloaded data")
+                        help="Path of data on bucket")
     result = parser.parse_args()
 
     inDir = result.bids_dir
