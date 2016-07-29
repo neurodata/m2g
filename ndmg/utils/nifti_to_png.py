@@ -27,9 +27,9 @@ import os
 
 def convert(indir, outdir,  verbose=False):
     """
-    Takes in nifti images, creates directory structure desired by ndstore ingest,
-    and then converts niftis to png stacks. This script should be called prior to
-    ingesting MR data into ndstore.
+    Takes in nifti images, creates directory structure desired by ndstore
+    ingest, and then converts niftis to png stacks. This script should be
+    called prior to ingesting MR data into ndstore.
     """
 
     # Create output directory structure
@@ -49,22 +49,23 @@ def convert(indir, outdir,  verbose=False):
             chan = "_".join(base.split('_')[1:3])
             if verbose:
                 print "File:", fl
-                print "Channel:", chan 
+                print "Channel:", chan
                 print "Time steps:", ntime
                 print "Creating", outdir + "/" + chan, "..."
             os.system('mkdir -p ' + outdir + "/" + chan)
 
             for count in range(int(ntime)):
-                dirname = outdir + "/" + chan + "/time%04d"%count
+                dirname = outdir + "/" + chan + "/time%04d" % count
                 if verbose:
-                    print "Creating", dirname , "..."
+                    print "Creating", dirname, "..."
                 os.system('mkdir -p ' + dirname)
                 for slices in range(dat.shape[2]):
                     if verbose:
                         print "Saving slice:", slices
-                    imsave(dirname + '/%04d.png'%slices,
-                           dat[:,:,slices,count].astype('float32').T)
-                                
+                    imsave(dirname + '/%04d.png' % slices,
+                           dat[:, :, slices, count].astype('float32').T)
+
+
 def main():
     parser = ArgumentParser(description="")
     parser.add_argument("indir", action="store", help="directory for niftis")

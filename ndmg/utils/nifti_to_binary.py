@@ -35,6 +35,7 @@ def nib_to_bin(nii, dat):
     with open(dat, 'wb') as fl:
         fl.write(dat_d)
 
+
 def main():
     parser = ArgumentParser(description="")
     parser.add_argument("filenames", action="store", nargs="+", help="")
