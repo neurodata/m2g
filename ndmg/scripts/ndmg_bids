@@ -83,6 +83,11 @@ labels = [op.join(atlas_dir, l) for l in labels]
 
 
 def driver(inDir, outDir, subj, sesh):
+    """
+    Crawls the given BIDS organized directory for data pertaining to the given
+    subject and session, and passes necessary files to ndmg_pipeline for
+    processing.
+    """
     if inDir is None or outDir is None or subj is None:
         sys.exit("Error: Missing input, output directory or subject id.\
                  \n Try 'ndmg_bids -h' for help")
