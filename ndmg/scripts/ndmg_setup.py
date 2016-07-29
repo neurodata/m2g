@@ -29,7 +29,7 @@ import glob
 def setup(inDir, dtiListFile, bvalListFile, bvecListFile, mprageListFile):
     # Create lists of files
     dti_types = ('*DTI.nii', '*DTI.nii.gz')
-    
+
     dtiFiles = get_files(dti_types, inDir)
 
     bval_types = ('*.b', '*.bval')
@@ -39,7 +39,7 @@ def setup(inDir, dtiListFile, bvalListFile, bvecListFile, mprageListFile):
     bvecFiles = get_files(bvec_types, inDir)
 
     mprage_types = ('*MPRAGE.nii', '*MPRAGE.nii.gz')
-    mprageFiles = get_files(mprage_types, inDir) 
+    mprageFiles = get_files(mprage_types, inDir)
 
     # Writes lists to disk
     write_files(dtiListFile, dtiFiles)

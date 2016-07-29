@@ -68,7 +68,7 @@ def ndmg_pipeline(dti, bvals, bvecs, mprage, atlas, mask, labels, outdir,
     # Again, graphs are different
     graphs = ["".join([outdir, "/graphs/", x, '/', dti_name, "_", x, '.', fmt])
               for x in label_name]
-    print("Graphs of streamlines downsampled to given labels: " +\
+    print("Graphs of streamlines downsampled to given labels: " +
           (", ".join([x for x in graphs])))
 
     # Creates gradient table from bvalues and bvectors

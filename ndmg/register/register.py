@@ -122,7 +122,6 @@ class register(object):
         nb.save(target_im, ingested)
         pass
 
-
     def dti2atlas(self, dti, gtab, mprage, atlas,
                   aligned_dti, outdir, clean=False):
         """
