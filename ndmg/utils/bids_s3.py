@@ -33,7 +33,7 @@ def get_data(bucket, remote_path, local):
     client = boto3.client('s3')
     bkts = [bk['Name'] for bk in client.list_buckets()['Buckets']]
     if bucket not in bkts:
-        sys.exit("Error: could not locate bucket. Available buckets: " +\
+        sys.exit("Error: could not locate bucket. Available buckets: " +
                  ", ".join(bkts))
 
     cmd = "".join(['aws s3 cp --recursive s3://', bucket, '/',

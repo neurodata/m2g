@@ -122,7 +122,7 @@ class utils():
         p = Popen(cmd, stdout=PIPE, stderr=PIPE, shell=True)
         out, err = p.communicate()
         code = p.returncode
-        if code: 
+        if code:
             sys.exit("Error  " + str(code) + ": " + err)
         return out, err
 
