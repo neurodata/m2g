@@ -28,36 +28,54 @@ Like a normal docker container, you can startup your container with a single lin
 I can start my container with:
 ```{bash}
 $ docker run -ti gkiar/ndmg
-Error: Missing input, output directory or subject id.
- Try 'ndmg_bids -h' for help
+usage: ndmg_bids [-h]
+                 [--participant_label PARTICIPANT_LABEL [PARTICIPANT_LABEL ...]]
+                 [--bucket BUCKET] [--remote_path REMOTE_PATH]
+                 bids_dir output_dir {participant}
+ndmg_bids: error: too few arguments
 ```
 
 We should've noticed that I got an error back suggesting that I didn't properly provide information to our container. Let's try again, with the help flag:
 ```{bash}
-$ docker run -ti gkiar/ndmg -h
+$ docker run -ti neurodata/ndmg:v4 -h
 
-usage: ndmg_bids [-h] [-i BIDS_DIR] [-o OUTPUT_DIR] [-p PARTICIPANT_LABEL]
-                 [-s SESSION_LABEL] [-b BUCKET] [-r REMOTE_PATH]
+usage: ndmg_bids [-h]
+                 [--participant_label PARTICIPANT_LABEL [PARTICIPANT_LABEL ...]]
+                 [--bucket BUCKET] [--remote_path REMOTE_PATH]
+                 bids_dir output_dir {participant}
 
 This is an end-to-end connectome estimation pipeline from sMRI and DTI images
 
+positional arguments:
+  bids_dir              The directory with the input dataset formatted
+                        according to the BIDS standard.
+  output_dir            The directory where the output files should be stored.
+                        If you are running group level analysis this folder
+                        should be prepopulated with the results of the
+                        participant level analysis.
+  {participant}         Level of the analysis that will be performed. Multiple
+                        participant level analyses can be run independently
+                        (in parallel) using the same output_dir.
+
 optional arguments:
   -h, --help            show this help message and exit
-  -i BIDS_DIR, --bids-dir BIDS_DIR
-                        Base directory for input data
-  -o OUTPUT_DIR, --output-dir OUTPUT_DIR
-                        Base directory to store derivaties
-  -p PARTICIPANT_LABEL, --participant-label PARTICIPANT_LABEL
-                        Subject ID to be analyzed
-  -s SESSION_LABEL, --session-label SESSION_LABEL
-                        Session ID to be analyzed (if multiple exist)
-  -b BUCKET, --bucket BUCKET
-                        Name of S3 bucket containing data
-  -r REMOTE_PATH, --remote-path REMOTE_PATH
-                        Path of data on bucket
+  --participant_label PARTICIPANT_LABEL [PARTICIPANT_LABEL ...]
+                        The label(s) of the participant(s) that should be
+                        analyzed. The label corresponds to
+                        sub-<participant_label> from the BIDS spec (so it does
+                        not include "sub-"). If this parameter is not provided
+                        all subjects should be analyzed. Multiple participants
+                        can be specified with a space separated list.
+  --bucket BUCKET       The name of an S3 bucket which holds BIDS organized
+                        data. You must have built your bucket with credentials
+                        to the S3 bucket you wish to access.
+  --remote_path REMOTE_PATH
+                        The path to the data on your S3 bucket. The data will
+                        be downloaded to the provided bids_dir on your
+                        machine.
 ```
 
 Cool! That taught us some stuff. So now for the last unintuitive piece of instruction and then just echoing back commands I'm sure you could've figured out from here: in order to share data between our container and the rest of our machine, we need to mount a volume. Docker does this with the `-v` flag. Docker expects its input formatted as: `-v path/to/local/data:/path/in/container`. We'll do this when we launch our container, as well as give it a helpful name so we can locate it later on. Finally:
 ```{bash}
-docker run -ti --name ndmg_test -v ./data:${HOME}/data neurodata/ndmg -i ${HOME}/data/ -o ${HOME}/data/outputs -p 01 -s 01 -b mybucket -r path/on/bucket/
+docker run -ti --name ndmg_test -v ./data:${HOME}/data neurodata/ndmg ${HOME}/data/ ${HOME}/data/outputs participant -p 01 -b mybucket -r path/on/bucket/
 ```
