@@ -25,20 +25,12 @@ from os.path import expanduser
 from ndmg.scripts.ndmg_setup import get_files
 from ndmg.utils import bids_s3
 from ndmg.scripts.ndmg_pipeline import ndmg_pipeline
+from glob import glob
 import ndmg.utils as mgu
 import os.path as op
 import os
 import sys
 
-
-# Define organizational variables
-subj_tag = 'sub-'
-sesh_tag = 'ses-'
-anat_tag = 'anat'
-dwi_tag = 'dwi'
-bval_ext = '.bval'
-bvec_ext = '.bvec'
-imgs_ext = ('*.nii', '*.nii.gz')
 
 atlas_dir = op.join(expanduser("~"), 'atlases')
 atlas = op.join(atlas_dir, 'atlas/MNI152_T1_1mm.nii.gz')
@@ -82,47 +74,13 @@ labels = [op.join(atlas_dir, l) for l in labels]
 # *these files can be anywhere up stream of the dwi data, and are inherited.
 
 
-def driver(inDir, outDir, subj, sesh):
+def driver(inDir, outDir, subjs):
     """
     Crawls the given BIDS organized directory for data pertaining to the given
     subject and session, and passes necessary files to ndmg_pipeline for
     processing.
     """
-    if inDir is None or outDir is None or subj is None:
-        sys.exit("Error: Missing input, output directory or subject id.\
-                 \n Try 'ndmg_bids -h' for help")
-
-    subj_dir_contents = next(os.walk(op.join(inDir, subj_tag + subj)))[1]
-    loc = '%s/%s%s/' % (inDir, subj_tag, subj)
-    if any(sesh_tag in item for item in subj_dir_contents):
-        if sesh is None:
-            sys.exit("Error: Multiple sessions found, no session provided.\
-                     \n Try 'ndmg_bids -h' for help")
-        elif (sesh_tag + sesh) not in subj_dir_contents:
-            sys.exit("Error: Session ID provided does not match those found.\
-                     \nSessions found: " + ", ".join(subj_dir_contents) +\
-                     "\n Try 'ndmg_bids -h' for help")
-        loc = '%s%s%s/' % (loc, sesh_tag, sesh)
-
-    anat =[x[0] for x in os.walk(loc) if anat_tag in x[0]]
-    anat_file = get_files(imgs_ext, anat[0])[0]
-
-    dwi = [x[0] for x in os.walk(loc) if dwi_tag in x[0]]
-    dwi_file = get_files(imgs_ext, dwi[0])[0]
-
-    bvec_file = []
-    bval_file = []
-    dwi_step = dwi[0]
-    while not bval_file or not bvec_file:
-        bval_file = [op.join(dwi_step, f) for f in os.listdir(dwi_step)
-                     if f.endswith(bval_ext)][0]
-        bvec_file = [op.join(dwi_step, f) for f in os.listdir(dwi_step)
-                     if f.endswith(bvec_ext)][0]
-        if dwi_step is op.abspath(op.join(inDir, os.pardir)):
-            sys.exit("Error: No b-values or b-vectors found for this subject.\
-                     \nPlease review BIDS spec (bids.neuroimaging.io).")
-        dwi_step = op.abspath(op.join(dwi_step, os.pardir))
-
+    # Get atlases
     ope = op.exists
     if any(not ope(l) for l in labels) or not (ope(atlas) and ope(atlas_mask)):
         print("Cannot find atlas information; downloading...")
@@ -131,41 +89,89 @@ def driver(inDir, outDir, subj, sesh):
                         'http://openconnecto.me/mrdata/share/atlases/'])
         mgu().execute_cmd(cmd)
 
-    print("T1 file: " + anat_file)
-    print("DWI file: " + dwi_file)
-    print("Bval file: " + bval_file)
-    print("Bvec file: " + bvec_file)
-    print("Atlas file: " + atlas)
-    print("Mask file: " + atlas_mask)
-    print("Label file(s): " + ", ".join(labels))
-
-
+    # Make output dir
     mgu().execute_cmd("mkdir -p " + outDir + " " + outDir + "/tmp")
-    ndmg_pipeline(dwi_file, bval_file, bvec_file, anat_file,
-                  atlas, atlas_mask, labels, outDir, clean=False)
+
+    # Get subjects
+    if subjs is None:
+        subj_dirs = glob(op.join(inDir, "sub-*"))
+        subjs = [subj_dir.split("-")[-1] for subj_dir in subj_dirs]
+
+    bvec = []; bval = []; anat = []; dwi = [];
+    # Get all image data for each subject
+    for subj in subjs:
+        anat_t = glob(op.join(inDir, "sub-%s" % subj, "anat", "*_T1w.nii*")) +\
+                 glob(op.join(inDir, "sub-%s" % subj, "ses-*",
+                            "anat", "*_T1w.nii*"))
+        dwi_t = glob(op.join(inDir, "sub-%s" % subj, "dwi", "*_dwi.nii*")) +\
+                glob(op.join(inDir, "sub-%s" % subj, "ses-*",
+                           "dwi", "*_dwi.nii*"))
+        anat = anat + anat_t
+        dwi = dwi +  dwi_t
+
+    bvec_t = []; bval_t = []
+    # Look for bval, bvec files for each DWI file
+    for scan in dwi:
+        step = op.dirname(scan)
+        while not bval_t or not bvec_t:
+            bval_t = glob(op.join(step, "*dwi.bval"))
+            bvec_t = glob(op.join(step, "*dwi.bvec"))
+            if step is op.abspath(op.join(inDir, os.pardir)):
+                sys.exit("Error: No b-values or b-vectors found..\
+                    \nPlease review BIDS spec (bids.neuroimaging.io).")
+            step = op.abspath(op.join(step, os.pardir))
+        bvec.append(bvec_t[0])
+        bval.append(bval_t[0])
+        bvec_t = []; bval_t = []
+
+    assert(len(anat) == len(dwi))
+    assert(len(bvec) == len(dwi))
+    assert(len(bval) == len(dwi))
+
+    # Run for each 
+    for i, scans in enumerate(anat):     
+        print("T1 file: " + anat[i])
+        print("DWI file: " + dwi[i])
+        print("Bval file: " + bval[i])
+        print("Bvec file: " + bvec[i])
+        
+        ndmg_pipeline(dwi[i], bval[i], bvec[i], anat[i], atlas, atlas_mask,
+                      labels, outDir, clean=True)
 
 
 def main():
     parser = ArgumentParser(description="This is an end-to-end connectome \
                             estimation pipeline from sMRI and DTI images")
-    parser.add_argument("-i", "--bids-dir", action="store",
-                        help="Base directory for input data")
-    parser.add_argument("-o", "--output-dir", action="store",
-                        help="Base directory to store derivaties")
-    parser.add_argument("-p", "--participant-label", action="store",
-                        help="Subject ID to be analyzed")
-    parser.add_argument("-s", "--session-label", action="store",
-                        help="Session ID to be analyzed (if multiple exist)")
-    parser.add_argument("-b", "--bucket", action="store",
-                        help="Name of S3 bucket containing data")
-    parser.add_argument("-r", "--remote-path", action="store",
-                        help="Path of data on bucket")
+
+    parser.add_argument('bids_dir', help='The directory with the input dataset'
+                        ' formatted according to the BIDS standard.')
+    parser.add_argument('output_dir', help='The directory where the output '
+                        'files should be stored. If you are running group '
+                        'level analysis this folder should be prepopulated '
+                        'with the results of the participant level analysis.')
+    parser.add_argument('analysis_level', help='Level of the analysis that '
+                        'will be performed. Multiple participant level '
+                        'analyses can be run independently (in parallel) '
+                        'using the same output_dir.', choices=['participant'])
+    parser.add_argument('--participant_label', help='The label(s) of the '
+                        'participant(s) that should be analyzed. The label '
+                        'corresponds to sub-<participant_label> from the BIDS '
+                        'spec (so it does not include "sub-"). If this '
+                        'parameter is not provided all subjects should be '
+                        'analyzed. Multiple participants can be specified '
+                        'with a space separated list.', nargs="+")
+    parser.add_argument('--bucket', action='store', help='The name of '
+                        'an S3 bucket which holds BIDS organized data. You '
+                        'must have built your bucket with credentials to the '
+                        'S3 bucket you wish to access.')
+    parser.add_argument('--remote_path', action='store', help='The path to '
+                        'the data on your S3 bucket. The data will be '
+                        'downloaded to the provided bids_dir on your machine.')
     result = parser.parse_args()
 
     inDir = result.bids_dir
     outDir = result.output_dir
     subj = result.participant_label
-    sesh = result.session_label
     bucket = result.bucket
     remote = result.remote_path
 
@@ -173,7 +179,7 @@ def main():
         print("Retrieving data from S3...")
         bids_s3.get_data(bucket, remote, inDir)
 
-    driver(inDir, outDir, subj, sesh)
+    driver(inDir, outDir, subj)
 
 if __name__ == "__main__":
     main()
