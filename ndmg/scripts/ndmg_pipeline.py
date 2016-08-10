@@ -98,6 +98,7 @@ def ndmg_pipeline(dti, bvals, bvecs, mprage, atlas, mask, labels, outdir,
         g1.make_graph(tracks)
         g1.summary()
         g1.save_graph(graphs[idx], fmt=fmt)
+        graph_metrics(g1)
 
     print("Execution took: " + str(datetime.now() - startTime))
 
