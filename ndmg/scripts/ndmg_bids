@@ -25,6 +25,8 @@ from os.path import expanduser
 from ndmg.scripts.ndmg_setup import get_files
 from ndmg.utils import bids_s3
 from ndmg.scripts.ndmg_pipeline import ndmg_pipeline
+from ndmg.stats.graph_qc import *
+
 from glob import glob
 import ndmg.utils as mgu
 import os.path as op
@@ -74,7 +76,7 @@ labels = [op.join(atlas_dir, l) for l in labels]
 # *these files can be anywhere up stream of the dwi data, and are inherited.
 
 
-def driver(inDir, outDir, subjs):
+def participant_level(inDir, outDir, subjs):
     """
     Crawls the given BIDS organized directory for data pertaining to the given
     subject and session, and passes necessary files to ndmg_pipeline for
@@ -139,6 +141,31 @@ def driver(inDir, outDir, subjs):
                       labels, outDir, clean=True)
 
 
+def group_level(inDir, outDir):
+    """
+    Crawls the output directory from ndmg and computes qc metrics on the
+    derivatives produced
+    """
+    # Make output dir
+    mgu().execute_cmd("mkdir -p " + outDir)
+
+    # Get list of graphs
+    labels = next(os.walk(inDir))[1]
+
+    # Run for each
+    for label in labels:
+        print("Parcellation: " + label)
+        tmp_in = op.join(inDir, label)
+        fs = [op.join(tmp_in, fl)
+              for root, dirs, files in os.walk(tmp_in)
+              for fl in files
+              if fl.endswith(".graphml") or fl.endswith(".gpickle")]
+        tmp_out = op.join(outDir, label)
+        print(tmp_out)
+        mgu().execute_cmd("mkdir -p " + tmp_out)
+        compute_metrics(fs, tmp_out, label)
+
+
 def main():
     parser = ArgumentParser(description="This is an end-to-end connectome \
                             estimation pipeline from sMRI and DTI images")
@@ -152,7 +179,8 @@ def main():
     parser.add_argument('analysis_level', help='Level of the analysis that '
                         'will be performed. Multiple participant level '
                         'analyses can be run independently (in parallel) '
-                        'using the same output_dir.', choices=['participant'])
+                        'using the same output_dir.',
+                        choices=['participant', 'group'])
     parser.add_argument('--participant_label', help='The label(s) of the '
                         'participant(s) that should be analyzed. The label '
                         'corresponds to sub-<participant_label> from the BIDS '
@@ -174,12 +202,27 @@ def main():
     subj = result.participant_label
     bucket = result.bucket
     remote = result.remote_path
+    level = result.analysis_level
 
-    if bucket is not None and remote is not None:
-        print("Retrieving data from S3...")
-        bids_s3.get_data(bucket, remote, inDir)
+    if level == 'participant':
+        if bucket is not None and remote is not None:
+            print("Retrieving data from S3...")
+            if subj is not None:
+                [bids_s3.get_data(bucket, remote, inDir, s) for s in subj]
+            else:
+                bids_s3.get_data(bucket, remote, inDir)
+        participant_level(inDir, outDir, subj)
 
-    driver(inDir, outDir, subj)
+    elif level == 'group':
+        if bucket is not None and remote is not None:
+            print("Retrieving data from S3...")
+            if subj is not None:
+                [bids_s3.get_data(bucket, remote, inDir, s) for s in subj]
+            else:
+                bids_s3.get_data(bucket, remote, inDir)
+
+        group_level(inDir, outDir)
+
 
 if __name__ == "__main__":
     main()
