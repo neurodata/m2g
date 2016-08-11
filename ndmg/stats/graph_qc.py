@@ -143,7 +143,7 @@ def density(data, nbins=1000):
     for subj in data:
         dens = gaussian_kde(data[subj])
         xs[subj] = np.linspace(0, 1.2*np.max(data[subj]), nbins)
-        density[subj] = dens.pdf(xs[subj])
+        density[subj] = dens.evaluate(xs[subj])
 
     return {"xs": xs, "pdfs": density}
 
