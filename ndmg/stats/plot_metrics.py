@@ -19,11 +19,13 @@
 # Created by Greg Kiar on 2016-05-11.
 # Email: gkiar@jhu.edu
 
-import matplotlib.pyplot as plt
-import matplotlib.ticker as mtick
 import numpy as np
 import networkx as nx
 import matplotlib
+matplotlib.use('Agg') #very important this is above pyplot import
+
+import matplotlib.pyplot as plt
+import matplotlib.ticker as mtick
 import time
 import json
 import sys
@@ -31,7 +33,6 @@ import os
 
 font = {'weight' : 'bold',
         'size'   : 14}
-
 matplotlib.rc('font', **font)
 
 cols = '#000000'
