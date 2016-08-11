@@ -23,6 +23,8 @@ from argparse import ArgumentParser
 from collections import OrderedDict
 from subprocess import Popen
 from scipy.stats import gaussian_kde
+from ndmg.utils import loadGraphs
+from ndmg.stats import plot_metrics
 
 import numpy as np
 import nibabel as nb
@@ -30,34 +32,6 @@ import networkx as nx
 import pickle
 import sys
 import os
-
-
-def loadGraphs(filenames, verb=False):
-    """
-    Given a list of files, returns a dictionary of graphs
-
-    Required parameters:
-        filenames:
-            - List of filenames for graphs
-    Optional parameters:
-        verb:
-            - Toggles verbose output statements
-    """
-    #  Initializes empty dictionary
-    if type(filenames) is not list: filenames = [filenames]
-    gstruct = OrderedDict()
-    for idx, files in enumerate(filenames):
-        if verb:
-            print "Loading: " + files
-        #  Adds graphs to dictionary with key being filename
-        fname = os.path.basename(files)
-        try:
-            gstruct[fname] = nx.read_graphml(files)
-        except:
-            gstruct[fname] = nx.read_gpickle(files)
-        else:
-            sys.exit('Cannot understand graph format: ' + files)
-    return gstruct
 
 
 def compute_metrics(fs, outdir, atlas, verb=False):
@@ -128,6 +102,10 @@ def compute_metrics(fs, outdir, atlas, verb=False):
                            for subj in graphs)
     centrality = density(temp_bc)
     write(outdir, 'betweenness_centrality', centrality, atlas) 
+
+    outf = outdir + '/' + atlas + '_summary.png'
+
+    plot_metrics(nnz, deg, ew, ccoefs, ss1, eigs, centrality, outf)
 
 
 def scan_statistic(mygs, i):
