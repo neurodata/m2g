@@ -20,7 +20,6 @@
 # Email: gkiar@jhu.edu
 
 import ndmg.utils as mgu
-
 import sys
 import boto3
 
@@ -39,8 +38,10 @@ def get_data(bucket, remote_path, local, subj=None):
     cmd = "".join(['aws s3 cp --recursive s3://', bucket, '/',
                    remote_path])
     if subj is not None:
-        cmd = "".join([cmd, '/', subj])
-    
+        cmd = "".join([cmd, '/sub-', subj])
+        std, err = mgu().execute_cmd('mkdir -p ' + local + '/sub-' + subj)
+        local += '/sub-' + subj
+
     cmd = "".join([cmd, ' ', local])
     std, err = mgu().execute_cmd(cmd)
     return
