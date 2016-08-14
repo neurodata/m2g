@@ -16,7 +16,7 @@
 | Degree                    | of each node in the graph              | graph                | DTI, fMRI (if thresholded) |
 | Edge weight               | of each edge in the graph              | graph                | DTI, fMRI                  |
 | Clustering coefficient    | of each node in the graph              | graph                | DTI, fMRI                  |
-| Scan statistic-1          | of each node in the graph              | graph                | DTI, fMRI                  |
-| Betweenness centrality    | of each node in the graph              | graph                | DTI, fMRI                  |
+| Scan statistic-1          | of each node in the graph              | graph                | DTI, fMRI (if thresholded) |
+| Betweenness centrality    | of each node in the graph              | graph                | DTI, fMRI (if thresholded) |
 | Eigen values              | of graph laplacian                     | graph                | DTI, fMRI                  |
 | Scree plot                | of graph variance                      | graph                | DTI, fMRI                  |
