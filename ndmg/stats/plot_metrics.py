@@ -19,23 +19,22 @@
 # Created by Greg Kiar on 2016-05-11.
 # Email: gkiar@jhu.edu
 
-import numpy as np
-import networkx as nx
-import matplotlib
-matplotlib.use('Agg') #very important this is above pyplot import
-
-import matplotlib.pyplot as plt
-import matplotlib.ticker as mtick
 import time
 import json
 import sys
 import os
+import numpy as np
+import networkx as nx
+import matplotlib; matplotlib.use('Agg')  # very important above pyplot import
+import matplotlib.pyplot as plt
+import matplotlib.ticker as mtick
 
-font = {'weight' : 'bold',
-        'size'   : 14}
+font = {'weight': 'bold',
+        'size': 14}
 matplotlib.rc('font', **font)
 
 cols = '#000000'
+
 
 class plot_metrics():
 
@@ -93,7 +92,7 @@ class plot_metrics():
         plt.savefig(self.outf, bbox_inches='tight')
         # plt.show()
 
-        metadata = {"subjects" : self.nnz.keys(),
+        metadata = {"subjects": self.nnz.keys(),
                     "date": time.asctime(time.localtime())}
         with open(os.path.splitext(self.outf)[0]+'_info.json', 'w') as fp:
             json.dump(metadata, fp)
@@ -135,8 +134,8 @@ class plot_metrics():
     def rand_jitter(self, arr):
         stdev = .03*(max(arr)-min(arr)+2)
         return arr + np.random.randn(len(arr)) * stdev
-        
-    def factors(self, N): 
+
+    def factors(self, N):
         factors = [subitem for subitem in [(i, N//i)
                    for i in range(1, int(N**0.5) + 1)
                    if N % i == 0 and i > 1]]

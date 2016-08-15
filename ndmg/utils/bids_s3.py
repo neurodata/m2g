@@ -34,7 +34,7 @@ def get_data(bucket, remote_path, local, subj=None):
     if bucket not in bkts:
         sys.exit("Error: could not locate bucket. Available buckets: " +
                  ", ".join(bkts))
-    
+
     cmd = "".join(['aws s3 cp --recursive s3://', bucket, '/',
                    remote_path])
     if subj is not None:
