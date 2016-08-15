@@ -127,13 +127,9 @@ class plot_metrics():
         else:
             plt.xlim([np.min(x), np.max(x)])
             plt.ylim([np.min(y), maxy])
-            # eps = 1e-10
-            # minx = 0 if abs(np.min(x)) < eps else np.min(x)
-            # miny = 0 if abs(np.min(y)) < eps else np.min(y)
             plt.xticks([np.min(x),  np.max(x)])
             plt.yticks([np.min(y), (np.max(y) - np.min(y))/2, np.max(y)])
 
-        # plt.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
         plt.title(tit, y=1.04)
 
     def rand_jitter(self, arr):
@@ -141,8 +137,7 @@ class plot_metrics():
         return arr + np.random.randn(len(arr)) * stdev
         
     def factors(self, N): 
-        return set([item for subitem in 
-                    [(i, N//i)
-                    for i in range(1, int(N**0.5) + 1)
-                    if N % i == 0 and i > 1]
-                    for item in subitem])
+        factors = [subitem for subitem in [(i, N//i)
+                   for i in range(1, int(N**0.5) + 1)
+                   if N % i == 0 and i > 1]]
+        return set([fact for item in factors for fact in item])
