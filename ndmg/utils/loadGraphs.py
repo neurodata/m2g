@@ -26,6 +26,7 @@ import networkx as nx
 import sys
 import os
 
+
 def loadGraphs(filenames, verb=False):
     """
     Given a list of files, returns a dictionary of graphs
@@ -38,7 +39,8 @@ def loadGraphs(filenames, verb=False):
             - Toggles verbose output statements
     """
     #  Initializes empty dictionary
-    if type(filenames) is not list: filenames = [filenames]
+    if type(filenames) is not list:
+        filenames = [filenames]
     gstruct = OrderedDict()
     for idx, files in enumerate(filenames):
         if verb:

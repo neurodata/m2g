@@ -57,50 +57,50 @@ def compute_metrics(fs, outdir, atlas, verb=False):
     #  Number of non-zero edges (i.e. binary edge count)
     print("Computing: NNZ")
     nnz = OrderedDict((subj, len(nx.edges(graphs[subj]))) for subj in graphs)
-    write(outdir, 'number_non_zeros', nnz, atlas) 
+    write(outdir, 'number_non_zeros', nnz, atlas)
 
     #  Degree sequence
     print("Computing: Degree Seuqence")
     temp_deg = OrderedDict((subj, np.array(nx.degree(graphs[subj]).values()))
-                               for subj in graphs)
+                           for subj in graphs)
     deg = density(temp_deg)
-    write(outdir, 'degree_distribution', deg, atlas) 
+    write(outdir, 'degree_distribution', deg, atlas)
 
     #  Edge Weights
     print("Computing: Edge Weight Sequence")
-    temp_ew = OrderedDict((subj, [graphs[subj].get_edge_data(e[0], e[1])['weight']
-                           for e in graphs[subj].edges()]) for subj in graphs)
+    temp_ew = OrderedDict((s, [graphs[s].get_edge_data(e[0], e[1])['weight']
+                           for e in graphs[s].edges()]) for s in graphs)
     ew = density(temp_ew)
-    write(outdir, 'edge_weight_distribution', ew, atlas) 
+    write(outdir, 'edge_weight_distribution', ew, atlas)
 
     #   Clustering Coefficients
     print("Computing: Clustering Coefficient Sequence")
     temp_cc = OrderedDict((subj, nx.clustering(graphs[subj]).values())
-                           for subj in graphs)
+                          for subj in graphs)
     ccoefs = density(temp_cc)
-    write(outdir, 'clustering_coefficients', ccoefs, atlas) 
+    write(outdir, 'clustering_coefficients', ccoefs, atlas)
 
     # Scan Statistic-1
     print("Computing: Scan Statistic-1 Sequence")
     temp_ss1 = scan_statistic(graphs, 1)
     ss1 = density(temp_ss1)
-    write(outdir, 'scan_statistic_1', ss1, atlas) 
+    write(outdir, 'scan_statistic_1', ss1, atlas)
 
     # Eigen Values
     print("Computing: Eigen Value Sequence")
     laplac = OrderedDict((subj, nx.normalized_laplacian_matrix(graphs[subj]))
-                             for subj in graphs)
+                         for subj in graphs)
     eigs = OrderedDict((subj, np.sort(np.linalg.eigvals(laplac[subj].A))[::-1])
-                                 for subj in graphs)
-    write(outdir, 'eigen_sequence', eigs, atlas) 
+                       for subj in graphs)
+    write(outdir, 'eigen_sequence', eigs, atlas)
 
     # Betweenness Centrality
     print("Computing: Betweenness Centrality Sequence")
     nxbc = nx.algorithms.betweenness_centrality  # For PEP8 line length...
     temp_bc = OrderedDict((subj, nxbc(graphs[subj]).values())
-                           for subj in graphs)
+                          for subj in graphs)
     centrality = density(temp_bc)
-    write(outdir, 'betweenness_centrality', centrality, atlas) 
+    write(outdir, 'betweenness_centrality', centrality, atlas)
 
     outf = outdir + '/' + atlas + '_summary.png'
 
