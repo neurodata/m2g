@@ -55,40 +55,39 @@ def compute_metrics(fs, outdir, atlas, verb=False):
     graphs = loadGraphs(fs, verb=verb)
 
     #  Number of non-zero edges (i.e. binary edge count)
-    print "Computing: NNZ"
+    print("Computing: NNZ")
     nnz = OrderedDict((subj, len(nx.edges(graphs[subj]))) for subj in graphs)
     write(outdir, 'number_non_zeros', nnz, atlas) 
 
     #  Degree sequence
-    print "Computing: Degree Seuqence"
+    print("Computing: Degree Seuqence")
     temp_deg = OrderedDict((subj, np.array(nx.degree(graphs[subj]).values()))
                                for subj in graphs)
     deg = density(temp_deg)
     write(outdir, 'degree_distribution', deg, atlas) 
 
     #  Edge Weights
-    print "Computing: Edge Weight Sequence"
+    print("Computing: Edge Weight Sequence")
     temp_ew = OrderedDict((subj, [graphs[subj].get_edge_data(e[0], e[1])['weight']
                            for e in graphs[subj].edges()]) for subj in graphs)
     ew = density(temp_ew)
     write(outdir, 'edge_weight_distribution', ew, atlas) 
 
     #   Clustering Coefficients
-    print "Computing: Clustering Coefficient Sequence"
-    nxc = nx.clustering  # For PEP8 line length...
-    temp_cc = OrderedDict((subj, nxc(graphs[subj]).values())
+    print("Computing: Clustering Coefficient Sequence")
+    temp_cc = OrderedDict((subj, nx.clustering(graphs[subj]).values())
                            for subj in graphs)
     ccoefs = density(temp_cc)
     write(outdir, 'clustering_coefficients', ccoefs, atlas) 
 
     # Scan Statistic-1
-    print "Computing: Scan Statistic-1 Sequence"
+    print("Computing: Scan Statistic-1 Sequence")
     temp_ss1 = scan_statistic(graphs, 1)
     ss1 = density(temp_ss1)
     write(outdir, 'scan_statistic_1', ss1, atlas) 
 
     # Eigen Values
-    print "Computing: Eigen Value Sequence"
+    print("Computing: Eigen Value Sequence")
     laplac = OrderedDict((subj, nx.normalized_laplacian_matrix(graphs[subj]))
                              for subj in graphs)
     eigs = OrderedDict((subj, np.sort(np.linalg.eigvals(laplac[subj].A))[::-1])
@@ -96,7 +95,7 @@ def compute_metrics(fs, outdir, atlas, verb=False):
     write(outdir, 'eigen_sequence', eigs, atlas) 
 
     # Betweenness Centrality
-    print "Computing: Betweenness Centrality Sequence"
+    print("Computing: Betweenness Centrality Sequence")
     nxbc = nx.algorithms.betweenness_centrality  # For PEP8 line length...
     temp_bc = OrderedDict((subj, nxbc(graphs[subj]).values())
                            for subj in graphs)
