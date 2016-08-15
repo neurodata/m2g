@@ -5,6 +5,7 @@
 [![](https://img.shields.io/pypi/v/ndmg.svg)](https://pypi.python.org/pypi/ndmg)
 ![](https://travis-ci.org/neurodata/ndmg.svg?branch=master)
 ![](https://img.shields.io/badge/pep8-0E-green.svg?style=flat)
+[![DOI](https://zenodo.org/badge/doi/10.5281/zenodo.60206.svg)](http://dx.doi.org/10.5281/zenodo.60206)
 [![Code Climate](https://codeclimate.com/github/neurodata/ndmg/badges/gpa.svg)](https://codeclimate.com/github/neurodata/ndmg)
 [![Neurodata.io](https://img.shields.io/badge/Visit-neurodata.io-ff69b4.svg)](http://neurodata.io/)
 
