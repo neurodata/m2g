@@ -200,26 +200,26 @@ def main():
     inDir = result.bids_dir
     outDir = result.output_dir
     subj = result.participant_label
-    bucket = result.bucket
-    remote = result.remote_path
+    buck = result.bucket
+    remo = result.remote_path
     level = result.analysis_level
 
     if level == 'participant':
-        if bucket is not None and remote is not None:
+        if buck is not None and remo is not None:
             print("Retrieving data from S3...")
             if subj is not None:
-                [bids_s3.get_data(bucket, remote, inDir, s) for s in subj]
+                [bids_s3.get_data(buck, remo, inDir, s, True) for s in subj]
             else:
-                bids_s3.get_data(bucket, remote, inDir)
+                bids_s3.get_data(buck, remo, inDir)
         participant_level(inDir, outDir, subj)
 
     elif level == 'group':
-        if bucket is not None and remote is not None:
+        if buck is not None and remo is not None:
             print("Retrieving data from S3...")
             if subj is not None:
-                [bids_s3.get_data(bucket, remote, inDir, s) for s in subj]
+                [bids_s3.get_data(buck, remo, inDir, s, True) for s in subj]
             else:
-                bids_s3.get_data(bucket, remote, inDir)
+                bids_s3.get_data(buck, remo, inDir)
 
         group_level(inDir, outDir)
 
