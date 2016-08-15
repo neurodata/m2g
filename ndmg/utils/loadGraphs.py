@@ -20,7 +20,6 @@
 # Email: gkiar@jhu.edu
 
 from collections import OrderedDict
-from ndmg.stats import *
 
 import networkx as nx
 import sys
@@ -51,6 +50,4 @@ def loadGraphs(filenames, verb=False):
             gstruct[fname] = nx.read_graphml(files)
         except:
             gstruct[fname] = nx.read_gpickle(files)
-        else:
-            sys.exit('Cannot understand graph format: ' + files)
     return gstruct
