@@ -24,7 +24,7 @@ import sys
 import boto3
 
 
-def get_data(bucket, remote_path, local, subj=None):
+def get_data(bucket, remote_path, local, subj=None, public=True):
     """
     Given an s3 bucket, data location on the bucket, and a download location,
     crawls the bucket and recursively pulls all data.
@@ -34,8 +34,10 @@ def get_data(bucket, remote_path, local, subj=None):
     if bucket not in bkts:
         sys.exit("Error: could not locate bucket. Available buckets: " +
                  ", ".join(bkts))
-
-    cmd = "".join(['aws s3 cp --recursive s3://', bucket, '/',
+    cmd = 'aws'
+    if public:
+        cmd += '--no-sign-request --region=us-east-1'
+    cmd = "".join([cmd, ' s3 cp --recursive s3://', bucket, '/',
                    remote_path])
     if subj is not None:
         cmd = "".join([cmd, '/sub-', subj])
