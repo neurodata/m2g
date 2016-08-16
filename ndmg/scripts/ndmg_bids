@@ -210,7 +210,7 @@ def main():
             if subj is not None:
                 [bids_s3.get_data(buck, remo, inDir, s, True) for s in subj]
             else:
-                bids_s3.get_data(buck, remo, inDir)
+                bids_s3.get_data(buck, remo, inDir, public=True)
         participant_level(inDir, outDir, subj)
 
     elif level == 'group':
@@ -219,7 +219,7 @@ def main():
             if subj is not None:
                 [bids_s3.get_data(buck, remo, inDir, s, True) for s in subj]
             else:
-                bids_s3.get_data(buck, remo, inDir)
+                bids_s3.get_data(buck, remo, inDir, public=True)
 
         group_level(inDir, outDir)
 
