@@ -36,7 +36,7 @@ def get_data(bucket, remote_path, local, subj=None, public=True):
                  ", ".join(bkts))
     cmd = 'aws'
     if public:
-        cmd += '--no-sign-request --region=us-east-1'
+        cmd += ' --no-sign-request --region=us-east-1'
     cmd = "".join([cmd, ' s3 cp --recursive s3://', bucket, '/',
                    remote_path])
     if subj is not None:
