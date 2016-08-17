@@ -38,7 +38,8 @@ cols = '#000000'
 
 class plot_metrics():
 
-    def __init__(self, nnz, deg, ew, ccoefs, ss1, eigs, centrality, outf):
+    def __init__(self, nnz, deg, ew, ccoefs, ss1, eigs, centrality, outf,
+                 suptit = None):
         """
         Visualizes the computed summary statistics for each atlas
 
@@ -59,6 +60,8 @@ class plot_metrics():
                 - dictionary of betweenness centrality coefficients per graph
             outf:
                 - string for outgoing figure file name
+            suptit:
+                - super title if you choose to have one
         """
         self.nnz = nnz
         self.deg = deg
@@ -69,6 +72,7 @@ class plot_metrics():
         self.centrality = centrality
         self.color = cols
         self.outf = outf
+        self.suptit = suptit
         self.plotting()
 
     def plotting(self):
@@ -88,8 +92,11 @@ class plot_metrics():
             self.plot_helper(val, name_list[idx], typ=type_list[idx])
 
         fig.tight_layout()
-
-        plt.savefig(self.outf, bbox_inches='tight')
+        if self.suptit is not None:
+            t = plt.suptitle(self.suptit, y = 1.04, size=20)
+            plt.savefig(self.outf, bbox_inches='tight', bbox_extra_artists=[t])
+        else:
+            plt.savefig(self.outf, bbox_inches='tight')
         # plt.show()
 
         metadata = {"subjects": self.nnz.keys(),
@@ -106,6 +113,7 @@ class plot_metrics():
                 ty = np.max(y)
                 maxy = ty if ty > maxy else maxy
                 plt.plot(x, y, color=self.color, alpha=0.1)
+                plt.ylabel('Density')
         elif typ == 'se':
             for subj in data:
                 x = np.linspace(1, len(data[subj]), len(data[subj]))
@@ -113,10 +121,12 @@ class plot_metrics():
                 ty = np.max(y)
                 maxy = ty if ty > maxy else maxy
                 plt.plot(x, y, color=self.color, alpha=0.1)
+                plt.ylabel('Value')
         elif typ == 'sc':
             x = self.rand_jitter([0]*len(data.values()))
             y = data.values()
             plt.scatter(x, y, alpha=0.1, color=self.color)
+            plt.ylabel('Count')
 
         if typ == 'sc':
             plt.xlim([np.mean(x)-0.2, np.mean(x)+0.2])
@@ -127,7 +137,7 @@ class plot_metrics():
             plt.xlim([np.min(x), np.max(x)])
             plt.ylim([np.min(y), maxy])
             plt.xticks([np.min(x),  np.max(x)])
-            plt.yticks([np.min(y), (np.max(y) - np.min(y))/2, np.max(y)])
+            plt.yticks([np.min(y), (maxy - np.min(y))/2, maxy])
 
         plt.title(tit, y=1.04)
 
