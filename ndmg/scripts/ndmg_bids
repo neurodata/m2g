@@ -76,7 +76,7 @@ labels = [op.join(atlas_dir, l) for l in labels]
 # *these files can be anywhere up stream of the dwi data, and are inherited.
 
 
-def participant_level(inDir, outDir, subjs):
+def participant_level(inDir, outDir, subjs, debug=False):
     """
     Crawls the given BIDS organized directory for data pertaining to the given
     subject and session, and passes necessary files to ndmg_pipeline for
@@ -138,7 +138,7 @@ def participant_level(inDir, outDir, subjs):
         print("Bvec file: " + bvec[i])
         
         ndmg_pipeline(dwi[i], bval[i], bvec[i], anat[i], atlas, atlas_mask,
-                      labels, outDir, clean=True)
+                      labels, outDir, clean=(not debug))
 
 
 def group_level(inDir, outDir):
@@ -195,6 +195,9 @@ def main():
     parser.add_argument('--remote_path', action='store', help='The path to '
                         'the data on your S3 bucket. The data will be '
                         'downloaded to the provided bids_dir on your machine.')
+    parser.add_argument('--debug', action='store_true', help='flag to store '
+                        'temp files along the path of processing.',
+                        default=False)
     result = parser.parse_args()
 
     inDir = result.bids_dir
@@ -211,7 +214,7 @@ def main():
                 [bids_s3.get_data(buck, remo, inDir, s, True) for s in subj]
             else:
                 bids_s3.get_data(buck, remo, inDir, public=True)
-        participant_level(inDir, outDir, subj)
+        participant_level(inDir, outDir, subj, result.debug)
 
     elif level == 'group':
         if buck is not None and remo is not None:
