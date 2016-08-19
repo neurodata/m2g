@@ -34,7 +34,7 @@ import os
 import sys
 
 
-atlas_dir = op.join(expanduser("~"), 'atlases')
+atlas_dir = '/ndmg_atlases'  # This location bc it is convenient for containers
 atlas = op.join(atlas_dir, 'atlas/MNI152_T1_1mm.nii.gz')
 atlas_mask = op.join(atlas_dir, 'atlas/MNI152_T1_1mm_brain_mask.nii.gz')
 labels = ['labels/AAL.nii.gz',
