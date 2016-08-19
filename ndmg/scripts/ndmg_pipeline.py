@@ -43,8 +43,7 @@ def ndmg_pipeline(dti, bvals, bvecs, mprage, atlas, mask, labels, outdir,
     dti_name = mgu().get_filename(dti)
     cmd = "".join(["mkdir -p ", outdir, "/reg_dti ", outdir, "/tensors ",
                    outdir, "/fibers ", outdir, "/graphs"])
-    p = Popen(cmd, stdout=PIPE, stderr=PIPE, shell=True)
-    p.communicate()
+    mgu().execute_cmd(cmd)
 
     # Graphs are different because of multiple atlases
     if isinstance(labels, list):
@@ -104,9 +103,9 @@ def ndmg_pipeline(dti, bvals, bvecs, mprage, atlas, mask, labels, outdir,
     # Clean temp files
     if clean:
         print("Cleaning up intermediate files... ")
-        cmd = "".join(['rm -f ', tensors, ' ', outdir, '/tmp/', dti_name, '*'])
-        p = Popen(cmd, stdout=PIPE, stderr=PIPE, shell=True)
-        p.communicate()
+        cmd = "".join(['rm -f ', tensors, ' ', outdir, '/tmp/', dti_name, '*',
+                       ' ', aligned_dti, ' ', fibers])
+        mgu().execute_cmd(cmd)
 
     print("Complete!")
     pass
