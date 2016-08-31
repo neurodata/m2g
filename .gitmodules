@@ -2,5 +2,5 @@
 	path = draft/extensible_science
 	url = https://git.overleaf.com/5884261pfbzrv
 [submodule "docker"]
-	path = docker
+	path = bids-app
 	url = https://github.com/BIDS-Apps/ndmg
