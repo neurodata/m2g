@@ -30,10 +30,11 @@ def get_data(bucket, remote_path, local, subj=None, public=True):
     crawls the bucket and recursively pulls all data.
     """
     client = boto3.client('s3')
-    bkts = [bk['Name'] for bk in client.list_buckets()['Buckets']]
-    if bucket not in bkts:
-        sys.exit("Error: could not locate bucket. Available buckets: " +
-                 ", ".join(bkts))
+    if not public:
+        bkts = [bk['Name'] for bk in client.list_buckets()['Buckets']]
+        if bucket not in bkts:
+            sys.exit("Error: could not locate bucket. Available buckets: " +
+                     ", ".join(bkts))
     cmd = 'aws'
     if public:
         cmd += ' --no-sign-request --region=us-east-1'
