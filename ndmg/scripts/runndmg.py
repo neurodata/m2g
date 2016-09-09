@@ -6,7 +6,6 @@
 
 import sys
 import argparse
-sys.path.insert(0, 'ndmg/')
 from ndmg.scripts.fmri_pipeline import fmri_pipeline
 from multiprocessing import Process
 
