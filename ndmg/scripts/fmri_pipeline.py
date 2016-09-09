@@ -32,7 +32,6 @@ from ndmg.timeseries import timeseries as mgts
 from ndmg.qc import qc as mgqc
 from ndmg.preproc import preproc as mgp
 from ndmg.nuis import nuis as mgn
-from guppy import hpy
 
 
 def fmri_pipeline(fmri, mprage, atlas, atlas_brain, mask, labels, outdir,
