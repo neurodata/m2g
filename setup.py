@@ -14,7 +14,10 @@ setup(
         'ndmg.graph',
         'ndmg.stats',
         'ndmg.utils',
-        'ndmg.scripts'
+        'ndmg.scripts',
+        'ndmg.timeseries',
+        'ndmg.qc',
+        'ndmg.nuis'
     ],
     scripts = [
         'ndmg/scripts/ndmg_bids',
