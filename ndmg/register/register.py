@@ -27,7 +27,7 @@ import numpy as np
 import nilearn.image as nl
 import sys
 import dipy.align.reslice as dr
-from ndmg.qc import qc as mgqc
+from ndmg.stats import fmri_qc as mgqc
 
 
 class register(object):
@@ -55,6 +55,16 @@ class register(object):
                     - Image being aligned to as a nifti image file
                 xfm:
                     - Returned transform between two images
+                out:
+                    - determines whether the image will be automatically
+                    aligned.
+                dof:
+                    - the number of degrees of freedom of the alignment.
+                searchrad:
+                    - a bool indicating whether to use the predefined
+                    searchradius parameter (180 degree sweep in x, y, and z).
+                interp:
+                    - the interpolation method to use. Default is trilinear.
         """
         cmd = "flirt -in " + inp + " -ref " + ref + " -interp " + str(interp)
         if xfm is not None:
@@ -75,10 +85,18 @@ class register(object):
         transform between them.
 
         **Positional Arguments:**
-            - inp: the input image.
-            - ref: the reference image.
-            - affxfm: the affine transform to use.
-            - warp: the path to store the nonlinear warp.
+
+            inp:
+                - the input image.
+            ref:
+                - the reference image.
+            affxfm:
+                - the affine transform to use.
+            warp:
+                - the path to store the nonlinear warp.
+            mask:
+                - a mask in which voxels will be extracted
+                during nonlinear alignment.
         """
         cmd = "fnirt --in=" + inp + " --aff=" + xfm + " --cout=" +\
               warp + " --ref=" + ref + " --subsamp=4,2,1,1"
@@ -86,8 +104,6 @@ class register(object):
             cmd += " --refmask=" + mask
         status = mgu().execute_cmd(cmd)
         pass
-
-
 
     def applyxfm(self, inp, ref, xfm, aligned):
         """
@@ -116,11 +132,17 @@ class register(object):
         mapping as well as the functional to structural mapping.
 
         **Positional Arguments:**
-            inp: the input image to be aligned as a nifti image file.
-            out: the output aligned image.
-            ref: the image being aligned to.
-            warp: the warp from the structural to reference space.
-            premat: the affine transformation from functional to
+
+            inp:
+                - the input image to be aligned as a nifti image file.
+            out:
+                - the output aligned image.
+            ref:
+                - the image being aligned to.
+            warp:
+                - the warp from the structural to reference space.
+            premat:
+                - the affine transformation from functional to
                 structural space.
         """
         cmd = "applywarp --ref=" + ref + " --in=" + inp + " --out=" + out +\
@@ -183,9 +205,13 @@ class register(object):
             resampling.
 
         **Positional Arguments:**
-            - base: the path to the base image to resample.
-            - res: the filename after resampling.
-            - template: the template image to align to.
+
+            base:
+                - the path to the base image to resample.
+            res:
+                - the filename after resampling.
+            template:
+                - the template image to align to.
         """
         print("Resampling " + str(base) + " to " + str(template) + "...")
         baseimg = nb.load(base)
@@ -202,9 +228,13 @@ class register(object):
         """
         A function to resample a base image in fsl to that of a template.
         **Positional Arguments:**
-            - base: the path to the base image to resample.
-            - res: the filename after resampling.
-            - template: the template image to align to.
+
+           base:
+                - the path to the base image to resample.
+            res:
+                - the filename after resampling.
+            template:
+                - the template image to align to.
         """
         goal_res = int(nb.load(template).get_header().get_zooms()[0])
         cmd = "flirt -in " + base + " -ref " + template + " -out " +\
@@ -212,40 +242,51 @@ class register(object):
         mgu().execute_cmd(cmd)
         pass
 
-
     def combine_xfms(self, xfm1, xfm2, xfmout):
         """
         A function to combine two transformations, and output the
         resulting transformation.
 
         **Positional Arguments**
-            - xfm1: the path to the first transformation
-            - xfm2: the path to the second transformation
-            -xfmout: the path to the output transformation
+            xfm1:
+                - the path to the first transformation
+            xfm2:
+                - the path to the second transformation
+            xfmout:
+                - the path to the output transformation
         """
         cmd = "convert_xfm -omat " + xfmout + " -concat " + xfm1 + " " + xfm2
         mgu().execute_cmd(cmd)
         pass
 
     def fmri2atlas(self, mri, anat, atlas, atlas_brain, atlas_mask,
-                   aligned_mri, aligned_anat, outdir, qcdir=""):
-
+                   aligned_mri, aligned_anat, outdir, qcdir=None):
         """
         A function to change coordinates from the subject's
         brain space to that of a template using nonlinear
         registration.
 
         **Positional Arguments:**
-            mri: the path of the preprocessed mri image.
-            anat: the path of the raw anatomical scan.
-            atlas: the template atlas.
-            atlas_brain: the template brain.
-            atlas_mask: the template mask.
-            aligned_mri: the name of the aligned mri scan to produce.
-            aligned_anat: the name of the aligned anatomical scan to
+
+            mri:
+                - the path of the preprocessed mri image.
+            anat:
+                - the path of the raw anatomical scan.
+            atlas:
+                - the template atlas.
+            atlas_brain:
+                - the template brain.
+            atlas_mask:
+                - the template mask.
+            aligned_mri:
+                - the name of the aligned mri scan to produce.
+            aligned_anat:
+                - the name of the aligned anatomical scan to
                 produce
-            outdir: the output base directory.
-            qcdir: the quality control directory. If None, then
+            outdir:
+                - the output base directory.
+            qcdir:
+                - the quality control directory. If None, then
                 no QC will be performed.
        """
         mri_name = mgu().get_filename(mri)
@@ -262,7 +303,6 @@ class register(object):
 
         sys.path.insert(0, '..')
         mgu().get_slice(mri, 0, s0)  # get the 0 slice and save
-        # TODO EB: do we want to align the resampled image?
         mgu().extract_brain(anat, anat_brain)
         mgu().extract_brain(s0, s0_brain)
         self.align(s0_brain, anat_brain, xfm_func2mpr)

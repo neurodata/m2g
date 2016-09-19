@@ -119,9 +119,12 @@ class utils():
         Takes a volume index and constructs a new nifti image from
         the specified volume.
         **Positional Arguments:**
-            - mri: the path to a 4d mri volume to extract a slice from.
-            - volid: the index of the volume desired.
-            - sli: the path to the destination for the slice.
+            mri:
+                - the path to a 4d mri volume to extract a slice from.
+            volid:
+                - the index of the volume desired.
+            sli:
+                - the path to the destination for the slice.
         """
         mri_im = nb.load(mri)
         data = mri_im.get_data()
@@ -142,15 +145,17 @@ class utils():
         """
         Opens a brain data series for a mask, mri image, or atlas.
         Returns a numpy.ndarray representation of a brain.
+
         **Positional Arguements**
-            -brain_file: an object to open the data for a brain.
-                         Can be a string (path to a brain file),
-                         nibabel.nifti1.nifti1image, or a numpy.ndarray
+            brain_file:
+                - an object to open the data for a brain.
+                Can be a string (path to a brain file),
+                nibabel.nifti1.nifti1image, or a numpy.ndarray
         """
         if type(brain_file) is np.ndarray:  # if brain passed as matrix
             braindata = brain_file
         else:
-            if type(brain_file) is str or type(brain_file) is unicode:  # object is a path
+            if type(brain_file) is str or type(brain_file) is unicode:
                 brain = nb.load(str(brain_file))
             elif type(brain_file) is nb.nifti1.Nifti1Image:
                 brain = brain_file
@@ -164,10 +169,14 @@ class utils():
     def apply_mask(self, inp, masked, mask):
         """
         A function to apply a mask to a brain.
+
         **Positional Arguments:**
-            inp: the input path to an mri image.
-            masked: the output path to the masked image.
-            mask: the path to a brain mask.
+            inp:
+                - the input path to an mri image.
+            masked:
+                - the output path to the masked image.
+            mask:
+                - the path to a brain mask.
         """
         cmd = "fslmaths " + inp + " -mas " + mask + " " + masked
         self.execute_cmd(cmd)
@@ -176,9 +185,12 @@ class utils():
     def extract_brain(self, inp, out, opts=""):
         """
         A function to extract the brain from an image using FSL's BET.
+
         **Positional Arguments:**
-            inp: the input image.
-            out: the output brain extracted image.
+            inp:
+                - the input image.
+            out:
+                - the output brain extracted image.
         """
         cmd = "bet " + inp + " " + out
         if opts is not None:
@@ -190,6 +202,10 @@ class utils():
         """
         Given a bash command, it is executed and the response piped back to the
         calling script
+
+        **Positional Arguments:**
+            cmd:
+                - the bash command to execute.
         """
         print("Executing: " + cmd)
         p = Popen(cmd, stdout=PIPE, stderr=PIPE, shell=True)
@@ -202,6 +218,7 @@ class utils():
     def get_b0(self, gtab, data):
         """
         Takes bval and bvec files and produces a structure in dipy format
+
         **Positional Arguments:**
                 streamlines:
                     - Fiber streamlines either file or array in a dipy EuDX

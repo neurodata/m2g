@@ -13,7 +13,7 @@
 # limitations under the License.
 #
 
-# quality_control.py
+# fmri_qc.py
 # Created by Eric W Bridgeford on 2016-06-08.
 # Email: ebridge2@jhu.edu
 
@@ -33,12 +33,11 @@ import matplotlib.pyplot as plt
 from ndmg.utils import utils as mgu
 
 
-class qc(object):
+class fmri_qc(object):
 
     def __init__(self):
         """
-        Enables quality control of fMRI and DTI processing pipelines
-        using the ggplot plotting system.
+        Enables quality control of fMRI and DTI processing pipelines.
         """
         pass
 
@@ -47,9 +46,12 @@ class qc(object):
         dice coefficient 2nt/na + nb.
         Code taken from https://en.wikibooks.org/wiki/Algorithm_Implementation
         /Strings/Dice%27s_coefficient#Python
+
         ** Positional Arguments:**
-            - a: the first array.
-            - b: the second array.
+            a:
+                - the first array.
+            b:
+                - the second array.
         """
         a = nar.tolist(nar.flatten(a))
         b = nar.tolist(nar.flatten(b))
@@ -84,6 +86,12 @@ class qc(object):
         Otherwise, fMRI signal vastly overpowers MPRAGE signal and our MSE
         would have very low accuracy (fMRI signal differences >>> actual
         differences we are looking for).
+
+        **Positional Arguments:**
+            imageA:
+                - the first image.
+            imageB:
+                - the second image.
         """
         err = np.sum((imageA.astype("float") - imageB.astype("float")) ** 2)
         err /= (float(imageA.shape[0] * imageA.shape[1]))
@@ -96,8 +104,10 @@ class qc(object):
         the before/reference and after/reference.
 
         **Positional Arguments:**
-            - before: a numpy array before an operational step.
-            - after: a numpy array after an operational step.
+            before:
+                - a numpy array before an operational step.
+            after:
+                - a numpy array after an operational step.
         """
         x_min = min(np.nanmin(before), np.nanmin(after))
         x_max = max(np.nanmax(before), np.nanmax(after))
@@ -112,8 +122,10 @@ class qc(object):
         1 and 2.
 
         **Positional Arguments:**
-            - array 1: the first array.
-            - array 2: the second array.
+            array1:
+                - the first array.
+            array2:
+                - the second array.
         """
         return np.sqrt(np.sum((np.sqrt(array1) -
                               np.sqrt(array2)) ** 2)) / np.sqrt(2)
@@ -121,29 +133,23 @@ class qc(object):
     def check_alignments(self, mri_bname, mri_aname, refname, qcdir,
                          fname, title=""):
         """
-        A function for checking alignments between two data items.
-        The function produces [numnvols] plots in the output
-        directory. Each plot is a multiplot comprised of [numslices]
-        rows, and 2 columns. The left column shows the overlap between
-        the mri scan and the reference before any operation, and the
-        right shows the overlap between the mri scan and the reference
-        after an operation has taken place. The title is the DICE
-        overlap between the two images.
-
-        An additional plot is produced to create a density estimate
-        of the DICE scores for the entire subject before and after
-        an operation has taken place. The title is the hellinger distance.
-
+        A function to check alignments and generate descriptive statistics
+        and plots based on the overlap between two images.
+        
         **Positional Arguments**
-            - mri_bname: the 4d mri file before an operation has taken place
-            - mri_aname: the 4d mri file after an operation has taken place
-            - refname: the 3d file used as a reference for the operation
-            - qcdir: the output directory for the plots
-            - title: a string (such as the operation name) for use in the plot
+            mri_bname:
+                - the 4d mri file before an operation has taken place
+            mri_aname:
+                - the 4d mri file after an operation has taken place
+            refname:
+                - the 3d file used as a reference for the operation
+            qcdir:
+                - the output directory for the plots
+            title:
+                - a string (such as the operation name) for use in the plot
                      titles (defaults to "")
-            - fname: a string to use in the file handle for easy finding
-            - bin=binary: a bool indicating whether to binarize the scans
-                          to analyze alignment for (defaults to False)
+            fname:
+                - a string to use in the file handle for easy finding
         """
         print "Performing Quality Control for " + title + "..."
         print "\tBefore " + title + ": " + mri_bname
@@ -155,6 +161,7 @@ class qc(object):
         mri_after = nb.load(mri_aname)
         reference = nb.load(refname)
 
+        # resample if not in same image space
         if not all(x in mri_after.get_header().get_zooms()[:3] for x in
                    mri_before.get_header().get_zooms()[:3]):
             mri_tname = qcdir + "/" + fname + "_res.nii.gz"
@@ -230,9 +237,22 @@ class qc(object):
         reference images.
 
         **Positional Arguments:**
-            mri_image: the first matrix.
-            ref_image: the reference matrix.
-            qcdir: the path to a directory to dump the outputs.
+            mri_image:
+                - the first matrix.
+            ref_image:
+                - the reference matrix.
+            qcdir:
+                - the path to a directory to dump the outputs.
+            scan_id:
+                - the id of the scan being analyzed.
+            refid:
+                - the id of the reference being analyzed.
+            binmri:
+                - determines whether binarization will take place
+                for mri image.
+            binref:
+                - determines whether binarization will take place for
+                reference
         """
         cmd = "mkdir -p " + qcdir
         mgu().execute_cmd(cmd)
@@ -282,34 +302,47 @@ class qc(object):
         an image of all the slices of this mri scan.
 
         **Outputs:**
-            - Mean figure: plot for each voxel's mean signal intensity for
+            Mean figure:
+                - plot for each voxel's mean signal intensity for
               each voxel in the corrected mri's timecourse
-            - STdev figure: plot of the standard deviation of each voxel's
+            STdev figure:
+                - plot of the standard deviation of each voxel's
               corrected timecourse
-            - SNR figure: plot of signal to noise ratio for each voxel in the
+            SNR figure:
+                - plot of signal to noise ratio for each voxel in the
               corrected timecourse
-            - Slice Wise Intensity figure: averages intensity over slices
-              and plots each slice as a line for corrected mri
+            Slice Wise Intensity figure:
+                - averages intensity over slices
+                    and plots each slice as a line for corrected mri
                 - goal: slice mean signal intensity is approximately same
                   throughout all nvols (lines are relatively flat)
-            - motion parameters figures (3):
+            motion parameters figures (3):
                 - 1 figure for rotational, 1 figure for translational motion
                   params, 1 for displacement, calculated with fsl's mcflirt
-            - stat summary file:
+            stat summary file:
                 - provides some useful statistics for analyzing fMRI data;
                   see resources for each individual statistic for the
                   computation
 
         **Positional Arguments:**
-            - mri: the path to a corrected mri scan to analyze
-            - mri_raw: the path to an uncorrected mri scan to analyze
-            - mri_mc: the motion corrected mri scan.
-            - mask: the mask to calculate statistics over.
-            - voxel: a matrix for the voxel timeseries.
-            - aligned_mprage: the aligned MPRAGE image.
-            - atlas: the atlas for alignment.
-            - title: the title for the file (ie, Registered, Resampled, etc)
-            - fname: the name to give the file.
+            - mri:
+                - the path to a corrected mri scan to analyze
+            - mri_raw:
+                - the path to an uncorrected mri scan to analyze
+            - mri_mc:
+                - the motion corrected mri scan.
+            - mask:
+                - the mask to calculate statistics over.
+            - voxel:
+                - a matrix for the voxel timeseries.
+            - aligned_mprage:
+                - the aligned MPRAGE image.
+            - atlas:
+                - the atlas for alignment.
+            - title:
+                - the title for the plots (ie, Registered, Resampled, etc)
+            - fname:
+                - the name to give the file.
         """
         print "Producing Quality Control Summary. \n" +\
             "\tRaw Image: " + mri_raw + "\n" +\

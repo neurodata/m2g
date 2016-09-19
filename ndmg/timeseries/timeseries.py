@@ -22,7 +22,7 @@ import numpy as np
 import nibabel as nb
 import sys
 from ndmg.utils import utils as mgu
-from ndmg.qc import qc as mgqc
+from ndmg.stats import fmri_qc as mgqc
 
 
 class timeseries(object):
@@ -33,20 +33,24 @@ class timeseries(object):
         """
         pass
 
-    def voxel_timeseries(self, fmri_file, mask_file, voxel_file=""):
+    def voxel_timeseries(self, fmri_file, mask_file, voxel_file=None):
         """
         Function to extract timeseries for the voxels in the provided
         mask.
         Returns the voxel timeseries as a numpy.ndarray.
 
         **Positional Arguments**
-            - fmri_file: the path to the fmri 4d volume to extract timeseries.
-                         can be string, nifti1image, or ndarray
-            - mask_file: the path to the binary mask the user wants to extract
-                    voxel timeseries over. Can be string, nifti1image, or
-                    ndarray
-            - voxel_file: the path to the voxel timeseries to be created.
-                          Must be string.
+            fmri_file:
+                - the path to the fmri 4d volume to extract timeseries.
+                can be string, nifti1image, or ndarray
+            mask_file:
+                - the path to the binary mask the user wants to extract
+                voxel timeseries over. Can be string, nifti1image, or
+                ndarray
+            voxel_file:
+                - the path to the voxel timeseries to be created.
+                Must be string. If None, don't save and just return
+                the voxel timeseries.
         """
         print "Extracting Voxel Timeseries for " + str(fmri_file) + "..."
 
@@ -57,22 +61,27 @@ class timeseries(object):
         # load the MRI data
         fmridata = mgu().get_brain(fmri_file)
         voxel_ts = fmridata[maskbool, :]
-        if voxel_file:
+        if voxel_file is not None:
             np.savez(voxel_file, voxel_ts)
         return voxel_ts
 
-    def roi_timeseries(self, fmri_file, label_file, roits_file="", qcdir=None,
-                       scanid="", refid=""):
+    def roi_timeseries(self, fmri_file, label_file, roits_file=None, qcdir=None,
+                       scanid=None, refid=None):
         """
         Function to extract average timeseries for the voxels in each
         roi of the labelled atlas.
         Returns the roi timeseries as a numpy.ndarray.
 
         **Positional Arguments**
-            - fmri_file: the path to the 4d volume to extract timeseries
-            - label_file: the path to the labelled atlas containing labels
+
+            fmri_file:
+                - the path to the 4d volume to extract timeseries
+            label_file:
+                - the path to the labelled atlas containing labels
                     for the voxels in the fmri image
-            - roits_file: the path to where the roi timeseries will be saved
+            roits_file:
+                - the path to where the roi timeseries will be saved. If
+                None, don't save and just return the roi_timeseries.
         """
         labeldata = mgu().get_brain(label_file)
 
@@ -89,7 +98,6 @@ class timeseries(object):
             roibool = (labeldata == roi)  # get a bool where our voxels in roi
             roi_voxelwisets = fmridata[roibool, :]
 
-            print(roi_voxelwisets.shape)
             roi_ts[roi_idx, :] = np.mean(roi_voxelwisets, axis=0)
 
         if qcdir is not None:
