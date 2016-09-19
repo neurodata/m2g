@@ -15,7 +15,7 @@
 # limitations under the License.
 #
 
-# preproc.py
+# nuis.py
 # Created by Eric Bridgeford on 2016-06-20-16.
 # Email: ebridge2@jhu.edu
 from ndmg.utils import utils as mgu
@@ -32,46 +32,38 @@ class nuis(object):
         """
         pass
 
-    def calc_residuals(self, mri, nuisance_mri):
+    def highpass_filter(self, mri, bandpass_mri):
         """
-        A function that applies nuisance correction for linear
-        and quadratic drift. Adjusts the CPAC function found here:
-        http://fcp-indi.github.io/docs/developer/_modules/CPAC/
-        nuisance/nuisance.html
+        A function that uses FSL's fslmaths to high pass
+        an fMRI image.
 
         **Positional Arguments:**
-            mri: the mri file.
-            nuisance_mri: the nuisance corrected filename.
+            mri:
+                - the unfiltered image.
+            bandpass_mri:
+                - the image with low frequency signal removed.
         """
         mri_im = nb.load(mri)
-        mri_dat = mgu().get_brain(mri_im)
+        highpass = 1/.01 # above this freq we want to include
+        low = -1 # below this freq we want to include, -1
+                 # includes all (ignore low pass)
+        tr = mri_im.header.get_zooms()[3]
+        sigma_high = highpass/(2*tr)
 
-        region_mask = (mri_dat != 0).sum(-1) != 0
-        # Calculate regressors
-        # regressor_map = {'constant' : np.ones((mri_dat.shape[3],1))}
-        # if(selector['compcor']):
-        #   print 'compcor_ncomponents ', compcor_ncomponents
-        #   regressor_map['compcor'] = calc_compcor_components(
-        #            mri_dat, compcor_ncomponents, wm_sigs, csf_sigs)
+        cmd = "fslmaths " + mri + " -bptf " + str(sigma_high) + " " +\
+            str(low) + " " + bandpass_mri
+        mgu().execute_cmd(cmd)
 
-        nvol = mri_dat.shape[3]
-        X = np.zeros((nvol, 1))
-        linear = np.arange(0, nvol)
-        quad = np.arange(0, nvol)**2
-        # ncomp = calc_compcor_components(mri_dat, 5, )
-        for rval in [linear, quad]:
-            X = np.hstack((X, rval.reshape(rval.shape[0], -1)))
-        
-        X = X[:, 1:]
+    def nuis_correct(self, mri, nuisance_mri):
+        """
+        A function for nuisance correction on an aligned fMRI
+        image. So far, this only highpass filters.
 
-        Y = mri_dat[region_mask].T
-        B = np.linalg.inv(X.T.dot(X)).dot(X.T).dot(Y)
-        Y_res = Y - X.dot(B)
-
-        mri_dat[region_mask] = Y_res.T
-
-        new_img = nb.Nifti1Image(mri_dat, header=mri_im.get_header(),
-                                 affine=mri_im.get_affine())
-
-        nb.save(new_img, nuisance_mri)
+        **Positional Arguments:**
+            mri:
+                - the mri file.
+            nuisance_mri:
+                - the nuisance corrected filename.
+        """
+        self.highpass_filter(mri, nuisance_mri)
         pass

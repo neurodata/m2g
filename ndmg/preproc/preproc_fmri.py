@@ -15,7 +15,7 @@
 # limitations under the License.
 #
 
-# preproc.py
+# preproc_fmri.py
 # Created by Eric Bridgeford on 2016-06-20-16.
 # Email: ebridge2@jhu.edu
 
@@ -26,16 +26,16 @@ import os.path as op
 import os.path
 import nilearn as nl
 from ndmg.utils import utils as mgu
-from ndmg.qc import qc as mgqc
+from ndmg.stats import fmri_qc as mgqc
 from scipy import signal
 
 
-class preproc(object):
+class preproc_fmri(object):
 
     def __init__(self):
         """
         Enables preprocessing of single images for single images. Has options
-        to perform motion correction (now).
+        to perform motion correction.
         """
         pass
 
@@ -44,31 +44,14 @@ class preproc(object):
         Performs motion correction of a stack of 3D images.
 
         **Positional Arguments:**
-            - mri: the 4d (fMRI) image volume as a nifti file.
-            - corrected_mri: the corrected and aligned fMRI image volume.
+            mri (String):
+                 -the 4d (fMRI) image volume as a nifti file.
+            corrected_mri (String):
+                - the corrected and aligned fMRI image volume.
         """
         cmd = "mcflirt -in " + mri + " -out " + corrected_mri +\
             " -plots -refvol " + str(idx)
         mgu().execute_cmd(cmd)
-        pass
-
-    def detrend(self, mri, detrended_mri):
-        """
-        Removes linear and quadratic trending of a fmri brain.
-
-        *Positional Arguments:*
-            mri: the mri to detrend.
-            detrended_mri: the mri that is smoothed.
-        """
-        mri_im = nb.load(mri)
-        mri_dat = mgu().get_brain(mri_im)
-        dt_mri_dat = signal.detrend(mri_dat)
-        mri_mean = np.mean(mri_dat, axis=3)
-        nvol = dt_mri_dat.shape[3]
-        for t in range(0, nvol):
-            dt_mri_dat[:, :, :, t] = dt_mri_dat[:, :, :, t] + mri_mean
-        dt_mri = nb.Nifti1Image(dt_mri_dat, mri_im.get_affine())
-        nb.save(dt_mri, detrended_mri)
         pass
 
     def smooth(self, mri, smoothed_mri):
@@ -87,16 +70,27 @@ class preproc(object):
         A function to preprocess a stack of 3D images.
 
         **Positional Arguments:**
-            - mri: the 4d (fMRI) image volume as a nifti file.
-            - preproc_mri: the 4d (fMRI) preprocessed image volume
-                as a nifti image.
-            - outdir: the location to place outputs
+
+            mri:
+                - the 4d (fMRI) image volume as a nifti file (String).
+            motion_mri:
+                - the 4d (fMRI) image volume that is motion aligned (String).
+            preproc_mri:
+                - the 4d (fMRI) preprocessed image volume
+                as a nifti image (String).
+            outdir:
+                - the location to place outputs (String).
+            qcdir:
+                - optional argument required for quality control output
+                directory (String).
+            scanid:
+                - optional argument required for quality control, is the id
+                of the subject (String).
         """
 
         mri_name = op.splitext(op.splitext(op.basename(mri))[0])[0]
 
         s0 = outdir + "/tmp/" + mri_name + "_0slice.nii.gz"
-        dt_mri = outdir + "/tmp/" + mri_name + "_detrended.nii.gz"
 
         # TODO EB: decide whether it is advantageous to align to mean image
         self.motion_correct(mri, motion_mri, 0)
@@ -107,10 +101,7 @@ class preproc(object):
                                     title="Motion Correction")
             mgqc().image_align(motion_mri, s0, qcdir, scanid=mri_name,
                                refid=mri_name + "_s0")
-            print("Test")
 
         cmd = "cp " + motion_mri + " " + preproc_mri
         mgu().execute_cmd(cmd)
-        # self.detrend(mri, preproc_mri)
-        # self.smooth(mri, preproc_mri)
         pass

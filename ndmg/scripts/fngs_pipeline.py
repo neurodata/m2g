@@ -25,25 +25,46 @@ from subprocess import Popen, PIPE
 import os.path as op
 from ndmg.utils import utils as mgu
 from ndmg.register import register as mgr
-from ndmg.graph import graph as mgg
+from ndmg import graph as mgg
 import numpy as np
 import nibabel as nb
 from ndmg.timeseries import timeseries as mgts
-from ndmg.qc import qc as mgqc
-from ndmg.preproc import preproc as mgp
+from ndmg.stats import fmri_qc as mgqc
+from ndmg.preproc import preproc_fmri as mgp
 from ndmg.nuis import nuis as mgn
 
 
-def fmri_pipeline(fmri, mprage, atlas, atlas_brain, mask, labels, outdir,
+def fngs_pipeline(fmri, struct, atlas, atlas_brain, mask, labels, outdir,
                   clean=False, fmt='gpickle'):
     """
-    Creates a brain graph from MRI data
+    Analyzes fMRI images and produces subject-specific derivatives.
+
+    **Positional Arguments:**
+        fmri:
+            - the path to a 4D (fMRI) image.
+        struct:
+            - the path to a 3d (anatomical) image.
+        atlas:
+            - the path to a reference atlas.
+        atlas_brain:
+            - the path to a reference atlas, brain extracted.
+        mask:
+            - the path to a reference brain mask.
+        labels:
+            - a list of labels files.
+        outdir:
+            - the base output directory to place outputs.
+        clean:
+            - a flag whether or not to clean out directories once finished.
+        fmt:
+            - the format for produced graphs. Supported options are gpickle and
+            graphml.
     """
     startTime = datetime.now()
 
     # Create derivative output directories
     fmri_name = op.splitext(op.splitext(op.basename(fmri))[0])[0]
-    mprage_name = op.splitext(op.splitext(op.basename(mprage))[0])[0]
+    struct_name = op.splitext(op.splitext(op.basename(struct))[0])[0]
     atlas_name = op.splitext(op.splitext(op.basename(atlas))[0])[0]
 
     qcdir = outdir + "/qc"
@@ -55,7 +76,7 @@ def fmri_pipeline(fmri, mprage, atlas, atlas_brain, mask, labels, outdir,
     cmd = "mkdir -p " + outdir + "/reg_fmri " + outdir +\
         "/preproc_fmri " + outdir + "/motion_fmri " + outdir +\
         "/voxel_timeseries " + outdir + "/roi_timeseries " +\
-        outdir + "/reg_mprage " + outdir + "/tmp " +\
+        outdir + "/reg_struct " + outdir + "/tmp " +\
         outdir + "/graphs " + outdir + "/nuis_fmri " + qcdir + " " +\
         mcdir + " " + regdir + " " + overalldir + " " + roidir
     mgu().execute_cmd(cmd)
@@ -79,7 +100,7 @@ def fmri_pipeline(fmri, mprage, atlas, atlas_brain, mask, labels, outdir,
     # Create derivative output file names
     preproc_fmri = outdir + "/preproc_fmri/" + fmri_name + "_preproc.nii.gz"
     aligned_fmri = outdir + "/reg_fmri/" + fmri_name + "_aligned.nii.gz"
-    aligned_mprage = outdir + "/reg_mprage/" + fmri_name +\
+    aligned_struct = outdir + "/reg_struct/" + fmri_name +\
         "_anat_aligned.nii.gz"
     motion_fmri = outdir + "/motion_fmri/" + fmri_name + "_mc.nii.gz"
     nuis_fmri = outdir + "/nuis_fmri/" + fmri_name + "_nuis.nii.gz"
@@ -103,15 +124,14 @@ def fmri_pipeline(fmri, mprage, atlas, atlas_brain, mask, labels, outdir,
     print "Preprocessing volumes..."
     mgp().preprocess(fmri, preproc_fmri, motion_fmri, outdir, qcdir=mcdir)
     print "Aligning volumes..."
-    mgr().fmri2atlas(preproc_fmri, mprage, atlas, atlas_brain, mask,
-                     aligned_fmri, aligned_mprage, outdir, qcdir=regdir)
-    #mgn().calc_residuals(aligned_fmri, nuis_fmri)
-    mgu().execute_cmd("fslmaths  " + aligned_fmri + " -bptf 100 -1 " + nuis_fmri)
- 
+    mgr().fmri2atlas(preproc_fmri, struct, atlas, atlas_brain, mask,
+                     aligned_fmri, aligned_struct, outdir, qcdir=regdir)
+    mgn().nuis_correct(aligned_fmri, nuis_fmri)
+
     voxel = mgts().voxel_timeseries(nuis_fmri, mask, voxel_ts)
     
     mgqc().stat_summary(nuis_fmri, fmri, motion_fmri, mask, voxel,
-                        aligned_mprage, atlas_brain,
+                        aligned_struct, atlas_brain,
                         qcdir=overalldir, scanid=fmri_name)
 
     for idx, label in enumerate(label_name):
@@ -124,7 +144,7 @@ def fmri_pipeline(fmri, mprage, atlas, atlas_brain, mask, labels, outdir,
                                refid=label)
         except OSError as err:
             print(err)
-        graph = mgg(ts.shape[0], labels[idx])
+        graph = mgg(ts.shape[0], labels[idx], sens="Functional")
         graph.cor_graph(ts)
         graph.summary()
         graph.save_graph(graphs[idx], fmt=fmt)
@@ -140,7 +160,7 @@ def main():
     parser = ArgumentParser(description="This is an end-to-end connectome \
                             estimation pipeline from sMRI and DTI images")
     parser.add_argument("fmri", action="store", help="Nifti DTI image stack")
-    parser.add_argument("mprage", action="store", help="Nifti T1 MRI image")
+    parser.add_argument("struct", action="store", help="Nifti T1 MRI image")
     parser.add_argument("atlas", action="store", help="Nifti T1 MRI atlas")
     parser.add_argument("atlas_brain", action="store", help="Nifti T1 MRI \
                         brain only atlas")
@@ -162,7 +182,7 @@ def main():
     print "Creating output temp directory: " + result.outdir + "/tmp"
     mgu().execute_cmd(cmd)
 
-    fmri_pipeline(result.fmri, result.mprage, result.atlas, result.atlas_brain,
+    fngs_pipeline(result.fmri, result.struct, result.atlas, result.atlas_brain,
                   result.mask, result.labels, result.outdir, result.clean,
                   result.fmt)
 
