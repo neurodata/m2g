@@ -105,6 +105,33 @@ class graph(object):
         self.g.add_weighted_edges_from(edge_list)
         pass
 
+    def cor_graph(self, timeseries, attr=None):
+        """
+        Takes timeseries and produces a correlation matrix
+
+        **Positional Arguments:**
+            timeseries:
+                -the timeseries file to extract correlation for.
+                          dimensions are [numrois]x[numtimesteps]
+        """
+        print "Estimating correlation matrix for " + str(self.N) +\
+              " roi graph..."
+        cor = np.corrcoef(timeseries)  # calculate pearson correlation
+
+        roilist = np.unique(self.rois)
+        roilist = roilist[roilist != 0]
+        roilist = np.sort(roilist)
+
+        for (idx_out, roi_out) in enumerate(roilist):
+            for (idx_in, roi_in) in enumerate(roilist):
+                self.edge_dict[tuple((roi_out, roi_in))] = float(np.absolute(
+                        cor[idx_out, idx_in]))
+
+        edge_list = [(k[0], k[1], v) for k, v in self.edge_dict.items()]
+
+        self.g.add_weighted_edges_from(edge_list)
+        pass
+
     def get_graph(self):
         """
         Returns the graph object created
