@@ -94,6 +94,10 @@ def compute_metrics(fs, outdir, atlas, verb=False):
                        for subj in graphs)
     write(outdir, 'eigen_sequence', eigs, atlas)
 
+    scree = OrderedDict((subj, np.cumsum(eigs[subj])/np.sum(eigs[subj]))
+                        for subj in eigs)
+    write(outdir, 'scree_eigen', scree, atlas)
+
     # Betweenness Centrality
     print("Computing: Betweenness Centrality Sequence")
     nxbc = nx.algorithms.betweenness_centrality  # For PEP8 line length...
@@ -104,7 +108,7 @@ def compute_metrics(fs, outdir, atlas, verb=False):
 
     outf = outdir + '/' + atlas + '_summary.png'
 
-    plot_metrics(nnz, deg, ew, ccoefs, ss1, eigs, centrality, outf)
+    plot_metrics(nnz, deg, ew, ccoefs, ss1, eigs, scree, centrality, outf)
 
 
 def scan_statistic(mygs, i):

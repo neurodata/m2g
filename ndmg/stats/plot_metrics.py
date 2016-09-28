@@ -38,8 +38,8 @@ cols = '#000000'
 
 class plot_metrics():
 
-    def __init__(self, nnz, deg, ew, ccoefs, ss1, eigs, centrality, outf,
-                 suptit = None):
+    def __init__(self, nnz, deg, ew, ccoefs, ss1, eigs, scree,
+                 centrality, outf, suptit = None):
         """
         Visualizes the computed summary statistics for each atlas
 
@@ -56,6 +56,8 @@ class plot_metrics():
                 - dictionary of scan statistic-1 distributions per graph
             eigs:
                 - dictionary of eigen sequence per graph
+            scree:
+                - dictionary of eigen values organizes for a scree plot
             centrality:
                 - dictionary of betweenness centrality coefficients per graph
             outf:
@@ -69,6 +71,7 @@ class plot_metrics():
         self.ccoefs = ccoefs
         self.ss1 = ss1
         self.eigs = eigs
+        self.scree = scree
         self.centrality = centrality
         self.color = cols
         self.outf = outf
@@ -80,16 +83,16 @@ class plot_metrics():
 
         i = 0
         metric_list = [self.nnz, self.deg, self.ew, self.ccoefs, self.ss1,
-                       self.centrality, self.eigs]
-        name_list = ['NNZ', 'Degree', 'Edge Weight', 'Clustering Coefficient',
-                     'Scan Statistic-1', 'Centrality', 'Eigen']
-        type_list = ['sc', 'hi', 'hi', 'hi', 'hi', 'hi', 'se']
+                       self.centrality, self.eigs, self.scree]
+        name_list = ['NNZ', 'log(Degree)', 'log(Edge Weight)',
+                     'log(Clustering Coefficient)', 'log(Scan Statistic-1)',
+                     'log(Centrality)', 'Eigen', 'Scree Plot']
+        type_list = ['sc', 'hi', 'hi', 'hi', 'hi', 'hi', 'se', 'se']
         for idx, val in enumerate(metric_list):
             i += 1
             ax = plt.subplot(2, 4, i)
-            ax.yaxis.set_major_formatter(mtick.FormatStrFormatter('%2.1e'))
             plt.hold(True)
-            self.plot_helper(val, name_list[idx], typ=type_list[idx])
+            self.plot_helper(ax, val, name_list[idx], typ=type_list[idx])
 
         fig.tight_layout()
         if self.suptit is not None:
@@ -97,48 +100,76 @@ class plot_metrics():
             plt.savefig(self.outf, bbox_inches='tight', bbox_extra_artists=[t])
         else:
             plt.savefig(self.outf, bbox_inches='tight')
-        # plt.show()
 
         metadata = {"subjects": self.nnz.keys(),
                     "date": time.asctime(time.localtime())}
         with open(os.path.splitext(self.outf)[0]+'_info.json', 'w') as fp:
             json.dump(metadata, fp)
 
-    def plot_helper(self, data, tit, typ='hi'):
+    def set_tick_labels(self, ax, miny, maxy):
+        print miny, maxy
+        power = np.floor(np.log10(maxy))
+        print power
+        miny = 0 if miny < 10**(power-1) else self.round_to_n(miny/(10**power), 2)
+        maxy = self.round_to_n(maxy/(10**power),2)
+        print miny, maxy
+
+        labels = [miny,
+                  (maxy+miny)/2,
+                  maxy]
+        ax.set_yticklabels(labels)
+        ax.xaxis.set_major_formatter(mtick.FormatStrFormatter('%.2f'))
+        return ' x10^%d' % power
+
+    def round_to_n(self, x, n):
+        return round(x, (n-1)-int(np.floor(np.log10(abs(x)))))
+
+    def plot_helper(self, ax, data, tit, typ='hi'):
         maxy = float('-inf')
+        miny = float('inf')
         if typ == 'hi':
             for subj in data['pdfs']:
                 x = data['xs'][subj]
                 y = data['pdfs'][subj]
                 ty = np.max(y)
                 maxy = ty if ty > maxy else maxy
-                plt.plot(x, y, color=self.color, alpha=0.1)
-                plt.ylabel('Density')
+                ty = np.min(y)
+                miny = ty if ty < miny else miny
+                plt.plot(np.log(x+1), y, color=self.color, alpha=0.1)
+            modif = self.set_tick_labels(ax, miny, maxy)
+            plt.ylabel('Density'+modif)
         elif typ == 'se':
             for subj in data:
                 x = np.linspace(1, len(data[subj]), len(data[subj]))
                 y = data[subj]
                 ty = np.max(y)
                 maxy = ty if ty > maxy else maxy
-                plt.plot(x, y, color=self.color, alpha=0.1)
-                plt.ylabel('Value')
+                ty = np.min(y)
+                miny = ty if ty < miny else miny
+                plt.plot(x, y, color=self.color, alpha=0.1) 
+            modif = self.set_tick_labels(ax, miny, maxy)
+            plt.ylabel('Value'+modif)
         elif typ == 'sc':
-            x = self.rand_jitter([0]*len(data.values()))
+            x = 0
             y = data.values()
-            plt.scatter(x, y, alpha=0.1, color=self.color)
+            voil = plt.violinplot(y)
+            voil['bodies'][0].set_color(self.color)
             plt.ylabel('Count')
 
         if typ == 'sc':
-            plt.xlim([np.mean(x)-0.2, np.mean(x)+0.2])
-            plt.ylim([0, np.max(data.values())*1.1])
+            plt.ylim([np.min(y)*0.9, np.max(y)*1.1])
             plt.xticks([])
-            plt.yticks([0, (np.max(y))/2, np.max(y)])
+            plt.yticks([np.min(y), np.max(y)])
         else:
-            plt.xlim([np.min(x), np.max(x)])
-            plt.ylim([np.min(y), maxy])
-            plt.xticks([np.min(x),  np.max(x)])
-            plt.yticks([np.min(y), (maxy - np.min(y))/2, maxy])
-
+            if typ == 'se':
+                plt.xlim([np.min(x), np.max(y)])
+                plt.xticks([np.min(x),  np.max(x)])
+            else:
+                plt.xlim([np.min(np.log(x+1)), np.max(np.log(x+1))])
+                plt.xticks([np.min(np.log(x+1)),  np.max(np.log(x+1))])
+            plt.ylim([miny, maxy])
+            plt.yticks([miny, ((maxy - miny)/2), maxy])
+        
         plt.title(tit, y=1.04)
 
     def rand_jitter(self, arr):
