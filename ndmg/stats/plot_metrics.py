@@ -25,9 +25,12 @@ import sys
 import os
 import numpy as np
 import networkx as nx
-import matplotlib; matplotlib.use('Agg')  # very important above pyplot import
+import matplotlib
+matplotlib.use('Agg')  # very important above pyplot import
+
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mtick
+
 
 font = {'weight': 'bold',
         'size': 14}
@@ -39,7 +42,7 @@ cols = '#000000'
 class plot_metrics():
 
     def __init__(self, nnz, deg, ew, ccoefs, ss1, eigs, scree,
-                 centrality, outf, suptit = None):
+                 centrality, outf, suptit=None):
         """
         Visualizes the computed summary statistics for each atlas
 
@@ -82,12 +85,18 @@ class plot_metrics():
         fig = plt.figure(figsize=(14, 6))
 
         i = 0
+        # metric_list = [self.nnz, self.deg, self.ew, self.ccoefs, self.ss1,
+        #                self.centrality, self.eigs, self.scree]
+        # name_list = ['NNZ', 'log(Degree)', 'log(Edge Weight)',
+        #              'log(Clustering Coefficient)', 'log(Scan Statistic-1)',
+        #              'log(Centrality)', 'Eigen', 'Scree Plot']
+        # type_list = ['sc', 'hi', 'hi', 'hi', 'hi', 'hi', 'se', 'se']
         metric_list = [self.nnz, self.deg, self.ew, self.ccoefs, self.ss1,
-                       self.centrality, self.eigs, self.scree]
-        name_list = ['NNZ', 'log(Degree)', 'log(Edge Weight)',
-                     'log(Clustering Coefficient)', 'log(Scan Statistic-1)',
-                     'log(Centrality)', 'Eigen', 'Scree Plot']
-        type_list = ['sc', 'hi', 'hi', 'hi', 'hi', 'hi', 'se', 'se']
+                       self.centrality, self.eigs]
+        name_list = ['NNZ', 'Degree', 'Edge Weight',
+                     'Clustering Coefficient', 'Scan Statistic-1',
+                     'Centrality', 'Eigen']
+        type_list = ['sc', 'hi', 'hi', 'hi', 'hi', 'hi', 'se']
         for idx, val in enumerate(metric_list):
             i += 1
             ax = plt.subplot(2, 4, i)
@@ -96,7 +105,7 @@ class plot_metrics():
 
         fig.tight_layout()
         if self.suptit is not None:
-            t = plt.suptitle(self.suptit, y = 1.04, size=20)
+            t = plt.suptitle(self.suptit, y=1.04, size=20)
             plt.savefig(self.outf, bbox_inches='tight', bbox_extra_artists=[t])
         else:
             plt.savefig(self.outf, bbox_inches='tight')
@@ -107,19 +116,19 @@ class plot_metrics():
             json.dump(metadata, fp)
 
     def set_tick_labels(self, ax, miny, maxy):
-        print miny, maxy
-        power = np.floor(np.log10(maxy))
-        print power
-        miny = 0 if miny < 10**(power-1) else self.round_to_n(miny/(10**power), 2)
-        maxy = self.round_to_n(maxy/(10**power),2)
-        print miny, maxy
+        po = np.floor(np.log10(maxy))
+        miny = 0 if miny < 10**(po-1) else self.round_to_n(miny/(10**po), 2)
+        maxy = self.round_to_n(maxy/(10**po), 2)
 
         labels = [miny,
                   (maxy+miny)/2,
                   maxy]
         ax.set_yticklabels(labels)
         ax.xaxis.set_major_formatter(mtick.FormatStrFormatter('%.2f'))
-        return ' x10^%d' % power
+        if po == 0:
+            return ''
+        else:
+            return ' (10^%d)' % po
 
     def round_to_n(self, x, n):
         return round(x, (n-1)-int(np.floor(np.log10(abs(x)))))
@@ -135,7 +144,8 @@ class plot_metrics():
                 maxy = ty if ty > maxy else maxy
                 ty = np.min(y)
                 miny = ty if ty < miny else miny
-                plt.plot(np.log(x+1), y, color=self.color, alpha=0.1)
+                # plt.plot(np.log(x+1), y, color=self.color, alpha=0.1)
+                plt.plot(x, y, color=self.color, alpha=0.1)
             modif = self.set_tick_labels(ax, miny, maxy)
             plt.ylabel('Density'+modif)
         elif typ == 'se':
@@ -146,7 +156,7 @@ class plot_metrics():
                 maxy = ty if ty > maxy else maxy
                 ty = np.min(y)
                 miny = ty if ty < miny else miny
-                plt.plot(x, y, color=self.color, alpha=0.1) 
+                plt.plot(x, y, color=self.color, alpha=0.1)
             modif = self.set_tick_labels(ax, miny, maxy)
             plt.ylabel('Value'+modif)
         elif typ == 'sc':
@@ -162,14 +172,16 @@ class plot_metrics():
             plt.yticks([np.min(y), np.max(y)])
         else:
             if typ == 'se':
-                plt.xlim([np.min(x), np.max(y)])
+                plt.xlim([np.min(x), np.max(x)])
                 plt.xticks([np.min(x),  np.max(x)])
             else:
-                plt.xlim([np.min(np.log(x+1)), np.max(np.log(x+1))])
-                plt.xticks([np.min(np.log(x+1)),  np.max(np.log(x+1))])
+                plt.xlim([np.min(x), np.max(x)])
+                plt.xticks([np.min(x),  np.max(x)])
+                # plt.xlim([np.min(np.log(x+1)), np.max(np.log(x+1))])
+                # plt.xticks([np.min(np.log(x+1)),  np.max(np.log(x+1))])
             plt.ylim([miny, maxy])
             plt.yticks([miny, ((maxy - miny)/2), maxy])
-        
+
         plt.title(tit, y=1.04)
 
     def rand_jitter(self, arr):
