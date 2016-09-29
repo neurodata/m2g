@@ -195,6 +195,8 @@ def main():
     parser.add_argument('--remote_path', action='store', help='The path to '
                         'the data on your S3 bucket. The data will be '
                         'downloaded to the provided bids_dir on your machine.')
+    parser.add_argument('--push_data', action='store_true', help='flag to '
+                        'push derivatives back up to S3.', default=False)
     parser.add_argument('--debug', action='store_true', help='flag to store '
                         'temp files along the path of processing.',
                         default=False)
@@ -205,6 +207,7 @@ def main():
     subj = result.participant_label
     buck = result.bucket
     remo = result.remote_path
+    push = result.push_data
     level = result.analysis_level
 
     if level == 'participant':
@@ -215,7 +218,7 @@ def main():
             else:
                 bids_s3.get_data(buck, remo, inDir, public=True)
         participant_level(inDir, outDir, subj, result.debug)
-
+        modif = 'derivatives'
     elif level == 'group':
         if buck is not None and remo is not None:
             print("Retrieving data from S3...")
@@ -223,8 +226,17 @@ def main():
                 [bids_s3.get_data(buck, remo, inDir, s, True) for s in subj]
             else:
                 bids_s3.get_data(buck, remo, inDir, public=True)
-
+        modif = 'qc'
         group_level(inDir, outDir)
+
+
+    if push and buck is not None and remo is not None:
+        print("Pushing results to S3...")
+        cmd = "".join(['aws s3 cp ', outDir, ' s3://', buck, '/', remo,
+                       '/', modif, '/ --recursive --no-sign-request',
+                       ' --acl public-read-write'])
+        print cmd
+        mgu().execute_cmd(cmd)
 
 
 if __name__ == "__main__":
