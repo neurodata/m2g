@@ -9,4 +9,4 @@ from .stats import *
 from .utils.utils import utils as utils
 from .scripts import ndmg_pipeline as ndmg_pipeline
 
-version = "0.0.31"
+version = "0.0.32"
