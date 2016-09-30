@@ -85,18 +85,18 @@ class plot_metrics():
         fig = plt.figure(figsize=(14, 6))
 
         i = 0
-        # metric_list = [self.nnz, self.deg, self.ew, self.ccoefs, self.ss1,
-        #                self.centrality, self.eigs, self.scree]
-        # name_list = ['NNZ', 'log(Degree)', 'log(Edge Weight)',
-        #              'log(Clustering Coefficient)', 'log(Scan Statistic-1)',
-        #              'log(Centrality)', 'Eigen', 'Scree Plot']
-        # type_list = ['sc', 'hi', 'hi', 'hi', 'hi', 'hi', 'se', 'se']
         metric_list = [self.nnz, self.deg, self.ew, self.ccoefs, self.ss1,
-                       self.centrality, self.eigs]
-        name_list = ['NNZ', 'Degree', 'Edge Weight',
-                     'Clustering Coefficient', 'Scan Statistic-1',
-                     'Centrality', 'Eigen']
-        type_list = ['sc', 'hi', 'hi', 'hi', 'hi', 'hi', 'se']
+                       self.centrality, self.eigs, self.scree]
+        name_list = ['NNZ', 'log(Degree)', 'log(Edge Weight)',
+                     'log(Clustering Coefficient)', 'log(Scan Statistic-1)',
+                     'log(Centrality)', 'Eigen', 'Scree Plot']
+        type_list = ['sc', 'hi', 'hi', 'hi', 'hi', 'hi', 'se', 'se']
+        # metric_list = [self.nnz, self.deg, self.ew, self.ccoefs, self.ss1,
+        #                self.centrality, self.eigs]
+        # name_list = ['NNZ', 'Degree', 'Edge Weight',
+        #              'Clustering Coefficient', 'Scan Statistic-1',
+        #              'Centrality', 'Eigen']
+        # type_list = ['sc', 'hi', 'hi', 'hi', 'hi', 'hi', 'se']
         for idx, val in enumerate(metric_list):
             i += 1
             ax = plt.subplot(2, 4, i)
@@ -134,10 +134,10 @@ class plot_metrics():
         return round(x, (n-1)-int(np.floor(np.log10(abs(x)))))
 
     def plot_helper(self, ax, data, tit, typ='hi'):
-        alpha = 0.5/len(data)
         maxy = float('-inf')
         miny = float('inf')
         if typ == 'hi':
+            alpha = np.min((1, 2.0/len(data['pdfs'])))
             for subj in data['pdfs']:
                 x = data['xs'][subj]
                 y = data['pdfs'][subj]
@@ -145,11 +145,12 @@ class plot_metrics():
                 maxy = ty if ty > maxy else maxy
                 ty = np.min(y)
                 miny = ty if ty < miny else miny
-                # plt.plot(np.log(x+1), y, color=self.color, alpha=alpha)
-                plt.plot(x, y, color=self.color, alpha=alpha)
+                plt.plot(np.log(x+1), y, color=self.color, alpha=alpha)
+                # plt.plot(x, y, color=self.color, alpha=alpha)
             modif = self.set_tick_labels(ax, miny, maxy)
             plt.ylabel('Density'+modif)
         elif typ == 'se':
+            alpha = np.min((1, 2.0/len(data)))
             for subj in data:
                 x = np.linspace(1, len(data[subj]), len(data[subj]))
                 y = data[subj]
@@ -164,7 +165,7 @@ class plot_metrics():
             x = 0
             y = data.values()
             if len(y) <= 1:
-                plt.scatter(0, y, color=self.color, alpha=alpha)
+                plt.scatter(0, y, color=self.color)
                 plt.xlim([-0.5, 0.5])
             else:
                 voil = plt.violinplot(y)
@@ -180,10 +181,10 @@ class plot_metrics():
                 plt.xlim([np.min(x), np.max(x)])
                 plt.xticks([np.min(x),  np.max(x)])
             else:
-                plt.xlim([np.min(x), np.max(x)])
-                plt.xticks([np.min(x),  np.max(x)])
-                # plt.xlim([np.min(np.log(x+1)), np.max(np.log(x+1))])
-                # plt.xticks([np.min(np.log(x+1)),  np.max(np.log(x+1))])
+                # plt.xlim([np.min(x), np.max(x)])
+                # plt.xticks([np.min(x),  np.max(x)])
+                plt.xlim([np.min(np.log(x+1)), np.max(np.log(x+1))])
+                plt.xticks([np.min(np.log(x+1)),  np.max(np.log(x+1))])
             plt.ylim([miny, maxy])
             plt.yticks([miny, ((maxy - miny)/2), maxy])
 
