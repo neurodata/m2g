@@ -134,6 +134,7 @@ class plot_metrics():
         return round(x, (n-1)-int(np.floor(np.log10(abs(x)))))
 
     def plot_helper(self, ax, data, tit, typ='hi'):
+        alpha = 0.5/len(data)
         maxy = float('-inf')
         miny = float('inf')
         if typ == 'hi':
@@ -144,8 +145,8 @@ class plot_metrics():
                 maxy = ty if ty > maxy else maxy
                 ty = np.min(y)
                 miny = ty if ty < miny else miny
-                # plt.plot(np.log(x+1), y, color=self.color, alpha=0.1)
-                plt.plot(x, y, color=self.color, alpha=0.1)
+                # plt.plot(np.log(x+1), y, color=self.color, alpha=alpha)
+                plt.plot(x, y, color=self.color, alpha=alpha)
             modif = self.set_tick_labels(ax, miny, maxy)
             plt.ylabel('Density'+modif)
         elif typ == 'se':
@@ -156,14 +157,18 @@ class plot_metrics():
                 maxy = ty if ty > maxy else maxy
                 ty = np.min(y)
                 miny = ty if ty < miny else miny
-                plt.plot(x, y, color=self.color, alpha=0.1)
+                plt.plot(x, y, color=self.color, alpha=alpha)
             modif = self.set_tick_labels(ax, miny, maxy)
             plt.ylabel('Value'+modif)
         elif typ == 'sc':
             x = 0
             y = data.values()
-            voil = plt.violinplot(y)
-            voil['bodies'][0].set_color(self.color)
+            if len(y) <= 1:
+                plt.scatter(0, y, color=self.color, alpha=alpha)
+                plt.xlim([-0.5, 0.5])
+            else:
+                voil = plt.violinplot(y)
+                voil['bodies'][0].set_color(self.color)
             plt.ylabel('Count')
 
         if typ == 'sc':
