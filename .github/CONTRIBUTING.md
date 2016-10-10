@@ -4,3 +4,4 @@ Thanks for helping solve the world! The requirements we have for contributing co
 
 - PEP8 compliant
 - Consistent organization with directory structure established
+- Sphinx-style autodocs
