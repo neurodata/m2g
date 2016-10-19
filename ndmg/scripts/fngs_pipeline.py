@@ -130,7 +130,7 @@ def fngs_pipeline(fmri, struct, atlas, atlas_brain, mask, labels, outdir,
 
     voxel = mgts().voxel_timeseries(nuis_fmri, mask, voxel_ts)
     
-    mgqc().stat_summary(nuis_fmri, fmri, motion_fmri, mask, voxel,
+    mgqc().stat_summary(aligned_fmri, fmri, motion_fmri, mask, voxel,
                         aligned_struct, atlas_brain,
                         qcdir=overalldir, scanid=fmri_name)
 
