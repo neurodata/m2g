@@ -210,12 +210,13 @@ class fmri_qc(object):
         axkde.legend(['before, mean = %.2E' % np.mean(zip(*v_bef)[1]),
                      'after, mean = %.2E' % np.mean(zip(*v_aft)[1])])
         fnamekde = qcdir + "/" + fname + "_kde.png"
+        fkde.tight_layout()
         fkde.savefig(fnamekde)
 
         fjit = plt.figure()
         axjit = fjit.add_subplot(111)
-        axjit.scatter(*zip(*v_bef), color='red', alpha=0.4, s=.5)
-        axjit.scatter(*zip(*v_aft), color='blue', alpha=0.4, s=.5)
+        axjit.scatter(*zip(*v_bef), color='blue', alpha=0.4, s=.5)
+        axjit.scatter(*zip(*v_aft), color='green', alpha=0.4, s=.5)
         axjit.set_title("Jitter Plot showing slicewise impact of " + title)
         axjit.set_xlabel('Slice Number')
         axjit.set_ylabel('MSE')
@@ -227,6 +228,7 @@ class fmri_qc(object):
         axjit.legend(['before, mean = %.2E' % np.mean(zip(*v_bef)[1]),
                      'after, mean = %.2E' % np.mean(zip(*v_aft)[1])])
         fnamejit = qcdir + "/" + fname + "_jitter.png"
+        fjit.tight_layout()
         fjit.savefig(fnamejit)
         pass
 
@@ -292,6 +294,7 @@ class fmri_qc(object):
             axalign.set_ylabel('Position (res)')
             axalign.set_title('%d slice' % i)
         falign.set_size_inches(nrows*6, ncols*6)
+        falign.tight_layout()
         falign.savefig(qcdir + "/" + scanid + "_" + refid + "_overlap.png")
 
     def stat_summary(self, mri, mri_raw, mri_mc, mask, voxel,
@@ -459,21 +462,30 @@ class fmri_qc(object):
         fsnr.set_size_inches(nrows*6, ncols*6)
         fanat_mni.set_size_inches(nrows*6, ncols*6)
 
+        fmean_mni.tight_layout()
         fmean_mni.savefig(fname + "_mean_mni.png")
+        fmean_anat.tight_layout()
         fmean_anat.savefig(fname + "_mean_anat.png")
+        fstd.tight_layout()
         fstd.savefig(fname + "_std.png")
+        fsnr.tight_layout()
         fsnr.savefig(fname + "_snr.png")
+        fmi.tight_layout()
         fmi.savefig(fname + "_slice_intens.png")
+        fanat_mni.tight_layout()
         fanat_mni.savefig(fname + "_anat_mni.png")
 
         fvoxel_intens_hist = plt.figure()
         axvih = fvoxel_intens_hist.add_subplot(111)
-        hist, bins = np.histogram(voxel, bins=5000)
+        nonzero_data = mri_datmean[mri_datmean != 0]
+        hist, bins = np.histogram(nonzero_data, bins=500)
         width = 0.7 * (bins[1] - bins[0])
         center = (bins[:-1] + bins[1:]) / 2
-        axvih.bar(center, hist, align='center', width=width)
+        axvih.bar(center, hist, align='center', width=width,
+                    range=(0, 3*np.std(nonzero_data)))
         axvih.set_xlabel('Voxel Intensity')
         axvih.set_ylabel('Number of Voxels')
+        fvoxel_intens_hist.tight_layout() 
         fvoxel_intens_hist.savefig(fname + "_hist.png")
 
         par_file = mri_mc + ".par"
@@ -503,6 +515,7 @@ class fmri_qc(object):
         axtrans.set_title('Translational Motion Parameters')
         axtrans.legend(['x', 'y', 'z'])
         axtrans.set_xlim((0, nvols))
+        ftrans.tight_layout()
         ftrans.savefig(fname + "_trans_mc.png")
 
         frot = plt.figure()
@@ -513,6 +526,7 @@ class fmri_qc(object):
         axrot.set_title('Rotational Motion Parameters')
         axrot.legend(['x', 'y', 'z'])
         axrot.set_xlim((0, nvols))
+        frot.tight_layout()
         frot.savefig(fname + "_rot_mc.png")
 
         fmc = plt.figure()
@@ -524,6 +538,7 @@ class fmri_qc(object):
         axmc.set_title('Estimated Displacement')
         axmc.legend(['absolute', 'relative'])
         axmc.set_xlim((0, nvols))
+        fmc.tight_layout()
         fmc.savefig(fname + "_disp_mc.png")
 
         fstat = open(fname + "_stat_sum.txt", 'w')
