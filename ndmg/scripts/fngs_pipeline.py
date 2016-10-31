@@ -35,7 +35,7 @@ from ndmg.nuis import nuis as mgn
 
 
 def fngs_pipeline(fmri, struct, atlas, atlas_brain, mask, labels, outdir,
-                  clean=False, fmt='gpickle'):
+                  clean=False, stc=None, fmt='gpickle'):
     """
     Analyzes fMRI images and produces subject-specific derivatives.
 
@@ -52,6 +52,9 @@ def fngs_pipeline(fmri, struct, atlas, atlas_brain, mask, labels, outdir,
             - the path to a reference brain mask.
         labels:
             - a list of labels files.
+        stc:
+            - a slice timing correction file. See slice_time_correct() in the
+              preprocessing module for details.
         outdir:
             - the base output directory to place outputs.
         clean:
@@ -122,7 +125,8 @@ def fngs_pipeline(fmri, struct, atlas, atlas_brain, mask, labels, outdir,
 
     # Align fMRI volumes to Atlas
     print "Preprocessing volumes..."
-    mgp().preprocess(fmri, preproc_fmri, motion_fmri, outdir, qcdir=mcdir)
+    mgp().preprocess(fmri, preproc_fmri, motion_fmri, outdir,
+    qcdir=mcdir, stc=stc)
     print "Aligning volumes..."
     mgr().fmri2atlas(preproc_fmri, struct, atlas, atlas_brain, mask,
                      aligned_fmri, aligned_struct, outdir, qcdir=regdir)
@@ -133,6 +137,7 @@ def fngs_pipeline(fmri, struct, atlas, atlas_brain, mask, labels, outdir,
     mgqc().stat_summary(aligned_fmri, fmri, motion_fmri, mask, voxel,
                         aligned_struct, atlas_brain,
                         qcdir=overalldir, scanid=fmri_name)
+    mgqc().stat_summary(fmri_name, qcdir)
 
     for idx, label in enumerate(label_name):
         print "Extracting roi timeseries for " + label + " parcellation..."
@@ -172,6 +177,10 @@ def main():
                         labels of regions of interest in atlas space")
     parser.add_argument("-c", "--clean", action="store_true", default=False,
                         help="Whether or not to delete intemediates")
+    parser.add_argument("-s", "--stc", action="store", help="A file for slice timing \
+                        correction. Options are a TR sequence file (where \
+                        each line is the shift in TRs), up (ie, bottom to top), \
+                        down (ie, top to bottom), and interleaved.", default=None)
     parser.add_argument("-f", "--fmt", action="store", default='gpickle',
                         help="Determines graph output format")
     result = parser.parse_args()
@@ -183,8 +192,8 @@ def main():
     mgu().execute_cmd(cmd)
 
     fngs_pipeline(result.fmri, result.struct, result.atlas, result.atlas_brain,
-                  result.mask, result.labels, result.outdir, result.clean,
-                  result.fmt)
+                  result.mask, result.labels, result.outdir,
+                  result.clean, result.stc, result.fmt)
 
 
 if __name__ == "__main__":

@@ -72,7 +72,7 @@ class fmri_qc(object):
         a_bigrams = set(a_bigram_list)
         b_bigrams = set(b_bigram_list)
         overlap = len(a_bigrams & b_bigrams)
-        dice_coeff = overlap * 2.0/(len(a_bigrams) + len(b_bigrams))
+        dice_coeff = overlap * 2.0/float(len(a_bigrams) + len(b_bigrams))
         return dice_coeff
 
     def mse(self, imageA, imageB):
@@ -128,7 +128,7 @@ class fmri_qc(object):
                 - the second array.
         """
         return np.sqrt(np.sum((np.sqrt(array1) -
-                              np.sqrt(array2)) ** 2)) / np.sqrt(2)
+                              np.sqrt(array2)) ** 2)) / float(np.sqrt(2))
 
     def check_alignments(self, mri_bname, mri_aname, refname, qcdir,
                          fname, title=""):
@@ -232,6 +232,22 @@ class fmri_qc(object):
         fjit.savefig(fnamejit)
         pass
 
+    def opaque_colorscale(self, basemap, reference):
+        """
+        A function to return a colorscale, with opacities
+        dependent on reference intensities.
+
+        **Positional Arguments:**
+            reference:
+                - the reference matrix.
+        """
+        cmap = basemap(reference)
+        # all values beteween 0 opacity and .6
+        opaque_scale = 0.5*reference/float(np.nanmax(reference))
+        # remaps intensities
+        cmap[:,:,3] = opaque_scale
+        return cmap
+
     def image_align(self, mri_data, ref_data, qcdir, scanid="", refid="",
                     binmri=False, binref=False):
         """
@@ -277,19 +293,18 @@ class fmri_qc(object):
 
         depth_seq = np.unique(np.round(np.linspace(0, depth - 1, 25)))
         nrows = np.ceil(np.sqrt(depth_seq.shape[0]))
-        ncols = np.ceil(depth_seq.shape[0]/nrows)
+        ncols = np.ceil(depth_seq.shape[0]/float(nrows))
+
         # produce figures for each slice in the image
         for d in range(0, depth_seq.shape[0]):
             # TODO EB: create nifti image with these values
             # and allow option to add overlap with mni vs mprage
             i = depth_seq[d]
-            axalign = falign.add_subplot(nrows, ncols, d+1)
-            axalign.imshow(mri_data[:, :, i], cmap='gray',
-                           interpolation='nearest', vmin=0,
-                           vmax=np.max(mri_data))
-            axalign.imshow(ref_data[:, :, i], cmap='copper',
-                           interpolation='nearest',  alpha=0.4,
-                           vmin=0, vmax=np.max(ref_data))
+            axalign = falign.add_subplot(nrows, ncols, d+1) 
+            axalign.imshow(self.opaque_colorscale(matplotlib.cm.Blues,
+                                                  mri_data[:, :, i]))
+            axalign.imshow(self.opaque_colorscale(matplotlib.cm.Reds,
+                                                  ref_data[:, :, i]))
             axalign.set_xlabel('Position (res)')
             axalign.set_ylabel('Position (res)')
             axalign.set_title('%d slice' % i)
@@ -390,7 +405,7 @@ class fmri_qc(object):
         # with sequences
         depth_seq = np.unique(np.round(np.linspace(0, depth - 1, 25)))
         nrows = np.ceil(np.sqrt(depth_seq.shape[0]))
-        ncols = np.ceil(depth_seq.shape[0]/nrows)
+        ncols = np.ceil(depth_seq.shape[0]/float(nrows))
 
         mri_dat = None  # done with this, so save memory here
 
@@ -400,23 +415,19 @@ class fmri_qc(object):
             # and allow option to add overlap with mni vs mprage
             i = depth_seq[d]
             axmean_mni = fmean_mni.add_subplot(nrows, ncols, d+1)
-            axmean_mni.imshow(mri_datmean[:, :, i], cmap='gray',
-                              interpolation='nearest', vmin=0,
-                              vmax=np.max(mri_datmean))
-            axmean_mni.imshow(at_dat[:, :, i], cmap='copper',
-                              interpolation='nearest', alpha=0.4, vmin=0,
-                              vmax=np.max(at_dat))
+            axmean_mni.imshow(self.opaque_colorscale(matplotlib.cm.Blues,
+                                                     mri_datmean[:, :, i]))
+            axmean_mni.imshow(self.opaque_colorscale(matplotlib.cm.Reds,
+                                                     at_dat[:, :, i]))
             axmean_mni.set_xlabel('Position (res)')
             axmean_mni.set_ylabel('Position (res)')
             axmean_mni.set_title('%d slice' % i)
 
             axmean_anat = fmean_anat.add_subplot(nrows, ncols, d+1)
-            axmean_anat.imshow(mri_datmean[:, :, i], cmap='gray',
-                               interpolation='nearest', vmin=0,
-                               vmax=np.max(mri_datmean))
-            axmean_anat.imshow(mprage_dat[:, :, i], cmap='copper',
-                               interpolation='nearest', alpha=0.4, vmin=0,
-                               vmax=np.max(mprage_dat))
+            axmean_anat.imshow(self.opaque_colorscale(matplotlib.cm.Blues,
+                                                      mri_datmean[:, :, i]))
+            axmean_anat.imshow(self.opaque_colorscale(matplotlib.cm.Reds,
+                                                      mprage_dat[:, :, i]))
             axmean_anat.set_xlabel('Position (res)')
             axmean_anat.set_ylabel('Position (res)')
             axmean_anat.set_title('%d slice' % i)
@@ -438,15 +449,13 @@ class fmri_qc(object):
             axsnr.set_title('%d slice' % i)
 
             axanat_mni = fanat_mni.add_subplot(nrows, ncols, d+1)
-            axanat_mni.imshow(mprage_dat[:, :, i], cmap='gray',
-                              interpolation='nearest', vmin=0,
-                              vmax=np.max(mprage_dat))
+            axanat_mni.imshow(self.opaque_colorscale(matplotlib.cm.Blues,
+                                                     mprage_dat[:, :, i]))
             axanat_mni.set_xlabel('Position (res)')
             axanat_mni.set_ylabel('Position (res)')
             axanat_mni.set_title('%d slice' % i)
-            axanat_mni.imshow(at_dat[:, :, i], cmap='copper',
-                              interpolation='nearest', alpha=0.4, vmin=0,
-                              vmax=np.max(at_dat))
+            axanat_mni.imshow(self.opaque_colorscale(matplotlib.cm.Reds,
+                                                     at_dat[:, :, i]))
 
         for d in range(0, depth):
             axmi.plot(mri_datmi[d, :])
@@ -478,11 +487,12 @@ class fmri_qc(object):
         fvoxel_intens_hist = plt.figure()
         axvih = fvoxel_intens_hist.add_subplot(111)
         nonzero_data = mri_datmean[mri_datmean != 0]
-        hist, bins = np.histogram(nonzero_data, bins=500)
+        hist, bins = np.histogram(nonzero_data, bins=500,
+                                 range=(0, np.nanmean(nonzero_data) + 
+                                        2*np.nanstd(nonzero_data)))
         width = 0.7 * (bins[1] - bins[0])
-        center = (bins[:-1] + bins[1:]) / 2
-        axvih.bar(center, hist, align='center', width=width,
-                    range=(0, 3*np.std(nonzero_data)))
+        center = (bins[:-1] + bins[1:]) / float(2)
+        axvih.bar(center, hist, align='center', width=width)
         axvih.set_xlabel('Voxel Intensity')
         axvih.set_ylabel('Number of Voxels')
         fvoxel_intens_hist.tight_layout() 
@@ -664,4 +674,28 @@ class fmri_qc(object):
                     max_rel[2])
 
         fstat.close()
+        pass
+
+    def make_html_qc(self, sub, qcdir):
+        """
+        A function for making templated html quality control summary.
+
+        **Positional Arguments:**
+            - sub:
+                 - the subject.
+            - qcdir:
+                 - the root quality control directory.
+        """
+
+        template = open(os.path.dirname(__file__) + '/templates/qc.html', 'r').read()
+        context = {
+            'sub': sub,
+            'qcdir': qcdir
+        }
+        for key in context:
+            template = re.sub("{{ " + key + " }}", context[key], template)
+
+        qc_html = open(qcdir + "/overall/" + sub + "/" + sub + "_qc.html", "w")
+        qc_html.write(template)
+        qc_html.close()
         pass

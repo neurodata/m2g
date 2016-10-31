@@ -54,6 +54,48 @@ class preproc_fmri(object):
         mgu().execute_cmd(cmd)
         pass
 
+    def slice_time_correct(self, mri, corrected_mri, stc=None):
+        """
+	Performs slice timing correction of a stack of 3D images.
+
+        **Positional Arguments:**
+            mri (String):
+                 -the 4d (fMRI) image volume as a nifti file.
+            corrected_mri (String):
+                - the corrected and aligned fMRI image volume.
+            stc: the slice timing correction options, a string
+                  corresponding to the acquisition sequence.
+                  Options are "/path/to/file", "down", "up",
+                  "interleaved". If a file is passed, each line
+                  should correspond to a single value (in TRs)
+                  of the shift of each slice. For example,
+                  if the first slice has no shift, the first line
+                  in the text file would be "0.5".
+                  If not None, make sure the "zooms" property is set
+                  in your data (nb.load(mri).header.get_zooms()), otherwise
+                  this function will throw an error.
+        """
+        if (stc is not None):
+            cmd = "slicetimer -i " + mri + " -o " + corrected_mri
+            if stc == "down":
+                cmd += " --down"
+            elif stc == "interleaved":
+                cmd += " --odd"
+            elif stc == "up":
+                # do nothing, as this is default behavior
+                pass
+            elif op.isfile(stc):
+                cmd += " --tcustom " + str(stc)
+            else:
+                raise ValueError("You have not passed a valid slice-timing " +
+                                 "option")
+            zooms = nb.load(mri).header.get_zooms()
+            cmd += " -r " + str(zooms[3])
+            mgu().execute_cmd(cmd)
+        else:
+            print "No slice timing information provided, so skipping."
+        pass
+
     def smooth(self, mri, smoothed_mri):
         """
         Smooths a nifti image by applying a fwhm filter of specified diameter.
@@ -64,7 +106,7 @@ class preproc_fmri(object):
         """
         pass
 
-    def preprocess(self, mri, preproc_mri, motion_mri, outdir, qcdir="",
+    def preprocess(self, mri, preproc_mri, motion_mri, outdir, stc=None, qcdir="",
                    scanid=""):
         """
         A function to preprocess a stack of 3D images.
@@ -78,6 +120,9 @@ class preproc_fmri(object):
             preproc_mri:
                 - the 4d (fMRI) preprocessed image volume
                 as a nifti image (String).
+            stc:
+                - the slice timing correction information. See documentation
+                  for slice_time_correct() for details.
             outdir:
                 - the location to place outputs (String).
             qcdir:
@@ -91,9 +136,13 @@ class preproc_fmri(object):
         mri_name = op.splitext(op.splitext(op.basename(mri))[0])[0]
 
         s0 = outdir + "/tmp/" + mri_name + "_0slice.nii.gz"
-
+        stc_mri = outdir + "/tmp/" + mri_name + "_stc.nii.gz"
         # TODO EB: decide whether it is advantageous to align to mean image
-        self.motion_correct(mri, motion_mri, 0)
+        if (stc is not None):
+            self.slice_time_correct(mri, stc_mri, stc)
+        else:
+            stc_mri = mri 
+        self.motion_correct(stc_mri, motion_mri, 0)
 
         if qcdir is not None:
             mgu().get_slice(motion_mri, 0, s0)

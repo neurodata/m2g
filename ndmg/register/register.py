@@ -370,7 +370,7 @@ class register(object):
         nb.save(b0_out, b0)
 
         # Applies skull stripping to MPRAGE volume
-        cmd = 'bet ' + mprage + ' ' + mprage2 + ' -B'
+        cmd = 'bet ' + mprage + ' ' + mprage2
         print("Executing: " + cmd)
         mgu().execute_cmd(cmd)
 

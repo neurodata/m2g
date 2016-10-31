@@ -48,5 +48,6 @@ setup(
         'scipy',  # We use 0.17.0
         'dipy>=0.1',
         'multiprocessing'
-    ]
+    ],
+    include_package_data=True, # for HTML template
 )
