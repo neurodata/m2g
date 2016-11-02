@@ -18,6 +18,8 @@ setup(
     ],
     scripts = [
         'ndmg/scripts/ndmg_bids',
+        'ndmg/scripts/ndmg_demo-dwi',
+        'ndmg/scripts/ndmg_demo-qc'
     ],
     entry_points = {
         'console_scripts': ['ndmg_pipeline=ndmg.scripts.ndmg_pipeline:main'],
@@ -42,5 +44,6 @@ setup(
         'numpy',  # We use nump v1.10.4
         'scipy',  # We use 0.17.0
         'dipy>=0.1',
+        'matplotlib>=1.5',
     ]
 )

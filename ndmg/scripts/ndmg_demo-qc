@@ -1,0 +1,9 @@
+#!/bin/bash
+
+loc="$PWD"
+cd /tmp/
+
+ndmg_bids  /tmp/small_demo/outputs/graphs/ /tmp/small_demo/outputs/qc group
+
+echo "Path to qc fig: /tmp/small_demo/outputs/qc/desikan_s4/desikan_s4_summary.png"
+cd "$loc"

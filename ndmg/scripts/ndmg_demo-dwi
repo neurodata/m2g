@@ -1,0 +1,12 @@
+#!/bin/bash
+
+echo "Getting test data..."
+
+loc="$PWD"
+cd /tmp/
+wget http://openconnecto.me/mrdata/share/demo_data/small_demo.zip
+unzip /tmp/small_demo.zip
+
+ndmg_pipeline  /tmp/small_demo/KKI2009_113_1_DTI_s4.nii /tmp/small_demo/KKI2009_113_1_DTI_s4.bval /tmp/small_demo/KKI2009_113_1_DTI_s4.bvec /tmp/small_demo/KKI2009_113_1_MPRAGE_s4.nii /tmp/small_demo/MNI152_T1_1mm_s4.nii.gz /tmp/small_demo/MNI152_T1_1mm_brain_mask_s4.nii.gz /tmp/small_demo/outputs /tmp/small_demo/desikan_s4.nii.gz
+
+cd "$loc"
