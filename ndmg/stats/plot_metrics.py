@@ -85,18 +85,18 @@ class plot_metrics():
         fig = plt.figure(figsize=(14, 6))
 
         i = 0
-        metric_list = [self.nnz, self.deg, self.ew, self.ccoefs, self.ss1,
-                       self.centrality, self.eigs, self.scree]
-        name_list = ['NNZ', 'log(Degree)', 'log(Edge Weight)',
-                     'log(Clustering Coefficient)', 'log(Max Locality Stat)',
-                     'log(Centrality)', 'Spectrum', 'Scree Plot']
-        type_list = ['sc', 'hi', 'hi', 'hi', 'hi', 'hi', 'se', 'se']
         # metric_list = [self.nnz, self.deg, self.ew, self.ccoefs, self.ss1,
-        #                self.centrality, self.eigs]
-        # name_list = ['NNZ', 'Degree', 'Edge Weight',
-        #              'Clustering Coefficient', 'Scan Statistic-1',
-        #              'Centrality', 'Eigen']
-        # type_list = ['sc', 'hi', 'hi', 'hi', 'hi', 'hi', 'se']
+        #                self.centrality, self.eigs, self.scree]
+        # name_list = ['NNZ', 'log(Degree)', 'log(Edge Weight)',
+        #              'log(Clustering Coefficient)', 'log(Max Locality Stat)',
+        #              'log(Centrality)', 'Spectrum', 'Scree Plot']
+        # type_list = ['sc', 'hi', 'hi', 'hi', 'hi', 'hi', 'se', 'se']
+        metric_list = [self.nnz, self.deg, self.ew, self.ccoefs, self.ss1,
+                       self.centrality, self.eigs]
+        name_list = ['NNZ', 'Degree', 'Edge Weight',
+                     'Clustering Coefficient', 'Scan Statistic-1',
+                     'Centrality', 'Spectrum']
+        type_list = ['sc', 'hi', 'hi', 'hi', 'hi', 'hi', 'se']
         for idx, val in enumerate(metric_list):
             i += 1
             ax = plt.subplot(2, 4, i)
@@ -145,8 +145,8 @@ class plot_metrics():
                 maxy = ty if ty > maxy else maxy
                 ty = np.min(y)
                 miny = ty if ty < miny else miny
-                plt.plot(np.log(x+1), y, color=self.color, alpha=alpha)
-                # plt.plot(x, y, color=self.color, alpha=alpha)
+                #plt.plot(np.log(x+1), y, color=self.color, alpha=alpha)
+                plt.plot(x, y, color=self.color, alpha=alpha)
             modif = self.set_tick_labels(ax, miny, maxy)
             plt.ylabel('Density'+modif)
         elif typ == 'se':
@@ -184,10 +184,10 @@ class plot_metrics():
                 plt.xlim([np.min(x), np.max(x)])
                 plt.xticks([np.min(x),  np.max(x)])
             else:
-                # plt.xlim([np.min(x), np.max(x)])
-                # plt.xticks([np.min(x),  np.max(x)])
-                plt.xlim([np.min(np.log(x+1)), np.max(np.log(x+1))])
-                plt.xticks([np.min(np.log(x+1)),  np.max(np.log(x+1))])
+                plt.xlim([np.min(x), np.max(x)])
+                plt.xticks([np.min(x),  np.max(x)])
+                # plt.xlim([np.min(np.log(x+1)), np.max(np.log(x+1))])
+                # plt.xticks([np.min(np.log(x+1)),  np.max(np.log(x+1))])
             plt.ylim([miny, maxy])
             plt.yticks([miny, ((maxy - miny)/2), maxy])
 
