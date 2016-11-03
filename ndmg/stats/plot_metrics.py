@@ -88,8 +88,8 @@ class plot_metrics():
         metric_list = [self.nnz, self.deg, self.ew, self.ccoefs, self.ss1,
                        self.centrality, self.eigs, self.scree]
         name_list = ['NNZ', 'log(Degree)', 'log(Edge Weight)',
-                     'log(Clustering Coefficient)', 'log(Scan Statistic-1)',
-                     'log(Centrality)', 'Eigen', 'Scree Plot']
+                     'log(Clustering Coefficient)', 'log(Max Locality Stat)',
+                     'log(Centrality)', 'Spectrum', 'Scree Plot']
         type_list = ['sc', 'hi', 'hi', 'hi', 'hi', 'hi', 'se', 'se']
         # metric_list = [self.nnz, self.deg, self.ew, self.ccoefs, self.ss1,
         #                self.centrality, self.eigs]
@@ -128,7 +128,7 @@ class plot_metrics():
         if po == 0:
             return ''
         else:
-            return ' (10^%d)' % po
+            return ' (x 10^%d)' % po
 
     def round_to_n(self, x, n):
         return round(x, (n-1)-int(np.floor(np.log10(abs(x)))))
@@ -160,7 +160,10 @@ class plot_metrics():
                 miny = ty if ty < miny else miny
                 plt.plot(x, y, color=self.color, alpha=alpha)
             modif = self.set_tick_labels(ax, miny, maxy)
-            plt.ylabel('Value'+modif)
+            if tit is 'Spectrum':
+                plt.ylabel('Eigenvalue'+modif)
+            else:
+                plt.ylabel('Portion of Total Variance')
         elif typ == 'sc':
             x = 0
             y = data.values()
