@@ -30,8 +30,10 @@ import numpy as np
 import nibabel as nb
 from ndmg.timeseries import timeseries as mgts
 from ndmg.stats import fmri_qc as mgqc
+from ndmg.stats import qc as mggqc
 from ndmg.preproc import preproc_fmri as mgp
 from ndmg.nuis import nuis as mgn
+from ndmg.stats import qc as imgqc
 
 
 def fngs_pipeline(fmri, struct, atlas, atlas_brain, mask, labels, outdir,
@@ -84,6 +86,8 @@ def fngs_pipeline(fmri, struct, atlas, atlas_brain, mask, labels, outdir,
         mcdir + " " + regdir + " " + overalldir + " " + roidir
     mgu().execute_cmd(cmd)
 
+    mggqc().generate_html_templated(overalldir)
+
     # Graphs are different because of multiple atlases
     if isinstance(labels, list):
         label_name = [op.splitext(op.splitext(op.basename(x))[0])[0]
@@ -114,7 +118,7 @@ def fngs_pipeline(fmri, struct, atlas, atlas_brain, mask, labels, outdir,
     print "fMRI volumes motion corrected: " + motion_fmri
     print "fMRI volume registered to atlas: " + aligned_fmri
     print "Voxel timecourse in atlas space: " + voxel_ts
-
+    print "Quality Control HTML Page: " + qc_html
     # Again, graphs are different
     graphs = [outdir + "/graphs/" + x + '/' + fmri_name + "_" + x + '.' + fmt
               for x in label_name]
@@ -136,8 +140,7 @@ def fngs_pipeline(fmri, struct, atlas, atlas_brain, mask, labels, outdir,
     
     mgqc().stat_summary(aligned_fmri, fmri, motion_fmri, mask, voxel,
                         aligned_struct, atlas_brain,
-                        qcdir=overalldir, scanid=fmri_name)
-    mgqc().stat_summary(fmri_name, qcdir)
+                        qcdir=overalldir, scanid=fmri_name, qc_html=qc_html)
 
     for idx, label in enumerate(label_name):
         print "Extracting roi timeseries for " + label + " parcellation..."
