@@ -380,8 +380,8 @@ class qc(object):
                   the values to replace them with.
         """
         template = open(html_qc).read()
-        for key in dict_keys:
-            template = re.sub("{{ " + key + " }}", dict_keys[key], template)
+        for key, fname in dict_keys.items():
+            template = re.sub("{{ " + key + " }}", fname, template)
         qc_html = open(html_qc, "w")
         qc_html.write(template)
         qc_html.close()

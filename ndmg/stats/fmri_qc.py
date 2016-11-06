@@ -266,7 +266,6 @@ class fmri_qc(object):
         fnames = {}
 
         for idx, fig in figures.items():
-            print fig
             fig.tight_layout()
             fig.set_size_inches(nrows*6, ncols*6)
             appended_path = scanid + "_" + str(idx) + ".png"
