@@ -212,17 +212,6 @@ class fmri_qc(object):
         axvih.set_xlabel('Voxel Intensity')
         axvih.set_ylabel('Number of Voxels')
 
-        ftrans = plt.figure()
-        axtrans = ftrans.add_subplot(111)
-        axtrans.plot(abs_pos[:, 3:6])  # plots the parameters
-        axtrans.set_xlabel('Timepoint')
-        axtrans.set_ylabel('Translation (mm)')
-        axtrans.set_title('Translational Motion Parameters')
-        axtrans.legend(['x', 'y', 'z'])
-        axtrans.set_xlim((0, nvols))
-        ftrans.tight_layout()
-        ftrans.savefig(fname + "_trans_mc.png")
-
         par_file = mri_mc + ".par"
 
         abs_pos = np.zeros((nvols, 6))
@@ -237,6 +226,17 @@ class fmri_qc(object):
                                                       abs_pos[counter-1, :])
                 counter += 1
 
+
+        ftrans = plt.figure()
+        axtrans = ftrans.add_subplot(111)
+        axtrans.plot(abs_pos[:, 3:6])  # plots the parameters
+        axtrans.set_xlabel('Timepoint')
+        axtrans.set_ylabel('Translation (mm)')
+        axtrans.set_title('Translational Motion Parameters')
+        axtrans.legend(['x', 'y', 'z'])
+        axtrans.set_xlim((0, nvols))
+        ftrans.tight_layout()
+        ftrans.savefig(fname + "_trans_mc.png")
 
         frot = plt.figure()
         axrot = frot.add_subplot(111)
