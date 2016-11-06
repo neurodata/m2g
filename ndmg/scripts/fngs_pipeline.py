@@ -150,7 +150,7 @@ def fngs_pipeline(fmri, struct, atlas, atlas_brain, mask, labels, outdir,
             ts = mgts().roi_timeseries(nuis_fmri, labels[idx], roi_ts[idx],
                                    qcdir=roidir,
                                    scanid=fmri_name, refid=label)
-            mgqc().image_align(atlas_brain, labels[idx], roidir, scanid=atlas_name,
+            mggqc().image_align(atlas_brain, labels[idx], roidir, scanid=atlas_name,
                                refid=label)
         except OSError as err:
             print(err)

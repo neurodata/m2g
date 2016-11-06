@@ -273,12 +273,13 @@ class fmri_qc(object):
             path = fname + appended_path
             fig.savefig(path)
 
-        figures['sub'] = scanid
+        
+        fnames['sub'] = scanid
 
         mgqc().update_template_qc(qc_html, fnames)
 
 
-        fstat = open(fname + "_stat_sum.txt", 'w')
+        fstat = open(fname + scanid + "_stat_sum.txt", 'w')
         fstat.write("General Information\n")
         fstat.write("Raw Image Resolution: " +
                     str(mri_raw_im.get_header().get_zooms()[0:3]) + "\n")

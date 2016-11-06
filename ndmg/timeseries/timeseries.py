@@ -22,7 +22,7 @@ import numpy as np
 import nibabel as nb
 import sys
 from ndmg.utils import utils as mgu
-from ndmg.stats import fmri_qc as mgqc
+from ndmg.stats import qc as mgqc
 
 
 class timeseries(object):
@@ -103,7 +103,7 @@ class timeseries(object):
         if qcdir is not None:
             mgqc().image_align(fmridata, labeldata, qcdir=qcdir,
                                scanid=scanid, refid=refid)
-            mgqc().plot_timeseries(roi_ts, qcdir=qcrid,
+            mgqc().plot_timeseries(roi_ts, qcdir=qcdir,
                                scanid=scanid, refid=refid)
 
         if roits_file:
