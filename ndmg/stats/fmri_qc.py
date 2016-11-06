@@ -264,15 +264,17 @@ class fmri_qc(object):
         figures = {"mean_ref": fmean_ref, "mean_anat": fmean_anat,
                    "anat_ref": fanat_ref, "std": fstd, "snr": fsnr,
                     "voxel_hist": fhist, "intens": fmi, "trans": ftrans,
-                    "rot": frot, "disp": fmc, "sub": scanid}
+                    "rot": frot, "disp": fmc}
 
-        for idx in figures:
-            fig = figures[idx]
+        for idx, fig in figures.items():
+            print fig
             fig.tight_layout()
             fig.set_size_inches(nrows*6, ncols*6)
             appended_path = scanid + "_" + str(idx) + ".png"
             path = fname + appended_path
             fig.savefig(path)
+
+        figures['sub'] = scanid
 
         mgqc().update_template_qc(qc_html, figures)
 
