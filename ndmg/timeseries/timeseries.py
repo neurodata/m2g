@@ -103,6 +103,8 @@ class timeseries(object):
         if qcdir is not None:
             mgqc().image_align(fmridata, labeldata, qcdir=qcdir,
                                scanid=scanid, refid=refid)
+            mgqc().plot_timeseries(roi_ts, qcdir=qcrid,
+                               scanid=scanid, refid=refid)
 
         if roits_file:
             np.savez(roits_file, roi_ts)

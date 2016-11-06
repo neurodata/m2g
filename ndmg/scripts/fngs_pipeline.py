@@ -86,7 +86,9 @@ def fngs_pipeline(fmri, struct, atlas, atlas_brain, mask, labels, outdir,
         mcdir + " " + regdir + " " + overalldir + " " + roidir
     mgu().execute_cmd(cmd)
 
-    mggqc().generate_html_templated(overalldir)
+    qc_html = overalldir + fmri_name + ".html"
+
+    mggqc().generate_html_templated(qc_html)
 
     # Graphs are different because of multiple atlases
     if isinstance(labels, list):

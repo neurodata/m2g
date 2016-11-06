@@ -27,7 +27,7 @@ import numpy as np
 import nilearn.image as nl
 import sys
 import dipy.align.reslice as dr
-from ndmg.stats import fmri_qc as mgqc
+from ndmg.stats import qc as mgqc
 
 
 class register(object):
