@@ -116,7 +116,7 @@ def compute_metrics(fs, outdir, atlas, verb=False):
 
     outf = outdir + '/' + atlas + '_summary.png'
 
-    plot_metrics(nnz, deg, ew, ccoefs, ss1, eigs, scree, centrality, outf)
+    #plot_metrics(nnz, deg, ew, ccoefs, ss1, eigs, scree, centrality, outf)
 
 def show_means(data):
     print("Subject Means: " + ", ".join(["%.2f" % np.mean(data[key])
