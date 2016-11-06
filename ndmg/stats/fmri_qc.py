@@ -31,7 +31,7 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from ndmg.utils import utils as mgu
-from ndmg.stats import qc as mgqc
+from ndmg.stats.qc import qc as mgqc
 
 
 class fmri_qc(object):
@@ -223,6 +223,21 @@ class fmri_qc(object):
         ftrans.tight_layout()
         ftrans.savefig(fname + "_trans_mc.png")
 
+        par_file = mri_mc + ".par"
+
+        abs_pos = np.zeros((nvols, 6))
+        rel_pos = np.zeros((nvols, 6))
+        with open(par_file) as f:
+            counter = 0
+            for line in f:
+                abs_pos[counter, :] = [float(i) for i in re.split("\\s+",
+                                                                  line)[0:6]]
+                if counter > 0:
+                    rel_pos[counter, :] = np.subtract(abs_pos[counter, :],
+                                                      abs_pos[counter-1, :])
+                counter += 1
+
+
         frot = plt.figure()
         axrot = frot.add_subplot(111)
         axrot.plot(abs_pos[:, 0:3])
@@ -260,20 +275,6 @@ class fmri_qc(object):
             fig.savefig(path)
 
         mgqc().update_template_qc(qc_html, figures)
-
-        par_file = mri_mc + ".par"
-
-        abs_pos = np.zeros((nvols, 6))
-        rel_pos = np.zeros((nvols, 6))
-        with open(par_file) as f:
-            counter = 0
-            for line in f:
-                abs_pos[counter, :] = [float(i) for i in re.split("\\s+",
-                                                                  line)[0:6]]
-                if counter > 0:
-                    rel_pos[counter, :] = np.subtract(abs_pos[counter, :],
-                                                      abs_pos[counter-1, :])
-                counter += 1
 
 
         fstat = open(fname + "_stat_sum.txt", 'w')

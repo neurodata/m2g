@@ -86,7 +86,7 @@ def fngs_pipeline(fmri, struct, atlas, atlas_brain, mask, labels, outdir,
         mcdir + " " + regdir + " " + overalldir + " " + roidir
     mgu().execute_cmd(cmd)
 
-    qc_html = overalldir + fmri_name + ".html"
+    qc_html = overalldir + "/" + fmri_name + ".html"
 
     mggqc().generate_html_templated(qc_html)
 
