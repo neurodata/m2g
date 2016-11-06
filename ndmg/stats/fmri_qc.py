@@ -191,8 +191,6 @@ class fmri_qc(object):
         for d in range(0, depth):
             axmi.plot(mri_datmi[d, :])
 
-        dict_keys = {} 
-
         fname = qcdir + "/"
         axmi.set_xlabel('Timepoint')
         axmi.set_ylabel('Mean Intensity')
@@ -265,18 +263,20 @@ class fmri_qc(object):
                    "anat_ref": fanat_ref, "std": fstd, "snr": fsnr,
                     "voxel_hist": fhist, "intens": fmi, "trans": ftrans,
                     "rot": frot, "disp": fmc}
+        fnames = {}
 
         for idx, fig in figures.items():
             print fig
             fig.tight_layout()
             fig.set_size_inches(nrows*6, ncols*6)
             appended_path = scanid + "_" + str(idx) + ".png"
+            fnames[idx] = appended_path
             path = fname + appended_path
             fig.savefig(path)
 
         figures['sub'] = scanid
 
-        mgqc().update_template_qc(qc_html, figures)
+        mgqc().update_template_qc(qc_html, fnames)
 
 
         fstat = open(fname + "_stat_sum.txt", 'w')
