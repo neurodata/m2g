@@ -264,7 +264,7 @@ class fmri_qc(object):
         figures = {"mean_ref": fmean_ref, "mean_anat": fmean_anat,
                    "anat_ref": fanat_ref, "std": fstd, "snr": fsnr,
                     "voxel_hist": fhist, "intens": fmi, "trans": ftrans,
-                    "rot": frot, "disp": fmc, "sub": scan_id}
+                    "rot": frot, "disp": fmc, "sub": scanid}
 
         for idx in figures:
             fig = figures[idx]
