@@ -3,3 +3,4 @@ from __future__ import absolute_import
 from . import *
 from .fmri_qc import fmri_qc
 from .plot_metrics import plot_metrics
+from .qc import qc
