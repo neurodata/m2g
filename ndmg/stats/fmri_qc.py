@@ -262,7 +262,7 @@ class fmri_qc(object):
         axmc.set_xlim((0, nvols))
 
         figures = {"mean_ref": fmean_ref, "mean_anat": fmean_anat,
-                   "anat_ref": fanat_ref, "std": fstd, "snr": fsnr, "mean": fmean,
+                   "anat_ref": fanat_ref, "std": fstd, "snr": fsnr,
                     "voxel_hist": fhist, "intens": fmi, "trans": ftrans,
                     "rot": frot, "disp": fmc, "sub": scan_id}
 
