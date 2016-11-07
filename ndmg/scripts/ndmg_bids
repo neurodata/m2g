@@ -111,18 +111,19 @@ def participant_level(inDir, outDir, subjs, debug=False, func=False, acquisition
                               "anat", "*_T1w.nii*"))
         anat = anat + anat_t
         if (func):
+            fmri = []
             func_t = glob(op.join(inDir, "sub-%s" % subj, "func", "*_bold.nii*")) +\
                      glob(op.join(inDir, "sub-%s" % subj, "ses-*",
                                   "func", "*_bold.nii*"))
-            func = func + func_t
+            fmri = fmri + func_t
 
             assert(len(anat) == len(func))
 
             for i, scans in enumerate(anat):
-                print ("fMRI file: " + func[i])
+                print ("fMRI file: " + fmri[i])
                 print ("Acquisition pattern: " + str(acquisition))
 
-                fngs_pipeline(func[i], anat[i], atlas, atlas_brain, atlas_mask,
+                fngs_pipeline(fmri[i], anat[i], atlas, atlas_brain, atlas_mask,
                               labels, outDir, clean=(not debug), stc=acquisition)
 
         else:
