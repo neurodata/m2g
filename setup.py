@@ -50,8 +50,8 @@ setup(
         'numpy',  # We use nump v1.10.4
         'scipy',  # We use 0.17.0
         'dipy>=0.1',
-        'multiprocessing'
-        'matplotlib>=1.5',
+        'multiprocessing',
+        'matplotlib>=1.5'
     ],
     include_package_data=True, # for HTML template
 )
