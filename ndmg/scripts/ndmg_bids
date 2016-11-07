@@ -117,7 +117,7 @@ def participant_level(inDir, outDir, subjs, debug=False, func=False, acquisition
                                   "func", "*_bold.nii*"))
             fmri = fmri + func_t
 
-            assert(len(anat) == len(func))
+            assert(len(anat) == len(fmri))
 
             for i, scans in enumerate(anat):
                 print ("fMRI file: " + fmri[i])
