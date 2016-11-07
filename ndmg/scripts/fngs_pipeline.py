@@ -62,7 +62,7 @@ def fngs_pipeline(fmri, struct, atlas, atlas_brain, mask, labels, outdir,
         clean:
             - a flag whether or not to clean out directories once finished.
         fmt:
-            - the format for produced graphs. Supported options are gpickle and
+            - the format for produced . Supported options are gpickle and
             graphml.
     """
     startTime = datetime.now()
@@ -82,7 +82,7 @@ def fngs_pipeline(fmri, struct, atlas, atlas_brain, mask, labels, outdir,
         "/preproc_fmri " + outdir + "/motion_fmri " + outdir +\
         "/voxel_timeseries " + outdir + "/roi_timeseries " +\
         outdir + "/reg_struct " + outdir + "/tmp " +\
-        outdir + "/graphs " + outdir + "/nuis_fmri " + qcdir + " " +\
+        outdir + "/ " + outdir + "/nuis_fmri " + qcdir + " " +\
         mcdir + " " + regdir + " " + overalldir + " " + roidir
     mgu().execute_cmd(cmd)
 
@@ -97,13 +97,13 @@ def fngs_pipeline(fmri, struct, atlas, atlas_brain, mask, labels, outdir,
         for label in label_name:
             p = Popen("mkdir -p " + outdir + "/roi_timeseries/" + label,
                       stdout=PIPE, stderr=PIPE, shell=True)
-            p = Popen("mkdir -p " + outdir + "/graphs/" + label,
+            p = Popen("mkdir -p " + outdir + "//" + label,
                       stdout=PIPE, stderr=PIPE, shell=True)
     else:
         label_name = op.splitext(op.splitext(op.basename(labels))[0])[0]
         p = Popen("mkdir -p " + outdir + "/roi_timeseries/" + label_name,
                   stdout=PIPE, stderr=PIPE, shell=True)
-        p = Popen("mkdir -p " + outdir + "/graphs/" + label_name,
+        p = Popen("mkdir -p " + outdir + "//" + label_name,
                   stdout=PIPE, stderr=PIPE, shell=True)
 
     # Create derivative output file names
@@ -121,8 +121,8 @@ def fngs_pipeline(fmri, struct, atlas, atlas_brain, mask, labels, outdir,
     print "fMRI volume registered to atlas: " + aligned_fmri
     print "Voxel timecourse in atlas space: " + voxel_ts
     print "Quality Control HTML Page: " + qc_html
-    # Again, graphs are different
-    graphs = [outdir + "/graphs/" + x + '/' + fmri_name + "_" + x + '.' + fmt
+    # Again,  are different
+     = [outdir + "/connectomes/" + x + '/' + fmri_name + "_" + x + '.' + fmt
               for x in label_name]
     roi_ts = [outdir + "/roi_timeseries/" + x + '/' + fmri_name + "_" + x +
               ".npz" for x in label_name]
@@ -154,10 +154,10 @@ def fngs_pipeline(fmri, struct, atlas, atlas_brain, mask, labels, outdir,
                                refid=label)
         except OSError as err:
             print(err)
-        graph = mgg(ts.shape[0], labels[idx], sens="Functional")
-        graph.cor_graph(ts)
-        graph.summary()
-        graph.save_graph(graphs[idx], fmt=fmt)
+        connectome = mgg(ts.shape[0], labels[idx], sens="Functional")
+        connectome.cor_graph(ts)
+        connectome.summary()
+        connectome.save_graph([idx], fmt=fmt)
 
     #cmd = "rm -r " + outdir + "/tmp/" + fmri_name + "*"
     #mgu().execute_cmd(cmd)
@@ -187,7 +187,7 @@ def main():
                         each line is the shift in TRs), up (ie, bottom to top), \
                         down (ie, top to bottom), and interleaved.", default=None)
     parser.add_argument("-f", "--fmt", action="store", default='gpickle',
-                        help="Determines graph output format")
+                        help="Determines connectome output format")
     result = parser.parse_args()
 
     # Create output directory
