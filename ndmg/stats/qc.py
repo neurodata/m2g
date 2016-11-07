@@ -239,7 +239,9 @@ class qc(object):
         dependent on reference intensities.
 
         **Positional Arguments:**
-            reference:
+            - basemap:
+                - the colormap to use for this colorscale.
+            - reference:
                 - the reference matrix.
         """
         cmap = basemap(reference)
