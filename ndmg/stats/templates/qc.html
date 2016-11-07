@@ -4,22 +4,22 @@
     <h1>Motion Correction</h1>
     <h2>Motion Parameters</h2>
     <p>First, we look at the motion parameters produced by mcflirt. We have both translational (x, y, and z) parameters, as well as rotational (x, y, and z) to cosider. First, we look at the rotational and translational motion parameters. Second, we consider overall motion, both absolute and relative. Absolute motion is defined as the total euclidian deviation from the zeroth timestep, whereas relative defines the distance from each timestep to its previous. Here, we want to be verifying that we do not have any sudden motions (indicated by significant spikes) as these could lead to signal dropout:</p>
-    <img src="{{ trans }}" alt="Translational MPs" height="600" width="600">
+    <img src="{{ trans }}" alt="Translational MPs" height="600" width="500">
     <br>
-    <img src="{{ rot }}" alt="Rotational MPs" height="600" width="600">
+    <img src="{{ rot }}" alt="Rotational MPs" height="600" width="500">
     <br>
-    <img src="{{ disp }}" alt="Displacement MPs" height="600" width="600">
+    <img src="{{ disp }}" alt="Displacement MPs" height="600" width="500">
     <h2>Comparison Before and After Motion Correction</h2>
     <p>We align to the zeroth slice, so what we want to look for with our preprocessing here is to compare the quality of alignment before and after motion correction to the zeroth slice of each slice in the brain. We measure similarity with the mean squared error, where a smaller error indicates that our images have better alignment of higher activation regions, which typically would be associated with high white matter alignment (for all alignment comparisons hereafter, the MSE is taken between images normalized by their maximum values, such that all intensities are normalized between 0 and 1). Below, we provide two ways to compare the alignment quality before and after motion correction; in the jitter plot, we show a single point per axial slice per time point, in the kernel density estimate, we see the distribution of mean squared errors (this distribution is over all of the points of our jitter plot). As we can see, the MSE improves slightly after motion correction, which is about what we might expect.</p>
-    <img src="../../mc/{{ sub }}/{{ sub }}_jitter.png" alt="MC jitter" height="600" width="600">
+    <img src="../../mc/{{ sub }}/{{ sub }}_jitter.png" alt="MC jitter" height="600" width="500">
     <br>
-    <img src="../../mc/{{ sub }}/{{ sub }}_kde.png" alt="MC KDE" height="600" width="600">
+    <img src="../../mc/{{ sub }}/{{ sub }}_kde.png" alt="MC KDE" height="600" width="500">
 
     <h1>Registration</h1>
     <h2>Comparison Before and After Registration</h2>
     <p>Next, we want to determine the effectiveness of our registration. Similar to the motion correction plots, we compute the axial slice-wise MSE between each axial slice per time point and that of the atlas we are registering to.</p>
-    <img src="../../reg/{{ sub }}/{{ sub }}_preproc_jitter.png" alt="Registration jitter" height="600" width="600">
-    <img src="../../reg/{{ sub }}/{{ sub }}_preproc_kde.png" alt="Registration KDE" height="600" width="600">
+    <img src="../../reg/{{ sub }}/{{ sub }}_preproc_jitter.png" alt="Registration jitter" height="600" width="500">
+    <img src="../../reg/{{ sub }}/{{ sub }}_preproc_kde.png" alt="Registration KDE" height="600" width="500">
 
     <h2>Registration Figures</h2>
     <p>In these figures, we look at different figures to give us a sense of the quality of our alignment. We compare scans using one white image and one orange image, and a proper alignment will have a relatively homogeneous coloring (and therefore no purely orange or purely white components sticking out). First, we look at the aligned fMRI image (blue) overlaid with the reference atlas (red):</p>
@@ -50,11 +50,11 @@
  
     <h3>Mean Slice Intensity</h3>
     <p>Our final few plots concern voxel statistics. First, we want to check our slice intensities. We average all of the voxels for each slice in the image, and the goal is that the average intensities are relatively consistent as we proceed in time. We show a single line for each axial slice:</p>
-    <img src="{{ intens }}" alt="fMRI Struct Overlap" height="600" width="600">
+    <img src="{{ intens }}" alt="fMRI Struct Overlap" height="600" width="500">
  
     <h3>Histogram</h3>
     <p>Next, we look at a histogram of voxel intensities. This distribution should appear to be relatively normal, and can sometimes take the form of a Gaussian Mixture, with one main pack of voxels (the brain intensities) and a very low number of voxels of far lower intensity (probably the skull):</p>
-    <img src="{{ voxel_hist }}" alt="fMRI Struct Overlap" height="600" width="600">
+    <img src="{{ voxel_hist }}" alt="fMRI Struct Overlap" height="600" width="500">
  
     </body>
 </html>

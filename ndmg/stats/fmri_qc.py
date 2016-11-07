@@ -259,15 +259,18 @@ class fmri_qc(object):
         axmc.legend(['absolute', 'relative'])
         axmc.set_xlim((0, nvols))
 
-        figures = {"mean_ref": fmean_ref, "mean_anat": fmean_anat,
-                   "anat_ref": fanat_ref, "std": fstd, "snr": fsnr,
-                    "voxel_hist": fhist, "intens": fmi, "trans": ftrans,
-                    "rot": frot, "disp": fmc}
+        figures = {"mean_ref": [fmean_ref, nrows, ncols],
+                   "mean_anat": [fmean_anat,nrows,ncols],
+                   "anat_ref": [fanat_ref,nrows,ncols],
+                   "std": [fstd,nrows,ncols],
+                   "snr": [fsnr,nrows,ncols],
+                   "voxel_hist": [fhist,1,1], "intens": [fmi,1,1], 
+                   "trans": [ftrans,1,1], "rot": [frot,1,1], "disp": [fmc,1,1]}
         fnames = {}
 
         for idx, fig in figures.items():
-            fig.tight_layout()
             fig.set_size_inches(nrows*6, ncols*6)
+            fig.tight_layout()
             appended_path = scanid + "_" + str(idx) + ".png"
             fnames[idx] = appended_path
             path = fname + appended_path
