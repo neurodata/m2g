@@ -43,21 +43,22 @@ def make_panel_plot(basepath, outf, dataset=None, atlas=None):
     multi = pp.traces_to_panels(traces)
     for idx, curr, in enumerate(paths):
         key = 'axis%d' % (idx+1)
-        if idx in [0, 3, 6]:
-            multi.layout['x'+key]['type'] = 'log'
-        if idx in [4, 7]:
-            multi.layout['x'+key]['range'] = [1, dims]
-            multi.layout['x'+key]['tickvals'] = [1, dims]
-        if idx in [1]:
-            multi.layout['x'+key]['range'] = [0, 1]
         d = multi.layout['x'+key]['domain']
         multi.layout['x'+key]['domain'] = [d[0], d[1]-0.0125]
         multi.layout['y'+key]['zeroline'] = False
         multi.layout['x'+key]['zeroline'] = False
         multi.layout['x'+key]['title'] = xlabs[idx]
         multi.layout['y'+key]['title'] = ylabs[idx]
-        multi.layout['x'+key]['nticks'] = 4
+        multi.layout['x'+key]['nticks'] = 3
         multi.layout['y'+key]['nticks'] = 3
+        if idx in [0, 3, 6]:
+            multi.layout['x'+key]['type'] = 'log'
+            multi.layout['x'+key]['title'] += ' (log scale)'
+        if idx in [4, 7]:
+            multi.layout['x'+key]['range'] = [1, dims]
+            multi.layout['x'+key]['tickvals'] = [1, dims]
+        if idx in [1]:
+            multi.layout['x'+key]['range'] = [0, 1]
     
     
     if dataset is not None and atlas is not None:
