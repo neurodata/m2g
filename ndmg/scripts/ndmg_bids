@@ -26,10 +26,7 @@ from ndmg.scripts.ndmg_setup import get_files
 from ndmg.utils import bids_s3
 from ndmg.scripts.ndmg_pipeline import ndmg_pipeline
 from ndmg.stats.graph_qc import *
-<<<<<<< HEAD
 from ndmg.stats.plotly_multiplot import *
-=======
->>>>>>> 4d2be83413c223633a6042faed6b5a869b59dfd5
 
 from glob import glob
 import ndmg.utils as mgu
