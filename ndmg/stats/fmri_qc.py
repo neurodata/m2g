@@ -268,8 +268,9 @@ class fmri_qc(object):
                    "trans": [ftrans,1,1], "rot": [frot,1,1], "disp": [fmc,1,1]}
         fnames = {}
 
-        for idx, fig in figures.items():
-            fig.set_size_inches(nrows*6, ncols*6)
+        for idx, figlist in figures.items():
+            fig=figlist[0]
+            fig.set_size_inches(figlist[1]*6, figlist[2]*6)
             fig.tight_layout()
             appended_path = scanid + "_" + str(idx) + ".png"
             fnames[idx] = appended_path
