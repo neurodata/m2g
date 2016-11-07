@@ -17,11 +17,12 @@ def make_panel_plot(basepath, outf, dataset=None, atlas=None):
               if os.path.splitext(name)[1] == '.pkl']
     paths = [os.path.join(basepath, item) for item in fnames]
     keys = ["_".join(n.split('.')[0].split('_')[1:]) for n in fnames]
-    ylabs = ['Density', 'Density', 'Density', 'Density',
-             'Eigenvalue', 'Density', 'Density', 'Portion of Total Variance']
+    rela = 'Relative Probability'
+    ylabs = [rela, rela, rela, rela,
+             'Eigenvalue', rela, rela, 'Portion of Total Variance']
     xlabs = ['Betweenness Centrality', 'Clustering Coefficient', 'Degree',
              'Edge Weight', 'Dimension', 'Number of Non-zeros',
-             'Max Locality Statistic', 'Dimension']
+             'Locality Statistic-1', 'Dimension']
     
     traces = list(())
     for idx, curr in enumerate(paths):
@@ -55,7 +56,7 @@ def make_panel_plot(basepath, outf, dataset=None, atlas=None):
         multi.layout['x'+key]['zeroline'] = False
         multi.layout['x'+key]['title'] = xlabs[idx]
         multi.layout['y'+key]['title'] = ylabs[idx]
-        multi.layout['x'+key]['nticks'] = 3
+        multi.layout['x'+key]['nticks'] = 4
         multi.layout['y'+key]['nticks'] = 3
     
     
