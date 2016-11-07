@@ -160,8 +160,6 @@ class qc(object):
         mri_before = nb.load(mri_bname)
         mri_after = nb.load(mri_aname)
         reference = nb.load(refname)
-        print mri_after.get_header().get_zooms()
-        print mri_before.get_header().get_zooms()
 
         # resample if not in same image space
         if not all(x in mri_after.get_header().get_zooms()[:3] for x in
