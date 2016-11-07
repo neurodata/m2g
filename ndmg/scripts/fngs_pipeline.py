@@ -82,7 +82,7 @@ def fngs_pipeline(fmri, struct, atlas, atlas_brain, mask, labels, outdir,
         "/preproc_fmri " + outdir + "/motion_fmri " + outdir +\
         "/voxel_timeseries " + outdir + "/roi_timeseries " +\
         outdir + "/reg_struct " + outdir + "/tmp " +\
-        outdir + "/ " + outdir + "/nuis_fmri " + qcdir + " " +\
+        outdir + "/connectomes " + outdir + "/nuis_fmri " + qcdir + " " +\
         mcdir + " " + regdir + " " + overalldir + " " + roidir
     mgu().execute_cmd(cmd)
 
@@ -97,13 +97,13 @@ def fngs_pipeline(fmri, struct, atlas, atlas_brain, mask, labels, outdir,
         for label in label_name:
             p = Popen("mkdir -p " + outdir + "/roi_timeseries/" + label,
                       stdout=PIPE, stderr=PIPE, shell=True)
-            p = Popen("mkdir -p " + outdir + "//" + label,
+            p = Popen("mkdir -p " + outdir + "/connectomes/" + label,
                       stdout=PIPE, stderr=PIPE, shell=True)
     else:
         label_name = op.splitext(op.splitext(op.basename(labels))[0])[0]
         p = Popen("mkdir -p " + outdir + "/roi_timeseries/" + label_name,
                   stdout=PIPE, stderr=PIPE, shell=True)
-        p = Popen("mkdir -p " + outdir + "//" + label_name,
+        p = Popen("mkdir -p " + outdir + "/connectomes/" + label_name,
                   stdout=PIPE, stderr=PIPE, shell=True)
 
     # Create derivative output file names
@@ -121,9 +121,9 @@ def fngs_pipeline(fmri, struct, atlas, atlas_brain, mask, labels, outdir,
     print "fMRI volume registered to atlas: " + aligned_fmri
     print "Voxel timecourse in atlas space: " + voxel_ts
     print "Quality Control HTML Page: " + qc_html
-    # Again,  are different
-     = [outdir + "/connectomes/" + x + '/' + fmri_name + "_" + x + '.' + fmt
-              for x in label_name]
+    # Again, connectomes are different
+    connectomes = [outdir + "/connectomes/" + x + '/' + fmri_name +
+              "_" + x + '.' + fmt for x in label_name]
     roi_ts = [outdir + "/roi_timeseries/" + x + '/' + fmri_name + "_" + x +
               ".npz" for x in label_name]
     print "ROI timecourse downsampled to given labels: " +\
@@ -157,7 +157,7 @@ def fngs_pipeline(fmri, struct, atlas, atlas_brain, mask, labels, outdir,
         connectome = mgg(ts.shape[0], labels[idx], sens="Functional")
         connectome.cor_graph(ts)
         connectome.summary()
-        connectome.save_graph([idx], fmt=fmt)
+        connectome.save_graph(connectomes[idx], fmt=fmt)
 
     #cmd = "rm -r " + outdir + "/tmp/" + fmri_name + "*"
     #mgu().execute_cmd(cmd)
