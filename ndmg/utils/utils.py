@@ -141,7 +141,7 @@ class utils():
         nb.save(out, sli)
         pass
 
-    def get_brain(self, brain_file):
+    def get_braindata(self, brain_file):
         """
         Opens a brain data series for a mask, mri image, or atlas.
         Returns a numpy.ndarray representation of a brain.

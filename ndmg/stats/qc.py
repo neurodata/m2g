@@ -277,8 +277,8 @@ class qc(object):
         """
         cmd = "mkdir -p " + qcdir
         mgu().execute_cmd(cmd)
-        mri_data = mgu().get_brain(mri_data)
-        ref_data = mgu().get_brain(ref_data)
+        mri_data = mgu().get_braindata(mri_data)
+        ref_data = mgu().get_braindata(ref_data)
 
         # if we have 4d data, np.mean() to get 3d data
         if len(mri_data.shape) == 4:

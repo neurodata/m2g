@@ -55,11 +55,11 @@ class timeseries(object):
         print "Extracting Voxel Timeseries for " + str(fmri_file) + "..."
 
         # load the mask data
-        maskdata = mgu().get_brain(mask_file)
+        maskdata = mgu().get_braindata(mask_file)
         maskbool = (maskdata > 0)  # extract timeseries for any labelled voxels
 
         # load the MRI data
-        fmridata = mgu().get_brain(fmri_file)
+        fmridata = mgu().get_braindata(fmri_file)
         voxel_ts = fmridata[maskbool, :]
         if voxel_file is not None:
             np.savez(voxel_file, voxel_ts)
@@ -83,11 +83,11 @@ class timeseries(object):
                 - the path to where the roi timeseries will be saved. If
                 None, don't save and just return the roi_timeseries.
         """
-        labeldata = mgu().get_brain(label_file)
+        labeldata = mgu().get_braindata(label_file)
 
         rois = np.sort(np.unique(labeldata[labeldata > 0]))
 
-        fmridata = mgu().get_brain(fmri_file)
+        fmridata = mgu().get_braindata(fmri_file)
 
         # initialize so resulting ra is [numrois]x[numtimepoints]
         roi_ts = np.zeros((rois.shape[0], fmridata.shape[3]))
