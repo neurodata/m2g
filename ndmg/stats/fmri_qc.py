@@ -234,7 +234,6 @@ class fmri_qc(object):
         axtrans.legend(['x', 'y', 'z'])
         axtrans.set_xlim((0, nvols))
         ftrans.tight_layout()
-        ftrans.savefig(fname + "_trans_mc.png")
 
         frot = plt.figure()
         axrot = frot.add_subplot(111)
