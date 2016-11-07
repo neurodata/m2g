@@ -114,6 +114,7 @@ class utils():
         """
         return op.splitext(op.splitext(op.basename(label))[0])[0]
 
+<<<<<<< HEAD
     def get_slice(self, mri, volid, sli):
         """
         Takes a volume index and constructs a new nifti image from
@@ -198,16 +199,22 @@ class utils():
         self.execute_cmd(cmd)
         pass
 
+=======
+>>>>>>> dbb0c4c0a5147a2d80ddf68fe054f139323ce823
     def execute_cmd(self, cmd):
         """
         Given a bash command, it is executed and the response piped back to the
         calling script
+<<<<<<< HEAD
 
         **Positional Arguments:**
             cmd:
                 - the bash command to execute.
         """
         print("Executing: " + cmd)
+=======
+        """
+>>>>>>> dbb0c4c0a5147a2d80ddf68fe054f139323ce823
         p = Popen(cmd, stdout=PIPE, stderr=PIPE, shell=True)
         out, err = p.communicate()
         code = p.returncode
@@ -215,6 +222,7 @@ class utils():
             sys.exit("Error  " + str(code) + ": " + err)
         return out, err
 
+<<<<<<< HEAD
     def get_b0(self, gtab, data):
         """
         Takes bval and bvec files and produces a structure in dipy format
@@ -229,5 +237,7 @@ class utils():
         b0_vol = np.squeeze(data[:, :, :, b0])  # if more than 1, use first one
         return b0_vol
 
+=======
+>>>>>>> dbb0c4c0a5147a2d80ddf68fe054f139323ce823
     def name_tmps(self, basedir, basename, extension):
         return basedir + "/tmp/" + basename + extension

@@ -14,22 +14,25 @@ setup(
         'ndmg.graph',
         'ndmg.stats',
         'ndmg.utils',
-        'ndmg.scripts',
         'ndmg.timeseries',
         'ndmg.nuis'
+        'ndmg.scripts'
     ],
     scripts = [
         'ndmg/scripts/ndmg_bids',
+        'ndmg/scripts/ndmg_demo-dwi',
+        'ndmg/scripts/ndmg_demo-qc'
     ],
     entry_points = {
         'console_scripts': [
                             'ndmg_pipeline=ndmg.scripts.ndmg_pipeline:main',
                             'fngs_pipeline=ndmg.scripts.fngs_pipeline:main'
                             ]
+
     },
     version=VERSION,
     description='Neuro Data MRI to Graphs Pipeline',
-    author='Greg Kiar, Will Gray Roncal, and Eric Bridgeford',
+    author='Greg Kiar, Will Gray Roncal and Eric Bridgeford',
     author_email='gkiar@jhu.edu, wgr@jhu.edu, ebridge2@jhu.edu',
     url='https://github.com/neurodata/ndmg',
     download_url='https://github.com/neurodata/ndmg/tarball/' + VERSION,
@@ -48,6 +51,7 @@ setup(
         'scipy',  # We use 0.17.0
         'dipy>=0.1',
         'multiprocessing'
+        'matplotlib>=1.5',
     ],
     include_package_data=True, # for HTML template
 )

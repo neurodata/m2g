@@ -58,13 +58,15 @@ def compute_metrics(fs, outdir, atlas, verb=False):
     print("Computing: NNZ")
     nnz = OrderedDict((subj, len(nx.edges(graphs[subj]))) for subj in graphs)
     write(outdir, 'number_non_zeros', nnz, atlas)
-
+    print("Sample Mean: %.2f" % np.mean(nnz.values()))
+    
     #  Degree sequence
     print("Computing: Degree Seuqence")
     temp_deg = OrderedDict((subj, np.array(nx.degree(graphs[subj]).values()))
                            for subj in graphs)
     deg = density(temp_deg)
     write(outdir, 'degree_distribution', deg, atlas)
+    show_means(temp_deg)
 
     #  Edge Weights
     print("Computing: Edge Weight Sequence")
@@ -72,6 +74,7 @@ def compute_metrics(fs, outdir, atlas, verb=False):
                            for e in graphs[s].edges()]) for s in graphs)
     ew = density(temp_ew)
     write(outdir, 'edge_weight_distribution', ew, atlas)
+    show_means(temp_ew)
 
     #   Clustering Coefficients
     print("Computing: Clustering Coefficient Sequence")
@@ -79,12 +82,14 @@ def compute_metrics(fs, outdir, atlas, verb=False):
                           for subj in graphs)
     ccoefs = density(temp_cc)
     write(outdir, 'clustering_coefficients', ccoefs, atlas)
+    show_means(temp_cc)
 
     # Scan Statistic-1
-    print("Computing: Scan Statistic-1 Sequence")
+    print("Computing: Max Local Statistic Sequence")
     temp_ss1 = scan_statistic(graphs, 1)
     ss1 = density(temp_ss1)
     write(outdir, 'scan_statistic_1', ss1, atlas)
+    show_means(temp_ss1)
 
     # Eigen Values
     print("Computing: Eigen Value Sequence")
@@ -93,6 +98,12 @@ def compute_metrics(fs, outdir, atlas, verb=False):
     eigs = OrderedDict((subj, np.sort(np.linalg.eigvals(laplac[subj].A))[::-1])
                        for subj in graphs)
     write(outdir, 'eigen_sequence', eigs, atlas)
+    print("Subject Maxes: " + ", ".join(["%.2f" % np.max(eigs[key])
+                               for key in eigs.keys()]))
+
+    scree = OrderedDict((subj, np.cumsum(eigs[subj])/np.sum(eigs[subj]))
+                        for subj in eigs)
+    write(outdir, 'scree_eigen', scree, atlas)
 
     # Betweenness Centrality
     print("Computing: Betweenness Centrality Sequence")
@@ -101,10 +112,15 @@ def compute_metrics(fs, outdir, atlas, verb=False):
                           for subj in graphs)
     centrality = density(temp_bc)
     write(outdir, 'betweenness_centrality', centrality, atlas)
+    show_means(temp_bc)
 
     outf = outdir + '/' + atlas + '_summary.png'
 
-    plot_metrics(nnz, deg, ew, ccoefs, ss1, eigs, centrality, outf)
+    #plot_metrics(nnz, deg, ew, ccoefs, ss1, eigs, scree, centrality, outf)
+
+def show_means(data):
+    print("Subject Means: " + ", ".join(["%.2f" % np.mean(data[key])
+                                         for key in data.keys()]))
 
 
 def scan_statistic(mygs, i):

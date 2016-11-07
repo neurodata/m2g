@@ -26,6 +26,8 @@ from ndmg.scripts.ndmg_setup import get_files
 from ndmg.utils import bids_s3
 from ndmg.scripts.ndmg_pipeline import ndmg_pipeline
 from ndmg.stats.graph_qc import *
+from ndmg.stats.plotly_multiplot import *
+from ndmg.scripts.fngs_pipeline import fngs_pipeline
 
 from glob import glob
 import ndmg.utils as mgu
@@ -163,7 +165,7 @@ def participant_level(inDir, outDir, subjs, debug=False, func=False, acquisition
                 ndmg_pipeline(dwi[i], bval[i], bvec[i], anat[i], atlas, atlas_mask,
                               labels, outDir, clean=(not debug))
 
-def group_level(inDir, outDir, func):
+def group_level(inDir, outDir, func, dataset=None, atlas=None):
     """
     Crawls the output directory from ndmg and computes qc metrics on the
     derivatives produced
@@ -176,8 +178,12 @@ def group_level(inDir, outDir, func):
 
     # Get list of graphs
     labels = next(os.walk(inDir))[1]
+    print labels
 
     # Run for each
+    if atlas is not None:
+        labels = [atlas]
+
     for label in labels:
         print("Parcellation: " + label)
         tmp_in = op.join(inDir, label)
@@ -189,6 +195,8 @@ def group_level(inDir, outDir, func):
         print(tmp_out)
         mgu().execute_cmd("mkdir -p " + tmp_out)
         compute_metrics(fs, tmp_out, label)
+        outf = op.join(tmp_out, 'plot')
+        make_panel_plot(tmp_out, outf, dataset=dataset, atlas=label)
 
 
 def main():
@@ -220,15 +228,21 @@ def main():
     parser.add_argument('--remote_path', action='store', help='The path to '
                         'the data on your S3 bucket. The data will be '
                         'downloaded to the provided bids_dir on your machine.')
-    parser.add_argument('--debug', action='store_true', help='flag to store '
-                        'temp files along the path of processing.',
-                        default=False)
     parser.add_argument('--func', help='flag to determine whether to run '
                         'functional analysis.', default=True)
     parser.add_argument('--acquisition', help='flag that specifies the acquisition '
                         'pattern if you want to use slice timing correction '
                         'with functional analysis. Options are \'up\', \'down\', '
                         '\'interleaved\', \'None\'.', default=None)
+    parser.add_argument('--push_data', action='store_true', help='flag to '
+                        'push derivatives back up to S3.', default=False)
+    parser.add_argument('--dataset', action='store', help='The name of '
+                        'the dataset you are perfoming QC on.')
+    parser.add_argument('--atlas', action='store', help='The atlas '
+                        'being analyzed in QC (if you only want one).')
+    parser.add_argument('--debug', action='store_true', help='flag to store '
+                        'temp files along the path of processing.',
+                        default=False)
     result = parser.parse_args()
 
     inDir = result.bids_dir
@@ -236,6 +250,7 @@ def main():
     subj = result.participant_label
     buck = result.bucket
     remo = result.remote_path
+    push = result.push_data
     level = result.analysis_level
 
     if level == 'participant':
@@ -248,6 +263,7 @@ def main():
         participant_level(inDir, outDir, subj, result.debug, result.func,
                           result.acquisition)
 
+        modif = 'derivatives'
     elif level == 'group':
         if buck is not None and remo is not None:
             print("Retrieving data from S3...")
@@ -256,7 +272,17 @@ def main():
             else:
                 bids_s3.get_data(buck, remo, inDir, public=True)
 
-        group_level(inDir, outDir, result.func, result.acquisition)
+        modif = 'qc'
+        group_level(inDir, outDir, result.func, result.dataset, result.atlas)
+
+
+    if push and buck is not None and remo is not None:
+        print("Pushing results to S3...")
+        cmd = "".join(['aws s3 cp ', outDir, ' s3://', buck, '/', remo,
+                       '/', modif, '/ --recursive --no-sign-request',
+                       ' --acl public-read-write'])
+        print cmd
+        mgu().execute_cmd(cmd)
 
 
 if __name__ == "__main__":
