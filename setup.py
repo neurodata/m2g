@@ -15,7 +15,7 @@ setup(
         'ndmg.stats',
         'ndmg.utils',
         'ndmg.timeseries',
-        'ndmg.nuis'
+        'ndmg.nuis',
         'ndmg.scripts'
     ],
     scripts = [
