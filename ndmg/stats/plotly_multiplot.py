@@ -6,7 +6,7 @@ import pickle
 import plotly_panels as pp
 import os
 
-init_notebook_mode()
+# init_notebook_mode()
 
 def make_panel_plot(basepath, outf, dataset=None, atlas=None):
     # basepath = '/Users/gkiar/code/ocp/scratch/aug15/qc/desikan/'
