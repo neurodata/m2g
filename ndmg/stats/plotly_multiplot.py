@@ -15,6 +15,7 @@ def make_panel_plot(basepath, outf, dataset=None, atlas=None):
     
     fnames = [name for name in os.listdir(basepath)
               if os.path.splitext(name)[1] == '.pkl']
+    fnames = sorted(fnames)
     paths = [os.path.join(basepath, item) for item in fnames]
     keys = ["_".join(n.split('.')[0].split('_')[1:]) for n in fnames]
     rela = 'Count'

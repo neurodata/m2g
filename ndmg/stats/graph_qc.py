@@ -53,6 +53,7 @@ def compute_metrics(fs, outdir, atlas, verb=False):
     """
 
     graphs = loadGraphs(fs, verb=verb)
+    nodes = nx.number_of_nodes(graphs.values()[0])
 
     #  Number of non-zero edges (i.e. binary edge count)
     print("Computing: NNZ")
@@ -64,7 +65,7 @@ def compute_metrics(fs, outdir, atlas, verb=False):
     print("Computing: Degree Seuqence")
     temp_deg = OrderedDict((subj, np.array(nx.degree(graphs[subj]).values()))
                            for subj in graphs)
-    deg = density(temp_deg)
+    deg = density(temp_deg, nbins=nodes)
     write(outdir, 'degree_distribution', deg, atlas)
     show_means(temp_deg)
 
@@ -72,7 +73,7 @@ def compute_metrics(fs, outdir, atlas, verb=False):
     print("Computing: Edge Weight Sequence")
     temp_ew = OrderedDict((s, [graphs[s].get_edge_data(e[0], e[1])['weight']
                            for e in graphs[s].edges()]) for s in graphs)
-    ew = density(temp_ew)
+    ew = density(temp_ew, nbins=2*nodes)
     write(outdir, 'edge_weight_distribution', ew, atlas)
     show_means(temp_ew)
 
@@ -80,14 +81,14 @@ def compute_metrics(fs, outdir, atlas, verb=False):
     print("Computing: Clustering Coefficient Sequence")
     temp_cc = OrderedDict((subj, nx.clustering(graphs[subj]).values())
                           for subj in graphs)
-    ccoefs = density(temp_cc)
+    ccoefs = density(temp_cc, nbins=2*nodes)
     write(outdir, 'clustering_coefficients', ccoefs, atlas)
     show_means(temp_cc)
 
     # Scan Statistic-1
     print("Computing: Max Local Statistic Sequence")
     temp_ss1 = scan_statistic(graphs, 1)
-    ss1 = density(temp_ss1)
+    ss1 = density(temp_ss1, nbins=2*nodes)
     write(outdir, 'scan_statistic_1', ss1, atlas)
     show_means(temp_ss1)
 
@@ -110,7 +111,7 @@ def compute_metrics(fs, outdir, atlas, verb=False):
     nxbc = nx.algorithms.betweenness_centrality  # For PEP8 line length...
     temp_bc = OrderedDict((subj, nxbc(graphs[subj]).values())
                           for subj in graphs)
-    centrality = density(temp_bc)
+    centrality = density(temp_bc, nbins=2*nodes)
     write(outdir, 'betweenness_centrality', centrality, atlas)
     show_means(temp_bc)
 
@@ -159,7 +160,7 @@ def density(data, nbins=500):
         hist = np.histogram(data[subj], nbins)
         hist = np.max(hist[0])
         dens = gaussian_kde(data[subj])
-        xs[subj] = np.linspace(0, 1.2*np.max(data[subj]), nbins)
+        xs[subj] = np.linspace(0, np.max(data[subj]), nbins)
         density[subj] = dens.evaluate(xs[subj])*np.max(data[subj]*hist)
     return {"xs": xs, "pdfs": density}
 
