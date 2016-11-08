@@ -30,7 +30,7 @@ def plot_series(dats, name=None, ylab=None, xlab=None):
     for idx, ys in enumerate(dats):
         data += [
                  Scatter(
-                         x=np.linspace(1, len(ys)),
+                         x=np.linspace(1, len(ys), len(ys)),
                          y=ys,
                          line=Line(
                                    color='rgba(0,0,0,%1.2f)' % (7.0/len(dats))
@@ -66,7 +66,7 @@ def plot_density(xs, ys, name=None, ylab=None, xlab=None):
 def plot_rugdensity(series, name=None, ylab=None, xlab=None):
     dens = gaussian_kde(series)
     x = np.linspace(np.min(series), np.max(series), 1000)
-    y = dens.evaluate(x)
+    y = dens.evaluate(x)*np.max(series)
 
     d_dens = Scatter(
                 x=x,

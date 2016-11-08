@@ -145,7 +145,7 @@ def scan_statistic(mygs, i):
     return ss
 
 
-def density(data, nbins=1000):
+def density(data, nbins=500):
     """
     Computes density for metrics which return vectors
 
@@ -156,10 +156,11 @@ def density(data, nbins=1000):
     density = OrderedDict()
     xs = OrderedDict()
     for subj in data:
+        hist = np.histogram(data[subj], nbins)
+        hist = np.max(hist[0])
         dens = gaussian_kde(data[subj])
         xs[subj] = np.linspace(0, 1.2*np.max(data[subj]), nbins)
-        density[subj] = dens.evaluate(xs[subj])
-
+        density[subj] = dens.evaluate(xs[subj])*np.max(data[subj]*hist)
     return {"xs": xs, "pdfs": density}
 
 

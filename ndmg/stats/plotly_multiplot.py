@@ -17,7 +17,7 @@ def make_panel_plot(basepath, outf, dataset=None, atlas=None):
               if os.path.splitext(name)[1] == '.pkl']
     paths = [os.path.join(basepath, item) for item in fnames]
     keys = ["_".join(n.split('.')[0].split('_')[1:]) for n in fnames]
-    rela = 'Relative Probability'
+    rela = 'Count'
     ylabs = [rela, rela, rela, rela,
              'Eigenvalue', rela, rela, 'Portion of Total Variance']
     xlabs = ['Betweenness Centrality', 'Clustering Coefficient', 'Degree',
@@ -56,10 +56,12 @@ def make_panel_plot(basepath, outf, dataset=None, atlas=None):
             multi.layout['x'+key]['title'] += ' (log scale)'
         if idx in [4, 7]:
             multi.layout['x'+key]['range'] = [1, dims]
-            multi.layout['x'+key]['tickvals'] = [1, dims]
+            multi.layout['x'+key]['tickvals'] = [1, dims/2, dims]
+            if idx in [7]:
+                multi.layout['y'+key]['range'] = [0, 1]
+                multi.layout['y'+key]['tickvals'] = [0, 0.5, 1]
         if idx in [1]:
-            multi.layout['x'+key]['range'] = [0, 1]
-    
+            multi.layout['x'+key]['range'] = [0, 1] 
     
     if dataset is not None and atlas is not None:
         if atlas == 'desikan':
