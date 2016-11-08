@@ -30,10 +30,10 @@ import numpy as np
 import nibabel as nb
 from ndmg.timeseries import timeseries as mgts
 from ndmg.stats import fmri_qc as mgqc
-from ndmg.stats import qc as mggqc
 from ndmg.preproc import preproc_fmri as mgp
 from ndmg.nuis import nuis as mgn
-from ndmg.stats import qc as imgqc
+from ndmg.stats import qc as mggqc
+
 
 
 def fngs_pipeline(fmri, struct, atlas, atlas_brain, mask, labels, outdir,
