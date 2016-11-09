@@ -46,10 +46,10 @@ def make_panel_plot(basepath, outf, dataset=None, atlas=None):
         multi.layout['y'+key]['title'] = ylabs[idx]
         multi.layout['x'+key]['nticks'] = 3
         multi.layout['y'+key]['nticks'] = 3
-        if idx in [0, 3, 6]:
+        if idx in [0, 2, 3, 6]:
             multi.layout['x'+key]['type'] = 'log'
             multi.layout['x'+key]['title'] = 'Log ' + xlabs[idx]
-        if idx in [4]:
+        if idx in [4, 7]:
             multi.layout['x'+key]['range'] = [1, dims]
             multi.layout['x'+key]['tickvals'] = [1, dims/2, dims]
             if idx in [7]:

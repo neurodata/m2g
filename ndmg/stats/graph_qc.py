@@ -102,9 +102,9 @@ def compute_metrics(fs, outdir, atlas, verb=False):
     print("Subject Maxes: " + ", ".join(["%.2f" % np.max(eigs[key])
                                          for key in eigs.keys()]))
 
-    # scree = OrderedDict((subj, np.cumsum(eigs[subj])/np.sum(eigs[subj]))
-    #                     for subj in eigs)
-    # write(outdir, 'scree_eigen', scree, atlas)
+    scree = OrderedDict((subj, np.cumsum(eigs[subj])/np.sum(eigs[subj]))
+                        for subj in eigs)
+    write(outdir, 'scree_eigen', scree, atlas)
 
     # Betweenness Centrality
     print("Computing: Betweenness Centrality Sequence")
