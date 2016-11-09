@@ -25,6 +25,7 @@ from itertools import product
 from plotly.graph_objs import *
 from plotly import tools
 
+
 def plot_series(dats, name=None, ylab=None, xlab=None):
     data = list()
     for idx, ys in enumerate(dats):
@@ -99,10 +100,10 @@ def std_layout(name=None, ylab=None, xlab=None):
     return Layout(
             title=name,
             showlegend=False,
-            xaxis={'nticks':5,
-                   'title':xlab},
-            yaxis={'nticks':3,
-                   'title':ylab}
+            xaxis={'nticks': 5,
+                   'title': xlab},
+            yaxis={'nticks': 3,
+                   'title': ylab}
           )
 
 
@@ -123,7 +124,7 @@ def traces_to_panels(traces, names=[], ylabs=None, xlabs=None):
                 multi.append_trace(component, *loc)
         else:
             multi = panel_invisible(multi, idx+1)
-    multi.layout['showlegend']=False
+    multi.layout['showlegend'] = False
     return multi
 
 
@@ -140,7 +141,7 @@ def panel_arrangement(num):
         row = dims[0]
         col = dims[-1]
 
-    locations = [(a+1, b+1) for a,b in product(range(row), range(col))]
+    locations = [(a+1, b+1) for a, b in product(range(row), range(col))]
     return row, col, locations
 
 
@@ -159,7 +160,8 @@ def rand_jitter(arr):
     return arr + np.random.randn(len(arr)) * stdev
 
 
-def factors(N): 
-    return set([item for subitem in 
-                [(i, N//i) for i in range(1, int(N**0.5) + 1) if N % i == 0 and i > 1]
-                for item in subitem])
+def factors(N):
+    return set([item for subitem in
+                [(i, N//i) for i in range(1, int(N**0.5) + 1)
+                 if N % i == 0 and i > 1]
+               for item in subitem])

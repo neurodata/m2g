@@ -60,7 +60,7 @@ def compute_metrics(fs, outdir, atlas, verb=False):
     nnz = OrderedDict((subj, len(nx.edges(graphs[subj]))) for subj in graphs)
     write(outdir, 'number_non_zeros', nnz, atlas)
     print("Sample Mean: %.2f" % np.mean(nnz.values()))
-    
+
     #  Degree sequence
     print("Computing: Degree Seuqence")
     temp_deg = OrderedDict((subj, np.array(nx.degree(graphs[subj]).values()))
@@ -100,11 +100,11 @@ def compute_metrics(fs, outdir, atlas, verb=False):
                        for subj in graphs)
     write(outdir, 'eigen_sequence', eigs, atlas)
     print("Subject Maxes: " + ", ".join(["%.2f" % np.max(eigs[key])
-                               for key in eigs.keys()]))
+                                         for key in eigs.keys()]))
 
-    scree = OrderedDict((subj, np.cumsum(eigs[subj])/np.sum(eigs[subj]))
-                        for subj in eigs)
-    write(outdir, 'scree_eigen', scree, atlas)
+    # scree = OrderedDict((subj, np.cumsum(eigs[subj])/np.sum(eigs[subj]))
+    #                     for subj in eigs)
+    # write(outdir, 'scree_eigen', scree, atlas)
 
     # Betweenness Centrality
     print("Computing: Betweenness Centrality Sequence")
@@ -117,7 +117,8 @@ def compute_metrics(fs, outdir, atlas, verb=False):
 
     outf = outdir + '/' + atlas + '_summary.png'
 
-    #plot_metrics(nnz, deg, ew, ccoefs, ss1, eigs, scree, centrality, outf)
+    # plot_metrics(nnz, deg, ew, ccoefs, ss1, eigs, scree, centrality, outf)
+
 
 def show_means(data):
     print("Subject Means: " + ", ".join(["%.2f" % np.mean(data[key])
