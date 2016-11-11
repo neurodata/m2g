@@ -65,9 +65,26 @@ def plot_density(xs, ys, name=None, ylab=None, xlab=None):
 
 
 def plot_rugdensity(series, name=None, ylab=None, xlab=None):
-    dens = gaussian_kde(series)
-    x = np.linspace(np.min(series), np.max(series), 1000)
-    y = dens.evaluate(x)*np.max(series)
+    if len(series) > 1:
+        dens = gaussian_kde(series)
+        x = np.linspace(np.min(series), np.max(series), 100)
+        y = dens.evaluate(x)*np.max(series)
+
+        d_rug = Scatter(
+                    x=series,
+                    y=[0]*len(series),
+                    mode='markers',
+                    marker=Marker(
+                             color='rgba(0,0,0,0.9)',
+                             symbol='line-ns-open',
+                             size=10,
+                             opacity=0.5
+                           ),
+                    name=name
+              )
+    else:
+        x = 0
+        y = series
 
     d_dens = Scatter(
                 x=x,
@@ -78,19 +95,10 @@ def plot_rugdensity(series, name=None, ylab=None, xlab=None):
                 hoverinfo='x',
                 name=name,
            )
-    d_rug = Scatter(
-                x=series,
-                y=[0]*len(series),
-                mode='markers',
-                marker=Marker(
-                         color='rgba(0,0,0,0.9)',
-                         symbol='line-ns-open',
-                         size=10,
-                         opacity=0.5
-                       ),
-                name=name
-          )
-    data = [d_dens, d_rug]
+    if len(series) > 1:
+        data = [d_dens, d_rug]
+    else:
+        data = [d_dens]
     layout = std_layout(name, ylab, xlab)
     fig = Figure(data=data, layout=layout)
     return fig
