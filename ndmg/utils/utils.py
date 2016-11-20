@@ -38,6 +38,22 @@ class utils():
 
         pass
 
+    def apply_mask(self, inp, masked, mask):
+        """
+        A function to apply a mask to a brain.
+
+        **Positional Arguments:**
+            inp:
+                - the input path to an mri image.
+            masked:
+                - the output path to the masked image.
+            mask:
+                - the path to a brain mask.
+        """
+        cmd = "fslmaths " + inp + " -mas " + mask + " " + masked
+        self.execute_cmd(cmd)
+        pass
+
     def load_bval_bvec_dti(self, fbval, fbvec, dti_file, dti_file_out):
         """
         Takes bval and bvec files and produces a structure in dipy format
@@ -93,6 +109,33 @@ class utils():
         print gtab.info
         return gtab
 
+    def get_slice(self, mri, volid, sli):
+        """
+        Takes a volume index and constructs a new nifti image from
+        the specified volume.
+        **Positional Arguments:**
+            mri:
+                - the path to a 4d mri volume to extract a slice from.
+            volid:
+                - the index of the volume desired.
+            sli:
+                - the path to the destination for the slice.
+        """
+        mri_im = nb.load(mri)
+        data = mri_im.get_data()
+        # get the slice at the desired volume
+        vol = np.squeeze(data[:, :, :, volid])
+
+        # Wraps volume in new nifti image
+        head = mri_im.get_header()
+        head.set_data_shape(head.get_data_shape()[0:3])
+        out = nb.Nifti1Image(vol, affine=mri_im.get_affine(),
+                             header=head)
+        out.update_header()
+        # and saved to a new file
+        nb.save(out, sli)
+        pass
+
     def get_b0(self, gtab, data):
         """
         Takes bval and bvec files and produces a structure in dipy format
@@ -114,17 +157,63 @@ class utils():
         """
         return op.splitext(op.splitext(op.basename(label))[0])[0]
 
+    def get_braindata(self, brain_file):
+        """
+        Opens a brain data series for a mask, mri image, or atlas.
+        Returns a numpy.ndarray representation of a brain.
+
+        **Positional Arguements**
+            brain_file:
+                - an object to open the data for a brain.
+                Can be a string (path to a brain file),
+                nibabel.nifti1.nifti1image, or a numpy.ndarray
+        """
+        if type(brain_file) is np.ndarray:  # if brain passed as matrix
+            braindata = brain_file
+        else:
+            if type(brain_file) is str or type(brain_file) is unicode:
+                brain = nb.load(str(brain_file))
+            elif type(brain_file) is nb.nifti1.Nifti1Image:
+                brain = brain_file
+            else:
+                raise TypeError("Mask file is of type " + str(type(brain_file)) +
+                                "; accepted types are numpy.ndarray, " +
+                                "string, and nibabel.nifti1.Nifti1Image.")
+            braindata = brain.get_data()
+        return braindata
+
     def execute_cmd(self, cmd):
         """
         Given a bash command, it is executed and the response piped back to the
         calling script
+
+        **Positional Arguments:**
+            cmd:
+                - the bash command to execute.
         """
+        print("Executing: " + cmd)
         p = Popen(cmd, stdout=PIPE, stderr=PIPE, shell=True)
         out, err = p.communicate()
         code = p.returncode
         if code:
             sys.exit("Error  " + str(code) + ": " + err)
         return out, err
+
+    def extract_brain(self, inp, out, opts=""):
+        """
+        A function to extract the brain from an image using FSL's BET.
+
+        **Positional Arguments:**
+            inp:
+                - the input image.
+            out:
+                - the output brain extracted image.
+        """
+        cmd = "bet " + inp + " " + out
+        if opts is not None:
+            cmd = cmd + " " + str(opts)
+        self.execute_cmd(cmd)
+        pass
 
     def name_tmps(self, basedir, basename, extension):
         return basedir + "/tmp/" + basename + extension
