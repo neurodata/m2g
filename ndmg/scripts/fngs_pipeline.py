@@ -24,7 +24,7 @@ from datetime import datetime
 from subprocess import Popen, PIPE
 import os.path as op
 from ndmg.utils import utils as mgu
-from ndmg.register import register as mgr
+from ndmg import register as mgr
 from ndmg import graph as mgg
 import numpy as np
 import nibabel as nb

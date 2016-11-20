@@ -111,20 +111,20 @@ class nuis(object):
             str(low) + " " + bandpass_mri
         mgu().execute_cmd(cmd)
 
-    def regress_signal(self, data, regressors):
+    def regress_signal(self, data, W):
         """
         Regresses data to given regressors.
 
         **Positional Arguments:**
             - data:
                 - the data as a ndarray.
-            - regressors:
+            - W:
                 - a numpy ndarray of regressors to
                   regress to.
         """
         # OLS solution for GLM B = (X^TX)^(-1)X^TY
-        coefs = np.linalg.inv(regressors.T.dot(regressors)).dot(regressors.T).dot(data)
-        return regressors.dot(coefs)
+        coefs = np.linalg.inv(W.T.dot(W)).dot(W.T).dot(data)
+        return W.dot(coefs)
 
     def nuis_correct(self, mri, nuisance_mri, outdir, mask=None,
                      regressor_masks=[]):
@@ -148,46 +148,49 @@ class nuis(object):
         highpass_im = mgu().name_tmps(outdir, fmri_name, "_highpass.nii.gz")
         self.highpass_filter(mri, highpass_im)
 
-        uncorrected = nb.load(highpass_im)
-        fmri_data = uncorrected.get_data()
-
-        if mask is None:
-            # use a mask that masks voxels with no data over
-            # the timecourse
-            maskbool = ((fmri_data != 0).sum(-1) != 0)
-        else:
-            mask = mgu().get_braindata(mask)
-            maskbool = (mask > 0)
-        # get the voxel timecourse inside of the mask
-            voxel_ts = fmri_data[mask, :]
-        # normalize the signal to improve our nuisance steps, as
-        # SVD performs best on normalized data
-        # note that we transpose in this step, and will un-transpose when
-        # we are done, as SVD operates natively on the transpose
-        # of our data.
-        voxel_ts = self.normalize_signal(voxel_ts).T
-
-        # perform comp cor on top 5 components
-        if regressor_masks:
-            CompCor_regressors = self.CompCor(voxel_ts, regressor_masks, ncomponents=5)
-            # regress the signal to the CompCor regressors
-            compcor_regressed = self.regress_signal(voxel_ts, CompCor_regressors)
-            # and then regress these away
-            voxel_ts = voxel_ts - compcor_regressed
-
-        # perform PCA to preserve maximal variance
-        PCA_regressors = self.PCA(voxel_ts, ncomponents=10)
-
-        # regress the signal to the PCA regressors
-        voxel_ts = self.regress_signal(voxel_ts, PCA_regressors)
-
-        # put the brain back together again and un-transpose...
-        fmri_data[mask,:] = voxel_ts.T
-        # put back into a nifti image. We don't do anything that breaks
-        # headers or changes scaling, so use the same header and affine
-        # as previously.
-        img = nb.Nifti1Image(fmri_data, header = uncorrected.get_header(),
-                             affine = uncorrected.get_affine)
-        # save the nuisance corrected image
-        nb.save(img, nuisance_mri)
+        mgu().execute_cmd("cp " + highpass_im + " " + nuisance_mri)
+#         uncorrected = nb.load(highpass_im)
+#         fmri_data = uncorrected.get_data()
+# 
+#         if mask is None:
+#             # use a mask that masks voxels with no data over
+#             # the timecourse
+#             maskbool = ((fmri_data != 0).sum(-1) != 0)
+#         else:
+#             mask = mgu().get_braindata(mask)
+#             maskbool = (mask > 0)
+#         # get the voxel timecourse inside of the mask
+#             voxel_ts = fmri_data[mask, :]
+#         # normalize the signal to improve our nuisance steps, as
+#         # SVD performs best on normalized data
+#         # note that we transpose in this step, and will un-transpose when
+#         # we are done, as SVD operates natively on the transpose
+#         # of our data.
+#         voxel_ts = self.normalize_signal(voxel_ts).T
+# 
+#         # perform comp cor on top 5 components
+#         if regressor_masks:
+#             CompCor_regressors = self.CompCor(voxel_ts, regressor_masks,
+#                                               ncomponents=5)
+#             # regress the signal to the CompCor regressors
+#             compcor_regressed = self.regress_signal(voxel_ts,
+#                                                     CompCor_regressors)
+#             # and then regress these away
+#             voxel_ts = voxel_ts - compcor_regressed
+# 
+#         # perform PCA to preserve maximal variance
+#         PCA_regressors = self.PCA(voxel_ts, ncomponents=10)
+# 
+#         # regress the signal to the PCA regressors
+#         voxel_ts = self.regress_signal(voxel_ts, PCA_regressors)
+# 
+#         # put the brain back together again and un-transpose...
+#         fmri_data[mask,:] = voxel_ts.T
+#         # put back into a nifti image. We don't do anything that breaks
+#         # headers or changes scaling, so use the same header and affine
+#         # as previously.
+#         img = nb.Nifti1Image(fmri_data, header = uncorrected.get_header(),
+#                              affine = uncorrected.get_affine)
+#         # save the nuisance corrected image
+#         nb.save(img, nuisance_mri)
         pass

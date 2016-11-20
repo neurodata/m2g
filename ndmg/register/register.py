@@ -42,7 +42,7 @@ class register(object):
         pass
 
     def align(self, inp, ref, xfm=None, out=None, dof=12, searchrad=True,
-              interp=None, cost="mutualinfo"):
+              bins=256, interp=None, cost="mutualinfo"):
         """
         Aligns two images and stores the transform between them
 
@@ -312,11 +312,11 @@ class register(object):
         # extract the brain from the s0 image
         mgu().extract_brain(s0, s0_brain)
         # align the anatomical brain to the s0 brain
-        self.align(s0_brain, anat_brain, xfm_func2mpr)
+        self.align(s0_brain, anat_brain, xfm_func2mpr, bins=None)
         # align the anatomical high-res brain to the high-res atlas_brain
         # this linear transformation gives us a starting point for
         # our nonlinear transformations
-        self.align(anat_brain, atlas_brain, xfm_mpr2temp)
+        self.align(anat_brain, atlas_brain, xfm_mpr2temp, bins=None)
         # align the anatomical image to the atlas image using
         # the linear alignment as a starting guess. extract over atlas_brain.
         self.align_nonlinear(anat, atlas, xfm_mpr2temp,
