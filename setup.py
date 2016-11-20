@@ -53,6 +53,6 @@ setup(
         'matplotlib>=1.5',
 	'boto3',
 	'plotly',
-    ]
+    ],
     include_package_data=True,
 )

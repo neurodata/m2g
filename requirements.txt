@@ -5,4 +5,5 @@ nilearn
 sklearn
 dipy
 networkx
+matplotlib
 multiprocessing
