@@ -166,7 +166,7 @@ class qc(object):
                    mri_before.get_header().get_zooms()[:3]):
 
             mri_tname = qcdir + "/" + fname + "_res.nii.gz"
-            from ndmg.register import register as mgr
+            from ndmg import register as mgr
             mgr().resample_fsl(mri_bname, mri_tname, refname)
             mri_before = nb.load(mri_tname)
 
