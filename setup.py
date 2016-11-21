@@ -45,5 +45,7 @@ setup(
         'scipy',  # We use 0.17.0
         'dipy>=0.1',
         'matplotlib>=1.5',
+	'boto3',
+	'plotly',
     ]
 )
