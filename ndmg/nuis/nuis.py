@@ -44,50 +44,58 @@ class nuis(object):
                 - the fMRI data. Should be passed as an ndarray,
                   with dimensions [nvoxels, ntimesteps].
         """
-        # remove the mean
-        voxel = voxel - np.mean(voxel, axis=1)
+        # remove the voxels that are unchanging, as normalizing
+        # these by std would lead to a divide by 0
+        voxel = voxel[:, voxel.std(0) != 0]
+        voxel = voxel - voxel.mean(axis=0)
         # normalize the signal
-        voxel = np.divide(voxel, voxel.max(axis=1) - voxel.min(axis=1)[:, None])
-        # replace nan entries with 0s, since we can have voxels
-        # that are masked in but contain no data that would have
-        # max - min = 0, and then divide by zero, in the prev step
-        voxel[np.isnan(voxel)] = 0
+        voxel = np.divide(voxel, voxel.std(0))
         # returns the normalized signal
         return voxel
 
-    def PCA(self, data, ncomponents=10):
+    def compcor(self, masked_ts, n=None, t=None, qcdir=None):
         """
-        A function to perform principal component
-        analysis on a voxel timeseries.
-
-        **Positional Arguments:**
-            data:
-                - the data to perform PCA on.
-            ncomponents:
-                - the number of components we wish
-                  to keep.
-        """
-        print "Performing Principal Component Analysis..."
-        U, s, V = np.linalg.svd(data, full_matrices=False)
-
-        print "Extracting top " + str(ncomponents) + "Components..."
-        return U[:,0:ncomponents], s
-
-    def CompCor(self, data, regressor_masks, ncomponents=10):
-        """
-        A function to perform CompCor given a list of regressor
-        masks.
+        A function to extract principal components on
+        timeseries of nuisance variables.
     
         **Positional Arguments:**
-            data:
-                - the data to perform compcor on.
-            regressor_masks:
-                - a list of regressor masks to include.
-            ncomponents:
-                - the number of components to calculate.
+            masked_ts:
+                - the timeseries over a masked region.
+            n:
+                - the number of components to use. Default is None.
+                  Note that either n or t should be set, but not
+                  both.
+            t:
+                - the threshold for the amount of expected variance,
+                  as a float between 0 and 1, where the number of
+                  components returned will be less than the threshold
+                  indicated. 
+            qcdir:
+                - an optional argument for passing a directory
+                  to place quality control information.
         """
+        # normalize the signal to mean center
+        masked_ts = self.normalize_signal(masked_ts)
+        # singular value decomposition to get the ordered
+        # principal components
+        (U, s, V) = np.linalg.svd(masked_ts, full_matrices=False)
+        if qcdir is not None:
+            # TODO add QC stuff with s
+            pass
+        if n is not None and t is not None:
+            raise ValueError('CompCor: you have passed both a number of
+                              components and a threshold. You should only pass
+                              one or the other, not both.')
+        else if n is not None:
+            # return the top n principal components
+            return U[:, 0:n]
+        else if t is not None:
+            # TODO add thresholding
+            pass
+        else:
+            raise ValueError('CompCor: you have not passed a threshold nor
+                              a number of components. You must specify one.')
         pass
-        
 
     def highpass_filter(self, mri, bandpass_mri):
         """
@@ -110,87 +118,137 @@ class nuis(object):
         cmd = "fslmaths " + mri + " -bptf " + str(sigma_high) + " " +\
             str(low) + " " + bandpass_mri
         mgu().execute_cmd(cmd)
+        pass
 
-    def regress_signal(self, data, W):
+    def regress_signal(self, data, R):
         """
         Regresses data to given regressors.
 
         **Positional Arguments:**
             - data:
                 - the data as a ndarray.
-            - W:
+            - R:
                 - a numpy ndarray of regressors to
                   regress to.
         """
         # OLS solution for GLM B = (X^TX)^(-1)X^TY
-        coefs = np.linalg.inv(W.T.dot(W)).dot(W.T).dot(data)
-        return W.dot(coefs)
+        coefs = np.linalg.inv(R.T.dot(R)).dot(R.T).dot(data)
+        return R.dot(coefs)
 
-    def nuis_correct(self, mri, nuisance_mri, outdir, mask=None,
-                     regressor_masks=[]):
+    def segment_anat(self, amri, an, basename):
+        """
+        A function to use FSL's FAST to segment an anatomical
+        image into GM, WM, and CSF masks.
+
+        **Positional Arguments:**
+            - amri:
+                - an anatomical image.
+            - an:
+                - an integer representing the type of the anatomical image.
+                  (1 for T1w, 2 for T2w, 3 for PD).
+            - basename:
+                - the basename for outputs. Often it will be
+                  most convenient for this to be the dataset,
+                  followed by the subject, followed by the step of
+                  processing. Note that this anticipates a path as well;
+                  ie, /path/to/dataset_sub_nuis, with no extension.
+        """
+        # run FAST, with options -t for the image type and -n to
+        # segment into CSF (pve_0), WM (pve_1), GM (pve_2)
+        cmd = " ".join(["fast -t", int(an), "-n 3 -o", basename, amri])
+        mgu().execute_cmd(cmd)
+        pass
+
+    def extract_mask(self, prob_map, t, v):
+        """
+        A function to extract a mask from a probability map.
+        Also, performs mask erosion.
+
+        **Positional Arguments:**
+            - prob_map:
+                - the path to probability map for the given class
+                  of brain tissue.
+            - t:
+                - the threshold to consider voxels part of the class.
+            - v:
+                - the number of voxels to erode.
+        """
+        prob = nb.load(prob_map)
+        prob_dat = prob.get_data()
+        mask = (prob_dat > t).astype(int)
+        # TODO: mask erosion
+        return mask
+
+    def nuis_correct(self, fmri, amri, amask, an, lvmask, nuisance_mri,
+                     basename, outdir, qcdir):
         """
         A function for nuisance correction on an aligned fMRI
         image. So far, this only highpass filters.
 
         **Positional Arguments:**
-            mri:
-                - the mri file.
+            fmri:
+                - the path to an fMRI.
+            amri:
+                - the path to the anatomical MRI.
+            amask:
+                - the path to the anatomical mask we registered with.
+            an:
+                - an integer representing the type of the anatomical image.
+                  (1 for T1w, 2 for T2w, 3 for PD).
             nuisance_mri:
-                - the nuisance corrected filename.
+                - the path where the nuisance MRI will be created.
+            basename:
+                - the name to use for files. Should be dataset_sub.
             outdir:
-                - the base output directory to place outputs.
-            mask:
-                - the mask with which to consider timeseries.
-                  If None, simply ignore voxels with values of 0.
+                - the base directory to place temporary files,
+                  with no trailing /.
+            qcdir:
+                - the directory in which nuisance correction qc will be
+                  placed, with no trailing /.
         """
-        fmri_name = mgu().get_filename(mri)
+        # load images as nibabel objects
+        fmri_im = nb.load(fmri)
+        amri_im = nb.load(amri)
+        amask_im = nb.load(amask)
+        nuisname = "".join([basename, "_nuis"])
 
-        highpass_im = mgu().name_tmps(outdir, fmri_name, "_highpass.nii.gz")
-        self.highpass_filter(mri, highpass_im)
+        fmri_dat = fmri_im.get_data()[amask, :]
+        # load the voxel timeseries and transpose
+        voxel = fmri.get_data().T
+        maskpath = outdir + "/" + basename + "_mask"
+        segment_anat(amri, an, maskpath)
 
-        mgu().execute_cmd("cp " + highpass_im + " " + nuisance_mri)
-#         uncorrected = nb.load(highpass_im)
-#         fmri_data = uncorrected.get_data()
-# 
-#         if mask is None:
-#             # use a mask that masks voxels with no data over
-#             # the timecourse
-#             maskbool = ((fmri_data != 0).sum(-1) != 0)
-#         else:
-#             mask = mgu().get_braindata(mask)
-#             maskbool = (mask > 0)
-#         # get the voxel timecourse inside of the mask
-#             voxel_ts = fmri_data[mask, :]
-#         # normalize the signal to improve our nuisance steps, as
-#         # SVD performs best on normalized data
-#         # note that we transpose in this step, and will un-transpose when
-#         # we are done, as SVD operates natively on the transpose
-#         # of our data.
-#         voxel_ts = self.normalize_signal(voxel_ts).T
-# 
-#         # perform comp cor on top 5 components
-#         if regressor_masks:
-#             CompCor_regressors = self.CompCor(voxel_ts, regressor_masks,
-#                                               ncomponents=5)
-#             # regress the signal to the CompCor regressors
-#             compcor_regressed = self.regress_signal(voxel_ts,
-#                                                     CompCor_regressors)
-#             # and then regress these away
-#             voxel_ts = voxel_ts - compcor_regressed
-# 
-#         # perform PCA to preserve maximal variance
-#         PCA_regressors = self.PCA(voxel_ts, ncomponents=10)
-# 
-#         # regress the signal to the PCA regressors
-#         voxel_ts = self.regress_signal(voxel_ts, PCA_regressors)
-# 
-#         # put the brain back together again and un-transpose...
-#         fmri_data[mask,:] = voxel_ts.T
-#         # put back into a nifti image. We don't do anything that breaks
-#         # headers or changes scaling, so use the same header and affine
-#         # as previously.
-#         img = nb.Nifti1Image(fmri_data, header = uncorrected.get_header(),
-#                              affine = uncorrected.get_affine)
-#         # save the nuisance corrected image
-#         nb.save(img, nuisance_mri)
+        # FAST will place the white matter probability map here
+        wm_prob = maskpath + "_pve_2.nii.gz"
+        wmm = self.extract_mask(wm_prob, .99, 2).T
+        # extract the timeseries of white matter regions and transpose
+        wm_ts = fmri_dat[wmm == 1, :].T
+        # load the lateral ventricles CSF timeseries
+        lv_ts = fmri_dat[lvmask == 1, :].T
+        # time dimension is now the 0th dim
+        t = voxel.shape[0]
+
+        # linear drift regressor
+        lin_reg = np.linspace(0, t)
+        # quadratic drift regressor
+        quad_reg = np.array(np.linspace(0, t)**2
+        # csf regressor is the mean of all voxels in the csf
+        # mask at each time point
+        csf_reg = lv_ts.mean(axis=0)
+        # white matter regressor is the top 5 components
+        # in the white matter
+        wm_reg = self.compcor(wm_ts, n=5)
+        # use GLM model given regressors to approximate the weight we want
+        # to regress out
+        W = self.regress_signal(voxel, wm_reg)
+        # nuisance ts is the difference btwn the original timeseries and
+        # our regressors, and then we transpose back
+        nuis_voxel = (voxel - W).T
+        # put the nifti back together again
+        fmri_dat[amask, :] = nuis_voxel
+        img = nb.Nifti1Image(fmri_dat,
+                             header = fmri_im.header,
+                             affine = fmri_im.get_affine())
+        # save the corrected image
+        nb.save(img, nuisance_mri)
         pass
