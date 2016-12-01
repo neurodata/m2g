@@ -106,8 +106,8 @@ class preproc_fmri(object):
         """
         pass
 
-    def preprocess(self, mri, preproc_mri, motion_mri, outdir, stc=None, qcdir="",
-                   scanid=""):
+    def preprocess(self, mri, preproc_mri, motion_mri,
+                   outdir, stc=None, qcdir="", scanid=""):
         """
         A function to preprocess a stack of 3D images.
 
@@ -123,6 +123,8 @@ class preproc_fmri(object):
             stc:
                 - the slice timing correction information. See documentation
                   for slice_time_correct() for details.
+            mri_name:
+                - the name to append before all paths for file naming.
             outdir:
                 - the location to place outputs (String).
             qcdir:
@@ -132,11 +134,10 @@ class preproc_fmri(object):
                 - optional argument required for quality control, is the id
                 of the subject (String).
         """
+        mri_name = mgu().get_filename(mri)
 
-        mri_name = op.splitext(op.splitext(op.basename(mri))[0])[0]
-
-        s0 = outdir + "/tmp/" + mri_name + "_0slice.nii.gz"
-        stc_mri = outdir + "/tmp/" + mri_name + "_stc.nii.gz"
+        s0 = mgu().name_tmps(outdir, mri_name, "_0slice.nii.gz")
+        stc_mri = mgu().name_tmps(outdir, mri_name, "_stc.nii.gz")
         # TODO EB: decide whether it is advantageous to align to mean image
         if (stc is not None):
             self.slice_time_correct(mri, stc_mri, stc)

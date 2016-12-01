@@ -46,12 +46,15 @@ class nuis(object):
         """
         # remove the voxels that are unchanging, as normalizing
         # these by std would lead to a divide by 0
-        voxel = voxel[:, voxel.std(0) != 0]
-        voxel = voxel - voxel.mean(axis=0)
+        print "normalize"
+        print data.shape
+        print data.std(axis=0).shape
+        data = data[:, data.std(axis=0) != 0]
+        data = data - data.mean(axis=0)
         # normalize the signal
-        voxel = np.divide(voxel, voxel.std(0))
+        data = np.divide(data, data.std(axis=0))
         # returns the normalized signal
-        return voxel
+        return data
 
     def compcor(self, masked_ts, n=None, t=None, qcdir=None):
         """
@@ -74,6 +77,7 @@ class nuis(object):
                 - an optional argument for passing a directory
                   to place quality control information.
         """
+        print "Extracting Nuisance Components..."
         # normalize the signal to mean center
         masked_ts = self.normalize_signal(masked_ts)
         # singular value decomposition to get the ordered
@@ -83,17 +87,17 @@ class nuis(object):
             # TODO add QC stuff with s
             pass
         if n is not None and t is not None:
-            raise ValueError('CompCor: you have passed both a number of
-                              components and a threshold. You should only pass
+            raise ValueError('CompCor: you have passed both a number of \
+                              components and a threshold. You should only pass \
                               one or the other, not both.')
-        else if n is not None:
+        elif n is not None:
             # return the top n principal components
             return U[:, 0:n]
-        else if t is not None:
+        elif t is not None:
             # TODO add thresholding
             pass
         else:
-            raise ValueError('CompCor: you have not passed a threshold nor
+            raise ValueError('CompCor: you have not passed a threshold nor \
                               a number of components. You must specify one.')
         pass
 
@@ -131,6 +135,7 @@ class nuis(object):
                 - a numpy ndarray of regressors to
                   regress to.
         """
+        print "Calculating Regressors..."
         # OLS solution for GLM B = (X^TX)^(-1)X^TY
         coefs = np.linalg.inv(R.T.dot(R)).dot(R.T).dot(data)
         return R.dot(coefs)
@@ -138,7 +143,7 @@ class nuis(object):
     def segment_anat(self, amri, an, basename):
         """
         A function to use FSL's FAST to segment an anatomical
-        image into GM, WM, and CSF masks.
+        image into GM, WM, and CSF maps.
 
         **Positional Arguments:**
             - amri:
@@ -153,9 +158,10 @@ class nuis(object):
                   processing. Note that this anticipates a path as well;
                   ie, /path/to/dataset_sub_nuis, with no extension.
         """
+        print "Segmenting Anatomical Image into WM, GM, and CSF..."
         # run FAST, with options -t for the image type and -n to
         # segment into CSF (pve_0), WM (pve_1), GM (pve_2)
-        cmd = " ".join(["fast -t", int(an), "-n 3 -o", basename, amri])
+        cmd = " ".join(["fast -t", str(int(an)), "-n 3 -o", basename, amri])
         mgu().execute_cmd(cmd)
         pass
 
@@ -173,6 +179,7 @@ class nuis(object):
             - v:
                 - the number of voxels to erode.
         """
+        print "Extracting Mask..."
         prob = nb.load(prob_map)
         prob_dat = prob.get_data()
         mask = (prob_dat > t).astype(int)
@@ -180,7 +187,7 @@ class nuis(object):
         return mask
 
     def nuis_correct(self, fmri, amri, amask, an, lvmask, nuisance_mri,
-                     basename, outdir, qcdir):
+                     outdir, qcdir=None):
         """
         A function for nuisance correction on an aligned fMRI
         image. So far, this only highpass filters.
@@ -197,8 +204,6 @@ class nuis(object):
                   (1 for T1w, 2 for T2w, 3 for PD).
             nuisance_mri:
                 - the path where the nuisance MRI will be created.
-            basename:
-                - the name to use for files. Should be dataset_sub.
             outdir:
                 - the base directory to place temporary files,
                   with no trailing /.
@@ -210,31 +215,41 @@ class nuis(object):
         fmri_im = nb.load(fmri)
         amri_im = nb.load(amri)
         amask_im = nb.load(amask)
-        nuisname = "".join([basename, "_nuis"])
+        amm = amask_im.get_data()
+        lv_im = nb.load(lvmask)
+        lvm = lv_im.get_data()
 
-        fmri_dat = fmri_im.get_data()[amask, :]
+        fmri_name = mgu().get_filename(fmri)
+        anat_name = mgu().get_filename(amri)
+        nuisname = "".join([anat_name, "_nuis"])
+
+        fmri_dat = fmri_im.get_data()
         # load the voxel timeseries and transpose
-        voxel = fmri.get_data().T
-        maskpath = outdir + "/" + basename + "_mask"
-        segment_anat(amri, an, maskpath)
+        voxel = fmri_dat[amm > 0,:].T
+        maskpath = mgu().name_tmps(outdir, nuisname, "_mask")
+        self.segment_anat(amri, an, maskpath)
 
         # FAST will place the white matter probability map here
         wm_prob = maskpath + "_pve_2.nii.gz"
         wmm = self.extract_mask(wm_prob, .99, 2).T
         # extract the timeseries of white matter regions and transpose
-        wm_ts = fmri_dat[wmm == 1, :].T
+        wmm.shape
+        fmri_dat.shape
+        wm_ts = fmri_dat[wmm > 0, :].T
         # load the lateral ventricles CSF timeseries
-        lv_ts = fmri_dat[lvmask == 1, :].T
+        lv_ts = fmri_dat[lvm > 0, :].T
         # time dimension is now the 0th dim
         t = voxel.shape[0]
 
         # linear drift regressor
         lin_reg = np.linspace(0, t)
         # quadratic drift regressor
-        quad_reg = np.array(np.linspace(0, t)**2
+        quad_reg = np.linspace(0, t)**2
         # csf regressor is the mean of all voxels in the csf
         # mask at each time point
-        csf_reg = lv_ts.mean(axis=0)
+        print "lv"
+        print lv_ts.shape
+        csf_reg = lv_ts.mean(axis=1)
         # white matter regressor is the top 5 components
         # in the white matter
         wm_reg = self.compcor(wm_ts, n=5)
@@ -245,7 +260,10 @@ class nuis(object):
         # our regressors, and then we transpose back
         nuis_voxel = (voxel - W).T
         # put the nifti back together again
-        fmri_dat[amask, :] = nuis_voxel
+        print "end"
+        print nuis_voxel.shape
+        print fmri_dat.shape
+        fmri_dat[amm > 0, :] = nuis_voxel
         img = nb.Nifti1Image(fmri_dat,
                              header = fmri_im.header,
                              affine = fmri_im.get_affine())

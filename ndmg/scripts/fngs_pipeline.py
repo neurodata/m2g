@@ -36,8 +36,8 @@ from ndmg.stats import qc as mggqc
 
 
 
-def fngs_pipeline(fmri, struct, atlas, atlas_brain, atlas_mask, labels, outdir,
-                  clean=False, stc=None, fmt='gpickle'):
+def fngs_pipeline(fmri, struct, an, atlas, atlas_brain, atlas_mask, lv_mask,
+                  labels, outdir, clean=False, stc=None, fmt='gpickle'):
     """
     Analyzes fMRI images and produces subject-specific derivatives.
 
@@ -46,12 +46,17 @@ def fngs_pipeline(fmri, struct, atlas, atlas_brain, atlas_mask, labels, outdir,
             - the path to a 4D (fMRI) image.
         struct:
             - the path to a 3d (anatomical) image.
+        an:
+            - an integer indicating the type of anatomical image.
+              (1 for T1w, 2 for T2w, 3 for PD).
         atlas:
             - the path to a reference atlas.
         atlas_brain:
             - the path to a reference atlas, brain extracted.
         atlas_mask:
             - the path to a reference brain mask.
+        lv_mask:
+            - the path to the lateral ventricles mask.
         labels:
             - a list of labels files.
         stc:
@@ -67,6 +72,8 @@ def fngs_pipeline(fmri, struct, atlas, atlas_brain, atlas_mask, labels, outdir,
     """
     startTime = datetime.now()
 
+    print "here"
+    print stc
     # Create derivative output directories
     fmri_name = op.splitext(op.splitext(op.basename(fmri))[0])[0]
     struct_name = op.splitext(op.splitext(op.basename(struct))[0])[0]
@@ -77,13 +84,14 @@ def fngs_pipeline(fmri, struct, atlas, atlas_brain, atlas_mask, labels, outdir,
     regdir = qcdir + "/reg/" + fmri_name
     overalldir = qcdir + "/overall/" + fmri_name
     roidir = qcdir + "/roi/" + fmri_name
+    nuisdir = qcdir + "/nuis/" + fmri_name
 
     cmd = "mkdir -p " + outdir + "/reg_fmri " + outdir +\
         "/preproc_fmri " + outdir + "/motion_fmri " + outdir +\
         "/voxel_timeseries " + outdir + "/roi_timeseries " +\
         outdir + "/reg_struct " + outdir + "/tmp " +\
         outdir + "/connectomes " + outdir + "/nuis_fmri " + qcdir + " " +\
-        mcdir + " " + regdir + " " + overalldir + " " + roidir
+        mcdir + " " + regdir + " " + overalldir + " " + roidir + nuisdir
     mgu().execute_cmd(cmd)
 
     qc_html = overalldir + "/" + fmri_name + ".html"
@@ -132,20 +140,21 @@ def fngs_pipeline(fmri, struct, atlas, atlas_brain, atlas_mask, labels, outdir,
     # Align fMRI volumes to Atlas
     print "Preprocessing volumes..."
     mgp().preprocess(fmri, preproc_fmri, motion_fmri, outdir,
-    qcdir=mcdir, stc=stc)
+                     qcdir=mcdir, stc=stc)
     print "Aligning volumes..."
     mgr().fmri2atlas(preproc_fmri, struct, atlas, atlas_brain, atlas_mask,
-                     aligned_fmri, aligned_struct, outdir, qcdir=regdir)
-    mgn().nuis_correct(aligned_fmri, nuis_fmri, outdir, mask=atlas_mask)
-
+                     aligned_fmri, aligned_struct, outdir,
+                     qcdir=regdir)
+    print "Correcting Nuisance Variables..."
+    mgn().nuis_correct(aligned_fmri, aligned_struct, atlas_mask, an, lv_mask,
+                       nuis_fmri, outdir, qcdir=nuisdir)
+    print "Extracting Voxelwise Timeseries..."
     voxel = mgts().voxel_timeseries(nuis_fmri, atlas_mask, voxel_ts)
-    
     mgqc().stat_summary(aligned_fmri, fmri, motion_fmri, atlas_mask, voxel,
                         aligned_struct, atlas_brain,
                         qcdir=overalldir, scanid=fmri_name, qc_html=qc_html)
-
     for idx, label in enumerate(label_name):
-        print "Extracting roi timeseries for " + label + " parcellation..."
+        print "Extracting ROI timeseries for " + label + " parcellation..."
         try:
             ts = mgts().roi_timeseries(nuis_fmri, labels[idx], roi_ts[idx],
                                    qcdir=roidir,
@@ -169,13 +178,17 @@ def fngs_pipeline(fmri, struct, atlas, atlas_brain, atlas_mask, labels, outdir,
 def main():
     parser = ArgumentParser(description="This is an end-to-end connectome \
                             estimation pipeline from sMRI and DTI images")
-    parser.add_argument("fmri", action="store", help="Nifti DTI image stack")
-    parser.add_argument("struct", action="store", help="Nifti T1 MRI image")
+    parser.add_argument("fmri", action="store", help="Nifti fMRI stack")
+    parser.add_argument("struct", action="store", help="Nifti aMRI")
+    parser.add_argument("an", action="store", help="anatomical image type. \
+                        1 for T1w (default), 2 for T2w, 3 for PD.", default=1)
     parser.add_argument("atlas", action="store", help="Nifti T1 MRI atlas")
     parser.add_argument("atlas_brain", action="store", help="Nifti T1 MRI \
                         brain only atlas")
     parser.add_argument("atlas_mask", action="store", help="Nifti binary mask of \
                         brain space in the atlas")
+    parser.add_argument("lv_mask", action="store", help="Nifti binary mask of \
+                        lateral ventricles in atlas space.")
     parser.add_argument("outdir", action="store", help="Path to which \
                         derivatives will be stored")
     parser.add_argument("labels", action="store", nargs="*", help="Nifti \
@@ -196,9 +209,10 @@ def main():
     print "Creating output temp directory: " + result.outdir + "/tmp"
     mgu().execute_cmd(cmd)
 
-    fngs_pipeline(result.fmri, result.struct, result.atlas, result.atlas_brain,
-                  result.atlas_mask, result.labels, result.outdir,
-                  result.clean, result.stc, result.fmt)
+    fngs_pipeline(result.fmri, result.struct, int(result.an), result.atlas,
+                  result.atlas_brain, result.atlas_mask, result.lv_mask,
+                  result.labels, result.outdir, result.clean, result.stc,
+                  result.fmt)
 
 
 if __name__ == "__main__":
