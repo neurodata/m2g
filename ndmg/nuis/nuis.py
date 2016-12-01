@@ -46,9 +46,6 @@ class nuis(object):
         """
         # remove the voxels that are unchanging, as normalizing
         # these by std would lead to a divide by 0
-        print "normalize"
-        print data.shape
-        print data.std(axis=0).shape
         data = data[:, data.std(axis=0) != 0]
         data = data - data.mean(axis=0)
         # normalize the signal
@@ -225,45 +222,47 @@ class nuis(object):
 
         fmri_dat = fmri_im.get_data()
         # load the voxel timeseries and transpose
-        voxel = fmri_dat[amm > 0,:].T
+        voxel = fmri_dat[fmri_dat.sum(axis=3) > 0, :].T
         maskpath = mgu().name_tmps(outdir, nuisname, "_mask")
         self.segment_anat(amri, an, maskpath)
+        print "Voxel shape"
+        print fmri_dat[amm != 0, :].shape
 
         # FAST will place the white matter probability map here
         wm_prob = maskpath + "_pve_2.nii.gz"
-        wmm = self.extract_mask(wm_prob, .99, 2).T
+        wmm = self.extract_mask(wm_prob, .99, 2)
         # extract the timeseries of white matter regions and transpose
-        wmm.shape
-        fmri_dat.shape
-        wm_ts = fmri_dat[wmm > 0, :].T
+        wm_ts = fmri_dat[wmm != 0, :].T
+        print "WM Shape"
+        print wm_ts.shape
         # load the lateral ventricles CSF timeseries
-        lv_ts = fmri_dat[lvm > 0, :].T
+        lv_ts = fmri_dat[lvm != 0, :].T
         # time dimension is now the 0th dim
         t = voxel.shape[0]
 
         # linear drift regressor
-        lin_reg = np.linspace(0, t)
+        lin_reg = np.array(range(0, t))
         # quadratic drift regressor
-        quad_reg = np.linspace(0, t)**2
+        quad_reg = np.array(range(0, t))**2
         # csf regressor is the mean of all voxels in the csf
         # mask at each time point
-        print "lv"
-        print lv_ts.shape
         csf_reg = lv_ts.mean(axis=1)
         # white matter regressor is the top 5 components
         # in the white matter
         wm_reg = self.compcor(wm_ts, n=5)
         # use GLM model given regressors to approximate the weight we want
         # to regress out
-        W = self.regress_signal(voxel, wm_reg)
+        print lin_reg.shape
+        print quad_reg.shape
+        print csf_reg.shape
+        print wm_reg.shape
+        R = np.column_stack((lin_reg))
+        W = self.regress_signal(voxel, R)
         # nuisance ts is the difference btwn the original timeseries and
         # our regressors, and then we transpose back
         nuis_voxel = (voxel - W).T
         # put the nifti back together again
-        print "end"
-        print nuis_voxel.shape
-        print fmri_dat.shape
-        fmri_dat[amm > 0, :] = nuis_voxel
+        fmri_dat[fmri_dat.sum(axis=3) > 0,:] = nuis_voxel
         img = nb.Nifti1Image(fmri_dat,
                              header = fmri_im.header,
                              affine = fmri_im.get_affine())
