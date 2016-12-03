@@ -337,20 +337,33 @@ class qc(object):
                 - the reference of the atlas we are plotting timeseries
                   for.
         """
-        fname = qcdir + "/" + scanid + "_" + refid + "_timeseries.png"
+        path = qcdir + "/" + scanid + "_" + refid
+        fname_ts = path + "_timeseries.png"
+        fname_corr = path + "_corr.png"
         fts = plt.figure()
         axts = fts.add_subplot(111)
 
-        axts.plot(np.transpose(timeseries))
+        axts.plot(timeseries.T)
 
         axts.set_xlabel("Time Point (TRs)")
         axts.set_ylabel("Intensity")
-        axts.set_title(refid + " ROI Timeseries")
+        axts.set_title(" ".join(scanid, refid, "ROI Timeseries"))
 
         fts.set_size_inches(6, 6)
         fts.tight_layout()
 
-        fts.savefig(fname)
+        fts.savefig(fname_ts)
+
+        fcorr = plt.figure()
+        axcorr = fcorr.add_subplot(111)
+        axcorr.plot(np.transpose(timeseries))
+
+        axcorr.imshow(np.corrcoef(timseries), interpolation='nearest',
+                      cmap=plt.cm.ocean)
+        axcorr.colorbar()
+        axcorr.set_title(" ".join(scanid, refid,"Correlation Matrix"))
+        axcorr.set_xlabel('ROI')
+        axcorr.set_ylabel('ROI')
         pass
 
     def generate_html_templated(self, location):
