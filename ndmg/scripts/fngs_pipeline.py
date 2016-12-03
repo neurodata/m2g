@@ -91,7 +91,7 @@ def fngs_pipeline(fmri, struct, an, atlas, atlas_brain, atlas_mask, lv_mask,
         "/voxel_timeseries " + outdir + "/roi_timeseries " +\
         outdir + "/reg_struct " + outdir + "/tmp " +\
         outdir + "/connectomes " + outdir + "/nuis_fmri " + qcdir + " " +\
-        mcdir + " " + regdir + " " + overalldir + " " + roidir + nuisdir
+        mcdir + " " + regdir + " " + overalldir + " " + roidir + " " + nuisdir
     mgu().execute_cmd(cmd)
 
     qc_html = overalldir + "/" + fmri_name + ".html"

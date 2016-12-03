@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#/usr/bin/env python
 
 # Copyright 2016 NeuroData (http://neuromri_dat.io)
 #
@@ -162,25 +162,76 @@ class nuis(object):
         mgu().execute_cmd(cmd)
         pass
 
-    def extract_mask(self, prob_map, t, v):
+    def erode_mask(self, mask_path, eroded_path, v=0):
+        """
+        A function to erode a mask by a specified number of
+        voxels. Here, we define erosion as the process of checking
+        whether all the voxels within a number of voxels for a
+        mask have values.
+
+        **Positional Arguments:**
+            - mask_path:
+                - a path to a nifti containing a mask.
+            - eroded_path:
+                - a path to the eroded mask to be created.
+            - v:
+                - the number of voxels to erode by.
+        """
+        print "Eroding Mask..."
+        mask_img = nb.load(mask_path)
+        mask = mask_img.get_data()
+        for i in range(0, v):
+            # masked_vox is a tuple 0f [x]. [y]. [z] cooords
+            # wherever mask is nonzero
+            erode_mask = np.zeros(mask.shape)
+            x, y, z = np.where(mask != 0)
+            if (x.shape == y.shape and
+                y.shape == z.shape):
+                # iterated over all the nonzero voxels
+                for j in range(0, x.shape[0]):
+                    # check that the 3d voxels within 1 voxel are 1
+                    # if so, add to the new mask
+                    md = mask.shape
+                    if (mask[x[j],y[j],z[j]] and
+                        mask[np.min((x[j]+1, md[0]-1)),y[j],z[j]] and
+                        mask[x[j],np.min((y[j]+1, md[1]-1)),z[j]] and
+                        mask[x[j],y[j],np.min((z[j]+1, md[2]-1))] and
+                        mask[np.max((x[j]-1, 0)),y[j],z[j]] and
+                        mask[x[j],np.max((y[j]-1, 0)),z[j]] and
+                        mask[x[j],y[j],np.max((z[j]-1, 0))]):
+                        erode_mask[x[j],y[j],z[j]] = 1
+            else:
+                raise ValueError('Your mask erosion has an invalid shape.')
+            mask = erode_mask
+        eroded_mask_img = nb.Nifti1Image(mask,
+                                         header = mask_img.header,
+                                         affine = mask_img.get_affine())
+        nb.save(eroded_mask_img, eroded_path)
+        return mask
+
+    def extract_mask(self, prob_map, mask_path, t):
         """
         A function to extract a mask from a probability map.
-        Also, performs mask erosion.
+        Also, performs mask erosion as a substep.
 
         **Positional Arguments:**
             - prob_map:
                 - the path to probability map for the given class
                   of brain tissue.
+            - mask_path:
+                - the path to the extracted mask.
             - t:
                 - the threshold to consider voxels part of the class.
-            - v:
-                - the number of voxels to erode.
         """
-        print "Extracting Mask..."
+        print "Extracting Mask from probability map..."
         prob = nb.load(prob_map)
         prob_dat = prob.get_data()
         mask = (prob_dat > t).astype(int)
-        # TODO: mask erosion
+        img = nb.Nifti1Image(mask,
+                             header = prob.header,
+                             affine = prob.get_affine())
+        # save the corrected image
+        nb.save(img, mask_path)
         return mask
 
     def nuis_correct(self, fmri, amri, amask, an, lvmask, nuisance_mri,
@@ -223,18 +274,18 @@ class nuis(object):
         fmri_dat = fmri_im.get_data()
         # load the voxel timeseries and transpose
         voxel = fmri_dat[fmri_dat.sum(axis=3) > 0, :].T
-        maskpath = mgu().name_tmps(outdir, nuisname, "_mask")
-        self.segment_anat(amri, an, maskpath)
-        print "Voxel shape"
-        print fmri_dat[amm != 0, :].shape
+        map_path = mgu().name_tmps(outdir, nuisname, "_map")
+        wmm_path = mgu().name_tmps(outdir, nuisname, "_wm_mask.nii.gz")
+        er_wmm_path = mgu().name_tmps(outdir, nuisname, "_eroded_wm_mask.nii.gz")
 
+        # segmetn the image into different classes of brain tissue
+        self.segment_anat(amri, an, map_path)
         # FAST will place the white matter probability map here
-        wm_prob = maskpath + "_pve_2.nii.gz"
-        wmm = self.extract_mask(wm_prob, .99, 2)
+        wm_prob = map_path + "_pve_2.nii.gz"
+        self.extract_mask(wm_prob, wmm_path, .99)
+        wmm = self.erode_mask(wmm_path, er_wmm_path, 2)
         # extract the timeseries of white matter regions and transpose
         wm_ts = fmri_dat[wmm != 0, :].T
-        print "WM Shape"
-        print wm_ts.shape
         # load the lateral ventricles CSF timeseries
         lv_ts = fmri_dat[lvm != 0, :].T
         # time dimension is now the 0th dim
@@ -252,11 +303,7 @@ class nuis(object):
         wm_reg = self.compcor(wm_ts, n=5)
         # use GLM model given regressors to approximate the weight we want
         # to regress out
-        print lin_reg.shape
-        print quad_reg.shape
-        print csf_reg.shape
-        print wm_reg.shape
-        R = np.column_stack((lin_reg))
+        R = np.column_stack((np.ones(t), lin_reg, quad_reg, wm_reg, csf_reg))
         W = self.regress_signal(voxel, R)
         # nuisance ts is the difference btwn the original timeseries and
         # our regressors, and then we transpose back
