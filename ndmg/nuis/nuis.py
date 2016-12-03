@@ -158,7 +158,7 @@ class nuis(object):
         print "Segmenting Anatomical Image into WM, GM, and CSF..."
         # run FAST, with options -t for the image type and -n to
         # segment into CSF (pve_0), WM (pve_1), GM (pve_2)
-        cmd = " ".join(["fast -t", str(int(an)), "-n 3 -o", basename, amri])
+        cmd = " ".join(["fast -t", str(int(an)), "-n 3 -B -o", basename, amri])
         mgu().execute_cmd(cmd)
         pass
 
@@ -260,8 +260,6 @@ class nuis(object):
                   placed, with no trailing /.
         """
         # load images as nibabel objects
-        fmri_im = nb.load(fmri)
-        amri_im = nb.load(amri)
         amask_im = nb.load(amask)
         amm = amask_im.get_data()
         lv_im = nb.load(lvmask)
@@ -271,9 +269,7 @@ class nuis(object):
         anat_name = mgu().get_filename(amri)
         nuisname = "".join([anat_name, "_nuis"])
 
-        fmri_dat = fmri_im.get_data()
-        # load the voxel timeseries and transpose
-        voxel = fmri_dat[fmri_dat.sum(axis=3) > 0, :].T
+
         map_path = mgu().name_tmps(outdir, nuisname, "_map")
         wmm_path = mgu().name_tmps(outdir, nuisname, "_wm_mask.nii.gz")
         er_wmm_path = mgu().name_tmps(outdir, nuisname, "_eroded_wm_mask.nii.gz")
@@ -284,6 +280,14 @@ class nuis(object):
         wm_prob = map_path + "_pve_2.nii.gz"
         self.extract_mask(wm_prob, wmm_path, .99)
         wmm = self.erode_mask(wmm_path, er_wmm_path, 2)
+
+        fmri_im = nb.load(fmri)
+        amri_im = nb.load(amri)
+
+        fmri_dat = fmri_im.get_data()
+        # load the voxel timeseries and transpose
+        voxel = fmri_dat[fmri_dat.sum(axis=3) > 0, :].T
+
         # extract the timeseries of white matter regions and transpose
         wm_ts = fmri_dat[wmm != 0, :].T
         # load the lateral ventricles CSF timeseries
