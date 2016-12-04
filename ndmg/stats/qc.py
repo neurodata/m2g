@@ -213,6 +213,7 @@ class qc(object):
         fnamekde = qcdir + "/" + fname + "_kde.png"
         fkde.tight_layout()
         fkde.savefig(fnamekde)
+        fkde.close()
 
         fjit = plt.figure()
         axjit = fjit.add_subplot(111)
@@ -231,6 +232,7 @@ class qc(object):
         fnamejit = qcdir + "/" + fname + "_jitter.png"
         fjit.tight_layout()
         fjit.savefig(fnamejit)
+        fjit.close()
         pass
 
     def opaque_colorscale(self, basemap, reference, alpha=0.5):
@@ -290,6 +292,7 @@ class qc(object):
         fvar.set_size_inches(6,6)
         fvar.tight_layout()
         fvar.savefig(qcdir + "/" + scanid + "_var.png")
+        fvar.close()
 
     def mask_align(self, mri_data, ref_data, qcdir, scanid="", refid=""):
         """
@@ -342,6 +345,7 @@ class qc(object):
         falign.tight_layout()
         fname = qcdir + "/" + scanid + "_" + refid + "_overlap.png"
         falign.savefig(fname)
+        falign.close()
         # return the figpath so we can save it back to the html
         return fname
 
@@ -396,6 +400,7 @@ class qc(object):
         falign.tight_layout()
         fname = qcdir + "/" + scanid + "_" + refid + "_overlap.png"
         falign.savefig(fname)
+        falign.close()
         # return the figpath so we can save it back to the html
         return fname
 
@@ -433,14 +438,15 @@ class qc(object):
         fts.tight_layout()
 
         fts.savefig(fname_ts)
+        fts.close()
 
         fcorr = plt.figure()
         axcorr = fcorr.add_subplot(111)
         axcorr.plot(np.transpose(timeseries))
 
-        axcorr.imshow(np.corrcoef(timeseries), interpolation='nearest',
+        cax = axcorr.imshow(np.corrcoef(timeseries), interpolation='nearest',
                       cmap=plt.cm.ocean)
-        fcorr.colorbar(axcorr)
+        fcorr.colorbar(cax)
         axcorr.set_title(" ".join([scanid, refid,"Correlation Matrix"]))
         axcorr.set_xlabel('ROI')
         axcorr.set_ylabel('ROI')
@@ -448,6 +454,7 @@ class qc(object):
         fcorr.set_size_inches(6,6)
         fcorr.tight_layout()
         fcorr.savefig(fname_corr)
+        fcorr.close()
         pass
 
     def generate_html_templated(self, location):
