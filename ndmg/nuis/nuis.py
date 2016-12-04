@@ -95,7 +95,7 @@ class nuis(object):
             thresh_var = total_var[total_var > t]
             # return up to lowest component greater than threshold
             idx = np.argmin(thresh_var)
-           return U[:, 0:idx]
+            return U[:, 0:idx]
         else:
             raise ValueError('CompCor: you have not passed a threshold nor \
                               a number of components. You must specify one.')
