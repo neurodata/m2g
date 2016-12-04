@@ -440,10 +440,14 @@ class qc(object):
 
         axcorr.imshow(np.corrcoef(timeseries), interpolation='nearest',
                       cmap=plt.cm.ocean)
-        axcorr.colorbar()
+        fcorr.colorbar(axcorr)
         axcorr.set_title(" ".join([scanid, refid,"Correlation Matrix"]))
         axcorr.set_xlabel('ROI')
         axcorr.set_ylabel('ROI')
+
+        fcorr.set_size_inches(6,6)
+        fcorr.tight_layout()
+        fcorr.savefig(fname_corr)
         pass
 
     def generate_html_templated(self, location):
