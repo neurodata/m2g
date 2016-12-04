@@ -275,7 +275,7 @@ class fmri_qc(object):
             fnames[idx] = appended_path
             path = fname + appended_path
             fig.savefig(path)
-            fig.close()
+            plt.close(fig)
 
         fnames['sub'] = scanid
 

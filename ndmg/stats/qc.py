@@ -213,7 +213,7 @@ class qc(object):
         fnamekde = qcdir + "/" + fname + "_kde.png"
         fkde.tight_layout()
         fkde.savefig(fnamekde)
-        fkde.close()
+        plt.close(fkde)
 
         fjit = plt.figure()
         axjit = fjit.add_subplot(111)
@@ -232,7 +232,7 @@ class qc(object):
         fnamejit = qcdir + "/" + fname + "_jitter.png"
         fjit.tight_layout()
         fjit.savefig(fnamejit)
-        fjit.close()
+        plt.close(fjit)
         pass
 
     def opaque_colorscale(self, basemap, reference, alpha=0.5):
@@ -292,7 +292,7 @@ class qc(object):
         fvar.set_size_inches(6,6)
         fvar.tight_layout()
         fvar.savefig(qcdir + "/" + scanid + "_var.png")
-        fvar.close()
+        plt.close(fvar)
 
     def mask_align(self, mri_data, ref_data, qcdir, scanid="", refid=""):
         """
@@ -345,7 +345,7 @@ class qc(object):
         falign.tight_layout()
         fname = qcdir + "/" + scanid + "_" + refid + "_overlap.png"
         falign.savefig(fname)
-        falign.close()
+        plt.close(falign)
         # return the figpath so we can save it back to the html
         return fname
 
@@ -400,7 +400,7 @@ class qc(object):
         falign.tight_layout()
         fname = qcdir + "/" + scanid + "_" + refid + "_overlap.png"
         falign.savefig(fname)
-        falign.close()
+        plt.close(falign)
         # return the figpath so we can save it back to the html
         return fname
 
@@ -438,7 +438,7 @@ class qc(object):
         fts.tight_layout()
 
         fts.savefig(fname_ts)
-        fts.close()
+        plt.close(fts)
 
         fcorr = plt.figure()
         axcorr = fcorr.add_subplot(111)
@@ -454,7 +454,7 @@ class qc(object):
         fcorr.set_size_inches(6,6)
         fcorr.tight_layout()
         fcorr.savefig(fname_corr)
-        fcorr.close()
+        plt.close(fcorr)
         pass
 
     def generate_html_templated(self, location):
