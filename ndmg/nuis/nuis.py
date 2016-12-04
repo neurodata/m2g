@@ -21,7 +21,8 @@
 from ndmg.utils import utils as mgu
 import nibabel as nb
 import numpy as np
-
+from ndmg.stats import qc as mgqc
+import scipy.signal as signal
 
 class nuis(object):
 
@@ -41,18 +42,19 @@ class nuis(object):
         **Positional Arguments:**
             data:
                 - the fMRI data. Should be passed as an ndarray,
-                  with dimensions [nvoxels, ntimesteps].
+                  with dimensions [ntimesteps, nvoxels].
         """
         # remove the voxels that are unchanging, as normalizing
         # these by std would lead to a divide by 0
         data = data[:, data.std(axis=0) != 0]
+        data = signal.detrend(data, axis=0, type='linear')
         data = data - data.mean(axis=0)
         # normalize the signal
         data = np.divide(data, data.std(axis=0))
         # returns the normalized signal
         return data
 
-    def compcor(self, masked_ts, n=None, t=None, qcdir=None):
+    def compcor(self, masked_ts, n=None, t=None):
         """
         A function to extract principal components on
         timeseries of nuisance variables.
@@ -69,33 +71,27 @@ class nuis(object):
                   as a float between 0 and 1, where the number of
                   components returned will be less than the threshold
                   indicated. 
-            qcdir:
-                - an optional argument for passing a directory
-                  to place quality control information.
         """
         print "Extracting Nuisance Components..."
         # normalize the signal to mean center
         masked_ts = self.normalize_signal(masked_ts)
         # singular value decomposition to get the ordered
         # principal components
-        U, s, V = np.linalg.svd(masked_ts, full_matrices=False)
-        if qcdir is not None:
-            # TODO add QC stuff with s
-            pass
+        U, s, V = np.linalg.svd(masked_ts)
         if n is not None and t is not None:
             raise ValueError('CompCor: you have passed both a number of \
                               components and a threshold. You should only pass \
                               one or the other, not both.')
         elif n is not None:
             # return the top n principal components
-            return U[:, 0:n]
+            return U[:, 0:n], s
         elif t is not None:
             var_per_comp = s/np.sum(s) # get percent variance of each component
             total_var = np.cumsum(var_per_comp)
             thresh_var = total_var[total_var > t]
             # return up to lowest component greater than threshold
             idx = np.argmin(thresh_var)
-            return U[:, 0:idx]
+            return U[:, 0:idx], s
         else:
             raise ValueError('CompCor: you have not passed a threshold nor \
                               a number of components. You must specify one.')
@@ -297,7 +293,6 @@ class nuis(object):
         lv_ts = fmri_dat[lvm != 0, :].T
         # time dimension is now the 0th dim
         t = voxel.shape[0]
-
         # linear drift regressor
         lin_reg = np.array(range(0, t))
         # quadratic drift regressor
@@ -307,7 +302,21 @@ class nuis(object):
         csf_reg = lv_ts.mean(axis=1)
         # white matter regressor is the top 5 components
         # in the white matter
-        wm_reg = self.compcor(wm_ts, n=5)
+        wm_reg, s = self.compcor(wm_ts, n=5)
+ 
+        if qcdir is not None:
+            # show the eroded white matter mask over the anatomical image
+            # with different opaquenesses
+            mgqc().mask_align(er_wmm_path, amri, qcdir,
+                              scanid=anat_name + "_eroded_wm", refid=anat_name)
+            # show the eroded white mask over the original white matter mask
+            mgqc().mask_align(er_wmm_path, wmm_path, qcdir,
+                              scanid=anat_name + "_eroded_wm",
+                              refid=anat_name + "_wm")
+            mgqc().expected_variance(s, wm_reg.shape[1], qcdir,
+                                     scanid=anat_name + "_compcor",
+                                     title="CompCor")
+
         # use GLM model given regressors to approximate the weight we want
         # to regress out
         R = np.column_stack((np.ones(t), lin_reg, quad_reg, wm_reg, csf_reg))
@@ -319,7 +328,7 @@ class nuis(object):
         fmri_dat[fmri_dat.sum(axis=3) > 0,:] = nuis_voxel
         img = nb.Nifti1Image(fmri_dat,
                              header = fmri_im.header,
-                             affine = fmri_im.get_affine())
+                             affine = fmri_im.affine)
         # save the corrected image
         nb.save(img, nuisance_mri)
         pass

@@ -233,7 +233,7 @@ class qc(object):
         fjit.savefig(fnamejit)
         pass
 
-    def opaque_colorscale(self, basemap, reference):
+    def opaque_colorscale(self, basemap, reference, alpha=0.5):
         """
         A function to return a colorscale, with opacities
         dependent on reference intensities.
@@ -246,13 +246,106 @@ class qc(object):
         """
         cmap = basemap(reference)
         # all values beteween 0 opacity and .6
-        opaque_scale = 0.5*reference/float(np.nanmax(reference))
+        opaque_scale = alpha*reference/float(np.nanmax(reference))
         # remaps intensities
         cmap[:,:,3] = opaque_scale
         return cmap
 
-    def image_align(self, mri_data, ref_data, qcdir, scanid="", refid="",
-                    binmri=False, binref=False):
+    def expected_variance(self, s, n, qcdir, scanid="", title=""):
+        """
+        A function to show the expected variance of each component
+        in nuisance regression.
+
+        **Positional Arguments:**
+            - s:
+                - an array of the variance of each component, or the
+                  eigenvalues computed in SVD/eigendecomposition for each
+                  component (should be sorted by variance).
+            - n:
+                - the number of components chosen for compcor.
+            - qcdir:
+                - the directory to place outputs in.
+            - scanid:
+                - the id of the particular subject.
+            - title:
+                - the method being employed that an expected variance
+                  plot is neede for. Examples are "CompCor" or "PCA".
+        """
+        # normalize so that it sums to one
+        s = s/np.sum(s)
+        total_var = np.cumsum(s)
+        # the variance accounted for by the top used components
+        var_acct = total_var[n-1]
+
+        fvar = plt.figure()
+        axvar = fvar.add_subplot(111)
+
+        axvar.plot(total_var[0:n], '-bD')
+
+        axvar.set_xlabel('Component')
+        axvar.set_ylabel('Cumulative Variance')
+
+        axvar.set_title(", ".join([title,"N=", str(n), "Explained Variance=",
+                        str(var_acct)]))
+        fvar.set_size_inches(6,6)
+        fvar.tight_layout()
+        fvar.savefig(qcdir + "/" + scanid + "_var.png")
+
+    def mask_align(self, mri_data, ref_data, qcdir, scanid="", refid=""):
+        """
+        A function to produce an image showing the alignments of two
+        reference images for checking mask alignments.
+
+        **Positional Arguments:**
+            mri_image:
+                - the first matrix.
+            ref_image:
+                - the reference matrix.
+            qcdir:
+                - the path to a directory to dump the outputs.
+            scan_id:
+                - the id of the scan being analyzed.
+            refid:
+                - the id of the reference being analyzed.
+        """
+        cmd = "mkdir -p " + qcdir
+        mgu().execute_cmd(cmd)
+        mri_data = mgu().get_braindata(mri_data)
+        ref_data = mgu().get_braindata(ref_data)
+
+        # if we have 4d data, np.mean() to get 3d data
+        if len(mri_data.shape) == 4:
+            mri_data = np.nanmean(mri_data, axis=3)
+
+        falign = plt.figure()
+
+        depth = mri_data.shape[2]
+
+        depth_seq = np.unique(np.round(np.linspace(0, depth - 1, 25)))
+        nrows = np.ceil(np.sqrt(depth_seq.shape[0]))
+        ncols = np.ceil(depth_seq.shape[0]/float(nrows))
+
+        # produce figures for each slice in the image
+        for d in range(0, depth_seq.shape[0]):
+            # TODO EB: create nifti image with these values
+            # and allow option to add overlap with mni vs mprage
+            i = depth_seq[d]
+            axalign = falign.add_subplot(nrows, ncols, d+1) 
+            axalign.imshow(self.opaque_colorscale(matplotlib.cm.Blues,
+                                                  mri_data[:, :, i], 0.6))
+            axalign.imshow(self.opaque_colorscale(matplotlib.cm.Reds,
+                                                  ref_data[:, :, i], 0.4))
+            axalign.set_xlabel('Position (res)')
+            axalign.set_ylabel('Position (res)')
+            axalign.set_title('%d slice' % i)
+        falign.set_size_inches(nrows*6, ncols*6)
+        falign.tight_layout()
+        fname = qcdir + "/" + scanid + "_" + refid + "_overlap.png"
+        falign.savefig(fname)
+        # return the figpath so we can save it back to the html
+        return fname
+
+    def image_align(self, mri_data, ref_data, qcdir, scanid="", refid=""):
         """
         A function to produce an image showing the alignments of two
         reference images.
@@ -268,12 +361,6 @@ class qc(object):
                 - the id of the scan being analyzed.
             refid:
                 - the id of the reference being analyzed.
-            binmri:
-                - determines whether binarization will take place
-                for mri image.
-            binref:
-                - determines whether binarization will take place for
-                reference
         """
         cmd = "mkdir -p " + qcdir
         mgu().execute_cmd(cmd)
@@ -283,12 +370,6 @@ class qc(object):
         # if we have 4d data, np.mean() to get 3d data
         if len(mri_data.shape) == 4:
             mri_data = np.nanmean(mri_data, axis=3)
-
-        if binmri is True:
-            mri_data = (mri_data != 0).astype(float)
-
-        if binref is True:
-            ref_data = (ref_data != 0).astype(float)
 
         falign = plt.figure()
 
@@ -315,7 +396,6 @@ class qc(object):
         falign.tight_layout()
         fname = qcdir + "/" + scanid + "_" + refid + "_overlap.png"
         falign.savefig(fname)
-
         # return the figpath so we can save it back to the html
         return fname
 
@@ -347,7 +427,7 @@ class qc(object):
 
         axts.set_xlabel("Time Point (TRs)")
         axts.set_ylabel("Intensity")
-        axts.set_title(" ".join(scanid, refid, "ROI Timeseries"))
+        axts.set_title(" ".join([scanid, refid, "ROI Timeseries"]))
 
         fts.set_size_inches(6, 6)
         fts.tight_layout()
@@ -358,10 +438,10 @@ class qc(object):
         axcorr = fcorr.add_subplot(111)
         axcorr.plot(np.transpose(timeseries))
 
-        axcorr.imshow(np.corrcoef(timseries), interpolation='nearest',
+        axcorr.imshow(np.corrcoef(timeseries), interpolation='nearest',
                       cmap=plt.cm.ocean)
         axcorr.colorbar()
-        axcorr.set_title(" ".join(scanid, refid,"Correlation Matrix"))
+        axcorr.set_title(" ".join([scanid, refid,"Correlation Matrix"]))
         axcorr.set_xlabel('ROI')
         axcorr.set_ylabel('ROI')
         pass
