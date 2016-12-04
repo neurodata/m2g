@@ -107,11 +107,15 @@ def fngs_pipeline(fmri, struct, an, atlas, atlas_brain, atlas_mask, lv_mask,
                       stdout=PIPE, stderr=PIPE, shell=True)
             p = Popen("mkdir -p " + outdir + "/connectomes/" + label,
                       stdout=PIPE, stderr=PIPE, shell=True)
+            p = Popen("mkdir -p " roidir + "/" + label,
+                      stdout=PIPE, stderr=PIPE, shell=True)
     else:
         label_name = op.splitext(op.splitext(op.basename(labels))[0])[0]
         p = Popen("mkdir -p " + outdir + "/roi_timeseries/" + label_name,
                   stdout=PIPE, stderr=PIPE, shell=True)
         p = Popen("mkdir -p " + outdir + "/connectomes/" + label_name,
+                  stdout=PIPE, stderr=PIPE, shell=True)
+        p = Popen("mkdir -p " + roidir + "/" + label_name,
                   stdout=PIPE, stderr=PIPE, shell=True)
 
     # Create derivative output file names

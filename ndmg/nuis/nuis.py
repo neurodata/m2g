@@ -19,7 +19,6 @@
 # Created by Eric Bridgeford on 2016-06-20-16.
 # Email: ebridge2@jhu.edu
 from ndmg.utils import utils as mgu
-# from CPAC.nuisance import calc_compcor_components
 import nibabel as nb
 import numpy as np
 
@@ -79,7 +78,7 @@ class nuis(object):
         masked_ts = self.normalize_signal(masked_ts)
         # singular value decomposition to get the ordered
         # principal components
-        (U, s, V) = np.linalg.svd(masked_ts, full_matrices=False)
+        U, s, V = np.linalg.svd(masked_ts, full_matrices=False)
         if qcdir is not None:
             # TODO add QC stuff with s
             pass
@@ -91,8 +90,12 @@ class nuis(object):
             # return the top n principal components
             return U[:, 0:n]
         elif t is not None:
-            # TODO add thresholding
-            pass
+            var_per_comp = s/np.sum(s) # get percent variance of each component
+            total_var = np.cumsum(var_per_comp)
+            thresh_var = total_var[total_var > t]
+            # return up to lowest component greater than threshold
+            idx = np.argmin(thresh_var)
+           return U[:, 0:idx]
         else:
             raise ValueError('CompCor: you have not passed a threshold nor \
                               a number of components. You must specify one.')
@@ -158,7 +161,7 @@ class nuis(object):
         print "Segmenting Anatomical Image into WM, GM, and CSF..."
         # run FAST, with options -t for the image type and -n to
         # segment into CSF (pve_0), WM (pve_1), GM (pve_2)
-        cmd = " ".join(["fast -t", str(int(an)), "-n 3 -B -o", basename, amri])
+        cmd = " ".join(["fast -t", str(int(an)), "-n 3 -o", basename, amri])
         mgu().execute_cmd(cmd)
         pass
 
@@ -307,7 +310,7 @@ class nuis(object):
         wm_reg = self.compcor(wm_ts, n=5)
         # use GLM model given regressors to approximate the weight we want
         # to regress out
-        R = np.column_stack((np.ones(t), lin_reg, quad_reg, wm_reg, csf_reg))
+        R = np.vstack((np.ones(t), lin_reg, quad_reg, wm_reg, csf_reg)).T
         W = self.regress_signal(voxel, R)
         # nuisance ts is the difference btwn the original timeseries and
         # our regressors, and then we transpose back
