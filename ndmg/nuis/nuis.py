@@ -310,7 +310,7 @@ class nuis(object):
         wm_reg = self.compcor(wm_ts, n=5)
         # use GLM model given regressors to approximate the weight we want
         # to regress out
-        R = np.vstack((np.ones(t), lin_reg, quad_reg, wm_reg, csf_reg)).T
+        R = np.column_stack((np.ones(t), lin_reg, quad_reg, wm_reg, csf_reg))
         W = self.regress_signal(voxel, R)
         # nuisance ts is the difference btwn the original timeseries and
         # our regressors, and then we transpose back
