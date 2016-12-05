@@ -445,8 +445,8 @@ class qc(object):
 
         cax = axcorr.imshow(np.corrcoef(timeseries), interpolation='nearest',
                       cmap=plt.cm.ocean)
-        fcorr.colorbar(cax)
-        axcorr.set_title(" ".join([scanid, refid,"Correlation Matrix"]))
+        fcorr.colorbar(cax, fraction=0.046, pad=0.04)
+        axcorr.set_title(" ".join([scanid, refid,"Corr"]))
         axcorr.set_xlabel('ROI')
         axcorr.set_ylabel('ROI')
 

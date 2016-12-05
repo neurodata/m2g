@@ -163,8 +163,8 @@ def fngs_pipeline(fmri, struct, an, atlas, atlas_brain, atlas_mask, lv_mask,
             ts = mgts().roi_timeseries(nuis_fmri, labels[idx], roi_ts[idx],
                                    qcdir=roidir + "/" + label,
                                    scanid=fmri_name, refid=label)
-            mggqc().image_align(atlas_brain, labels[idx], roidir, scanid=atlas_name,
-                               refid=label)
+            mggqc().image_align(atlas_brain, labels[idx], roidir + "/" + label,
+                                scanid=atlas_name, refid=label)
         except OSError as err:
             print(err)
         connectome = mgg(ts.shape[0], labels[idx], sens="Functional")
