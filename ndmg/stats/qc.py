@@ -282,10 +282,10 @@ class qc(object):
         fvar = plt.figure()
         axvar = fvar.add_subplot(111)
 
-        axvar.plot(total_var[0:n], '-bD')
+        axvar.bar(s)
 
         axvar.set_xlabel('Component')
-        axvar.set_ylabel('Cumulative Variance')
+        axvar.set_ylabel('Variance')
 
         axvar.set_title(", ".join([title,"N=", str(n), "Explained Variance=",
                         str(var_acct)]))
