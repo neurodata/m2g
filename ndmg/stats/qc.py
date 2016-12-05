@@ -442,7 +442,6 @@ class qc(object):
 
         fcorr = plt.figure()
         axcorr = fcorr.add_subplot(111)
-        axcorr.plot(np.transpose(timeseries))
 
         cax = axcorr.imshow(np.corrcoef(timeseries), interpolation='nearest',
                       cmap=plt.cm.ocean)

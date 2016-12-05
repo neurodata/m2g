@@ -161,7 +161,7 @@ def fngs_pipeline(fmri, struct, an, atlas, atlas_brain, atlas_mask, lv_mask,
         print "Extracting ROI timeseries for " + label + " parcellation..."
         try:
             ts = mgts().roi_timeseries(nuis_fmri, labels[idx], roi_ts[idx],
-                                   qcdir=roidir,
+                                   qcdir=roidir + "/" + label,
                                    scanid=fmri_name, refid=label)
             mggqc().image_align(atlas_brain, labels[idx], roidir, scanid=atlas_name,
                                refid=label)
