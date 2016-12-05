@@ -282,7 +282,7 @@ class qc(object):
         fvar = plt.figure()
         axvar = fvar.add_subplot(111)
 
-        axvar.bar(s)
+        axvar.bar(range(s.shape[0]), s)
 
         axvar.set_xlabel('Component')
         axvar.set_ylabel('Variance')
