@@ -78,6 +78,7 @@ class nuis(object):
         # singular value decomposition to get the ordered
         # principal components
         U, s, V = np.linalg.svd(masked_ts)
+        print t
         if n is not None and t is not None:
             raise ValueError('CompCor: you have passed both a number of \
                               components and a threshold. You should only pass \
@@ -233,11 +234,87 @@ class nuis(object):
         nb.save(img, mask_path)
         return mask
 
+    def regress_nuisance(self, fmri, nuisance_mri, wmmask, lvmask, n=5, t=None,
+                         qcdir=None):
+        """
+        Regresses Nuisance Signals from brain images. Note that this
+        function assumes that you have exactly the masks you wish to use;
+        no erosion or segmentation takes place here. See nuisance_correct
+        for the implementation that goes from fmri and amri -> corrected.
+
+        **Positional Arguments:**
+            - fmri:
+                - the path to a fmri brain as a nifti image.
+            - nuisance_fmri:
+                - the desired path for the nuisance corrected brain.
+            - wmmask:
+                - the path to a white matter mask (should be eroded ahead of time).
+            - lvmask:
+                - the path to a lateral ventricles mask.
+            - n:
+                - the number of components to consider for white matter regression.
+            - t:
+                - the expected variance to consider for white matter regression.
+            - qcdir:
+                - the quality control directory to place qc.
+        """
+        fmri_name = mgu().get_filename(fmri)
+        fmri_im = nb.load(fmri)
+
+        lv_im = nb.load(lvmask)
+        lvm = lv_im.get_data()
+
+        wm_im = nb.load(wmmask)
+        wmm = wm_im.get_data()
+
+        fmri_dat = fmri_im.get_data()
+        # load the voxel timeseries and transpose
+        voxel = fmri_dat[fmri_dat.sum(axis=3) > 0, :].T
+        # extract the timeseries of white matter regions and transpose
+        wm_ts = fmri_dat[wmm != 0, :].T
+        # load the lateral ventricles CSF timeseries
+        lv_ts = fmri_dat[lvm != 0, :].T
+        # time dimension is now the 0th dim
+        time = voxel.shape[0]
+        # linear drift regressor
+        lin_reg = np.array(range(0, time))
+        # quadratic drift regressor
+        quad_reg = np.array(range(0, time))**2
+        # csf regressor is the mean of all voxels in the csf
+        # mask at each time point
+        csf_reg = lv_ts.mean(axis=1)
+        # white matter regressor is the top 5 components
+        # in the white matter
+        wm_reg, s = self.compcor(wm_ts, n=n, t=t)
+ 
+        if qcdir is not None:
+            mgqc().expected_variance(s, wm_reg.shape[1], qcdir,
+                                     scanid=fmri_name + "_compcor",
+                                     title="CompCor")
+
+        # use GLM model given regressors to approximate the weight we want
+        # to regress out
+        R = np.column_stack((np.ones(time), lin_reg, quad_reg, wm_reg, csf_reg))
+        W = self.regress_signal(voxel, R)
+        # nuisance ts is the difference btwn the original timeseries and
+        # our regressors, and then we transpose back
+        nuis_voxel = (voxel - W).T
+        # put the nifti back together again
+        fmri_dat[fmri_dat.sum(axis=3) > 0,:] = nuis_voxel
+        img = nb.Nifti1Image(fmri_dat,
+                             header = fmri_im.header,
+                             affine = fmri_im.affine)
+        # save the corrected image
+        nb.save(img, nuisance_mri)
+        pass
+
     def nuis_correct(self, fmri, amri, amask, an, lvmask, nuisance_mri,
                      outdir, qcdir=None):
         """
         A function for nuisance correction on an aligned fMRI
-        image. So far, this only highpass filters.
+        image. This assumes we have purely registered brains,
+        and a lateral ventricle mask, and does the rest of the work
+        computing intermediates for you.
 
         **Positional Arguments:**
             fmri:
@@ -261,74 +338,32 @@ class nuis(object):
         # load images as nibabel objects
         amask_im = nb.load(amask)
         amm = amask_im.get_data()
-        lv_im = nb.load(lvmask)
-        lvm = lv_im.get_data()
 
-        fmri_name = mgu().get_filename(fmri)
         anat_name = mgu().get_filename(amri)
         nuisname = "".join([anat_name, "_nuis"])
 
 
         map_path = mgu().name_tmps(outdir, nuisname, "_map")
-        wmm_path = mgu().name_tmps(outdir, nuisname, "_wm_mask.nii.gz")
-        er_wmm_path = mgu().name_tmps(outdir, nuisname, "_eroded_wm_mask.nii.gz")
+        wmmask = mgu().name_tmps(outdir, nuisname, "_wm_mask.nii.gz")
+        er_wmmask = mgu().name_tmps(outdir, nuisname, "_eroded_wm_mask.nii.gz")
 
         # segmetn the image into different classes of brain tissue
         self.segment_anat(amri, an, map_path)
         # FAST will place the white matter probability map here
         wm_prob = map_path + "_pve_2.nii.gz"
-        self.extract_mask(wm_prob, wmm_path, .99)
-        wmm = self.erode_mask(wmm_path, er_wmm_path, 2)
+        self.extract_mask(wm_prob, wmmask, .99)
+        self.erode_mask(wmmask, er_wmmask, 2)
 
-        fmri_im = nb.load(fmri)
-        amri_im = nb.load(amri)
-
-        fmri_dat = fmri_im.get_data()
-        # load the voxel timeseries and transpose
-        voxel = fmri_dat[fmri_dat.sum(axis=3) > 0, :].T
-
-        # extract the timeseries of white matter regions and transpose
-        wm_ts = fmri_dat[wmm != 0, :].T
-        # load the lateral ventricles CSF timeseries
-        lv_ts = fmri_dat[lvm != 0, :].T
-        # time dimension is now the 0th dim
-        t = voxel.shape[0]
-        # linear drift regressor
-        lin_reg = np.array(range(0, t))
-        # quadratic drift regressor
-        quad_reg = np.array(range(0, t))**2
-        # csf regressor is the mean of all voxels in the csf
-        # mask at each time point
-        csf_reg = lv_ts.mean(axis=1)
-        # white matter regressor is the top 5 components
-        # in the white matter
-        wm_reg, s = self.compcor(wm_ts, n=5)
- 
         if qcdir is not None:
             # show the eroded white matter mask over the anatomical image
             # with different opaquenesses
-            mgqc().mask_align(er_wmm_path, amri, qcdir,
+            mgqc().mask_align(er_wmmask, amri, qcdir,
                               scanid=anat_name + "_eroded_wm", refid=anat_name)
             # show the eroded white mask over the original white matter mask
-            mgqc().mask_align(er_wmm_path, wmm_path, qcdir,
+            mgqc().mask_align(er_wmmask, wmmask, qcdir,
                               scanid=anat_name + "_eroded_wm",
                               refid=anat_name + "_wm")
-            mgqc().expected_variance(s, wm_reg.shape[1], qcdir,
-                                     scanid=anat_name + "_compcor",
-                                     title="CompCor")
 
-        # use GLM model given regressors to approximate the weight we want
-        # to regress out
-        R = np.column_stack((np.ones(t), lin_reg, quad_reg, wm_reg, csf_reg))
-        W = self.regress_signal(voxel, R)
-        # nuisance ts is the difference btwn the original timeseries and
-        # our regressors, and then we transpose back
-        nuis_voxel = (voxel - W).T
-        # put the nifti back together again
-        fmri_dat[fmri_dat.sum(axis=3) > 0,:] = nuis_voxel
-        img = nb.Nifti1Image(fmri_dat,
-                             header = fmri_im.header,
-                             affine = fmri_im.affine)
-        # save the corrected image
-        nb.save(img, nuisance_mri)
+        self.regress_nuisance(fmri, nuisance_mri, er_wmmask, lvmask, n=5,
+                              t=None, qcdir=qcdir)
         pass
