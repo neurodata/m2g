@@ -287,11 +287,11 @@ class qc(object):
         axvar.set_xlabel('Component')
         axvar.set_ylabel('Variance')
 
-        axvar.set_title(", ".join([title,"N=", str(n), "Explained Variance=",
-                        str(var_acct)]))
+        axvar.set_title(title + "Scree Plot, N=%d, Explained Var = %.3f" % (n,
+                        str(var_acct)))
         fvar.set_size_inches(6,6)
         fvar.tight_layout()
-        fvar.savefig(qcdir + "/" + scanid + "_var.png")
+        fvar.savefig(qcdir + "/" + scanid + "_scree.png")
         plt.close(fvar)
 
     def mask_align(self, mri_data, ref_data, qcdir, scanid="", refid=""):
