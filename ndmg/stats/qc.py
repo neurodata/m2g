@@ -288,7 +288,7 @@ class qc(object):
         axvar.set_ylabel('Variance')
 
         axvar.set_title(title + "Scree Plot, N=%d, Explained Var = %.3f" % (n,
-                        str(var_acct)))
+                        var_acct))
         fvar.set_size_inches(6,6)
         fvar.tight_layout()
         fvar.savefig(qcdir + "/" + scanid + "_scree.png")
