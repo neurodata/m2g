@@ -287,7 +287,7 @@ class qc(object):
         axvar.set_xlabel('Component')
         axvar.set_ylabel('Variance')
 
-        axvar.set_title(title + "Scree Plot, N=%d, Explained Var = %.3f" % (n,
+        axvar.set_title(title + " Scree Plot, N=%d, Total Var = %.3f" % (n,
                         var_acct))
         fvar.set_size_inches(6,6)
         fvar.tight_layout()

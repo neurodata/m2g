@@ -364,6 +364,6 @@ class nuis(object):
                               scanid=anat_name + "_eroded_wm",
                               refid=anat_name + "_wm")
 
-        self.regress_nuisance(fmri, nuisance_mri, er_wmmask, lvmask, n=5,
+        self.regress_nuisance(fmri, nuisance_mri, er_wmmask, lvmask, n=15,
                               t=None, qcdir=qcdir)
         pass
