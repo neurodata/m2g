@@ -199,7 +199,7 @@ class nuis(object):
                         mask[np.max((x[j]-1, 0)),y[j],z[j]] and
                         mask[x[j],np.max((y[j]-1, 0)),z[j]] and
                         mask[x[j],y[j],np.max((z[j]-1, 0))]):
-                        erod_mask[x[j],y[j],z[j]] = 1
+                        erode_mask[x[j],y[j],z[j]] = 1
             else:
                 raise ValueError('Your mask erosion has an invalid shape.')
             mask = erode_mask
