@@ -199,7 +199,7 @@ class nuis(object):
                         mask[np.max((x[j]-1, 0)),y[j],z[j]] and
                         mask[x[j],np.max((y[j]-1, 0)),z[j]] and
                         mask[x[j],y[j],np.max((z[j]-1, 0))]):
-                        erode_mask[x[j],y[j],z[j]] = 1
+                        erod_mask[x[j],y[j],z[j]] = 1
             else:
                 raise ValueError('Your mask erosion has an invalid shape.')
             mask = erode_mask
@@ -285,7 +285,7 @@ class nuis(object):
         csf_reg = lv_ts.mean(axis=1)
         # white matter regressor is the top 5 components
         # in the white matter
-        wm_reg, s = self.compcor(wm_ts, n=n, t=t)
+        wm_reg, s = self.compcor(wm_ts, n=None, t=.1)
  
         if qcdir is not None:
             mgqc().expected_variance(s, wm_reg.shape[1], qcdir,
@@ -364,6 +364,6 @@ class nuis(object):
                               scanid=anat_name + "_eroded_wm",
                               refid=anat_name + "_wm")
 
-        self.regress_nuisance(fmri, nuisance_mri, er_wmmask, lvmask, n=15,
-                              t=None, qcdir=qcdir)
+        self.regress_nuisance(fmri, nuisance_mri, er_wmmask, lvmask, n=None,
+                              t=.1, qcdir=qcdir)
         pass
