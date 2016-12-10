@@ -285,9 +285,10 @@ class nuis(object):
         csf_reg = lv_ts.mean(axis=1)
         # white matter regressor is the top 5 components
         # in the white matter
-        wm_reg, s = self.compcor(wm_ts, n=n, t=t)
+        wm_reg, s = self.compcor(wm_ts, n=15, t=t)
  
         if qcdir is not None:
+            print "Extracting CompCor with " + wm_reg.shape
             mgqc().expected_variance(s, wm_reg.shape[1], qcdir,
                                      scanid=fmri_name + "_compcor",
                                      title="CompCor")
