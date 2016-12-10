@@ -285,7 +285,7 @@ class nuis(object):
         csf_reg = lv_ts.mean(axis=1)
         # white matter regressor is the top 5 components
         # in the white matter
-        wm_reg, s = self.compcor(wm_ts, n=None, t=.1)
+        wm_reg, s = self.compcor(wm_ts, n=n, t=t)
  
         if qcdir is not None:
             mgqc().expected_variance(s, wm_reg.shape[1], qcdir,
@@ -364,6 +364,6 @@ class nuis(object):
                               scanid=anat_name + "_eroded_wm",
                               refid=anat_name + "_wm")
 
-        self.regress_nuisance(fmri, nuisance_mri, er_wmmask, lvmask, n=None,
-                              t=.1, qcdir=qcdir)
+        self.regress_nuisance(fmri, nuisance_mri, er_wmmask, lvmask, n=100,
+                              t=None, qcdir=qcdir)
         pass
