@@ -288,7 +288,7 @@ class nuis(object):
         wm_reg, s = self.compcor(wm_ts, n=150, t=t)
  
         if qcdir is not None:
-            print "Extracting CompCor with " + wm_reg.shape
+            print "Extracting CompCor with " + str(wm_reg.shape)
             mgqc().expected_variance(s, wm_reg.shape[1], qcdir,
                                      scanid=fmri_name + "_compcor",
                                      title="CompCor")
