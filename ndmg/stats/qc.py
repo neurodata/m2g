@@ -31,7 +31,8 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from ndmg.utils import utils as mgu
-
+import plotly as py
+import plotly.offline as offline
 
 class qc(object):
 
@@ -196,43 +197,68 @@ class qc(object):
                                     refdata[:, :, s]))))
 
         kdes = self.compute_kdes(zip(*v_bef)[1], zip(*v_aft)[1])
-        fkde = plt.figure()
-        axkde = fkde.add_subplot(111)
-        axkde.plot(kdes[0], kdes[1])
-        axkde.plot(kdes[0], kdes[2])
-        axkde.set_title(title + (" Hellinger Distance = %.4E" %
-                        self.hdist(zip(*v_bef)[1], zip(*v_aft)[1])))
-        axkde.set_xlabel('MSE')
+
+        #fkde = plt.figure()
+        #axkde = fkde.add_subplot(111)
+        #axkde.plot(kdes[0], kdes[1])
+        #axkde.plot(kdes[0], kdes[2])
+        #axkde.set_title(title + (" Hellinger Distance = %.4E" %
+        #                self.hdist(zip(*v_bef)[1], zip(*v_aft)[1])))
+        #axkde.set_xlabel('MSE')
+
         xlim = tuple((0, np.nanmax(kdes[0])))
         ylim = tuple((0, max(np.nanmax(kdes[1]), np.nanmax(kdes[2]))))
-        axkde.set_xlim(xlim)
-        axkde.set_ylim(ylim)
-        axkde.set_ylabel('Density')
-        axkde.legend(['before, mean = %.2E' % np.mean(zip(*v_bef)[1]),
-                     'after, mean = %.2E' % np.mean(zip(*v_aft)[1])])
-        fnamekde = qcdir + "/" + fname + "_kde.png"
-        fkde.tight_layout()
-        fkde.savefig(fnamekde)
-        plt.close(fkde)
 
-        fjit = plt.figure()
-        axjit = fjit.add_subplot(111)
-        axjit.scatter(*zip(*v_bef), color='blue', alpha=0.4, s=.5)
-        axjit.scatter(*zip(*v_aft), color='green', alpha=0.4, s=.5)
-        axjit.set_title("Jitter Plot showing slicewise impact of " + title)
-        axjit.set_xlabel('Slice Number')
-        axjit.set_ylabel('MSE')
+        #axkde.set_xlim(xlim)
+        #axkde.set_ylim(ylim)
+        #axkde.set_ylabel('Density')
+        #axkde.legend(['before, mean = %.2E' % np.mean(zip(*v_bef)[1]),
+        #             'after, mean = %.2E' % np.mean(zip(*v_aft)[1])])
+        #fnamekde = qcdir + "/" + fname + "_kde.png"
+        #fkde.tight_layout()
+        #fkde.savefig(fnamekde)
+        #plt.close(fkde)
+
+        axkde_list = []
+	axkde_list.append(py.graph_objs.Scatter(x=kdes[0],y=kdes[1], mode='lines', name='before, mean = %.2E' % np.mean(zip(*v_bef)[1])))
+        axkde_list.append(py.graph_objs.Scatter(x=kdes[0],y=kdes[2], mode='lines', name='after, mean = %.2E' % np.mean(zip(*v_aft)[1])))
+	layout = dict(title = title + (" Hellinger Distance = %.4E" % self.hdist(zip(*v_bef)[1], zip(*v_aft)[1])), xaxis = dict(title = 'MSE', range=xlim), yaxis = dict(title = 'Density', range=ylim))
+        fkde = dict(data=axkde_list, layout=layout)
+        path = qcdir + "/" + fname + "_kde.png"
+        #py.plotly.image.save_as(fkde, filename=path)
+        offline.plot(fkde, filename=path)
+
+        #fjit = plt.figure()
+        #axjit = fjit.add_subplot(111)
+        #axjit.scatter(*zip(*v_bef), color='blue', alpha=0.4, s=.5)
+        #axjit.scatter(*zip(*v_aft), color='green', alpha=0.4, s=.5)
+        #axjit.set_title("Jitter Plot showing slicewise impact of " + title)
+        #axjit.set_xlabel('Slice Number')
+        #axjit.set_ylabel('MSE')
+        
         xlim = tuple((0, nslices + 1))
         ylim = tuple((0, max(np.nanmax(zip(*v_bef)[1]),
                              np.nanmax(zip(*v_aft)[1]))))
-        axjit.set_ylim(ylim)
-        axjit.set_xlim(xlim)
-        axjit.legend(['before, mean = %.2E' % np.mean(zip(*v_bef)[1]),
-                     'after, mean = %.2E' % np.mean(zip(*v_aft)[1])])
-        fnamejit = qcdir + "/" + fname + "_jitter.png"
-        fjit.tight_layout()
-        fjit.savefig(fnamejit)
-        plt.close(fjit)
+        #axjit.set_ylim(ylim)
+        #axjit.set_xlim(xlim)
+        #axjit.legend(['before, mean = %.2E' % np.mean(zip(*v_bef)[1]),
+        #             'after, mean = %.2E' % np.mean(zip(*v_aft)[1])])
+        #fnamejit = qcdir + "/" + fname + "_jitter.png"
+        #fjit.tight_layout()
+        #fjit.savefig(fnamejit)
+        #plt.close(fjit)
+
+        axjit_list = []
+	axjit_list.append(py.graph_objs.Scatter(x=zip(*v_bef)[0],y=zip(*v_bef)[1], name='before, mean = %.2E' % np.mean(zip(*v_bef)[1]), marker = dict(size = 3.0, color = 'rgba(0, 0, 255, .4)'), mode='markers'))
+        axjit_list.append(py.graph_objs.Scatter(x=zip(*v_aft)[0],y=zip(*v_aft)[1], name='after, mean = %.2E' % np.mean(zip(*v_aft)[1]), marker = dict(size = 3.0, color = 'rgba(0, 255, 0, .4)'), mode='markers'))
+	layout = dict(title = "Jitter Plot showing slicewise impact of " + title, \
+                      xaxis = dict(title = 'Slice Number', range=xlim), \
+                      yaxis = dict(title = 'MSE', range=ylim))
+        fjit = dict(data=axjit_list, layout=layout)
+        path = qcdir + "/" + fname + "_jitter.png"
+        #py.plotly.image.save_as(fjit, filename=path)
+        offline.plot(fjit, filename=path)
+        
         pass
 
     def opaque_colorscale(self, basemap, reference, alpha=0.5):
@@ -279,20 +305,29 @@ class qc(object):
         # the variance accounted for by the top used components
         var_acct = total_var[n-1]
 
-        fvar = plt.figure()
-        axvar = fvar.add_subplot(111)
+        #fvar = plt.figure()
+        #axvar = fvar.add_subplot(111)
 
-        axvar.bar(range(s.shape[0]), s)
+        #axvar.bar(range(s.shape[0]), s)
 
-        axvar.set_xlabel('Component')
-        axvar.set_ylabel('Variance')
+        #axvar.set_xlabel('Component')
+        #axvar.set_ylabel('Variance')
 
-        axvar.set_title(title + " Scree Plot, N=%d, Total Var = %.3f" % (n,
-                        var_acct))
-        fvar.set_size_inches(6,6)
-        fvar.tight_layout()
-        fvar.savefig(qcdir + "/" + scanid + "_scree.png")
-        plt.close(fvar)
+        #axvar.set_title(title + "Scree Plot, N=%d, Explained Var = %.3f" % (n,
+        #                var_acct))
+        #fvar.set_size_inches(6,6)
+        #fvar.tight_layout()
+        #fvar.savefig(qcdir + "/" + scanid + "_scree.png")
+        #plt.close(fvar)
+
+        colors = ['rgba(26,118,255,1)'] * s.shape[0]
+        colors[n] = 'rgba(26,200,255,1)'
+        axvar = [py.graph_objs.Bar(x=range(s.shape[0]),y=s, marker=dict(color=colors))]
+        #axvar.append(py.graph_obs.Bar(x=range(s.shape[0]), y=s[n]))
+        layout = dict(title = " ".join([title,"Scree Plot," ,"N=", str(n),",","Explained Variance=",str(var_acct)]), xaxis = dict(title = 'Component'), yaxis = dict(title = 'Variance'))#, height=405, width=720)
+        fvar = dict(data=axvar, layout=layout)
+        #py.plotly.image.save_as(fvar, filename=str(qcdir + "/" + scanid + "_var.png"))
+        offline.plot(fvar, filename=str(qcdir + "/" + scanid + "_var"))
 
     def mask_align(self, mri_data, ref_data, qcdir, scanid="", refid=""):
         """
@@ -425,20 +460,28 @@ class qc(object):
         path = qcdir + "/" + scanid + "_" + refid
         fname_ts = path + "_timeseries.png"
         fname_corr = path + "_corr.png"
-        fts = plt.figure()
-        axts = fts.add_subplot(111)
+        #fts = plt.figure()
+        #axts = fts.add_subplot(111)
 
-        axts.plot(timeseries.T)
+        #axts.plot(timeseries.T)
 
-        axts.set_xlabel("Time Point (TRs)")
-        axts.set_ylabel("Intensity")
-        axts.set_title(" ".join([scanid, refid, "ROI Timeseries"]))
+        #axts.set_xlabel("Time Point (TRs)")
+        #axts.set_ylabel("Intensity")
+        #axts.set_title(" ".join([scanid, refid, "ROI Timeseries"]))
 
-        fts.set_size_inches(6, 6)
-        fts.tight_layout()
+        #fts.set_size_inches(6, 6)
+        #fts.tight_layout()
 
-        fts.savefig(fname_ts)
-        plt.close(fts)
+        #fts.savefig(fname_ts)
+        #plt.close(fts)
+
+        fts_list = []
+        for d in range(0, timeseries.T.shape[1]):
+            fts_list.append(py.graph_objs.Scatter(x=range(0,timeseries.T.shape[0]), y=timeseries.T[:,d], mode='lines'))
+        layout = dict(title = " ".join([scanid, refid, "ROI Timeseries"]), xaxis = dict(title = 'Time Point (TRs)', range=[0,timeseries.T.shape[0]]), yaxis = dict(title = 'Intensity'), showlegend = False)#, height=405, width=720)
+        fts = dict(data=fts_list, layout=layout)
+        #py.plotly.image.save_as(fts, filename=fname_ts)
+        offline.plot(fts, filename=fname_ts)
 
         fcorr = plt.figure()
         axcorr = fcorr.add_subplot(111)

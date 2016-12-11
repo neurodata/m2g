@@ -32,7 +32,8 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from ndmg.utils import utils as mgu
 from ndmg.stats.qc import qc as mgqc
-
+import plotly as py
+import plotly.offline as offline
 
 class fmri_qc(object):
 
@@ -126,8 +127,8 @@ class fmri_qc(object):
         mri_datmi = np.squeeze(np.apply_over_axes(np.nanmean,
                                                   mri_dat, (0, 1)))
         fanat_ref = plt.figure()
-        fmi = plt.figure()
-        axmi = fmi.add_subplot(111)
+        #fmi = plt.figure()
+        #axmi = fmi.add_subplot(111)
 
         depth = mri_dat.shape[2]
         nvols = mri_dat.shape[3]
@@ -188,27 +189,50 @@ class fmri_qc(object):
             axanat_ref.imshow(mgqc().opaque_colorscale(matplotlib.cm.Reds,
                                                      at_dat[:, :, i]))
 
+        #for d in range(0, depth):
+        #    axmi.plot(mri_datmi[d, :])
+
+        #fname = qcdir + "/"
+        #axmi.set_xlabel('Timepoint')
+        #axmi.set_ylabel('Mean Intensity')
+        #axmi.set_title('Mean Slice Intensity')
+        #axmi.set_xlim((0, nvols))
+
+        axmi_list = []
         for d in range(0, depth):
-            axmi.plot(mri_datmi[d, :])
+            axmi_list.append(py.graph_objs.Scatter(x=range(0,nvols), \
+                                                   y=mri_datmi[d, :], mode='lines', showlegend=False))
+        layout = dict(title = 'Mean Slice Intensity', \
+                      xaxis = dict(title = 'Timepoint', range=[0,nvols]), \
+                      yaxis = dict(title = 'Mean Intensity'), height=405, width=720)
+        axmi = dict(data=axmi_list, layout=layout)
+        appended_path = scanid + "_intens.png"
+        #fnames["intens"] = appended_path
+        path = qcdir + "/" + appended_path
+        #py.plotly.image.save_as(axmi, filename=path)
+        offline.plot(axmi, filename=path)
 
-        fname = qcdir + "/"
-        axmi.set_xlabel('Timepoint')
-        axmi.set_ylabel('Mean Intensity')
-        axmi.set_title('Mean Slice Intensity')
-        axmi.set_xlim((0, nvols))
+        #fhist = plt.figure()
+        #axvih = fhist.add_subplot(111)
 
-
-        fhist = plt.figure()
-        axvih = fhist.add_subplot(111)
         nonzero_data = mri_datmean[mri_datmean != 0]
-        hist, bins = np.histogram(nonzero_data, bins=500,
-                                 range=(0, np.nanmean(nonzero_data) + 
-                                        2*np.nanstd(nonzero_data)))
+        hist, bins = np.histogram(nonzero_data, bins=500, range=(0, np.nanmean(nonzero_data) + 2*np.nanstd(nonzero_data)))
         width = 0.7 * (bins[1] - bins[0])
         center = (bins[:-1] + bins[1:]) / float(2)
-        axvih.bar(center, hist, align='center', width=width)
-        axvih.set_xlabel('Voxel Intensity')
-        axvih.set_ylabel('Number of Voxels')
+
+        #axvih.bar(center, hist, align='center', width=width)
+        #axvih.set_xlabel('Voxel Intensity')
+        #axvih.set_ylabel('Number of Voxels')
+
+        axvih = [py.graph_objs.Bar(x=center, y=hist)]
+        layout = dict(xaxis = dict(title = 'Voxel Intensity'), \
+                      yaxis = dict(title = 'Number of Voxels'), height=405, width=720)
+        fhist = dict(data=axvih, layout=layout)
+        appended_path = scanid + "_voxel_hist.png"
+        #fnames["voxel_hist"] = appended_path
+        path = qcdir + "/" + appended_path
+        #py.plotly.image.save_as(fhist, filename=path)
+        offline.plot(fhist, filename=path)
 
         par_file = mri_mc + ".par"
 
@@ -225,46 +249,86 @@ class fmri_qc(object):
                 counter += 1
 
 
-        ftrans = plt.figure()
-        axtrans = ftrans.add_subplot(111)
-        axtrans.plot(abs_pos[:, 3:6])  # plots the parameters
-        axtrans.set_xlabel('Timepoint')
-        axtrans.set_ylabel('Translation (mm)')
-        axtrans.set_title('Translational Motion Parameters')
-        axtrans.legend(['x', 'y', 'z'])
-        axtrans.set_xlim((0, nvols))
-        ftrans.tight_layout()
+        #ftrans = plt.figure()
+        #axtrans = ftrans.add_subplot(111)
+        #axtrans.plot(abs_pos[:, 3:6])  # plots the parameters
+        #axtrans.set_xlabel('Timepoint')
+        #axtrans.set_ylabel('Translation (mm)')
+        #axtrans.set_title('Translational Motion Parameters')
+        #axtrans.legend(['x', 'y', 'z'])
+        #axtrans.set_xlim((0, nvols))
+        #ftrans.tight_layout()
 
-        frot = plt.figure()
-        axrot = frot.add_subplot(111)
-        axrot.plot(abs_pos[:, 0:3])
-        axrot.set_xlabel('Timepoint')
-        axrot.set_ylabel('Rotation (rad)')
-        axrot.set_title('Rotational Motion Parameters')
-        axrot.legend(['x', 'y', 'z'])
-        axrot.set_xlim((0, nvols))
+        ftrans_list = []
+        ftrans_list.append(py.graph_objs.Scatter(x=range(0,nvols),y=abs_pos[:,3], mode='lines', name='x'))
+        ftrans_list.append(py.graph_objs.Scatter(x=range(0,nvols),y=abs_pos[:,4], mode='lines', name='y'))
+        ftrans_list.append(py.graph_objs.Scatter(x=range(0,nvols),y=abs_pos[:,5], mode='lines', name='z'))
+        layout = dict(title = 'Translational Motion Parameters', \
+                      xaxis = dict(title = 'Timepoint', range=[0,nvols]), \
+                      yaxis = dict(title = 'Translation (mm)'))
+        ftrans = dict(data=ftrans_list, layout=layout)
+        appended_path = scanid + "_trans.png"
+        #fnames["trans"] = appended_path
+        path = qcdir + "/" + appended_path
+        #py.plotly.image.save_as(ftrans, filename=path)
+        offline.plot(ftrans, filename=path)
+
+        #frot = plt.figure()
+        #axrot = frot.add_subplot(111)
+        #axrot.plot(abs_pos[:, 0:3])
+        #axrot.set_xlabel('Timepoint')
+        #axrot.set_ylabel('Rotation (rad)')
+        #axrot.set_title('Rotational Motion Parameters')
+        #axrot.legend(['x', 'y', 'z'])
+        #axrot.set_xlim((0, nvols))
+
+        frot_list = []
+        frot_list.append(py.graph_objs.Scatter(x=range(0,nvols),y=abs_pos[:, 0], mode='lines', name='x'))
+        frot_list.append(py.graph_objs.Scatter(x=range(0,nvols),y=abs_pos[:, 1], mode='lines', name='y'))
+        frot_list.append(py.graph_objs.Scatter(x=range(0,nvols),y=abs_pos[:, 2], mode='lines', name='z'))
+        layout = dict(title = 'Rotational Motion Parameters', \
+                      xaxis = dict(title = 'Timepoint', range=[0,nvols]), \
+                      yaxis = dict(title = 'Rotation (rad)'))
+        frot = dict(data=frot_list, layout=layout)
+        appended_path = scanid + "_rot.png"
+        #fnames["rot"] = appended_path
+        path = qcdir + "/" + appended_path
+        #py.plotly.image.save_as(frot, filename=path)
+        offline.plot(frot, filename=path)
 
         trans_abs = np.linalg.norm(abs_pos[:, 3:6], axis=1)
         trans_rel = np.linalg.norm(rel_pos[:, 3:6], axis=1)
         rot_abs = np.linalg.norm(abs_pos[:, 0:3], axis=1)
         rot_rel = np.linalg.norm(rel_pos[:, 0:3], axis=1)
-        fmc = plt.figure()
-        axmc = fmc.add_subplot(111)
-        axmc.plot(trans_abs)
-        axmc.plot(trans_rel)
-        axmc.set_xlabel('Timepoint')
-        axmc.set_ylabel('Movement (mm)')
-        axmc.set_title('Estimated Displacement')
-        axmc.legend(['absolute', 'relative'])
-        axmc.set_xlim((0, nvols))
+        
+        #fmc = plt.figure()
+        #axmc = fmc.add_subplot(111)
+        #axmc.plot(trans_abs)
+        #axmc.plot(trans_rel)
+        #axmc.set_xlabel('Timepoint')
+        #axmc.set_ylabel('Movement (mm)')
+        #axmc.set_title('Estimated Displacement')
+        #axmc.legend(['absolute', 'relative'])
+        #axmc.set_xlim((0, nvols))
+
+        fmc_list = []
+        fmc_list.append(py.graph_objs.Scatter(x=range(0,nvols),y=trans_abs, mode='lines', name='absolute'))
+        fmc_list.append(py.graph_objs.Scatter(x=range(0,nvols),y=trans_rel, mode='lines', name='relative'))
+        layout = dict(title = 'Estimated Displacement', \
+                      xaxis = dict(title = 'Timepoint', range=[0,nvols]), \
+                      yaxis = dict(title = 'Movement (mm)'))
+        fmc = dict(data=fmc_list, layout=layout)
+        appended_path = scanid + "_disp.png"
+        #fnames["disp"] = appended_path
+        path = qcdir + "/" + appended_path
+        #py.plotly.image.save_as(fmc, filename=path)
+        offline.plot(fmc, filename=path)
 
         figures = {"mean_ref": [fmean_ref, nrows, ncols],
                    "mean_anat": [fmean_anat,nrows,ncols],
                    "anat_ref": [fanat_ref,nrows,ncols],
                    "std": [fstd,nrows,ncols],
-                   "snr": [fsnr,nrows,ncols],
-                   "voxel_hist": [fhist,1,1], "intens": [fmi,1,1], 
-                   "trans": [ftrans,1,1], "rot": [frot,1,1], "disp": [fmc,1,1]}
+                   "snr": [fsnr,nrows,ncols]}
         fnames = {}
 
         for idx, figlist in figures.items():
@@ -273,16 +337,16 @@ class fmri_qc(object):
             fig.tight_layout()
             appended_path = scanid + "_" + str(idx) + ".png"
             fnames[idx] = appended_path
-            path = fname + appended_path
+            path = qcdir + "/" + appended_path
             fig.savefig(path)
             plt.close(fig)
 
         fnames['sub'] = scanid
 
-        mgqc().update_template_qc(qc_html, fnames)
+        #mgqc().update_template_qc(qc_html, fnames)
 
 
-        fstat = open(fname + scanid + "_stat_sum.txt", 'w')
+        fstat = open(qcdir + "/" + scanid + "_stat_sum.txt", 'w')
         fstat.write("General Information\n")
         fstat.write("Raw Image Resolution: " +
                     str(mri_raw_im.get_header().get_zooms()[0:3]) + "\n")
@@ -308,101 +372,40 @@ class fmri_qc(object):
         std_rel = np.std(rel_pos, axis=0)
         max_rel = np.max(np.abs(rel_pos), axis=0)
         fstat.write("Motion Statistics\n")
-        fstat.write("Absolute Translational Statistics>>\n")
-        fstat.write("Max absolute motion: %.4f\n" % max(trans_abs))
-        fstat.write("Mean absolute motion: %.4f\n" % np.mean(trans_abs))
-        fstat.write("Number of absolute motions > 1mm: %d\n" %
-                    np.sum(trans_abs > 1))
-        fstat.write("Number of absolute motions > 5mm: %d\n" %
-                    np.sum(trans_abs > 5))
-        fstat.write("Mean absolute x motion: %.4f\n" %
-                    mean_abs[3])
-        fstat.write("Std absolute x position: %.4f\n" %
-                    std_abs[3])
-        fstat.write("Max absolute x motion: %.4f\n" %
-                    max_abs[3])
-        fstat.write("Mean absolute y motion: %.4f\n" %
-                    mean_abs[4])
-        fstat.write("Std absolute y position: %.4f\n" %
-                    std_abs[4])
-        fstat.write("Max absolute y motion: %.4f\n" %
-                    max_abs[4])
-        fstat.write("Mean absolute z motion: %.4f\n" %
-                    mean_abs[5])
-        fstat.write("Std absolute z position: %.4f\n" %
-                    std_abs[5])
-        fstat.write("Max absolute z motion: %.4f\n" %
-                    max_abs[5])
 
-        fstat.write("Relative Translational Statistics>>\n")
-        fstat.write("Max relative motion: %.4f\n" % max(trans_rel))
-        fstat.write("Mean relative motion: %.4f\n" % np.mean(trans_rel))
-        fstat.write("Number of relative motions > 1mm: %d\n" %
-                    np.sum(trans_rel > 1))
-        fstat.write("Number of relative motions > 5mm: %d\n" %
-                    np.sum(trans_rel > 5))
-        fstat.write("Mean relative x motion: %.4f\n" %
-                    mean_abs[3])
-        fstat.write("Std relative x motion: %.4f\n" %
-                    std_rel[3])
-        fstat.write("Max relative x motion: %.4f\n" %
-                    max_rel[3])
-        fstat.write("Mean relative y motion: %.4f\n" %
-                    mean_abs[4])
-        fstat.write("Std relative y motion: %.4f\n" %
-                    std_rel[4])
-        fstat.write("Max relative y motion: %.4f\n" %
-                    max_rel[4])
-        fstat.write("Mean relative z motion: %.4f\n" %
-                    mean_abs[5])
-        fstat.write("Std relative z motion: %.4f\n" %
-                    std_rel[5])
-        fstat.write("Max relative z motion: %.4f\n" %
-                    max_rel[5])
-
-        fstat.write("Absolute Rotational Statistics>>\n")
-        fstat.write("Max absolute rotation: %.4f\n" % max(rot_abs))
-        fstat.write("Mean absolute rotation: %.4f\n" % np.mean(rot_abs))
-        fstat.write("Mean absolute x rotation: %.4f\n" %
-                    mean_abs[0])
-        fstat.write("Std absolute x rotation: %.4f\n" %
-                    std_abs[0])
-        fstat.write("Max absolute x rotation: %.4f\n" %
-                    max_abs[0])
-        fstat.write("Mean absolute y rotation: %.4f\n" %
-                    mean_abs[1])
-        fstat.write("Std absolute y rotation: %.4f\n" %
-                    std_abs[1])
-        fstat.write("Max absolute y rotation: %.4f\n" %
-                    max_abs[1])
-        fstat.write("Mean absolute z rotation: %.4f\n" %
-                    mean_abs[2])
-        fstat.write("Std absolute z rotation: %.4f\n" %
-                    std_abs[2])
-        fstat.write("Max absolute z rotation: %.4f\n" %
-                    max_abs[2])
-
-        fstat.write("Relative Rotational Statistics>>\n")
-        fstat.write("Max relative rotation: %.4f\n" % max(rot_rel))
-        fstat.write("Mean relative rotation: %.4f\n" % np.mean(rot_rel))
-        fstat.write("Mean relative x rotation: %.4f\n" %
-                    mean_rel[0])
-        fstat.write("Std relative x rotation: %.4f\n" %
-                    std_rel[0])
-        fstat.write("Max relative x rotation: %.4f\n" %
-                    max_rel[0])
-        fstat.write("Mean relative y rotation: %.4f\n" %
-                    mean_rel[1])
-        fstat.write("Std relative y rotation: %.4f\n" %
-                    std_rel[1])
-        fstat.write("Max relative y rotation: %.4f\n" %
-                    max_rel[1])
-        fstat.write("Mean relative z rotation: %.4f\n" %
-                    mean_rel[2])
-        fstat.write("Std relative z rotation: %.4f\n" %
-                    std_rel[2])
-        fstat.write("Max relative z rotation: %.4f\n" %
-                    max_rel[2])
+        absrel = ["absolute", "relative"]
+        transrot = ["motion", "rotation"]
+        list1 = [max(trans_abs), np.mean(trans_abs), np.sum(trans_abs > 1), np.sum(trans_abs > 5), \
+                 mean_abs[3], std_abs[3], max_abs[3], mean_abs[4], std_abs[4], max_abs[4], mean_abs[5], \
+                 std_abs[5], max_abs[5]]
+        list2 = [max(trans_rel), np.mean(trans_rel), np.sum(trans_rel > 1), np.sum(trans_rel > 5), \
+                 mean_abs[3], std_rel[3], max_rel[3], mean_abs[4], std_rel[4], max_rel[4], mean_abs[5], \
+                 std_rel[5], max_rel[5]]
+        list3 = [max(rot_abs), np.mean(rot_abs), 0, 0, mean_abs[0], std_abs[0], max_abs[0], mean_abs[1],\
+                 std_abs[1], max_abs[1], mean_abs[2], std_abs[2], max_abs[2]]
+        list4 = [max(rot_rel), np.mean(rot_rel), 0, 0, mean_rel[0], std_rel[0], max_rel[0], mean_rel[1],\
+                 std_rel[1], max_rel[1], mean_rel[2], std_rel[2], max_rel[2]]
+        lists = [list1, list2, list3, list4]
+        headinglist = ["Absolute Translational Statistics>>\n", "Relative Translational Statistics>>\n",\
+                       "Absolute Rotational Statistics>>\n", "Relative Rotational Statistics>>\n"]
+        x = 0
+        for motiontype in transrot:
+            for measurement in absrel:
+                fstat.write(headinglist[x])
+                fstat.write("Max " +measurement+" "+motiontype+": %.4f\n" % lists[x][0])
+                fstat.write("Mean "+measurement+" "+motiontype+": %.4f\n" % lists[x][1])
+                if motiontype == "motion":
+                    fstat.write("Number of "+measurement+" "+motiontype+"s > 1mm: %.4f\n" % lists[x][2])
+                    fstat.write("Number of "+measurement+" "+motiontype+"s > 5mm: %.4f\n" % lists[x][3])
+                fstat.write("Mean "+measurement+" x "+motiontype+": %.4f\n" % lists[x][4])
+                fstat.write("Std " +measurement+" x "+motiontype+": %.4f\n" % lists[x][5])
+                fstat.write("Max " +measurement+" x "+motiontype+": %.4f\n" % lists[x][6])
+                fstat.write("Mean "+measurement+" y "+motiontype+": %.4f\n" % lists[x][7])
+                fstat.write("Std " +measurement+" y "+motiontype+": %.4f\n" % lists[x][8])
+                fstat.write("Max " +measurement+" y "+motiontype+": %.4f\n" % lists[x][9])
+                fstat.write("Mean "+measurement+" z "+motiontype+": %.4f\n" % lists[x][10])
+                fstat.write("Std " +measurement+" z "+motiontype+": %.4f\n" % lists[x][11])
+                fstat.write("Max " +measurement+" z "+motiontype+": %.4f\n" % lists[x][12])
+                x = x + 1
 
         fstat.close()
-        pass
