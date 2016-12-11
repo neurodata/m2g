@@ -206,7 +206,7 @@ class fmri_qc(object):
                       xaxis = dict(title = 'Timepoint', range=[0,nvols]), \
                       yaxis = dict(title = 'Mean Intensity'), height=405, width=720)
         axmi = dict(data=axmi_list, layout=layout)
-        appended_path = scanid + "_intens.html"
+        appended_path = scanid + "_intens.png"
         #fnames["intens"] = appended_path
         path = qcdir + "/" + appended_path
         #py.plotly.image.save_as(axmi, filename=path)
@@ -228,7 +228,7 @@ class fmri_qc(object):
         layout = dict(xaxis = dict(title = 'Voxel Intensity'), \
                       yaxis = dict(title = 'Number of Voxels'), height=405, width=720)
         fhist = dict(data=axvih, layout=layout)
-        appended_path = scanid + "_voxel_hist.html"
+        appended_path = scanid + "_voxel_hist.png"
         #fnames["voxel_hist"] = appended_path
         path = qcdir + "/" + appended_path
         #py.plotly.image.save_as(fhist, filename=path)
@@ -267,7 +267,7 @@ class fmri_qc(object):
                       xaxis = dict(title = 'Timepoint', range=[0,nvols]), \
                       yaxis = dict(title = 'Translation (mm)'))
         ftrans = dict(data=ftrans_list, layout=layout)
-        appended_path = scanid + "_trans.html"
+        appended_path = scanid + "_trans.png"
         #fnames["trans"] = appended_path
         path = qcdir + "/" + appended_path
         #py.plotly.image.save_as(ftrans, filename=path)
@@ -290,7 +290,7 @@ class fmri_qc(object):
                       xaxis = dict(title = 'Timepoint', range=[0,nvols]), \
                       yaxis = dict(title = 'Rotation (rad)'))
         frot = dict(data=frot_list, layout=layout)
-        appended_path = scanid + "_rot.html"
+        appended_path = scanid + "_rot.png"
         #fnames["rot"] = appended_path
         path = qcdir + "/" + appended_path
         #py.plotly.image.save_as(frot, filename=path)
@@ -318,7 +318,7 @@ class fmri_qc(object):
                       xaxis = dict(title = 'Timepoint', range=[0,nvols]), \
                       yaxis = dict(title = 'Movement (mm)'))
         fmc = dict(data=fmc_list, layout=layout)
-        appended_path = scanid + "_disp.html"
+        appended_path = scanid + "_disp.png"
         #fnames["disp"] = appended_path
         path = qcdir + "/" + appended_path
         #py.plotly.image.save_as(fmc, filename=path)
@@ -343,7 +343,7 @@ class fmri_qc(object):
 
         fnames['sub'] = scanid
 
-        #mgqc().update_template_qc(qc_html, fnames)
+        mgqc().update_template_qc(qc_html, fnames)
 
 
         fstat = open(qcdir + "/" + scanid + "_stat_sum.txt", 'w')
