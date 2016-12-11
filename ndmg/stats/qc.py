@@ -324,10 +324,10 @@ class qc(object):
         colors[n] = 'rgba(26,200,255,1)'
         axvar = [py.graph_objs.Bar(x=range(s.shape[0]),y=s, marker=dict(color=colors))]
         #axvar.append(py.graph_obs.Bar(x=range(s.shape[0]), y=s[n]))
-        layout = dict(title = " ".join([title,"Scree Plot," ,"N=", str(n),",","Explained Variance=",str(var_acct)]), xaxis = dict(title = 'Component'), yaxis = dict(title = 'Variance'))#, height=405, width=720)
+        layout = dict(title = " ".join([title,"Scree Plot," ,"N=", str(n),",","Var=",str(var_acct)]), xaxis = dict(title = 'Component'), yaxis = dict(title = 'Variance'))#, height=405, width=720)
         fvar = dict(data=axvar, layout=layout)
         #py.plotly.image.save_as(fvar, filename=str(qcdir + "/" + scanid + "_var.png"))
-        offline.plot(fvar, filename=str(qcdir + "/" + scanid + "_var"), auto_open=False)
+        offline.plot(fvar, filename=str(qcdir + "/" + scanid + "_scree.html"), auto_open=False)
 
     def mask_align(self, mri_data, ref_data, qcdir, scanid="", refid=""):
         """
