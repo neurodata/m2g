@@ -220,13 +220,13 @@ class qc(object):
         #plt.close(fkde)
 
         axkde_list = []
-	axkde_list.append(py.graph_objs.Scatter(x=kdes[0],y=kdes[1], mode='lines', name='before, mean = %.2E' % np.mean(zip(*v_bef)[1])))
-        axkde_list.append(py.graph_objs.Scatter(x=kdes[0],y=kdes[2], mode='lines', name='after, mean = %.2E' % np.mean(zip(*v_aft)[1])))
+	axkde_list.append(py.graph_objs.Scatter(x=kdes[0],y=kdes[1], color='(0, 0, 255, 1)', mode='lines', name='before, mean = %.2E' % np.mean(zip(*v_bef)[1])))
+        axkde_list.append(py.graph_objs.Scatter(x=kdes[0],y=kdes[2], color='(255, 0, 0, 1)' mode='lines', name='after, mean = %.2E' % np.mean(zip(*v_aft)[1])))
 	layout = dict(title = title + (" Hellinger Distance = %.4E" % self.hdist(zip(*v_bef)[1], zip(*v_aft)[1])), xaxis = dict(title = 'MSE', range=xlim), yaxis = dict(title = 'Density', range=ylim))
         fkde = dict(data=axkde_list, layout=layout)
-        path = qcdir + "/" + fname + "_kde.png"
+        path = qcdir + "/" + fname + "_kde.html"
         #py.plotly.image.save_as(fkde, filename=path)
-        offline.plot(fkde, filename=path)
+        offline.plot(fkde, filename=path, auto_open=False)
 
         #fjit = plt.figure()
         #axjit = fjit.add_subplot(111)
@@ -249,15 +249,15 @@ class qc(object):
         #plt.close(fjit)
 
         axjit_list = []
-	axjit_list.append(py.graph_objs.Scatter(x=zip(*v_bef)[0],y=zip(*v_bef)[1], name='before, mean = %.2E' % np.mean(zip(*v_bef)[1]), marker = dict(size = 3.0, color = 'rgba(0, 0, 255, .4)'), mode='markers'))
-        axjit_list.append(py.graph_objs.Scatter(x=zip(*v_aft)[0],y=zip(*v_aft)[1], name='after, mean = %.2E' % np.mean(zip(*v_aft)[1]), marker = dict(size = 3.0, color = 'rgba(0, 255, 0, .4)'), mode='markers'))
+	axjit_list.append(py.graph_objs.Scatter(x=zip(*v_bef)[0],y=zip(*v_bef)[1], name='before, mean = %.2E' % np.mean(zip(*v_bef)[1]), marker = dict(size = 3.0, color = 'rgba(0, 0, 255, 1)'), mode='markers'))
+        axjit_list.append(py.graph_objs.Scatter(x=zip(*v_aft)[0],y=zip(*v_aft)[1], name='after, mean = %.2E' % np.mean(zip(*v_aft)[1]), marker = dict(size = 3.0, color = 'rgba(255, 0, 0, 1)'), mode='markers'))
 	layout = dict(title = "Jitter Plot showing slicewise impact of " + title, \
                       xaxis = dict(title = 'Slice Number', range=xlim), \
                       yaxis = dict(title = 'MSE', range=ylim))
         fjit = dict(data=axjit_list, layout=layout)
-        path = qcdir + "/" + fname + "_jitter.png"
+        path = qcdir + "/" + fname + "_jitter.html"
         #py.plotly.image.save_as(fjit, filename=path)
-        offline.plot(fjit, filename=path)
+        offline.plot(fjit, filename=path, auto_open=False)
         
         pass
 
@@ -320,14 +320,14 @@ class qc(object):
         #fvar.savefig(qcdir + "/" + scanid + "_scree.png")
         #plt.close(fvar)
 
-        colors = ['rgba(26,118,255,1)'] * s.shape[0]
+        colors = ['rgba(255,0, 0,1)'] * s.shape[0]
         colors[n] = 'rgba(26,200,255,1)'
         axvar = [py.graph_objs.Bar(x=range(s.shape[0]),y=s, marker=dict(color=colors))]
         #axvar.append(py.graph_obs.Bar(x=range(s.shape[0]), y=s[n]))
         layout = dict(title = " ".join([title,"Scree Plot," ,"N=", str(n),",","Explained Variance=",str(var_acct)]), xaxis = dict(title = 'Component'), yaxis = dict(title = 'Variance'))#, height=405, width=720)
         fvar = dict(data=axvar, layout=layout)
         #py.plotly.image.save_as(fvar, filename=str(qcdir + "/" + scanid + "_var.png"))
-        offline.plot(fvar, filename=str(qcdir + "/" + scanid + "_var"))
+        offline.plot(fvar, filename=str(qcdir + "/" + scanid + "_var"), auto_open=False)
 
     def mask_align(self, mri_data, ref_data, qcdir, scanid="", refid=""):
         """
@@ -458,7 +458,7 @@ class qc(object):
                   for.
         """
         path = qcdir + "/" + scanid + "_" + refid
-        fname_ts = path + "_timeseries.png"
+        fname_ts = path + "_timeseries.html"
         fname_corr = path + "_corr.png"
         #fts = plt.figure()
         #axts = fts.add_subplot(111)
@@ -481,7 +481,7 @@ class qc(object):
         layout = dict(title = " ".join([scanid, refid, "ROI Timeseries"]), xaxis = dict(title = 'Time Point (TRs)', range=[0,timeseries.T.shape[0]]), yaxis = dict(title = 'Intensity'), showlegend = False)#, height=405, width=720)
         fts = dict(data=fts_list, layout=layout)
         #py.plotly.image.save_as(fts, filename=fname_ts)
-        offline.plot(fts, filename=fname_ts)
+        offline.plot(fts, filename=fname_ts, auto_open=False)
 
         fcorr = plt.figure()
         axcorr = fcorr.add_subplot(111)
