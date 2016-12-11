@@ -220,8 +220,8 @@ class qc(object):
         #plt.close(fkde)
 
         axkde_list = []
-	axkde_list.append(py.graph_objs.Scatter(x=kdes[0],y=kdes[1], color='(0, 0, 255, 1)', mode='lines', name='before, mean = %.2E' % np.mean(zip(*v_bef)[1])))
-        axkde_list.append(py.graph_objs.Scatter(x=kdes[0],y=kdes[2], color='(255, 0, 0, 1)', mode='lines', name='after, mean = %.2E' % np.mean(zip(*v_aft)[1])))
+	axkde_list.append(py.graph_objs.Scatter(x=kdes[0],y=kdes[1], fillcolor='(0, 0, 255, 1)', mode='lines', name='before, mean = %.2E' % np.mean(zip(*v_bef)[1])))
+        axkde_list.append(py.graph_objs.Scatter(x=kdes[0],y=kdes[2], fillcolor='(255, 0, 0, 1)', mode='lines', name='after, mean = %.2E' % np.mean(zip(*v_aft)[1])))
 	layout = dict(title = title + (" Hellinger Distance = %.4E" % self.hdist(zip(*v_bef)[1], zip(*v_aft)[1])), xaxis = dict(title = 'MSE', range=xlim), yaxis = dict(title = 'Density', range=ylim))
         fkde = dict(data=axkde_list, layout=layout)
         path = qcdir + "/" + fname + "_kde.html"
