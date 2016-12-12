@@ -342,9 +342,13 @@ class fmri_qc(object):
             plt.close(fig)
 
         fnames['sub'] = scanid
+        fnames['trans'] = scanid + "_trans.html"
+        fnames['rot'] = scanid + "_rot.html"
+        fnames['disp'] = scanid + "_disp.html"
+        fnames['intens'] = scanid + "_intens.html"
+        fnames['voxel_hist'] = scanid + "_voxel_hist.html"
 
         mgqc().update_template_qc(qc_html, fnames)
-
 
         fstat = open(qcdir + "/" + scanid + "_stat_sum.txt", 'w')
         fstat.write("General Information\n")
