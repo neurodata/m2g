@@ -1,0 +1,14 @@
+{
+	"inputs" : [
+		{ "dti_file" : "/tmp/project_demo/sub-0025864_session-1_dwi.nii.gz" },
+		{ "bval_file" : "/tmp/project_demo/sub-0025864_session-1_dwi.bval" },
+		{ "bvec_file" : "/tmp/project_demo/sub-0025864_session-1_dwi.bvec" },
+		{ "mprage_file" : "/tmp/project_demo/sub-0025864_session-1_T1w.nii.gz" },
+		{ "atlas" : "/ndmg_atlases/atlas/MNI152_T1_1mm.nii.gz" },
+		{ "mask" : "/ndmg_atlases/atlas/MNI152_T1_1mm_brain_mask.nii.gz" },
+		{ "outdir" : "/project_demo/output/" },
+		{ "desikan" : "/ndmg_atlases/labels/desikan.nii.gz" },
+		{ "aal" : "/ndmg_atlases/labels/AAL.nii.gz" },
+		{ "clean" : "true" }
+	]
+}
