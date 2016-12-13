@@ -1,0 +1,233 @@
+{
+  "name": "ndmg",
+  "tool-version": "v0.0.38",
+  "description": "dwi connectome estimation pipeline",
+  "command-line": "ndmg_pipeline [DTI] [BVAL] [BVEC] [MPRAGE] [ATLAS] [MASK] [OUTDIR] [DESIKAN] [JHU] [TALAIRACH] [AAL] [HARVARDOXFORD] [CPAC200] [DS00071] [DS00096] [DS00108] [DS00140] [DS00195] [DS00278] [DS00350] [DS00446] [DS00583] [DS00833] [DS01216] [DS01876] [DS03231] [DS06481] [DS16784] [DS72784] [SLAB1068] [SLAB907] [CLEAN]",
+  "docker-image": "neurodata/ndmg",
+  "docker-index": "http://index.docker.io",
+  "schema-version": "0.2",
+  "walltime-estimate": 3600,
+  "groups": [
+    {
+      "id": "parcellation_group",
+      "name": "Group of all used parcellations",
+      "members": [
+        "desikan",
+        "jhu",
+        "talairach",
+        "aal",
+        "harvardoxford",
+        "cpac200"
+      ],
+      "one-is-required": true
+    }
+  ],
+  "inputs": [
+    {
+      "id": "dti_file",
+      "name": "Diffusion Tensor Image",
+      "type": "File",
+      "command-line-key": "[DTI]",
+      "optional": false
+    },
+    {
+      "id": "bval_file",
+      "name": "B-values file",
+      "type": "File",
+      "command-line-key": "[BVAL]",
+      "optional": false
+    },
+    {
+      "id": "bvec_file",
+      "name": "Gradient vectors file",
+      "type": "File",
+      "command-line-key": "[BVEC]",
+      "optional": false
+    },
+    {
+      "id": "mprage_file",
+      "name": "Structural scan file",
+      "type": "File",
+      "command-line-key": "[MPRAGE]",
+      "optional": false
+    },
+    {
+      "id": "atlas",
+      "name": "Atlas image (MNI152)",
+      "type": "Enum",
+      "command-line-key": "[ATLAS]",
+      "optional": false,
+      "enum-value-choices": [
+        "/ndmg_atlases/atlas/MNI152_T1_1mm.nii.gz"
+      ]
+    },
+    {
+      "id": "mask",
+      "name": "Atlas brain mask",
+      "type": "Enum",
+      "command-line-key": "[MASK]",
+      "optional": false,
+      "enum-value-choices": [
+        "/ndmg_atlases/atlas/MNI152_T1_1mm_brain_mask.nii.gz"
+      ]
+    },
+    {
+      "id": "outdir",
+      "name": "Output directory",
+      "type": "String",
+      "command-line-key": "[OUTDIR]",
+      "optional": false
+    },
+    {
+      "id": "desikan",
+      "name": "Desikan parcellation",
+      "type": "Enum",
+      "command-line-key": "[DESIKAN]",
+      "optional": true,
+      "enum-value-choices": [
+        "/ndmg_atlases/labels/desikan.nii.gz"
+      ]
+    },
+    {
+      "id": "jhu",
+      "name": "JHU parcellation",
+      "type": "Enum",
+      "command-line-key": "[JHU]",
+      "optional": true,
+      "enum-value-choices": [
+        "/ndmg_atlases/labels/JHU.nii.gz"
+      ]
+    },
+    {
+      "id": "talairach",
+      "name": "Talairach parcellation",
+      "type": "Enum",
+      "command-line-key": "[TALAIRACH]",
+      "optional": true,
+      "enum-value-choices": [
+        "/ndmg_atlases/labels/Talairach.nii.gz"
+      ]
+    },
+    {
+      "id": "aal",
+      "name": "AAL parcellation",
+      "type": "Enum",
+      "command-line-key": "[AAL]",
+      "optional": true,
+      "enum-value-choices": [
+        "/ndmg_atlases/labels/AAL.nii.gz"
+      ]
+    },
+    {
+      "id": "harvardoxford",
+      "name": "Harvard-Oxford parcellation",
+      "type": "Enum",
+      "command-line-key": "[HARVARDOXFORD]",
+      "optional": true,
+      "enum-value-choices": [
+        "/ndmg_atlases/labels/HarvardOxford.nii.gz"
+      ]
+    },
+    {
+      "id": "cpac200",
+      "name": "CPAC200 parcellation",
+      "type": "Enum",
+      "command-line-key": "[CPAC200]",
+      "optional": true,
+      "enum-value-choices": [
+        "/ndmg_atlases/labels/CPAC200.nii.gz"
+      ]
+    },
+    {
+      "id": "clean",
+      "name": "Clean-up flag",
+      "type": "Flag",
+      "command-line-key": "[CLEAN]",
+      "optional": true,
+      "command-line-flag": "-c"
+    }
+  ],
+  "output-files": [
+    {
+      "id": "aligned_dti",
+      "name": "Aligned DTI volume",
+      "path-template": "[OUTDIR]/reg_dti/[DTI]_aligned.nii.gz",
+      "path-template-stripped-extensions": [
+        "[\".nii\",\".nii.gz\"]"
+      ],
+      "optional": true
+    },
+    {
+      "id": "tensors",
+      "name": "Tensor maps",
+      "path-template": "[OUTDIR]/tensors/[DTI]_tensors.npz",
+      "path-template-stripped-extensions": [
+        "[\".nii\",\".nii.gz\"]"
+      ],
+      "optional": true
+    },
+    {
+      "id": "fibers",
+      "name": "Fiber streamlines",
+      "path-template": "[OUTDIR]/fiberes/[DTI]_fibers.npz",
+      "path-template-stripped-extensions": [
+        "[\".nii\",\".nii.gz\"]"
+      ],
+      "optional": true
+    },
+    {
+      "id": "desikan_graph",
+      "name": "Desikan graph",
+      "path-template": "[OUTDIR]/graphs/desikan/[DTI]_desikan.gpickle",
+      "path-template-stripped-extensions": [
+        "[\".nii\",\".nii.gz\"]"
+      ],
+      "optional": true
+    },
+    {
+      "id": "jhu_graph",
+      "name": "JHU graph",
+      "path-template": "[OUTDIR]/graphs/JHU/[DTI]_JHU.gpickle",
+      "path-template-stripped-extensions": [
+        "[\".nii\",\".nii.gz\"]"
+      ],
+      "optional": true
+    },
+    {
+      "id": "talairach_graph",
+      "name": "Talairach graph",
+      "path-template": "[OUTDIR]/graphs/Talairach/[DTI]_Talairach.gpickle",
+      "path-template-stripped-extensions": [
+        "[\".nii\",\".nii.gz\"]"
+      ],
+      "optional": true
+    },
+    {
+      "id": "aal_graph",
+      "name": "AAL graph",
+      "path-template": "[OUTDIR]/graphs/AAL/[DTI]_AAL.gpickle",
+      "path-template-stripped-extensions": [
+        "[\".nii\",\".nii.gz\"]"
+      ],
+      "optional": true
+    },
+    {
+      "id": "harvardoxford_graph",
+      "name": "Harvard-Oxford graph",
+      "path-template": "[OUTDIR]/graphs/HarvardOxford/[DTI]_HarvardOxford.gpickle",
+      "path-template-stripped-extensions": [
+        "[\".nii\",\".nii.gz\"]"
+      ],
+      "optional": true
+    },
+    {
+      "id": "cpac200_graph",
+      "name": "CPAC200 graph",
+      "path-template": "[OUTDIR]/graphs/CPAC200/[DTI]_CPAC200.gpickle",
+      "path-template-stripped-extensions": [
+        "[\".nii\",\".nii.gz\"]"
+      ],
+      "optional": true
+    }
+  ]
+}
