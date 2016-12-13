@@ -2,7 +2,7 @@
   "name": "ndmg",
   "tool-version": "v0.0.38",
   "description": "dwi connectome estimation pipeline",
-  "command-line": "ndmg_pipeline [DTI] [BVAL] [BVEC] [MPRAGE] [ATLAS] [MASK] [OUTDIR] [DESIKAN] [JHU] [TALAIRACH] [AAL] [HARVARDOXFORD] [CPAC200] [DS00071] [DS00096] [DS00108] [DS00140] [DS00195] [DS00278] [DS00350] [DS00446] [DS00583] [DS00833] [DS01216] [DS01876] [DS03231] [DS06481] [DS16784] [DS72784] [SLAB1068] [SLAB907] [CLEAN]",
+  "command-line": "ndmg_pipeline [DTI] [BVAL] [BVEC] [MPRAGE] [ATLAS] [MASK] [OUTDIR] [DESIKAN] [JHU] [TALAIRACH] [AAL] [HARVARDOXFORD] [CPAC200] [CLEAN]",
   "docker-image": "neurodata/ndmg",
   "docker-index": "http://index.docker.io",
   "schema-version": "0.2",
