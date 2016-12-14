@@ -3,4 +3,4 @@
 	url = https://github.com/BIDS-Apps/ndmg
 [submodule "cbrain-tools"]
 	path = apps/cbrain-tools
-	url = git@github.com:neurodata/cbrain-tools.git
+	url = https://github.com/neurodata/cbrain-tools
