@@ -1,3 +1,6 @@
 [submodule "docker"]
-	path = bids-app
+	path = apps/bids-app
 	url = https://github.com/BIDS-Apps/ndmg
+[submodule "cbrain-tools"]
+	path = apps/cbrain-tools
+	url = git@github.com:neurodata/cbrain-tools.git
