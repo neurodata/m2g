@@ -2,5 +2,5 @@
 	path = apps/bids-app
 	url = https://github.com/BIDS-Apps/ndmg
 [submodule "cbrain-tools"]
-	path = apps/cbrain-tools
+	path = apps/boutiques
 	url = https://github.com/neurodata/cbrain-tools
