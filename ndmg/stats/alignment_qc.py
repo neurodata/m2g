@@ -34,7 +34,7 @@ from ndmg.utils import utils as mgu
 import plotly as py
 import plotly.offline as offline
 
-class qc(object):
+class alignment_qc(object):
 
     def __init__(self):
         """

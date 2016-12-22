@@ -21,7 +21,7 @@
 from ndmg.utils import utils as mgu
 import nibabel as nb
 import numpy as np
-from ndmg.stats import qc as mgqc
+from ndmg.stats import alignment_qc as mgqc
 import scipy.signal as signal
 
 class nuis(object):
@@ -250,7 +250,7 @@ class nuis(object):
             - wmmask:
                 - the path to a white matter mask (should be eroded ahead of time).
             - lvmask:
-                - the path to a lateral ventricles mask.
+                - the path to a lateral ventricles csf mask.
             - n:
                 - the number of components to consider for white matter regression.
             - t:
@@ -346,25 +346,36 @@ class nuis(object):
 
         map_path = mgu().name_tmps(outdir, nuisname, "_map")
         wmmask = mgu().name_tmps(outdir, nuisname, "_wm_mask.nii.gz")
+        csfmask = mgu().name_tmps(outdir, nuisname, "_csf_mask.nii.gz")
         er_wmmask = mgu().name_tmps(outdir, nuisname, "_eroded_wm_mask.nii.gz")
+        er_csfmask = mgu().name_tmps(outdir, nuisname, "_eroded_csf_mask.nii.gz")
 
         # segmetn the image into different classes of brain tissue
         self.segment_anat(amri, an, map_path)
         # FAST will place the white matter probability map here
         wm_prob = map_path + "_pve_2.nii.gz"
+        csf_prob = map_path + "_pve_0.nii.gz"
         self.extract_mask(wm_prob, wmmask, .99)
+        self.extract_mask(csf_prob, csfmask, .95)
         self.erode_mask(wmmask, er_wmmask, 2)
+        self.erode_mask(csfmask, er_csfmask, 2)
 
         if qcdir is not None:
             # show the eroded white matter mask over the anatomical image
             # with different opaquenesses
             mgqc().mask_align(er_wmmask, amri, qcdir,
                               scanid=anat_name + "_eroded_wm", refid=anat_name)
+            # same for csf
+            mgqc().mask_align(er_csfmask, amri, qcdir,
+                              scanid=anat_name + "_eroded_csf", refid=anat_name)
             # show the eroded white mask over the original white matter mask
             mgqc().mask_align(er_wmmask, wmmask, qcdir,
                               scanid=anat_name + "_eroded_wm",
                               refid=anat_name + "_wm")
+            mgqc().mask_align(er_csfmask, csfmask, qcdir,
+                              scanid=anat_name + "_eroded_csf",
+                              refid=anat_name + "_csf")
 
-        self.regress_nuisance(fmri, nuisance_mri, er_wmmask, lvmask, n=5,
+        self.regress_nuisance(fmri, nuisance_mri, er_wmmask, er_csfmask, n=5,
                               t=None, qcdir=qcdir)
         pass

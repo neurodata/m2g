@@ -26,7 +26,7 @@ import nibabel as nb
 import numpy as np
 import nilearn.image as nl
 import dipy.align.reslice as dr
-from ndmg.stats import qc as mgqc
+from ndmg.stats import alignment_qc as mgqc
 
 
 class register(object):
