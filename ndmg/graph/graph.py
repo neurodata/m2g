@@ -19,6 +19,8 @@
 # Created by Greg Kiar on 2016-01-27.
 # Email: gkiar@jhu.edu
 
+from __future__ import print_function
+
 from itertools import combinations
 from collections import defaultdict
 import numpy as np
@@ -61,7 +63,7 @@ class graph(object):
                           ecount=0,
                           vcount=len(n_ids)
                           )
-        print self.g.graph
+        print(self.g.graph)
 
         [self.g.add_node(ids) for ids in n_ids]
         pass
@@ -77,11 +79,11 @@ class graph(object):
                       or compatible format.
         """
 
-        print "# of Streamlines: " + str(np.shape(streamlines)[0])
+        print("# of Streamlines: " + str(np.shape(streamlines)[0]))
 
         for idx, streamline in enumerate(streamlines):
             if (idx % 25000) == 0:
-                print idx
+                print(idx)
 
             points = np.round(streamline).astype(int)
             p = set()
@@ -112,7 +114,7 @@ class graph(object):
         try:
             return self.g
         except AttributeError:
-            print "Error: the graph has not yet been defined."
+            print("Error: the graph has not yet been defined.")
             pass
 
     def save_graph(self, graphname, fmt='gpickle'):
@@ -135,13 +137,13 @@ class graph(object):
         elif fmt == 'graphml':
             nx.write_graphml(self.g, graphname)
         else:
-            Error('graphml is the only format currently supported')
+            raise ValueError('graphml is the only format currently supported')
         pass
 
     def summary(self):
         """
         User friendly wrapping and display of graph properties
         """
-        print "\n Graph Summary:"
-        print nx.info(self.g)
+        print("\n Graph Summary:")
+        print(nx.info(self.g))
         pass

@@ -19,9 +19,10 @@
 # Created by Will Gray Roncal on 2016-01-28.
 # Email: wgr@jhu.edu
 
-from itertools import combinations
+from __future__ import print_function
+
 from datetime import datetime
-from dipy.io import read_bvals_bvecs, read_bvec_file
+from dipy.io import read_bvals_bvecs
 from dipy.core.gradients import gradient_table
 from subprocess import Popen, PIPE
 import numpy as np
@@ -50,6 +51,7 @@ class utils():
         """
 
         # Load Data
+        # XXX unused
         startTime = datetime.now()
 
         img = nb.load(dti_file)
@@ -72,7 +74,7 @@ class utils():
 
         gtab = gradient_table(bvals, bvecs, atol=0.01)
 
-        print gtab.info
+        print(gtab.info)
         return gtab
 
     def load_bval_bvec(self, fbval, fbvec):
@@ -90,7 +92,7 @@ class utils():
 
         gtab = gradient_table(bvals, bvecs, atol=0.01)
 
-        print gtab.info
+        print(gtab.info)
         return gtab
 
     def get_b0(self, gtab, data):

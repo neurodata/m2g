@@ -19,6 +19,8 @@
 # Created by Greg Kiar on 2016-02-12.
 # Email: gkiar@jhu.edu
 
+from __future__ import print_function
+
 import numpy as np
 import os.path as op
 
@@ -48,8 +50,8 @@ def rescale_bvec(bvec, bvec_new):
         np.savetxt(bvec_new, bv2)
         pass
     except AssertionError:
-        print 'Error: your new b-vector file must have extension .bvec to' +\
-              ' be compatible with the the pipeline.'
+        print('Error: your new b-vector file must have extension .bvec to' +
+              ' be compatible with the the pipeline.')
         pass
     else:
         pass

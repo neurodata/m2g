@@ -19,10 +19,11 @@
 # Created by Greg Kiar and Will Gray Roncal on 2016-01-27.
 # Email: gkiar@jhu.edu, wgr@jhu.edu
 
+from __future__ import print_function
+
 from argparse import ArgumentParser
 from datetime import datetime
 from subprocess import Popen, PIPE
-import os.path as op
 import ndmg.utils as mgu
 import ndmg.register as mgr
 import ndmg.track as mgt
@@ -49,10 +50,14 @@ def ndmg_pipeline(dti, bvals, bvecs, mprage, atlas, mask, labels, outdir,
     if isinstance(labels, list):
         label_name = [mgu().get_filename(x) for x in labels]
         for label in label_name:
+            # XXX - to be really clean, should probably communicate() or wait()
+            # or even better subprocess.call()
             p = Popen("mkdir -p " + outdir + "/graphs/" + label,
                       stdout=PIPE, stderr=PIPE, shell=True)
     else:
         label_name = mgu().get_filename(labels)
+        # XXX - to be really clean, should probably communicate() or wait()
+        # or even better subprocess.call()
         p = Popen("mkdir -p " + outdir + "/graphs/" + label_name,
                   stdout=PIPE, stderr=PIPE, shell=True)
     # Create derivative output file names
@@ -60,18 +65,18 @@ def ndmg_pipeline(dti, bvals, bvecs, mprage, atlas, mask, labels, outdir,
     tensors = "".join([outdir, "/tensors/", dti_name, "_tensors.npz"])
     fibers = "".join([outdir, "/fibers/", dti_name, "_fibers.npz"])
     print("This pipeline will produce the following derivatives...")
-    print("DTI volume registered to atlas: " + aligned_dti)
-    print("Diffusion tensors in atlas space: " + tensors)
-    print("Fiber streamlines in atlas space: " + fibers)
+    print(("DTI volume registered to atlas: " + aligned_dti))
+    print(("Diffusion tensors in atlas space: " + tensors))
+    print(("Fiber streamlines in atlas space: " + fibers))
 
     # Again, graphs are different
     graphs = ["".join([outdir, "/graphs/", x, '/', dti_name, "_", x, '.', fmt])
               for x in label_name]
-    print("Graphs of streamlines downsampled to given labels: " +
-          (", ".join([x for x in graphs])))
+    print(("Graphs of streamlines downsampled to given labels: " +
+          (", ".join([x for x in graphs]))))
 
     # Creates gradient table from bvalues and bvectors
-    print "Generating gradient table..."
+    print("Generating gradient table...")
     dti1 = "".join([outdir, "/tmp/", dti_name, "_t1.nii.gz"])
     bvecs1 = "".join([outdir, "/tmp/", dti_name, "_1.bvec"])
     mgp.rescale_bvec(bvecs, bvecs1)
@@ -91,14 +96,14 @@ def ndmg_pipeline(dti, bvals, bvecs, mprage, atlas, mask, labels, outdir,
 
     # Generate graphs from streamlines for each parcellation
     for idx, label in enumerate(label_name):
-        print("Generating graph for " + label + "parcellation...")
+        print(("Generating graph for " + label + "parcellation..."))
         labels_im = nb.load(labels[idx])
         g1 = mgg(len(np.unique(labels_im.get_data()))-1, labels[idx])
         g1.make_graph(tracks)
         g1.summary()
         g1.save_graph(graphs[idx], fmt=fmt)
 
-    print("Execution took: " + str(datetime.now() - startTime))
+    print(("Execution took: " + str(datetime.now() - startTime)))
 
     # Clean temp files
     if clean:
@@ -133,8 +138,8 @@ def main():
 
     # Create output directory
     cmd = "mkdir -p " + result.outdir + " " + result.outdir + "/tmp"
-    print "Creating output directory: " + result.outdir
-    print "Creating output temp directory: " + result.outdir + "/tmp"
+    print("Creating output directory: " + result.outdir)
+    print("Creating output temp directory: " + result.outdir + "/tmp")
     p = Popen(cmd, stdout=PIPE, stderr=PIPE, shell=True)
     p.communicate()
 

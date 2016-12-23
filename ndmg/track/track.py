@@ -18,7 +18,8 @@
 # Created by Will Gray Roncal on 2016-01-28.
 # Email: wgr@jhu.edu
 
-from itertools import combinations
+from __future__ import print_function
+
 import numpy as np
 import nibabel as nb
 from dipy.reconst.dti import TensorModel, fractional_anisotropy, quantize_evecs
@@ -26,8 +27,7 @@ from dipy.reconst.csdeconv import (ConstrainedSphericalDeconvModel,
                                    auto_response)
 from dipy.direction import peaks_from_model
 from dipy.tracking.eudx import EuDX
-from dipy.data import get_sphere, get_data
-from dipy.core.gradients import gradient_table
+from dipy.data import get_sphere
 
 
 class track():
@@ -140,7 +140,7 @@ class track():
         To derive the FA, used as a stopping criterion, we need to fit a
         tensor model first. Here, we use weighted least squares (WLS).
         """
-        print 'tensors...'
+        print('tensors...')
 
         tensor_model = TensorModel(gtab, fit_method='WLS')
         tensor_fit = tensor_model.fit(data, mask)
@@ -184,7 +184,7 @@ class track():
                     - Structure containing dipy formatted bval/bvec information
         """
 
-        labeldata = nib.load(atlas_file)
+        labeldata = nb.load(atlas_file)
 
         label = labeldata.get_data()
 
@@ -195,7 +195,8 @@ class track():
         mask = (label > 0)
 
         gtab.info
-        print data.shape
+        # XXX probably supposed to be label.shape?
+        print(data.shape)
         """
         For the constrained spherical deconvolution we need to estimate the
         response function (see :ref:`example_reconst_csd`) and create a model.
@@ -214,6 +215,7 @@ class track():
         sphere = get_sphere('symmetric724')
 
         csd_peaks = peaks_from_model(model=csd_model,
+                                     # XXX data not defined
                                      data=data,
                                      sphere=sphere,
                                      mask=mask,
@@ -227,9 +229,10 @@ class track():
         To derive the FA, used as a stopping criterion, we need to fit a
         tensor model first. Here, we use weighted least squares (WLS).
         """
-        print 'tensors...'
+        print('tensors...')
 
         tensor_model = TensorModel(gtab, fit_method='WLS')
+        # XXX data not defined
         tensor_fit = tensor_model.fit(data, mask)
 
         FA = fractional_anisotropy(tensor_fit.evals)
@@ -244,7 +247,8 @@ class track():
 
         stopping_values = np.zeros(csd_peaks.peak_values.shape)
         stopping_values[:] = FA[..., None]
-        print datetime.now() - startTime
+        # XXX datetime not imported, startTime not defined
+        print(datetime.now() - startTime)
         pass
 
     def fibers_eudx(self, stopping_values, peak_indices, seeds,
@@ -265,8 +269,10 @@ class track():
         """
 
         streamline_generator = EuDX(stopping_values,
+                                    # XXX csd_peaks not defined
                                     csd_peaks.peak_indices,
                                     seeds=10**6,
+                                    # XXX sphere not defined
                                     odf_vertices=sphere.vertices,
                                     a_low=0.1)
 
