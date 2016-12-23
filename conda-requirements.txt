@@ -1,0 +1,7 @@
+numpy
+scipy
+nibabel
+nilearn
+scikit-learn
+dipy
+networkx
