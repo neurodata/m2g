@@ -222,12 +222,11 @@ class alignment_qc(object):
         axjit_list = []
         axjit_list.append(py.graph_objs.Scatter(x=zip(*v_bef)[0],
                                                 y=zip(*v_bef)[1],
-                          name='before, mean = %.2E' % np.mean(zip(*v_bef)[1]),
-                          marker=dict(size=3.0, color='rgba(0, 0, 255, 1)'),
-                          mode='markers'))
+                                                name='before, mean = %.2E' % np.mean(zip(*v_bef)[1]),
+                                                marker=dict(size=3.0, color='rgba(0, 0, 255, 1)'),
+                                                mode='markers'))
         axjit_list.append(py.graph_objs.Scatter(x=zip(*v_aft)[0], y=zip(*v_aft)[1],
                                                 name='after, mean = %.2E' % np.mean(zip(*v_aft)[1]),
-                                                np.mean(zip(*v_aft)[1]),
                                                 marker=dict(size=3.0, color='rgba(255, 0, 0, 1)'),
                                                 mode='markers'))
         layout = dict(title="Jitter Plot showing slicewise impact of " + title,
