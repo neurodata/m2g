@@ -26,7 +26,6 @@ import os.path as op
 import os.path
 import nilearn as nl
 from ndmg.utils import utils as mgu
-from ndmg.stats import qc as mgqc
 from scipy import signal
 from ndmg.stats import alignment_qc as mgqc
 
