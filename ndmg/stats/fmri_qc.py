@@ -31,7 +31,7 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from ndmg.utils import utils as mgu
-from ndmg.stats.qc import qc as mgqc
+from ndmg.stats.alignment_qc import alignment_qc as mgqc
 import plotly as py
 import plotly.offline as offline
 
