@@ -203,13 +203,13 @@ class alignment_qc(object):
         axkde_list = []
         axkde_list.append(py.graph_objs.Scatter(x=kdes[0], y=kdes[1],
                           fillcolor='(0, 0, 255, 1)', mode='lines',
-                          name='before, mean = %.2E' % np.mean(zip(*v_bef)[1])))
+                          name='before mean = %.2E' % np.mean(zip(*v_bef)[1])))
         axkde_list.append(py.graph_objs.Scatter(x=kdes[0], y=kdes[2],
                           fillcolor='(255, 0, 0, 1)', mode='lines',
-                          name='after, mean = %.2E' % np.mean(zip(*v_aft)[1])))
+                          name='after mean = %.2E' % np.mean(zip(*v_aft)[1])))
         layout = dict(title=title +
-                      (" Hellinger Distance = %.4E" % self.hdist(zip(*v_bef)[1],
-                                                                 zip(*v_aft)[1])),
+                      (" Hellinger Distance = %.4E" %
+                       self.hdist(zip(*v_bef)[1], zip(*v_aft)[1])),
                       xaxis=dict(title='MSE', range=xlim),
                       yaxis=dict(title='Density', range=ylim))
         fkde = dict(data=axkde_list, layout=layout)
@@ -221,15 +221,17 @@ class alignment_qc(object):
                              np.nanmax(zip(*v_aft)[1]))))
         axjit_list = []
         axjit_list.append(py.graph_objs.Scatter(x=zip(*v_bef)[0],
-                                                y=zip(*v_bef)[1],
-                                                name='before, mean = %.2E' % np.mean(zip(*v_bef)[1]),
-                                                marker=dict(size=3.0, color='rgba(0, 0, 255, 1)'),
-                                                mode='markers'))
-        axjit_list.append(py.graph_objs.Scatter(x=zip(*v_aft)[0], y=zip(*v_aft)[1],
-                                                name='after, mean = %.2E' % np.mean(zip(*v_aft)[1]),
-                                                marker=dict(size=3.0, color='rgba(255, 0, 0, 1)'),
-                                                mode='markers'))
-        layout = dict(title="Jitter Plot showing slicewise impact of " + title,
+                          y=zip(*v_bef)[1],
+                          name='before mean = %.2E' % np.mean(zip(*v_bef)[1]),
+                          marker=dict(size=3.0, color='rgba(0, 0, 255, 1)'),
+                          mode='markers'))
+        axjit_list.append(py.graph_objs.Scatter(x=zip(*v_aft)[0],
+                          y=zip(*v_aft)[1],
+                          name='after mean = %.2E' % np.mean(zip(*v_aft)[1]),
+                          marker=dict(size=3.0, color='rgba(255, 0, 0, 1)'),
+                          mode='markers'))
+        layout = dict(title="Jitter Plot showing slicewise impact of " +
+                      title,
                       xaxis=dict(title='Slice Number', range=xlim),
                       yaxis=dict(title='MSE', range=ylim))
         fjit = dict(data=axjit_list, layout=layout)
@@ -427,8 +429,9 @@ class alignment_qc(object):
 
         fts_list = []
         for d in range(0, timeseries.T.shape[1]):
-            fts_list.append(py.graph_objs.Scatter(x=range(0, timeseries.T.shape[0]),
-                                                  y=timeseries.T[:, d], mode='lines'))
+            fts_list.append(py.graph_objs.Scatter(
+                            x=range(0, timeseries.T.shape[0]),
+                            y=timeseries.T[:, d], mode='lines'))
         layout = dict(title=" ".join([scanid, refid, "ROI Timeseries"]),
                       xaxis=dict(title='Time Point (TRs)',
                                  range=[0, timeseries.T.shape[0]]),
