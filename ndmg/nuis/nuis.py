@@ -1,4 +1,4 @@
-#/usr/bin/env python
+#!/usr/bin/env python
 
 # Copyright 2016 NeuroData (http://neuromri_dat.io)
 #
@@ -23,6 +23,7 @@ import nibabel as nb
 import numpy as np
 from ndmg.stats import alignment_qc as mgqc
 import scipy.signal as signal
+
 
 class nuis(object):
 
@@ -58,7 +59,7 @@ class nuis(object):
         """
         A function to extract principal components on
         timeseries of nuisance variables.
-    
+
         **Positional Arguments:**
             masked_ts:
                 - the timeseries over a masked region.
@@ -70,7 +71,7 @@ class nuis(object):
                 - the threshold for the amount of expected variance,
                   as a float between 0 and 1, where the number of
                   components returned will be less than the threshold
-                  indicated. 
+                  indicated.
         """
         print "Extracting Nuisance Components..."
         # normalize the signal to mean center
@@ -81,13 +82,13 @@ class nuis(object):
         print t
         if n is not None and t is not None:
             raise ValueError('CompCor: you have passed both a number of \
-                              components and a threshold. You should only pass \
+                              components and a threshold. You should pass \
                               one or the other, not both.')
         elif n is not None:
             # return the top n principal components
             return U[:, 0:n], s
         elif t is not None:
-            var_per_comp = s/np.sum(s) # get percent variance of each component
+            var_per_comp = s/np.sum(s)  # percent variance of each component
             total_var = np.cumsum(var_per_comp)
             thresh_var = total_var[total_var > t]
             # return up to lowest component greater than threshold
@@ -110,9 +111,9 @@ class nuis(object):
                 - the image with low frequency signal removed.
         """
         mri_im = nb.load(mri)
-        highpass = 1/.01 # above this freq we want to include
-        low = -1 # below this freq we want to include, -1
-                 # includes all (ignore low pass)
+        highpass = 1/.01  # above this freq we want to include
+        low = -1  # below this freq we want to include, -1
+        # includes all (ignore low pass)
         tr = mri_im.header.get_zooms()[3]
         sigma_high = highpass/(2*tr)
 
@@ -185,27 +186,26 @@ class nuis(object):
             # wherever mask is nonzero
             erode_mask = np.zeros(mask.shape)
             x, y, z = np.where(mask != 0)
-            if (x.shape == y.shape and
-                y.shape == z.shape):
+            if (x.shape == y.shape and y.shape == z.shape):
                 # iterated over all the nonzero voxels
                 for j in range(0, x.shape[0]):
                     # check that the 3d voxels within 1 voxel are 1
                     # if so, add to the new mask
                     md = mask.shape
-                    if (mask[x[j],y[j],z[j]] and
-                        mask[np.min((x[j]+1, md[0]-1)),y[j],z[j]] and
-                        mask[x[j],np.min((y[j]+1, md[1]-1)),z[j]] and
-                        mask[x[j],y[j],np.min((z[j]+1, md[2]-1))] and
-                        mask[np.max((x[j]-1, 0)),y[j],z[j]] and
-                        mask[x[j],np.max((y[j]-1, 0)),z[j]] and
-                        mask[x[j],y[j],np.max((z[j]-1, 0))]):
-                        erode_mask[x[j],y[j],z[j]] = 1
+                    if (mask[x[j], y[j], z[j]] and
+                            mask[np.min((x[j]+1, md[0]-1)), y[j], z[j]] and
+                            mask[x[j], np.min((y[j]+1, md[1]-1)), z[j]] and
+                            mask[x[j], y[j], np.min((z[j]+1, md[2]-1))] and
+                            mask[np.max((x[j]-1, 0)), y[j], z[j]] and
+                            mask[x[j], np.max((y[j]-1, 0)), z[j]] and
+                            mask[x[j], y[j], np.max((z[j]-1, 0))]):
+                        erode_mask[x[j], y[j], z[j]] = 1
             else:
                 raise ValueError('Your mask erosion has an invalid shape.')
             mask = erode_mask
         eroded_mask_img = nb.Nifti1Image(mask,
-                                         header = mask_img.header,
-                                         affine = mask_img.get_affine())
+                                         header=mask_img.header,
+                                         affine=mask_img.get_affine())
         nb.save(eroded_mask_img, eroded_path)
         return mask
 
@@ -228,14 +228,14 @@ class nuis(object):
         prob_dat = prob.get_data()
         mask = (prob_dat > t).astype(int)
         img = nb.Nifti1Image(mask,
-                             header = prob.header,
-                             affine = prob.get_affine())
+                             header=prob.header,
+                             affine=prob.get_affine())
         # save the corrected image
         nb.save(img, mask_path)
         return mask
 
-    def regress_nuisance(self, fmri, nuisance_mri, wmmask, er_csfmask, n=5, t=None,
-                         qcdir=None):
+    def regress_nuisance(self, fmri, nuisance_mri, wmmask, er_csfmask, n=5,
+                         t=None, qcdir=None):
         """
         Regresses Nuisance Signals from brain images. Note that this
         function assumes that you have exactly the masks you wish to use;
@@ -248,13 +248,16 @@ class nuis(object):
             - nuisance_fmri:
                 - the desired path for the nuisance corrected brain.
             - wmmask:
-                - the path to a white matter mask (should be eroded ahead of time).
+                - the path to a white matter mask (should be eroded ahead of
+                  time).
             - er_csfmask:
                 - the path to a lateral ventricles csf mask.
             - n:
-                - the number of components to consider for white matter regression.
+                - the number of components to consider for white matter
+                  regression.
             - t:
-                - the expected variance to consider for white matter regression.
+                - the expected variance to consider for white matter
+                  regression.
             - qcdir:
                 - the quality control directory to place qc.
         """
@@ -286,7 +289,7 @@ class nuis(object):
         # white matter regressor is the top 5 components
         # in the white matter
         wm_reg, s = self.compcor(wm_ts, n=n, t=t)
- 
+
         if qcdir is not None:
             print "Extracting CompCor with " + str(wm_reg.shape)
             mgqc().expected_variance(s, wm_reg.shape[1], qcdir,
@@ -295,16 +298,17 @@ class nuis(object):
 
         # use GLM model given regressors to approximate the weight we want
         # to regress out
-        R = np.column_stack((np.ones(time), lin_reg, quad_reg, wm_reg, csf_reg))
+        R = np.column_stack((np.ones(time), lin_reg, quad_reg, wm_reg,
+                             csf_reg))
         W = self.regress_signal(voxel, R)
         # nuisance ts is the difference btwn the original timeseries and
         # our regressors, and then we transpose back
         nuis_voxel = (voxel - W).T
         # put the nifti back together again
-        fmri_dat[fmri_dat.sum(axis=3) > 0,:] = nuis_voxel
+        fmri_dat[fmri_dat.sum(axis=3) > 0, :] = nuis_voxel
         img = nb.Nifti1Image(fmri_dat,
-                             header = fmri_im.header,
-                             affine = fmri_im.affine)
+                             header=fmri_im.header,
+                             affine=fmri_im.affine)
         # save the corrected image
         nb.save(img, nuisance_mri)
         pass
@@ -343,7 +347,6 @@ class nuis(object):
         anat_name = mgu().get_filename(amri)
         nuisname = "".join([anat_name, "_nuis"])
 
-
         map_path = mgu().name_tmps(outdir, nuisname, "_map")
         wmmask = mgu().name_tmps(outdir, nuisname, "_wm_mask.nii.gz")
         er_wmmask = mgu().name_tmps(outdir, nuisname, "_eroded_wm_mask.nii.gz")
@@ -363,7 +366,8 @@ class nuis(object):
                               scanid=anat_name + "_eroded_wm", refid=anat_name)
             # same for csf
             mgqc().mask_align(er_csfmask, amri, qcdir,
-                              scanid=anat_name + "_eroded_csf", refid=anat_name)
+                              scanid=anat_name + "_eroded_csf",
+                              refid=anat_name)
             # show the eroded white mask over the original white matter mask
             mgqc().mask_align(er_wmmask, wmmask, qcdir,
                               scanid=anat_name + "_eroded_wm",

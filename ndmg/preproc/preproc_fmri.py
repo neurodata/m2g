@@ -57,7 +57,7 @@ class preproc_fmri(object):
 
     def slice_time_correct(self, mri, corrected_mri, stc=None):
         """
-	Performs slice timing correction of a stack of 3D images.
+        Performs slice timing correction of a stack of 3D images.
 
         **Positional Arguments:**
             mri (String):
@@ -143,7 +143,7 @@ class preproc_fmri(object):
         if (stc is not None):
             self.slice_time_correct(mri, stc_mri, stc)
         else:
-            stc_mri = mri 
+            stc_mri = mri
         self.motion_correct(stc_mri, motion_mri, 0)
 
         if qcdir is not None:
