@@ -176,7 +176,7 @@ class utils():
             elif type(brain_file) is nb.nifti1.Nifti1Image:
                 brain = brain_file
             else:
-                raise TypeError("Mask file is of type " + str(type(brain_file)) +
+                raise TypeError("Mask file is type " + str(type(brain_file)) +
                                 "; accepted types are numpy.ndarray, " +
                                 "string, and nibabel.nifti1.Nifti1Image.")
             braindata = brain.get_data()

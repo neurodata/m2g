@@ -35,7 +35,6 @@ from ndmg.nuis import nuis as mgn
 from ndmg.stats import alignment_qc as mggqc
 
 
-
 def fngs_pipeline(fmri, struct, an, atlas, atlas_brain, atlas_mask, lv_mask,
                   labels, outdir, clean=False, stc=None, fmt='gpickle'):
     """
@@ -132,7 +131,7 @@ def fngs_pipeline(fmri, struct, an, atlas, atlas_brain, atlas_mask, lv_mask,
     print "Quality Control HTML Page: " + qc_html
     # Again, connectomes are different
     connectomes = [outdir + "/connectomes/" + x + '/' + fmri_name +
-              "_" + x + '.' + fmt for x in label_name]
+                   "_" + x + '.' + fmt for x in label_name]
     roi_ts = [outdir + "/roi_timeseries/" + x + '/' + fmri_name + "_" + x +
               ".npz" for x in label_name]
     print "ROI timecourse downsampled to given labels: " +\
@@ -158,8 +157,8 @@ def fngs_pipeline(fmri, struct, an, atlas, atlas_brain, atlas_mask, lv_mask,
         print "Extracting ROI timeseries for " + label + " parcellation..."
         try:
             ts = mgts().roi_timeseries(nuis_fmri, labels[idx], roi_ts[idx],
-                                   qcdir=roidir + "/" + label,
-                                   scanid=fmri_name, refid=label)
+                                       qcdir=roidir + "/" + label,
+                                       scanid=fmri_name, refid=label)
             mggqc().image_align(atlas_brain, labels[idx], roidir + "/" + label,
                                 scanid=atlas_name, refid=label)
         except OSError as err:
@@ -169,8 +168,9 @@ def fngs_pipeline(fmri, struct, an, atlas, atlas_brain, atlas_mask, lv_mask,
         connectome.summary()
         connectome.save_graph(connectomes[idx], fmt=fmt)
 
-    #cmd = "rm -r " + outdir + "/tmp/" + fmri_name + "*"
-    #mgu().execute_cmd(cmd)
+    if clean:
+        cmd = "rm -r " + outdir + "/tmp/" + fmri_name + "*"
+        mgu().execute_cmd(cmd)
 
     print "Complete! FNGS first run"
     pass
@@ -196,10 +196,11 @@ def main():
                         labels of regions of interest in atlas space")
     parser.add_argument("-c", "--clean", action="store_true", default=False,
                         help="Whether or not to delete intemediates")
-    parser.add_argument("-s", "--stc", action="store", help="A file for slice timing \
-                        correction. Options are a TR sequence file (where \
-                        each line is the shift in TRs), up (ie, bottom to top), \
-                        down (ie, top to bottom), and interleaved.", default=None)
+    parser.add_argument("-s", "--stc", action="store", help="A file for slice \
+                        timing correction. Options are a TR sequence file \
+                        (where \ each line is the shift in TRs), \
+                        up (ie, bottom to top), down (ie, top to bottom), \
+                        and interleaved.", default=None)
     parser.add_argument("-f", "--fmt", action="store", default='gpickle',
                         help="Determines connectome output format")
     result = parser.parse_args()

@@ -305,7 +305,6 @@ class register(object):
         warp_mpr2temp = mgu().name_tmps(outdir, mri_name,
                                         "_warp_mpr2temp.nii.gz")
 
-
         mgu().get_slice(mri, 0, s0)  # get the 0 slice and save
         # extract the anatomical brain
         mgu().extract_brain(anat, anat_brain)
@@ -325,8 +324,9 @@ class register(object):
         self.apply_warp(mri, aligned_mri, atlas, warp_mpr2temp,
                         xfm=xfm_func2mpr)
         # apply the warp back to the anatomical image for quality control.
-        self.apply_warp(anat, aligned_anat, atlas, warp_mpr2temp, mask=atlas_mask)
-        #mgu().extract_brain(aligned_anat, aligned_anat)
+        self.apply_warp(anat, aligned_anat, atlas, warp_mpr2temp,
+                        mask=atlas_mask)
+        # mgu().extract_brain(aligned_anat, aligned_anat)
 
         if qcdir is not None:
             mgqc().check_alignments(mri, aligned_mri, atlas, qcdir,
@@ -334,7 +334,6 @@ class register(object):
             mgqc().image_align(aligned_mri, atlas_brain, qcdir,
                                scanid=mri_name, refid=atlas_name)
         pass
-
 
     def dti2atlas(self, dti, gtab, mprage, atlas,
                   aligned_dti, outdir, clean=False):

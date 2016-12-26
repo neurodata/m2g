@@ -34,8 +34,8 @@ from ndmg.utils import utils as mgu
 import plotly as py
 import plotly.offline as offline
 
-class alignment_qc(object):
 
+class alignment_qc(object):
     def __init__(self):
         """
         Enables quality control of fMRI and DTI processing pipelines.
@@ -136,7 +136,7 @@ class alignment_qc(object):
         """
         A function to check alignments and generate descriptive statistics
         and plots based on the overlap between two images.
-        
+
         **Positional Arguments**
             mri_bname:
                 - the 4d mri file before an operation has taken place
@@ -201,17 +201,17 @@ class alignment_qc(object):
         xlim = tuple((0, np.nanmax(kdes[0])))
         ylim = tuple((0, max(np.nanmax(kdes[1]), np.nanmax(kdes[2]))))
         axkde_list = []
-        axkde_list.append(py.graph_objs.Scatter(x=kdes[0],y=kdes[1],
+        axkde_list.append(py.graph_objs.Scatter(x=kdes[0], y=kdes[1],
                           fillcolor='(0, 0, 255, 1)', mode='lines',
                           name='before, mean = %.2E' % np.mean(zip(*v_bef)[1])))
-        axkde_list.append(py.graph_objs.Scatter(x=kdes[0],y=kdes[2],
+        axkde_list.append(py.graph_objs.Scatter(x=kdes[0], y=kdes[2],
                           fillcolor='(255, 0, 0, 1)', mode='lines',
                           name='after, mean = %.2E' % np.mean(zip(*v_aft)[1])))
-        layout = dict(title = title + 
+        layout = dict(title=title +
                       (" Hellinger Distance = %.4E" % self.hdist(zip(*v_bef)[1],
                                                                  zip(*v_aft)[1])),
-                      xaxis = dict(title = 'MSE', range=xlim),
-                      yaxis = dict(title = 'Density', range=ylim))
+                      xaxis=dict(title='MSE', range=xlim),
+                      yaxis=dict(title='Density', range=ylim))
         fkde = dict(data=axkde_list, layout=layout)
         path = qcdir + "/" + fname + "_kde.html"
         offline.plot(fkde, filename=path, auto_open=False)
@@ -220,22 +220,22 @@ class alignment_qc(object):
         ylim = tuple((0, max(np.nanmax(zip(*v_bef)[1]),
                              np.nanmax(zip(*v_aft)[1]))))
         axjit_list = []
-        axjit_list.append(py.graph_objs.Scatter(x=zip(*v_bef)[0],y=zip(*v_bef)[1],
+        axjit_list.append(py.graph_objs.Scatter(x=zip(*v_bef)[0],
+                                                y=zip(*v_bef)[1],
                           name='before, mean = %.2E' % np.mean(zip(*v_bef)[1]),
-                          marker = dict(size = 3.0, color = 'rgba(0, 0, 255, 1)'),
+                          marker=dict(size=3.0, color='rgba(0, 0, 255, 1)'),
                           mode='markers'))
-        axjit_list.append(py.graph_objs.Scatter(x=zip(*v_aft)[0],y=zip(*v_aft)[1],
-                                                name='after, mean = %.2E' %
+        axjit_list.append(py.graph_objs.Scatter(x=zip(*v_aft)[0], y=zip(*v_aft)[1],
+                                                name='after, mean = %.2E' % np.mean(zip(*v_aft)[1]),
                                                 np.mean(zip(*v_aft)[1]),
-                                                marker = dict(size = 3.0, color = 'rgba(255, 0, 0, 1)'),
+                                                marker=dict(size=3.0, color='rgba(255, 0, 0, 1)'),
                                                 mode='markers'))
-        layout = dict(title = "Jitter Plot showing slicewise impact of " + title, \
-                      xaxis = dict(title = 'Slice Number', range=xlim), \
-                      yaxis = dict(title = 'MSE', range=ylim))
+        layout = dict(title="Jitter Plot showing slicewise impact of " + title,
+                      xaxis=dict(title='Slice Number', range=xlim),
+                      yaxis=dict(title='MSE', range=ylim))
         fjit = dict(data=axjit_list, layout=layout)
         path = qcdir + "/" + fname + "_jitter.html"
         offline.plot(fjit, filename=path, auto_open=False)
-        
         pass
 
     def opaque_colorscale(self, basemap, reference, alpha=0.5):
@@ -253,7 +253,7 @@ class alignment_qc(object):
         # all values beteween 0 opacity and .6
         opaque_scale = alpha*reference/float(np.nanmax(reference))
         # remaps intensities
-        cmap[:,:,3] = opaque_scale
+        cmap[:, :, 3] = opaque_scale
         return cmap
 
     def expected_variance(self, s, n, qcdir, scanid="", title=""):
@@ -284,13 +284,15 @@ class alignment_qc(object):
 
         colors = ['rgba(255,0, 0,1)'] * s.shape[0]
         colors[n] = 'rgba(26,200,255,1)'
-        axvar = [py.graph_objs.Bar(x=range(s.shape[0]),y=s, marker=dict(color=colors))]
-        layout = dict(title = " ".join([title,"Scree Plot," ,"N=", str(n),
-                                        ",","Var=",str(var_acct)]),
-                      xaxis = dict(title = 'Component'),
-                      yaxis = dict(title = 'Variance'))
+        axvar = [py.graph_objs.Bar(x=range(s.shape[0]), y=s,
+                 marker=dict(color=colors))]
+        layout = dict(title=" ".join([title, "Scree Plot,", "N=", str(n),
+                                      ",", "Var=", str(var_acct)]),
+                      xaxis=dict(title='Component'),
+                      yaxis=dict(title='Variance'))
         fvar = dict(data=axvar, layout=layout)
-        offline.plot(fvar, filename=str(qcdir + "/" + scanid + "_scree.html"), auto_open=False)
+        offline.plot(fvar, filename=str(qcdir + "/" + scanid + "_scree.html"),
+                     auto_open=False)
 
     def mask_align(self, mri_data, ref_data, qcdir, scanid="", refid=""):
         """
@@ -322,7 +324,7 @@ class alignment_qc(object):
 
         depth = mri_data.shape[2]
 
-        depth_seq = np.unique(np.round(np.linspace(0, depth - 1, 25)))
+        depth_seq = np.unique(np.round(np.linspace(0, depth-1, 25)))
         nrows = np.ceil(np.sqrt(depth_seq.shape[0]))
         ncols = np.ceil(depth_seq.shape[0]/float(nrows))
 
@@ -331,7 +333,7 @@ class alignment_qc(object):
             # TODO EB: create nifti image with these values
             # and allow option to add overlap with mni vs mprage
             i = depth_seq[d]
-            axalign = falign.add_subplot(nrows, ncols, d+1) 
+            axalign = falign.add_subplot(nrows, ncols, d+1)
             axalign.imshow(self.opaque_colorscale(matplotlib.cm.Blues,
                                                   mri_data[:, :, i], 0.6))
             axalign.imshow(self.opaque_colorscale(matplotlib.cm.Reds,
@@ -386,7 +388,7 @@ class alignment_qc(object):
             # TODO EB: create nifti image with these values
             # and allow option to add overlap with mni vs mprage
             i = depth_seq[d]
-            axalign = falign.add_subplot(nrows, ncols, d+1) 
+            axalign = falign.add_subplot(nrows, ncols, d+1)
             axalign.imshow(self.opaque_colorscale(matplotlib.cm.Blues,
                                                   mri_data[:, :, i]))
             axalign.imshow(self.opaque_colorscale(matplotlib.cm.Reds,
@@ -426,28 +428,28 @@ class alignment_qc(object):
 
         fts_list = []
         for d in range(0, timeseries.T.shape[1]):
-            fts_list.append(py.graph_objs.Scatter(x=range(0,timeseries.T.shape[0]),
-                                                  y=timeseries.T[:,d], mode='lines'))
-        layout = dict(title = " ".join([scanid, refid, "ROI Timeseries"]),
-                      xaxis = dict(title = 'Time Point (TRs)',
-                                   range=[0,timeseries.T.shape[0]]),
-                      yaxis = dict(title = 'Intensity'),
-                      showlegend = False)#, height=405, width=720)
+            fts_list.append(py.graph_objs.Scatter(x=range(0, timeseries.T.shape[0]),
+                                                  y=timeseries.T[:, d], mode='lines'))
+        layout = dict(title=" ".join([scanid, refid, "ROI Timeseries"]),
+                      xaxis=dict(title='Time Point (TRs)',
+                                 range=[0, timeseries.T.shape[0]]),
+                      yaxis=dict(title='Intensity'),
+                      showlegend=False)  # height=405, width=720)
         fts = dict(data=fts_list, layout=layout)
-        #py.plotly.image.save_as(fts, filename=fname_ts)
+        # py.plotly.image.save_as(fts, filename=fname_ts)
         offline.plot(fts, filename=fname_ts, auto_open=False)
 
         fcorr = plt.figure()
         axcorr = fcorr.add_subplot(111)
 
         cax = axcorr.imshow(np.corrcoef(timeseries), interpolation='nearest',
-                      cmap=plt.cm.ocean)
+                            cmap=plt.cm.ocean)
         fcorr.colorbar(cax, fraction=0.046, pad=0.04)
-        axcorr.set_title(" ".join([scanid, refid,"Corr"]))
+        axcorr.set_title(" ".join([scanid, refid, "Corr"]))
         axcorr.set_xlabel('ROI')
         axcorr.set_ylabel('ROI')
 
-        fcorr.set_size_inches(6,6)
+        fcorr.set_size_inches(6, 6)
         fcorr.tight_layout()
         fcorr.savefig(fname_corr)
         plt.close(fcorr)
