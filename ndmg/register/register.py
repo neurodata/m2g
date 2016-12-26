@@ -325,8 +325,8 @@ class register(object):
         self.apply_warp(mri, aligned_mri, atlas, warp_mpr2temp,
                         xfm=xfm_func2mpr)
         # apply the warp back to the anatomical image for quality control.
-        self.apply_warp(anat, aligned_anat, atlas, warp_mpr2temp,
-                        mask=atlas_mask)
+        self.apply_warp(anat, aligned_anat, atlas, warp_mpr2temp, mask=atlas_mask)
+        #mgu().extract_brain(aligned_anat, aligned_anat)
 
         if qcdir is not None:
             mgqc().check_alignments(mri, aligned_mri, atlas, qcdir,

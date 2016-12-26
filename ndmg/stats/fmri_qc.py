@@ -189,15 +189,6 @@ class fmri_qc(object):
             axanat_ref.imshow(mgqc().opaque_colorscale(matplotlib.cm.Reds,
                                                      at_dat[:, :, i]))
 
-        #for d in range(0, depth):
-        #    axmi.plot(mri_datmi[d, :])
-
-        #fname = qcdir + "/"
-        #axmi.set_xlabel('Timepoint')
-        #axmi.set_ylabel('Mean Intensity')
-        #axmi.set_title('Mean Slice Intensity')
-        #axmi.set_xlim((0, nvols))
-
         axmi_list = []
         for d in range(0, depth):
             axmi_list.append(py.graph_objs.Scatter(x=range(0,nvols), \
@@ -210,7 +201,7 @@ class fmri_qc(object):
         #fnames["intens"] = appended_path
         path = qcdir + "/" + appended_path
         #py.plotly.image.save_as(axmi, filename=path)
-        offline.plot(axmi, filename=path)
+        offline.plot(axmi, filename=path, auto_open=False)
 
         #fhist = plt.figure()
         #axvih = fhist.add_subplot(111)
@@ -232,7 +223,7 @@ class fmri_qc(object):
         #fnames["voxel_hist"] = appended_path
         path = qcdir + "/" + appended_path
         #py.plotly.image.save_as(fhist, filename=path)
-        offline.plot(fhist, filename=path)
+        offline.plot(fhist, filename=path, auto_open=False)
 
         par_file = mri_mc + ".par"
 
@@ -249,16 +240,6 @@ class fmri_qc(object):
                 counter += 1
 
 
-        #ftrans = plt.figure()
-        #axtrans = ftrans.add_subplot(111)
-        #axtrans.plot(abs_pos[:, 3:6])  # plots the parameters
-        #axtrans.set_xlabel('Timepoint')
-        #axtrans.set_ylabel('Translation (mm)')
-        #axtrans.set_title('Translational Motion Parameters')
-        #axtrans.legend(['x', 'y', 'z'])
-        #axtrans.set_xlim((0, nvols))
-        #ftrans.tight_layout()
-
         ftrans_list = []
         ftrans_list.append(py.graph_objs.Scatter(x=range(0,nvols),y=abs_pos[:,3], mode='lines', name='x'))
         ftrans_list.append(py.graph_objs.Scatter(x=range(0,nvols),y=abs_pos[:,4], mode='lines', name='y'))
@@ -271,16 +252,7 @@ class fmri_qc(object):
         #fnames["trans"] = appended_path
         path = qcdir + "/" + appended_path
         #py.plotly.image.save_as(ftrans, filename=path)
-        offline.plot(ftrans, filename=path)
-
-        #frot = plt.figure()
-        #axrot = frot.add_subplot(111)
-        #axrot.plot(abs_pos[:, 0:3])
-        #axrot.set_xlabel('Timepoint')
-        #axrot.set_ylabel('Rotation (rad)')
-        #axrot.set_title('Rotational Motion Parameters')
-        #axrot.legend(['x', 'y', 'z'])
-        #axrot.set_xlim((0, nvols))
+        offline.plot(ftrans, filename=path, auto_open=False)
 
         frot_list = []
         frot_list.append(py.graph_objs.Scatter(x=range(0,nvols),y=abs_pos[:, 0], mode='lines', name='x'))
@@ -294,23 +266,13 @@ class fmri_qc(object):
         #fnames["rot"] = appended_path
         path = qcdir + "/" + appended_path
         #py.plotly.image.save_as(frot, filename=path)
-        offline.plot(frot, filename=path)
+        offline.plot(frot, filename=path, auto_open=False)
 
         trans_abs = np.linalg.norm(abs_pos[:, 3:6], axis=1)
         trans_rel = np.linalg.norm(rel_pos[:, 3:6], axis=1)
         rot_abs = np.linalg.norm(abs_pos[:, 0:3], axis=1)
         rot_rel = np.linalg.norm(rel_pos[:, 0:3], axis=1)
         
-        #fmc = plt.figure()
-        #axmc = fmc.add_subplot(111)
-        #axmc.plot(trans_abs)
-        #axmc.plot(trans_rel)
-        #axmc.set_xlabel('Timepoint')
-        #axmc.set_ylabel('Movement (mm)')
-        #axmc.set_title('Estimated Displacement')
-        #axmc.legend(['absolute', 'relative'])
-        #axmc.set_xlim((0, nvols))
-
         fmc_list = []
         fmc_list.append(py.graph_objs.Scatter(x=range(0,nvols),y=trans_abs, mode='lines', name='absolute'))
         fmc_list.append(py.graph_objs.Scatter(x=range(0,nvols),y=trans_rel, mode='lines', name='relative'))
@@ -322,7 +284,7 @@ class fmri_qc(object):
         #fnames["disp"] = appended_path
         path = qcdir + "/" + appended_path
         #py.plotly.image.save_as(fmc, filename=path)
-        offline.plot(fmc, filename=path)
+        offline.plot(fmc, filename=path, auto_open=False)
 
         figures = {"mean_ref": [fmean_ref, nrows, ncols],
                    "mean_anat": [fmean_anat,nrows,ncols],

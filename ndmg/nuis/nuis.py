@@ -234,7 +234,7 @@ class nuis(object):
         nb.save(img, mask_path)
         return mask
 
-    def regress_nuisance(self, fmri, nuisance_mri, wmmask, lvmask, n=5, t=None,
+    def regress_nuisance(self, fmri, nuisance_mri, wmmask, er_csfmask, n=5, t=None,
                          qcdir=None):
         """
         Regresses Nuisance Signals from brain images. Note that this
@@ -249,7 +249,7 @@ class nuis(object):
                 - the desired path for the nuisance corrected brain.
             - wmmask:
                 - the path to a white matter mask (should be eroded ahead of time).
-            - lvmask:
+            - er_csfmask:
                 - the path to a lateral ventricles csf mask.
             - n:
                 - the number of components to consider for white matter regression.
@@ -261,7 +261,7 @@ class nuis(object):
         fmri_name = mgu().get_filename(fmri)
         fmri_im = nb.load(fmri)
 
-        lv_im = nb.load(lvmask)
+        lv_im = nb.load(er_csfmask)
         lvm = lv_im.get_data()
 
         wm_im = nb.load(wmmask)
@@ -309,7 +309,7 @@ class nuis(object):
         nb.save(img, nuisance_mri)
         pass
 
-    def nuis_correct(self, fmri, amri, amask, an, lvmask, nuisance_mri,
+    def nuis_correct(self, fmri, amri, amask, an, er_csfmask, nuisance_mri,
                      outdir, qcdir=None):
         """
         A function for nuisance correction on an aligned fMRI
@@ -346,9 +346,7 @@ class nuis(object):
 
         map_path = mgu().name_tmps(outdir, nuisname, "_map")
         wmmask = mgu().name_tmps(outdir, nuisname, "_wm_mask.nii.gz")
-        csfmask = mgu().name_tmps(outdir, nuisname, "_csf_mask.nii.gz")
         er_wmmask = mgu().name_tmps(outdir, nuisname, "_eroded_wm_mask.nii.gz")
-        er_csfmask = mgu().name_tmps(outdir, nuisname, "_eroded_csf_mask.nii.gz")
 
         # segmetn the image into different classes of brain tissue
         self.segment_anat(amri, an, map_path)
@@ -356,9 +354,7 @@ class nuis(object):
         wm_prob = map_path + "_pve_2.nii.gz"
         csf_prob = map_path + "_pve_0.nii.gz"
         self.extract_mask(wm_prob, wmmask, .99)
-        self.extract_mask(csf_prob, csfmask, .95)
         self.erode_mask(wmmask, er_wmmask, 2)
-        self.erode_mask(csfmask, er_csfmask, 2)
 
         if qcdir is not None:
             # show the eroded white matter mask over the anatomical image
@@ -372,9 +368,6 @@ class nuis(object):
             mgqc().mask_align(er_wmmask, wmmask, qcdir,
                               scanid=anat_name + "_eroded_wm",
                               refid=anat_name + "_wm")
-            mgqc().mask_align(er_csfmask, csfmask, qcdir,
-                              scanid=anat_name + "_eroded_csf",
-                              refid=anat_name + "_csf")
 
         self.regress_nuisance(fmri, nuisance_mri, er_wmmask, er_csfmask, n=5,
                               t=None, qcdir=qcdir)

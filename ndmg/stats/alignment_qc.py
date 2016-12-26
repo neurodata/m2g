@@ -31,6 +31,7 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from ndmg.utils import utils as mgu
+import plotly as py
 import plotly.offline as offline
 
 class alignment_qc(object):
@@ -200,13 +201,13 @@ class alignment_qc(object):
         xlim = tuple((0, np.nanmax(kdes[0])))
         ylim = tuple((0, max(np.nanmax(kdes[1]), np.nanmax(kdes[2]))))
         axkde_list = []
-	    axkde_list.append(py.graph_objs.Scatter(x=kdes[0],y=kdes[1],
+        axkde_list.append(py.graph_objs.Scatter(x=kdes[0],y=kdes[1],
                           fillcolor='(0, 0, 255, 1)', mode='lines',
                           name='before, mean = %.2E' % np.mean(zip(*v_bef)[1])))
         axkde_list.append(py.graph_objs.Scatter(x=kdes[0],y=kdes[2],
                           fillcolor='(255, 0, 0, 1)', mode='lines',
                           name='after, mean = %.2E' % np.mean(zip(*v_aft)[1])))
-	    layout = dict(title = title + 
+        layout = dict(title = title + 
                       (" Hellinger Distance = %.4E" % self.hdist(zip(*v_bef)[1],
                                                                  zip(*v_aft)[1])),
                       xaxis = dict(title = 'MSE', range=xlim),
@@ -219,7 +220,7 @@ class alignment_qc(object):
         ylim = tuple((0, max(np.nanmax(zip(*v_bef)[1]),
                              np.nanmax(zip(*v_aft)[1]))))
         axjit_list = []
-	    axjit_list.append(py.graph_objs.Scatter(x=zip(*v_bef)[0],y=zip(*v_bef)[1],
+        axjit_list.append(py.graph_objs.Scatter(x=zip(*v_bef)[0],y=zip(*v_bef)[1],
                           name='before, mean = %.2E' % np.mean(zip(*v_bef)[1]),
                           marker = dict(size = 3.0, color = 'rgba(0, 0, 255, 1)'),
                           mode='markers'))
@@ -228,7 +229,7 @@ class alignment_qc(object):
                                                 np.mean(zip(*v_aft)[1]),
                                                 marker = dict(size = 3.0, color = 'rgba(255, 0, 0, 1)'),
                                                 mode='markers'))
-	    layout = dict(title = "Jitter Plot showing slicewise impact of " + title, \
+        layout = dict(title = "Jitter Plot showing slicewise impact of " + title, \
                       xaxis = dict(title = 'Slice Number', range=xlim), \
                       yaxis = dict(title = 'MSE', range=ylim))
         fjit = dict(data=axjit_list, layout=layout)

@@ -71,9 +71,6 @@ def fngs_pipeline(fmri, struct, an, atlas, atlas_brain, atlas_mask, lv_mask,
             graphml.
     """
     startTime = datetime.now()
-
-    print "here"
-    print stc
     # Create derivative output directories
     fmri_name = op.splitext(op.splitext(op.basename(fmri))[0])[0]
     struct_name = op.splitext(op.splitext(op.basename(struct))[0])[0]
