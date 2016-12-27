@@ -191,10 +191,10 @@ class alignment_qc(object):
             for s in range(0, nslices):
                 v_bef.append(tuple((s + ran.random(),
                                     self.mse(mribefdat[:, :, s],
-                                    refdata[:, :, s]))))
+                                             refdata[:, :, s]))))
                 v_aft.append(tuple((s + ran.random(),
                                     self.mse(mriaftdat[:, :, s],
-                                    refdata[:, :, s]))))
+                                             refdata[:, :, s]))))
 
         kdes = self.compute_kdes(zip(*v_bef)[1], zip(*v_aft)[1])
 
