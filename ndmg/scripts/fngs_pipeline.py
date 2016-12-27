@@ -186,8 +186,8 @@ def main():
     parser.add_argument("atlas", action="store", help="Nifti T1 MRI atlas")
     parser.add_argument("atlas_brain", action="store", help="Nifti T1 MRI \
                         brain only atlas")
-    parser.add_argument("atlas_mask", action="store", help="Nifti binary mask of \
-                        brain space in the atlas")
+    parser.add_argument("atlas_mask", action="store", help="Nifti binary mask \
+                        of brain space in the atlas")
     parser.add_argument("lv_mask", action="store", help="Nifti binary mask of \
                         lateral ventricles in atlas space.")
     parser.add_argument("outdir", action="store", help="Path to which \
