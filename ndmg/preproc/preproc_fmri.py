@@ -86,6 +86,10 @@ class preproc_fmri(object):
                 pass
             elif op.isfile(stc):
                 cmd += " --tcustom " + str(stc)
+            elif stc == "None":
+                # do nothing since we don't want to slice time correct
+                print("User Specified No slice timing correction")
+                break
             else:
                 raise ValueError("You have not passed a valid slice-timing " +
                                  "option")
