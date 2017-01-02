@@ -76,26 +76,26 @@ class preproc_fmri(object):
                   this function will throw an error.
         """
         if (stc is not None):
-            cmd = "slicetimer -i " + mri + " -o " + corrected_mri
-            if stc == "down":
-                cmd += " --down"
-            elif stc == "interleaved":
-                cmd += " --odd"
-            elif stc == "up":
-                # do nothing, as this is default behavior
-                pass
-            elif op.isfile(stc):
-                cmd += " --tcustom " + str(stc)
-            elif stc == "None":
+            if (stc != "None"):
+                cmd = "slicetimer -i " + mri + " -o " + corrected_mri
+                if stc == "down":
+                    cmd += " --down"
+                elif stc == "interleaved":
+                    cmd += " --odd"
+                elif stc == "up":
+                    # do nothing, as this is default behavior
+                    pass
+                elif op.isfile(stc):
+                    cmd += " --tcustom " + str(stc)
+                else:
+                    raise ValueError("You have not passed a valid slice-timing " +
+                                     "option")
+                zooms = nb.load(mri).header.get_zooms()
+                cmd += " -r " + str(zooms[3])
+                mgu().execute_cmd(cmd)
+            else:
                 # do nothing since we don't want to slice time correct
                 print("User Specified No slice timing correction")
-                break
-            else:
-                raise ValueError("You have not passed a valid slice-timing " +
-                                 "option")
-            zooms = nb.load(mri).header.get_zooms()
-            cmd += " -r " + str(zooms[3])
-            mgu().execute_cmd(cmd)
         else:
             print "No slice timing information provided, so skipping."
         pass
