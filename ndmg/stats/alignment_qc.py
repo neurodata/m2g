@@ -163,8 +163,10 @@ class alignment_qc(object):
         reference = nb.load(refname)
 
         # resample if not in same image space
-        if not all(x in mri_after.get_header().get_zooms()[:3] for x in
-                   mri_before.get_header().get_zooms()[:3]):
+        if not all(x in mri_after.header.get_zooms()[:3] for x in
+                   mri_before.header.get_zooms()[:3]) or not all(x
+                   in mri_after.header.get_data_shape()[:3] for x in
+                   mri_before.header.get_data_shape()[:3]):
 
             mri_tname = qcdir + "/" + fname + "_res.nii.gz"
             from ndmg import register as mgr
