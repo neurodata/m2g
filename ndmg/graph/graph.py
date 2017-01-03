@@ -116,8 +116,8 @@ class graph(object):
                 -the timeseries file to extract correlation for.
                           dimensions are [numrois]x[numtimesteps]
         """
-        print "Estimating correlation matrix for " + str(self.N) +\
-              " roi graph..."
+        print ("Estimating correlation matrix for " + str(self.N) +
+              " roi graph...")
         cor = np.corrcoef(timeseries)  # calculate pearson correlation
 
         roilist = np.unique(self.rois)
