@@ -20,7 +20,6 @@ setup(
 
     ],
     scripts = [
-        'ndmg/scripts/ndmg_bids',
         'ndmg/scripts/ndmg_demo-dwi',
         'ndmg/scripts/ndmg_demo-qc'
     ],
