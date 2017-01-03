@@ -51,9 +51,6 @@ class utils():
         """
 
         # Load Data
-        # XXX unused
-        startTime = datetime.now()
-
         img = nb.load(dti_file)
         data = img.get_data()
 

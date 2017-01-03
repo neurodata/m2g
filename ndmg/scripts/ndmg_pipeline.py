@@ -52,16 +52,11 @@ def ndmg_pipeline(dti, bvals, bvecs, mprage, atlas, mask, labels, outdir,
     if isinstance(labels, list):
         label_name = [mgu().get_filename(x) for x in labels]
         for label in label_name:
-            # XXX - to be really clean, should probably communicate() or wait()
-            # or even better subprocess.call()
-            p = Popen("mkdir -p " + outdir + "/graphs/" + label,
-                      stdout=PIPE, stderr=PIPE, shell=True)
+            mgu().execute_cmd("mkdir -p " + outdir + "/graphs/" + label)
     else:
         label_name = mgu().get_filename(labels)
-        # XXX - to be really clean, should probably communicate() or wait()
-        # or even better subprocess.call()
-        p = Popen("mkdir -p " + outdir + "/graphs/" + label_name,
-                  stdout=PIPE, stderr=PIPE, shell=True)
+        mgu().execute_cmd("mkdir -p " + outdir + "/graphs/" + label_name)
+
     # Create derivative output file names
     aligned_dti = "".join([outdir, "/reg_dti/", dti_name, "_aligned.nii.gz"])
     tensors = "".join([outdir, "/tensors/", dti_name, "_tensors.npz"])
