@@ -78,11 +78,11 @@ class graph(object):
                     - Fiber streamlines either file or array in a dipy EuDX
                       or compatible format.
         """
-
-        print("# of Streamlines: " + str(np.shape(streamlines)[0]))
+        nlines = np.shape(streamlines)[0]
+        print("# of Streamlines: " + str(nlines))
 
         for idx, streamline in enumerate(streamlines):
-            if (idx % 25000) == 0:
+            if (idx % int(nlines*0.05)) == 0:
                 print(idx)
 
             points = np.round(streamline).astype(int)
