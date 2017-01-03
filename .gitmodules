@@ -1,0 +1,6 @@
+[submodule "docker"]
+    path = apps/bids-app
+    url = https://github.com/BIDS-Apps/ndmg
+[submodule "apps/boutiques"]
+    path = apps/boutiques
+    url = https://github.com/neurodata/boutiques-tools.git/
