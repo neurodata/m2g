@@ -13,8 +13,9 @@ def make_panel_plot(basepath, outf, dataset=None, atlas=None):
     fnames = sorted(fnames)
     paths = [os.path.join(basepath, item) for item in fnames]
     keys = ["_".join(n.split('.')[0].split('_')[1:]) for n in fnames]
-    ylabs = ['Count', 'Count', 'Count', 'Count',
-             'Eigenvalue', 'Count', 'Count', 'Portion of Total Variance']
+    relprob = 'Relative Probability'
+    ylabs = [relprob, relprob, relprob, relprob,
+             'Eigenvalue', relprob, relprob, 'Portion of Total Variance']
     xlabs = ['Betweenness Centrality', 'Clustering Coefficient', 'Degree',
              'Edge Weight', 'Dimension', 'Number of Non-zeros',
              'Locality Statistic-1', 'Dimension']

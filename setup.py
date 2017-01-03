@@ -17,12 +17,14 @@ setup(
         'ndmg.scripts'
     ],
     scripts = [
-        'ndmg/scripts/ndmg_bids',
         'ndmg/scripts/ndmg_demo-dwi',
         'ndmg/scripts/ndmg_demo-qc'
     ],
     entry_points = {
-        'console_scripts': ['ndmg_pipeline=ndmg.scripts.ndmg_pipeline:main'],
+        'console_scripts': [
+            'ndmg_pipeline=ndmg.scripts.ndmg_pipeline:main',
+            'ndmg_bids=ndmg.scripts.ndmg_bids:main'
+    ]
     },
     version=VERSION,
     description='Neuro Data MRI to Graphs Pipeline',
