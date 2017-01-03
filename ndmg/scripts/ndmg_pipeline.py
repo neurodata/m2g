@@ -30,6 +30,8 @@ import ndmg.graph as mgg
 import ndmg.preproc as mgp
 import numpy as np
 import nibabel as nb
+import os
+os.environ["MPLCONFIGDIR"] = "/tmp/"
 
 
 def ndmg_pipeline(dti, bvals, bvecs, mprage, atlas, mask, labels, outdir,
@@ -91,7 +93,7 @@ def ndmg_pipeline(dti, bvals, bvecs, mprage, atlas, mask, labels, outdir,
 
     # Generate graphs from streamlines for each parcellation
     for idx, label in enumerate(label_name):
-        print("Generating graph for " + label + "parcellation...")
+        print("Generating graph for " + label + " parcellation...")
         labels_im = nb.load(labels[idx])
         g1 = mgg(len(np.unique(labels_im.get_data()))-1, labels[idx])
         g1.make_graph(tracks)
