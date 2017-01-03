@@ -19,10 +19,11 @@
 # Created by Greg Kiar on 2016-05-11.
 # Email: gkiar@jhu.edu
 
+from __future__ import print_function
+
 from collections import OrderedDict
 
 import networkx as nx
-import sys
 import os
 
 
@@ -43,7 +44,7 @@ def loadGraphs(filenames, verb=False):
     gstruct = OrderedDict()
     for idx, files in enumerate(filenames):
         if verb:
-            print "Loading: " + files
+            print("Loading: " + files)
         #  Adds graphs to dictionary with key being filename
         fname = os.path.basename(files)
         try:
