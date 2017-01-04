@@ -152,7 +152,6 @@ def group_level(inDir, outDir, dataset=None, atlas=None):
 
     # Get list of graphs
     labels = next(os.walk(inDir))[1]
-    print labels
 
     # Run for each
     if atlas is not None:
@@ -166,7 +165,6 @@ def group_level(inDir, outDir, dataset=None, atlas=None):
               for fl in files
               if fl.endswith(".graphml") or fl.endswith(".gpickle")]
         tmp_out = op.join(outDir, label)
-        print(tmp_out)
         mgu().execute_cmd("mkdir -p " + tmp_out)
         compute_metrics(fs, tmp_out, label)
         outf = op.join(tmp_out, 'plot')
