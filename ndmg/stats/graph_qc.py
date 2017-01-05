@@ -24,7 +24,6 @@ from collections import OrderedDict
 from subprocess import Popen
 from scipy.stats import gaussian_kde
 from ndmg.utils import loadGraphs
-from ndmg.stats import plot_metrics
 
 import numpy as np
 import nibabel as nb
@@ -116,8 +115,6 @@ def compute_metrics(fs, outdir, atlas, verb=False):
     show_means(temp_bc)
 
     outf = outdir + '/' + atlas + '_summary.png'
-
-    # plot_metrics(nnz, deg, ew, ccoefs, ss1, eigs, scree, centrality, outf)
 
 
 def show_means(data):
