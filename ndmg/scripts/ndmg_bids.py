@@ -142,7 +142,8 @@ def participant_level(inDir, outDir, subjs, debug=False):
                       labels, outDir, clean=(not debug))
 
 
-def group_level(inDir, outDir, dataset=None, atlas=None):
+def group_level(inDir, outDir, dataset=None, atlas=None, minimal=False,
+                log=False):
     """
     Crawls the output directory from ndmg and computes qc metrics on the
     derivatives produced
@@ -169,7 +170,7 @@ def group_level(inDir, outDir, dataset=None, atlas=None):
         compute_metrics(fs, tmp_out, label)
         outf = op.join(tmp_out, 'plot')
         make_panel_plot(tmp_out, outf, dataset=dataset, atlas=label,
-                        scree=False)
+                        scree=minimal, log=log)
 
 
 def main():
@@ -207,6 +208,11 @@ def main():
                         'the dataset you are perfoming QC on.')
     parser.add_argument('--atlas', action='store', help='The atlas '
                         'being analyzed in QC (if you only want one).')
+    parser.add_argument('--minimal', action='store_true', help='Determines '
+                        'whether to show a minimal or full set of plots.',
+                        default=False)
+    parser.add_argument('--log', action='store_true', help='Determines '
+                        'axis scale for plotting.', default=False)
     parser.add_argument('--debug', action='store_true', help='flag to store '
                         'temp files along the path of processing.',
                         default=False)
@@ -219,6 +225,8 @@ def main():
     remo = result.remote_path
     push = result.push_data
     level = result.analysis_level
+    minimal = result.minimal
+    log = result.log
 
     if level == 'participant':
         if buck is not None and remo is not None:
@@ -237,7 +245,7 @@ def main():
             else:
                 bids_s3.get_data(buck, remo, inDir, public=True)
         modif = 'qc'
-        group_level(inDir, outDir, result.dataset, result.atlas)
+        group_level(inDir, outDir, result.dataset, result.atlas, minimal, log)
 
 
     if push and buck is not None and remo is not None:

@@ -7,7 +7,8 @@ import plotly_panels as pp
 import os
 
 
-def make_panel_plot(basepath, outf, dataset=None, atlas=None, scree=True):
+def make_panel_plot(basepath, outf, dataset=None, atlas=None, scree=True,
+                    log=True):
     fnames = [name for name in os.listdir(basepath)
               if os.path.splitext(name)[1] == '.pkl']
     fnames = sorted(fnames)
@@ -15,7 +16,7 @@ def make_panel_plot(basepath, outf, dataset=None, atlas=None, scree=True):
     keys = ["_".join(n.split('.')[0].split('_')[1:]) for n in fnames]
     relprob = 'Relative Probability'
     ylabs = [relprob, relprob, relprob, relprob,
-             'Eigenvalue', relprob, relprob, 'Portion of Total Variance']
+             'Eigenvalue', 'Count', relprob, 'Portion of Total Variance']
     xlabs = ['Betweenness Centrality', 'Clustering Coefficient', 'Degree',
              'Edge Weight', 'Dimension', 'Number of Non-zeros',
              'Locality Statistic-1', 'Dimension']
@@ -48,8 +49,9 @@ def make_panel_plot(basepath, outf, dataset=None, atlas=None, scree=True):
         multi.layout['x'+key]['nticks'] = 3
         multi.layout['y'+key]['nticks'] = 3
         if idx in [0, 2, 3, 6]:
-            multi.layout['x'+key]['type'] = 'log'
-            multi.layout['x'+key]['title'] += ' (log scale)'
+            if log:
+                multi.layout['x'+key]['type'] = 'log'
+                multi.layout['x'+key]['title'] += ' (log scale)'
         if idx in [4, 7]:
             multi.layout['x'+key]['range'] = [1, dims]
             multi.layout['x'+key]['tickvals'] = [1, dims/2, dims]
