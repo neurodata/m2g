@@ -46,8 +46,7 @@ setup(
         'numpy',  # We use nump v1.10.4
         'scipy',  # We use 0.17.0
         'dipy>=0.1',
-        'matplotlib>=1.5',
-	'boto3',
-	'plotly',
+        'boto3',
+        'plotly',
     ]
 )
