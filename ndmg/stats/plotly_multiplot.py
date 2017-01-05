@@ -7,7 +7,7 @@ import plotly_panels as pp
 import os
 
 
-def make_panel_plot(basepath, outf, dataset=None, atlas=None, scree=True,
+def make_panel_plot(basepath, outf, dataset=None, atlas=None, minimal=True,
                     log=True):
     fnames = [name for name in os.listdir(basepath)
               if os.path.splitext(name)[1] == '.pkl']
@@ -48,10 +48,9 @@ def make_panel_plot(basepath, outf, dataset=None, atlas=None, scree=True,
         multi.layout['y'+key]['title'] = ylabs[idx]
         multi.layout['x'+key]['nticks'] = 3
         multi.layout['y'+key]['nticks'] = 3
-        if idx in [0, 2, 3, 6]:
-            if log:
-                multi.layout['x'+key]['type'] = 'log'
-                multi.layout['x'+key]['title'] += ' (log scale)'
+        if idx in [0, 2, 3, 6] and log:
+            multi.layout['x'+key]['type'] = 'log'
+            multi.layout['x'+key]['title'] += ' (log scale)'
         if idx in [4, 7]:
             multi.layout['x'+key]['range'] = [1, dims]
             multi.layout['x'+key]['tickvals'] = [1, dims/2, dims]
@@ -70,8 +69,10 @@ def make_panel_plot(basepath, outf, dataset=None, atlas=None, scree=True,
     multi.layout['title'] = tit
     # iplot(multi, validate=False)
 
-    if not scree:
-        multi.data[-1] = {}
+    if minimal:
+        locs = [idx for idx, d in enumerate(multi.data) if d['yaxis'] == 'y8']
+        for l in locs:
+            multi.data[l] = {}
         multi.layout['x'+key]['title'] = ''
         multi.layout['y'+key]['title'] = ''
         multi = pp.panel_invisible(multi, 8)

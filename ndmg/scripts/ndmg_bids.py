@@ -170,7 +170,7 @@ def group_level(inDir, outDir, dataset=None, atlas=None, minimal=False,
         compute_metrics(fs, tmp_out, label)
         outf = op.join(tmp_out, 'plot')
         make_panel_plot(tmp_out, outf, dataset=dataset, atlas=label,
-                        scree=minimal, log=log)
+                        minimal=minimal, log=log)
 
 
 def main():
