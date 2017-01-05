@@ -7,7 +7,7 @@ import plotly_panels as pp
 import os
 
 
-def make_panel_plot(basepath, outf, dataset=None, atlas=None):
+def make_panel_plot(basepath, outf, dataset=None, atlas=None, scree=True):
     fnames = [name for name in os.listdir(basepath)
               if os.path.splitext(name)[1] == '.pkl']
     fnames = sorted(fnames)
@@ -67,6 +67,13 @@ def make_panel_plot(basepath, outf, dataset=None, atlas=None):
         tit = None
     multi.layout['title'] = tit
     # iplot(multi, validate=False)
+
+    if not scree:
+        multi.data[-1] = {}
+        multi.layout['x'+key]['title'] = ''
+        multi.layout['y'+key]['title'] = ''
+        multi = pp.panel_invisible(multi, 8)
+        
     plot(multi, validate=False, filename=outf+'.html')
 
 

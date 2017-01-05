@@ -168,7 +168,8 @@ def group_level(inDir, outDir, dataset=None, atlas=None):
         mgu().execute_cmd("mkdir -p " + tmp_out)
         compute_metrics(fs, tmp_out, label)
         outf = op.join(tmp_out, 'plot')
-        make_panel_plot(tmp_out, outf, dataset=dataset, atlas=label)
+        make_panel_plot(tmp_out, outf, dataset=dataset, atlas=label,
+                        scree=False)
 
 
 def main():
