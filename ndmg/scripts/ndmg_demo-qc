@@ -6,7 +6,7 @@ cd /tmp/
 WARN=${PYTHONWARNINGS}
 export PYTHONWARNINGS="ignore"
 
-ndmg_bids /tmp/small_demo/outputs/graphs/ /tmp/small_demo/outputs/qc group
+ndmg_bids /tmp/small_demo/outputs/graphs/ /tmp/small_demo/outputs/qc group --dataset 'KKI2009_sub-113_ses-1'
 
 export PYTHONWARNINGS=${WARN}
 
