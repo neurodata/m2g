@@ -166,7 +166,8 @@ def participant_level(inDir, outDir, subjs, debug=False, func=False, acquisition
                 ndmg_pipeline(dwi[i], bval[i], bvec[i], anat[i], atlas, atlas_mask,
                               labels, outDir, clean=(not debug))
 
-def group_level(inDir, outDir, func, dataset=None, atlas=None):
+def group_level(inDir, outDir, func, dataset=None, atlas=None, minimal=False,
+                log=False):
     """
     Crawls the output directory from ndmg and computes qc metrics on the
     derivatives produced
@@ -179,7 +180,6 @@ def group_level(inDir, outDir, func, dataset=None, atlas=None):
 
     # Get list of graphs
     labels = next(os.walk(inDir))[1]
-    print labels
 
     # Run for each
     if atlas is not None:
@@ -193,11 +193,11 @@ def group_level(inDir, outDir, func, dataset=None, atlas=None):
               for fl in files
               if fl.endswith(".graphml") or fl.endswith(".gpickle")]
         tmp_out = op.join(outDir, label)
-        print(tmp_out)
         mgu().execute_cmd("mkdir -p " + tmp_out)
         compute_metrics(fs, tmp_out, label)
         outf = op.join(tmp_out, 'plot')
-        make_panel_plot(tmp_out, outf, dataset=dataset, atlas=label)
+        make_panel_plot(tmp_out, outf, dataset=dataset, atlas=label,
+                        minimal=minimal, log=log)
 
 
 def main():
@@ -241,6 +241,11 @@ def main():
                         'the dataset you are perfoming QC on.')
     parser.add_argument('--atlas', action='store', help='The atlas '
                         'being analyzed in QC (if you only want one).')
+    parser.add_argument('--minimal', action='store_true', help='Determines '
+                        'whether to show a minimal or full set of plots.',
+                        default=False)
+    parser.add_argument('--log', action='store_true', help='Determines '
+                        'axis scale for plotting.', default=False)
     parser.add_argument('--debug', action='store_true', help='flag to store '
                         'temp files along the path of processing.',
                         default=False)
@@ -253,6 +258,8 @@ def main():
     remo = result.remote_path
     push = result.push_data
     level = result.analysis_level
+    minimal = result.minimal
+    log = result.log
 
     if level == 'participant':
         if buck is not None and remo is not None:
@@ -274,7 +281,8 @@ def main():
                 bids_s3.get_data(buck, remo, inDir, public=True)
 
         modif = 'qc'
-        group_level(inDir, outDir, result.func, result.dataset, result.atlas)
+        group_level(inDir, outDir, func, result.dataset,
+                    result.atlas, minimal, log)
 
 
     if push and buck is not None and remo is not None:

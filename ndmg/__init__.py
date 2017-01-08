@@ -11,4 +11,4 @@ from .timeseries import timeseries as timeseries
 from .scripts import ndmg_pipeline as ndmg_pipeline
 from .scripts import fngs_pipeline as fngs_pipeline
 
-version = "0.0.38"
+version = "0.0.41-2"
