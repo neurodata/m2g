@@ -8,12 +8,19 @@ import numpy as np
 from argparse import ArgumentParser
 
 def graph2png(infile, outdir, fname=None):
+    '''
+    infile: input .gpickle or .graphml file
+    outdir: path to directory to store output png files 
+    '''
+    # if file is .gpickle, otherwise load .graphml
     try:
         graph = nx.read_gpickle(infile)
     except:
         graph = nx.read_graphml(infile)                                       
+    # get numpy array equivalent of adjacency matrix
     g = nx.adj_matrix(graph).todense()
     fig = plt.figure(figsize=(7,7))
+    # plot adjacency matrix
     p = plt.imshow(g, interpolation='None', cmap='jet')
     if fname == None:
         fname = os.path.split(infile)[1].split('.')[0] + '.png'

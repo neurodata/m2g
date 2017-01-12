@@ -14,17 +14,20 @@ import sys
 def tensor2fa(fs, outdir, fname=None):
     '''
     fs: of 2-tuples containing the tensor file and regdti file
-    outdir: location of output directory. default is none (folder named fa_maps is created)
+    outdir: location of output directory. 
     fname: name of output fa map file. default is none (name created based on input file)
     '''
+    # load dti file 
     ften, fdti = fs
     img = nib.load(fdti)    
     dti_data = img.get_data()
     
+    # load tensor file and grab data
     with np.load(ften) as data:
         tensor_fit = data['arr_0']
         tensor_fit = tensor_fit.tolist()
         
+    # create FA map
     FA = fractional_anisotropy(tensor_fit.evals)
     # get rid of NaNs
     FA[np.isnan(FA)] = 0
@@ -38,6 +41,7 @@ def tensor2fa(fs, outdir, fname=None):
     RGB = color_fa(FA, tensor_fit.evecs)
     # save the RGB FA map
     nib.save(nib.Nifti1Image(np.array(255 * RGB, 'uint8'), img.affine), outdir + fname)
+    # return path of file
     return outdir + fname
 
 
@@ -46,6 +50,7 @@ def save_fa_png(fa_file, outdir, fname=None):
     fa_file: path to fa map file
     '''
     plt.rcParams.update({'axes.labelsize': 'x-large', 'axes.titlesize':'x-large'})
+    # helper function to make sure that all slices are plotted on the same figure
     def create_subplot(number, title, ylabel=None, xlabel=None, set_ticks=None, set_ticklabels=False):
         ax = plt.subplot(number)
         ax.set_title(title)
@@ -87,9 +92,7 @@ def save_fa_png(fa_file, outdir, fname=None):
 
 def main():
     """
-    Argument parser and directory crawler. Takes organization and atlas
-    information and produces a dictionary of file lists based on datasets
-    of interest and then passes it off for processing.
+    Argument parser.
     Required parameters:
         tenfile:
             - Path to tensor file
@@ -101,10 +104,10 @@ def main():
             - Path to fa png save location
     """
     parser = ArgumentParser(description="Computes FA maps and saves FA slices")
-    parser.add_argument("tenfile", action="store", help="base directory loc")
-    parser.add_argument("dtifile", action="store", help="base directory loc")
-    parser.add_argument("faoutdir", action="store", help="base directory loc")
-    parser.add_argument("pngoutdir", action="store", help="base directory loc")
+    parser.add_argument("tenfile", action="store", help="path to tensor file")
+    parser.add_argument("dtifile", action="store", help="path to regdti file")
+    parser.add_argument("faoutdir", action="store", help="output directory for fa map")
+    parser.add_argument("pngoutdir", action="store", help="output directory for png")
     result = parser.parse_args()
 
     if (not os.path.isdir(result.faoutdir)): os.mkdir(result.faoutdir)

@@ -17,15 +17,25 @@ def visualize(fibfile, atlasfile, outdir, opacity, num_samples, fname=None):
     Takes fiber streamlines and visualizes them using DiPy
     Required Arguments:
         - fibfile: Path to fiber file
+        - atlasfile: Path to atlas file
+        - outdir: Path to output directory
+        - opacity: Opacity of overlayed brain
+        - num_samples: number of fibers to randomly sample from fibfile
+    Optional Arguments:
+        - fname: name of output file. default is None (fname based on input fibfile name)
     """
+    # loading the fibers
     fibs = np.load(fibfile)
     fibs = fibs[fibs.keys()[0]]
     fibs = threshold_fibers(fibs)
+
     # make sure if fiber streamlines
     # have no fibers, no error occurs
     if len(fibs) == 0: return
+    # randomly sample num_samples fibers from given fibers
     resampled_fibs = random_sample(fibs, num_samples)
-    
+   
+    # load atlas file
     atlas_volume = load_atlas(atlasfile, opacity)
 
     # Initialize renderer
@@ -52,30 +62,44 @@ def visualize(fibfile, atlasfile, outdir, opacity, num_samples, fname=None):
     window.record(renderer, out_path=outdir + fname, size=(600, 600))
     print('done')   
 
+
 def threshold_fibers(fibs):
+    '''
+    fibs: fibers as 2D array (N,3)
+    '''
     fib_lengths = [len(f) for f in fibs]
     if (len(fib_lengths) == 0): return fib_lengths
+    # calculate median of  fiber lengths
     med = np.median(fib_lengths)
-    maximum = max(fib_lengths)
-    minimum = min(fib_lengths)
+    # get only fibers above the median length
     long_fibs = [f for f in fibs if len(f) > med]
     return long_fibs
 
 def random_sample(fibs, num_samples):
+    '''
+    fibs: fibers thresholded above median 
+    num_samples: number of fibers to sample from fibs
+    '''
+    # if the number of samples is more than amount 
+    # of fibers available, then make num_samples 
+    # equal number of fibers available
     if (len(fibs) <= num_samples): num_samples = len(fibs)
+    # generate the random sample indices
     samples = random.sample(range(len(fibs)), num_samples)
     return [fibs[i] for i in samples]
 
 def load_atlas(path, opacity):
+    '''
+    path: path to atlas file
+    opacity: opacity of overlayed atlas brain 
+    '''
     nifti_reader = vtk.vtkNIFTIImageReader()
     nifti_reader.SetFileName(path)
     nifti_reader.Update()
 
-    # The following class is used to store transparencyv-values for later retrival. In our case, we want the value 0 to be
-    # completly opaque whereas the three different cubes are given different transperancy-values to show how it works.
+    # The following class is used to store transparencyv-values for later retrival. In our case, we want the value 0 to be completly opaque 
     alphaChannelFunc = vtk.vtkPiecewiseFunction()
     alphaChannelFunc.AddPoint(0, 0.0)
-    print(opacity)
     alphaChannelFunc.AddPoint(1, opacity)
 
     # This class stores color data and can create color tables from a few color points. For this demo, we want the three cubes
@@ -92,11 +116,8 @@ def load_atlas(path, opacity):
     volumeProperty.ShadeOn()
 
 
-    # This class describes how the volume is rendered (through ray tracing).
-    # compositeFunction = vtk.vtkVolumeRayCastCompositeFunction()
     # We can finally create our volume. We also have to specify the data for it, as well as how the data will be rendered.
     volumeMapper = vtk.vtkSmartVolumeMapper()
-    # volumeMapper.SetBlendModeToComposite()
     volumeMapper.SetInputDataObject(nifti_reader.GetOutput())
 
     # The class vtkVolume is used to pair the preaviusly declared volume as well as the properties to be used when rendering that volume.

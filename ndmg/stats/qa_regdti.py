@@ -19,11 +19,16 @@ def save_reg_pngs(fs, outdir, fname=None):
     """
     fs: 4-tuple of paths to regdti, bval, bvec, and atlas files 
     outdir: directory where output png file is saved 
+    fname: name of output file WITHOUT FULL PATH. Path provided in outdir.
     """
     plt.rcParams.update({'axes.labelsize': 'x-large', 'axes.titlesize':'x-large'})
+    # unpack the files from the tuple
     fdti, fbval, fbvec, fatlas = fs
+    # load atlas file and extract data
     atlas_img = nib.load(fatlas)
     atlas_data = atlas_img.get_data()
+    # set the slice numbers you want to visualize
+    # for each of the 3 dimensions
     x1 = 78 
     x2 = 90 
     x3 = 100
@@ -33,22 +38,32 @@ def save_reg_pngs(fs, outdir, fname=None):
     z1 = 88
     z2 = 103
     z3 = 107
+    # load dti file and extract data
     img = nib.load(fdti)
     data = img.get_data()
+    # making sure the image displayed is the
+    # brain without any magnetic gradent applied
     data = get_b0_vol(data, fbval, fbvec)
 
+    # creating the two custom colormaps
     cmap1 = LinearSegmentedColormap.from_list('mycmap1', ['black', 'magenta'])
     cmap2 = LinearSegmentedColormap.from_list('mycmap2', ['black', 'green'])
     
+    # create subplot for first slice
+    # and customize all labels 
     ax_x1 = plt.subplot(331)
     ax_x1.set_ylabel('Sagittal Slice: Y and Z fixed')
     ax_x1.set_title('X = ' + str(x1))
     ax_x1.yaxis.set_ticks([0, data.shape[2]/2, data.shape[2] - 1 ])
     ax_x1.xaxis.set_ticks([0, data.shape[1]/2, data.shape[1] - 1 ])
     image = data[x1,:,:,0] 
+    # get the intensity value of the 3rd  and 98th percentiles (as min_val and max_val, respectively)
+    # important to reduce impact of outliers on intensity of image
     min_val, max_val = get_min_max(image)
+    # displaying the images with atlas image using magenta and regdti using green colormaps 
     plt.imshow(ndimage.rotate(atlas_data[x1,:,:], 90), interpolation='none', cmap=cmap1, alpha=0.5)
     plt.imshow(ndimage.rotate(image, 90), interpolation='none', cmap=cmap2, vmin=min_val, vmax=max_val, alpha=0.5)
+    # repeating above for each of the following slices
     ax_x2 = plt.subplot(332)
     ax_x2.set_title('X = ' + str(x2))
     ax_x2.get_yaxis().set_ticklabels([])
@@ -117,36 +132,50 @@ def save_reg_pngs(fs, outdir, fname=None):
     min_val, max_val = get_min_max(image)
     plt.imshow(atlas_data[:,:,z3], interpolation='none', cmap=cmap1, alpha=0.5)
     plt.imshow(ndimage.rotate(image, 0), interpolation='none', cmap=cmap2, vmin=min_val, vmax=max_val, alpha=0.5)
+    # getting the current figure which has all the slices plotted on it
     fig = plt.gcf()
     fig.set_size_inches(12.5, 10.5, forward=True)
+    # name and save the file
     if fname == None:
         fname = os.path.split(fdti)[1].split(".")[0] + '.png'
     plt.savefig(outdir + '/' + fname, format='png')
     print(fname + " saved!")
 
 def get_min_max(data):
+    '''
+    data: regdti data to threshold.
+    '''
     min_val = np.percentile(data, 3) 
     max_val = np.percentile(data, 92) 
     return (min_val, max_val)
 
 def get_b0_vol(data, fbval, fbvec):
+    '''
+    data: 4D regdti data 
+    fbval: path to bval file
+    fbvec: path to bvec file
+    '''
     bvals, bvecs = read_bvals_bvecs(fbval, fbvec)
+    # make sure that all bvecs are unit vectors
     normalize_bvecs(bvecs)
     gtab = gradient_table(bvals, bvecs)
+    # return the 0-gradient volume
     return data[:, :, :, gtab.b0s_mask]
 
 def normalize_bvecs(bvecs):
+    '''
+    bvecs: (N,3) array of bvecs
+    '''
     for i in range(bvecs.shape[0]):
         norm = np.linalg.norm(bvecs[i,:])
+        # if not unit length, normalize
         if norm != 1 or norm != 0:
             bvecs[i, :] = bvecs[i, :]/norm
         
 
 def main():
     """
-    Argument parser and directory crawler. Takes organization and atlas
-    information and produces a dictionary of file lists based on datasets
-    of interest and then passes it off for processing.
+    Argument parser. 
     Required parameters:
         dtifile:
             - path to regdti file 
@@ -167,7 +196,9 @@ def main():
     parser.add_argument("outdir", action="store", help="base directory loc")
     result = parser.parse_args()
 
+    # create the output directory if it doesn't exist
     if (not os.path.isdir(result.outdir)): os.mkdir(result.outdir)
+    # do all the processing and save the output png file
     save_reg_pngs((result.dtifile, result.bvalfile, result.bvecfile, result.atlasfile), result.outdir)
 
 
