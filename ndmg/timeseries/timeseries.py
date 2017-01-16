@@ -96,9 +96,15 @@ class timeseries(object):
             roi_idx = np.where(rois == roi)[0][0]  # the index of the roi
 
             roibool = (labeldata == roi)  # get a bool where our voxels in roi
-            roi_voxelwisets = fmridata[roibool, :]
+            roi_vts = fmridata[roibool, :]
 
-            roi_ts[roi_idx, :] = np.mean(roi_voxelwisets, axis=0)
+            # take the mean for the voxel timeseries, and ignore voxels of 0
+            # when possible.
+            ts = np.mean(roi_vts[:, roi_vts.std(axis=0) != 0], axis=0)
+            if (ts.shape == 0):
+                roi_ts[roi_idx, :] = np.mean(roi_vts, axis=0)
+            else:
+                roi_ts[roi_idx, :] = ts
 
         if qcdir is not None:
             mgqc().image_align(fmridata, labeldata, qcdir=qcdir,
