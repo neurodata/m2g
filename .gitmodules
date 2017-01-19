@@ -3,4 +3,4 @@
     url = https://github.com/BIDS-Apps/ndmg.git/
 [submodule "apps/boutiques"]
     path = apps/boutiques
-    url = https://github.com/neurodata/boutiques-tools.git.
+    url = https://github.com/neurodata/boutiques-tools.git/
