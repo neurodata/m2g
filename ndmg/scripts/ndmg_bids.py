@@ -87,7 +87,7 @@ def participant_level(inDir, outDir, subjs, debug=False):
     ope = op.exists
     if any(not ope(l) for l in labels) or not (ope(atlas) and ope(atlas_mask)):
         print("Cannot find atlas information; downloading...")
-        mgu().execute_cmd('mkdir -p ' + atlas_dir) 
+        mgu().execute_cmd('mkdir -p ' + atlas_dir)
         cmd = " ".join(['wget -rnH --cut-dirs=3 --no-parent -P ' + atlas_dir,
                         'http://openconnecto.me/mrdata/share/atlases/'])
         mgu().execute_cmd(cmd)
@@ -100,19 +100,23 @@ def participant_level(inDir, outDir, subjs, debug=False):
         subj_dirs = glob(op.join(inDir, "sub-*"))
         subjs = [subj_dir.split("-")[-1] for subj_dir in subj_dirs]
 
-    bvec = []; bval = []; anat = []; dwi = [];
+    bvec = []
+    bval = []
+    anat = []
+    dwi = []
     # Get all image data for each subject
     for subj in subjs:
         anat_t = glob(op.join(inDir, "sub-%s" % subj, "anat", "*_T1w.nii*")) +\
                  glob(op.join(inDir, "sub-%s" % subj, "ses-*",
-                            "anat", "*_T1w.nii*"))
+                              "anat", "*_T1w.nii*"))
         dwi_t = glob(op.join(inDir, "sub-%s" % subj, "dwi", "*_dwi.nii*")) +\
                 glob(op.join(inDir, "sub-%s" % subj, "ses-*",
-                           "dwi", "*_dwi.nii*"))
+                             "dwi", "*_dwi.nii*"))
         anat = anat + anat_t
-        dwi = dwi +  dwi_t
+        dwi = dwi + dwi_t
 
-    bvec_t = []; bval_t = []
+    bvec_t = []
+    bval_t = []
     # Look for bval, bvec files for each DWI file
     for scan in dwi:
         step = op.dirname(scan)
@@ -125,19 +129,20 @@ def participant_level(inDir, outDir, subjs, debug=False):
             step = op.abspath(op.join(step, os.pardir))
         bvec.append(bvec_t[0])
         bval.append(bval_t[0])
-        bvec_t = []; bval_t = []
+        bvec_t = []
+        bval_t = []
 
     assert(len(anat) == len(dwi))
     assert(len(bvec) == len(dwi))
     assert(len(bval) == len(dwi))
 
-    # Run for each 
-    for i, scans in enumerate(anat):     
+    # Run for each
+    for i, scans in enumerate(anat):
         print("T1 file: " + anat[i])
         print("DWI file: " + dwi[i])
         print("Bval file: " + bval[i])
         print("Bvec file: " + bvec[i])
-        
+
         ndmg_pipeline(dwi[i], bval[i], bvec[i], anat[i], atlas, atlas_mask,
                       labels, outDir, clean=(not debug))
 
@@ -246,7 +251,6 @@ def main():
                 bids_s3.get_data(buck, remo, inDir, public=True)
         modif = 'qc'
         group_level(inDir, outDir, result.dataset, result.atlas, minimal, log)
-
 
     if push and buck is not None and remo is not None:
         print("Pushing results to S3...")

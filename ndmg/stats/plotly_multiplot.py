@@ -76,7 +76,7 @@ def make_panel_plot(basepath, outf, dataset=None, atlas=None, minimal=True,
         multi.layout['x'+key]['title'] = ''
         multi.layout['y'+key]['title'] = ''
         multi = pp.panel_invisible(multi, 8)
-        
+
     plot(multi, validate=False, filename=outf+'.html')
 
 

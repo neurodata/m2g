@@ -77,4 +77,3 @@ class track():
                   odf_vertices=sphere.vertices, a_low=stop_val)
         tracks = [e for e in eu]
         return (ten, tracks)
-
