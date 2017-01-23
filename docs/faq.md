@@ -1,3 +1,13 @@
+## Parcellations/Atlases
+
+**Q: What are the Desikan labels?**
+
+**A:** The labels for the Desikan atlas can be found [here](http://openconnecto.me/data/public/MR/atlases/parcellations/raw/desikan.txt).
+
+**Q: What are the spatial coordinates for the Desikan labels?**
+
+**A:** The centroids for Desikan atlas regions can be found [here](https://github.com/neurodata/ndgrutedb/raw/master/MR-OCP/mrcap/utils/centroids.mat).
+
 ## DTI Pipeline
 
 
