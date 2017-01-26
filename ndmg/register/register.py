@@ -307,6 +307,9 @@ class register(object):
 
         mgu().get_slice(mri, 0, s0)  # get the 0 slice and save
         # extract the anatomical brain
+        # use threshold of .1 so that we don't accidentally cut off
+        # any brain tissue while segmenting. cutting off brain tissue
+        # leads to disasterous registration failures
         mgu().extract_brain(anat, anat_brain)
         # extract the brain from the s0 image
         mgu().extract_brain(s0, s0_brain)
