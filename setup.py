@@ -21,6 +21,7 @@ setup(
     ],
     scripts = [
         'ndmg/scripts/ndmg_demo-dwi',
+        'ndmg/scripts/ndmg_demo-func',
         'ndmg/scripts/ndmg_demo-qc'
     ],
     entry_points = {
