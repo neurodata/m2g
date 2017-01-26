@@ -27,7 +27,6 @@ from ndmg.utils import bids_s3
 from ndmg.scripts.ndmg_pipeline import ndmg_pipeline
 from ndmg.stats.graph_qc import *
 from ndmg.stats.plotly_multiplot import *
-from ndmg.scripts.fngs_pipeline import fngs_pipeline
 
 from glob import glob
 import ndmg.utils as mgu
@@ -38,7 +37,6 @@ import sys
 
 atlas_dir = '/ndmg_atlases'  # This location bc it is convenient for containers
 atlas = op.join(atlas_dir, 'atlas/MNI152_T1_1mm.nii.gz')
-atlas_brain = op.join(atlas_dir, 'atlas/MNI152_T1_1mm_brain.nii.gz')
 atlas_mask = op.join(atlas_dir, 'atlas/MNI152_T1_1mm_brain_mask.nii.gz')
 labels = ['labels/AAL.nii.gz',
           'labels/desikan.nii.gz',
@@ -71,8 +69,6 @@ labels = [op.join(atlas_dir, l) for l in labels]
 #   ses-<session id>/
 #     anat/
 #       sub-<subject id>_ses-<session id>_T1w.nii.gz
-#     func/
-#       sub-<subject id>_ses-<session id>_bold.nii.gz
 #     dwi/
 #       sub-<subject id>_ses-<session id>_dwi.nii.gz
 #   *   sub-<subject id>_ses-<session id>_dwi.bval
@@ -81,7 +77,7 @@ labels = [op.join(atlas_dir, l) for l in labels]
 # *these files can be anywhere up stream of the dwi data, and are inherited.
 
 
-def participant_level(inDir, outDir, subjs, debug=False, func=False, acquisition=None):
+def participant_level(inDir, outDir, subjs, debug=False):
     """
     Crawls the given BIDS organized directory for data pertaining to the given
     subject and session, and passes necessary files to ndmg_pipeline for
@@ -91,7 +87,7 @@ def participant_level(inDir, outDir, subjs, debug=False, func=False, acquisition
     ope = op.exists
     if any(not ope(l) for l in labels) or not (ope(atlas) and ope(atlas_mask)):
         print("Cannot find atlas information; downloading...")
-        mgu().execute_cmd('mkdir -p ' + atlas_dir) 
+        mgu().execute_cmd('mkdir -p ' + atlas_dir)
         cmd = " ".join(['wget -rnH --cut-dirs=3 --no-parent -P ' + atlas_dir,
                         'http://openconnecto.me/mrdata/share/atlases/'])
         mgu().execute_cmd(cmd)
@@ -104,77 +100,59 @@ def participant_level(inDir, outDir, subjs, debug=False, func=False, acquisition
         subj_dirs = glob(op.join(inDir, "sub-*"))
         subjs = [subj_dir.split("-")[-1] for subj_dir in subj_dirs]
 
-    anat = [];
+    bvec = []
+    bval = []
+    anat = []
+    dwi = []
     # Get all image data for each subject
     for subj in subjs:
-        anat = []
         anat_t = glob(op.join(inDir, "sub-%s" % subj, "anat", "*_T1w.nii*")) +\
                  glob(op.join(inDir, "sub-%s" % subj, "ses-*",
                               "anat", "*_T1w.nii*"))
+        dwi_t = glob(op.join(inDir, "sub-%s" % subj, "dwi", "*_dwi.nii*")) +\
+                glob(op.join(inDir, "sub-%s" % subj, "ses-*",
+                             "dwi", "*_dwi.nii*"))
         anat = anat + anat_t
-        if (func):
-            fmri = []
-            func_t = glob(op.join(inDir, "sub-%s" % subj, "func", "*_bold.nii*")) +\
-                     glob(op.join(inDir, "sub-%s" % subj, "ses-*",
-                                  "func", "*_bold.nii*"))
-            fmri = fmri + func_t
+        dwi = dwi + dwi_t
 
-            assert(len(anat) == len(fmri))
+    bvec_t = []
+    bval_t = []
+    # Look for bval, bvec files for each DWI file
+    for scan in dwi:
+        step = op.dirname(scan)
+        while not bval_t or not bvec_t:
+            bval_t = glob(op.join(step, "*dwi.bval"))
+            bvec_t = glob(op.join(step, "*dwi.bvec"))
+            if step is op.abspath(op.join(inDir, os.pardir)):
+                sys.exit("Error: No b-values or b-vectors found..\
+                    \nPlease review BIDS spec (bids.neuroimaging.io).")
+            step = op.abspath(op.join(step, os.pardir))
+        bvec.append(bvec_t[0])
+        bval.append(bval_t[0])
+        bvec_t = []
+        bval_t = []
 
-            for i, scans in enumerate(anat):
-                print ("T1 file: " + anat[i])
-                print ("fMRI file: " + fmri[i])
-                print ("Acquisition pattern: " + str(acquisition))
+    assert(len(anat) == len(dwi))
+    assert(len(bvec) == len(dwi))
+    assert(len(bval) == len(dwi))
 
-                fngs_pipeline(fmri[i], anat[i], atlas, atlas_brain, atlas_mask,
-                              labels, outDir, clean=(not debug), stc=acquisition)
+    # Run for each
+    for i, scans in enumerate(anat):
+        print("T1 file: " + anat[i])
+        print("DWI file: " + dwi[i])
+        print("Bval file: " + bval[i])
+        print("Bvec file: " + bvec[i])
 
-        else:
-            dwi = []; bval = []; bvec = [];
-            dwi_t = glob(op.join(inDir, "sub-%s" % subj, "dwi", "*_dwi.nii*")) +\
-                    glob(op.join(inDir, "sub-%s" % subj, "ses-*",
-                                 "dwi", "*_dwi.nii*"))
-            anat = anat + anat_t
-            dwi = dwi +  dwi_t
+        ndmg_pipeline(dwi[i], bval[i], bvec[i], anat[i], atlas, atlas_mask,
+                      labels, outDir, clean=(not debug))
 
-            bvec_t = []; bval_t = []
-            # Look for bval, bvec files for each DWI file
-            for scan in dwi:
-                step = op.dirname(scan)
-                while not bval_t or not bvec_t:
-                    bval_t = glob(op.join(step, "*dwi.bval"))
-                    bvec_t = glob(op.join(step, "*dwi.bvec"))
-                    if step is op.abspath(op.join(inDir, os.pardir)):
-                        sys.exit("Error: No b-values or b-vectors found..\
-                            \nPlease review BIDS spec (bids.neuroimaging.io).")
-                    step = op.abspath(op.join(step, os.pardir))
-                bvec.append(bvec_t[0])
-                bval.append(bval_t[0])
-                bvec_t = []; bval_t = []
 
-            assert(len(anat) == len(dwi))
-            assert(len(bvec) == len(dwi))
-            assert(len(bval) == len(dwi))
-
-            # Run for each 
-            for i, scans in enumerate(anat):     
-                print("T1 file: " + anat[i])
-                print("DWI file: " + dwi[i])
-                print("Bval file: " + bval[i])
-                print("Bvec file: " + bvec[i])
-                
-                ndmg_pipeline(dwi[i], bval[i], bvec[i], anat[i], atlas, atlas_mask,
-                              labels, outDir, clean=(not debug))
-
-def group_level(inDir, outDir, func, dataset=None, atlas=None, minimal=False,
+def group_level(inDir, outDir, dataset=None, atlas=None, minimal=False,
                 log=False):
     """
     Crawls the output directory from ndmg and computes qc metrics on the
     derivatives produced
     """
-    if (func):
-        sys.exit('Sorry, functional group analysis is not supported at '
-                 'this time.')
     # Make output dir
     mgu().execute_cmd("mkdir -p " + outDir)
 
@@ -229,12 +207,6 @@ def main():
     parser.add_argument('--remote_path', action='store', help='The path to '
                         'the data on your S3 bucket. The data will be '
                         'downloaded to the provided bids_dir on your machine.')
-    parser.add_argument('--func', help='flag to determine whether to run '
-                        'functional analysis.', default=True)
-    parser.add_argument('--acquisition', help='flag that specifies the acquisition '
-                        'pattern if you want to use slice timing correction '
-                        'with functional analysis. Options are \'up\', \'down\', '
-                        '\'interleaved\', \'None\'.', default=None)
     parser.add_argument('--push_data', action='store_true', help='flag to '
                         'push derivatives back up to S3.', default=False)
     parser.add_argument('--dataset', action='store', help='The name of '
@@ -268,9 +240,7 @@ def main():
                 [bids_s3.get_data(buck, remo, inDir, s, True) for s in subj]
             else:
                 bids_s3.get_data(buck, remo, inDir, public=True)
-        participant_level(inDir, outDir, subj, result.debug, result.func,
-                          result.acquisition)
-
+        participant_level(inDir, outDir, subj, result.debug)
         modif = 'derivatives'
     elif level == 'group':
         if buck is not None and remo is not None:
@@ -279,11 +249,8 @@ def main():
                 [bids_s3.get_data(buck, remo, inDir, s, True) for s in subj]
             else:
                 bids_s3.get_data(buck, remo, inDir, public=True)
-
         modif = 'qc'
-        group_level(inDir, outDir, func, result.dataset,
-                    result.atlas, minimal, log)
-
+        group_level(inDir, outDir, result.dataset, result.atlas, minimal, log)
 
     if push and buck is not None and remo is not None:
         print("Pushing results to S3...")

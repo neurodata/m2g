@@ -26,7 +26,8 @@ setup(
     entry_points = {
         'console_scripts': [
                             'ndmg_pipeline=ndmg.scripts.ndmg_pipeline:main',
-                            'fngs_pipeline=ndmg.scripts.fngs_pipeline:main'
+                            'fngs_pipeline=ndmg.scripts.fngs_pipeline:main',
+                            'ndmg_bids=ndmg.scripts.ndmg_bids:main'
                             ]
     },
     version=VERSION,
