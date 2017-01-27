@@ -25,8 +25,8 @@ from os.path import expanduser
 from ndmg.scripts.ndmg_setup import get_files
 from ndmg.utils import bids_s3
 from ndmg.scripts.ndmg_pipeline import ndmg_pipeline
-from ndmg.stats.graph_qc import *
-from ndmg.stats.plotly_multiplot import *
+from ndmg.stats.qa_graphs import *
+from ndmg.stats.qa_graphs_plotting import *
 
 from glob import glob
 import ndmg.utils as mgu

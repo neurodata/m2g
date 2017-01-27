@@ -15,7 +15,7 @@
 # limitations under the License.
 #
 
-# graph_qc.py
+# loadGraphs.py
 # Created by Greg Kiar on 2016-05-11.
 # Email: gkiar@jhu.edu
 

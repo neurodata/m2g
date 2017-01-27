@@ -15,7 +15,7 @@
 # limitations under the License.
 #
 
-# plotly_panels.py
+# plotly_helper.py
 # Created by Greg Kiar on 2016-09-19.
 # Email: gkiar@jhu.edu
 
@@ -26,15 +26,30 @@ from plotly.graph_objs import *
 from plotly import tools
 
 
-def plot_series(dats, name=None, ylab=None, xlab=None):
+def plot_heatmap(dats, name=None, ylab=None, xlab=None):
+    data = [
+            Heatmap(
+                    z=dats,
+                    name=name,
+                    showscale=False,
+                   )
+           ]
+    layout = std_layout(name, ylab, xlab)
+    fig = Figure(data=data, layout=layout)
+    return fig
+
+
+def plot_series(dats, name=None, ylab=None, xlab=None, sort=False):
     data = list()
     for idx, ys in enumerate(dats):
+        if sort:
+            ys = np.sort(ys)
         data += [
                  Scatter(
                          x=np.linspace(1, len(ys), len(ys)),
                          y=ys,
                          line=Line(
-                                   color='rgba(0,0,0,%1.2f)' % (7.0/len(dats))
+                                   color='rgba(0,0,0,%1.2f)' % (4.0/len(dats))
                                   ),
                          hoverinfo='x',
                          name=name,
@@ -53,7 +68,7 @@ def plot_density(xs, ys, name=None, ylab=None, xlab=None):
                          x=xs[idx],
                          y=ys[idx],
                          line=Line(
-                                   color='rgba(0,0,0,%1.2f)' % (7.0/len(ys))
+                                   color='rgba(0,0,0,%1.2f)' % (4.0/len(ys))
                                   ),
                          hoverinfo='x',
                          name=name,

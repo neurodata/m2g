@@ -15,7 +15,7 @@
 # limitations under the License.
 #
 
-# graph_qc.py
+# qa_graphs.py
 # Created by Greg Kiar on 2016-05-11.
 # Email: gkiar@jhu.edu
 
@@ -64,7 +64,7 @@ def compute_metrics(fs, outdir, atlas, verb=False):
     print("Computing: Degree Seuqence")
     temp_deg = OrderedDict((subj, np.array(nx.degree(graphs[subj]).values()))
                            for subj in graphs)
-    deg = density(temp_deg, nbins=nodes)
+    deg = temp_deg
     write(outdir, 'degree_distribution', deg, atlas)
     show_means(temp_deg)
 
@@ -72,23 +72,23 @@ def compute_metrics(fs, outdir, atlas, verb=False):
     print("Computing: Edge Weight Sequence")
     temp_ew = OrderedDict((s, [graphs[s].get_edge_data(e[0], e[1])['weight']
                            for e in graphs[s].edges()]) for s in graphs)
-    ew = density(temp_ew, nbins=2*nodes)
-    write(outdir, 'edge_weight_distribution', ew, atlas)
+    ew = temp_ew
+    write(outdir, 'edge_weight', ew, atlas)
     show_means(temp_ew)
 
     #   Clustering Coefficients
     print("Computing: Clustering Coefficient Sequence")
     temp_cc = OrderedDict((subj, nx.clustering(graphs[subj]).values())
                           for subj in graphs)
-    ccoefs = density(temp_cc, nbins=2*nodes)
+    ccoefs = temp_cc
     write(outdir, 'clustering_coefficients', ccoefs, atlas)
     show_means(temp_cc)
 
     # Scan Statistic-1
     print("Computing: Max Local Statistic Sequence")
     temp_ss1 = scan_statistic(graphs, 1)
-    ss1 = density(temp_ss1, nbins=2*nodes)
-    write(outdir, 'scan_statistic_1', ss1, atlas)
+    ss1 = temp_ss1
+    write(outdir, 'locality_statistic', ss1, atlas)
     show_means(temp_ss1)
 
     # Eigen Values
@@ -101,20 +101,24 @@ def compute_metrics(fs, outdir, atlas, verb=False):
     print("Subject Maxes: " + ", ".join(["%.2f" % np.max(eigs[key])
                                          for key in eigs.keys()]))
 
-    scree = OrderedDict((subj, np.cumsum(eigs[subj])/np.sum(eigs[subj]))
-                        for subj in eigs)
-    write(outdir, 'scree_eigen', scree, atlas)
-
     # Betweenness Centrality
     print("Computing: Betweenness Centrality Sequence")
     nxbc = nx.algorithms.betweenness_centrality  # For PEP8 line length...
     temp_bc = OrderedDict((subj, nxbc(graphs[subj]).values())
                           for subj in graphs)
-    centrality = density(temp_bc, nbins=2*nodes)
+    centrality = temp_bc
     write(outdir, 'betweenness_centrality', centrality, atlas)
     show_means(temp_bc)
 
-    outf = outdir + '/' + atlas + '_summary.png'
+    # Mean connectome
+    print("Computing: Mean Connectome")
+    adj = OrderedDict((subj, nx.adj_matrix(graphs[subj]).todense())
+                      for subj in graphs)
+    mat = np.zeros(adj.values()[0].shape)
+    for subj in adj:
+        mat += adj[subj]
+    mat = mat/len(adj.keys())
+    write(outdir, 'study_mean_connectome', mat, atlas)
 
 
 def show_means(data):
@@ -144,7 +148,7 @@ def scan_statistic(mygs, i):
     return ss
 
 
-def density(data, nbins=500):
+def density(data, nbins=500, rng=None):
     """
     Computes density for metrics which return vectors
 
@@ -158,7 +162,10 @@ def density(data, nbins=500):
         hist = np.histogram(data[subj], nbins)
         hist = np.max(hist[0])
         dens = gaussian_kde(data[subj])
-        xs[subj] = np.linspace(0, np.max(data[subj]), nbins)
+        if rng is not None:
+            xs[subj] = np.linspace(rng[0], rng[1], nbins)
+        else:
+            xs[subj] = np.linspace(0, np.max(data[subj]), nbins)
         density[subj] = dens.evaluate(xs[subj])*np.max(data[subj]*hist)
     return {"xs": xs, "pdfs": density}
 
