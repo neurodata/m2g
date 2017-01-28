@@ -1,0 +1,1 @@
+recursive-include ndmg/stats/templates *.html
