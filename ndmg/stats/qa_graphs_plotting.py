@@ -70,6 +70,8 @@ def make_panel_plot(basepath, outf, dataset=None, atlas=None, minimal=True,
                                        size=14)
                             )]
         elif keys[idx] == 'study_mean_connectome':
+            if log:
+                dat = np.log10(dat+1)
             fig = pp.plot_heatmap(dat, name=labs[idx])
         else:
             dims = len(dat.values()[0])
@@ -90,11 +92,12 @@ def make_panel_plot(basepath, outf, dataset=None, atlas=None, minimal=True,
         if idx in [0, 1, 2, 3, 5]:
             multi.layout['x'+key]['range'] = [1, dims]
             multi.layout['x'+key]['tickvals'] = [1, dims/2, dims]
-            if log:
+            if idx in [2]:
+                if hemispheres:
+                    multi.layout['annotations'] = anno
+            elif log:
                 multi.layout['y'+key]['type'] = 'log'
                 multi.layout['y'+key]['title'] += ' (log scale)'
-            if idx in [2] and hemispheres:
-                multi.layout['annotations'] = anno
         if idx in [3]:
             multi.layout['x'+key]['range'] = [1, edges]
             multi.layout['x'+key]['tickvals'] = [1, edges/2, edges]
@@ -114,6 +117,8 @@ def make_panel_plot(basepath, outf, dataset=None, atlas=None, minimal=True,
             multi.layout['y'+key]['tickvals'] = [0, dims/2-1, dims-1]
             multi.layout['x'+key]['ticktext'] = [1, dims/2, dims]
             multi.layout['y'+key]['ticktext'] = [1, dims/2, dims]
+            if log:
+                multi.layout['x'+key]['title'] += ' (log10)'
 
     if dataset is not None and atlas is not None:
         if atlas == 'desikan':

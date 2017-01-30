@@ -29,7 +29,7 @@ from plotly import tools
 def plot_heatmap(dats, name=None, ylab=None, xlab=None):
     data = [
             Heatmap(
-                    z=np.log10(dats+1),
+                    z=dats,
                     name=name,
                     showscale=False,
                     colorscale='Viridis'
