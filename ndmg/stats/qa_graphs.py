@@ -61,12 +61,34 @@ def compute_metrics(fs, outdir, atlas, verb=False):
     print("Sample Mean: %.2f" % np.mean(nnz.values()))
 
     #  Degree sequence
-    print("Computing: Degree Seuqence")
-    temp_deg = OrderedDict((subj, np.array(nx.degree(graphs[subj]).values()))
+    print("Computing: Degree Sequence")
+    total_deg = OrderedDict((subj, np.array(nx.degree(graphs[subj]).values()))
                            for subj in graphs)
-    deg = temp_deg
+    ipso_deg = OrderedDict()
+    contra_deg = OrderedDict()
+    for subj in graphs:  # TODO GK: remove forloop and use comprehension maybe?
+        g = graphs[subj]
+        N = len(g.nodes())
+        LLnodes = g.nodes()[0:N/2]  # TODO GK: don't assume hemispheres
+        LL = g.subgraph(LLnodes)
+        LLdegs = [LL.degree()[n] for n in LLnodes]
+
+        RRnodes = g.nodes()[N/2:N] # TODO GK: don't assume hemispheres
+        RR = g.subgraph(RRnodes)
+        RRdegs = [RR.degree()[n] for n in RRnodes]
+
+        LRnodes = g.nodes()
+        ipso_list = LLdegs + RRdegs
+        degs = [g.degree()[n] for n in LRnodes]
+        contra_deg[subj] = [a_i - b_i for a_i, b_i in zip(degs, ipso_list)]
+        ipso_deg[subj] = ipso_list
+        # import pdb; pdb.set_trace()
+
+    deg = {'total_deg': total_deg,
+           'ipso_deg': ipso_deg,
+           'contra_deg': contra_deg}
     write(outdir, 'degree_distribution', deg, atlas)
-    show_means(temp_deg)
+    show_means(total_deg)
 
     #  Edge Weights
     print("Computing: Edge Weight Sequence")

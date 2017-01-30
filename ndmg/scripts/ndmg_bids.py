@@ -148,7 +148,7 @@ def participant_level(inDir, outDir, subjs, debug=False):
 
 
 def group_level(inDir, outDir, dataset=None, atlas=None, minimal=False,
-                log=False):
+                log=False, hemispheres=False):
     """
     Crawls the output directory from ndmg and computes qc metrics on the
     derivatives produced
@@ -175,7 +175,8 @@ def group_level(inDir, outDir, dataset=None, atlas=None, minimal=False,
         compute_metrics(fs, tmp_out, label)
         outf = op.join(tmp_out, 'plot')
         make_panel_plot(tmp_out, outf, dataset=dataset, atlas=label,
-                        minimal=minimal, log=log)
+                        minimal=minimal, log=log, hemispheres=hemispheres)
+
 
 
 def main():
@@ -216,6 +217,9 @@ def main():
     parser.add_argument('--minimal', action='store_true', help='Determines '
                         'whether to show a minimal or full set of plots.',
                         default=False)
+    parser.add_argument('--hemispheres', action='store_true', help='Whether '
+                        'or not to break degrees into hemispheres or not',
+                        default=False)
     parser.add_argument('--log', action='store_true', help='Determines '
                         'axis scale for plotting.', default=False)
     parser.add_argument('--debug', action='store_true', help='flag to store '
@@ -232,6 +236,7 @@ def main():
     level = result.analysis_level
     minimal = result.minimal
     log = result.log
+    hemi = result.hemispheres
 
     if level == 'participant':
         if buck is not None and remo is not None:
@@ -250,7 +255,8 @@ def main():
             else:
                 bids_s3.get_data(buck, remo, inDir, public=True)
         modif = 'qc'
-        group_level(inDir, outDir, result.dataset, result.atlas, minimal, log)
+        group_level(inDir, outDir, result.dataset, result.atlas, minimal,
+                    log, hemi)
 
     if push and buck is not None and remo is not None:
         print("Pushing results to S3...")

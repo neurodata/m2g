@@ -28,7 +28,7 @@ import os
 
 
 def make_panel_plot(basepath, outf, dataset=None, atlas=None, minimal=True,
-                    log=True):
+                    log=True, hemispheres=True):
     fnames = [name for name in os.listdir(basepath)
               if os.path.splitext(name)[1] == '.pkl']
     fnames = sorted(fnames)
@@ -48,6 +48,27 @@ def make_panel_plot(basepath, outf, dataset=None, atlas=None, minimal=True,
         elif keys[idx] == 'edge_weight':
             edges = np.max([len(dat[i]) for i in dat.keys()])
             fig = pp.plot_series(dat.values(), sort=True)
+        elif keys[idx] == 'degree_distribution':
+            fig = pp.plot_degrees(dat, hemi=hemispheres)
+            if hemispheres:
+                anno = [dict(x=dims/3,
+                             y=3*dims/5,
+                             xref='x3',
+                             yref='y3',
+                             text='ipsolateral',
+                             showarrow=False,
+                             font=dict(color='rgba(0.0,0.0,0.0,0.6)',
+                                       size=14)
+                            ),
+                        dict(x=2*dims/3,
+                             y=3*dims/5,
+                             xref='x3',
+                             yref='y3',
+                             text='contralateral',
+                             showarrow=False,
+                             font=dict(color='rgba(0.11,0.62,0.47,0.6)',
+                                       size=14)
+                            )]
         elif keys[idx] == 'study_mean_connectome':
             fig = pp.plot_heatmap(dat, name=labs[idx])
         else:
@@ -72,6 +93,8 @@ def make_panel_plot(basepath, outf, dataset=None, atlas=None, minimal=True,
             if log:
                 multi.layout['y'+key]['type'] = 'log'
                 multi.layout['y'+key]['title'] += ' (log scale)'
+            if idx in [2] and hemispheres:
+                multi.layout['annotations'] = anno
         if idx in [3]:
             multi.layout['x'+key]['range'] = [1, edges]
             multi.layout['x'+key]['tickvals'] = [1, edges/2, edges]
@@ -87,8 +110,6 @@ def make_panel_plot(basepath, outf, dataset=None, atlas=None, minimal=True,
             multi.layout['y'+key]['title'] = None
             multi.layout['x'+key]['title'] = labs[idx]
             multi.layout['y'+key]['autorange'] = 'reversed'
-            multi.layout['y'+key]['range'] = [1, dims]
-            multi.layout['x'+key]['range'] = [1, dims]
             multi.layout['x'+key]['tickvals'] = [0, dims/2-1, dims-1]
             multi.layout['y'+key]['tickvals'] = [0, dims/2-1, dims-1]
             multi.layout['x'+key]['ticktext'] = [1, dims/2, dims]

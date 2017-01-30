@@ -29,11 +29,51 @@ from plotly import tools
 def plot_heatmap(dats, name=None, ylab=None, xlab=None):
     data = [
             Heatmap(
-                    z=dats,
+                    z=np.log10(dats+1),
                     name=name,
                     showscale=False,
+                    colorscale='Viridis'
                    )
            ]
+    layout = std_layout(name, ylab, xlab)
+    fig = Figure(data=data, layout=layout)
+    return fig
+
+
+def plot_degrees(dats, name=None, ylab=None, xlab=None, hemi=True):
+    data = list()
+    if hemi:
+        main = dats['ipso_deg']
+        contra = dats['contra_deg']
+    else:
+        main = dats['total_deg']
+    al = (4.0/len(main.keys()))
+
+    for key in main.keys():
+        lgth = len(main[key])
+        data += [
+                 Scatter(
+                         x=np.linspace(1, lgth, lgth),
+                         y=main[key],
+                         line=Line(
+                                   color='rgba(0,0,0,%1.2f)' % al
+                                  ),
+                         hoverinfo='x',
+                         name=name,
+                        )
+                ]
+        if hemi:
+            data += [
+                     Scatter(
+                             x=np.linspace(1, lgth, lgth),
+                             y=contra[key],
+                             line=Line(
+                                       color='rgba(0.11,0.62,0.47,%1.2f)' % al
+                                      ),
+                             hoverinfo='x',
+                             name=name,
+                            )
+                    ]
     layout = std_layout(name, ylab, xlab)
     fig = Figure(data=data, layout=layout)
     return fig
