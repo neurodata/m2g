@@ -114,10 +114,11 @@ def get_status(jobdir):
     """
     Given list of jobs, returns status of each.
     """
-    for job in jobs:
-        pass
+    #for job in os.path.listdir(jobdir):
+    #    pass
         # TODO: this
-    return 0
+    #return 0
+    print("This has yet to be implemented - come back soon!")
 
 
 def main():
