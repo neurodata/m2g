@@ -30,6 +30,7 @@ from ndmg.stats.qa_graphs_plotting import *
 
 from glob import glob
 import ndmg.utils as mgu
+import ndmg
 import os.path as op
 import os
 import sys
