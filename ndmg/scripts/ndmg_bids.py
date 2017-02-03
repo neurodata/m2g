@@ -245,8 +245,8 @@ def main():
                 [bids_s3.get_data(buck, remo, inDir, s, True) for s in subj]
             else:
                 bids_s3.get_data(buck, remo, inDir, public=True)
+        modif = 'ndmg_{}'.format(ndmg.version.replace('.', '-'))
         participant_level(inDir, outDir, subj, result.debug)
-        modif = 'ndmg_{}'.format(ndmg.version.replace('.', '-')
     elif level == 'group':
         if buck is not None and remo is not None:
             print("Retrieving data from S3...")
@@ -262,7 +262,7 @@ def main():
                        ' --acl public-read-write'])
         print cmd
         mgu().execute_cmd(cmd)
-   sys.exit(0) 
+    sys.exit(0) 
 
 if __name__ == "__main__":
     main()
