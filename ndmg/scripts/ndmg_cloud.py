@@ -73,7 +73,6 @@ def create_json(bucket, path, subjs, jobdir, debug=False, dataset=None):
     jobs = list()
     for idx, subj in enumerate(subjs):
         print("... Generating job for sub-{}".format(subj))
-        print(subjs)
         job_cmd = deepcopy(cmd)
         job_cmd[4] = re.sub('(<BUCKET>)', bucket, job_cmd[4])
         job_cmd[6] = re.sub('(<PATH>)', path, job_cmd[6])
