@@ -155,7 +155,8 @@ def group_level(inDir, outDir, dataset=None, atlas=None, minimal=False,
     derivatives produced
     """
     # Make output dir
-    mgu().execute_cmd("mkdir -p " + outDir + "/graphs")
+    outDir += "/graphs"
+    mgu().execute_cmd("mkdir -p " + outDir)
 
     # Get list of graphs
     labels = next(os.walk(inDir))[1]
