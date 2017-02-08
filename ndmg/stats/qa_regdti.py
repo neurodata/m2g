@@ -17,6 +17,7 @@
 
 # qa_regdti.py
 # Created by Vikram Chandrashekhar.
+# Edited by Greg Kiar.
 # Email: Greg Kiar @ gkiar@jhu.edu
 
 import os
@@ -24,6 +25,7 @@ import re
 import sys
 import numpy as np
 import nibabel as nb
+import ndmg.utils as mgu
 from argparse import ArgumentParser
 from scipy import ndimage
 from matplotlib.colors import LinearSegmentedColormap
@@ -31,7 +33,7 @@ import matplotlib as mpl
 mpl.use('Agg')  # very important above pyplot import
 
 import matplotlib.pyplot as plt
-import ndmg.utils as mgu
+
 
 def reg_dti_pngs(dti, gtab, atlas, outdir):
     """
@@ -45,19 +47,18 @@ def reg_dti_pngs(dti, gtab, atlas, outdir):
 
     cmap1 = LinearSegmentedColormap.from_list('mycmap1', ['black', 'magenta'])
     cmap2 = LinearSegmentedColormap.from_list('mycmap2', ['black', 'green'])
-   
+
     fig = plot_overlays(atlas_data, b0_data, (cmap1, cmap2))
-    
+
     # name and save the file
     fname = os.path.split(dti)[1].split(".")[0] + '.png'
     plt.savefig(outdir + '/' + fname, format='png')
-    print(fname + " saved!")
 
 
 def plot_overlays(atlas, b0, cmaps):
     plt.rcParams.update({'axes.labelsize': 'x-large',
                          'axes.titlesize': 'x-large'})
-    
+
     if b0.shape == (182, 218, 182):
         x = [78, 90, 100]
         y = [82, 107, 142]
@@ -79,7 +80,7 @@ def plot_overlays(atlas, b0, cmaps):
     for i, coord in enumerate(coords):
         for pos in coord:
             idx += 1
-            ax = plt.subplot(3,3,idx)
+            ax = plt.subplot(3, 3, idx)
             ax.set_title(var[i] + " = " + str(pos))
             if i == 0:
                 image = ndimage.rotate(b0[pos, :, :], 90)
@@ -95,7 +96,7 @@ def plot_overlays(atlas, b0, cmaps):
                 ax.set_ylabel(labs[i])
                 ax.yaxis.set_ticks([0, image.shape[0]/2, image.shape[0] - 1])
                 ax.xaxis.set_ticks([0, image.shape[1]/2, image.shape[1] - 1])
-            
+
             min_val, max_val = get_min_max(image)
             plt.imshow(atl, interpolation='none', cmap=cmaps[0], alpha=0.5)
             plt.imshow(image, interpolation='none', cmap=cmaps[1], alpha=0.5,

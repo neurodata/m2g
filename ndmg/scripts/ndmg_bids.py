@@ -179,7 +179,6 @@ def group_level(inDir, outDir, dataset=None, atlas=None, minimal=False,
                         minimal=minimal, log=log, hemispheres=hemispheres)
 
 
-
 def main():
     parser = ArgumentParser(description="This is an end-to-end connectome \
                             estimation pipeline from sMRI and DTI images")
@@ -263,7 +262,7 @@ def main():
                        ' --acl public-read-write'])
         print cmd
         mgu().execute_cmd(cmd)
-    sys.exit(0) 
+    sys.exit(0)
 
 if __name__ == "__main__":
     main()

@@ -63,7 +63,7 @@ def compute_metrics(fs, outdir, atlas, verb=False):
     #  Degree sequence
     print("Computing: Degree Sequence")
     total_deg = OrderedDict((subj, np.array(nx.degree(graphs[subj]).values()))
-                           for subj in graphs)
+                            for subj in graphs)
     ipso_deg = OrderedDict()
     contra_deg = OrderedDict()
     for subj in graphs:  # TODO GK: remove forloop and use comprehension maybe?
@@ -73,7 +73,7 @@ def compute_metrics(fs, outdir, atlas, verb=False):
         LL = g.subgraph(LLnodes)
         LLdegs = [LL.degree()[n] for n in LLnodes]
 
-        RRnodes = g.nodes()[N/2:N] # TODO GK: don't assume hemispheres
+        RRnodes = g.nodes()[N/2:N]  # TODO GK: don't assume hemispheres
         RR = g.subgraph(RRnodes)
         RRdegs = [RR.degree()[n] for n in RRnodes]
 

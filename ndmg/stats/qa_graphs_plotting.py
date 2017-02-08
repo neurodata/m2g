@@ -58,8 +58,7 @@ def make_panel_plot(basepath, outf, dataset=None, atlas=None, minimal=True,
                              text='ipsilateral',
                              showarrow=False,
                              font=dict(color='rgba(0.0,0.0,0.0,0.6)',
-                                       size=14)
-                            ),
+                                       size=14)),
                         dict(x=dims/3,
                              y=3.7*dims/7,
                              xref='x3',
@@ -67,8 +66,7 @@ def make_panel_plot(basepath, outf, dataset=None, atlas=None, minimal=True,
                              text='contralateral',
                              showarrow=False,
                              font=dict(color='rgba(0.11,0.62,0.47,0.6)',
-                                       size=14)
-                            )]
+                                       size=14))]
         elif keys[idx] == 'study_mean_connectome':
             if log:
                 dat = np.log10(dat+1)

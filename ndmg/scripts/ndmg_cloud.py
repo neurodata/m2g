@@ -31,6 +31,7 @@ import json
 
 job_template = 'https://raw.githubusercontent.com/neurodata/sic/master/code/ec2/batch/json_files/job_template.json'
 
+
 def batch_submit(bucket, path, jobdir, debug=False, dataset=None):
     """
     Searches through an S3 bucket, gets all subject-ids, creates json files
@@ -42,7 +43,8 @@ def batch_submit(bucket, path, jobdir, debug=False, dataset=None):
     print("Generating job for each subject...")
     jobs = create_json(bucket, path, subjs, jobdir, debug, dataset)
     print("Submitting jobs to the queue...")
-    ids = submit_jobs(jobs) 
+    ids = submit_jobs(jobs)
+
 
 def crawl_bucket(bucket, path):
     """
@@ -51,7 +53,7 @@ def crawl_bucket(bucket, path):
     cmd = 'aws s3 ls s3://{}/{}/'.format(bucket, path)
     out, err = mgu().execute_cmd(cmd)
     subjs = re.findall('sub-(.+)/', out)
-    print("Subject IDs: " + ", ".join(subjs)) 
+    print("Subject IDs: " + ", ".join(subjs))
     return subjs
 
 
@@ -79,7 +81,7 @@ def create_json(bucket, path, subjs, jobdir, debug=False, dataset=None):
         job_cmd[8] = re.sub('(<SUBJ>)', subj, job_cmd[8])
         if debug:
             job_cmd += [u'--debug']
-        
+
         job_json = deepcopy(template)
         ver = ndmg.version.replace('.', '-')
         if dataset:
@@ -88,7 +90,7 @@ def create_json(bucket, path, subjs, jobdir, debug=False, dataset=None):
             name = 'ndmg_{}_sub-{}'.format(ver, subj)
         job_json['jobName'] = name
         job_json['containerOverrides']['command'] = job_cmd
-        
+
         jobs += [os.path.join(jobdir, 'jobs', name)]
         with open(jobs[idx], 'w') as outfile:
             json.dump(job_json, outfile)
@@ -113,10 +115,10 @@ def get_status(jobdir):
     """
     Given list of jobs, returns status of each.
     """
-    #for job in os.path.listdir(jobdir):
+    # for job in os.path.listdir(jobdir):
     #    pass
-        # TODO: this
-    #return 0
+    # TODO: this
+    # return 0
     print("This has yet to be implemented - come back soon!")
 
 
@@ -153,15 +155,16 @@ def main():
     if (bucket is None or remo is None) and (status is False):
         sys.exit('Requires either path to bucket and data, or the status flag'
                  ' and job IDs to query. Try ndmg_cloud --help')
-    
+
     if status:
         print("Checking job status...")
         get_status(jobdir)
     else:
         print("Beginning batch submission process...")
         batch_submit(bucket, remo, jobdir, debug, dset)
-    
-    sys.exit(0) 
+
+    sys.exit(0)
+
 
 if __name__ == "__main__":
     main()

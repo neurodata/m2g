@@ -17,6 +17,7 @@
 
 # qa_tensor.py
 # Created by Vikram Chandrashekhar.
+# Edited by Greg Kiar.
 # Email: Greg Kiar @ gkiar@jhu.edu
 
 from dipy.reconst.dti import fractional_anisotropy, color_fa
@@ -40,9 +41,9 @@ def tensor2fa(tensors, tensor_name, dti, derivdir, qcdir):
     input file)
     '''
     dti_data = nb.load(dti)
-    affine =  dti_data.get_affine()
+    affine = dti_data.get_affine()
     dti_data = dti_data.get_data()
-    
+
     # create FA map
     FA = fractional_anisotropy(tensors.evals)
     FA[np.isnan(FA)] = 0
@@ -57,6 +58,7 @@ def tensor2fa(tensors, tensor_name, dti, derivdir, qcdir):
 
     fa_pngs(fa, fname, qcdir)
 
+
 def fa_pngs(data, fname, outdir):
     '''
     data: fa map
@@ -65,7 +67,6 @@ def fa_pngs(data, fname, outdir):
     fig = plot_rgb(im)
     fname = os.path.split(fname)[1].split(".")[0] + '.png'
     plt.savefig(outdir + fname, format='png')
-    print(fname + " saved!")
 
 
 def plot_rgb(im):
@@ -92,7 +93,7 @@ def plot_rgb(im):
     for i, coord in enumerate(coords):
         for pos in coord:
             idx += 1
-            ax = plt.subplot(3,3,idx)
+            ax = plt.subplot(3, 3, idx)
             ax.set_title(var[i] + " = " + str(pos))
             if i == 0:
                 image = ndimage.rotate(im[pos, :, :], 90)
@@ -105,7 +106,7 @@ def plot_rgb(im):
                 ax.set_ylabel(labs[i])
                 ax.yaxis.set_ticks([0, image.shape[0]/2, image.shape[0] - 1])
                 ax.xaxis.set_ticks([0, image.shape[1]/2, image.shape[1] - 1])
-            
+
             plt.imshow(image)
 
     fig = plt.gcf()

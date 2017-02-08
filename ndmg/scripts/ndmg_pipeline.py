@@ -26,6 +26,7 @@ from datetime import datetime
 from subprocess import Popen, PIPE
 from ndmg.stats.qa_regdti import *
 from ndmg.stats.qa_tensor import *
+from ndmg.stats.qa_fibers import *
 import ndmg.utils as mgu
 import ndmg.register as mgr
 import ndmg.track as mgt
@@ -94,6 +95,10 @@ def ndmg_pipeline(dti, bvals, bvecs, mprage, atlas, mask, labels, outdir,
     tens, tracks = mgt().eudx_basic(aligned_dti, mask, gtab, stop_val=0.2)
     tensor2fa(tens, tensors, aligned_dti, outdir+"/tensors/",
               outdir+"/qa/tensors/")
+
+    # As we've only tested VTK plotting on MNI152 aligned data...
+    if nb.load(mask).shape is (182, 218, 182):
+        visualize_fibs(tracks, fibers, mask, outdir+"/qa/fibers/", 0.05, 4000)
 
     # And save them to disk
     np.savez(tensors, tens)

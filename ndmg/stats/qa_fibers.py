@@ -17,16 +17,13 @@
 
 # qa_fibers.py
 # Created by Vikram Chandrashekhar.
+# Edited by Greg Kiar.
 # Email: Greg Kiar @ gkiar@jhu.edu
 
 import numpy as np
-import nibabel as nib
 import random
-import sys
 import os
-import re
 import vtk
-import paramiko
 import getpass
 import subprocess
 
@@ -34,7 +31,7 @@ from dipy.viz import window, actor
 from argparse import ArgumentParser
 
 
-def visualize(fibfile, atlasfile, outdir, opacity, num_samples, fname=None):
+def visualize_fibs(fibs, fibfile, atlasfile, outdir, opacity, num_samples):
     """
     Takes fiber streamlines and visualizes them using DiPy
     Required Arguments:
@@ -44,12 +41,8 @@ def visualize(fibfile, atlasfile, outdir, opacity, num_samples, fname=None):
         - opacity: Opacity of overlayed brain
         - num_samples: number of fibers to randomly sample from fibfile
     Optional Arguments:
-        - fname: name of output file. default is None (fname based on input
-          fibfile name)
     """
     # loading the fibers
-    fibs = np.load(fibfile)
-    fibs = fibs[fibs.keys()[0]]
     fibs = threshold_fibers(fibs)
 
     # make sure if fiber streamlines
@@ -80,11 +73,8 @@ def visualize(fibfile, atlasfile, outdir, opacity, num_samples, fname=None):
     # TODO: allow size of window as an argument
     # window.show(renderer, size=(600, 600), reset_camera=False)
 
-    # Saves file, if you're into that sort of thing...
-    if fname is None:
-        fname = os.path.split(fibfile)[1].split('.')[0] + '.png'
+    fname = os.path.split(fibfile)[1].split('.')[0] + '.png'
     window.record(renderer, out_path=outdir + fname, size=(600, 600))
-    print('done')
 
 
 def threshold_fibers(fibs):
@@ -158,36 +148,3 @@ def load_atlas(path, opacity):
     volume.SetProperty(volumeProperty)
 
     return volume
-
-
-def main():
-    """
-    Argument parser. Takes organization and atlas
-    information and produces a dictionary of file lists based on datasets
-    of interest and then passes it off for processing.
-    Required parameters:
-        fibfile:
-            - Path to tensor file
-        atlasfile:
-            - Path to regdti file
-        opacity:
-            - Opacity of overlayed atlas file
-        outdir:
-            - Path to fa png save location
-    """
-    parser = ArgumentParser(description="Generates a fiber png based on fibers"
-                            " and atlas")
-    parser.add_argument("fibfile", action="store", help="base directory loc")
-    parser.add_argument("atlasfile", action="store", help="base directory loc")
-    parser.add_argument("outdir", action="store", help="base directory loc")
-    parser.add_argument("--opacity", action="store", help="opacity of"
-                        " overlayed atlas file", type=float, default=0.05)
-    parser.add_argument("--samples", action="store", help="change number of"
-                        " fibers to show in png", type=int, default=4000)
-    result = parser.parse_args()
-
-    visualize(result.fibfile, result.atlasfile, result.outdir, result.opacity,
-              result.samples)
-
-if __name__ == "__main__":
-    main()
