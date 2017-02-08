@@ -24,6 +24,7 @@ from __future__ import print_function
 from argparse import ArgumentParser
 from datetime import datetime
 from subprocess import Popen, PIPE
+from ndmg.stats.qa_regdti import *
 import ndmg.utils as mgu
 import ndmg.register as mgr
 import ndmg.track as mgt
@@ -32,6 +33,7 @@ import ndmg.preproc as mgp
 import numpy as np
 import nibabel as nb
 import os
+
 os.environ["MPLCONFIGDIR"] = "/tmp/"
 
 
@@ -45,7 +47,9 @@ def ndmg_pipeline(dti, bvals, bvecs, mprage, atlas, mask, labels, outdir,
     # Create derivative output directories
     dti_name = mgu().get_filename(dti)
     cmd = "".join(["mkdir -p ", outdir, "/reg_dti ", outdir, "/tensors ",
-                   outdir, "/fibers ", outdir, "/graphs"])
+                   outdir, "/fibers ", outdir, "/graphs ", outdir,
+                   "/qc/tensors ", outdir, "/qc/fibers ", outdir,
+                   "/qc/graphs ", outdir, "/qc/reg_dti"])
     mgu().execute_cmd(cmd)
 
     # Graphs are different because of multiple atlases
@@ -82,6 +86,7 @@ def ndmg_pipeline(dti, bvals, bvecs, mprage, atlas, mask, labels, outdir,
     # Align DTI volumes to Atlas
     print("Aligning volumes...")
     mgr().dti2atlas(dti1, gtab, mprage, atlas, aligned_dti, outdir, clean)
+    reg_dti_pngs(aligned_dti, gtab, atlas, outdir+"/qc/reg_dti/")
 
     print("Beginning tractography...")
     # Compute tensors and track fiber streamlines

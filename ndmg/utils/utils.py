@@ -21,7 +21,6 @@
 
 from __future__ import print_function
 
-from datetime import datetime
 from dipy.io import read_bvals_bvecs
 from dipy.core.gradients import gradient_table
 from subprocess import Popen, PIPE
@@ -44,10 +43,6 @@ class utils():
         Takes bval and bvec files and produces a structure in dipy format
 
         **Positional Arguments:**
-
-                streamlines:
-                    - Fiber streamlines either file or array in a dipy EuDX
-                      or compatible format.
         """
 
         # Load Data
@@ -79,10 +74,6 @@ class utils():
         Takes bval and bvec files and produces a structure in dipy format
 
         **Positional Arguments:**
-
-                streamlines:
-                    - Fiber streamlines either file or array in a dipy EuDX
-                      or compatible format.
         """
 
         bvals, bvecs = read_bvals_bvecs(fbval, fbvec)
@@ -97,10 +88,6 @@ class utils():
         Takes bval and bvec files and produces a structure in dipy format
 
         **Positional Arguments:**
-
-                streamlines:
-                    - Fiber streamlines either file or array in a dipy EuDX
-                      or compatible format.
         """
 
         b0 = np.where(gtab.b0s_mask)[0]
