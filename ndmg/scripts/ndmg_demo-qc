@@ -10,5 +10,5 @@ ndmg_bids /tmp/small_demo/outputs/graphs/ /tmp/small_demo/outputs/qa group --dat
 
 export PYTHONWARNINGS=${WARN}
 
-echo "Path to qc fig: /tmp/small_demo/outputs/qc/desikan/plot.html"
+echo "Path to qc fig: /tmp/small_demo/outputs/qa/desikan/plot.html"
 cd "$loc"
