@@ -25,8 +25,6 @@ import sys
 import numpy as np
 import nibabel as nb
 from argparse import ArgumentParser
-from matplotlib.colors import colorConverter
-from skimage.filters import threshold_otsu
 from scipy import ndimage
 from matplotlib.colors import LinearSegmentedColormap
 import matplotlib as mpl
@@ -45,22 +43,10 @@ def reg_dti_pngs(dti, gtab, atlas, outdir):
     dti_data = nb.load(dti).get_data()
     b0_data = mgu().get_b0(gtab, dti_data)
 
-    # TODO gk: don't hard code these (diff atlases may make values diff)
-    if b0_data.shape == (182, 218, 182):
-        x = [78, 90, 100]
-        y = [82, 107, 142]
-        z = [88, 103, 107]
-    else:
-        shap = b0_data.shape
-        x = [int(shap[0]*0.35), int(shap[0]*0.51), int(shap[0]*0.65)]
-        y = [int(shap[1]*0.35), int(shap[1]*0.51), int(shap[1]*0.65)]
-        z = [int(shap[2]*0.35), int(shap[2]*0.51), int(shap[2]*0.65)]
-
-    # creating the two custom colormaps
     cmap1 = LinearSegmentedColormap.from_list('mycmap1', ['black', 'magenta'])
     cmap2 = LinearSegmentedColormap.from_list('mycmap2', ['black', 'green'])
    
-    fig = plot_overlays(atlas_data, b0_data, (x, y, z), (cmap1, cmap2))
+    fig = plot_overlays(atlas_data, b0_data, (cmap1, cmap2))
     
     # name and save the file
     fname = os.path.split(dti)[1].split(".")[0] + '.png'
@@ -68,9 +54,20 @@ def reg_dti_pngs(dti, gtab, atlas, outdir):
     print(fname + " saved!")
 
 
-def plot_overlays(atlas, b0, coords, cmaps):
+def plot_overlays(atlas, b0, cmaps):
     plt.rcParams.update({'axes.labelsize': 'x-large',
                          'axes.titlesize': 'x-large'})
+    
+    if b0.shape == (182, 218, 182):
+        x = [78, 90, 100]
+        y = [82, 107, 142]
+        z = [88, 103, 107]
+    else:
+        shap = b0.shape
+        x = [int(shap[0]*0.35), int(shap[0]*0.51), int(shap[0]*0.65)]
+        y = [int(shap[1]*0.35), int(shap[1]*0.51), int(shap[1]*0.65)]
+        z = [int(shap[2]*0.35), int(shap[2]*0.51), int(shap[2]*0.65)]
+    coords = (x, y, z)
 
     labs = ['Sagittal Slice (YZ fixed)',
             'Coronal Slice (XZ fixed)',
