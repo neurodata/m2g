@@ -155,7 +155,7 @@ def group_level(inDir, outDir, dataset=None, atlas=None, minimal=False,
     derivatives produced
     """
     # Make output dir
-    mgu().execute_cmd("mkdir -p " + outDir)
+    mgu().execute_cmd("mkdir -p " + outDir + "/graphs")
 
     # Get list of graphs
     labels = next(os.walk(inDir))[1]
@@ -251,7 +251,7 @@ def main():
         if buck is not None and remo is not None:
             print("Retrieving data from S3...")
             bids_s3.get_data(buck, remo, inDir, public=True)
-        modif = 'qc'
+        modif = 'qc/graphs'
         group_level(inDir, outDir, result.dataset, result.atlas, minimal,
                     log, hemi)
 
