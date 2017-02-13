@@ -91,7 +91,7 @@ class utils():
         """
 
         b0 = np.where(gtab.b0s_mask)[0]
-        b0_vol = np.squeeze(data[:, :, :, b0])  # if more than 1, use first one
+        b0_vol = np.squeeze(data[:, :, :, b0[0]])  # if more than 1, use first
         return b0_vol
 
     def get_filename(self, label):
