@@ -156,7 +156,7 @@ class register(object):
                               "_" + atlas_name + "_xfm.mat")
 
         # Align DTI volumes to each other
-        self.align_slices(dti, dti2, np.where(gtab.b0s_mask)[0])
+        self.align_slices(dti, dti2, np.where(gtab.b0s_mask)[0][0])
 
         # Loads DTI image in as data and extracts B0 volume
         dti_im = nb.load(dti2)
