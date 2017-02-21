@@ -26,13 +26,15 @@ import ndmg
 import sys
 import os
 import re
+import csv
 import boto3
 import json
 
 job_template = 'https://raw.githubusercontent.com/neurodata/sic/master/code/ec2/batch/json_files/job_template.json'
 
 
-def batch_submit(bucket, path, jobdir, debug=False, dataset=None):
+def batch_submit(bucket, path, jobdir, credentials=None, debug=False,
+                 dataset=None):
     """
     Searches through an S3 bucket, gets all subject-ids, creates json files
     for each, submits batch jobs, and returns list of job ids to query status
@@ -41,7 +43,8 @@ def batch_submit(bucket, path, jobdir, debug=False, dataset=None):
     print("Getting subject list from s3://{}/{}/...".format(bucket, path))
     subjs = crawl_bucket(bucket, path)
     print("Generating job for each subject...")
-    jobs = create_json(bucket, path, subjs, jobdir, debug, dataset)
+    jobs = create_json(bucket, path, subjs, jobdir, credentials, debug,
+                       dataset)
     print("Submitting jobs to the queue...")
     ids = submit_jobs(jobs)
 
@@ -57,7 +60,8 @@ def crawl_bucket(bucket, path):
     return subjs
 
 
-def create_json(bucket, path, subjs, jobdir, debug=False, dataset=None):
+def create_json(bucket, path, subjs, jobdir, credentials=None, debug=False,
+                dataset=None):
     """
     Takes parameters to make jsons
     """
@@ -70,14 +74,28 @@ def create_json(bucket, path, subjs, jobdir, debug=False, dataset=None):
     with open('{}/job_template.json'.format(jobdir), 'r') as infile:
         template = json.load(infile)
     cmd = template['containerOverrides']['command']
+    env = template['containerOverrides']['environment']
+
+    if credentials is not None:
+        cred = [line for line in csv.reader(open(credentials))]
+        env[0]['value'] = [cred[1][idx]
+                           for idx, val in enumerate(cred[0])
+                           if "ID" in val][0]  # Adds public key ID to env
+        env[1]['value'] = [cred[1][idx]
+                           for idx, val in enumerate(cred[0])
+                           if "Secret" in val][0]  # Adds secret key to env
+    else:
+        env = []
+    template['containerOverrides']['environment'] = env
 
     print(subjs)
     jobs = list()
+    cmd[4] = re.sub('(<BUCKET>)', bucket, cmd[4])
+    cmd[6] = re.sub('(<PATH>)', path, cmd[6])
+
     for idx, subj in enumerate(subjs):
         print("... Generating job for sub-{}".format(subj))
         job_cmd = deepcopy(cmd)
-        job_cmd[4] = re.sub('(<BUCKET>)', bucket, job_cmd[4])
-        job_cmd[6] = re.sub('(<PATH>)', path, job_cmd[6])
         job_cmd[8] = re.sub('(<SUBJ>)', subj, job_cmd[8])
         if debug:
             job_cmd += [u'--debug']
@@ -91,7 +109,7 @@ def create_json(bucket, path, subjs, jobdir, debug=False, dataset=None):
         job_json['jobName'] = name
         job_json['containerOverrides']['command'] = job_cmd
 
-        jobs += [os.path.join(jobdir, 'jobs', name)]
+        jobs += [os.path.join(jobdir, 'jobs', name+'.json')]
         with open(jobs[idx], 'w') as outfile:
             json.dump(job_json, outfile)
     return jobs
@@ -134,6 +152,8 @@ def main():
                         ' with the results of the participant level analysis.')
     parser.add_argument('--jobdir', action='store', help='Dir of batch jobs to'
                         ' generate/check up on.')
+    parser.add_argument('--credentials', action='store', help='AWS formatted'
+                        ' csv of credentials.')
     parser.add_argument('--debug', action='store_true', help='flag to store '
                         'temp files along the path of processing.',
                         default=False)
@@ -147,6 +167,7 @@ def main():
     remo = result.bidsdir
     debug = result.debug
     status = result.status
+    creds = result.credentials
     jobdir = result.jobdir
     dset = result.dataset
     if jobdir is None:
@@ -154,14 +175,14 @@ def main():
 
     if (bucket is None or remo is None) and (status is False):
         sys.exit('Requires either path to bucket and data, or the status flag'
-                 ' and job IDs to query. Try ndmg_cloud --help')
+                 ' and job IDs to query.\n  Try:\n    ndmg_cloud --help')
 
     if status:
         print("Checking job status...")
         get_status(jobdir)
     else:
         print("Beginning batch submission process...")
-        batch_submit(bucket, remo, jobdir, debug, dset)
+        batch_submit(bucket, remo, jobdir, creds, debug, dset)
 
     sys.exit(0)
 

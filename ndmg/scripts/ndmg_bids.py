@@ -239,19 +239,23 @@ def main():
     log = result.log
     hemi = result.hemispheres
 
+    creds = bool(os.getenv("AWS_ACCESS_KEY_ID", 0) and
+                 os.getenv("AWS_SECRET_ACCESS_KEY", 0))
+    print creds
+
     if level == 'participant':
         if buck is not None and remo is not None:
             print("Retrieving data from S3...")
             if subj is not None:
                 [bids_s3.get_data(buck, remo, inDir, s, True) for s in subj]
             else:
-                bids_s3.get_data(buck, remo, inDir, public=True)
+                bids_s3.get_data(buck, remo, inDir, public=creds)
         modif = 'ndmg_{}'.format(ndmg.version.replace('.', '-'))
         participant_level(inDir, outDir, subj, result.debug)
     elif level == 'group':
         if buck is not None and remo is not None:
             print("Retrieving data from S3...")
-            bids_s3.get_data(buck, remo, inDir, public=True)
+            bids_s3.get_data(buck, remo, inDir, public=creds)
         modif = 'qc/graphs'
         group_level(inDir, outDir, result.dataset, result.atlas, minimal,
                     log, hemi)
@@ -259,9 +263,11 @@ def main():
     if push and buck is not None and remo is not None:
         print("Pushing results to S3...")
         cmd = "".join(['aws s3 cp ', outDir, ' s3://', buck, '/', remo,
-                       '/', modif, '/ --recursive --no-sign-request',
-                       ' --acl public-read-write'])
-        print cmd
+                       '/', modif, '/ --recursive --acl public-read-write'])
+        if not creds:
+            print("Note: no credentials provided, may fail to push big files")
+            cmd += ' --no-sign-request'
+        print(cmd)
         mgu().execute_cmd(cmd)
     sys.exit(0)
 
