@@ -53,7 +53,7 @@ setup(
         'dipy>=0.1',
         'matplotlib>=1.5',
         'boto3',
-        'plotly==1.14',
+        'plotly==1.12',
     ],
     include_package_data=True,
 )
