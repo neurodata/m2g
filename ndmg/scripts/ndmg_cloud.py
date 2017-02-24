@@ -20,6 +20,7 @@
 # Email: gkiar@jhu.edu
 
 from argparse import ArgumentParser
+from collections import OrderedDict
 from copy import deepcopy
 import ndmg.utils as mgu
 import ndmg
@@ -41,9 +42,9 @@ def batch_submit(bucket, path, jobdir, credentials=None, debug=False,
     upon later.
     """
     print("Getting subject list from s3://{}/{}/...".format(bucket, path))
-    subjs = crawl_bucket(bucket, path)
+    seshs = crawl_bucket(bucket, path)
     print("Generating job for each subject...")
-    jobs = create_json(bucket, path, subjs, jobdir, credentials, debug,
+    jobs = create_json(bucket, path, sesh, jobdir, credentials, debug,
                        dataset)
     print("Submitting jobs to the queue...")
     ids = submit_jobs(jobs)
@@ -56,11 +57,20 @@ def crawl_bucket(bucket, path):
     cmd = 'aws s3 ls s3://{}/{}/'.format(bucket, path)
     out, err = mgu().execute_cmd(cmd)
     subjs = re.findall('sub-(.+)/', out)
-    print("Subject IDs: " + ", ".join(subjs))
-    return subjs
+    cmd = 'aws s3 ls s3://{}/{}/sub-{}/'
+    seshs = OrderedDict()
+    for subj in subjs:
+        out, err = mgu().execute_cmd(cmd.format(bucket, path, subj))
+        sesh = re.findall('ses-(.+)/', out)
+        seshs[subj] = sesh if sesh != [] else [None]
+    print("Session IDs: " + ", ".join([subj+'-'+sesh if sesh is not None
+                                       else subj
+                                       for subj in subjs
+                                       for sesh in seshs[subj]]))
+    return seshs
 
 
-def create_json(bucket, path, subjs, jobdir, credentials=None, debug=False,
+def create_json(bucket, path, seshs, jobdir, credentials=None, debug=False,
                 dataset=None):
     """
     Takes parameters to make jsons
@@ -88,30 +98,35 @@ def create_json(bucket, path, subjs, jobdir, credentials=None, debug=False,
         env = []
     template['containerOverrides']['environment'] = env
 
-    print(subjs)
     jobs = list()
     cmd[4] = re.sub('(<BUCKET>)', bucket, cmd[4])
     cmd[6] = re.sub('(<PATH>)', path, cmd[6])
 
-    for idx, subj in enumerate(subjs):
+    for subj in seshs.keys():
         print("... Generating job for sub-{}".format(subj))
-        job_cmd = deepcopy(cmd)
-        job_cmd[8] = re.sub('(<SUBJ>)', subj, job_cmd[8])
-        if debug:
-            job_cmd += [u'--debug']
+        for sesh in seshs[subj]:
+            job_cmd = deepcopy(cmd)
+            job_cmd[8] = re.sub('(<SUBJ>)', subj, job_cmd[8])
+            if sesh is not None:
+                job_cmd += [u'--session_label']
+                job_cmd += [u'{}'.format(sesh)]
+            if debug:
+                job_cmd += [u'--debug']
 
-        job_json = deepcopy(template)
-        ver = ndmg.version.replace('.', '-')
-        if dataset:
-            name = 'ndmg-{}_{}_sub-{}'.format(ver, dataset, subj)
-        else:
-            name = 'ndmg_{}_sub-{}'.format(ver, subj)
-        job_json['jobName'] = name
-        job_json['containerOverrides']['command'] = job_cmd
-
-        jobs += [os.path.join(jobdir, 'jobs', name+'.json')]
-        with open(jobs[idx], 'w') as outfile:
-            json.dump(job_json, outfile)
+            job_json = deepcopy(template)
+            ver = ndmg.version.replace('.', '-')
+            if dataset:
+                name = 'ndmg-{}_{}_sub-{}'.format(ver, dataset, subj)
+            else:
+                name = 'ndmg_{}_sub-{}'.format(ver, subj)
+            if sesh is not None:
+                name = '{}_ses-{}'.format(name, sesh)
+            job_json['jobName'] = name
+            job_json['containerOverrides']['command'] = job_cmd
+            job = os.path.join(jobdir, 'jobs', name+'.json')
+            with open(job, 'w') as outfile:
+                json.dump(job_json, outfile)
+            jobs += [job]
     return jobs
 
 
@@ -124,8 +139,9 @@ def submit_jobs(jobs):
     for job in jobs:
         cmd = cmd_template.format(job)
         print("... Submitting job {}...".format(job))
-        mgu().execute_cmd(cmd)
-
+        out, err = mgu().execute_cmd(cmd)
+        print("Out: {}".format(out))
+        print("Err: {}".format(err))
     return 0
 
 

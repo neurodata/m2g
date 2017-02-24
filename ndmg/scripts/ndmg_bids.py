@@ -78,7 +78,7 @@ labels = [op.join(atlas_dir, l) for l in labels]
 # *these files can be anywhere up stream of the dwi data, and are inherited.
 
 
-def participant_level(inDir, outDir, subjs, debug=False):
+def participant_level(inDir, outDir, subjs, sesh=None, debug=False):
     """
     Crawls the given BIDS organized directory for data pertaining to the given
     subject and session, and passes necessary files to ndmg_pipeline for
@@ -107,12 +107,20 @@ def participant_level(inDir, outDir, subjs, debug=False):
     dwi = []
     # Get all image data for each subject
     for subj in subjs:
-        anat_t = glob(op.join(inDir, "sub-%s" % subj, "anat", "*_T1w.nii*")) +\
-                 glob(op.join(inDir, "sub-%s" % subj, "ses-*",
-                              "anat", "*_T1w.nii*"))
-        dwi_t = glob(op.join(inDir, "sub-%s" % subj, "dwi", "*_dwi.nii*")) +\
-                glob(op.join(inDir, "sub-%s" % subj, "ses-*",
-                             "dwi", "*_dwi.nii*"))
+        if sesh is not None:
+            anat_t = glob(op.join(inDir, "sub-{}/ses-{}".format(subj, sesh),
+                                  "anat", "*_T1w.nii*"))
+            dwi_t = glob(op.join(inDir, "sub-{}/ses-{}".format(subj, sesh),
+                                 "dwi", "*_dwi.nii*"))
+        else:
+            anat_t = glob(op.join(inDir, "sub-%s" % subj, "anat",
+                                  "*_T1w.nii*")) +\
+                     glob(op.join(inDir, "sub-%s" % subj, "ses-*",
+                                  "anat", "*_T1w.nii*"))
+            dwi_t = glob(op.join(inDir, "sub-%s" % subj, "dwi",
+                                 "*_dwi.nii*")) +\
+                    glob(op.join(inDir, "sub-%s" % subj, "ses-*",
+                                 "dwi", "*_dwi.nii*"))
         anat = anat + anat_t
         dwi = dwi + dwi_t
 
@@ -136,6 +144,8 @@ def participant_level(inDir, outDir, subjs, debug=False):
     assert(len(anat) == len(dwi))
     assert(len(bvec) == len(dwi))
     assert(len(bval) == len(dwi))
+
+    print(dwi)
 
     # Run for each
     for i, scans in enumerate(anat):
@@ -202,6 +212,13 @@ def main():
                         'parameter is not provided all subjects should be '
                         'analyzed. Multiple participants can be specified '
                         'with a space separated list.', nargs="+")
+    parser.add_argument('--session_label', help='The label(s) of the '
+                        'session that should be analyzed. The label '
+                        'corresponds to ses-<participant_label> from the BIDS '
+                        'spec (so it does not include "ses-"). If this '
+                        'parameter is not provided all sessions should be '
+                        'analyzed. Multiple sessions can be specified '
+                        'with a space separated list.')
     parser.add_argument('--bucket', action='store', help='The name of '
                         'an S3 bucket which holds BIDS organized data. You '
                         'must have built your bucket with credentials to the '
@@ -231,6 +248,7 @@ def main():
     inDir = result.bids_dir
     outDir = result.output_dir
     subj = result.participant_label
+    sesh = result.session_label
     buck = result.bucket
     remo = result.remote_path
     push = result.push_data
@@ -241,7 +259,6 @@ def main():
 
     creds = bool(os.getenv("AWS_ACCESS_KEY_ID", 0) and
                  os.getenv("AWS_SECRET_ACCESS_KEY", 0))
-    print creds
 
     if level == 'participant':
         if buck is not None and remo is not None:
@@ -251,7 +268,7 @@ def main():
             else:
                 bids_s3.get_data(buck, remo, inDir, public=creds)
         modif = 'ndmg_{}'.format(ndmg.version.replace('.', '-'))
-        participant_level(inDir, outDir, subj, result.debug)
+        participant_level(inDir, outDir, subj, sesh, result.debug)
     elif level == 'group':
         if buck is not None and remo is not None:
             print("Retrieving data from S3...")
