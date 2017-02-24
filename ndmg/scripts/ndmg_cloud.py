@@ -44,7 +44,7 @@ def batch_submit(bucket, path, jobdir, credentials=None, debug=False,
     print("Getting subject list from s3://{}/{}/...".format(bucket, path))
     seshs = crawl_bucket(bucket, path)
     print("Generating job for each subject...")
-    jobs = create_json(bucket, path, sesh, jobdir, credentials, debug,
+    jobs = create_json(bucket, path, seshs, jobdir, credentials, debug,
                        dataset)
     print("Submitting jobs to the queue...")
     ids = submit_jobs(jobs)
