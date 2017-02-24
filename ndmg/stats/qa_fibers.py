@@ -23,7 +23,6 @@
 import numpy as np
 import random
 import os
-import vtk
 import getpass
 import subprocess
 
@@ -42,6 +41,12 @@ def visualize_fibs(fibs, fibfile, atlasfile, outdir, opacity, num_samples):
         - num_samples: number of fibers to randomly sample from fibfile
     Optional Arguments:
     """
+    try:
+        import vtk
+    except ImportError:
+        print("!! VTK not found; skipping fiber qa.")
+        return
+
     # loading the fibers
     fibs = threshold_fibers(fibs)
 
@@ -57,6 +62,7 @@ def visualize_fibs(fibs, fibfile, atlasfile, outdir, opacity, num_samples):
 
     # Initialize renderer
     renderer = window.Renderer()
+    renderer.SetBackground(1.0, 1.0, 1.0)
 
     # Add streamlines as a DiPy viz object
     stream_actor = actor.line(fibs)
