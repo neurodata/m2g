@@ -97,7 +97,7 @@ def ndmg_pipeline(dti, bvals, bvecs, mprage, atlas, mask, labels, outdir,
               outdir+"/qa/tensors/")
 
     # As we've only tested VTK plotting on MNI152 aligned data...
-    if nb.load(mask).shape is (182, 218, 182):
+    if nb.load(mask).get_data().shape == (182, 218, 182):
         visualize_fibs(tracks, fibers, mask, outdir+"/qa/fibers/", 0.02, 4000)
 
     # And save them to disk
