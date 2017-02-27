@@ -29,6 +29,10 @@ import subprocess
 from dipy.viz import window, actor
 from argparse import ArgumentParser
 
+try:
+    import vtk
+except ImportError:
+    pass
 
 def visualize_fibs(fibs, fibfile, atlasfile, outdir, opacity, num_samples):
     """
@@ -43,8 +47,9 @@ def visualize_fibs(fibs, fibfile, atlasfile, outdir, opacity, num_samples):
     """
     try:
         import vtk
+        print("VTK found - beginning fiber QA.")
     except ImportError:
-        print("!! VTK not found; skipping fiber qa.")
+        print("!! VTK not found; skipping fiber QA.")
         return
 
     # loading the fibers
