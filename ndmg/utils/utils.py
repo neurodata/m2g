@@ -198,7 +198,7 @@ class utils():
             sys.exit("Error  " + str(code) + ": " + err)
         return out, err
 
-    def extract_brain(self, inp, out, opts="-f .1"):
+    def extract_brain(self, inp, out, opts="-f .3"):
         """
         A function to extract the brain from an image using FSL's BET.
 
