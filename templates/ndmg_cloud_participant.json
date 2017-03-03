@@ -1,0 +1,31 @@
+{
+    "jobName": "<JOBNAME>", 
+    "jobQueue": "ndmg-queue", 
+    "dependsOn": [], 
+    "jobDefinition": "ndmg", 
+    "parameters": {},
+    "containerOverrides": {
+        "command": [
+            "/data/raw",
+            "/data/outputs",
+            "participant",
+            "--bucket",
+            "<BUCKET>",
+            "--remote_path",
+            "<PATH>",
+            "--participant_label",
+            "<SUBJ>",
+            "--push_data"
+        ],
+        "environment": [
+            {
+                "name": "AWS_ACCESS_KEY_ID",
+                "value": "<KEYID>"
+            },
+            {
+                "name": "AWS_SECRET_ACCESS_KEY",
+                "value": "<SECRET>"
+            }
+        ]
+    }
+}
