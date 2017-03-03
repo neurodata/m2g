@@ -15,7 +15,7 @@
             "<PATH>",
             "--push_data",
             "--dataset",
-            "<DATASET>",
+            "<DATASET>"
         ],
         "environment": [
             {
