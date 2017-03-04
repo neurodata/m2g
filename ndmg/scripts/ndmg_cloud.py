@@ -30,6 +30,7 @@ import re
 import csv
 import boto3
 import json
+import ast
 
 participant_templ = 'https://raw.githubusercontent.com/neurodata/ndmg/master/templates/ndmg_cloud_participant.json'
 group_templ = 'https://raw.githubusercontent.com/neurodata/ndmg/master/templates/ndmg_cloud_group.json'
@@ -51,14 +52,15 @@ def batch_submit(bucket, path, jobdir, credentials=None, state='participant',
                        debug, dataset, log)
     
     print("Submitting jobs to the queue...")
-    ids = submit_jobs(jobs)
+    ids = submit_jobs(jobs, jobdir)
+
 
 def crawl_bucket(bucket, path, group=False):
     """
     Gets subject list for a given S3 bucket and path
     """
     if group:
-        cmd = 'aws s3 ls s3://{}/{}/'.format(bucket, path)
+        cmd = 'aws s3 ls s3://{}/{}/graphs/'.format(bucket, path)
         out, err = mgu().execute_cmd(cmd)
         atlases = re.findall('PRE (.+)/', out)
         print("Atlas IDs: " + ", ".join(atlases))
@@ -87,6 +89,7 @@ def create_json(bucket, path, threads, jobdir, group=False, credentials=None,
     """
     mgu().execute_cmd("mkdir -p {}".format(jobdir))
     mgu().execute_cmd("mkdir -p {}/jobs/".format(jobdir))
+    mgu().execute_cmd("mkdir -p {}/ids/".format(jobdir))
     if group:
         template = group_templ
         atlases = threads
@@ -125,7 +128,11 @@ def create_json(bucket, path, threads, jobdir, group=False, credentials=None,
         else:
             cmd[9] = re.sub('(<DATASET>)', '', cmd[9])
 
+        batlas = ['slab907', 'DS03231', 'DS06481', 'DS16784', 'DS72784']
         for atlas in atlases:
+            if atlas in batlas:
+                print("... Skipping {} parcellation".format(atlas))
+                continue
             print("... Generating job for {} parcellation".format(atlas))
             job_cmd = deepcopy(cmd)
             job_cmd[11] = re.sub('(<ATLAS>)', atlas, job_cmd[11])
@@ -173,11 +180,10 @@ def create_json(bucket, path, threads, jobdir, group=False, credentials=None,
                 with open(job, 'w') as outfile:
                     json.dump(job_json, outfile)
                 jobs += [job]
-
     return jobs
 
 
-def submit_jobs(jobs):
+def submit_jobs(jobs, jobdir):
     """
     Give list of jobs to submit, submits them to AWS Batch
     """
@@ -187,17 +193,68 @@ def submit_jobs(jobs):
         cmd = cmd_template.format(job)
         print("... Submitting job {}...".format(job))
         out, err = mgu().execute_cmd(cmd)
-        print("Out: {}".format(out))
-        print("Err: {}".format(err))
+        submission = ast.literal_eval(out)
+        print("Job Name: {}, Job ID: {}".format(submission['jobName'],
+                                                submission['jobId']))
+        sub_file = os.path.join(jobdir, 'ids', submission['jobName']+'.json')
+        with open(sub_file, 'w') as outfile:
+            json.dump(submission, outfile)
     return 0
 
 
-def get_status(jobdir):
+def get_status(jobdir, jobid=None):
     """
     Given list of jobs, returns status of each.
     """
-    print("This has yet to be implemented - come back soon!")
+    cmd_template = 'aws batch describe-jobs --jobs {}'
 
+    if jobid is None:
+        print("Describing jobs in {}/ids/...".format(jobdir))
+        jobs = os.listdir(jobdir+'/ids/')
+        for job in jobs:
+            with open('{}/ids/{}'.format(jobdir, job), 'r') as inf:
+                submission = json.load(inf)
+            cmd = cmd_template.format(submission['jobId'])
+            print("... Checking job {}...".format(submission['jobName']))
+            out, err = mgu().execute_cmd(cmd)
+            status = re.findall('"status": "([A-Za-z]+)",', out)[0]
+            print("... ... Status: {}".format(status))
+        return 0
+    else:
+        print("Describing job id {}...".format(jobid))
+        cmd = cmd_template.format(jobid)
+        out, err = mgu().execute_cmd(cmd)
+        status = re.findall('"status": "([A-Za-z]+)",', out)[0]
+        print("... Status: {}".format(status))
+        return status
+
+def kill_jobs(jobdir, reason='"Killing job"'):
+    """
+    Given a list of jobs, kills them all.
+    """
+    cmd_template1 = 'aws batch cancel-job --job-id {} --reason {}'
+    cmd_template2 = 'aws batch terminate-job --job-id {} --reason {}'
+
+    print("Canelling/Terminating jobs in {}/ids/...".format(jobdir))
+    jobs = os.listdir(jobdir+'/ids/')
+    for job in jobs:
+        with open('{}/ids/{}'.format(jobdir, job), 'r') as inf:
+            submission = json.load(inf)
+        jid = submission['jobId']
+        name = submission['jobName']
+        status = get_status(jobdir, jid)
+        if status in ['SUCCEEDED', 'FAILED']:
+            print("... No action needed for {}...".format(name))
+        elif status in ['SUBMITTED', 'PENDING', 'RUNNABLE']:
+            cmd = cmd_template1.format(jid, reason)
+            print("... Cancelling job {}...".format(name))
+            out, err = mgu().execute_cmd(cmd)
+        elif status in ['STARTING', 'RUNNING']:
+            cmd = cmd_template2.format(jid, reason)
+            print("... Terminating job {}...".format(name))
+            out, err = mgu().execute_cmd(cmd)
+        else:
+            print("... Unknown status??")
 
 def main():
     parser = ArgumentParser(description="This is an end-to-end connectome \
@@ -228,7 +285,8 @@ def main():
     result = parser.parse_args()
 
     bucket = result.bucket
-    path = result.bidsdir.strip('/')
+    path = result.bidsdir
+    path = path.strip('/') if path is not None else path
     debug = result.debug
     state = result.state
     creds = result.credentials
@@ -240,7 +298,7 @@ def main():
         jobdir = './'
 
     if (bucket is None or path is None) and \
-       (state != 'status' or state != 'kill'):
+       (state != 'status' and state != 'kill'):
         sys.exit('Requires either path to bucket and data, or the status flag'
                  ' and job IDs to query.\n  Try:\n    ndmg_cloud --help')
 
