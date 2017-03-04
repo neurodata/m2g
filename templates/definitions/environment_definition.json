@@ -1,0 +1,28 @@
+{
+    "computeEnvironmentName": "ndmg_cluster", 
+    "type": "MANAGED", 
+    "state": "ENABLED", 
+    "computeResources": {
+        "type": "EC2", 
+        "minvCpus": 0, 
+        "maxvCpus": 256, 
+        "desiredvCpus": 2, 
+        "instanceTypes": [
+            "optimal"
+        ], 
+        "subnets": [
+            "subnet-a04e9b8b"
+        ], 
+        "securityGroupIds": [
+            "gk-sic"
+        ], 
+        "ec2KeyPair": "gk-sic", 
+        "instanceRole": "ecsInstanceRole", 
+        "tags": {
+            "Name": "ndmg cluster"
+        }, 
+        "bidPercentage": 0, 
+        "spotIamFleetRole": ""
+    }, 
+    "serviceRole": "arn:aws:iam::117817015711:role/AWSBatchServiceRole"
+}

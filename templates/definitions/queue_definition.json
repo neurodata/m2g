@@ -1,0 +1,11 @@
+{
+    "jobQueueName": "gksicqueue", 
+    "state": "ENABLED", 
+    "priority": 1,
+    "computeEnvironmentOrder": [
+      {
+        "order": 1,
+        "computeEnvironment": "gksic2"
+      }
+    ]
+}
