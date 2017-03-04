@@ -272,15 +272,16 @@ def main():
     elif level == 'group':
         if buck is not None and remo is not None:
             print("Retrieving data from S3...")
-            bids_s3.get_data(buck, remo, inDir, public=creds)
-        modif = 'qc/graphs'
+            bids_s3.get_data(buck, remo+'/graphs', inDir, public=creds)
+        modif = 'qa'
         group_level(inDir, outDir, result.dataset, result.atlas, minimal,
                     log, hemi)
 
     if push and buck is not None and remo is not None:
         print("Pushing results to S3...")
-        cmd = "".join(['aws s3 cp ', outDir, ' s3://', buck, '/', remo,
-                       '/', modif, '/ --recursive --acl public-read-write'])
+        cmd = "".join(['aws s3 cp ', outDir, '--exclude "tmp/*" s3://', buck,
+                       '/', remo, '/', modif,
+                       '/ --recursive --acl public-read-write'])
         if not creds:
             print("Note: no credentials provided, may fail to push big files")
             cmd += ' --no-sign-request'
