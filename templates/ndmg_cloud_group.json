@@ -8,14 +8,16 @@
         "command": [
             "/data/raw",
             "/data/outputs",
-            "goup",
+            "group",
             "--bucket",
             "<BUCKET>",
             "--remote_path",
             "<PATH>",
             "--push_data",
             "--dataset",
-            "<DATASET>"
+            "<DATASET>",
+            "--atlas",
+            "<ATLAS>"
         ],
         "environment": [
             {
