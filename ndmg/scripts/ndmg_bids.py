@@ -279,7 +279,7 @@ def main():
 
     if push and buck is not None and remo is not None:
         print("Pushing results to S3...")
-        cmd = "".join(['aws s3 cp ', outDir, '--exclude "tmp/*" s3://', buck,
+        cmd = "".join(['aws s3 cp --exclude "tmp/*" ', outDir, ' s3://', buck,
                        '/', remo, '/', modif,
                        '/ --recursive --acl public-read-write'])
         if not creds:
