@@ -155,7 +155,7 @@ def participant_level(inDir, outDir, subjs, sesh=None, debug=False):
         print("Bvec file: " + bvec[i])
 
         ndmg_pipeline(dwi[i], bval[i], bvec[i], anat[i], atlas, atlas_mask,
-                      labels, outDir, clean=(not debug), fmt='graphml')
+                      labels, outDir, clean=(not debug))
 
 
 def group_level(inDir, outDir, dataset=None, atlas=None, minimal=False,
