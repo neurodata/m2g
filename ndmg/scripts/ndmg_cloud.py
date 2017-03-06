@@ -46,11 +46,11 @@ def batch_submit(bucket, path, jobdir, credentials=None, state='participant',
     group = state == 'group'
     print("Getting list from s3://{}/{}/...".format(bucket, path))
     threads = crawl_bucket(bucket, path, group)
-    
+
     print("Generating job for each subject...")
     jobs = create_json(bucket, path, threads, jobdir, group, credentials,
                        debug, dataset, log)
-    
+
     print("Submitting jobs to the queue...")
     ids = submit_jobs(jobs, jobdir)
 
@@ -100,7 +100,7 @@ def create_json(bucket, path, threads, jobdir, group=False, credentials=None,
     if not os.path.isfile('{}/{}'.format(jobdir, template.split('/')[-1])):
         cmd = 'wget --quiet -P {} {}'.format(jobdir, template)
         mgu().execute_cmd(cmd)
-    
+
     with open('{}/{}'.format(jobdir, template.split('/')[-1]), 'r') as inf:
         template = json.load(inf)
     cmd = template['containerOverrides']['command']
@@ -228,6 +228,7 @@ def get_status(jobdir, jobid=None):
         print("... Status: {}".format(status))
         return status
 
+
 def kill_jobs(jobdir, reason='"Killing job"'):
     """
     Given a list of jobs, kills them all.
@@ -256,14 +257,15 @@ def kill_jobs(jobdir, reason='"Killing job"'):
         else:
             print("... Unknown status??")
 
+
 def main():
     parser = ArgumentParser(description="This is an end-to-end connectome \
                             estimation pipeline from sMRI and DTI images")
 
     parser.add_argument('state', choices=['participant',
-                                           'group',
-                                           'status',
-                                           'kill'], default='paricipant',
+                                          'group',
+                                          'status',
+                                          'kill'], default='paricipant',
                         help='determines the function to be performed by '
                         'this function.')
     parser.add_argument('--bucket', help='The S3 bucket with the input dataset'
