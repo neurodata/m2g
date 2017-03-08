@@ -255,6 +255,7 @@ def main():
     level = result.analysis_level
     minimal = result.minimal
     log = result.log
+    atlas = result.atlas
     hemi = result.hemispheres
 
     creds = bool(os.getenv("AWS_ACCESS_KEY_ID", 0) and
@@ -272,7 +273,11 @@ def main():
     elif level == 'group':
         if buck is not None and remo is not None:
             print("Retrieving data from S3...")
-            bids_s3.get_data(buck, remo+'/graphs', inDir, public=creds)
+            if atlas is not None:
+                bids_s3.get_data(buck, remo+'/graphs/'+atlas, inDir+'/'+atlas,
+                                 public=creds)
+            else:
+                bids_s3.get_data(buck, remo+'/graphs', inDir, public=creds)
         modif = 'qa'
         group_level(inDir, outDir, result.dataset, result.atlas, minimal,
                     log, hemi)
