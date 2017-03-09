@@ -88,7 +88,8 @@ def ndmg_pipeline(dti, bvals, bvecs, mprage, atlas, mask, labels, outdir,
     # Align DTI volumes to Atlas
     print("Aligning volumes...")
     mgr().dti2atlas(dti1, gtab, mprage, atlas, aligned_dti, outdir, clean)
-    reg_dti_pngs(aligned_dti, gtab, atlas, outdir+"/qa/reg_dti/")
+    b0loc = np.where(gtab.b0s_mask)[0][0]
+    reg_dti_pngs(aligned_dti, b0loc, atlas, outdir+"/qa/reg_dti/")
 
     print("Beginning tractography...")
     # Compute tensors and track fiber streamlines

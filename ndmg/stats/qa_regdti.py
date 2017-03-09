@@ -35,7 +35,7 @@ mpl.use('Agg')  # very important above pyplot import
 import matplotlib.pyplot as plt
 
 
-def reg_dti_pngs(dti, gtab, atlas, outdir):
+def reg_dti_pngs(dti, loc, atlas, outdir):
     """
     outdir: directory where output png file is saved
     fname: name of output file WITHOUT FULL PATH. Path provided in outdir.
@@ -43,7 +43,7 @@ def reg_dti_pngs(dti, gtab, atlas, outdir):
 
     atlas_data = nb.load(atlas).get_data()
     dti_data = nb.load(dti).get_data()
-    b0_data = mgu().get_b0(gtab, dti_data)
+    b0_data = dti_data[:,:,:,loc]
 
     cmap1 = LinearSegmentedColormap.from_list('mycmap1', ['black', 'magenta'])
     cmap2 = LinearSegmentedColormap.from_list('mycmap2', ['black', 'green'])
