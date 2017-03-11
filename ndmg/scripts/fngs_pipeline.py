@@ -146,7 +146,7 @@ def fngs_pipeline(fmri, struct, an, atlas, atlas_brain, atlas_mask, lv_mask,
                      aligned_fmri, aligned_struct, outdir,
                      qcdir=regdir)
     print "Correcting Nuisance Variables..."
-    mgn().nuis_correct(aligned_fmri, nuis_fmri, lv_mask, qcdir=nuisdir)
+    mgn().nuis_correct(aligned_fmri, nuis_fmri, lv_mask, trim=2, qcdir=nuisdir)
     print "Extracting Voxelwise Timeseries..."
     voxel = mgts().voxel_timeseries(nuis_fmri, atlas_mask, voxel_ts)
     mgqc().stat_summary(aligned_fmri, fmri, motion_fmri, atlas_mask, voxel,

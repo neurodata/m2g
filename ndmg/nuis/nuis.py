@@ -338,7 +338,7 @@ class nuis(object):
         fmri_dat[basic_mask, :] = nuis_voxel.T
 
         # correct for T1 effect
-        fmri_dat = fmri_dat[:, 2:]
+        fmri_dat = fmri_dat[:, trim:]
         img = nb.Nifti1Image(fmri_dat,
                              header=fmri_im.header,
                              affine=fmri_im.affine)
