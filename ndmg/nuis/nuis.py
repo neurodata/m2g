@@ -326,7 +326,9 @@ class nuis(object):
 
         lc_voxel = self.linear_reg(voxel, csf_reg = csf_reg)
 
-        nuis_voxel = self.freq_filter(lc_voxel, tr, highpass=highpass, lowpass=lowpass)
+        # nuis_voxel = self.freq_filter(lc_voxel, tr, highpass=highpass,
+        #                                lowpass=lowpass)
+        nuis_voxel = lc_voxel
         # put the nifti back together again and re-transpose
         fmri_dat[basic_mask, :] = nuis_voxel.T
         img = nb.Nifti1Image(fmri_dat,
