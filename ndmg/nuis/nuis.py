@@ -279,7 +279,7 @@ class nuis(object):
         return (voxel - W)
 
     def nuis_correct(self, fmri, nuisance_mri, er_csfmask=None, highpass=0.01,
-                     lowpass=None, qcdir=None):
+                     lowpass=None, trim=0, qcdir=None):
         """
         Removes Nuisance Signals from brain images, using a combination
         of Frequency filtering, and mean csf/quadratic regression.
@@ -298,6 +298,11 @@ class nuis(object):
                 - the highpass cutoff for FFT.
             - lowpass:
                 - the lowpass cutoff for FFT. NOT recommended.
+            - trim:
+                - trim the timeseries by a number of slices. Corrects
+                  for T1 effects; that is, in some datasets, the first few
+                  timesteps may have a non-saturated T1 contrast and as such
+                  will show non-standard intensities.
             - qcdir:
                 - the quality control directory to place qc.
         """
@@ -331,6 +336,9 @@ class nuis(object):
         nuis_voxel = lc_voxel
         # put the nifti back together again and re-transpose
         fmri_dat[basic_mask, :] = nuis_voxel.T
+
+        # correct for T1 effect
+        fmri_dat = fmri_dat[:, 2:]
         img = nb.Nifti1Image(fmri_dat,
                              header=fmri_im.header,
                              affine=fmri_im.affine)
