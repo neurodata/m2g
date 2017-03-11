@@ -21,12 +21,12 @@
 
 from subprocess import Popen, PIPE
 import os.path as op
-import ndmg.utils.utils as mgu
+from ndmg.utils import utils as mgu
 import nibabel as nb
 import numpy as np
 import nilearn.image as nl
-from ndmg.stats import qa_regmri as mrqc
-from ndmg/stats import fmri_qc as mgqc
+from ndmg.stats.qa_regmri import *
+from ndmg.stats import alignment_qc as mgqc
 
 
 class register(object):
@@ -306,6 +306,7 @@ class register(object):
         warp_mpr2temp = mgu().name_tmps(outdir, mri_name,
                                         "_warp_mpr2temp.nii.gz")
 
+        print dir(mgu)
         mgu().get_slice(mri, 0, s0)  # get the 0 slice and save
         # extract the anatomical brain
         # use threshold of .1 so that we don't accidentally cut off
@@ -335,8 +336,8 @@ class register(object):
         if qcdir is not None:
             mgqc().check_alignments(mri, aligned_mri, atlas, qcdir,
                                     mri_name, title="Registration")
-            mrqc().reg_mri_pngs(aligned_mri, atlas, qcdir, mean=True)
-            mrqc().reg_mri_pngs(aligned_anat, atlas, qcdir, dim=3)
+            reg_mri_pngs(aligned_mri, atlas, qcdir, mean=True)
+            reg_mri_pngs(aligned_anat, atlas, qcdir, dim=3)
         pass
 
     def dti2atlas(self, dti, gtab, mprage, atlas,

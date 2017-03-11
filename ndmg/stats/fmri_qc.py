@@ -133,7 +133,7 @@ class fmri_qc(object):
 
         # max image size is 5x5. after that, reduce size to 5x5
         # with sequences
-        depth_seq = np.unique(np.round(np.linspace(0, depth - 1, 25)))
+        depth_seq = np.unique(np.round(np.linspace(0, depth - 1, 25))).astype(int)
         nrows = np.ceil(np.sqrt(depth_seq.shape[0]))
         ncols = np.ceil(depth_seq.shape[0]/float(nrows))
 

@@ -3,4 +3,3 @@ from __future__ import absolute_import
 from . import *
 from .fmri_qc import fmri_qc
 from .alignment_qc import alignment_qc
-

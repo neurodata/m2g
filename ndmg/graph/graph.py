@@ -31,7 +31,7 @@ import time
 
 
 class graph(object):
-    def __init__(self, N, rois, attr=None):
+    def __init__(self, N, rois, attr=None, sens="Diffusion MRI"):
         """
         Initializes the graph with nodes corresponding to the number of ROIs
 
@@ -59,7 +59,7 @@ class graph(object):
                           date=time.asctime(time.localtime()),
                           source="http://m2g.io",
                           region="brain",
-                          sensor="Diffusion MRI",
+                          sensor=sens,
                           ecount=0,
                           vcount=len(n_ids)
                           )
