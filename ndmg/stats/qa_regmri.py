@@ -35,7 +35,7 @@ mpl.use('Agg')  # very important above pyplot import
 import matplotlib.pyplot as plt
 
 
-def reg_mri_pngs(mri, loc, atlas, outdir):
+def reg_mri_pngs(mri, atlas, outdir, loc=0, mean=False):
     """
     outdir: directory where output png file is saved
     fname: name of output file WITHOUT FULL PATH. Path provided in outdir.
@@ -43,7 +43,10 @@ def reg_mri_pngs(mri, loc, atlas, outdir):
 
     atlas_data = nb.load(atlas).get_data()
     mri_data = nb.load(mri).get_data()
-    b0_data = mri_data[:,:,:,loc]
+    if mean:
+        b0_data = mri_data.mean(axis=3)
+    else:
+        b0_data = mri_data[:,:,:,loc]
 
     cmap1 = LinearSegmentedColormap.from_list('mycmap1', ['black', 'magenta'])
     cmap2 = LinearSegmentedColormap.from_list('mycmap2', ['black', 'green'])

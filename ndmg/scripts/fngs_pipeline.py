@@ -152,6 +152,7 @@ def fngs_pipeline(fmri, struct, an, atlas, atlas_brain, atlas_mask, lv_mask,
     mgqc().stat_summary(aligned_fmri, fmri, motion_fmri, atlas_mask, voxel,
                         aligned_struct, atlas_brain,
                         qcdir=overalldir, scanid=fmri_name, qc_html=qc_html)
+
     for idx, label in enumerate(label_name):
         print "Extracting ROI timeseries for " + label + " parcellation..."
         try:
