@@ -7,7 +7,7 @@ from .track.track import track as track
 from .stats import *
 # from .preproc.preproc import preproc as preproc
 from .utils.utils import utils as utils
-from .timeseries import timeeseries as timeseries
+from .timeseries import timeseries as timeseries
 from .scripts import ndmg_pipeline as ndmg_pipeline
 from .scripts import fngs_pipeline as fngs_pipeline
 

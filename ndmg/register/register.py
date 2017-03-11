@@ -25,7 +25,7 @@ import ndmg.utils.utils as mgu
 import nibabel as nb
 import numpy as np
 import nilearn.image as nl
-
+from ndmg.stats import qa_regmri as mrqc
 
 class register(object):
 
