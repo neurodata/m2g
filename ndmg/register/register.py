@@ -333,8 +333,8 @@ class register(object):
         if qcdir is not None:
             mgqc().check_alignments(mri, aligned_mri, atlas, qcdir,
                                     mri_name, title="Registration")
-            mgqc().image_align(aligned_mri, atlas_brain, qcdir,
-                               scanid=mri_name, refid=atlas_name)
+            mrqc().reg_mri_pngs(aligned_mri, atlas, qcdir, mean=True)
+            mrqc().reg_mri_pngs(aligned_anat, atlas, qcdir, dim=3)
         pass
 
     def dti2atlas(self, dti, gtab, mprage, atlas,
