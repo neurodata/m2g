@@ -46,7 +46,7 @@ class fmri_qc(object):
 
     def stat_summary(self, mri, mri_raw, mri_mc, mask, voxel,
                      aligned_mprage, atlas, title=None, qcdir=None,
-                     scanid=None, qc_html=None):
+                     scanid=None):
         """
         A function for producing a stat summary page, along with
         an image of all the slices of this mri scan.
@@ -310,7 +310,7 @@ class fmri_qc(object):
         fnames['intens'] = scanid + "_intens.html"
         fnames['voxel_hist'] = scanid + "_voxel_hist.html"
 
-        mgqc().update_template_qc(qc_html, fnames)
+        # mgqc().update_template_qc(qc_html, fnames)
 
         fstat = open(qcdir + "/" + scanid + "_stat_sum.txt", 'w')
         fstat.write("General Information\n")

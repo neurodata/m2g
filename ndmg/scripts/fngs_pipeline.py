@@ -90,9 +90,9 @@ def fngs_pipeline(fmri, struct, an, atlas, atlas_brain, atlas_mask, lv_mask,
         mcdir + " " + regdir + " " + overalldir + " " + roidir + " " + nuisdir
     mgu().execute_cmd(cmd)
 
-    qc_html = overalldir + "/" + fmri_name + ".html"
+    # qc_html = overalldir + "/" + fmri_name + ".html"
 
-    mggqc().generate_html_templated(qc_html)
+    # mggqc().generate_html_templated(qc_html)
 
     # Graphs are different because of multiple atlases
     if isinstance(labels, list):
@@ -128,7 +128,7 @@ def fngs_pipeline(fmri, struct, an, atlas, atlas_brain, atlas_mask, lv_mask,
     print "fMRI volumes motion corrected: " + motion_fmri
     print "fMRI volume registered to atlas: " + aligned_fmri
     print "Voxel timecourse in atlas space: " + voxel_ts
-    print "Quality Control HTML Page: " + qc_html
+    # print "Quality Control HTML Page: " + qc_html
     # Again, connectomes are different
     connectomes = [outdir + "/connectomes/" + x + '/' + fmri_name +
                    "_" + x + '.' + fmt for x in label_name]
@@ -151,7 +151,7 @@ def fngs_pipeline(fmri, struct, an, atlas, atlas_brain, atlas_mask, lv_mask,
     voxel = mgts().voxel_timeseries(nuis_fmri, atlas_mask, voxel_ts)
     mgqc().stat_summary(aligned_fmri, fmri, motion_fmri, atlas_mask, voxel,
                         aligned_struct, atlas_brain,
-                        qcdir=overalldir, scanid=fmri_name, qc_html=qc_html)
+                        qcdir=overalldir, scanid=fmri_name)
 
     for idx, label in enumerate(label_name):
         print "Extracting ROI timeseries for " + label + " parcellation..."
