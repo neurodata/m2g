@@ -26,6 +26,8 @@ import nibabel as nb
 import numpy as np
 import nilearn.image as nl
 from ndmg.stats import qa_regmri as mrqc
+from ndmg/stats import fmri_qc as mgqc
+
 
 class register(object):
 
