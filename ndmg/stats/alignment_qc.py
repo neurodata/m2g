@@ -254,7 +254,7 @@ class alignment_qc(object):
         """
         cmap = basemap(reference)
         # all values beteween 0 opacity and .6
-        denom = float(np.nanmax(reference)
+        denom = float(np.nanmax(reference))
         denom[denom == 0] = 1  # so we don't get divide by zero
         opaque_scale = alpha*reference/denom
         # remaps intensities
