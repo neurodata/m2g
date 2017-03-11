@@ -24,7 +24,7 @@ from __future__ import print_function
 from argparse import ArgumentParser
 from datetime import datetime
 from subprocess import Popen, PIPE
-from ndmg.stats.qa_regdti import *
+from ndmg.stats.qa_regmri import *
 from ndmg.stats.qa_tensor import *
 from ndmg.stats.qa_fibers import *
 import ndmg.utils as mgu
