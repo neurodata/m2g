@@ -116,6 +116,7 @@ class fmri_qc(object):
         fmean_anat = plt.figure()
 
         mri_datstd = np.nanstd(mri_dat, axis=3)
+        mri_datstd[mri_datstd == 0] = 1  # so we don't get zeros
         fstd = plt.figure()
 
         # image for slice SNR = mean / stdev
@@ -325,9 +326,12 @@ class fmri_qc(object):
         fstat.write("Signal Mean: %.4f\n" % np.mean(voxel))
         fstat.write("Signal Stdev: %.4f\n" % np.std(voxel))
         fstat.write("Number of Voxels: %d\n" % voxel.shape[0])
+
+        voxel_std = np.std(voxel, axis=1)
+        voxel_std[voxel_std == 0] = 1  # so we dont' divide by zero
         fstat.write("Average SNR per voxel: %.4f\n" %
                     np.nanmean(np.divide(np.mean(voxel, axis=1),
-                               np.std(voxel, axis=1))))
+                               voxel_std)))
         fstat.write("\n\n")
 
         # Motion Statistics
