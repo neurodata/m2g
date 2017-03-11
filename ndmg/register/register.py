@@ -306,7 +306,6 @@ class register(object):
         warp_mpr2temp = mgu().name_tmps(outdir, mri_name,
                                         "_warp_mpr2temp.nii.gz")
 
-        print dir(mgu)
         mgu().get_slice(mri, 0, s0)  # get the 0 slice and save
         # extract the anatomical brain
         # use threshold of .1 so that we don't accidentally cut off

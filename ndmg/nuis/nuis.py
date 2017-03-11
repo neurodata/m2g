@@ -146,7 +146,7 @@ class nuis(object):
                 - a numpy ndarray of regressors to
                   regress to.
         """
-        print "Calculating Regressors..."
+        print "GLM with Design Matrix of Dimensions " + str(R.shape) + "..."
         # OLS solution for GLM B = (X^TX)^(-1)X^TY
         coefs = np.linalg.inv(R.T.dot(R)).dot(R.T).dot(data)
         return R.dot(coefs)
@@ -271,7 +271,7 @@ class nuis(object):
         R = np.column_stack((np.ones(time), lin_reg, quad_reg))
         if csf_reg is not None:
             # add coefficients to our regression
-            np.column_stack((R, csf_reg))
+            R = np.column_stack((R, csf_reg))
 
         W = self.regress_signal(voxel, R)
         # corr'd ts is the difference btwn the original timeseries and
@@ -322,12 +322,12 @@ class nuis(object):
             lv_ts = fmri_dat[lvm != 0, :].T
             csf_reg = lv_ts.mean(axis=1)
         else:
-            csf_reg = None 
+            csf_reg = None
 
         lc_voxel = self.linear_reg(voxel, csf_reg = csf_reg)
 
-        # nuis_voxel = self.freq_filter(lc_voxel, tr, highpass=highpass,
-        #                                lowpass=lowpass)
+        nuis_voxel = self.freq_filter(lc_voxel, tr, highpass=highpass,
+                                      lowpass=lowpass)
         nuis_voxel = lc_voxel
         # put the nifti back together again and re-transpose
         fmri_dat[basic_mask, :] = nuis_voxel.T

@@ -386,7 +386,6 @@ class alignment_qc(object):
         nrows = np.ceil(np.sqrt(depth_seq.shape[0]))
         ncols = np.ceil(depth_seq.shape[0]/float(nrows))
 
-        print mri_data.shape
         # produce figures for each slice in the image
         for d in range(0, depth_seq.shape[0]):
             # TODO EB: create nifti image with these values
