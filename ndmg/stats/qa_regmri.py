@@ -43,7 +43,7 @@ def reg_mri_pngs(mri, atlas, outdir, loc=0, mean=False, dim=4):
 
     atlas_data = nb.load(atlas).get_data()
     mri_data = nb.load(mri).get_data()
-    if dim=4:  # 4d data
+    if dim==4:  # 4d data, so we need to reduce a dimension
         if mean:
             b0_data = mri_data.mean(axis=3)
         else:
