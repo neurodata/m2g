@@ -336,6 +336,8 @@ def main():
     creds = bool(os.getenv("AWS_ACCESS_KEY_ID", 0) and
                  os.getenv("AWS_SECRET_ACCESS_KEY", 0))
 
+    print result.dwi
+    print type(result.dwi)
     if level == 'participant':
         if buck is not None and remo is not None:
             print("Retrieving data from S3...")
