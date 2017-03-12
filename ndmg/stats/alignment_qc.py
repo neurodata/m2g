@@ -456,7 +456,7 @@ class alignment_qc(object):
         axcorr.set_xlabel('ROI')
         axcorr.set_ylabel('ROI')
 
-        fcorr.set_size_inches(6, 6)
+        fcorr.set_size_inches(10, 10)
         fcorr.tight_layout()
         fcorr.savefig(fname_corr)
         plt.close(fcorr)
