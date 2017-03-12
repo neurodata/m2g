@@ -328,7 +328,8 @@ class fmri_qc(object):
         fstat.write("Number of Voxels: %d\n" % voxel.shape[0])
 
         voxel_std = np.std(voxel, axis=1)
-        voxel_std[voxel_std == 0] = 1  # so we dont' divide by zero
+        # to avoid divide by zero
+        voxel_std[voxel_std == float(0)] = float(1)
         fstat.write("Average SNR per voxel: %.4f\n" %
                     np.nanmean(np.divide(np.mean(voxel, axis=1),
                                voxel_std)))

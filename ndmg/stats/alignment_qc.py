@@ -254,9 +254,10 @@ class alignment_qc(object):
         """
         cmap = basemap(reference)
         # all values beteween 0 opacity and .6
-        denom = np.nanmax(reference).astype(float)
-        denom[denom == 0] = 1  # so we don't get divide by zero
-        opaque_scale = alpha*reference/denom
+        denom = np.nanmax(reference)
+        if denom == 0:  # avoid divide by zero
+             denom = 1
+        opaque_scale = alpha*reference/float(denom)
         # remaps intensities
         cmap[:, :, 3] = opaque_scale
         return cmap
