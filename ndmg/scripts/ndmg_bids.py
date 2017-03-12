@@ -315,9 +315,13 @@ def main():
                         up (ie, bottom to top), down (ie, top to bottom), \
                         and interleaved.", default=None)
     parser.add_argument('-d', '--dwi', action="store", help="Indicator boolean \
-                        for whether functional or diffusion analysis will take \
-                        place. Defaults to True (Diffusion analysis).",
-                        type=bool, default=True)
+                        for whether diffusion analysis will take \
+                        place. Defaults to False.",
+                        default=False)
+    parser.add_argument('-f', '--func', action="store", help="Indicator boolean \
+                        for whether fmri analysis will take \
+                        place. Defaults to False.",
+                        default=False)
     result = parser.parse_args()
 
     inDir = result.bids_dir
@@ -349,7 +353,7 @@ def main():
         if result.dwi:
             participant_level_dwi(inDir, outDir, subj, sesh,
                                   result.debug)
-        else:
+        if result.func:
             participant_level_func(inDir, outDir, subj, sesh,
                                    result.stc, result.debug)
     elif level == 'group':
