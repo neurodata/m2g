@@ -317,7 +317,7 @@ def main():
     parser.add_argument('-d', '--dwi', action="store", help="Indicator boolean \
                         for whether functional or diffusion analysis will take \
                         place. Defaults to True (Diffusion analysis).",
-                        default=True)
+                        type=bool, default=True)
     result = parser.parse_args()
 
     inDir = result.bids_dir
