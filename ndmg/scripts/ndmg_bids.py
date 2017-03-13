@@ -27,7 +27,7 @@ from ndmg.utils import bids_s3
 from ndmg.scripts.ndmg_pipeline import ndmg_pipeline
 from ndmg.stats.qa_graphs import *
 from ndmg.stats.qa_graphs_plotting import *
-
+from ndmg.scripts.fngs_pipeline import fngs_pipeline
 from glob import glob
 import ndmg.utils as mgu
 import ndmg
@@ -98,7 +98,9 @@ def participant_level_dwi(inDir, outDir, subjs, sesh=None, debug=False):
 
     # Get subjects
     if subjs is None:
+        print inDir
         subj_dirs = glob(op.join(inDir, "sub-*"))
+        print subj_dirs
         subjs = [subj_dir.split("-")[-1] for subj_dir in subj_dirs]
 
     bvec = []
@@ -157,13 +159,25 @@ def participant_level_dwi(inDir, outDir, subjs, sesh=None, debug=False):
         ndmg_pipeline(dwi[i], bval[i], bvec[i], anat[i], atlas, atlas_mask,
                       labels, outDir, clean=(not debug))
 
-def participant_level_func(inDir, outDir, subjs, stc=None, sesh=None,
+def participant_level_func(inDir, outDir, subjs, sesh=None, stc=None,
                            debug=False):
     """
     Crawls the given BIDS organized directory for data pertaining to the given
     subject and session, and passes necessary files to fngs_pipeline for
     processing.
     """
+    atlas_dir = '/FNGS_server/atlases'
+    atlas = atlas_dir + '/atlas/MNI152_T1-2mm.nii.gz'
+    atlas_brain = atlas_dir + '/atlas/MNI152_T1-2mm_brain.nii.gz'
+    atlas_mask = atlas_dir + '/mask/MNI152_T1-2mm_brain_mask.nii.gz'
+    lv_mask = atlas_dir + '/mask/HarvOx_lv_thr25-2mm.nii.gz'
+    labels = [atlas_dir + '/label/HarvardOxford-cort-maxprob-thr25-2mm.nii.gz',
+              atlas_dir + '/label/aal-2mm.nii.gz',
+              atlas_dir + '/label/brodmann-2mm.nii.gz',
+              atlas_dir + '/label/desikan-2mm.nii.gz',
+              atlas_dir + '/label/Talairach-2mm.nii.gz',
+              atlas_dir + '/label/cc200_scorr05_mean-2mm.nii.gz']
+
     # Get atlases
     ope = op.exists
     if any(not ope(l) for l in labels) or not (ope(atlas) and ope(atlas_mask)):
@@ -181,18 +195,6 @@ def participant_level_func(inDir, outDir, subjs, stc=None, sesh=None,
         subj_dirs = glob(op.join(inDir, "sub-*"))
         subjs = [subj_dir.split("-")[-1] for subj_dir in subj_dirs]
 
-    atlas_dir = '/FNGS_server/atlases'
-    atlas = atlas_dir + '/atlas/MNI152_T1-2mm.nii.gz'
-    atlas_brain = atlas_dir + '/atlas/MNI152_T1-2mm_brain.nii.gz'
-    atlas_mask = atlas_dir + '/mask/MNI152_T1-2mm_brain_mask.nii.gz'
-    lv_mask = atlas_dir + '/mask/HarvOx_lv_thr-2mm.nii.gz'
-    labels = [atlas_dir + '/label/HarvardOxford-cort-maxprob-thr25-2mm.nii.gz',
-              atlas_dir + '/label/aal-2mm.nii.gz',
-              atlas_dir + '/label/brodmann-2mm.nii.gz',
-              atlas_dir + '/label/desikan-2mm.nii.gz',
-              atlas_dir + '/label/princeton-visual-top-2mm.nii.gz',
-              atlas_dir + '/label/Talairach-2mm.nii.gz',
-              atlas_dir + '/cc200_scorr05_mean-2mm.nii.gz']
     func = []
     anat = []
     for subj in subjs:
@@ -212,14 +214,14 @@ def participant_level_func(inDir, outDir, subjs, stc=None, sesh=None,
                                   "func", "*_bold.nii*"))
         anat = anat + anat_t
         func = func + func_t
-    assert(len(anat) == len(fmri))
-
+    assert(len(anat) == len(func))
     for i, scans in enumerate(anat):
         print ("T1 file: " + anat[i])
-        print ("fMRI file: " + fmri[i])
-        print ("Acquisition pattern: " + str(acquisition))
-
-        fngs_pipeline(fmri[i], anat[i], atlas, atlas_brain, atlas_mask,
+        print ("fMRI file: " + func[i])
+        print ("Acquisition pattern: " + str(stc))
+        # anatomical file is assumed T1w
+        anat_type = 1
+        fngs_pipeline(func[i], anat[i], anat_type, atlas, atlas_brain, atlas_mask,
                       lv_mask, labels, outDir, clean=(not debug), stc=stc)
 
 
@@ -309,16 +311,16 @@ def main():
     parser.add_argument('--debug', action='store_true', help='flag to store '
                         'temp files along the path of processing.',
                         default=False)
-    parser.add_argument('-s', "--stc", action="store", help="A file for slice \
+    parser.add_argument("--stc", action="store", help="A file for slice \
                         timing correction. Options are a TR sequence file \
                         (where \ each line is the shift in TRs), \
                         up (ie, bottom to top), down (ie, top to bottom), \
                         and interleaved.", default=None)
-    parser.add_argument('-d', '--dwi', action="store", help="Indicator boolean \
+    parser.add_argument('-d', '--dwi', action="store_true", help="Indicator boolean \
                         for whether diffusion analysis will take \
                         place. Defaults to False.",
                         default=False)
-    parser.add_argument('-f', '--func', action="store", help="Indicator boolean \
+    parser.add_argument('-f', '--func', action="store_true", help="Indicator boolean \
                         for whether fmri analysis will take \
                         place. Defaults to False.",
                         default=False)
@@ -340,8 +342,6 @@ def main():
     creds = bool(os.getenv("AWS_ACCESS_KEY_ID", 0) and
                  os.getenv("AWS_SECRET_ACCESS_KEY", 0))
 
-    print result.dwi
-    print type(result.dwi)
     if level == 'participant':
         if buck is not None and remo is not None:
             print("Retrieving data from S3...")
