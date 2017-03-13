@@ -101,10 +101,11 @@ class timeseries(object):
             # take the mean for the voxel timeseries, and ignore voxels of 0
             # when possible.
             ts = np.mean(roi_vts[:, roi_vts.std(axis=0) != 0], axis=0)
-            if (ts.shape == 0):
-                roi_ts[roi_idx, :] = np.mean(roi_vts, axis=0)
-            else:
+            if ts.size != 0:
                 roi_ts[roi_idx, :] = ts
+            else:
+                # put empty row in if there are no voxels
+                roi_ts[roi_idx, :] = np.zeros((fmridata.shape[3]))
 
         if qcdir is not None:
             mgqc().image_align(fmridata, labeldata, qcdir=qcdir,

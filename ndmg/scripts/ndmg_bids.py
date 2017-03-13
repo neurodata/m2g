@@ -175,8 +175,7 @@ def participant_level_func(inDir, outDir, subjs, sesh=None, stc=None,
               atlas_dir + '/label/aal-2mm.nii.gz',
               atlas_dir + '/label/brodmann-2mm.nii.gz',
               atlas_dir + '/label/desikan-2mm.nii.gz',
-              atlas_dir + '/label/Talairach-2mm.nii.gz',
-              atlas_dir + '/label/cc200_scorr05_mean-2mm.nii.gz']
+              atlas_dir + '/label/Talairach-2mm.nii.gz']
 
     # Get atlases
     ope = op.exists
