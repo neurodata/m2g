@@ -8,12 +8,15 @@
 | func demo (`ndmg_demo-func`) | :x: | :heavy_check_mark: | **(1)** does not run - it appears that you are not passing parameters properly to the pipeline; **(2)** the demo downloads atlases ranging from 1mm-4mm in resolution, which is unnecessary. demo should do bare minimum (i.e. download only the atlases used in the demo); **(3)** demo data should be downloaded from s3 not brainstore, to reduce chance of outages; **(4)** there should be 1 file downloaded for each demo, eventually 1 total, but there were 2 or 3? ***all are now fixed***|
 | func pipeline (`fngs_pipeline`) | :heavy_check_mark: | :heavy_check_mark: | ran on demo data once the demo was fixed. |
 | func pipeline (`fngs_pipeline`) | :hourglass: | :hourglass: | have not yet run on abritrary full-sized dataset. |
+| bids pipeline (`ndmg_bids`) | :hourglass: | :hourglass: | **(1)** should not default to doing neither dwi or func analysis, should be a "choice" input like analysis level (eventually this will be irrelevant as they will be one in the same, but currently is verr bad); **(2)** currently the `participant_level_func` module is basically a verbatim copy of the dwi equivalent, with minor changes - meaning, we should only have 1 of these functions. |
 
 
 ### testing+inspecting
 | Topic | Initial Status | Current Status | Notes |
 |:------|:---------------|:---------------|:------|
-|    |    |    |   |
+| performance | :hourglass: | :hourglass: | have not run discriminability |
+| graphs| :hourglass: | :hourglass: | have not verified correspondance between nodes in both dwi and fmri graphs |
+
 
 
 ### integrating
@@ -21,3 +24,4 @@
 |:------|:---------------|:---------------|:------|
 | demos | :x: | :x: | **(1)** should be 1 demo that generates multi-connectomes; **(2)** they should use the same subject/session for both dwi and fmri; **(3)** for the sake of consistency, input files should be organized in BIDS |
 | func pipeline (`fngs_pipeline`) | :x: | :x: | **(1)** needs to be renamed `ndmg_pipeline` and accept flag for functional or diffusion; **(2)** should do QC along the way, as derivatives are produced, not just at the end; |
+| parcellations | :x: | :x: | **(1)** need either parcellations at both resolutions to make the multigraphs or to process them at the same resolution as one another; |
