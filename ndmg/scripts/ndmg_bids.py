@@ -220,8 +220,7 @@ def participant_level_func(inDir, outDir, subjs, sesh=None, stc=None,
         print ("fMRI file: " + func[i])
         print ("Acquisition pattern: " + str(stc))
         # anatomical file is assumed T1w
-        anat_type = 1
-        fngs_pipeline(func[i], anat[i], anat_type, atlas, atlas_brain, atlas_mask,
+        fngs_pipeline(func[i], anat[i], atlas, atlas_brain, atlas_mask,
                       lv_mask, labels, outDir, clean=(not debug), stc=stc)
 
 
