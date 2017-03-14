@@ -389,7 +389,6 @@ class register(object):
 
         # Applies skull stripping to MPRAGE volume
         mgu.extract_brain(mprage, mprage2, ' -B')
-        print("Executing: " + cmd)
 
         # Algins B0 volume to MPRAGE, and MPRAGE to Atlas
         cmd = "".join(['epi_reg --epi=', dti2, ' --t1=', mprage,
