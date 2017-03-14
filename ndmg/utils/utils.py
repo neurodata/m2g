@@ -179,11 +179,14 @@ def extract_brain(inp, out, opts=""):
     execute_cmd(cmd)
 
 
-def execute_cmd(cmd):
+def execute_cmd(cmd, verb=False):
     """
     Given a bash command, it is executed and the response piped back to the
     calling script
     """
+    if verb:
+        print("Executing: {}".format(cmd))
+
     p = Popen(cmd, stdout=PIPE, stderr=PIPE, shell=True)
     out, err = p.communicate()
     code = p.returncode

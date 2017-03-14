@@ -15,6 +15,7 @@
 | Topic | Initial Status | Current Status | Notes |
 |:------|:---------------|:---------------|:------|
 | performance | :hourglass: | :hourglass: | have not run discriminability |
+| registration | :hourglass: | :hourglass: | **(1)** we are currently not resampling after registration, though we do it for qc figs. We should test the pipeline with this resampling happening directly after reg and re-evaluate performance; **(2)** we are skull stripping fmri, which I think we should not do, so we should figure out which is right;|
 | graphs| :hourglass: | :hourglass: | have not verified correspondance between nodes in both dwi and fmri graphs |
 
 

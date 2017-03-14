@@ -21,7 +21,7 @@
 
 from subprocess import Popen, PIPE
 import os.path as op
-from ndmg.utils import utils as mgu
+import ndmg.utils as mgu
 import nibabel as nb
 import numpy as np
 import nilearn.image as nl
@@ -38,7 +38,6 @@ class register(object):
         apply transforms, as well as a built-in method for aligning low
         resolution dwi images to a high resolution atlas.
         """
-        import ndmg.utils as mgu
         pass
 
     def align(self, inp, ref, xfm=None, out=None, dof=12, searchrad=True,
@@ -65,24 +64,31 @@ class register(object):
                 interp:
                     - the interpolation method to use. Default is trilinear.
         """
-        cmd = "flirt -in " + inp + " -ref " + ref
+        cmd = "flirt -in {} -ref {}".format(inp, ref)
         if xfm is not None:
-            cmd += " -omat " + xfm
+            cmd += " -omat {}".format(xfm)
         if out is not None:
-            cmd += " -out " + out
+            cmd += " -out {}".format(out)
         if dof is not None:
-            cmd += " -dof " + str(dof)
+            cmd += " -dof {}".format(dof)
         if bins is not None:
-            cmd += " -bins " + str(bins)
+            cmd += " -bins {}".format(bins)
         if interp is not None:
-            cmd += " -interp " + str(interp)
+            cmd += " -interp {}".format(interp)
         if cost is not None:
-            cmd += " -cost " + str(cost)
+            cmd += " -cost {}".format(cost)
         if searchrad is not None:
             cmd += " -searchrx -180 180 -searchry -180 180 " +\
                    "-searchrz -180 180"
-        mgu.execute_cmd(cmd)
-        pass
+        mgu.execute_cmd(cmd, verb=True)
+
+    def align_epi(self, epi, t1, brain, out):
+        """
+        Algins EPI images to T1w image
+        """
+        cmd = 'epi_reg --epi={} --t1={} --t1brain={} --out={}'
+        cmd = cmd.format(epi, t1, brain, out)
+        mgu.execute_cmd(cmd, verb=True)
 
     def align_nonlinear(self, inp, ref, xfm, warp, mask=None):
         """
@@ -103,12 +109,11 @@ class register(object):
                 - a mask in which voxels will be extracted
                 during nonlinear alignment.
         """
-        cmd = "fnirt --in=" + inp + " --aff=" + xfm + " --cout=" +\
-              warp + " --ref=" + ref + " --subsamp=4,2,1,1"
+        cmd = "fnirt --in={} --aff={} --cout={} --ref={} --subsamp=4,2,1,1"
+        cmd = cmd.format(inp, xfm, warp, ref)
         if mask is not None:
-            cmd += " --refmask=" + mask
-        status = mgu.execute_cmd(cmd)
-        pass
+            cmd += " --refmask={}".format(mask)
+        out, err = mgu.execute_cmd(cmd, verb=True)
 
     def applyxfm(self, inp, ref, xfm, aligned):
         """
@@ -125,11 +130,9 @@ class register(object):
                 aligned:
                     - Aligned output image as a nifti image file
         """
-        cmd = "".join(["flirt -in ", inp, " -ref ", ref, " -out ", aligned,
-                       " -init ", xfm, " -interp trilinear -applyxfm"])
-        print("Executing: " + cmd)
-        mgu.execute_cmd(cmd)
-        pass
+        cmd = "flirt -in {} -ref {} -out {} -init {} -interp trilinear -applyxfm"
+        cmd = cmd.format(inp, ref, aligned, xfm)
+        mgu.execute_cmd(cmd, verb=True)
 
     def apply_warp(self, inp, out, ref, warp, xfm=None, mask=None):
         """
@@ -157,8 +160,7 @@ class register(object):
             cmd += " --premat=" + xfm
         if mask is not None:
             cmd += " --mask=" + mask
-        mgu.execute_cmd(cmd)
-        pass
+        mgu.execute_cmd(cmd, verb=True)
 
     def align_slices(self, dwi, corrected_dwi, idx):
         """
@@ -172,10 +174,8 @@ class register(object):
                 idx:
                     - Index of the first B0 volume in the stack
         """
-        cmd = "eddy_correct " + dwi + " " + corrected_dwi + " " + str(idx)
-        print("Executing: " + cmd)
-        status = mgu.execute_cmd(cmd)
-        pass
+        cmd = "eddy_correct {} {} {}".format(dwi, corrected_dwi, idx)
+        status = mgu.execute_cmd(cmd, verb=True)
 
     def resample(self, base, ingested, template):
         """
@@ -200,34 +200,6 @@ class register(object):
                                     interpolation="nearest")
         # Saves new image
         nb.save(target_im, ingested)
-        pass
-
-    def resample_ant(self, base, res, template):
-        """
-        A function to resample a base image to that of a template image
-        using dipy.
-        NOTE: Dipy is far superior for antisotropic -> isotropic
-            resampling.
-
-        **Positional Arguments:**
-
-            base:
-                - the path to the base image to resample.
-            res:
-                - the filename after resampling.
-            template:
-                - the template image to align to.
-        """
-        print("Resampling " + str(base) + " to " + str(template) + "...")
-        baseimg = nb.load(base)
-        tempimg = nb.load(template)
-        data2, affine2 = dr.reslice(baseimg.get_data(),
-                                    baseimg.get_affine(),
-                                    baseimg.get_header().get_zooms()[:3],
-                                    tempimg.get_header().get_zooms()[:3])
-        img2 = nb.Nifti1Image(data2, affine2)
-        nb.save(img2, res)
-        pass
 
     def resample_fsl(self, base, res, template):
         """
@@ -242,10 +214,9 @@ class register(object):
                 - the template image to align to.
         """
         goal_res = int(nb.load(template).get_header().get_zooms()[0])
-        cmd = "flirt -in " + base + " -ref " + template + " -out " +\
-              res + " -nosearch -applyisoxfm " + str(goal_res)
-        mgu.execute_cmd(cmd)
-        pass
+        cmd = "flirt -in {} -ref {} -out {} -nosearch -applyisoxfm"
+        cmd = cmd.format(base, template, res, goal_res)
+        mgu.execute_cmd(cmd, verb=True)
 
     def combine_xfms(self, xfm1, xfm2, xfmout):
         """
@@ -260,12 +231,11 @@ class register(object):
             xfmout:
                 - the path to the output transformation
         """
-        cmd = "convert_xfm -omat " + xfmout + " -concat " + xfm1 + " " + xfm2
-        mgu.execute_cmd(cmd)
-        pass
+        cmd = "convert_xfm -omat {} -concat {} {}".format(xfmout, xfm1, xfm2)
+        mgu.execute_cmd(cmd, verb=True)
 
-    def fmri2atlas(self, mri, anat, atlas, atlas_brain, atlas_mask,
-                   aligned_mri, aligned_anat, outdir, qcdir=None):
+    def fmri2atlas(self, func, t1w, atlas, atlas_brain, atlas_mask,
+                   aligned_func, aligned_t1w, outdir):
         """
         A function to change coordinates from the subject's
         brain space to that of a template using nonlinear
@@ -273,73 +243,55 @@ class register(object):
 
         **Positional Arguments:**
 
-            mri:
-                - the path of the preprocessed mri image.
-            anat:
-                - the path of the raw anatomical scan.
+            fun:
+                - the path of the preprocessed fmri image.
+            t1w:
+                - the path of the T1 scan.
             atlas:
                 - the template atlas.
             atlas_brain:
                 - the template brain.
             atlas_mask:
                 - the template mask.
-            aligned_mri:
-                - the name of the aligned mri scan to produce.
-            aligned_anat:
-                - the name of the aligned anatomical scan to
-                produce
+            aligned_func:
+                - the name of the aligned fmri scan to produce.
+            aligned_t1w:
+                - the name of the aligned anatomical scan to produce
             outdir:
                 - the output base directory.
-            qcdir:
-                - the quality control directory. If None, then
-                no QC will be performed.
        """
-        mri_name = mgu.get_filename(mri)
-        anat_name = mgu.get_filename(anat)
+        func_name = mgu.get_filename(func)
+        t1w_name = mgu.get_filename(t1w)
         atlas_name = mgu.get_filename(atlas)
 
-        s0 = mgu.name_tmps(outdir, mri_name, "_0slice.nii.gz")
-        s0_brain = mgu.name_tmps(outdir, mri_name, "_0slice_brain.nii.gz")
-        anat_brain = mgu.name_tmps(outdir, mri_name, "_anat_brain.nii.gz")
-        xfm_func2mpr = mgu.name_tmps(outdir, mri_name, "_xfm_func2mpr.mat")
-        xfm_mpr2temp = mgu.name_tmps(outdir, mri_name, "_xfm_mpr2temp.mat")
-        warp_mpr2temp = mgu.name_tmps(outdir, mri_name,
+        func2 = mgu.name_tmps(outdir, func_name, "_t1w.nii.gz")
+        anat_brain = mgu.name_tmps(outdir, func_name, "_anat_brain.nii.gz")
+        xfm_func2mpr = mgu.name_tmps(outdir, func_name, "_xfm_func2mpr.mat")
+        xfm_mpr2temp = mgu.name_tmps(outdir, func_name, "_xfm_mpr2temp.mat")
+        warp_mpr2temp = mgu.name_tmps(outdir, func_name,
                                       "_warp_mpr2temp.nii.gz")
 
-        mgu.get_slice(mri, 0, s0)  # get the 0 slice and save
-        # extract the anatomical brain
-        # use threshold of .1 so that we don't accidentally cut off
-        # any brain tissue while segmenting. cutting off brain tissue
-        # leads to disasterous registration failures
-        mgu.extract_brain(anat, anat_brain)
-        # extract the brain from the s0 image
-        mgu.extract_brain(s0, s0_brain)
-        # align the anatomical brain to the s0 brain
-        self.align(s0_brain, anat_brain, xfm_func2mpr, bins=None)
-        # align the anatomical high-res brain to the high-res atlas_brain
-        # this linear transformation gives us a starting point for
-        # our nonlinear transformations
-        self.align(anat_brain, atlas_brain, xfm_mpr2temp, bins=None)
-        # align the anatomical image to the atlas image using
-        # the linear alignment as a starting guess. extract over atlas_brain.
-        self.align_nonlinear(anat, atlas, xfm_mpr2temp,
-                             warp_mpr2temp, mask=atlas_mask)
-        # apply the warp obtained from anat -> atlas to the fmri stack.
-        self.apply_warp(mri, aligned_mri, atlas, warp_mpr2temp,
+        # Applies skull stripping to T1 volume, then EPI alignment to T1
+        mgu.extract_brain(t1w, t1w_brain, ' -B')
+        self.align_epi(func, t1w, t1w_brain, func2)
+        
+        self.align(t1w_brain, atlas_brain, xfm_mpr2temp, bins=None)
+        self.align_nonlinear(t1w, atlas, xfm_mpr2temp, warp_mpr2temp,
+                             mask=atlas_mask)
+        self.apply_warp(func, aligned_func, atlas, warp_mpr2temp,
                         xfm=xfm_func2mpr)
         # apply the warp back to the anatomical image for quality control.
-        self.apply_warp(anat, aligned_anat, atlas, warp_mpr2temp,
+        self.apply_warp(t1w, aligned_t1w, atlas, warp_mpr2temp,
                         mask=atlas_mask)
-        # mgu.extract_brain(aligned_anat, aligned_anat)
 
-        if qcdir is not None:
-            mgqc().check_alignments(mri, aligned_mri, atlas, qcdir,
-                                    mri_name, title="Registration")
-            reg_mri_pngs(aligned_mri, atlas, qcdir, mean=True)
-            reg_mri_pngs(aligned_anat, atlas, qcdir, dim=3)
-        pass
+        # TODO: move this out to main pipeline script
+        # if qcdir is not None:
+        #    mgqc().check_alignments(func, aligned_func, atlas, qcdir,
+        #                            func_name, title="Registration")
+        #    reg_mri_pngs(aligned_func, atlas, qcdir, mean=True)
+        #    reg_mri_pngs(aligned_t1w, atlas, qcdir, dim=3)
 
-    def dwi2atlas(self, dwi, gtab, mprage, atlas,
+    def dwi2atlas(self, dwi, gtab, t1w, atlas,
                   aligned_dwi, outdir, clean=False):
         """
         Aligns two images and stores the transform between them
@@ -348,28 +300,28 @@ class register(object):
 
                 dwi:
                     - Input impage to be aligned as a nifti image file
-                bvals:
-                    - File containing list of bvalues for each scan
-                bvecs:
-                    - File containing gradient directions for each scan
-                mprage:
+                gtab:
+                    - object containing gradient directions and strength
+                t1w:
                     - Intermediate image being aligned to as a nifti image file
                 atlas:
                     - Terminal image being aligned to as a nifti image file
                 aligned_dwi:
                     - Aligned output dwi image as a nifti image file
+                outdir:
+                    - Directory for derivatives to be stored
         """
         # Creates names for all intermediate files used
         dwi_name = mgu.get_filename(dwi)
-        mprage_name = mgu.get_filename(mprage)
+        t1w_name = mgu.get_filename(t1w)
         atlas_name = mgu.get_filename(atlas)
 
         dwi2 = mgu.name_tmps(outdir, dwi_name, "_t2.nii.gz")
         temp_aligned = mgu.name_tmps(outdir, dwi_name, "_ta.nii.gz")
         temp_aligned2 = mgu.name_tmps(outdir, dwi_name, "_ta2.nii.gz")
         b0 = mgu.name_tmps(outdir, dwi_name, "_b0.nii.gz")
-        mprage2 = mgu.name_tmps(outdir, mprage_name, "_ss.nii.gz")
-        xfm = mgu.name_tmps(outdir, mprage_name,
+        t1w_brain = mgu.name_tmps(outdir, t1w_name, "_ss.nii.gz")
+        xfm = mgu.name_tmps(outdir, t1w_name,
                             "_" + atlas_name + "_xfm.mat")
 
         # Align DTI volumes to each other
@@ -387,24 +339,19 @@ class register(object):
         b0_out.update_header()
         nb.save(b0_out, b0)
 
-        # Applies skull stripping to MPRAGE volume
-        mgu.extract_brain(mprage, mprage2, ' -B')
+        # Applies skull stripping to T1 volume, then EPI alignment to T1
+        mgu.extract_brain(t1w, t1w_brain, ' -B')
+        self.align_epi(dwi2, t1w, t1w_brain, temp_aligned)
 
-        # Algins B0 volume to MPRAGE, and MPRAGE to Atlas
-        cmd = "".join(['epi_reg --epi=', dwi2, ' --t1=', mprage,
-                       ' --t1brain=', mprage2, ' --out=', temp_aligned])
-        print("Executing: " + cmd)
-        mgu.execute_cmd(cmd)
-
-        self.align(mprage, atlas, xfm)
+        # Applies linear registration from T1 to template
+        self.align(t1w, atlas, xfm)
 
         # Applies combined transform to dwi image volume
         self.applyxfm(temp_aligned, atlas, xfm, temp_aligned2)
         self.resample(temp_aligned2, aligned_dwi, atlas)
 
         if clean:
-            cmd = "".join(["rm -f ", dwi2, " ", temp_aligned,
-                           " ", b0, " ", xfm, " ", outdir, "/tmp/",
-                           mprage_name, "*"])
+            cmd = "rm -f {} {} {} {} {} {}*".format(dwi2, temp_aligned, b0,
+                                                    xfm, outdir, t1w_name)
             print("Cleaning temporary registration files...")
             mgu.execute_cmd(cmd)
