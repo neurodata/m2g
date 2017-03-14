@@ -36,7 +36,7 @@ class register(object):
         Enables registration of single images to one another as well as volumes
         within multi-volume image stacks. Has options to compute transforms,
         apply transforms, as well as a built-in method for aligning low
-        resolution dti images to a high resolution atlas.
+        resolution dwi images to a high resolution atlas.
         """
         import ndmg.utils as mgu
         pass
@@ -160,19 +160,19 @@ class register(object):
         mgu.execute_cmd(cmd)
         pass
 
-    def align_slices(self, dti, corrected_dti, idx):
+    def align_slices(self, dwi, corrected_dwi, idx):
         """
         Performs eddy-correction (or self-alignment) of a stack of 3D images
 
         **Positional Arguments:**
-                dti:
+                dwi:
                     - 4D (DTI) image volume as a nifti file
-                corrected_dti:
+                corrected_dwi:
                     - Corrected and aligned DTI volume in a nifti file
                 idx:
                     - Index of the first B0 volume in the stack
         """
-        cmd = "eddy_correct " + dti + " " + corrected_dti + " " + str(idx)
+        cmd = "eddy_correct " + dwi + " " + corrected_dwi + " " + str(idx)
         print("Executing: " + cmd)
         status = mgu.execute_cmd(cmd)
         pass
@@ -339,14 +339,14 @@ class register(object):
             reg_mri_pngs(aligned_anat, atlas, qcdir, dim=3)
         pass
 
-    def dti2atlas(self, dti, gtab, mprage, atlas,
-                  aligned_dti, outdir, clean=False):
+    def dwi2atlas(self, dwi, gtab, mprage, atlas,
+                  aligned_dwi, outdir, clean=False):
         """
         Aligns two images and stores the transform between them
 
         **Positional Arguments:**
 
-                dti:
+                dwi:
                     - Input impage to be aligned as a nifti image file
                 bvals:
                     - File containing list of bvalues for each scan
@@ -356,33 +356,33 @@ class register(object):
                     - Intermediate image being aligned to as a nifti image file
                 atlas:
                     - Terminal image being aligned to as a nifti image file
-                aligned_dti:
-                    - Aligned output dti image as a nifti image file
+                aligned_dwi:
+                    - Aligned output dwi image as a nifti image file
         """
         # Creates names for all intermediate files used
-        dti_name = mgu.get_filename(dti)
+        dwi_name = mgu.get_filename(dwi)
         mprage_name = mgu.get_filename(mprage)
         atlas_name = mgu.get_filename(atlas)
 
-        dti2 = mgu.name_tmps(outdir, dti_name, "_t2.nii.gz")
-        temp_aligned = mgu.name_tmps(outdir, dti_name, "_ta.nii.gz")
-        temp_aligned2 = mgu.name_tmps(outdir, dti_name, "_ta2.nii.gz")
-        b0 = mgu.name_tmps(outdir, dti_name, "_b0.nii.gz")
+        dwi2 = mgu.name_tmps(outdir, dwi_name, "_t2.nii.gz")
+        temp_aligned = mgu.name_tmps(outdir, dwi_name, "_ta.nii.gz")
+        temp_aligned2 = mgu.name_tmps(outdir, dwi_name, "_ta2.nii.gz")
+        b0 = mgu.name_tmps(outdir, dwi_name, "_b0.nii.gz")
         mprage2 = mgu.name_tmps(outdir, mprage_name, "_ss.nii.gz")
         xfm = mgu.name_tmps(outdir, mprage_name,
                             "_" + atlas_name + "_xfm.mat")
 
         # Align DTI volumes to each other
-        self.align_slices(dti, dti2, np.where(gtab.b0s_mask)[0][0])
+        self.align_slices(dwi, dwi2, np.where(gtab.b0s_mask)[0][0])
 
         # Loads DTI image in as data and extracts B0 volume
-        dti_im = nb.load(dti2)
-        b0_im = mgu.get_b0(gtab, dti_im.get_data())
+        dwi_im = nb.load(dwi2)
+        b0_im = mgu.get_b0(gtab, dwi_im.get_data())
 
         # Wraps B0 volume in new nifti image
-        b0_head = dti_im.get_header()
+        b0_head = dwi_im.get_header()
         b0_head.set_data_shape(b0_head.get_data_shape()[0:3])
-        b0_out = nb.Nifti1Image(b0_im, affine=dti_im.get_affine(),
+        b0_out = nb.Nifti1Image(b0_im, affine=dwi_im.get_affine(),
                                 header=b0_head)
         b0_out.update_header()
         nb.save(b0_out, b0)
@@ -391,19 +391,19 @@ class register(object):
         mgu.extract_brain(mprage, mprage2, ' -B')
 
         # Algins B0 volume to MPRAGE, and MPRAGE to Atlas
-        cmd = "".join(['epi_reg --epi=', dti2, ' --t1=', mprage,
+        cmd = "".join(['epi_reg --epi=', dwi2, ' --t1=', mprage,
                        ' --t1brain=', mprage2, ' --out=', temp_aligned])
         print("Executing: " + cmd)
         mgu.execute_cmd(cmd)
 
         self.align(mprage, atlas, xfm)
 
-        # Applies combined transform to dti image volume
+        # Applies combined transform to dwi image volume
         self.applyxfm(temp_aligned, atlas, xfm, temp_aligned2)
-        self.resample(temp_aligned2, aligned_dti, atlas)
+        self.resample(temp_aligned2, aligned_dwi, atlas)
 
         if clean:
-            cmd = "".join(["rm -f ", dti2, " ", temp_aligned,
+            cmd = "".join(["rm -f ", dwi2, " ", temp_aligned,
                            " ", b0, " ", xfm, " ", outdir, "/tmp/",
                            mprage_name, "*"])
             print("Cleaning temporary registration files...")

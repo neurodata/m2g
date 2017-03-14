@@ -47,7 +47,7 @@ def apply_mask(inp, masked, mask):
     pass
 
 
-def load_bval_bvec_dti(fbval, fbvec, dti_file, dti_file_out):
+def load_bval_bvec_dwi(fbval, fbvec, dwi_file, dwi_file_out):
     """
     Takes bval and bvec files and produces a structure in dipy format
 
@@ -55,7 +55,7 @@ def load_bval_bvec_dti(fbval, fbvec, dti_file, dti_file_out):
     """
 
     # Load Data
-    img = nb.load(dti_file)
+    img = nb.load(dwi_file)
     data = img.get_data()
 
     bvals, bvecs = read_bvals_bvecs(fbval, fbvec)
@@ -68,10 +68,10 @@ def load_bval_bvec_dti(fbval, fbvec, dti_file, dti_file_out):
     data = np.delete(data, idx, axis=3)
 
     # Save corrected DTI volume
-    dti_new = nb.Nifti1Image(data, affine=img.get_affine(),
+    dwi_new = nb.Nifti1Image(data, affine=img.get_affine(),
                              header=img.get_header())
-    dti_new.update_header()
-    nb.save(dti_new, dti_file_out)
+    dwi_new.update_header()
+    nb.save(dwi_new, dwi_file_out)
 
     gtab = gradient_table(bvals, bvecs, atol=0.01)
 

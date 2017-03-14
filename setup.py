@@ -19,14 +19,13 @@ setup(
         'ndmg.scripts'
     ],
     scripts = [
-        'ndmg/scripts/ndmg_demo-dwi',
-        'ndmg/scripts/ndmg_demo-func',
-        'ndmg/scripts/ndmg_demo-qc'
+        'ndmg/scripts/ndmg_demo_dwi',
+        'ndmg/scripts/ndmg_demo_func'
     ],
     entry_points = {
         'console_scripts': [
-            'fngs_pipeline=ndmg.scripts.fngs_pipeline:main',
-            'ndmg_pipeline=ndmg.scripts.ndmg_pipeline:main',
+            'ndmg_func_pipeline=ndmg.scripts.ndmg_func_pipeline:main',
+            'ndmg_dwi_pipeline=ndmg.scripts.ndmg_dwi_pipeline:main',
             'ndmg_bids=ndmg.scripts.ndmg_bids:main',
             'ndmg_cloud=ndmg.scripts.ndmg_cloud:main'
     ]

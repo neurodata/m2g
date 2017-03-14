@@ -8,7 +8,7 @@ from .track.track import track as track
 from .stats import *
 # from .preproc.preproc import preproc as preproc
 from .timeseries import timeseries as timeseries
-from .scripts import ndmg_pipeline as ndmg_pipeline
-from .scripts import fngs_pipeline as fngs_pipeline
+from .scripts import ndmg_dwi_pipeline as ndmg_dwi_pipeline
+from .scripts import ndmg_func_pipeline as ndmg_func_pipeline
 
 version = "0.0.49"

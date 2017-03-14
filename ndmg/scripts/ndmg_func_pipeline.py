@@ -15,9 +15,10 @@
 # limitations under the License.
 #
 
-# fmri_pipeline.py
+# ndmg_func_pipeline.py
 # Created by Eric Bridgeford on 2016-06-07.
-# Email: gkiar@jhu.edu, wgr@jhu.edu, ebridge2@jhu.edu
+# Edited by Greg Kiar on 2017-03-14.
+# Email: gkiar@jhu.edu, ebridge2@jhu.edu
 
 from argparse import ArgumentParser
 from datetime import datetime
