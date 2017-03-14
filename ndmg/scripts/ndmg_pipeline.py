@@ -47,21 +47,21 @@ def ndmg_pipeline(dti, bvals, bvecs, mprage, atlas, mask, labels, outdir,
     startTime = datetime.now()
 
     # Create derivative output directories
-    dti_name = mgu().get_filename(dti)
+    dti_name = mgu.get_filename(dti)
     cmd = "".join(["mkdir -p ", outdir, "/reg_dti ", outdir, "/tensors ",
                    outdir, "/fibers ", outdir, "/graphs ", outdir,
                    "/qa/tensors ", outdir, "/qa/fibers ", outdir,
                    "/qa/reg_dti"])
-    mgu().execute_cmd(cmd)
+    mgu.execute_cmd(cmd)
 
     # Graphs are different because of multiple atlases
     if isinstance(labels, list):
-        label_name = [mgu().get_filename(x) for x in labels]
+        label_name = [mgu.get_filename(x) for x in labels]
         for label in label_name:
-            mgu().execute_cmd("mkdir -p " + outdir + "/graphs/" + label)
+            mgu.execute_cmd("mkdir -p " + outdir + "/graphs/" + label)
     else:
-        label_name = mgu().get_filename(labels)
-        mgu().execute_cmd("mkdir -p " + outdir + "/graphs/" + label_name)
+        label_name = mgu.get_filename(labels)
+        mgu.execute_cmd("mkdir -p " + outdir + "/graphs/" + label_name)
 
     # Create derivative output file names
     aligned_dti = "".join([outdir, "/reg_dti/", dti_name, "_aligned.nii.gz"])
@@ -83,7 +83,7 @@ def ndmg_pipeline(dti, bvals, bvecs, mprage, atlas, mask, labels, outdir,
     dti1 = "".join([outdir, "/tmp/", dti_name, "_t1.nii.gz"])
     bvecs1 = "".join([outdir, "/tmp/", dti_name, "_1.bvec"])
     mgp.rescale_bvec(bvecs, bvecs1)
-    gtab = mgu().load_bval_bvec_dti(bvals, bvecs1, dti, dti1)
+    gtab = mgu.load_bval_bvec_dti(bvals, bvecs1, dti, dti1)
 
     # Align DTI volumes to Atlas
     print("Aligning volumes...")
@@ -125,7 +125,7 @@ def ndmg_pipeline(dti, bvals, bvecs, mprage, atlas, mask, labels, outdir,
         print("Cleaning up intermediate files... ")
         cmd = "".join(['rm -f ', tensors, ' ', outdir, '/tmp/', dti_name, '*',
                        ' ', aligned_dti, ' ', fibers])
-        mgu().execute_cmd(cmd)
+        mgu.execute_cmd(cmd)
 
     print("Complete!")
     pass

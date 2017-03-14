@@ -173,7 +173,7 @@ class nuis(object):
         # run FAST, with options -t for the image type and -n to
         # segment into CSF (pve_0), WM (pve_1), GM (pve_2)
         cmd = " ".join(["fast -t", str(int(an)), "-n 3 -o", basename, amri])
-        mgu().execute_cmd(cmd)
+        mgu.execute_cmd(cmd)
         pass
 
     def erode_mask(self, mask_path, eroded_path, v=0):
@@ -306,7 +306,7 @@ class nuis(object):
             - qcdir:
                 - the quality control directory to place qc.
         """
-        fmri_name = mgu().get_filename(fmri)
+        fmri_name = mgu.get_filename(fmri)
         fmri_im = nb.load(fmri)
 
         fmri_dat = fmri_im.get_data()

@@ -99,7 +99,7 @@ class fmri_qc(object):
             "\tCorrected Image: " + mri + "\n" +\
             " \tMask: " + mask + "\n"
         cmd = "mkdir -p " + qcdir
-        mgu().execute_cmd(cmd)
+        mgu.execute_cmd(cmd)
 
         mri_im = nb.load(mri)
         mri_dat = mri_im.get_data()

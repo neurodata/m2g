@@ -81,7 +81,7 @@ class register(object):
         if searchrad is not None:
             cmd += " -searchrx -180 180 -searchry -180 180 " +\
                    "-searchrz -180 180"
-        mgu().execute_cmd(cmd)
+        mgu.execute_cmd(cmd)
         pass
 
     def align_nonlinear(self, inp, ref, xfm, warp, mask=None):
@@ -107,7 +107,7 @@ class register(object):
               warp + " --ref=" + ref + " --subsamp=4,2,1,1"
         if mask is not None:
             cmd += " --refmask=" + mask
-        status = mgu().execute_cmd(cmd)
+        status = mgu.execute_cmd(cmd)
         pass
 
     def applyxfm(self, inp, ref, xfm, aligned):
@@ -128,7 +128,7 @@ class register(object):
         cmd = "".join(["flirt -in ", inp, " -ref ", ref, " -out ", aligned,
                        " -init ", xfm, " -interp trilinear -applyxfm"])
         print("Executing: " + cmd)
-        mgu().execute_cmd(cmd)
+        mgu.execute_cmd(cmd)
         pass
 
     def apply_warp(self, inp, out, ref, warp, xfm=None, mask=None):
@@ -157,7 +157,7 @@ class register(object):
             cmd += " --premat=" + xfm
         if mask is not None:
             cmd += " --mask=" + mask
-        mgu().execute_cmd(cmd)
+        mgu.execute_cmd(cmd)
         pass
 
     def align_slices(self, dti, corrected_dti, idx):
@@ -174,7 +174,7 @@ class register(object):
         """
         cmd = "eddy_correct " + dti + " " + corrected_dti + " " + str(idx)
         print("Executing: " + cmd)
-        status = mgu().execute_cmd(cmd)
+        status = mgu.execute_cmd(cmd)
         pass
 
     def resample(self, base, ingested, template):
@@ -244,7 +244,7 @@ class register(object):
         goal_res = int(nb.load(template).get_header().get_zooms()[0])
         cmd = "flirt -in " + base + " -ref " + template + " -out " +\
               res + " -nosearch -applyisoxfm " + str(goal_res)
-        mgu().execute_cmd(cmd)
+        mgu.execute_cmd(cmd)
         pass
 
     def combine_xfms(self, xfm1, xfm2, xfmout):
@@ -261,7 +261,7 @@ class register(object):
                 - the path to the output transformation
         """
         cmd = "convert_xfm -omat " + xfmout + " -concat " + xfm1 + " " + xfm2
-        mgu().execute_cmd(cmd)
+        mgu.execute_cmd(cmd)
         pass
 
     def fmri2atlas(self, mri, anat, atlas, atlas_brain, atlas_mask,
@@ -294,26 +294,26 @@ class register(object):
                 - the quality control directory. If None, then
                 no QC will be performed.
        """
-        mri_name = mgu().get_filename(mri)
-        anat_name = mgu().get_filename(anat)
-        atlas_name = mgu().get_filename(atlas)
+        mri_name = mgu.get_filename(mri)
+        anat_name = mgu.get_filename(anat)
+        atlas_name = mgu.get_filename(atlas)
 
-        s0 = mgu().name_tmps(outdir, mri_name, "_0slice.nii.gz")
-        s0_brain = mgu().name_tmps(outdir, mri_name, "_0slice_brain.nii.gz")
-        anat_brain = mgu().name_tmps(outdir, mri_name, "_anat_brain.nii.gz")
-        xfm_func2mpr = mgu().name_tmps(outdir, mri_name, "_xfm_func2mpr.mat")
-        xfm_mpr2temp = mgu().name_tmps(outdir, mri_name, "_xfm_mpr2temp.mat")
-        warp_mpr2temp = mgu().name_tmps(outdir, mri_name,
-                                        "_warp_mpr2temp.nii.gz")
+        s0 = mgu.name_tmps(outdir, mri_name, "_0slice.nii.gz")
+        s0_brain = mgu.name_tmps(outdir, mri_name, "_0slice_brain.nii.gz")
+        anat_brain = mgu.name_tmps(outdir, mri_name, "_anat_brain.nii.gz")
+        xfm_func2mpr = mgu.name_tmps(outdir, mri_name, "_xfm_func2mpr.mat")
+        xfm_mpr2temp = mgu.name_tmps(outdir, mri_name, "_xfm_mpr2temp.mat")
+        warp_mpr2temp = mgu.name_tmps(outdir, mri_name,
+                                      "_warp_mpr2temp.nii.gz")
 
-        mgu().get_slice(mri, 0, s0)  # get the 0 slice and save
+        mgu.get_slice(mri, 0, s0)  # get the 0 slice and save
         # extract the anatomical brain
         # use threshold of .1 so that we don't accidentally cut off
         # any brain tissue while segmenting. cutting off brain tissue
         # leads to disasterous registration failures
-        mgu().extract_brain(anat, anat_brain)
+        mgu.extract_brain(anat, anat_brain)
         # extract the brain from the s0 image
-        mgu().extract_brain(s0, s0_brain)
+        mgu.extract_brain(s0, s0_brain)
         # align the anatomical brain to the s0 brain
         self.align(s0_brain, anat_brain, xfm_func2mpr, bins=None)
         # align the anatomical high-res brain to the high-res atlas_brain
@@ -330,7 +330,7 @@ class register(object):
         # apply the warp back to the anatomical image for quality control.
         self.apply_warp(anat, aligned_anat, atlas, warp_mpr2temp,
                         mask=atlas_mask)
-        # mgu().extract_brain(aligned_anat, aligned_anat)
+        # mgu.extract_brain(aligned_anat, aligned_anat)
 
         if qcdir is not None:
             mgqc().check_alignments(mri, aligned_mri, atlas, qcdir,
@@ -360,24 +360,24 @@ class register(object):
                     - Aligned output dti image as a nifti image file
         """
         # Creates names for all intermediate files used
-        dti_name = mgu().get_filename(dti)
-        mprage_name = mgu().get_filename(mprage)
-        atlas_name = mgu().get_filename(atlas)
+        dti_name = mgu.get_filename(dti)
+        mprage_name = mgu.get_filename(mprage)
+        atlas_name = mgu.get_filename(atlas)
 
-        dti2 = mgu().name_tmps(outdir, dti_name, "_t2.nii.gz")
-        temp_aligned = mgu().name_tmps(outdir, dti_name, "_ta.nii.gz")
-        temp_aligned2 = mgu().name_tmps(outdir, dti_name, "_ta2.nii.gz")
-        b0 = mgu().name_tmps(outdir, dti_name, "_b0.nii.gz")
-        mprage2 = mgu().name_tmps(outdir, mprage_name, "_ss.nii.gz")
-        xfm = mgu().name_tmps(outdir, mprage_name,
-                              "_" + atlas_name + "_xfm.mat")
+        dti2 = mgu.name_tmps(outdir, dti_name, "_t2.nii.gz")
+        temp_aligned = mgu.name_tmps(outdir, dti_name, "_ta.nii.gz")
+        temp_aligned2 = mgu.name_tmps(outdir, dti_name, "_ta2.nii.gz")
+        b0 = mgu.name_tmps(outdir, dti_name, "_b0.nii.gz")
+        mprage2 = mgu.name_tmps(outdir, mprage_name, "_ss.nii.gz")
+        xfm = mgu.name_tmps(outdir, mprage_name,
+                            "_" + atlas_name + "_xfm.mat")
 
         # Align DTI volumes to each other
         self.align_slices(dti, dti2, np.where(gtab.b0s_mask)[0][0])
 
         # Loads DTI image in as data and extracts B0 volume
         dti_im = nb.load(dti2)
-        b0_im = mgu().get_b0(gtab, dti_im.get_data())
+        b0_im = mgu.get_b0(gtab, dti_im.get_data())
 
         # Wraps B0 volume in new nifti image
         b0_head = dti_im.get_header()
@@ -388,15 +388,14 @@ class register(object):
         nb.save(b0_out, b0)
 
         # Applies skull stripping to MPRAGE volume
-        cmd = 'bet ' + mprage + ' ' + mprage2 + ' -B'
+        mgu.extract_brain(mprage, mprage2, ' -B')
         print("Executing: " + cmd)
-        mgu().execute_cmd(cmd)
 
         # Algins B0 volume to MPRAGE, and MPRAGE to Atlas
         cmd = "".join(['epi_reg --epi=', dti2, ' --t1=', mprage,
                        ' --t1brain=', mprage2, ' --out=', temp_aligned])
         print("Executing: " + cmd)
-        mgu().execute_cmd(cmd)
+        mgu.execute_cmd(cmd)
 
         self.align(mprage, atlas, xfm)
 
@@ -409,4 +408,4 @@ class register(object):
                            " ", b0, " ", xfm, " ", outdir, "/tmp/",
                            mprage_name, "*"])
             print("Cleaning temporary registration files...")
-            mgu().execute_cmd(cmd)
+            mgu.execute_cmd(cmd)

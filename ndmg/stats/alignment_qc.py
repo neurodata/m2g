@@ -318,9 +318,9 @@ class alignment_qc(object):
                 - the id of the reference being analyzed.
         """
         cmd = "mkdir -p " + qcdir
-        mgu().execute_cmd(cmd)
-        mri_data = mgu().get_braindata(mri_data)
-        ref_data = mgu().get_braindata(ref_data)
+        mgu.execute_cmd(cmd)
+        mri_data = mgu.get_braindata(mri_data)
+        ref_data = mgu.get_braindata(ref_data)
 
         # if we have 4d data, np.mean() to get 3d data
         if len(mri_data.shape) == 4:
@@ -373,9 +373,9 @@ class alignment_qc(object):
                 - the id of the reference being analyzed.
         """
         cmd = "mkdir -p " + qcdir
-        mgu().execute_cmd(cmd)
-        mri_data = mgu().get_braindata(mri_data)
-        ref_data = mgu().get_braindata(ref_data)
+        mgu.execute_cmd(cmd)
+        mri_data = mgu.get_braindata(mri_data)
+        ref_data = mgu.get_braindata(ref_data)
 
         # if we have 4d data, np.mean() to get 3d data
         if len(mri_data.shape) == 4:
@@ -474,7 +474,7 @@ class alignment_qc(object):
         cmd = "cp " + os.path.dirname(os.path.realpath(__file__)) +\
             "/templates/qc.html " + location
 
-        mgu().execute_cmd(cmd)
+        mgu.execute_cmd(cmd)
         pass
 
     def update_template_qc(self, html_qc, dict_keys):

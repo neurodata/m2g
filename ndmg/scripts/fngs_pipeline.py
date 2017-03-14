@@ -85,7 +85,7 @@ def fngs_pipeline(fmri, struct, atlas, atlas_brain, atlas_mask, lv_mask,
         outdir + "/reg_struct " + outdir + "/tmp " +\
         outdir + "/connectomes " + outdir + "/nuis_fmri " + qcdir + " " +\
         mcdir + " " + regdir + " " + overalldir + " " + roidir + " " + nuisdir
-    mgu().execute_cmd(cmd)
+    mgu.execute_cmd(cmd)
 
     # qc_html = overalldir + "/" + fmri_name + ".html"
 
@@ -167,7 +167,7 @@ def fngs_pipeline(fmri, struct, atlas, atlas_brain, atlas_mask, lv_mask,
 
     if clean:
         cmd = "rm -r " + outdir + "/tmp/" + fmri_name + "*"
-        mgu().execute_cmd(cmd)
+        mgu.execute_cmd(cmd)
 
     print "Complete! FNGS first run"
     pass
@@ -204,7 +204,7 @@ def main():
     cmd = "mkdir -p " + result.outdir + " " + result.outdir + "/tmp"
     print "Creating output directory: " + result.outdir
     print "Creating output temp directory: " + result.outdir + "/tmp"
-    mgu().execute_cmd(cmd)
+    mgu.execute_cmd(cmd)
 
     fngs_pipeline(result.fmri, result.struct, result.atlas,
                   result.atlas_brain, result.atlas_mask, result.lv_mask,

@@ -51,7 +51,7 @@ class preproc_fmri(object):
         """
         cmd = "mcflirt -in " + mri + " -out " + corrected_mri +\
             " -plots -refvol " + str(idx)
-        mgu().execute_cmd(cmd)
+        mgu.execute_cmd(cmd)
         pass
 
     def slice_time_correct(self, mri, corrected_mri, stc=None):
@@ -92,7 +92,7 @@ class preproc_fmri(object):
                                      "option")
                 zooms = nb.load(mri).header.get_zooms()
                 cmd += " -r " + str(zooms[3])
-                mgu().execute_cmd(cmd)
+                mgu.execute_cmd(cmd)
             else:
                 # do nothing since we don't want to slice time correct
                 print("User Specified No slice timing correction")
@@ -138,10 +138,10 @@ class preproc_fmri(object):
                 - optional argument required for quality control, is the id
                 of the subject (String).
         """
-        mri_name = mgu().get_filename(mri)
+        mri_name = mgu.get_filename(mri)
 
-        s0 = mgu().name_tmps(outdir, mri_name, "_0slice.nii.gz")
-        stc_mri = mgu().name_tmps(outdir, mri_name, "_stc.nii.gz")
+        s0 = mgu.name_tmps(outdir, mri_name, "_0slice.nii.gz")
+        stc_mri = mgu.name_tmps(outdir, mri_name, "_stc.nii.gz")
         # TODO EB: decide whether it is advantageous to align to mean image
         if (stc is not None):
             self.slice_time_correct(mri, stc_mri, stc)
@@ -150,12 +150,12 @@ class preproc_fmri(object):
         self.motion_correct(stc_mri, motion_mri, 0)
 
         if qcdir is not None:
-            mgu().get_slice(motion_mri, 0, s0)
+            mgu.get_slice(motion_mri, 0, s0)
             mgqc().check_alignments(mri, motion_mri, s0, qcdir, mri_name,
                                     title="Motion Correction")
             mgqc().image_align(motion_mri, s0, qcdir, scanid=mri_name,
                                refid=mri_name + "_s0")
 
         cmd = "cp " + motion_mri + " " + preproc_mri
-        mgu().execute_cmd(cmd)
+        mgu.execute_cmd(cmd)
         pass

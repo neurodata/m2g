@@ -34,10 +34,10 @@ def multigraphs(fibers, labels, outdir):
     Creates a brain graph from fiber streamlines
     """
     startTime = datetime.now()
-    fiber_name = mgu().get_filename(fibers)
+    fiber_name = mgu.get_filename(fibers)
     base = fiber_name.split('_fibers', 1)[0]
     # Create output directories for graphs
-    label_name = [mgu().get_filename(x) for x in labels]
+    label_name = [mgu.get_filename(x) for x in labels]
     for label in label_name:
         p = Popen("mkdir -p " + outdir + "/graphs/" + label,
                   stdout=PIPE, stderr=PIPE, shell=True)
