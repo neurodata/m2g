@@ -265,7 +265,7 @@ class register(object):
         atlas_name = mgu.get_filename(atlas)
 
         func2 = mgu.name_tmps(outdir, func_name, "_t1w.nii.gz")
-        anat_brain = mgu.name_tmps(outdir, func_name, "_anat_brain.nii.gz")
+        t1w_brain = mgu.name_tmps(outdir, t1w_name, "_brain.nii.gz")
         xfm_func2mpr = mgu.name_tmps(outdir, func_name, "_xfm_func2mpr.mat")
         xfm_mpr2temp = mgu.name_tmps(outdir, func_name, "_xfm_mpr2temp.mat")
         warp_mpr2temp = mgu.name_tmps(outdir, func_name,
@@ -278,8 +278,7 @@ class register(object):
         self.align(t1w_brain, atlas_brain, xfm_mpr2temp, bins=None)
         self.align_nonlinear(t1w, atlas, xfm_mpr2temp, warp_mpr2temp,
                              mask=atlas_mask)
-        self.apply_warp(func, aligned_func, atlas, warp_mpr2temp,
-                        xfm=xfm_func2mpr)
+        self.apply_warp(func, aligned_func, atlas, warp_mpr2temp)
         # apply the warp back to the anatomical image for quality control.
         self.apply_warp(t1w, aligned_t1w, atlas, warp_mpr2temp,
                         mask=atlas_mask)

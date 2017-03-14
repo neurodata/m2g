@@ -73,9 +73,9 @@ def fngs_pipeline(fmri, struct, atlas, atlas_brain, atlas_mask, lv_mask,
     struct_name = op.splitext(op.splitext(op.basename(struct))[0])[0]
     atlas_name = op.splitext(op.splitext(op.basename(atlas))[0])[0]
 
-    qcdir = outdir + "/qc"
+    qcdir = outdir + "/qa"
     mcdir = qcdir + "/mc/" + fmri_name
-    regdir = qcdir + "/reg/" + fmri_name
+    regdir = qcdir + "/reg_func/" + fmri_name
     overalldir = qcdir + "/overall/" + fmri_name
     roidir = qcdir + "/roi/" + fmri_name
     nuisdir = qcdir + "/nuis/" + fmri_name
@@ -141,8 +141,7 @@ def fngs_pipeline(fmri, struct, atlas, atlas_brain, atlas_mask, lv_mask,
                      qcdir=mcdir, stc=stc)
     print "Aligning volumes..."
     mgr().fmri2atlas(preproc_fmri, struct, atlas, atlas_brain, atlas_mask,
-                     aligned_fmri, aligned_struct, outdir,
-                     qcdir=regdir)
+                     aligned_fmri, aligned_struct, outdir)
     print "Correcting Nuisance Variables..."
     mgn().nuis_correct(aligned_fmri, nuis_fmri, lv_mask, trim=2, qcdir=nuisdir)
     print "Extracting Voxelwise Timeseries..."
