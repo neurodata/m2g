@@ -21,7 +21,7 @@
 from ndmg.utils import utils as mgu
 import nibabel as nb
 import numpy as np
-from ndmg.stats import alignment_qc as mgqc
+from ndmg.stats import qa_reg_func as mgrq
 import scipy.signal as signal
 from scipy import fftpack as scifft
 
@@ -279,7 +279,7 @@ class nuis(object):
         return (voxel - W)
 
     def nuis_correct(self, fmri, nuisance_mri, er_csfmask=None, highpass=0.01,
-                     lowpass=None, trim=0, qcdir=None):
+                     lowpass=None, trim=0):
         """
         Removes Nuisance Signals from brain images, using a combination
         of Frequency filtering, and mean csf/quadratic regression.
@@ -303,8 +303,6 @@ class nuis(object):
                   for T1 effects; that is, in some datasets, the first few
                   timesteps may have a non-saturated T1 contrast and as such
                   will show non-standard intensities.
-            - qcdir:
-                - the quality control directory to place qc.
         """
         fmri_name = mgu.get_filename(fmri)
         fmri_im = nb.load(fmri)

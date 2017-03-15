@@ -15,7 +15,7 @@
 # limitations under the License.
 #
 
-# qa_regmri.py
+# qa_reg.py
 # Created by Vikram Chandrashekhar.
 # Edited by Greg Kiar.
 # Email: Greg Kiar @ gkiar@jhu.edu

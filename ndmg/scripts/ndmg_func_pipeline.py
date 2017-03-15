@@ -20,31 +20,31 @@
 # Edited by Greg Kiar on 2017-03-14.
 # Email: gkiar@jhu.edu, ebridge2@jhu.edu
 
+import numpy as np
+import nibabel as nb
+import os.path as op
 from argparse import ArgumentParser
 from datetime import datetime
-from subprocess import Popen, PIPE
-import os.path as op
 from ndmg.utils import utils as mgu
 from ndmg import register as mgr
 from ndmg import graph as mgg
-import numpy as np
-import nibabel as nb
 from ndmg.timeseries import timeseries as mgts
-from ndmg.stats import fmri_qc as mgqc
-from ndmg.preproc import preproc_fmri as mgp
+from ndmg.stats import qa_func as mgrf
+from ndmg.preproc import preproc_func as mgp
 from ndmg.nuis import nuis as mgn
-from ndmg.stats import alignment_qc as mggqc
+from ndmg.stats.qa_reg_func import qa_reg_func as mgrq
+from ndmg.stats.qa_reg import *
 
 
-def fngs_pipeline(fmri, struct, atlas, atlas_brain, atlas_mask, lv_mask,
+def fngs_pipeline(func, t1w, atlas, atlas_brain, atlas_mask, lv_mask,
                   labels, outdir, clean=False, stc=None, fmt='gpickle'):
     """
     Analyzes fMRI images and produces subject-specific derivatives.
 
     **Positional Arguments:**
-        fmri:
+        func:
             - the path to a 4D (fMRI) image.
-        struct:
+        t1w:
             - the path to a 3d (anatomical) image.
         atlas:
             - the path to a reference atlas.
@@ -68,96 +68,103 @@ def fngs_pipeline(fmri, struct, atlas, atlas_brain, atlas_mask, lv_mask,
             graphml.
     """
     startTime = datetime.now()
+
     # Create derivative output directories
-    fmri_name = op.splitext(op.splitext(op.basename(fmri))[0])[0]
-    struct_name = op.splitext(op.splitext(op.basename(struct))[0])[0]
-    atlas_name = op.splitext(op.splitext(op.basename(atlas))[0])[0]
+    func_name = mgu.get_filename(func)
+    t1w_name = mgu.get_filename(t1w)
+    atlas_name = mgu.get_filename(atlas)
 
-    qcdir = outdir + "/qa"
-    mcdir = qcdir + "/mc/" + fmri_name
-    regdir = qcdir + "/reg_func/" + fmri_name
-    overalldir = qcdir + "/overall/" + fmri_name
-    roidir = qcdir + "/roi/" + fmri_name
-    nuisdir = qcdir + "/nuis/" + fmri_name
+    qadir = "{}/qa".format(outdir)
+    mcdir = "{}/reg/func/mc/".format(qadir)
+    regdir = "{}/reg/func/align/".format(qadir)
+    finaldir = "{}/reg/func/final/".format(qadir)
+    roidir = "{}/ts_roi/".format(qadir)
+    nuisdir = "{}/reg/func/nuis/".format(qadir)
 
-    cmd = "mkdir -p " + outdir + "/reg_fmri " + outdir +\
-        "/preproc_fmri " + outdir + "/motion_fmri " + outdir +\
-        "/voxel_timeseries " + outdir + "/roi_timeseries " +\
-        outdir + "/reg_struct " + outdir + "/tmp " +\
-        outdir + "/connectomes " + outdir + "/nuis_fmri " + qcdir + " " +\
-        mcdir + " " + regdir + " " + overalldir + " " + roidir + " " + nuisdir
+    cmd = "mkdir -p {} {} {} {} {} {} {}/reg/func/align {}/reg/func/preproc \
+           {}/reg/func/mc {}/ts_voxel {}/ts_roi {}/reg/t1w {}/tmp \
+           {}/connectomes/ {}/reg/func/nuis"
+    cmd = cmd.format(qadir, mcdir, regdir, finaldir, roidir, nuisdir,
+                     *([outdir] * 9))
     mgu.execute_cmd(cmd)
 
-    # qc_html = overalldir + "/" + fmri_name + ".html"
-
-    # mggqc().generate_html_templated(qc_html)
-
-    # Graphs are different because of multiple atlases
+    # Graphs are different because of multiple parcellations
     if isinstance(labels, list):
-        label_name = [op.splitext(op.splitext(op.basename(x))[0])[0]
-                      for x in labels]
+        label_name = [mgu.get_filename(x) for x in labels]
         for label in label_name:
-            p = Popen("mkdir -p " + outdir + "/roi_timeseries/" + label,
-                      stdout=PIPE, stderr=PIPE, shell=True)
-            p = Popen("mkdir -p " + outdir + "/connectomes/" + label,
-                      stdout=PIPE, stderr=PIPE, shell=True)
-            p = Popen("mkdir -p " + roidir + "/" + label,
-                      stdout=PIPE, stderr=PIPE, shell=True)
+            cmd = "mkdir -p {}/ts_roi/{} {}/connectomes/{} {}/{}"
+            cmd = cmd.format(outdir, label, outdir, label, roidir, label)
+            mgu.execute_cmd(cmd)
     else:
-        label_name = op.splitext(op.splitext(op.basename(labels))[0])[0]
-        p = Popen("mkdir -p " + outdir + "/roi_timeseries/" + label_name,
-                  stdout=PIPE, stderr=PIPE, shell=True)
-        p = Popen("mkdir -p " + outdir + "/connectomes/" + label_name,
-                  stdout=PIPE, stderr=PIPE, shell=True)
-        p = Popen("mkdir -p " + roidir + "/" + label_name,
-                  stdout=PIPE, stderr=PIPE, shell=True)
+        label_name = mgu.get_filename(labels)
+        label = label_name
+        cmd = "mkdir -p {}/ts_roi/{} {}/connectomes/{} {}/{}"
+        cmd = cmd.format(outdir, label, outdir, label, roidir, label)
+        mgu.execute_cmd(cmd)
 
     # Create derivative output file names
-    preproc_fmri = outdir + "/preproc_fmri/" + fmri_name + "_preproc.nii.gz"
-    aligned_fmri = outdir + "/reg_fmri/" + fmri_name + "_aligned.nii.gz"
-    aligned_struct = outdir + "/reg_struct/" + fmri_name +\
-        "_anat_aligned.nii.gz"
-    motion_fmri = outdir + "/motion_fmri/" + fmri_name + "_mc.nii.gz"
-    nuis_fmri = outdir + "/nuis_fmri/" + fmri_name + "_nuis.nii.gz"
-    voxel_ts = outdir + "/voxel_timeseries/" + fmri_name + "_voxel.npz"
+    preproc_func = "{}/reg/func/preproc/{}_preproc.nii.gz".format(outdir, func_name)
+    aligned_func = "{}/reg/func/align/{}_aligned.nii.gz".format(outdir, func_name)
+    aligned_t1w = "{}/reg/t1w/{}_aligned.nii.gz".format(outdir, t1w_name)
+    motion_func = "{}/reg/func/mc/{}_mc.nii.gz".format(outdir, func_name)
+    nuis_func = "{}/reg/func/nuis/{}_nuis.nii.gz".format(outdir, func_name)
+    voxel_ts = "{}/ts_voxel/{}_voxel.npz".format(outdir, func_name)
 
-    print "This pipeline will produce the following derivatives..."
-    print "fMRI volumes preprocessed: " + preproc_fmri
-    print "fMRI volumes motion corrected: " + motion_fmri
-    print "fMRI volume registered to atlas: " + aligned_fmri
-    print "Voxel timecourse in atlas space: " + voxel_ts
-    # print "Quality Control HTML Page: " + qc_html
+    print("This pipeline will produce the following derivatives...")
+    print("fMRI volumes preprocessed: {}".format(preproc_func))
+    print("fMRI volumes motion corrected: {}".format(motion_func))
+    print("fMRI volume registered to atlas: {}".format(aligned_func))
+    print("Voxel timecourse in atlas space: {}".format(voxel_ts))
+
     # Again, connectomes are different
-    connectomes = [outdir + "/connectomes/" + x + '/' + fmri_name +
-                   "_" + x + '.' + fmt for x in label_name]
-    roi_ts = [outdir + "/roi_timeseries/" + x + '/' + fmri_name + "_" + x +
-              ".npz" for x in label_name]
-    print "ROI timecourse downsampled to given labels: " +\
-          (", ".join([x for x in roi_ts]))
+    connectomes = ["{}/connectomes/{}/{}_{}.fmt".format(outdir, x, func_name,
+                                                        x, fmt)
+                   for x in label_name]
+    roi_ts = ["{}/ts_roi/{}/{}_{}.npz".format(outdir, x, func_name, x)
+              for x in label_name] 
+    print("ROI timeseries downsampled to given labels: " +
+          ", ".join([x for x in connectomes]))
+    print("Connectomes downsampled to given labels: " +
+          ", ".join([x for x in roi_ts]))
 
     # Align fMRI volumes to Atlas
     print "Preprocessing volumes..."
-    mgp().preprocess(fmri, preproc_fmri, motion_fmri, outdir,
-                     qcdir=mcdir, stc=stc)
+    mgp().preprocess(func, preproc_func, motion_func, outdir, qcdir=mcdir, stc=stc)
+    # mgu.get_slice(motion_mri, 0, s0)
+    # mgrq().check_alignments(mri, motion_mri, s0, qcdir, mri_name,
+    #                         title="Motion Correction")
+    # mgrq().image_align(motion_mri, s0, qcdir, scanid=mri_name,
+    #                    refid=mri_name + "_s0")
+
+    
     print "Aligning volumes..."
-    mgr().fmri2atlas(preproc_fmri, struct, atlas, atlas_brain, atlas_mask,
-                     aligned_fmri, aligned_struct, outdir)
+    mgr().func2atlas(preproc_func, t1w, atlas, atlas_brain, atlas_mask,
+                     aligned_func, aligned_t1w, outdir)
+    reg_mri_pngs(aligned_func, atlas, regdir, loc=0)
+    # mgqc().check_alignments(func, aligned_func, atlas, qcdir,
+    #                         func_name, title="Registration")
+    # reg_mri_pngs(aligned_func, atlas, qcdir, mean=True)
+    # reg_mri_pngs(aligned_t1w, atlas, qcdir, dim=3)
+
     print "Correcting Nuisance Variables..."
-    mgn().nuis_correct(aligned_fmri, nuis_fmri, lv_mask, trim=2, qcdir=nuisdir)
+    mgn().nuis_correct(aligned_func, nuis_func, lv_mask, trim=2)
+
     print "Extracting Voxelwise Timeseries..."
-    voxel = mgts().voxel_timeseries(nuis_fmri, atlas_mask, voxel_ts)
-    mgqc().stat_summary(aligned_fmri, fmri, motion_fmri, atlas_mask, voxel,
-                        aligned_struct, atlas_brain,
-                        qcdir=overalldir, scanid=fmri_name)
+    voxel = mgts().voxel_timeseries(nuis_func, atlas_mask, voxel_ts)
+    mgrf.stat_summary(aligned_func, func, motion_func, atlas_mask, voxel,
+                        aligned_t1w, atlas_brain,
+                        qcdir=finaldir, scanid=func_name)
 
     for idx, label in enumerate(label_name):
         print "Extracting ROI timeseries for " + label + " parcellation..."
         try:
-            ts = mgts().roi_timeseries(nuis_fmri, labels[idx], roi_ts[idx],
+            ts = mgts().roi_timeseries(nuis_func, labels[idx], roi_ts[idx],
                                        qcdir=roidir + "/" + label,
-                                       scanid=fmri_name, refid=label)
-            mggqc().image_align(atlas_brain, labels[idx], roidir + "/" + label,
-                                scanid=atlas_name, refid=label)
+                                       scanid=func_name, refid=label)
+            # mgrq().plot_timeseries(roi_ts, qcdir=qcdir,
+            #                        scanid=scanid, refid=refid)
+            # mgrq().image_align(atlas_brain, labels[idx], roidir + "/" + label,
+            #                    scanid=atlas_name, refid=label)
         except OSError as err:
             print(err)
         connectome = mgg(ts.shape[0], labels[idx], sens="Functional")
@@ -165,19 +172,20 @@ def fngs_pipeline(fmri, struct, atlas, atlas_brain, atlas_mask, lv_mask,
         connectome.summary()
         connectome.save_graph(connectomes[idx], fmt=fmt)
 
+    print("Execution took: {}".format(datetime.now() - startTime))
+
     if clean:
-        cmd = "rm -r " + outdir + "/tmp/" + fmri_name + "*"
+        cmd = "rm -r " + outdir + "/tmp/" + func_name + "*"
         mgu.execute_cmd(cmd)
 
-    print "Complete! FNGS first run"
-    pass
+    print("Complete!")
 
 
 def main():
     parser = ArgumentParser(description="This is an end-to-end connectome \
                             estimation pipeline from sMRI and DTI images")
-    parser.add_argument("fmri", action="store", help="Nifti fMRI stack")
-    parser.add_argument("struct", action="store", help="Nifti aMRI")
+    parser.add_argument("func", action="store", help="Nifti fMRI stack")
+    parser.add_argument("t1w", action="store", help="Nifti aMRI")
     parser.add_argument("atlas", action="store", help="Nifti T1 MRI atlas")
     parser.add_argument("atlas_brain", action="store", help="Nifti T1 MRI \
                         brain only atlas")
@@ -201,12 +209,11 @@ def main():
     result = parser.parse_args()
 
     # Create output directory
-    cmd = "mkdir -p " + result.outdir + " " + result.outdir + "/tmp"
-    print "Creating output directory: " + result.outdir
-    print "Creating output temp directory: " + result.outdir + "/tmp"
-    mgu.execute_cmd(cmd)
+    print "Creating output directory: {}".format(result.outdir)
+    print "Creating output temp directory: {}/tmp".format(result.outdir)
+    mgu.execute_cmd("mkdir -p {} {}/tmp".format(result.outdir, result.outdir))
 
-    fngs_pipeline(result.fmri, result.struct, result.atlas,
+    fngs_pipeline(result.func, result.t1w, result.atlas,
                   result.atlas_brain, result.atlas_mask, result.lv_mask,
                   result.labels, result.outdir, result.clean, result.stc,
                   result.fmt)

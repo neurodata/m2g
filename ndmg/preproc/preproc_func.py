@@ -27,10 +27,10 @@ import os.path
 import nilearn as nl
 from ndmg.utils import utils as mgu
 from scipy import signal
-from ndmg.stats import alignment_qc as mgqc
+from ndmg.stats import qa_reg_func as mgrq
 
 
-class preproc_fmri(object):
+class preproc_func():
 
     def __init__(self):
         """
@@ -149,13 +149,5 @@ class preproc_fmri(object):
             stc_mri = mri
         self.motion_correct(stc_mri, motion_mri, 0)
 
-        if qcdir is not None:
-            mgu.get_slice(motion_mri, 0, s0)
-            mgqc().check_alignments(mri, motion_mri, s0, qcdir, mri_name,
-                                    title="Motion Correction")
-            mgqc().image_align(motion_mri, s0, qcdir, scanid=mri_name,
-                               refid=mri_name + "_s0")
-
         cmd = "cp " + motion_mri + " " + preproc_mri
         mgu.execute_cmd(cmd)
-        pass

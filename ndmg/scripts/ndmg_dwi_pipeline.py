@@ -24,7 +24,7 @@ from __future__ import print_function
 from argparse import ArgumentParser
 from datetime import datetime
 from subprocess import Popen, PIPE
-from ndmg.stats.qa_regmri import *
+from ndmg.stats.qa_reg import *
 from ndmg.stats.qa_tensor import *
 from ndmg.stats.qa_fibers import *
 import ndmg.utils as mgu
@@ -46,12 +46,12 @@ def ndmg_dwi_pipeline(dwi, bvals, bvecs, mprage, atlas, mask, labels, outdir,
 
     # Create derivative output directories
     dwi_name = mgu.get_filename(dwi)
-    cmd = "mkdir -p {}/reg_dwi {}/tensors {}/fibers {}/graphs \
-           {}/qa/tensors {}/qa/tensors {}/qa/fibers {}/qa/reg_dwi"
+    cmd = "mkdir -p {}/reg/dwi {}/tensors {}/fibers {}/graphs \
+           {}/qa/tensors {}/qa/tensors {}/qa/fibers {}/qa/reg/dwi"
     cmd = cmd.format(*([outdir] * 8))
     mgu.execute_cmd(cmd)
 
-    # Graphs are different because of multiple atlases
+    # Graphs are different because of multiple parcellations
     if isinstance(labels, list):
         label_name = [mgu.get_filename(x) for x in labels]
         for label in label_name:
@@ -61,7 +61,7 @@ def ndmg_dwi_pipeline(dwi, bvals, bvecs, mprage, atlas, mask, labels, outdir,
         mgu.execute_cmd("mkdir -p {}/graphs/".format(outdir, label_name))
 
     # Create derivative output file names
-    aligned_dwi = "{}/reg_dwi/{}_aligned.nii.gz".format(outdir, dwi_name)
+    aligned_dwi = "{}/reg/dwi/{}_aligned.nii.gz".format(outdir, dwi_name)
     tensors = "{}/tensors/{}_tensors.npz".format(outdir, dwi_name)
     fibers = "{}/fibers/{}_fibers.npz".format(outdir, dwi_name)
     print("This pipeline will produce the following derivatives...")
@@ -86,7 +86,7 @@ def ndmg_dwi_pipeline(dwi, bvals, bvecs, mprage, atlas, mask, labels, outdir,
     print("Aligning volumes...")
     mgr().dwi2atlas(dwi1, gtab, mprage, atlas, aligned_dwi, outdir, clean)
     loc0 = np.where(gtab.b0s_mask)[0][0]
-    reg_mri_pngs(aligned_dwi, atlas, "{}/qa/reg_dwi/".format(outdir), loc=loc0)
+    reg_mri_pngs(aligned_dwi, atlas, "{}/qa/reg/dwi/".format(outdir), loc=loc0)
 
     print("Beginning tractography...")
     # Compute tensors and track fiber streamlines
@@ -126,7 +126,6 @@ def ndmg_dwi_pipeline(dwi, bvals, bvecs, mprage, atlas, mask, labels, outdir,
         mgu.execute_cmd(cmd)
 
     print("Complete!")
-    pass
 
 
 def main():

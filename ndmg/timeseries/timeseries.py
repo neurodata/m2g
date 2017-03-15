@@ -22,7 +22,7 @@ import numpy as np
 import nibabel as nb
 import sys
 from ndmg.utils import utils as mgu
-from ndmg.stats import alignment_qc as mgqc
+from ndmg.stats import qa_reg_func as mgrq
 
 
 class timeseries(object):
@@ -106,12 +106,6 @@ class timeseries(object):
             else:
                 # put empty row in if there are no voxels
                 roi_ts[roi_idx, :] = np.zeros((fmridata.shape[3]))
-
-        if qcdir is not None:
-            mgqc().image_align(fmridata, labeldata, qcdir=qcdir,
-                               scanid=scanid, refid=refid)
-            mgqc().plot_timeseries(roi_ts, qcdir=qcdir,
-                                   scanid=scanid, refid=refid)
 
         if roits_file:
             np.savez(roits_file, roi_ts)

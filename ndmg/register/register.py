@@ -25,8 +25,6 @@ import ndmg.utils as mgu
 import nibabel as nb
 import numpy as np
 import nilearn.image as nl
-from ndmg.stats.qa_regmri import *
-from ndmg.stats import alignment_qc as mgqc
 
 
 class register(object):
@@ -214,7 +212,7 @@ class register(object):
                 - the template image to align to.
         """
         goal_res = int(nb.load(template).get_header().get_zooms()[0])
-        cmd = "flirt -in {} -ref {} -out {} -nosearch -applyisoxfm"
+        cmd = "flirt -in {} -ref {} -out {} -nosearch -applyisoxfm {}"
         cmd = cmd.format(base, template, res, goal_res)
         mgu.execute_cmd(cmd, verb=True)
 
@@ -234,7 +232,7 @@ class register(object):
         cmd = "convert_xfm -omat {} -concat {} {}".format(xfmout, xfm1, xfm2)
         mgu.execute_cmd(cmd, verb=True)
 
-    def fmri2atlas(self, func, t1w, atlas, atlas_brain, atlas_mask,
+    def func2atlas(self, func, t1w, atlas, atlas_brain, atlas_mask,
                    aligned_func, aligned_t1w, outdir):
         """
         A function to change coordinates from the subject's
@@ -265,6 +263,7 @@ class register(object):
         atlas_name = mgu.get_filename(atlas)
 
         func2 = mgu.name_tmps(outdir, func_name, "_t1w.nii.gz")
+        temp_aligned = mgu.name_tmps(outdir, func_name, "_noresamp.nii.gz")
         t1w_brain = mgu.name_tmps(outdir, t1w_name, "_brain.nii.gz")
         xfm_func2mpr = mgu.name_tmps(outdir, func_name, "_xfm_func2mpr.mat")
         xfm_mpr2temp = mgu.name_tmps(outdir, func_name, "_xfm_mpr2temp.mat")
@@ -278,17 +277,15 @@ class register(object):
         self.align(t1w_brain, atlas_brain, xfm_mpr2temp, bins=None)
         self.align_nonlinear(t1w, atlas, xfm_mpr2temp, warp_mpr2temp,
                              mask=atlas_mask)
-        self.apply_warp(func, aligned_func, atlas, warp_mpr2temp)
+        self.apply_warp(func, temp_aligned, atlas, warp_mpr2temp)
+        
+        self.resample(temp_aligned, aligned_func, atlas)
+        self.resample_fsl(temp_aligned, aligned_func, atlas)
+
         # apply the warp back to the anatomical image for quality control.
         self.apply_warp(t1w, aligned_t1w, atlas, warp_mpr2temp,
                         mask=atlas_mask)
 
-        # TODO: move this out to main pipeline script
-        # if qcdir is not None:
-        #    mgqc().check_alignments(func, aligned_func, atlas, qcdir,
-        #                            func_name, title="Registration")
-        #    reg_mri_pngs(aligned_func, atlas, qcdir, mean=True)
-        #    reg_mri_pngs(aligned_t1w, atlas, qcdir, dim=3)
 
     def dwi2atlas(self, dwi, gtab, t1w, atlas,
                   aligned_dwi, outdir, clean=False):
