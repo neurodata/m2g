@@ -6,7 +6,7 @@
 | installation | :heavy_check_mark: | :heavy_check_mark: | no obvious problems |
 | dwi demo (`ndmg_demo-dwi`) | :heavy_check_mark: | :heavy_check_mark: | same behaviour as master |
 | func demo (`ndmg_demo-func`) | :x: | :heavy_check_mark: | **(1)** does not run - it appears that you are not passing parameters properly to the pipeline; **(2)** the demo downloads atlases ranging from 1mm-4mm in resolution, which is unnecessary. demo should do bare minimum (i.e. download only the atlases used in the demo); **(3)** demo data should be downloaded from s3 not brainstore, to reduce chance of outages; **(4)** there should be 1 file downloaded for each demo, eventually 1 total, but there were 2 or 3? ***all are now fixed***|
-| func pipeline (`fngs_pipeline`) | :heavy_check_mark: | :heavy_check_mark: | ran on demo data once the demo was fixed. |
+| func pipeline (`fngs_pipeline`) | :x: | :hourglass: | **(1)** ran on demo data once the demo was fixed, but did not produce any roi-wise timeseries or connectomes? |
 | func pipeline (`fngs_pipeline`) | :hourglass: | :hourglass: | have not yet run on abritrary full-sized dataset. |
 | bids pipeline (`ndmg_bids`) | :x: | :heavy_check_mark: | **(1)** should not default to doing neither dwi or func analysis, should be a "choice" input like analysis level (eventually this will be irrelevant as they will be one in the same, but currently is bad); **(2)** currently the `participant_level_func` module is a verbatim copy of the dwi equivalent, with minor changes - meaning, we should only have 1 of these functions; **(3)** logic was convoluted (my own fault) for getting subject lists, etc., so needs to be cleaned and modularized. ***All of these are now done***|
 
