@@ -265,26 +265,29 @@ class register(object):
         func2 = mgu.name_tmps(outdir, func_name, "_t1w.nii.gz")
         temp_aligned = mgu.name_tmps(outdir, func_name, "_noresamp.nii.gz")
         t1w_brain = mgu.name_tmps(outdir, t1w_name, "_brain.nii.gz")
-        xfm_func2mpr = mgu.name_tmps(outdir, func_name, "_xfm_func2mpr.mat")
-        xfm_mpr2temp = mgu.name_tmps(outdir, func_name, "_xfm_mpr2temp.mat")
-        warp_mpr2temp = mgu.name_tmps(outdir, func_name,
-                                      "_warp_mpr2temp.nii.gz")
+        xfm_t1w2temp = mgu.name_tmps(outdir, func_name, "_xfm_t1w2temp.mat")
 
         # Applies skull stripping to T1 volume, then EPI alignment to T1
         mgu.extract_brain(t1w, t1w_brain, ' -B')
         self.align_epi(func, t1w, t1w_brain, func2)
         
-        self.align(t1w_brain, atlas_brain, xfm_mpr2temp, bins=None)
-        self.align_nonlinear(t1w, atlas, xfm_mpr2temp, warp_mpr2temp,
-                             mask=atlas_mask)
-        self.apply_warp(func, temp_aligned, atlas, warp_mpr2temp)
-        
-        self.resample(temp_aligned, aligned_func, atlas)
-        self.resample_fsl(temp_aligned, aligned_func, atlas)
+        self.align(t1w_brain, atlas_brain, xfm_t1w2temp)
+        # Only do FNIRT at 1mm or 2mm
+        if nb.load(atlas).get_data().shape in [(182, 218, 182), (91, 109, 91)]:
+            warp_t1w2temp = mgu.name_tmps(outdir, func_name,
+                                          "_warp_t1w2temp.nii.gz")
 
-        # apply the warp back to the anatomical image for quality control.
-        self.apply_warp(t1w, aligned_t1w, atlas, warp_mpr2temp,
-                        mask=atlas_mask)
+            self.align_nonlinear(t1w, atlas, xfm_t1w2temp, warp_t1w2temp,
+                                 mask=atlas_mask)
+
+            self.apply_warp(func2, temp_aligned, atlas, warp_t1w2temp) 
+            self.apply_warp(t1w, aligned_t1w, atlas, warp_t1w2temp,
+                            mask=atlas_mask)
+        else:
+            self.applyxfm(func2, atlas, xfm_t1w2temp, temp_aligned)
+            self.applyxfm(t1w, atlas, xfm_t1w2temp, aligned_t1w)
+
+        self.resample(temp_aligned, aligned_func, atlas)
 
 
     def dwi2atlas(self, dwi, gtab, t1w, atlas,
