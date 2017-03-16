@@ -31,7 +31,7 @@ import time
 
 
 class graph(object):
-    def __init__(self, N, rois, attr=None, sens="Diffusion MRI"):
+    def __init__(self, N, rois, attr=None, sens="dwi"):
         """
         Initializes the graph with nodes corresponding to the number of ROIs
 
@@ -105,7 +105,6 @@ class graph(object):
 
         edge_list = [(k[0], k[1], v) for k, v in self.edge_dict.items()]
         self.g.add_weighted_edges_from(edge_list)
-        pass
 
     def cor_graph(self, timeseries, attr=None):
         """
@@ -116,8 +115,7 @@ class graph(object):
                 -the timeseries file to extract correlation for.
                           dimensions are [numrois]x[numtimesteps]
         """
-        print ("Estimating correlation matrix for " + str(self.N) +
-              " roi graph...")
+        print("Estimating correlation matrix for {} ROIs...".format(self.N))
         cor = np.corrcoef(timeseries)  # calculate pearson correlation
 
         roilist = np.unique(self.rois)

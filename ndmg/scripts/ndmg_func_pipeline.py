@@ -151,7 +151,7 @@ def fngs_pipeline(func, t1w, atlas, atlas_brain, atlas_mask, lv_mask,
         ts = mgts().roi_timeseries(nuis_func, labels[idx], roi_ts[idx],
                                    qcdir=roidir + "/" + label,
                                    scanid=func_name, refid=label)
-        connectome = mgg(ts.shape[0], labels[idx], sens="Functional")
+        connectome = mgg(ts.shape[0], labels[idx], sens="func")
         connectome.cor_graph(ts)
         connectome.summary()
         connectome.save_graph(connectomes[idx], fmt=fmt)
@@ -159,7 +159,7 @@ def fngs_pipeline(func, t1w, atlas, atlas_brain, atlas_mask, lv_mask,
     print("Execution took: {}".format(datetime.now() - startTime))
 
     if clean:
-        cmd = "rm -r " + outdir + "/tmp/" + func_name + "*"
+        cmd = "rm -r {}/tmp/{}*".format(outdir, func_name)
         mgu.execute_cmd(cmd)
 
     print("Complete!")

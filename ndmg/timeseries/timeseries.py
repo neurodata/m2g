@@ -33,14 +33,14 @@ class timeseries(object):
         """
         pass
 
-    def voxel_timeseries(self, fmri_file, mask_file, voxel_file=None):
+    def voxel_timeseries(self, func_file, mask_file, voxel_file=None):
         """
         Function to extract timeseries for the voxels in the provided
         mask.
         Returns the voxel timeseries as a numpy.ndarray.
 
         **Positional Arguments**
-            fmri_file:
+            func_file:
                 - the path to the fmri 4d volume to extract timeseries.
                 can be string, nifti1image, or ndarray
             mask_file:
@@ -52,20 +52,20 @@ class timeseries(object):
                 Must be string. If None, don't save and just return
                 the voxel timeseries.
         """
-        print "Extracting Voxel Timeseries for " + str(fmri_file) + "..."
+        print "Extracting Voxel Timeseries for " + str(func_file) + "..."
 
         # load the mask data
         maskdata = mgu.get_braindata(mask_file)
         maskbool = (maskdata > 0)  # extract timeseries for any labelled voxels
 
         # load the MRI data
-        fmridata = mgu.get_braindata(fmri_file)
-        voxel_ts = fmridata[maskbool, :]
+        funcdata = mgu.get_braindata(func_file)
+        voxel_ts = funcdata[maskbool, :]
         if voxel_file is not None:
             np.savez(voxel_file, voxel_ts)
         return voxel_ts
 
-    def roi_timeseries(self, fmri_file, label_file, roits_file=None,
+    def roi_timeseries(self, func_file, label_file, roits_file=None,
                        qcdir=None, scanid=None, refid=None):
         """
         Function to extract average timeseries for the voxels in each
@@ -74,7 +74,7 @@ class timeseries(object):
 
         **Positional Arguments**
 
-            fmri_file:
+            func_file:
                 - the path to the 4d volume to extract timeseries
             label_file:
                 - the path to the labelled atlas containing labels
@@ -84,28 +84,21 @@ class timeseries(object):
                 None, don't save and just return the roi_timeseries.
         """
         labeldata = mgu.get_braindata(label_file)
-
         rois = np.sort(np.unique(labeldata[labeldata > 0]))
+        funcdata = mgu.get_braindata(func_file)
 
-        fmridata = mgu.get_braindata(fmri_file)
+        # initialize time series to [numrois]x[numtimepoints]
+        roi_ts = np.zeros((len(rois), funcdata.shape[3]))
 
-        # initialize so resulting ra is [numrois]x[numtimepoints]
-        roi_ts = np.zeros((rois.shape[0], fmridata.shape[3]))
+        for idx, roi in enumerate(rois):
+            roibool = labeldata == roi  # get a bool where our voxels in roi
+            roi_vts = funcdata[roibool, :]
 
-        for roi in rois:
-            roi_idx = np.where(rois == roi)[0][0]  # the index of the roi
-
-            roibool = (labeldata == roi)  # get a bool where our voxels in roi
-            roi_vts = fmridata[roibool, :]
-
-            # take the mean for the voxel timeseries, and ignore voxels of 0
-            # when possible.
+            # take the mean for the voxel timeseries, and ignore voxels with
+            # no variance 
             ts = np.mean(roi_vts[:, roi_vts.std(axis=0) != 0], axis=0)
             if ts.size != 0:
-                roi_ts[roi_idx, :] = ts
-            else:
-                # put empty row in if there are no voxels
-                roi_ts[roi_idx, :] = np.zeros((fmridata.shape[3]))
+                roi_ts[idx, :] = ts
 
         if roits_file:
             np.savez(roits_file, roi_ts)
