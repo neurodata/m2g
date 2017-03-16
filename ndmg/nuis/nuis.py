@@ -18,12 +18,12 @@
 # nuis.py
 # Created by Eric Bridgeford on 2016-06-20-16.
 # Email: ebridge2@jhu.edu
-from ndmg.utils import utils as mgu
 import nibabel as nb
 import numpy as np
-from ndmg.stats import qa_reg_func as mgrq
 import scipy.signal as signal
 from scipy import fftpack as scifft
+from ndmg.utils import utils as mgu
+from ndmg.stats import qa_reg_func as mgrq
 
 class nuis(object):
 
@@ -73,16 +73,16 @@ class nuis(object):
                   components returned will be less than the threshold
                   indicated.
         """
-        print "Extracting Nuisance Components..."
+        print("Extracting Nuisance Components...")
         # normalize the signal to mean center
         masked_ts = self.normalize_signal(masked_ts)
         # singular value decomposition to get the ordered
         # principal components
         U, s, V = np.linalg.svd(masked_ts)
         if n is not None and t is not None:
-            raise ValueError('CompCor: you have passed both a number of \
-                              components and a threshold. You should pass \
-                              one or the other, not both.')
+            raise ValueError("CompCor: you have passed both a number of"
+                             " components and a threshold. You should pass"
+                             " one or the other, not both.")
         elif n is not None:
             # return the top n principal components
             return U[:, 0:n], s
@@ -94,9 +94,8 @@ class nuis(object):
             idx = np.argmin(thresh_var)
             return U[:, 0:idx], s
         else:
-            raise ValueError('CompCor: you have not passed a threshold nor \
-                              a number of components. You must specify one.')
-        pass
+            raise ValueError("CompCor: you have not passed a threshold nor"
+                             " a number of components. You must specify one.")
 
     def freq_filter(self, mri, tr, highpass=0.01, lowpass=None):
         """
@@ -125,12 +124,12 @@ class nuis(object):
 
         # figure out which positions we will exclude
         if highpass is not None:
-            print "filtering below " + str(highpass) + " Hz..."
+            print("Filtering below {} Hz".format(highpass))
             bpra[freq_ra < highpass] = True
         if lowpass is not None:
-            print "filtering above " + str(lowpass) + " Hz..."
+            print("Filtering above {} Hz".format(lowpass))
             bpra[freq_ra > lowpass] = True
-        print "Applying Frequency Filtering..."
+        print("Applying Frequency Filtering...")
         fftd[bpra, :] = 0
         # go back to time domain
         return np.apply_along_axis(np.fft.ifft, 0, fftd)
@@ -146,18 +145,18 @@ class nuis(object):
                 - a numpy ndarray of regressors to
                   regress to.
         """
-        print "GLM with Design Matrix of Dimensions " + str(R.shape) + "..."
+        print("GLM with design matrix of shape: {}".format(R.shape))
         # OLS solution for GLM B = (X^TX)^(-1)X^TY
         coefs = np.linalg.inv(R.T.dot(R)).dot(R.T).dot(data)
         return R.dot(coefs)
 
-    def segment_anat(self, amri, an, basename):
+    def segment_anat(self, anat, an, basename):
         """
         A function to use FSL's FAST to segment an anatomical
         image into GM, WM, and CSF maps.
 
         **Positional Arguments:**
-            - amri:
+            - anat:
                 - an anatomical image.
             - an:
                 - an integer representing the type of the anatomical image.
@@ -169,12 +168,11 @@ class nuis(object):
                   processing. Note that this anticipates a path as well;
                   ie, /path/to/dataset_sub_nuis, with no extension.
         """
-        print "Segmenting Anatomical Image into WM, GM, and CSF..."
+        print("Segmenting Anatomical Image into WM, GM, and CSF...")
         # run FAST, with options -t for the image type and -n to
         # segment into CSF (pve_0), WM (pve_1), GM (pve_2)
-        cmd = " ".join(["fast -t", str(int(an)), "-n 3 -o", basename, amri])
+        cmd = "fast -t {} -n 3 -o {} {}".format(int(an), basename, anat)
         mgu.execute_cmd(cmd)
-        pass
 
     def erode_mask(self, mask_path, eroded_path, v=0):
         """
@@ -191,7 +189,7 @@ class nuis(object):
             - v:
                 - the number of voxels to erode by.
         """
-        print "Eroding Mask..."
+        print("Eroding Mask...")
         mask_img = nb.load(mask_path)
         mask = mask_img.get_data()
         for i in range(0, v):
@@ -236,7 +234,7 @@ class nuis(object):
             - t:
                 - the threshold to consider voxels part of the class.
         """
-        print "Extracting Mask from probability map..."
+        print("Extracting Mask from probability map...")
         prob = nb.load(prob_map)
         prob_dat = prob.get_data()
         mask = (prob_dat > t).astype(int)
