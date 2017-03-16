@@ -49,12 +49,11 @@ class preproc_func():
             corrected_mri (String):
                 - the corrected and aligned fMRI image volume.
         """
-        cmd = "mcflirt -in " + mri + " -out " + corrected_mri +\
-            " -plots -refvol " + str(idx)
+        cmd = "mcflirt -in {} -out {} -plots -refvol {}"
+        cmd = cmd.format(mri, corrected_mri, idx)
         mgu.execute_cmd(cmd)
-        pass
 
-    def slice_time_correct(self, mri, corrected_mri, stc=None):
+    def slice_time_correct(self, func, corrected_func, stc=None):
         """
         Performs slice timing correction of a stack of 3D images.
 
@@ -76,41 +75,20 @@ class preproc_func():
                   this function will throw an error.
         """
         if (stc is not None):
-            if (stc != "None"):
-                cmd = "slicetimer -i " + mri + " -o " + corrected_mri
-                if stc == "down":
-                    cmd += " --down"
-                elif stc == "interleaved":
-                    cmd += " --odd"
-                elif stc == "up":
-                    # do nothing, as this is default behavior
-                    pass
-                elif op.isfile(stc):
-                    cmd += " --tcustom " + str(stc)
-                else:
-                    raise ValueError("You have not passed a valid slice-timing " +
-                                     "option")
-                zooms = nb.load(mri).header.get_zooms()
-                cmd += " -r " + str(zooms[3])
-                mgu.execute_cmd(cmd)
-            else:
-                # do nothing since we don't want to slice time correct
-                print("User Specified No slice timing correction")
+            cmd = "slicetimer -i {} -o {}".format(func, corrected_func)
+            if stc == "down":
+                cmd += " --down"
+            elif stc == "interleaved":
+                cmd += " --odd"
+            elif op.isfile(stc):
+                cmd += " --tcustom {}".format(stc)
+            zooms = nb.load(func).header.get_zooms()
+            cmd += " -r {}".format(zooms[3])
+            mgu.execute_cmd(cmd)
         else:
-            print "No slice timing information provided, so skipping."
-        pass
+            print "Skipping slice timing correction."
 
-    def smooth(self, mri, smoothed_mri):
-        """
-        Smooths a nifti image by applying a fwhm filter of specified diameter.
-
-        *Positional Arguments:*
-            mri: the mri to smooth.
-            smoothed_mri: the smoothed mri path.
-        """
-        pass
-
-    def preprocess(self, mri, preproc_mri, motion_mri,
+    def preprocess(self, func, preproc_func, motion_func,
                    outdir, stc=None, qcdir="", scanid=""):
         """
         A function to preprocess a stack of 3D images.
@@ -138,16 +116,16 @@ class preproc_func():
                 - optional argument required for quality control, is the id
                 of the subject (String).
         """
-        mri_name = mgu.get_filename(mri)
+        func_name = mgu.get_filename(func)
 
-        s0 = mgu.name_tmps(outdir, mri_name, "_0slice.nii.gz")
-        stc_mri = mgu.name_tmps(outdir, mri_name, "_stc.nii.gz")
+        s0 = mgu.name_tmps(outdir, func_name, "_0slice.nii.gz")
+        stc_func = mgu.name_tmps(outdir, func_name, "_stc.nii.gz")
         # TODO EB: decide whether it is advantageous to align to mean image
         if (stc is not None):
-            self.slice_time_correct(mri, stc_mri, stc)
+            self.slice_time_correct(func, stc_func, stc)
         else:
-            stc_mri = mri
-        self.motion_correct(stc_mri, motion_mri, 0)
+            stc_func = func
+        self.motion_correct(stc_func, motion_func, 0)
 
-        cmd = "cp " + motion_mri + " " + preproc_mri
+        cmd = "cp {} {}".format(motion_func, preproc_func)
         mgu.execute_cmd(cmd)

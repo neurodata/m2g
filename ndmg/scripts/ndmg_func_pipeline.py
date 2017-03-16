@@ -129,22 +129,13 @@ def fngs_pipeline(func, t1w, atlas, atlas_brain, atlas_mask, lv_mask,
 
     # Align fMRI volumes to Atlas
     print "Preprocessing volumes..."
-    mgp().preprocess(func, preproc_func, motion_func, outdir, qcdir=mcdir, stc=stc)
-    # mgu.get_slice(motion_mri, 0, s0)
-    # mgrq().check_alignments(mri, motion_mri, s0, qcdir, mri_name,
-    #                         title="Motion Correction")
-    # mgrq().image_align(motion_mri, s0, qcdir, scanid=mri_name,
-    #                    refid=mri_name + "_s0")
-
+    mgp().preprocess(func, preproc_func, motion_func, outdir, stc=stc)
+    reg_mri_pngs(motion_func, atlas, mcdir, loc=0)
     
     print "Aligning volumes..."
     mgr().func2atlas(preproc_func, t1w, atlas, atlas_brain, atlas_mask,
                      aligned_func, aligned_t1w, outdir)
     reg_mri_pngs(aligned_func, atlas, regdir, loc=0)
-    # mgqc().check_alignments(func, aligned_func, atlas, qcdir,
-    #                         func_name, title="Registration")
-    # reg_mri_pngs(aligned_func, atlas, qcdir, mean=True)
-    # reg_mri_pngs(aligned_t1w, atlas, qcdir, dim=3)
 
     print "Correcting Nuisance Variables..."
     mgn().nuis_correct(aligned_func, nuis_func, lv_mask, trim=2)
@@ -157,16 +148,9 @@ def fngs_pipeline(func, t1w, atlas, atlas_brain, atlas_mask, lv_mask,
 
     for idx, label in enumerate(label_name):
         print "Extracting ROI timeseries for " + label + " parcellation..."
-        try:
-            ts = mgts().roi_timeseries(nuis_func, labels[idx], roi_ts[idx],
-                                       qcdir=roidir + "/" + label,
-                                       scanid=func_name, refid=label)
-            # mgrq().plot_timeseries(roi_ts, qcdir=qcdir,
-            #                        scanid=scanid, refid=refid)
-            # mgrq().image_align(atlas_brain, labels[idx], roidir + "/" + label,
-            #                    scanid=atlas_name, refid=label)
-        except OSError as err:
-            print(err)
+        ts = mgts().roi_timeseries(nuis_func, labels[idx], roi_ts[idx],
+                                   qcdir=roidir + "/" + label,
+                                   scanid=func_name, refid=label)
         connectome = mgg(ts.shape[0], labels[idx], sens="Functional")
         connectome.cor_graph(ts)
         connectome.summary()
@@ -182,31 +166,45 @@ def fngs_pipeline(func, t1w, atlas, atlas_brain, atlas_mask, lv_mask,
 
 
 def main():
-    parser = ArgumentParser(description="This is an end-to-end connectome \
-                            estimation pipeline from sMRI and DTI images")
+    parser = ArgumentParser(description="This is an end-to-end connectome"
+                            " estimation pipeline from sMRI and DTI images")
     parser.add_argument("func", action="store", help="Nifti fMRI stack")
     parser.add_argument("t1w", action="store", help="Nifti aMRI")
     parser.add_argument("atlas", action="store", help="Nifti T1 MRI atlas")
-    parser.add_argument("atlas_brain", action="store", help="Nifti T1 MRI \
-                        brain only atlas")
-    parser.add_argument("atlas_mask", action="store", help="Nifti binary mask \
-                        of brain space in the atlas")
-    parser.add_argument("lv_mask", action="store", help="Nifti binary mask of \
-                        lateral ventricles in atlas space.")
-    parser.add_argument("outdir", action="store", help="Path to which \
-                        derivatives will be stored")
-    parser.add_argument("labels", action="store", nargs="*", help="Nifti \
-                        labels of regions of interest in atlas space")
+    parser.add_argument("atlas_brain", action="store", help="Nifti T1 MRI"
+                        " brain only atlas")
+    parser.add_argument("atlas_mask", action="store", help="Nifti binary mask"
+                        " of brain space in the atlas")
+    parser.add_argument("lv_mask", action="store", help="Nifti binary mask of"
+                        " lateral ventricles in atlas space.")
+    parser.add_argument("outdir", action="store", help="Path to which"
+                        " derivatives will be stored")
+    parser.add_argument("stc", action="store", help="A file or setting for"
+                        " slice timing correction. If file option selected,"
+                        " must provide path as well.",
+                        choices=["none", "interleaved", "up", "down", "file"])
+    parser.add_argument("labels", action="store", nargs="*", help="Nifti"
+                        " labels of regions of interest in atlas space")
+    parser.add_argument("-s", "--stc_file", action="store",
+                        help="File for STC.")
     parser.add_argument("-c", "--clean", action="store_true", default=False,
                         help="Whether or not to delete intemediates")
-    parser.add_argument("-s", "--stc", action="store", help="A file for slice \
-                        timing correction. Options are a TR sequence file \
-                        (where \ each line is the shift in TRs), \
-                        up (ie, bottom to top), down (ie, top to bottom), \
-                        and interleaved.", default=None)
     parser.add_argument("-f", "--fmt", action="store", default='gpickle',
                         help="Determines connectome output format")
     result = parser.parse_args()
+
+    result.stc = None if result.stc == "none" else result.stc
+
+    if result.stc == "file":
+        if result.stc_file is None:
+            sys.exit("Selected 'file' option for slice timing correction but"
+                      " did not pass a file. Please select another option or"
+                      " provide a file.")
+        else:
+            if not op.isfile(result.stc_file):
+                sys.exit("Invalid file for STC provided.")
+            else:
+                result.stc = result.stc_file
 
     # Create output directory
     print "Creating output directory: {}".format(result.outdir)
