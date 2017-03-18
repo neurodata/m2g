@@ -39,7 +39,7 @@ class preproc_func():
         """
         pass
 
-    def motion_correct(self, mri, corrected_mri, idx):
+    def motion_correct(self, mri, corrected_mri, idx=None):
         """
         Performs motion correction of a stack of 3D images.
 
@@ -48,9 +48,16 @@ class preproc_func():
                  -the 4d (fMRI) image volume as a nifti file.
             corrected_mri (String):
                 - the corrected and aligned fMRI image volume.
+            idx:
+                - the index to use as a reference for self
+                  alignment. Uses the meanvolume if not specified
         """
-        cmd = "mcflirt -in {} -out {} -plots -refvol {}"
-        cmd = cmd.format(mri, corrected_mri, idx)
+        if idx is None:
+            cmd = "mcflirt -in {} -out {} -plots -meanvol"
+            cmd = cmd.format(mri, corrected_mri)
+        else:
+            cmd = "mcflirt -in {} -out {} -plots -refvol {}"
+            cmd = cmd.format(mri, corrected_mri, idx)
         mgu.execute_cmd(cmd)
 
     def slice_time_correct(self, func, corrected_func, stc=None):
