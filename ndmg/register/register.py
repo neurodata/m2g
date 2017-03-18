@@ -107,7 +107,9 @@ class register(object):
                 - a mask in which voxels will be extracted
                 during nonlinear alignment.
         """
-        cmd = "fnirt --in={} --aff={} --cout={} --ref={} --subsamp=4,2,1,1"
+        # if we are doing fnirt, use predefined fnirt config file
+        # since the config is most robust
+        cmd = "fnirt --in={} --aff={} --cout={} --ref={} --config=T1_2_MNI152_2mm"
         cmd = cmd.format(inp, xfm, warp, ref)
         if mask is not None:
             cmd += " --refmask={}".format(mask)
@@ -268,7 +270,7 @@ class register(object):
         xfm_t1w2temp = mgu.name_tmps(outdir, func_name, "_xfm_t1w2temp.mat")
 
         # Applies skull stripping to T1 volume, then EPI alignment to T1
-        mgu.extract_brain(t1w, t1w_brain, ' -B')
+        mgu.extract_brain(t1w, t1w_brain)
         self.align_epi(func, t1w, t1w_brain, func2)
         
         self.align(t1w_brain, atlas_brain, xfm_t1w2temp)
