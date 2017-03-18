@@ -168,7 +168,7 @@ class utils():
             braindata = brain.get_data()
         return braindata
 
-    def extract_brain(self, inp, out, opts=""):
+    def extract_brain(self, inp, out, opts="-B"):
         """
         A function to extract the brain from an image using FSL's BET.
 

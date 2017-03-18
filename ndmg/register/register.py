@@ -103,8 +103,9 @@ class register(object):
                 - a mask in which voxels will be extracted
                 during nonlinear alignment.
         """
+        # run FNIRT with MNI config file
         cmd = "fnirt --in=" + inp + " --aff=" + xfm + " --cout=" +\
-              warp + " --ref=" + ref + " --subsamp=4,2,1,1"
+              warp + " --ref=" + ref + " --config=T1_2_MNI152_2mm"
         if mask is not None:
             cmd += " --refmask=" + mask
         status = mgu().execute_cmd(cmd)
