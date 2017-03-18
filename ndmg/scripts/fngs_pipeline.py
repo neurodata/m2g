@@ -35,7 +35,7 @@ from ndmg.nuis import nuis as mgn
 from ndmg.stats import alignment_qc as mggqc
 
 
-def fngs_pipeline(fmri, struct, an, atlas, atlas_brain, atlas_mask, lv_mask,
+def fngs_pipeline(fmri, struct, atlas, atlas_brain, atlas_mask, lv_mask,
                   labels, outdir, clean=False, stc=None, fmt='gpickle'):
     """
     Analyzes fMRI images and produces subject-specific derivatives.
@@ -45,9 +45,6 @@ def fngs_pipeline(fmri, struct, an, atlas, atlas_brain, atlas_mask, lv_mask,
             - the path to a 4D (fMRI) image.
         struct:
             - the path to a 3d (anatomical) image.
-        an:
-            - an integer indicating the type of anatomical image.
-              (1 for T1w, 2 for T2w, 3 for PD).
         atlas:
             - the path to a reference atlas.
         atlas_brain:
@@ -181,8 +178,6 @@ def main():
                             estimation pipeline from sMRI and DTI images")
     parser.add_argument("fmri", action="store", help="Nifti fMRI stack")
     parser.add_argument("struct", action="store", help="Nifti aMRI")
-    parser.add_argument("an", action="store", help="anatomical image type. \
-                        1 for T1w (default), 2 for T2w, 3 for PD.", default=1)
     parser.add_argument("atlas", action="store", help="Nifti T1 MRI atlas")
     parser.add_argument("atlas_brain", action="store", help="Nifti T1 MRI \
                         brain only atlas")
@@ -211,7 +206,7 @@ def main():
     print "Creating output temp directory: " + result.outdir + "/tmp"
     mgu().execute_cmd(cmd)
 
-    fngs_pipeline(result.fmri, result.struct, int(result.an), result.atlas,
+    fngs_pipeline(result.fmri, result.struct, result.atlas,
                   result.atlas_brain, result.atlas_mask, result.lv_mask,
                   result.labels, result.outdir, result.clean, result.stc,
                   result.fmt)
