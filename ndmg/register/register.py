@@ -274,7 +274,7 @@ class register(object):
         self.align_epi(func, t1w, t1w_brain, func2)
         
         self.align(t1w_brain, atlas_brain, xfm_t1w2temp)
-        # Only do FNIRT at 1mm or 2mm
+        # Only do FNIRT at 1mm or 2mm with something in MNI space
         if nb.load(atlas).get_data().shape in [(182, 218, 182), (91, 109, 91)]:
             warp_t1w2temp = mgu.name_tmps(outdir, func_name,
                                           "_warp_t1w2temp.nii.gz")
@@ -282,7 +282,7 @@ class register(object):
             self.align_nonlinear(t1w, atlas, xfm_t1w2temp, warp_t1w2temp,
                                  mask=atlas_mask)
 
-            self.apply_warp(func2, temp_aligned, atlas, warp_t1w2temp) 
+            self.apply_warp(func2, temp_aligned, atlas, warp_t1w2temp)
             self.apply_warp(t1w, aligned_t1w, atlas, warp_t1w2temp,
                             mask=atlas_mask)
         else:
