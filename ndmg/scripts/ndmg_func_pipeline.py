@@ -76,15 +76,14 @@ def fngs_pipeline(func, t1w, atlas, atlas_brain, atlas_mask, lv_mask,
     qadir = "{}/qa/{}".format(outdir, func_name)
     prepdir = "{}/reg/func/preproc".format(qadir)
     regdir = "{}/reg/func/align".format(qadir)
-    finaldir = "{}/reg/func/final".format(qadir)
     roidir = "{}/ts_roi".format(qadir)
     voxeldir = "{}/ts_voxel".format(qadir)
     nuisdir = "{}/nuis".format(qadir)
 
-    cmd = "mkdir -p {} {} {} {} {} {} {} {}/reg/func/align {}/reg/func/preproc \
+    cmd = "mkdir -p {} {} {} {} {} {} {}/reg/func/align {}/reg/func/preproc \
            {}/reg/func/mc {}/ts_voxel {}/ts_roi {}/reg/t1w {}/tmp \
            {}/connectomes/ {}/nuis"
-    cmd = cmd.format(qadir, prepdir, regdir, finaldir, roidir, voxeldir, nuisdir,
+    cmd = cmd.format(qadir, prepdir, regdir, roidir, voxeldir, nuisdir,
                      *([outdir] * 9))
     mgu.execute_cmd(cmd)
 

@@ -213,8 +213,25 @@ def registration_qa(aligned_func, aligned_anat, atlas, qcdir=None):
     """
     cmd = "mkdir -p {}".format(qcdir)
     mgu.execute_cmd(cmd)
-    reg_mri_pngs(aligned_func, atlas, qcdir, loc=0)
-    reg_mri_pngs(aligned_anat, atlas, qcdir, loc=0, dim=3)
+    reg_mri_pngs(aligned_func, atlas, qcdir, mean=True)
+    reg_mri_pngs(aligned_anat, atlas, qcdir, dim=3)
+
+    scanid = mgu.get_filename(aligned_func)
+    voxel = nb.load(voxel_func).get_data()
+    mean_ts = voxel.mean(axis=1)
+    std_ts = voxel.std(axis=1)
+
+    np.seterr(divide='ignore')
+    snr_ts = np.divide(mean_ts, std_ts)
+
+    plots = {}
+    plots["mean"] = plot_brain(mean_ts)
+    plots["std"] = plot_brain(std_ts)
+    plots["snr"] = plot_brain(snr_ts)
+
+    for plotname, plot in plots.iteritems():
+        fname = "{}/{}_{}.png".format(qcdir, scanid, plotname)
+        plot.savefig(fname, format='png')
     return
 
 
@@ -265,22 +282,5 @@ def voxel_ts_qa(timeseries, voxel_func, atlas_mask, qcdir=None):
     cmd = "mkdir -p {}".format(qcdir)
     mgu.execute_cmd(cmd)
  
-    scanid = mgu.get_filename(voxel_func)
-    voxel = nb.load(voxel_func).get_data()
-    mean_ts = voxel.mean(axis=1)
-    std_ts = voxel.std(axis=1)
-
-    np.seterr(divide='ignore')
-    snr_ts = np.divide(mean_ts, std_ts)
-
-    plots = {}
-    plots["mean"] = plot_brain(mean_ts)
-    plots["std"] = plot_brain(std_ts)
-    plots["snr"] = plot_brain(snr_ts)
-
-    for plotname, plot in plots.iteritems():
-        fname = "{}/{}_{}.png".format(qcdir, scanid, plotname)
-        plot.savefig(fname, format='png')
-
     reg_mri_pngs(voxel_func, atlas_mask, qcdir, loc=0)
     return

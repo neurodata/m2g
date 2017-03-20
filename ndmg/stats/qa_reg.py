@@ -40,7 +40,6 @@ def reg_mri_pngs(mri, atlas, outdir, loc=0, mean=False, dim=4):
     outdir: directory where output png file is saved
     fname: name of output file WITHOUT FULL PATH. Path provided in outdir.
     """
-
     atlas_data = nb.load(atlas).get_data()
     mri_data = nb.load(mri).get_data()
     if dim==4:  # 4d data, so we need to reduce a dimension
