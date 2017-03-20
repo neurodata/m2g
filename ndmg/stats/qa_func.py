@@ -279,7 +279,7 @@ def voxel_ts_qa(timeseries, voxel_func, atlas_mask, qcdir=None):
     plots["snr"] = plot_brain(snr_ts)
 
     for plotname, plot in plots.iteritems():
-        fname = "{}/{}.png".format(qcdir, plotname)
+        fname = "{}/{}_{}.png".format(qcdir, scanid, plotname)
         plot.savefig(fname, format='png')
 
     reg_mri_pngs(voxel_func, atlas_mask, qcdir, loc=0)
