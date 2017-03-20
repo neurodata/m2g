@@ -213,13 +213,16 @@ def registration_qa(aligned_func, aligned_anat, atlas, qcdir=None):
     """
     cmd = "mkdir -p {}".format(qcdir)
     mgu.execute_cmd(cmd)
+    print(aligned_func)
+    print(atlas)
+    print(qcdir)
     reg_mri_pngs(aligned_func, atlas, qcdir, mean=True)
     reg_mri_pngs(aligned_anat, atlas, qcdir, dim=3)
 
     scanid = mgu.get_filename(aligned_func)
-    voxel = nb.load(voxel_func).get_data()
-    mean_ts = voxel.mean(axis=1)
-    std_ts = voxel.std(axis=1)
+    voxel = nb.load(aligned_func).get_data()
+    mean_ts = voxel.mean(axis=3)
+    std_ts = voxel.std(axis=3)
 
     np.seterr(divide='ignore')
     snr_ts = np.divide(mean_ts, std_ts)

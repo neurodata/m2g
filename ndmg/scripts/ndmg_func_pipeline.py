@@ -134,7 +134,7 @@ def fngs_pipeline(func, t1w, atlas, atlas_brain, atlas_mask, lv_mask,
     print "Aligning volumes..."
     mgr().func2atlas(preproc_func, t1w, atlas, atlas_brain, atlas_mask,
                      aligned_func, aligned_t1w, outdir)
-    mgrf.registration_qa(aligned_func, aligned_t1w, atlas, regdir)    
+    mgrf.registration_qa(aligned_func, aligned_t1w, atlas, qcdir=regdir)
 
     print "Correcting Nuisance Variables..."
     nuis = mgn().nuis_correct(aligned_func, nuis_func, lv_mask, trim=2)
