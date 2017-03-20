@@ -339,4 +339,4 @@ class nuis(object):
                              affine=fmri_im.affine)
         # save the corrected image
         nb.save(img, nuisance_mri)
-        pass
+        return fmri_dat

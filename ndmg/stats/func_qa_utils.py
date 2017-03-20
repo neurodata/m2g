@@ -32,6 +32,7 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import plotly as py
 import plotly.offline as offline
+from ndmg.timeseries import timeseries as mgts
 
 
 class func_qa_utils(object):
@@ -421,10 +422,10 @@ class func_qa_utils(object):
             - qcdir:
                 - the directory to place quality control figures.
         """
-        scan = get_filename(timeseries)
-        path = qcdir + "/" + scan
-        fname_ts = path + "_timeseries.html"
-        fname_corr = path + "_corr.png"
+        scan = mgu.get_filename(timeseries)
+        path = "{}/{}".format(qcdir, scan)
+        fname_ts = "{}_timeseries.html".format(path)
+        fname_corr = "{}_corr.png".format(path)
 
         timeseries = mgts().load_timeseries(timeseries)
 
@@ -434,7 +435,7 @@ class func_qa_utils(object):
                             x=range(0, timeseries.T.shape[0]),
                             y=timeseries.T[:, d], mode='lines'))
 
-        layout = dict(title=" ".join([scanid, refid, "ROI Timeseries"]),
+        layout = dict(title=" ".join([scan, "ROI Timeseries"]),
                       xaxis=dict(title='Time Point (TRs)',
                                  range=[0, timeseries.T.shape[0]]),
                       yaxis=dict(title='Intensity'),
@@ -448,7 +449,7 @@ class func_qa_utils(object):
         cax = axcorr.imshow(np.corrcoef(timeseries), interpolation='nearest',
                             cmap=plt.cm.ocean)
         fcorr.colorbar(cax, fraction=0.046, pad=0.04)
-        axcorr.set_title(" ".join([scanid, refid, "Corr"]))
+        axcorr.set_title(" ".join([scan, "Corr"]))
         axcorr.set_xlabel('ROI')
         axcorr.set_ylabel('ROI')
 

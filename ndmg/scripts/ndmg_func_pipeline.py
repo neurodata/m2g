@@ -81,10 +81,10 @@ def fngs_pipeline(func, t1w, atlas, atlas_brain, atlas_mask, lv_mask,
     voxeldir = "{}/ts_voxel".format(qadir)
     nuisdir = "{}/nuis".format(qadir)
 
-    cmd = "mkdir -p {} {} {} {} {} {} {}/reg/func/align {}/reg/func/preproc \
+    cmd = "mkdir -p {} {} {} {} {} {} {} {}/reg/func/align {}/reg/func/preproc \
            {}/reg/func/mc {}/ts_voxel {}/ts_roi {}/reg/t1w {}/tmp \
            {}/connectomes/ {}/nuis"
-    cmd = cmd.format(qadir, mcdir, regdir, finaldir, roidir, nuisdir,
+    cmd = cmd.format(qadir, prepdir, regdir, finaldir, roidir, voxeldir, nuisdir,
                      *([outdir] * 9))
     mgu.execute_cmd(cmd)
 
@@ -103,10 +103,10 @@ def fngs_pipeline(func, t1w, atlas, atlas_brain, atlas_mask, lv_mask,
         mgu.execute_cmd(cmd)
 
     # Create derivative output file names
-    preproc_func = "{}/tmp/{}_preproc.nii.gz".format(tmpdir, func_name)
+    preproc_func = "{}/tmp/{}_preproc.nii.gz".format(outdir, func_name)
     aligned_func = "{}/reg/func/align/{}_aligned.nii.gz".format(outdir, func_name)
     aligned_t1w = "{}/reg/t1w/{}_aligned.nii.gz".format(outdir, t1w_name)
-    motion_func = "{}/tmp/{}_mc.nii.gz".format(tmpdir, func_name)
+    motion_func = "{}/tmp/{}_mc.nii.gz".format(outdir, func_name)
     nuis_func = "{}/nuis/{}_nuis.nii.gz".format(outdir, func_name)
     voxel_ts = "{}/ts_voxel/{}_voxel.npz".format(outdir, func_name)
 
@@ -117,15 +117,15 @@ def fngs_pipeline(func, t1w, atlas, atlas_brain, atlas_mask, lv_mask,
     print("Voxel timecourse in atlas space: {}".format(voxel_ts))
 
     # Again, connectomes are different
-    connectomes = ["{}/connectomes/{}/{}_{}.fmt".format(outdir, x, func_name,
+    connectomes = ["{}/connectomes/{}/{}_{}.{}".format(outdir, x, func_name,
                                                         x, fmt)
                    for x in label_name]
-    roi_ts = ["{}/ts_roi/{}/{}_{}.npz".format(outdir, x, func_name, x)
+    roi_ts = ["{}/ts_roi/{}/{}_{}.npy".format(outdir, x, func_name, x)
               for x in label_name] 
     print("ROI timeseries downsampled to given labels: " +
-          ", ".join([x for x in connectomes]))
-    print("Connectomes downsampled to given labels: " +
           ", ".join([x for x in roi_ts]))
+    print("Connectomes downsampled to given labels: " +
+          ", ".join([x for x in connectomes]))
 
     # Align fMRI volumes to Atlas
     print "Preprocessing volumes..."
@@ -139,7 +139,7 @@ def fngs_pipeline(func, t1w, atlas, atlas_brain, atlas_mask, lv_mask,
 
     print "Correcting Nuisance Variables..."
     nuis = mgn().nuis_correct(aligned_func, nuis_func, lv_mask, trim=2)
-    mgrf.nuisance_qa(nuis_brain, nuis_func, aligned_func, qcdir=nuisdir)
+    mgrf.nuisance_qa(nuis, nuis_func, aligned_func, qcdir=nuisdir)
 
     print "Extracting Voxelwise Timeseries..."
     voxel = mgts().voxel_timeseries(nuis_func, atlas_mask, voxel_ts)

@@ -49,14 +49,21 @@ def preproc_qa(mc_brain, qcdir=None):
         - qcdir: the quality control directory.
     """
     cmd = "mkdir -p {}".format(qcdir)
-    mgu().execute_cmd(cmd)
+    mgu.execute_cmd(cmd)
     scanid = mgu.get_filename(mc_brain)
 
-    fnames = {}
-    fnames['trans'] = scanid + "_trans.html"
-    fnames['rot'] = scanid + "_rot.html" 
+    mc_im = nb.load(mc_brain)
+    mc_dat = mc_im.get_data()
 
-    par_file = mc_brain + ".par"
+    mcfig = plot_brain(mc_dat.mean(axis=3))
+    nvols = mc_dat.shape[3]
+
+    fnames = {}
+    fnames['trans'] = "{}_trans.html".format(scanid)
+    fnames['rot'] = "{}_rot.html".format(scanid) 
+
+    par_file = "{}.par".format(mc_brain)
+    mc_file = "{}/{}_stats.txt".format(qcdir, scanid)
 
     abs_pos = np.zeros((nvols, 6))
     rel_pos = np.zeros((nvols, 6))
@@ -85,9 +92,8 @@ def preproc_qa(mc_brain, qcdir=None):
                   yaxis=dict(title='Movement (mm)'))
     fmc = dict(data=fmc_list, layout=layout)
 
-    appended_path = scanid + "_disp.html"
-    path = qcdir + "/" + appended_path
-    offline.plot(fmc, filename=path, auto_open=False)
+    disp_path = "{}/{}_disp.html".format(qcdir, scanid)
+    offline.plot(fmc, filename=disp_path, auto_open=False)
     ftrans_list = []
     ftrans_list.append(py.graph_objs.Scatter(x=range(0, nvols),
                                              y=abs_pos[:, 3],
@@ -102,9 +108,8 @@ def preproc_qa(mc_brain, qcdir=None):
                   xaxis=dict(title='Timepoint', range=[0, nvols]),
                   yaxis=dict(title='Translation (mm)'))
     ftrans = dict(data=ftrans_list, layout=layout)
-    appended_path = scanid + "_trans.html"
-    path = qcdir + "/" + appended_path
-    offline.plot(ftrans, filename=path, auto_open=False)
+    trans_path = "{}/{}_trans.html".format(qcdir, scanid)
+    offline.plot(ftrans, filename=trans_path, auto_open=False)
 
     frot_list = []
     frot_list.append(py.graph_objs.Scatter(x=range(0, nvols),
@@ -120,9 +125,8 @@ def preproc_qa(mc_brain, qcdir=None):
                   xaxis=dict(title='Timepoint', range=[0, nvols]),
                   yaxis=dict(title='Rotation (rad)'))
     frot = dict(data=frot_list, layout=layout)
-    appended_path = scanid + "_rot.html"
-    path = qcdir + "/" + appended_path
-    offline.plot(frot, filename=path, auto_open=False)
+    rot_path ="{}/{}_rot.html".format(qcdir, scanid)
+    offline.plot(frot, filename=rot_path, auto_open=False)
 
     # Motion Statistics
     mean_abs = np.mean(abs_pos, axis=0)  # column wise means per param
@@ -131,6 +135,8 @@ def preproc_qa(mc_brain, qcdir=None):
     mean_rel = np.mean(rel_pos, axis=0)
     std_rel = np.std(rel_pos, axis=0)
     max_rel = np.max(np.abs(rel_pos), axis=0)
+
+    fstat = open(mc_file, 'w')
     fstat.write("Motion Statistics\n")
 
     absrel = ["absolute", "relative"]
@@ -156,7 +162,6 @@ def preproc_qa(mc_brain, qcdir=None):
                    "Relative Rotational Statistics>>\n"]
     x = 0
 
-    fstat = open(qcdir + "/" + scanid + "_mc.txt", 'w')
     for motiontype in transrot:
         for measurement in absrel:
             fstat.write(headinglist[x])
@@ -209,11 +214,11 @@ def registration_qa(aligned_func, aligned_anat, atlas, qcdir=None):
     cmd = "mkdir -p {}".format(qcdir)
     mgu.execute_cmd(cmd)
     reg_mri_pngs(aligned_func, atlas, qcdir, loc=0)
-    reg_mri_pngs(aligned_anat, atlas, qcdir, loc=0)
+    reg_mri_pngs(aligned_anat, atlas, qcdir, loc=0, dim=3)
     return
 
 
-def nuisance_qa(nuis_brain, prenuis_brain, qcdir=None):
+def nuisance_qa(nuis_ts, nuis_brain, prenuis_brain, qcdir=None):
     """
     A function to assess the quality of nuisance correction.
 
@@ -239,8 +244,11 @@ def roi_ts_qa(timeseries, func, label, qcdir=None):
             downsampled.
         - qcdir: the quality control directory to place outputs.
     """
+    cmd = "mkdir -p {}".format(qcdir)
+    mgu.execute_cmd(cmd)
+ 
     reg_mri_pngs(func, label, qcdir, loc=0)
-    fqc_utils().plot_timeseries(timeseries)
+    fqc_utils().plot_timeseries(timeseries, qcdir=qcdir)
     return
 
 def voxel_ts_qa(timeseries, voxel_func, atlas_mask, qcdir=None):
@@ -254,13 +262,16 @@ def voxel_ts_qa(timeseries, voxel_func, atlas_mask, qcdir=None):
           voxel timeseries was extracted.
         - qcdir: the directory to place qc in.
     """
+    cmd = "mkdir -p {}".format(qcdir)
+    mgu.execute_cmd(cmd)
+ 
     scanid = mgu.get_filename(voxel_func)
     voxel = nb.load(voxel_func).get_data()
     mean_ts = voxel.mean(axis=1)
     std_ts = voxel.std(axis=1)
 
     np.seterr(divide='ignore')
-    snr_ts = np.divide(mean_ts/std_ts)
+    snr_ts = np.divide(mean_ts, std_ts)
 
     plots = {}
     plots["mean"] = plot_brain(mean_ts)
