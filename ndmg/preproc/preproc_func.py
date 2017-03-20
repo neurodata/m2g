@@ -27,7 +27,6 @@ import os.path
 import nilearn as nl
 from ndmg.utils import utils as mgu
 from scipy import signal
-from ndmg.stats import qa_reg_func as mgrq
 
 
 class preproc_func():

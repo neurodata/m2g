@@ -22,7 +22,6 @@ import numpy as np
 import nibabel as nb
 import sys
 from ndmg.utils import utils as mgu
-from ndmg.stats import qa_reg_func as mgrq
 
 
 class timeseries(object):
@@ -65,8 +64,7 @@ class timeseries(object):
             np.savez(voxel_file, voxel_ts)
         return voxel_ts
 
-    def roi_timeseries(self, func_file, label_file, roits_file=None,
-                       qcdir=None, scanid=None, refid=None):
+    def roi_timeseries(self, func_file, label_file, roits_file=None):
         """
         Function to extract average timeseries for the voxels in each
         roi of the labelled atlas.

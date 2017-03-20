@@ -23,7 +23,7 @@ import numpy as np
 import scipy.signal as signal
 from scipy import fftpack as scifft
 from ndmg.utils import utils as mgu
-from ndmg.stats import qa_reg_func as mgrq
+
 
 class nuis(object):
 
