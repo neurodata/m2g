@@ -73,7 +73,7 @@ def fngs_pipeline(func, t1w, atlas, atlas_brain, atlas_mask, lv_mask,
     t1w_name = mgu.get_filename(t1w)
     atlas_name = mgu.get_filename(atlas)
 
-    qadir = "{}/qa".format(outdir)
+    qadir = "{}/qa/{}".format(outdir, func_name)
     prepdir = "{}/reg/func/preproc".format(qadir)
     regdir = "{}/reg/func/align".format(qadir)
     finaldir = "{}/reg/func/final".format(qadir)
