@@ -34,7 +34,7 @@ import plotly as py
 import plotly.offline as offline
 
 
-class qa_reg_func(object):
+class func_qa_utils(object):
     def __init__(self):
         """
         Enables quality control of fMRI and DTI processing pipelines.
@@ -409,8 +409,7 @@ class qa_reg_func(object):
         # return the figpath so we can save it back to the html
         return fname
 
-    def plot_timeseries(self, timeseries, qcdir=None,
-                        scanid=None, refid=None):
+    def plot_timeseries(self, timeseries, qcdir=None):
         """
         A function to generate a plot of the timeseries
         of the particular ROI. Makes sure nothing nonsensical is
@@ -418,24 +417,23 @@ class qa_reg_func(object):
 
         **Positional Arguments:**
             - timeseries:
-                - the timeseries.
+                - the path to a roi timeseries.
             - qcdir:
                 - the directory to place quality control figures.
-            - scanid:
-                - the scan id of the subject.
-            - refid:
-                - the reference of the atlas we are plotting timeseries
-                  for.
         """
-        path = qcdir + "/" + scanid + "_" + refid
+        scan = get_filename(timeseries)
+        path = qcdir + "/" + scan
         fname_ts = path + "_timeseries.html"
         fname_corr = path + "_corr.png"
+
+        timeseries = mgts().load_timeseries(timeseries)
 
         fts_list = []
         for d in range(0, timeseries.T.shape[1]):
             fts_list.append(py.graph_objs.Scatter(
                             x=range(0, timeseries.T.shape[0]),
                             y=timeseries.T[:, d], mode='lines'))
+
         layout = dict(title=" ".join([scanid, refid, "ROI Timeseries"]),
                       xaxis=dict(title='Time Point (TRs)',
                                  range=[0, timeseries.T.shape[0]]),
@@ -447,7 +445,6 @@ class qa_reg_func(object):
 
         fcorr = plt.figure()
         axcorr = fcorr.add_subplot(111)
-
         cax = axcorr.imshow(np.corrcoef(timeseries), interpolation='nearest',
                             cmap=plt.cm.ocean)
         fcorr.colorbar(cax, fraction=0.046, pad=0.04)

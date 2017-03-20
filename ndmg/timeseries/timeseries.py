@@ -101,5 +101,17 @@ class timeseries(object):
                 roi_ts[idx, :] = ts
 
         if roits_file:
-            np.savez(roits_file, roi_ts)
+            np.save(roits_file, roi_ts)
         return roi_ts
+
+    def load_timeseries(self, timeseries_file):
+        """
+        A function to load timeseries data. Exists to standardize
+        formatting in case changes are made with how timeseries are
+        saved in future versions.
+
+        **Positional Arguments**
+            timeseries_file: the file to load timeseries data from.
+        """
+        timeseries = np.load(timeseries_file)
+        return timeseries
