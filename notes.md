@@ -4,6 +4,7 @@
 ### integrating func pipeline
 
 Engineering estimate for rolling fMRI pipeline into the package at a sufficient level for including it in the publication is **2.5-3.5 weeks of Greg time**.
+
 **Breakdown:**
 
 | task | time (weeks) | explanation |
