@@ -1,5 +1,24 @@
 ## notes from @gkiar running/testing+inspecting/integrating the fmri-merge branch of ndmg
 
+
+### integrating func pipeline
+
+Engineering estimate for rolling fMRI pipeline into the package at a sufficient level for including it in the publication is **2.5-3.5 weeks of Greg time**.
+**Breakdown:**
+
+| task | time (weeks) | explanation |
+|------|-------|--------------|
+| merging the pipelines | 1 | I've already spent a week to this effect, and got through about 2/3 of this - the 2/3 I was most familiar with. |
+| consolidating qa | 0.5 | one of the qa figures in the fmri pipeline was designed covering up bugs/errors, so we should probably redo many of these from the ground up to be safe. |
+| justifying decisions | 0.5-1 | if there are differences between what we do and what others do in terms of fmri preprocessing, we need to make sure we justify them |
+| testing | 0.5-1 | This involves discriminability as well as thorough inspection of all intermediate qa. I still don't have a good metric that I feel will help me trust the graphs more. |
+
+My current feeling is that we don't include this in the first drafts of the ndmg paper. I suggest we complete a draft (or several) based solely upon the dwi pipeline, and if we find that we have time or some of these tasks are completed by @ebridge2, we can revisit at a later date.
+
+
+---------- 
+
+
 ### running
 | Topic | Initial Status | Current Status | Notes |
 |:------|:---------------|:---------------|:------|
