@@ -165,7 +165,7 @@ def get_braindata(brain_file):
     return braindata
 
 
-def extract_brain(inp, out, opts=""):
+def extract_brain(inp, out, opts="-B"):
     """
     A function to extract the brain from an image using FSL's BET.
 

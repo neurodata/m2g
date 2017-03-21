@@ -28,190 +28,43 @@ import numpy as np
 from numpy import ndarray as nar
 from scipy.stats import gaussian_kde
 from ndmg.utils import utils as mgu
-from ndmg.stats.qa_reg_func import qa_reg_func as mgrq
-
+from ndmg.stats.func_qa_utils import func_qa_utils as fqc_utils
+from ndmg.stats.qa_reg import reg_mri_pngs, plot_brain
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import plotly as py
 import plotly.offline as offline
 
 
-def stat_summary(mri, mri_raw, mri_mc, mask, voxel,
-                 aligned_t1w, atlas, title=None, qcdir=None,
-                 scanid=None):
+def preproc_qa(mc_brain, qcdir=None):
     """
-    A function for producing a stat summary page, along with
-    an image of all the slices of this mri scan.
+    A function for performing quality control given motion
+    correction information. Produces plots of the motion correction
+    parameters used.
 
-    **Outputs:**
-        Mean figure:
-            - plot for each voxel's mean signal intensity for
-          each voxel in the corrected mri's timecourse
-        STdev figure:
-            - plot of the standard deviation of each voxel's
-          corrected timecourse
-        SNR figure:
-            - plot of signal to noise ratio for each voxel in the
-          corrected timecourse
-        Slice Wise Intensity figure:
-            - averages intensity over slices
-                and plots each slice as a line for corrected mri
-            - goal: slice mean signal intensity is approximately same
-              throughout all nvols (lines are relatively flat)
-        motion parameters figures (3):
-            - 1 figure for rotational, 1 figure for translational motion
-              params, 1 for displacement, calculated with fsl's mcflirt
-        stat summary file:
-            - provides some useful statistics for analyzing fMRI data;
-              see resources for each individual statistic for the
-              computation
-
-    **Positional Arguments:**
-        - mri:
-            - the path to a corrected mri scan to analyze
-        - mri_raw:
-            - the path to an uncorrected mri scan to analyze
-        - mri_mc:
-            - the motion corrected mri scan.
-        - mask:
-            - the mask to calculate statistics over.
-        - voxel:
-            - a matrix for the voxel timeseries.
-        - aligned_t1w:
-            - the aligned MPRAGE image.
-        - atlas:
-            - the atlas for alignment.
-        - title:
-            - the title for the plots (ie, Registered, Resampled, etc)
-        - fname:
-            - the name to give the file.
+    **Positional Arguments**
+        - mc_brain: the motion corrected brain. should have
+          an identically named file + '.par' created by mcflirt.
+        - scan_id: the id of the subject.
+        - qcdir: the quality control directory.
     """
-    print "Producing Quality Control Summary. \n" +\
-        "\tRaw Image: " + mri_raw + "\n" +\
-        "\tCorrected Image: " + mri + "\n" +\
-        " \tMask: " + mask + "\n"
-    cmd = "mkdir -p " + qcdir
+    print "Performing QA for Preprocessing..."
+    cmd = "mkdir -p {}".format(qcdir)
     mgu.execute_cmd(cmd)
+    scanid = mgu.get_filename(mc_brain)
 
-    mri_im = nb.load(mri)
-    mri_dat = mri_im.get_data()
-    mri_raw_im = nb.load(mri_raw)
+    mc_im = nb.load(mc_brain)
+    mc_dat = mc_im.get_data()
 
-    t1w_dat = nb.load(aligned_t1w).get_data()
-    at_dat = nb.load(atlas).get_data()
+    mcfig = plot_brain(mc_dat.mean(axis=3))
+    nvols = mc_dat.shape[3]
 
-    print "Opened MRI Images."
+    fnames = {}
+    fnames['trans'] = "{}_trans.html".format(scanid)
+    fnames['rot'] = "{}_rot.html".format(scanid) 
 
-    # image for mean signal intensity over time
-    mri_datmean = np.nanmean(mri_dat, axis=3)
-    fmean_ref = plt.figure()
-    fmean_anat = plt.figure()
-
-    mri_datstd = np.nanstd(mri_dat, axis=3)
-    mri_datstd[mri_datstd == 0] = 1  # so we don't get zeros
-    fstd = plt.figure()
-
-    # image for slice SNR = mean / stdev
-    mri_datsnr = np.divide(mri_datmean, mri_datstd)
-    mri_datsnr[np.isnan(mri_datsnr)] = 0
-    fsnr = plt.figure()
-
-    # image for slice-wise mean intensity
-    mri_datmi = np.squeeze(np.apply_over_axes(np.nanmean,
-                                              mri_dat, (0, 1)))
-    fanat_ref = plt.figure()
-
-    depth = mri_dat.shape[2]
-    nvols = mri_dat.shape[3]
-
-    # max image size is 5x5. after that, reduce size to 5x5
-    # with sequences
-    depth_seq = np.unique(np.round(np.linspace(0, depth - 1, 25))).astype(int)
-    nrows = np.ceil(np.sqrt(depth_seq.shape[0]))
-    ncols = np.ceil(depth_seq.shape[0]/float(nrows))
-
-    mri_dat = None  # done with this, so save memory here
-
-    # produce figures for each slice in the image
-    for d in range(0, depth_seq.shape[0]):
-        # TODO EB: create nifti image with these values
-        # and allow option to add overlap with ref vs t1w
-        i = depth_seq[d]
-        axmean_ref = fmean_ref.add_subplot(nrows, ncols, d+1)
-        axmean_ref.imshow(mgrq().opaque_colorscale(matplotlib.cm.Blues,
-                                                   mri_datmean[:, :, i]))
-        axmean_ref.imshow(mgrq().opaque_colorscale(matplotlib.cm.Reds,
-                                                   at_dat[:, :, i]))
-        axmean_ref.set_xlabel('Position (res)')
-        axmean_ref.set_ylabel('Position (res)')
-        axmean_ref.set_title('%d slice' % i)
-
-        axmean_anat = fmean_anat.add_subplot(nrows, ncols, d+1)
-        axmean_anat.imshow(mgrq().opaque_colorscale(matplotlib.cm.Blues,
-                                                    mri_datmean[:, :, i]))
-        axmean_anat.imshow(mgrq().opaque_colorscale(matplotlib.cm.Reds,
-                                                    t1w_dat[:, :, i]))
-        axmean_anat.set_xlabel('Position (res)')
-        axmean_anat.set_ylabel('Position (res)')
-        axmean_anat.set_title('%d slice' % i)
-
-        axstd = fstd.add_subplot(nrows, ncols, d+1)
-        axstd.imshow(mri_datstd[:, :, i], cmap='gray',
-                     interpolation='nearest', vmin=0,
-                     vmax=np.max(mri_datstd))
-        axstd.set_xlabel('Position (res)')
-        axstd.set_ylabel('Position (res)')
-        axstd.set_title('%d slice' % i)
-
-        axsnr = fsnr.add_subplot(nrows, ncols, d+1)
-        axsnr.imshow(mri_datsnr[:, :, i], cmap='gray',
-                     interpolation='nearest', vmin=0,
-                     vmax=np.max(mri_datsnr))
-        axsnr.set_xlabel('Position (res)')
-        axsnr.set_ylabel('Position (res)')
-        axsnr.set_title('%d slice' % i)
-
-        axanat_ref = fanat_ref.add_subplot(nrows, ncols, d+1)
-        axanat_ref.imshow(mgrq().opaque_colorscale(matplotlib.cm.Blues,
-                                                   t1w_dat[:, :, i]))
-        axanat_ref.set_xlabel('Position (res)')
-        axanat_ref.set_ylabel('Position (res)')
-        axanat_ref.set_title('%d slice' % i)
-        axanat_ref.imshow(mgrq().opaque_colorscale(matplotlib.cm.Reds,
-                                                   at_dat[:, :, i]))
-
-    axmi_list = []
-    for d in range(0, depth):
-        axmi_list.append(py.graph_objs.Scatter(x=range(0, nvols),
-                                               y=mri_datmi[d, :],
-                                               mode='lines',
-                                               showlegend=False))
-    layout = dict(title='Mean Slice Intensity',
-                  xaxis=dict(title='Timepoint', range=[0, nvols]),
-                  yaxis=dict(title='Mean Intensity'),
-                  height=405, width=720)
-    axmi = dict(data=axmi_list, layout=layout)
-    appended_path = scanid + "_intens.html"
-    path = qcdir + "/" + appended_path
-    offline.plot(axmi, filename=path, auto_open=False)
-
-    nonzero_data = mri_datmean[mri_datmean != 0]
-    hist, bins = np.histogram(nonzero_data, bins=500,
-                              range=(0, np.nanmean(nonzero_data) +
-                                     2*np.nanstd(nonzero_data)))
-    width = 0.7 * (bins[1] - bins[0])
-    center = (bins[:-1] + bins[1:]) / float(2)
-
-    axvih = [py.graph_objs.Bar(x=center, y=hist)]
-    layout = dict(xaxis=dict(title='Voxel Intensity'),
-                  yaxis=dict(title='Number of Voxels'),
-                  height=405, width=720)
-    fhist = dict(data=axvih, layout=layout)
-    appended_path = scanid + "_voxel_hist.html"
-    path = qcdir + "/" + appended_path
-    offline.plot(fhist, filename=path, auto_open=False)
-
-    par_file = mri_mc + ".par"
+    par_file = "{}.par".format(mc_brain)
+    mc_file = "{}/{}_stats.txt".format(qcdir, scanid)
 
     abs_pos = np.zeros((nvols, 6))
     rel_pos = np.zeros((nvols, 6))
@@ -224,42 +77,6 @@ def stat_summary(mri, mri_raw, mri_mc, mask, voxel,
                 rel_pos[counter, :] = np.subtract(abs_pos[counter, :],
                                                   abs_pos[counter-1, :])
             counter += 1
-
-    ftrans_list = []
-    ftrans_list.append(py.graph_objs.Scatter(x=range(0, nvols),
-                                             y=abs_pos[:, 3],
-                                             mode='lines', name='x'))
-    ftrans_list.append(py.graph_objs.Scatter(x=range(0, nvols),
-                                             y=abs_pos[:, 4],
-                                             mode='lines', name='y'))
-    ftrans_list.append(py.graph_objs.Scatter(x=range(0, nvols),
-                                             y=abs_pos[:, 5],
-                                             mode='lines', name='z'))
-    layout = dict(title='Translational Motion Parameters',
-                  xaxis=dict(title='Timepoint', range=[0, nvols]),
-                  yaxis=dict(title='Translation (mm)'))
-    ftrans = dict(data=ftrans_list, layout=layout)
-    appended_path = scanid + "_trans.html"
-    path = qcdir + "/" + appended_path
-    offline.plot(ftrans, filename=path, auto_open=False)
-
-    frot_list = []
-    frot_list.append(py.graph_objs.Scatter(x=range(0, nvols),
-                                           y=abs_pos[:, 0],
-                                           mode='lines', name='x'))
-    frot_list.append(py.graph_objs.Scatter(x=range(0, nvols),
-                                           y=abs_pos[:, 1],
-                                           mode='lines', name='y'))
-    frot_list.append(py.graph_objs.Scatter(x=range(0, nvols),
-                                           y=abs_pos[:, 2],
-                                           mode='lines', name='z'))
-    layout = dict(title='Rotational Motion Parameters',
-                  xaxis=dict(title='Timepoint', range=[0, nvols]),
-                  yaxis=dict(title='Rotation (rad)'))
-    frot = dict(data=frot_list, layout=layout)
-    appended_path = scanid + "_rot.html"
-    path = qcdir + "/" + appended_path
-    offline.plot(frot, filename=path, auto_open=False)
 
     trans_abs = np.linalg.norm(abs_pos[:, 3:6], axis=1)
     trans_rel = np.linalg.norm(rel_pos[:, 3:6], axis=1)
@@ -275,57 +92,42 @@ def stat_summary(mri, mri_raw, mri_mc, mask, voxel,
                   xaxis=dict(title='Timepoint', range=[0, nvols]),
                   yaxis=dict(title='Movement (mm)'))
     fmc = dict(data=fmc_list, layout=layout)
-    appended_path = scanid + "_disp.html"
-    path = qcdir + "/" + appended_path
-    offline.plot(fmc, filename=path, auto_open=False)
 
-    figures = {"mean_ref": [fmean_ref, nrows, ncols],
-               "mean_anat": [fmean_anat, nrows, ncols],
-               "anat_ref": [fanat_ref, nrows, ncols],
-               "std": [fstd, nrows, ncols],
-               "snr": [fsnr, nrows, ncols]}
-    fnames = {}
+    disp_path = "{}/{}_disp.html".format(qcdir, scanid)
+    offline.plot(fmc, filename=disp_path, auto_open=False)
+    ftrans_list = []
+    ftrans_list.append(py.graph_objs.Scatter(x=range(0, nvols),
+                                             y=abs_pos[:, 3],
+                                             mode='lines', name='x'))
+    ftrans_list.append(py.graph_objs.Scatter(x=range(0, nvols),
+                                             y=abs_pos[:, 4],
+                                             mode='lines', name='y'))
+    ftrans_list.append(py.graph_objs.Scatter(x=range(0, nvols),
+                                             y=abs_pos[:, 5],
+                                             mode='lines', name='z'))
+    layout = dict(title='Translational Motion Parameters',
+                  xaxis=dict(title='Timepoint', range=[0, nvols]),
+                  yaxis=dict(title='Translation (mm)'))
+    ftrans = dict(data=ftrans_list, layout=layout)
+    trans_path = "{}/{}_trans.html".format(qcdir, scanid)
+    offline.plot(ftrans, filename=trans_path, auto_open=False)
 
-    for idx, figlist in figures.items():
-        fig = figlist[0]
-        fig.set_size_inches(figlist[1]*6, figlist[2]*6)
-        fig.tight_layout()
-        appended_path = scanid + "_" + str(idx) + ".png"
-        fnames[idx] = appended_path
-        path = qcdir + "/" + appended_path
-        fig.savefig(path)
-        plt.close(fig)
-
-    fnames['sub'] = scanid
-    fnames['trans'] = scanid + "_trans.html"
-    fnames['rot'] = scanid + "_rot.html"
-    fnames['disp'] = scanid + "_disp.html"
-    fnames['intens'] = scanid + "_intens.html"
-    fnames['voxel_hist'] = scanid + "_voxel_hist.html"
-
-    # mgrq().update_template_qc(qc_html, fnames)
-
-    fstat = open(qcdir + "/" + scanid + "_stat_sum.txt", 'w')
-    fstat.write("General Information\n")
-    fstat.write("Raw Image Resolution: " +
-                str(mri_raw_im.get_header().get_zooms()[0:3]) + "\n")
-    fstat.write("Corrected Image Resolution: " +
-                str(mri_im.get_header().get_zooms()[0:3]) + "\n")
-    fstat.write("Number of Volumes: %d" % nvols)
-
-    fstat.write("\n\n")
-    fstat.write("Signal  Statistics\n")
-    fstat.write("Signal Mean: %.4f\n" % np.mean(voxel))
-    fstat.write("Signal Stdev: %.4f\n" % np.std(voxel))
-    fstat.write("Number of Voxels: %d\n" % voxel.shape[0])
-
-    voxel_std = np.std(voxel, axis=1)
-    # to avoid divide by zero
-    voxel_std[voxel_std == float(0)] = float(1)
-    fstat.write("Average SNR per voxel: %.4f\n" %
-                np.nanmean(np.divide(np.mean(voxel, axis=1),
-                           voxel_std)))
-    fstat.write("\n\n")
+    frot_list = []
+    frot_list.append(py.graph_objs.Scatter(x=range(0, nvols),
+                                           y=abs_pos[:, 0],
+                                           mode='lines', name='x'))
+    frot_list.append(py.graph_objs.Scatter(x=range(0, nvols),
+                                           y=abs_pos[:, 1],
+                                           mode='lines', name='y'))
+    frot_list.append(py.graph_objs.Scatter(x=range(0, nvols),
+                                           y=abs_pos[:, 2],
+                                           mode='lines', name='z'))
+    layout = dict(title='Rotational Motion Parameters',
+                  xaxis=dict(title='Timepoint', range=[0, nvols]),
+                  yaxis=dict(title='Rotation (rad)'))
+    frot = dict(data=frot_list, layout=layout)
+    rot_path ="{}/{}_rot.html".format(qcdir, scanid)
+    offline.plot(frot, filename=rot_path, auto_open=False)
 
     # Motion Statistics
     mean_abs = np.mean(abs_pos, axis=0)  # column wise means per param
@@ -334,6 +136,8 @@ def stat_summary(mri, mri_raw, mri_mc, mask, voxel,
     mean_rel = np.mean(rel_pos, axis=0)
     std_rel = np.std(rel_pos, axis=0)
     max_rel = np.max(np.abs(rel_pos), axis=0)
+
+    fstat = open(mc_file, 'w')
     fstat.write("Motion Statistics\n")
 
     absrel = ["absolute", "relative"]
@@ -358,6 +162,7 @@ def stat_summary(mri, mri_raw, mri_mc, mask, voxel,
                    "Absolute Rotational Statistics>>\n",
                    "Relative Rotational Statistics>>\n"]
     x = 0
+
     for motiontype in transrot:
         for measurement in absrel:
             fstat.write(headinglist[x])
@@ -391,3 +196,114 @@ def stat_summary(mri, mri_raw, mri_mc, mask, voxel,
             x = x + 1
 
     fstat.close()
+    return
+
+
+def reg_func_qa(aligned_func, atlas, qcdir=None):
+    """
+    A function that produces quality control information for registration
+    leg of the pipeline for functional scans.
+
+    **Positional Arguments**
+        - aligned_func: the aligned functional MRI.
+        - atlas: the atlas the functional and anatomical brains
+            were aligned to.
+        - qcdir: the directory in which quality control images will
+            be placed.
+    """
+    print "Performing QA for Functional Registration..."
+    cmd = "mkdir -p {}".format(qcdir)
+    mgu.execute_cmd(cmd)
+    reg_mri_pngs(aligned_func, atlas, qcdir, mean=True)
+
+    scanid = mgu.get_filename(aligned_func)
+    voxel = nb.load(aligned_func).get_data()
+    mean_ts = voxel.mean(axis=3)
+    std_ts = voxel.std(axis=3)
+
+    np.seterr(divide='ignore', invalid='ignore')
+    snr_ts = np.divide(mean_ts, std_ts)
+
+    plots = {}
+    plots["mean"] = plot_brain(mean_ts)
+    plots["std"] = plot_brain(std_ts)
+    plots["snr"] = plot_brain(snr_ts)
+
+    for plotname, plot in plots.iteritems():
+        fname = "{}/{}_{}.png".format(qcdir, scanid, plotname)
+        plot.savefig(fname, format='png')
+    return
+
+
+def reg_anat_qa(aligned_anat, atlas, qcdir=None):
+    """
+    A function that produces quality control information for registration
+    leg of the pipeline for anatomical scans.
+
+    **Positional Arguments**
+        - aligned_anat: the aligned anatomical MRI.
+        - atlas: the atlas the functional and anatomical brains
+            were aligned to.
+        - qcdir: the directory in which quality control images will
+            be placed.
+    """
+    print "Performing QA for Anatomical Registration..."
+    cmd = "mkdir -p {}".format(qcdir)
+    mgu.execute_cmd(cmd)
+    reg_mri_pngs(aligned_anat, atlas, qcdir, dim=3)
+    return
+
+
+
+def nuisance_qa(nuis_ts, nuis_brain, prenuis_brain, qcdir=None):
+    """
+    A function to assess the quality of nuisance correction.
+
+    **Positional Arguments**
+        - nuis_brain: the nuisance corrected brain image.
+        - prenuis_brain: the brain before nuisance correction.
+        - qcdir: the directory to place quality control images.
+    """
+    print "Performing QA for Nuisance..."
+    cmd = "mkdir -p {}".format(qcdir)
+    mgu.execute_cmd(cmd)
+    return
+
+
+def roi_ts_qa(timeseries, func, label, qcdir=None):
+    """
+    A function to perform ROI timeseries quality control.
+
+    **Positional Arguments**
+        - timeseries: a path to the ROI timeseries.
+        - func: the functional image that has timeseries
+            extract from it.
+        - label: the label in which voxel timeseries will be
+            downsampled.
+        - qcdir: the quality control directory to place outputs.
+    """
+    print "Performing QA for ROI Timeseries..."
+    cmd = "mkdir -p {}".format(qcdir)
+    mgu.execute_cmd(cmd)
+ 
+    reg_mri_pngs(func, label, qcdir, loc=0)
+    fqc_utils().plot_timeseries(timeseries, qcdir=qcdir)
+    return
+
+def voxel_ts_qa(timeseries, voxel_func, atlas_mask, qcdir=None):
+    """
+    A function to analyze the voxel timeseries extracted.
+
+    **Positional Arguments**
+        - voxel_func: the functional timeseries that
+          has voxel timeseries extracted from it.
+        - atlas_mask: the mask under which
+          voxel timeseries was extracted.
+        - qcdir: the directory to place qc in.
+    """
+    print "Performing QA for Voxel Timeseries..."
+    cmd = "mkdir -p {}".format(qcdir)
+    mgu.execute_cmd(cmd)
+ 
+    reg_mri_pngs(voxel_func, atlas_mask, qcdir, loc=0)
+    return
