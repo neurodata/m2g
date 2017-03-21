@@ -103,10 +103,10 @@ def fngs_pipeline(func, t1w, atlas, atlas_brain, atlas_mask, lv_mask,
         mgu.execute_cmd(cmd)
 
     # Create derivative output file names
-    preproc_func = "{}/tmp/{}_preproc.nii.gz".format(outdir, func_name)
+    preproc_func = "{}/reg/func/preproc/{}_preproc.nii.gz".format(outdir, func_name)
     aligned_func = "{}/reg/func/align/{}_aligned.nii.gz".format(outdir, func_name)
     aligned_t1w = "{}/reg/t1w/{}_aligned.nii.gz".format(outdir, t1w_name)
-    motion_func = "{}/tmp/{}_mc.nii.gz".format(outdir, func_name)
+    motion_func = "{}/reg/func/mc/{}_mc.nii.gz".format(outdir, func_name)
     nuis_func = "{}/nuis/{}_nuis.nii.gz".format(outdir, func_name)
     voxel_ts = "{}/ts_voxel/{}_voxel.npz".format(outdir, func_name)
 
