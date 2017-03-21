@@ -221,7 +221,7 @@ def reg_func_qa(aligned_func, atlas, qcdir=None):
     mean_ts = voxel.mean(axis=3)
     std_ts = voxel.std(axis=3)
 
-    np.seterr(divide='ignore')
+    np.seterr(divide='ignore', invalid='ignore')
     snr_ts = np.divide(mean_ts, std_ts)
 
     plots = {}
