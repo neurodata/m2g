@@ -48,6 +48,7 @@ def preproc_qa(mc_brain, qcdir=None):
         - scan_id: the id of the subject.
         - qcdir: the quality control directory.
     """
+    print "Performing QA for Preprocessing..."
     cmd = "mkdir -p {}".format(qcdir)
     mgu.execute_cmd(cmd)
     scanid = mgu.get_filename(mc_brain)
@@ -211,11 +212,9 @@ def registration_qa(aligned_func, aligned_anat, atlas, qcdir=None):
         - qcdir: the directory in which quality control images will
             be placed.
     """
+    print "Performing QA for Registration..."
     cmd = "mkdir -p {}".format(qcdir)
     mgu.execute_cmd(cmd)
-    print(aligned_func)
-    print(atlas)
-    print(qcdir)
     reg_mri_pngs(aligned_func, atlas, qcdir, mean=True)
     reg_mri_pngs(aligned_anat, atlas, qcdir, dim=3)
 
@@ -247,6 +246,7 @@ def nuisance_qa(nuis_ts, nuis_brain, prenuis_brain, qcdir=None):
         - prenuis_brain: the brain before nuisance correction.
         - qcdir: the directory to place quality control images.
     """
+    print "Performing QA for Nuisance..."
     cmd = "mkdir -p {}".format(qcdir)
     mgu.execute_cmd(cmd)
     return
@@ -264,6 +264,7 @@ def roi_ts_qa(timeseries, func, label, qcdir=None):
             downsampled.
         - qcdir: the quality control directory to place outputs.
     """
+    print "Performing QA for ROI Timeseries..."
     cmd = "mkdir -p {}".format(qcdir)
     mgu.execute_cmd(cmd)
  
@@ -282,6 +283,7 @@ def voxel_ts_qa(timeseries, voxel_func, atlas_mask, qcdir=None):
           voxel timeseries was extracted.
         - qcdir: the directory to place qc in.
     """
+    print "Performing QA for Voxel Timeseries..."
     cmd = "mkdir -p {}".format(qcdir)
     mgu.execute_cmd(cmd)
  
