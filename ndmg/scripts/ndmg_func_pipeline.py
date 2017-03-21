@@ -118,7 +118,7 @@ def fngs_pipeline(func, t1w, atlas, atlas_brain, atlas_mask, lv_mask,
 
     # Again, connectomes are different
     connectomes = ["{}/connectomes/{}/{}_{}.{}".format(outdir, x, func_name,
-                                                        x, fmt)
+                                                       x, fmt)
                    for x in label_name]
     roi_ts = ["{}/ts_roi/{}/{}_{}.npy".format(outdir, x, func_name, x)
               for x in label_name] 
@@ -154,7 +154,7 @@ def fngs_pipeline(func, t1w, atlas, atlas_brain, atlas_mask, lv_mask,
         connectome.cor_graph(ts)
         connectome.summary()
         connectome.save_graph(connectomes[idx], fmt=fmt)
-        mgrf.roi_ts_qa(roi_ts[idx], nuis_func, labels[idx], labeldir)
+        mgrf.roi_ts_qa(roi_ts[idx], aligned_anat, labels[idx], labeldir)
 
     print("Execution took: {}".format(datetime.now() - startTime))
 
