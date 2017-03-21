@@ -199,24 +199,22 @@ def preproc_qa(mc_brain, qcdir=None):
     return
 
 
-def registration_qa(aligned_func, aligned_anat, atlas, qcdir=None):
+def reg_func_qa(aligned_func, atlas, qcdir=None):
     """
     A function that produces quality control information for registration
-    leg of the pipeline.
+    leg of the pipeline for functional scans.
 
     **Positional Arguments**
         - aligned_func: the aligned functional MRI.
-        - aligned_anat: the aligned anatomical MRI.
         - atlas: the atlas the functional and anatomical brains
             were aligned to.
         - qcdir: the directory in which quality control images will
             be placed.
     """
-    print "Performing QA for Registration..."
+    print "Performing QA for Functional Registration..."
     cmd = "mkdir -p {}".format(qcdir)
     mgu.execute_cmd(cmd)
     reg_mri_pngs(aligned_func, atlas, qcdir, mean=True)
-    reg_mri_pngs(aligned_anat, atlas, qcdir, dim=3)
 
     scanid = mgu.get_filename(aligned_func)
     voxel = nb.load(aligned_func).get_data()
@@ -235,6 +233,26 @@ def registration_qa(aligned_func, aligned_anat, atlas, qcdir=None):
         fname = "{}/{}_{}.png".format(qcdir, scanid, plotname)
         plot.savefig(fname, format='png')
     return
+
+
+def reg_anat_qa(aligned_anat, atlas, qcdir=None):
+    """
+    A function that produces quality control information for registration
+    leg of the pipeline for anatomical scans.
+
+    **Positional Arguments**
+        - aligned_anat: the aligned anatomical MRI.
+        - atlas: the atlas the functional and anatomical brains
+            were aligned to.
+        - qcdir: the directory in which quality control images will
+            be placed.
+    """
+    print "Performing QA for Anatomical Registration..."
+    cmd = "mkdir -p {}".format(qcdir)
+    mgu.execute_cmd(cmd)
+    reg_mri_pngs(aligned_anat, atlas, qcdir, dim=3)
+    return
+
 
 
 def nuisance_qa(nuis_ts, nuis_brain, prenuis_brain, qcdir=None):

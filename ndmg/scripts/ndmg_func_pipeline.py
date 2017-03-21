@@ -75,16 +75,17 @@ def fngs_pipeline(func, t1w, atlas, atlas_brain, atlas_mask, lv_mask,
 
     qadir = "{}/qa/{}".format(outdir, func_name)
     prepdir = "{}/reg/func/preproc".format(qadir)
-    regdir = "{}/reg/func/align".format(qadir)
+    regfdir = "{}/reg/func/align".format(qadir)
+    regadir = "{}/reg/T1w/align".format(qadir)
     roidir = "{}/ts_roi".format(qadir)
     voxeldir = "{}/ts_voxel".format(qadir)
     nuisdir = "{}/nuis".format(qadir)
 
-    cmd = "mkdir -p {} {} {} {} {} {} {}/reg/func/align {}/reg/func/preproc \
+    cmd = "mkdir -p {} {} {} {} {} {} {} {}/reg/func/align {}/reg/func/preproc \
            {}/reg/func/mc {}/ts_voxel {}/ts_roi {}/reg/t1w {}/tmp \
            {}/connectomes/ {}/nuis"
-    cmd = cmd.format(qadir, prepdir, regdir, roidir, voxeldir, nuisdir,
-                     *([outdir] * 9))
+    cmd = cmd.format(qadir, prepdir, regfdir, regadir, roidir, voxeldir,
+                     nuisdir, *([outdir] * 9))
     mgu.execute_cmd(cmd)
 
     # Graphs are different because of multiple parcellations
@@ -134,7 +135,8 @@ def fngs_pipeline(func, t1w, atlas, atlas_brain, atlas_mask, lv_mask,
     print "Aligning volumes..."
     mgr().func2atlas(preproc_func, t1w, atlas, atlas_brain, atlas_mask,
                      aligned_func, aligned_t1w, outdir)
-    mgrf.registration_qa(aligned_func, aligned_t1w, atlas, qcdir=regdir)
+    mgrf.reg_func_qa(aligned_func, atlas, qcdir=regfdir)
+    mgrf.reg_anat_qa(aligned_t1w, atlas, qcdir=regadir)
 
     print "Correcting Nuisance Variables..."
     nuis = mgn().nuis_correct(aligned_func, nuis_func, lv_mask, trim=2)
