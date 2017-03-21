@@ -76,7 +76,7 @@ def fngs_pipeline(func, t1w, atlas, atlas_brain, atlas_mask, lv_mask,
     qadir = "{}/qa/{}".format(outdir, func_name)
     prepdir = "{}/reg/func/preproc".format(qadir)
     regfdir = "{}/reg/func/align".format(qadir)
-    regadir = "{}/reg/T1w/align".format(qadir)
+    regadir = "{}/reg/t1w/align".format(qadir)
     roidir = "{}/ts_roi".format(qadir)
     voxeldir = "{}/ts_voxel".format(qadir)
     nuisdir = "{}/nuis".format(qadir)
