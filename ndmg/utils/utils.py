@@ -43,7 +43,7 @@ def apply_mask(inp, masked, mask):
             - the path to a brain mask.
     """
     cmd = "fslmaths {} -mas {} {}".format(inp, mask, masked)
-    execute_cmd(cmd)
+    execute_cmd(cmd, verb=True)
     pass
 
 
@@ -176,7 +176,7 @@ def extract_brain(inp, out, opts="-B"):
             - the output brain extracted image.
     """
     cmd = "bet {} {} {}".format(inp, out, opts)
-    execute_cmd(cmd)
+    execute_cmd(cmd, verb=True)
 
 
 def execute_cmd(cmd, verb=False):

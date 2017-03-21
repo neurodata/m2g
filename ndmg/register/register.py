@@ -265,16 +265,13 @@ class register(object):
         atlas_name = mgu.get_filename(atlas)
 
         func2 = mgu.name_tmps(outdir, func_name, "_t1w.nii.gz")
-        func2_brain = mgu.name_tmps(outdir, func_name, "_t1w_brain.nii.gz")
         temp_aligned = mgu.name_tmps(outdir, func_name, "_noresamp.nii.gz")
         t1w_brain = mgu.name_tmps(outdir, t1w_name, "_brain.nii.gz")
         xfm_t1w2temp = mgu.name_tmps(outdir, func_name, "_xfm_t1w2temp.mat")
 
         # Applies skull stripping to T1 volume, then EPI alignment to T1
-        mgu.extract_brain(t1w, t1w_brain)
+        mgu.extract_brain(t1w, t1w_brain, opts='-R')
         self.align_epi(func, t1w, t1w_brain, func2)
-
-        mgu.extract_brain(func2, func2_brain)
 
         self.align(t1w_brain, atlas_brain, xfm_t1w2temp)
         # Only do FNIRT at 1mm or 2mm with something in MNI space
@@ -282,11 +279,11 @@ class register(object):
             warp_t1w2temp = mgu.name_tmps(outdir, func_name,
                                           "_warp_t1w2temp.nii.gz")
 
-            self.align_nonlinear(t1w_brain, atlas_brain, xfm_t1w2temp,
+            self.align_nonlinear(t1w, atlas, xfm_t1w2temp,
                                  warp_t1w2temp, mask=atlas_mask)
 
-            self.apply_warp(func2_brain, temp_aligned, atlas, warp_t1w2temp)
-            self.apply_warp(t1w_brain, aligned_t1w, atlas, warp_t1w2temp,
+            self.apply_warp(func2, temp_aligned, atlas, warp_t1w2temp)
+            self.apply_warp(t1w, aligned_t1w, atlas, warp_t1w2temp,
                             mask=atlas_mask)
         else:
             self.applyxfm(func2, atlas, xfm_t1w2temp, temp_aligned)
