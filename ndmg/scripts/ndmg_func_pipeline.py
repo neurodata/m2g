@@ -35,8 +35,8 @@ from ndmg.nuis import nuis as mgn
 from ndmg.stats.qa_reg import *
 
 
-def fngs_pipeline(func, t1w, atlas, atlas_brain, atlas_mask, lv_mask,
-                  labels, outdir, clean=False, stc=None, fmt='gpickle'):
+def fngs_pipeline(func, t1w, atlas, atlas_brain, atlas_mask, lv_mask, labels,
+                  outdir, clean=False, stc=None, bet=0.5, fmt='gpickle'):
     """
     Analyzes fMRI images and produces subject-specific derivatives.
 
@@ -62,6 +62,10 @@ def fngs_pipeline(func, t1w, atlas, atlas_brain, atlas_mask, lv_mask,
             - the base output directory to place outputs.
         clean:
             - a flag whether or not to clean out directories once finished.
+        bet:
+            - an optional parameter for the sensitivity of BET. If your
+              anatomical images are dark, or if too much gets skull stripped,
+              set this threshold between 0.2 and 0.5.
         fmt:
             - the format for produced . Supported options are gpickle and
             graphml.
@@ -134,7 +138,7 @@ def fngs_pipeline(func, t1w, atlas, atlas_brain, atlas_mask, lv_mask,
     
     print "Aligning volumes..."
     mgr().func2atlas(preproc_func, t1w, atlas, atlas_brain, atlas_mask,
-                     aligned_func, aligned_t1w, outdir)
+                     aligned_func, aligned_t1w, bet, outdir)
     mgrf.reg_func_qa(aligned_func, atlas, qcdir=regfdir)
     mgrf.reg_anat_qa(aligned_t1w, atlas, qcdir=regadir)
 
@@ -189,6 +193,10 @@ def main():
                         help="File for STC.")
     parser.add_argument("-c", "--clean", action="store_true", default=False,
                         help="Whether or not to delete intemediates")
+    parser.add_argument("-b", "--bet", action="store", default=0.5, type=float,
+                        help="an optional argument to change the sensitivity"
+                        " of brain extraction. If anatomical images are"
+                        " very dark, this should be set to 0.3.")
     parser.add_argument("-f", "--fmt", action="store", default='gpickle',
                         help="Determines connectome output format")
     result = parser.parse_args()
@@ -214,8 +222,7 @@ def main():
     fngs_pipeline(result.func, result.t1w, result.atlas,
                   result.atlas_brain, result.atlas_mask, result.lv_mask,
                   result.labels, result.outdir, result.clean, result.stc,
-                  result.fmt)
-
+                  result.bet, result.fmt)
 
 if __name__ == "__main__":
     main()

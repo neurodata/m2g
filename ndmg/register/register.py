@@ -235,7 +235,7 @@ class register(object):
         mgu.execute_cmd(cmd, verb=True)
 
     def func2atlas(self, func, t1w, atlas, atlas_brain, atlas_mask,
-                   aligned_func, aligned_t1w, outdir):
+                   aligned_func, aligned_t1w, outdir, bet=0.5):
         """
         A function to change coordinates from the subject's
         brain space to that of a template using nonlinear
@@ -259,6 +259,11 @@ class register(object):
                 - the name of the aligned anatomical scan to produce
             outdir:
                 - the output base directory.
+            bet:
+                - an optional string for the sensitivity of BET. If
+                  you anatomical scans are over-skullstripped by BET,
+                  set btwn 0.0 and 0.5. If your anatomical scans are under-
+                  skullstripped, set btwn 0.5 and 1.0.
        """
         func_name = mgu.get_filename(func)
         t1w_name = mgu.get_filename(t1w)
@@ -269,8 +274,11 @@ class register(object):
         t1w_brain = mgu.name_tmps(outdir, t1w_name, "_brain.nii.gz")
         xfm_t1w2temp = mgu.name_tmps(outdir, func_name, "_xfm_t1w2temp.mat")
 
-        # Applies skull stripping to T1 volume, then EPI alignment to T1
-        mgu.extract_brain(t1w, t1w_brain, opts='-R')
+        # Applies skull stripping to T1 volume
+        bet_sens = '-f {} -R'.format(bet)
+        mgu.extract_brain(t1w, t1_brain, opts=bet_sens)
+
+        # EPI alignment to T1w
         self.align_epi(func, t1w, t1w_brain, func2)
 
         self.align(t1w_brain, atlas_brain, xfm_t1w2temp)
