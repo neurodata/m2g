@@ -158,7 +158,7 @@ def fngs_pipeline(func, t1w, atlas, atlas_brain, atlas_mask, lv_mask, labels,
         connectome.cor_graph(ts)
         connectome.summary()
         connectome.save_graph(connectomes[idx], fmt=fmt)
-        mgrf.roi_ts_qa(roi_ts[idx], aligned_anat, labels[idx], labeldir)
+        mgrf.roi_ts_qa(roi_ts[idx], aligned_t1w, labels[idx], labeldir)
 
     print("Execution took: {}".format(datetime.now() - startTime))
 
