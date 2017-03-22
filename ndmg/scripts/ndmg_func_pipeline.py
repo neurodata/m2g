@@ -138,7 +138,7 @@ def fngs_pipeline(func, t1w, atlas, atlas_brain, atlas_mask, lv_mask, labels,
     
     print "Aligning volumes..."
     mgr().func2atlas(preproc_func, t1w, atlas, atlas_brain, atlas_mask,
-                     aligned_func, aligned_t1w, bet, outdir)
+                     aligned_func, aligned_t1w, outdir, bet=bet)
     mgrf.reg_func_qa(aligned_func, atlas, qcdir=regfdir)
     mgrf.reg_anat_qa(aligned_t1w, atlas, qcdir=regadir)
 

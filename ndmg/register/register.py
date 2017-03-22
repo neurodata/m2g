@@ -276,7 +276,7 @@ class register(object):
 
         # Applies skull stripping to T1 volume
         bet_sens = '-f {} -R'.format(bet)
-        mgu.extract_brain(t1w, t1_brain, opts=bet_sens)
+        mgu.extract_brain(t1w, t1w_brain, opts=bet_sens)
 
         # EPI alignment to T1w
         self.align_epi(func, t1w, t1w_brain, func2)
