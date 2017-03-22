@@ -270,7 +270,7 @@ def nuisance_qa(nuis_ts, nuis_brain, prenuis_brain, qcdir=None):
     return
 
 
-def roi_ts_qa(timeseries, func, label, qcdir=None):
+def roi_ts_qa(timeseries, func, anat, label, qcdir=None):
     """
     A function to perform ROI timeseries quality control.
 
@@ -278,6 +278,7 @@ def roi_ts_qa(timeseries, func, label, qcdir=None):
         - timeseries: a path to the ROI timeseries.
         - func: the functional image that has timeseries
             extract from it.
+        - anat: the anatomical image that is aligned.
         - label: the label in which voxel timeseries will be
             downsampled.
         - qcdir: the quality control directory to place outputs.
@@ -286,7 +287,7 @@ def roi_ts_qa(timeseries, func, label, qcdir=None):
     cmd = "mkdir -p {}".format(qcdir)
     mgu.execute_cmd(cmd)
  
-    reg_mri_pngs(func, label, qcdir, loc=0)
+    reg_mri_pngs(anat, label, qcdir, dim=3)
     fqc_utils().plot_timeseries(timeseries, qcdir=qcdir)
     return
 
