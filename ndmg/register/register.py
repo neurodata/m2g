@@ -239,7 +239,7 @@ class register(object):
         mgu.execute_cmd(cmd, verb=True)
 
     def func2atlas(self, func, t1w, atlas, atlas_brain, atlas_mask,
-                   aligned_func, aligned_t1w, outdir, bet=0.5, sreg="flirt",
+                   aligned_func, aligned_t1w, outdir, bet=0.5, sreg="epi",
                    rreg="fnirt"):
         """
         A function to change coordinates from the subject's
@@ -296,7 +296,10 @@ class register(object):
         bet_sens = '-f {} -R'.format(bet)
         mgu.extract_brain(t1w, t1w_brain, opts=bet_sens)
 
-        if sreg != "epi":
+        if sreg == "epi":
+            # EPI alignment to T1w
+            self.align_epi(func, t1w, t1w_brain, func2)
+        else:
             # FLIRT with local optimization cost function, which is
             # a good alternative for low quality brains
             sxfm = mgu.name_tmps(outdir, func_name, "_xfm_func2t1w.mat")
@@ -304,10 +307,7 @@ class register(object):
                        cost=None, searchrad=None,
                        sch="${FSLDIR}/etc/flirtsch/simple3D.sch")
             self.applyxfm(func, t1w_brain, sxfm, func2)
-        else:
-            # EPI alignment to T1w
-            self.align_epi(func, t1w, t1w_brain, func2)
-            
+
         self.align(t1w_brain, atlas_brain, xfm_t1w2temp)
         # Only do FNIRT at 1mm or 2mm with something in MNI space
         if (nb.load(atlas).get_data().shape in [(91, 109, 91)]) \

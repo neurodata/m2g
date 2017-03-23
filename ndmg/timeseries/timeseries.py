@@ -90,11 +90,11 @@ class timeseries(object):
 
         for idx, roi in enumerate(rois):
             roibool = labeldata == roi  # get a bool where our voxels in roi
+            roibool
             roi_vts = funcdata[roibool, :]
-
             # take the mean for the voxel timeseries, and ignore voxels with
-            # no variance 
-            ts = np.mean(roi_vts[:, roi_vts.std(axis=0) != 0], axis=0)
+            # no variance
+            ts = roi_vts[roi_vts.std(axis=1) != 0, :].mean(axis=0)
             if ts.size != 0:
                 roi_ts[idx, :] = ts
 

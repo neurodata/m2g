@@ -36,7 +36,7 @@ from ndmg.stats.qa_reg import *
 
 
 def fngs_pipeline(func, t1w, atlas, atlas_brain, atlas_mask, lv_mask, labels,
-                  outdir, clean=False, stc=None, bet=0.5, sreg="flirt",
+                  outdir, clean=False, stc=None, bet=0.5, sreg="epi",
                   rreg="fnirt", fmt='gpickle'):
     """
     Analyzes fMRI images and produces subject-specific derivatives.
