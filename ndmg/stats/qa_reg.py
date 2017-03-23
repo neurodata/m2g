@@ -108,10 +108,18 @@ def plot_brain(brain):
     return fbr
 
 
-def plot_overlays(atlas, b0, cmaps):
+def plot_overlays(atlas, b0, cmaps=None):
     plt.rcParams.update({'axes.labelsize': 'x-large',
                          'axes.titlesize': 'x-large'})
     foverlay = plt.figure()
+
+    if cmaps is None:
+        cmap1 = LinearSegmentedColormap.from_list('mycmap1',
+                                                  ['black', 'magenta'])
+        cmap2 = LinearSegmentedColormap.from_list('mycmap2',
+                                                  ['black', 'green'])
+        cmaps = (cmap1, cmap2)
+
     if b0.shape == (182, 218, 182):
         x = [78, 90, 100]
         y = [82, 107, 142]

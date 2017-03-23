@@ -148,7 +148,9 @@ def percent_overlap(array1, array2):
 
     overlap = np.logical_and(array1, array2)
     occupied_space = np.logical_or(array1, array2)
-    return overlap.sum()/occupied_space.sum()
+    print "space" + str(occupied_space.sum())
+    print "overlap" + str(overlap.sum())
+    return overlap.sum()/float(occupied_space.sum())
 
 
 def check_alignments(mri_bname, mri_aname, refname, qcdir,

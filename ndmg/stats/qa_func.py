@@ -223,7 +223,7 @@ def registration_score(aligned_func, reference_mask, qcdir=None):
     fdat[fdat < tval] = 0
     freg_qual = plot_overlays(fdat, mdat)
     reg_score = fqc_utils.percent_overlap(fdat, mdat)
-    fname = "{}/{}_overlap.png"
+    fname = "{}/{}_overlap.png".format(qcdir, fid)
     freg_qual.savefig(fname, format='png')
     print "reg_score: " + str(reg_score)
     return reg_score
@@ -260,7 +260,7 @@ def reg_func_qa(aligned_func, atlas, atlas_mask, qcdir=None):
     plots["std"] = plot_brain(std_ts)
     plots["snr"] = plot_brain(snr_ts)
 
-    registration_score(aligned_func, atlas_mask)
+    registration_score(aligned_func, atlas_mask, qcdir=qcdir)
 
     for plotname, plot in plots.iteritems():
         fname = "{}/{}_{}.png".format(qcdir, scanid, plotname)
