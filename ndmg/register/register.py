@@ -39,7 +39,7 @@ class register(object):
         pass
 
     def align(self, inp, ref, xfm=None, out=None, dof=12, searchrad=True,
-              bins=256, interp=None, cost="mutualinfo"):
+              bins=256, interp=None, cost="mutualinfo", sch=None):
         """
         Aligns two images and stores the transform between them
 
@@ -61,6 +61,8 @@ class register(object):
                     searchradius parameter (180 degree sweep in x, y, and z).
                 interp:
                     - the interpolation method to use. Default is trilinear.
+                sch:
+                    - the optional FLIRT schedule file.
         """
         cmd = "flirt -in {} -ref {}".format(inp, ref)
         if xfm is not None:
@@ -78,6 +80,8 @@ class register(object):
         if searchrad is not None:
             cmd += " -searchrx -180 180 -searchry -180 180 " +\
                    "-searchrz -180 180"
+        if sch is not None:
+            cmd += " -schedule {}".format(sch)
         mgu.execute_cmd(cmd, verb=True)
 
     def align_epi(self, epi, t1, brain, out):
@@ -235,7 +239,8 @@ class register(object):
         mgu.execute_cmd(cmd, verb=True)
 
     def func2atlas(self, func, t1w, atlas, atlas_brain, atlas_mask,
-                   aligned_func, aligned_t1w, outdir, bet=0.5):
+                   aligned_func, aligned_t1w, outdir, bet=0.5, sreg="flirt",
+                   rreg="fnirt"):
         """
         A function to change coordinates from the subject's
         brain space to that of a template using nonlinear
@@ -264,6 +269,19 @@ class register(object):
                   you anatomical scans are over-skullstripped by BET,
                   set btwn 0.0 and 0.5. If your anatomical scans are under-
                   skullstripped, set btwn 0.5 and 1.0.
+            sreg:
+                - an optional parameter to select the self registration method.
+                  Use epi for epi_reg's fsl self registration. epi works well
+                  on high resolution, and high FOV, brains. Use flirt to use
+                  a more restrictive linear registration. Uses local
+                  optimization cost function that works better on lower
+                  quality brains.
+            rreg:
+                - a parameter for reference registration method. Use fnirt for
+                  nonlinear registration. Nonlinear registration is effective
+                  if your brains have high resolution. Use flirt for linear
+                  registration. Linear registration works better if your brains
+                  are lower resolution. 
        """
         func_name = mgu.get_filename(func)
         t1w_name = mgu.get_filename(t1w)
@@ -278,12 +296,22 @@ class register(object):
         bet_sens = '-f {} -R'.format(bet)
         mgu.extract_brain(t1w, t1w_brain, opts=bet_sens)
 
-        # EPI alignment to T1w
-        self.align_epi(func, t1w, t1w_brain, func2)
-
+        if sreg != "epi":
+            # FLIRT with local optimization cost function, which is
+            # a good alternative for low quality brains
+            sxfm = mgu.name_tmps(outdir, func_name, "_xfm_func2t1w.mat")
+            self.align(func, t1w_brain, xfm=sxfm, bins=None, dof=None,
+                       cost=None, searchrad=None,
+                       sch="${FSLDIR}/etc/flirtsch/simple3D.sch")
+            self.applyxfm(func, t1w_brain, sxfm, func2)
+        else:
+            # EPI alignment to T1w
+            self.align_epi(func, t1w, t1w_brain, func2)
+            
         self.align(t1w_brain, atlas_brain, xfm_t1w2temp)
         # Only do FNIRT at 1mm or 2mm with something in MNI space
-        if nb.load(atlas).get_data().shape in [(182, 218, 182), (91, 109, 91)]:
+        if (nb.load(atlas).get_data().shape in [(91, 109, 91)]) \
+                and rreg == "fnirt":
             warp_t1w2temp = mgu.name_tmps(outdir, func_name,
                                           "_warp_t1w2temp.nii.gz")
 
