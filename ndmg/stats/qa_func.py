@@ -28,8 +28,8 @@ import numpy as np
 from numpy import ndarray as nar
 from scipy.stats import gaussian_kde
 from ndmg.utils import utils as mgu
-from ndmg.stats.func_qa_utils import func_qa_utils as fqc_utils
-from ndmg.stats.qa_reg import reg_mri_pngs, plot_brain
+from ndmg.stats import func_qa_utils as fqc_utils
+from ndmg.stats.qa_reg import reg_mri_pngs, plot_brain, plot_overlays
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import plotly as py
@@ -199,7 +199,37 @@ def preproc_qa(mc_brain, qcdir=None):
     return
 
 
-def reg_func_qa(aligned_func, atlas, qcdir=None):
+def registration_score(aligned_func, reference_mask, qcdir=None):
+    """
+    A function to compute the registration score between two images.
+    **Positional Arguments:**
+        aligned_func:
+            - the brain being aligned. assumed to be a 4d fMRI scan.
+        reference_mask:
+            - the template being aligned to. assumed to be a 3d mask.
+    """
+    func = nb.load(aligned_func)
+    mask = nb.load(reference_mask)
+    fid = mgu.get_filename(aligned_func)
+
+    fdat = func.get_data()
+    mdat = mask.get_data()
+
+    if fdat.ndim == 4:
+        # if our data is 4d, mean over the temporal dimension
+        fdat = fdat.mean(axis=3)
+    tval = np.mean(fdat)*2
+    fdat[fdat >= tval] = 1
+    fdat[fdat < tval] = 0
+    freg_qual = plot_overlays(fdat, mdat)
+    reg_score = fqc_utils.percent_overlap(fdat, mdat)
+    fname = "{}/{}_overlap.png"
+    freg_qual.savefig(fname, format='png')
+    print "reg_score: " + str(reg_score)
+    return reg_score
+
+
+def reg_func_qa(aligned_func, atlas, atlas_mask, qcdir=None):
     """
     A function that produces quality control information for registration
     leg of the pipeline for functional scans.
@@ -208,6 +238,7 @@ def reg_func_qa(aligned_func, atlas, qcdir=None):
         - aligned_func: the aligned functional MRI.
         - atlas: the atlas the functional and anatomical brains
             were aligned to.
+        - atlas_mask: the mask for the atlas that we aligned to.
         - qcdir: the directory in which quality control images will
             be placed.
     """
@@ -228,6 +259,8 @@ def reg_func_qa(aligned_func, atlas, qcdir=None):
     plots["mean"] = plot_brain(mean_ts)
     plots["std"] = plot_brain(std_ts)
     plots["snr"] = plot_brain(snr_ts)
+
+    registration_score(aligned_func, atlas_mask)
 
     for plotname, plot in plots.iteritems():
         fname = "{}/{}_{}.png".format(qcdir, scanid, plotname)
@@ -288,8 +321,9 @@ def roi_ts_qa(timeseries, func, anat, label, qcdir=None):
     mgu.execute_cmd(cmd)
  
     reg_mri_pngs(anat, label, qcdir, dim=3)
-    fqc_utils().plot_timeseries(timeseries, qcdir=qcdir)
+    fqc_utils.plot_timeseries(timeseries, qcdir=qcdir)
     return
+
 
 def voxel_ts_qa(timeseries, voxel_func, atlas_mask, qcdir=None):
     """
