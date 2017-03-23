@@ -213,7 +213,7 @@ def main():
     parser.add_argument("--sreg", action="store", help="a setting for "
                         "which self registration method to use. Options are"
                         " FLIRT for linear and EPI for epi registration.",
-                        choices=["flirt", "epi"], default="flirt")
+                        choices=["flirt", "epi"], default="epi")
     parser.add_argument("--rreg", action="store", help="a setting for "
                         "which registration method to use. Options are FNIRT "
                         "or FLIRT.", choices=["fnirt", "flirt"],
