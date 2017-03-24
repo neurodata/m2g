@@ -238,6 +238,7 @@ class register(object):
         cmd = "convert_xfm -omat {} -concat {} {}".format(xfmout, xfm1, xfm2)
         mgu.execute_cmd(cmd, verb=True)
 
+
     def func2atlas(self, func, t1w, atlas, atlas_brain, atlas_mask,
                    aligned_func, aligned_t1w, outdir, bet=0.5, sreg="epi",
                    rreg="fnirt"):
@@ -326,6 +327,217 @@ class register(object):
             self.applyxfm(t1w, atlas, xfm_t1w2temp, aligned_t1w)
 
         self.resample(temp_aligned, aligned_func, atlas)
+
+
+    def func2atlas_nonlinear(self, func, t1w, atlas, atlas_brain, atlas_mask,
+                             aligned_func, aligned_t1w, outdir):
+        """
+        A function to change coordinates from the subject's
+        brain space to that of a template using nonlinear
+        registration.
+
+        **Positional Arguments:**
+
+            fun:
+                - the path of the preprocessed fmri image.
+            t1w:
+                - the path of the T1 scan.
+            atlas:
+                - the template atlas.
+            atlas_brain:
+                - the template brain.
+            atlas_mask:
+                - the template mask.
+            aligned_func:
+                - the name of the aligned fmri scan to produce.
+            aligned_t1w:
+                - the name of the aligned anatomical scan to produce
+            outdir:
+                - the output base directory.
+        """
+        return self.func2atlas_body(func, t1w, atlas, atlas_brain, atlas_mask,
+                                    aligned_func, aligned_t1w, outdir, bet=0.5,
+                                    sreg='epi', rreg='fnirt')
+
+
+    def func2atlas_linear(self, func, t1w, atlas, atlas_brain, atlas_mask,
+                             aligned_func, aligned_t1w, outdir):
+        """
+        A function to change coordinates from the subject's
+        brain space to that of a template using a more lax linear
+        registration. A good alternative if the brains cannot be
+        effectively processed with nonlinear registration.
+
+        **Positional Arguments:**
+
+            fun:
+                - the path of the preprocessed fmri image.
+            t1w:
+                - the path of the T1 scan.
+            atlas:
+                - the template atlas.
+            atlas_brain:
+                - the template brain.
+            atlas_mask:
+                - the template mask.
+            aligned_func:
+                - the name of the aligned fmri scan to produce.
+            aligned_t1w:
+                - the name of the aligned anatomical scan to produce
+            outdir:
+                - the output base directory.
+        """
+        return self.func2atlas_body(func, t1w, atlas, atlas_brain, atlas_mask,
+                                    aligned_func, aligned_t1w, outdir, bet=0.1,
+                                    sreg='flirt', rreg='flirt')
+
+
+    def func2atlas_body(self, func, t1w, atlas, atlas_brain, atlas_mask,
+                   aligned_func, aligned_t1w, outdir, bet=None, sreg=None,
+                   rreg=None):
+        """
+        A function to change coordinates from the subject's
+        brain space to that of a template using nonlinear
+        registration.
+
+        **Positional Arguments:**
+
+            fun:
+                - the path of the preprocessed fmri image.
+            t1w:
+                - the path of the T1 scan.
+            atlas:
+                - the template atlas.
+            atlas_brain:
+                - the template brain.
+            atlas_mask:
+                - the template mask.
+            aligned_func:
+                - the name of the aligned fmri scan to produce.
+            aligned_t1w:
+                - the name of the aligned anatomical scan to produce
+            outdir:
+                - the output base directory.
+        """
+        func_name = mgu.get_filename(func)
+        t1w_name = mgu.get_filename(t1w)
+        atlas_name = mgu.get_filename(atlas)
+
+        func2 = mgu.name_tmps(outdir, func_name, "_t1w.nii.gz")
+        temp_aligned = mgu.name_tmps(outdir, func_name, "_noresamp.nii.gz")
+        t1w_brain = mgu.name_tmps(outdir, t1w_name, "_brain.nii.gz")
+        xfm_t1w2temp = mgu.name_tmps(outdir, func_name, "_xfm_t1w2temp.mat")
+
+        # Applies skull stripping to T1 volume
+        bet_sens = '-f {} -R'.format(bet)
+        mgu.extract_brain(t1w, t1w_brain, opts=bet_sens)
+
+        if sreg == "epi":
+            # EPI alignment to T1w
+            self.align_epi(func, t1w, t1w_brain, func2)
+        else:
+            # FLIRT with local optimization cost function, which is
+            # a good alternative for low quality brains
+            sxfm = mgu.name_tmps(outdir, func_name, "_xfm_func2t1w.mat")
+            self.align(func, t1w_brain, xfm=sxfm, bins=None, dof=None,
+                       cost=None, searchrad=None,
+                       sch="${FSLDIR}/etc/flirtsch/simple3D.sch")
+            self.applyxfm(func, t1w_brain, sxfm, func2)
+
+        self.align(t1w_brain, atlas_brain, xfm_t1w2temp)
+        # Only do FNIRT at 1mm or 2mm with something in MNI space
+        if rreg == "fnirt":
+            warp_t1w2temp = mgu.name_tmps(outdir, func_name,
+                                          "_warp_t1w2temp.nii.gz")
+
+            self.align_nonlinear(t1w, atlas, xfm_t1w2temp,
+                                 warp_t1w2temp, mask=atlas_mask)
+
+            self.apply_warp(func2, temp_aligned, atlas, warp_t1w2temp)
+            self.apply_warp(t1w, aligned_t1w, atlas, warp_t1w2temp,
+                            mask=atlas_mask)
+        else:
+            self.applyxfm(func2, atlas, xfm_t1w2temp, temp_aligned)
+            self.applyxfm(t1w, atlas, xfm_t1w2temp, aligned_t1w)
+
+        self.resample(temp_aligned, aligned_func, atlas)
+
+
+    def func2atlas(self, func, t1w, atlas, atlas_brain, atlas_mask,
+                   aligned_func, aligned_t1w, outdir):
+        """
+        A function to change coordinates from the subject's
+        brain space to that of a template using nonlinear
+        registration.
+
+        **Positional Arguments:**
+
+            fun:
+                - the path of the preprocessed fmri image.
+            t1w:
+                - the path of the T1 scan.
+            atlas:
+                - the template atlas.
+            atlas_brain:
+                - the template brain.
+            atlas_mask:
+                - the template mask.
+            aligned_func:
+                - the name of the aligned fmri scan to produce.
+            aligned_t1w:
+                - the name of the aligned anatomical scan to produce
+            outdir:
+                - the output base directory.
+        """
+        func_name = mgu.get_filename(func)
+        t1w_name = mgu.get_filename(t1w)
+        atlas_name = mgu.get_filename(atlas)
+
+        func2 = mgu.name_tmps(outdir, func_name, "_t1w.nii.gz")
+        temp_aligned = mgu.name_tmps(outdir, func_name, "_noresamp.nii.gz")
+        t1w_brain = mgu.name_tmps(outdir, t1w_name, "_brain.nii.gz")
+        xfm_t1w2temp = mgu.name_tmps(outdir, func_name, "_xfm_t1w2temp.mat")
+
+        # Applies skull stripping to T1 volume
+        bet_sens = '-f {} -R'.format(bet)
+        mgu.extract_brain(t1w, t1w_brain, opts=bet_sens)
+
+        strats = [self.func2atlas_linear]
+        strat_id = ['lin']
+        if (nb.load(atlas).get_data().shape in [(91, 109, 91)]):
+            strats.insert(0, self.func2atlas_nonlinear)
+            strats_id.insert(0, 'nonlin')
+
+        strat_func = ["_aligned_func_{}.nii.gz".format(outdir, x) \
+                      for x in strats_id]
+        strat_anat =  ["_aligned_t1w_{}.nii.gz".format(outdir, x) \
+                      for x in strats_id]
+
+        scores = np.zeros(length(strats))
+        sc = 0
+        counter = 0
+        while sc < .75 and counter < length(strats):
+            print "Trying Strategy {}...".format(strats_id[counter])
+            this_strategy = strats[counter]
+            strat_func = mgu.name_tmps(outdir, func_name,
+               (strats[counter]))
+            strat_anat = mgu.name_tmps(outdir, func_name,
+                "_aligned_t1w_{}.nii.gz".format(strats[counter]))
+            this_strategy(func, t1w, atlas, atlas_brain, atlas_mask,
+                          strat_func, strat_t1w, outdir)
+            sc = registration_score(temp_aligned, atlas_mask)
+            scores[counter] = sc  # save the score
+            counter += 1
+
+        best_str = np.argmax(scores)
+        print "Best strategy is {}.".format(strats_id[best_str])
+        best_func = strat_func[best_str]
+        best_t1w = strat_anat[best_str]        
+        cmd = "cp {} {}".format(best_func, aligned_func)
+        mgu.execute_cmd(cmd)
+        cmd = "cp {} {}".format(best_anat, aligned_t1w)
+        mgu.execute_cmd(cmd)
+        
 
 
     def dwi2atlas(self, dwi, gtab, t1w, atlas,

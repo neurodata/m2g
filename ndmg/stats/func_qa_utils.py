@@ -148,8 +148,6 @@ def percent_overlap(array1, array2):
 
     overlap = np.logical_and(array1, array2)
     occupied_space = np.logical_or(array1, array2)
-    print "space" + str(occupied_space.sum())
-    print "overlap" + str(overlap.sum())
     return overlap.sum()/float(occupied_space.sum())
 
 

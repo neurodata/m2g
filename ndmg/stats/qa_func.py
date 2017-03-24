@@ -208,6 +208,7 @@ def registration_score(aligned_func, reference_mask, qcdir=None):
         reference_mask:
             - the template being aligned to. assumed to be a 3d mask.
     """
+    print aligned_func
     func = nb.load(aligned_func)
     mask = nb.load(reference_mask)
     fid = mgu.get_filename(aligned_func)
@@ -218,11 +219,15 @@ def registration_score(aligned_func, reference_mask, qcdir=None):
     if fdat.ndim == 4:
         # if our data is 4d, mean over the temporal dimension
         fdat = fdat.mean(axis=3)
-    tval = np.mean(fdat)*2
-    fdat[fdat >= tval] = 1
-    fdat[fdat < tval] = 0
-    freg_qual = plot_overlays(fdat, mdat)
-    reg_score = fqc_utils.percent_overlap(fdat, mdat)
+
+    tval = np.mean(fdat)
+
+    fmask = np.zeros(fdat.shape)
+
+    fmask[fdat >= tval] = 1
+    fmask[fdat < tval] = 0
+    freg_qual = plot_overlays(mdat, fmask)
+    reg_score = fqc_utils.percent_overlap(fmask, mdat)
     fname = "{}/{}_overlap.png".format(qcdir, fid)
     freg_qual.savefig(fname, format='png')
     print "reg_score: " + str(reg_score)
@@ -260,12 +265,12 @@ def reg_func_qa(aligned_func, atlas, atlas_mask, qcdir=None):
     plots["std"] = plot_brain(std_ts)
     plots["snr"] = plot_brain(snr_ts)
 
-    registration_score(aligned_func, atlas_mask, qcdir=qcdir)
+    sc = registration_score(aligned_func, atlas_mask, qcdir=qcdir)
 
     for plotname, plot in plots.iteritems():
         fname = "{}/{}_{}.png".format(qcdir, scanid, plotname)
         plot.savefig(fname, format='png')
-    return
+    return sc
 
 
 def reg_anat_qa(aligned_anat, atlas, qcdir=None):

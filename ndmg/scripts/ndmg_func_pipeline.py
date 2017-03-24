@@ -151,7 +151,7 @@ def fngs_pipeline(func, t1w, atlas, atlas_brain, atlas_mask, lv_mask, labels,
     mgr().func2atlas(preproc_func, t1w, atlas, atlas_brain, atlas_mask,
                      aligned_func, aligned_t1w, outdir, bet=bet,
                      sreg=sreg, rreg=rreg)
-    mgrf.reg_func_qa(aligned_func, atlas, atlas_brain, qcdir=regfdir)
+    mgrf.reg_func_qa(aligned_func, atlas, atlas_mask, qcdir=regfdir)
     mgrf.reg_anat_qa(aligned_t1w, atlas, qcdir=regadir)
 
     print "Correcting Nuisance Variables..."
