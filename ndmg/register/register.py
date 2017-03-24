@@ -25,6 +25,7 @@ import ndmg.utils as mgu
 import nibabel as nb
 import numpy as np
 import nilearn.image as nl
+from ndmg.stats.qa_func import registration_score
 
 
 class register(object):
@@ -493,51 +494,35 @@ class register(object):
         t1w_name = mgu.get_filename(t1w)
         atlas_name = mgu.get_filename(atlas)
 
-        func2 = mgu.name_tmps(outdir, func_name, "_t1w.nii.gz")
-        temp_aligned = mgu.name_tmps(outdir, func_name, "_noresamp.nii.gz")
-        t1w_brain = mgu.name_tmps(outdir, t1w_name, "_brain.nii.gz")
-        xfm_t1w2temp = mgu.name_tmps(outdir, func_name, "_xfm_t1w2temp.mat")
-
-        # Applies skull stripping to T1 volume
-        bet_sens = '-f {} -R'.format(bet)
-        mgu.extract_brain(t1w, t1w_brain, opts=bet_sens)
-
         strats = [self.func2atlas_linear]
-        strat_id = ['lin']
+        strats_id = ['lin']
         if (nb.load(atlas).get_data().shape in [(91, 109, 91)]):
             strats.insert(0, self.func2atlas_nonlinear)
             strats_id.insert(0, 'nonlin')
 
-        strat_func = ["_aligned_func_{}.nii.gz".format(outdir, x) \
+        strat_func = ["{}/{}_aligned_func_{}.nii.gz".format(outdir, func_name, x) \
                       for x in strats_id]
-        strat_anat =  ["_aligned_t1w_{}.nii.gz".format(outdir, x) \
+        strat_anat =  ["{}/{}_aligned_t1w_{}.nii.gz".format(outdir, func_name, x) \
                       for x in strats_id]
 
-        scores = np.zeros(length(strats))
+        scores = np.zeros(len(strats))
         sc = 0
-        counter = 0
-        while sc < .75 and counter < length(strats):
-            print "Trying Strategy {}...".format(strats_id[counter])
-            this_strategy = strats[counter]
-            strat_func = mgu.name_tmps(outdir, func_name,
-               (strats[counter]))
-            strat_anat = mgu.name_tmps(outdir, func_name,
-                "_aligned_t1w_{}.nii.gz".format(strats[counter]))
+        c = 0
+        while sc < .75 and c < len(strats):
+            print "Trying Strategy {}...".format(strats_id[c])
+            this_strategy = strats[c]
             this_strategy(func, t1w, atlas, atlas_brain, atlas_mask,
-                          strat_func, strat_t1w, outdir)
-            sc = registration_score(temp_aligned, atlas_mask)
-            scores[counter] = sc  # save the score
-            counter += 1
-
+                          strat_func[c], strat_anat[c], outdir)
+            sc = registration_score(strat_func[c], atlas_mask)
+            scores[c] = sc  # save the score
+            c += 1
         best_str = np.argmax(scores)
-        print "Best strategy is {}.".format(strats_id[best_str])
         best_func = strat_func[best_str]
-        best_t1w = strat_anat[best_str]        
+        best_t1w = strat_anat[best_str]  
         cmd = "cp {} {}".format(best_func, aligned_func)
         mgu.execute_cmd(cmd)
-        cmd = "cp {} {}".format(best_anat, aligned_t1w)
-        mgu.execute_cmd(cmd)
-        
+        cmd = "cp {} {}".format(best_t1w, aligned_t1w)
+        mgu.execute_cmd(cmd)        
 
 
     def dwi2atlas(self, dwi, gtab, t1w, atlas,
