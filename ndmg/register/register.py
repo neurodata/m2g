@@ -518,12 +518,12 @@ class register(object):
             c += 1
         best_str = np.argmax(scores)
         best_func = strat_func[best_str]
-        best_t1w = strat_anat[best_str]  
+        best_t1w = strat_anat[best_str]
         cmd = "cp {} {}".format(best_func, aligned_func)
         mgu.execute_cmd(cmd)
         cmd = "cp {} {}".format(best_t1w, aligned_t1w)
         mgu.execute_cmd(cmd)
-        return (strats[0:c], scores[0:c], strat_func[0:c], strat_anat[0:c])
+        return (strats_id[0:c], scores[0:c], strat_func[0:c], strat_anat[0:c])
 
 
     def dwi2atlas(self, dwi, gtab, t1w, atlas,

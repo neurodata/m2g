@@ -252,7 +252,6 @@ def reg_func_qa(aligned_func, atlas, atlas_mask, qcdir=None):
     cmd = "mkdir -p {}".format(qcdir)
     mgu.execute_cmd(cmd)
     reg_mri_pngs(aligned_func, atlas, qcdir, mean=True)
-
     scanid = mgu.get_filename(aligned_func)
     voxel = nb.load(aligned_func).get_data()
     mean_ts = voxel.mean(axis=3)
@@ -265,9 +264,7 @@ def reg_func_qa(aligned_func, atlas, atlas_mask, qcdir=None):
     plots["mean"] = plot_brain(mean_ts)
     plots["std"] = plot_brain(std_ts)
     plots["snr"] = plot_brain(snr_ts)
-
     sc = registration_score(aligned_func, atlas_mask, qcdir=qcdir)
-
     for plotname, plot in plots.iteritems():
         fname = "{}/{}_{}.png".format(qcdir, scanid, plotname)
         plot.savefig(fname, format='png')

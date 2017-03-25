@@ -35,8 +35,8 @@ from ndmg.nuis import nuis as mgn
 from ndmg.stats.qa_reg import *
 
 
-def fngs_pipeline(func, t1w, atlas, atlas_brain, atlas_mask, lv_mask, labels,
-                  outdir, clean=False, stc=None, fmt='gpickle'):
+def ndmg_func_pipeline(func, t1w, atlas, atlas_brain, atlas_mask, lv_mask, labels,
+                       outdir, clean=False, stc=None, fmt='gpickle'):
     """
     Analyzes fMRI images and produces subject-specific derivatives.
 
@@ -138,12 +138,14 @@ def fngs_pipeline(func, t1w, atlas, atlas_brain, atlas_mask, lv_mask, labels,
                                                      aligned_func, aligned_t1w,
                                                      outdir)
     # do QC for each strategy attempted
-    for (strat, sc, fstrat, t1wstrat) in zip(strats, score, funcs, t1ws):
-        dirname = "{0:.0f}".format(sc*1000)  # get the score in the dir name
+    for (strat, sc, fstrat, t1wstrat) in zip(strats, scores, funcs, t1ws):
+        # get the score in the directory name so users know how each
+        # registration pipeline performed
+        dirname = "{0}_score_{1:.0f}".format(strat, sc*1000)
         stratf_dir = "{}/{}".format(regfdir, dirname)
         strata_dir = "{}/{}".format(regadir, dirname)
-        mgrf.reg_func_qa(aligned_func, atlas, atlas_mask, qcdir=stratf_dir)
-        mgrf.reg_anat_qa(aligned_t1w, atlas, qcdir=rega_dir)
+        mgrf.reg_func_qa(fstrat, atlas, atlas_mask, qcdir=stratf_dir)
+        mgrf.reg_anat_qa(t1wstrat, atlas, qcdir=strata_dir)
     # and make sure to note a special folder for the strategy actually used
     regf_final = "{}/{}".format(regfdir, "final")
     rega_final = "{}/{}".format(regadir, "final")
@@ -224,10 +226,10 @@ def main():
     print "Creating output temp directory: {}/tmp".format(result.outdir)
     mgu.execute_cmd("mkdir -p {} {}/tmp".format(result.outdir, result.outdir))
 
-    fngs_pipeline(result.func, result.t1w, result.atlas,
-                  result.atlas_brain, result.atlas_mask, result.lv_mask,
-                  result.labels, result.outdir, result.clean, result.stc,
-                  result.fmt)
+    ndmg_func_pipeline(result.func, result.t1w, result.atlas,
+                       result.atlas_brain, result.atlas_mask, result.lv_mask,
+                       result.labels, result.outdir, result.clean, result.stc,
+                       result.fmt)
 
 if __name__ == "__main__":
     main()
