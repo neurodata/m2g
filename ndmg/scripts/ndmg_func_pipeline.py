@@ -144,12 +144,12 @@ def ndmg_func_pipeline(func, t1w, atlas, atlas_brain, atlas_mask, lv_mask, label
         dirname = "{0}_score_{1:.0f}".format(strat, sc*1000)
         stratf_dir = "{}/{}".format(regfdir, dirname)
         strata_dir = "{}/{}".format(regadir, dirname)
-        mgrf.reg_func_qa(fstrat, atlas, atlas_mask, qcdir=stratf_dir)
+        mgrf.reg_func_qa(fstrat, atlas, atlas_mask, outdir, qcdir=stratf_dir)
         mgrf.reg_anat_qa(t1wstrat, atlas, qcdir=strata_dir)
     # and make sure to note a special folder for the strategy actually used
     regf_final = "{}/{}".format(regfdir, "final")
     rega_final = "{}/{}".format(regadir, "final")
-    mgrf.reg_func_qa(aligned_func, atlas, atlas_mask, qcdir=regf_final)
+    mgrf.reg_func_qa(aligned_func, atlas, atlas_mask, outdir, qcdir=regf_final)
     mgrf.reg_anat_qa(aligned_t1w, atlas, qcdir=rega_final)
 
     print "Correcting Nuisance Variables..."

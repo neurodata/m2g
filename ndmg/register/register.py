@@ -513,7 +513,7 @@ class register(object):
             this_strategy = strats[c]
             this_strategy(func, t1w, atlas, atlas_brain, atlas_mask,
                           strat_func[c], strat_anat[c], outdir)
-            sc = registration_score(strat_func[c], atlas_mask)
+            sc = registration_score(strat_func[c], atlas_mask, outdir)
             scores[c] = sc  # save the score
             c += 1
         best_str = np.argmax(scores)

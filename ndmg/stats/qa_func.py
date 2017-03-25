@@ -43,10 +43,13 @@ def preproc_qa(mc_brain, qcdir=None):
     parameters used.
 
     **Positional Arguments**
-        - mc_brain: the motion corrected brain. should have
-          an identically named file + '.par' created by mcflirt.
-        - scan_id: the id of the subject.
-        - qcdir: the quality control directory.
+        - mc_brain:
+            - the motion corrected brain. should have
+            an identically named file + '.par' created by mcflirt.
+        - scan_id:
+            - the id of the subject.
+        - qcdir:
+            - the quality control directory.
     """
     print "Performing QA for Preprocessing..."
     cmd = "mkdir -p {}".format(qcdir)
@@ -199,7 +202,7 @@ def preproc_qa(mc_brain, qcdir=None):
     return
 
 
-def registration_score(aligned_func, reference_mask, qcdir=None):
+def registration_score(aligned_func, reference_mask, outdir, qcdir=None):
     """
     A function to compute the registration score between two images.
     **Positional Arguments:**
@@ -207,9 +210,16 @@ def registration_score(aligned_func, reference_mask, qcdir=None):
             - the brain being aligned. assumed to be a 4d fMRI scan.
         reference_mask:
             - the template being aligned to. assumed to be a 3d mask.
+        outdir:
+            - the directory in which temporary files will be placed.
     """
-    print aligned_func
-    func = nb.load(aligned_func)
+    func_name = mgu.get_filename(aligned_func)
+    func_brain = mgu.name_tmps(outdir, func_name, "_brain.nii.gz")
+    func_mask = mgu.name_tmps(outdir, func_name, "_brain_mask.nii.gz")
+    # extract brain and use generous 0.3 threshold with -m mask option
+    mgu.extract_brain(aligned_func, func_brain, opts=' -f 0.3 -m')
+
+    func = nb.load(func_mask)
     mask = nb.load(reference_mask)
     fid = mgu.get_filename(aligned_func)
 
@@ -224,8 +234,6 @@ def registration_score(aligned_func, reference_mask, qcdir=None):
 
     fmask = np.zeros(fdat.shape)
 
-    fmask[fdat >= tval] = 1
-    fmask[fdat < tval] = 0
     freg_qual = plot_overlays(mdat, fmask)
     reg_score = fqc_utils.percent_overlap(fmask, mdat)
     if qcdir is not None:
@@ -235,17 +243,23 @@ def registration_score(aligned_func, reference_mask, qcdir=None):
     return reg_score
 
 
-def reg_func_qa(aligned_func, atlas, atlas_mask, qcdir=None):
+def reg_func_qa(aligned_func, atlas, atlas_mask, outdir, qcdir=None):
     """
     A function that produces quality control information for registration
     leg of the pipeline for functional scans.
 
     **Positional Arguments**
-        - aligned_func: the aligned functional MRI.
-        - atlas: the atlas the functional and anatomical brains
+        - aligned_func:
+            - the aligned functional MRI.
+        - atlas:
+            - the atlas the functional and anatomical brains
             were aligned to.
-        - atlas_mask: the mask for the atlas that we aligned to.
-        - qcdir: the directory in which quality control images will
+        - atlas_mask:
+            - the mask for the atlas that we aligned to.
+        - outdir:
+            - the directory where temporary files will be placed.
+        - qcdir:
+            - the directory in which quality control images will
             be placed.
     """
     print "Performing QA for Functional Registration..."
@@ -264,7 +278,7 @@ def reg_func_qa(aligned_func, atlas, atlas_mask, qcdir=None):
     plots["mean"] = plot_brain(mean_ts)
     plots["std"] = plot_brain(std_ts)
     plots["snr"] = plot_brain(snr_ts)
-    sc = registration_score(aligned_func, atlas_mask, qcdir=qcdir)
+    sc = registration_score(aligned_func, atlas_mask, outdir, qcdir=qcdir)
     for plotname, plot in plots.iteritems():
         fname = "{}/{}_{}.png".format(qcdir, scanid, plotname)
         plot.savefig(fname, format='png')
@@ -277,10 +291,13 @@ def reg_anat_qa(aligned_anat, atlas, qcdir=None):
     leg of the pipeline for anatomical scans.
 
     **Positional Arguments**
-        - aligned_anat: the aligned anatomical MRI.
-        - atlas: the atlas the functional and anatomical brains
+        - aligned_anat:
+            - the aligned anatomical MRI.
+        - atlas:
+            - the atlas the functional and anatomical brains
             were aligned to.
-        - qcdir: the directory in which quality control images will
+        - qcdir:
+            - the directory in which quality control images will
             be placed.
     """
     print "Performing QA for Anatomical Registration..."
@@ -296,9 +313,12 @@ def nuisance_qa(nuis_ts, nuis_brain, prenuis_brain, qcdir=None):
     A function to assess the quality of nuisance correction.
 
     **Positional Arguments**
-        - nuis_brain: the nuisance corrected brain image.
-        - prenuis_brain: the brain before nuisance correction.
-        - qcdir: the directory to place quality control images.
+        - nuis_brain:
+            - the nuisance corrected brain image.
+        - prenuis_brain:
+            - the brain before nuisance correction.
+        - qcdir:
+            - the directory to place quality control images.
     """
     print "Performing QA for Nuisance..."
     cmd = "mkdir -p {}".format(qcdir)
@@ -311,13 +331,18 @@ def roi_ts_qa(timeseries, func, anat, label, qcdir=None):
     A function to perform ROI timeseries quality control.
 
     **Positional Arguments**
-        - timeseries: a path to the ROI timeseries.
-        - func: the functional image that has timeseries
+        - timeseries:
+            - a path to the ROI timeseries.
+        - func:
+            - the functional image that has timeseries
             extract from it.
-        - anat: the anatomical image that is aligned.
-        - label: the label in which voxel timeseries will be
+        - anat:
+            - the anatomical image that is aligned.
+        - label:
+            - the label in which voxel timeseries will be
             downsampled.
-        - qcdir: the quality control directory to place outputs.
+        - qcdir:
+            - the quality control directory to place outputs.
     """
     print "Performing QA for ROI Timeseries..."
     cmd = "mkdir -p {}".format(qcdir)
@@ -333,11 +358,14 @@ def voxel_ts_qa(timeseries, voxel_func, atlas_mask, qcdir=None):
     A function to analyze the voxel timeseries extracted.
 
     **Positional Arguments**
-        - voxel_func: the functional timeseries that
+        - voxel_func:
+            - the functional timeseries that
           has voxel timeseries extracted from it.
-        - atlas_mask: the mask under which
+        - atlas_mask:
+            - the mask under which
           voxel timeseries was extracted.
-        - qcdir: the directory to place qc in.
+        - qcdir:
+            - the directory to place qc in.
     """
     print "Performing QA for Voxel Timeseries..."
     cmd = "mkdir -p {}".format(qcdir)
