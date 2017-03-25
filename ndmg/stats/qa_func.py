@@ -230,10 +230,6 @@ def registration_score(aligned_func, reference_mask, outdir, qcdir=None):
         # if our data is 4d, mean over the temporal dimension
         fdat = fdat.mean(axis=3)
 
-    tval = np.mean(fdat)
-
-    fmask = np.zeros(fdat.shape)
-
     freg_qual = plot_overlays(mdat, fmask)
     reg_score = fqc_utils.percent_overlap(fmask, mdat)
     if qcdir is not None:
