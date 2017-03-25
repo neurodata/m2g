@@ -500,9 +500,9 @@ class register(object):
             strats.insert(0, self.func2atlas_nonlinear)
             strats_id.insert(0, 'nonlin')
 
-        strat_func = ["{}/{}_aligned_func_{}.nii.gz".format(outdir, func_name, x) \
+        strat_func = [mgu.name_tmps(outdir, func_name, "_{}_aligned.nii.gz".format(x)) \
                       for x in strats_id]
-        strat_anat =  ["{}/{}_aligned_t1w_{}.nii.gz".format(outdir, func_name, x) \
+        strat_anat =  [mgu.name_tmps(outdir, t1w_name, "_{}_aligned.nii.gz".format(x)) \
                       for x in strats_id]
 
         scores = np.zeros(len(strats))
@@ -522,7 +522,8 @@ class register(object):
         cmd = "cp {} {}".format(best_func, aligned_func)
         mgu.execute_cmd(cmd)
         cmd = "cp {} {}".format(best_t1w, aligned_t1w)
-        mgu.execute_cmd(cmd)        
+        mgu.execute_cmd(cmd)
+        return (strats[0:c], scores[0:c], strat_func[0:c], strat_anat[0:c])
 
 
     def dwi2atlas(self, dwi, gtab, t1w, atlas,

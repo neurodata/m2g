@@ -133,10 +133,19 @@ def fngs_pipeline(func, t1w, atlas, atlas_brain, atlas_mask, lv_mask, labels,
     mgrf.preproc_qa(motion_func, prepdir)
     
     print "Aligning volumes..."
-    mgr().func2atlas(preproc_func, t1w, atlas, atlas_brain, atlas_mask,
-                     aligned_func, aligned_t1w, outdir)
-    mgrf.reg_func_qa(aligned_func, atlas, atlas_mask, qcdir=regfdir)
-    mgrf.reg_anat_qa(aligned_t1w, atlas, qcdir=regadir)
+    (strats, scores, funcs, t1ws) = mgr().func2atlas(preproc_func, t1w, atlas,
+                                                     atlas_brain, atlas_mask,
+                                                     aligned_func, aligned_t1w,
+                                                     outdir)
+    for (strat, sc, fstrat, t1wstrat) in zip(strats, score, funcs, t1ws):
+        stratf_dir = "{}/{}".format(regfdir, strat)
+        strata_dir = "{}/{}".format(regadir, strat)
+        mgrf.reg_func_qa(aligned_func, atlas, atlas_mask, qcdir=stratf_dir)
+        mgrf.reg_anat_qa(aligned_t1w, atlas, qcdir=rega_dir)
+    regf_final = "{}/{}".format(regfdir, "final")
+    rega_final = "{}/{}".format(regadir, "final")
+    mgrf.reg_func_qa(aligned_func, atlas, atlas_mask, qcdir=regf_final)
+    mgrf.reg_anat_qa(aligned_t1w, atlas, qcdir=rega_final)
 
     print "Correcting Nuisance Variables..."
     nuis = mgn().nuis_correct(aligned_func, nuis_func, lv_mask, trim=2)
