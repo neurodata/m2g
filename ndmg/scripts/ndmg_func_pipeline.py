@@ -137,11 +137,14 @@ def fngs_pipeline(func, t1w, atlas, atlas_brain, atlas_mask, lv_mask, labels,
                                                      atlas_brain, atlas_mask,
                                                      aligned_func, aligned_t1w,
                                                      outdir)
+    # do QC for each strategy attempted
     for (strat, sc, fstrat, t1wstrat) in zip(strats, score, funcs, t1ws):
-        stratf_dir = "{}/{}".format(regfdir, strat)
-        strata_dir = "{}/{}".format(regadir, strat)
+        dirname = "{0:.0f}".format(sc*1000)  # get the score in the dir name
+        stratf_dir = "{}/{}".format(regfdir, dirname)
+        strata_dir = "{}/{}".format(regadir, dirname)
         mgrf.reg_func_qa(aligned_func, atlas, atlas_mask, qcdir=stratf_dir)
         mgrf.reg_anat_qa(aligned_t1w, atlas, qcdir=rega_dir)
+    # and make sure to note a special folder for the strategy actually used
     regf_final = "{}/{}".format(regfdir, "final")
     rega_final = "{}/{}".format(regadir, "final")
     mgrf.reg_func_qa(aligned_func, atlas, atlas_mask, qcdir=regf_final)
