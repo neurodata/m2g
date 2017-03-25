@@ -230,8 +230,8 @@ def registration_score(aligned_func, reference_mask, outdir, qcdir=None):
         # if our data is 4d, mean over the temporal dimension
         fdat = fdat.mean(axis=3)
 
-    freg_qual = plot_overlays(mdat, fmask)
-    reg_score = fqc_utils.percent_overlap(fmask, mdat)
+    freg_qual = plot_overlays(mdat, fdat)
+    reg_score = fqc_utils.percent_overlap(fdat, mdat)
     if qcdir is not None:
         fname = "{}/{}_overlap.png".format(qcdir, fid)
         freg_qual.savefig(fname, format='png')
