@@ -413,10 +413,10 @@ class func_register(register):
         registration instead.
         NOTE: for this to work, must first have called self-align.
         """
-        xfm_t1w2tmp = mgu.name_tmps(self.outdir, self.epi_name,
+        xfm_t1w2temp = mgu.name_tmps(self.outdir, self.epi_name,
                                     "_xfm_t1w2temp.mat")
         # linear registration from t1 space to atlas space
-        self.align(self.t1w_brain, self.atlas_brain, xfm_t1w2tmp)
+        self.align(self.t1w_brain, self.atlas_brain, xfm_t1w2temp)
 
         # if the atlas is MNI 2mm, then we have a config file for it
         if (nb.load(self.atlas).get_data().shape in [(91, 109, 91)]):
@@ -459,8 +459,8 @@ class func_register(register):
         self.treg_epi.insert(0, epi_lin)
         self.treg_t1w.insert(0, t1w_lin)
         # just apply our previously computed linear transform
-        self.applyxfm(self.saligned_epi, self.atlas, xfm_t1w2tmp, epi_lin)
-        self.applyxfm(self.t1w, self.atlas, xfm_t1w2tmp, t1w_lin)
+        self.applyxfm(self.saligned_epi, self.atlas, xfm_t1w2temp, epi_lin)
+        self.applyxfm(self.t1w, self.atlas, xfm_t1w2temp, t1w_lin)
         self.resample(t1w_lin, self.taligned_t1w, self.atlas)
         self.resample(epi_lin, self.taligned_epi, self.atlas)
         pass
