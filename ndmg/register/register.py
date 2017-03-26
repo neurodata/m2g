@@ -414,7 +414,7 @@ class func_register(register):
         NOTE: for this to work, must first have called self-align.
         """
         xfm_t1w2temp = mgu.name_tmps(self.outdir, self.epi_name,
-                                    "_xfm_t1w2temp.mat")
+                                     "_xfm_t1w2temp.mat")
         # linear registration from t1 space to atlas space
         self.align(self.t1w_brain, self.atlas_brain, xfm_t1w2temp)
 
