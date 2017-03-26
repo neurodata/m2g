@@ -26,7 +26,7 @@ import os.path as op
 from argparse import ArgumentParser
 from datetime import datetime
 from ndmg.utils import utils as mgu
-from ndmg import register as mgr
+from ndmg import func_register as mgr
 from ndmg import graph as mgg
 from ndmg.timeseries import timeseries as mgts
 from ndmg.stats import qa_func as mgrf
@@ -75,17 +75,19 @@ def ndmg_func_pipeline(func, t1w, atlas, atlas_brain, atlas_mask, lv_mask, label
 
     qadir = "{}/qa/{}".format(outdir, func_name)
     prepdir = "{}/reg/func/preproc".format(qadir)
-    regfdir = "{}/reg/func/align".format(qadir)
-    regadir = "{}/reg/t1w/align".format(qadir)
+    sreg_fdir = "{}/reg/func/align/self".format(qadir)
+    sreg_adir = "{}/reg/t1w/align/self".format(qadir)
+    treg_fdir = "{}/reg/func/align/temp".format(qadir)
+    treg_adir = "{}/reg/t1w/align/temp".format(qadir) 
     roidir = "{}/ts_roi".format(qadir)
     voxeldir = "{}/ts_voxel".format(qadir)
     nuisdir = "{}/nuis".format(qadir)
 
-    cmd = "mkdir -p {} {} {} {} {} {} {} {}/reg/func/align {}/reg/func/preproc \
-           {}/reg/func/mc {}/ts_voxel {}/ts_roi {}/reg/t1w {}/tmp \
-           {}/connectomes/ {}/nuis"
-    cmd = cmd.format(qadir, prepdir, regfdir, regadir, roidir, voxeldir,
-                     nuisdir, *([outdir] * 9))
+    cmd = "mkdir -p {} {} {} {} {} {} {} {} {} {}/reg/func/align \
+           {}/reg/func/preproc {}/reg/func/mc {}/ts_voxel {}/ts_roi \
+           {}/reg/t1w {}/tmp {}/connectomes/ {}/nuis"
+    cmd = cmd.format(qadir, prepdir, sreg_fdir, sreg_adir, treg_fdir,
+                     treg_adir, roidir, voxeldir, nuisdir, *([outdir] * 9))
     mgu.execute_cmd(cmd)
 
     # Graphs are different because of multiple parcellations
@@ -133,24 +135,17 @@ def ndmg_func_pipeline(func, t1w, atlas, atlas_brain, atlas_mask, lv_mask, label
     mgrf.preproc_qa(motion_func, prepdir)
     
     print "Aligning volumes..."
-    (strats, scores, funcs, t1ws) = mgr().func2atlas(preproc_func, t1w, atlas,
-                                                     atlas_brain, atlas_mask,
-                                                     aligned_func, aligned_t1w,
-                                                     outdir)
-    # do QC for each strategy attempted
-    for (strat, sc, fstrat, t1wstrat) in zip(strats, scores, funcs, t1ws):
-        # get the score in the directory name so users know how each
-        # registration pipeline performed
-        dirname = "{0}_score_{1:.0f}".format(strat, sc*1000)
-        stratf_dir = "{}/{}".format(regfdir, dirname)
-        strata_dir = "{}/{}".format(regadir, dirname)
-        mgrf.reg_func_qa(fstrat, atlas, atlas_mask, outdir, qcdir=stratf_dir)
-        mgrf.reg_anat_qa(t1wstrat, atlas, qcdir=strata_dir)
-    # and make sure to note a special folder for the strategy actually used
-    regf_final = "{}/{}".format(regfdir, "final")
-    rega_final = "{}/{}".format(regadir, "final")
-    mgrf.reg_func_qa(aligned_func, atlas, atlas_mask, outdir, qcdir=regf_final)
-    mgrf.reg_anat_qa(aligned_t1w, atlas, qcdir=rega_final)
+    func_reg = mgr(preproc_func, t1w, atlas, atlas_brain, atlas_mask,
+                   aligned_func, aligned_t1w, outdir)
+    func_reg.register()
+
+    mgrf.self_reg_qa(func_reg.saligned_epi, t1w, func_reg.t1w_brain,
+                     func_reg.sreg_strat, func_reg.sreg_epi,
+                     sreg_fdir, sreg_adir, outdir)
+
+    mgrf.temp_reg_qa(aligned_func, aligned_t1w, atlas, atlas_brain,
+                     func_reg.treg_strat, func_reg.treg_epi, func_reg.treg_t1w,
+                     treg_fdir, treg_adir, outdir)
 
     print "Correcting Nuisance Variables..."
     nuis = mgn().nuis_correct(aligned_func, nuis_func, lv_mask, trim=2)

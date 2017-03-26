@@ -202,7 +202,7 @@ def preproc_qa(mc_brain, qcdir=None):
     return
 
 
-def registration_score(aligned_func, reference_mask, outdir, qcdir=None):
+def registration_score(aligned_func, reference_mask, outdir):
     """
     A function to compute the registration score between two images.
     **Positional Arguments:**
@@ -232,14 +232,10 @@ def registration_score(aligned_func, reference_mask, outdir, qcdir=None):
 
     freg_qual = plot_overlays(mdat, fdat)
     reg_score = fqc_utils.percent_overlap(fdat, mdat)
-    if qcdir is not None:
-        fname = "{}/{}_overlap.png".format(qcdir, fid)
-        freg_qual.savefig(fname, format='png')
-    print "reg_score: " + str(reg_score)
-    return reg_score
+    return (reg_score, freg_qual)
 
 
-def reg_func_qa(aligned_func, atlas, atlas_mask, outdir, qcdir=None):
+def reg_func_qa(aligned_func, atlas, outdir, qcdir):
     """
     A function that produces quality control information for registration
     leg of the pipeline for functional scans.
@@ -248,17 +244,13 @@ def reg_func_qa(aligned_func, atlas, atlas_mask, outdir, qcdir=None):
         - aligned_func:
             - the aligned functional MRI.
         - atlas:
-            - the atlas the functional and anatomical brains
-            were aligned to.
-        - atlas_mask:
-            - the mask for the atlas that we aligned to.
+            - the atlas the functional brain is aligned to.
         - outdir:
             - the directory where temporary files will be placed.
         - qcdir:
             - the directory in which quality control images will
             be placed.
     """
-    print "Performing QA for Functional Registration..."
     cmd = "mkdir -p {}".format(qcdir)
     mgu.execute_cmd(cmd)
     reg_mri_pngs(aligned_func, atlas, qcdir, mean=True)
@@ -274,14 +266,14 @@ def reg_func_qa(aligned_func, atlas, atlas_mask, outdir, qcdir=None):
     plots["mean"] = plot_brain(mean_ts)
     plots["std"] = plot_brain(std_ts)
     plots["snr"] = plot_brain(snr_ts)
-    sc = registration_score(aligned_func, atlas_mask, outdir, qcdir=qcdir)
     for plotname, plot in plots.iteritems():
         fname = "{}/{}_{}.png".format(qcdir, scanid, plotname)
         plot.savefig(fname, format='png')
-    return sc
+        plt.close()
+    pass
 
 
-def reg_anat_qa(aligned_anat, atlas, qcdir=None):
+def reg_anat_qa(aligned_anat, atlas, outdir, qcdir):
     """
     A function that produces quality control information for registration
     leg of the pipeline for anatomical scans.
@@ -292,16 +284,105 @@ def reg_anat_qa(aligned_anat, atlas, qcdir=None):
         - atlas:
             - the atlas the functional and anatomical brains
             were aligned to.
+        - outdir:
+            - the directory where temporary files will be placed.
         - qcdir:
             - the directory in which quality control images will
             be placed.
     """
-    print "Performing QA for Anatomical Registration..."
     cmd = "mkdir -p {}".format(qcdir)
     mgu.execute_cmd(cmd)
-    reg_mri_pngs(aligned_anat, atlas, qcdir, dim=3)
+    anat_name = mgu.get_filename(aligned_anat)
+    anat_brain = mgu.name_tmps(outdir, anat_name, "_brain.nii.gz")
+    # extract brain and use generous 0.3 threshold
+    mgu.extract_brain(aligned_anat, anat_brain, opts=' -f 0.3 -B -R -S')
+
+    reg_mri_pngs(anat_brain, atlas, qcdir, dim=3)
     return
 
+
+def self_reg_qa(saligned_epi, t1w, t1w_brain, sreg_strats, sreg_epis, 
+                sreg_func_dir, sreg_anat_dir, outdir):
+    """
+    A function that produces self-registration quality control figures.
+        - saligned_epi:
+            - the self aligned epi sequence.
+        - t1w:
+            - the anatomical scan associated with the current subject.
+        - t1w_brain:
+            - the skullstripped brain of the same subject.
+        - sreg_strats:
+            - the strategies attempted in self registration.
+        - sreg_epis:
+            - the epi sequences for each step of self registration.
+        - sreg_func_dir:
+            - the directory to place functional qc images.
+        - outdir:
+            - the directory where the temporary files will be placed.
+    """
+    print "Performing QA for Self-Registration..."
+    print sreg_func_dir
+    print sreg_anat_dir
+    # analyze the quality of each self registration performed
+    for (strat, fsreg) in zip(sreg_strats, sreg_epis):
+        sc = registration_score(fsreg, t1w_brain, outdir)
+        sreg_f = "{}/{}_score_{:.0f}".format(sreg_func_dir, strat, sc[0]*1000)
+        reg_func_qa(fsreg, t1w, outdir, sreg_f)
+    # make sure to note which brain is actually used
+    sreg_f_final = "{}/{}".format(sreg_func_dir, "final")
+    sc = registration_score(saligned_epi, t1w_brain, outdir)
+    reg_func_qa(saligned_epi, t1w, outdir, sreg_f_final)
+    # provide qc for the skull stripping step
+    t1brain_dat = nb.load(t1w_brain).get_data()
+    t1_dat = nb.load(t1w).get_data()
+    freg_qual = plot_overlays(t1_dat, t1brain_dat)
+    fraw_name = "{}_bet_quality.png".format(mgu.get_filename(t1w_brain))
+    fname = "{}/{}".format(sreg_anat_dir, fraw_name)              
+    freg_qual.savefig(fname)
+    plt.close()
+    pass
+
+
+def temp_reg_qa(aligned_epi, aligned_t1w, atlas, atlas_brain, treg_strats,
+                treg_epis, treg_t1ws, treg_func_dir, treg_anat_dir, outdir):
+    """
+    A function that produces self-registration quality control figures.
+        - aligned_epi:
+            - the template aligned epi sequence.
+        - aligned_t1w:
+            - the template aligned  anatomical scan associated
+            with the current subject.
+        - atlas:
+            - the template being aligned to.
+        - atlas_brain:
+            - the skullstripped brain of the same template.
+        - treg_strats:
+            - the strategies attempted in self registration.
+        - treg_epis:
+            - the epi sequences for each step of temp registration.
+        - treg_t1ws:
+            - the anatomical sequences for each step of temp registration.
+        - treg_func_dir:
+            - the directory to place functional qc images.
+        - treg_anat_dir:
+            - the directory to place anatomical qc images.
+        - outdir:
+            - the directory where the temporary files will be placed.
+    """
+    print "Performing QA for Template-Registration..."
+    # analyze the quality of each self registration performed
+    for (strat, ftreg, fareg) in zip(treg_strats, treg_epis, treg_t1ws):
+        sc = registration_score(ftreg, atlas_brain, outdir)
+        treg_f = "{}/{}_score_{:.0f}".format(treg_func_dir, strat, sc[0]*1000)
+        treg_a = "{}/{}_score_{:.0f}".format(treg_anat_dir, strat, sc[0]*1000)
+        reg_func_qa(ftreg, atlas, outdir, treg_f)
+        reg_anat_qa(fareg, atlas, outdir, treg_a)
+    # make sure to note which brain is actually used
+    treg_f_final = "{}/{}".format(treg_func_dir, "final")
+    treg_a_final = "{}/{}".format(treg_anat_dir, "final")
+    reg_func_qa(aligned_epi, atlas, outdir, treg_a_final)
+    reg_anat_qa(aligned_t1w, atlas, outdir, treg_a_final)
+    pass
 
 
 def nuisance_qa(nuis_ts, nuis_brain, prenuis_brain, qcdir=None):

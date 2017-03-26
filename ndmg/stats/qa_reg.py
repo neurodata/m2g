@@ -57,8 +57,8 @@ def reg_mri_pngs(mri, atlas, outdir, loc=0, mean=False, dim=4):
 
     # name and save the file
     fname = os.path.split(mri)[1].split(".")[0] + '.png'
-    plt.savefig(outdir + '/' + fname, format='png')
-    plt.close(fig)
+    fig.savefig(outdir + '/' + fname, format='png')
+    plt.close()
 
 def plot_brain(brain):
     cmap = LinearSegmentedColormap.from_list('mycmap2', ['black', 'magenta'])
