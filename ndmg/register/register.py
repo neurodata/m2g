@@ -433,17 +433,17 @@ class func_register(register):
                             warp_t1w2temp)
 
             print "Analyzing Nonlinear Template Registration Quality..."
-            sc_fnirt = registration_score(epi_nl, self.atlas_brain, outdir)
+            sc_fnirt = registration_score(epi_nl, self.atlas_brain, self.outdir)
 
             self.treg_strat.insert(0, 'nonlinear')
             self.treg_epi.insert(0, epi_nl)
             self.treg_t1w.insert(0, t1w_nl)
             # if self registration does well, return. else, use linear
             if (sc_fnirt[0] > 0.8):
-                self.apply_warp(self.t1w, self.taligned_t1w, self.atlas,
+                self.apply_warp(self.t1w, t1w_nl, self.atlas,
                                 warp_t1w2temp, mask=self.atlas_mask)
-                self.resample(t1w_nl, self.taligned_t1w, atlas)
-                self.resample(epi_nl, self.taligned_epi, atlas)
+                self.resample(t1w_nl, self.taligned_t1w, self.atlas)
+                self.resample(epi_nl, self.taligned_epi, self.atlas)
                 return
             else:
                 print "WARNING: Error using FNIRT."

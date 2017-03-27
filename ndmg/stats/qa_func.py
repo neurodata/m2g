@@ -297,7 +297,7 @@ def reg_anat_qa(aligned_anat, atlas, outdir, qcdir):
     # extract brain and use generous 0.3 threshold
     mgu.extract_brain(aligned_anat, anat_brain, opts=' -f 0.3 -B -R -S')
 
-    reg_mri_pngs(anat_brain, atlas, qcdir, dim=3)
+    reg_mri_pngs(anat_brain, atlas, qcdir)
     return
 
 
@@ -321,8 +321,6 @@ def self_reg_qa(saligned_epi, t1w, t1w_brain, sreg_strats, sreg_epis,
             - the directory where the temporary files will be placed.
     """
     print "Performing QA for Self-Registration..."
-    print sreg_func_dir
-    print sreg_anat_dir
     # analyze the quality of each self registration performed
     for (strat, fsreg) in zip(sreg_strats, sreg_epis):
         sc = registration_score(fsreg, t1w_brain, outdir)
@@ -425,7 +423,7 @@ def roi_ts_qa(timeseries, func, anat, label, qcdir=None):
     cmd = "mkdir -p {}".format(qcdir)
     mgu.execute_cmd(cmd)
  
-    reg_mri_pngs(anat, label, qcdir, dim=3)
+    reg_mri_pngs(anat, label, qcdir)
     fqc_utils.plot_timeseries(timeseries, qcdir=qcdir)
     return
 
