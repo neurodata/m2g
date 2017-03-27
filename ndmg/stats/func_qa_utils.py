@@ -130,7 +130,8 @@ def hdist(array1, array2):
 def percent_overlap(array1, array2):
     """
     A function to compute the degree of overlap between two binarized
-    arrays. Assumes that inputs are already appropriately thresholded.
+    arrays. Assumes that inputs are already appropriately thresholded,
+    and are of the desired shape.
 
     **Positional Arguments:**
         array1:
@@ -138,6 +139,7 @@ def percent_overlap(array1, array2):
         array2:
             - the second array.
     """
+    # binarize if not already
     array1[array1 > 0] = 1
     array1[array1 <= 0] = 0
     array2[array2 > 0] = 1
