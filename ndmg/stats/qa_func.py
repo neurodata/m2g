@@ -252,6 +252,12 @@ def reg_func_qa(aligned_func, atlas, outdir, qcdir):
             be placed.
     """
     cmd = "mkdir -p {}".format(qcdir)
+    print "aligned"
+    print aligned_func
+    print atlas
+    print outdir
+    print qcdir
+
     mgu.execute_cmd(cmd)
     reg_mri_pngs(aligned_func, atlas, qcdir, mean=True)
     scanid = mgu.get_filename(aligned_func)

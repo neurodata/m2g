@@ -26,7 +26,6 @@ import nibabel as nb
 import numpy as np
 import nilearn.image as nl
 from ndmg.stats.qa_func import registration_score
-from abc import ABCMeta, abstractmethod
 
 
 class register(object):
