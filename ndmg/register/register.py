@@ -25,7 +25,7 @@ import ndmg.utils as mgu
 import nibabel as nb
 import numpy as np
 import nilearn.image as nl
-from ndmg.stats.qa_func import registration_score
+from ndmg.stats.func_qa_utils import registration_score
 from abc import ABCMeta, abstractmethod
 
 
