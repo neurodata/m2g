@@ -346,7 +346,7 @@ class qa_func(object):
                     treg_epis, treg_t1ws, treg_func_dir, treg_anat_dir, outdir):
         """
         A function that produces self-registration quality control figures.
- 
+
         **Positional Arguments:**
            - aligned_epi:
                 - the template aligned epi sequence.
