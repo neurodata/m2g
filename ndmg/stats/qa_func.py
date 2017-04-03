@@ -13,7 +13,7 @@
 # limitations under the License.
 #
 
-# fmri_qc.py
+# qa_func.py
 # Created by Eric W Bridgeford on 2016-06-08.
 # Email: ebridge2@jhu.edu
 
@@ -329,7 +329,7 @@ class qa_func(object):
         # make sure to note which brain is actually used
         sreg_f_final = "{}/{}".format(sreg_func_dir, "final")
         sc = fqc_utils.registration_score(saligned_epi, t1w_brain, outdir)
-        self.func_reg_sc = sc[0]  # so we can recover this later
+        self.self_reg_sc = sc[0]  # so we can recover this later
         self.reg_func_qa(saligned_epi, t1w, outdir, sreg_f_final)
         # provide qc for the skull stripping step
         t1brain_dat = nb.load(t1w_brain).get_data()
@@ -381,6 +381,8 @@ class qa_func(object):
         # make sure to note which brain is actually used
         treg_f_final = "{}/{}".format(treg_func_dir, "final")
         treg_a_final = "{}/{}".format(treg_anat_dir, "final")
+        sc = fqc_utils.registration_score(aligned_epi, atlas, outdir)
+        self.temp_reg_sc = sc[0]  # so we can recover this later 
         self.reg_func_qa(aligned_epi, atlas, outdir, treg_a_final)
         self.reg_anat_qa(aligned_t1w, atlas, outdir, treg_a_final)
         pass
