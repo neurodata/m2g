@@ -390,9 +390,10 @@ class func_register(register):
         self.align(self.epi, self.t1w_brain, xfm=xfm_init1, bins=None,
                    dof=None, cost=None, searchrad=None,
                    sch="${FSLDIR}/etc/flirtsch/sch3Dtrans_3dof")
-        # perform a more aggressive 6 DOF registration
+        # perform a local registration
         self.align(self.epi, self.t1w_brain, xfm=xfm_init2, init=xfm_init1,
-                   bins=None, dof=6, cost=None, searchrad=None, sch=None)
+                   bins=None, dof=None, cost=None, searchrad=None,
+                    sch="${FSLDIR}/etc/flirtsch/simple3D.sch")
         self.applyxfm(self.epi, self.t1w_brain, xfm_init2, epi_init)
 
         # attempt EPI registration. note that this somethimes does not
