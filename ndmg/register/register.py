@@ -40,7 +40,7 @@ class register(object):
         pass
 
     def align(self, inp, ref, xfm=None, out=None, dof=12, searchrad=True,
-              bins=256, interp=None, cost="mutualinfo", sch=None):
+              bins=256, interp=None, cost="mutualinfo", sch=None, init=None):
         """
         Aligns two images and stores the transform between them
 
@@ -61,9 +61,11 @@ class register(object):
                     - a bool indicating whether to use the predefined
                     searchradius parameter (180 degree sweep in x, y, and z).
                 interp:
-                    - the interpolation method to use. Default is trilinear.
+                    - the interpolation method to use.
                 sch:
                     - the optional FLIRT schedule file.
+                init:
+                    - an initial guess of an alignment.
         """
         cmd = "flirt -in {} -ref {}".format(inp, ref)
         if xfm is not None:
@@ -83,6 +85,8 @@ class register(object):
                    "-searchrz -180 180"
         if sch is not None:
             cmd += " -schedule {}".format(sch)
+        if init is not None:
+            cmd += " -init {}".format(init)
         mgu.execute_cmd(cmd, verb=True)
 
     def align_epi(self, epi, t1, brain, out):
@@ -371,24 +375,29 @@ class func_register(register):
         cost function to get the two images close, and then uses bbr
         to obtain a good alignment of brain boundaries.
         """
-        epi_local = mgu.name_tmps(self.outdir, self.epi_name,
-                                  "_self-aligned_local.nii.gz")
+        epi_init = mgu.name_tmps(self.outdir, self.epi_name,
+                                  "_self-aligned_init.nii.gz")
         epi_bbr = mgu.name_tmps(self.outdir, self.epi_name,
                                 "_self-aligned_bbr.nii.gz")
         temp_aligned = mgu.name_tmps(self.outdir, self.epi_name,
                                      "_noresamp.nii.gz")
-        xfm_local = mgu.name_tmps(self.outdir, self.epi_name,
-                                  "_xfm_epi2t1w_local.mat")
+        xfm_init1 = mgu.name_tmps(self.outdir, self.epi_name,
+                                  "_xfm_epi2t1w_init1.mat")
+        xfm_init2 = mgu.name_tmps(self.outdir, self.epi_name,
+                                  "_xfm_epi2t1w_init2.mat")
 
-        # perform an initial alignment with a gentle local optimization
-        self.align(self.epi, self.t1w_brain, xfm=xfm_local, bins=None,
+        # perform an initial alignment with a gentle translational guess
+        self.align(self.epi, self.t1w_brain, xfm=xfm_init1, bins=None,
                    dof=None, cost=None, searchrad=None,
-                   sch="${FSLDIR}/etc/flirtsch/simple3D.sch")
-        self.applyxfm(self.epi, self.t1w_brain, xfm_local, epi_local)
+                   schedule="${FSLDIR}/etc/flirtsch/sch3Dtrans_3dof")
+        # perform a more aggressive 6 DOF registration
+        self.align(self.epi, self.t1w_brain, xfm=xfm_init2, init=xfm_init1,
+                   bins=None, dof=6, cost=None, searchrad=None, schedule=None)
+        self.applyxfm(self.epi, self.t1w_brain, xfm_init2, epi_init)
 
         # attempt EPI registration. note that this somethimes does not
         # work great if our EPI has a low field of view.
-        self.align_epi(epi_local, self.t1w, self.t1w_brain, epi_bbr)
+        self.align_epi(epi_init, self.t1w, self.t1w_brain, epi_bbr)
 
         print "Analyzing Self Registration Quality..."
         sc_bbr = registration_score(epi_bbr, self.t1w_brain, self.outdir)
@@ -399,9 +408,9 @@ class func_register(register):
             self.resample(epi_bbr, self.saligned_epi, self.t1w)
         else:
             print "WARNING: BBR Self registration failed."
-            self.resample(epi_local, self.saligned_epi, self.t1w)
+            self.resample(epi_init, self.saligned_epi, self.t1w)
         self.sreg_strat = ['bbr', 'local']
-        self.sreg_epi = [epi_bbr, epi_local]
+        self.sreg_epi = [epi_bbr, epi_init]
         pass
 
 
