@@ -33,6 +33,7 @@ import matplotlib.pyplot as plt
 import plotly as py
 import plotly.offline as offline
 from ndmg.timeseries import timeseries as mgts
+from ndmg.stats.qa_reg import plot_overlays
 
 
 def dice_coefficient(a, b):
@@ -151,6 +152,42 @@ def percent_overlap(array1, array2):
     overlap = np.logical_and(array1, array2)
     occupied_space = np.logical_or(array1, array2)
     return overlap.sum()/float(occupied_space.sum())
+
+
+def registration_score(aligned_func, reference_mask, outdir):
+    """
+	A function to compute the registration score between two images.
+
+    **Positional Arguments:**
+        aligned_func:
+        - the brain being aligned. assumed to be a 4d fMRI scan.
+        reference_mask:
+        - the template being aligned to. assumed to be a 3d mask.
+        outdir:
+        - the directory in which temporary files will be placed.
+    """
+    func_name = mgu.get_filename(aligned_func)
+    func_brain = mgu.name_tmps(outdir, func_name, "_brain.nii.gz")
+    func_mask = mgu.name_tmps(outdir, func_name, "_brain_mask.nii.gz")
+    # extract brain and use generous 0.3 threshold with -m mask option
+    mgu.extract_brain(aligned_func, func_brain, opts=' -f 0.3 -m')
+
+    func = nb.load(func_mask)
+    mask = nb.load(reference_mask)
+    fid = mgu.get_filename(aligned_func)
+
+    fdat = func.get_data()
+    mdat = mask.get_data()
+
+    if fdat.ndim == 4:
+        # if our data is 4d, mean over the temporal dimension
+        fdat = fdat.mean(axis=3)
+
+    freg_qual = plot_overlays(mdat, fdat)
+    reg_score = percent_overlap(fdat, mdat)
+    return (reg_score, freg_qual)
+
+
 
 
 def check_alignments(mri_bname, mri_aname, refname, qcdir,

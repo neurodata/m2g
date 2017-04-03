@@ -29,7 +29,7 @@ from ndmg.utils import utils as mgu
 from ndmg import func_register as mgr
 from ndmg import graph as mgg
 from ndmg.timeseries import timeseries as mgts
-from ndmg.stats import qa_func as mgrf
+from ndmg.stats.qa_func import qa_func as mgrf
 from ndmg.preproc import preproc_func as mgp
 from ndmg.nuis import nuis as mgn
 from ndmg.stats.qa_reg import *
@@ -82,6 +82,7 @@ def ndmg_func_pipeline(func, t1w, atlas, atlas_brain, atlas_mask, lv_mask, label
     roidir = "{}/ts_roi".format(qadir)
     voxeldir = "{}/ts_voxel".format(qadir)
     nuisdir = "{}/nuis".format(qadir)
+    qc_stats = "{}/{}_stats.pkl".format(qadir, func_name)
 
     cmd = "mkdir -p {} {} {} {} {} {} {} {} {} {}/reg/func/align \
            {}/reg/func/preproc {}/reg/func/mc {}/ts_voxel {}/ts_roi \
@@ -129,31 +130,32 @@ def ndmg_func_pipeline(func, t1w, atlas, atlas_brain, atlas_mask, lv_mask, label
     print("Connectomes downsampled to given labels: " +
           ", ".join([x for x in connectomes]))
 
+    qc_func = mgrf()
     # Align fMRI volumes to Atlas
     print "Preprocessing volumes..."
     mgp().preprocess(func, preproc_func, motion_func, outdir, stc=stc)
-    mgrf.preproc_qa(motion_func, prepdir)
+    qc_func.preproc_qa(motion_func, prepdir)
     
     print "Aligning volumes..."
     func_reg = mgr(preproc_func, t1w, atlas, atlas_brain, atlas_mask,
                    aligned_func, aligned_t1w, outdir)
     func_reg.register()
 
-    mgrf.self_reg_qa(func_reg.saligned_epi, t1w, func_reg.t1w_brain,
-                     func_reg.sreg_strat, func_reg.sreg_epi,
-                     sreg_fdir, sreg_adir, outdir)
+    qc_func.self_reg_qa(func_reg.saligned_epi, t1w, func_reg.t1w_brain,
+                        func_reg.sreg_strat, func_reg.sreg_epi,
+                        sreg_fdir, sreg_adir, outdir)
 
-    mgrf.temp_reg_qa(aligned_func, aligned_t1w, atlas, atlas_brain,
-                     func_reg.treg_strat, func_reg.treg_epi, func_reg.treg_t1w,
-                     treg_fdir, treg_adir, outdir)
+    qc_func.temp_reg_qa(aligned_func, aligned_t1w, atlas, atlas_brain,
+                        func_reg.treg_strat, func_reg.treg_epi, func_reg.treg_t1w,
+                        treg_fdir, treg_adir, outdir)
 
     print "Correcting Nuisance Variables..."
     nuis = mgn().nuis_correct(aligned_func, nuis_func, lv_mask, trim=2)
-    mgrf.nuisance_qa(nuis, nuis_func, aligned_func, qcdir=nuisdir)
+    qc_func.nuisance_qa(nuis, nuis_func, aligned_func, qcdir=nuisdir)
 
     print "Extracting Voxelwise Timeseries..."
     voxel = mgts().voxel_timeseries(nuis_func, atlas_mask, voxel_ts)
-    mgrf.voxel_ts_qa(voxel, nuis_func, atlas_mask, qcdir=voxeldir)
+    qc_func.voxel_ts_qa(voxel, nuis_func, atlas_mask, qcdir=voxeldir)
 
     for idx, label in enumerate(label_name):
         print "Extracting ROI timeseries for " + label + " parcellation..."
@@ -163,8 +165,10 @@ def ndmg_func_pipeline(func, t1w, atlas, atlas_brain, atlas_mask, lv_mask, label
         connectome.cor_graph(ts)
         connectome.summary()
         connectome.save_graph(connectomes[idx], fmt=fmt)
-        mgrf.roi_ts_qa(roi_ts[idx], nuis_func, aligned_t1w,
+        qc_func.roi_ts_qa(roi_ts[idx], nuis_func, aligned_t1w,
                        labels[idx], labeldir)
+    # save our statistics so that we can do group level
+    qc_func.save(qc_stats)
 
     print("Execution took: {}".format(datetime.now() - startTime))
 
