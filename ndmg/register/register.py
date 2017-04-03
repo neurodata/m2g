@@ -389,10 +389,10 @@ class func_register(register):
         # perform an initial alignment with a gentle translational guess
         self.align(self.epi, self.t1w_brain, xfm=xfm_init1, bins=None,
                    dof=None, cost=None, searchrad=None,
-                   schedule="${FSLDIR}/etc/flirtsch/sch3Dtrans_3dof")
+                   sch="${FSLDIR}/etc/flirtsch/sch3Dtrans_3dof")
         # perform a more aggressive 6 DOF registration
         self.align(self.epi, self.t1w_brain, xfm=xfm_init2, init=xfm_init1,
-                   bins=None, dof=6, cost=None, searchrad=None, schedule=None)
+                   bins=None, dof=6, cost=None, searchrad=None, sch=None)
         self.applyxfm(self.epi, self.t1w_brain, xfm_init2, epi_init)
 
         # attempt EPI registration. note that this somethimes does not
