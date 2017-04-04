@@ -370,7 +370,7 @@ class qa_func(object):
         treg_a_final = "{}/{}".format(treg_anat_dir, "final")
         sc = fqc_utils.registration_score(aligned_epi, atlas, outdir)
         self.temp_reg_sc = sc[0]  # so we can recover this later 
-        self.reg_func_qa(aligned_epi, atlas, outdir, treg_a_final)
+        self.reg_func_qa(aligned_epi, atlas, outdir, treg_f_final)
         self.reg_anat_qa(aligned_t1w, atlas, outdir, treg_a_final)
 
         # estimating mean signal intensity and deviation in brain/non-brain
@@ -380,27 +380,28 @@ class qa_func(object):
         mask_dat = mask.get_data()
 
         # threshold to identify the brain and non-brain regions
-        brain = fmri[mask > 0, :]
-        non_brain = fmri[mask == 0, :]
+        brain = fmri_dat[mask_dat > 0, :]
+        non_brain = fmri_dat[mask_dat == 0, :]
         # identify key statistics
         mean_brain = brain.mean()
-        std_nonbrain = non_brain.nanstd()
-        std_brain = brain.nanstd()
+        std_nonbrain = np.nanstd(non_brain)
+        std_brain = np.nanstd(brain)
         self.snr = mean_brain/std_nonbrain
         self.cnr = std_brain/std_nonbrain
 
-        scanid = mgu.get_filename(aligned_func)
+        scanid = mgu.get_filename(aligned_epi)
 
         np.seterr(divide='ignore', invalid='ignore')
-        snr_ts = np.divide(fmri.mean(axis=3), std_nonbrain)
-        cnr_ts = np.divide(fmri.nanstd(axis=3), std_nonbrain)
+        mean_ts = fmri_dat.mean(axis=3)
+        snr_ts = np.divide(mean_ts, std_nonbrain)
+        cnr_ts = np.divide(np.nanstd(fmri_dat, axis=3), std_nonbrain)
 
         plots = {}
         plots["mean"] = plot_brain(mean_ts)
         plots["snr"] = plot_brain(snr_ts)
         plots["cnr"] = plot_brain(cnr_ts)
         for plotname, plot in plots.iteritems():
-            fname = "{}/{}_{}.png".format(qcdir, scanid, plotname)
+            fname = "{}/{}_{}.png".format(treg_f_final, scanid, plotname)
             plot.savefig(fname, format='png')
             plt.close()
         pass
