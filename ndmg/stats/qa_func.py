@@ -252,22 +252,6 @@ class qa_func(object):
         cmd = "mkdir -p {}".format(qcdir)
         mgu.execute_cmd(cmd)
         reg_mri_pngs(aligned_func, atlas, qcdir, mean=True)
-        scanid = mgu.get_filename(aligned_func)
-        voxel = nb.load(aligned_func).get_data()
-        mean_ts = voxel.mean(axis=3)
-        std_ts = voxel.std(axis=3)
-
-        np.seterr(divide='ignore', invalid='ignore')
-        snr_ts = np.divide(mean_ts, std_ts)
-
-        plots = {}
-        plots["mean"] = plot_brain(mean_ts)
-        plots["std"] = plot_brain(std_ts)
-        plots["snr"] = plot_brain(snr_ts)
-        for plotname, plot in plots.iteritems():
-            fname = "{}/{}_{}.png".format(qcdir, scanid, plotname)
-            plot.savefig(fname, format='png')
-            plt.close()
         pass
 
 
@@ -342,8 +326,9 @@ class qa_func(object):
         pass
 
 
-    def temp_reg_qa(self, aligned_epi, aligned_t1w, atlas, atlas_brain, treg_strats,
-                    treg_epis, treg_t1ws, treg_func_dir, treg_anat_dir, outdir):
+    def temp_reg_qa(self, aligned_epi, aligned_t1w, atlas, atlas_brain, atlas_mask,
+                    treg_strats, treg_epis, treg_t1ws, treg_func_dir, treg_anat_dir,
+                    outdir):
         """
         A function that produces self-registration quality control figures.
 
@@ -357,6 +342,8 @@ class qa_func(object):
                 - the template being aligned to.
             - atlas_brain:
                 - the skullstripped brain of the same template.
+            - atlas_mask:
+                - a mask of brain tissue for an image.
             - treg_strats:
                 - the strategies attempted in self registration.
             - treg_epis:
@@ -385,6 +372,37 @@ class qa_func(object):
         self.temp_reg_sc = sc[0]  # so we can recover this later 
         self.reg_func_qa(aligned_epi, atlas, outdir, treg_a_final)
         self.reg_anat_qa(aligned_t1w, atlas, outdir, treg_a_final)
+
+        # estimating mean signal intensity and deviation in brain/non-brain
+        fmri = nb.load(aligned_epi)
+        mask = nb.load(atlas_mask)
+        fmri_dat = fmri.get_data()
+        mask_dat = mask.get_data()
+
+        # threshold to identify the brain and non-brain regions
+        brain = fmri[mask > 0, :]
+        non_brain = fmri[mask == 0, :]
+        # identify key statistics
+        mean_brain = brain.mean()
+        std_nonbrain = non_brain.nanstd()
+        std_brain = brain.nanstd()
+        self.snr = mean_brain/std_nonbrain
+        self.cnr = std_brain/std_nonbrain
+
+        scanid = mgu.get_filename(aligned_func)
+
+        np.seterr(divide='ignore', invalid='ignore')
+        snr_ts = np.divide(fmri.mean(axis=3), std_nonbrain)
+        cnr_ts = np.divide(fmri.nanstd(axis=3), std_nonbrain)
+
+        plots = {}
+        plots["mean"] = plot_brain(mean_ts)
+        plots["snr"] = plot_brain(snr_ts)
+        plots["cnr"] = plot_brain(cnr_ts)
+        for plotname, plot in plots.iteritems():
+            fname = "{}/{}_{}.png".format(qcdir, scanid, plotname)
+            plot.savefig(fname, format='png')
+            plt.close()
         pass
 
 

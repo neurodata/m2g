@@ -146,8 +146,8 @@ def ndmg_func_pipeline(func, t1w, atlas, atlas_brain, atlas_mask, lv_mask, label
                         sreg_fdir, sreg_adir, outdir)
 
     qc_func.temp_reg_qa(aligned_func, aligned_t1w, atlas, atlas_brain,
-                        func_reg.treg_strat, func_reg.treg_epi, func_reg.treg_t1w,
-                        treg_fdir, treg_adir, outdir)
+                        atlas_mask, func_reg.treg_strat, func_reg.treg_epi,
+                        func_reg.treg_t1w, treg_fdir, treg_adir, outdir)
 
     print "Correcting Nuisance Variables..."
     nuis = mgn().nuis_correct(aligned_func, nuis_func, lv_mask, trim=2)
