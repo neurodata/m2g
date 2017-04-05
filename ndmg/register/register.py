@@ -437,12 +437,9 @@ class func_register(register):
          
         xfm_t1w2temp = mgu.name_tmps(self.outdir, self.epi_name,
                                   "_xfm_t1w2temp.mat")
-        xfm_init = mgu.name_tmps(self.outdir, self.epi_name,
-                                  "_xfm_t1w2temp_init.mat")
 
         # linear registration from t1 space to atlas space
-        self.align(self.t1w_brain, self.atlas_brain, xfm_t1w2temp,
-                   init=xfm_init)
+        self.align(self.t1w_brain, self.atlas_brain, xfm_t1w2temp)
 
         # if the atlas is MNI 2mm, then we have a config file for it
         if (nb.load(self.atlas).get_data().shape in [(91, 109, 91)]):
