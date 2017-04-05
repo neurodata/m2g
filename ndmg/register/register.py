@@ -440,9 +440,6 @@ class func_register(register):
         xfm_init = mgu.name_tmps(self.outdir, self.epi_name,
                                   "_xfm_t1w2temp_init.mat")
 
-        self.align(self.t1w_brain, self.atlas_brain, xfm=xfm_init1, bins=None,
-                   dof=None, cost=None, searchrad=None,
-                   sch="${FSLDIR}/etc/flirtsch/sch3Dtrans_3dof")
         # linear registration from t1 space to atlas space
         self.align(self.t1w_brain, self.atlas_brain, xfm_t1w2temp,
                    init=xfm_init)
