@@ -349,9 +349,14 @@ class func_register(register):
         # strategies so we can iterate for qc later
         self.sreg_strat = []
         self.sreg_epi = []
+        self.sreg_sc = []
+        self.sreg_sc_fig = []
         self.treg_strat = []
         self.treg_epi = []
         self.treg_t1w = []
+        self.treg_sc = []
+        self.treg_sc_fig = []
+
         # for naming temporary files
         self.epi_name = mgu.get_filename(func)
         self.t1w_name = mgu.get_filename(t1w)
@@ -401,17 +406,22 @@ class func_register(register):
         self.align_epi(epi_init, self.t1w, self.t1w_brain, epi_bbr)
 
         print "Analyzing Self Registration Quality..."
-        sc_bbr = registration_score(epi_bbr, self.t1w_brain, self.outdir)
-
+        (sc_bbr, fig_bbr) = registration_score(epi_bbr, self.t1w_brain,
+                                               self.outdir)
+        (sc_init, fig_init) = registration_score(epi_init, self.t1w_brain,
+                                                 self.outdir)
+        self.sreg_strat = ['epireg', 'flirt']
+        self.sreg_epi = [epi_bbr, epi_init]
+        self.sreg_sc = [sc_bbr, sc_init]
+        self.sreg_sc_fig = [fig_bbr, fig_init]
         # if BBR worked well, it performs a much better self registration
         # so use that strategy
-        if (sc_bbr[0] > 0.8):
+        if (sc_bbr == np.max(self.sreg_sc)):
             self.resample(epi_bbr, self.saligned_epi, self.t1w)
         else:
             print "WARNING: BBR Self registration failed."
             self.resample(epi_init, self.saligned_epi, self.t1w)
-        self.sreg_strat = ['bbr', 'local']
-        self.sreg_epi = [epi_bbr, epi_init]
+
         pass
 
 
@@ -422,10 +432,25 @@ class func_register(register):
         registration instead.
         NOTE: for this to work, must first have called self-align.
         """
+         
         xfm_t1w2temp = mgu.name_tmps(self.outdir, self.epi_name,
-                                     "_xfm_t1w2temp.mat")
+                                  "_xfm_t1w2temp.mat")
+        xfm_init1 = mgu.name_tmps(self.outdir, self.epi_name,
+                                  "_xfm_t1w2temp_init1.mat")
+        xfm_init2 = mgu.name_tmps(self.outdir, self.epi_name,
+                                  "_xfm_t1w2temp_init2.mat")
+
+        self.align(self.t1w_brain, self.atlas_brain, xfm=xfm_init1, bins=None,
+                   dof=None, cost=None, searchrad=None,
+                   sch="${FSLDIR}/etc/flirtsch/sch3Dtrans_3dof")
+        # perform a local registration
+        self.align(self.t1w_brain, self.atlas_brain, xfm=xfm_init2,
+                   init=xfm_init1,
+                   bins=None, dof=None, cost=None, searchrad=None,
+                   sch="${FSLDIR}/etc/flirtsch/simple3D.sch")
         # linear registration from t1 space to atlas space
-        self.align(self.t1w_brain, self.atlas_brain, xfm_t1w2temp)
+        self.align(self.t1w_brain, self.atlas_brain, xfm_t1w2temp,
+                   init=xfm_init2)
 
         # if the atlas is MNI 2mm, then we have a config file for it
         if (nb.load(self.atlas).get_data().shape in [(91, 109, 91)]):
@@ -442,20 +467,21 @@ class func_register(register):
                             warp_t1w2temp)
 
             print "Analyzing Nonlinear Template Registration Quality..."
-            sc_fnirt = registration_score(epi_nl, self.atlas_brain, self.outdir)
+            (sc_fnirt, fig_fnirt) = registration_score(epi_nl, self.atlas_brain,
+                self.outdir)
 
-            self.treg_strat.insert(0, 'nonlinear')
+            self.treg_strat.insert(0, 'fnirt')
             self.treg_epi.insert(0, epi_nl)
             self.treg_t1w.insert(0, t1w_nl)
+            self.treg_sc.insert(0, sc_fnirt)
+            self.treg_sc_fig.insert(0, fig_fnirt)
             # if self registration does well, return. else, use linear
-            if (sc_fnirt[0] > 0.8):
+            if (sc_fnirt > 0.8):
                 self.apply_warp(self.t1w, t1w_nl, self.atlas,
                                 warp_t1w2temp, mask=self.atlas_mask)
                 self.resample(t1w_nl, self.taligned_t1w, self.atlas)
                 self.resample(epi_nl, self.taligned_epi, self.atlas)
                 return
-            else:
-                print "WARNING: Error using FNIRT."
         else:
             print "Atlas is not 2mm MNI. Using linear template registration."
 
@@ -464,14 +490,23 @@ class func_register(register):
                                 "_temp-aligned_linear.nii.gz")
         t1w_lin = mgu.name_tmps(self.outdir, self.t1w_name,
                                 "_temp-aligned_linear.nii.gz") 
-        self.treg_strat.insert(0, 'linear')
+        self.treg_strat.insert(0, 'flirt')
         self.treg_epi.insert(0, epi_lin)
         self.treg_t1w.insert(0, t1w_lin)
         # just apply our previously computed linear transform
         self.applyxfm(self.saligned_epi, self.atlas, xfm_t1w2temp, epi_lin)
         self.applyxfm(self.t1w, self.atlas, xfm_t1w2temp, t1w_lin)
-        self.resample(t1w_lin, self.taligned_t1w, self.atlas)
-        self.resample(epi_lin, self.taligned_epi, self.atlas)
+        (sc_flirt, fig_flirt) = registration_score(epi_lin, self.atlas_brain,
+            self.outdir)
+        self.treg_sc.insert(0, sc_flirt)
+        self.treg_sc_fig.insert(0, fig_flirt)
+
+        if (sc_flirt == np.max(self.treg_sc)):
+            self.resample(t1w_lin, self.taligned_t1w, self.atlas)
+            self.resample(epi_lin, self.taligned_epi, self.atlas)
+        else:
+            self.resample(t1w_nl, self.taligned_t1w, self.atlas)
+            self.resample(epi_nl, self.taligned_epi, self.atlas)
         pass
 
 

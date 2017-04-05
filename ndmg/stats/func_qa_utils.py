@@ -179,6 +179,8 @@ def registration_score(aligned_func, reference_mask, outdir):
     fdat = func.get_data()
     mdat = mask.get_data()
 
+    prod_im = np.multiply(fdat, mdat)
+
     if fdat.ndim == 4:
         # if our data is 4d, mean over the temporal dimension
         fdat = fdat.mean(axis=3)

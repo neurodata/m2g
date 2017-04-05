@@ -26,6 +26,7 @@ import numpy as np
 from ndmg.utils import utils as mgu
 from ndmg.stats import func_qa_utils as fqc_utils
 from ndmg.stats.qa_reg import reg_mri_pngs, plot_brain, plot_overlays
+from ndmg.register.register import func_register as ndfr
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import plotly as py
@@ -283,22 +284,13 @@ class qa_func(object):
         return
 
 
-    def self_reg_qa(self, saligned_epi, t1w, t1w_brain, sreg_strats, sreg_epis, 
-                    sreg_func_dir, sreg_anat_dir, outdir):
+    def self_reg_qa(self, freg, sreg_func_dir, sreg_anat_dir, outdir):
         """
         A function that produces self-registration quality control figures.
 
         **Positional Arguments:**
-            - saligned_epi:
-                - the self aligned epi sequence.
-            - t1w:
-                - the anatomical scan associated with the current subject.
-            - t1w_brain:
-                - the skullstripped brain of the same subject.
-            - sreg_strats:
-                - the strategies attempted in self registration.
-            - sreg_epis:
-                - the epi sequences for each step of self registration.
+            - freg:
+                - the func_register object from registration.
             - sreg_func_dir:
                 - the directory to place functional qc images.
             - outdir:
@@ -306,50 +298,38 @@ class qa_func(object):
         """
         print "Performing QA for Self-Registration..."
         # analyze the quality of each self registration performed
-        for (strat, fsreg) in zip(sreg_strats, sreg_epis):
-            sc = fqc_utils.registration_score(fsreg, t1w_brain, outdir)
-            sreg_f = "{}/{}_score_{:.0f}".format(sreg_func_dir, strat, sc[0]*1000)
-            self.reg_func_qa(fsreg, t1w, outdir, sreg_f)
+        regiter = zip(freg.sreg_strat, freg.sreg_epi,
+                      freg.sreg_sc, freg.sreg_sc_fig)
+        for (strat, fsreg, sc, fig_ov) in regiter:
+            sreg_f = "{}/{}_score_{:.0f}".format(sreg_func_dir, strat, sc*1000)
+            func_name = mgu.get_filename(fsreg)
+            self.reg_func_qa(fsreg, freg.t1w, outdir, sreg_f)
+            fname = "{}/{}_bet_quality.png".format(sreg_f, func_name)
+            fig_ov.savefig(fname)
+            plt.close()
         # make sure to note which brain is actually used
-        sreg_f_final = "{}/{}".format(sreg_func_dir, "final")
-        sc = fqc_utils.registration_score(saligned_epi, t1w_brain, outdir)
-        self.self_reg_sc = sc[0]  # so we can recover this later
-        self.reg_func_qa(saligned_epi, t1w, outdir, sreg_f_final)
+        best_sc = np.max(freg.sreg_sc)
+        sreg_f_final = "{}/{}_score_{:.0f}".format(sreg_func_dir, "final", sc*1000)
+        self.self_reg_sc = best_sc  # so we can recover this later
+        self.reg_func_qa(freg.saligned_epi, freg.t1w, outdir, sreg_f_final)
         # provide qc for the skull stripping step
-        t1brain_dat = nb.load(t1w_brain).get_data()
-        t1_dat = nb.load(t1w).get_data()
+        t1brain_dat = nb.load(freg.t1w_brain).get_data()
+        t1_dat = nb.load(freg.t1w).get_data()
         freg_qual = plot_overlays(t1_dat, t1brain_dat)
-        fraw_name = "{}_bet_quality.png".format(mgu.get_filename(t1w_brain))
+        fraw_name = "{}_bet_quality.png".format(mgu.get_filename(freg.t1w_brain))
         fname = "{}/{}".format(sreg_anat_dir, fraw_name)              
         freg_qual.savefig(fname)
         plt.close()
         pass
 
 
-    def temp_reg_qa(self, aligned_epi, aligned_t1w, atlas, atlas_brain, atlas_mask,
-                    treg_strats, treg_epis, treg_t1ws, treg_func_dir, treg_anat_dir,
-                    outdir):
+    def temp_reg_qa(self, freg, treg_func_dir, treg_anat_dir, outdir):
         """
         A function that produces self-registration quality control figures.
 
         **Positional Arguments:**
-           - aligned_epi:
-                - the template aligned epi sequence.
-            - aligned_t1w:
-                - the template aligned  anatomical scan associated
-                with the current subject.
-            - atlas:
-                - the template being aligned to.
-            - atlas_brain:
-                - the skullstripped brain of the same template.
-            - atlas_mask:
-                - a mask of brain tissue for an image.
-            - treg_strats:
-                - the strategies attempted in self registration.
-            - treg_epis:
-                - the epi sequences for each step of temp registration.
-            - treg_t1ws:
-                - the anatomical sequences for each step of temp registration.
+            - freg:
+                - the functional registration object.
             - treg_func_dir:
                 - the directory to place functional qc images.
             - treg_anat_dir:
@@ -359,23 +339,28 @@ class qa_func(object):
         """
         print "Performing QA for Template-Registration..."
         # analyze the quality of each self registration performed
-        for (strat, ftreg, fareg) in zip(treg_strats, treg_epis, treg_t1ws):
-            sc = fqc_utils.registration_score(ftreg, atlas_brain, outdir)
-            treg_f = "{}/{}_score_{:.0f}".format(treg_func_dir, strat, sc[0]*1000)
-            treg_a = "{}/{}_score_{:.0f}".format(treg_anat_dir, strat, sc[0]*1000)
-            self.reg_func_qa(ftreg, atlas, outdir, treg_f)
-            self.reg_anat_qa(fareg, atlas, outdir, treg_a)
+        regiter =  zip(freg.treg_strat, freg.treg_epi, freg.treg_t1w,
+                       freg.treg_sc, freg.treg_sc_fig)
+        for (strat, ftreg, fareg, sc, fig_ov) in regiter:
+            treg_f = "{}/{}_score_{:.0f}".format(treg_func_dir, strat, sc*1000)
+            treg_a = "{}/{}_score_{:.0f}".format(treg_anat_dir, strat, sc*1000)
+            self.reg_func_qa(ftreg, freg.atlas, outdir, treg_f)
+            self.reg_anat_qa(fareg, freg.atlas, outdir, treg_a)
+            func_name = mgu.get_filename(ftreg)
+            fname = "{}/{}_bet_quality.png".format(treg_f, func_name)
+            fig_ov.savefig(fname)
+            plt.close()
         # make sure to note which brain is actually used
-        treg_f_final = "{}/{}".format(treg_func_dir, "final")
-        treg_a_final = "{}/{}".format(treg_anat_dir, "final")
-        sc = fqc_utils.registration_score(aligned_epi, atlas, outdir)
-        self.temp_reg_sc = sc[0]  # so we can recover this later 
-        self.reg_func_qa(aligned_epi, atlas, outdir, treg_f_final)
-        self.reg_anat_qa(aligned_t1w, atlas, outdir, treg_a_final)
+        best_sc = np.max(freg.treg_sc)
+        treg_f_final = "{}/{}_score_{:.0f}".format(treg_func_dir, "final", best_sc*1000)
+        treg_a_final = "{}/{}_score_{:.0f}".format(treg_anat_dir, "final", best_sc*1000)
+        self.temp_reg_sc = best_sc  # so we can recover this later 
+        self.reg_func_qa(freg.taligned_epi, freg.atlas, outdir, treg_f_final)
+        self.reg_anat_qa(freg.taligned_t1w, freg.atlas, outdir, treg_a_final)
 
         # estimating mean signal intensity and deviation in brain/non-brain
-        fmri = nb.load(aligned_epi)
-        mask = nb.load(atlas_mask)
+        fmri = nb.load(freg.taligned_epi)
+        mask = nb.load(freg.atlas_mask)
         fmri_dat = fmri.get_data()
         mask_dat = mask.get_data()
 
@@ -389,7 +374,7 @@ class qa_func(object):
         self.snr = mean_brain/std_nonbrain
         self.cnr = std_brain/std_nonbrain
 
-        scanid = mgu.get_filename(aligned_epi)
+        scanid = mgu.get_filename(freg.taligned_epi)
 
         np.seterr(divide='ignore', invalid='ignore')
         mean_ts = fmri_dat.mean(axis=3)
