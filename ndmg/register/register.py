@@ -410,18 +410,20 @@ class func_register(register):
                                                self.outdir)
         (sc_init, fig_init) = registration_score(epi_init, self.t1w_brain,
                                                  self.outdir)
-        self.sreg_strat = ['epireg', 'flirt']
-        self.sreg_epi = [epi_bbr, epi_init]
-        self.sreg_sc = [sc_bbr, sc_init]
-        self.sreg_sc_fig = [fig_bbr, fig_init]
-        # if BBR worked well, it performs a much better self registration
-        # so use that strategy
-        if (sc_bbr == np.max(self.sreg_sc)):
+
+        self.sreg_strat.insert(0, 'epireg')
+        self.sreg_epi.insert(0, epi_bbr)
+        self.sreg_sc.insert(0, sc_bbr)
+        self.sreg_sc_fig.insert(0, fig_bbr)
+        if (sc_bbr > 0.8):
             self.resample(epi_bbr, self.saligned_epi, self.t1w)
         else:
-            print "WARNING: BBR Self registration failed."
-            self.resample(epi_init, self.saligned_epi, self.t1w)
-
+            print "Warning: BBR self registration failed."
+            self.sreg_strat.insert(0, 'flirt')
+            self.sreg_epi.insert(0, epi_init)
+            self.sreg_sc.insert(0, sc_init)
+            self.sreg_sc_fig.insert(0, fig_init)
+            self.resample(epi_bbr, self.saligned_epi, self.t1w)
         pass
 
 
@@ -435,22 +437,15 @@ class func_register(register):
          
         xfm_t1w2temp = mgu.name_tmps(self.outdir, self.epi_name,
                                   "_xfm_t1w2temp.mat")
-        xfm_init1 = mgu.name_tmps(self.outdir, self.epi_name,
-                                  "_xfm_t1w2temp_init1.mat")
-        xfm_init2 = mgu.name_tmps(self.outdir, self.epi_name,
-                                  "_xfm_t1w2temp_init2.mat")
+        xfm_init = mgu.name_tmps(self.outdir, self.epi_name,
+                                  "_xfm_t1w2temp_init.mat")
 
         self.align(self.t1w_brain, self.atlas_brain, xfm=xfm_init1, bins=None,
                    dof=None, cost=None, searchrad=None,
                    sch="${FSLDIR}/etc/flirtsch/sch3Dtrans_3dof")
-        # perform a local registration
-        self.align(self.t1w_brain, self.atlas_brain, xfm=xfm_init2,
-                   init=xfm_init1,
-                   bins=None, dof=None, cost=None, searchrad=None,
-                   sch="${FSLDIR}/etc/flirtsch/simple3D.sch")
         # linear registration from t1 space to atlas space
         self.align(self.t1w_brain, self.atlas_brain, xfm_t1w2temp,
-                   init=xfm_init2)
+                   init=xfm_init)
 
         # if the atlas is MNI 2mm, then we have a config file for it
         if (nb.load(self.atlas).get_data().shape in [(91, 109, 91)]):
