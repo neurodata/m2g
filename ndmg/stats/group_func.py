@@ -23,6 +23,7 @@ import plotly.offline as pyo
 from plotly.tools import FigureFactory as ff
 from ndmg.stats.qa_func import qa_func as fqa
 import numpy as np
+import ndmg.utils as mgu
 import os
 
 
@@ -41,10 +42,11 @@ class group_func(object):
                 - an optional parameter for the name of the dataset
                   to be present in the quality control output filenames.
         """
+        print np.__version__
         self.ndmgdir = basedir
-        self.qadir = "{}/qa/".format(self.ndmgdir)
+        self.qadir = "{}/qa".format(self.ndmgdir)
         self.outdir = outdir
-        self.conn_dir = "{}/connectomes/".format(self.ndmgdir)
+        self.conn_dir = "{}/connectomes".format(self.ndmgdir)
         self.dataset = dataset
 
         (self.qa_files, self.subs) = self.get_qa_files()
@@ -63,8 +65,10 @@ class group_func(object):
         qa_files = []
         subs = []
         for sub in os.listdir(self.qadir):
-            sub_qa = "{}/{}_stats.pkl".format(sub)
+            print sub
+            sub_qa = "{}/{}/{}_stats.pkl".format(self.qadir, sub, sub)
             # if the files exists, add it to our qa_files
+            print sub_qa
             if os.path.isfile(sub_qa):
                 qa_files.append(sub_qa)
                 subs.append(sub)
@@ -90,7 +94,7 @@ class group_func(object):
         A function to load the quality control objects.
         """
         qa_objects = []
-        for qa_file in qa_files:
+        for qa_file in self.qa_files:
             # load the qa objects as qa_func objects
             qa_objects.append(fqa.load(qa_file))
         return qa_objects
@@ -107,7 +111,7 @@ class group_func(object):
         """
         A function that performs group level registration quality control.
         """
-        regdir = "{}/{}".format(outdir, "reg")
+        regdir = "{}/{}".format(self.outdir, "reg")
         cmd = "mkdir -p {}".format(regdir)
         mgu.execute_cmd(cmd)
 
@@ -120,23 +124,19 @@ class group_func(object):
             temp_reg_sc.append(sub.temp_reg_sc)
             cnr.append(sub.cnr)
             snr.append(sub.snr)
-        fig_self = ff.create_violin(self_reg_sc,
-                                    yaxis=dict(title="Registration Score"),
-                                    name="Subject Self Registration",
-                                    text=~paste('subject: ', self.subs)) 
-        fig_temp = ff.create_violin(temp_reg_sc,
-                                    yaxis=dict(title="Registration Score"),
-                                    name="Subject Template Registration",
-                                    text=~paste('subject: ', self.subs))
-        fig_cnr = ff.create_violin(cnr,
-                                   yaxis=dict(title="Contrast-to-Noise Ratio"),
-                                   name="Contrast to Noise after Registration",
-                                   text=~paste('subject: ', self.subs))
-        fig_snr = ff.create_violin(snr,
-                                   yaxis=dict(title="Contrast-to-Noise Ratio"),
-                                   name="Contrast to Noise after Registration",
-                                   text=~paste('subject: ', self.subs))
-
+        fig_self = ff.create_violin(self_reg_sc)
+                                    #yaxis=dict(title="Registration Score"),
+                                    #name="Subject Self Registration",
+                                    #text='subject: {}'.format(self.subs))
+        fig_temp = ff.create_violin(temp_reg_sc)
+                                    #yaxis=dict(title="Registration Score"),
+                                    #name="Subject Template Registration",
+        fig_cnr = ff.create_violin(cnr)
+                                   #yaxis=dict(title="Contrast-to-Noise Ratio"),
+                                   #name="Contrast to Noise after Registration",
+        fig_snr = ff.create_violin(snr)
+                                   #name="Contrast to Noise after Registration",
+                                   #yaxis=dict(title="Contrast-to-Noise Ratio"),
 
         fname_self = "self_reg_group.html"
         fname_temp = "temp_reg_group.html"
@@ -144,15 +144,18 @@ class group_func(object):
         fname_snr = "snr_reg_group.html"
         # if a dataset name is provided, add it to the name
         if self.dataset is not None:
-            fname_self = "{}/{}_{}".format(regdir, self.dataset,
+            fname_self = "{}_{}".format(self.dataset,
                                            fname_self)
-            fname_temp = "{}/{}_{}".format(regdir, self.dataset,
+            fname_temp = "{}_{}".format(self.dataset,
                                            fname_temp)
-            fname_cnr = "{}/{}_{}".format(regdir, self.dataset,
+            fname_cnr = "{}_{}".format(self.dataset,
                                           fname_cnr)
-            fname_snr = "{}/{}_{}".format(regdir, self.dataset,
+            fname_snr = "{}_{}".format(self.dataset,
                                           fname_snr)
-
+        fname_self = "{}/{}".format(regdir, fname_self)
+        fname_temp = "{}/{}".format(regdir, fname_temp)
+        fname_cnr = "{}/{}".format(regdir, fname_cnr)
+        fname_snr = "{}/{}".format(regdir, fname_snr)
         pyo.plot(fig_snr, filename=fname_snr, auto_open=False)
         pyo.plot(fig_self, filename=fname_self, auto_open=False)
         pyo.plot(fig_temp, filename=fname_temp, auto_open=False)
@@ -163,14 +166,15 @@ class group_func(object):
         """
         A function that performs group level motion corrective quality control.
         """
-        mcdir = "{}/{}".format(outdir, "mc")
+        mcdir = "{}/{}".format(self.outdir, "mc")
         cmd = "mkdir -p {}".format(mcdir)
         mgu.execute_cmd(cmd)
 
         dimension = ["x", "y", "z", "x", "y", "z"]
         motion = ["translation", "translation", "translation",
                   "rotation", "rotation", "rotation"]
-        mean_per_dim = np.zeros(len(self.qa_objects), 6)
+
+        mean_per_dim = np.zeros((len(self.qa_objects), 6))
 
         for sub in self.qa_objects:
             abs_mc = sub.abs_pos
@@ -186,7 +190,22 @@ class group_func(object):
                                           fname_self)
             fname_rel = "{}/{}_{}".format(mcdir, self.dataset,
                                           fname_temp)
+ 
+        fig_abs = ff.create_violin(trans_abs)
+                                    #name="Mean Absolute Translation from Volume to Volume",
+                                    #text='subject: {}'.format(self.subs))
+                                    #yaxis=dict(title="Registration Score"),
+        fig_rel = ff.create_violin(trans_rel)
+                                    #name="Mean Relative Translation from Volume to Volume",
+                                    #text='subject: {}'.format(self.subs))
+                                    #yaxis=dict(title="Registration Score"),
         pyo.plot(fig_abs, filename=fname_abs, auto_open=False)
         pyo.plot(fig_rel, filename=fname_rel, auto_open=False)
         pass
 
+    def connectome_analysis(self):
+        """
+        A function that calls ndmg group analysis script for each connectome,
+        at each scale.
+        """
+        pass

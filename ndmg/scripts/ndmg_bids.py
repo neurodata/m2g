@@ -154,7 +154,7 @@ def group_level(inDir, outDir, dataset=None, atlas=None, minimal=False,
     """
     if not dwi:
         fgr = group_func(inDir, outDir, dataset=dataset)
-        pass
+        return
     outDir += "/graphs"
     mgu.execute_cmd("mkdir -p {}".format(outDir))
 
@@ -290,7 +290,7 @@ def main():
                 tindir = inDir
             s3_get_data(buck, tpath, tindir, public=creds)
         modif = 'qa'
-        group_level(inDir, outDir, dataset, atlas, minimal, log, hemi)
+        group_level(inDir, outDir, dataset, atlas, minimal, log, hemi, dwi)
 
     if push and buck is not None and remo is not None:
         print("Pushing results to S3...")
