@@ -20,11 +20,13 @@
 import pickle
 import plotly as py
 import plotly.offline as pyo
+from plotly.tools import make_subplots
 from plotly.tools import FigureFactory as ff
 from ndmg.stats.qa_func import qa_func as fqa
 import numpy as np
 import ndmg.utils as mgu
 import os
+import pandas as pd
 
 
 class group_func(object):
@@ -42,7 +44,6 @@ class group_func(object):
                 - an optional parameter for the name of the dataset
                   to be present in the quality control output filenames.
         """
-        print np.__version__
         self.ndmgdir = basedir
         self.qadir = "{}/qa".format(self.ndmgdir)
         self.outdir = outdir
@@ -65,10 +66,8 @@ class group_func(object):
         qa_files = []
         subs = []
         for sub in os.listdir(self.qadir):
-            print sub
             sub_qa = "{}/{}/{}_stats.pkl".format(self.qadir, sub, sub)
             # if the files exists, add it to our qa_files
-            print sub_qa
             if os.path.isfile(sub_qa):
                 qa_files.append(sub_qa)
                 subs.append(sub)
@@ -124,41 +123,67 @@ class group_func(object):
             temp_reg_sc.append(sub.temp_reg_sc)
             cnr.append(sub.cnr)
             snr.append(sub.snr)
-        fig_self = ff.create_violin(self_reg_sc)
-                                    #yaxis=dict(title="Registration Score"),
-                                    #name="Subject Self Registration",
-                                    #text='subject: {}'.format(self.subs))
-        fig_temp = ff.create_violin(temp_reg_sc)
-                                    #yaxis=dict(title="Registration Score"),
-                                    #name="Subject Template Registration",
-        fig_cnr = ff.create_violin(cnr)
-                                   #yaxis=dict(title="Contrast-to-Noise Ratio"),
-                                   #name="Contrast to Noise after Registration",
-        fig_snr = ff.create_violin(snr)
-                                   #name="Contrast to Noise after Registration",
-                                   #yaxis=dict(title="Contrast-to-Noise Ratio"),
 
-        fname_self = "self_reg_group.html"
-        fname_temp = "temp_reg_group.html"
+        # need to use pandas to make the violin plots look right
+        sreg_sc_names = ['Self']*len(self_reg_sc)
+        sreg_sc_df = pd.DataFrame(dict(Score=self_reg_sc,
+                                      Method=sreg_sc_names))
+        treg_sc_names = ['Template']*len(temp_reg_sc)
+        treg_sc_df = pd.DataFrame(dict(Score=temp_reg_sc,
+                                      Method=treg_sc_names))
+        cnr_names = ['CNR']*len(cnr)
+        cnr_df = pd.DataFrame(dict(CNR=cnr, ratio=cnr_names))
+        snr_names = ['SNR']*len(snr)
+        snr_df = pd.DataFrame(dict(SNR=snr, ratio=snr_names))
+
+        fig_sreg_sc = ff.create_violin(sreg_sc_df, data_header='Score',
+                                    group_header='Method',
+                                    title='Self Registration Scores')
+        fig_treg_sc = ff.create_violin(treg_sc_df, data_header='Score',
+                                    group_header='Method',
+                                    title='Template Registration Scores')
+        fig_cnr = ff.create_violin(cnr_df, data_header='CNR',
+                                   group_header='ratio',
+                                   title='Contrast to Noise Ratio')
+        fig_snr = ff.create_violin(snr_df, data_header='SNR',
+                                   group_header='ratio',
+                                   title='Signal to Noise Ratio')
+
+        #fig_reg = make_subplots(rows=2, cols=2)
+        #fig_reg.append_trace(fig_sreg_sc, 1, 1)
+        #fig_reg.append_trace(fig_treg_sc, 1, 2)
+        #fig_reg.append_trace(fig_cnr, 2, 1)
+        #fig_reg.append_trace(fig_snr, 2, 2)
+        
+
+        #fname_reg_sc = "self_reg_scores.html"
+        fname_sreg_sc = "self_sreg_scores.html"
+        fname_treg_sc = "self_treg_scores.html"
         fname_cnr = "cnr_reg_group.html"
         fname_snr = "snr_reg_group.html"
         # if a dataset name is provided, add it to the name
         if self.dataset is not None:
-            fname_self = "{}_{}".format(self.dataset,
-                                           fname_self)
-            fname_temp = "{}_{}".format(self.dataset,
-                                           fname_temp)
+            #fname_reg_sc = "{}_{}".format(self.dataset,
+            #                               fname_reg_sc)
+            fname_sreg_sc = "{}_{}".format(self.dataset,
+                                           fname_sreg_sc)
+            fname_treg_sc = "{}_{}".format(self.dataset,
+                                           fname_treg_sc)
             fname_cnr = "{}_{}".format(self.dataset,
                                           fname_cnr)
             fname_snr = "{}_{}".format(self.dataset,
                                           fname_snr)
-        fname_self = "{}/{}".format(regdir, fname_self)
-        fname_temp = "{}/{}".format(regdir, fname_temp)
+
+        fname_sreg_sc = "{}/{}".format(regdir, fname_sreg_sc)
+        fname_treg_sc = "{}/{}".format(regdir, fname_treg_sc)
+        #fname_reg_sc = "{}/{}".format(regdir, fname_reg_sc)
         fname_cnr = "{}/{}".format(regdir, fname_cnr)
         fname_snr = "{}/{}".format(regdir, fname_snr)
+
         pyo.plot(fig_snr, filename=fname_snr, auto_open=False)
-        pyo.plot(fig_self, filename=fname_self, auto_open=False)
-        pyo.plot(fig_temp, filename=fname_temp, auto_open=False)
+        pyo.plot(fig_sreg_sc, filename=fname_sreg_sc, auto_open=False)
+        pyo.plot(fig_treg_sc, filename=fname_treg_sc, auto_open=False)
+        #pyo.plot(fig_reg, filename=fname_reg_sc, auto_open=False)
         pyo.plot(fig_cnr, filename=fname_cnr, auto_open=False)
         pass
 
@@ -170,37 +195,66 @@ class group_func(object):
         cmd = "mkdir -p {}".format(mcdir)
         mgu.execute_cmd(cmd)
 
-        dimension = ["x", "y", "z", "x", "y", "z"]
-        motion = ["translation", "translation", "translation",
-                  "rotation", "rotation", "rotation"]
+        trans_abs = np.zeros((len(self.qa_objects)))
+        trans_rel = np.zeros((len(self.qa_objects)))
+        trans_abs_gt = np.zeros((len(self.qa_objects)))
+        trans_rel_gt = np.zeros((len(self.qa_objects)))
 
-        mean_per_dim = np.zeros((len(self.qa_objects), 6))
+        for i, sub in enumerate(self.qa_objects):
+            abs_m = np.linalg.norm(sub.abs_pos[:, 3:6], axis=1)
+            rel_m = np.linalg.norm(sub.rel_pos[:, 3:6], axis=1)
+            trans_abs[i] = np.mean(abs_m)
+            trans_rel[i] = np.mean(rel_m)
+            trans_abs_gt[i] = np.sum(abs_m > 0.2)
+            trans_rel_gt[i] = np.sum(rel_m > 0.05)
 
-        for sub in self.qa_objects:
-            abs_mc = sub.abs_pos
-            rel_mc = sub.rel_pos
-
-        trans_abs = np.linalg.norm(abs_mc[:, 3:6], axis=1)
-        trans_rel = np.linalg.norm(abs_mc[:, 3:6], axis=1)
         fname_abs = "trans_absolute_group.html"
         fname_rel = "trans_relative_group.html"
+        fname_abs_gt = "large_trans_absolute_motion.html"
+        fname_rel_gt = "large_trans_relative_motion.html"
+
         # if a dataset name is provided, add it to the name
         if self.dataset is not None:
-            fname_abs = "{}/{}_{}".format(mcdir, self.dataset,
-                                          fname_self)
-            fname_rel = "{}/{}_{}".format(mcdir, self.dataset,
-                                          fname_temp)
+            fname_abs = "{}_{}".format(self.dataset,
+                                          fname_abs)
+            fname_rel = "{}_{}".format(self.dataset,
+                                          fname_rel)
+            fname_abs_gt = "{}_{}".format(self.dataset,
+                                          fname_abs_gt)
+            fname_rel_gt = "{}_{}".format(self.dataset,
+                                          fname_rel_gt)
+        fname_abs = "{}/{}".format(mcdir, fname_abs)
+        fname_rel = "{}/{}".format(mcdir, fname_rel)
+        fname_abs_gt = "{}/{}".format(mcdir, fname_abs_gt)
+        fname_rel_gt = "{}/{}".format(mcdir, fname_rel_gt)
  
-        fig_abs = ff.create_violin(trans_abs)
-                                    #name="Mean Absolute Translation from Volume to Volume",
-                                    #text='subject: {}'.format(self.subs))
-                                    #yaxis=dict(title="Registration Score"),
-        fig_rel = ff.create_violin(trans_rel)
-                                    #name="Mean Relative Translation from Volume to Volume",
-                                    #text='subject: {}'.format(self.subs))
-                                    #yaxis=dict(title="Registration Score"),
+        abs_mc_names = ['absolute']*len(trans_abs)
+        abs_df = pd.DataFrame(dict(motion=trans_abs.tolist(), mtype=abs_mc_names))
+        rel_mc_names =['relative']*len(trans_rel)
+        rel_df = pd.DataFrame(dict(motion=trans_rel.tolist(), mtype=rel_mc_names))
+        abs_gt_names = ['absolute']*len(trans_abs_gt)
+        abs_gt_df = pd.DataFrame(dict(number=trans_abs_gt.tolist(), mtype=abs_gt_names))
+        rel_gt_names = ['relative']*len(trans_rel_gt)
+        rel_gt_df = pd.DataFrame(dict(number=trans_rel_gt.tolist(), mtype=rel_gt_names)) 
+
+        fig_abs = ff.create_violin(abs_df, data_header='motion',
+                                    group_header='mtype',
+                                    title='Average Absolute Translational Motion (mm)')
+ 
+        fig_rel = ff.create_violin(rel_df, data_header='motion',
+                                   group_header='mtype',
+                                   title='Average Relative Translational Motion (mm)')
+        fig_abs_gt = ff.create_violin(abs_gt_df, data_header='number',
+                                   group_header='mtype',
+                                   title='Number of Absolute Motions Greater than 0.2 mm')
+        fig_rel_gt = ff.create_violin(rel_gt_df, data_header='number',
+                                   group_header='mtype',
+                                   title='Number of Relative Motions Greater than 0.1 mm')
+
         pyo.plot(fig_abs, filename=fname_abs, auto_open=False)
         pyo.plot(fig_rel, filename=fname_rel, auto_open=False)
+        pyo.plot(fig_abs_gt, filename=fname_abs_gt, auto_open=False)
+        pyo.plot(fig_rel_gt, filename=fname_rel_gt, auto_open=False)
         pass
 
     def connectome_analysis(self):
