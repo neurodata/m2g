@@ -27,6 +27,10 @@ import numpy as np
 import ndmg.utils as mgu
 import os
 import pandas as pd
+from ndmg.utils import loadGraphs
+from ndmg.stats.qa_graphs import compute_metrics
+from ndmg.stats.qa_graphs_plotting import make_panel_plot
+import networkx as nx
 
 
 class group_func(object):
@@ -81,10 +85,11 @@ class group_func(object):
         connectomes = {}
         for label in os.listdir(self.conn_dir):
             this_label = []
-            label_dir = "{}/{}/".format(self.conn_dir, label)
-            for connectome in os.listdir(dataset_dir):
-                if os.path.isfile(connectome):
-                    this_label.append(connectome)
+            label_dir = "{}/{}".format(self.conn_dir, label)
+            for connectome in os.listdir(label_dir):
+                conn_path = "{}/{}".format(label_dir, connectome)
+                if os.path.isfile(conn_path):
+                    this_label.append(conn_path)
             connectomes[label] = this_label
         return connectomes
 
@@ -257,7 +262,7 @@ class group_func(object):
         pyo.plot(fig_rel_gt, filename=fname_rel_gt, auto_open=False)
         pass
 
-    def connectome_analysis(thr=0.3, minimal=False, log=False,
+    def connectome_analysis(self, thr=0.6, minimal=False, log=False,
                             hemispheres=False):
         """
         A function to threshold and binarize the connectomes.
@@ -274,25 +279,32 @@ class group_func(object):
         cmd = "mkdir -p {}".format(self.graph_dir)
         mgu.execute_cmd(cmd)
         for label, raw_conn_files in self.connectomes.iteritems():
+            print("Parcellation: {}".format(label))
             label_raw = loadGraphs(raw_conn_files)
-            label_graphs = []
+            label_graphs = {}
             label_dir = "{}/{}".format(self.graph_dir, label)
-            tmp_dir = "{}/graphs".format(tmp_dir)
+            tmp_dir = "{}/graphs".format(label_dir)
+            # verify that directories exist
             cmd = "mkdir -p {}".format(label_dir)
             mgu.execute_cmd(cmd)
             cmd = "mkdir -p {}".format(tmp_dir)
             mgu.execute_cmd(cmd)
-            for subj, raw in label_raw:
+            for subj, raw in label_raw.iteritems():
+                # loop over edges to threshold
                 for u, v, d in raw.edges(data=True):
                     # threshold graphs
-                    d['weight'] = (d['weight'] > thr).astype(int)
-                gname = "{}/{}.gpickle".format(tmp_dir, subj)
+                    if d['weight'] > thr:
+                        d['weight'] = 1
+                    else:
+                        raw.remove_edge(u, v)
+                # resave the thresholded graphs
+                gname = "{}/{}".format(tmp_dir, subj)
                 nx.write_gpickle(raw, gname)
                 # so our graphs are in the format expected by
                 # graphing qa
                 label_graphs[subj] = gname
-            compute_metrics(label_graphs, label_dir, label)
-            outf = op.join(label_dir, "{}_plot".format(label)
+            compute_metrics(label_graphs.values(), label_dir, label)
+            outf = os.path.join(label_dir, "{}_plot".format(label))
             make_panel_plot(label_dir, outf, dataset=self.dataset,
                             atlas=label, minimal=minimal,
                             log=log, hemispheres=hemispheres)

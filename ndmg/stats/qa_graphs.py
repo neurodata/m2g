@@ -117,7 +117,7 @@ def compute_metrics(fs, outdir, atlas, verb=False):
     print("Computing: Eigen Value Sequence")
     laplac = OrderedDict((subj, nx.normalized_laplacian_matrix(graphs[subj]))
                          for subj in graphs)
-    eigs = OrderedDict((subj, np.sort(np.linalg.eigvals(laplac[subj].A))[::-1])
+    eigs = OrderedDict((subj, np.real(np.sort(np.linalg.eigvals(laplac[subj].A))[::-1]))
                        for subj in graphs)
     write(outdir, 'eigen_sequence', eigs, atlas)
     print("Subject Maxes: " + ", ".join(["%.2f" % np.max(eigs[key])
