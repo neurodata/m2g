@@ -79,13 +79,13 @@ class group_func(object):
         for each parcellation we have.
         """
         connectomes = {}
-        for dataset in os.listdir(self.conn_dir):
-            this_dataset = []
-            dataset_dir = "{}/{}/".format(self.conn_dir, dataset)
+        for label in os.listdir(self.conn_dir):
+            this_label = []
+            label_dir = "{}/{}/".format(self.conn_dir, label)
             for connectome in os.listdir(dataset_dir):
                 if os.path.isfile(connectome):
-                    this_dataset.append(connectome)
-            connectomes[dataset] = this_dataset
+                    this_label.append(connectome)
+            connectomes[label] = this_label
         return connectomes
 
     def load_qa(self):
@@ -257,9 +257,44 @@ class group_func(object):
         pyo.plot(fig_rel_gt, filename=fname_rel_gt, auto_open=False)
         pass
 
-    def connectome_analysis(self):
+    def connectome_analysis(thr=0.3, minimal=False, log=False,
+                            hemispheres=False):
         """
-        A function that calls ndmg group analysis script for each connectome,
-        at each scale.
+        A function to threshold and binarize the connectomes.
+        Presently just thresholds to reference correlation of
+        setting all edges below 0.3 to 0, and those greater to 1.
+        This value of 0.3 was generally the highest performing in
+        discriminability analyses.
+
+        **Positional Arguments:**
+            - thr:
+                - the threshold to binarize below.
         """
+        self.graph_dir = "{}/graphs".format(self.outdir)
+        cmd = "mkdir -p {}".format(self.graph_dir)
+        mgu.execute_cmd(cmd)
+        for label, raw_conn_files in self.connectomes.iteritems():
+            label_raw = loadGraphs(raw_conn_files)
+            label_graphs = []
+            label_dir = "{}/{}".format(self.graph_dir, label)
+            tmp_dir = "{}/graphs".format(tmp_dir)
+            cmd = "mkdir -p {}".format(label_dir)
+            mgu.execute_cmd(cmd)
+            cmd = "mkdir -p {}".format(tmp_dir)
+            mgu.execute_cmd(cmd)
+            for subj, raw in label_raw:
+                for u, v, d in raw.edges(data=True):
+                    # threshold graphs
+                    d['weight'] = (d['weight'] > thr).astype(int)
+                gname = "{}/{}.gpickle".format(tmp_dir, subj)
+                nx.write_gpickle(raw, gname)
+                # so our graphs are in the format expected by
+                # graphing qa
+                label_graphs[subj] = gname
+            compute_metrics(label_graphs, label_dir, label)
+            outf = op.join(label_dir, "{}_plot".format(label)
+            make_panel_plot(label_dir, outf, dataset=self.dataset,
+                            atlas=label, minimal=minimal,
+                            log=log, hemispheres=hemispheres)
         pass
+
