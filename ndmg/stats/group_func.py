@@ -167,7 +167,7 @@ class group_func(object):
             trans_abs[i] = np.mean(abs_m)
             trans_rel[i] = np.mean(rel_m)
             trans_abs_gt[i] = np.sum(abs_m > 0.2)
-            trans_rel_gt[i] = np.sum(rel_m > 0.05)
+            trans_rel_gt[i] = np.sum(rel_m > 0.1)
 
         fig_abs = plot_rugdensity(trans_abs)
         fig_rel = plot_rugdensity(trans_rel)
@@ -176,7 +176,7 @@ class group_func(object):
 
         figs = [fig_abs, fig_rel, fig_abs_gt, fig_rel_gt]
         names = ['Average Absolute Translational Motion', 'Average Relative Translational Motion',
-                 'Number of Absolute Motions > 0.2 mm', 'Number of Relative Motions > 0.05 mm']
+                 'Number of Absolute Motions > 0.2 mm', 'Number of Relative Motions > 0.1 mm']
         ylab = ['Density', 'Density', 'Density', 'Density']
         xlab = ['Average Motion (mm)', 'Average Motion (mm)',
                 'Number of Volumes', 'Number of Volumes']
