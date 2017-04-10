@@ -187,6 +187,16 @@ def traces_to_panels(traces, names=[], ylabs=None, xlabs=None):
                 multi.append_trace(component, *loc)
         else:
             multi = panel_invisible(multi, idx+1)
+    # enumerate so we can make this assignment internally
+    # if the user wants x or y labels to be assigned here
+    if ylabs is not None:
+        for i, yax in enumerate(ylabs):
+            key = 'yaxis{}'.format(i+1)
+            multi.layout[key]['title'] = yax
+    if xlabs is not None:
+        for i, xax in enumerate(xlabs):
+            key = 'xaxis{}'.format(i+1)
+            multi.layout[key]['title'] = xax
     multi.layout['showlegend'] = False
     return multi
 

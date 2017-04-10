@@ -18,19 +18,17 @@
 # Email: ebridge2@jhu.edu
 
 import pickle
-import plotly as py
-import plotly.offline as pyo
-from plotly.tools import make_subplots
-from plotly.tools import FigureFactory as ff
 from ndmg.stats.qa_func import qa_func as fqa
 import numpy as np
 import ndmg.utils as mgu
 import os
-import pandas as pd
+import plotly.offline as pyo
+from plotly.tools import FigureFactory as ff
 from ndmg.utils import loadGraphs
 from ndmg.stats.qa_graphs import compute_metrics
 from ndmg.stats.qa_graphs_plotting import make_panel_plot
 import networkx as nx
+from ndmg.stats.plotly_helper import *
 
 
 class group_func(object):
@@ -129,67 +127,25 @@ class group_func(object):
             cnr.append(sub.cnr)
             snr.append(sub.snr)
 
-        # need to use pandas to make the violin plots look right
-        sreg_sc_names = ['Self']*len(self_reg_sc)
-        sreg_sc_df = pd.DataFrame(dict(Score=self_reg_sc,
-                                      Method=sreg_sc_names))
-        treg_sc_names = ['Template']*len(temp_reg_sc)
-        treg_sc_df = pd.DataFrame(dict(Score=temp_reg_sc,
-                                      Method=treg_sc_names))
-        cnr_names = ['CNR']*len(cnr)
-        cnr_df = pd.DataFrame(dict(CNR=cnr, ratio=cnr_names))
-        snr_names = ['SNR']*len(snr)
-        snr_df = pd.DataFrame(dict(SNR=snr, ratio=snr_names))
+        fig_cnr = plot_rugdensity(cnr)
+        fig_snr = plot_rugdensity(snr)
+        fig_sreg = plot_rugdensity(self_reg_sc)
+        fig_treg = plot_rugdensity(temp_reg_sc)
 
-        fig_sreg_sc = ff.create_violin(sreg_sc_df, data_header='Score',
-                                    group_header='Method',
-                                    title='Self Registration Scores')
-        fig_treg_sc = ff.create_violin(treg_sc_df, data_header='Score',
-                                    group_header='Method',
-                                    title='Template Registration Scores')
-        fig_cnr = ff.create_violin(cnr_df, data_header='CNR',
-                                   group_header='ratio',
-                                   title='Contrast to Noise Ratio')
-        fig_snr = ff.create_violin(snr_df, data_header='SNR',
-                                   group_header='ratio',
-                                   title='Signal to Noise Ratio')
-
-        #fig_reg = make_subplots(rows=2, cols=2)
-        #fig_reg.append_trace(fig_sreg_sc, 1, 1)
-        #fig_reg.append_trace(fig_treg_sc, 1, 2)
-        #fig_reg.append_trace(fig_cnr, 2, 1)
-        #fig_reg.append_trace(fig_snr, 2, 2)
-        
-
-        #fname_reg_sc = "self_reg_scores.html"
-        fname_sreg_sc = "self_sreg_scores.html"
-        fname_treg_sc = "self_treg_scores.html"
-        fname_cnr = "cnr_reg_group.html"
-        fname_snr = "snr_reg_group.html"
+        figs = [fig_cnr, fig_snr, fig_sreg, fig_treg]
+        names = ['temporal Contrast to Noise Ratio', 'temporal Signal to Noise Ratio',
+                 'Self Registration Score', 'Template Registration Score']
+        ylab = ['Density', 'Density', 'Density', 'Density']
+        xlab = ['Ratio', 'Ratio', 'Score', 'Score']
+        traces = [fig_to_trace(fig) for fig in figs]
+ 
+        fname_multi = "registration_qa.html"
         # if a dataset name is provided, add it to the name
         if self.dataset is not None:
-            #fname_reg_sc = "{}_{}".format(self.dataset,
-            #                               fname_reg_sc)
-            fname_sreg_sc = "{}_{}".format(self.dataset,
-                                           fname_sreg_sc)
-            fname_treg_sc = "{}_{}".format(self.dataset,
-                                           fname_treg_sc)
-            fname_cnr = "{}_{}".format(self.dataset,
-                                          fname_cnr)
-            fname_snr = "{}_{}".format(self.dataset,
-                                          fname_snr)
-
-        fname_sreg_sc = "{}/{}".format(regdir, fname_sreg_sc)
-        fname_treg_sc = "{}/{}".format(regdir, fname_treg_sc)
-        #fname_reg_sc = "{}/{}".format(regdir, fname_reg_sc)
-        fname_cnr = "{}/{}".format(regdir, fname_cnr)
-        fname_snr = "{}/{}".format(regdir, fname_snr)
-
-        pyo.plot(fig_snr, filename=fname_snr, auto_open=False)
-        pyo.plot(fig_sreg_sc, filename=fname_sreg_sc, auto_open=False)
-        pyo.plot(fig_treg_sc, filename=fname_treg_sc, auto_open=False)
-        #pyo.plot(fig_reg, filename=fname_reg_sc, auto_open=False)
-        pyo.plot(fig_cnr, filename=fname_cnr, auto_open=False)
+            fname_multi = "{}_{}".format(self.dataset, fname_multi)
+        fname_multi = "{}/{}".format(regdir, fname_multi)
+        multi = traces_to_panels(traces, names=names, ylabs=ylab, xlabs=xlab)
+        pyo.plot(multi, validate=False, filename=fname_multi)
         pass
 
     def group_motion(self):
@@ -213,53 +169,29 @@ class group_func(object):
             trans_abs_gt[i] = np.sum(abs_m > 0.2)
             trans_rel_gt[i] = np.sum(rel_m > 0.05)
 
-        fname_abs = "trans_absolute_group.html"
-        fname_rel = "trans_relative_group.html"
-        fname_abs_gt = "large_trans_absolute_motion.html"
-        fname_rel_gt = "large_trans_relative_motion.html"
+        fig_abs = plot_rugdensity(trans_abs)
+        fig_rel = plot_rugdensity(trans_rel)
+        fig_abs_gt = plot_rugdensity(trans_abs_gt)
+        fig_rel_gt = plot_rugdensity(trans_rel_gt)
+
+        figs = [fig_abs, fig_rel, fig_abs_gt, fig_rel_gt]
+        names = ['Average Absolute Translational Motion', 'Average Relative Translational Motion',
+                 'Number of Absolute Motions > 0.2 mm', 'Number of Relative Motions > 0.05 mm']
+        ylab = ['Density', 'Density', 'Density', 'Density']
+        xlab = ['Average Motion (mm)', 'Average Motion (mm)',
+                'Number of Volumes', 'Number of Volumes']
+        traces = [fig_to_trace(fig) for fig in figs]
+
+        fname_multi = "motion_correction.html"
 
         # if a dataset name is provided, add it to the name
         if self.dataset is not None:
-            fname_abs = "{}_{}".format(self.dataset,
-                                          fname_abs)
-            fname_rel = "{}_{}".format(self.dataset,
-                                          fname_rel)
-            fname_abs_gt = "{}_{}".format(self.dataset,
-                                          fname_abs_gt)
-            fname_rel_gt = "{}_{}".format(self.dataset,
-                                          fname_rel_gt)
-        fname_abs = "{}/{}".format(mcdir, fname_abs)
-        fname_rel = "{}/{}".format(mcdir, fname_rel)
-        fname_abs_gt = "{}/{}".format(mcdir, fname_abs_gt)
-        fname_rel_gt = "{}/{}".format(mcdir, fname_rel_gt)
- 
-        abs_mc_names = ['absolute']*len(trans_abs)
-        abs_df = pd.DataFrame(dict(motion=trans_abs.tolist(), mtype=abs_mc_names))
-        rel_mc_names =['relative']*len(trans_rel)
-        rel_df = pd.DataFrame(dict(motion=trans_rel.tolist(), mtype=rel_mc_names))
-        abs_gt_names = ['absolute']*len(trans_abs_gt)
-        abs_gt_df = pd.DataFrame(dict(number=trans_abs_gt.tolist(), mtype=abs_gt_names))
-        rel_gt_names = ['relative']*len(trans_rel_gt)
-        rel_gt_df = pd.DataFrame(dict(number=trans_rel_gt.tolist(), mtype=rel_gt_names)) 
+            fname_multi = "{}_{}".format(self.dataset,
+                                         fname_multi)
+        fname_multi = "{}/{}".format(mcdir, fname_multi)
 
-        fig_abs = ff.create_violin(abs_df, data_header='motion',
-                                    group_header='mtype',
-                                    title='Average Absolute Translational Motion (mm)')
- 
-        fig_rel = ff.create_violin(rel_df, data_header='motion',
-                                   group_header='mtype',
-                                   title='Average Relative Translational Motion (mm)')
-        fig_abs_gt = ff.create_violin(abs_gt_df, data_header='number',
-                                   group_header='mtype',
-                                   title='Number of Absolute Motions Greater than 0.2 mm')
-        fig_rel_gt = ff.create_violin(rel_gt_df, data_header='number',
-                                   group_header='mtype',
-                                   title='Number of Relative Motions Greater than 0.1 mm')
-
-        pyo.plot(fig_abs, filename=fname_abs, auto_open=False)
-        pyo.plot(fig_rel, filename=fname_rel, auto_open=False)
-        pyo.plot(fig_abs_gt, filename=fname_abs_gt, auto_open=False)
-        pyo.plot(fig_rel_gt, filename=fname_rel_gt, auto_open=False)
+        multi = traces_to_panels(traces, names=names, ylabs=ylab, xlabs=xlab)
+        pyo.plot(multi, validate=False, filename=fname_multi) 
         pass
 
     def connectome_analysis(self, thr=0.6, minimal=False, log=False,
