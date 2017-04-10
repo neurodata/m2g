@@ -309,7 +309,7 @@ class qa_func(object):
             plt.close()
         # make sure to note which brain is actually used
         best_sc = np.max(freg.sreg_sc)
-        sreg_f_final = "{}/{}_score_{:.0f}".format(sreg_func_dir, "final", sc*1000)
+        sreg_f_final = "{}/{}_score_{:.0f}".format(sreg_func_dir, "final", best_sc*1000)
         self.self_reg_sc = best_sc  # so we can recover this later
         self.reg_func_qa(freg.saligned_epi, freg.t1w, outdir, sreg_f_final)
         # provide qc for the skull stripping step
