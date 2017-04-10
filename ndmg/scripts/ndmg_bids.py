@@ -17,6 +17,7 @@
 
 # ndmg_bids.py
 # Created by Greg Kiar on 2016-07-25.
+# edited by Eric Bridgeford to incorporate fMRI.
 # Email: gkiar@jhu.edu
 
 from argparse import ArgumentParser

@@ -17,6 +17,7 @@
 
 # qa_graphs.py
 # Created by Greg Kiar on 2016-05-11.
+# editied by Eric Bridgeford to allow weighted metrics.
 # Email: gkiar@jhu.edu
 
 from argparse import ArgumentParser
@@ -33,7 +34,7 @@ import sys
 import os
 
 
-def compute_metrics(fs, outdir, atlas, verb=False):
+def compute_metrics(fs, outdir, atlas, verb=False, weight=None):
     """
     Given a set of files and a directory to put things, loads graphs and
     performs set of analyses on them, storing derivatives in a pickle format
@@ -62,7 +63,7 @@ def compute_metrics(fs, outdir, atlas, verb=False):
 
     #  Degree sequence
     print("Computing: Degree Sequence")
-    total_deg = OrderedDict((subj, np.array(nx.degree(graphs[subj]).values()))
+    total_deg = OrderedDict((subj, np.array(nx.degree(graphs[subj], degree=degree).values()))
                             for subj in graphs)
     ipso_deg = OrderedDict()
     contra_deg = OrderedDict()
@@ -71,15 +72,15 @@ def compute_metrics(fs, outdir, atlas, verb=False):
         N = len(g.nodes())
         LLnodes = g.nodes()[0:N/2]  # TODO GK: don't assume hemispheres
         LL = g.subgraph(LLnodes)
-        LLdegs = [LL.degree()[n] for n in LLnodes]
+        LLdegs = [LL.degree(weight=weight)[n] for n in LLnodes]
 
         RRnodes = g.nodes()[N/2:N]  # TODO GK: don't assume hemispheres
         RR = g.subgraph(RRnodes)
-        RRdegs = [RR.degree()[n] for n in RRnodes]
+        RRdegs = [RR.degree(weight=weight)[n] for n in RRnodes]
 
         LRnodes = g.nodes()
         ipso_list = LLdegs + RRdegs
-        degs = [g.degree()[n] for n in LRnodes]
+        degs = [g.degree(weight=weight)[n] for n in LRnodes]
         contra_deg[subj] = [a_i - b_i for a_i, b_i in zip(degs, ipso_list)]
         ipso_deg[subj] = ipso_list
         # import pdb; pdb.set_trace()
@@ -100,7 +101,7 @@ def compute_metrics(fs, outdir, atlas, verb=False):
 
     #   Clustering Coefficients
     print("Computing: Clustering Coefficient Sequence")
-    temp_cc = OrderedDict((subj, nx.clustering(graphs[subj]).values())
+    temp_cc = OrderedDict((subj, nx.clustering(graphs[subj], weight=weight).values())
                           for subj in graphs)
     ccoefs = temp_cc
     write(outdir, 'clustering_coefficients', ccoefs, atlas)
@@ -126,7 +127,7 @@ def compute_metrics(fs, outdir, atlas, verb=False):
     # Betweenness Centrality
     print("Computing: Betweenness Centrality Sequence")
     nxbc = nx.algorithms.betweenness_centrality  # For PEP8 line length...
-    temp_bc = OrderedDict((subj, nxbc(graphs[subj]).values())
+    temp_bc = OrderedDict((subj, nxbc(graphs[subj], weight=weight).values())
                           for subj in graphs)
     centrality = temp_bc
     write(outdir, 'betweenness_centrality', centrality, atlas)
