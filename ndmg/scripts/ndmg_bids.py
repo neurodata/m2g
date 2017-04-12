@@ -112,23 +112,25 @@ def participant_level(inDir, outDir, subjs, sesh=None, debug=False,
 
     mgu.execute_cmd("mkdir -p {} {}/tmp".format(outDir, outDir))
 
-    anat, func, dwi, bvec, bval = crawl_bids_directory(inDir, subjs, sesh)
-    
+    result = crawl_bids_directory(inDir, subjs, sesh, dwi=dwi)
+   
     if dwi:
+	anat, dwi, bval, bvec = result 
         assert(len(anat) == len(dwi))
         assert(len(bvec) == len(dwi))
         assert(len(bval) == len(dwi))
+        # TODO remove below
+        print anat
+        print bvec
+        print bval
+        # TODO remove above
     else:
+        anat, func = result
         assert(len(anat) == len(func))
-
-    #TODO remove below
-    print(anat)
-    print(bval)
-    print(bvec)
-    print(dwi)
-    print(func)
-
-    #TODO remove above
+        print anat
+        print func
+        print len(anat)
+        print len(func)
 
     for i, scans in enumerate(anat):
         print("T1 file: {}".format(anat[i]))
