@@ -110,7 +110,7 @@ def crawl_bids_directory(inDir, subjs, sesh, dwi=True):
     bvec_t = []
     bval_t = []
     # Look for bval, bvec files for each DWI file
-    for scan in dwi:
+    for scan in mod:
         step = op.dirname(scan)
         while not bval_t or not bvec_t:
             bval_t = glob(op.join(step, "*dwi.bval"))
