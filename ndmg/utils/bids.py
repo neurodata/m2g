@@ -106,7 +106,8 @@ def crawl_bids_directory(inDir, subjs, sesh, dwi=True):
 
     if modality == "func":
         return(anat, mod)
-
+    bval = []
+    bvec = []
     bvec_t = []
     bval_t = []
     # Look for bval, bvec files for each DWI file
@@ -123,7 +124,7 @@ def crawl_bids_directory(inDir, subjs, sesh, dwi=True):
         bval.append(bval_t[0])
         bvec_t = []
         bval_t = []
-    return (anat, mod, bvec, bval)
+    return (anat, mod, bval, bvec)
 
 
 def s3_get_data(bucket, remote, local, public=True):
