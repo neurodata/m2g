@@ -121,6 +121,7 @@ def participant_level(inDir, outDir, subjs, sesh=None, debug=False,
         assert(len(bval) == len(dwi))
         # TODO remove below
         print anat
+        print dwi
         print bvec
         print bval
         # TODO remove above
