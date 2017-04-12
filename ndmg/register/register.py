@@ -454,7 +454,9 @@ class func_register(register):
 
             self.apply_warp(self.saligned_epi, epi_nl, self.atlas,
                             warp_t1w2temp)
-
+            self.apply_warp(self.t1w, t1w_nl, self.atlas,
+                            warp_t1w2temp, mask=self.atlas_mask)
+ 
             print "Analyzing Nonlinear Template Registration Quality..."
             (sc_fnirt, fig_fnirt) = registration_score(epi_nl, self.atlas_brain,
                 self.outdir)
@@ -464,10 +466,9 @@ class func_register(register):
             self.treg_t1w.insert(0, t1w_nl)
             self.treg_sc.insert(0, sc_fnirt)
             self.treg_sc_fig.insert(0, fig_fnirt)
+
             # if self registration does well, return. else, use linear
             if (sc_fnirt > 0.8):
-                self.apply_warp(self.t1w, t1w_nl, self.atlas,
-                                warp_t1w2temp, mask=self.atlas_mask)
                 self.resample(t1w_nl, self.taligned_t1w, self.atlas)
                 self.resample(epi_nl, self.taligned_epi, self.atlas)
                 return
