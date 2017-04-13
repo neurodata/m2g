@@ -45,7 +45,7 @@ def match_anatomical(inDir, subj, anat_opt, modal):
             - a modality specific scan that we want to find a corresponding
               anatomical match for.
     """
-    match_ses = op.join(inDir, "sub-{}/ses-([\s\S]*?)".format(subj))
+    match_ses = op.join(inDir, "sub-{}/(ses-[\s\S].*?)".format(subj))
     # see if we have a session-level modality file
     session_match = re.search(match_ses, modal)
     if session_match is not None:
