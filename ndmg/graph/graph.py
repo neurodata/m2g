@@ -116,7 +116,7 @@ class graph(object):
                           dimensions are [numrois]x[numtimesteps]
         """
         print("Estimating correlation matrix for {} ROIs...".format(self.N))
-        cor = np.corrcoef(timeseries)  # calculate pearson correlation
+        cor = np.abs(np.corrcoef(timeseries))  # calculate pearson correlation
 
         roilist = np.unique(self.rois)
         roilist = roilist[roilist != 0]
@@ -124,11 +124,9 @@ class graph(object):
 
         for (idx_out, roi_out) in enumerate(roilist):
             for (idx_in, roi_in) in enumerate(roilist):
-                self.edge_dict[tuple((roi_out, roi_in))] = float(np.absolute(
-                    cor[idx_out, idx_in]))
+                self.edge_dict[(roi_out, roi_in)] = cor[idx_out, idx_in]
 
         edge_list = [(k[0], k[1], v) for k, v in self.edge_dict.items()]
-
         self.g.add_weighted_edges_from(edge_list)
         pass
 
@@ -141,6 +139,13 @@ class graph(object):
         except AttributeError:
             print("Error: the graph has not yet been defined.")
             pass
+
+    def as_matrix(self):
+        """
+        Returns the graph as a matrix.
+        """
+        g = self.get_graph()
+        return nx.to_numpy_matrix(g, nodelist=np.sort(g.nodes()).tolist())
 
     def save_graph(self, graphname, fmt='gpickle'):
         """

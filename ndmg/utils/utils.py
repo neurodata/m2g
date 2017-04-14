@@ -28,7 +28,7 @@ import numpy as np
 import nibabel as nb
 import os.path as op
 import sys
-
+from networkx import to_numpy_matrix as graph2np
 
 def apply_mask(inp, masked, mask):
     """
@@ -178,6 +178,18 @@ def extract_brain(inp, out, opts="-B"):
     cmd = "bet {} {} {}".format(inp, out, opts)
     execute_cmd(cmd, verb=True)
 
+
+def graph2mtx(self, graph):
+    """
+    A function to convert a networkx graph to an appropriate
+    numpy matrix that is ordered properly from smallest
+    ROI to largest.
+
+    **Positional Arguments:**
+        - graph:
+            - a networkx graph.
+    """
+    return graph2np(graph, nodelist=np.sort(graph.nodes()).tolist())
 
 def execute_cmd(cmd, verb=False):
     """
