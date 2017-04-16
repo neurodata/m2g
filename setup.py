@@ -54,6 +54,7 @@ setup(
         'pandas',
         'matplotlib==1.5.1',
         'plotly==1.12.1',
+        'awscli'
     ],
     include_package_data=True,
 )
