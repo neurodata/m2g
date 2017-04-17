@@ -416,14 +416,19 @@ class func_register(register):
         self.sreg_sc.insert(0, sc_bbr)
         self.sreg_sc_fig.insert(0, fig_bbr)
         if (sc_bbr > 0.8):
+            self.sreg_epi[0] = self.saligned_epi
             self.resample(epi_bbr, self.saligned_epi, self.t1w)
+            cmd = "rm {} {}".format(epi_bbr, epi_init)
+            mgu.execute_cmd(cmd)
         else:
             print "Warning: BBR self registration failed."
             self.sreg_strat.insert(0, 'flirt')
             self.sreg_epi.insert(0, epi_init)
             self.sreg_sc.insert(0, sc_init)
             self.sreg_sc_fig.insert(0, fig_init)
-            self.resample(epi_bbr, self.saligned_epi, self.t1w)
+            self.resample(epi_init, self.saligned_epi, self.t1w)
+            cmd = "rm {}".foramt(epi_init)
+            mgu.execute_cmd(cmd)
         pass
 
 
