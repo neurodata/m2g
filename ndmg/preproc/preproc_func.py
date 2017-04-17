@@ -86,6 +86,8 @@ class preproc_func():
                 cmd += " --down"
             elif stc == "interleaved":
                 cmd += " --odd"
+            elif stc == "up":
+                cmd += '' # default
             elif op.isfile(stc):
                 cmd += " --tcustom {}".format(stc)
             zooms = nb.load(func).header.get_zooms()
