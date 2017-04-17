@@ -36,7 +36,7 @@ from ndmg.stats.qa_reg import *
 
 
 def ndmg_func_pipeline(func, t1w, atlas, atlas_brain, atlas_mask, lv_mask, labels,
-                       outdir, clean=False, stc=None, fmt='gpickle'):
+                       outdir, clean=True, stc=None, fmt='gpickle'):
     """
     Analyzes fMRI images and produces subject-specific derivatives.
 
@@ -135,7 +135,11 @@ def ndmg_func_pipeline(func, t1w, atlas, atlas_brain, atlas_mask, lv_mask, label
     print "Preprocessing volumes..."
     mgp().preprocess(func, preproc_func, motion_func, outdir, stc=stc)
     qc_func.preproc_qa(motion_func, prepdir)
-    
+ 
+    if clean:
+        cmd = "rm -r {}/tmp/{}*".format(outdir, func_name)
+        mgu.execute_cmd(cmd)   
+
     print "Aligning volumes..."
     func_reg = mgr(preproc_func, t1w, atlas, atlas_brain, atlas_mask,
                    aligned_func, aligned_t1w, outdir)
@@ -144,6 +148,10 @@ def ndmg_func_pipeline(func, t1w, atlas, atlas_brain, atlas_mask, lv_mask, label
     qc_func.self_reg_qa(func_reg, sreg_fdir, sreg_adir, outdir)
 
     qc_func.temp_reg_qa(func_reg, treg_fdir, treg_adir, outdir)
+
+    if clean:
+        cmd = "rm -r {}/tmp/{}*".format(outdir, func_name)
+        mgu.execute_cmd(cmd)
 
     print "Correcting Nuisance Variables..."
     nuis = mgn().nuis_correct(aligned_func, nuis_func, lv_mask, trim=2)
