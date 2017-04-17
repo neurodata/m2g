@@ -289,7 +289,6 @@ def main():
     parser.add_argument('--stc', action='store', choices=['None', 'interleaved',
                         'up', 'down'], default=None, help="The slice timing "
                         "direction to correct. Not necessary.")
-                        help='Pipeline to run')
     parser.add_argument('--modality', action='store', choices=['func', 'dwi'],
                         help='Pipeline to run')
     result = parser.parse_args()
