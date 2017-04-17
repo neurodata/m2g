@@ -14,10 +14,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
 # bids.py
 # Created by Greg Kiar on 2016-07-29.
 # Email: gkiar@jhu.edu
+# Edited by Eric Bridgeford.
 
 import ndmg.utils as mgu
 import os.path as op
@@ -25,8 +25,41 @@ import os
 import sys
 import boto3
 from glob import glob
+import re
 
-def crawl_bids_directory(inDir, subjs, sesh):
+
+def match_anatomical(inDir, subj, anat_opt, modal):
+    """
+    A function to match from a list of anatomical scans to a corresponding
+    modality specific scan.
+
+    **Positional Arguments:**
+        - inDir:
+            - the base directory for inputs.
+        - subj:
+            - the current subject.
+        - anat_opt:
+            - a list of possible anatomical scans. Note that the list
+              is expected to have at least 1 element.
+        - modal:
+            - a modality specific scan that we want to find a corresponding
+              anatomical match for.
+    """
+    match_ses = op.join(inDir, "sub-{}/(ses-[\s\S].*?)".format(subj))
+    # see if we have a session-level modality file
+    session_match = re.search(match_ses, modal)
+    if session_match is not None:
+        # try to find an associated anatomical scan from that same session
+        match = [s for s in anat_opt if session_match.group(0) in s]
+        if len(match) > 0:
+            # return the anatomical scan from this particular session
+            return match[0]
+    # if we do not meet any more detailed matches, just return the most basic
+    # subject-level match
+    return anat_opt[0]
+
+
+def crawl_bids_directory(inDir, subjs, sesh, dwi=True):
     """
     Given a BIDS directory and optionally list of sessions and subjects,
     crawls the path and returns pointers to all relevant files for analysis.
@@ -35,41 +68,50 @@ def crawl_bids_directory(inDir, subjs, sesh):
         subj_dirs = glob(op.join(inDir, "sub-*"))
         subjs = [subj_dir.split("-")[-1] for subj_dir in subj_dirs]
 
-    bvec = []
-    bval = []
-    dwi = []
+    mod = []
     anat = []
-    func = []
+
+    if dwi:
+        modality='dwi'
+        modal_str = "dwi"
+    else:
+        modality='func'
+        modal_str = "bold"
 
     for subj in subjs:
         if sesh is not None:
-            anat_t = glob(op.join(inDir, "sub-{}/ses-{}".format(subj, sesh),
-                                  "anat", "*_T1w.nii*"))
-            dwi_t = glob(op.join(inDir, "sub-{}/ses-{}".format(subj, sesh),
-                                 "dwi", "*_dwi.nii*"))
-            func_t = glob(op.join(inDir, "sub-{}/ses-{}".format(subj, sesh),
-                                 "func", "*_bold.nii*"))
+            mod_t = glob(op.join(inDir, "sub-{}/ses-{}".format(subj, sesh),
+                                 modality, "*{}.nii*".format(modal_str)))
+            anat_opt = glob(op.join(inDir, "sub-{}/ses-{}".format(subj, sesh),
+                                    "anat", "*_T1w.nii*"))
         else:
-            anat_t = glob(op.join(inDir, "sub-{}".format(subj), "anat",
-                                  "*_T1w.nii*")) +\
-                     glob(op.join(inDir, "sub-{}".format(subj), "ses-*",
-                                  "anat", "*_T1w.nii*"))
-            dwi_t = glob(op.join(inDir, "sub-{}".format(subj), "dwi",
-                                 "*_dwi.nii*")) +\
+            mod_t = glob(op.join(inDir, "sub-{}".format(subj), modality,
+                                 "*_{}.nii*".format(modal_str))) +\
                     glob(op.join(inDir, "sub-{}".format(subj), "ses-*",
-                                 "dwi", "*_dwi.nii*"))
-            func_t = glob(op.join(inDir, "sub-{}".format(subj), "func",
-                                  "*_bold.nii*")) +\
-                     glob(op.join(inDir, "sub-{}".format(subj), "ses-*",
-                                  "func", "*_bold.nii*"))
-        dwi = dwi + dwi_t
-        anat = anat + anat_t
-        func = func + func_t
+                                 modality, "*_{}.nii*".format(modal_str)))
+            # options for anatomical scans
+            anat_opt = glob(op.join(inDir, "sub-{}".format(subj), "anat",
+                                    "*_T1w.nii*")) +\
+                       glob(op.join(inDir, "sub-{}".format(subj), "ses-*",
+                                    "anat", "*_T1w.nii*"))
+        # if we are missing anatomical or modality-specific scans, we cannot
+        # analyze this subject.
+        if len(anat_opt) > 0 and len(mod_t) > 0:
+            anat_t = []
+            for modal in mod_t:
+                anat_match = match_anatomical(inDir, subj, anat_opt, modal)
+                anat_t.append(anat_match)
+            mod = mod + mod_t
+            anat = anat + anat_t
 
+    if modality == "func":
+        return(anat, mod)
+    bval = []
+    bvec = []
     bvec_t = []
     bval_t = []
     # Look for bval, bvec files for each DWI file
-    for scan in dwi:
+    for scan in mod:
         step = op.dirname(scan)
         while not bval_t or not bvec_t:
             bval_t = glob(op.join(step, "*dwi.bval"))
@@ -82,7 +124,7 @@ def crawl_bids_directory(inDir, subjs, sesh):
         bval.append(bval_t[0])
         bvec_t = []
         bval_t = []
-    return (anat, func, dwi, bvec, bval)
+    return (anat, mod, bval, bvec)
 
 
 def s3_get_data(bucket, remote, local, public=True):

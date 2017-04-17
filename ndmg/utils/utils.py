@@ -28,7 +28,7 @@ import numpy as np
 import nibabel as nb
 import os.path as op
 import sys
-
+from networkx import to_numpy_matrix as graph2np
 
 def apply_mask(inp, masked, mask):
     """
@@ -43,7 +43,7 @@ def apply_mask(inp, masked, mask):
             - the path to a brain mask.
     """
     cmd = "fslmaths {} -mas {} {}".format(inp, mask, masked)
-    execute_cmd(cmd)
+    execute_cmd(cmd, verb=True)
     pass
 
 
@@ -165,7 +165,7 @@ def get_braindata(brain_file):
     return braindata
 
 
-def extract_brain(inp, out, opts=""):
+def extract_brain(inp, out, opts="-B"):
     """
     A function to extract the brain from an image using FSL's BET.
 
@@ -176,8 +176,20 @@ def extract_brain(inp, out, opts=""):
             - the output brain extracted image.
     """
     cmd = "bet {} {} {}".format(inp, out, opts)
-    execute_cmd(cmd)
+    execute_cmd(cmd, verb=True)
 
+
+def graph2mtx(self, graph):
+    """
+    A function to convert a networkx graph to an appropriate
+    numpy matrix that is ordered properly from smallest
+    ROI to largest.
+
+    **Positional Arguments:**
+        - graph:
+            - a networkx graph.
+    """
+    return graph2np(graph, nodelist=np.sort(graph.nodes()).tolist())
 
 def execute_cmd(cmd, verb=False):
     """

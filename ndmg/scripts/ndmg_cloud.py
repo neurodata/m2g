@@ -32,12 +32,12 @@ import boto3
 import json
 import ast
 
-participant_templ = 'https://raw.githubusercontent.com/neurodata/ndmg/master/templates/ndmg_cloud_participant.json'
-group_templ = 'https://raw.githubusercontent.com/neurodata/ndmg/master/templates/ndmg_cloud_group.json'
+participant_templ = 'https://raw.githubusercontent.com/neurodata/ndmg/eric-dev-gkiar-fmri/templates/ndmg_cloud_participant.json'
+group_templ = 'https://raw.githubusercontent.com/neurodata/ndmg/eric-dev-gkiar-fmri/templates/ndmg_cloud_group.json'
 
 
 def batch_submit(bucket, path, jobdir, credentials=None, state='participant',
-                 debug=False, dataset=None, log=False):
+                 debug=False, dataset=None, log=False, stc=None, mode='func'):
     """
     Searches through an S3 bucket, gets all subject-ids, creates json files
     for each, submits batch jobs, and returns list of job ids to query status
@@ -49,7 +49,7 @@ def batch_submit(bucket, path, jobdir, credentials=None, state='participant',
 
     print("Generating job for each subject...")
     jobs = create_json(bucket, path, threads, jobdir, group, credentials,
-                       debug, dataset, log)
+                       debug, dataset, log, stc, mode)
 
     print("Submitting jobs to the queue...")
     ids = submit_jobs(jobs, jobdir)
@@ -83,7 +83,7 @@ def crawl_bucket(bucket, path, group=False):
 
 
 def create_json(bucket, path, threads, jobdir, group=False, credentials=None,
-                debug=False, dataset=None, log=False):
+                debug=False, dataset=None, log=False, stc=None, mode='func'):
     """
     Takes parameters to make jsons
     """
@@ -117,16 +117,19 @@ def create_json(bucket, path, threads, jobdir, group=False, credentials=None,
     else:
         env = []
     template['containerOverrides']['environment'] = env
-
+    print "I am here."
     jobs = list()
-    cmd[4] = re.sub('(<BUCKET>)', bucket, cmd[4])
-    cmd[6] = re.sub('(<PATH>)', path, cmd[6])
-
+    cmd[3] = re.sub('(<MODE>)', mode, cmd[3])
+    cmd[5] = re.sub('(<BUCKET>)', bucket, cmd[5])
+    cmd[7] = re.sub('(<PATH>)', path, cmd[7])
+    print "Here 2"
+    cmd[12] = re.sub('(<STC>)', stc, cmd[12])
+    print "Here 3"
     if group:
         if dataset is not None:
-            cmd[9] = re.sub('(<DATASET>)', dataset, cmd[9])
+            cmd[10] = re.sub('(<DATASET>)', dataset, cmd[10])
         else:
-            cmd[9] = re.sub('(<DATASET>)', '', cmd[9])
+            cmd[10] = re.sub('(<DATASET>)', '', cmd[10])
 
         batlas = ['slab907', 'DS03231', 'DS06481', 'DS16784', 'DS72784']
         for atlas in atlases:
@@ -135,7 +138,7 @@ def create_json(bucket, path, threads, jobdir, group=False, credentials=None,
                 continue
             print("... Generating job for {} parcellation".format(atlas))
             job_cmd = deepcopy(cmd)
-            job_cmd[11] = re.sub('(<ATLAS>)', atlas, job_cmd[11])
+            job_cmd[12] = re.sub('(<ATLAS>)', atlas, job_cmd[12])
             if log:
                 job_cmd += ['--log']
             if atlas == 'desikan':
@@ -159,7 +162,7 @@ def create_json(bucket, path, threads, jobdir, group=False, credentials=None,
             print("... Generating job for sub-{}".format(subj))
             for sesh in seshs[subj]:
                 job_cmd = deepcopy(cmd)
-                job_cmd[8] = re.sub('(<SUBJ>)', subj, job_cmd[8])
+                job_cmd[9] = re.sub('(<SUBJ>)', subj, job_cmd[9])
                 if sesh is not None:
                     job_cmd += [u'--session_label']
                     job_cmd += [u'{}'.format(sesh)]
@@ -284,6 +287,11 @@ def main():
                         'temp files along the path of processing.',
                         default=False)
     parser.add_argument('--dataset', action='store', help='Dataset name')
+    parser.add_argument('--stc', action='store', choices=['None', 'interleaved',
+                        'up', 'down'], default=None, help="The slice timing "
+                        "direction to correct. Not necessary.")
+    parser.add_argument('--modality', action='store', choices=['func', 'dwi'],
+                        help='Pipeline to run')
     result = parser.parse_args()
 
     bucket = result.bucket
@@ -295,6 +303,8 @@ def main():
     jobdir = result.jobdir
     dset = result.dataset
     log = result.log
+    mode = result.modality
+    stc = result.stc
 
     if jobdir is None:
         jobdir = './'
@@ -312,7 +322,7 @@ def main():
         kill_jobs(jobdir)
     elif state == 'group' or state == 'participant':
         print("Beginning batch submission process...")
-        batch_submit(bucket, path, jobdir, creds, state, debug, dset, log)
+        batch_submit(bucket, path, jobdir, creds, state, debug, dset, log, stc, mode)
 
     sys.exit(0)
 

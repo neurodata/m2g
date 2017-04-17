@@ -27,7 +27,6 @@ import os.path
 import nilearn as nl
 from ndmg.utils import utils as mgu
 from scipy import signal
-from ndmg.stats import qa_reg_func as mgrq
 
 
 class preproc_func():
@@ -39,7 +38,7 @@ class preproc_func():
         """
         pass
 
-    def motion_correct(self, mri, corrected_mri, idx):
+    def motion_correct(self, mri, corrected_mri, idx=None):
         """
         Performs motion correction of a stack of 3D images.
 
@@ -48,10 +47,17 @@ class preproc_func():
                  -the 4d (fMRI) image volume as a nifti file.
             corrected_mri (String):
                 - the corrected and aligned fMRI image volume.
+            idx:
+                - the index to use as a reference for self
+                  alignment. Uses the meanvolume if not specified
         """
-        cmd = "mcflirt -in {} -out {} -plots -refvol {}"
-        cmd = cmd.format(mri, corrected_mri, idx)
-        mgu.execute_cmd(cmd)
+        if idx is None:
+            cmd = "mcflirt -in {} -out {} -plots -meanvol"
+            cmd = cmd.format(mri, corrected_mri)
+        else:
+            cmd = "mcflirt -in {} -out {} -plots -refvol {}"
+            cmd = cmd.format(mri, corrected_mri, idx)
+        mgu.execute_cmd(cmd, verb=True)
 
     def slice_time_correct(self, func, corrected_func, stc=None):
         """
@@ -80,11 +86,13 @@ class preproc_func():
                 cmd += " --down"
             elif stc == "interleaved":
                 cmd += " --odd"
+            elif stc == "up":
+                cmd += '' # default
             elif op.isfile(stc):
                 cmd += " --tcustom {}".format(stc)
             zooms = nb.load(func).header.get_zooms()
             cmd += " -r {}".format(zooms[3])
-            mgu.execute_cmd(cmd)
+            mgu.execute_cmd(cmd, verb=True)
         else:
             print "Skipping slice timing correction."
 
@@ -128,4 +136,4 @@ class preproc_func():
         self.motion_correct(stc_func, motion_func, 0)
 
         cmd = "cp {} {}".format(motion_func, preproc_func)
-        mgu.execute_cmd(cmd)
+        mgu.execute_cmd(cmd, verb=True)

@@ -24,6 +24,8 @@ install:
     - pip install multiprocessing
     - pip install pyvtk
     - pip install plotly==1.12
+    - pip install pandas
+    - pip install awscli
     - pip install .
 script:
     - coverage run -m unittest discover

@@ -9,6 +9,7 @@
             "/data/raw",
             "/data/outputs",
             "group",
+            "<MODE>",
             "--bucket",
             "<BUCKET>",
             "--remote_path",

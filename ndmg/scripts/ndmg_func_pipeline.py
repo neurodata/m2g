@@ -26,18 +26,17 @@ import os.path as op
 from argparse import ArgumentParser
 from datetime import datetime
 from ndmg.utils import utils as mgu
-from ndmg import register as mgr
+from ndmg import func_register as mgr
 from ndmg import graph as mgg
 from ndmg.timeseries import timeseries as mgts
-from ndmg.stats import qa_func as mgrf
+from ndmg.stats.qa_func import qa_func as mgrf
 from ndmg.preproc import preproc_func as mgp
 from ndmg.nuis import nuis as mgn
-from ndmg.stats.qa_reg_func import qa_reg_func as mgrq
 from ndmg.stats.qa_reg import *
 
 
-def fngs_pipeline(func, t1w, atlas, atlas_brain, atlas_mask, lv_mask,
-                  labels, outdir, clean=False, stc=None, fmt='gpickle'):
+def ndmg_func_pipeline(func, t1w, atlas, atlas_brain, atlas_mask, lv_mask, labels,
+                       outdir, clean=True, stc=None, fmt='gpickle'):
     """
     Analyzes fMRI images and produces subject-specific derivatives.
 
@@ -74,18 +73,22 @@ def fngs_pipeline(func, t1w, atlas, atlas_brain, atlas_mask, lv_mask,
     t1w_name = mgu.get_filename(t1w)
     atlas_name = mgu.get_filename(atlas)
 
-    qadir = "{}/qa".format(outdir)
-    mcdir = "{}/reg/func/mc/".format(qadir)
-    regdir = "{}/reg/func/align/".format(qadir)
-    finaldir = "{}/reg/func/final/".format(qadir)
-    roidir = "{}/ts_roi/".format(qadir)
-    nuisdir = "{}/reg/func/nuis/".format(qadir)
+    qadir = "{}/qa/{}".format(outdir, func_name)
+    prepdir = "{}/reg/func/preproc".format(qadir)
+    sreg_fdir = "{}/reg/func/align/self".format(qadir)
+    sreg_adir = "{}/reg/t1w/align/self".format(qadir)
+    treg_fdir = "{}/reg/func/align/temp".format(qadir)
+    treg_adir = "{}/reg/t1w/align/temp".format(qadir) 
+    roidir = "{}/ts_roi".format(qadir)
+    voxeldir = "{}/ts_voxel".format(qadir)
+    nuisdir = "{}/nuis".format(qadir)
+    qc_stats = "{}/{}_stats.pkl".format(qadir, func_name)
 
-    cmd = "mkdir -p {} {} {} {} {} {} {}/reg/func/align {}/reg/func/preproc \
-           {}/reg/func/mc {}/ts_voxel {}/ts_roi {}/reg/t1w {}/tmp \
-           {}/connectomes/ {}/reg/func/nuis"
-    cmd = cmd.format(qadir, mcdir, regdir, finaldir, roidir, nuisdir,
-                     *([outdir] * 9))
+    cmd = "mkdir -p {} {} {} {} {} {} {} {} {} {}/reg/func/align \
+           {}/reg/func/preproc {}/reg/func/mc {}/ts_voxel {}/ts_roi \
+           {}/reg/t1w {}/tmp {}/connectomes/ {}/nuis"
+    cmd = cmd.format(qadir, prepdir, sreg_fdir, sreg_adir, treg_fdir,
+                     treg_adir, roidir, voxeldir, nuisdir, *([outdir] * 9))
     mgu.execute_cmd(cmd)
 
     # Graphs are different because of multiple parcellations
@@ -107,7 +110,7 @@ def fngs_pipeline(func, t1w, atlas, atlas_brain, atlas_mask, lv_mask,
     aligned_func = "{}/reg/func/align/{}_aligned.nii.gz".format(outdir, func_name)
     aligned_t1w = "{}/reg/t1w/{}_aligned.nii.gz".format(outdir, t1w_name)
     motion_func = "{}/reg/func/mc/{}_mc.nii.gz".format(outdir, func_name)
-    nuis_func = "{}/reg/func/nuis/{}_nuis.nii.gz".format(outdir, func_name)
+    nuis_func = "{}/nuis/{}_nuis.nii.gz".format(outdir, func_name)
     voxel_ts = "{}/ts_voxel/{}_voxel.npz".format(outdir, func_name)
 
     print("This pipeline will produce the following derivatives...")
@@ -117,44 +120,59 @@ def fngs_pipeline(func, t1w, atlas, atlas_brain, atlas_mask, lv_mask,
     print("Voxel timecourse in atlas space: {}".format(voxel_ts))
 
     # Again, connectomes are different
-    connectomes = ["{}/connectomes/{}/{}_{}.fmt".format(outdir, x, func_name,
-                                                        x, fmt)
+    connectomes = ["{}/connectomes/{}/{}_{}.{}".format(outdir, x, func_name,
+                                                       x, fmt)
                    for x in label_name]
-    roi_ts = ["{}/ts_roi/{}/{}_{}.npz".format(outdir, x, func_name, x)
+    roi_ts = ["{}/ts_roi/{}/{}_{}.npy".format(outdir, x, func_name, x)
               for x in label_name] 
     print("ROI timeseries downsampled to given labels: " +
-          ", ".join([x for x in connectomes]))
-    print("Connectomes downsampled to given labels: " +
           ", ".join([x for x in roi_ts]))
+    print("Connectomes downsampled to given labels: " +
+          ", ".join([x for x in connectomes]))
 
+    qc_func = mgrf()
     # Align fMRI volumes to Atlas
     print "Preprocessing volumes..."
     mgp().preprocess(func, preproc_func, motion_func, outdir, stc=stc)
-    reg_mri_pngs(motion_func, atlas, mcdir, loc=0)
-    
+    qc_func.preproc_qa(motion_func, prepdir)
+ 
+    if clean:
+        cmd = "rm -r {}/tmp/{}*".format(outdir, func_name)
+        mgu.execute_cmd(cmd)   
+
     print "Aligning volumes..."
-    mgr().func2atlas(preproc_func, t1w, atlas, atlas_brain, atlas_mask,
-                     aligned_func, aligned_t1w, outdir)
-    reg_mri_pngs(aligned_func, atlas, regdir, loc=0)
+    func_reg = mgr(preproc_func, t1w, atlas, atlas_brain, atlas_mask,
+                   aligned_func, aligned_t1w, outdir)
+    func_reg.register()
+
+    qc_func.self_reg_qa(func_reg, sreg_fdir, sreg_adir, outdir)
+
+    qc_func.temp_reg_qa(func_reg, treg_fdir, treg_adir, outdir)
+
+    if clean:
+        cmd = "rm -r {}/tmp/{}*".format(outdir, func_name)
+        mgu.execute_cmd(cmd)
 
     print "Correcting Nuisance Variables..."
-    mgn().nuis_correct(aligned_func, nuis_func, lv_mask, trim=2)
+    nuis = mgn().nuis_correct(aligned_func, nuis_func, lv_mask, trim=2)
+    qc_func.nuisance_qa(nuis, nuis_func, aligned_func, qcdir=nuisdir)
 
     print "Extracting Voxelwise Timeseries..."
     voxel = mgts().voxel_timeseries(nuis_func, atlas_mask, voxel_ts)
-    mgrf.stat_summary(aligned_func, func, motion_func, atlas_mask, voxel,
-                        aligned_t1w, atlas_brain,
-                        qcdir=finaldir, scanid=func_name)
+    qc_func.voxel_ts_qa(voxel, nuis_func, atlas_mask, qcdir=voxeldir)
 
     for idx, label in enumerate(label_name):
         print "Extracting ROI timeseries for " + label + " parcellation..."
-        ts = mgts().roi_timeseries(nuis_func, labels[idx], roi_ts[idx],
-                                   qcdir=roidir + "/" + label,
-                                   scanid=func_name, refid=label)
+        ts = mgts().roi_timeseries(nuis_func, labels[idx], roi_ts[idx])
+        labeldir = "{}/{}".format(roidir, label)
         connectome = mgg(ts.shape[0], labels[idx], sens="func")
         connectome.cor_graph(ts)
         connectome.summary()
         connectome.save_graph(connectomes[idx], fmt=fmt)
+        qc_func.roi_ts_qa(roi_ts[idx], nuis_func, aligned_t1w,
+                       labels[idx], labeldir)
+    # save our statistics so that we can do group level
+    qc_func.save(qc_stats)
 
     print("Execution took: {}".format(datetime.now() - startTime))
 
@@ -211,11 +229,10 @@ def main():
     print "Creating output temp directory: {}/tmp".format(result.outdir)
     mgu.execute_cmd("mkdir -p {} {}/tmp".format(result.outdir, result.outdir))
 
-    fngs_pipeline(result.func, result.t1w, result.atlas,
-                  result.atlas_brain, result.atlas_mask, result.lv_mask,
-                  result.labels, result.outdir, result.clean, result.stc,
-                  result.fmt)
-
+    ndmg_func_pipeline(result.func, result.t1w, result.atlas,
+                       result.atlas_brain, result.atlas_mask, result.lv_mask,
+                       result.labels, result.outdir, result.clean, result.stc,
+                       result.fmt)
 
 if __name__ == "__main__":
     main()

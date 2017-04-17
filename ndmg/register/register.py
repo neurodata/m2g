@@ -25,6 +25,7 @@ import ndmg.utils as mgu
 import nibabel as nb
 import numpy as np
 import nilearn.image as nl
+from ndmg.stats.func_qa_utils import registration_score
 
 
 class register(object):
@@ -39,7 +40,7 @@ class register(object):
         pass
 
     def align(self, inp, ref, xfm=None, out=None, dof=12, searchrad=True,
-              bins=256, interp=None, cost="mutualinfo"):
+              bins=256, interp=None, cost="mutualinfo", sch=None, init=None):
         """
         Aligns two images and stores the transform between them
 
@@ -60,7 +61,11 @@ class register(object):
                     - a bool indicating whether to use the predefined
                     searchradius parameter (180 degree sweep in x, y, and z).
                 interp:
-                    - the interpolation method to use. Default is trilinear.
+                    - the interpolation method to use.
+                sch:
+                    - the optional FLIRT schedule file.
+                init:
+                    - an initial guess of an alignment.
         """
         cmd = "flirt -in {} -ref {}".format(inp, ref)
         if xfm is not None:
@@ -78,6 +83,10 @@ class register(object):
         if searchrad is not None:
             cmd += " -searchrx -180 180 -searchry -180 180 " +\
                    "-searchrz -180 180"
+        if sch is not None:
+            cmd += " -schedule {}".format(sch)
+        if init is not None:
+            cmd += " -init {}".format(init)
         mgu.execute_cmd(cmd, verb=True)
 
     def align_epi(self, epi, t1, brain, out):
@@ -107,7 +116,9 @@ class register(object):
                 - a mask in which voxels will be extracted
                 during nonlinear alignment.
         """
-        cmd = "fnirt --in={} --aff={} --cout={} --ref={} --subsamp=4,2,1,1"
+        # if we are doing fnirt, use predefined fnirt config file
+        # since the config is most robust
+        cmd = "fnirt --in={} --aff={} --cout={} --ref={} --config=T1_2_MNI152_2mm"
         cmd = cmd.format(inp, xfm, warp, ref)
         if mask is not None:
             cmd += " --refmask={}".format(mask)
@@ -230,64 +241,7 @@ class register(object):
                 - the path to the output transformation
         """
         cmd = "convert_xfm -omat {} -concat {} {}".format(xfmout, xfm1, xfm2)
-        mgu.execute_cmd(cmd, verb=True)
-
-    def func2atlas(self, func, t1w, atlas, atlas_brain, atlas_mask,
-                   aligned_func, aligned_t1w, outdir):
-        """
-        A function to change coordinates from the subject's
-        brain space to that of a template using nonlinear
-        registration.
-
-        **Positional Arguments:**
-
-            fun:
-                - the path of the preprocessed fmri image.
-            t1w:
-                - the path of the T1 scan.
-            atlas:
-                - the template atlas.
-            atlas_brain:
-                - the template brain.
-            atlas_mask:
-                - the template mask.
-            aligned_func:
-                - the name of the aligned fmri scan to produce.
-            aligned_t1w:
-                - the name of the aligned anatomical scan to produce
-            outdir:
-                - the output base directory.
-       """
-        func_name = mgu.get_filename(func)
-        t1w_name = mgu.get_filename(t1w)
-        atlas_name = mgu.get_filename(atlas)
-
-        func2 = mgu.name_tmps(outdir, func_name, "_t1w.nii.gz")
-        temp_aligned = mgu.name_tmps(outdir, func_name, "_noresamp.nii.gz")
-        t1w_brain = mgu.name_tmps(outdir, t1w_name, "_brain.nii.gz")
-        xfm_t1w2temp = mgu.name_tmps(outdir, func_name, "_xfm_t1w2temp.mat")
-
-        # Applies skull stripping to T1 volume, then EPI alignment to T1
-        mgu.extract_brain(t1w, t1w_brain, ' -B')
-        self.align_epi(func, t1w, t1w_brain, func2)
-        
-        self.align(t1w_brain, atlas_brain, xfm_t1w2temp)
-        # Only do FNIRT at 1mm or 2mm
-        if nb.load(atlas).get_data().shape in [(182, 218, 182), (91, 109, 91)]:
-            warp_t1w2temp = mgu.name_tmps(outdir, func_name,
-                                          "_warp_t1w2temp.nii.gz")
-
-            self.align_nonlinear(t1w, atlas, xfm_t1w2temp, warp_t1w2temp,
-                                 mask=atlas_mask)
-
-            self.apply_warp(func2, temp_aligned, atlas, warp_t1w2temp) 
-            self.apply_warp(t1w, aligned_t1w, atlas, warp_t1w2temp,
-                            mask=atlas_mask)
-        else:
-            self.applyxfm(func2, atlas, xfm_t1w2temp, temp_aligned)
-            self.applyxfm(t1w, atlas, xfm_t1w2temp, aligned_t1w)
-
-        self.resample(temp_aligned, aligned_func, atlas)
+        mgu.execute_cmd(cmd, verb=True)       
 
 
     def dwi2atlas(self, dwi, gtab, t1w, atlas,
@@ -354,3 +308,208 @@ class register(object):
                                                     xfm, outdir, t1w_name)
             print("Cleaning temporary registration files...")
             mgu.execute_cmd(cmd)
+
+
+class func_register(register):
+    def __init__(self, func, t1w, atlas, atlas_brain, atlas_mask,
+                 aligned_func, aligned_t1w, outdir):
+        """
+        A class to change brain spaces from a subject's epi sequence
+        to that of a standardized atlas.
+
+        **Positional Arguments:**
+
+            func:
+                - the path of the preprocessed fmri image.
+            t1w:
+                - the path of the T1 scan.
+            atlas:
+                - the template atlas.
+            atlas_brain:
+                - the template brain.
+            atlas_mask:
+                - the template mask.
+            aligned_func:
+                - the name of the aligned fmri scan to produce.
+            aligned_t1w:
+                - the name of the aligned anatomical scan to produce
+            outdir:
+                - the output base directory.
+        """
+        super(register, self).__init__()
+        # our basic dependencies
+        self.epi = func
+        self.t1w = t1w
+        self.atlas = atlas
+        self.atlas_brain = atlas_brain
+        self.atlas_mask = atlas_mask
+        self.taligned_epi = aligned_func
+        self.taligned_t1w = aligned_t1w
+        self.outdir = outdir
+        # strategies so we can iterate for qc later
+        self.sreg_strat = []
+        self.sreg_epi = []
+        self.sreg_sc = []
+        self.sreg_sc_fig = []
+        self.treg_strat = []
+        self.treg_epi = []
+        self.treg_t1w = []
+        self.treg_sc = []
+        self.treg_sc_fig = []
+
+        # for naming temporary files
+        self.epi_name = mgu.get_filename(func)
+        self.t1w_name = mgu.get_filename(t1w)
+        self.atlas_name = mgu.get_filename(atlas)
+        # since we will need the t1w brain multiple times
+        self.t1w_brain = mgu.name_tmps(self.outdir, self.t1w_name,
+                                       "_brain.nii.gz")
+        # Applies skull stripping to T1 volume
+        # using a very low sensitivity for thresholding
+        bet_sens = '-f 0.3 -R -B -S'
+        mgu.extract_brain(self.t1w, self.t1w_brain, opts=bet_sens)
+        # name intermediates for self-alignment
+        self.saligned_epi = mgu.name_tmps(self.outdir, self.epi_name,
+                                          "_self-aligned.nii.gz")
+        pass
+
+
+    def self_align(self):
+        """
+        A function to perform self alignment. Uses a local optimisation
+        cost function to get the two images close, and then uses bbr
+        to obtain a good alignment of brain boundaries.
+        """
+        epi_init = mgu.name_tmps(self.outdir, self.epi_name,
+                                  "_self-aligned_init.nii.gz")
+        epi_bbr = mgu.name_tmps(self.outdir, self.epi_name,
+                                "_self-aligned_bbr.nii.gz")
+        temp_aligned = mgu.name_tmps(self.outdir, self.epi_name,
+                                     "_noresamp.nii.gz")
+        xfm_init1 = mgu.name_tmps(self.outdir, self.epi_name,
+                                  "_xfm_epi2t1w_init1.mat")
+        xfm_init2 = mgu.name_tmps(self.outdir, self.epi_name,
+                                  "_xfm_epi2t1w_init2.mat")
+
+        # perform an initial alignment with a gentle translational guess
+        self.align(self.epi, self.t1w_brain, xfm=xfm_init1, bins=None,
+                   dof=None, cost=None, searchrad=None,
+                   sch="${FSLDIR}/etc/flirtsch/sch3Dtrans_3dof")
+        # perform a local registration
+        self.align(self.epi, self.t1w_brain, xfm=xfm_init2, init=xfm_init1,
+                   bins=None, dof=None, cost=None, searchrad=None,
+                    sch="${FSLDIR}/etc/flirtsch/simple3D.sch")
+        self.applyxfm(self.epi, self.t1w_brain, xfm_init2, epi_init)
+
+        # attempt EPI registration. note that this somethimes does not
+        # work great if our EPI has a low field of view.
+        self.align_epi(epi_init, self.t1w, self.t1w_brain, epi_bbr)
+
+        print "Analyzing Self Registration Quality..."
+        (sc_bbr, fig_bbr) = registration_score(epi_bbr, self.t1w_brain,
+                                               self.outdir)
+        (sc_init, fig_init) = registration_score(epi_init, self.t1w_brain,
+                                                 self.outdir)
+
+        self.sreg_strat.insert(0, 'epireg')
+        self.sreg_epi.insert(0, epi_bbr)
+        self.sreg_sc.insert(0, sc_bbr)
+        self.sreg_sc_fig.insert(0, fig_bbr)
+        if (sc_bbr > 0.8):
+            self.sreg_epi[0] = self.saligned_epi
+            self.resample(epi_bbr, self.saligned_epi, self.t1w)
+            cmd = "rm {} {}".format(epi_bbr, epi_init)
+            mgu.execute_cmd(cmd)
+        else:
+            print "Warning: BBR self registration failed."
+            self.sreg_strat.insert(0, 'flirt')
+            self.sreg_epi.insert(0, epi_init)
+            self.sreg_sc.insert(0, sc_init)
+            self.sreg_sc_fig.insert(0, fig_init)
+            self.resample(epi_init, self.saligned_epi, self.t1w)
+            cmd = "rm {}".foramt(epi_init)
+            mgu.execute_cmd(cmd)
+        pass
+
+
+    def template_align(self):
+        """
+        A function to perform template alignment. First tries nonlinear
+        registration, and if that does not work effectively, does a linear
+        registration instead.
+        NOTE: for this to work, must first have called self-align.
+        """
+         
+        xfm_t1w2temp = mgu.name_tmps(self.outdir, self.epi_name,
+                                  "_xfm_t1w2temp.mat")
+
+        # linear registration from t1 space to atlas space
+        self.align(self.t1w_brain, self.atlas_brain, xfm_t1w2temp)
+
+        # if the atlas is MNI 2mm, then we have a config file for it
+        if (nb.load(self.atlas).get_data().shape in [(91, 109, 91)]):
+            warp_t1w2temp = mgu.name_tmps(self.outdir, self.epi_name,
+                                          "_warp_t1w2temp.nii.gz")
+            epi_nl = mgu.name_tmps(self.outdir, self.epi_name,
+                                   "_temp-aligned_nonlinear.nii.gz")
+            t1w_nl = mgu.name_tmps(self.outdir, self.t1w_name,
+                                   "_temp-aligned_nonlinear.nii.gz")
+            self.align_nonlinear(self.t1w, self.atlas, xfm_t1w2temp,
+                                 warp_t1w2temp, mask=self.atlas_mask)
+
+            self.apply_warp(self.saligned_epi, epi_nl, self.atlas,
+                            warp_t1w2temp)
+            self.apply_warp(self.t1w, t1w_nl, self.atlas,
+                            warp_t1w2temp, mask=self.atlas_mask)
+ 
+            print "Analyzing Nonlinear Template Registration Quality..."
+            (sc_fnirt, fig_fnirt) = registration_score(epi_nl, self.atlas_brain,
+                self.outdir)
+
+            self.treg_strat.insert(0, 'fnirt')
+            self.treg_epi.insert(0, epi_nl)
+            self.treg_t1w.insert(0, t1w_nl)
+            self.treg_sc.insert(0, sc_fnirt)
+            self.treg_sc_fig.insert(0, fig_fnirt)
+
+            # if self registration does well, return. else, use linear
+            if (sc_fnirt > 0.8):
+                self.resample(t1w_nl, self.taligned_t1w, self.atlas)
+                self.resample(epi_nl, self.taligned_epi, self.atlas)
+                return
+        else:
+            print "Atlas is not 2mm MNI. Using linear template registration."
+
+        # note that if Nonlinear failed, we will come here as well
+        epi_lin = mgu.name_tmps(self.outdir, self.epi_name,
+                                "_temp-aligned_linear.nii.gz")
+        t1w_lin = mgu.name_tmps(self.outdir, self.t1w_name,
+                                "_temp-aligned_linear.nii.gz") 
+        self.treg_strat.insert(0, 'flirt')
+        self.treg_epi.insert(0, epi_lin)
+        self.treg_t1w.insert(0, t1w_lin)
+        # just apply our previously computed linear transform
+        self.applyxfm(self.saligned_epi, self.atlas, xfm_t1w2temp, epi_lin)
+        self.applyxfm(self.t1w, self.atlas, xfm_t1w2temp, t1w_lin)
+        (sc_flirt, fig_flirt) = registration_score(epi_lin, self.atlas_brain,
+            self.outdir)
+        self.treg_sc.insert(0, sc_flirt)
+        self.treg_sc_fig.insert(0, fig_flirt)
+
+        if (sc_flirt == np.max(self.treg_sc)):
+            self.resample(t1w_lin, self.taligned_t1w, self.atlas)
+            self.resample(epi_lin, self.taligned_epi, self.atlas)
+        else:
+            self.resample(t1w_nl, self.taligned_t1w, self.atlas)
+            self.resample(epi_nl, self.taligned_epi, self.atlas)
+        pass
+
+
+    def register(self):
+        """
+        A function to perform self registration followed by
+        template registration.
+        """
+        self.self_align()
+        self.template_align()
+        pass

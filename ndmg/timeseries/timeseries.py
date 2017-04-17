@@ -22,7 +22,6 @@ import numpy as np
 import nibabel as nb
 import sys
 from ndmg.utils import utils as mgu
-from ndmg.stats import qa_reg_func as mgrq
 
 
 class timeseries(object):
@@ -65,8 +64,7 @@ class timeseries(object):
             np.savez(voxel_file, voxel_ts)
         return voxel_ts
 
-    def roi_timeseries(self, func_file, label_file, roits_file=None,
-                       qcdir=None, scanid=None, refid=None):
+    def roi_timeseries(self, func_file, label_file, roits_file=None):
         """
         Function to extract average timeseries for the voxels in each
         roi of the labelled atlas.
@@ -92,14 +90,26 @@ class timeseries(object):
 
         for idx, roi in enumerate(rois):
             roibool = labeldata == roi  # get a bool where our voxels in roi
+            roibool
             roi_vts = funcdata[roibool, :]
-
             # take the mean for the voxel timeseries, and ignore voxels with
-            # no variance 
-            ts = np.mean(roi_vts[:, roi_vts.std(axis=0) != 0], axis=0)
+            # no variance
+            ts = roi_vts[roi_vts.std(axis=1) != 0, :].mean(axis=0)
             if ts.size != 0:
                 roi_ts[idx, :] = ts
 
         if roits_file:
-            np.savez(roits_file, roi_ts)
+            np.save(roits_file, roi_ts)
         return roi_ts
+
+    def load_timeseries(self, timeseries_file):
+        """
+        A function to load timeseries data. Exists to standardize
+        formatting in case changes are made with how timeseries are
+        saved in future versions.
+
+        **Positional Arguments**
+            timeseries_file: the file to load timeseries data from.
+        """
+        timeseries = np.load(timeseries_file)
+        return timeseries

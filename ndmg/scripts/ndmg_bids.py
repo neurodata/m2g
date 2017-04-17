@@ -17,17 +17,19 @@
 
 # ndmg_bids.py
 # Created by Greg Kiar on 2016-07-25.
+# edited by Eric Bridgeford to incorporate fMRI.
 # Email: gkiar@jhu.edu
 
 from argparse import ArgumentParser
 from subprocess import Popen, PIPE
 from os.path import expanduser
 from ndmg.scripts.ndmg_setup import get_files
-from ndmg.scripts.ndmg_pipeline import ndmg_pipeline
+from ndmg.scripts.ndmg_dwi_pipeline import ndmg_dwi_pipeline
 from ndmg.utils.bids import *
 from ndmg.stats.qa_graphs import *
 from ndmg.stats.qa_graphs_plotting import *
-from ndmg.scripts.fngs_pipeline import fngs_pipeline  #TODO rename
+from ndmg.stats.group_func import group_func
+from ndmg.scripts.ndmg_func_pipeline import ndmg_func_pipeline  #TODO rename
 from glob import glob
 import ndmg.utils as mgu
 import ndmg
@@ -74,16 +76,18 @@ def get_atlas(atlas_dir, dwi=True):
         labels = [op.join(atlas_dir, l) for l in labels]
         fils = labels + [atlas, atlas_mask]
     else:
-        atlas = atlas_dir + '/atlas/MNI152_T1-2mm.nii.gz'
-        atlas_brain = atlas_dir + '/atlas/MNI152_T1-2mm_brain.nii.gz'
-        atlas_mask = atlas_dir + '/atlas/MNI152_T1-2mm_brain_mask.nii.gz'
-        lv_mask = atlas_dir + '/atlas/HarvOx_lv_thr25-2mm.nii.gz'
-        labels = ['/labels/HarvardOxford-cort-maxprob-thr25-2mm.nii.gz',
-                  '/labels/aal-2mm.nii.gz', '/labels/brodmann-2mm.nii.gz',
-                  '/labels/desikan-2mm.nii.gz', '/labels/Talairach-2mm.nii.gz']
-        labels = [op.join(atlas_dir, l) for l in labels]
+        atlas_func = op.join(atlas_dir, 'atlases')
+        atlas = op.join(atlas_func, 'atlas/MNI152_T1-2mm.nii.gz')
+        atlas_brain = op.join(atlas_func, 'atlas/MNI152_T1-2mm_brain.nii.gz')
+        atlas_mask = op.join(atlas_func, 'mask/MNI152_T1-2mm_brain_mask.nii.gz')
+        lv_mask = op.join(atlas_func, 'mask/HarvOx_lv_thr25-2mm.nii.gz')
+        labels = ['label/HarvardOxford-cort-maxprob-thr25-2mm.nii.gz',
+                  'label/aal-2mm.nii.gz', 'label/brodmann-2mm.nii.gz',
+                  'label/desikan-2mm.nii.gz', 'label/Talairach-2mm.nii.gz']
+        labels = [op.join(atlas_func, l) for l in labels]
         fils = labels + [atlas, atlas_mask, atlas_brain, lv_mask]
 
+    print fils
     ope = op.exists
     if any(not ope(f) for f in fils):
         print("Cannot find atlas information; downloading...")
@@ -101,31 +105,33 @@ def participant_level(inDir, outDir, subjs, sesh=None, debug=False,
                       stc=None, dwi=True):
     """
     Crawls the given BIDS organized directory for data pertaining to the given
-    subject and session, and passes necessary files to ndmg_pipeline for
+    subject and session, and passes necessary files to ndmg_dwi_pipeline for
     processing.
     """
-    labels, atlas, atlas_mask, atlas_brain, lv_maks = get_atlas(atlas_dir, dwi)
+    labels, atlas, atlas_mask, atlas_brain, lv_mask = get_atlas(atlas_dir, dwi)
 
     mgu.execute_cmd("mkdir -p {} {}/tmp".format(outDir, outDir))
 
-    anat, func, dwi, bvec, bval = crawl_bids_directory(inDir, subjs, sesh)
-    
+    result = crawl_bids_directory(inDir, subjs, sesh, dwi=dwi)
+   
     if dwi:
+	anat, dwi, bval, bvec = result 
         assert(len(anat) == len(dwi))
         assert(len(bvec) == len(dwi))
         assert(len(bval) == len(dwi))
+        # TODO remove below
+        print anat
+        print dwi
+        print bvec
+        print bval
+        # TODO remove above
     else:
+        anat, func = result
         assert(len(anat) == len(func))
-
-    #TODO remove below
-    print(anat)
-    print(bval)
-    print(bvec)
-    print(dwi)
-    print(func)
-
-    return 0
-    #TODO remove above
+        print anat
+        print func
+        print len(anat)
+        print len(func)
 
     for i, scans in enumerate(anat):
         print("T1 file: {}".format(anat[i]))
@@ -134,14 +140,14 @@ def participant_level(inDir, outDir, subjs, sesh=None, debug=False,
             print("Bval file: {}".format(bval[i]))
             print("Bvec file: {}".format(bvec[i]))
 
-            ndmg_pipeline(dwi[i], bval[i], bvec[i], anat[i], atlas, atlas_mask,
+            ndmg_dwi_pipeline(dwi[i], bval[i], bvec[i], anat[i], atlas, atlas_mask,
                           labels, outDir, clean=(not debug))
         else:
             print ("fMRI file: {}".format(func[i]))
             print ("Acquisition pattern: {}".format(stc))
 
-            fngs_pipeline(func[i], anat[i], atlas, atlas_brain, atlas_mask,
-                          lv_mask, labels, outDir, clean=(not debug), stc=stc)
+            ndmg_func_pipeline(func[i], anat[i], atlas, atlas_brain, atlas_mask,
+                               lv_mask, labels, outDir, clean=(not debug), stc=stc)
 
 
 def group_level(inDir, outDir, dataset=None, atlas=None, minimal=False,
@@ -151,9 +157,8 @@ def group_level(inDir, outDir, dataset=None, atlas=None, minimal=False,
     derivatives produced
     """
     if not dwi:
-        print("Currently there is no group level analysis for fmri.")
-        return -1
-
+        fgr = group_func(inDir, outDir, dataset=dataset)
+        return
     outDir += "/graphs"
     mgu.execute_cmd("mkdir -p {}".format(outDir))
 
@@ -289,7 +294,7 @@ def main():
                 tindir = inDir
             s3_get_data(buck, tpath, tindir, public=creds)
         modif = 'qa'
-        group_level(inDir, outDir, dataset, atlas, minimal, log, hemi)
+        group_level(inDir, outDir, dataset, atlas, minimal, log, hemi, dwi)
 
     if push and buck is not None and remo is not None:
         print("Pushing results to S3...")
