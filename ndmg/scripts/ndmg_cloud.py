@@ -122,7 +122,7 @@ def create_json(bucket, path, threads, jobdir, group=False, credentials=None,
     cmd[3] = re.sub('(<MODE>)', mode, cmd[3])
     cmd[5] = re.sub('(<BUCKET>)', bucket, cmd[5])
     cmd[7] = re.sub('(<PATH>)', path, cmd[7])
-    cmd[9] = re.sub('(<STC>)', stc, cmd[9])
+    cmd[12] = re.sub('(<STC>)', stc, cmd[12])
 
     if group:
         if dataset is not None:
@@ -287,8 +287,8 @@ def main():
                         default=False)
     parser.add_argument('--dataset', action='store', help='Dataset name')
     parser.add_argument('--stc', action='store', choices=['None', 'interleaved',
-                        'up', 'down'], default=None, help="The slice timing direction
-                        to correct. Not necessary.")
+                        'up', 'down'], default=None, help="The slice timing "
+                        "direction to correct. Not necessary.")
                         help='Pipeline to run')
     parser.add_argument('--modality', action='store', choices=['func', 'dwi'],
                         help='Pipeline to run')
@@ -304,6 +304,7 @@ def main():
     dset = result.dataset
     log = result.log
     mode = result.modality
+    stc = result.stc
 
     if jobdir is None:
         jobdir = './'
@@ -321,7 +322,7 @@ def main():
         kill_jobs(jobdir)
     elif state == 'group' or state == 'participant':
         print("Beginning batch submission process...")
-        batch_submit(bucket, path, jobdir, creds, state, debug, dset, log, mode)
+        batch_submit(bucket, path, jobdir, creds, state, debug, dset, log, stc, mode)
 
     sys.exit(0)
 
