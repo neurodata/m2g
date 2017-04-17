@@ -32,7 +32,7 @@ import boto3
 import json
 import ast
 
-participant_templ = 'https://https://raw.githubusercontent.com/neurodata/ndmg/eric-dev-gkiar-fmri/templates/ndmg_cloud_participant.json'
+participant_templ = 'https://raw.githubusercontent.com/neurodata/ndmg/eric-dev-gkiar-fmri/templates/ndmg_cloud_participant.json'
 group_templ = 'https://raw.githubusercontent.com/neurodata/ndmg/eric-dev-gkiar-fmri/templates/ndmg_cloud_group.json'
 
 
@@ -117,13 +117,14 @@ def create_json(bucket, path, threads, jobdir, group=False, credentials=None,
     else:
         env = []
     template['containerOverrides']['environment'] = env
-
+    print "I am here."
     jobs = list()
     cmd[3] = re.sub('(<MODE>)', mode, cmd[3])
     cmd[5] = re.sub('(<BUCKET>)', bucket, cmd[5])
     cmd[7] = re.sub('(<PATH>)', path, cmd[7])
+    print "Here 2"
     cmd[12] = re.sub('(<STC>)', stc, cmd[12])
-
+    print "Here 3"
     if group:
         if dataset is not None:
             cmd[10] = re.sub('(<DATASET>)', dataset, cmd[10])

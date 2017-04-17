@@ -57,7 +57,7 @@ class preproc_func():
         else:
             cmd = "mcflirt -in {} -out {} -plots -refvol {}"
             cmd = cmd.format(mri, corrected_mri, idx)
-        mgu.execute_cmd(cmd)
+        mgu.execute_cmd(cmd, verb=True)
 
     def slice_time_correct(self, func, corrected_func, stc=None):
         """
@@ -92,7 +92,7 @@ class preproc_func():
                 cmd += " --tcustom {}".format(stc)
             zooms = nb.load(func).header.get_zooms()
             cmd += " -r {}".format(zooms[3])
-            mgu.execute_cmd(cmd)
+            mgu.execute_cmd(cmd, verb=True)
         else:
             print "Skipping slice timing correction."
 
@@ -136,4 +136,4 @@ class preproc_func():
         self.motion_correct(stc_func, motion_func, 0)
 
         cmd = "cp {} {}".format(motion_func, preproc_func)
-        mgu.execute_cmd(cmd)
+        mgu.execute_cmd(cmd, verb=True)
