@@ -18,7 +18,7 @@ setup(
     ],
     scripts = [
         'ndmg/scripts/ndmg_demo-dwi',
-        'ndmg/scripts/ndmg_demo-qc'
+        'ndmg/scripts/ndmg_demo-qa'
     ],
     entry_points = {
         'console_scripts': [
