@@ -17,9 +17,10 @@ install:
     - pip install coveralls
     - pip install wget
     - pip install nibabel
+    - pip install scikit-learn
+    - pip install scikit-image
     - pip install nilearn
     - pip install dipy
-    - pip install sklearn
     - pip install networkx
     - pip install multiprocessing
     - pip install pyvtk
