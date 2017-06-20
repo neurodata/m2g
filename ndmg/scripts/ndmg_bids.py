@@ -165,9 +165,10 @@ def group_level(inDir, outDir, dataset=None, atlas=None, minimal=False,
     derivatives produced
     """
     # Make output dir
-    outDir += "/graphs"
+    outDir += "/qa/graphs/"
     mgu().execute_cmd("mkdir -p " + outDir)
 
+    inDir += '/graphs/'
     # Get list of graphs
     labels = next(os.walk(inDir))[1]
 
@@ -274,12 +275,13 @@ def main():
         if buck is not None and remo is not None:
             print("Retrieving data from S3...")
             if atlas is not None:
-                bids_s3.get_data(buck, remo+'/graphs/'+atlas, inDir+'/'+atlas,
-                                 public=creds)
+                bids_s3.get_data(buck, remo+'/graphs/'+atlas,
+                                 outDir+'/graphs/'+atlas, public=creds)
             else:
-                bids_s3.get_data(buck, remo+'/graphs', inDir, public=creds)
+                bids_s3.get_data(buck, remo+'/graphs', outDir+'/graphs',
+                                 public=creds)
         modif = 'qa'
-        group_level(inDir, outDir, result.dataset, result.atlas, minimal,
+        group_level(outDir, outDir, result.dataset, result.atlas, minimal,
                     log, hemi)
 
     if push and buck is not None and remo is not None:
