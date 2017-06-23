@@ -14,7 +14,7 @@ NeuroData's MR Graphs package, **ndmg** (pronounced "***nutmeg***"), is the succ
 ### Installing ndmg
 Installing **ndmg** is very simple! We have a few dependencies which must be installed, but once that's taken care of you are ready to dive in!
 
-**ndmg** relies on: [FSL](http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FslInstallation), [DiPy](http://nipy.org/dipy/), [networkx](https://networkx.github.io/), and [nibabel](http://nipy.org/nibabel/), as well as [numpy](http://www.numpy.org/) and [scipy](http://www.scipy.org/). You should install FSL through the instructions on their website. Then, you can install **ndmg** with one of the following commands:
+**ndmg** relies on: [FSL](http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FslInstallation), [DiPy](http://nipy.org/dipy/), [networkx](https://networkx.github.io/), and [nibabel](http://nipy.org/nibabel/), [numpy](http://www.numpy.org/) [scipy](http://www.scipy.org/), [scikit-learn](http://scikit-learn.org/stable/), [scikit-image](http://scikit-image.org/), [nilearn](http://nilearn.github.io/). You should install FSL through the instructions on their website. Then, you can install **ndmg** with one of the following commands:
 
 #### Install from pip
 
@@ -30,7 +30,7 @@ Installing **ndmg** is very simple! We have a few dependencies which must be ins
 
 We provide the ability to exercise our entire end to end pipeline in < 3 minutes on downsampled data.  The connectome produced may not have neurological significance, but this test should ensure that all of the pieces of the code and driver script still execute and is a great interface check.
 
-    python ndmg/scripts/ndmg_pipeline.py tests/data/KKI2009_113_1_DTI_s4.nii tests/data/KKI2009_113_1_DTI_s4.bval tests/data/KKI2009_113_1_DTI_s4.bvec tests/data/KKI2009_113_1_MPRAGE_s4.nii tests/data/MNI152_T1_1mm_s4.nii.gz tests/data/MNI152_T1_1mm_brain_mask_s4.nii.gz tests/data/outputs tests/data/desikan_s4.nii.gz
+    ndmg_demo_dwi
 
 ### Documentation
 
