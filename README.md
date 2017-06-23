@@ -30,7 +30,7 @@ Installing **ndmg** is very simple! We have a few dependencies which must be ins
 
 We provide the ability to exercise our entire end to end pipeline in < 3 minutes on downsampled data.  The connectome produced may not have neurological significance, but this test should ensure that all of the pieces of the code and driver script still execute and is a great interface check.
 
-    ndmg_demo_dwi
+    ndmg_demo-dwi
 
 ### Documentation
 
