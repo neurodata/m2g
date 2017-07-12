@@ -35,7 +35,7 @@ import ndmg.preproc as mgp
 import numpy as np
 import nibabel as nb
 import os
-import ndmg.biggraph as mgbg
+from ndmg.graph import biggraph as ndbg
 
 os.environ["MPLCONFIGDIR"] = "/tmp/"
 
@@ -111,13 +111,13 @@ def ndmg_pipeline(dti, bvals, bvecs, mprage, atlas, mask, labels, outdir,
 
     # Generate big graphs from streamlines
     if bg:
-        print "Making Big Graph..."
+        print("Making Big Graph...")
         fibergraph = "{}/biggraph/{}_bg.edgelist".format(outdir, dti_name)
         cmd = "mkdir -p {}/biggraph".format(outdir)
-        mgu.execute_cmd(cmd, verb=True)
-        bg1 = mgbg()
+        mgu().execute_cmd(cmd)
+        bg1 = ndbg()
         bg1.make_graph(tracks)
-        bg1.save_graph()
+        bg1.save_graph(fibergraph)
 
     # Generate graphs from streamlines for each parcellation
     for idx, label in enumerate(label_name):

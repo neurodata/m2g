@@ -28,10 +28,10 @@ import networkx as nx
 import nibabel as nb
 import ndmg
 import time
-from zindex import XYZMorton
+from ndmg.graph.zindex import XYZMorton
 
 class biggraph(object):
-    def __init__(self, N, rois, attr=None):
+    def __init__(self):
         """
         Initializes the fiber graph.
         """
@@ -41,10 +41,8 @@ class biggraph(object):
                           source="http://m2g.io",
                           region="brain",
                           sensor="Diffusion MRI",
-                          ecount=0,
-                          vcount=len(n_ids)
                           )
-        print(self.g.graph)
+        self.edge_dict = defaultdict(int)
         pass
 
     def make_graph(self, streamlines, attr=None):
@@ -97,7 +95,7 @@ class biggraph(object):
             print("Error: the graph has not yet been defined.")
             pass
 
-    def save_graph(self, graphname, fmt='gpickle'):
+    def save_graph(self, graphname):
         """
         Saves the graph to disk
 
