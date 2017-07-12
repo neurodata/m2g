@@ -30,7 +30,7 @@ import ndmg
 import time
 from zindex import XYZMorton
 
-class fibergraph(object):
+class biggraph(object):
     def __init__(self, N, rois, attr=None):
         """
         Initializes the fiber graph.
