@@ -1,6 +1,8 @@
 from distutils.core import setup
 from setuptools import setup
 import ndmg
+from Cython.Distutils import build_ext
+
 
 VERSION = ndmg.version
 
@@ -50,5 +52,7 @@ setup(
         'boto3',
         'matplotlib==1.5.1',
         'plotly',
-    ]
+        'cython'
+    ],
+    ext_modules=cythonize("ndmg/graph/zindex.pyx")
 )
