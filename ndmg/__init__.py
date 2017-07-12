@@ -2,6 +2,7 @@ from . import *
 
 # so we don't have to type ndg.graph.graph(), etc., to get the classes
 from .graph.graph import graph as graph
+from graph.fibergraph import biggraph as biggraph
 from .register.register import register as register
 from .track.track import track as track
 from .stats import *

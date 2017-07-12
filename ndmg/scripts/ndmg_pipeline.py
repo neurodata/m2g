@@ -35,12 +35,13 @@ import ndmg.preproc as mgp
 import numpy as np
 import nibabel as nb
 import os
+import ndmg.biggraph as mgbg
 
 os.environ["MPLCONFIGDIR"] = "/tmp/"
 
 
 def ndmg_pipeline(dti, bvals, bvecs, mprage, atlas, mask, labels, outdir,
-                  clean=False, fmt='gpickle'):
+                  clean=False, fmt='gpickle', bg=False):
     """
     Creates a brain graph from MRI data
     """
@@ -108,6 +109,16 @@ def ndmg_pipeline(dti, bvals, bvecs, mprage, atlas, mask, labels, outdir,
     np.savez(tensors, tens)
     np.savez(fibers, tracks)
 
+    # Generate big graphs from streamlines
+    if bg:
+        print "Making Big Graph..."
+        fibergraph = "{}/biggraph/{}_bg.edgelist".format(outdir, dti_name)
+        cmd = "mkdir -p {}/biggraph".format(outdir)
+        mgu.execute_cmd(cmd, verb=True)
+        bg1 = mgbg()
+        bg1.make_graph(tracks)
+        bg1.save_graph()
+
     # Generate graphs from streamlines for each parcellation
     for idx, label in enumerate(label_name):
         print("Generating graph for " + label + " parcellation...")
@@ -149,6 +160,8 @@ def main():
                         help="Whether or not to delete intemediates")
     parser.add_argument("-f", "--fmt", action="store", default='gpickle',
                         help="Determines graph output format")
+    parser.add_argument("-b", "--bg", action="store_true", default=False,
+                        help="whether or not to produce voxelwise big graph")
     result = parser.parse_args()
 
     # Create output directory
@@ -160,7 +173,7 @@ def main():
 
     ndmg_pipeline(result.dti, result.bval, result.bvec, result.mprage,
                   result.atlas, result.mask, result.labels, result.outdir,
-                  result.clean, result.fmt)
+                  result.clean, result.fmt, result.bg)
 
 
 if __name__ == "__main__":
