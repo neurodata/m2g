@@ -81,7 +81,7 @@ class graph(object):
         nlines = np.shape(streamlines)[0]
         print("# of Streamlines: " + str(nlines))
 
-        print_id = np.max(int(nlines*0.05), 1)  # in case nlines*.05=0
+        print_id = np.max((int(nlines*0.05), 1))  # in case nlines*.05=0
         for idx, streamline in enumerate(streamlines):
             if (idx % print_id) == 0:
                 print(idx)

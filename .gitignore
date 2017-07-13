@@ -7,6 +7,7 @@
 *.nii.gz
 *.so
 *.o
+*.c
 *.egg*
 build/
 credentials.csv

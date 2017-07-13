@@ -58,10 +58,11 @@ class biggraph(object):
         nlines = np.shape(streamlines)[0]
         print("# of Streamlines: " + str(nlines))
 
+        print_id = np.max((int(nlines*0.05), 1))  # in case nlines*.05=0
         for idx, streamline in enumerate(streamlines):
-            if (idx % int(nlines*0.05)) == 0:
+            if (idx % print_id) == 0:
                 print(idx)
-
+ 
             points = np.round(streamline).astype(int)
             p = set()
             for point in points:
@@ -81,8 +82,7 @@ class biggraph(object):
                 lst = tuple([str(node) for node in edge])
                 self.edge_dict[tuple(sorted(lst))] += 1
 
-        edge_list = [(k[0], k[1], v) for k, v in self.edge_dict.items()]
-        self.g.add_weighted_edges_from(edge_list)
+        self.edge_list = [(k[0], k[1], v) for k, v in self.edge_dict.items()]
         pass
 
     def get_graph(self):
@@ -104,7 +104,10 @@ class biggraph(object):
                 graphname:
                     - Filename for the graph
         """
-        nx.write_edgelist(self.g, graphname)
+        with open(graphname, 'w') as edgefile:
+            for edge in self.edge_list:
+                line = "{} {} {}".format(edge[0], edge[1], edge[2])
+                edgefile.write(line)
         pass
 
     def summary(self):
