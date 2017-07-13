@@ -29,7 +29,7 @@ def run_tests(nthreads):
     args = [[dw, bval, bvec, anat, atlas, atlas_mask, label, outdir] for (dw, bval, bvec, anat)
             in zip(dwis, bvals, bvecs, anats)]
     f = ndmg_pipeline
-    arg_list = [(f, arg, {}) for arg in args]
+    arg_list = [(f, arg, {'bg': True}) for arg in args]
     p = Pool(nthreads)
     mgu.execute_cmd("mkdir -p " + outdir)
     p.map(worker_wrapper, arg_list)
