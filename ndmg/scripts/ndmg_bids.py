@@ -113,7 +113,7 @@ def worker_wrapper((f, args, kwargs)):
 
 
 def participant_level(inDir, outDir, subjs, sesh=None, debug=False,
-                      stc=None, dwi=True, nthreads=1):
+                      stc=None, dwi=True, nthreads=1, bg=False):
     """
     Crawls the given BIDS organized directory for data pertaining to the given
     subject and session, and passes necessary files to ndmg_dwi_pipeline for
@@ -143,6 +143,7 @@ def participant_level(inDir, outDir, subjs, sesh=None, debug=False,
                  labels, outDir] for (dw, bval, bvec, anat)
                 in zip(dwis, bvals, bvecs, anats)]
         f = ndmg_pipeline  # the function of choice
+        kwargs['bg'] = bg
     '''else:
         args = [[func, anat, atlas, atlas_brain, atlas_mask,
                  lv_mask, labels, outDir] for (func, anat) in
@@ -249,6 +250,8 @@ def main():
                         '(where each line is the shift in TRs), '
                         'up (ie, bottom to top), down (ie, top to bottom), '
                         'and interleaved.', default=None)
+    parser.add_argument('--bg', action='store_true', help='Whether to produce '
+                        'big graphs.', default=False)
     parser.add_argument("--nthreads", action="store", help="The number of "
                         "threads you have available. Should be approximately "
                         "min(ncpu*hyperthreads/cpu, maxram/10)", default=1,
@@ -267,6 +270,7 @@ def main():
     debug = result.debug
     dwi = result.modality == 'dwi'
     nthreads = result.nthreads
+    bg = result.bg
 
     minimal = result.minimal
     log = result.log
@@ -294,7 +298,8 @@ def main():
             else:
                 s3_get_data(buck, remo, inDir, public=creds)
         modif = 'ndmg_{}'.format(ndmg.version.replace('.', '-'))
-        participant_level(inDir, outDir, subj, sesh, debug, stc, dwi, nthreads)
+        participant_level(inDir, outDir, subj, sesh, debug, stc, dwi, nthreads,
+                          bg=bg)
 
     elif level == 'group':
         if buck is not None and remo is not None:
