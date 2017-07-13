@@ -104,7 +104,7 @@ class biggraph(object):
                 graphname:
                     - Filename for the graph
         """
-        nx.write_edgelist(self.g, graphname)
+        nx.write_edgelist(self.g, graphname, data='weight')
         pass
 
     def summary(self):
