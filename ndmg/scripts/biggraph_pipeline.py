@@ -34,7 +34,7 @@ def biggraphs(fibers, outdir):
     Creates a brain graph from fiber streamlines
     """
     startTime = datetime.now()
-    fiber_name = mgu().get_filename(fibers)
+    fiber_name = mgu.get_filename(fibers)
     base = fiber_name.split('_fibers', 1)[0]
     # Create output directories for graphs
     p = Popen("mkdir -p " + outdir + "/biggraphs/",
