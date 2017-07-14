@@ -106,7 +106,7 @@ class biggraph(object):
                 graphname:
                     - Filename for the graph
         """
-        sep = os.linesep
+        sep = '\n'
         with open(graphname, 'w') as edgefile:
             for edge in self.edge_list:
                 line = "{} {} {}".format(edge[0], edge[1], edge[2])
