@@ -110,7 +110,7 @@ class biggraph(object):
         with open(graphname, 'w') as edgefile:
             for edge in self.edge_list:
                 line = "{} {} {}".format(edge[0], edge[1], edge[2])
-                edgefile.write(line + os.sep)
+                edgefile.write(line + sep)
         pass
 
     def summary(self):
