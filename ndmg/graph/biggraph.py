@@ -15,9 +15,9 @@
 # limitations under the License.
 #
 
-# graph.py
-# Created by Greg Kiar on 2016-01-27.
-# Email: gkiar@jhu.edu
+# biggraph.py
+# Created by Eric Bridgeford on 2017-07-13.
+# Email: ebridge2@jhu.edu
 
 from __future__ import print_function
 
@@ -29,6 +29,8 @@ import nibabel as nb
 import ndmg
 import time
 from ndmg.graph.zindex import XYZMorton
+import os
+
 
 class biggraph(object):
     def __init__(self):
@@ -104,10 +106,11 @@ class biggraph(object):
                 graphname:
                     - Filename for the graph
         """
+        sep = os.linesep
         with open(graphname, 'w') as edgefile:
             for edge in self.edge_list:
                 line = "{} {} {}".format(edge[0], edge[1], edge[2])
-                edgefile.write(line)
+                edgefile.write(line + os.sep)
         pass
 
     def summary(self):
