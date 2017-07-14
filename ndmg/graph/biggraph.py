@@ -69,7 +69,9 @@ class biggraph(object):
             p = set()
             for point in points:
                 try:
-                    loc = XYZMorton((point[0], point[1], point[2]))
+                    loc = XYZMorton((np.floor(point[0]),
+                                     np.floor(point[1]),
+                                     np.floor(point[2])))
                 except IndexError:
                     pass
                 else:
