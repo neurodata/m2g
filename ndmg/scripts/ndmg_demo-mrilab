@@ -13,7 +13,7 @@ import os
 def run_tests(nthreads):
     print("Getting test data...")
     os.chdir("/tmp")
-    mgu.execute_cmd("rm -rf /tmp/mrilab_demo/")
+    mgu.execute_cmd("rm -rf /tmp/mrilab_demo*")
     mgu.execute_cmd("wget http://openconnecto.me/mrdata/share/demo_data/mrilab_demo.zip", verb=True)
     mgu.execute_cmd("unzip mrilab_demo.zip", verb=True)
 
