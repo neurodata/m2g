@@ -17,53 +17,29 @@
 
 # ndmg_bids.py
 # Created by Greg Kiar on 2016-07-25.
+# edited by Eric Bridgeford to incorporate fMRI.
 # Email: gkiar@jhu.edu
 
 from argparse import ArgumentParser
 from subprocess import Popen, PIPE
 from os.path import expanduser
 from ndmg.scripts.ndmg_setup import get_files
-from ndmg.utils import bids_s3
 from ndmg.scripts.ndmg_pipeline import ndmg_pipeline
+from ndmg.utils.bids import *
 from ndmg.stats.qa_graphs import *
 from ndmg.stats.qa_graphs_plotting import *
-
+# from ndmg.stats.group_func import group_func
+# from ndmg.scripts.ndmg_func_pipeline import ndmg_func_pipeline
 from glob import glob
 import ndmg.utils as mgu
 import ndmg
 import os.path as op
 import os
 import sys
-
+from multiprocessing import Pool
+from functools import partial
 
 atlas_dir = '/ndmg_atlases'  # This location bc it is convenient for containers
-atlas = op.join(atlas_dir, 'atlas/MNI152_T1_1mm.nii.gz')
-atlas_mask = op.join(atlas_dir, 'atlas/MNI152_T1_1mm_brain_mask.nii.gz')
-labels = ['labels/AAL.nii.gz',
-          'labels/desikan.nii.gz',
-          'labels/HarvardOxford.nii.gz',
-          'labels/CPAC200.nii.gz',
-          'labels/Talairach.nii.gz',
-          'labels/JHU.nii.gz',
-          'labels/slab907.nii.gz',
-          'labels/slab1068.nii.gz',
-          'labels/DS00071.nii.gz',
-          'labels/DS00096.nii.gz',
-          'labels/DS00108.nii.gz',
-          'labels/DS00140.nii.gz',
-          'labels/DS00195.nii.gz',
-          'labels/DS00278.nii.gz',
-          'labels/DS00350.nii.gz',
-          'labels/DS00446.nii.gz',
-          'labels/DS00583.nii.gz',
-          'labels/DS00833.nii.gz',
-          'labels/DS01216.nii.gz',
-          'labels/DS01876.nii.gz',
-          'labels/DS03231.nii.gz',
-          'labels/DS06481.nii.gz',
-          'labels/DS16784.nii.gz',
-          'labels/DS72784.nii.gz']
-labels = [op.join(atlas_dir, l) for l in labels]
 
 # Data structure:
 # sub-<subject id>/
@@ -78,115 +54,138 @@ labels = [op.join(atlas_dir, l) for l in labels]
 # *these files can be anywhere up stream of the dwi data, and are inherited.
 
 
-def participant_level(inDir, outDir, subjs, sesh=None, debug=False):
+def get_atlas(atlas_dir, dwi=True):
+    """
+    Given the desired location for atlases and the type of processing, ensure
+    we have all the atlases and parcellations.
+    """
+    if dwi:
+        atlas = op.join(atlas_dir, 'atlas/MNI152_T1_1mm.nii.gz')
+        atlas_mask = op.join(atlas_dir,
+                             'atlas/MNI152_T1_1mm_brain_mask.nii.gz')
+        labels = ['labels/AAL.nii.gz', 'labels/desikan.nii.gz',
+                  'labels/HarvardOxford.nii.gz', 'labels/CPAC200.nii.gz',
+                  'labels/Talairach.nii.gz', 'labels/JHU.nii.gz',
+                  'labels/slab907.nii.gz', 'labels/slab1068.nii.gz',
+                  'labels/DS00071.nii.gz', 'labels/DS00096.nii.gz',
+                  'labels/DS00108.nii.gz', 'labels/DS00140.nii.gz',
+                  'labels/DS00195.nii.gz', 'labels/DS00278.nii.gz',
+                  'labels/DS00350.nii.gz', 'labels/DS00446.nii.gz',
+                  'labels/DS00583.nii.gz', 'labels/DS00833.nii.gz',
+                  'labels/DS01216.nii.gz', 'labels/DS01876.nii.gz',
+                  'labels/DS03231.nii.gz', 'labels/DS06481.nii.gz',
+                  'labels/DS16784.nii.gz', 'labels/DS72784.nii.gz']
+        labels = [op.join(atlas_dir, l) for l in labels]
+        fils = labels + [atlas, atlas_mask]
+    '''else:
+        atlas_func = op.join(atlas_dir, 'func_atlases')
+        atlas = op.join(atlas_func, 'atlas/MNI152_T1-2mm.nii.gz')
+        atlas_brain = op.join(atlas_func, 'atlas/MNI152_T1-2mm_brain.nii.gz')
+        atlas_mask = op.join(atlas_func,
+                             'mask/MNI152_T1-2mm_brain_mask.nii.gz')
+        lv_mask = op.join(atlas_func, 'mask/HarvOx_lv_thr25-2mm.nii.gz')
+        labels = ['label/HarvardOxford-cort-maxprob-thr25-2mm.nii.gz',
+                  'label/aal-2mm.nii.gz', 'label/brodmann-2mm.nii.gz',
+                  'label/desikan-2mm.nii.gz', 'label/pp264-2mm.nii.gz']
+        labels = [op.join(atlas_func, l) for l in labels]
+        fils = labels + [atlas, atlas_mask, atlas_brain, lv_mask]
+    '''
+    ope = op.exists
+    if any(not ope(f) for f in fils):
+        print("Cannot find atlas information; downloading...")
+        mgu.execute_cmd('mkdir -p ' + atlas_dir)
+        cmd = 'wget -rnH --cut-dirs=3 --no-parent -P {} '.format(atlas_dir)
+        cmd += 'http://openconnecto.me/mrdata/share/atlases/'
+        mgu.execute_cmd(cmd)
+
+    if dwi:
+        atlas_brain = None
+        lv_mask = None
+    return (labels, atlas, atlas_mask, atlas_brain, lv_mask)
+
+
+def worker_wrapper((f, args, kwargs)):
+    # allows us to wrap the per-subject module and remap the arguments
+    # so that we can take lists of args since f in this case can be
+    # ndmg_dwi_pipeline or ndmg_func_pipeline, and each takes slightly
+    # different arguments
+    return f(*args, **kwargs)
+
+
+def participant_level(inDir, outDir, subjs, sesh=None, debug=False,
+                      stc=None, dwi=True, nthreads=1, bg=False):
     """
     Crawls the given BIDS organized directory for data pertaining to the given
-    subject and session, and passes necessary files to ndmg_pipeline for
+    subject and session, and passes necessary files to ndmg_dwi_pipeline for
     processing.
     """
-    # Get atlases
-    ope = op.exists
-    if any(not ope(l) for l in labels) or not (ope(atlas) and ope(atlas_mask)):
-        print("Cannot find atlas information; downloading...")
-        mgu().execute_cmd('mkdir -p ' + atlas_dir)
-        cmd = " ".join(['wget -rnH --cut-dirs=3 --no-parent -P ' + atlas_dir,
-                        'http://openconnecto.me/mrdata/share/atlases/'])
-        mgu().execute_cmd(cmd)
+    labels, atlas, atlas_mask, atlas_brain, lv_mask = get_atlas(atlas_dir, dwi)
 
-    # Make output dir
-    mgu().execute_cmd("mkdir -p " + outDir + " " + outDir + "/tmp")
+    mgu.execute_cmd("mkdir -p {} {}/tmp".format(outDir, outDir))
 
-    # Get subjects
-    if subjs is None:
-        subj_dirs = glob(op.join(inDir, "sub-*"))
-        subjs = [subj_dir.split("-")[-1] for subj_dir in subj_dirs]
+    result = crawl_bids_directory(inDir, subjs, sesh, dwi=dwi)
 
-    bvec = []
-    bval = []
-    anat = []
-    dwi = []
-    # Get all image data for each subject
-    for subj in subjs:
-        if sesh is not None:
-            anat_t = glob(op.join(inDir, "sub-{}/ses-{}".format(subj, sesh),
-                                  "anat", "*_T1w.nii*"))
-            dwi_t = glob(op.join(inDir, "sub-{}/ses-{}".format(subj, sesh),
-                                 "dwi", "*_dwi.nii*"))
-        else:
-            anat_t = glob(op.join(inDir, "sub-%s" % subj, "anat",
-                                  "*_T1w.nii*")) +\
-                     glob(op.join(inDir, "sub-%s" % subj, "ses-*",
-                                  "anat", "*_T1w.nii*"))
-            dwi_t = glob(op.join(inDir, "sub-%s" % subj, "dwi",
-                                 "*_dwi.nii*")) +\
-                    glob(op.join(inDir, "sub-%s" % subj, "ses-*",
-                                 "dwi", "*_dwi.nii*"))
-        anat = anat + anat_t
-        dwi = dwi + dwi_t
+    if dwi:
+        anats, dwis, bvals, bvecs = result
+        assert(len(anats) == len(dwis))
+        assert(len(bvecs) == len(dwis))
+        assert(len(bvals) == len(dwis))
+    '''else:
+        anats, funcs = result
+        assert(len(anats) == len(funcs))
+    '''
+    # put the arguments for each iteration as lists forming
+    # the elements of a tuple of jobs in args
+    # store the function we will be calling in f
+    kwargs = {'clean': (not debug)}  # our keyword arguments
+    if dwi:
+        args = [[dw, bval, bvec, anat, atlas, atlas_mask,
+                 labels, outDir] for (dw, bval, bvec, anat)
+                in zip(dwis, bvals, bvecs, anats)]
+        f = ndmg_pipeline  # the function of choice
+        kwargs['bg'] = bg
+    '''else:
+        args = [[func, anat, atlas, atlas_brain, atlas_mask,
+                 lv_mask, labels, outDir] for (func, anat) in
+                zip(funcs, anats)]
+        f = ndmg_func_pipeline
+        kwargs['stc'] = stc
+    '''
 
-    bvec_t = []
-    bval_t = []
-    # Look for bval, bvec files for each DWI file
-    for scan in dwi:
-        step = op.dirname(scan)
-        while not bval_t or not bvec_t:
-            bval_t = glob(op.join(step, "*dwi.bval"))
-            bvec_t = glob(op.join(step, "*dwi.bvec"))
-            if step is op.abspath(op.join(inDir, os.pardir)):
-                sys.exit("Error: No b-values or b-vectors found..\
-                    \nPlease review BIDS spec (bids.neuroimaging.io).")
-            step = op.abspath(op.join(step, os.pardir))
-        bvec.append(bvec_t[0])
-        bval.append(bval_t[0])
-        bvec_t = []
-        bval_t = []
-
-    assert(len(anat) == len(dwi))
-    assert(len(bvec) == len(dwi))
-    assert(len(bval) == len(dwi))
-
-    print(dwi)
-
-    # Run for each
-    for i, scans in enumerate(anat):
-        print("T1 file: " + anat[i])
-        print("DWI file: " + dwi[i])
-        print("Bval file: " + bval[i])
-        print("Bvec file: " + bvec[i])
-
-        ndmg_pipeline(dwi[i], bval[i], bvec[i], anat[i], atlas, atlas_mask,
-                      labels, outDir, clean=(not debug))
+    # optional args stored in kwargs
+    # use worker wrapper to call function f with args arg
+    # and keyword args kwargs
+    arg_list = [(f, arg, kwargs) for arg in args]
+    p = Pool(nthreads)  # start nthreads in parallel
+    p.map(worker_wrapper, arg_list)  # run them
 
 
 def group_level(inDir, outDir, dataset=None, atlas=None, minimal=False,
-                log=False, hemispheres=False):
+                log=False, hemispheres=False, dwi=True):
     """
     Crawls the output directory from ndmg and computes qc metrics on the
     derivatives produced
     """
-    # Make output dir
-    outDir += "/qa/graphs/"
-    mgu().execute_cmd("mkdir -p " + outDir)
+    outDir += "/graphs"
+    mgu.execute_cmd("mkdir -p {}".format(outDir))
 
-    inDir += '/graphs/'
-    # Get list of graphs
     labels = next(os.walk(inDir))[1]
 
-    # Run for each
     if atlas is not None:
         labels = [atlas]
 
     for label in labels:
-        print("Parcellation: " + label)
+        print("Parcellation: {}".format(label))
         tmp_in = op.join(inDir, label)
         fs = [op.join(tmp_in, fl)
               for root, dirs, files in os.walk(tmp_in)
               for fl in files
               if fl.endswith(".graphml") or fl.endswith(".gpickle")]
         tmp_out = op.join(outDir, label)
-        mgu().execute_cmd("mkdir -p " + tmp_out)
+        mgu.execute_cmd("mkdir -p {}".format(tmp_out))
+
         compute_metrics(fs, tmp_out, label)
-        outf = op.join(tmp_out, 'plot')
+        outf = op.join(tmp_out, '{}_plot'.format(label))
         make_panel_plot(tmp_out, outf, dataset=dataset, atlas=label,
                         minimal=minimal, log=log, hemispheres=hemispheres)
 
@@ -206,6 +205,8 @@ def main():
                         'analyses can be run independently (in parallel) '
                         'using the same output_dir.',
                         choices=['participant', 'group'])
+    parser.add_argument('modality', help='Modality of graphs that \
+                        are being generated.', choices=['dwi', 'func'])
     parser.add_argument('--participant_label', help='The label(s) of the '
                         'participant(s) that should be analyzed. The label '
                         'corresponds to sub-<participant_label> from the BIDS '
@@ -244,6 +245,17 @@ def main():
     parser.add_argument('--debug', action='store_true', help='flag to store '
                         'temp files along the path of processing.',
                         default=False)
+    parser.add_argument("--stc", action="store", help='A file for slice '
+                        'timing correction. Options are a TR sequence file '
+                        '(where each line is the shift in TRs), '
+                        'up (ie, bottom to top), down (ie, top to bottom), '
+                        'and interleaved.', default=None)
+    parser.add_argument('--bg', action='store_true', help='Whether to produce '
+                        'big graphs.', default=False)
+    parser.add_argument("--nthreads", action="store", help="The number of "
+                        "threads you have available. Should be approximately "
+                        "min(ncpu*hyperthreads/cpu, maxram/10)", default=1,
+                        type=int)
     result = parser.parse_args()
 
     inDir = result.bids_dir
@@ -254,47 +266,65 @@ def main():
     remo = result.remote_path
     push = result.push_data
     level = result.analysis_level
+    stc = result.stc
+    debug = result.debug
+    dwi = result.modality == 'dwi'
+    nthreads = result.nthreads
+    bg = result.bg
+
     minimal = result.minimal
     log = result.log
     atlas = result.atlas
+    dataset = result.dataset
     hemi = result.hemispheres
 
     creds = bool(os.getenv("AWS_ACCESS_KEY_ID", 0) and
                  os.getenv("AWS_SECRET_ACCESS_KEY", 0))
+    if not dwi:
+        raise ValueError('The functional pipeline is not yet supported.')
 
     if level == 'participant':
         if buck is not None and remo is not None:
             print("Retrieving data from S3...")
             if subj is not None:
-                [bids_s3.get_data(buck, remo, inDir, s, True) for s in subj]
+                for sub in subj:
+                    if sesh is not None:
+                        tpath = '{}/sub-{}/ses-{}'.format(remo, sub, sesh)
+                        tindir = '{}/sub-{}/ses-{}'.format(inDir, sub, sesh)
+                    else:
+                        tpath = '{}/sub-{}'.format(remo, sub)
+                        tindir = '{}/sub-{}'.format(inDir, sub)
+                s3_get_data(buck, tpath, tindir, public=creds)
             else:
-                bids_s3.get_data(buck, remo, inDir, public=creds)
+                s3_get_data(buck, remo, inDir, public=creds)
         modif = 'ndmg_{}'.format(ndmg.version.replace('.', '-'))
-        participant_level(inDir, outDir, subj, sesh, result.debug)
+        participant_level(inDir, outDir, subj, sesh, debug, stc, dwi, nthreads,
+                          bg=bg)
+
     elif level == 'group':
         if buck is not None and remo is not None:
             print("Retrieving data from S3...")
             if atlas is not None:
-                bids_s3.get_data(buck, remo+'/graphs/'+atlas,
-                                 outDir+'/graphs/'+atlas, public=creds)
+                tpath = '{}/graphs/{}'.format(remo, atlas)
+                tindir = '{}/{}'.format(inDir, atlas)
+                #if not dwi:
+                #    tpath = '{}/connectomes/{}'.format(remo, atlas)
+                #    tindir = '{}/connectomes/{}'.format(inDir, atlas)
             else:
-                bids_s3.get_data(buck, remo+'/graphs', outDir+'/graphs',
-                                 public=creds)
+                tpath = '{}/graphs'.format(remo)
+                tindir = inDir
+            #if not dwi:
+            #    qadir_rem = '{}/qa'.format(remo)
+            #    qadir_local = '{}/qa'.format(inDir)
+            #    s3_get_data(buck, qadir_rem, qadir_local, public=creds)
+            s3_get_data(buck, tpath, tindir, public=creds)
         modif = 'qa'
-        group_level(outDir, outDir, result.dataset, result.atlas, minimal,
-                    log, hemi)
+        group_level(inDir, outDir, dataset, atlas, minimal, log, hemi, dwi)
 
     if push and buck is not None and remo is not None:
         print("Pushing results to S3...")
-        cmd = "".join(['aws s3 cp --exclude "tmp/*" ', outDir, ' s3://', buck,
-                       '/', remo, '/', modif,
-                       '/ --recursive --acl public-read-write'])
-        if not creds:
-            print("Note: no credentials provided, may fail to push big files")
-            cmd += ' --no-sign-request'
-        print(cmd)
-        mgu().execute_cmd(cmd)
-    sys.exit(0)
+        s3_push_data(buck, remo, outDir, modif, creds)
+
 
 if __name__ == "__main__":
     main()

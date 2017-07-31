@@ -21,7 +21,7 @@
 
 from subprocess import Popen, PIPE
 import os.path as op
-import ndmg.utils.utils as mgu
+import ndmg.utils as mgu
 import nibabel as nb
 import numpy as np
 import nilearn.image as nl
@@ -36,7 +36,6 @@ class register(object):
         apply transforms, as well as a built-in method for aligning low
         resolution dti images to a high resolution atlas.
         """
-        import ndmg.utils as mgu
         pass
 
     def align(self, inp, ref, xfm):
@@ -56,7 +55,7 @@ class register(object):
               " -cost mutualinfo -bins 256 -dof 12 -searchrx -180 180" +\
               " -searchry -180 180 -searchrz -180 180"
         print("Executing: " + cmd)
-        mgu().execute_cmd(cmd)
+        mgu.execute_cmd(cmd)
         pass
 
     def applyxfm(self, inp, ref, xfm, aligned):
@@ -77,7 +76,7 @@ class register(object):
         cmd = "".join(["flirt -in ", inp, " -ref ", ref, " -out ", aligned,
                        " -init ", xfm, " -interp trilinear -applyxfm"])
         print("Executing: " + cmd)
-        mgu().execute_cmd(cmd)
+        mgu.execute_cmd(cmd)
         pass
 
     def align_slices(self, dti, corrected_dti, idx):
@@ -94,7 +93,7 @@ class register(object):
         """
         cmd = "eddy_correct " + dti + " " + corrected_dti + " " + str(idx)
         print("Executing: " + cmd)
-        status = mgu().execute_cmd(cmd)
+        status = mgu.execute_cmd(cmd)
         pass
 
     def resample(self, base, ingested, template):
@@ -143,16 +142,16 @@ class register(object):
                     - Aligned output dti image as a nifti image file
         """
         # Creates names for all intermediate files used
-        dti_name = mgu().get_filename(dti)
-        mprage_name = mgu().get_filename(mprage)
-        atlas_name = mgu().get_filename(atlas)
+        dti_name = mgu.get_filename(dti)
+        mprage_name = mgu.get_filename(mprage)
+        atlas_name = mgu.get_filename(atlas)
 
-        dti2 = mgu().name_tmps(outdir, dti_name, "_t2.nii.gz")
-        temp_aligned = mgu().name_tmps(outdir, dti_name, "_ta.nii.gz")
-        temp_aligned2 = mgu().name_tmps(outdir, dti_name, "_ta2.nii.gz")
-        b0 = mgu().name_tmps(outdir, dti_name, "_b0.nii.gz")
-        mprage2 = mgu().name_tmps(outdir, mprage_name, "_ss.nii.gz")
-        xfm = mgu().name_tmps(outdir, mprage_name,
+        dti2 = mgu.name_tmps(outdir, dti_name, "_t2.nii.gz")
+        temp_aligned = mgu.name_tmps(outdir, dti_name, "_ta.nii.gz")
+        temp_aligned2 = mgu.name_tmps(outdir, dti_name, "_ta2.nii.gz")
+        b0 = mgu.name_tmps(outdir, dti_name, "_b0.nii.gz")
+        mprage2 = mgu.name_tmps(outdir, mprage_name, "_ss.nii.gz")
+        xfm = mgu.name_tmps(outdir, mprage_name,
                               "_" + atlas_name + "_xfm.mat")
 
         # Align DTI volumes to each other
@@ -160,7 +159,7 @@ class register(object):
 
         # Loads DTI image in as data and extracts B0 volume
         dti_im = nb.load(dti2)
-        b0_im = mgu().get_b0(gtab, dti_im.get_data())
+        b0_im = mgu.get_b0(gtab, dti_im.get_data())
 
         # Wraps B0 volume in new nifti image
         b0_head = dti_im.get_header()
@@ -173,13 +172,13 @@ class register(object):
         # Applies skull stripping to MPRAGE volume
         cmd = 'bet ' + mprage + ' ' + mprage2 + ' -B'
         print("Executing: " + cmd)
-        mgu().execute_cmd(cmd)
+        mgu.execute_cmd(cmd)
 
         # Algins B0 volume to MPRAGE, and MPRAGE to Atlas
         cmd = "".join(['epi_reg --epi=', dti2, ' --t1=', mprage,
                        ' --t1brain=', mprage2, ' --out=', temp_aligned])
         print("Executing: " + cmd)
-        mgu().execute_cmd(cmd)
+        mgu.execute_cmd(cmd)
 
         self.align(mprage, atlas, xfm)
 
@@ -192,4 +191,4 @@ class register(object):
                            " ", b0, " ", xfm, " ", outdir, "/tmp/",
                            mprage_name, "*"])
             print("Cleaning temporary registration files...")
-            mgu().execute_cmd(cmd)
+            mgu.execute_cmd(cmd)
