@@ -170,13 +170,17 @@ def group_level(inDir, outDir, dataset=None, atlas=None, minimal=False,
 
     inDir += '/graphs/'
     # Get list of graphs
-    labels = next(os.walk(inDir))[1]
+    labels_used = next(os.walk(inDir))[1]
 
     # Run for each
     if atlas is not None:
-        labels = [atlas]
+        labels_used = [atlas]
 
-    for label in labels:
+    for label in labels_used:
+        if label in ", ".join(labels[15:]):
+            print("Skipping {} parcellation".format(label))
+            continue
+
         print("Parcellation: " + label)
         tmp_in = op.join(inDir, label)
         fs = [op.join(tmp_in, fl)
@@ -185,10 +189,15 @@ def group_level(inDir, outDir, dataset=None, atlas=None, minimal=False,
               if fl.endswith(".graphml") or fl.endswith(".gpickle")]
         tmp_out = op.join(outDir, label)
         mgu().execute_cmd("mkdir -p " + tmp_out)
-        compute_metrics(fs, tmp_out, label)
-        outf = op.join(tmp_out, 'plot')
-        make_panel_plot(tmp_out, outf, dataset=dataset, atlas=label,
-                        minimal=minimal, log=log, hemispheres=hemispheres)
+        try:
+            compute_metrics(fs, tmp_out, label)
+            outf = op.join(tmp_out, 'plot')
+            make_panel_plot(tmp_out, outf, dataset=dataset, atlas=label,
+                            minimal=minimal, log=log, hemispheres=hemispheres)
+        except:
+            print("Failed group analysis for {} parcellation.".format(label))
+            print("-- graphs contain isolates")
+            continue
 
 
 def main():
