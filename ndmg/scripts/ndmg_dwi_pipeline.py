@@ -14,7 +14,7 @@
 # limitations under the License.
 #
 
-# ndmg_pipeline.py
+# ndmg_dwi_pipeline.py
 # Created by Greg Kiar and Will Gray Roncal on 2016-01-27.
 # Email: gkiar@jhu.edu, wgr@jhu.edu
 # Edited by Eric Bridgeford on 2017-07-13.
@@ -41,7 +41,7 @@ import traceback
 os.environ["MPLCONFIGDIR"] = "/tmp/"
 
 
-def ndmg_worker(dwi, bvals, bvecs, mprage, atlas, mask, labels, outdir,
+def ndmg_dwi_worker(dwi, bvals, bvecs, mprage, atlas, mask, labels, outdir,
                 clean=False, fmt='gpickle', bg=False):
     """
     Creates a brain graph from MRI data
@@ -143,13 +143,13 @@ def ndmg_worker(dwi, bvals, bvecs, mprage, atlas, mask, labels, outdir,
     pass
 
 
-def ndmg_pipeline(dwi, bvals, bvecs, mprage, atlas, mask, labels, outdir,
+def ndmg_dwi_pipeline(dwi, bvals, bvecs, mprage, atlas, mask, labels, outdir,
                   clean=False, fmt='gpickle', bg=False):
     """
     A wrapper for the worker to make our pipeline more robust to errors.
     """
     try:
-        ndmg_worker(dwi, bvals, bvecs, mprage, atlas, mask, labels, outdir,
+        ndmg_dwi_worker(dwi, bvals, bvecs, mprage, atlas, mask, labels, outdir,
                     clean, fmt, bg)
     except Exception, e:
         print(traceback.format_exc())
@@ -186,7 +186,7 @@ def main():
     p = Popen(cmd, stdout=PIPE, stderr=PIPE, shell=True)
     p.communicate()
 
-    ndmg_pipeline(result.dwi, result.bval, result.bvec, result.mprage,
+    ndmg_dwi_pipeline(result.dwi, result.bval, result.bvec, result.mprage,
                   result.atlas, result.mask, result.labels, result.outdir,
                   result.clean, result.fmt, result.bg)
 
