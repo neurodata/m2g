@@ -9,4 +9,4 @@ from .stats import *
 # from .preproc.preproc import preproc as preproc
 from .scripts import ndmg_dwi_pipeline as ndmg_dwi_pipeline
 
-version = "0.0.49-1"
+version = "0.0.50"
