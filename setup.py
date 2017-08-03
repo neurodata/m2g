@@ -29,7 +29,7 @@ setup(
     ],
     entry_points = {
         'console_scripts': [
-            'ndmg_pipeline=ndmg.scripts.ndmg_pipeline:main',
+            'ndmg_pipeline=ndmg.scripts.ndmg_dwi_pipeline:main',
             'ndmg_bids=ndmg.scripts.ndmg_bids:main',
             'ndmg_cloud=ndmg.scripts.ndmg_cloud:main'
     ]
