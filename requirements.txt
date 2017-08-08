@@ -5,4 +5,8 @@ nilearn
 sklearn
 dipy
 networkx
+matplotlib
+cython
+boto3
+pybids
 multiprocessing
