@@ -6,7 +6,7 @@ from Cython.Build import cythonize
 ext_modules = cythonize(Extension( "ndmg.graph.zindex", # the extension name
                         sources=["ndmg/graph/zindex.pyx"],
                         language="c"))
-VERSION="0.0.49"
+VERSION="0.0.50"
 
 setup(
     name='ndmg',

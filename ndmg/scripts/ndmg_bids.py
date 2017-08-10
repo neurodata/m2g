@@ -23,11 +23,10 @@ from argparse import ArgumentParser
 from subprocess import Popen, PIPE
 from os.path import expanduser
 from ndmg.scripts.ndmg_setup import get_files
-from ndmg.utils import bids_s3
+from ndmg.utils import bids_s3, bids_sweep
 from ndmg.scripts.ndmg_dwi_pipeline import ndmg_dwi_pipeline
 from ndmg.stats.qa_graphs import *
 from ndmg.stats.qa_graphs_plotting import *
-
 from glob import glob
 import ndmg.utils as mgu
 import ndmg
@@ -78,7 +77,7 @@ labels = [op.join(atlas_dir, l) for l in labels]
 # *these files can be anywhere up stream of the dwi data, and are inherited.
 
 
-def participant_level(inDir, outDir, subjs, sesh=None, debug=False):
+def participant_level(inDir, outDir, subjs, sesh=None, task=None, debug=False):
     """
     Crawls the given BIDS organized directory for data pertaining to the given
     subject and session, and passes necessary files to ndmg_pipeline for
@@ -96,50 +95,9 @@ def participant_level(inDir, outDir, subjs, sesh=None, debug=False):
     # Make output dir
     mgu().execute_cmd("mkdir -p " + outDir + " " + outDir + "/tmp")
 
-    # Get subjects
-    if subjs is None:
-        subj_dirs = glob(op.join(inDir, "sub-*"))
-        subjs = [subj_dir.split("-")[-1] for subj_dir in subj_dirs]
-
-    bvec = []
-    bval = []
-    anat = []
-    dwi = []
-    # Get all image data for each subject
-    for subj in subjs:
-        if sesh is not None:
-            anat_t = glob(op.join(inDir, "sub-{}/ses-{}".format(subj, sesh),
-                                  "anat", "*_T1w.nii*"))
-            dwi_t = glob(op.join(inDir, "sub-{}/ses-{}".format(subj, sesh),
-                                 "dwi", "*_dwi.nii*"))
-        else:
-            anat_t = glob(op.join(inDir, "sub-%s" % subj, "anat",
-                                  "*_T1w.nii*")) +\
-                     glob(op.join(inDir, "sub-%s" % subj, "ses-*",
-                                  "anat", "*_T1w.nii*"))
-            dwi_t = glob(op.join(inDir, "sub-%s" % subj, "dwi",
-                                 "*_dwi.nii*")) +\
-                    glob(op.join(inDir, "sub-%s" % subj, "ses-*",
-                                 "dwi", "*_dwi.nii*"))
-        anat = anat + anat_t
-        dwi = dwi + dwi_t
-
-    bvec_t = []
-    bval_t = []
-    # Look for bval, bvec files for each DWI file
-    for scan in dwi:
-        step = op.dirname(scan)
-        while not bval_t or not bvec_t:
-            bval_t = glob(op.join(step, "*dwi.bval"))
-            bvec_t = glob(op.join(step, "*dwi.bvec"))
-            if step is op.abspath(op.join(inDir, os.pardir)):
-                sys.exit("Error: No b-values or b-vectors found..\
-                    \nPlease review BIDS spec (bids.neuroimaging.io).")
-            step = op.abspath(op.join(step, os.pardir))
-        bvec.append(bvec_t[0])
-        bval.append(bval_t[0])
-        bvec_t = []
-        bval_t = []
+    dwis, bvecs, bvals, anats = bids_sweep.sweep_directory(inDir, subjs, sesh,
+                                                           task,
+                                                           modality='dwi')
 
     assert(len(anat) == len(dwi))
     assert(len(bvec) == len(dwi))
@@ -148,13 +106,13 @@ def participant_level(inDir, outDir, subjs, sesh=None, debug=False):
     print(dwi)
 
     # Run for each
-    for i, scans in enumerate(anat):
-        print("T1 file: " + anat[i])
-        print("DWI file: " + dwi[i])
-        print("Bval file: " + bval[i])
-        print("Bvec file: " + bvec[i])
+    for dwi, bval, bvec, anat in zip(dwis, bvals, bvecs, anats):
+        print("T1 file: " + anat)
+        print("DWI file: " + dwi)
+        print("Bval file: " + bval)
+        print("Bvec file: " + bvec)
 
-        ndmg_dwi_pipeline(dwi[i], bval[i], bvec[i], anat[i], atlas, atlas_mask,
+        ndmg_dwi_pipeline(dwi, bval, bvec, anat, atlas, atlas_mask,
                           labels, outDir, clean=(not debug))
 
 
@@ -229,6 +187,12 @@ def main():
                         'parameter is not provided all sessions should be '
                         'analyzed. Multiple sessions can be specified '
                         'with a space separated list.')
+    parser.add_argument('--task_label', help='The label(s) of the task '
+                        'that should be analyzed. The label corresponds to '
+                        'task-<task_label> from the BIDS spec (so it does not '
+                        'include "task-"). If this parameter is not provided '
+                        'all tasks should be analyzed. Multiple tasks can be '
+                        'specified with a space separated list.', nargs="+")
     parser.add_argument('--bucket', action='store', help='The name of '
                         'an S3 bucket which holds BIDS organized data. You '
                         'must have built your bucket with credentials to the '
@@ -261,6 +225,7 @@ def main():
     outDir = result.output_dir
     subj = result.participant_label
     sesh = result.session_label
+    task = result.task_label
     buck = result.bucket
     remo = result.remote_path
     push = result.push_data
@@ -281,7 +246,8 @@ def main():
             else:
                 bids_s3.get_data(buck, remo, inDir, public=creds)
         modif = 'ndmg_{}'.format(ndmg.version.replace('.', '-'))
-        participant_level(inDir, outDir, subj, sesh, result.debug, result.bg)
+        participant_level(inDir, outDir, subj, sesh, task, result.debug,
+                          result.bg)
     elif level == 'group':
         if buck is not None and remo is not None:
             print("Retrieving data from S3...")
