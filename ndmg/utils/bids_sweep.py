@@ -102,9 +102,11 @@ def sweep_directory(bdir, subj=None, sesh=None, task=None, modality='dwi'):
             elif modality is 'func':
                 func = layout.get(**merge_dicts(mod_query,
                                                 {'extensions': 'nii.gz|nii'}))
-                if func and anat and func[0].filename not in funcs:
-                    funcs.append(func[0].filename)
-                    anats.append(anat[0].filename)
+                if func and anat:
+                    for fun in func:
+                        if fun.filename not in funcs:
+                            funcs.append(fun.filename)
+                            anats.append(anat[0].filename)
     if modality is 'dwi':
         return (dwis, bvals, bvecs, anats)
     elif modality is 'func':
