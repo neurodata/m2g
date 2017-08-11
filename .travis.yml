@@ -7,14 +7,13 @@ install:
     - sudo apt-get update
     - sudo apt-get install python-dev
     - sudo apt-get install python-setuptools
-    - sudo apt-get install python-numpy python-scipy
     - sudo apt-get install zlib1g-dev
     - sudo apt-get install python-matplotlib python-nose
     - sudo apt-get install python-vtk
     - sudo easy_install pip
     - sudo pip install cython
     - pip install numpy
-    - pip install scipy
+    - pip install scipy>=0.13.3
     - pip install coveralls
     - pip install wget
     - pip install nibabel
