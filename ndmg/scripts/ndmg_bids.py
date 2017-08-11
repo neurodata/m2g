@@ -103,7 +103,7 @@ def participant_level(inDir, outDir, subjs, sesh=None, task=None, debug=False):
     assert(len(bvec) == len(dwi))
     assert(len(bval) == len(dwi))
 
-    print(dwi)
+    print(dwi); print(bvec); print(bval); print(anat)
 
     # Run for each
     for dwi, bval, bvec, anat in zip(dwis, bvals, bvecs, anats):
