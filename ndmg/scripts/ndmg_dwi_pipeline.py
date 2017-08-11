@@ -42,7 +42,7 @@ os.environ["MPLCONFIGDIR"] = "/tmp/"
 
 
 def ndmg_dwi_worker(dwi, bvals, bvecs, mprage, atlas, mask, labels, outdir,
-                clean=False, fmt='gpickle', bg=False):
+                    clean=False, fmt='gpickle', bg=False):
     """
     Creates a brain graph from MRI data
     """
@@ -144,16 +144,15 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, mprage, atlas, mask, labels, outdir,
 
 
 def ndmg_dwi_pipeline(dwi, bvals, bvecs, mprage, atlas, mask, labels, outdir,
-                  clean=False, fmt='gpickle', bg=False):
+                      clean=False, fmt='gpickle', bg=False):
     """
     A wrapper for the worker to make our pipeline more robust to errors.
     """
     try:
         ndmg_dwi_worker(dwi, bvals, bvecs, mprage, atlas, mask, labels, outdir,
-                    clean, fmt, bg)
+                        clean, fmt, bg)
     except Exception, e:
         print(traceback.format_exc())
-        return 
     return
 
 
@@ -187,8 +186,8 @@ def main():
     p.communicate()
 
     ndmg_dwi_pipeline(result.dwi, result.bval, result.bvec, result.mprage,
-                  result.atlas, result.mask, result.labels, result.outdir,
-                  result.clean, result.fmt, result.bg)
+                      result.atlas, result.mask, result.labels, result.outdir,
+                      result.clean, result.fmt, result.bg)
 
 
 if __name__ == "__main__":

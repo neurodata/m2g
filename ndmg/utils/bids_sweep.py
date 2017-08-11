@@ -45,25 +45,25 @@ def sweep_directory(bdir, subj=None, sesh=None, task=None, modality='dwi'):
         subjs = [subj]  # make it a list so we can iterate
     for sub in subjs:
         if not sesh:
-            seshs = [None]  # in case there are non-session level inputs
-            seshs += layout.get_sessions(subject=sub)
+            seshs = layout.get_sessions(subject=sub)
+            seshs += [None]  # in case there are non-session level inputs
         else:
             seshs = [sesh]  # make a list so we can iterate
 
         if not task:
-            tasks = [None]  # in case there are non-session level inputs
-            tasks += layout.get_tasks(subject=sub)
+            tasks = layout.get_tasks(subject=sub)
+            tasks += [None]
         else:
             tasks = [task]
-        
+
         # all the combinations of sessions and tasks that are possible
         for (ses, tas) in product(seshs, tasks):
             # the attributes for our modality img
-            mod_attributes = [sub, ses, tas] 
+            mod_attributes = [sub, ses, tas]
             # the keys for our modality img
             mod_keys = ['subject', 'session', 'task']
             # our query we will use for each modality img
-            mod_query = {'modality': modality} 
+            mod_query = {'modality': modality}
             if modality is 'dwi':
                 type_img = 'dwi'  # use the dwi image
             elif modality is 'func':
@@ -73,11 +73,12 @@ def sweep_directory(bdir, subj=None, sesh=None, task=None, modality='dwi'):
             for attr, key in zip(mod_attributes, mod_keys):
                 if attr:
                     mod_query[key] = attr
-            
+
             anat_attributes = [sub, ses]  # the attributes for our anat img
             anat_keys = ['subject', 'session']  # the keys for our modality img
-            anat_query = {'modality': 'anat', 'type':'T1w',
-                          'extensions': 'nii.gz|nii'}  # our query for the anat img
+            # our query for the anatomical image
+            anat_query = {'modality': 'anat', 'type': 'T1w',
+                          'extensions': 'nii.gz|nii'}
             for attr, key in zip(anat_attributes, anat_keys):
                 if attr:
                     anat_query[key] = attr
@@ -85,31 +86,36 @@ def sweep_directory(bdir, subj=None, sesh=None, task=None, modality='dwi'):
             anat = layout.get(**anat_query)
             if modality is 'dwi':
                 dwi = layout.get(**merge_dicts(mod_query,
-                                                {'extensions': 'nii.gz|nii'}))
+                                               {'extensions': 'nii.gz|nii'}))
                 bval = layout.get(**merge_dicts(mod_query,
                                                 {'extensions': 'bval'}))
                 bvec = layout.get(**merge_dicts(mod_query,
                                                 {'extensions': 'bvec'}))
-                if anat and dwi and bval and bvec and dwi[0].filename not in dwis:
+                if (anat and dwi and bval and bvec and
+                        dwi[0].filename not in dwis):
                     # if all the required files exist, append by the first
                     # match (0 index)
-                    anats.append(anat[0].filename); dwis.append(dwi[0].filename)
-                    bvals.append(bval[0].filename); bvecs.append(bvec[0].filename)
+                    anats.append(anat[0].filename)
+                    dwis.append(dwi[0].filename)
+                    bvals.append(bval[0].filename)
+                    bvecs.append(bvec[0].filename)
             elif modality is 'func':
                 func = layout.get(**merge_dicts(mod_query,
                                                 {'extensions': 'nii.gz|nii'}))
-                if func and anat:
-                    funcs.append(func[0].filename); anats.append(anat[0].filename)
+                if func and anat and func[0].filename not in funcs:
+                    funcs.append(func[0].filename)
+                    anats.append(anat[0].filename)
     if modality is 'dwi':
         return (dwis, bvals, bvecs, anats)
     elif modality is 'func':
         return (funcs, anats)
 
+
 def merge_dicts(x, y):
     """
     A function to merge two dictionaries, making it easier for us to make
-    modality specific queries for dwi images (since they have variable extensions due
-    to having an nii.gz, bval, and bvec file).
+    modality specific queries for dwi images (since they have variable
+    extensions due to having an nii.gz, bval, and bvec file).
     """
     z = x.copy()
     z.update(y)
