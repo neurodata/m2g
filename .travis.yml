@@ -14,6 +14,7 @@ install:
     - sudo easy_install pip
     - sudo pip install cython
     - pip install numpy
+    - pip install --upgrade scipy
     - pip install coveralls
     - pip install wget
     - pip install nibabel
