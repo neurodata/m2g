@@ -6,7 +6,7 @@ from Cython.Build import cythonize
 ext_modules = cythonize(Extension( "ndmg.graph.zindex", # the extension name
                         sources=["ndmg/graph/zindex.pyx"],
                         language="c"))
-VERSION="0.0.49"
+VERSION="0.0.50"
 
 setup(
     name='ndmg',
@@ -54,8 +54,9 @@ setup(
         'scipy',  # We use 0.17.0
         'dipy>=0.1',
         'boto3',
-        'matplotlib==1.5.1',
+        'matplotlib==1.5.3',
         'plotly',
-        'cython'
+        'cython',
+        'pybids'
     ]
 )
