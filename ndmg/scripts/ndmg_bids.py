@@ -77,7 +77,8 @@ labels = [op.join(atlas_dir, l) for l in labels]
 # *these files can be anywhere up stream of the dwi data, and are inherited.
 
 
-def participant_level(inDir, outDir, subjs, sesh=None, task=None, debug=False):
+def participant_level(inDir, outDir, subjs, sesh=None, task=None, run=None,
+                      debug=False):
     """
     Crawls the given BIDS organized directory for data pertaining to the given
     subject and session, and passes necessary files to ndmg_pipeline for
@@ -96,7 +97,7 @@ def participant_level(inDir, outDir, subjs, sesh=None, task=None, debug=False):
     mgu().execute_cmd("mkdir -p " + outDir + " " + outDir + "/tmp")
 
     dwis, bvecs, bvals, anats = bids_sweep.sweep_directory(inDir, subjs, sesh,
-                                                           task,
+                                                           task, run,
                                                            modality='dwi')
 
     assert(len(anat) == len(dwi))
@@ -193,6 +194,12 @@ def main():
                         'include "task-"). If this parameter is not provided '
                         'all tasks should be analyzed. Multiple tasks can be '
                         'specified with a space separated list.', nargs="+")
+    parser.add_argument('--run_label', help='The label(s) of the run '
+                        'that should be analyzed. The label corresponds to '
+                        'run-<run_label> from the BIDS spec (so it does not '
+                        'include "task-"). If this parameter is not provided '
+                        'all runs should be analyzed. Multiple runs can be '
+                        'specified with a space separated list.', nargs="+") 
     parser.add_argument('--bucket', action='store', help='The name of '
                         'an S3 bucket which holds BIDS organized data. You '
                         'must have built your bucket with credentials to the '
@@ -226,6 +233,7 @@ def main():
     subj = result.participant_label
     sesh = result.session_label
     task = result.task_label
+    run = result.run_label
     buck = result.bucket
     remo = result.remote_path
     push = result.push_data
@@ -246,7 +254,7 @@ def main():
             else:
                 bids_s3.get_data(buck, remo, inDir, public=creds)
         modif = 'ndmg_{}'.format(ndmg.version.replace('.', '-'))
-        participant_level(inDir, outDir, subj, sesh, task, result.debug,
+        participant_level(inDir, outDir, subj, sesh, task, run, result.debug,
                           result.bg)
     elif level == 'group':
         if buck is not None and remo is not None:
