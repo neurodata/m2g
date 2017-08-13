@@ -24,7 +24,7 @@ import re
 from itertools import product
 
 
-def sweep_directory(bdir, subj=None, sesh=None, task=None, modality='dwi'):
+def sweep_directory(bdir, subj=None, sesh=None, task=None, run=None, modality='dwi'):
     """
     Given a BIDs formatted directory, crawls the BIDs dir and prepares the
     necessary inputs for the NDMG pipeline. Uses regexes to check matches for
@@ -56,12 +56,18 @@ def sweep_directory(bdir, subj=None, sesh=None, task=None, modality='dwi'):
         else:
             tasks = [task]
 
+        if not run:
+            runs = layout.get_runs(subject=sub)
+            runs += [None]
+        else:
+            runs = [run]
+
         # all the combinations of sessions and tasks that are possible
-        for (ses, tas) in product(seshs, tasks):
+        for (ses, tas, ru) in product(seshs, tasks, runs):
             # the attributes for our modality img
-            mod_attributes = [sub, ses, tas]
+            mod_attributes = [sub, ses, tas, ru]
             # the keys for our modality img
-            mod_keys = ['subject', 'session', 'task']
+            mod_keys = ['subject', 'session', 'task', 'run']
             # our query we will use for each modality img
             mod_query = {'modality': modality}
             if modality is 'dwi':
@@ -91,14 +97,16 @@ def sweep_directory(bdir, subj=None, sesh=None, task=None, modality='dwi'):
                                                 {'extensions': 'bval'}))
                 bvec = layout.get(**merge_dicts(mod_query,
                                                 {'extensions': 'bvec'}))
-                if (anat and dwi and bval and bvec and
-                        dwi[0].filename not in dwis):
-                    # if all the required files exist, append by the first
-                    # match (0 index)
-                    anats.append(anat[0].filename)
-                    dwis.append(dwi[0].filename)
-                    bvals.append(bval[0].filename)
-                    bvecs.append(bvec[0].filename)
+                if (anat and dwi and bval and bvec:
+                    for (dw, bva, bve) in zip(dwi, bval, bvec):
+                        if dw.filename not in dwis:
+
+                            # if all the required files exist, append by the first
+                            # match (0 index)
+                            anats.append(anat[0].filename)
+                            dwis.append(dw.filename)
+                            bvals.append(bva.filename)
+                            bvecs.append(bve.filename)
             elif modality is 'func':
                 func = layout.get(**merge_dicts(mod_query,
                                                 {'extensions': 'nii.gz|nii'}))
