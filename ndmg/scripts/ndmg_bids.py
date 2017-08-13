@@ -247,7 +247,7 @@ def main():
                         'big graphs.', default=False)
     parser.add_argument("--nthreads", action="store", help="The number of "
                         "threads you have available. Should be approximately "
-                        "min(ncpu*hyperthreads/cpu, maxram/10)", default=1,
+                        "min(ncpu*hyperthreads/cpu, maxram/10).", default=1,
                         type=int)
     result = parser.parse_args()
 
