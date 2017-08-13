@@ -4,7 +4,7 @@ from argparse import ArgumentParser
 from multiprocessing import Pool
 from functools import partial
 from ndmg.scripts.ndmg_dwi_pipeline import ndmg_dwi_pipeline
-from ndmg.utils.bids import *
+from ndmg.utils import bids_sweep
 from ndmg.scripts.ndmg_bids import worker_wrapper
 import ndmg.utils as mgu
 import os
@@ -18,7 +18,7 @@ def run_tests(nthreads):
     mgu.execute_cmd("unzip mrilab_demo.zip", verb=True)
 
     # crawl the demo directory for the inputs
-    anats, dwis, bvals, bvecs = crawl_bids_directory("/tmp/mrilab_demo", None, None, dwi=True)
+    dwis, bvals, bvecs, anats = bids_sweep.sweep_directory("/tmp/mrilab_demo")
 
     # dependencies
     atlas = "/tmp/mrilab_demo/MNI152_T1-4mm.nii.gz"
