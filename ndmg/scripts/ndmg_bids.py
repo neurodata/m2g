@@ -26,8 +26,10 @@ from os.path import expanduser
 from ndmg.scripts.ndmg_setup import get_files
 from ndmg.utils.bids_utils import *
 from ndmg.scripts.ndmg_dwi_pipeline import ndmg_dwi_pipeline
+from ndmg.utils.bids import *
 from ndmg.stats.qa_graphs import *
 from ndmg.stats.qa_graphs_plotting import *
+from ndmg.stats.group_func import group_func
 from glob import glob
 import ndmg.utils as mgu
 import ndmg
@@ -97,6 +99,7 @@ def worker_wrapper((f, args, kwargs)):
     # ndmg_dwi_pipeline or ndmg_func_pipeline, and each takes slightly
     # different arguments
     return f(*args, **kwargs)
+
 
 def participant_level(inDir, outDir, subjs, sesh=None, task=None, run=None,
                       debug=False, modality='dwi', nthreads=1, bg=False):
@@ -174,7 +177,6 @@ def group_level(inDir, outDir, dataset=None, atlas=None, minimal=False,
 def main():
     parser = ArgumentParser(description="This is an end-to-end connectome \
                             estimation pipeline from sMRI and DTI images")
-
     parser.add_argument('bids_dir', help='The directory with the input dataset'
                         ' formatted according to the BIDS standard.')
     parser.add_argument('output_dir', help='The directory where the output '
@@ -238,11 +240,6 @@ def main():
     parser.add_argument('--debug', action='store_true', help='flag to store '
                         'temp files along the path of processing.',
                         default=False)
-    parser.add_argument("--stc", action="store", help='A file for slice '
-                        'timing correction. Options are a TR sequence file '
-                        '(where each line is the shift in TRs), '
-                        'up (ie, bottom to top), down (ie, top to bottom), '
-                        'and interleaved.', default=None)
     parser.add_argument('--bg', action='store_true', help='Whether to produce '
                         'big graphs.', default=False)
     parser.add_argument("--nthreads", action="store", help="The number of "
