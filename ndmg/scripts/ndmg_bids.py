@@ -85,7 +85,6 @@ def get_atlas(atlas_dir, modality='dwi'):
         cmd = 'wget -rnH --cut-dirs=3 --no-parent -P {} '.format(atlas_dir)
         cmd += 'http://openconnecto.me/mrdata/share/atlases/'
         mgu.execute_cmd(cmd)
-
     if modality == 'dwi':
         atlas_brain = None
         lv_mask = None
@@ -285,6 +284,7 @@ def main():
         modif = 'ndmg_{}'.format(ndmg.version.replace('.', '-'))
         participant_level(inDir, outDir, subj, sesh, task, run, debug,
                           modality, nthreads, bg)
+
     elif level == 'group':
         if buck is not None and remo is not None:
             print("Retrieving data from S3...")
