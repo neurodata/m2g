@@ -50,7 +50,7 @@ setup(
         'nilearn>=0.2',
         'sklearn>=0.0',
         'numpy',  # We use nump v1.10.4
-        'scipy',  # We use 0.17.0
+        'scipy>=0.13',  # We use 0.17.0
         'dipy>=0.1',
         'boto3',
         'matplotlib==1.5.3',
