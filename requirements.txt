@@ -1,5 +1,5 @@
 numpy
-scipy>=0.13
+scipy>=0.13.3
 nibabel>=2.0
 nilearn>=0.2
 sklearn>=0.0
