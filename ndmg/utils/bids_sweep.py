@@ -97,7 +97,7 @@ def sweep_directory(bdir, subj=None, sesh=None, task=None, run=None, modality='d
                                                 {'extensions': 'bval'}))
                 bvec = layout.get(**merge_dicts(mod_query,
                                                 {'extensions': 'bvec'}))
-                if (anat and dwi and bval and bvec:
+                if (anat and dwi and bval and bvec):
                     for (dw, bva, bve) in zip(dwi, bval, bvec):
                         if dw.filename not in dwis:
 
