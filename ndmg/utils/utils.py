@@ -17,6 +17,7 @@
 
 # utils.py
 # Created by Will Gray Roncal on 2016-01-28.
+# Edited by Eric Bridgeford.
 # Email: wgr@jhu.edu
 # Edited by Eric Bridgeford on 2017-07-13.
 

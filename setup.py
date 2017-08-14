@@ -20,24 +20,28 @@ setup(
         'ndmg.graph',
         'ndmg.stats',
         'ndmg.utils',
+        'ndmg.timeseries',
+        'ndmg.nuis',
         'ndmg.scripts'
     ],
     version=VERSION,
     scripts = [
         'ndmg/scripts/ndmg_demo-dwi',
         'ndmg/scripts/ndmg_demo-qa',
-        'ndmg/scripts/ndmg_demo-mrilab'
+        'ndmg/scripts/ndmg_demo-mrilab',
+        'ndmg/scripts/ndmg_demo-func'
     ],
     entry_points = {
         'console_scripts': [
-            'ndmg_pipeline=ndmg.scripts.ndmg_dwi_pipeline:main',
+            'ndmg_dwi_pipeline=ndmg.scripts.ndmg_dwi_pipeline:main',
+            'ndmg_func_pipeline=ndmg.scripts.ndmg_func_pipeline:main',
             'ndmg_bids=ndmg.scripts.ndmg_bids:main',
             'ndmg_cloud=ndmg.scripts.ndmg_cloud:main'
     ]
     },
     description='Neuro Data MRI to Graphs Pipeline',
-    author='Greg Kiar and Will Gray Roncal',
-    author_email='gkiar@jhu.edu, wgr@jhu.edu',
+    author='Greg Kiar, Will Gray Roncal and Eric Bridgeford',
+    author_email='gkiar@jhu.edu, wgr@jhu.edu, ebridge2@jhu.edu',
     url='https://github.com/neurodata/ndmg',
     download_url='https://github.com/neurodata/ndmg/tarball/' + VERSION,
     keywords=[

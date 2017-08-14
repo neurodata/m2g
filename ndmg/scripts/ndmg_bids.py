@@ -26,9 +26,11 @@ from os.path import expanduser
 from ndmg.scripts.ndmg_setup import get_files
 from ndmg.utils.bids_utils import *
 from ndmg.scripts.ndmg_dwi_pipeline import ndmg_dwi_pipeline
+from ndmg.scripts.ndmg_func_pipeline import ndmg_func_pipeline
 from ndmg.utils.bids_utils import *
 from ndmg.stats.qa_graphs import *
 from ndmg.stats.qa_graphs_plotting import *
+from ndmg.stats.group_func import group_func
 from glob import glob
 import ndmg.utils as mgu
 import ndmg
@@ -76,7 +78,18 @@ def get_atlas(atlas_dir, modality='dwi'):
     labels = [op.join(atlas_dir, l) for l in labels]
     fils = labels + [atlas, atlas_mask]
     if modality == 'func':
-        raise ValueError('fMRI Pipeline Not Supported.')
+        atlas_func = op.join(atlas_dir, 'func_atlases')
+        atlas = op.join(atlas_func, 'atlas/MNI152_T1-2mm.nii.gz')
+        atlas_brain = op.join(atlas_func, 'atlas/MNI152_T1-2mm_brain.nii.gz')
+        atlas_mask = op.join(atlas_func,
+                             'mask/MNI152_T1-2mm_brain_mask.nii.gz')
+        lv_mask = op.join(atlas_func, 'mask/HarvOx_lv_thr25-2mm.nii.gz')
+        labels_func = ['label/HarvardOxford-cort-maxprob-thr25-2mm.nii.gz',
+                  'label/aal-2mm.nii.gz', 'label/brodmann-2mm.nii.gz',
+                  'label/desikan-2mm.nii.gz', 'label/pp264-2mm.nii.gz']
+        labels_func = [op.join(atlas_func, l) for l in labels]
+        labels += labels_func
+        fils = labels + [atlas, atlas_mask, atlas_brain, lv_mask]
 
     ope = op.exists
     if any(not ope(f) for f in fils):
@@ -101,7 +114,8 @@ def worker_wrapper((f, args, kwargs)):
 
 
 def participant_level(inDir, outDir, subjs, sesh=None, task=None, run=None,
-                      debug=False, modality='dwi', nthreads=1, bg=False):
+                      debug=False, modality='dwi', nthreads=1, bg=False,
+                      stc=None):
     """
     Crawls the given BIDS organized directory for data pertaining to the given
     subject and session, and passes necessary files to ndmg_dwi_pipeline for
@@ -125,7 +139,13 @@ def participant_level(inDir, outDir, subjs, sesh=None, task=None, run=None,
         f = ndmg_dwi_pipeline  # the function of choice
         kwargs['bg'] = bg
     else:
-        raise ValueError('fMRI Pipeline Not Supported.')
+        funcs, anats = result
+        assert(len(anats) == len(funcs))
+        args = [[func, anat, atlas, atlas_brain, atlas_mask,
+                 lv_mask, labels, outDir] for (func, anat) in
+                zip(funcs, anats)]
+        f = ndmg_func_pipeline
+        kwargs['stc'] = stc
 
     # optional args stored in kwargs
     # use worker wrapper to call function f with args arg
@@ -142,7 +162,8 @@ def group_level(inDir, outDir, dataset=None, atlas=None, minimal=False,
     derivatives produced
     """
     if modality == 'func':
-        raise ValueError('fMRI Pipeline Not Supported.')
+        fgr = group_func(inDir, outDir, atlas=atlas, dataset=dataset)
+        return
 
     outDir += "/graphs"
     mgu.execute_cmd("mkdir -p {}".format(outDir))
@@ -186,8 +207,8 @@ def main():
                         'analyses can be run independently (in parallel) '
                         'using the same output_dir.',
                         choices=['participant', 'group'])
-    parser.add_argument('modality', help='Modality of graphs that \
-                        are being generated.', choices=['dwi'])
+    parser.add_argument('modality', help='Modality of MRI scans that \
+                        are being evaluated.', choices=['dwi', 'func'])
     parser.add_argument('--participant_label', help='The label(s) of the '
                         'participant(s) that should be analyzed. The label '
                         'corresponds to sub-<participant_label> from the BIDS '
@@ -244,6 +265,12 @@ def main():
                         "threads you have available. Should be approximately "
                         "min(ncpu*hyperthreads/cpu, maxram/10).", default=1,
                         type=int)
+    parser.add_argument("--stc", action="store", help='A file for slice '
+                        'timing correction. Options are a TR sequence file '
+                        '(where each line is the shift in TRs), '
+                        'up (ie, bottom to top), down (ie, top to bottom), '
+                        'and interleaved.', default=None)
+
     result = parser.parse_args()
 
     inDir = result.bids_dir
@@ -281,19 +308,26 @@ def main():
             else:
                 s3_get_data(buck, remo, inDir, public=creds)
         modif = 'ndmg_{}'.format(ndmg.version.replace('.', '-'))
-        participant_level(inDir, outDir, subj, sesh, task, run, result.debug,
-                          result.bg)
+        participant_level(inDir, outDir, subj, sesh, task, run, debug,
+                          bg, stc)
 
     elif level == 'group':
         if buck is not None and remo is not None:
             print("Retrieving data from S3...")
             if atlas is not None:
-                s3_get_data(buck, remo+'/graphs/'+atlas,
-                         outDir+'/graphs/'+atlas, public=creds)
+                tpath = '{}/graphs/{}'.format(remo, atlas)
+                tindir = '{}/{}'.format(inDir, atlas)
+                if modality is not 'dwi':
+                    tpath = '{}/connectomes/{}'.format(remo, atlas)
+                    tindir = '{}/connectomes/{}'.format(inDir, atlas)
             else:
-                s3_get_data(buck, remo+'/graphs', outDir+'/graphs',
-                            public=creds)
-        modif = 'qa'
+                tpath = '{}/graphs'.format(remo)
+                tindir = inDir
+            if modality is not 'dwi':
+                qadir_rem = '{}/qa'.format(remo)
+                qadir_local = '{}/qa'.format(inDir)
+                s3_get_data(buck, qadir_rem, qadir_local, public=creds)
+            s3_get_data(buck, tpath, tindir, public=creds)if = 'qa'
         group_level(inDir, outDir, dataset, atlas, minimal, log, hemi,
                     modality)
 
