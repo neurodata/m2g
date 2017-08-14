@@ -60,23 +60,24 @@ def get_atlas(atlas_dir, modality='dwi'):
     Given the desired location for atlases and the type of processing, ensure
     we have all the atlases and parcellations.
     """
-    atlas = op.join(atlas_dir, 'atlas/MNI152_T1_1mm.nii.gz')
-    atlas_mask = op.join(atlas_dir,
-                         'atlas/MNI152_T1_1mm_brain_mask.nii.gz')
-    labels = ['labels/AAL.nii.gz', 'labels/desikan.nii.gz',
-              'labels/HarvardOxford.nii.gz', 'labels/CPAC200.nii.gz',
-              'labels/Talairach.nii.gz', 'labels/JHU.nii.gz',
-              'labels/slab907.nii.gz', 'labels/slab1068.nii.gz',
-              'labels/DS00071.nii.gz', 'labels/DS00096.nii.gz',
-              'labels/DS00108.nii.gz', 'labels/DS00140.nii.gz',
-              'labels/DS00195.nii.gz', 'labels/DS00278.nii.gz',
-              'labels/DS00350.nii.gz', 'labels/DS00446.nii.gz',
-              'labels/DS00583.nii.gz', 'labels/DS00833.nii.gz',
-              'labels/DS01216.nii.gz', 'labels/DS01876.nii.gz',
-              'labels/DS03231.nii.gz', 'labels/DS06481.nii.gz',
-              'labels/DS16784.nii.gz', 'labels/DS72784.nii.gz']
-    labels = [op.join(atlas_dir, l) for l in labels]
-    fils = labels + [atlas, atlas_mask]
+    if modality == 'dwi':
+        atlas = op.join(atlas_dir, 'atlas/MNI152_T1_1mm.nii.gz')
+        atlas_mask = op.join(atlas_dir,
+                             'atlas/MNI152_T1_1mm_brain_mask.nii.gz')
+        labels = ['labels/AAL.nii.gz', 'labels/desikan.nii.gz',
+                  'labels/HarvardOxford.nii.gz', 'labels/CPAC200.nii.gz',
+                  'labels/Talairach.nii.gz', 'labels/JHU.nii.gz',
+                  'labels/slab907.nii.gz', 'labels/slab1068.nii.gz',
+                  'labels/DS00071.nii.gz', 'labels/DS00096.nii.gz',
+                  'labels/DS00108.nii.gz', 'labels/DS00140.nii.gz',
+                  'labels/DS00195.nii.gz', 'labels/DS00278.nii.gz',
+                  'labels/DS00350.nii.gz', 'labels/DS00446.nii.gz',
+                  'labels/DS00583.nii.gz', 'labels/DS00833.nii.gz',
+                  'labels/DS01216.nii.gz', 'labels/DS01876.nii.gz',
+                  'labels/DS03231.nii.gz', 'labels/DS06481.nii.gz',
+                  'labels/DS16784.nii.gz', 'labels/DS72784.nii.gz']
+        labels = [op.join(atlas_dir, l) for l in labels]
+        fils = labels + [atlas, atlas_mask]
     if modality == 'func':
         atlas_func = op.join(atlas_dir, 'func_atlases')
         atlas = op.join(atlas_func, 'atlas/MNI152_T1-2mm.nii.gz')
@@ -84,11 +85,20 @@ def get_atlas(atlas_dir, modality='dwi'):
         atlas_mask = op.join(atlas_func,
                              'mask/MNI152_T1-2mm_brain_mask.nii.gz')
         lv_mask = op.join(atlas_func, 'mask/HarvOx_lv_thr25-2mm.nii.gz')
-        labels_func = ['label/HarvardOxford-cort-maxprob-thr25-2mm.nii.gz',
+        labels= ['label/HarvardOxford-cort-maxprob-thr25-2mm.nii.gz',
                   'label/aal-2mm.nii.gz', 'label/brodmann-2mm.nii.gz',
-                  'label/desikan-2mm.nii.gz', 'label/pp264-2mm.nii.gz']
-        labels_func = [op.join(atlas_func, l) for l in labels]
-        labels += labels_func
+                  'label/desikan-2mm.nii.gz', 'label/pp264-2mm.nii.gz',
+                  'label/CPAC200-2mm.nii.gz',
+                  'label/DS00071-2mm.nii.gz', 'label/DS00096-2mm.nii.gz',
+                  'label/DS00108-2mm.nii.gz', 'label/DS00140-2mm.nii.gz',
+                  'label/DS00195-2mm.nii.gz', 'label/DS00278-2mm.nii.gz',
+                  'label/DS00350-2mm.nii.gz', 'label/DS00446-2mm.nii.gz',
+                  'label/DS00583-2mm.nii.gz', 'label/DS00833-2mm.nii.gz',
+                  'label/DS01216-2mm.nii.gz', 'label/DS01876-2mm.nii.gz',
+                  'label/DS03231-2mm.nii.gz', 'label/DS06481-2mm.nii.gz',
+                  'label/DS16784-2mm.nii.gz', 'label/DS72784-2mm.nii.gz']
+ 
+        labels = [op.join(atlas_func, l) for l in labels]
         fils = labels + [atlas, atlas_mask, atlas_brain, lv_mask]
 
     ope = op.exists
@@ -307,7 +317,7 @@ def main():
                 s3_get_data(buck, remo, inDir, public=creds)
         modif = 'ndmg_{}'.format(ndmg.version.replace('.', '-'))
         participant_level(inDir, outDir, subj, sesh, task, run, debug,
-                          modality, bg, stc)
+                          modality, nthreads, bg, stc)
 
     elif level == 'group':
         if buck is not None and remo is not None:
