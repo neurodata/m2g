@@ -78,7 +78,7 @@ labels = [op.join(atlas_dir, l) for l in labels]
 
 
 def participant_level(inDir, outDir, subjs, sesh=None, task=None, run=None,
-                      debug=False):
+                      debug=False, bg=False):
     """
     Crawls the given BIDS organized directory for data pertaining to the given
     subject and session, and passes necessary files to ndmg_pipeline for
@@ -88,13 +88,13 @@ def participant_level(inDir, outDir, subjs, sesh=None, task=None, run=None,
     ope = op.exists
     if any(not ope(l) for l in labels) or not (ope(atlas) and ope(atlas_mask)):
         print("Cannot find atlas information; downloading...")
-        mgu().execute_cmd('mkdir -p ' + atlas_dir)
+        mgu.execute_cmd('mkdir -p ' + atlas_dir)
         cmd = " ".join(['wget -rnH --cut-dirs=3 --no-parent -P ' + atlas_dir,
                         'http://openconnecto.me/mrdata/share/atlases/'])
-        mgu().execute_cmd(cmd)
+        mgu.execute_cmd(cmd)
 
     # Make output dir
-    mgu().execute_cmd("mkdir -p " + outDir + " " + outDir + "/tmp")
+    mgu.execute_cmd("mkdir -p " + outDir + " " + outDir + "/tmp")
 
     dwis, bvecs, bvals, anats = sweep_directory(inDir, subjs, sesh,
                                                 task, run, modality='dwi')
@@ -113,7 +113,7 @@ def participant_level(inDir, outDir, subjs, sesh=None, task=None, run=None,
         print("Bvec file: " + bvec)
 
         ndmg_dwi_pipeline(dwi, bval, bvec, anat, atlas, atlas_mask,
-                          labels, outDir, clean=(not debug))
+                          labels, outDir, clean=(not debug), bg=bg)
 
 
 def group_level(inDir, outDir, dataset=None, atlas=None, minimal=False,
@@ -124,7 +124,7 @@ def group_level(inDir, outDir, dataset=None, atlas=None, minimal=False,
     """
     # Make output dir
     outDir += "/qa/graphs/"
-    mgu().execute_cmd("mkdir -p " + outDir)
+    mgu.execute_cmd("mkdir -p " + outDir)
 
     inDir += '/graphs/'
     # Get list of graphs
@@ -146,7 +146,7 @@ def group_level(inDir, outDir, dataset=None, atlas=None, minimal=False,
               for fl in files
               if fl.endswith(".graphml") or fl.endswith(".gpickle")]
         tmp_out = op.join(outDir, label)
-        mgu().execute_cmd("mkdir -p " + tmp_out)
+        mgu.execute_cmd("mkdir -p " + tmp_out)
         try:
             compute_metrics(fs, tmp_out, label)
             outf = op.join(tmp_out, 'plot')
@@ -277,7 +277,7 @@ def main():
             print("Note: no credentials provided, may fail to push big files")
             cmd += ' --no-sign-request'
         print(cmd)
-        mgu().execute_cmd(cmd)
+        mgu.execute_cmd(cmd)
     sys.exit(0)
 
 if __name__ == "__main__":
