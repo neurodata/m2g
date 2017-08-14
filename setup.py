@@ -24,8 +24,7 @@ setup(
     version=VERSION,
     scripts = [
         'ndmg/scripts/ndmg_demo-dwi',
-        'ndmg/scripts/ndmg_demo-qa',
-        'ndmg/scripts/ndmg_demo-mrilab'
+        'ndmg/scripts/ndmg_demo-qa'
     ],
     entry_points = {
         'console_scripts': [
