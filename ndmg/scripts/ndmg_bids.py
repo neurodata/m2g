@@ -26,10 +26,9 @@ from os.path import expanduser
 from ndmg.scripts.ndmg_setup import get_files
 from ndmg.utils.bids_utils import *
 from ndmg.scripts.ndmg_dwi_pipeline import ndmg_dwi_pipeline
-from ndmg.utils.bids import *
+from ndmg.utils.bids_utils import *
 from ndmg.stats.qa_graphs import *
 from ndmg.stats.qa_graphs_plotting import *
-from ndmg.stats.group_func import group_func
 from glob import glob
 import ndmg.utils as mgu
 import ndmg
