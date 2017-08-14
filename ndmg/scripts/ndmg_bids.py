@@ -109,7 +109,6 @@ def participant_level(inDir, outDir, subjs, sesh=None, task=None, run=None,
     """
     labels, atlas, atlas_mask, atlas_brain, lv_mask = get_atlas(atlas_dir,
                                                                 modality)
-
     mgu.execute_cmd("mkdir -p {} {}/tmp".format(outDir, outDir))
 
     result = sweep_directory(inDir, subjs, sesh, task, run, modality=modality)

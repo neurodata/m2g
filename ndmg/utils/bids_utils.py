@@ -164,9 +164,18 @@ def s3_get_data(bucket, remote, local, public=True):
 
 
 def s3_push_data(bucket, remote, outDir, modifier, creds=True):
+<<<<<<< HEAD:ndmg/utils/bids_utils.py
     cmd = 'aws s3 cp --exclude "tmp/*" {} s3://{}/{}/{} --recursive --acl public-read'
     cmd = cmd.format(outDir, bucket, remote, modifier)
     if not creds:
         print("Note: no credentials provided, may fail to push big files.")
         cmd += ' --no-sign-request'
     mgu.execute_cmd(cmd)
+=======
+        cmd = 'aws s3 cp --exclude "tmp/*" {} s3://{}/{}/{} --recursive --acl public-read'
+        cmd = cmd.format(outDir, bucket, remote, modifier)
+        if not creds:
+            print("Note: no credentials provided, may fail to push big files.")
+            cmd += ' --no-sign-request'
+        mgu.execute_cmd(cmd)
+>>>>>>> dc1a36152336ebffb59337990764f6589df11bdf:ndmg/utils/bids_utils.py
