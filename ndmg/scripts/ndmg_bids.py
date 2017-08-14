@@ -78,7 +78,7 @@ labels = [op.join(atlas_dir, l) for l in labels]
 # *these files can be anywhere up stream of the dwi data, and are inherited.
 
 
-def participant_level(inDir, outDir, subjs, sesh=None, debug=False):
+def participant_level(inDir, outDir, subjs, sesh=None, debug=False, bg=False):
     """
     Crawls the given BIDS organized directory for data pertaining to the given
     subject and session, and passes necessary files to ndmg_pipeline for
@@ -155,7 +155,7 @@ def participant_level(inDir, outDir, subjs, sesh=None, debug=False):
         print("Bvec file: " + bvec[i])
 
         ndmg_dwi_pipeline(dwi[i], bval[i], bvec[i], anat[i], atlas, atlas_mask,
-                          labels, outDir, clean=(not debug))
+                          labels, outDir, clean=(not debug), bg=bg)
 
 
 def group_level(inDir, outDir, dataset=None, atlas=None, minimal=False,
