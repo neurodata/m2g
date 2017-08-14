@@ -30,11 +30,11 @@ def sweep_directory(bdir, subj=None, sesh=None, task=None, run=None, modality='d
     necessary inputs for the NDMG pipeline. Uses regexes to check matches for
     BIDs compliance.
     """
-    if modality is 'dwi':
+    if modality == 'dwi':
         dwis = []
         bvals = []
         bvecs = []
-    elif modality is 'func':
+    elif modality == 'func':
         funcs = []
     anats = []
     layout = BIDSLayout(bdir)  # initialize BIDs tree on bdir
@@ -70,9 +70,9 @@ def sweep_directory(bdir, subj=None, sesh=None, task=None, run=None, modality='d
             mod_keys = ['subject', 'session', 'task', 'run']
             # our query we will use for each modality img
             mod_query = {'modality': modality}
-            if modality is 'dwi':
+            if modality == 'dwi':
                 type_img = 'dwi'  # use the dwi image
-            elif modality is 'func':
+            elif modality == 'func':
                 type_img = 'bold'  # use the bold image
             mod_query['type'] = type_img
 
@@ -90,7 +90,7 @@ def sweep_directory(bdir, subj=None, sesh=None, task=None, run=None, modality='d
                     anat_query[key] = attr
             # make a query to fine the desired files from the BIDSLayout
             anat = layout.get(**anat_query)
-            if modality is 'dwi':
+            if modality == 'dwi':
                 dwi = layout.get(**merge_dicts(mod_query,
                                                {'extensions': 'nii.gz|nii'}))
                 bval = layout.get(**merge_dicts(mod_query,
@@ -107,7 +107,7 @@ def sweep_directory(bdir, subj=None, sesh=None, task=None, run=None, modality='d
                             dwis.append(dw.filename)
                             bvals.append(bva.filename)
                             bvecs.append(bve.filename)
-            elif modality is 'func':
+            elif modality == 'func':
                 func = layout.get(**merge_dicts(mod_query,
                                                 {'extensions': 'nii.gz|nii'}))
                 if func and anat:
@@ -115,10 +115,13 @@ def sweep_directory(bdir, subj=None, sesh=None, task=None, run=None, modality='d
                         if fun.filename not in funcs:
                             funcs.append(fun.filename)
                             anats.append(anat[0].filename)
-    if modality is 'dwi':
+    if modality == 'dwi':
         return (dwis, bvals, bvecs, anats)
-    elif modality is 'func':
+    elif modality == 'func':
         return (funcs, anats)
+    else:
+        raise ValueError('Incorrect modality passed.\
+                         Choices are \'func\' and \'dwi\'.')
 
 
 def as_list(x):
@@ -127,7 +130,7 @@ def as_list(x):
     it through otherwise.
     """
     if not isinstance(x, list):
-        return list(x)
+        return [x]
     else:
         return x
 
