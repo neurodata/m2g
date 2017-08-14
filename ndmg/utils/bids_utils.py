@@ -15,7 +15,7 @@
 # limitations under the License.
 #
 
-# bids_sweep.py
+# bids.py
 # Created by Eric Bridgeford on 2017-08-09.
 # Email: ebridge2@jhu.edu
 
@@ -130,3 +130,32 @@ def merge_dicts(x, y):
     z = x.copy()
     z.update(y)
     return z
+
+
+def s3_get_data(bucket, remote, local, public=True):
+    """
+    Given an s3 bucket, data location on the bucket, and a download location,
+    crawls the bucket and recursively pulls all data.
+    """
+    client = boto3.client('s3')
+    if not public:
+        bkts = [bk['Name'] for bk in client.list_buckets()['Buckets']]
+        if bucket not in bkts:
+            sys.exit("Error: could not locate bucket. Available buckets: " +
+                     ", ".join(bkts))
+
+    cmd = 'aws s3 cp --recursive s3://{}/{}/ {}'.format(bucket, remote, local)
+    if public:
+        cmd += ' --no-sign-request --region=us-east-1'
+
+    std, err = mgu.execute_cmd('mkdir -p {}'.format(local))
+    std, err = mgu.execute_cmd(cmd)
+
+
+def s3_push_data(bucket, remote, outDir, modifier, creds=True):
+    cmd = 'aws s3 cp --exclude "tmp/*" {} s3://{}/{}/{} --recursive --acl public-read'
+    cmd = cmd.format(outDir, bucket, remote, modifier)
+    if not creds:
+        print("Note: no credentials provided, may fail to push big files.")
+        cmd += ' --no-sign-request'
+    mgu.execute_cmd(cmd)
