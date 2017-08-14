@@ -1,5 +1,3 @@
-![](./docs/nutmeg.png)
-
 # ndmg
 
 [![](https://img.shields.io/pypi/v/ndmg.svg)](https://pypi.python.org/pypi/ndmg)
@@ -7,9 +5,13 @@
 ![](https://img.shields.io/badge/pep8-0E-green.svg?style=flat)
 [![DOI](https://zenodo.org/badge/doi/10.5281/zenodo.60206.svg)](http://dx.doi.org/10.5281/zenodo.60206)
 [![Code Climate](https://codeclimate.com/github/neurodata/ndmg/badges/gpa.svg)](https://codeclimate.com/github/neurodata/ndmg)
-[![Neurodata.io](https://img.shields.io/badge/Visit-neurodata.io-ff69b4.svg)](http://neurodata.io/)
+[![DockerHub](https://img.shields.io/docker/pulls/bids/ndmg.svg)](https://hub.docker.com/bids/ndmg)
+[![OpenNeuro](http://bids.neuroimaging.io/openneuro_badge.svg)](https://openneuro.org)
 
 NeuroData's MR Graphs package, **ndmg** (pronounced "***nutmeg***"), is the successor of the MRCAP, MIGRAINE, and m2g pipelines. **ndmg** combines dMRI and sMRI data from a single subject to estimate a high-level connectome reliably and scalably.
+
+![](./docs/nutmeg.png)
+
 
 ### Installing ndmg
 Installing **ndmg** is very simple! We have a few dependencies which must be installed, but once that's taken care of you are ready to dive in!
