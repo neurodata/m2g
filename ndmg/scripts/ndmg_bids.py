@@ -23,7 +23,7 @@ from argparse import ArgumentParser
 from subprocess import Popen, PIPE
 from os.path import expanduser
 from ndmg.scripts.ndmg_setup import get_files
-from ndmg.utils import bids_s3, bids_sweep
+from ndmg.utils.bids_utils import *
 from ndmg.scripts.ndmg_dwi_pipeline import ndmg_dwi_pipeline
 from ndmg.stats.qa_graphs import *
 from ndmg.stats.qa_graphs_plotting import *
@@ -96,9 +96,8 @@ def participant_level(inDir, outDir, subjs, sesh=None, task=None, run=None,
     # Make output dir
     mgu().execute_cmd("mkdir -p " + outDir + " " + outDir + "/tmp")
 
-    dwis, bvecs, bvals, anats = bids_sweep.sweep_directory(inDir, subjs, sesh,
-                                                           task, run,
-                                                           modality='dwi')
+    dwis, bvecs, bvals, anats = sweep_directory(inDir, subjs, sesh,
+                                                task, run, modality='dwi')
 
     assert(len(anat) == len(dwi))
     assert(len(bvec) == len(dwi))
@@ -250,9 +249,9 @@ def main():
         if buck is not None and remo is not None:
             print("Retrieving data from S3...")
             if subj is not None:
-                [bids_s3.get_data(buck, remo, inDir, s, True) for s in subj]
+                [s3_get_data(buck, remo, inDir, s, True) for s in subj]
             else:
-                bids_s3.get_data(buck, remo, inDir, public=creds)
+                s3_get_data(buck, remo, inDir, public=creds)
         modif = 'ndmg_{}'.format(ndmg.version.replace('.', '-'))
         participant_level(inDir, outDir, subj, sesh, task, run, result.debug,
                           result.bg)
@@ -260,11 +259,11 @@ def main():
         if buck is not None and remo is not None:
             print("Retrieving data from S3...")
             if atlas is not None:
-                bids_s3.get_data(buck, remo+'/graphs/'+atlas,
-                                 outDir+'/graphs/'+atlas, public=creds)
+                s3_get_data(buck, remo+'/graphs/'+atlas,
+                         outDir+'/graphs/'+atlas, public=creds)
             else:
-                bids_s3.get_data(buck, remo+'/graphs', outDir+'/graphs',
-                                 public=creds)
+                s3_get_data(buck, remo+'/graphs', outDir+'/graphs',
+                            public=creds)
         modif = 'qa'
         group_level(outDir, outDir, result.dataset, result.atlas, minimal,
                     log, hemi)
