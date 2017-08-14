@@ -25,10 +25,9 @@ from subprocess import Popen, PIPE
 from os.path import expanduser
 from ndmg.scripts.ndmg_setup import get_files
 from ndmg.scripts.ndmg_dwi_pipeline import ndmg_dwi_pipeline
-from ndmg.utils.bids import *
+from ndmg.utils.bids_utils import *
 from ndmg.stats.qa_graphs import *
 from ndmg.stats.qa_graphs_plotting import *
-from ndmg.stats.group_func import group_func
 from glob import glob
 import ndmg.utils as mgu
 import ndmg
@@ -108,8 +107,7 @@ def participant_level(inDir, outDir, subjs, sesh=None, task=None, run=None,
                                                                 modality)
 
     mgu.execute_cmd("mkdir -p {} {}/tmp".format(outDir, outDir))
-    result = bids_sweep.sweep_directory(inDir, subjs, sesh, task, run, 
-                                        modality='dwi')
+    result = sweep_directory(inDir, subjs, sesh, task, run, modality='dwi')
 
     kwargs = {'clean': (not debug)}  # our keyword arguments
     if modality == 'dwi':
