@@ -42,25 +42,25 @@ def sweep_directory(bdir, subj=None, sesh=None, task=None, run=None, modality='d
     if subj is None:
         subjs = layout.get_subjects()  # list of all the subjects
     else:
-        subjs = [subj]  # make it a list so we can iterate
+        subjs = as_list(subj)  # make it a list so we can iterate
     for sub in subjs:
         if not sesh:
             seshs = layout.get_sessions(subject=sub)
             seshs += [None]  # in case there are non-session level inputs
         else:
-            seshs = [sesh]  # make a list so we can iterate
+            seshs = as_list(sesh)  # make a list so we can iterate
 
         if not task:
             tasks = layout.get_tasks(subject=sub)
             tasks += [None]
         else:
-            tasks = [task]
+            tasks = as_list(task)
 
         if not run:
             runs = layout.get_runs(subject=sub)
             runs += [None]
         else:
-            runs = [run]
+            runs = as_list(run)
 
         # all the combinations of sessions and tasks that are possible
         for (ses, tas, ru) in product(seshs, tasks, runs):
@@ -119,6 +119,17 @@ def sweep_directory(bdir, subj=None, sesh=None, task=None, run=None, modality='d
         return (dwis, bvals, bvecs, anats)
     elif modality is 'func':
         return (funcs, anats)
+
+
+def as_list(x):
+    """
+    A function to convert an item to a list if it is not, or pass
+    it through otherwise.
+    """
+    if not isinstance(x, list):
+        return list(x)
+    else:
+        return x
 
 
 def merge_dicts(x, y):

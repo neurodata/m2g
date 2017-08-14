@@ -96,14 +96,16 @@ def participant_level(inDir, outDir, subjs, sesh=None, task=None, run=None,
     # Make output dir
     mgu.execute_cmd("mkdir -p " + outDir + " " + outDir + "/tmp")
 
-    dwis, bvecs, bvals, anats = sweep_directory(inDir, subjs, sesh,
+    print subjs
+    print sesh
+    dwis, bvals, bvecs, anats = sweep_directory(inDir, subjs, sesh,
                                                 task, run, modality='dwi')
 
-    assert(len(anat) == len(dwi))
-    assert(len(bvec) == len(dwi))
-    assert(len(bval) == len(dwi))
+    assert(len(anats) == len(dwis))
+    assert(len(bvecs) == len(dwis))
+    assert(len(bvals) == len(dwis))
 
-    print(dwi); print(bvec); print(bval); print(anat)
+    print anats; print bvecs; print bvals; print dwis
 
     # Run for each
     for dwi, bval, bvec, anat in zip(dwis, bvals, bvecs, anats):
