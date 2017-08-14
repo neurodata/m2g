@@ -88,13 +88,13 @@ def participant_level(inDir, outDir, subjs, sesh=None, debug=False):
     ope = op.exists
     if any(not ope(l) for l in labels) or not (ope(atlas) and ope(atlas_mask)):
         print("Cannot find atlas information; downloading...")
-        mgu().execute_cmd('mkdir -p ' + atlas_dir)
+        mgu.execute_cmd('mkdir -p ' + atlas_dir)
         cmd = " ".join(['wget -rnH --cut-dirs=3 --no-parent -P ' + atlas_dir,
                         'http://openconnecto.me/mrdata/share/atlases/'])
-        mgu().execute_cmd(cmd)
+        mgu.execute_cmd(cmd)
 
     # Make output dir
-    mgu().execute_cmd("mkdir -p " + outDir + " " + outDir + "/tmp")
+    mgu.execute_cmd("mkdir -p " + outDir + " " + outDir + "/tmp")
 
     # Get subjects
     if subjs is None:
@@ -166,7 +166,7 @@ def group_level(inDir, outDir, dataset=None, atlas=None, minimal=False,
     """
     # Make output dir
     outDir += "/qa/graphs/"
-    mgu().execute_cmd("mkdir -p " + outDir)
+    mgu.execute_cmd("mkdir -p " + outDir)
 
     inDir += '/graphs/'
     # Get list of graphs
@@ -188,7 +188,7 @@ def group_level(inDir, outDir, dataset=None, atlas=None, minimal=False,
               for fl in files
               if fl.endswith(".graphml") or fl.endswith(".gpickle")]
         tmp_out = op.join(outDir, label)
-        mgu().execute_cmd("mkdir -p " + tmp_out)
+        mgu.execute_cmd("mkdir -p " + tmp_out)
         try:
             compute_metrics(fs, tmp_out, label)
             outf = op.join(tmp_out, 'plot')
@@ -304,7 +304,7 @@ def main():
             print("Note: no credentials provided, may fail to push big files")
             cmd += ' --no-sign-request'
         print(cmd)
-        mgu().execute_cmd(cmd)
+        mgu.execute_cmd(cmd)
     sys.exit(0)
 
 if __name__ == "__main__":
