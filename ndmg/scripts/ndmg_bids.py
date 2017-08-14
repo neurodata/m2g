@@ -222,7 +222,7 @@ def main():
                         'spec (so it does not include "ses-"). If this '
                         'parameter is not provided all sessions should be '
                         'analyzed. Multiple sessions can be specified '
-                        'with a space separated list.')
+                        'with a space separated list.', nargs="+")
     parser.add_argument('--task_label', help='The label(s) of the task '
                         'that should be analyzed. The label corresponds to '
                         'task-<task_label> from the BIDS spec (so it does not '
@@ -297,8 +297,6 @@ def main():
 
     creds = bool(os.getenv("AWS_ACCESS_KEY_ID", 0) and
                  os.getenv("AWS_SECRET_ACCESS_KEY", 0))
-    if modality != 'dwi':
-        raise ValueError('The functional pipeline is not yet supported.')
 
     if level == 'participant':
         if buck is not None and remo is not None:
@@ -309,7 +307,7 @@ def main():
                 s3_get_data(buck, remo, inDir, public=creds)
         modif = 'ndmg_{}'.format(ndmg.version.replace('.', '-'))
         participant_level(inDir, outDir, subj, sesh, task, run, debug,
-                          bg, stc)
+                          modality, bg, stc)
 
     elif level == 'group':
         if buck is not None and remo is not None:
@@ -327,7 +325,8 @@ def main():
                 qadir_rem = '{}/qa'.format(remo)
                 qadir_local = '{}/qa'.format(inDir)
                 s3_get_data(buck, qadir_rem, qadir_local, public=creds)
-            s3_get_data(buck, tpath, tindir, public=creds)if = 'qa'
+            s3_get_data(buck, tpath, tindir, public=creds)
+        modif = 'qa'
         group_level(inDir, outDir, dataset, atlas, minimal, log, hemi,
                     modality)
 
