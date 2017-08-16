@@ -54,7 +54,7 @@ setup(
         'dipy>=0.1',
         'boto3',
         'matplotlib==1.5.3',
-        'plotly',
+        'plotly==1.12.1',
         'cython',
         'pybids'
     ]
