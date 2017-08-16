@@ -10,4 +10,4 @@ cython
 boto3
 pybids
 multiprocessing
-plotly==1.2.1
+plotly==1.12.1
