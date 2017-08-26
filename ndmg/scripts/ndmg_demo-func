@@ -4,7 +4,7 @@ echo "Getting test data..."
 
 loc="$PWD"
 cd /tmp/
-[ -f /tmp/ndmg_demo_func.zip ] || wget --quiet http://openconnecto.me/mrdata/share/eric_atlases/ndmg_demo_func.zip
+[ -f /tmp/ndmg_demo_func.zip ] || wget --quiet http://openconnecto.me/mrdata/share/demo_data/ndmg_demo_func.zip
 unzip -o /tmp/ndmg_demo_func.zip
 
 ndmg_func_pipeline /tmp/ndmg_demo_func/sub-0025864_session-1_bold_small.nii.gz \
