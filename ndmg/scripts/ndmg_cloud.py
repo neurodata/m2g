@@ -65,7 +65,7 @@ def crawl_bucket(bucket, path, group=False, mode='dwi'):
             cmd = 'aws s3 ls s3://{}/{}/graphs/'.format(bucket, path)
         else:
             cmd = 'aws s3 ls s3://{}/{}/connectomes/'.format(bucket, path)
-	out err = mgu.execute_cmd(cmd)
+	out, err = mgu.execute_cmd(cmd)
         atlases = re.findall('PRE (.+)/', out)
         print("Atlas IDs: " + ", ".join(atlases))
         return atlases
@@ -127,8 +127,8 @@ def create_json(bucket, path, threads, jobdir, group=False, credentials=None,
     cmd[3] = re.sub('(<MODE>)', mode, cmd[3])
     cmd[5] = re.sub('(<BUCKET>)', bucket, cmd[5])
     cmd[7] = re.sub('(<PATH>)', path, cmd[7])
-    cmd[12] = re.sub('(<STC>)', path, cmd[12])
-    cmd[14] = re.sub('(<BG>)', path, cmd[14])
+    cmd[12] = re.sub('(<STC>)', stc, cmd[12])
+    cmd[14] = re.sub('(<BG>)', bg, cmd[14])
     if group:
         if dataset is not None:
             cmd[10] = re.sub('(<DATASET>)', dataset, cmd[10])
@@ -166,7 +166,7 @@ def create_json(bucket, path, threads, jobdir, group=False, credentials=None,
             print("... Generating job for sub-{}".format(subj))
             for sesh in seshs[subj]:
                 job_cmd = deepcopy(cmd)
-                job_cmd[9] = re.sub('(<SUBJ>)', subj, job_cmd[8])
+                job_cmd[9] = re.sub('(<SUBJ>)', subj, job_cmd[9])
                 if sesh is not None:
                     job_cmd += [u'--session_label']
                     job_cmd += [u'{}'.format(sesh)]
@@ -181,6 +181,7 @@ def create_json(bucket, path, threads, jobdir, group=False, credentials=None,
                     name = 'ndmg_{}_sub-{}'.format(ver, subj)
                 if sesh is not None:
                     name = '{}_ses-{}'.format(name, sesh)
+                print(job_cmd)
                 job_json['jobName'] = name
                 job_json['containerOverrides']['command'] = job_cmd
                 job = os.path.join(jobdir, 'jobs', name+'.json')
@@ -292,7 +293,7 @@ def main():
                         default=False)
     parser.add_argument('--dataset', action='store', help='Dataset name')
     parser.add_argument('--stc', action='store', choices=['None', 'interleaved',
-                        'up', 'down'], default=None, help="The slice timing "
+                        'up', 'down'], default='None', help="The slice timing "
                         "direction to correct. Not necessary.")
     parser.add_argument('--modality', action='store', choices=['func', 'dwi'],
                         help='Pipeline to run')
@@ -310,8 +311,12 @@ def main():
     dset = result.dataset
     log = result.log
     stc = result.stc
-    mode = result.mode
+    mode = result.modality
     bg = result.bg
+    if bg:
+        bg = 'True'
+    else:
+        bg = 'False'
 
     if jobdir is None:
         jobdir = './'
