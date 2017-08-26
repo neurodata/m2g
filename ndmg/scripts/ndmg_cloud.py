@@ -32,8 +32,8 @@ import boto3
 import json
 import ast
 
-participant_templ = 'https://raw.githubusercontent.com/neurodata/ndmg/master/templates/ndmg_cloud_participant.json'
-group_templ = 'https://raw.githubusercontent.com/neurodata/ndmg/master/templates/ndmg_cloud_group.json'
+participant_templ = 'https://raw.githubusercontent.com/neurodata/ndmg/eric-dev-fmri/templates/ndmg_cloud_participant.json'
+group_templ = 'https://raw.githubusercontent.com/neurodata/ndmg/eric-dev-fmri/templates/ndmg_cloud_group.json'
 
 
 def batch_submit(bucket, path, jobdir, credentials=None, state='participant',
