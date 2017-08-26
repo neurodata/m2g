@@ -297,7 +297,7 @@ def main():
                         "direction to correct. Not necessary.")
     parser.add_argument('--modality', action='store', choices=['func', 'dwi'],
                         help='Pipeline to run')
-    parser.add_argument("-b", "--bg", action="store_true", default=False,
+    parser.add_argument("-b", "--bg", action="store", default='False',
                         help="whether or not to produce voxelwise big graph")
     result = parser.parse_args()
 
