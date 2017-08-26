@@ -22,6 +22,8 @@
 from bids.grabbids import BIDSLayout
 import re
 from itertools import product
+import boto3
+from ndmg.utils import utils as mgu
 
 
 def sweep_directory(bdir, subj=None, sesh=None, task=None, run=None, modality='dwi'):
@@ -145,8 +147,7 @@ def merge_dicts(x, y):
     z.update(y)
     return z
 
-
-def s3_get_data(bucket, remote, local, public=True):
+def s3_get_data(bucket, remote_path, local, subj=None, public=True):
     """
     Given an s3 bucket, data location on the bucket, and a download location,
     crawls the bucket and recursively pulls all data.
@@ -157,14 +158,19 @@ def s3_get_data(bucket, remote, local, public=True):
         if bucket not in bkts:
             sys.exit("Error: could not locate bucket. Available buckets: " +
                      ", ".join(bkts))
-
-    cmd = 'aws s3 cp --recursive s3://{}/{}/ {}'.format(bucket, remote, local)
+    cmd = 'aws'
     if public:
         cmd += ' --no-sign-request --region=us-east-1'
+    cmd = "".join([cmd, ' s3 cp --recursive s3://', bucket, '/',
+                   remote_path])
+    if subj is not None:
+        cmd = "".join([cmd, '/sub-', subj])
+        std, err = mgu.execute_cmd('mkdir -p ' + local + '/sub-' + subj)
+        local += '/sub-' + subj
 
-    std, err = mgu.execute_cmd('mkdir -p {}'.format(local))
+    cmd = "".join([cmd, ' ', local])
     std, err = mgu.execute_cmd(cmd)
-
+    return
 
 def s3_push_data(bucket, remote, outDir, modifier, creds=True):
     cmd = 'aws s3 cp --exclude "tmp/*" {} s3://{}/{}/{} --recursive --acl public-read'
