@@ -17,6 +17,7 @@
 
 # qa_graphs.py
 # Created by Greg Kiar on 2016-05-11.
+# Edited by Eric Bridgeford.
 # Email: gkiar@jhu.edu
 
 from argparse import ArgumentParser
@@ -50,22 +51,29 @@ def compute_metrics(fs, outdir, atlas, verb=False, modality='dwi'):
         verb:
             - Toggles verbose output statements
     """
-
     gr = loadGraphs(fs, verb=verb)
-    nodes = nx.number_of_nodes(graphs.values()[0])
     if modality == 'func':
         graphs = binGraphs(gr)
     else:
         graphs = gr
+ 
+    nodes = nx.number_of_nodes(graphs.values()[0])
     #  Number of non-zero edges (i.e. binary edge count)
     print("Computing: NNZ")
     nnz = OrderedDict((subj, len(nx.edges(graphs[subj]))) for subj in graphs)
     write(outdir, 'number_non_zeros', nnz, atlas)
     print("Sample Mean: %.2f" % np.mean(nnz.values()))
 
+    if modality == 'func':
+        graphs = gr
+        wt_args = {'weight': 'weight'}
+    else:
+        wt_args = {}
+
     #   Clustering Coefficients
     print("Computing: Clustering Coefficient Sequence")
-    temp_cc = OrderedDict((subj, nx.clustering(graphs[subj]).values())
+    temp_cc = OrderedDict((subj, nx.clustering(graphs[subj],
+                                               **wt_args).values())
                           for subj in graphs)
     ccoefs = temp_cc
     write(outdir, 'clustering_coefficients', ccoefs, atlas)
@@ -73,9 +81,8 @@ def compute_metrics(fs, outdir, atlas, verb=False, modality='dwi'):
 
     #  Degree sequence
     print("Computing: Degree Sequence")
-    if modality == 'func':
-        graphs = rankGraphs(gr)
-    total_deg = OrderedDict((subj, np.array(nx.degree(graphs[subj]).values()))
+    total_deg = OrderedDict((subj, np.array(nx.degree(graphs[subj],
+                                                      **wt_args).values()))
                             for subj in graphs)
     ipso_deg = OrderedDict()
     contra_deg = OrderedDict()
@@ -152,7 +159,7 @@ def show_means(data):
     print("Subject Means: " + ", ".join(["%.2f" % np.mean(data[key])
                                          for key in data.keys()]))
 
-def binGraphs(graphs, thr=0.5):
+def binGraphs(graphs, thr=0.7):
     """
     Binarizes a set of graphs given a threshold.
 
@@ -162,13 +169,13 @@ def binGraphs(graphs, thr=0.5):
         thr:
             - the threshold below which edges will be assumed disconnected.
     """
-    graphs = []
-    for subj in graphs:
+    binGraphs = {}
+    for subj, graph in graphs.iteritems():
         bin_graph = nx.Graph()
-        for (u, v, d) in graph.edges():
+        for (u, v, d) in graph.edges(data=True):
             if d > thr:
                 bin_graph.add_edge(u, v, weight=1)
-        graphs.append(bin_graph)
+        binGraphs[subj] = bin_graph
     return graphs
 
 
@@ -180,15 +187,15 @@ def rankGraphs(graphs):
         graphs:
             - a list of graphs.
     """
-    graphs = []
-    for subj in graphs:
+    rankGraphs = {}
+    for subj, graph in graphs.iteritems():
         rgraph = nx.Graph()
-        edge_ar = np.asarray([x[2] for x in subj.edges()])
+        edge_ar = np.asarray([x[2] for x in graph.edges(data=True)])
         rank_edge = np.argsort(edge_ar)  # rank the edges
-        for ((u, v, d), rank) in zip(graph.edges(), rank_edge):
+        for ((u, v, d), rank) in zip(graph.edges(data=True), rank_edge):
             rgraph.add_edge(u, v, weight=rank)
-        graphs.append(rgraph)
-
+        rankGraphs[subj] = rgraph
+    return rankGraphs
 
 def scan_statistic(mygs, i):
     """

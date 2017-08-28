@@ -39,6 +39,7 @@ import os
 import sys
 from multiprocessing import Pool
 from functools import partial
+import traceback
 
 atlas_dir = '/ndmg_atlases'  # This location bc it is convenient for containers
 
@@ -193,12 +194,13 @@ def group_level(inDir, outDir, dataset=None, atlas=None, minimal=False,
         tmp_out = op.join(outDir, label)
         mgu.execute_cmd("mkdir -p " + tmp_out)
         try:
-            group_func(tmp_in, tmp_out, atlas=label, dataset=dataset)
+            # group_func(tmp_in, tmp_out, atlas=label, dataset=dataset)
             compute_metrics(fs, tmp_out, label, modality=modality)
             outf = op.join(tmp_out, 'plot')
             make_panel_plot(tmp_out, outf, dataset=dataset, atlas=label,
                             minimal=minimal, log=log, hemispheres=hemispheres)
-        except:
+        except Exception, e:
+            print(traceback.format_exc())
             print("Failed group analysis for {} parcellation.".format(label))
             print("-- graphs contain isolates")
             continue
