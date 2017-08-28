@@ -64,6 +64,13 @@ def compute_metrics(fs, outdir, atlas, verb=False, modality='dwi'):
     write(outdir, 'number_non_zeros', nnz, atlas)
     print("Sample Mean: %.2f" % np.mean(nnz.values()))
 
+    # Scan Statistic-1
+    print("Computing: Max Local Statistic Sequence")
+    temp_ss1 = scan_statistic(graphs, 1)
+    ss1 = temp_ss1
+    write(outdir, 'locality_statistic', ss1, atlas)
+    show_means(temp_ss1)
+
     if modality == 'func':
         graphs = gr
         wt_args = {'weight': 'weight'}
@@ -118,13 +125,6 @@ def compute_metrics(fs, outdir, atlas, verb=False, modality='dwi'):
     write(outdir, 'edge_weight', ew, atlas)
     show_means(temp_ew)
 
-    # Scan Statistic-1
-    print("Computing: Max Local Statistic Sequence")
-    temp_ss1 = scan_statistic(graphs, 1)
-    ss1 = temp_ss1
-    write(outdir, 'locality_statistic', ss1, atlas)
-    show_means(temp_ss1)
-
     # Eigen Values
     print("Computing: Eigen Value Sequence")
     laplac = OrderedDict((subj, nx.normalized_laplacian_matrix(graphs[subj]))
@@ -173,7 +173,7 @@ def binGraphs(graphs, thr=0.7):
     for subj, graph in graphs.iteritems():
         bin_graph = nx.Graph()
         for (u, v, d) in graph.edges(data=True):
-            if d > thr:
+            if d['weight'] > thr:
                 bin_graph.add_edge(u, v, weight=1)
         binGraphs[subj] = bin_graph
     return graphs
