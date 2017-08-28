@@ -269,8 +269,8 @@ def main():
     parser.add_argument('--debug', action='store_true', help='flag to store '
                         'temp files along the path of processing.',
                         default=False)
-    parser.add_argument('--bg', action='store_true', help='Whether to produce '
-                        'big graphs.', default=False)
+    parser.add_argument('--bg', action='store', help='Whether to produce '
+                        'big graphs.', default='False')
     parser.add_argument("--nthreads", action="store", help="The number of "
                         "threads you have available. Should be approximately "
                         "min(ncpu*hyperthreads/cpu, maxram/10).", default=1,
@@ -297,7 +297,7 @@ def main():
     debug = result.debug
     modality = result.modality
     nthreads = result.nthreads
-    bg = result.bg
+    bg = (result.bg == 'True')
 
     minimal = result.minimal
     log = result.log
