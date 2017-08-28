@@ -33,7 +33,7 @@ import sys
 import os
 
 
-def compute_metrics(fs, outdir, atlas, verb=False):
+def compute_metrics(fs, outdir, atlas, verb=False, modality='dwi'):
     """
     Given a set of files and a directory to put things, loads graphs and
     performs set of analyses on them, storing derivatives in a pickle format
@@ -51,17 +51,30 @@ def compute_metrics(fs, outdir, atlas, verb=False):
             - Toggles verbose output statements
     """
 
-    graphs = loadGraphs(fs, verb=verb)
+    gr = loadGraphs(fs, verb=verb)
     nodes = nx.number_of_nodes(graphs.values()[0])
-
+    if modality == 'func':
+        graphs = binGraphs(gr)
+    else:
+        graphs = gr
     #  Number of non-zero edges (i.e. binary edge count)
     print("Computing: NNZ")
     nnz = OrderedDict((subj, len(nx.edges(graphs[subj]))) for subj in graphs)
     write(outdir, 'number_non_zeros', nnz, atlas)
     print("Sample Mean: %.2f" % np.mean(nnz.values()))
 
+    #   Clustering Coefficients
+    print("Computing: Clustering Coefficient Sequence")
+    temp_cc = OrderedDict((subj, nx.clustering(graphs[subj]).values())
+                          for subj in graphs)
+    ccoefs = temp_cc
+    write(outdir, 'clustering_coefficients', ccoefs, atlas)
+    show_means(temp_cc)
+
     #  Degree sequence
     print("Computing: Degree Sequence")
+    if modality == 'func':
+        graphs = rankGraphs(gr)
     total_deg = OrderedDict((subj, np.array(nx.degree(graphs[subj]).values()))
                             for subj in graphs)
     ipso_deg = OrderedDict()
@@ -97,14 +110,6 @@ def compute_metrics(fs, outdir, atlas, verb=False):
     ew = temp_ew
     write(outdir, 'edge_weight', ew, atlas)
     show_means(temp_ew)
-
-    #   Clustering Coefficients
-    print("Computing: Clustering Coefficient Sequence")
-    temp_cc = OrderedDict((subj, nx.clustering(graphs[subj]).values())
-                          for subj in graphs)
-    ccoefs = temp_cc
-    write(outdir, 'clustering_coefficients', ccoefs, atlas)
-    show_means(temp_cc)
 
     # Scan Statistic-1
     print("Computing: Max Local Statistic Sequence")
@@ -146,6 +151,43 @@ def compute_metrics(fs, outdir, atlas, verb=False):
 def show_means(data):
     print("Subject Means: " + ", ".join(["%.2f" % np.mean(data[key])
                                          for key in data.keys()]))
+
+def binGraphs(graphs, thr=0.5):
+    """
+    Binarizes a set of graphs given a threshold.
+
+    Required Parameters:
+        graphs:
+            - a list of graphs.
+        thr:
+            - the threshold below which edges will be assumed disconnected.
+    """
+    graphs = []
+    for subj in graphs:
+        bin_graph = nx.Graph()
+        for (u, v, d) in graph.edges():
+            if d > thr:
+                bin_graph.add_edge(u, v, weight=1)
+        graphs.append(bin_graph)
+    return graphs
+
+
+def rankGraphs(graphs):
+    """
+    Ranks the edges in each element of a list of graphs.
+
+    Required Parameters:
+        graphs:
+            - a list of graphs.
+    """
+    graphs = []
+    for subj in graphs:
+        rgraph = nx.Graph()
+        edge_ar = np.asarray([x[2] for x in subj.edges()])
+        rank_edge = np.argsort(edge_ar)  # rank the edges
+        for ((u, v, d), rank) in zip(graph.edges(), rank_edge):
+            rgraph.add_edge(u, v, weight=rank)
+        graphs.append(rgraph)
 
 
 def scan_statistic(mygs, i):
