@@ -172,10 +172,10 @@ def group_level(inDir, outDir, dataset=None, atlas=None, minimal=False,
     derivatives produced
     """
     if modality == 'func':
-        fgr = group_func(inDir, outDir, atlas=atlas, dataset=dataset)
-        return
-
-    outDir += "/graphs"
+        outDir += '/connectomes'
+    else:
+        outDir += "/graphs"
+        
     mgu.execute_cmd("mkdir -p {}".format(outDir))
 
     labels = next(os.walk(inDir))[1]
@@ -193,7 +193,8 @@ def group_level(inDir, outDir, dataset=None, atlas=None, minimal=False,
         tmp_out = op.join(outDir, label)
         mgu.execute_cmd("mkdir -p " + tmp_out)
         try:
-            compute_metrics(fs, tmp_out, label)
+            group_func(tmp_in, tmp_out, atlas=label, dataset=dataset)
+            compute_metrics(fs, tmp_out, label, modality=modality)
             outf = op.join(tmp_out, 'plot')
             make_panel_plot(tmp_out, outf, dataset=dataset, atlas=label,
                             minimal=minimal, log=log, hemispheres=hemispheres)

@@ -57,7 +57,6 @@ class group_func(object):
         self.connectomes = self.get_connectomes()
         self.qa_objects = self.load_qa()
         self.group_level_analysis()
-        self.connectome_analysis()
         pass
 
     def get_qa_files(self):
@@ -191,60 +190,5 @@ class group_func(object):
 
         multi = traces_to_panels(traces, names=names, ylabs=ylab, xlabs=xlab)
         pyo.plot(multi, validate=False, filename=fname_multi) 
-        pass
-
-    def connectome_analysis(self, thr=0.85, minimal=False, log=False,
-                            hemispheres=False):
-        """
-        A function to threshold and binarize the connectomes.
-        Presently just thresholds to reference correlation of
-        setting all edges below 0.3 to 0, and those greater to 1.
-        This value of 0.3 was generally the highest performing in
-        discriminability analyses.
-
-        **Positional Arguments:**
-            - thr:
-                - the threshold to binarize below.
-        """
-        self.graph_dir = "{}/connectomes".format(self.outdir)
-        cmd = "mkdir -p {}".format(self.graph_dir)
-        mgu.execute_cmd(cmd)
-        for label, raw_conn_files in self.connectomes.iteritems():
-            print("Parcellation: {}".format(label))
-            label_raw = loadGraphs(raw_conn_files)
-            label_connectomes = {}
-            label_dir = "{}/{}".format(self.graph_dir, label)
-            tmp_dir = "{}/connectomes".format(label_dir)
-            # verify that directories exist
-            cmd = "mkdir -p {}".format(label_dir)
-            mgu.execute_cmd(cmd)
-            cmd = "mkdir -p {}".format(tmp_dir)
-            mgu.execute_cmd(cmd)
-            for subj, raw in label_raw.iteritems():
-                # loop over edges to threshold
-                raw_mtx = nx.to_numpy_matrix(raw)
-                cor_thr = np.percentile(raw_mtx, thr*100) 
-                for u, v, d in raw.edges(data=True):
-                    # threshold connectomes by removing weights
-                    # above the threshold
-                    if d['weight'] < cor_thr:
-                        raw.remove_edge(u, v)
-                    else:
-                         d['weight'] = 1
-                # resave the thresholded connectomes
-                gname = "{}/{}".format(tmp_dir, subj)
-                nx.write_gpickle(raw, gname)
-                # so our connectomes are in the format expected by
-                # graphing qa
-                label_connectomes[subj] = gname
-            print "{}".format(label_dir)
-            print label_connectomes.values()
-            print "{}".format(label_dir)
-            compute_metrics(label_connectomes.values(), label_dir, label)
-            outf = os.path.join(label_dir, "{}_plot".format(label))
-            make_panel_plot(label_dir, outf, dataset=self.dataset,
-                            atlas=label, minimal=minimal,
-                            log=log, hemispheres=hemispheres)
-            print outf
         pass
 
