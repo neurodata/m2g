@@ -23,6 +23,7 @@ NeuroData's MR Graphs package, **ndmg** (pronounced "***nutmeg***"), is a turn-k
 - [Documentation](#documentation)
 - [License](#license)
 - [Manuscript Reproduction](#manuscript-reproduction)
+- [Issues](#issues)
 
 ## Overview
 
@@ -52,6 +53,8 @@ s3transfer==0.1.10 , scikit-image==0.13.0 , scikit-learn==0.18.2 , scipy==0.13.3
 **ndmg** relies on [FSL](http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FslInstallation), [Dipy](http://nipy.org/dipy/), [networkx](https://networkx.github.io/), and [nibabel](http://nipy.org/nibabel/), [numpy](http://www.numpy.org/) [scipy](http://www.scipy.org/), [scikit-learn](http://scikit-learn.org/stable/), [scikit-image](http://scikit-image.org/), [nilearn](http://nilearn.github.io/). You should install FSL through the instructions on their website, then follow install other Python dependencies with the following:
 
     pip install numpy scipy dipy networkx nibabel nilearn scikit-learn scikit-image awscli boto3 colorama matplotlib plotly==1.12.9
+
+As shown above, the only known package which requires a specific version is `plotly`, due to a backwards-compatability breaking change in the interface at version `1.13`.
 
 Finally, you can install **ndmg** either from `pip` or Github as shown below. Installation shouldn't take more than a few minutes, but depends on your internet connection.
 
@@ -179,5 +182,6 @@ This project is covered under the [Apache 2.0 License](https://github.com/neurod
 
 The figures produced in our manuscript linked in the [Overview](#overview) are all generated from code contained within Jupyter notebooks and made available at our [paper's Github repository](https://github.com/neurodata/ndmg-paper).
 
-## Issues?
+## Issues
+
 If you're having trouble, notice a bug, or want to contribute (such as a fix to the bug you may have just found) feel free to open a git issue or pull request. Enjoy!
