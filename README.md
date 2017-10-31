@@ -87,7 +87,7 @@ You can run our entire end-to-end pipeline in approximately 3 minutes on downsam
 
     ndmg_demo-dwi
 
-The connectome produced may not have neurological significance, as the data has been significantly downsampled, but this test should ensure that all of the pieces of the code and driver script execute properly. The expected output from the demo is:
+The connectome produced may not have neurological significance, as the data has been significantly downsampled, but this test should ensure that all of the pieces of the code and driver script execute properly. The expected output from the demo is shown below. Files will be downloaded and output data generated in `/tmp/small_demo/` and `/tmp/small_demo/outputs/`, respectively. If the graph properties summarized at the end of the execution below match those observed with your installation, the demo ran successfully.
 
     Getting test data...
     Archive:  /tmp/small_demo.zip
