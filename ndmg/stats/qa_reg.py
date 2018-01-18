@@ -15,7 +15,7 @@
 # limitations under the License.
 #
 
-# qa_regdti.py
+# qa_reg.py
 # Created by Vikram Chandrashekhar.
 # Edited by Greg Kiar.
 # Email: Greg Kiar @ gkiar@jhu.edu
@@ -35,15 +35,21 @@ mpl.use('Agg')  # very important above pyplot import
 import matplotlib.pyplot as plt
 
 
-def reg_dti_pngs(dti, loc, atlas, outdir):
+def reg_mri_pngs(mri, atlas, outdir, loc=0, mean=False, dim=4):
     """
     outdir: directory where output png file is saved
     fname: name of output file WITHOUT FULL PATH. Path provided in outdir.
     """
 
     atlas_data = nb.load(atlas).get_data()
-    dti_data = nb.load(dti).get_data()
-    b0_data = dti_data[:,:,:,loc]
+    mri_data = nb.load(mri).get_data()
+    if dim==4:  # 4d data, so we need to reduce a dimension
+        if mean:
+            b0_data = mri_data.mean(axis=3)
+        else:
+            b0_data = mri_data[:,:,:,loc]
+    else:  # dim=3
+        b0_data = mri_data
 
     cmap1 = LinearSegmentedColormap.from_list('mycmap1', ['black', 'magenta'])
     cmap2 = LinearSegmentedColormap.from_list('mycmap2', ['black', 'green'])
@@ -51,7 +57,7 @@ def reg_dti_pngs(dti, loc, atlas, outdir):
     fig = plot_overlays(atlas_data, b0_data, (cmap1, cmap2))
 
     # name and save the file
-    fname = os.path.split(dti)[1].split(".")[0] + '.png'
+    fname = os.path.split(mri)[1].split(".")[0] + '.png'
     plt.savefig(outdir + '/' + fname, format='png')
 
 
@@ -109,7 +115,7 @@ def plot_overlays(atlas, b0, cmaps):
 
 def get_min_max(data):
     '''
-    data: regdti data to threshold.
+    data: regmri data to threshold.
     '''
     min_val = np.percentile(data, 2)
     max_val = np.percentile(data, 95)

@@ -39,14 +39,14 @@ class track():
         # WGR:TODO rewrite help text
         pass
 
-    def eudx_basic(self, dti_file, mask_file, gtab, stop_val=0.1):
+    def eudx_basic(self, dwi_file, mask_file, gtab, stop_val=0.1):
         """
         Tracking with basic tensors and basic eudx - experimental
         We now force seeding at every voxel in the provided mask for
         simplicity.  Future functionality will extend these options.
         **Positional Arguments:**
 
-                dti_file:
+                dwi_file:
                     - File (registered) to use for tensor/fiber tracking
                 mask_file:
                     - Brain mask to keep tensors inside the brain
@@ -58,7 +58,7 @@ class track():
                     - Value to cutoff fiber track
         """
 
-        img = nb.load(dti_file)
+        img = nb.load(dwi_file)
         data = img.get_data()
 
         img = nb.load(mask_file)

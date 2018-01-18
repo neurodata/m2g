@@ -26,11 +26,11 @@ import sys
 import glob
 
 
-def setup(inDir, dtiListFile, bvalListFile, bvecListFile, mprageListFile):
+def setup(inDir, dwiListFile, bvalListFile, bvecListFile, mprageListFile):
     # Create lists of files
-    dti_types = ('*DTI.nii', '*DTI.nii.gz')
+    dwi_types = ('*DTI.nii', '*DTI.nii.gz')
 
-    dtiFiles = get_files(dti_types, inDir)
+    dwiFiles = get_files(dwi_types, inDir)
 
     bval_types = ('*.b', '*.bval')
     bvalFiles = get_files(bval_types, inDir)
@@ -42,7 +42,7 @@ def setup(inDir, dtiListFile, bvalListFile, bvecListFile, mprageListFile):
     mprageFiles = get_files(mprage_types, inDir)
 
     # Writes lists to disk
-    write_files(dtiListFile, dtiFiles)
+    write_files(dwiListFile, dwiFiles)
     write_files(bvalListFile, bvalFiles)
     write_files(bvecListFile, bvecFiles)
     write_files(mprageListFile, mprageFiles)
@@ -63,13 +63,13 @@ def main():
     parser = ArgumentParser(description="")
     parser.add_argument("inDir", action="store",
                         help="Input directory for raw data")
-    parser.add_argument("dtiListFile", action="store", help="")
+    parser.add_argument("dwiListFile", action="store", help="")
     parser.add_argument("bvalListFile", action="store", help="")
     parser.add_argument("bvecListFile", action="store", help="")
     parser.add_argument("mprageListFile", action="store", help="")
     result = parser.parse_args()
 
-    setup(result.inDir, result.dtiListFile, result.bvalListFile,
+    setup(result.inDir, result.dwiListFile, result.bvalListFile,
           result.bvecListFile, result.mprageListFile)
 
 if __name__ == "__main__":
