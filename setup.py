@@ -1,7 +1,7 @@
 from distutils.core import setup
 from setuptools import setup
 
-VERSION = "0.0.51-dev1"
+VERSION = "0.0.51-dev2"
 
 setup(
     name='ndmg',
@@ -38,12 +38,12 @@ setup(
     ],
     classifiers=[],
     install_requires=[  # We didnt put versions for numpy, scipy, b/c travis-ci
-        'networkx>=1.11',
+        'networkx==1.9',
         'nibabel>=2.0',
         'nilearn>=0.2',
         'sklearn>=0.0',
         'numpy',  # We use nump v1.10.4
-        'scipy',  # We use 0.17.0
+        'scipy>=0.14',  # We use 0.17.0
         'dipy>=0.1',
         'boto3',
         'matplotlib==1.5.1',

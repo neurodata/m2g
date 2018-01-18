@@ -54,7 +54,7 @@ s3transfer==0.1.10 , scikit-image==0.13.0 , scikit-learn==0.18.2 , scipy==0.13.3
 
     pip install ndmg
  
-The only known package which requires a specific version is `plotly`, due to a backwards-compatability breaking change in the interface at version `1.13`.
+The only known packages which require a specific version are `plotly` and `networkx`, due to backwards-compatability breaking changes.
 
 Finally, you can install **ndmg** either from `pip` or Github as shown below. Installation shouldn't take more than a few minutes, but depends on your internet connection.
 

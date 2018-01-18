@@ -140,17 +140,17 @@ def group_level(inDir, outDir, dataset=None, atlas=None, minimal=False,
     outDir = op.join(outDir, 'qa', 'graphs')
     mgu.execute_cmd("mkdir -p {}".format(outDir))
 
-    labels = next(os.walk(inDir))[1]
+    labels_used = next(os.walk(inDir))[1]
 
     if atlas is not None:
         labels_used = [atlas]
 
     for label in labels_used:
-        if label in ", ".join(labels[15:]):
+        if label in ", ".join(labels_used[15:]):
             print("Skipping {} parcellation".format(label))
             continue
 
-    for label in labels:
+    for label in labels_used:
         print("Parcellation: {}".format(label))
         tmp_in = op.join(inDir, label)
         fs = [op.join(tmp_in, fl)
@@ -273,7 +273,7 @@ def main():
                 tindir = op.join(outDir, 'graphs')
             s3_get_data(buck, tpath, tindir, public=creds)
         modif = 'qa'
-        group_level(outDir, outDir, dataset, atlas, minimal, log, hemi)
+        group_level(op.join(outDir, 'graphs'), outDir, dataset, atlas, minimal, log, hemi)
 
     if push and buck is not None and remo is not None:
         print("Pushing results to S3...")
