@@ -1,7 +1,7 @@
 from distutils.core import setup
 from setuptools import setup
 
-VERSION = 0.0.50
+VERSION = "0.0.50"
 
 setup(
     name='ndmg',

@@ -29,7 +29,7 @@ import ndmg.utils as mgu
 import numpy as np
 
 
-def multigraphs(fibers, labels, outdir):
+def multigraphs(fibers, labels, outdir, gformat='gpickle'):
     """
     Creates a brain graph from fiber streamlines
     """
@@ -43,7 +43,7 @@ def multigraphs(fibers, labels, outdir):
                   stdout=PIPE, stderr=PIPE, shell=True)
 
     # Create names of files to be produced
-    graphs = [outdir + "/graphs/" + x + '/' + base + "_" + x + ".graphml"
+    graphs = [op.join(outdir, "graphs", x, "{}_{}.{}".format(base, x, gformat))
               for x in label_name]
     print "Graphs of streamlines downsampled to given labels: " +\
           (", ".join([x for x in graphs]))
@@ -89,3 +89,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
