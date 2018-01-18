@@ -23,7 +23,7 @@ from argparse import ArgumentParser
 from subprocess import Popen, PIPE
 from os.path import expanduser
 from ndmg.scripts.ndmg_setup import get_files
-from ndmg.scripts.ndmg_pipeline import ndmg_pipeline
+from ndmg.scripts.ndmg_dwi_pipeline import ndmg_dwi_pipeline
 from ndmg.utils.bids import *
 from ndmg.stats.qa_graphs import *
 from ndmg.stats.qa_graphs_plotting import *

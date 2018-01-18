@@ -13,3 +13,4 @@ credentials.csv
 my_credentials.csv
 scratch/
 env/
+dist/
