@@ -125,12 +125,6 @@ def session_level(inDir, outDir, subjs, sesh=None, debug=False,
 
             ndmg_pipeline(dwi[i], bval[i], bvec[i], anat[i], atlas, atlas_mask,
                           labels, outDir, clean=(not debug))
-        else:
-            print ("fMRI file: {}".format(func[i]))
-            print ("Acquisition pattern: {}".format(stc))
-
-            # fngs_pipeline(func[i], anat[i], atlas, atlas_brain, atlas_mask,
-            #               lv_mask, labels, outDir, clean=(not debug), stc=stc)
 
 
 def group_level(inDir, outDir, dataset=None, atlas=None, minimal=False,
@@ -143,7 +137,7 @@ def group_level(inDir, outDir, dataset=None, atlas=None, minimal=False,
         print("Currently there is no group level analysis for fmri.")
         return -1
 
-    outDir += "/graphs"
+    outDir = op.join(outDir, 'qa', 'graphs')
     mgu.execute_cmd("mkdir -p {}".format(outDir))
 
     labels = next(os.walk(inDir))[1]
@@ -256,11 +250,11 @@ def main():
             if subj is not None:
                 for sub in subj:
                     if sesh is not None:
-                        tpath = '{}/sub-{}/ses-{}'.format(remo, sub, sesh)
-                        tindir = '{}/sub-{}/ses-{}'.format(inDir, sub, sesh)
+                        tpath = op.join(remo, 'sub-{}'.format(sub), 'ses-{}'.format(sesh))
+                        tindir = op.join(inDir, 'sub-{}'.format(sub), 'ses-{}'.format(sesh))
                     else:
-                        tpath = '{}/sub-{}'.format(remo, sub)
-                        tindir = '{}/sub-{}'.format(inDir, sub)
+                        tpath = op.join(remo, 'sub-{}'.format(sub))
+                        tindir = op.join(inDir, 'sub-{}'.format(sub))
                 s3_get_data(buck, tpath, tindir, public=creds)
             else: 
                 s3_get_data(buck, remo, inDir, public=creds)
@@ -271,14 +265,15 @@ def main():
         if buck is not None and remo is not None:
             print("Retrieving data from S3...")
             if atlas is not None:
-                tpath = '{}/graphs/{}'.format(remo, atlas)
-                tindir = '{}/{}'.format(inDir, atlas)
+                tpath = op.join(remo, 'graphs', atlas)
+                tindir = op.join(outDir, 'graphs', atlas)
+                # Using outDir as input location for group level since i work on graphs
             else:
-                tpath = '{}/graphs'.format(remo)
-                tindir = inDir
+                tpath = op.join(remo, 'graphs')
+                tindir = op.join(outDir, 'graphs')
             s3_get_data(buck, tpath, tindir, public=creds)
         modif = 'qa'
-        group_level(inDir, outDir, dataset, atlas, minimal, log, hemi)
+        group_level(outDir, outDir, dataset, atlas, minimal, log, hemi)
 
     if push and buck is not None and remo is not None:
         print("Pushing results to S3...")

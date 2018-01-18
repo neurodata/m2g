@@ -52,9 +52,9 @@ s3transfer==0.1.10 , scikit-image==0.13.0 , scikit-learn==0.18.2 , scipy==0.13.3
 
 **ndmg** relies on [FSL](http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FslInstallation), [Dipy](http://nipy.org/dipy/), [networkx](https://networkx.github.io/), and [nibabel](http://nipy.org/nibabel/), [numpy](http://www.numpy.org/) [scipy](http://www.scipy.org/), [scikit-learn](http://scikit-learn.org/stable/), [scikit-image](http://scikit-image.org/), [nilearn](http://nilearn.github.io/). You should install FSL through the instructions on their website, then follow install other Python dependencies with the following:
 
-    pip install numpy scipy dipy networkx nibabel nilearn scikit-learn scikit-image awscli boto3 colorama matplotlib plotly==1.12.9
-
-As shown above, the only known package which requires a specific version is `plotly`, due to a backwards-compatability breaking change in the interface at version `1.13`.
+    pip install ndmg
+ 
+The only known package which requires a specific version is `plotly`, due to a backwards-compatability breaking change in the interface at version `1.13`.
 
 Finally, you can install **ndmg** either from `pip` or Github as shown below. Installation shouldn't take more than a few minutes, but depends on your internet connection.
 
@@ -85,7 +85,7 @@ Currently, functional processing lives only in a development branch, so if you w
 
 You can run our entire end-to-end pipeline in approximately 3 minutes on downsampled data with the following command:
 
-    ndmg_demo-dwi
+    ndmg_demo_dwi
 
 The connectome produced may not have neurological significance, as the data has been significantly downsampled, but this test should ensure that all of the pieces of the code and driver script execute properly. The expected output from the demo is shown below. Files will be downloaded and output data generated in `/tmp/small_demo/` and `/tmp/small_demo/outputs/`, respectively. If the graph properties summarized at the end of the execution below match those observed with your installation, the demo ran successfully.
 
