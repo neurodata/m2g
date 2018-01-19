@@ -36,7 +36,7 @@ participant_templ = 'https://raw.githubusercontent.com/neurodata/ndmg/master/tem
 group_templ = 'https://raw.githubusercontent.com/neurodata/ndmg/master/templates/ndmg_cloud_group.json'
 
 
-def batch_submit(bucket, path, jobdir, credentials=None, state='participant',
+def batch_submit(bucket, path, jobdir, credentials=None, state='session',
                  debug=False, dataset=None, log=False):
     """
     Searches through an S3 bucket, gets all subject-ids, creates json files
@@ -262,7 +262,7 @@ def main():
     parser = ArgumentParser(description="This is an end-to-end connectome \
                             estimation pipeline from sMRI and DTI images")
 
-    parser.add_argument('state', choices=['participant',
+    parser.add_argument('state', choices=['session',
                                           'group',
                                           'status',
                                           'kill'], default='paricipant',
@@ -310,7 +310,7 @@ def main():
     elif state == 'kill':
         print("Killing jobs...")
         kill_jobs(jobdir)
-    elif state == 'group' or state == 'participant':
+    elif state == 'group' or state == 'session':
         print("Beginning batch submission process...")
         batch_submit(bucket, path, jobdir, creds, state, debug, dset, log)
 

@@ -350,7 +350,7 @@ class register(object):
         self.resample(temp_aligned2, aligned_dwi, atlas)
 
         if clean:
-            cmd = "rm -f {} {} {} {} {} {}*".format(dwi2, temp_aligned, b0,
-                                                    xfm, t1w_name)
+            cmd = "rm -f {} {} {} {} {}*".format(dwi2, temp_aligned, b0,
+                                                 xfm, t1w_name)
             print("Cleaning temporary registration files...")
             mgu.execute_cmd(cmd)
