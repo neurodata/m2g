@@ -351,6 +351,6 @@ class register(object):
 
         if clean:
             cmd = "rm -f {} {} {} {} {} {}*".format(dwi2, temp_aligned, b0,
-                                                    xfm, outdir, t1w_name)
+                                                    xfm, t1w_name)
             print("Cleaning temporary registration files...")
             mgu.execute_cmd(cmd)
