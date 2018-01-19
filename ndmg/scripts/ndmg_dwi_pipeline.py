@@ -121,8 +121,8 @@ def ndmg_dwi_pipeline(dwi, bvals, bvecs, mprage, atlas, mask, labels, outdir,
     # Clean temp files
     if clean:
         print("Cleaning up intermediate files... ")
-        cmd = 'rm -f {} {} /tmp/{}* {} {}'.format(tensors, outdir, dwi_name,
-                                                  aligned_dwi, fibers)
+        cmd = 'rm -f {} tmp/{}* {} {}'.format(tensors, dwi_name,
+                                               aligned_dwi, fibers)
         mgu.execute_cmd(cmd)
 
     print("Complete!")
