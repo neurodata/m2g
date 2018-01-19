@@ -20,7 +20,7 @@ ndmg_dwi_pipeline /tmp/ndmg_demo/sub-0025864/ses-1/dwi/sub-0025864_ses-1_dwi.nii
                   /tmp/ndmg_demo/desikan-res-4x4x4.nii.gz
 
 
-ndmg_bids /tmp/ndmg_demo/outputs/graphs/ /tmp/ndmg_demo/outputs/qa group --hemispheres
+ndmg_bids /tmp/ndmg_demo/ /tmp/ndmg_demo/outputs/ group --hemispheres
 
 echo "Path to qc fig: /tmp/ndmg_demo/outputs/qa/graphs/desikan-res-4x4x4/desikan-res-4x4x4_plot.html"
 

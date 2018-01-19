@@ -59,6 +59,7 @@ def get_atlas(atlas_dir, dwi=True):
         atlas = op.join(atlas_dir, 'atlas/MNI152_T1_1mm.nii.gz')
         atlas_mask = op.join(atlas_dir, 'atlas/MNI152_T1_1mm_brain_mask.nii.gz')
         labels = ['labels/AAL.nii.gz', 'labels/desikan.nii.gz',
+                  'labels/Desikan2012.nii.gz',
                   'labels/HarvardOxford.nii.gz', 'labels/CPAC200.nii.gz',
                   'labels/Talairach.nii.gz', 'labels/JHU.nii.gz',
                   'labels/slab907.nii.gz', 'labels/slab1068.nii.gz',
@@ -85,10 +86,9 @@ def get_atlas(atlas_dir, dwi=True):
 
     ope = op.exists
     if any(not ope(f) for f in fils):
-        print("Cannot find atlas information; downloading...")
-        mgu.execute_cmd('mkdir -p ' + atlas_dir)
-        cmd = 'wget -rnH --cut-dirs=3 --no-parent -P {} http://openconnecto.me/mrdata/share/atlases/'.format(atlas_dir)
-        mgu.execute_cmd(cmd)
+        print("Cannot find atlas information; please download and unzip as follows...")
+        print("Source: s3://mrneurodata/data/resources/ndmg_atlases.zip")
+        print("Destination: {}".format(atlas_dir))
 
     if dwi:
         atlas_brain = None
