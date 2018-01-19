@@ -258,7 +258,7 @@ def main():
                 s3_get_data(buck, tpath, tindir, public=creds)
             else: 
                 s3_get_data(buck, remo, inDir, public=creds)
-        modif = 'ndmg_{}'.format(ndmg.version.replace('.', '-'))
+        modif = 'ndmg'
         session_level(inDir, outDir, subj, sesh, debug)
 
     elif level == 'group':
