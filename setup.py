@@ -1,11 +1,16 @@
-from distutils.core import setup
-from setuptools import setup
-import ndmg
+from setuptools import setup, Extension
+from Cython.Distutils import build_ext
+from Cython.Build import cythonize
 
-VERSION = ndmg.version
+
+ext_modules = cythonize(Extension( "ndmg.graph.zindex", # the extension name
+                        sources=["ndmg/graph/zindex.pyx"],
+                        language="c"))
+VERSION="0.0.50"
 
 setup(
     name='ndmg',
+    ext_modules = ext_modules,
     packages=[
         'ndmg',
         'ndmg.preproc',
@@ -16,18 +21,19 @@ setup(
         'ndmg.utils',
         'ndmg.scripts'
     ],
+    version=VERSION,
     scripts = [
         'ndmg/scripts/ndmg_demo-dwi',
-        'ndmg/scripts/ndmg_demo-qa'
+        'ndmg/scripts/ndmg_demo-qa',
+        'ndmg/scripts/ndmg_demo-mrilab'
     ],
     entry_points = {
         'console_scripts': [
-            'ndmg_pipeline=ndmg.scripts.ndmg_pipeline:main',
+            'ndmg_pipeline=ndmg.scripts.ndmg_dwi_pipeline:main',
             'ndmg_bids=ndmg.scripts.ndmg_bids:main',
             'ndmg_cloud=ndmg.scripts.ndmg_cloud:main'
     ]
     },
-    version=VERSION,
     description='Neuro Data MRI to Graphs Pipeline',
     author='Greg Kiar and Will Gray Roncal',
     author_email='gkiar@jhu.edu, wgr@jhu.edu',
@@ -45,10 +51,12 @@ setup(
         'nilearn>=0.2',
         'sklearn>=0.0',
         'numpy',  # We use nump v1.10.4
-        'scipy',  # We use 0.17.0
+        'scipy>=0.13.3',  # We use 0.17.0
         'dipy>=0.1',
         'boto3',
-        'matplotlib==1.5.1',
+        'matplotlib==1.5.3',
         'plotly',
+        'cython',
+        'pybids'
     ]
 )

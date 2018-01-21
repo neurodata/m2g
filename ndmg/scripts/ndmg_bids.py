@@ -24,7 +24,7 @@ from subprocess import Popen, PIPE
 from os.path import expanduser
 from ndmg.scripts.ndmg_setup import get_files
 from ndmg.utils import bids_s3
-from ndmg.scripts.ndmg_pipeline import ndmg_pipeline
+from ndmg.scripts.ndmg_dwi_pipeline import ndmg_dwi_pipeline
 from ndmg.stats.qa_graphs import *
 from ndmg.stats.qa_graphs_plotting import *
 
@@ -78,7 +78,7 @@ labels = [op.join(atlas_dir, l) for l in labels]
 # *these files can be anywhere up stream of the dwi data, and are inherited.
 
 
-def participant_level(inDir, outDir, subjs, sesh=None, debug=False):
+def participant_level(inDir, outDir, subjs, sesh=None, debug=False, bg=False):
     """
     Crawls the given BIDS organized directory for data pertaining to the given
     subject and session, and passes necessary files to ndmg_pipeline for
@@ -88,13 +88,13 @@ def participant_level(inDir, outDir, subjs, sesh=None, debug=False):
     ope = op.exists
     if any(not ope(l) for l in labels) or not (ope(atlas) and ope(atlas_mask)):
         print("Cannot find atlas information; downloading...")
-        mgu().execute_cmd('mkdir -p ' + atlas_dir)
+        mgu.execute_cmd('mkdir -p ' + atlas_dir)
         cmd = " ".join(['wget -rnH --cut-dirs=3 --no-parent -P ' + atlas_dir,
                         'http://openconnecto.me/mrdata/share/atlases/'])
-        mgu().execute_cmd(cmd)
+        mgu.execute_cmd(cmd)
 
     # Make output dir
-    mgu().execute_cmd("mkdir -p " + outDir + " " + outDir + "/tmp")
+    mgu.execute_cmd("mkdir -p " + outDir + " " + outDir + "/tmp")
 
     # Get subjects
     if subjs is None:
@@ -154,8 +154,8 @@ def participant_level(inDir, outDir, subjs, sesh=None, debug=False):
         print("Bval file: " + bval[i])
         print("Bvec file: " + bvec[i])
 
-        ndmg_pipeline(dwi[i], bval[i], bvec[i], anat[i], atlas, atlas_mask,
-                      labels, outDir, clean=(not debug))
+        ndmg_dwi_pipeline(dwi[i], bval[i], bvec[i], anat[i], atlas, atlas_mask,
+                          labels, outDir, clean=(not debug), bg=bg)
 
 
 def group_level(inDir, outDir, dataset=None, atlas=None, minimal=False,
@@ -166,7 +166,7 @@ def group_level(inDir, outDir, dataset=None, atlas=None, minimal=False,
     """
     # Make output dir
     outDir += "/qa/graphs/"
-    mgu().execute_cmd("mkdir -p " + outDir)
+    mgu.execute_cmd("mkdir -p " + outDir)
 
     inDir += '/graphs/'
     # Get list of graphs
@@ -188,7 +188,7 @@ def group_level(inDir, outDir, dataset=None, atlas=None, minimal=False,
               for fl in files
               if fl.endswith(".graphml") or fl.endswith(".gpickle")]
         tmp_out = op.join(outDir, label)
-        mgu().execute_cmd("mkdir -p " + tmp_out)
+        mgu.execute_cmd("mkdir -p " + tmp_out)
         try:
             compute_metrics(fs, tmp_out, label)
             outf = op.join(tmp_out, 'plot')
@@ -253,6 +253,8 @@ def main():
     parser.add_argument('--debug', action='store_true', help='flag to store '
                         'temp files along the path of processing.',
                         default=False)
+    parser.add_argument('--bg', action='store_true', help='flag to create '
+                        'voxelwise graphs while processing.', default=False)
     result = parser.parse_args()
 
     inDir = result.bids_dir
@@ -279,7 +281,7 @@ def main():
             else:
                 bids_s3.get_data(buck, remo, inDir, public=creds)
         modif = 'ndmg_{}'.format(ndmg.version.replace('.', '-'))
-        participant_level(inDir, outDir, subj, sesh, result.debug)
+        participant_level(inDir, outDir, subj, sesh, result.debug, result.bg)
     elif level == 'group':
         if buck is not None and remo is not None:
             print("Retrieving data from S3...")
@@ -302,7 +304,7 @@ def main():
             print("Note: no credentials provided, may fail to push big files")
             cmd += ' --no-sign-request'
         print(cmd)
-        mgu().execute_cmd(cmd)
+        mgu.execute_cmd(cmd)
     sys.exit(0)
 
 if __name__ == "__main__":
