@@ -159,7 +159,7 @@ def group_level(inDir, outDir, dataset=None, atlas=None, minimal=False,
         fs = [op.join(tmp_in, fl)
               for root, dirs, files in os.walk(tmp_in)
               for fl in files
-              if fl.endswith(".graphml") or fl.endswith(".gpickle")]
+              if fl.endswith(".graphml") or fl.endswith(".gpickle") or fl.endswith('edgelist')]
         tmp_out = op.join(outDir, label)
         mgu.execute_cmd("mkdir -p {}".format(tmp_out))
         try:
@@ -167,9 +167,9 @@ def group_level(inDir, outDir, dataset=None, atlas=None, minimal=False,
             outf = op.join(tmp_out, '{}_plot'.format(label))
             make_panel_plot(tmp_out, outf, dataset=dataset, atlas=label,
                             minimal=minimal, log=log, hemispheres=hemispheres)
-        except:
+        except Exception as e:
             print("Failed group analysis for {} parcellation.".format(label))
-            print("-- graphs contain isolates")
+            print(e)
             continue
 
 
@@ -187,7 +187,7 @@ def main():
                         'will be performed. Multiple participant level '
                         'analyses can be run independently (in parallel) '
                         'using the same output_dir.',
-                        choices=['session', 'group'])
+                        choices=['session', 'participant', 'group'])
     parser.add_argument('--participant_label', help='The label(s) of the '
                         'participant(s) that should be analyzed. The label '
                         'corresponds to sub-<participant_label> from the BIDS '
@@ -246,6 +246,9 @@ def main():
 
     creds = bool(os.getenv("AWS_ACCESS_KEY_ID", 0) and
                  os.getenv("AWS_SECRET_ACCESS_KEY", 0))
+
+    # Since old interfaces only support participant level but we truly do session.
+    level = 'session' if level == 'participant' else level
 
     if level == 'session':
         if buck is not None and remo is not None:

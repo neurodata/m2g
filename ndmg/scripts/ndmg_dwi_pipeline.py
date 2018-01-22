@@ -38,7 +38,7 @@ import os
 
 
 def ndmg_dwi_pipeline(dwi, bvals, bvecs, mprage, atlas, mask, labels, outdir,
-                  clean=False, fmt='gpickle'):
+                  clean=False, fmt='edgelist'):
     """
     Creates a brain graph from MRI data
     """
@@ -144,7 +144,8 @@ def main():
                         labels of regions of interest in atlas space")
     parser.add_argument("-c", "--clean", action="store_true", default=False,
                         help="Whether or not to delete intemediates")
-    parser.add_argument("-f", "--fmt", action="store", default='gpickle',
+    parser.add_argument("-f", "--fmt", default='edgelist',
+                        choices=['gpickle', 'graphml', 'edgelist'],
                         help="Determines graph output format")
     result = parser.parse_args()
 

@@ -141,7 +141,7 @@ class graph(object):
             print("Error: the graph has not yet been defined.")
             pass
 
-    def save_graph(self, graphname, fmt='gpickle'):
+    def save_graph(self, graphname, fmt='edgelist'):
         """
         Saves the graph to disk
 
@@ -156,12 +156,15 @@ class graph(object):
                     - Output graph format
         """
         self.g.graph['ecount'] = nx.number_of_edges(self.g)
-        if fmt == 'gpickle':
-            nx.write_gpickle(self.g, graphname)
+        g = nx.convert_node_labels_to_integers(self.g, first_label=1)
+        if fmt == 'edgelist':
+            nx.write_weighted_edgelist(g, graphname, encoding='utf-8')
+        elif fmt == 'gpickle':
+            nx.write_gpickle(g, graphname)
         elif fmt == 'graphml':
-            nx.write_graphml(self.g, graphname)
+            nx.write_graphml(g, graphname)
         else:
-            raise ValueError('graphml is the only format currently supported')
+            raise ValueError('edgelist, gpickle, and graphml currently supported')
         pass
 
     def summary(self):
