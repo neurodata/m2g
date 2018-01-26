@@ -36,7 +36,7 @@ participant_templ = 'https://raw.githubusercontent.com/neurodata/ndmg/master/tem
 group_templ = 'https://raw.githubusercontent.com/neurodata/ndmg/master/templates/ndmg_cloud_group.json'
 
 
-def batch_submit(bucket, path, jobdir, credentials=None, state='participant',
+def batch_submit(bucket, path, jobdir, credentials=None, state='session',
                  debug=False, dataset=None, log=False):
     """
     Searches through an S3 bucket, gets all subject-ids, creates json files
@@ -61,18 +61,18 @@ def crawl_bucket(bucket, path, group=False):
     """
     if group:
         cmd = 'aws s3 ls s3://{}/{}/graphs/'.format(bucket, path)
-        out, err = mgu().execute_cmd(cmd)
+        out, err = mgu.execute_cmd(cmd)
         atlases = re.findall('PRE (.+)/', out)
         print("Atlas IDs: " + ", ".join(atlases))
         return atlases
     else:
         cmd = 'aws s3 ls s3://{}/{}/'.format(bucket, path)
-        out, err = mgu().execute_cmd(cmd)
+        out, err = mgu.execute_cmd(cmd)
         subjs = re.findall('PRE sub-(.+)/', out)
         cmd = 'aws s3 ls s3://{}/{}/sub-{}/'
         seshs = OrderedDict()
         for subj in subjs:
-            out, err = mgu().execute_cmd(cmd.format(bucket, path, subj))
+            out, err = mgu.execute_cmd(cmd.format(bucket, path, subj))
             sesh = re.findall('ses-(.+)/', out)
             seshs[subj] = sesh if sesh != [] else [None]
         print("Session IDs: " + ", ".join([subj+'-'+sesh if sesh is not None
@@ -87,9 +87,9 @@ def create_json(bucket, path, threads, jobdir, group=False, credentials=None,
     """
     Takes parameters to make jsons
     """
-    mgu().execute_cmd("mkdir -p {}".format(jobdir))
-    mgu().execute_cmd("mkdir -p {}/jobs/".format(jobdir))
-    mgu().execute_cmd("mkdir -p {}/ids/".format(jobdir))
+    mgu.execute_cmd("mkdir -p {}".format(jobdir))
+    mgu.execute_cmd("mkdir -p {}/jobs/".format(jobdir))
+    mgu.execute_cmd("mkdir -p {}/ids/".format(jobdir))
     if group:
         template = group_templ
         atlases = threads
@@ -99,7 +99,7 @@ def create_json(bucket, path, threads, jobdir, group=False, credentials=None,
 
     if not os.path.isfile('{}/{}'.format(jobdir, template.split('/')[-1])):
         cmd = 'wget --quiet -P {} {}'.format(jobdir, template)
-        mgu().execute_cmd(cmd)
+        mgu.execute_cmd(cmd)
 
     with open('{}/{}'.format(jobdir, template.split('/')[-1]), 'r') as inf:
         template = json.load(inf)
@@ -192,7 +192,7 @@ def submit_jobs(jobs, jobdir):
     for job in jobs:
         cmd = cmd_template.format(job)
         print("... Submitting job {}...".format(job))
-        out, err = mgu().execute_cmd(cmd)
+        out, err = mgu.execute_cmd(cmd)
         submission = ast.literal_eval(out)
         print("Job Name: {}, Job ID: {}".format(submission['jobName'],
                                                 submission['jobId']))
@@ -216,14 +216,14 @@ def get_status(jobdir, jobid=None):
                 submission = json.load(inf)
             cmd = cmd_template.format(submission['jobId'])
             print("... Checking job {}...".format(submission['jobName']))
-            out, err = mgu().execute_cmd(cmd)
+            out, err = mgu.execute_cmd(cmd)
             status = re.findall('"status": "([A-Za-z]+)",', out)[0]
             print("... ... Status: {}".format(status))
         return 0
     else:
         print("Describing job id {}...".format(jobid))
         cmd = cmd_template.format(jobid)
-        out, err = mgu().execute_cmd(cmd)
+        out, err = mgu.execute_cmd(cmd)
         status = re.findall('"status": "([A-Za-z]+)",', out)[0]
         print("... Status: {}".format(status))
         return status
@@ -249,11 +249,11 @@ def kill_jobs(jobdir, reason='"Killing job"'):
         elif status in ['SUBMITTED', 'PENDING', 'RUNNABLE']:
             cmd = cmd_template1.format(jid, reason)
             print("... Cancelling job {}...".format(name))
-            out, err = mgu().execute_cmd(cmd)
+            out, err = mgu.execute_cmd(cmd)
         elif status in ['STARTING', 'RUNNING']:
             cmd = cmd_template2.format(jid, reason)
             print("... Terminating job {}...".format(name))
-            out, err = mgu().execute_cmd(cmd)
+            out, err = mgu.execute_cmd(cmd)
         else:
             print("... Unknown status??")
 
@@ -262,7 +262,7 @@ def main():
     parser = ArgumentParser(description="This is an end-to-end connectome \
                             estimation pipeline from sMRI and DTI images")
 
-    parser.add_argument('state', choices=['participant',
+    parser.add_argument('state', choices=['session',
                                           'group',
                                           'status',
                                           'kill'], default='paricipant',
@@ -310,7 +310,7 @@ def main():
     elif state == 'kill':
         print("Killing jobs...")
         kill_jobs(jobdir)
-    elif state == 'group' or state == 'participant':
+    elif state == 'group' or state == 'session':
         print("Beginning batch submission process...")
         batch_submit(bucket, path, jobdir, creds, state, debug, dset, log)
 

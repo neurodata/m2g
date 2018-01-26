@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <pipeline version=".2">
         <connections>
-                <connection source="setupndmg_1.dtiListFile" sink="runndmg_1.dti" />
+                <connection source="setupndmg_1.dwiListFile" sink="runndmg_1.dwi" />
                 <connection source="setupndmg_1.bvalListFile" sink="runndmg_1.bval" />
                 <connection source="setupndmg_1.bvecListFile" sink="runndmg_1.bvec" />
                 <connection source="setupndmg_1.mprageListFile" sink="runndmg_1.mprage" />
@@ -23,7 +23,7 @@
                                         <value>{inDir}</value>
                                 </values>
                         </input>
-                        <output id="setupndmg_1.dtiListFile" name="dtiListFile" required="false" enabled="true" isListFile="true" order="1">
+                        <output id="setupndmg_1.dwiListFile" name="dwiListFile" required="false" enabled="true" isListFile="true" order="1">
                                 <format type="File" cardinality="1">
                                         <fileTypes>
                                                 <filetype name="list file" extension="list" description="list of things to be processed" />
@@ -57,7 +57,7 @@
                         <metadata>
                                 <data key="__creationDateKey" value="Sat Jan 30 16:23:50 EST 2016" />
                         </metadata>
-                        <input id="runndmg_1.dti" name="dti" required="false" enabled="true" order="0">
+                        <input id="runndmg_1.dwi" name="dwi" required="false" enabled="true" order="0">
                                 <format type="File" cardinality="1">
                                         <fileTypes>
                                                 <filetype name="File" extension="" description="Any type of data file" />

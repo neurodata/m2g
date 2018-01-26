@@ -34,15 +34,15 @@ matplotlib.use('Agg')  # very important above pyplot import
 import matplotlib.pyplot as plt
 
 
-def tensor2fa(tensors, tensor_name, dti, derivdir, qcdir):
+def tensor2fa(tensors, tensor_name, dwi, derivdir, qcdir):
     '''
     outdir: location of output directory.
     fname: name of output fa map file. default is none (name created based on
     input file)
     '''
-    dti_data = nb.load(dti)
-    affine = dti_data.get_affine()
-    dti_data = dti_data.get_data()
+    dwi_data = nb.load(dwi)
+    affine = dwi_data.get_affine()
+    dwi_data = dwi_data.get_data()
 
     # create FA map
     FA = fractional_anisotropy(tensors.evals)

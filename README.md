@@ -52,9 +52,9 @@ s3transfer==0.1.10 , scikit-image==0.13.0 , scikit-learn==0.18.2 , scipy==0.13.3
 
 **ndmg** relies on [FSL](http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FslInstallation), [Dipy](http://nipy.org/dipy/), [networkx](https://networkx.github.io/), and [nibabel](http://nipy.org/nibabel/), [numpy](http://www.numpy.org/) [scipy](http://www.scipy.org/), [scikit-learn](http://scikit-learn.org/stable/), [scikit-image](http://scikit-image.org/), [nilearn](http://nilearn.github.io/). You should install FSL through the instructions on their website, then follow install other Python dependencies with the following:
 
-    pip install numpy scipy dipy networkx nibabel nilearn scikit-learn scikit-image awscli boto3 colorama matplotlib plotly==1.12.9
-
-As shown above, the only known package which requires a specific version is `plotly`, due to a backwards-compatability breaking change in the interface at version `1.13`.
+    pip install ndmg
+ 
+The only known packages which require a specific version are `plotly` and `networkx`, due to backwards-compatability breaking changes.
 
 Finally, you can install **ndmg** either from `pip` or Github as shown below. Installation shouldn't take more than a few minutes, but depends on your internet connection.
 
@@ -85,74 +85,105 @@ Currently, functional processing lives only in a development branch, so if you w
 
 You can run our entire end-to-end pipeline in approximately 3 minutes on downsampled data with the following command:
 
-    ndmg_demo-dwi
+    ndmg_demo_dwi
 
 The connectome produced may not have neurological significance, as the data has been significantly downsampled, but this test should ensure that all of the pieces of the code and driver script execute properly. The expected output from the demo is shown below. Files will be downloaded and output data generated in `/tmp/small_demo/` and `/tmp/small_demo/outputs/`, respectively. If the graph properties summarized at the end of the execution below match those observed with your installation, the demo ran successfully.
 
     Getting test data...
-    Archive:  /tmp/small_demo.zip
-      inflating: small_demo/desikan.nii.gz
-      inflating: small_demo/KKI2009_113_1_DTI_s4.bval
-      inflating: small_demo/KKI2009_113_1_DTI_s4.bvec
-      inflating: small_demo/KKI2009_113_1_DTI_s4.nii
-      inflating: small_demo/KKI2009_113_1_MPRAGE_s4.nii
-      inflating: small_demo/MNI152_T1_1mm_brain_mask_s4.nii.gz
-      inflating: small_demo/MNI152_T1_1mm_s4.nii.gz
-    Creating output directory: /tmp/small_demo/outputs
-    Creating output temp directory: /tmp/small_demo/outputs/tmp
+    Archive:  /tmp/ndmg_demo.zip
+       creating: ndmg_demo/
+      inflating: ndmg_demo/MNI152NLin6_res-4x4x4_T1w.nii.gz
+      inflating: ndmg_demo/MNI152NLin6_res-4x4x4_T1w_brain.nii.gz
+       creating: ndmg_demo/sub-0025864/
+       creating: ndmg_demo/sub-0025864/ses-1/
+       creating: ndmg_demo/sub-0025864/ses-1/func/
+      inflating: ndmg_demo/sub-0025864/ses-1/func/sub-0025864_ses-1_bold.nii.gz
+       creating: ndmg_demo/sub-0025864/ses-1/dwi/
+      inflating: ndmg_demo/sub-0025864/ses-1/dwi/sub-0025864_ses-1_dwi.bvec
+      inflating: ndmg_demo/sub-0025864/ses-1/dwi/sub-0025864_ses-1_dwi.bval
+      inflating: ndmg_demo/sub-0025864/ses-1/dwi/sub-0025864_ses-1_dwi.nii.gz
+       creating: ndmg_demo/sub-0025864/ses-1/anat/
+      inflating: ndmg_demo/sub-0025864/ses-1/anat/sub-0025864_ses-1_T1w.nii.gz
+      inflating: ndmg_demo/desikan-res-4x4x4.nii.gz
+      inflating: ndmg_demo/HarvardOxford_variant-thr25_res-4x4x4_lvmask.nii.gz
+      inflating: ndmg_demo/MNI152NLin6_res-4x4x4_T1w_brainmask.nii.gz
+    Creating output directory: /tmp/ndmg_demo/outputs
+    Creating output temp directory: /tmp/ndmg_demo/outputs/tmp
     This pipeline will produce the following derivatives...
-    DTI volume registered to atlas: /tmp/small_demo/outputs/reg_dti/KKI2009_113_1_DTI_s4_aligned.nii.gz
-    Diffusion tensors in atlas space: /tmp/small_demo/outputs/tensors/KKI2009_113_1_DTI_s4_tensors.npz
-    Fiber streamlines in atlas space: /tmp/small_demo/outputs/fibers/KKI2009_113_1_DTI_s4_fibers.npz
-    Graphs of streamlines downsampled to given labels: /tmp/small_demo/outputs/graphs/desikan/KKI2009_113_1_DTI_s4_desikan.gpickle
+    DWI volume registered to atlas: /tmp/ndmg_demo/outputs/reg/dwi/sub-0025864_ses-1_dwi_aligned.nii.gz
+    Diffusion tensors in atlas space: /tmp/ndmg_demo/outputs/tensors/sub-0025864_ses-1_dwi_tensors.npz
+    Fiber streamlines in atlas space: /tmp/ndmg_demo/outputs/fibers/sub-0025864_ses-1_dwi_fibers.npz
+    Graphs of streamlines downsampled to given labels: /tmp/ndmg_demo/outputs/graphs/desikan-res-4x4x4/sub-0025864_ses-1_dwi_desikan-res-4x4x4.gpickle
     Generating gradient table...
-    B-values shape (17,)
-         min 0.000000
-         max 700.000000
-    B-vectors shape (17, 3)
-         min -0.991788
-         max 1.000000
+    B-values shape (15,)
+             min 0.000000
+             max 1000.000000
+    B-vectors shape (15, 3)
+             min -0.978756
+             max 0.941755
     None
     Aligning volumes...
-    Executing: eddy_correct /tmp/small_demo/outputs/tmp/KKI2009_113_1_DTI_s4_t1.nii.gz /tmp/small_demo/outputs/tmp/KKI2009_113_1_DTI_s4_t1_t2.nii.gz 16
-    Executing: bet /tmp/small_demo/KKI2009_113_1_MPRAGE_s4.nii /tmp/small_demo/outputs/tmp/KKI2009_113_1_MPRAGE_s4_ss.nii.gz -B
-    Executing: epi_reg --epi=/tmp/small_demo/outputs/tmp/KKI2009_113_1_DTI_s4_t1_t2.nii.gz --t1=/tmp/small_demo/KKI2009_113_1_MPRAGE_s4.nii --t1brain=/tmp/small_demo/outputs/tmp/KKI2009_113_1_MPRAGE_s4_ss.nii.gz --out=/tmp/small_demo/outputs/tmp/KKI2009_113_1_DTI_s4_t1_ta.nii.gz
-    Executing: flirt -in /tmp/small_demo/KKI2009_113_1_MPRAGE_s4.nii -ref /tmp/small_demo/MNI152_T1_1mm_s4.nii.gz -omat /tmp/small_demo/outputs/tmp/KKI2009_113_1_MPRAGE_s4_MNI152_T1_1mm_s4_xfm.mat -cost mutualinfo -bins 256 -dof 12 -searchrx -180 180 -searchry -180 180 -searchrz -180 180
-    Executing: flirt -in /tmp/small_demo/outputs/tmp/KKI2009_113_1_DTI_s4_t1_ta.nii.gz -ref /tmp/small_demo/MNI152_T1_1mm_s4.nii.gz -out /tmp/small_demo/outputs/tmp/KKI2009_113_1_DTI_s4_t1_ta2.nii.gz -init /tmp/small_demo/outputs/tmp/KKI2009_113_1_MPRAGE_s4_MNI152_T1_1mm_s4_xfm.mat -interp trilinear -applyxfm
+    Executing: eddy_correct /tmp/ndmg_demo/outputs/tmp/sub-0025864_ses-1_dwi_t1.nii.gz /tmp/ndmg_demo/outputs/tmp/sub-0025864_ses-1_dwi_t1_t2.nii.gz 0
+    Executing: epi_reg --epi=/tmp/ndmg_demo/outputs/tmp/sub-0025864_ses-1_dwi_t1_t2.nii.gz --t1=/tmp/ndmg_demo/sub-0025864/ses-1/anat/sub-0025864_ses-1_T1w.nii.gz --t1brain=/tmp/ndmg_demo/outputs/tmp/sub-0025864_ses-1_T1w_ss.nii.gz --out=/tmp/ndmg_demo/outputs/tmp/sub-0025864_ses-1_dwi_t1_ta.nii.gz
+    Executing: flirt -in /tmp/ndmg_demo/sub-0025864/ses-1/anat/sub-0025864_ses-1_T1w.nii.gz -ref /tmp/ndmg_demo/MNI152NLin6_res-4x4x4_T1w.nii.gz -omat /tmp/ndmg_demo/outputs/tmp/sub-0025864_ses-1_T1w_MNI152NLin6_res-4x4x4_T1w_xfm.mat -dof 12 -bins 256 -cost mutualinfo -searchrx -180 180 -searchry -180 180 -searchrz -180 180
+    Executing: flirt -in /tmp/ndmg_demo/outputs/tmp/sub-0025864_ses-1_dwi_t1_ta.nii.gz -ref /tmp/ndmg_demo/MNI152NLin6_res-4x4x4_T1w.nii.gz -out /tmp/ndmg_demo/outputs/tmp/sub-0025864_ses-1_dwi_t1_ta2.nii.gz -init /tmp/ndmg_demo/outputs/tmp/sub-0025864_ses-1_T1w_MNI152NLin6_res-4x4x4_T1w_xfm.mat -interp trilinear -applyxfm
     Beginning tractography...
-    Generating graph for desikan parcellation...
-    {'ecount': 0, 'vcount': 70, 'region': 'brain', 'source': 'http://m2g.io', 'version': '0.0.50', 'date': 'Sun Oct 29 17:49:05 2017', 'sensor': 'Diffusion MRI', 'name': "Generated by NeuroData's MRI Graphs (ndmg)"}
-    # of Streamlines: 8906
+    Generating graph for desikan-res-4x4x4 parcellation...
+    {'source': 'http://m2g.io', 'ecount': 0, 'vcount': 70, 'date': 'Fri Jan 19 00:15:32 2018', 'region': 'brain', 'sensor': 'dwi', 'name': "Generated by NeuroData's MRI Graphs (ndmg)"}
+    # of Streamlines: 5772
     0
-    445
-    890
-    1335
-    1780
-    2225
-    2670
-    3115
-    3560
-    4005
-    4450
-    4895
-    5340
-    5785
-    6230
-    6675
-    7120
-    7565
-    8010
-    8455
-    8900
+    288
+    576
+    864
+    1152
+    1440
+    1728
+    2016
+    2304
+    2592
+    2880
+    3168
+    3456
+    3744
+    4032
+    4320
+    4608
+    4896
+    5184
+    5472
+    5760
     
      Graph Summary:
     Name: Generated by NeuroData's MRI Graphs (ndmg)
     Type: Graph
     Number of nodes: 70
-    Number of edges: 773
-    Average degree:  22.0857
-    Execution took: 0:02:36.341239
+    Number of edges: 887
+    Average degree:  25.3429
+    Execution took: 0:02:56.343901
     Complete!
+    
+    Parcellation: desikan-res-4x4x4
+    Computing: NNZ
+    Sample Mean: 887.00
+    Computing: Degree Sequence
+    Subject Means: 25.34
+    Computing: Edge Weight Sequence
+    Subject Means: 68.99
+    Computing: Clustering Coefficient Sequence
+    Subject Means: 0.75
+    Computing: Max Local Statistic Sequence
+    Subject Means: 24948.83
+    Computing: Eigen Value Sequence
+    Subject Maxes: 1.32
+    Computing: Betweenness Centrality Sequence
+    Subject Means: 0.01
+    Computing: Mean Connectome
+    This is the format of your plot grid:
+    [ (1,1) x1,y1 ]  [ (1,2) x2,y2 ]  [ (1,3) x3,y3 ]  [ (1,4) x4,y4 ]
+    [ (2,1) x5,y5 ]  [ (2,2) x6,y6 ]  [ (2,3) x7,y7 ]  [ (2,4) x8,y8 ]
+
+    Path to qc fig: /tmp/ndmg_demo/outputs/qa/graphs/desikan-res-4x4x4/desikan-res-4x4x4_plot.html
+
 
 ## Usage
 

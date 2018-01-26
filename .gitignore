@@ -12,4 +12,5 @@ build/
 credentials.csv
 my_credentials.csv
 scratch/
-env-ndmg/
+env/
+dist/

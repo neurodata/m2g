@@ -24,7 +24,7 @@ from __future__ import print_function
 from argparse import ArgumentParser
 from datetime import datetime
 from subprocess import Popen, PIPE
-from ndmg.stats.qa_regdti import *
+from ndmg.stats.qa_reg import *
 from ndmg.stats.qa_tensor import *
 from ndmg.stats.qa_fibers import *
 import ndmg.utils as mgu
@@ -36,71 +36,69 @@ import numpy as np
 import nibabel as nb
 import os
 
-os.environ["MPLCONFIGDIR"] = "/tmp/"
 
-
-def ndmg_pipeline(dti, bvals, bvecs, mprage, atlas, mask, labels, outdir,
-                  clean=False, fmt='gpickle'):
+def ndmg_dwi_pipeline(dwi, bvals, bvecs, mprage, atlas, mask, labels, outdir,
+                  clean=False, fmt='edgelist'):
     """
     Creates a brain graph from MRI data
     """
     startTime = datetime.now()
 
     # Create derivative output directories
-    dti_name = mgu().get_filename(dti)
-    cmd = "".join(["mkdir -p ", outdir, "/reg_dti ", outdir, "/tensors ",
-                   outdir, "/fibers ", outdir, "/graphs ", outdir,
-                   "/qa/tensors ", outdir, "/qa/fibers ", outdir,
-                   "/qa/reg_dti"])
-    mgu().execute_cmd(cmd)
+    dwi_name = mgu.get_filename(dwi)
+    cmd = "mkdir -p {}/reg/dwi {}/tensors {}/fibers {}/graphs \
+           {}/qa/tensors {}/qa/tensors {}/qa/fibers {}/qa/reg/dwi"
+    cmd = cmd.format(*([outdir] * 8))
+    mgu.execute_cmd(cmd)
 
-    # Graphs are different because of multiple atlases
+    # Graphs are different because of multiple parcellations
     if isinstance(labels, list):
-        label_name = [mgu().get_filename(x) for x in labels]
+        label_name = [mgu.get_filename(x) for x in labels]
         for label in label_name:
-            mgu().execute_cmd("mkdir -p " + outdir + "/graphs/" + label)
+            mgu.execute_cmd("mkdir -p {}/graphs/{}".format(outdir, label))
     else:
-        label_name = mgu().get_filename(labels)
-        mgu().execute_cmd("mkdir -p " + outdir + "/graphs/" + label_name)
+        label_name = mgu.get_filename(labels)
+        mgu.execute_cmd("mkdir -p {}/graphs/".format(outdir, label_name))
 
     # Create derivative output file names
-    aligned_dti = "".join([outdir, "/reg_dti/", dti_name, "_aligned.nii.gz"])
-    tensors = "".join([outdir, "/tensors/", dti_name, "_tensors.npz"])
-    fibers = "".join([outdir, "/fibers/", dti_name, "_fibers.npz"])
+    aligned_dwi = "{}/reg/dwi/{}_aligned.nii.gz".format(outdir, dwi_name)
+    tensors = "{}/tensors/{}_tensors.npz".format(outdir, dwi_name)
+    fibers = "{}/fibers/{}_fibers.npz".format(outdir, dwi_name)
     print("This pipeline will produce the following derivatives...")
-    print("DTI volume registered to atlas: " + aligned_dti)
-    print("Diffusion tensors in atlas space: " + tensors)
-    print("Fiber streamlines in atlas space: " + fibers)
+    print("DWI volume registered to atlas: {}".format(aligned_dwi))
+    print("Diffusion tensors in atlas space: {}".format(tensors))
+    print("Fiber streamlines in atlas space: {}".format(fibers))
 
     # Again, graphs are different
-    graphs = ["".join([outdir, "/graphs/", x, '/', dti_name, "_", x, '.', fmt])
+    graphs = ["{}/graphs/{}/{}_{}.{}".format(outdir, x, dwi_name, x, fmt)
               for x in label_name]
     print("Graphs of streamlines downsampled to given labels: " +
           ", ".join([x for x in graphs]))
 
     # Creates gradient table from bvalues and bvectors
     print("Generating gradient table...")
-    dti1 = "".join([outdir, "/tmp/", dti_name, "_t1.nii.gz"])
-    bvecs1 = "".join([outdir, "/tmp/", dti_name, "_1.bvec"])
+    dwi1 = "{}/tmp/{}_t1.nii.gz".format(outdir, dwi_name)
+    bvecs1 = "{}/tmp/{}_1.bvec".format(outdir, dwi_name)
     mgp.rescale_bvec(bvecs, bvecs1)
-    gtab = mgu().load_bval_bvec_dti(bvals, bvecs1, dti, dti1)
+    gtab = mgu.load_bval_bvec_dwi(bvals, bvecs1, dwi, dwi1)
 
-    # Align DTI volumes to Atlas
+    # Align DWI volumes to Atlas
     print("Aligning volumes...")
-    mgr().dti2atlas(dti1, gtab, mprage, atlas, aligned_dti, outdir, clean)
-    b0loc = np.where(gtab.b0s_mask)[0][0]
-    reg_dti_pngs(aligned_dti, b0loc, atlas, outdir+"/qa/reg_dti/")
+    mgr().dwi2atlas(dwi1, gtab, mprage, atlas, aligned_dwi, outdir, clean)
+    loc0 = np.where(gtab.b0s_mask)[0][0]
+    reg_mri_pngs(aligned_dwi, atlas, "{}/qa/reg/dwi/".format(outdir), loc=loc0)
 
     print("Beginning tractography...")
     # Compute tensors and track fiber streamlines
-    tens, tracks = mgt().eudx_basic(aligned_dti, mask, gtab, stop_val=0.2)
-    tensor2fa(tens, tensors, aligned_dti, outdir+"/tensors/",
-              outdir+"/qa/tensors/")
+    tens, tracks = mgt().eudx_basic(aligned_dwi, mask, gtab, stop_val=0.2)
+    tensor2fa(tens, tensors, aligned_dwi, "{}/tensors/".format(outdir),
+              "{}/qa/tensors/".format(outdir))
 
     # As we've only tested VTK plotting on MNI152 aligned data...
     if nb.load(mask).get_data().shape == (182, 218, 182):
         try:
-            visualize_fibs(tracks, fibers, mask, outdir+"/qa/fibers/", 0.02)
+            visualize_fibs(tracks, fibers, mask,
+                           "{}/qa/fibers/".format(outdir), 0.02)
         except:
             print("Fiber QA failed - VTK for Python not configured properly.")
 
@@ -110,7 +108,7 @@ def ndmg_pipeline(dti, bvals, bvecs, mprage, atlas, mask, labels, outdir,
 
     # Generate graphs from streamlines for each parcellation
     for idx, label in enumerate(label_name):
-        print("Generating graph for " + label + " parcellation...")
+        print("Generating graph for {} parcellation...".format(label))
 
         labels_im = nb.load(labels[idx])
         g1 = mgg(len(np.unique(labels_im.get_data()))-1, labels[idx])
@@ -118,23 +116,22 @@ def ndmg_pipeline(dti, bvals, bvecs, mprage, atlas, mask, labels, outdir,
         g1.summary()
         g1.save_graph(graphs[idx], fmt=fmt)
 
-    print("Execution took: " + str(datetime.now() - startTime))
+    print("Execution took: {}".format(datetime.now() - startTime))
 
     # Clean temp files
     if clean:
         print("Cleaning up intermediate files... ")
-        cmd = "".join(['rm -f ', tensors, ' ', outdir, '/tmp/', dti_name, '*',
-                       ' ', aligned_dti, ' ', fibers])
-        mgu().execute_cmd(cmd)
+        cmd = 'rm -f {} tmp/{}* {} {}'.format(tensors, dwi_name,
+                                               aligned_dwi, fibers)
+        mgu.execute_cmd(cmd)
 
     print("Complete!")
-    pass
 
 
 def main():
     parser = ArgumentParser(description="This is an end-to-end connectome \
                             estimation pipeline from sMRI and DTI images")
-    parser.add_argument("dti", action="store", help="Nifti DTI image stack")
+    parser.add_argument("dwi", action="store", help="Nifti DTI image stack")
     parser.add_argument("bval", action="store", help="DTI scanner b-values")
     parser.add_argument("bvec", action="store", help="DTI scanner b-vectors")
     parser.add_argument("mprage", action="store", help="Nifti T1 MRI image")
@@ -147,20 +144,21 @@ def main():
                         labels of regions of interest in atlas space")
     parser.add_argument("-c", "--clean", action="store_true", default=False,
                         help="Whether or not to delete intemediates")
-    parser.add_argument("-f", "--fmt", action="store", default='gpickle',
+    parser.add_argument("-f", "--fmt", default='edgelist',
+                        choices=['gpickle', 'graphml', 'edgelist'],
                         help="Determines graph output format")
     result = parser.parse_args()
 
     # Create output directory
-    cmd = "mkdir -p " + result.outdir + " " + result.outdir + "/tmp"
-    print("Creating output directory: " + result.outdir)
-    print("Creating output temp directory: " + result.outdir + "/tmp")
+    cmd = "mkdir -p {} {}/tmp".format(result.outdir, result.outdir)
+    print("Creating output directory: {}".format(result.outdir))
+    print("Creating output temp directory: {}/tmp".format(result.outdir))
     p = Popen(cmd, stdout=PIPE, stderr=PIPE, shell=True)
     p.communicate()
 
-    ndmg_pipeline(result.dti, result.bval, result.bvec, result.mprage,
-                  result.atlas, result.mask, result.labels, result.outdir,
-                  result.clean, result.fmt)
+    ndmg_dwi_pipeline(result.dwi, result.bval, result.bvec, result.mprage,
+                      result.atlas, result.mask, result.labels, result.outdir,
+                      result.clean, result.fmt)
 
 
 if __name__ == "__main__":
