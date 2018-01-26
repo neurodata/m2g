@@ -2,7 +2,7 @@
 
 [![](https://img.shields.io/pypi/v/ndmg.svg)](https://pypi.python.org/pypi/ndmg)
 ![](https://travis-ci.org/neurodata/ndmg.svg?branch=master)
-[![DOI](https://zenodo.org/badge/doi/10.5281/zenodo.60206.svg)](http://dx.doi.org/10.5281/zenodo.60206)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1161284.svg)](https://doi.org/10.5281/zenodo.1161284)
 [![Code Climate](https://codeclimate.com/github/neurodata/ndmg/badges/gpa.svg)](https://codeclimate.com/github/neurodata/ndmg)
 [![DockerHub](https://img.shields.io/docker/pulls/bids/ndmg.svg)](https://hub.docker.com/r/bids/ndmg)
 [![OpenNeuro](http://bids.neuroimaging.io/openneuro_badge.svg)](https://openneuro.org)
