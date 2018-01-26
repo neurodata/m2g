@@ -1,7 +1,7 @@
 from distutils.core import setup
 from setuptools import setup
 
-VERSION = "0.0.51-dev12"
+VERSION = "0.1.0"
 
 setup(
     name='ndmg',
@@ -27,8 +27,8 @@ setup(
     },
     version=VERSION,
     description='Neuro Data MRI to Graphs Pipeline',
-    author='Greg Kiar, Will Gray Roncal, and Eric Bridgeford',
-    author_email='gkiar@jhu.edu, wgr@jhu.edu, ebridge2@jhu.edu',
+    author='Greg Kiar, Eric Bridgeford, Will Gray Roncal',
+    author_email='gkiar@jhu.edu, ebridge2@jhu.edu, wgr@jhu.edu',
     url='https://github.com/neurodata/ndmg',
     download_url='https://github.com/neurodata/ndmg/tarball/' + VERSION,
     keywords=[
