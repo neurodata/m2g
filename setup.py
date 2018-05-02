@@ -7,7 +7,7 @@ ext_modules = cythonize(Extension("ndmg.graph.zindex", # the extension name
                                   sources=["ndmg/graph/zindex.pyx"],
                                   include_dirs=['.'],
                                   language="c"))
-VERSION="0.0.50"
+VERSION="0.2.0"
 
 setup(
     name='ndmg',
