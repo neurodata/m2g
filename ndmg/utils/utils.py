@@ -17,7 +17,9 @@
 
 # utils.py
 # Created by Will Gray Roncal on 2016-01-28.
+# Edited by Eric Bridgeford.
 # Email: wgr@jhu.edu
+# Edited by Eric Bridgeford.
 
 from __future__ import print_function
 
@@ -28,69 +30,24 @@ import numpy as np
 import nibabel as nb
 import os.path as op
 import sys
+from networkx import to_numpy_matrix as graph2np
+from ndmg.graph.zindex import XYZMorton
+from scipy.sparse import lil_matrix
 
 
-def apply_mask(inp, masked, mask):
+def execute_cmd(cmd, verb=False):
     """
-    A function to apply a mask to a brain.
-
-    **Positional Arguments:**
-        inp:
-            - the input path to an mri image.
-        masked:
-            - the output path to the masked image.
-        mask:
-            - the path to a brain mask.
+    Given a bash command, it is executed and the response piped back to the
+    calling script
     """
-    cmd = "fslmaths {} -mas {} {}".format(inp, mask, masked)
-    execute_cmd(cmd)
-    pass
-
-
-def load_bval_bvec_dwi(fbval, fbvec, dwi_file, dwi_file_out):
-    """
-    Takes bval and bvec files and produces a structure in dipy format
-
-    **Positional Arguments:**
-    """
-
-    # Load Data
-    img = nb.load(dwi_file)
-    data = img.get_data()
-
-    bvals, bvecs = read_bvals_bvecs(fbval, fbvec)
-
-    # Get rid of spurrious scans
-    idx = np.where((bvecs[:, 0] == 100) & (bvecs[:, 1] == 100) &
-                   (bvecs[:, 2] == 100))
-    bvecs = np.delete(bvecs, idx, axis=0)
-    bvals = np.delete(bvals, idx, axis=0)
-    data = np.delete(data, idx, axis=3)
-
-    # Save corrected DTI volume
-    dwi_new = nb.Nifti1Image(data, affine=img.get_affine(),
-                             header=img.get_header())
-    dwi_new.update_header()
-    nb.save(dwi_new, dwi_file_out)
-
-    gtab = gradient_table(bvals, bvecs, atol=0.01)
-
-    print(gtab.info)
-    return gtab
-
-
-def load_bval_bvec(fbval, fbvec):
-    """
-    Takes bval and bvec files and produces a structure in dipy format
-
-    **Positional Arguments:**
-    """
-
-    bvals, bvecs = read_bvals_bvecs(fbval, fbvec)
-    gtab = gradient_table(bvals, bvecs, atol=0.01)
-
-    print(gtab.info)
-    return gtab
+    if verb:
+        print("Executing: {}".format(cmd))
+    p = Popen(cmd, stdout=PIPE, stderr=PIPE, shell=True)
+    out, err = p.communicate()
+    code = p.returncode
+    if code:
+        sys.exit("Error {}: {}".format(code, err))
+    return out, err
 
 
 def get_b0(gtab, data):
@@ -99,10 +56,36 @@ def get_b0(gtab, data):
 
     **Positional Arguments:**
     """
-
     b0 = np.where(gtab.b0s_mask)[0]
     b0_vol = np.squeeze(data[:, :, :, b0[0]])  # if more than 1, use first
     return b0_vol
+
+
+def get_braindata(brain_file):
+    """
+    Opens a brain data series for a mask, mri image, or atlas.
+    Returns a numpy.ndarray representation of a brain.
+
+    **Positional Arguements**
+
+        brain_file:
+            - an object to open the data for a brain.
+            Can be a string (path to a brain file),
+            nibabel.nifti1.nifti1image, or a numpy.ndarray
+    """
+    if type(brain_file) is np.ndarray:  # if brain passed as matrix
+        braindata = brain_file
+    else:
+        if type(brain_file) is str or type(brain_file) is unicode:
+            brain = nb.load(str(brain_file))
+        elif type(brain_file) is nb.nifti1.Nifti1Image:
+            brain = brain_file
+        else:
+            raise TypeError("Brain file is type: {}".format(type(brain_file)) +
+                            "; accepted types are numpy.ndarray, "
+                            "string, and nibabel.nifti1.Nifti1Image.")
+        braindata = brain.get_data()
+    return braindata
 
 
 def get_filename(label):
@@ -116,7 +99,9 @@ def get_slice(mri, volid, sli):
     """
     Takes a volume index and constructs a new nifti image from
     the specified volume.
+
     **Positional Arguments:**
+
         mri:
             - the path to a 4d mri volume to extract a slice from.
         volid:
@@ -139,62 +124,170 @@ def get_slice(mri, volid, sli):
     nb.save(out, sli)
 
 
-def get_braindata(brain_file):
+def load_bval_bvec_dwi(fbval, fbvec, dwi_file, dwi_file_out):
     """
-    Opens a brain data series for a mask, mri image, or atlas.
-    Returns a numpy.ndarray representation of a brain.
+    Takes bval and bvec files and produces a structure in dipy format
 
-    **Positional Arguements**
-        brain_file:
-            - an object to open the data for a brain.
-            Can be a string (path to a brain file),
-            nibabel.nifti1.nifti1image, or a numpy.ndarray
+    **Positional Arguments:**
     """
-    if type(brain_file) is np.ndarray:  # if brain passed as matrix
-        braindata = brain_file
+    # Load Data
+    img = nb.load(dwi_file)
+    data = img.get_data()
+
+    bvals, bvecs = read_bvals_bvecs(fbval, fbvec)
+
+    # Get rid of spurrious scans
+    idx = np.where((bvecs[:, 0] == 100) & (bvecs[:, 1] == 100) &
+                   (bvecs[:, 2] == 100))
+    bvecs = np.delete(bvecs, idx, axis=0)
+    bvals = np.delete(bvals, idx, axis=0)
+    data = np.delete(data, idx, axis=3)
+
+    # Save corrected DTI volume
+    dwi_new = nb.Nifti1Image(data, affine=img.get_affine(),
+                             header=img.get_header())
+    dwi_new.update_header()
+    nb.save(dwi_new, dwi_file_out)
+
+    gtab = gradient_table(bvals, bvecs, atol=0.01)
+    print(gtab.info)
+    return gtab
+
+
+def load_bval_bvec(fbval, fbvec):
+    """
+    Takes bval and bvec files and produces a structure in dipy format
+
+    **Positional Arguments:**
+    """
+    bvals, bvecs = read_bvals_bvecs(fbval, fbvec)
+    gtab = gradient_table(bvals, bvecs, atol=0.01)
+    print(gtab.info)
+    return gtab
+
+
+def load_timeseries(timeseries_file, ts='roi'):
+    """
+    A function to load timeseries data. Exists to standardize
+    formatting in case changes are made with how timeseries are
+    saved in future versions.
+     **Positional Arguments**
+         timeseries_file: the file to load timeseries data from.
+    """
+    if (ts == 'roi') or (ts == 'voxel'):
+        timeseries = np.load(timeseries_file)['roi']
+        return timeseries
     else:
-        if type(brain_file) is str or type(brain_file) is unicode:
-            brain = nb.load(str(brain_file))
-        elif type(brain_file) is nb.nifti1.Nifti1Image:
-            brain = brain_file
-        else:
-            raise TypeError("Brain file is type: {}".format(type(brain_file)) +
-                            "; accepted types are numpy.ndarray, "
-                            "string, and nibabel.nifti1.Nifti1Image.")
-        braindata = brain.get_data()
-    return braindata
+        print('You have not selected a valid timeseries type.' +
+              'options are ts=\'roi\' or ts=\'voxel\'.')
+    pass
 
 
-def extract_brain(inp, out, opts=""):
+def extract_brain(inp, out, opts="-B"):
     """
     A function to extract the brain from an image using FSL's BET.
 
     **Positional Arguments:**
+
         inp:
             - the input image.
         out:
             - the output brain extracted image.
     """
     cmd = "bet {} {} {}".format(inp, out, opts)
-    execute_cmd(cmd)
+    execute_cmd(cmd, verb=True)
+    pass
 
 
-def execute_cmd(cmd, verb=False):
+def graph2mtx(graph):
     """
-    Given a bash command, it is executed and the response piped back to the
-    calling script
-    """
-    if verb:
-        print("Executing: {}".format(cmd))
+    A function to convert a networkx graph to an appropriate
+    numpy matrix that is ordered properly from smallest
+    ROI to largest.
 
-    p = Popen(cmd, stdout=PIPE, stderr=PIPE, shell=True)
-    out, err = p.communicate()
-    code = p.returncode
-    if code:
-        sys.exit("Error {}: {}".format(code, err))
-    return out, err
+    **Positional Arguments:**
+        graph:
+            - a networkx graph.
+    """
+    return graph2np(graph, nodelist=np.sort(graph.nodes()).tolist())
 
 
 def name_tmps(basedir, basename, extension):
     return "{}/tmp/{}{}".format(basedir, basename, extension)
+
+
+def morton_region(parcellation, outpath):
+    """
+    A function to compute which region each morton index is in.
+    Col1 is the morton index. Col2 is the corresponding region
+    the particular morton index falls into. 0 means it falls into
+    a region unmapped in the parcellation.
+
+    **Positional ARguments:**
+        parcellation:
+            - the input parcellation to compute over.
+        outpath:
+            - the filepath of the matrix.
+    """
+    at_dat = nb.load(parcellation).get_data()
+    atlasn = get_filename(parcellation)
+    dims = at_dat.shape
+    region = {}
+    for x in range(0, dims[0]):
+        for y in range(0, dims[1]):
+            for z in range(0, dims[2]):
+                if at_dat[x, y, z] > 0:
+                    region[XYZMorton((int(x), int(y), int(z)))] = at_dat[x, y, z]
+    outf = op.join(outpath, atlasn + '_morton.csv')
+    with open(outf, 'w')  as f:
+        for key, val in region.iteritems():
+            f.write('{},{}\n'.format(key, val))
+        f.close()
+    return
+
+def parcel_overlap(parcellation1, parcellation2, outpath):
+    """
+    A function to compute the percent composition of each parcel in
+    parcellation 1 with the parcels in parcellation 2. Rows are indices
+    in parcellation 1; cols are parcels in parcellation 2. Values are the
+    percent of voxels in parcel (parcellation 1) that fall into parcel
+    (parcellation 2). Implied is that each row sums to 1.
+
+    **Positional Arguments:**
+        parcellation1:
+            - the path to the first parcellation.
+        parcellation2:
+            - the path to the second parcellation.
+        outpath:
+            - the path to produce the output.
+    """
+    p1_dat = nb.load(parcellation1).get_data()
+    p2_dat = nb.load(parcellation2).get_data()
+    p1regs = np.unique(p1_dat)
+    p1regs = p1regs[p1regs > 0]
+    p2regs = np.unique(p2_dat)
+
+    p1n = get_filename(parcellation1)
+    p2n = get_filename(parcellation2)
+    
+    overlapdat = lil_matrix((p1regs.shape[0], p2regs.shape[0]), dtype=np.float32)
+    for p1idx, p1reg in enumerate(p1regs):
+        p1seq = (p1_dat == p1reg)
+        N = p1seq.sum()
+        poss_regs = np.unique(p2_dat[p1seq])
+        for p2idx, p2reg in enumerate(p2regs):
+            if (p2reg in poss_regs):
+                # percent overlap is p1seq and'd with the anatomical region voxelspace, summed and normalized
+                pover = np.logical_and(p1seq, p2_dat == p2reg).sum()/float(N)
+                overlapdat[p1idx, p2idx] = pover
+            
+    outf = op.join(outpath, "{}_{}.csv".format(p1n, p2n))
+    with open(outf, 'w')  as f:
+        p2str = ["%s" % x for x in p2regs]
+        f.write("p1reg," + ",".join(p2str) + "\n")
+        for idx, p1reg in enumerate(p1regs):
+            datstr = ["%.4f" % x for x in overlapdat[idx,].toarray()[0,]]
+            f.write(str(p1reg) + "," + ",".join(datstr) + "\n")
+        f.close()
+    return
 

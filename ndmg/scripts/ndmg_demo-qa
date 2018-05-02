@@ -1,0 +1,14 @@
+#!/bin/bash
+
+loc="$PWD"
+cd /tmp/
+
+WARN=${PYTHONWARNINGS}
+export PYTHONWARNINGS="ignore"
+
+ndmg_bids /tmp/small_demo/ /tmp/small_demo/outputs/ group --dataset 'KKI2009_sub-113_ses-1' --hemispheres --atlas desikan
+
+export PYTHONWARNINGS=${WARN}
+
+echo "Path to qc fig: /tmp/small_demo/outputs/qa/desikan/plot.html"
+cd "$loc"

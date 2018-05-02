@@ -30,7 +30,6 @@ import os
 def loadGraphs(filenames, verb=False):
     """
     Given a list of files, returns a dictionary of graphs
-
     Required parameters:
         filenames:
             - List of filenames for graphs
