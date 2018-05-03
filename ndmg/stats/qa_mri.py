@@ -33,9 +33,10 @@ import matplotlib.pyplot as plt
 import pickle
 
 
-class qa_func(object):
-    def __init__(self, name):
+class qa_mri(object):
+    def __init__(self, name, modality):
         self.namer = name
+        self.modality = modality
         pass
 
     @staticmethod
@@ -95,7 +96,7 @@ class qa_func(object):
         # since the brain will be moving in time
         rawfig = plot_brain(raw_dat.mean(axis=3), minthr=10)
         rawfig.savefig(
-            "{}/{}_raw.png".format(self.namer.dirs['qa']['prep_f'],
+            "{}/{}_raw.png".format(self.namer.dirs['qa']['prep_m'],
                 func_name)
         )
 
@@ -108,7 +109,7 @@ class qa_func(object):
         prepfig = plot_brain(prep_dat.mean(axis=3), minthr=10)
         nvols = prep_dat.shape[3]
         prepfig.savefig(
-            "{}/{}_preproc.png".format(self.namer.dirs['qa']['prep_f'],
+            "{}/{}_preproc.png".format(self.namer.dirs['qa']['prep_m'],
                 func_name)
         )
 
@@ -165,7 +166,7 @@ class qa_func(object):
                                xlabel=xlab, ylabel=ylab)
 
             fname_reg = "{}/{}_{}_parameters.png".format(
-                self.namer.dirs['qa']['prep_f'], func_name, name
+                self.namer.dirs['qa']['prep_m'], func_name, name
                 )
             fig.savefig(fname_reg, format='png')
             plt.close(fig)
@@ -208,7 +209,7 @@ class qa_func(object):
             plt.close(fig)
         pass
 
-    def self_reg_qa(self, freg):
+    def self_reg_qa(self, reg):
         """
         A function that produces self-registration quality control figures.
 
@@ -221,43 +222,43 @@ class qa_func(object):
         # overlap statistic for the functional and anatomical
         # skull-off brains
         (sreg_sc, sreg_fig) = registration_score(
-            freg.sreg_brain,
-            freg.t1w_brain
+            reg.sreg_brain,
+            reg.t1w_brain
         )
         self.self_reg_sc = sreg_sc
         # use the jaccard score in the filepath to easily
         # identify failed subjects
-        sreg_f_final = "{}/space-T1w/{}_jaccard_{:.0f}".format(
-            self.namer.dirs['qa']['reg_f'],
-            freg.sreg_strat,
+        sreg_m_final = "{}/space-T1w/{}_jaccard_{:.0f}".format(
+            self.namer.dirs['qa']['reg_m'],
+            reg.sreg_strat,
             self.self_reg_sc*1000
         )
         sreg_a_final = "{}/space-T1w/{}_jaccard_{:.0f}".format(
             self.namer.dirs['qa']['reg_a'],
-            freg.sreg_strat,
+            reg.sreg_strat,
             self.self_reg_sc*1000
         )
-        cmd = "mkdir -p {} {}".format(sreg_f_final, sreg_a_final)
+        cmd = "mkdir -p {} {}".format(sreg_m_final, sreg_a_final)
         mgu.execute_cmd(cmd)
         sreg_fig.savefig(
-            "{}/{}_bold_t1w_overlap.png".format(sreg_f_final,
+            "{}/{}_bold_t1w_overlap.png".format(sreg_m_final,
                 self.namer.get_mod_source())
         )
         # produce plot of the white-matter mask used during bbr
-        if freg.wm_mask is not None:
-            mask_dat = nb.load(freg.wm_mask).get_data()
-            t1w_dat = nb.load(freg.t1w_brain).get_data()
-            f_mask = plot_overlays(t1w_dat, mask_dat, minthr=0, maxthr=100)
+        if mreg.wm_mask is not None:
+            mask_dat = nb.load(reg.wm_mask).get_data()
+            t1w_dat = nb.load(reg.t1w_brain).get_data()
+            m_mask = plot_overlays(t1w_dat, mask_dat, minthr=0, maxthr=100)
             fname_mask = "{}/{}_{}.png".format(sreg_a_final,
                                                self.namer.get_anat_source(),
                                                "wmm")
-            f_mask.savefig(fname_mask, format='png')
-            plt.close(f_mask)
+            m_mask.savefig(fname_mask, format='png')
+            plt.close(m_mask)
 
         plt.close(sreg_fig)
         pass
 
-    def aligned_func_name(self):
+    def aligned_mri_name(self):
         """
         A util to return aligned func name.
         """
@@ -271,7 +272,7 @@ class qa_func(object):
         return "{}_{}".format(self.namer.get_anat_source(),
             self.namer.get_template_info())
 
-    def temp_reg_qa(self, freg):
+    def temp_reg_qa(self, reg):
         """
         A function that produces self-registration quality control figures.
 
@@ -284,42 +285,42 @@ class qa_func(object):
         # overlap statistic and plot btwn template-aligned fmri
         # and the atlas brain that we are aligning to
         (treg_sc, treg_fig) = registration_score(
-            freg.taligned_epi,
-            freg.atlas_brain,
+            reg.taligned_epi,
+            reg.atlas_brain,
             edge=True
         )
         # use the registration score in the filepath for easy
         # identification of failed subjects
         self.temp_reg_sc = treg_sc
-        treg_f_final = "{}/template/{}_jaccard_{:.0f}".format(
-            self.namer.dirs['qa']['reg_f'],
-            freg.treg_strat,
+        treg_m_final = "{}/template/{}_jaccard_{:.0f}".format(
+            self.namer.dirs['qa']['reg_m'],
+            reg.treg_strat,
             self.temp_reg_sc*1000
         )
         treg_a_final = "{}/template/{}_jaccard_{:.0f}".format(
             self.namer.dirs['qa']['reg_a'],
-            freg.treg_strat,
+            reg.treg_strat,
             self.temp_reg_sc*1000
         )
-        cmd = "mkdir -p {} {}".format(treg_f_final, treg_a_final)
+        cmd = "mkdir -p {} {}".format(treg_m_final, treg_a_final)
         mgu.execute_cmd(cmd)
-        func_name = self.aligned_func_name()
+        mri_name = self.aligned_mri_name()
         treg_fig.savefig(
-            "{}/{}_epi2temp_overlap.png".format(treg_f_final,
-                func_name)
+            "{}/{}_epi2temp_overlap.png".format(treg_m_final,
+                mri_name)
         )
         plt.close(treg_fig)
         t1w_name = self.aligned_anat_name()
         # overlap between the template-aligned t1w and the atlas brain
         # that we are aligning to
-        t1w2temp_fig = plot_overlays(freg.taligned_t1w, freg.atlas_brain,
+        t1w2temp_fig = plot_overlays(reg.taligned_t1w, freg.atlas_brain,
                                      edge=True, minthr=0, maxthr=100)
         t1w2temp_fig.savefig(
             "{}/{}_t1w2temp.png".format(treg_a_final, t1w_name)
         )
         plt.close(t1w2temp_fig)
         # produce cnr, snr, and mean plots for temporal voxelwise statistics
-        self.voxel_qa(freg.epi_aligned_skull, freg.atlas_mask, treg_f_final)
+        self.voxel_qa(reg.epi_aligned_skull, reg.atlas_mask, treg_m_final)
         pass
 
     def voxel_qa(self, func, mask, qadir):
@@ -353,7 +354,7 @@ class qa_func(object):
         self.snr = mean_brain/std_nonbrain  # definition of snr
         self.cnr = std_brain/std_nonbrain  # definition of cnr
 
-        func_name = self.aligned_func_name()
+        func_name = self.aligned_mri_name()
 
         np.seterr(divide='ignore', invalid='ignore')
         mean_ts = fmri_dat.mean(axis=3)  # temporal mean
@@ -417,7 +418,7 @@ class qa_func(object):
                       "Motion Regressors", "aCompCor Regressors"]
         # whether we should include legend labels
         label_include = [True, True, False, True]
-        func_name = self.aligned_func_name()
+        func_name = self.aligned_mri_name()
         # iterate over tuples of our plotting variables
         for (reg, name, title, lab) in zip(glm_regs, glm_names, glm_titles,
                                            label_include):
@@ -484,7 +485,7 @@ class qa_func(object):
             plt.close(fig_fft_sig)
         pass
 
-    def roi_ts_qa(self, timeseries, connectome, func, anat, label):
+    def roi_graph_qa(self, timeseries, connectome, func, anat, label):
         """
         A function to perform ROI timeseries quality control.
 
@@ -504,8 +505,8 @@ class qa_func(object):
                 - the quality control directory to place outputs.
         """
         label_name = self.namer.get_label(label)
-        qcdir = self.namer.dirs['qa']['ts_roi'][label_name]
-        print "Performing QA for ROI Timeseries..."
+        qcdir = self.namer.dirs['qa']['conn'][label_name]
+        print "Performing QA for ROI Analysis..."
         cmd = "mkdir -p {}".format(qcdir)
         mgu.execute_cmd(cmd)
 
@@ -515,12 +516,13 @@ class qa_func(object):
         reg_mri_pngs(func, label, qcdir, minthr=10, maxthr=95)
         # plot the timeseries for each ROI and the connectivity matrix
         fname_ts = "{}/{}_{}_timeseries.html".format(qcdir,
-            self.aligned_func_name(), label_name)
+            self.aligned_mri_name(), label_name)
         fname_con = "{}/{}_{}_measure-correlation.html".format(qcdir,
-            self.aligned_func_name(), label_name)
-        plot_timeseries(timeseries, fname_ts, self.aligned_func_name(),
-                        label_name)
-        plot_connectome(connectome, fname_con, self.aligned_func_name(),
+            self.aligned_mri_name(), label_name)
+        if (self.modality == "func"):
+            plot_timeseries(timeseries, fname_ts, self.aligned_mri_name(),
+                            label_name)
+        plot_connectome(connectome, fname_con, self.aligned_mri_name(),
                         label_name)
         pass
 

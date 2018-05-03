@@ -54,7 +54,7 @@ def tensor2fa(tensors, tensor_name, dti, derivdir, qcdir):
 
     fname = os.path.split(tensor_name)[1].split(".")[0] + '_fa_rgb.nii.gz'
     fa = nb.Nifti1Image(np.array(255 * RGB, 'uint8'), affine)
-    nb.save(fa, derivdir + fname)
+    nb.save(fa, os.path.join(derivdir, fname))
 
     fa_pngs(fa, fname, qcdir)
 

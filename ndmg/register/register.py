@@ -14,7 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
 # register.py
 # Created by Greg Kiar on 2016-01-28.
 # Edited by Eric Bridgeford.
@@ -366,7 +365,7 @@ class epi_register(register):
             self.simple = True  # if the input is poor
         # name intermediates for self-alignment
         self.saligned_xfm = "{}/{}_self-aligned.mat".format(
-            self.outdir['reg_f'],
+            self.outdir['reg_m'],
             self.epi_name)
         pass
 
@@ -376,11 +375,11 @@ class epi_register(register):
         cost function to get the two images close, and then uses bbr
         to obtain a good alignment of brain boundaries.
         """
-        xfm_init1 = "{}/{}_xfm_epi2t1w_init1.mat".format(self.outdir['reg_f'],
+        xfm_init1 = "{}/{}_xfm_epi2t1w_init1.mat".format(self.outdir['reg_m'],
                                                          self.epi_name)
-        xfm_init2 = "{}/{}_xfm_epi2t1w_init2.mat".format(self.outdir['reg_f'],
+        xfm_init2 = "{}/{}_xfm_epi2t1w_init2.mat".format(self.outdir['reg_m'],
                                                          self.epi_name)
-        epi_init = "{}/{}_local.nii.gz".format(self.outdir['reg_f'],
+        epi_init = "{}/{}_local.nii.gz".format(self.outdir['reg_m'],
                                                self.epi_name)
 
         # perform an initial alignment with a gentle translational guess
@@ -400,11 +399,11 @@ class epi_register(register):
         # if we have a quality T1w image (resolution < 2x2x2) we will get
         # a decent segmentation, and then we can use bbr from flirt
         if not self.simple:
-            xfm_init3 = "{}/{}_xfm_epi2t1w.mat".format(self.outdir['reg_f'],
+            xfm_init3 = "{}/{}_xfm_epi2t1w.mat".format(self.outdir['reg_m'],
                                                        self.epi_name)
-            xfm_bbr = "{}/{}_xfm_bbr.mat".format(self.outdir['reg_f'],
+            xfm_bbr = "{}/{}_xfm_bbr.mat".format(self.outdir['reg_m'],
                                                  self.epi_name)
-            epi_bbr = "{}/{}_bbr.nii.gz".format(self.outdir['reg_f'],
+            epi_bbr = "{}/{}_bbr.nii.gz".format(self.outdir['reg_m'],
                                                 self.epi_name)
             # use a 6 dof registration with near-local initializer
             self.align(self.epi, self.t1w_brain, xfm=xfm_init3,
@@ -479,7 +478,7 @@ class epi_register(register):
                    wmseg=None, init=xfm_t1w2temp_init)
 
         self.epi_aligned_skull = "{}/{}_temp-aligned_skull.nii.gz".format(
-            self.outdir['reg_f'],
+            self.outdir['reg_m'],
             self.epi_name
         )  # template-aligned with skull
         # if the atlas is MNI 2mm, then we have a config file for it
@@ -507,7 +506,7 @@ class epi_register(register):
             print "Using linear template registration."
 
             xfm_epi2temp = "{}/{}_xfm_epi2temp.mat".format(
-                self.outdir['reg_f'],
+                self.outdir['reg_m'],
                 self.epi_name
             )
             # just combine our 12 dof linear transform from t1w to template

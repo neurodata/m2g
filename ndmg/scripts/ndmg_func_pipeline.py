@@ -29,7 +29,7 @@ from ndmg.utils import utils as mgu
 from ndmg import epi_register as mgreg
 from ndmg import graph as mgg
 from ndmg.timeseries import timeseries as mgts
-from ndmg.stats.qa_func import qa_func
+from ndmg.stats.qa_mri import qa_mri
 from ndmg.preproc import preproc_func as mgfp
 from ndmg.preproc import preproc_anat as mgap
 from ndmg.nuis import nuis as mgn
@@ -78,9 +78,9 @@ def ndmg_func_worker(func, t1w, atlas, atlas_brain, atlas_mask, lv_mask,
 
     namer = name_resource(func, t1w, atlas, outdir)
 
-    paths = {'prep_f': "func/preproc",
+    paths = {'prep_m': "func/preproc",
              'prep_a': "anat/preproc",
-             'reg_f': "func/registered",
+             'reg_m': "func/registered",
              'reg_a': "anat/registered",
              'nuis_f': "func/clean",
              'nuis_a': "func/clean",
@@ -88,8 +88,8 @@ def ndmg_func_worker(func, t1w, atlas, atlas_brain, atlas_mask, lv_mask,
              'ts_roi': "func/roi-timeseries",
              'conn': "func/connectomes"}
 
-    opt_dirs = ['prep_f', 'prep_a', 'reg_f', 'reg_a', 'nuis_f']
-    clean_dirs = ['nuis_a']
+    opt_dirs = ['prep_m', 'prep_a', 'reg_m', 'reg_a', 'nuis_a']
+    clean_dirs = ['nuis_m']
     label_dirs = ['ts_roi', 'conn']  # create label level granularity
 
     namer.add_dirs(paths, labels, label_dirs)
@@ -102,14 +102,14 @@ def ndmg_func_worker(func, t1w, atlas, atlas_brain, atlas_mask, lv_mask,
     reg_aname = "{}_{}".format(namer.get_anat_source(),
         namer.get_template_info())
     
-    preproc_func = namer.name_derivative(namer.dirs['output']['prep_f'],
+    preproc_func = namer.name_derivative(namer.dirs['output']['prep_m'],
         "{}_preproc.nii.gz".format(namer.get_mod_source()))
-    motion_func = namer.name_derivative(namer.dirs['tmp']['prep_f'],
+    motion_func = namer.name_derivative(namer.dirs['tmp']['prep_m'],
         "{}_variant-mc_preproc.nii.gz".format(namer.get_mod_source()))
     preproc_t1w_brain = namer.name_derivative(namer.dirs['output']['prep_a'],
         "{}_preproc_brain.nii.gz".format(namer.get_anat_source()))
 
-    aligned_func = namer.name_derivative(namer.dirs['output']['reg_f'],
+    aligned_func = namer.name_derivative(namer.dirs['output']['reg_m'],
         "{}_registered.nii.gz".format(reg_fname))
     aligned_t1w = namer.name_derivative(namer.dirs['output']['reg_a'],
         "{}_registered.nii.gz".format(reg_aname))
@@ -123,10 +123,13 @@ def ndmg_func_worker(func, t1w, atlas, atlas_brain, atlas_mask, lv_mask,
     if not clean:
         print("fMRI volumes preprocessed: {}".format(preproc_func))
         print("T1w volume preprocessed: {}".format(preproc_t1w_brain))
-        print("fMRI volume registered to atlas: {}".format(aligned_func))
+        print("fMRI volume registered to template: {}".format(aligned_func))
+        print("T1w volume registered to template: {}".format(aligned_func))
         print("fMRI volumes preprocessed: {}".format(preproc_func))
+    print("fMRI Cleaned of Nuisance Variables: {}".format(nuis_func))
+
     if big:
-        print("Voxel timecourse in atlas space: {}".format(voxel_ts))
+        print("Voxel timecourse in template space: {}".format(voxel_ts))
 
     # Again, connectomes are different
     if not isinstance(labels, list):
@@ -147,11 +150,11 @@ def ndmg_func_worker(func, t1w, atlas, atlas_brain, atlas_mask, lv_mask,
     print("Connectomes downsampled to given labels: " +
           ", ".join(connectomes))
 
-    qc_func = qa_func(namer)  # for quality control
+    qc_func = qa_mri(namer, 'func')  # for quality control
     # Align fMRI volumes to Atlas
     # -------- Preprocessing Steps --------------------------------- #
     print "Preprocessing volumes..."
-    f_prep = mgfp(func, preproc_func, motion_func, namer.dirs['tmp']['prep_f'])
+    f_prep = mgfp(func, preproc_func, motion_func, namer.dirs['tmp']['prep_m'])
     f_prep.preprocess(stc=stc)
     try:
         qc_func.func_preproc_qa(f_prep)
@@ -208,21 +211,25 @@ def ndmg_func_worker(func, t1w, atlas, atlas_brain, atlas_mask, lv_mask,
         connectome.summary()
         connectome.save_graph(connectomes[idx], fmt=fmt)
         try:
-            qc_func.roi_ts_qa(ts, conn, aligned_func,
-                              aligned_t1w, labels[idx])
+            qc_func.roi_graph_qa(ts, conn, aligned_func,
+                                 aligned_t1w, labels[idx])
         except Exception as e:
             erm = "Exception in Connectome Extraction for {} parcellation."
             print(erm.format(labels[idx]))
-    cmd = 'rm -rf {}'.format(namer.dirs['tmp']['base'])
-    mgu.execute_cmd(cmd)
 
     # save our statistics so that we can do group level
     exe_time = datetime.now() - startTime
     qc_func.save(qc_stats, exe_time)
 
-    print("Execution took: {}".format(exe_time))
-    cmd = "rm -rf {}".format(namer.dirs['tmp']['base'])
+    # Clean temp files
+    if clean:
+        print("Cleaning up intermediate files... ")
+        del_dirs = [namer.dirs['tmp']['base']] + \
+            [namer.dirs['output'][k] for k in opt_dirs]
+        cmd = "rm -rf {}".format(" ".format(del_dirs))
+        mgu.execute_cmd(cmd)
 
+    print("Execution took: {}".format(exe_time))
     print("Complete!")
 
 
