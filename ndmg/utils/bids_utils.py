@@ -55,7 +55,6 @@ class name_resource:
             self.__res__ = self.__res__.group()
         self.__basepath__ = opath
         self.__outdir__ = self._get_outdir()
-        self.__suball__ = 
         return
 
     def add_dirs(self, paths, labels, label_dirs):
