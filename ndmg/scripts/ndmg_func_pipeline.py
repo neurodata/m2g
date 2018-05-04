@@ -171,7 +171,7 @@ def ndmg_func_worker(func, t1w, atlas, atlas_brain, atlas_mask, lv_mask,
     print "Aligning volumes..."
     func_reg = mgreg(preproc_func, t1w, preproc_t1w_brain,
                      atlas, atlas_brain, atlas_mask, aligned_func,
-                     aligned_t1w, namer.dirs['tmp'])
+                     aligned_t1w, namer)
     func_reg.self_align()
     try:
         qc_func.self_reg_qa(func_reg)

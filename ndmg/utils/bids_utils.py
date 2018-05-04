@@ -35,12 +35,19 @@ class name_resource:
         self.__subi__ = os.path.basename(modf).split('.')[0]
         self.__anati__ = os.path.basename(t1wf).split('.')[0]
         self.__sub__ = re.search(r'(sub-)(?!.*sub-).*?(?=[_])', modf).group()
+        self.__suball__  = "sub-{}".format(self.__sub__)
         self.__ses__ = re.search(r'(ses-)(?!.*ses-).*?(?=[_])', modf)
         if self.__ses__:
             self.__ses__ = self.__ses__.group()
+            self.__suball__ = self.__suball__ + "_ses-{}".format(self.__ses__)
         self.__run__ = re.search(r'(run-)(?!.*run-).*?(?=[_])', modf)
         if self.__run__:
             self.__run__ = self.__run__.group()
+            self.__suball__ = self.__suball__ + "_run-{}".format(self.__run__)
+        self.__task__ = re.search(r'(task-)(?!.*task-).*?(?=[_])', modf)
+        if self.__task__:
+            self.__task__ = self.__task__.group()
+            self.__suball__ = self.__suball__ + "_run-{}".format(self.__task__)
         self.__temp__ = os.path.basename(tempf).split('.')[0]
         self.__space__ = re.split(r'[._]', self.__temp__)[0]
         self.__res__ = re.search(r'(res-)(?!.*res-).*?(?=[_])', tempf)
@@ -48,6 +55,7 @@ class name_resource:
             self.__res__ = self.__res__.group()
         self.__basepath__ = opath
         self.__outdir__ = self._get_outdir()
+        self.__suball__ = 
         return
 
     def add_dirs(self, paths, labels, label_dirs):

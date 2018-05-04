@@ -306,7 +306,7 @@ class register(object):
 
 class epi_register(register):
     def __init__(self, epi, t1w, t1w_brain, atlas, atlas_brain, atlas_mask,
-                 aligned_epi, aligned_t1w, outdir):
+                 aligned_epi, aligned_t1w, namer):
         """
         A class to change brain spaces from a subject's epi sequence
         to that of a standardized atlas.
@@ -329,15 +329,17 @@ class epi_register(register):
                 - the name of the aligned fmri scan to produce.
             aligned_t1w:
                 - the name of the aligned anatomical scan to produce
-            outdir:
-                - the output base directory.
+            namer:
+                - naming utility.
         """
         super(register, self).__init__()
 
         # for naming temporary files
         self.epi_name = mgu.get_filename(epi)
-        self.t1w_name = mgu.get_filename(t1w)
+        self.t1w_name = "{}_T1w".format(namer.__suball__)
         self.atlas_name = mgu.get_filename(atlas)
+        self.namer = namer
+        self.outdir = namer.dirs['tmp']
 
         # our basic dependencies
         self.epi = epi
@@ -348,7 +350,6 @@ class epi_register(register):
         self.atlas_mask = atlas_mask
         self.taligned_epi = aligned_epi
         self.taligned_t1w = aligned_t1w
-        self.outdir = outdir
         t1w_skull = "{}/{}_temp-aligned_skull.nii.gz"
         self.taligned_t1w_skull = t1w_skull.format(self.outdir['reg_a'],
                                                    self.t1w_name)
@@ -410,11 +411,11 @@ class epi_register(register):
                        init=xfm_init2, bins=None, dof=6, cost=None,
                        searchrad=None, sch=None)
             # segment the t1w brain into probability maps
-            map_path = "{}/{}_t1w_seg".format(self.outdir['reg_a'],
-                                              self.t1w_name)
+            map_path = "{}/{}_seg".format(self.outdir['reg_a'],
+                                          self.t1w_name)
             maps = mgnu.segment_t1w(self.t1w_brain, map_path)
             wm_mask = "{}/{}_wmm.nii.gz".format(self.outdir['reg_a'],
-                                                self.t1w_name)
+                                                    self.t1w_name)
             self.wm_mask = wm_mask
             # use the probability maps to extract white matter mask
             mgnu.probmap2mask(maps['wm_prob'], wm_mask, 0.5)
