@@ -67,8 +67,8 @@ def get_atlas(atlas_dir, modality='dwi'):
         atlas = op.join(atlas_dir, 'atlas/MNI152NLin6_res-1x1x1_T1w.nii.gz')
         atlas_mask = op.join(atlas_dir,
                              'mask/MNI152NLin6_res-1x1x1_T1w_brainmask.nii.gz')
-        labels= [harvlab + 'cort-maxprob-thr25_res-1x1x1.nii.gz',
-                 harvlab + 'sub-maxprob-thr25_res-1x1x1.nii.gz',
+        labels= ['HarvardOxfordcort-maxprob-thr25_res-1x1x1.nii.gz',
+                 'HarvardOxfordsub-maxprob-thr25_res-1x1x1.nii.gz',
                  'slab1067_res-1x1x1.nii.gz', 'slab907_res-1x1x1.nii.gz',
                  'aal_res-1x1x1.nii.gz', 'brodmann_res-1x1x1.nii.gz',
                  'desikan_res-1x1x1.nii.gz', 'pp264_res-1x1x1.nii.gz',
@@ -92,9 +92,8 @@ def get_atlas(atlas_dir, modality='dwi'):
         lv_mask = op.join(atlas_dir, "mask/HarvardOxford_variant-" +
                           "lateral-ventricles-thr25" +
                           "_res-2x2x2_brainmask.nii.gz")
-        harvlab = 'HarvardOxford'
-        labels= [harvlab + 'cort-maxprob-thr25_res-2x2x2.nii.gz',
-                 harvlab + 'sub-maxprob-thr25_res-2x2x2.nii.gz',
+        labels= ['HarvardOxfordcort-maxprob-thr25_res-2x2x2.nii.gz',
+                 'HarvardOxfordsub-maxprob-thr25_res-2x2x2.nii.gz',
                  'aal_res-2x2x2.nii.gz', 'brodmann_res-2x2x2.nii.gz',
                  'desikan_res-2x2x2.nii.gz', 'pp264_res-2x2x2.nii.gz',
                  'CPAC200_res-2x2x2.nii.gz', 'DS00071_res-2x2x2.nii.gz',
