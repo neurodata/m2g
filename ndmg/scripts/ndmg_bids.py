@@ -69,7 +69,7 @@ def get_atlas(atlas_dir, modality='dwi'):
                              'mask/MNI152NLin6_res-1x1x1_T1w_brainmask.nii.gz')
         labels= ['HarvardOxfordcort-maxprob-thr25_res-1x1x1.nii.gz',
                  'HarvardOxfordsub-maxprob-thr25_res-1x1x1.nii.gz',
-                 'slab1067_res-1x1x1.nii.gz', 'slab907_res-1x1x1.nii.gz',
+                 'slab1068_res-1x1x1.nii.gz', 'slab907_res-1x1x1.nii.gz',
                  'aal_res-1x1x1.nii.gz', 'brodmann_res-1x1x1.nii.gz',
                  'desikan_res-1x1x1.nii.gz',
                  'CPAC200_res-1x1x1.nii.gz', 'DS00071_res-1x1x1.nii.gz',
