@@ -18,7 +18,7 @@
 # Email: ebridge2@jhu.edu
 
 import pickle
-from ndmg.stats.qa_func import qa_func as fqa
+from ndmg.stats.qa_mri import qa_mri as mqa
 import numpy as np
 import ndmg.utils as mgu
 import os
@@ -98,8 +98,8 @@ class group_func(object):
         """
         qa_objects = []
         for qa_file in self.qa_files:
-            # load the qa objects as qa_func objects
-            qa_objects.append(fqa.load(qa_file))
+            # load the qa objects as qa_mri objects
+            qa_objects.append(mqa.load(qa_file))
         return qa_objects
 
     def group_level_analysis(self):

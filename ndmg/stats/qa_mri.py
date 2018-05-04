@@ -13,7 +13,7 @@
 # limitations under the License.
 #
 
-# qa_func.py
+# qa_mri.py
 # Created by Eric W Bridgeford on 2016-06-08.
 # Email: ebridge2@jhu.edu
 
