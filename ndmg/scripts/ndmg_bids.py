@@ -62,7 +62,7 @@ def get_atlas(atlas_dir, modality='dwi'):
     """
     Given the desired location for atlases and the type of processing, ensure
     we have all the atlases and parcellations.
-    """
+    """ 
     if modality == 'dwi':
         atlas = op.join(atlas_dir, 'atlas/MNI152NLin6_res-1x1x1_T1w.nii.gz')
         atlas_mask = op.join(atlas_dir,
@@ -71,7 +71,7 @@ def get_atlas(atlas_dir, modality='dwi'):
                  'HarvardOxfordsub-maxprob-thr25_res-1x1x1.nii.gz',
                  'slab1067_res-1x1x1.nii.gz', 'slab907_res-1x1x1.nii.gz',
                  'aal_res-1x1x1.nii.gz', 'brodmann_res-1x1x1.nii.gz',
-                 'desikan_res-1x1x1.nii.gz', 'pp264_res-1x1x1.nii.gz',
+                 'desikan_res-1x1x1.nii.gz',
                  'CPAC200_res-1x1x1.nii.gz', 'DS00071_res-1x1x1.nii.gz',
                  'DS00096_res-1x1x1.nii.gz', 'DS00108_res-1x1x1.nii.gz',
                  'DS00140_res-1x1x1.nii.gz', 'DS00195_res-1x1x1.nii.gz',
