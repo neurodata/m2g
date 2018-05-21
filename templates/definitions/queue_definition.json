@@ -1,11 +1,11 @@
 {
-    "jobQueueName": "gksicqueue", 
+    "jobQueueName": "ndmg-queue", 
     "state": "ENABLED", 
     "priority": 1,
     "computeEnvironmentOrder": [
       {
         "order": 1,
-        "computeEnvironment": "gksic2"
+        "computeEnvironment": "ndmg-env"
       }
     ]
 }
