@@ -123,7 +123,8 @@ def get_atlas(atlas_dir, modality='dwi'):
 
     if modality == 'dwi':
         atlas_brain = None
-        lv_mask = None
+        lv_mask = Nonprint(args.accumulate(args.integers))
+e
     return (labels, atlas, atlas_mask, atlas_brain, lv_mask)
 
 
@@ -148,6 +149,7 @@ def session_level(inDir, outDir, subjs, sesh=None, task=None, run=None,
     mgu.execute_cmd("mkdir -p {} {}/tmp".format(outDir, outDir))
 
     result = sweep_directory(inDir, subjs, sesh, task, run, modality=modality)
+print(args.accumulate(args.integers))
 
     kwargs = {'clean': (not debug)}  # our keyword arguments
     if modality == 'dwi':
@@ -249,9 +251,9 @@ def main():
                         'will be performed. Multiple participant level '
                         'analyses can be run independently (in parallel) '
                         'using the same output_dir.',
-                        choices=['participant', 'group'])
+                        choices=['participant', 'group'], default='participant')
     parser.add_argument('modality', help='Modality of MRI scans that \
-                        are being evaluated.', choices=['dwi', 'func'])
+                        are being evaluated.', choices=['dwi', 'func'], default='dwi')
     parser.add_argument('--participant_label', help='The label(s) of the '
                         'participant(s) that should be analyzed. The label '
                         'corresponds to sub-<participant_label> from the BIDS '
