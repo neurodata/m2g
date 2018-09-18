@@ -46,7 +46,7 @@ os.environ["MPLCONFIGDIR"] = "/tmp/"
 
 
 def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
-                    clean=False, fmt='edgelist', big=False):
+                    clean=False, fmt='csv', big=False):
     """
     Creates a brain graph from MRI data
     """
@@ -193,7 +193,7 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
 
 
 def ndmg_dwi_pipeline(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
-                      clean=False, fmt='edgelist', big=False):
+                      clean=False, fmt='csv', big=False):
     """
     A wrapper for the worker to make our pipeline more robust to errors.
     """
@@ -226,7 +226,7 @@ def main():
                         labels of regions of interest in atlas space")
     parser.add_argument("-c", "--clean", action="store_true", default=False,
                         help="Whether or not to delete intemediates")
-    parser.add_argument("-f", "--fmt", action="store", default='edgelist',
+    parser.add_argument("-f", "--fmt", action="store", default='csv',
                         help="Determines graph output format")
     parser.add_argument("-b", "--big", action="store_true", default=False,
                         help="whether or not to produce voxelwise big graph")

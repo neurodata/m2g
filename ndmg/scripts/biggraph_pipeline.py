@@ -41,7 +41,7 @@ def biggraphs(fibers, outdir):
               stdout=PIPE, stderr=PIPE, shell=True)
 
     # Create names of files to be produced
-    bgname = outdir + "/biggraphs/" + base + "_biggraph.edgelist"
+    bgname = outdir + "/biggraphs/" + base + "_biggraph.csv"
 
     # Load fibers
     print "Loading fibers..."

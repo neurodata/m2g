@@ -41,7 +41,7 @@ import os
 
 
 def ndmg_func_worker(func, t1w, atlas, atlas_brain, atlas_mask, lv_mask,
-                     labels, outdir, clean=False, stc=None, fmt='edgelist',
+                     labels, outdir, clean=False, stc=None, fmt='csv',
                      big=False):
     """
     analyzes fmri images and produces subject-specific derivatives.
@@ -234,7 +234,7 @@ def ndmg_func_worker(func, t1w, atlas, atlas_brain, atlas_mask, lv_mask,
 
 
 def ndmg_func_pipeline(func, t1w, atlas, atlas_brain, atlas_mask, lv_mask,
-                       labels, outdir, clean=False, stc=None, fmt='edgelist',
+                       labels, outdir, clean=False, stc=None, fmt='csv',
                        big=False):
     """
     analyzes fmri images and produces subject-specific derivatives.
@@ -304,7 +304,7 @@ def main():
                         help="File for STC.")
     parser.add_argument("-c", "--clean", action="store_true", default=False,
                         help="Whether or not to delete intemediates")
-    parser.add_argument("-f", "--fmt", action="store", default='edgelist',
+    parser.add_argument("-f", "--fmt", action="store", default='csv',
                         help="Determines connectome output format")
     parser.add_argument("-b", "--big", action="store_true", default=False,
                         help="Whether to produce voxelwise timeseries.")

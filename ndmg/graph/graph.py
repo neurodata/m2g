@@ -147,7 +147,7 @@ class graph(object):
         g = self.get_graph()
         return nx.to_numpy_matrix(g, nodelist=np.sort(g.nodes()).tolist())
 
-    def save_graph(self, graphname, fmt='edgelist'):
+    def save_graph(self, graphname, fmt='csv'):
         """
         Saves the graph to disk
 
@@ -162,7 +162,12 @@ class graph(object):
                     - Output graph format
         """
         self.g.graph['ecount'] = nx.number_of_edges(self.g)
-        nx.write_weighted_edgelist(self.g, graphname)
+        if fmt == 'csv':
+            nx.write_weighted_edgelist(self.g, graphname)
+        elif fmt == 'graphml':
+            nx.write_graphml(self.g, graphname)
+        else:
+            raise ValueError("You have passed an unsupported format.")
         pass
 
     def summary(self):
