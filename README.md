@@ -187,7 +187,7 @@ The connectome produced may not have neurological significance, as the data has 
 
 ## Usage
 
-The **ndmg** pipeline can be used to generate connectomes as a command-line utitlity on [BIDS datasets](http://bids.neuroimaging.io) with the following:
+The **ndmg** pipeline can be used to generate connectomes as a command-line utility on [BIDS datasets](http://bids.neuroimaging.io) with the following:
 
     ndmg_bids /input/bids/dataset /output/directory participant
 
