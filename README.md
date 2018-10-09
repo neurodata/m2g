@@ -9,7 +9,7 @@
 
 ![](./docs/nutmeg.png)
 
-NeuroData's MR Graphs package, **ndmg** (pronounced "***nutmeg***"), is a turn-key pipeline which combines structrual, diffusion, and functional\* MRI data to estimate multi-resolution connectomes reliably and scalably.
+NeuroData's MR Graphs package, **ndmg** (pronounced "***nutmeg***"), is a turn-key pipeline which combines structural, diffusion, and functional\* MRI data to estimate multi-resolution connectomes reliably and scalably.
 
 ## Contents
 
