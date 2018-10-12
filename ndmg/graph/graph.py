@@ -65,7 +65,8 @@ class graph(object):
                           vcount=len(n_ids)
                           )
         print(self.g.graph)
-
+        self.modal = sens
+        self.rois = n_ids
         [str(self.g.add_node(ids)) for ids in n_ids]
         pass
 
@@ -118,16 +119,12 @@ class graph(object):
         """
         print("Estimating correlation matrix for {} ROIs...".format(self.N))
         cor = np.abs(np.corrcoef(timeseries))  # calculate pearson correlation
-        cor = np.nan_to_num(cor)
-
-        roilist = self.g.nodes()
-
-        for (idx_out, roi_out) in enumerate(roilist):
-            for (idx_in, roi_in) in enumerate(roilist):
-                self.edge_dict[(roi_out, roi_in)] = float(cor[idx_out, idx_in])
-
-        edge_list = [(str(k[0]), str(k[1]), v) for k, v in self.edge_dict.items()]
-        self.g.add_weighted_edges_from(edge_list)
+        cor = np.nan_to_num(cor).astype(object)
+        tmp = np.zeros((cor.shape[0], cor.shape[1] + 1)).astype(object)
+        tmp[:, 0] = np.array(self.rois)
+        tmp[:, 1:] = cor
+        cor = tmp
+        self.g = cor
         return cor
 
     def get_graph(self):
@@ -161,13 +158,11 @@ class graph(object):
                 fmt:
                     - Output graph format
         """
-        self.g.graph['ecount'] = nx.number_of_edges(self.g)
-        if fmt == 'csv':
-            nx.write_weighted_edgelist(self.g, graphname)
-        elif fmt == 'graphml':
-            nx.write_graphml(self.g, graphname)
+        if self.modal == 'dwi':
+            self.g.graph['ecount'] = nx.number_of_edges(self.g)
+            nx.write_weighted_edgelist(self.g, graphname, delimiter=",")
         else:
-            raise ValueError("You have passed an unsupported format.")
+            self.g.tofile(graphname, sep=",")
         pass
 
     def summary(self):
