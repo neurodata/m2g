@@ -79,13 +79,13 @@ Currently, functional processing lives only in a development branch, so if you w
 
 **ndmg** is available through Dockerhub, and can be run directly with the following container (and any additional options you may require for Docker, such as volume mounting):
 
-    docker run -ti --entrypoint /bin/bash bids/ndmg
+    docker run -ti --entrypoint /bin/bash bids/m3r-release
 
 ## Demo
 
 You can run our entire end-to-end pipeline in approximately 3 minutes on downsampled data with the following command:
 
-    ndmg_demo_dwi
+    ndmg_demo-dwi
 
 The connectome produced may not have neurological significance, as the data has been significantly downsampled, but this test should ensure that all of the pieces of the code and driver script execute properly. The expected output from the demo is shown below. Files will be downloaded and output data generated in `/tmp/small_demo/` and `/tmp/small_demo/outputs/`, respectively. If the graph properties summarized at the end of the execution below match those observed with your installation, the demo ran successfully.
 
