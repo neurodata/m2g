@@ -123,8 +123,7 @@ def get_atlas(atlas_dir, modality='dwi'):
 
     if modality == 'dwi':
         atlas_brain = None
-        lv_mask = Nonprint(args.accumulate(args.integers))
-e
+        lv_mask = None
     return (labels, atlas, atlas_mask, atlas_brain, lv_mask)
 
 
@@ -149,7 +148,6 @@ def session_level(inDir, outDir, subjs, sesh=None, task=None, run=None,
     mgu.execute_cmd("mkdir -p {} {}/tmp".format(outDir, outDir))
 
     result = sweep_directory(inDir, subjs, sesh, task, run, modality=modality)
-print(args.accumulate(args.integers))
 
     kwargs = {'clean': (not debug)}  # our keyword arguments
     if modality == 'dwi':

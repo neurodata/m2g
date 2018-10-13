@@ -86,7 +86,7 @@ def ndmg_func_worker(func, t1w, atlas, atlas_brain, atlas_mask, lv_mask,
              'nuis_a': "func/clean",
              'ts_voxel': "func/voxel-timeseries",
              'ts_roi': "func/roi-timeseries",
-             'conn': "func/connectomes"}
+             'conn': "func/roi-connectomes"}
 
     opt_dirs = ['prep_m', 'prep_a', 'reg_m', 'reg_a', 'nuis_a']
     clean_dirs = ['nuis_m']
@@ -208,7 +208,6 @@ def ndmg_func_worker(func, t1w, atlas, atlas_brain, atlas_mask, lv_mask,
         ts = mgts().roi_timeseries(nuis_func, labels[idx], roi_ts[idx])
         connectome = mgg(ts.shape[0], labels[idx], sens="func")
         conn = connectome.cor_graph(ts)
-        connectome.summary()
         connectome.save_graph(connectomes[idx], fmt=fmt)
         try:
             qc_func.roi_graph_qa(ts, conn, aligned_func,
