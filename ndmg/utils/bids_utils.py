@@ -258,8 +258,7 @@ def sweep_directory(bdir, subj=None, sesh=None, task=None, run=None, modality='d
                             funcs.append(fun.filename)
                             anats.append(anat[0].filename)
     if modality == 'dwi':
-        if not len(dwis) or not len(bvals) or not len(bvecs) or
-                not len(anats):
+        if not len(dwis) or not len(bvals) or not len(bvecs) or not len(anats):
             print("No dMRI files found in BIDs spec. Skipping...")
         return (dwis, bvals, bvecs, anats)
     elif modality == 'func':
