@@ -201,6 +201,7 @@ def group_level(inDir, outDir, dataset=None, atlas=None, minimal=False,
     outDir = op.join(outDir, 'qa', 'roi-connectomes')
     mgu.execute_cmd("mkdir -p {}".format(outDir))
 
+    print(inDir)
     labels_used = next(os.walk(inDir))[1]
 
     if atlas is not None:
@@ -352,10 +353,7 @@ def main():
                       modality, nproc, big, stc)
 
     elif level == 'group':
-        if modality == 'func':
-            gpath = op.join('func', 'connectomes')
-        else:
-            gpath = 'graphs'
+        gpath = op.join(inDir, modality, 'roi-connectomes')
         if buck is not None and remo is not None:
             print("Retrieving data from S3...")
             if atlas is not None:
@@ -367,7 +365,7 @@ def main():
                 tindir = op.join(outDir, gpath)
             s3_get_data(buck, tpath, tindir, public=creds)
         modif = 'qa'
-        group_level(op.join(outDir, gpath), outDir, dataset, atlas, minimal, log, hemi)
+        group_level(op.join(inDir, gpath), outDir, dataset, atlas, minimal, log, hemi)
 
 
     if push and buck is not None and remo is not None:
