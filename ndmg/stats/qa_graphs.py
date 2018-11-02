@@ -88,8 +88,8 @@ def compute_metrics(fs, outdir, atlas, verb=False, modality='dwi'):
 
     #  Degree sequence
     print("Computing: Degree Sequence")
-    total_deg = OrderedDict((subj, np.array(nx.degree(graphs[subj],
-                                                      **wt_args).values()))
+    total_deg = OrderedDict((subj, np.array(dict(nx.degree(graphs[subj],
+                                                      **wt_args)).values()))
                             for subj in graphs)
     ipso_deg = OrderedDict()
     contra_deg = OrderedDict()
