@@ -25,7 +25,7 @@ from collections import OrderedDict
 from subprocess import Popen
 from scipy.stats import gaussian_kde, rankdata
 from ndmg.utils import loadGraphs
-
+from os import path as op
 import numpy as np
 import nibabel as nb
 import networkx as nx
@@ -51,6 +51,7 @@ def compute_metrics(fs, outdir, atlas, verb=False, modality='dwi'):
         verb:
             - Toggles verbose output statements
     """
+    print(atlas)
     gr = loadGraphs(fs, verb=verb)
     if modality == 'func':
         graphs = binGraphs(gr)
@@ -88,6 +89,7 @@ def compute_metrics(fs, outdir, atlas, verb=False, modality='dwi'):
 
     #  Degree sequence
     print("Computing: Degree Sequence")
+    test = OrderedDict()
     total_deg = OrderedDict((subj, np.array(dict(nx.degree(graphs[subj],
                                                       **wt_args)).values()))
                             for subj in graphs)
@@ -95,12 +97,12 @@ def compute_metrics(fs, outdir, atlas, verb=False, modality='dwi'):
     contra_deg = OrderedDict()
     for subj in graphs:  # TODO GK: remove forloop and use comprehension maybe?
         g = graphs[subj]
-        N = len(g.nodes())
-        LLnodes = g.nodes()[0:N/2]  # TODO GK: don't assume hemispheres
+        N = len(list(g.nodes()))
+        LLnodes = list(g.nodes())[0:N/2]  # TODO GK: don't assume hemispheres
         LL = g.subgraph(LLnodes)
         LLdegs = [LL.degree(**wt_args)[n] for n in LLnodes]
 
-        RRnodes = g.nodes()[N/2:N]  # TODO GK: don't assume hemispheres
+        RRnodes = list(g.nodes())[N/2:N]  # TODO GK: don't assume hemispheres
         RR = g.subgraph(RRnodes)
         RRdegs = [RR.degree(**wt_args)[n] for n in RRnodes]
 
@@ -116,7 +118,6 @@ def compute_metrics(fs, outdir, atlas, verb=False, modality='dwi'):
            'contra_deg': contra_deg}
     write(outdir, 'degree_distribution', deg, atlas)
     show_means(total_deg)
-
     #  Edge Weights
     if modality == 'dwi':
         print("Computing: Edge Weight Sequence")
@@ -150,7 +151,7 @@ def compute_metrics(fs, outdir, atlas, verb=False, modality='dwi'):
 
     # Betweenness Centrality
     print("Computing: Betweenness Centrality Sequence")
-    nxbc = nx.algorithms.betweenness_centrality  # For PEP8 line length...
+    nxbc = nx.algorithms.betweenness_centrality
     temp_bc = OrderedDict((subj, nxbc(graphs[subj], **wt_args).values())
                           for subj in graphs)
     centrality = temp_bc
@@ -271,7 +272,7 @@ def write(outdir, metric, data, atlas):
         atlas:
             - Name of atlas of interest as it appears in the directory titles
     """
-    with open(outdir + '/' + atlas + '_' + metric + '.pkl', 'wb') as of:
+    with open(op.join(outdir, atlas + '_' + metric + '.pkl'), 'wb') as of:
         pickle.dump({metric: data}, of)
 
 

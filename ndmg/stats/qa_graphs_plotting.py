@@ -33,7 +33,8 @@ def make_panel_plot(basepath, outf, dataset=None, atlas=None, minimal=True,
               if os.path.splitext(name)[1] == '.pkl']
     fnames = sorted(fnames)
     paths = [os.path.join(basepath, item) for item in fnames]
-    keys = ["_".join(n.split('.')[0].split('_')[1:]) for n in fnames]
+    keys = ["_".join(n.split('.')[0].split('_')[2:]) for n in fnames]
+    print(fnames)
     print(keys)
     if modality == 'dwi':
         modtit = "DWI"

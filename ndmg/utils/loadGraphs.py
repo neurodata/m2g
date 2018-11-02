@@ -22,7 +22,7 @@
 from __future__ import print_function
 
 from collections import OrderedDict
-
+import numpy as np
 import networkx as nx
 import os
 
@@ -41,6 +41,7 @@ def loadGraphs(filenames, verb=False):
     if type(filenames) is not list:
         filenames = [filenames]
     gstruct = OrderedDict()
+    vlist = set()
     for idx, files in enumerate(filenames):
         if verb:
             print("Loading: " + files)
@@ -48,9 +49,13 @@ def loadGraphs(filenames, verb=False):
         fname = os.path.basename(files)
         try:
             gstruct[fname] = nx.read_weighted_edgelist(files, delimiter=',')
+            vlist |= set(gstruct[fname].nodes())
         except:
             try:
                 gstruct[fname] = nx.read_gpickle(files)
             except:
                 gstruct[fname] = nx.read_graphml(files)
+    for k, v in gstruct.items():
+        vtx_to_add = list(np.setdiff1d(list(vlist), list(v.nodes())))
+        [gstruct[k].add_node(vtx) for vtx in vtx_to_add]
     return gstruct
