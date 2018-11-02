@@ -56,6 +56,8 @@ atlas_dir = '/ndmg_atlases'  # This location bc it is convenient for containers
 #   *   sub-<subject id>_ses-<session id>_dwi.bvec
 #
 # *these files can be anywhere up stream of the dwi data, and are inherited.
+skippers = ['slab907', 'slab1068', 'DS01216', 'DS01876',
+            'DS03231', 'DS06481', 'DS16784', 'DS72784']
 
 
 def get_atlas(atlas_dir, modality='dwi'):

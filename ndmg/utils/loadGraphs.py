@@ -47,7 +47,7 @@ def loadGraphs(filenames, verb=False):
         #  Adds graphs to dictionary with key being filename
         fname = os.path.basename(files)
         try:
-            gstruct[fname] = nx.read_weighted_edgelist(files) 
+            gstruct[fname] = nx.read_weighted_edgelist(files, delimiter=',')
         except:
             try:
                 gstruct[fname] = nx.read_gpickle(files)
