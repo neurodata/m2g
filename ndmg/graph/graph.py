@@ -81,8 +81,8 @@ class graph(object):
         """
         nlines = np.shape(streamlines)[0]
         print("# of Streamlines: " + str(nlines))
-
         print_id = np.max((int(nlines*0.05), 1))  # in case nlines*.05=0
+        q = set()
         for idx, streamline in enumerate(streamlines):
             if (idx % print_id) == 0:
                 print(idx)
@@ -97,13 +97,14 @@ class graph(object):
                 else:
                     pass
 
-            if loc:
-                p.add(loc)
+                if loc:
+                    p.add(loc)
             edges = set([tuple(sorted(x)) for x in product(p, p)])
+            if len(p) > len(q):
+                q = p
             for edge in edges:
                 lst = tuple(sorted([str(node) for node in edge]))
                 self.edge_dict[lst] += 1
-
         edge_list = [(str(k[0]), str(k[1]), v) for k, v in self.edge_dict.items()]
         self.g.add_weighted_edges_from(edge_list)
 
