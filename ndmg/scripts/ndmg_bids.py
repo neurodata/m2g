@@ -193,15 +193,12 @@ def session_level(inDir, outDir, subjs, sesh=None, task=None, run=None,
 
 
 def group_level(inDir, outDir, dataset=None, atlas=None, minimal=False,
-                log=False, hemispheres=False, dwi=True):
+                log=False, hemispheres=False, modality='dwi'):
     """
     Crawls the output directory from ndmg and computes qc metrics on the
     derivatives produced
     """
-    if modality == 'func':
-        outDir += '/connectomes'
-
-    outDir = op.join(outDir, 'qa', 'graphs')
+    outDir = op.join(outDir, 'qa', 'roi-connectomes')
     mgu.execute_cmd("mkdir -p {}".format(outDir))
 
     labels_used = next(os.walk(inDir))[1]
