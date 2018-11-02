@@ -189,6 +189,7 @@ def session_level(inDir, outDir, subjs, sesh=None, task=None, run=None,
     if len(rmflds) > 0:
         cmd = "rm -rf {}".format(" ".join(rmflds))
         mgu.execute_cmd(cmd)
+    sys.exit(0)  # terminated
 
 
 def group_level(inDir, outDir, dataset=None, atlas=None, minimal=False,
@@ -233,7 +234,7 @@ def group_level(inDir, outDir, dataset=None, atlas=None, minimal=False,
             print("Failed group analysis for {} parcellation.".format(label))
             print(e)
             continue
-
+    sys.exit(0)
 
 
 def main():
