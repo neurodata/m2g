@@ -20,7 +20,7 @@
 # Email: gkiar@jhu.edu
 
 from argparse import ArgumentParser
-from plotly.offline import download_plotlyjs, init_notebook_mode, iplot, plot
+from plotly.offline import download_plotlyjs, init_notebook_mode, plot
 import pickle
 import plotly_helper as pp
 import numpy as np
