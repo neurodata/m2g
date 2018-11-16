@@ -251,7 +251,7 @@ def main():
                         'analyses can be run independently (in parallel) '
                         'using the same output_dir.',
                         choices=['participant', 'group'], default='participant')
-    parser.add_argument('modality', help='Modality of MRI scans that \
+    parser.add_argument('--modality', help='Modality of MRI scans that \
                         are being evaluated.', choices=['dwi', 'func'], default='dwi')
     parser.add_argument('--participant_label', help='The label(s) of the '
                         'participant(s) that should be analyzed. The label '
