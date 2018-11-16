@@ -70,7 +70,7 @@ def ndmg_func_worker(func, t1w, atlas, atlas_brain, atlas_mask, lv_mask,
             - a flag whether or not to clean out directories once finished.
         fmt:
             - the format for produced connectomes. supported options are
-              gpickle and graphml.
+              csv.
         big:
             - whether to produce voxelwise timeseries.
     """
@@ -261,8 +261,7 @@ def ndmg_func_pipeline(func, t1w, atlas, atlas_brain, atlas_mask, lv_mask,
         clean:
             - a flag whether or not to clean out directories once finished.
         fmt:
-            - the format for produced . supported options are gpickle and
-            graphml.
+            - the format for produced . supported options are csv.
     """
     try:
         ndmg_func_worker(func, t1w, atlas, atlas_brain, atlas_mask, lv_mask,

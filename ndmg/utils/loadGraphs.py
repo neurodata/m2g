@@ -48,14 +48,15 @@ def loadGraphs(filenames, verb=False):
         #  Adds graphs to dictionary with key being filename
         fname = os.path.basename(files)
         try:
-            gstruct[fname] = nx.read_weighted_edgelist(files, delimiter=',')
+            gstruct[fname] = loadGraph(filename)
             vlist |= set(gstruct[fname].nodes())
         except:
-            try:
-                gstruct[fname] = nx.read_gpickle(files)
-            except:
-                gstruct[fname] = nx.read_graphml(files)
+            print("%s is not csv format. Skipping...".format(fname))
     for k, v in gstruct.items():
         vtx_to_add = list(np.setdiff1d(list(vlist), list(v.nodes())))
         [gstruct[k].add_node(vtx) for vtx in vtx_to_add]
     return gstruct
+
+def loadGraph(filename, verb=False):
+    graph = nx.read_weighted_edgelist(filename, delimiter=',')
+    return graph 

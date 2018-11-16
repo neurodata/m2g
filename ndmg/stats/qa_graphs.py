@@ -316,7 +316,7 @@ def main():
     fs = [indir + "/" + fl
           for root, dirs, files in os.walk(indir)
           for fl in files
-          if fl.endswith(".graphml") or fl.endswith(".gpickle")]
+          if fl.endswith(".csv")]
 
     p = Popen("mkdir -p " + result.outdir, shell=True)
     #  The fun begins and now we load our graphs and process them.

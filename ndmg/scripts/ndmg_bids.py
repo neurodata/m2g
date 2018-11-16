@@ -221,7 +221,7 @@ def group_level(inDir, outDir, dataset=None, atlas=None, minimal=False,
         fs = [op.join(tmp_in, fl)
               for root, dirs, files in os.walk(tmp_in)
               for fl in files
-              if fl.endswith(".graphml") or fl.endswith(".gpickle") or fl.endswith('csv')]
+              if fl.endswith('csv')]
         tmp_out = op.join(outDir, label)
         mgu.execute_cmd("mkdir -p {}".format(tmp_out))
         #try:
