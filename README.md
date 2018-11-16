@@ -72,14 +72,14 @@ Currently, functional processing lives only in a development branch, so if you w
 
     git clone https://github.com/neurodata/ndmg
     cd ndmg
-    git checkout m3r-release
+    git checkout ndmg
     python setup.py install
 
 ## Docker
 
 **ndmg** is available through Dockerhub, and can be run directly with the following container (and any additional options you may require for Docker, such as volume mounting):
 
-    docker run -ti --entrypoint /bin/bash bids/m3r-release
+    docker run -ti --entrypoint /bin/bash bids/ndmg
 
 ## Demo
 
@@ -207,7 +207,7 @@ Check out some [resources](http://m2g.io) on our website, or our [function refer
 
 ## License
 
-This project is covered under the [Apache 2.0 License](https://github.com/neurodata/ndmg/blob/m3r-release/LICENSE.txt).
+This project is covered under the [Apache 2.0 License](https://github.com/neurodata/ndmg/blob/ndmg/LICENSE.txt).
 
 ## Manuscript Reproduction
 
