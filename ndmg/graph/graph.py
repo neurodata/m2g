@@ -72,7 +72,7 @@ class graph(object):
                           date=time.asctime(time.localtime()),
                           source="http://m2g.io",
                           region="brain",
-                          sensor=sens,
+                          sensor=self.modal,
                           ecount=0,
                           vcount=len(self.n_ids)
                           )
