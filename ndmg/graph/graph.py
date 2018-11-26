@@ -162,8 +162,8 @@ class graph(object):
             nx.write_weighted_edgelist(self.g, graphname, delimiter=",")
 
         elif self.modal == 'func':
-            np.savetxt(graphname, self.g,
-                header=','.join([str(n) for n in self.n_ids]), delimiter=',')
+            np.savetxt(graphname, self.g, comments='', delimiter=',',
+                header=','.join([str(n) for n in self.n_ids]))
         else:
             raise ValueError("Unsupported Modality.")
         pass
