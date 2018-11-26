@@ -77,7 +77,7 @@ class graph(object):
                           vcount=len(self.n_ids)
                           )
         print(self.g.graph)
-        [str(self.g.add_node(ids)) for ids in n_ids]
+        [str(self.g.add_node(ids)) for ids in self.n_ids]
 
         nlines = np.shape(streamlines)[0]
         print("# of Streamlines: " + str(nlines))
