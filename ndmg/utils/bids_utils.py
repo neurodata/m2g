@@ -242,7 +242,6 @@ def sweep_directory(bdir, subj=None, sesh=None, task=None, run=None, modality='d
                 if (anat and dwi and bval and bvec):
                     for (dw, bva, bve) in zip(dwi, bval, bvec):
                         if dw.filename not in dwis:
-
                             # if all the required files exist, append by the first
                             # match (0 index)
                             anats.append(anat[0].filename)

@@ -30,7 +30,7 @@ from ndmg.stats.func_qa_utils import plot_timeseries, plot_signals, \
 from ndmg.stats.qa_reg import reg_mri_pngs, plot_brain, plot_overlays
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
-import pickle
+import csv
 
 
 class qa_mri(object):
@@ -39,10 +39,9 @@ class qa_mri(object):
         self.modality = modality
         pass
 
-    @staticmethod
-    def load(filename):
+    def load(self, filename):
         """
-        A function for loading a qa_func object, so that we
+        A function for loading a qa_mri object, so that we
         can perform group level quality control easily.
 
         **Positional Arguments:**
@@ -50,14 +49,13 @@ class qa_mri(object):
             filename: the name of the pickle file containing
                 our qa_func object
         """
-        with open(filename, 'rb') as f:
-            obj = pickle.load(f)
-        f.close()
-        return obj
+        reader = csv.reader(filename, delimiter=":")
+        self.__dict__ = dict(reader)
+        return self
 
     def save(self, filename, exetime):
         """
-        A function for saving a qa_func object.
+        A function for saving a qa_mri object.
 
         **Positional Arguments:**
 
@@ -66,9 +64,11 @@ class qa_mri(object):
             exetime:
                 - the runtime in seconds.
         """
-        self.runtime = exetime 
-        with open(filename, 'wb') as f:
-            pickle.dump(self, f)
+        attributes = [a for a in dir(self) if not a.startswith('__')]
+        self.runtime = exetime
+        writer = csv.writer(filename, delimiter=':')
+        for key, value in self.__dict__.items():
+            writer.writerow([key, value])
         f.close()
         pass
 

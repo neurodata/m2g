@@ -313,6 +313,7 @@ def main():
 
     #  Crawls directories and creates a dictionary entry of file names for each
     #  dataset which we plan to process.
+    gfmt = 'elist' if 
     fs = [indir + "/" + fl
           for root, dirs, files in os.walk(indir)
           for fl in files

@@ -46,12 +46,12 @@ os.environ["MPLCONFIGDIR"] = "/tmp/"
 
 
 def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
-                    clean=False, fmt='csv', big=False):
+                    clean=False, big=False):
     """
     Creates a brain graph from MRI data
     """
     startTime = datetime.now()
-
+    fmt = 'elist'
     # Create derivative output directories
     namer = name_resource(dwi, t1w, atlas, outdir)
 
@@ -69,7 +69,7 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
     label_dirs = ['conn']  # create label level granularity
 
     namer.add_dirs(paths, labels, label_dirs)
-    qc_stats = "{}/{}_stats.pkl".format(namer.dirs['qa']['base'],
+    qc_stats = "{}/{}_stats.csv".format(namer.dirs['qa']['base'],
         namer.get_mod_source())
 
     # Create derivative output file names
@@ -174,7 +174,7 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
         g1 = mgg(len(np.unique(labels_im.get_data()))-1, labels[idx])
         g1.make_graph(tracks)
         g1.summary()
-        g1.save_graph(connectomes[idx], fmt=fmt)
+        g1.save_graph(connectomes[idx])
 
     exe_time = datetime.now() - startTime
     qc_dwi.save(qc_stats, exe_time)
@@ -193,13 +193,13 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
 
 
 def ndmg_dwi_pipeline(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
-                      clean=False, fmt='csv', big=False):
+                      clean=False, big=False):
     """
     A wrapper for the worker to make our pipeline more robust to errors.
     """
     try:
         ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
-                        clean, fmt, big)
+                        clean, big)
     except Exception, e:
         print(traceback.format_exc())
     finally:
@@ -226,8 +226,6 @@ def main():
                         labels of regions of interest in atlas space")
     parser.add_argument("-c", "--clean", action="store_true", default=False,
                         help="Whether or not to delete intemediates")
-    parser.add_argument("-f", "--fmt", action="store", default='csv',
-                        help="Determines graph output format")
     parser.add_argument("-b", "--big", action="store_true", default=False,
                         help="whether or not to produce voxelwise big graph")
     result = parser.parse_args()
@@ -241,7 +239,7 @@ def main():
 
     ndmg_dwi_pipeline(result.dwi, result.bval, result.bvec, result.t1w,
                       result.atlas, result.mask, result.labels, result.outdir,
-                      result.clean, result.fmt, result.big)
+                      result.clean, result.big)
 
 
 if __name__ == "__main__":

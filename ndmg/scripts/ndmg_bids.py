@@ -214,14 +214,14 @@ def group_level(inDir, outDir, dataset=None, atlas=None, minimal=False,
             print("Skipping {} parcellation".format(skip))
             labels_used.remove(skip)
             continue
-
+    gfmt = 'elist' if modality == 'dwi' else 'adj'
     for label in labels_used:
         print("Parcellation: {}".format(label))
         tmp_in = op.join(inDir, label)
         fs = [op.join(tmp_in, fl)
               for root, dirs, files in os.walk(tmp_in)
               for fl in files
-              if fl.endswith('csv')]
+              if fl.endswith(gfmt)]
         tmp_out = op.join(outDir, label)
         mgu.execute_cmd("mkdir -p {}".format(tmp_out))
         #try:

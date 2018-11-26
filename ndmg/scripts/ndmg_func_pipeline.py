@@ -41,7 +41,7 @@ import os
 
 
 def ndmg_func_worker(func, t1w, atlas, atlas_brain, atlas_mask, lv_mask,
-                     labels, outdir, clean=False, stc=None, fmt='csv',
+                     labels, outdir, clean=False, stc=None,
                      big=False):
     """
     analyzes fmri images and produces subject-specific derivatives.
@@ -68,14 +68,11 @@ def ndmg_func_worker(func, t1w, atlas, atlas_brain, atlas_mask, lv_mask,
             - the base output directory to place outputs.
         clean:
             - a flag whether or not to clean out directories once finished.
-        fmt:
-            - the format for produced connectomes. supported options are
-              csv.
         big:
             - whether to produce voxelwise timeseries.
     """
     startTime = datetime.now()
-
+    fmt = 'adj'
     namer = name_resource(func, t1w, atlas, outdir)
 
     paths = {'prep_m': "func/preproc",
@@ -93,7 +90,7 @@ def ndmg_func_worker(func, t1w, atlas, atlas_brain, atlas_mask, lv_mask,
     label_dirs = ['ts_roi', 'conn']  # create label level granularity
 
     namer.add_dirs(paths, labels, label_dirs)
-    qc_stats = "{}/{}_stats.pkl".format(namer.dirs['qa']['base'],
+    qc_stats = "{}/{}_stats.csv".format(namer.dirs['qa']['base'],
         namer.get_mod_source())
 
     # Create derivative output file names
@@ -208,7 +205,7 @@ def ndmg_func_worker(func, t1w, atlas, atlas_brain, atlas_mask, lv_mask,
         ts = mgts().roi_timeseries(nuis_func, labels[idx], roi_ts[idx])
         connectome = mgg(ts.shape[0], labels[idx], sens="func")
         conn = connectome.cor_graph(ts)
-        connectome.save_graph(connectomes[idx], fmt=fmt)
+        connectome.save_graph(connectomes[idx])
         try:
             qc_func.roi_graph_qa(ts, conn, aligned_func,
                                  aligned_t1w, labels[idx])
@@ -233,7 +230,7 @@ def ndmg_func_worker(func, t1w, atlas, atlas_brain, atlas_mask, lv_mask,
 
 
 def ndmg_func_pipeline(func, t1w, atlas, atlas_brain, atlas_mask, lv_mask,
-                       labels, outdir, clean=False, stc=None, fmt='csv',
+                       labels, outdir, clean=False, stc=None,
                        big=False):
     """
     analyzes fmri images and produces subject-specific derivatives.
@@ -260,12 +257,10 @@ def ndmg_func_pipeline(func, t1w, atlas, atlas_brain, atlas_mask, lv_mask,
             - the base output directory to place outputs.
         clean:
             - a flag whether or not to clean out directories once finished.
-        fmt:
-            - the format for produced . supported options are csv.
     """
     try:
         ndmg_func_worker(func, t1w, atlas, atlas_brain, atlas_mask, lv_mask,
-                         labels, outdir, clean=clean, stc=stc, fmt=fmt,
+                         labels, outdir, clean=clean, stc=stc,
                          big=big)
     except Exception, e:
         print(traceback.format_exc())
@@ -302,8 +297,6 @@ def main():
                         help="File for STC.")
     parser.add_argument("-c", "--clean", action="store_true", default=False,
                         help="Whether or not to delete intemediates")
-    parser.add_argument("-f", "--fmt", action="store", default='csv',
-                        help="Determines connectome output format")
     parser.add_argument("-b", "--big", action="store_true", default=False,
                         help="Whether to produce voxelwise timeseries.")
     result = parser.parse_args()
@@ -329,7 +322,7 @@ def main():
     ndmg_func_pipeline(result.func, result.t1w, result.atlas,
                        result.atlas_brain, result.atlas_mask,
                        result.lv_mask, result.labels, result.outdir,
-                       result.clean, result.stc, result.fmt, result.big)
+                       result.clean, result.stc, result.big)
 
 if __name__ == "__main__":
     main()

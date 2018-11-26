@@ -17,7 +17,6 @@
 
 # utils.py
 # Created by Will Gray Roncal on 2016-01-28.
-# Edited by Eric Bridgeford.
 # Email: wgr@jhu.edu
 # Edited by Eric Bridgeford.
 
@@ -223,7 +222,7 @@ def morton_region(parcellation, outpath):
     the particular morton index falls into. 0 means it falls into
     a region unmapped in the parcellation.
 
-    **Positional ARguments:**
+    **Positional Arguments:**
         parcellation:
             - the input parcellation to compute over.
         outpath:

@@ -43,7 +43,7 @@ def multigraphs(fibers, labels, outdir):
                   stdout=PIPE, stderr=PIPE, shell=True)
 
     # Create names of files to be produced
-    graphs = [outdir + "/graphs/" + x + '/' + base + "_" + x + ".csv"
+    graphs = [outdir + "/graphs/" + x + '/' + base + "_" + x + ".elist"
               for x in label_name]
     print "Graphs of streamlines downsampled to given labels: " +\
           (", ".join([x for x in graphs]))
