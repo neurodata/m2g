@@ -64,12 +64,12 @@ class qa_mri(object):
             exetime:
                 - the runtime in seconds.
         """
-        attributes = [a for a in dir(self) if not a.startswith('__')]
         self.runtime = exetime
-        writer = csv.writer(filename, delimiter=':')
-        for key, value in self.__dict__.items():
-            writer.writerow([key, value])
-        f.close()
+        attributes = [a for a in dir(self) if not a.startswith('__')]
+        with open(filename, 'w') as file:
+            wr = csv.writer(file, delimiter=':')
+            for key, value in self.__dict__.items():
+                wr.writerow([key, value])
         pass
 
     def func_preproc_qa(self, prep):
