@@ -303,6 +303,8 @@ def main():
     parser.add_argument("outdir", action="store", help="base directory loc")
     parser.add_argument("-f", "--fmt", action="store_true", help="Formatting \
                         flag. True if bc1, False if greg's laptop.")
+    parser.add_argument('--modality', help='Modality of MRI scans that \
+                        are being evaluated.', choices=['dwi', 'func'], default='dwi')
     parser.add_argument("-v", "--verb", action="store_true", help="")
     result = parser.parse_args()
 
@@ -310,14 +312,15 @@ def main():
     #  working on. Which organizations are pretty clear by the code, methinks..
     indir = result.indir
     atlas = result.atlas
+    modality = result.modality
 
     #  Crawls directories and creates a dictionary entry of file names for each
     #  dataset which we plan to process.
-    gfmt = 'elist' if 
+    gfmt = 'elist' if modality == 'dwi' else 'adj'
     fs = [indir + "/" + fl
           for root, dirs, files in os.walk(indir)
           for fl in files
-          if fl.endswith(".csv")]
+          if fl.endswith(gfmt)]
 
     p = Popen("mkdir -p " + result.outdir, shell=True)
     #  The fun begins and now we load our graphs and process them.
