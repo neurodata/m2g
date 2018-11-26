@@ -161,7 +161,7 @@ class graph(object):
             self.g.graph['ecount'] = nx.number_of_edges(self.g)
             nx.write_weighted_edgelist(self.g, graphname, delimiter=",")
 
-        else if sels.modal == 'func':
+        elif sels.modal == 'func':
             np.savetxt(graphname, self.g, header=','.join(self.n_ids), delimiter=',')
         else:
             raise ValueError("Unsupported Modality.")
