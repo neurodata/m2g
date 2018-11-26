@@ -119,7 +119,7 @@ class graph(object):
         """
         print("Estimating correlation matrix for {} ROIs...".format(self.N))
         self.g = np.abs(np.corrcoef(timeseries))  # calculate pearson correlation
-        self.g = np.nan_to_num(self.cor).astype(object)
+        self.g = np.nan_to_num(self.g).astype(object)
 
         # roilist = self.g.nodes()
 
@@ -129,7 +129,7 @@ class graph(object):
 
         # edge_list = [(str(k[0]), str(k[1]), v) for k, v in self.edge_dict.items()]
         # self.g.add_weighted_edges_from(edge_list)
-        return cor        
+        return self.g        
 
     def get_graph(self):
         """
