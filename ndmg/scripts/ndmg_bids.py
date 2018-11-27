@@ -57,7 +57,9 @@ atlas_dir = '/ndmg_atlases'  # This location bc it is convenient for containers
 #
 # *these files can be anywhere up stream of the dwi data, and are inherited.
 skippers = ['slab907', 'slab1068', 'DS01216', 'DS01876',
-            'DS03231', 'DS06481', 'DS16784', 'DS72784']
+            'DS03231', 'DS06481', 'DS16784', 'DS72784',
+            'hemispheric_res-1x1x1', 'hemispheric_res-2x2x2',
+            'tissue_res-1x1x1', 'tissue_res-2x2x2']
 
 
 def get_atlas(atlas_dir, modality='dwi'):
