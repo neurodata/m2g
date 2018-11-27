@@ -201,7 +201,7 @@ def ndmg_func_worker(func, t1w, atlas, atlas_brain, atlas_mask, lv_mask,
 
     # ------ ROI Timeseries Steps ---------------------------------- #
     for idx, label in enumerate(labels):
-        print "Extracting ROI timeseries for " + label + " parcellation..."
+        print("Extracting ROI timeseries for {} parcellation...".format(label))
         ts = mgts().roi_timeseries(nuis_func, labels[idx], roi_ts[idx])
         connectome = mgg(ts.shape[0], labels[idx], sens="func")
         conn = connectome.cor_graph(ts)

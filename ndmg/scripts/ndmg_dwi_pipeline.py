@@ -168,7 +168,7 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
     # ------- Connectome Estimation --------------------------------- #
     # Generate graphs from streamlines for each parcellation
     for idx, label in enumerate(labels):
-        print("Generating graph for " + label + " parcellation...")
+        print("Generating graph for {} parcellation...".format(label))
 
         labels_im = nb.load(labels[idx])
         g1 = mgg(len(np.unique(labels_im.get_data()))-1, labels[idx])
@@ -232,11 +232,9 @@ def main():
     result = parser.parse_args()
 
     # Create output directory
-    cmd = "mkdir -p " + result.outdir + " " + result.outdir + "/tmp"
-    print("Creating output directory: " + result.outdir)
-    print("Creating output temp directory: " + result.outdir + "/tmp")
-    p = Popen(cmd, stdout=PIPE, stderr=PIPE, shell=True)
-    p.communicate()
+    print("Creating output directory: {}".format(result.outdir))
+    print("Creating output temp directory: {}/tmp".format(result.outdir))
+    mgu.execute_cmd("mkdir -p {} {}/tmp".format(result.outdir, result.outdir))
 
     ndmg_dwi_pipeline(result.dwi, result.bval, result.bvec, result.t1w,
                       result.atlas, result.mask, result.labels, result.outdir,
