@@ -105,7 +105,7 @@ class graph(object):
             for edge in edges:
                 lst = tuple(sorted([str(node) for node in edge]))
                 self.edge_dict[lst] += 1
-        edge_list = [(str(k[0]), str(k[1]), v) for k, v in self.edge_dict.items()]
+        edge_list = [(int(k[0]), int(k[1]), v) for k, v in self.edge_dict.items()]
         self.g.add_weighted_edges_from(edge_list)
 
     def cor_graph(self, timeseries, attr=None):
