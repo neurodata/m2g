@@ -72,7 +72,7 @@ def ndmg_func_worker(func, t1w, atlas, atlas_brain, atlas_mask, lv_mask,
             - whether to produce voxelwise timeseries.
     """
     startTime = datetime.now()
-    fmt = 'adj'
+    fmt = '_adj.csv'
     namer = name_resource(func, t1w, atlas, outdir)
 
     paths = {'prep_m': "func/preproc",

@@ -51,7 +51,7 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
     Creates a brain graph from MRI data
     """
     startTime = datetime.now()
-    fmt = 'elist'
+    fmt = '_elist.csv'
     # Create derivative output directories
     namer = name_resource(dwi, t1w, atlas, outdir)
 

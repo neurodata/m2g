@@ -215,7 +215,7 @@ def group_level(inDir, outDir, dataset=None, atlas=None, minimal=False,
             labels_used.remove(skip)
             continue
 
-    gfmt = 'elist' if modality == 'dwi' else 'adj'
+    gfmt = '_elist.csv' if modality == 'dwi' else '_adj.csv'
     for label in labels_used:
         print("Parcellation: {}".format(label))
         tmp_in = op.join(inDir, label)
