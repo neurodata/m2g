@@ -202,8 +202,6 @@ def group_level(inDir, outDir, dataset=None, atlas=None, minimal=False,
     """
     outDir = op.join(outDir, 'qa', 'roi-connectomes')
     mgu.execute_cmd("mkdir -p {}".format(outDir))
-
-    print(inDir)
     labels_used = next(os.walk(inDir))[1]
 
     if atlas is not None:
@@ -362,13 +360,14 @@ def main():
             if atlas is not None:
                 tpath = op.join(remo, gpath, atlas)
                 tindir = op.join(outDir, gpath, atlas)
-                # Using outDir as input location for group level since i work on graphs
+                # Using outDir as input location for group level since
             else:
                 tpath = op.join(remo, gpath)
                 tindir = op.join(outDir, gpath)
             s3_get_data(buck, tpath, tindir, public=creds)
         modif = 'qa'
-        group_level(op.join(inDir, gpath), outDir, dataset, atlas, minimal, log, hemi)
+        group_level(op.join(inDir, gpath), outDir, dataset, atlas, minimal, log,
+            hemi, modality)
 
 
     if push and buck is not None and remo is not None:

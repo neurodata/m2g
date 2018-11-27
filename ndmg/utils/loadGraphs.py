@@ -50,10 +50,10 @@ def loadGraphs(filenames, modality='dwi', verb=False):
         #  Adds graphs to dictionary with key being filename
         fname = os.path.basename(files)
         try:
-            gstruct[fname] = loadGraph(filename, modality=modality)
+            gstruct[fname] = loadGraph(files, modality=modality)
             vlist |= set(gstruct[fname].nodes())
         except:
-            print("%s is not in proper format. Skipping...".format(fname))
+            print("{} is not in proper format. Skipping...".format(fname))
     for k, v in gstruct.items():
         vtx_to_add = list(np.setdiff1d(list(vlist), list(v.nodes())))
         [gstruct[k].add_node(vtx) for vtx in vtx_to_add]
