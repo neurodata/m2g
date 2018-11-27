@@ -189,7 +189,7 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
 
     print("Execution took: {}".format(exe_time))
     print("Complete!")
-    pass
+    sys.exit(0)
 
 
 def ndmg_dwi_pipeline(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
@@ -202,11 +202,12 @@ def ndmg_dwi_pipeline(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
                         clean, big)
     except Exception, e:
         print(traceback.format_exc())
+        os.exit()
     finally:
         try:
             os.exit()
         except Exception, e:
-            pass
+            os.exit()
     return
 
 

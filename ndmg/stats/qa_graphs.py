@@ -17,8 +17,8 @@
 
 # qa_graphs.py
 # Created by Greg Kiar on 2016-05-11.
-# Edited by Eric Bridgeford.
 # Email: gkiar@jhu.edu
+# Edited by Eric Bridgeford.
 
 from argparse import ArgumentParser
 from collections import OrderedDict
@@ -52,7 +52,7 @@ def compute_metrics(fs, outdir, atlas, verb=False, modality='dwi'):
             - Toggles verbose output statements
     """
     print(atlas)
-    gr = loadGraphs(fs, verb=verb)
+    gr = loadGraphs(fs, modality=modality, verb=verb)
     if modality == 'func':
         graphs = binGraphs(gr)
     else:

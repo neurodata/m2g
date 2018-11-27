@@ -227,6 +227,7 @@ def ndmg_func_worker(func, t1w, atlas, atlas_brain, atlas_mask, lv_mask,
 
     print("Execution took: {}".format(exe_time))
     print("Complete!")
+    sys.exit(0)
 
 
 def ndmg_func_pipeline(func, t1w, atlas, atlas_brain, atlas_mask, lv_mask,
@@ -264,12 +265,12 @@ def ndmg_func_pipeline(func, t1w, atlas, atlas_brain, atlas_mask, lv_mask,
                          big=big)
     except Exception, e:
         print(traceback.format_exc())
-        return 
+        os.exit() 
     finally:
         try:
             os.exit()
         except Exception, e:
-            pass
+            os.exit()
     return
 
 

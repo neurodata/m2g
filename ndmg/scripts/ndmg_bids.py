@@ -17,9 +17,9 @@
 
 # ndmg_bids.py
 # Created by Greg Kiar on 2016-07-25.
+# Email: gkiar@jhu.edu
 # edited by Eric Bridgeford to incorporate fMRI, multi-threading, and
 # big-graph generation.
-# Email: gkiar@jhu.edu
 
 from argparse import ArgumentParser
 from subprocess import Popen, PIPE
@@ -214,6 +214,7 @@ def group_level(inDir, outDir, dataset=None, atlas=None, minimal=False,
             print("Skipping {} parcellation".format(skip))
             labels_used.remove(skip)
             continue
+
     gfmt = 'elist' if modality == 'dwi' else 'adj'
     for label in labels_used:
         print("Parcellation: {}".format(label))
