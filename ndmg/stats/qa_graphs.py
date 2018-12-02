@@ -251,6 +251,19 @@ def write(outdir, metric, data, atlas):
         pickle.dump({metric: data}, of)
 
 
+def is_valid_filetype(fl):
+    """
+    Check that a given file is a graph.
+
+    Required paramters:
+        fl:
+            - Filename
+    """
+    valid_filetypes = [".graphml", ".gpickle", ".edgelist"]
+    if os.path.splitext(fl)[1] in valid_filetypes:
+        return True
+
+
 def main():
     """
     Argument parser and directory crawler. Takes organization and atlas
@@ -291,7 +304,7 @@ def main():
     fs = [indir + "/" + fl
           for root, dirs, files in os.walk(indir)
           for fl in files
-          if fl.endswith(".graphml") or fl.endswith(".gpickle") or fl.endswith(".edgelist")]
+          if is_valid_filetype(fl)]
     # TODO VG: Implement a way to screen for empty edgelist files
 
     p = Popen("mkdir -p " + result.outdir, shell=True)
