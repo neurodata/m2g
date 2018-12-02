@@ -69,11 +69,11 @@ def compute_metrics(fs, outdir, atlas, verb=False):
     for subj in graphs:  # TODO GK: remove forloop and use comprehension maybe?
         g = graphs[subj]
         N = len(g.nodes())
-        LLnodes = g.nodes()[0:N/2]  # TODO GK: don't assume hemispheres
+        LLnodes = g.nodes()[0:N / 2]  # TODO GK: don't assume hemispheres
         LL = g.subgraph(LLnodes)
         LLdegs = [LL.degree()[n] for n in LLnodes]
 
-        RRnodes = g.nodes()[N/2:N]  # TODO GK: don't assume hemispheres
+        RRnodes = g.nodes()[N / 2:N]  # TODO GK: don't assume hemispheres
         RR = g.subgraph(RRnodes)
         RRdegs = [RR.degree()[n] for n in RRnodes]
 
@@ -93,7 +93,7 @@ def compute_metrics(fs, outdir, atlas, verb=False):
     #  Edge Weights
     print("Computing: Edge Weight Sequence")
     temp_ew = OrderedDict((s, [graphs[s].get_edge_data(e[0], e[1])['weight']
-                           for e in graphs[s].edges()]) for s in graphs)
+                               for e in graphs[s].edges()]) for s in graphs)
     ew = temp_ew
     write(outdir, 'edge_weight', ew, atlas)
     show_means(temp_ew)
@@ -139,7 +139,7 @@ def compute_metrics(fs, outdir, atlas, verb=False):
     mat = np.zeros(adj.values()[0].shape)
     for subj in adj:
         mat += adj[subj]
-    mat = mat/len(adj.keys())
+    mat = mat / len(adj.keys())
     write(outdir, 'study_mean_connectome', mat, atlas)
 
     # Triangles
@@ -152,7 +152,7 @@ def compute_metrics(fs, outdir, atlas, verb=False):
 
     # Communicability betweenness centrality
     print("Computing: Communicability Betweeness Centrality")
-    nxcbc = nx.communicability_betweenness_centrality # For PEP8 line length
+    nxcbc = nx.communicability_betweenness_centrality  # For PEP8 line length
     temp_commbc = OrderedDict((subj, nxcbc(graphs[subj]).values())
                               for subj in graphs)
     commbc = temp_commbc
@@ -161,21 +161,24 @@ def compute_metrics(fs, outdir, atlas, verb=False):
 
     # Closeness vitality
     print("Computing: Closeness Vitality")
-    temp_cv = OrderedDict((subj, nx.closeness_vitality(graphs[subj]).values()) for subj in graphs)
+    temp_cv = OrderedDict((subj, nx.closeness_vitality(
+        graphs[subj]).values()) for subj in graphs)
     closeness_vitality = temp_cv
     write(outdir, 'closeness_vitality', closeness_vitality, atlas)
     show_means(temp_cv)
 
     # Number of cliques
     print("Computing: Number of Cliques")
-    temp_cliques = OrderedDict((subj, nx.number_of_cliques(graphs[subj]).values()) for subj in graphs)
+    temp_cliques = OrderedDict(
+        (subj, nx.number_of_cliques(graphs[subj]).values()) for subj in graphs)
     num_cliques = temp_cliques
     write(outdir, 'number_of_cliques', num_cliques, atlas)
     show_means(temp_cliques)
 
     # Eccentricity
     print("Computing: Eccentricity")
-    temp_ecc = OrderedDict((subj, nx.eccentricity(graphs[subj]).values()) for subj in graphs)
+    temp_ecc = OrderedDict((subj, nx.eccentricity(
+        graphs[subj]).values()) for subj in graphs)
     ecc = temp_ecc
     write(outdir, 'eccentricity', ecc, atlas)
     show_means(temp_ecc)
@@ -203,7 +206,7 @@ def scan_statistic(mygs, i):
         for n in g.nodes():
             sg = nx.ego_graph(g, n, radius=i)
             tmp = np.append(tmp, np.sum([sg.get_edge_data(e[0], e[1])['weight']
-                            for e in sg.edges()]))
+                                         for e in sg.edges()]))
         ss[key] = tmp
     return ss
 
@@ -226,7 +229,7 @@ def density(data, nbins=500, rng=None):
             xs[subj] = np.linspace(rng[0], rng[1], nbins)
         else:
             xs[subj] = np.linspace(0, np.max(data[subj]), nbins)
-        density[subj] = dens.evaluate(xs[subj])*np.max(data[subj]*hist)
+        density[subj] = dens.evaluate(xs[subj]) * np.max(data[subj] * hist)
     return {"xs": xs, "pdfs": density}
 
 
@@ -289,7 +292,7 @@ def main():
           for root, dirs, files in os.walk(indir)
           for fl in files
           if fl.endswith(".graphml") or fl.endswith(".gpickle") or fl.endswith(".edgelist")]
-          # TODO VG: Implement a way to screen for empty edgelist files
+    # TODO VG: Implement a way to screen for empty edgelist files
 
     p = Popen("mkdir -p " + result.outdir, shell=True)
     #  The fun begins and now we load our graphs and process them.
