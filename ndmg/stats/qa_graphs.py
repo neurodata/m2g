@@ -142,6 +142,44 @@ def compute_metrics(fs, outdir, atlas, verb=False):
     mat = mat/len(adj.keys())
     write(outdir, 'study_mean_connectome', mat, atlas)
 
+    # Triangles
+    print("Computing: Triangles")
+    temp_tri = OrderedDict((subj, nx.triangles(graphs[subj]).values())
+                           for subj in graphs)
+    triangles = temp_tri
+    write(outdir, 'triangles', triangles, atlas)
+    show_means(temp_tri)
+
+    # Communicability betweenness centrality
+    print("Computing: Communicability Betweeness Centrality")
+    nxcbc = nx.communicability_betweenness_centrality # For PEP8 line length
+    temp_commbc = OrderedDict((subj, nxcbc(graphs[subj]).values())
+                              for subj in graphs)
+    commbc = temp_commbc
+    write(outdir, 'communicability_betweeness', commbc, atlas)
+    show_means(temp_commbc)
+
+    # Closeness vitality
+    print("Computing: Closeness Vitality")
+    temp_cv = OrderedDict((subj, nx.closeness_vitality(graphs[subj]).values()) for subj in graphs)
+    closeness_vitality = temp_cv
+    write(outdir, 'closeness_vitality', closeness_vitality, atlas)
+    show_means(temp_cv)
+
+    # Number of cliques
+    print("Computing: Number of Cliques")
+    temp_cliques = OrderedDict((subj, nx.number_of_cliques(graphs[subj]).values()) for subj in graphs)
+    num_cliques = temp_cliques
+    write(outdir, 'number_of_cliques', num_cliques, atlas)
+    show_means(temp_cliques)
+
+    # Eccentricity
+    print("Computing: Eccentricity")
+    temp_ecc = OrderedDict((subj, nx.eccentricity(graphs[subj]).values()) for subj in graphs)
+    ecc = temp_ecc
+    write(outdir, 'eccentricity', ecc, atlas)
+    show_means(temp_ecc)
+
 
 def show_means(data):
     print("Subject Means: " + ", ".join(["%.2f" % np.mean(data[key])
