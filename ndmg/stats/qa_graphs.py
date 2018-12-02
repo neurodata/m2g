@@ -151,12 +151,12 @@ def compute_metrics(fs, outdir, atlas, verb=False):
     show_means(temp_tri)
 
     # Communicability betweenness centrality
-    print("Computing: Communicability Betweeness Centrality")
+    print("Computing: Communicability Betweenness Centrality")
     nxcbc = nx.communicability_betweenness_centrality  # For PEP8 line length
     temp_commbc = OrderedDict((subj, nxcbc(graphs[subj]).values())
                               for subj in graphs)
     commbc = temp_commbc
-    write(outdir, 'communicability_betweeness', commbc, atlas)
+    write(outdir, 'communicability_betweenness', commbc, atlas)
     show_means(temp_commbc)
 
     # Closeness vitality
