@@ -50,7 +50,6 @@ def compute_metrics(fs, outdir, atlas, verb=False):
         verb:
             - Toggles verbose output statements
     """
-
     graphs = loadGraphs(fs, verb=verb)
     nodes = nx.number_of_nodes(graphs.values()[0])
 
@@ -131,6 +130,42 @@ def compute_metrics(fs, outdir, atlas, verb=False):
     centrality = temp_bc
     write(outdir, 'betweenness_centrality', centrality, atlas)
     show_means(temp_bc)
+
+    # Average Neighbor Degree
+    print("Computing: Neighbor Degree")
+    mnd = nx.average_neighbor_degree  # Line length
+    temp_mnd = OrderedDict((subj, mnd(graphs[subj]).values())
+                           for subj in graphs)
+    avg_neighbor_degree = temp_mnd
+    write(outdir, 'neighbor_degree', avg_neighbor_degree, atlas)
+    show_means(temp_mnd)
+
+    # Average Degree Connectivity
+    print("Computing: Mean Degree Connectivity")
+    adc = nx.average_degree_connectivity  # Line length
+    temp_adc = OrderedDict((subj, adc(graphs[subj]).values())
+                           for subj in graphs)
+    avg_deg_connectivity = temp_adc
+    write(outdir, 'degree_connectivity', avg_deg_connectivity, atlas)
+    show_means(temp_adc)
+
+    # Closeness Centrality
+    print("Computing: Closeness Centrality")
+    cc = nx.closeness_centrality  # Line length
+    temp_cc = OrderedDict((subj, cc(graphs[subj]).values())
+                          for subj in graphs)
+    c_centrality = temp_cc
+    write(outdir, 'degree_connectivity', c_centrality, atlas)
+    show_means(temp_cc)
+
+    # Eigenvector Centrality
+    print("Computing: Eigenvector Centrality")
+    eigc = nx.eigenvector_centrality  # Line length
+    temp_eigc = OrderedDict((subj, eigc(graphs[subj]).values())
+                            for subj in graphs)
+    eig_centrality = temp_eigc
+    write(outdir, 'degree_connectivity', eig_centrality, atlas)
+    show_means(temp_eigc)
 
     # Mean connectome
     print("Computing: Mean Connectome")
@@ -250,9 +285,12 @@ def main():
     fs = [indir + "/" + fl
           for root, dirs, files in os.walk(indir)
           for fl in files
-          if fl.endswith(".graphml") or fl.endswith(".gpickle")]
+          if fl.endswith(".graphml") or
+          fl.endswith(".gpickle") or
+          fl.endswith(".edgelist")]
 
     p = Popen("mkdir -p " + result.outdir, shell=True)
+
     #  The fun begins and now we load our graphs and process them.
     compute_metrics(fs, result.outdir, atlas, result.verb)
 
