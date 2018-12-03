@@ -141,7 +141,7 @@ def compute_metrics(fs, outdir, atlas, verb=False):
     show_means(temp_mnd)
 
     # Average Degree Connectivity
-    print("Computing: Mean Degree Connectivity")
+    print("Computing: Average Degree Connectivity")
     adc = nx.average_degree_connectivity  # Line length
     temp_adc = OrderedDict((subj, adc(graphs[subj]).values())
                            for subj in graphs)
@@ -155,7 +155,7 @@ def compute_metrics(fs, outdir, atlas, verb=False):
     temp_cc = OrderedDict((subj, cc(graphs[subj]).values())
                           for subj in graphs)
     c_centrality = temp_cc
-    write(outdir, 'degree_connectivity', c_centrality, atlas)
+    write(outdir, 'closeness_centrality', c_centrality, atlas)
     show_means(temp_cc)
 
     # Eigenvector Centrality
@@ -164,7 +164,7 @@ def compute_metrics(fs, outdir, atlas, verb=False):
     temp_eigc = OrderedDict((subj, eigc(graphs[subj]).values())
                             for subj in graphs)
     eig_centrality = temp_eigc
-    write(outdir, 'degree_connectivity', eig_centrality, atlas)
+    write(outdir, 'eigenvector_centrality', eig_centrality, atlas)
     show_means(temp_eigc)
 
     # Mean connectome
