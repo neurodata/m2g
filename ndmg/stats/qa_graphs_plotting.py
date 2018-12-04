@@ -40,7 +40,7 @@ def make_panel_plot(basepath, outf, dataset=None, atlas=None, minimal=True,
                        }
 
     traces = list(())
-    # import pdb; pdb.set_trace()
+    import pdb
     for idx, curr in enumerate(store.values()):
         f = open(curr['path'])
         dat = pickle.load(f)[curr['key']]
@@ -74,13 +74,15 @@ def make_panel_plot(basepath, outf, dataset=None, atlas=None, minimal=True,
             if log:
                 dat = np.log10(dat+1)
             fig = pp.plot_heatmap(dat, name=curr['label'])
+        elif curr['key'] == 'neighbor_degree':
+            fig = pp.plot_histogram(dat.values(), xlab='Average Neighbor Degree')
+        elif curr['key'] == 'degree_connectivity':
+            fig = pp.plot_histogram(dat.values(), xlab='Average Degree Connectivity')
         else:
             dims = len(dat.values()[0])
-            # layout = pp.std_layout(ylab=curr['label'], xlab='Graph')
             fig = pp.plot_series(dat.values())
-            fig['layout']['xaxis']['title'] = 'Node'
+            # fig['layout']['xaxis']['title'] = 'Index'
             fig['layout']['yaxis']['title'] = curr['label']
-            # fig.layout = layout
         traces += [pp.fig_to_trace(fig)]
 
     multi = pp.traces_to_panels(traces)
@@ -107,6 +109,14 @@ def make_panel_plot(basepath, outf, dataset=None, atlas=None, minimal=True,
         # Number of Non-zeros
         elif curr['key'] in ['number_non_zeros']:
             multi.layout['x'+key]['title'] = curr['label']
+            multi.layout['y'+key]['title'] = 'Relative Probability'
+        # Average Neighbor Degree, Average Degree Connectivity
+        elif curr['key'] in ['neighbor_degree']:
+            multi.layout['y'+key]['title'] = 'Freq'
+            multi.layout['x'+key]['title'] = 'Avg Neighbor Degree'
+        elif curr['key'] in ['degree_connectivity']:
+            multi.layout['y'+key]['title'] = 'Freq'
+            multi.layout['x'+key]['title'] = 'Avg Degree Connectivity'
         # Mean Connectome
         elif curr['key'] in ['study_mean_connectome']:
             multi.layout['y'+key]['title'] = None

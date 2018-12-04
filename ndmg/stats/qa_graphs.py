@@ -133,8 +133,10 @@ def compute_metrics(fs, outdir, atlas, verb=False):
 
     # Average Neighbor Degree
     print("Computing: Neighbor Degree")
+    # import pdb; pdb.set_trace()
     mnd = nx.average_neighbor_degree  # Line length
-    temp_mnd = OrderedDict((subj, mnd(graphs[subj]).values())
+    temp_mnd = OrderedDict((subj, sum(mnd(graphs[subj]).values())/
+                           len(mnd(graphs[subj]).values()))
                            for subj in graphs)
     avg_neighbor_degree = temp_mnd
     write(outdir, 'neighbor_degree', avg_neighbor_degree, atlas)
@@ -143,7 +145,8 @@ def compute_metrics(fs, outdir, atlas, verb=False):
     # Average Degree Connectivity
     print("Computing: Average Degree Connectivity")
     adc = nx.average_degree_connectivity  # Line length
-    temp_adc = OrderedDict((subj, adc(graphs[subj]).values())
+    temp_adc = OrderedDict((subj, sum(adc(graphs[subj]).values())/
+                           len(adc(graphs[subj]).values()))
                            for subj in graphs)
     avg_deg_connectivity = temp_adc
     write(outdir, 'degree_connectivity', avg_deg_connectivity, atlas)

@@ -158,6 +158,16 @@ def plot_rugdensity(series, name=None, ylab=None, xlab=None):
     fig = Figure(data=data, layout=layout)
     return fig
 
+def plot_histogram(dats, name=None, xlab=None, ylab=None):
+    data = [
+        Histogram(
+                x=dats,
+                name=name
+            )
+        ]
+    layout = std_layout(name, ylab, xlab)
+    fig = Figure(data=data, layout=layout)
+    return fig
 
 def std_layout(name=None, ylab=None, xlab=None):
     return Layout(
