@@ -133,7 +133,7 @@ class preproc_func():
         if (stc is not None):
             self.slice_time_correct(trim_func, stc_func, tr, stc)
         else:
-            stc_func = self.func
+            stc_func = trim_func
         # motion correct using the mean volume (FSL default)
         self.motion_correct(stc_func, self.motion_func, None)
         self.mc_params = "{}.par".format(self.motion_func)
