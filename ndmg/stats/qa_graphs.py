@@ -108,9 +108,10 @@ def compute_metrics(fs, outdir, atlas, verb=False):
 
     # Scan Statistic-1
     print("Computing: Max Local Statistic Sequence")
-    temp_ss1 = scan_statistic(graphs, 1)
+    radius = 1
+    temp_ss1 = scan_statistic(graphs, radius)
     ss1 = temp_ss1
-    write(outdir, 'locality_statistic', ss1, atlas)
+    write(outdir, 'locality_statistic_{}'.format(radius), ss1, atlas)
     show_means(temp_ss1)
 
     # Eigen Values
@@ -119,7 +120,7 @@ def compute_metrics(fs, outdir, atlas, verb=False):
                          for subj in graphs)
     eigs = OrderedDict((subj, np.sort(np.linalg.eigvals(laplac[subj].A))[::-1])
                        for subj in graphs)
-    write(outdir, 'eigen_sequence', eigs, atlas)
+    write(outdir, 'eigenvalue_sequence', eigs, atlas)
     print("Subject Maxes: " + ", ".join(["%.2f" % np.max(eigs[key])
                                          for key in eigs.keys()]))
 
@@ -140,7 +141,7 @@ def compute_metrics(fs, outdir, atlas, verb=False):
     for subj in adj:
         mat += adj[subj]
     mat = mat / len(adj.keys())
-    write(outdir, 'study_mean_connectome', mat, atlas)
+    write(outdir, 'mean_connectome', mat, atlas)
 
     # Triangles
     print("Computing: Triangles")
