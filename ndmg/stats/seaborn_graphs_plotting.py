@@ -47,9 +47,8 @@ def make_panel_plot(basepath, outf, dataset=None, atlas=None, minimal=True,
     with sns.plotting_context(**params):
         fig, axs = plt.subplots(
             nrows=int(r), ncols=int(c),
-            dpi=500, figsize=(40.,30.)
+            dpi=500, figsize=(c * 10., r * 10.)
         )
-
 
     for idx, ax in enumerate(axs.flatten()):
 
