@@ -212,8 +212,8 @@ def compute_metrics(fs, outdir, atlas, verb=False, summary=None):
         print("Computing: Summaries")
         for key, dat in cliffnotes.iteritems():
             c = calculate_summary_statistic(data=dat, fn=fn)
-            fname = 'summary_{}_'.format(fn) + key
-            write(summaries, key, c, atlas)
+            fname = 'summary_{}_'.format(summary) + key
+            write(summaries, fname, c, atlas)
 
 
 def show_means(data):
