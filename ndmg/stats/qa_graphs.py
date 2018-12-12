@@ -293,7 +293,7 @@ def main():
     parser.add_argument("-f", "--fmt", action="store_true", help="Formatting \
                         flag. True if bc1, False if greg's laptop.")
     parser.add_argument("-v", "--verb", action="store_true", help="Verbose \
-                        flag.")
+                        output statements.")
     result = parser.parse_args()
 
     #  Sets up directory to crawl based on the system organization you're
