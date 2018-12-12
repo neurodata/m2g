@@ -79,7 +79,7 @@ def make_panel_plot(basepath, outf, dataset=None, atlas=None, minimal=True,
                 xlab='Edge',
                 ylab='Edge Weight',
                 sort=True,
-                log_transform=False,
+                sci_scale=True,
                 **params
             )
         elif keys[idx] == 'degree_distribution':
@@ -116,7 +116,7 @@ def make_panel_plot(basepath, outf, dataset=None, atlas=None, minimal=True,
                 xlab='Node',
                 ylab=labs[idx],
                 title='',
-                log_transform=True if keys[idx] in to_transform else False,
+                sci_scale=True if keys[idx] in to_transform else False,
                 **params
             )
 
@@ -127,7 +127,7 @@ def make_panel_plot(basepath, outf, dataset=None, atlas=None, minimal=True,
         tit = dataset + ' Dataset (' + atlas + ' parcellation)'
     else:
         tit = None
-    fig.suptitle(tit)
+    fig.suptitle(tit, fontsize=45)
 
     # Save
     plt.tight_layout()

@@ -70,13 +70,13 @@ def plot_degrees(dats, ax, title='', ylab='', xlab='', hemi=True,
             )
 
         # Legend
-        ax.text(40, 31, 'ipsilateral', color='#000000')
-        ax.text(40, 33, 'contralateral', color='#0B622F')
+        ax.text(40, 31, 'ipsilateral', color='#000000', fontsize=30)
+        ax.text(40, 33, 'contralateral', color='#0B622F', fontsize=30)
     std_layout(ax, title, ylab, xlab)
 
 
 def plot_series(dats, ax, title='', ylab='', xlab='', sort=False,
-                context=None, font_scale=None, log_transform=False):
+                context=None, font_scale=None, sci_scale=False):
     with sns.plotting_context(context=context, font_scale=font_scale):
         for idx, ys in enumerate(dats):
             if sort:
@@ -88,9 +88,8 @@ def plot_series(dats, ax, title='', ylab='', xlab='', sort=False,
                 alpha=float('%1.2f' % (4.0 / len(dats))),
                 ax=ax,
             )
-        if log_transform:
-            ax.set_yscale('log')
-            ylab = ylab + ' (log scale)'
+        if sci_scale:
+            ax.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
     std_layout(ax, title, ylab, xlab)
 
 
@@ -105,12 +104,13 @@ def plot_rugdensity(series, ax, title='', ylab='', xlab='',
             color='#000000',
             ax=ax
         )
+        ax.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
     std_layout(ax, title, ylab, xlab)
 
 
 # Helper functions
 def std_layout(ax, title, ylab, xlab, format_range=True):
-    ax.set_title(title)
+    ax.set_title(title, fontsize=30)
     ax.set_xlabel(xlab)
     ax.set_ylabel(ylab)
 
