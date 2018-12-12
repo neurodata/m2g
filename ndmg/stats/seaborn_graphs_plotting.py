@@ -95,6 +95,15 @@ def make_panel_plot(basepath, outf, dataset=None, atlas=None, minimal=True,
                 title=labs[idx],
                 **params
             )
+        elif 'summary' in key:
+            ss.plot_rugdensity(
+                dat.values(),
+                ax,
+                title=labs[idx],
+                xlab='Node',
+                ylab='Count',
+                **params
+            )
         else:
             dims = len(dat.values()[0])
             ss.plot_series(
