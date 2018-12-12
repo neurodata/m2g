@@ -48,6 +48,7 @@ setup(
         'boto3',
         'matplotlib==1.5.1',
         'plotly==1.12',
+        'seaborn==0.9.0',
     ],
     include_package_data=True,
 )
