@@ -33,7 +33,7 @@ import sys
 import os
 
 
-def compute_metrics(fs, outdir, atlas, verb=False, summary=None):
+def compute_metrics(fs, outdir, atlas, verb=False, summary=False):
     """
     Given a set of files and a directory to put things, loads graphs and
     performs set of analyses on them, storing derivatives in a pickle format
@@ -58,7 +58,7 @@ def compute_metrics(fs, outdir, atlas, verb=False, summary=None):
     for path in [statistics, summaries]:
         if not os.path.exists(path):
             os.mkdir(path)
-    cliffnotes = dict()
+    data_dict = dict()
 
     #  Number of non-zero edges (i.e. binary edge count)
     print("Computing: NNZ")
@@ -109,7 +109,7 @@ def compute_metrics(fs, outdir, atlas, verb=False, summary=None):
     temp_cc = OrderedDict((subj, nx.clustering(graphs[subj]).values())
                           for subj in graphs)
     ccoefs = temp_cc
-    cliffnotes['clustering_coefficients'] = ccoefs
+    data_dict['clustering_coefficients'] = ccoefs
     write(statistics, 'clustering_coefficients', ccoefs, atlas)
     show_means(temp_cc)
 
@@ -118,7 +118,7 @@ def compute_metrics(fs, outdir, atlas, verb=False, summary=None):
     radius = 1
     temp_ss1 = scan_statistic(graphs, radius)
     ss1 = temp_ss1
-    cliffnotes['locality_statistic_{}'.format(radius)] = ss1
+    data_dict['locality_statistic_{}'.format(radius)] = ss1
     write(statistics, 'locality_statistic_{}'.format(radius), ss1, atlas)
     show_means(temp_ss1)
 
@@ -128,7 +128,7 @@ def compute_metrics(fs, outdir, atlas, verb=False, summary=None):
                          for subj in graphs)
     eigs = OrderedDict((subj, np.sort(np.linalg.eigvals(laplac[subj].A))[::-1])
                        for subj in graphs)
-    cliffnotes['eigenvalue_sequence'] = eigs
+    data_dict['eigenvalue_sequence'] = eigs
     write(statistics, 'eigenvalue_sequence', eigs, atlas)
     print("Subject Maxes: " + ", ".join(["%.2f" % np.max(eigs[key])
                                          for key in eigs.keys()]))
@@ -139,7 +139,7 @@ def compute_metrics(fs, outdir, atlas, verb=False, summary=None):
     temp_bc = OrderedDict((subj, nxbc(graphs[subj]).values())
                           for subj in graphs)
     centrality = temp_bc
-    cliffnotes['betweenness_centrality'] = centrality
+    data_dict['betweenness_centrality'] = centrality
     write(statistics, 'betweenness_centrality', centrality, atlas)
     show_means(temp_bc)
 
@@ -158,7 +158,7 @@ def compute_metrics(fs, outdir, atlas, verb=False, summary=None):
     temp_tri = OrderedDict((subj, nx.triangles(graphs[subj]).values())
                            for subj in graphs)
     triangles = temp_tri
-    cliffnotes['triangles'] = triangles
+    data_dict['triangles'] = triangles
     write(statistics, 'triangles', triangles, atlas)
     show_means(temp_tri)
 
@@ -168,7 +168,7 @@ def compute_metrics(fs, outdir, atlas, verb=False, summary=None):
     temp_commbc = OrderedDict((subj, nxcbc(graphs[subj]).values())
                               for subj in graphs)
     commbc = temp_commbc
-    cliffnotes['communicability_betweenness'] = commbc
+    data_dict['communicability_betweenness'] = commbc
     write(statistics, 'communicability_betweenness', commbc, atlas)
     show_means(temp_commbc)
 
@@ -177,7 +177,7 @@ def compute_metrics(fs, outdir, atlas, verb=False, summary=None):
     temp_cv = OrderedDict((subj, nx.closeness_vitality(
         graphs[subj]).values()) for subj in graphs)
     closeness_vitality = temp_cv
-    cliffnotes['closeness_vitality'] = closeness_vitality
+    data_dict['closeness_vitality'] = closeness_vitality
     write(statistics, 'closeness_vitality', closeness_vitality, atlas)
     show_means(temp_cv)
 
@@ -186,7 +186,7 @@ def compute_metrics(fs, outdir, atlas, verb=False, summary=None):
     temp_cliques = OrderedDict(
         (subj, nx.number_of_cliques(graphs[subj]).values()) for subj in graphs)
     num_cliques = temp_cliques
-    cliffnotes['number_of_cliques'] = num_cliques
+    data_dict['number_of_cliques'] = num_cliques
     write(statistics, 'number_of_cliques', num_cliques, atlas)
     show_means(temp_cliques)
 
@@ -195,23 +195,26 @@ def compute_metrics(fs, outdir, atlas, verb=False, summary=None):
     temp_ecc = OrderedDict((subj, nx.eccentricity(
         graphs[subj]).values()) for subj in graphs)
     ecc = temp_ecc
-    cliffnotes['eccentricity'] = ecc
+    data_dict['eccentricity'] = ecc
     write(statistics, 'eccentricity', ecc, atlas)
     show_means(temp_ecc)
 
     #  Calculate summaries
-    if summary is not None:
-        if summary in ['min', 'max', 'mean', 'median']:
-            fn = getattr(np, summary)
+    if summary:
+        query = ("What summary statistic do you want to calculate?\n"
+                 "Choose from ['min', 'max', 'mean', 'median'].\n")
+        funcname = raw_input(query)
+        if funcname in ['min', 'max', 'mean', 'median']:
+            fn = getattr(np, funcname)
         else:
             raise ValueError("Summary function must be either \
                              'min', 'max', 'mean', or 'median', not \
-                             {}".format(summary))
+                             {}".format(funcname))
 
         print("Computing: Summaries")
-        for key, dat in cliffnotes.iteritems():
+        for key, dat in data_dict.iteritems():
             c = calculate_summary_statistic(data=dat, fn=fn)
-            fname = 'summary_{}_'.format(summary) + key
+            fname = 'summary_{}_'.format(funcname) + key
             write(summaries, fname, c, atlas)
 
 
@@ -341,9 +344,8 @@ def main():
                         flag. True if bc1, False if greg's laptop.")
     parser.add_argument("-v", "--verb", action="store_true", help="Verbose \
                         output statements.")
-    parser.add_argument("summary", action="store", default=None,
-                        help="Caculate summary statistic (optional). Choose \
-                         from 'max', 'min', 'median' or 'mean'.")
+    parser.add_argument("-s", "--summary", action="store_true",
+                        help="Caculate summary statistics.")
     result = parser.parse_args()
 
     #  Sets up directory to crawl based on the system organization you're
