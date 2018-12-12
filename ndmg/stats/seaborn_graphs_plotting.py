@@ -41,17 +41,21 @@ def make_panel_plot(basepath, outf, dataset=None, atlas=None, minimal=True,
     to_transform = ['locality_statistic_1', 'triangles']
 
     # Format subplots
-    params = dict(context='talk', font_scale=1.3)
+    params = dict(context='talk', font_scale=2)
     c = float(4)
     r = np.ceil(len(keys) / c)
     with sns.plotting_context(**params):
         fig, axs = plt.subplots(
             nrows=int(r), ncols=int(c),
-            dpi=500, figsize=(40., 30.)
+            dpi=500, figsize=(40.,30.)
         )
 
-    for idx, (key, ax) in enumerate(zip(keys, axs.flatten())):
 
+    for idx, ax in enumerate(axs.flatten()):
+
+        if idx >= len(keys):
+            fig.delaxes(ax)
+            continue
         if verb:
             print(labs[idx])
 
@@ -59,7 +63,7 @@ def make_panel_plot(basepath, outf, dataset=None, atlas=None, minimal=True,
         dat = pickle.load(f)[keys[idx]]
         f.close()
 
-        if key == 'number_non_zeros':
+        if keys[idx] == 'number_non_zeros':
             ss.plot_rugdensity(
                 dat.values(),
                 ax,
@@ -67,7 +71,7 @@ def make_panel_plot(basepath, outf, dataset=None, atlas=None, minimal=True,
                 ylab='Relative Probability',
                 **params
             )
-        elif key == 'edge_weight':
+        elif keys[idx] == 'edge_weight':
             edges = np.max([len(dat[i]) for i in dat.keys()])
             ss.plot_series(
                 dat.values(),
@@ -75,10 +79,10 @@ def make_panel_plot(basepath, outf, dataset=None, atlas=None, minimal=True,
                 xlab='Edge',
                 ylab='Edge Weight',
                 sort=True,
-                log_transform=True,
+                log_transform=False,
                 **params
             )
-        elif key == 'degree_distribution':
+        elif keys[idx] == 'degree_distribution':
             ss.plot_degrees(
                 dat,
                 ax,
@@ -86,7 +90,7 @@ def make_panel_plot(basepath, outf, dataset=None, atlas=None, minimal=True,
                 xlab='Node',
                 ylab=labs[idx],
             )
-        elif key == 'mean_connectome':
+        elif keys[idx] == 'mean_connectome':
             if log:
                 dat = np.log10(dat + 1)
             ss.plot_heatmap(
@@ -95,7 +99,7 @@ def make_panel_plot(basepath, outf, dataset=None, atlas=None, minimal=True,
                 title=labs[idx],
                 **params
             )
-        elif 'summary' in key:
+        elif 'summary' in keys[idx]:
             ss.plot_rugdensity(
                 dat.values(),
                 ax,
@@ -112,7 +116,7 @@ def make_panel_plot(basepath, outf, dataset=None, atlas=None, minimal=True,
                 xlab='Node',
                 ylab=labs[idx],
                 title='',
-                log_transform=True if key in to_transform else False,
+                log_transform=True if keys[idx] in to_transform else False,
                 **params
             )
 
@@ -123,9 +127,10 @@ def make_panel_plot(basepath, outf, dataset=None, atlas=None, minimal=True,
         tit = dataset + ' Dataset (' + atlas + ' parcellation)'
     else:
         tit = None
-    fig.suptitle(tit, fontsize=30)
+    fig.suptitle(tit)
 
     # Save
+    plt.tight_layout()
     fig.savefig(outf)
 
 
