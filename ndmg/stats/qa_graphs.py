@@ -33,7 +33,7 @@ import sys
 import os
 
 
-def compute_metrics(fs, outdir, atlas, verb=False, fn=None):
+def compute_metrics(fs, outdir, atlas, verb=False, summarize=None):
     """
     Given a set of files and a directory to put things, loads graphs and
     performs set of analyses on them, storing derivatives in a pickle format
@@ -56,7 +56,16 @@ def compute_metrics(fs, outdir, atlas, verb=False, fn=None):
     statistics = os.path.join(outdir, 'statistics')
     summaries = os.path.join(outdir, 'summaries')
     for path in [statistics, summaries]:
-        os.mkdir(path)
+        if not os.path.exists(path):
+            os.mkdir(path)
+
+    #  Check the summary function type:
+    if summarize is not None:
+        if summarize in ['min', 'max', 'mean', 'median']:
+            fn = getattr(np, summarize)
+        else:
+            raise ValueError("Summary function must be either \
+                             'min', 'max', 'mean', or 'median'.")
 
     #  Number of non-zero edges (i.e. binary edge count)
     print("Computing: NNZ")
@@ -99,8 +108,6 @@ def compute_metrics(fs, outdir, atlas, verb=False, fn=None):
     temp_ew = OrderedDict((s, [graphs[s].get_edge_data(e[0], e[1])['weight']
                                for e in graphs[s].edges()]) for s in graphs)
     ew = temp_ew
-    summary = calc_summary_stat(temp_ew, fn)
-    write(summaries, 'summary_edge_weight', summary, atlas)
     write(statistics, 'edge_weight', ew, atlas)
     show_means(temp_ew)
 
@@ -109,8 +116,10 @@ def compute_metrics(fs, outdir, atlas, verb=False, fn=None):
     temp_cc = OrderedDict((subj, nx.clustering(graphs[subj]).values())
                           for subj in graphs)
     ccoefs = temp_cc
-    summary = calc_summary_stat(ccoefs, fn)
-    write(summaries, 'summary_clustering_coefficients', summary, atlas)
+    if summarize is not None:
+        summary = calc_summary_stat(ccoefs, fn)
+        write(summaries, 'summary_{}_clustering_coefficients'.format(summarize),
+              summary, atlas)
     write(statistics, 'clustering_coefficients', ccoefs, atlas)
     show_means(temp_cc)
 
@@ -119,9 +128,10 @@ def compute_metrics(fs, outdir, atlas, verb=False, fn=None):
     radius = 1
     temp_ss1 = scan_statistic(graphs, radius)
     ss1 = temp_ss1
-    summary = calc_summary_stat(ss1, fn)
-    write(summaries, 'summary_locality_statistic_{}'.format(radius),
-          summary, atlas)
+    if summarize is not None:
+        summary = calc_summary_stat(ss1, fn)
+        write(summaries, 'summary_{}_locality_statistic_{}'.format(summarize, radius),
+              summary, atlas)
     write(statistics, 'locality_statistic_{}'.format(radius), ss1, atlas)
     show_means(temp_ss1)
 
@@ -131,8 +141,10 @@ def compute_metrics(fs, outdir, atlas, verb=False, fn=None):
                          for subj in graphs)
     eigs = OrderedDict((subj, np.sort(np.linalg.eigvals(laplac[subj].A))[::-1])
                        for subj in graphs)
-    summary = calc_summary_stat(ss1, fn)
-    write(summaries, 'summary_eigenvalue_sequence', summary, atlas)
+    if summarize is not None:
+        summary = calc_summary_stat(ss1, fn)
+        write(summaries, 'summary_{}_eigenvalue_sequence'.format(summarize),
+              summary, atlas)
     write(statistics, 'eigenvalue_sequence', eigs, atlas)
     print("Subject Maxes: " + ", ".join(["%.2f" % np.max(eigs[key])
                                          for key in eigs.keys()]))
@@ -143,8 +155,10 @@ def compute_metrics(fs, outdir, atlas, verb=False, fn=None):
     temp_bc = OrderedDict((subj, nxbc(graphs[subj]).values())
                           for subj in graphs)
     centrality = temp_bc
-    summary = calc_summary_stat(centrality, fn)
-    write(summaries, 'summary_betweenness_centrality', summary, atlas)
+    if summarize is not None:
+        summary = calc_summary_stat(centrality, fn)
+        write(summaries, 'summary_{}_betweenness_centrality'.format(summarize),
+              summary, atlas)
     write(statistics, 'betweenness_centrality', centrality, atlas)
     show_means(temp_bc)
 
@@ -163,8 +177,10 @@ def compute_metrics(fs, outdir, atlas, verb=False, fn=None):
     temp_tri = OrderedDict((subj, nx.triangles(graphs[subj]).values())
                            for subj in graphs)
     triangles = temp_tri
-    summary = calc_summary_stat(triangles, fn)
-    write(summaries, 'summary_triangles', summary, atlas)
+    if summarize is not None:
+        summary = calc_summary_stat(triangles, fn)
+        write(summaries, 'summary_{}_triangles'.format(summarize),
+              summary, atlas)
     write(statistics, 'triangles', triangles, atlas)
     show_means(temp_tri)
 
@@ -174,8 +190,10 @@ def compute_metrics(fs, outdir, atlas, verb=False, fn=None):
     temp_commbc = OrderedDict((subj, nxcbc(graphs[subj]).values())
                               for subj in graphs)
     commbc = temp_commbc
-    summary = calc_summary_stat(commbc, fn)
-    write(summaries, 'summary_communicability_betweenness', summary, atlas)
+    if summarize is not None:
+        summary = calc_summary_stat(commbc, fn)
+        write(summaries, 'summary_{}_communicability_betweenness'.format(summarize),
+              summary, atlas)
     write(statistics, 'communicability_betweenness', commbc, atlas)
     show_means(temp_commbc)
 
@@ -184,8 +202,10 @@ def compute_metrics(fs, outdir, atlas, verb=False, fn=None):
     temp_cv = OrderedDict((subj, nx.closeness_vitality(
         graphs[subj]).values()) for subj in graphs)
     closeness_vitality = temp_cv
-    summary = calc_summary_stat(closeness_vitality, fn)
-    write(summaries, 'summary_closeness_vitality', summary, atlas)
+    if summarize is not None:
+        summary = calc_summary_stat(closeness_vitality, fn)
+        write(summaries, 'summary_{}_closeness_vitality'.format(summarize),
+              summary, atlas)
     write(statistics, 'closeness_vitality', closeness_vitality, atlas)
     show_means(temp_cv)
 
@@ -194,8 +214,10 @@ def compute_metrics(fs, outdir, atlas, verb=False, fn=None):
     temp_cliques = OrderedDict(
         (subj, nx.number_of_cliques(graphs[subj]).values()) for subj in graphs)
     num_cliques = temp_cliques
-    summary = calc_summary_stat(num_cliques, fn)
-    write(summaries, 'summary_number_of_cliques', summary, atlas)
+    if summarize is not None:
+        summary = calc_summary_stat(num_cliques, fn)
+        write(summaries, 'summary_{}_number_of_cliques'.format(summarize),
+              summary, atlas)
     write(statistics, 'number_of_cliques', num_cliques, atlas)
     show_means(temp_cliques)
 
@@ -204,8 +226,10 @@ def compute_metrics(fs, outdir, atlas, verb=False, fn=None):
     temp_ecc = OrderedDict((subj, nx.eccentricity(
         graphs[subj]).values()) for subj in graphs)
     ecc = temp_ecc
-    summary = calc_summary_stat(ecc, fn)
-    write(summaries, 'summary_eccentricity', summary, atlas)
+    if summarize is not None:
+        summary = calc_summary_stat(ecc, fn)
+        write(summaries, 'summary_{}_eccentricity'.format(summarize),
+              summary, atlas)
     write(statistics, 'eccentricity', ecc, atlas)
     show_means(temp_ecc)
 
@@ -306,6 +330,7 @@ def calc_summary_stat(data, fn):
     else:
         return OrderedDict((key, fn(data[key])) for key in data.keys())
 
+
 def main():
     """
     Argument parser and directory crawler. Takes organization and atlas
@@ -336,7 +361,7 @@ def main():
     parser.add_argument("-v", "--verb", action="store_true", help="Verbose \
                         output statements.")
     parser.add_argument("summary", action="store", default=None,
-                         help="Caculate summary statistic (optional). Choose \
+                        help="Caculate summary statistic (optional). Choose \
                          from 'max', 'min', 'median' or 'mean'.")
     result = parser.parse_args()
 
@@ -353,17 +378,9 @@ def main():
           if is_valid_filetype(fl)]
     #  TODO VG: Implement a way to screen for empty edgelist files
 
-    #  Check the summary function type:
-    if result.summary is not None:
-        if result.summary in ['min', 'max', 'mean', 'median']:
-            fn = getattr(np, result.summary)
-        else:
-            raise ValueError("Summary function must be either \
-                             'min', 'max', 'mean', or 'median'.")
-
     p = Popen("mkdir -p " + result.outdir, shell=True)
     #  The fun begins and now we load our graphs and process them.
-    compute_metrics(fs, result.outdir, atlas, result.verb, fn)
+    compute_metrics(fs, result.outdir, atlas, result.verb, result.summary)
 
 
 if __name__ == "__main__":
