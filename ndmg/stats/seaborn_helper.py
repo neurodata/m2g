@@ -89,7 +89,7 @@ def plot_series(dats, ax, title='', ylab='', xlab='', sort=False,
                 ax=ax,
             )
         if sci_scale:
-            ax.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
+            ax.ticklabel_format(style='sci', axis='y', scilimits=(0, 0))
     std_layout(ax, title, ylab, xlab)
 
 
@@ -104,7 +104,7 @@ def plot_rugdensity(series, ax, title='', ylab='', xlab='',
             color='#000000',
             ax=ax
         )
-        ax.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
+        ax.ticklabel_format(style='sci', axis='y', scilimits=(0, 0))
     std_layout(ax, title, ylab, xlab)
 
 

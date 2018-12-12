@@ -199,7 +199,6 @@ def compute_metrics(fs, outdir, atlas, verb=False, summary=None):
     write(statistics, 'eccentricity', ecc, atlas)
     show_means(temp_ecc)
 
-
     #  Calculate summaries
     if summary is not None:
         if summary in ['min', 'max', 'mean', 'median']:
