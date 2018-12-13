@@ -117,10 +117,12 @@ class graph(object):
                 -the timeseries file to extract correlation for.
                           dimensions are [numrois]x[numtimesteps]
         """
+        ts = timeseries[0]
+        rois = timeseries[1]
         print("Estimating correlation matrix for {} ROIs...".format(self.N))
         self.g = np.abs(np.corrcoef(timeseries))  # calculate pearson correlation
         self.g = np.nan_to_num(self.g).astype(object)
-
+        self.n_ids = rois
         # roilist = self.g.nodes()
 
         # for (idx_out, roi_out) in enumerate(roilist):
