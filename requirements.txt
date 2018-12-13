@@ -8,6 +8,7 @@ dipy>=0.1
 boto3
 matplotlib==1.5.3
 plotly==1.12.1
+seaborn==0.9.0
 cython
 pybids
 
