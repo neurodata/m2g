@@ -9,13 +9,16 @@
             "/data/raw",
             "/data/outputs",
             "participant",
+            "<MODE>",
             "--bucket",
             "<BUCKET>",
             "--remote_path",
             "<PATH>",
             "--participant_label",
             "<SUBJ>",
-            "--push_data"
+            "--push_data",
+            "--stc",
+            "<STC>"
         ],
         "environment": [
             {

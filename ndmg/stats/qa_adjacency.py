@@ -31,14 +31,10 @@ import matplotlib.pyplot as plt
 
 def graph2png(infile, outdir, fname=None):
     '''
-    infile: input .gpickle or .graphml file
+    infile: input .csv file
     outdir: path to directory to store output png files
     '''
-    # if file is .gpickle, otherwise load .graphml
-    try:
-        graph = nx.read_gpickle(infile)
-    except:
-        graph = nx.read_graphml(infile)
+    graph = loadGraph(infile)
     # get numpy array equivalent of adjacency matrix
     g = nx.adj_matrix(graph).todense()
     fig = plt.figure(figsize=(7, 7))

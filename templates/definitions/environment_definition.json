@@ -1,5 +1,5 @@
 {
-    "computeEnvironmentName": "ndmg_cluster", 
+    "computeEnvironmentName": "ndmg-env", 
     "type": "MANAGED", 
     "state": "ENABLED", 
     "computeResources": {
@@ -8,7 +8,7 @@
         "maxvCpus": 256, 
         "desiredvCpus": 2, 
         "instanceTypes": [
-            "optimal"
+            "r4.large"
         ], 
         "subnets": [
             "subnet-a04e9b8b"

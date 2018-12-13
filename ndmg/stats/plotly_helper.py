@@ -26,13 +26,15 @@ from plotly.graph_objs import *
 from plotly import tools
 
 
-def plot_heatmap(dats, name=None, ylab=None, xlab=None):
+def plot_heatmap(dats, name=None, ylab=None, xlab=None, scale=False,
+                 scaletit=''):
     data = [
             Heatmap(
                     z=dats,
                     name=name,
-                    showscale=False,
-                    colorscale='Viridis'
+                    showscale=scale,
+                    colorscale='Reds',
+                    colorbar=dict(title=scaletit)
                    )
            ]
     layout = std_layout(name, ylab, xlab)

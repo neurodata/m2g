@@ -24,12 +24,12 @@ from datetime import datetime
 from subprocess import Popen, PIPE
 import os.path as op
 import nibabel as nb
-import ndmg.graph as mgg
+from ndmg.graph import biggraph as mgg
 import ndmg.utils as mgu
 import numpy as np
 
 
-def multigraphs(fibers, labels, outdir):
+def biggraphs(fibers, outdir):
     """
     Creates a brain graph from fiber streamlines
     """
@@ -37,30 +37,20 @@ def multigraphs(fibers, labels, outdir):
     fiber_name = mgu.get_filename(fibers)
     base = fiber_name.split('_fibers', 1)[0]
     # Create output directories for graphs
-    label_name = [mgu.get_filename(x) for x in labels]
-    for label in label_name:
-        p = Popen("mkdir -p " + outdir + "/graphs/" + label,
-                  stdout=PIPE, stderr=PIPE, shell=True)
+    p = Popen("mkdir -p " + outdir + "/biggraphs/",
+              stdout=PIPE, stderr=PIPE, shell=True)
 
     # Create names of files to be produced
-    graphs = [outdir + "/graphs/" + x + '/' + base + "_" + x + "_elist.csv"
-              for x in label_name]
-    print "Graphs of streamlines downsampled to given labels: " +\
-          (", ".join([x for x in graphs]))
+    bgname = outdir + "/biggraphs/" + base + "_biggraph.csv"
 
     # Load fibers
     print "Loading fibers..."
     fiber_npz = np.load(fibers)
     tracks = fiber_npz[fiber_npz.keys()[0]]
 
-    # Generate graphs from streamlines for each parcellation
-    for idx, label in enumerate(label_name):
-        print "Generating graph for " + label + " parcellation..."
-        labels_im = nb.load(labels[idx])
-        g1 = mgg(len(np.unique(labels_im.get_data()))-1, labels[idx])
-        g1.make_graph(tracks)
-        g1.summary()
-        g1.save_graph(graphs[idx])
+    g1 = mgg()
+    g1.make_graph(tracks)
+    g1.save_graph(bgname)
 
     print "Execution took: " + str(datetime.now() - startTime)
     print "Complete!"
@@ -73,8 +63,6 @@ def main():
     parser.add_argument("fibers", action="store", help="DTI streamlines")
     parser.add_argument("outdir", action="store", help="Path to which \
                         derivatives will be stored")
-    parser.add_argument("labels", action="store", nargs="*", help="Nifti \
-                        labels of regions of interest in atlas space")
     result = parser.parse_args()
 
     # Create output directory
@@ -84,7 +72,7 @@ def main():
     p = Popen(cmd, stdout=PIPE, stderr=PIPE, shell=True)
     p.communicate()
 
-    multigraphs(result.fibers, result.labels, result.outdir)
+    biggraphs(result.fibers, result.outdir)
 
 
 if __name__ == "__main__":

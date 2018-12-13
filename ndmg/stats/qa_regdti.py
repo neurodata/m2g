@@ -15,70 +15,56 @@
 # limitations under the License.
 #
 
-# qa_tensor.py
+# qa_regdti.py
 # Created by Vikram Chandrashekhar.
 # Edited by Greg Kiar.
 # Email: Greg Kiar @ gkiar@jhu.edu
 
-from dipy.reconst.dti import fractional_anisotropy, color_fa
-from argparse import ArgumentParser
-from scipy import ndimage
 import os
 import re
+import sys
 import numpy as np
 import nibabel as nb
-import sys
-import matplotlib
+import ndmg.utils as mgu
+from argparse import ArgumentParser
+from scipy import ndimage
+from matplotlib.colors import LinearSegmentedColormap
+import matplotlib as mpl
+mpl.use('Agg')  # very important above pyplot import
 
-matplotlib.use('Agg')  # very important above pyplot import
 import matplotlib.pyplot as plt
 
 
-def tensor2fa(tensors, tensor_name, dti, derivdir, qcdir):
-    '''
-    outdir: location of output directory.
-    fname: name of output fa map file. default is none (name created based on
-    input file)
-    '''
-    dti_data = nb.load(dti)
-    affine = dti_data.get_affine()
-    dti_data = dti_data.get_data()
+def reg_dti_pngs(dti, loc, atlas, outdir):
+    """
+    outdir: directory where output png file is saved
+    fname: name of output file WITHOUT FULL PATH. Path provided in outdir.
+    """
 
-    # create FA map
-    FA = fractional_anisotropy(tensors.evals)
-    FA[np.isnan(FA)] = 0
+    atlas_data = nb.load(atlas).get_data()
+    dti_data = nb.load(dti).get_data()
+    b0_data = dti_data[:,:,:,loc]
 
-    # generate the RGB FA map
-    FA = np.clip(FA, 0, 1)
-    RGB = color_fa(FA, tensors.evecs)
+    cmap1 = LinearSegmentedColormap.from_list('mycmap1', ['black', 'magenta'])
+    cmap2 = LinearSegmentedColormap.from_list('mycmap2', ['black', 'green'])
 
-    fname = os.path.split(tensor_name)[1].split(".")[0] + '_fa_rgb.nii.gz'
-    fa = nb.Nifti1Image(np.array(255 * RGB, 'uint8'), affine)
-    nb.save(fa, os.path.join(derivdir, fname))
+    fig = plot_overlays(atlas_data, b0_data, (cmap1, cmap2))
 
-    fa_pngs(fa, fname, qcdir)
+    # name and save the file
+    fname = os.path.split(dti)[1].split(".")[0] + '.png'
+    plt.savefig(outdir + '/' + fname, format='png')
 
 
-def fa_pngs(data, fname, outdir):
-    '''
-    data: fa map
-    '''
-    im = data.get_data()
-    fig = plot_rgb(im)
-    fname = os.path.split(fname)[1].split(".")[0] + '.png'
-    plt.savefig(outdir + fname, format='png')
-
-
-def plot_rgb(im):
+def plot_overlays(atlas, b0, cmaps):
     plt.rcParams.update({'axes.labelsize': 'x-large',
                          'axes.titlesize': 'x-large'})
 
-    if im.shape == (182, 218, 182):
+    if b0.shape == (182, 218, 182):
         x = [78, 90, 100]
         y = [82, 107, 142]
         z = [88, 103, 107]
     else:
-        shap = im.shape
+        shap = b0.shape
         x = [int(shap[0]*0.35), int(shap[0]*0.51), int(shap[0]*0.65)]
         y = [int(shap[1]*0.35), int(shap[1]*0.51), int(shap[1]*0.65)]
         z = [int(shap[2]*0.35), int(shap[2]*0.51), int(shap[2]*0.65)]
@@ -88,7 +74,8 @@ def plot_rgb(im):
             'Coronal Slice (XZ fixed)',
             'Axial Slice (XY fixed)']
     var = ['X', 'Y', 'Z']
-
+    # create subplot for first slice
+    # and customize all labels
     idx = 0
     for i, coord in enumerate(coords):
         for pos in coord:
@@ -96,19 +83,34 @@ def plot_rgb(im):
             ax = plt.subplot(3, 3, idx)
             ax.set_title(var[i] + " = " + str(pos))
             if i == 0:
-                image = ndimage.rotate(im[pos, :, :], 90)
+                image = ndimage.rotate(b0[pos, :, :], 90)
+                atl = ndimage.rotate(atlas[pos, :, :], 90)
             elif i == 1:
-                image = ndimage.rotate(im[:, pos, :], 90)
+                image = ndimage.rotate(b0[:, pos, :], 90)
+                atl = ndimage.rotate(atlas[:, pos, :], 90)
             else:
-                image = im[:, :, pos]
+                image = b0[:, :, pos]
+                atl = atlas[:, :, pos]
 
             if idx % 3 == 1:
                 ax.set_ylabel(labs[i])
                 ax.yaxis.set_ticks([0, image.shape[0]/2, image.shape[0] - 1])
                 ax.xaxis.set_ticks([0, image.shape[1]/2, image.shape[1] - 1])
 
-            plt.imshow(image)
+            min_val, max_val = get_min_max(image)
+            plt.imshow(atl, interpolation='none', cmap=cmaps[0], alpha=0.5)
+            plt.imshow(image, interpolation='none', cmap=cmaps[1], alpha=0.5,
+                       vmin=min_val, vmax=max_val)
 
     fig = plt.gcf()
     fig.set_size_inches(12.5, 10.5, forward=True)
     return fig
+
+
+def get_min_max(data):
+    '''
+    data: regdti data to threshold.
+    '''
+    min_val = np.percentile(data, 2)
+    max_val = np.percentile(data, 95)
+    return (min_val, max_val)

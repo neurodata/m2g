@@ -72,7 +72,7 @@ Currently, functional processing lives only in a development branch, so if you w
 
     git clone https://github.com/neurodata/ndmg
     cd ndmg
-    git checkout m3r-release
+    git checkout ndmg
     python setup.py install
 
 ## Docker
@@ -85,7 +85,7 @@ Currently, functional processing lives only in a development branch, so if you w
 
 You can run our entire end-to-end pipeline in approximately 3 minutes on downsampled data with the following command:
 
-    ndmg_demo_dwi
+    ndmg_demo-dwi
 
 The connectome produced may not have neurological significance, as the data has been significantly downsampled, but this test should ensure that all of the pieces of the code and driver script execute properly. The expected output from the demo is shown below. Files will be downloaded and output data generated in `/tmp/small_demo/` and `/tmp/small_demo/outputs/`, respectively. If the graph properties summarized at the end of the execution below match those observed with your installation, the demo ran successfully.
 
@@ -207,7 +207,7 @@ Check out some [resources](http://m2g.io) on our website, or our [function refer
 
 ## License
 
-This project is covered under the [Apache 2.0 License](https://github.com/neurodata/ndmg/blob/m3r-release/LICENSE.txt).
+This project is covered under the [Apache 2.0 License](https://github.com/neurodata/ndmg/blob/ndmg/LICENSE.txt).
 
 ## Manuscript Reproduction
 
