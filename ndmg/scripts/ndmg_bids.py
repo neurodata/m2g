@@ -315,7 +315,7 @@ def main():
                         'timing correction. Options are a TR sequence file '
                         '(where each line is the shift in TRs), '
                         'up (ie, bottom to top), down (ie, top to bottom), '
-                        'and interleaved.', default=None)
+                        'or interleaved.', default=None)
 
     result = parser.parse_args()
 
