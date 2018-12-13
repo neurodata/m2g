@@ -50,9 +50,9 @@ def compute_metrics(fs, outdir, atlas, modality='dwi',
             - Name of atlas of interest as it appears in the directory titles
     Optional parameters:
         modality:
-            - 
+            - Modality of MRI scans that are being evaluated
         summary:
-            - Toggles calculation of summary statistics
+            - Summary statstic to be calculated on derivatives
         verb:
             - Toggles verbose output statements
     """
