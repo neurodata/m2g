@@ -18,7 +18,7 @@
 # qa_graphs.py
 # Created by Greg Kiar on 2016-05-11.
 # Email: gkiar@jhu.edu
-# Edited by Eric Bridgeford.
+# Edited by Eric Bridgeford and Vivek Gopalakrishnan.
 
 from argparse import ArgumentParser
 from collections import OrderedDict
@@ -34,7 +34,7 @@ import sys
 import os
 
 
-def compute_metrics(fs, outdir, atlas, modality='dwi', 
+def compute_metrics(fs, outdir, atlas, modality='dwi',
                     summary=None, verb=False):
     """
     Given a set of files and a directory to put things, loads graphs and
@@ -62,9 +62,9 @@ def compute_metrics(fs, outdir, atlas, modality='dwi',
         graphs = binGraphs(gr)
     else:
         graphs = gr
- 
+
     nodes = nx.number_of_nodes(graphs.values()[0])
-                    
+
     # Make folders to store derivatives and derivative summaries
     statistics = os.path.join(outdir, 'statistics')
     summaries = os.path.join(outdir, 'summaries')
@@ -132,7 +132,7 @@ def compute_metrics(fs, outdir, atlas, modality='dwi',
            'contra_deg': contra_deg}
     write(statistics, 'degree_distribution', deg, atlas)
     show_means(total_deg)
-    
+
     #  Edge Weights
     if modality == 'dwi':
         print("Computing: Edge Weight Sequence")
@@ -409,7 +409,7 @@ def main():
     parser.add_argument("indir", action="store", help="base directory loc")
     parser.add_argument("outdir", action="store", help="base directory loc")
     parser.add_argument('--modality', help="Modality of MRI scans that \
-                        are being evaluated.", choices=['dwi', 'func'], 
+                        are being evaluated.", choices=['dwi', 'func'],
                         default='dwi')
     parser.add_argument("--summary", action="store", help="Caculate summary \
                         statistics.", choices=[None, 'max', 'mean', 'median'],
@@ -423,12 +423,10 @@ def main():
     #  Sets up directory to crawl based on the system organization you're
     #  working on. Which organizations are pretty clear by the code, methinks..
     indir = result.indir
-    atlas = result.atlas
-    modality = result.modality
 
     #  Crawls directories and creates a dictionary entry of file names for each
     #  dataset which we plan to process.
-    gfmt = '_elist.csv' if modality == 'dwi' else '_adj.csv'
+    gfmt = '_elist.csv' if result.modality == 'dwi' else '_adj.csv'
     fs = [indir + "/" + fl
           for root, dirs, files in os.walk(indir)
           for fl in files
@@ -436,7 +434,9 @@ def main():
 
     p = Popen("mkdir -p " + result.outdir, shell=True)
     #  The fun begins and now we load our graphs and process them.
-    compute_metrics(fs, result.outdir, atlas, result.verb, result.summary)
+    compute_metrics(fs=fs, outdir=result.outdir, atlas=result.atlas,
+                    modality=result.modality, summary=result.summary,
+                    verb=result.verb)
 
 
 if __name__ == "__main__":
