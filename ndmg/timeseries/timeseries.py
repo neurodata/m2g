@@ -103,5 +103,5 @@ class timeseries(object):
                 roi_ts[idx, :] = ts
 
         if roits_file:
-            np.savez(roits_file, roi=roi_ts)
-        return roi_ts
+            np.savez(roits_file, ts=roi_ts, rois=rois)
+        return (roi_ts, rois)
