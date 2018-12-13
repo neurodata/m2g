@@ -79,13 +79,6 @@ def compute_metrics(fs, outdir, atlas, modality='dwi',
     write(statistics, 'number_non_zeros', nnz, atlas)
     print("Sample Mean: %.2f" % np.mean(nnz.values()))
 
-    # Scan Statistic-1
-    print("Computing: Max Local Statistic Sequence")
-    temp_ss1 = scan_statistic(graphs, 1)
-    ss1 = temp_ss1
-    write(outdir, 'locality_statistic', ss1, atlas)
-    show_means(temp_ss1)
-
     if modality == 'func':
         graphs = rankGraphs(gr)
         wt_args = {'weight': 'weight'}
@@ -98,7 +91,7 @@ def compute_metrics(fs, outdir, atlas, modality='dwi',
                                                **wt_args).values())
                           for subj in graphs)
     ccoefs = temp_cc
-    write(outdir, 'clustering_coefficients', ccoefs, atlas)
+    write(statistics, 'clustering_coefficients', ccoefs, atlas)
     show_means(temp_cc)
 
     #  Degree sequence
@@ -139,7 +132,7 @@ def compute_metrics(fs, outdir, atlas, modality='dwi',
         temp_ew = OrderedDict((s, [graphs[s].get_edge_data(e[0], e[1])['weight']
                                for e in graphs[s].edges()]) for s in graphs)
         ew = temp_ew
-        write(outdir, 'edge_weight', ew, atlas)
+        write(statistics, 'edge_weight', ew, atlas)
         show_means(temp_ew)
     else:
         temp_pl = OrderedDict()
@@ -151,7 +144,7 @@ def compute_metrics(fs, outdir, atlas, modality='dwi',
             avg_path = [np.nanmean(v.values()) for k, v in apd.iteritems()]
             temp_pl[s] = np.array(avg_path)
         pl = temp_pl
-        write(outdir, 'path_length', pl, atlas)
+        write(statistics, 'path_length', pl, atlas)
         show_means(pl)
 
     #   Clustering Coefficients
@@ -427,7 +420,7 @@ def main():
     #  Crawls directories and creates a dictionary entry of file names for each
     #  dataset which we plan to process.
     gfmt = '_elist.csv' if result.modality == 'dwi' else '_adj.csv'
-    fs = [indir + "/" + fl
+    fs = [os.path.join(indir, fl)
           for root, dirs, files in os.walk(indir)
           for fl in files
           if fl.endswith(gfmt)]
