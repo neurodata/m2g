@@ -30,11 +30,11 @@ Output Summary Table
     * - Tractography
       - tensor field
       - fiber tracts
-      - Figure S4
+      - 
     * - Graph Generation
       - fiber tracts, parcellations
       - connectome
-      -
+      - Figure S4
 
 
 Output subject-level pipeline summary
