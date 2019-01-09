@@ -14,3 +14,5 @@ my_credentials.csv
 scratch/
 env/
 dist/
+.vscode
+*.ipynb_checkpoints/
