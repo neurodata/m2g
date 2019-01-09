@@ -203,7 +203,7 @@ def ndmg_func_worker(func, t1w, atlas, atlas_brain, atlas_mask, lv_mask,
     for idx, label in enumerate(labels):
         print("Extracting ROI timeseries for {} parcellation...".format(label))
         ts = mgts().roi_timeseries(nuis_func, labels[idx], roi_ts[idx])
-        connectome = mgg(ts.shape[0], labels[idx], sens="func")
+        connectome = mgg(ts[0].shape[0], labels[idx], sens="func")
         conn = connectome.cor_graph(ts)
         connectome.save_graph(connectomes[idx])
         try:
