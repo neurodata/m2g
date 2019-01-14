@@ -19,7 +19,7 @@
 # Created by Eric Bridgeford on 2017-08-09.
 # Email: ebridge2@jhu.edu
 
-from bids.grabbids import BIDSLayout
+from bids import BIDSLayout
 import re
 from itertools import product
 import boto3
