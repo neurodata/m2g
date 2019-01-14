@@ -207,7 +207,7 @@ def ndmg_func_worker(func, t1w, atlas, atlas_brain, atlas_mask, lv_mask,
         conn = connectome.cor_graph(ts)
         connectome.save_graph(connectomes[idx])
         try:
-            qc_func.roi_graph_qa(ts, conn, aligned_func,
+            qc_func.roi_graph_qa(ts[0], conn, aligned_func,
                                  aligned_t1w, labels[idx])
         except Exception as e:
             erm = "Exception in Connectome Extraction for {} parcellation."
