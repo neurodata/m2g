@@ -1,4 +1,4 @@
-#ble to work out !/usr/bin/env python
+#!/usr/bin/env python
 
 # Copyright 2016 NeuroData (http://neurodata.io)
 #
