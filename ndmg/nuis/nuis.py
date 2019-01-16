@@ -19,7 +19,7 @@
 # Created by Eric Bridgeford on 2016-06-20-16.
 # Email: ebridge2@jhu.edu
 from ndmg.utils import utils as mgu
-from ndmg.utils import nuis_utils as mgnu
+from ndmg.utils import reg_utils as mgru
 import nibabel as nb
 import numpy as np
 from scipy.fftpack import rfft, irfft, rfftfreq
@@ -70,11 +70,11 @@ class nuis(object):
         self.gm_mask = "{}/{}_gmm.nii.gz".format(self.aoutdir, nuisname)
         self.map_path = "{}/{}_seg".format(self.aoutdir, nuisname)
         # segment the brain for quality control purposes
-        maps = mgnu.segment_t1w(self.smri, self.map_path, opts='-P')
+        maps = mgru.segment_t1w(self.smri, self.map_path, opts='-P')
         # extract the masks
         self.wm_prob = maps['wm_prob']
-        mgnu.probmap2mask(maps['wm_prob'], self.wm_mask, .99)
-        mgnu.probmap2mask(maps['gm_prob'], self.gm_mask, .95)
+        mgru.probmap2mask(maps['wm_prob'], self.wm_mask, .99)
+        mgru.probmap2mask(maps['gm_prob'], self.gm_mask, .95)
         # the centered brain
         self.cent_nuis = None
         # the brain after glm
@@ -396,7 +396,7 @@ class nuis(object):
                                                     "wm_mask_eroded")
             # extract the mask where prob map for wm has at least p>.99
             # and erode by 2 voxels
-            mgnu.probmap2mask(self.wm_prob, self.er_wm_mask,
+            mgru.probmap2mask(self.wm_prob, self.er_wm_mask,
                               .99, erode=2)
             # load whitematter mask as binary array of 0 for exclude,
             # 1 for include
