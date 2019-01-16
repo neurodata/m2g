@@ -100,7 +100,7 @@ def extract_t1w_brain(t1w, out, tmpdir):
     skull_t1w = "{}/{}_noskull.nii.gz".format(tmpdir, t1w_name)
     # 3dskullstrip to extract the brain-only t1w
     t1w_skullstrip(t1w, skull_t1w)
-    # 3dcalc to apply the mask over the 4d image
+    # 3dcalc to apply the mask over the 3d image
     apply_mask(t1w, skull_t1w, out)
     pass
 
