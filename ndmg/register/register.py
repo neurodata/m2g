@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright 2016 NeuroData (http://neurodata.io)
+# Copyright 2019 NeuroData (http://neurodata.io)
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,293 +15,261 @@
 # limitations under the License.
 #
 # register.py
-# Created by Greg Kiar on 2016-01-28.
 # Edited by Eric Bridgeford.
-# Email: gkiar@jhu.edu
+# Repackaged for native space registrations by Derek Pisner on 2019-01-16
+# Email: dpisner@utexas.edu
 
-from subprocess import Popen, PIPE
-import os.path as op
+from __future__ import print_function
+import os
+import nibabel as nib
+from nilearn.image import load_img, math_img, resample_img, mean_img, new_img_like
+from dipy.core.gradients import gradient_table
+from dipy.io import read_bvals_bvecs
+try:
+    FSLDIR = os.environ['FSLDIR']
+except KeyError:
+    print('FSLDIR environment variable not set!')
 import ndmg.utils as mgu
 from ndmg.utils import reg_utils as mgru
 from ndmg.utils import nuis_utils as mgnu
-import nibabel as nb
-import numpy as np
-import nilearn.image as nl
-from ndmg.stats.func_qa_utils import registration_score
 
 
 class register(object):
 
-    def __init__(self):
+    def __init__(self, outdir_base_in, nodif_B0_mask, t1w_in, vox_size, simple):
+        self.simple = simple
+        self.outdir_base = outdir_base_in
+        self.outdir = dict()
+        self.outdir['reg_a'] = "%s%s" % (self.outdir_base, '/reg_a')
+        self.outdir['reg_m'] = "%s%s" % (self.outdir_base, '/reg_m')
+        try:
+            os.mkdir(self.outdir['reg_a'])
+        except:
+            pass
+        try:
+            os.mkdir(self.outdir['reg_m'])
+        except:
+            pass
+        self.nodif_B0_mask = nodif_B0_mask
+        self.t1w = t1w_in
+        self.vox_size = vox_size
+        self.t1w_name = 't1w'
+        self.dwi_name = 'dwi'
+        self.t12mni_xfm_init = "{}/xfm_t1w2mni_init.mat".format(self.outdir['reg_m'])
+        self.t12mni_xfm = "{}/xfm_t1w2mni.mat".format(self.outdir['reg_m'])
+        self.mni2t1_xfm = "{}/xfm_mni2t1.mat".format(self.outdir['reg_m'])
+        self.mni2t1w_warp = "{}/mni2t1w_warp.nii.gz".format(self.outdir['reg_a'])
+        self.warp_t1w2mni = "{}/warp_t12mni.nii.gz".format(self.outdir['reg_a'])
+        self.t1w2dwi = "{}/{}_in_dwi.nii.gz".format(self.outdir['reg_a'], self.t1w_name)
+        self.t1_aligned_mni = "{}/{}_aligned_mni.nii.gz".format(self.outdir['reg_a'], self.t1w_name)
+        self.t1w_brain = "{}/{}_brain.nii.gz".format(self.outdir['reg_a'], self.t1w_name)
+        self.dwi2t1w_xfm = "{}/dwi2t1w_xfm.mat".format(self.outdir['reg_m'])
+        self.t1w2dwi_xfm = "{}/t1w2dwi_xfm.mat".format(self.outdir['reg_m'])
+        self.t1wmni_dwi_bbr_xfm = "{}/t1wmni_dwi_bbr_xfm.mat".format(self.outdir['reg_m'])
+        self.dwi2t1w_bbr_xfm = "{}/dwi2t1w_bbr_xfm.mat".format(self.outdir['reg_m'])
+        self.xfm_atlas2t1w_init = "{}/{}_xfm_atlas2t1w_init.mat".format(self.outdir['reg_m'], self.t1w_name)
+        self.xfm_atlas2t1w = "{}/{}_xfm_atlas2t1w.mat".format(self.outdir['reg_m'], self.t1w_name)
+        self.temp2dwi_xfm = "{}/{}_xfm_temp2dwi.mat".format(self.outdir['reg_m'], self.dwi_name)
+        self.input_mni = "%s%s%s%s" % (FSLDIR, '/data/standard/MNI152_T1_', vox_size,'_brain.nii.gz')
+        self.temp2dwi_xfm = "{}/{}_xfm_temp2dwi.mat".format(self.outdir['reg_m'], self.dwi_name)
+        self.map_path = "{}/{}_seg".format(self.outdir['reg_a'], self.t1w_name)
+        self.wm_mask = "{}/{}_wm.nii.gz".format(self.outdir['reg_a'], self.t1w_name)
+        self.csf_mask = "{}/{}_csf.nii.gz".format(self.outdir['reg_a'], self.t1w_name)
+        self.gm_mask = "{}/{}_gm.nii.gz".format(self.outdir['reg_a'], self.t1w_name)
+        self.xfm_roi2mni_init = "{}/roi_2_mni.mat".format(self.outdir['reg_m'])
+        self.lvent_out_file = "{}/LVentricle.nii.gz".format(self.outdir['reg_a'])
+        self.rvent_out_file = "{}/RVentricle.nii.gz".format(self.outdir['reg_a'])
+        self.mni_vent_loc = "{}/VentricleMask.nii.gz".format(self.outdir['reg_a'])
+        self.csf_mask_dwi = "{}/{}_csf_mask_dwi.nii.gz".format(self.outdir['reg_a'], self.t1w_name)
+        self.gm_in_dwi = "{}/{}_gm_in_dwi.nii.gz".format(self.outdir['reg_a'], self.t1w_name)
+        self.vent_csf_in_dwi = "{}/{}_vent_csf_in_dwi.nii.gz".format(self.outdir['reg_a'], self.t1w_name)
+        self.vent_csf_in_dwi_bin = "{}/{}_vent_csf_in_dwi_bin.nii.gz".format(self.outdir['reg_a'], self.t1w_name)
+        self.vent_mask_dwi = "{}/{}_vent_mask_dwi.nii.gz".format(self.outdir['reg_a'], self.t1w_name)
+        self.vent_mask_mni = "{}/vent_mask_mni.nii.gz".format(self.outdir['reg_a'])
+        self.vent_mask_t1w = "{}/vent_mask_t1w.nii.gz".format(self.outdir['reg_a'])
+        self.wm_in_dwi = "{}/{}_wm_in_dwi.nii.gz".format(self.outdir['reg_a'], self.t1w_name)
+        self.wm_in_dwi_bin = "{}/{}_wm_in_dwi_bin.nii.gz".format(self.outdir['reg_a'], self.t1w_name)
+        self.mni_atlas = "%s%s%s%s" % (FSLDIR, '/data/atlases/HarvardOxford/HarvardOxford-sub-prob-', vox_size, '.nii.gz')
+        self.input_mni = "%s%s%s%s" % (FSLDIR, '/data/standard/MNI152_T1_', vox_size, '_brain.nii.gz')
+        self.gm_in_dwi_bin = "{}/{}_gm_in_dwi_bin.nii.gz".format(self.outdir['reg_a'], self.t1w_name)
+
+    def gen_tissue(self):
+        # BET needed for this, as afni 3dautomask only works on 4d volumes
+        print('Extracting brain from raw T1w image...')
+        mgru.t1w_skullstrip(self.t1w, self.t1w_brain)
+
+        # Segment the t1w brain into probability maps
+        self.maps = mgru.segment_t1w(self.t1w_brain, self.map_path)
+
+        # Use the probability maps to extract white matter mask
+        mgru.probmap2mask(self.maps['wm_prob'], self.wm_mask, 0.5)
+        mgru.probmap2mask(self.maps['gm_prob'], self.gm_mask, 0.3)
+        mgru.probmap2mask(self.maps['csf_prob'], self.csf_mask, 0.3)
+        return
+
+    def t1w2dwi_align(self):
         """
-        Enables registration of single images to one another as well as volumes
-        within multi-volume image stacks. Has options to compute transforms,
-        apply transforms, as well as a built-in method for aligning low
-        resolution dwi images to a high resolution atlas.
+        alignment from T1w --> MNI and T1w_MNI --> DWI
+        A function to perform self alignment. Uses a local optimisation
+        cost function to get the two images close, and then uses bbr
+        to obtain a good alignment of brain boundaries.
+        Assumes input dwi is already preprocessed and brain extracted.
         """
-        pass
 
-    def align(self, inp, ref, xfm=None, out=None, dof=12, searchrad=True,
-              bins=256, interp=None, cost="mutualinfo", sch=None,
-              wmseg=None, init=None):
+        # Create linear transform/ initializer T1w-->MNI
+        mgru.align(self.t1w_brain, self.input_mni, xfm=self.t12mni_xfm_init, bins=None, interp="spline", out=None, dof=12, cost='mutualinfo', searchrad=True, sch=None)
+
+        # Attempt non-linear registration of T1 to MNI template
+        if self.simple is False:
+            try:
+                print('Attempting non-linear registration: T1w-->MNI ...')
+                # Use FNIRT to nonlinearly align T1 to MNI template
+                mgru.align_nonlinear(self.t1w_brain, self.input_mni, xfm=self.t12mni_xfm_init, out=self.t1_aligned_mni, warp=self.warp_t1w2mni, mask=None)
+
+                # Get warp from MNI -> T1
+                mgru.inverse_warp(self.t1w_brain, self.mni2t1w_warp, self.warp_t1w2mni)
+            except RuntimeError('fnirt failed!'):
+                pass
+        else:
+            # Falling back to linear registration
+            mgru.align(self.t1w_brain, self.input_mni, xfm=self.t12mni_xfm, init=self.t12mni_xfm_init, bins=None, dof=12, cost='mutualinfo', searchrad=True, interp="spline", out=self.t1_aligned_mni, sch=None)
+
+        # Align T1w-->DWI
+        mgru.align(self.nodif_B0, self.t1w_brain, xfm=self.dwi2t1w_xfm, bins=None, interp="spline", dof=7, cost='mutualinfo', out=None, searchrad=True, sch=None)
+        cmd = 'convert_xfm -omat ' + self.t1w2dwi_xfm + ' -inverse ' + self.dwi2t1w_xfm
+        os.system(cmd)
+
+        if self.simple is False:
+            # Flirt bbr
+            try:
+                mgru.align(self.nodif_B0, self.t1w_brain, wmseg=self.wm_mask, xfm=self.t1wmni_dwi_bbr_xfm, init=self.t1w2dwi_xfm, bins=256, dof=7, searchrad=True, interp="spline", out=None, cost='bbr', finesearch=5, sch="${FSLDIR}/etc/flirtsch/bbr.sch")
+                cmd = 'convert_xfm -omat ' + self.dwi2t1w_bbr_xfm + ' -inverse ' + self.t1wmni_dwi_bbr_xfm
+                os.system(cmd)
+
+                # Apply the alignment
+                mgru.align(self.t1w_brain, self.nodif_B0, init=self.dwi2t1w_bbr_xfm, bins=None, interp="spline", dof=7, cost='mutualinfo', out=self.t1w2dwi, searchrad=True, sch=None)
+            except RuntimeError('bbr failed!'):
+                pass
+        else:
+            # Apply the alignment
+            mgru.align(self.t1w_brain, self.nodif_B0, init=self.t1w2dwi_xfm, bins=None, interp="spline", dof=7, cost='mutualinfo', out=self.t1w2dwi, searchrad=True, sch=None)
+
+        return
+
+    def atlas2t1w2dwi_align(self, atlas):
         """
-        Aligns two images and stores the transform between them
-
-        **Positional Arguments:**
-
-                inp:
-                    - Input impage to be aligned as a nifti image file
-                ref:
-                    - Image being aligned to as a nifti image file
-                xfm:
-                    - Returned transform between two images
-                out:
-                    - determines whether the image will be automatically
-                    aligned.
-                dof:
-                    - the number of degrees of freedom of the alignment.
-                searchrad:
-                    - a bool indicating whether to use the predefined
-                    searchradius parameter (180 degree sweep in x, y, and z).
-                interp:
-                    - the interpolation method to use.
-                sch:
-                    - the optional FLIRT schedule file.
-                wmseg:
-                    - an optional white-matter segmentation for bbr.
-                init:
-                    - an initial guess of an alignment.
+        alignment from atlas --> T1 --> dwi
+        A function to perform atlas alignment.
+        Tries nonlinear registration first, and if that fails,
+        does a linear registration instead.
+        NOTE: for this to work, must first have called t1w2dwi_align.
         """
-        cmd = "flirt -in {} -ref {}".format(inp, ref)
-        if xfm is not None:
-            cmd += " -omat {}".format(xfm)
-        if out is not None:
-            cmd += " -out {}".format(out)
-        if dof is not None:
-            cmd += " -dof {}".format(dof)
-        if bins is not None:
-            cmd += " -bins {}".format(bins)
-        if interp is not None:
-            cmd += " -interp {}".format(interp)
-        if cost is not None:
-            cmd += " -cost {}".format(cost)
-        if searchrad is not None:
-            cmd += " -searchrx -180 180 -searchry -180 180 " +\
-                   "-searchrz -180 180"
-        if sch is not None:
-            cmd += " -schedule {}".format(sch)
-        if wmseg is not None:
-            cmd += " -wmseg {}".format(wmseg)
-        if init is not None:
-            cmd += " -init {}".format(init)
-        mgu.execute_cmd(cmd, verb=True)
+        self.atlas = atlas
+        self.atlas_name = self.atlas.split('/')[-1].split('.')[0]
+        self.aligned_atlas_skull = "{}/{}_aligned_atlas_skull.nii.gz".format(self.outdir['reg_a'], self.atlas_name)
+        self.dwi_aligned_atlas = "{}/{}_aligned_atlas.nii.gz".format(self.outdir['reg_a'], self.atlas_name)
+        #self.dwi_aligned_atlas_mask = "{}/{}_aligned_atlas_mask.nii.gz".format(self.outdir['reg_a'], self.atlas_name)
 
-    def align_epi(self, epi, t1, brain, out):
+        if (nib.load(self.atlas).get_data().shape in [(91, 109, 91), (182, 218, 182)] and (self.simple is False)):
+            try:
+                # Apply warp resulting from the inverse MNI->T1w created earlier
+                mgru.apply_warp(self.t1w_brain, self.atlas, self.aligned_atlas_skull, warp=self.mni2t1w_warp)
+
+                # Apply transform to dwi space
+                mgru.applyxfm(self.nodif_B0, self.aligned_atlas_skull, self.t1w2dwi_xfm, self.dwi_aligned_atlas)
+            except:
+                # If we dont have 2mm MNI or a low quality t1w, FNIRT is unsuitable
+                print("Atlas is not in correct dimensions, or input is low quality,\nusing linear template registration.")
+
+                # Create transform to align atlas to T1w using flirt
+                mgru.align(self.atlas, self.t1w_brain, xfm=self.xfm_atlas2t1w_init, init=None, bins=None, dof=6, cost='mutualinfo', searchrad=True, interp="spline", out=None, sch=None)
+                mgru.align(self.atlas, self.t1_aligned_mni, xfm=self.xfm_atlas2t1w, out=None, dof=6, searchrad=True, bins=None, interp="spline", cost='mutualinfo', wmseg=None, init=self.xfm_atlas2t1w_init)
+
+                # Combine our linear transform from t1w to template with our transform from dwi to t1w space to get a transform from atlas ->(-> t1w ->)-> dwi
+                mgru.combine_xfms(self.xfm_atlas2t1w, self.t1w2dwi_xfm, self.temp2dwi_xfm)
+
+                # Apply linear transformation from template to dwi space
+                mgru.applyxfm(self.nodif_B0, self.atlas, self.temp2dwi_xfm, self.dwi_aligned_atlas)
+        else:
+            # Create transform to align atlas to T1w using flirt
+            mgru.align(self.atlas, self.t1w_brain, xfm=self.xfm_atlas2t1w_init, init=None, bins=None, dof=6, cost='mutualinfo', searchrad=None, interp="spline", out=None, sch=None)
+            mgru.align(self.atlas, self.t1w_brain, xfm=self.xfm_atlas2t1w, out=None, dof=6, searchrad=True, bins=None, interp="spline", cost='mutualinfo', wmseg=None, init=self.xfm_atlas2t1w_init)
+
+            # Combine our linear transform from t1w to template with our transform from dwi to t1w space to get a transform from atlas ->(-> t1w ->)-> dwi
+            mgru.combine_xfms(self.xfm_atlas2t1w, self.t1w2dwi_xfm, self.temp2dwi_xfm)
+
+            # Apply linear transformation from template to dwi space
+            mgru.applyxfm(self.nodif_B0, self.atlas, self.temp2dwi_xfm, self.dwi_aligned_atlas)
+
+        # Set intensities to int
+        self.atlas_img = nib.load(self.dwi_aligned_atlas)
+        self.atlas_data = self.atlas_img.get_data()
+        nib.save(nib.Nifti1Image(self.atlas_data.astype('int'), affine=self.atlas_img.affine, header=self.atlas_img.header), self.dwi_aligned_atlas)
+        cmd='fslmaths ' + self.dwi_aligned_atlas + ' -mas ' + self.nodif_B0_mask + ' ' + self.dwi_aligned_atlas
+        os.system(cmd)
+
+        return self.dwi_aligned_atlas
+
+    def tissue2dwi_align(self):
         """
-        Algins EPI images to T1w image
+        alignment of ventricle ROI's from MNI space --> dwi and
+        CSF from T1w space --> dwi
+        A function to generate and perform dwi space alignment of avoidance/waypoint masks for tractography.
+        First creates ventricle ROI. Then creates transforms from stock MNI template to dwi space.
+        NOTE: for this to work, must first have called both t1w2dwi_align and atlas2t1w2dwi_align.
         """
-        cmd = 'epi_reg --epi={} --t1={} --t1brain={} --out={}'
-        cmd = cmd.format(epi, t1, brain, out)
-        mgu.execute_cmd(cmd, verb=True)
 
-    def align_nonlinear(self, inp, ref, xfm, warp, mask=None):
-        """
-        Aligns two images using nonlinear methods and stores the
-        transform between them.
+        # Create MNI-space ventricle mask
+        print('Creating MNI-space ventricle ROI...')
+        if not os.path.isfile(self.mni_atlas):
+            raise ValueError('FSL atlas for ventricle reference not found!')
+        cmd='fslroi ' + self.mni_atlas + ' ' + self.rvent_out_file + ' 2 1'
+        os.system(cmd)
+        cmd='fslroi ' + self.mni_atlas + ' ' + self.lvent_out_file + ' 13 1'
+        os.system(cmd)
+        self.args = "%s%s%s" % (' -add ', self.rvent_out_file, ' -thr 0.1 -bin -dilF ')
+        cmd='fslmaths ' + self.lvent_out_file + self.args + self.mni_vent_loc
+        os.system(cmd)
 
-        **Positional Arguments:**
+        # Create transform to MNI atlas to T1w using flirt. This will be use to transform the ventricles to dwi space.
+        mgru.align(self.mni_atlas, self.input_mni, xfm=self.xfm_roi2mni_init, init=None, bins=None, dof=6, cost='mutualinfo', searchrad=True, interp="spline", out=None, sch="${FSLDIR}/etc/flirtsch/sch3Dtrans_3dof")
 
-            inp:
-                - the input image.
-            ref:
-                - the reference image.
-            affxfm:
-                - the affine transform to use.
-            warp:
-                - the path to store the nonlinear warp.
-            mask:
-                - a mask in which voxels will be extracted
-                during nonlinear alignment.
-        """
-        # if we are doing fnirt, use predefined fnirt config file
-        # since the config is most robust
-        cmd = "fnirt --in={} --aff={} --cout={} --ref={}"
-        cmd += " --config=T1_2_MNI152_2mm"
-        cmd = cmd.format(inp, xfm, warp, ref)
-        if mask is not None:
-            cmd += " --refmask={}".format(mask)
-        out, err = mgu.execute_cmd(cmd, verb=True)
+        # Create transform to align roi to mni and T1w using flirt
+        mgru.applyxfm(self.input_mni, self.mni_vent_loc, self.xfm_roi2mni_init, self.vent_mask_mni)
 
-    def applyxfm(self, inp, ref, xfm, aligned, interp='trilinear'):
-        """
-        Aligns two images with a given transform
+        if self.simple is False:
+            # Apply warp resulting from the inverse MNI->T1w created earlier
+            mgru.apply_warp(self.t1w_brain, self.vent_mask_mni, self.vent_mask_t1w, warp=self.mni2t1w_warp)
 
-        **Positional Arguments:**
+        # Applyxfm tissue maps to dwi space
+        mgru.applyxfm(self.nodif_B0, self.vent_mask_t1w, self.t1w2dwi_xfm, self.vent_mask_dwi)
+        mgru.applyxfm(self.nodif_B0, self.csf_mask, self.t1w2dwi_xfm, self.csf_mask_dwi)
+        mgru.applyxfm(self.nodif_B0, self.gm_mask, self.t1w2dwi_xfm, self.gm_in_dwi)
+        mgru.applyxfm(self.nodif_B0, self.wm_mask, self.t1w2dwi_xfm, self.wm_in_dwi)
 
-            inp:
-                - Input impage to be aligned as a nifti image file
-            ref:
-                - Image being aligned to as a nifti image file
-            xfm:
-                - Transform between two images
-            aligned:
-                - Aligned output image as a nifti image file
-            interp:
-                - the interpolation method to use from fsl.
-        """
-        cmd = "flirt -in {} -ref {} -out {} -init {} -interp {} -applyxfm"
-        cmd = cmd.format(inp, ref, aligned, xfm, interp)
-        mgu.execute_cmd(cmd, verb=True)
+        # Threshold WM to binary in dwi space
+        self.t_img = load_img(self.wm_in_dwi)
+        self.mask = math_img('img > 0', img=self.t_img)
+        self.mask.to_filename(self.wm_in_dwi_bin)
 
-    def apply_warp(self, inp, ref, out, warp=None, xfm=None, mask=None):
-        """
-        Applies a warp from the input to reference space
-        in a single step, using information about the structural->ref
-        mapping as well as the epi to structural mapping.
+        # Erode and mask CSF with ventricle mask and and subtract atlas
+        print('Masking CSF with ventricle mask...')
+        cmd='fslmaths ' + self.vent_mask_dwi + ' -bin ' + self.vent_mask_dwi
+        os.system(cmd)
+        #cmd='fslmaths ' + self.dwi_aligned_atlas + ' -binv ' + self.dwi_aligned_atlas_mask
+        #os.system(cmd)
+        #cmd='fslmaths ' + self.csf_mask_dwi + ' -mas ' + self.vent_mask_dwi + ' -mas ' + self.dwi_aligned_atlas_mask + ' ' + self.vent_csf_in_dwi
+        #os.system(cmd)
+        cmd='fslmaths ' + self.csf_mask_dwi + ' -mas ' + self.vent_mask_dwi + ' ' + self.vent_csf_in_dwi
+        os.system(cmd)
+        cmd='fslmaths ' + self.vent_csf_in_dwi + ' -bin ' + self.vent_csf_in_dwi_bin
+        os.system(cmd)
 
-        **Positional Arguments:**
-
-            inp:
-                - the input image to be aligned as a nifti image file.
-            out:
-                - the output aligned image.
-            ref:
-                - the image being aligned to.
-            warp:
-                - the warp from the structural to reference space.
-            xfm:
-                - the affine transformation to apply to the input.
-            mask:
-                - the mask to extract around after applying the transform.
-        """
-        cmd = "applywarp --ref={} --in={} --out={}".format(ref, inp, out)
-        if warp is not None:
-            cmd += " --warp={}".format(warp)
-        if xfm is not None:
-            cmd += " --premat={}".format(xfm)
-        if mask is not None:
-            cmd += " --mask={}".format(mask)
-        mgu.execute_cmd(cmd, verb=True)
-
-    def align_slices(self, dwi, corrected_dwi, idx):
-        """
-        Performs eddy-correction (or self-alignment) of a stack of 3D images
-
-        **Positional Arguments:**
-                dwi:
-                    - 4D (DTI) image volume as a nifti file
-                corrected_dwi:
-                    - Corrected and aligned DTI volume in a nifti file
-                idx:
-                    - Index of the first B0 volume in the stack
-        """
-        cmd = "eddy_correct {} {} {}".format(dwi, corrected_dwi, idx)
-        status = mgu.execute_cmd(cmd, verb=True)
-
-    def resample(self, base, ingested, template):
-        """
-        Resamples the image such that images which have already been aligned
-        in real coordinates also overlap in the image/voxel space.
-
-        **Positional Arguments**
-                base:
-                    - Image to be aligned
-                ingested:
-                    - Name of image after alignment
-                template:
-                    - Image that is the target of the alignment
-        """
-        # Loads images
-        template_im = nb.load(template)
-        base_im = nb.load(base)
-        # Aligns images
-        target_im = nl.resample_img(base_im,
-                                    target_affine=template_im.get_affine(),
-                                    target_shape=template_im.get_data().shape,
-                                    interpolation="nearest")
-        # Saves new image
-        nb.save(target_im, ingested)
-
-    def combine_xfms(self, xfm1, xfm2, xfmout):
-        """
-        A function to combine two transformations, and output the
-        resulting transformation.
-
-        **Positional Arguments**
-            xfm1:
-                - the path to the first transformation
-            xfm2:
-                - the path to the second transformation
-            xfmout:
-                - the path to the output transformation
-        """
-        cmd = "convert_xfm -omat {} -concat {} {}".format(xfmout, xfm1, xfm2)
-        mgu.execute_cmd(cmd, verb=True)
-
-    def dwi2atlas(self, dwi, gtab, t1w, atlas,
-                  aligned_dwi, outdir, clean=False):
-        """
-        Aligns two images and stores the transform between them
-
-        **Positional Arguments:**
-
-                dwi:
-                    - Input impage to be aligned as a nifti image file
-                gtab:
-                    - object containing gradient directions and strength
-                t1w:
-                    - Intermediate image being aligned to as a nifti image file
-                atlas:
-                    - Terminal image being aligned to as a nifti image file
-                aligned_dwi:
-                    - Aligned output dwi image as a nifti image file
-                outdir:
-                    - Directory for derivatives to be stored
-        """
-        # Creates names for all intermediate files used
-        dwi_name = mgu.get_filename(dwi)
-        t1w_name = mgu.get_filename(t1w)
-        atlas_name = mgu.get_filename(atlas)
-
-        dwi2 = mgu.name_tmps(outdir, dwi_name, "_t2.nii.gz")
-        temp_aligned = mgu.name_tmps(outdir, dwi_name, "_ta.nii.gz")
-        temp_aligned2 = mgu.name_tmps(outdir, dwi_name, "_ta2.nii.gz")
-        b0 = mgu.name_tmps(outdir, dwi_name, "_b0.nii.gz")
-        t1w_brain = mgu.name_tmps(outdir, t1w_name, "_ss.nii.gz")
-        xfm = mgu.name_tmps(outdir, t1w_name,
-                            "_" + atlas_name + "_xfm.mat")
-
-        # Align DTI volumes to each other
-        self.align_slices(dwi, dwi2, np.where(gtab.b0s_mask)[0][0])
-
-        # Loads DTI image in as data and extracts B0 volume
-        dwi_im = nb.load(dwi2)
-        b0_im = mgu.get_b0(gtab, dwi_im.get_data())
-
-        # Wraps B0 volume in new nifti image
-        b0_head = dwi_im.get_header()
-        b0_head.set_data_shape(b0_head.get_data_shape()[0:3])
-        b0_out = nb.Nifti1Image(b0_im, affine=dwi_im.get_affine(),
-                                header=b0_head)
-        b0_out.update_header()
-        nb.save(b0_out, b0)
-
-        # Applies skull stripping to T1 volume, then EPI alignment to T1
-        mgu.extract_brain(t1w, t1w_brain, ' -B')
-        self.align_epi(dwi2, t1w, t1w_brain, temp_aligned)
-
-        # Applies linear registration from T1 to template
-        self.align(t1w, atlas, xfm)
-
-        # Applies combined transform to dwi image volume
-        self.applyxfm(temp_aligned, atlas, xfm, temp_aligned2)
-        self.resample(temp_aligned2, aligned_dwi, atlas)
-
-        if clean:
-            cmd = "rm -f {} {} {} {} {}*".format(dwi2, temp_aligned, b0,
-                                                 xfm, t1w_name)
-            print("Cleaning temporary registration files...")
-            mgu.execute_cmd(cmd)
+        # Threshold GM to binary in dwi space
+        self.t_img = load_img(self.gm_in_dwi)
+        self.mask = math_img('img > 0', img=self.t_img)
+        self.mask.to_filename(self.gm_in_dwi_bin)
+        return
 
 
 class epi_register(register):
@@ -310,9 +278,7 @@ class epi_register(register):
         """
         A class to change brain spaces from a subject's epi sequence
         to that of a standardized atlas.
-
         **Positional Arguments:**
-
             epi:
                 - the path of the preprocessed fmri image.
             t1w:
@@ -360,7 +326,7 @@ class epi_register(register):
         # if we do bbr, then we will need a wm mask, so store for qa
         self.wm_mask = None
 
-        if sum(nb.load(t1w).header.get_zooms()) <= 6:
+        if sum(nib.load(t1w).header.get_zooms()) <= 6:
             self.simple = False
         else:
             self.simple = True  # if the input is poor
@@ -415,7 +381,7 @@ class epi_register(register):
                                           self.t1w_name)
             maps = mgnu.segment_t1w(self.t1w_brain, map_path)
             wm_mask = "{}/{}_wmm.nii.gz".format(self.outdir['reg_a'],
-                                                    self.t1w_name)
+                                                self.t1w_name)
             self.wm_mask = wm_mask
             # use the probability maps to extract white matter mask
             mgnu.probmap2mask(maps['wm_prob'], wm_mask, 0.5)
@@ -432,8 +398,8 @@ class epi_register(register):
         else:
             # if we have low quality T1w image, we will not be able
             # to segment, so do not use bbr
-            print ("Warning: BBR self registration not "
-                   "attempted, as input is low quality.")
+            print("Warning: BBR self registration not "
+                  "attempted, as input is low quality.")
             # use the 3d image and transform from the near-local registration
             # instead
             self.sreg_xfm = xfm_init2
@@ -470,7 +436,7 @@ class epi_register(register):
         # leading the 12 dof registration to not totally distort the image
         self.align(self.t1w_brain, self.atlas_brain, xfm=xfm_t1w2temp_init,
                    init=None, bins=None, dof=None, cost=None, searchrad=None,
-                   out=None, sch="${FSLDIR}/etc/flirtsch/sch3Dtrans_3dof") 
+                   out=None, sch="${FSLDIR}/etc/flirtsch/sch3Dtrans_3dof")
 
         # linear registration from t1 space to atlas space with a 12 dof
         # linear registration to serve as our initializer
@@ -483,7 +449,7 @@ class epi_register(register):
             self.epi_name
         )  # template-aligned with skull
         # if the atlas is MNI 2mm, then we have a config file for it
-        if (nb.load(self.atlas).get_data().shape in [(91, 109, 91)] and
+        if (nib.load(self.atlas).get_data().shape in [(91, 109, 91)] and
                 (self.simple is False)):
             warp_t1w2temp = "{}/{}_warp_t1w2temp.nii.gz".format(
                 self.outdir['reg_a'],
@@ -503,8 +469,10 @@ class epi_register(register):
             self.treg_strat = 'fnirt'  # strategy details
         else:
             # if we dont have 2mm mni or a low quality t1w, FNIRT is unsuitable
-            print "Atlas is not 2mm MNI, or input is low quality."
-            print "Using linear template registration."
+            print
+            "Atlas is not 2mm MNI, or input is low quality."
+            print
+            "Using linear template registration."
 
             xfm_epi2temp = "{}/{}_xfm_epi2temp.mat".format(
                 self.outdir['reg_m'],
@@ -524,7 +492,7 @@ class epi_register(register):
         # use BET to extract brain from our epi volume
         mgu.extract_brain(self.epi_aligned_skull, self.taligned_epi,
                           opts='-F')
-        
+
         # use AFNI to extract brain from our t1w volume
         mgru.extract_t1w_brain(self.taligned_t1w_skull, self.taligned_t1w,
                                self.outdir['reg_a'])

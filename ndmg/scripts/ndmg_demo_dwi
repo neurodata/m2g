@@ -1,0 +1,29 @@
+#!/bin/bash
+
+echo "Getting test data..."
+
+loc="$PWD"
+WARN=${PYTHONWARNINGS}
+export PYTHONWARNINGS="ignore"
+
+cd /tmp/
+[ -f /tmp/ndmg_demo_dwi.zip ] || wget --quiet https://mrneurodata.s3.amazonaws.com/data/resources/ndmg_demo.zip
+unzip -o /tmp/ndmg_demo.zip
+
+ndmg_dwi_pipeline /tmp/ndmg_demo/sub-0025864/ses-1/dwi/sub-0025864_ses-1_dwi.nii.gz \
+                  /tmp/ndmg_demo/sub-0025864/ses-1/dwi/sub-0025864_ses-1_dwi.bval \
+                  /tmp/ndmg_demo/sub-0025864/ses-1/dwi/sub-0025864_ses-1_dwi.bvec \
+                  /tmp/ndmg_demo/sub-0025864/ses-1/anat/sub-0025864_ses-1_T1w.nii.gz \
+                  /tmp/ndmg_demo/MNI152NLin6_res-4x4x4_T1w.nii.gz \
+                  /tmp/ndmg_demo/MNI152NLin6_res-4x4x4_T1w_brainmask.nii.gz \
+                  /tmp/ndmg_demo/outputs \
+                  /tmp/ndmg_demo/desikan-res-4x4x4.nii.gz
+
+
+ndmg_bids /tmp/ndmg_demo/ /tmp/ndmg_demo/outputs/ group --hemispheres
+
+echo "Path to qc fig: /tmp/ndmg_demo/outputs/qa/graphs/desikan-res-4x4x4/desikan-res-4x4x4_plot.html"
+
+export PYTHONWARNINGS=${WARN}
+cd "$loc"
+
