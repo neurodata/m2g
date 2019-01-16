@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+# !/usr/bin/env python
 
 # Copyright 2016 NeuroData (http://neurodata.io)
 #
@@ -21,7 +21,6 @@
 # Edited by Eric Bridgeford.
 
 from __future__ import print_function
-
 from dipy.io import read_bvals_bvecs
 from dipy.core.gradients import gradient_table
 from subprocess import Popen, PIPE
@@ -52,7 +51,6 @@ def execute_cmd(cmd, verb=False):
 def get_b0(gtab, data):
     """
     Takes bval and bvec files and produces a structure in dipy format
-
     **Positional Arguments:**
     """
     b0 = np.where(gtab.b0s_mask)[0]
@@ -64,9 +62,7 @@ def get_braindata(brain_file):
     """
     Opens a brain data series for a mask, mri image, or atlas.
     Returns a numpy.ndarray representation of a brain.
-
     **Positional Arguements**
-
         brain_file:
             - an object to open the data for a brain.
             Can be a string (path to a brain file),
@@ -98,9 +94,7 @@ def get_slice(mri, volid, sli):
     """
     Takes a volume index and constructs a new nifti image from
     the specified volume.
-
     **Positional Arguments:**
-
         mri:
             - the path to a 4d mri volume to extract a slice from.
         volid:
@@ -123,40 +117,58 @@ def get_slice(mri, volid, sli):
     nb.save(out, sli)
 
 
-def load_bval_bvec_dwi(fbval, fbvec, dwi_file, dwi_file_out):
+def make_gtab_and_bmask(fbval, fbvec, dwi_file, outdir):
+    import nibabel as nib
+    import os
+    from nilearn.image import mean_img
     """
     Takes bval and bvec files and produces a structure in dipy format
-
     **Positional Arguments:**
     """
-    # Load Data
-    img = nb.load(dwi_file)
-    data = img.get_data()
+    # Use B0's from the DWI to create a more stable DWI image for registration
+    nodif_B0 = "{}/nodif_B0.nii.gz".format(outdir['prep'])
+    nodif_B0_mask = "{}/nodif_B0_mask.nii.gz".format(outdir['prep'])
 
+    # loading bvecs/bvals
     bvals, bvecs = read_bvals_bvecs(fbval, fbvec)
 
-    # Get rid of spurrious scans
-    idx = np.where((bvecs[:, 0] == 100) & (bvecs[:, 1] == 100) &
-                   (bvecs[:, 2] == 100))
-    bvecs = np.delete(bvecs, idx, axis=0)
-    bvals = np.delete(bvals, idx, axis=0)
-    data = np.delete(data, idx, axis=3)
+    # Creating the gradient table
+    gtab = gradient_table(bvals, bvecs)
 
-    # Save corrected DTI volume
-    dwi_new = nb.Nifti1Image(data, affine=img.get_affine(),
-                             header=img.get_header())
-    dwi_new.update_header()
-    nb.save(dwi_new, dwi_file_out)
+    # Correct b0 threshold
+    gtab.b0_threshold = min(bvals)
 
-    gtab = gradient_table(bvals, bvecs, atol=0.01)
-    print(gtab.info)
-    return gtab
+    # Get B0 indices
+    B0s = np.where(gtab.bvals == gtab.b0_threshold)[0]
+    print('B0\'s found at: ' + str(B0s))
+
+    # Extract and Combine all B0s collected
+    print('Extracting B0\'s...')
+    cmds = []
+    B0s_bbr = []
+    for B0 in B0s:
+        print(B0)
+        B0_bbr = "{}/{}_B0.nii.gz".format(outdir['prep_m'], str(B0))
+        cmd = 'fslroi ' + dwi_file + ' ' + B0_bbr + ' ' + str(B0) + ' 1'
+        cmds.append(cmd)
+        B0s_bbr.append(B0_bbr)
+
+    for cmd in cmds:
+        os.system(cmd)
+
+    # Get mean B0
+    mean_B0 = mean_img(B0s_bbr)
+    nib.save(mean_B0, nodif_B0)
+
+    # Get mean B0 brain mask
+    cmd = 'fslmaths ' + nodif_B0 + ' -bin ' + nodif_B0_mask
+    os.system(cmd)
+    return gtab, nodif_B0_mask
 
 
 def load_bval_bvec(fbval, fbvec):
     """
     Takes bval and bvec files and produces a structure in dipy format
-
     **Positional Arguments:**
     """
     bvals, bvecs = read_bvals_bvecs(fbval, fbvec)
@@ -185,9 +197,7 @@ def load_timeseries(timeseries_file, ts='roi'):
 def extract_brain(inp, out, opts="-B"):
     """
     A function to extract the brain from an image using FSL's BET.
-
     **Positional Arguments:**
-
         inp:
             - the input image.
         out:
@@ -203,7 +213,6 @@ def graph2mtx(graph):
     A function to convert a networkx graph to an appropriate
     numpy matrix that is ordered properly from smallest
     ROI to largest.
-
     **Positional Arguments:**
         graph:
             - a networkx graph.
@@ -221,7 +230,6 @@ def morton_region(parcellation, outpath):
     Col1 is the morton index. Col2 is the corresponding region
     the particular morton index falls into. 0 means it falls into
     a region unmapped in the parcellation.
-
     **Positional Arguments:**
         parcellation:
             - the input parcellation to compute over.
@@ -244,6 +252,7 @@ def morton_region(parcellation, outpath):
         f.close()
     return
 
+
 def parcel_overlap(parcellation1, parcellation2, outpath):
     """
     A function to compute the percent composition of each parcel in
@@ -251,7 +260,6 @@ def parcel_overlap(parcellation1, parcellation2, outpath):
     in parcellation 1; cols are parcels in parcellation 2. Values are the
     percent of voxels in parcel (parcellation 1) that fall into parcel
     (parcellation 2). Implied is that each row sums to 1.
-
     **Positional Arguments:**
         parcellation1:
             - the path to the first parcellation.
@@ -268,7 +276,7 @@ def parcel_overlap(parcellation1, parcellation2, outpath):
 
     p1n = get_filename(parcellation1)
     p2n = get_filename(parcellation2)
-    
+
     overlapdat = lil_matrix((p1regs.shape[0], p2regs.shape[0]), dtype=np.float32)
     for p1idx, p1reg in enumerate(p1regs):
         p1seq = (p1_dat == p1reg)
@@ -277,9 +285,9 @@ def parcel_overlap(parcellation1, parcellation2, outpath):
         for p2idx, p2reg in enumerate(p2regs):
             if (p2reg in poss_regs):
                 # percent overlap is p1seq and'd with the anatomical region voxelspace, summed and normalized
-                pover = np.logical_and(p1seq, p2_dat == p2reg).sum()/float(N)
+                pover = np.logical_and(p1seq, p2_dat == p2reg).sum() / float(N)
                 overlapdat[p1idx, p2idx] = pover
-            
+
     outf = op.join(outpath, "{}_{}.csv".format(p1n, p2n))
     with open(outf, 'w')  as f:
         p2str = ["%s" % x for x in p2regs]
@@ -289,4 +297,3 @@ def parcel_overlap(parcellation1, parcellation2, outpath):
             f.write(str(p1reg) + "," + ",".join(datstr) + "\n")
         f.close()
     return
-

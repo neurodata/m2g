@@ -20,11 +20,8 @@
 # Edited by Eric Bridgeford on 2017-07-13.
 
 from __future__ import print_function
-
-from argparse import ArgumentParser
 from datetime import datetime
-from subprocess import Popen, PIPE
-from ndmg.stats.qa_regdti import *
+import time
 from ndmg.stats.qa_tensor import *
 from ndmg.stats.qa_fibers import *
 from ndmg.stats.qa_mri import qa_mri
@@ -34,7 +31,7 @@ import ndmg.track as mgt
 import ndmg.graph as mgg
 import ndmg.preproc as mgp
 import numpy as np
-import nibabel as nb
+import nibabel as nib
 import os
 from ndmg.graph import biggraph as ndbg
 import traceback
@@ -123,21 +120,41 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
     # Align fMRI volumes to Atlas
 
     # -------- Preprocessing Steps --------------------------------- #
-    # Creates gradient table from bvalues and bvectors
-    print("Generating gradient table...")
-    dwi1 = namer.name_derivative(namer.dirs['tmp']['prep_m'],
-        "{}_t1.nii.gz".format(namer.get_mod_source()))
-    bvecs1 = namer.name_derivative(namer.dirs['tmp']['prep_m'],
-        "{}_1.bvec".format(namer.get_mod_source()))
-    mgp.rescale_bvec(bvecs, bvecs1)
-    gtab = mgu.load_bval_bvec_dwi(bvals, bvecs1, dwi, dwi1)
+    # Perform eddy correction
+    dwi_prep = "{}/eddy_corrected_data.nii.gz".format(outdir['prep'])
+    cmd='eddy_correct ' + dwi + ' ' + dwi_prep + ' 0'
+    os.system(cmd)
 
+    # Rotate bvecs
+    eddy_rot_param = dwi_prep.split('/')[-1].split('.')[0] + 'eddy_corrected_data.ecclog'
+    bvec_rotated = bvecs.split('/')[-1].split('.')[0] + 'bvec_rotated'
+    cmd='fdt_rotate_bvecs ' + bvecs + ' ' + bvec_rotated + ' ' + eddy_rot_param
+    os.system(cmd)
+
+    dwi = dwi_prep
+    bvecs = bvec_rotated
+    [gtab, nodif_B0_mask] = mgu.make_gtab_and_bmask(bvals, bvecs, dwi, outdir)
     # -------- Registration Steps ----------------------------------- #
-    # Align DTI volumes to Atlas
-    print("Aligning volumes...")
-    mgr().dwi2atlas(dwi1, gtab, t1w, atlas, aligned_dwi, outdir, clean)
-    b0loc = np.where(gtab.b0s_mask)[0][0]
-    reg_dti_pngs(aligned_dwi, b0loc, atlas, namer.dirs['qa']['reg_m'])
+    vox_size = '2mm'
+    reg = mgr.register(outdir, nodif_B0_mask, t1w, vox_size, simple=False)
+    # Perform anatomical segmentation
+    start_time = time.time()
+    reg.gen_tissue()
+    print("%s%s%s" % ('gen_tissue runtime: ', str(np.round(time.time() - start_time, 1)), 's'))
+    # align t1w to dwi
+    start_time = time.time()
+    reg.t1w2dwi_align()
+    print("%s%s%s" % ('t1w2dwi_align runtime: ', str(np.round(time.time() - start_time, 1)), 's'))
+    # align atlas to t1w to dwi
+    start_time = time.time()
+    for atlas in labels:
+        print("%s%s" % ('Applying native-space alignment to ', atlas))
+        reg.atlas2t1w2dwi_align(atlas)
+    print("%s%s%s" % ('atlas2t1w2dwi_align runtime: ', str(np.round(time.time() - start_time, 1)), 's'))
+    # align tissue classifiers
+    start_time = time.time()
+    reg.tissue2dwi_align()
+    print("%s%s%s" % ('tissue2dwi_align runtime: ', str(np.round(time.time() - start_time, 1)), 's'))
 
     # -------- Tensor Fitting and Fiber Tractography ---------------- #
     # Compute tensors and track fiber streamlines
@@ -147,7 +164,7 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
               namer.dirs['qa']['tensor'])
 
     # As we've only tested VTK plotting on MNI152 aligned data...
-    if nb.load(mask).get_data().shape == (182, 218, 182):
+    if nib.load(mask).get_data().shape == (182, 218, 182):
         try:
             visualize_fibs(tracks, fibers, mask, namer.dirs['qa']['fiber'], 0.02)
         except:
@@ -169,7 +186,8 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
     # Generate graphs from streamlines for each parcellation
     for idx, label in enumerate(labels):
         print("Generating graph for {} parcellation...".format(label))
-        labels_im = nb.load(labels[idx])
+
+        labels_im = nib.load(labels[idx])
         g1 = mgg(len(np.unique(labels_im.get_data()))-1, labels[idx])
         g1.make_graph(tracks)
         g1.summary()
