@@ -194,20 +194,6 @@ def load_timeseries(timeseries_file, ts='roi'):
     pass
 
 
-def extract_brain(inp, out, opts="-B"):
-    """
-    A function to extract the brain from an image using FSL's BET.
-    **Positional Arguments:**
-        inp:
-            - the input image.
-        out:
-            - the output brain extracted image.
-    """
-    cmd = "bet {} {} {}".format(inp, out, opts)
-    execute_cmd(cmd, verb=True)
-    pass
-
-
 def graph2mtx(graph):
     """
     A function to convert a networkx graph to an appropriate

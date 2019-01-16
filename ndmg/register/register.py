@@ -31,7 +31,6 @@ except KeyError:
     print('FSLDIR environment variable not set!')
 import ndmg.utils as mgu
 from ndmg.utils import reg_utils as mgru
-from ndmg.utils import nuis_utils as mgnu
 
 
 class register(object):
@@ -272,7 +271,7 @@ class register(object):
         return
 
 
-class epi_register(register):
+class epi_register(object):
     def __init__(self, epi, t1w, t1w_brain, atlas, atlas_brain, atlas_mask,
                  aligned_epi, aligned_t1w, namer):
         """
@@ -352,14 +351,14 @@ class epi_register(register):
         # perform an initial alignment with a gentle translational guess
         # note that this schedule file only adjusts such that the x, y, z
         # params between the epi and the t1w brain are optimal
-        self.align(self.epi, self.t1w_brain, xfm=xfm_init1, bins=None,
+        mgru.align(self.epi, self.t1w_brain, xfm=xfm_init1, bins=None,
                    dof=None, cost=None, searchrad=None,
                    sch="${FSLDIR}/etc/flirtsch/sch3Dtrans_3dof")
         # perform a near local-only registration, which looks for local
         # fits of the voxels and will improve our registration if our
         # image is for instance cut off somewhere with simple3d
         # make sure to initialize with our translationally optimal fit
-        self.align(self.epi, self.t1w_brain, xfm=xfm_init2, init=xfm_init1,
+        mgru.align(self.epi, self.t1w_brain, xfm=xfm_init2, init=xfm_init1,
                    bins=None, dof=None, cost=None, searchrad=None,
                    out=epi_init, sch="${FSLDIR}/etc/flirtsch/simple3D.sch")
 
@@ -373,7 +372,7 @@ class epi_register(register):
             epi_bbr = "{}/{}_bbr.nii.gz".format(self.outdir['reg_m'],
                                                 self.epi_name)
             # use a 6 dof registration with near-local initializer
-            self.align(self.epi, self.t1w_brain, xfm=xfm_init3,
+            mgru.align(self.epi, self.t1w_brain, xfm=xfm_init3,
                        init=xfm_init2, bins=None, dof=6, cost=None,
                        searchrad=None, sch=None)
             # segment the t1w brain into probability maps
@@ -387,7 +386,7 @@ class epi_register(register):
             mgnu.probmap2mask(maps['wm_prob'], wm_mask, 0.5)
             # perform flirt with boundary-based registration, using the
             # white matter mask to improve registration quality
-            self.align(self.epi, self.t1w, xfm=xfm_bbr, wmseg=wm_mask,
+            mgru.align(self.epi, self.t1w, xfm=xfm_bbr, wmseg=wm_mask,
                        out=epi_bbr, init=xfm_init3, interp="spline",
                        sch="${FSLDIR}/etc/flirtsch/bbr.sch")
             # store the 3d image to use as our qa image, but keep the transform
@@ -407,8 +406,8 @@ class epi_register(register):
             self.sreg_strat = 'flirt'
         # have to use bet for this, as afni 3dautomask
         # only works on 4d volumes
-        mgu.extract_brain(self.sreg_brain, self.sreg_brain,
-                          opts='-f 0.3 -R')
+        mgru.extract_brain(self.sreg_brain, self.sreg_brain,
+                           opts='-f 0.3 -R')
         pass
 
     def template_align(self):
@@ -434,13 +433,13 @@ class epi_register(register):
         # align "regions" of the brain, and as such, will not add unnecessary
         # stretching if the brain is not the correct shape, potentially
         # leading the 12 dof registration to not totally distort the image
-        self.align(self.t1w_brain, self.atlas_brain, xfm=xfm_t1w2temp_init,
+        mgru.align(self.t1w_brain, self.atlas_brain, xfm=xfm_t1w2temp_init,
                    init=None, bins=None, dof=None, cost=None, searchrad=None,
                    out=None, sch="${FSLDIR}/etc/flirtsch/sch3Dtrans_3dof")
 
         # linear registration from t1 space to atlas space with a 12 dof
         # linear registration to serve as our initializer
-        self.align(self.t1w_brain, self.atlas_brain, xfm=xfm_t1w2temp,
+        mgru.align(self.t1w_brain, self.atlas_brain, xfm=xfm_t1w2temp,
                    out=None, dof=12, searchrad=True, bins=256, interp="spline",
                    wmseg=None, init=xfm_t1w2temp_init)
 
@@ -457,14 +456,14 @@ class epi_register(register):
             )  # to store the template warp
             # use FNIRT to nonlinearly align from the t1w to the
             # template space, using the 12 dof transform as an initializer
-            self.align_nonlinear(self.t1w, self.atlas, xfm_t1w2temp,
+            mgru.align_nonlinear(self.t1w, self.atlas, xfm_t1w2temp,
                                  warp_t1w2temp, mask=self.atlas_mask)
             # apply the warp from the epi to the atlas space by first using
             # the linear transform from the epi to the template space
-            self.apply_warp(self.epi, self.atlas, self.epi_aligned_skull,
+            mgru.apply_warp(self.epi, self.atlas, self.epi_aligned_skull,
                             warp=warp_t1w2temp, xfm=self.sreg_xfm)
             # apply the warp from the t1w to the atlas space
-            self.apply_warp(self.t1w, self.atlas, self.taligned_t1w_skull,
+            mgru.apply_warp(self.t1w, self.atlas, self.taligned_t1w_skull,
                             warp=warp_t1w2temp)
             self.treg_strat = 'fnirt'  # strategy details
         else:
@@ -481,17 +480,17 @@ class epi_register(register):
             # just combine our 12 dof linear transform from t1w to template
             # with our transform from epi to t1w space to get a transform
             # from epi ->(-> t1w ->)-> temp space (epi -> temp)
-            self.combine_xfms(xfm_t1w2temp, self.sreg_xfm, xfm_epi2temp)
+            mgru.combine_xfms(xfm_t1w2temp, self.sreg_xfm, xfm_epi2temp)
             # apply linear transformation from epi to template space
-            self.applyxfm(self.epi, self.atlas, xfm_epi2temp,
+            mgru.applyxfm(self.epi, self.atlas, xfm_epi2temp,
                           self.epi_aligned_skull, interp='spline')
             # apply 12 dof linear transform from t1w to template space
-            self.apply_warp(self.t1w, self.atlas, self.taligned_t1w_skull,
+            mgru.apply_warp(self.t1w, self.atlas, self.taligned_t1w_skull,
                             xfm=xfm_t1w2temp)
             self.treg_strat = 'flirt'  # strategy
         # use BET to extract brain from our epi volume
-        mgu.extract_brain(self.epi_aligned_skull, self.taligned_epi,
-                          opts='-F')
+        mgru.extract_brain(self.epi_aligned_skull, self.taligned_epi,
+                           opts='-F')
 
         # use AFNI to extract brain from our t1w volume
         mgru.extract_t1w_brain(self.taligned_t1w_skull, self.taligned_t1w,

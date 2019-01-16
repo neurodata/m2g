@@ -74,7 +74,7 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
         namer.get_template_info())
     reg_aname = "{}_{}".format(namer.get_anat_source(),
         namer.get_template_info())
-    
+    `
     preproc_dwi = namer.name_derivative(namer.dirs['output']['prep_m'],
         "{}_preproc.nii.gz".format(namer.get_mod_source()))
     motion_dwi = namer.name_derivative(namer.dirs['tmp']['prep_m'],
@@ -159,9 +159,9 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
     # -------- Tensor Fitting and Fiber Tractography ---------------- #
     # Compute tensors and track fiber streamlines
     print("Beginning tractography...")
-    tens, tracks = mgt().eudx_basic(aligned_dwi, mask, gtab, stop_val=0.2)
-    tensor2fa(tens, tensors, aligned_dwi, namer.dirs['output']['tensor'],
-              namer.dirs['qa']['tensor'])
+    trac = mgt(dwi_prep, reg.nodif_B0_mask, reg.gm_in_dwi, reg.vent_csf_in_dwi,
+               reg.wm_in_dwi, reg.wm_in_dwi_bin, gtab,seeds=1000000,
+               a_low=0.02, step_sz=0.5, max_points=2000, ang_thr=60.0)
 
     # As we've only tested VTK plotting on MNI152 aligned data...
     if nib.load(mask).get_data().shape == (182, 218, 182):
