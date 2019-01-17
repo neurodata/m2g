@@ -29,7 +29,7 @@ try:
     FSLDIR = os.environ['FSLDIR']
 except KeyError:
     print('FSLDIR environment variable not set!')
-import ndmg.utils as mgu
+from ndmg.utils import utils as mgu
 from ndmg.utils import reg_utils as mgru
 
 

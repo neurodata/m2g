@@ -19,7 +19,7 @@
 # Created by Greg Kiar on 2016-07-29.
 # Email: gkiar@jhu.edu
 
-import ndmg.utils as mgu
+from ndmg.utils import utils as mgu
 import os.path as op
 import os
 import sys
