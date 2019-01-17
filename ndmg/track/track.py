@@ -15,7 +15,7 @@
 # limitations under the License.
 #
 # track.py
-# Created by Will Gray Roncal on 2016-01-28.
+# Created by derek Pisner on 10/20/2018.
 # Email: wgr@jhu.edu
 
 from __future__ import print_function
@@ -31,8 +31,8 @@ from dipy.io import read_bvals_bvecs
 
 class track(object):
     def __init__(self, dwi_in, nodif_B0_mask, gm_in_dwi, vent_csf_in_dwi,
-                 wm_in_dwi, wm_in_dwi_bin, fbval_in, fbvec_in,
-                 dwi_aligned_atlas, seeds=1000000, a_low=0.02, step_sz=0.5,
+                 wm_in_dwi, wm_in_dwi_bin, gtab,
+                 seeds=1000000, a_low=0.02, step_sz=0.5,
                  max_points=2000, ang_thr=60.0):
         """
         A class for deterministic tractography in native space.
@@ -63,10 +63,8 @@ class track(object):
             - Path to a binarized white matter segmentation in EPI space.
             Should be a nifti, gzipped nifti, or other image file that 
             nibabel is capable of reading, with data as a 3D object.
-        fbval_in: string
-            - Path to the BValue file, as a ssv.
-        fbvec_in: string
-            - Path to the BVector file, as a ssv.
+        gtab: string
+            - Gradient table.
         seeds: int
             - the number of seeds to use for tractography.
         a_low: float
@@ -82,8 +80,7 @@ class track(object):
         self.vent_csf_in_dwi = vent_csf_in_dwi
         self.wm_in_dwi = wm_in_dwi
         self.wm_in_dwi_bin = wm_in_dwi_bin
-        self.fbval = fbval_in
-        self.fbvec = fbvec_in
+        self.gtab = gtab
         self.dwi_aligned_atlas = dwi_aligned_atlas
 
     def run(self):
@@ -93,20 +90,11 @@ class track(object):
         return tracks
 
     def prep_tracking(self):
-
         self.dwi_img = nib.load(self.dwi)
         self.data = self.dwi_img.get_data()
-
         # Loads mask and ensures it's a true binary mask
         self.mask_img = nib.load(self.nodif_B0_mask)
         self.mask = self.mask_img.get_data() > 0
-
-        # loading bvecs/bvals
-        self.bvals, self.bvecs = read_bvals_bvecs(self.fbval, self.fbvec)
-
-        # Creating the gradient table
-        self.gtab = gradient_table(self.bvals, self.bvecs)
-
         # Load tissue maps and prepare tissue classifier
         self.gm_mask = nib.load(self.gm_in_dwi)
         self.gm_mask_data = self.gm_mask.get_data().astype('bool')

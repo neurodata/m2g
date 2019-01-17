@@ -15,9 +15,9 @@
 # limitations under the License.
 #
 # register.py
-# Edited by Eric Bridgeford.
+# Created by Eric Bridgeford.
 # Repackaged for native space registrations by Derek Pisner on 2019-01-16
-# Email: dpisner@utexas.edu
+# Email: dpisner@utexas.edu.
 
 from __future__ import print_function
 import os
@@ -206,7 +206,6 @@ class register(object):
         nib.save(nib.Nifti1Image(self.atlas_data.astype('int'), affine=self.atlas_img.affine, header=self.atlas_img.header), self.dwi_aligned_atlas)
         cmd='fslmaths ' + self.dwi_aligned_atlas + ' -mas ' + self.nodif_B0_mask + ' ' + self.dwi_aligned_atlas
         os.system(cmd)
-
         return self.dwi_aligned_atlas
 
     def tissue2dwi_align(self):

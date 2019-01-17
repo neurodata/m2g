@@ -20,7 +20,9 @@
 # Edited by Eric Bridgeford on 2017-07-13.
 
 from __future__ import print_function
+from argparse import ArgumentParser
 from datetime import datetime
+from ndmg.stats.qa_regdti import *
 import time
 from ndmg.stats.qa_tensor import *
 from ndmg.stats.qa_fibers import *
@@ -48,7 +50,7 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
     Creates a brain graph from MRI data
     """
     startTime = datetime.now()
-    fmt = '_elist.csv'
+    fmt = '_adj.csv'
     # Create derivative output directories
     namer = name_resource(dwi, t1w, atlas, outdir)
 
@@ -160,7 +162,7 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
     # Compute tensors and track fiber streamlines
     print("Beginning tractography...")
     trac = mgt(dwi_prep, reg.nodif_B0_mask, reg.gm_in_dwi, reg.vent_csf_in_dwi,
-               reg.wm_in_dwi, reg.wm_in_dwi_bin, gtab,seeds=1000000,
+               reg.wm_in_dwi, reg.wm_in_dwi_bin, gtab, seeds=1000000,
                a_low=0.02, step_sz=0.5, max_points=2000, ang_thr=60.0)
 
     # As we've only tested VTK plotting on MNI152 aligned data...
@@ -186,9 +188,8 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
     # Generate graphs from streamlines for each parcellation
     for idx, label in enumerate(labels):
         print("Generating graph for {} parcellation...".format(label))
-
-        labels_im = nib.load(labels[idx])
-        g1 = mgg(len(np.unique(labels_im.get_data()))-1, labels[idx])
+        label2dwi = reg.atlas2t1w2dwi_align(labels[idx])
+        g1 = mgg(label2dwi)
         g1.make_graph(tracks)
         g1.summary()
         g1.save_graph(connectomes[idx])
