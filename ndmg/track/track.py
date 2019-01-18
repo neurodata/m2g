@@ -19,17 +19,15 @@
 # Email: wgr@jhu.edu
 
 from __future__ import print_function
-
-from dipy.reconst.csdeconv import ConstrainedSphericalDeconvModel, recursive_response
-from dipy.tracking.local import ActTissueClassifier
-from dipy.tracking import streamline
-from dipy.direction import ProbabilisticDirectionGetter
-from dipy.data import default_sphere
-from dipy.core.gradients import gradient_table
-from dipy.io import read_bvals_bvecs
+import numpy as np
+import nibabel as nib
+from dipy.reconst.dti import TensorModel, fractional_anisotropy, quantize_evecs
+from dipy.tracking.eudx import EuDX
+from dipy.data import get_sphere
+from dipy.tracking.streamline import Streamlines
 
 
-class track(object):
+class run_track(object):
     def __init__(self, dwi_in, nodif_B0_mask, gm_in_dwi, vent_csf_in_dwi,
                  wm_in_dwi, wm_in_dwi_bin, gtab,
                  seeds=1000000, a_low=0.02, step_sz=0.5,
@@ -81,7 +79,6 @@ class track(object):
         self.wm_in_dwi = wm_in_dwi
         self.wm_in_dwi_bin = wm_in_dwi_bin
         self.gtab = gtab
-        self.dwi_aligned_atlas = dwi_aligned_atlas
 
     def run(self):
         self.prep_tracking()

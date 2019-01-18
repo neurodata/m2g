@@ -126,18 +126,23 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
     cmd='eddy_correct ' + dwi + ' ' + dwi_prep + ' 0'
     os.system(cmd)
 
-    # Rotate bvecs
+    print("Rotating b-vectors and generating gradient table...")
     eddy_rot_param = dwi_prep.split('/')[-1].split('.')[0] + 'eddy_corrected_data.ecclog'
+    dwi = dwi_prep
+    bvec_scaled = bvecs.split('/')[-1].split('.')[0] + 'bvec_scaled'
     bvec_rotated = bvecs.split('/')[-1].split('.')[0] + 'bvec_rotated'
+
+    # Rotate bvecs
     cmd='fdt_rotate_bvecs ' + bvecs + ' ' + bvec_rotated + ' ' + eddy_rot_param
     os.system(cmd)
 
-    dwi = dwi_prep
-    bvecs = bvec_rotated
-    [gtab, nodif_B0_mask] = mgu.make_gtab_and_bmask(bvals, bvecs, dwi, outdir)
+    # Rescale bvecs
+    mgp.rescale_bvec(bvec_rotated, bvec_scaled)
+
+    [gtab, nodif_B0_mask] = mgu.make_gtab_and_bmask(bvals, bvec_scaled, dwi, outdir)
     # -------- Registration Steps ----------------------------------- #
     vox_size = '2mm'
-    reg = mgr.register(outdir, nodif_B0_mask, t1w, vox_size, simple=False)
+    reg = mgr.dmri_reg(outdir, nodif_B0_mask, t1w, vox_size, simple=False)
     # Perform anatomical segmentation
     start_time = time.time()
     reg.gen_tissue()
@@ -148,9 +153,8 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
     print("%s%s%s" % ('t1w2dwi_align runtime: ', str(np.round(time.time() - start_time, 1)), 's'))
     # align atlas to t1w to dwi
     start_time = time.time()
-    for atlas in labels:
-        print("%s%s" % ('Applying native-space alignment to ', atlas))
-        reg.atlas2t1w2dwi_align(atlas)
+    print("%s%s" % ('Applying native-space alignment to ', atlas))
+    reg.atlas2t1w2dwi_align(atlas)
     print("%s%s%s" % ('atlas2t1w2dwi_align runtime: ', str(np.round(time.time() - start_time, 1)), 's'))
     # align tissue classifiers
     start_time = time.time()
@@ -160,7 +164,7 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
     # -------- Tensor Fitting and Fiber Tractography ---------------- #
     # Compute tensors and track fiber streamlines
     print("Beginning tractography...")
-    trac = mgt(dwi_prep, reg.nodif_B0_mask, reg.gm_in_dwi, reg.vent_csf_in_dwi,
+    trac = mgt.run_track(dwi_prep, reg.nodif_B0_mask, reg.gm_in_dwi, reg.vent_csf_in_dwi,
                reg.wm_in_dwi, reg.wm_in_dwi_bin, gtab, seeds=1000000,
                a_low=0.02, step_sz=0.5, max_points=2000, ang_thr=60.0)
 
