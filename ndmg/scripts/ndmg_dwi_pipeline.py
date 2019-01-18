@@ -76,7 +76,6 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
         namer.get_template_info())
     reg_aname = "{}_{}".format(namer.get_anat_source(),
         namer.get_template_info())
-    `
     preproc_dwi = namer.name_derivative(namer.dirs['output']['prep_m'],
         "{}_preproc.nii.gz".format(namer.get_mod_source()))
     motion_dwi = namer.name_derivative(namer.dirs['tmp']['prep_m'],
