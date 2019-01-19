@@ -33,7 +33,7 @@ from ndmg.utils import utils as mgu
 from ndmg.utils import reg_utils as mgru
 
 
-class register(object):
+class dmri_reg(object):
 
     def __init__(self, outdir_base_in, nodif_B0_mask, t1w_in, vox_size, simple):
         self.simple = simple
