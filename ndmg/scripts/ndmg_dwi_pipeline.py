@@ -255,7 +255,7 @@ def main():
     # Create output directory
     print("Creating output directory: {}".format(result.outdir))
     print("Creating output temp directory: {}/tmp".format(result.outdir))
-    mgu.execute_cmd("mkdir -p {} {}/tmp".format(result.outdir, result.outdir))
+    mgu.utils.execute_cmd("mkdir -p {} {}/tmp".format(result.outdir, result.outdir))
 
     ndmg_dwi_pipeline(result.dwi, result.bval, result.bvec, result.t1w,
                       result.atlas, result.mask, result.labels, result.outdir,

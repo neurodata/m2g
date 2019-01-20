@@ -32,7 +32,6 @@ from networkx import to_numpy_matrix as graph2np
 from ndmg.graph.zindex import XYZMorton
 from scipy.sparse import lil_matrix
 
-
 def execute_cmd(cmd, verb=False):
     """
     Given a bash command, it is executed and the response piped back to the
@@ -40,6 +39,7 @@ def execute_cmd(cmd, verb=False):
     """
     if verb:
         print("Executing: {}".format(cmd))
+
     p = Popen(cmd, stdout=PIPE, stderr=PIPE, shell=True)
     out, err = p.communicate()
     code = p.returncode
@@ -47,6 +47,9 @@ def execute_cmd(cmd, verb=False):
         sys.exit("Error {}: {}".format(code, err))
     return out, err
 
+
+def name_tmps(basedir, basename, extension):
+    return "{}/tmp/{}{}".format(basedir, basename, extension)
 
 def get_b0(gtab, data):
     """
