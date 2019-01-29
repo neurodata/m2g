@@ -57,11 +57,11 @@ setup(
         'sklearn>=0.0',
         'numpy',  # We use nump v1.10.4
         'scipy>=0.13.3',  # We use 0.17.0
-        'dipy>=0.1',
+        'dipy==0.14.0',
         'boto3',
-        'matplotlib==1.5.3',
+        'matplotlib==2.2.3',
         'plotly==1.12.1',
         'cython',
-        'pybids>=0.6.4'
+        'pybids==0.6.4'
     ]
 )
