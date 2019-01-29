@@ -17,7 +17,7 @@
 # Created by Eric Bridgeford on 2017-06-21.
 # Email: ebridge2@jhu.edu
 from __future__ import print_function
-from ndmg.utils import utils as mgu
+from ndmg.utils import gen_utils as mgu
 import nibabel as nib
 import numpy as np
 import nilearn.image as nl

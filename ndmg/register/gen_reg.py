@@ -20,6 +20,8 @@
 # Email: dpisner@utexas.edu.
 
 from __future__ import print_function
+import warnings
+warnings.filterwarnings("ignore", message="numpy.dtype size changed")
 import os
 import nibabel as nib
 from nilearn.image import load_img, math_img, resample_img, mean_img, new_img_like
@@ -29,7 +31,7 @@ try:
     FSLDIR = os.environ['FSLDIR']
 except KeyError:
     print('FSLDIR environment variable not set!')
-from ndmg.utils import utils as mgu
+from ndmg.utils import gen_utils as mgu
 from ndmg.utils import reg_utils as mgru
 
 
@@ -49,7 +51,7 @@ class dmri_reg(object):
             os.mkdir(self.outdir['reg_m'])
         except:
             pass
-        self.nodif_B0_mask = nodif_B0_mask
+        self.nodif_B0 = nodif_B0_mask
         self.t1w = t1w_in
         self.vox_size = vox_size
         self.t1w_name = 't1w'

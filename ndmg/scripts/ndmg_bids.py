@@ -21,6 +21,8 @@
 # edited by Eric Bridgeford to incorporate fMRI, multi-threading, and
 # big-graph generation.
 
+import warnings
+warnings.filterwarnings("ignore", message="numpy.dtype size changed")
 from argparse import ArgumentParser
 from subprocess import Popen, PIPE
 from os.path import expanduser
@@ -33,7 +35,7 @@ from ndmg.stats.qa_graphs import *
 from ndmg.stats.qa_graphs_plotting import *
 from ndmg.stats.group_func import group_func
 from glob import glob
-from ndmg.utils import utils as mgu
+from ndmg.utils import gen_utils as mgu
 import ndmg
 import os.path as op
 import os

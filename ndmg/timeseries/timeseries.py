@@ -21,7 +21,7 @@
 import numpy as np
 import nibabel as nb
 import sys
-from ndmg.utils import utils as mgu
+from ndmg.utils import gen_utils as mgu
 
 
 class timeseries(object):

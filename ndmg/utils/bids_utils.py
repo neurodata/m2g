@@ -23,7 +23,7 @@ from bids import BIDSLayout
 import re
 from itertools import product
 import boto3
-from ndmg.utils import utils as mgu
+from ndmg.utils import gen_utils as mgu
 import os
 
 

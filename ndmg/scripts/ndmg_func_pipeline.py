@@ -25,7 +25,7 @@ import nibabel as nb
 import os.path as op
 from argparse import ArgumentParser
 from datetime import datetime
-from ndmg.utils import utils as mgu
+from ndmg.utils import gen_utils as mgu
 from ndmg import epi_register as mgreg
 from ndmg import graph as mgg
 from ndmg.timeseries import timeseries as mgts

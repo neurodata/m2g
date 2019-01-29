@@ -19,7 +19,7 @@
 
 from numpy import ndarray as nar
 from scipy.stats import gaussian_kde
-from ndmg.utils import utils as mgu
+from ndmg.utils import gen_utils as mgu
 import numpy as np
 import nibabel as nb
 import matplotlib

@@ -20,6 +20,8 @@
 # Edited by Eric Bridgeford on 2017-07-13.
 
 from __future__ import print_function
+import warnings
+warnings.filterwarnings("ignore", message="numpy.dtype size changed")
 from argparse import ArgumentParser
 from datetime import datetime
 from ndmg.stats.qa_regdti import *
@@ -27,8 +29,8 @@ import time
 from ndmg.stats.qa_tensor import *
 from ndmg.stats.qa_fibers import *
 from ndmg.stats.qa_mri import qa_mri
-import ndmg.utils as mgu
-import ndmg.register as mgr
+from ndmg.utils import gen_utils as mgu
+from ndmg.register import gen_reg as mgr
 import ndmg.track as mgt
 import ndmg.graph as mgg
 import ndmg.preproc as mgp
@@ -122,24 +124,25 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
 
     # -------- Preprocessing Steps --------------------------------- #
     # Perform eddy correction
-    dwi_prep = "{}/eddy_corrected_data.nii.gz".format(outdir['prep'])
-    cmd='eddy_correct ' + dwi + ' ' + dwi_prep + ' 0'
-    os.system(cmd)
+    dwi_prep = "{}/eddy_corrected_data.nii.gz".format(namer.dirs['output']['prep_m'])
+    #cmd='eddy_correct ' + dwi + ' ' + dwi_prep + ' 0'
+    #os.system(cmd)
 
     print("Rotating b-vectors and generating gradient table...")
-    eddy_rot_param = dwi_prep.split('/')[-1].split('.')[0] + 'eddy_corrected_data.ecclog'
+    #eddy_rot_param = dwi_prep.split('/')[-1].split('.')[0] + 'eddy_corrected_data.ecclog'
     dwi = dwi_prep
-    bvec_scaled = bvecs.split('/')[-1].split('.')[0] + 'bvec_scaled'
-    bvec_rotated = bvecs.split('/')[-1].split('.')[0] + 'bvec_rotated'
+    bvec_scaled = "{}/bvec_scaled.bvec".format(namer.dirs['output']['prep_m'])
+    #bvec_rotated = bvecs.split('/')[-1].split('.')[0] + 'bvec_rotated'
 
     # Rotate bvecs
-    cmd='fdt_rotate_bvecs ' + bvecs + ' ' + bvec_rotated + ' ' + eddy_rot_param
-    os.system(cmd)
+    #cmd='fdt_rotate_bvecs ' + bvecs + ' ' + bvec_rotated + ' ' + eddy_rot_param
+    #os.system(cmd)
 
     # Rescale bvecs
-    mgp.rescale_bvec(bvec_rotated, bvec_scaled)
+    mgp.rescale_bvec(bvecs, bvec_scaled)
+    #mgp.rescale_bvec(bvec_rotated, bvec_scaled)
 
-    [gtab, nodif_B0_mask] = mgu.make_gtab_and_bmask(bvals, bvec_scaled, dwi, outdir)
+    [gtab, nodif_B0_mask] = mgu.make_gtab_and_bmask(bvals, bvec_scaled, dwi, namer.dirs['output']['prep_m'])
     # -------- Registration Steps ----------------------------------- #
     vox_size = '2mm'
     reg = mgr.dmri_reg(outdir, nodif_B0_mask, t1w, vox_size, simple=False)

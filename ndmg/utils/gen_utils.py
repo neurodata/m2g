@@ -15,7 +15,7 @@
 # limitations under the License.
 #
 
-# utils.py
+# gen_utils.py
 # Created by Will Gray Roncal on 2016-01-28.
 # Email: wgr@jhu.edu
 # Edited by Eric Bridgeford.
@@ -129,10 +129,12 @@ def make_gtab_and_bmask(fbval, fbvec, dwi_file, outdir):
     **Positional Arguments:**
     """
     # Use B0's from the DWI to create a more stable DWI image for registration
-    nodif_B0 = "{}/nodif_B0.nii.gz".format(outdir['prep'])
-    nodif_B0_mask = "{}/nodif_B0_mask.nii.gz".format(outdir['prep'])
+    nodif_B0 = "{}/nodif_B0.nii.gz".format(outdir)
+    nodif_B0_mask = "{}/nodif_B0_mask.nii.gz".format(outdir)
 
     # loading bvecs/bvals
+    print(fbval)
+    print(fbvec)
     bvals, bvecs = read_bvals_bvecs(fbval, fbvec)
 
     # Creating the gradient table
@@ -151,7 +153,7 @@ def make_gtab_and_bmask(fbval, fbvec, dwi_file, outdir):
     B0s_bbr = []
     for B0 in B0s:
         print(B0)
-        B0_bbr = "{}/{}_B0.nii.gz".format(outdir['prep_m'], str(B0))
+        B0_bbr = "{}/{}_B0.nii.gz".format(outdir, str(B0))
         cmd = 'fslroi ' + dwi_file + ' ' + B0_bbr + ' ' + str(B0) + ' 1'
         cmds.append(cmd)
         B0s_bbr.append(B0_bbr)

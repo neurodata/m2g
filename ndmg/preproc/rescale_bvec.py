@@ -46,7 +46,7 @@ def rescale_bvec(bvec, bvec_new):
            else b for b in bv1]
 
     try:
-        assert(op.splitext(bvec_new)[1] == '.bvec')
+        assert('bvec' in bvec_new)
         np.savetxt(bvec_new, bv2)
         pass
     except AssertionError:
