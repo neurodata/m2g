@@ -59,7 +59,7 @@ setup(
         'scipy>=0.13.3',  # We use 0.17.0
         'dipy==0.14.0',
         'boto3',
-        'matplotlib==2.2.3',
+        'matplotlib',
         'plotly==1.12.1',
         'cython',
         'pybids==0.6.4'
