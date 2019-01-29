@@ -33,7 +33,7 @@ from ndmg.stats.qa_graphs import *
 from ndmg.stats.qa_graphs_plotting import *
 from ndmg.stats.group_func import group_func
 from glob import glob
-import ndmg.utils as mgu
+import ndmg.utils import utils as mgu
 import ndmg
 import os.path as op
 import os
