@@ -28,7 +28,7 @@ import networkx as nx
 import nibabel as nb
 import ndmg
 import time
-from ndmg.graph.zindex import XYZMorton
+#from ndmg.graph.zindex import XYZMorton
 import os
 
 

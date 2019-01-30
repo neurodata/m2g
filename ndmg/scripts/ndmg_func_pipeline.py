@@ -27,7 +27,7 @@ from argparse import ArgumentParser
 from datetime import datetime
 from ndmg.utils import gen_utils as mgu
 from ndmg import epi_register as mgreg
-from ndmg import graph as mgg
+from ndmg.graph import gen_graph as mgg
 from ndmg.timeseries import timeseries as mgts
 from ndmg.stats.qa_mri import qa_mri
 from ndmg.preproc import preproc_func as mgfp

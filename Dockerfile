@@ -62,7 +62,7 @@ ENV PATH=/opt/afni:$PATH
 RUN \
     pip install numpy networkx>=1.11 nibabel>=2.0 dipy==0.14.0 scipy \
     python-dateutil==2.6.1 boto3 awscli matplotlib==1.5.3 plotly==1.12.9 nilearn>=0.2 sklearn>=0.0 \
-    pandas cython pyvtk awscli requests==2.5.3 scikit-image pybids==0.6.4
+    pandas cython vtk pyvtk awscli requests==2.5.3 scikit-image pybids==0.6.4
 
 RUN \
     git clone -b dev-dmri-fmri $NDMG_URL /ndmg && \

@@ -24,7 +24,7 @@ import warnings
 warnings.filterwarnings("ignore", message="numpy.dtype size changed")
 from argparse import ArgumentParser
 from datetime import datetime
-from ndmg.stats.qa_regdti import *
+#from ndmg.stats.qa_regdti import *
 import time
 from ndmg.stats.qa_tensor import *
 from ndmg.stats.qa_fibers import *
@@ -41,7 +41,7 @@ from ndmg.graph import biggraph as ndbg
 import traceback
 from ndmg.utils.bids_utils import name_resource
 import sys
-
+from dipy.io.dpy import Dpy
 
 os.environ["MPLCONFIGDIR"] = "/tmp/"
 
@@ -165,17 +165,15 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
     # -------- Tensor Fitting and Fiber Tractography ---------------- #
     # Compute tensors and track fiber streamlines
     print("Beginning tractography...")
-    print('dwi_prep: ' + dwi_prep)
-    print('nodif_B0_mask: ' + nodif_B0_mask)
-    print('gm_in_dwi: ' + reg.gm_in_dwi)
-    print('vent_csf_in_dwi: ' + reg.vent_csf_in_dwi)
-    print('wm_in_dwi: ' + reg.wm_in_dwi)
-    print('wm_in_dwi_bin: ' + reg.wm_in_dwi_bin)
-    print('gtab: ' + gtab)
     trct = mgt.run_track(dwi_prep, nodif_B0_mask, reg.gm_in_dwi, reg.vent_csf_in_dwi, reg.wm_in_dwi, reg.wm_in_dwi_bin, gtab)
-    [tracks, tens] = trct.run()
-    print('tracks: ' + tracks)
-    print('tens: ' + tens)    
+    [streamlines, tens] = trct.run()
+
+    tracks = [sl for sl in streamlines if len(sl) > 1]
+
+    # And save them to disk
+    dpw = Dpy(fibers, 'w')
+    dpw.write_tracks(streamlines)
+    dpw.close()
 
     # As we've only tested VTK plotting on MNI152 aligned data...
     if nib.load(mask).get_data().shape == (182, 218, 182):
@@ -183,10 +181,6 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
             visualize_fibs(tracks, fibers, nodif_B0_mask, namer.dirs['qa']['fiber'], 0.02)
         except:
             print("Fiber QA failed - VTK for Python not configured properly.")
-
-    # And save them to disk
-    np.savez(tensors, tens)
-    np.savez(fibers, tracks)
 
     # -------- Big Graph Generation --------------------------------- #
     # Generate big graphs from streamlines

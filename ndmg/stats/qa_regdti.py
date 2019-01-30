@@ -20,6 +20,8 @@
 # Edited by Greg Kiar.
 # Email: Greg Kiar @ gkiar@jhu.edu
 
+import warnings
+warnings.filterwarnings("ignore", message="numpy.dtype size changed")
 import os
 import re
 import sys

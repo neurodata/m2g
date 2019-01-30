@@ -29,7 +29,7 @@ import nibabel as nb
 import os.path as op
 import sys
 from networkx import to_numpy_matrix as graph2np
-from ndmg.graph.zindex import XYZMorton
+#from ndmg.graph.zindex import XYZMorton
 from scipy.sparse import lil_matrix
 
 def execute_cmd(cmd, verb=False):

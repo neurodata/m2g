@@ -25,7 +25,7 @@ import sys
 import os.path as op
 import os.path
 import nilearn as nl
-from ndmg import utils as mgu
+from ndmg.utils import gen_utils as mgu
 from scipy import signal
 
 
