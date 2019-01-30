@@ -126,40 +126,40 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
     # Perform eddy correction
     dwi_prep = "{}/eddy_corrected_data.nii.gz".format(namer.dirs['output']['prep_m'])
     cmd='eddy_correct ' + dwi + ' ' + dwi_prep + ' 0'
-    os.system(cmd)
+    #os.system(cmd)
 
     print("Rotating b-vectors and generating gradient table...")
     eddy_rot_param = "{}/eddy_corrected_data.ecclog".format(namer.dirs['output']['prep_m'])
     bvec_scaled = "{}/bvec_scaled.bvec".format(namer.dirs['output']['prep_m'])
     bvec_rotated = "{}/bvec_rotated.bvec".format(namer.dirs['output']['prep_m'])
 
-    # Rescale bvecs
-    mgp.rescale_bvec(bvecs, bvec_scaled)
-
     # Rotate bvecs
-    cmd='bash fdt_rotate_bvecs ' + bvec_scaled + ' ' + bvec_rotated + ' ' + eddy_rot_param
+    cmd='bash fdt_rotate_bvecs ' + bvecs + ' ' + bvec_rotated + ' ' + eddy_rot_param
     os.system(cmd)
 
-    [gtab, nodif_B0, nodif_B0_mask] = mgu.make_gtab_and_bmask(bvals, bvec_rotated, dwi_prep, namer.dirs['output']['prep_m'])
+    # Rescale bvecs
+    mgp.rescale_bvec(bvec_rotated, bvec_scaled)
+
+    [gtab, nodif_B0, nodif_B0_mask] = mgu.make_gtab_and_bmask(bvals, bvec_scaled, dwi_prep, namer.dirs['output']['prep_m'])
     # -------- Registration Steps ----------------------------------- #
     vox_size = '2mm'
     reg = mgr.dmri_reg(outdir, nodif_B0, nodif_B0_mask, t1w, vox_size, simple=False)
     # Perform anatomical segmentation
     start_time = time.time()
-    #reg.gen_tissue()
+    reg.gen_tissue()
     print("%s%s%s" % ('gen_tissue runtime: ', str(np.round(time.time() - start_time, 1)), 's'))
     # align t1w to dwi
     start_time = time.time()
-    #reg.t1w2dwi_align()
+    reg.t1w2dwi_align()
     print("%s%s%s" % ('t1w2dwi_align runtime: ', str(np.round(time.time() - start_time, 1)), 's'))
     # align atlas to t1w to dwi
     start_time = time.time()
     print("%s%s" % ('Applying native-space alignment to ', atlas))
-    #reg.atlas2t1w2dwi_align(atlas)
+    reg.atlas2t1w2dwi_align(atlas)
     print("%s%s%s" % ('atlas2t1w2dwi_align runtime: ', str(np.round(time.time() - start_time, 1)), 's'))
     # align tissue classifiers
     start_time = time.time()
-    #reg.tissue2dwi_align()
+    reg.tissue2dwi_align()
     print("%s%s%s" % ('tissue2dwi_align runtime: ', str(np.round(time.time() - start_time, 1)), 's'))
 
     # -------- Tensor Fitting and Fiber Tractography ---------------- #
@@ -178,7 +178,7 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
     # As we've only tested VTK plotting on MNI152 aligned data...
     if nib.load(mask).get_data().shape == (182, 218, 182):
         try:
-            visualize_fibs(tracks, fibers, nodif_B0_mask, namer.dirs['qa']['fiber'], 0.02)
+            visualize_fibs(tracks, fibers, aligned_atlas, namer.dirs['qa']['fiber'], 0.02, 2000)
         except:
             print("Fiber QA failed - VTK for Python not configured properly.")
 
