@@ -37,7 +37,7 @@ from ndmg.utils import reg_utils as mgru
 
 class dmri_reg(object):
 
-    def __init__(self, outdir_base_in, nodif_B0_mask, t1w_in, vox_size, simple):
+    def __init__(self, outdir_base_in, nodif_B0, nodif_B0_mask, t1w_in, vox_size, simple):
         self.simple = simple
         self.outdir_base = outdir_base_in
         self.outdir = dict()
@@ -51,7 +51,8 @@ class dmri_reg(object):
             os.mkdir(self.outdir['reg_m'])
         except:
             pass
-        self.nodif_B0 = nodif_B0_mask
+        self.nodif_B0 = nodif_B0
+	self.nodif_B0_mask = nodif_B0_mask
         self.t1w = t1w_in
         self.vox_size = vox_size
         self.t1w_name = 't1w'

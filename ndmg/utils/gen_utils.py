@@ -168,7 +168,7 @@ def make_gtab_and_bmask(fbval, fbvec, dwi_file, outdir):
     # Get mean B0 brain mask
     cmd = 'fslmaths ' + nodif_B0 + ' -bin ' + nodif_B0_mask
     os.system(cmd)
-    return gtab, nodif_B0_mask
+    return gtab, nodif_B0, nodif_B0_mask
 
 
 def load_bval_bvec(fbval, fbvec):

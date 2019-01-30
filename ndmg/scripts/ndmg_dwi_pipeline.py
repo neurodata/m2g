@@ -129,23 +129,22 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
     #os.system(cmd)
 
     print("Rotating b-vectors and generating gradient table...")
-    #eddy_rot_param = dwi_prep.split('/')[-1].split('.')[0] + 'eddy_corrected_data.ecclog'
+    eddy_rot_param = dwi_prep.split('/')[-1].split('.')[0] + 'eddy_corrected_data.ecclog'
     dwi = dwi_prep
+    bvec_rotated = "{}/bvec_rotated.bvec".format(namer.dirs['output']['prep_m'])
     bvec_scaled = "{}/bvec_scaled.bvec".format(namer.dirs['output']['prep_m'])
-    #bvec_rotated = bvecs.split('/')[-1].split('.')[0] + 'bvec_rotated'
 
     # Rotate bvecs
-    #cmd='fdt_rotate_bvecs ' + bvecs + ' ' + bvec_rotated + ' ' + eddy_rot_param
-    #os.system(cmd)
+    cmd='fdt_rotate_bvecs ' + bvecs + ' ' + bvec_rotated + ' ' + eddy_rot_param
+    os.system(cmd)
 
     # Rescale bvecs
-    mgp.rescale_bvec(bvecs, bvec_scaled)
-    #mgp.rescale_bvec(bvec_rotated, bvec_scaled)
+    mgp.rescale_bvec(bvec_rotated, bvec_scaled)
 
-    [gtab, nodif_B0_mask] = mgu.make_gtab_and_bmask(bvals, bvec_scaled, dwi, namer.dirs['output']['prep_m'])
+    [gtab, nodif_B0, nodif_B0_mask] = mgu.make_gtab_and_bmask(bvals, bvec_scaled, dwi, namer.dirs['output']['prep_m'])
     # -------- Registration Steps ----------------------------------- #
     vox_size = '2mm'
-    reg = mgr.dmri_reg(outdir, nodif_B0_mask, t1w, vox_size, simple=False)
+    reg = mgr.dmri_reg(outdir, nodif_B0, nodif_B0_mask, t1w, vox_size, simple=False)
     # Perform anatomical segmentation
     start_time = time.time()
     reg.gen_tissue()
