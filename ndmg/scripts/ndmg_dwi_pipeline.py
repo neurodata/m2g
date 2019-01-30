@@ -126,7 +126,7 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
     # Perform eddy correction
     dwi_prep = "{}/eddy_corrected_data.nii.gz".format(namer.dirs['output']['prep_m'])
     cmd='eddy_correct ' + dwi + ' ' + dwi_prep + ' 0'
-    #os.system(cmd)
+    os.system(cmd)
 
     print("Rotating b-vectors and generating gradient table...")
     eddy_rot_param = "{}/eddy_corrected_data.ecclog".format(namer.dirs['output']['prep_m'])
@@ -134,11 +134,11 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
     bvec_rotated = "{}/bvec_rotated.bvec".format(namer.dirs['output']['prep_m'])
 
     # Rescale bvecs
-    #mgp.rescale_bvec(bvecs, bvec_scaled)
+    mgp.rescale_bvec(bvecs, bvec_scaled)
 
     # Rotate bvecs
     cmd='bash fdt_rotate_bvecs ' + bvec_scaled + ' ' + bvec_rotated + ' ' + eddy_rot_param
-    #os.system(cmd)
+    os.system(cmd)
 
     [gtab, nodif_B0, nodif_B0_mask] = mgu.make_gtab_and_bmask(bvals, bvec_rotated, dwi_prep, namer.dirs['output']['prep_m'])
     # -------- Registration Steps ----------------------------------- #
