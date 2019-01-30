@@ -29,9 +29,7 @@ from dipy.tracking.streamline import Streamlines
 
 class run_track(object):
     def __init__(self, dwi_in, nodif_B0_mask, gm_in_dwi, vent_csf_in_dwi,
-                 wm_in_dwi, wm_in_dwi_bin, gtab,
-                 seeds=1000000, a_low=0.02, step_sz=0.5,
-                 max_points=2000, ang_thr=60.0):
+                 wm_in_dwi, wm_in_dwi_bin, gtab):
         """
         A class for deterministic tractography in native space.
 
@@ -63,14 +61,6 @@ class run_track(object):
             nibabel is capable of reading, with data as a 3D object.
         gtab: string
             - Gradient table.
-        seeds: int
-            - the number of seeds to use for tractography.
-        a_low: float
-        step_sz: float
-            - Step Size.
-        max_points: int
-        ang_thr: float
-            - Angular Threshold for the angle fibers can take.
         """
         self.dwi = dwi_in
         self.nodif_B0_mask = nodif_B0_mask
@@ -116,9 +106,7 @@ class run_track(object):
 
     def det_connectometry(self):
         print('Running deterministic tractography...')
-        self.streamline_generator = EuDX(self.fa, self.ind, odf_vertices=self.sphere.vertices, 
-            a_low=self.a_low, seeds=self.seeds, step_sz=self.step_sz,
-            max_points=self.max_points, ang_thr=self.ang_thr, affine=self.dwi_img.affine)
+        self.streamline_generator = EuDX(self.fa, self.ind, odf_vertices=self.sphere.vertices, a_low=float(0.02), seeds=int(1000000), step_sz=float(0.5), max_points=int(2000), ang_thr=float(60.0), affine=self.dwi_img.affine)
         self.streamlines = Streamlines(self.streamline_generator, buffer_size=512)
         self.tracks = [sl for sl in self.streamlines if len(sl) > 1]
-        return self.tracks
+        return self.tracks, self.ten

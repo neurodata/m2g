@@ -31,8 +31,8 @@ from ndmg.stats.qa_fibers import *
 from ndmg.stats.qa_mri import qa_mri
 from ndmg.utils import gen_utils as mgu
 from ndmg.register import gen_reg as mgr
-import ndmg.track as mgt
-import ndmg.graph as mgg
+from ndmg.track import gen_track as mgt
+from ndmg.graph import gen_graph as mgg
 import ndmg.preproc as mgp
 import numpy as np
 import nibabel as nib
@@ -125,55 +125,62 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
     # -------- Preprocessing Steps --------------------------------- #
     # Perform eddy correction
     dwi_prep = "{}/eddy_corrected_data.nii.gz".format(namer.dirs['output']['prep_m'])
-    #cmd='eddy_correct ' + dwi + ' ' + dwi_prep + ' 0'
+    cmd='eddy_correct ' + dwi + ' ' + dwi_prep + ' 0'
     #os.system(cmd)
 
     print("Rotating b-vectors and generating gradient table...")
-    eddy_rot_param = dwi_prep.split('/')[-1].split('.')[0] + 'eddy_corrected_data.ecclog'
-    dwi = dwi_prep
-    bvec_rotated = "{}/bvec_rotated.bvec".format(namer.dirs['output']['prep_m'])
+    eddy_rot_param = "{}/eddy_corrected_data.ecclog".format(namer.dirs['output']['prep_m'])
     bvec_scaled = "{}/bvec_scaled.bvec".format(namer.dirs['output']['prep_m'])
-
-    # Rotate bvecs
-    cmd='fdt_rotate_bvecs ' + bvecs + ' ' + bvec_rotated + ' ' + eddy_rot_param
-    os.system(cmd)
+    bvec_rotated = "{}/bvec_rotated.bvec".format(namer.dirs['output']['prep_m'])
 
     # Rescale bvecs
-    mgp.rescale_bvec(bvec_rotated, bvec_scaled)
+    #mgp.rescale_bvec(bvecs, bvec_scaled)
 
-    [gtab, nodif_B0, nodif_B0_mask] = mgu.make_gtab_and_bmask(bvals, bvec_scaled, dwi, namer.dirs['output']['prep_m'])
+    # Rotate bvecs
+    cmd='bash fdt_rotate_bvecs ' + bvec_scaled + ' ' + bvec_rotated + ' ' + eddy_rot_param
+    #os.system(cmd)
+
+    [gtab, nodif_B0, nodif_B0_mask] = mgu.make_gtab_and_bmask(bvals, bvec_rotated, dwi_prep, namer.dirs['output']['prep_m'])
     # -------- Registration Steps ----------------------------------- #
     vox_size = '2mm'
     reg = mgr.dmri_reg(outdir, nodif_B0, nodif_B0_mask, t1w, vox_size, simple=False)
     # Perform anatomical segmentation
     start_time = time.time()
-    reg.gen_tissue()
+    #reg.gen_tissue()
     print("%s%s%s" % ('gen_tissue runtime: ', str(np.round(time.time() - start_time, 1)), 's'))
     # align t1w to dwi
     start_time = time.time()
-    reg.t1w2dwi_align()
+    #reg.t1w2dwi_align()
     print("%s%s%s" % ('t1w2dwi_align runtime: ', str(np.round(time.time() - start_time, 1)), 's'))
     # align atlas to t1w to dwi
     start_time = time.time()
     print("%s%s" % ('Applying native-space alignment to ', atlas))
-    reg.atlas2t1w2dwi_align(atlas)
+    #reg.atlas2t1w2dwi_align(atlas)
     print("%s%s%s" % ('atlas2t1w2dwi_align runtime: ', str(np.round(time.time() - start_time, 1)), 's'))
     # align tissue classifiers
     start_time = time.time()
-    reg.tissue2dwi_align()
+    #reg.tissue2dwi_align()
     print("%s%s%s" % ('tissue2dwi_align runtime: ', str(np.round(time.time() - start_time, 1)), 's'))
 
     # -------- Tensor Fitting and Fiber Tractography ---------------- #
     # Compute tensors and track fiber streamlines
     print("Beginning tractography...")
-    trac = mgt.run_track(dwi_prep, reg.nodif_B0_mask, reg.gm_in_dwi, reg.vent_csf_in_dwi,
-               reg.wm_in_dwi, reg.wm_in_dwi_bin, gtab, seeds=1000000,
-               a_low=0.02, step_sz=0.5, max_points=2000, ang_thr=60.0)
+    print('dwi_prep: ' + dwi_prep)
+    print('nodif_B0_mask: ' + nodif_B0_mask)
+    print('gm_in_dwi: ' + reg.gm_in_dwi)
+    print('vent_csf_in_dwi: ' + reg.vent_csf_in_dwi)
+    print('wm_in_dwi: ' + reg.wm_in_dwi)
+    print('wm_in_dwi_bin: ' + reg.wm_in_dwi_bin)
+    print('gtab: ' + gtab)
+    trct = mgt.run_track(dwi_prep, nodif_B0_mask, reg.gm_in_dwi, reg.vent_csf_in_dwi, reg.wm_in_dwi, reg.wm_in_dwi_bin, gtab)
+    [tracks, tens] = trct.run()
+    print('tracks: ' + tracks)
+    print('tens: ' + tens)    
 
     # As we've only tested VTK plotting on MNI152 aligned data...
     if nib.load(mask).get_data().shape == (182, 218, 182):
         try:
-            visualize_fibs(tracks, fibers, mask, namer.dirs['qa']['fiber'], 0.02)
+            visualize_fibs(tracks, fibers, nodif_B0_mask, namer.dirs['qa']['fiber'], 0.02)
         except:
             print("Fiber QA failed - VTK for Python not configured properly.")
 
@@ -193,8 +200,8 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
     # Generate graphs from streamlines for each parcellation
     for idx, label in enumerate(labels):
         print("Generating graph for {} parcellation...".format(label))
-        label2dwi = reg.atlas2t1w2dwi_align(labels[idx])
-        g1 = mgg(label2dwi)
+        labels_im = reg.atlas2t1w2dwi_align(labels[idx])
+        g1 = mgg(len(np.unique(labels_im.get_data()))-1, labels[idx])
         g1.make_graph(tracks)
         g1.summary()
         g1.save_graph(connectomes[idx])
