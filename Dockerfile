@@ -28,6 +28,13 @@ RUN wget https://bootstrap.pypa.io/get-pip.py && \
 
 RUN pip install --upgrade pip
 
+# Get neurodebian config
+RUN curl -sSL http://neuro.debian.net/lists/stretch.us-tn.full >> /etc/apt/sources.list.d/neurodebian.sources.list && \
+    apt-key add /root/.neurodebian.gpg && \
+    (apt-key adv --refresh-keys --keyserver hkp://ha.pool.sks-keyservers.net 0xA5D32F012649A5A9 || true) && \
+    apt-get update -qq
+RUN apt-get -f install
+
 #---------AFNI INSTALL--------------------------------------------------------#
 # setup of AFNI, which provides robust modifications of many of neuroimaging
 # algorithms
@@ -62,7 +69,7 @@ ENV PATH=/opt/afni:$PATH
 RUN \
     pip install numpy networkx>=1.11 nibabel>=2.0 dipy==0.14.0 scipy \
     python-dateutil==2.6.1 boto3 awscli matplotlib==1.5.3 plotly==1.12.9 nilearn>=0.2 sklearn>=0.0 \
-    pandas cython vtk pyvtk awscli requests==2.5.3 scikit-image pybids==0.6.4
+    pandas cython vtk pyvtk awscli requests==2.5.3 scikit-image pybids==0.6.4 ipython
 
 RUN \
     git clone -b dev-dmri-fmri $NDMG_URL /ndmg && \

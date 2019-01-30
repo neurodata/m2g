@@ -30,7 +30,7 @@ import ndmg
 import time
 
 
-class graph(object):
+class graph_tools(object):
     def __init__(self, rois, attr=None, sens="dmri"):
         """
         Initializes the graph with nodes corresponding to the number of ROIs
