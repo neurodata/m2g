@@ -149,8 +149,16 @@ class graph_tools(object):
                 graphname:
                     - Filename for the graph
         """
-        np.savetxt(graphname, self.g, comments='', delimiter=',',
-            header=','.join([str(n) for n in self.n_ids]))
+        self.g.graph['ecount'] = nx.number_of_edges(self.g)
+        g = nx.convert_node_labels_to_integers(self.g, first_label=1)
+        if fmt == 'edgelist':
+            nx.write_weighted_edgelist(g, graphname, encoding='utf-8')
+        elif fmt == 'gpickle':
+            nx.write_gpickle(g, graphname)
+        elif fmt == 'graphml':
+            nx.write_graphml(g, graphname)
+        else:
+            raise ValueError('edgelist, gpickle, and graphml currently supported')
         pass
 
     def summary(self):
