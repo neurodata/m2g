@@ -22,7 +22,8 @@
 from ndmg.utils import gen_utils as mgu
 from ndmg.utils import reg_utils as mgru
 import nibabel as nb
-
+import warnings
+warnings.filterwarnings("ignore", message="numpy.dtype size changed")
 
 class preproc_anat():
 

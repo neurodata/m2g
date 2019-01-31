@@ -25,7 +25,8 @@ import random
 import os
 import getpass
 import subprocess
-
+import warnings
+warnings.filterwarnings("ignore", message="numpy.dtype size changed")
 from dipy.viz import window, actor
 from argparse import ArgumentParser
 

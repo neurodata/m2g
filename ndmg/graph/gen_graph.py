@@ -27,7 +27,8 @@ import networkx as nx
 import nibabel as nb
 import ndmg
 import time
-
+import warnings
+warnings.filterwarnings("ignore", message="numpy.dtype size changed")
 
 class graph_tools(object):
     def __init__(self, rois, streamlines, attr=None, sens="dmri"):

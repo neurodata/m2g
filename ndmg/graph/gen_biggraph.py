@@ -28,7 +28,14 @@ import networkx as nx
 import nibabel as nb
 import ndmg
 import time
-#from ndmg.graph.zindex import XYZMorton
+import warnings
+warnings.filterwarnings("ignore", message="numpy.dtype size changed")
+import pyximport
+try:
+    from ndmg.graph.zindex import XYZMorton
+except:
+    pyximport.install()
+    from ndmg.graph.zindex import XYZMorton
 import os
 
 

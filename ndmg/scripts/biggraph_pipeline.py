@@ -19,6 +19,8 @@
 # Created by Greg Kiar and Will Gray Roncal on 2016-01-27.
 # Email: gkiar@jhu.edu, wgr@jhu.edu
 
+import warnings
+warnings.filterwarnings("ignore", message="numpy.dtype size changed")
 from argparse import ArgumentParser
 from datetime import datetime
 from subprocess import Popen, PIPE

@@ -23,7 +23,8 @@ import numpy as np
 import nilearn.image as nl
 import os
 import os.path as op
-
+import warnings
+warnings.filterwarnings("ignore", message="numpy.dtype size changed")
 
 def erode_mask(mask, v=0):
     """

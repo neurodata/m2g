@@ -29,7 +29,8 @@ import numpy as np
 import nibabel as nb
 import sys
 import matplotlib
-
+import warnings
+warnings.filterwarnings("ignore", message="numpy.dtype size changed")
 matplotlib.use('Agg')  # very important above pyplot import
 import matplotlib.pyplot as plt
 

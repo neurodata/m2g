@@ -38,7 +38,7 @@ import ndmg.preproc as mgp
 import numpy as np
 import nibabel as nib
 import os
-from ndmg.graph import biggraph as ndbg
+from ndmg.graph import gen_biggraph as ndbg
 import traceback
 from ndmg.utils.bids_utils import name_resource
 import sys
@@ -104,7 +104,7 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
     start_time = time.time()
     dwi_prep = "{}/eddy_corrected_data.nii.gz".format(namer.dirs['output']['prep_m'])
     cmd='eddy_correct ' + dwi + ' ' + dwi_prep + ' 0'
-    os.system(cmd)
+    #os.system(cmd)
 
     print("Rotating b-vectors and generating gradient table...")
     eddy_rot_param = "{}/eddy_corrected_data.ecclog".format(namer.dirs['output']['prep_m'])
@@ -115,10 +115,10 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
 
     # Rotate bvecs
     cmd='bash fdt_rotate_bvecs ' + bvecs + ' ' + bvec_rotated + ' ' + eddy_rot_param
-    os.system(cmd)
+    #os.system(cmd)
 
     # Rescale bvecs
-    mgp.rescale_bvec(bvec_rotated, bvec_scaled)
+    #mgp.rescale_bvec(bvec_rotated, bvec_scaled)
 
     [gtab, nodif_B0, nodif_B0_mask] = mgu.make_gtab_and_bmask(bvals, bvec_scaled, dwi_prep, namer.dirs['output']['prep_m'])
     print("%s%s%s" % ('Preprocessing runtime: ', str(np.round(time.time() - start_time, 1)), 's'))
@@ -127,15 +127,15 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
     reg = mgr.dmri_reg(outdir, nodif_B0, nodif_B0_mask, t1w, vox_size, simple=False)
     # Perform anatomical segmentation
     start_time = time.time()
-    reg.gen_tissue()
+    #reg.gen_tissue()
     print("%s%s%s" % ('gen_tissue runtime: ', str(np.round(time.time() - start_time, 1)), 's'))
     # align t1w to dwi
     start_time = time.time()
-    reg.t1w2dwi_align()
+    #reg.t1w2dwi_align()
     print("%s%s%s" % ('t1w2dwi_align runtime: ', str(np.round(time.time() - start_time, 1)), 's'))
     # align tissue classifiers
     start_time = time.time()
-    reg.tissue2dwi_align()
+    #reg.tissue2dwi_align()
     print("%s%s%s" % ('tissue2dwi_align runtime: ', str(np.round(time.time() - start_time, 1)), 's'))
 
     # -------- Tensor Fitting and Fiber Tractography ---------------- #
@@ -163,7 +163,7 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
     # Generate big graphs from streamlines
     if big:
         print("Making Voxelwise Graph...")
-        bg1 = ndbg()
+        bg1 = ndbg.biggraph()
         bg1.make_graph(tracks)
         bg1.save_graph(voxel)
 

@@ -21,6 +21,8 @@
 from __future__ import print_function
 import numpy as np
 import nibabel as nib
+import warnings
+warnings.filterwarnings("ignore", message="numpy.dtype size changed")
 from dipy.reconst.dti import TensorModel, fractional_anisotropy, quantize_evecs
 from dipy.tracking.eudx import EuDX
 from dipy.data import get_sphere
@@ -106,7 +108,7 @@ class run_track(object):
 
     def det_connectometry(self):
         print('Running deterministic tractography...')
-        self.streamline_generator = EuDX(self.fa, self.ind, odf_vertices=self.sphere.vertices, a_low=float(0.02), seeds=int(1000000), step_sz=float(0.5), max_points=int(2000), ang_thr=float(60.0), affine=self.dwi_img.affine)
+        self.streamline_generator = EuDX(self.fa, self.ind, odf_vertices=self.sphere.vertices, a_low=float(0.02), seeds=int(10000000), step_sz=float(0.5), max_points=int(2000), ang_thr=float(60.0), affine=self.dwi_img.affine)
         self.streamlines = Streamlines(self.streamline_generator, buffer_size=512)
         self.tracks = [sl for sl in self.streamlines if len(sl) > 1]
         return self.streamlines, self.ten

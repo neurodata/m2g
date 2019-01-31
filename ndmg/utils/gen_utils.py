@@ -28,8 +28,15 @@ import numpy as np
 import nibabel as nb
 import os.path as op
 import sys
+import warnings
+warnings.filterwarnings("ignore", message="numpy.dtype size changed")
 from networkx import to_numpy_matrix as graph2np
-#from ndmg.graph.zindex import XYZMorton
+import pyximport
+try:
+   from ndmg.graph.zindex import XYZMorton
+except:
+   pyximport.install()
+   from ndmg.graph.zindex import XYZMorton
 from scipy.sparse import lil_matrix
 
 def execute_cmd(cmd, verb=False):

@@ -32,6 +32,8 @@ import networkx as nx
 import pickle
 import sys
 import os
+import warnings
+warnings.filterwarnings("ignore", message="numpy.dtype size changed")
 
 
 def compute_metrics(fs, outdir, atlas, verb=False, modality='dwi'):
