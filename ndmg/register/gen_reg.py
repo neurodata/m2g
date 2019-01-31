@@ -39,7 +39,7 @@ class dmri_reg(object):
 
     def __init__(self, outdir_base_in, nodif_B0, nodif_B0_mask, t1w_in, vox_size, simple):
         self.simple = simple
-        self.outdir_base = outdir_base_in
+        self.outdir_base = outdir_base_in + '/tmp'
         self.outdir = dict()
         self.outdir['reg_a'] = "%s%s" % (self.outdir_base, '/reg_a')
         self.outdir['reg_m'] = "%s%s" % (self.outdir_base, '/reg_m')
