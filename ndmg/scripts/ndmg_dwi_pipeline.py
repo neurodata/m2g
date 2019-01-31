@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright 2016 NeuroData (http://neurodata.io)
+# Copyright 2019 NeuroData (http://neurodata.io)
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,11 +15,12 @@
 #
 
 # ndmg_dwi_pipeline.py
-# Created by Greg Kiar and Will Gray Roncal on 2016-01-27.
-# Email: gkiar@jhu.edu, wgr@jhu.edu
-# Edited by Eric Bridgeford on 2017-07-13.
+# Repackaged for native space tractography by Derek Pisner
+# Email: dpisner@utexas.edu
+# Originally created by Greg Kiar and Will Gray Roncal on 2016-01-27.
 
 from __future__ import print_function
+import shutil
 import warnings
 warnings.filterwarnings("ignore", message="numpy.dtype size changed")
 from argparse import ArgumentParser
@@ -78,30 +79,8 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
         namer.get_template_info())
     reg_aname = "{}_{}".format(namer.get_anat_source(),
         namer.get_template_info())
-    preproc_dwi = namer.name_derivative(namer.dirs['output']['prep_m'],
-        "{}_preproc.nii.gz".format(namer.get_mod_source()))
-    motion_dwi = namer.name_derivative(namer.dirs['tmp']['prep_m'],
-        "{}_variant-mc_preproc.nii.gz".format(namer.get_mod_source()))
-    preproc_t1w_brain = namer.name_derivative(namer.dirs['output']['prep_a'],
-        "{}_preproc_brain.nii.gz".format(namer.get_anat_source()))
-
-    aligned_dwi = namer.name_derivative(namer.dirs['output']['reg_m'],
-        "{}_registered.nii.gz".format(reg_dname))
-    aligned_t1w = namer.name_derivative(namer.dirs['output']['reg_a'],
-        "{}_registered.nii.gz".format(reg_aname))
-
-    tensors = namer.name_derivative(namer.dirs['output']['tensor'],
-        "{}_tensor.npz".format(reg_dname))
-    fibers = namer.name_derivative(namer.dirs['output']['fiber'],
-        "{}_fibers.npz".format(reg_dname))
-
-    print("This pipeline will produce the following derivatives...")
-    if not clean:
-        print("dMRI volumes preprocessed: {}".format(preproc_dwi))
-        print("T1w volume preprocessed: {}".format(preproc_t1w_brain))
-        print("dMRI volume registered to template: {}".format(aligned_dwi))
-    print("dMRI Tensors: {}".format(tensors))
-    print("dMRI Fibers: {}".format(fibers))
+    streams = namer.name_derivative(namer.dirs['output']['fiber'],
+        "{}_streamlines.dpy".format(reg_dname))
 
     if big:
         voxel = namer.name_derivative(namer.dirs['output']['voxel'],
@@ -120,46 +99,43 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
           ", ".join(connectomes))
 
     qc_dwi = qa_mri(namer, 'dwi')  # for quality control
-    # Align fMRI volumes to Atlas
-
     # -------- Preprocessing Steps --------------------------------- #
     # Perform eddy correction
+    start_time = time.time()
     dwi_prep = "{}/eddy_corrected_data.nii.gz".format(namer.dirs['output']['prep_m'])
     cmd='eddy_correct ' + dwi + ' ' + dwi_prep + ' 0'
-    #os.system(cmd)
+#    os.system(cmd)
 
     print("Rotating b-vectors and generating gradient table...")
     eddy_rot_param = "{}/eddy_corrected_data.ecclog".format(namer.dirs['output']['prep_m'])
     bvec_scaled = "{}/bvec_scaled.bvec".format(namer.dirs['output']['prep_m'])
     bvec_rotated = "{}/bvec_rotated.bvec".format(namer.dirs['output']['prep_m'])
+    bval = "{}/bval.bval".format(namer.dirs['output']['prep_m'])
+#    shutil.copyfile(bvals, bval)  
 
     # Rotate bvecs
     cmd='bash fdt_rotate_bvecs ' + bvecs + ' ' + bvec_rotated + ' ' + eddy_rot_param
-    os.system(cmd)
+#    os.system(cmd)
 
     # Rescale bvecs
-    mgp.rescale_bvec(bvec_rotated, bvec_scaled)
+#    mgp.rescale_bvec(bvec_rotated, bvec_scaled)
 
     [gtab, nodif_B0, nodif_B0_mask] = mgu.make_gtab_and_bmask(bvals, bvec_scaled, dwi_prep, namer.dirs['output']['prep_m'])
+    print("%s%s%s" % ('Preprocessing runtime: ', str(np.round(time.time() - start_time, 1)), 's'))
     # -------- Registration Steps ----------------------------------- #
     vox_size = '2mm'
     reg = mgr.dmri_reg(outdir, nodif_B0, nodif_B0_mask, t1w, vox_size, simple=False)
     # Perform anatomical segmentation
     start_time = time.time()
-    reg.gen_tissue()
+#    reg.gen_tissue()
     print("%s%s%s" % ('gen_tissue runtime: ', str(np.round(time.time() - start_time, 1)), 's'))
     # align t1w to dwi
     start_time = time.time()
-    reg.t1w2dwi_align()
+#    reg.t1w2dwi_align()
     print("%s%s%s" % ('t1w2dwi_align runtime: ', str(np.round(time.time() - start_time, 1)), 's'))
-    # align atlas to t1w to dwi
-    start_time = time.time()
-    print("%s%s" % ('Applying native-space alignment to ', atlas))
-    reg.atlas2t1w2dwi_align(atlas)
-    print("%s%s%s" % ('atlas2t1w2dwi_align runtime: ', str(np.round(time.time() - start_time, 1)), 's'))
     # align tissue classifiers
     start_time = time.time()
-    reg.tissue2dwi_align()
+#    reg.tissue2dwi_align()
     print("%s%s%s" % ('tissue2dwi_align runtime: ', str(np.round(time.time() - start_time, 1)), 's'))
 
     # -------- Tensor Fitting and Fiber Tractography ---------------- #
@@ -170,15 +146,16 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
 
     tracks = [sl for sl in streamlines if len(sl) > 1]
 
-    # And save them to disk
-    dpw = Dpy(fibers, 'w')
+    # Save streamlines to disk
+    print('Streamlines: ' + streams)
+    dpw = Dpy(streams, 'w')
     dpw.write_tracks(streamlines)
     dpw.close()
 
     # As we've only tested VTK plotting on MNI152 aligned data...
     if nib.load(mask).get_data().shape == (182, 218, 182):
         try:
-            visualize_fibs(tracks, fibers, aligned_atlas, namer.dirs['qa']['fiber'], 0.02, 2000)
+            visualize_fibs(streamlines, streams, aligned_atlas, namer.dirs['qa']['fiber'], 0.02, 2000)
         except:
             print("Fiber QA failed - VTK for Python not configured properly.")
 
@@ -194,8 +171,12 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
     # Generate graphs from streamlines for each parcellation
     for idx, label in enumerate(labels):
         print("Generating graph for {} parcellation...".format(label))
-        labels_im = reg.atlas2t1w2dwi_align(labels[idx])
-        g1 = mgg(len(np.unique(labels_im.get_data()))-1, labels[idx])
+	print("%s%s" % ('Applying native-space alignment to ', labels[idx]))
+	# align atlas to t1w to dwi
+        labels_im_file = reg.atlas2t1w2dwi_align(labels[idx])
+	print('Aligned Atlas: ' + labels_im_file)
+	labels_im = nib.load(labels_im_file)
+	g1 = mgg.graph_tools(attr=len(np.unique(labels_im.get_data()))-1, rois=labels[idx])
         g1.make_graph(tracks)
         g1.summary()
         g1.save_graph(connectomes[idx])

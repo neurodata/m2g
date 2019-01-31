@@ -56,6 +56,7 @@ class graph_tools(object):
         pass
 
     def make_graph(self, streamlines, attr=None):
+	from dipy.tracking.utils import connectivity_matrix
         """
         Takes streamlines and produces a graph. Note that the parcellation is
         expected to be numbered from 0 to n, where n are the number of vertices.
@@ -67,9 +68,7 @@ class graph_tools(object):
                     - Fiber streamlines either file or array in a dipy EuDX
                       or compatible format.
         """
-        self.g, _ = utils.connectivity_matrix(self.tracks, self.rois,
-        affine=self.dwi_img.affine, return_mapping=True, mapping_as_streamlines=True,
-            symmetric=True)
+        self.g, _ = connectivity_matrix(self.tracks, self.rois, affine=self.dwi_img.affine, return_mapping=True, mapping_as_streamlines=True, symmetric=True)
         self.conn_matrix_filt = self.conn_matrix[1:self.N, 1:self.N]
         return self.conn_matrix_symm
 
