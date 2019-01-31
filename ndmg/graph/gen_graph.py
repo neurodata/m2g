@@ -140,7 +140,7 @@ class graph_tools(object):
         g = self.get_graph()
         return nx.to_numpy_matrix(g, nodelist=np.sort(g.nodes()).tolist())
 
-    def save_graph(self, graphname, fmt='edgelist'):
+    def save_graph(self, graphname, fmt='txt'):
         """
         Saves the graph to disk
 
@@ -157,6 +157,10 @@ class graph_tools(object):
             nx.write_gpickle(g, graphname)
         elif fmt == 'graphml':
             nx.write_graphml(g, graphname)
+	elif fmt == 'txt':
+	    np.savetxt(graphname, nx.to_numpy_matrix(g))
+        elif fmt == 'npy':
+            np.save(graphname, nx.to_numpy_matrix(g))
         else:
             raise ValueError('edgelist, gpickle, and graphml currently supported')
         pass
