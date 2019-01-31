@@ -140,7 +140,7 @@ class graph_tools(object):
         g = self.get_graph()
         return nx.to_numpy_matrix(g, nodelist=np.sort(g.nodes()).tolist())
 
-    def save_graph(self, graphname):
+    def save_graph(self, graphname, fmt='edgelist'):
         """
         Saves the graph to disk
 
