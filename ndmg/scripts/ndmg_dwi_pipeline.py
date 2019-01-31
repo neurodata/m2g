@@ -176,8 +176,8 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
         labels_im_file = reg.atlas2t1w2dwi_align(labels[idx])
 	print('Aligned Atlas: ' + labels_im_file)
 	labels_im = nib.load(labels_im_file)
-	g1 = mgg.graph_tools(attr=len(np.unique(labels_im.get_data()))-1, rois=labels[idx])
-        g1.make_graph(tracks)
+	g1 = mgg.graph_tools(attr=len(np.unique(labels_im.get_data()))-1, rois=labels[idx], streamlines=streamlines)
+        g1.make_graph()
         g1.summary()
         g1.save_graph(connectomes[idx])
 
