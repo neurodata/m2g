@@ -92,7 +92,7 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
         labels = [labels]
     connectomes = [namer.name_derivative(
         namer.dirs['output']['conn'][namer.get_label(lab)],
-        "{}_{}_measure-spatial-ds.{}".format(namer.get_mod_source(),
+        "{}_{}_measure-spatial-ds{}".format(namer.get_mod_source(),
             namer.get_label(lab), fmt)) for lab in labels]
 
     print("Connectomes downsampled to given labels: " +
