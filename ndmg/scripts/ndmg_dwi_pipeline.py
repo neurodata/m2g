@@ -48,7 +48,7 @@ os.environ["MPLCONFIGDIR"] = "/tmp/"
 
 
 def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
-                    clean=False, big=False):
+                    clean=False, big=True):
     """
     Creates a brain graph from MRI data
     """
@@ -147,10 +147,9 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
     #tracks = [sl for sl in streamlines if len(sl) > 1]
 
     # Save streamlines to disk
-    #print('Streamlines: ' + streams)
-    #dpw = Dpy(streams, 'w')
-    #dpw.write_tracks(streamlines)
-    #dpw.close()
+    print('Saving streamlines: ' + streams)
+    tractogram = Tractogram(streamlines, affine_to_rasmm=nib.load(dwi_prep).affine)
+    save(tractogram, streams)
 
     # As we've only tested VTK plotting on MNI152 aligned data...
     if nib.load(mask).get_data().shape == (182, 218, 182):
