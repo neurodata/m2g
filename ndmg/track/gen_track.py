@@ -102,13 +102,13 @@ class run_track(object):
         self.model = TensorModel(self.gtab)
         self.ten = self.model.fit(self.data, self.mask)
         self.fa = self.ten.fa
+	self.fa[np.isnan(self.fa)] = 0
         self.sphere = get_sphere('symmetric724')
         self.ind = quantize_evecs(self.ten.evecs, self.sphere.vertices)
         return
 
     def det_connectometry(self):
         print('Running deterministic tractography...')
-        self.streamline_generator = EuDX(self.fa, self.ind, odf_vertices=self.sphere.vertices, a_low=float(0.02), seeds=int(10000000), step_sz=float(0.5), max_points=int(2000), ang_thr=float(60.0), affine=self.dwi_img.affine)
+        self.streamline_generator = EuDX(self.fa.astype('f8'), self.ind, odf_vertices=self.sphere.vertices, a_low=float(0.2), seeds=int(1000000))
         self.streamlines = Streamlines(self.streamline_generator, buffer_size=512)
-        self.tracks = [sl for sl in self.streamlines if len(sl) > 1]
         return self.streamlines, self.ten

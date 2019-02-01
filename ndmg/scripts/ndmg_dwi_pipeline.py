@@ -144,13 +144,13 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
     trct = mgt.run_track(dwi_prep, nodif_B0_mask, reg.gm_in_dwi, reg.vent_csf_in_dwi, reg.wm_in_dwi, reg.wm_in_dwi_bin, gtab)
     [streamlines, tens] = trct.run()
 
-    tracks = [sl for sl in streamlines if len(sl) > 1]
+    #tracks = [sl for sl in streamlines if len(sl) > 1]
 
     # Save streamlines to disk
-    print('Streamlines: ' + streams)
-    dpw = Dpy(streams, 'w')
-    dpw.write_tracks(streamlines)
-    dpw.close()
+    #print('Streamlines: ' + streams)
+    #dpw = Dpy(streams, 'w')
+    #dpw.write_tracks(streamlines)
+    #dpw.close()
 
     # As we've only tested VTK plotting on MNI152 aligned data...
     if nib.load(mask).get_data().shape == (182, 218, 182):
