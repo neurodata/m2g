@@ -42,7 +42,7 @@ from ndmg.graph import gen_biggraph as ndbg
 import traceback
 from ndmg.utils.bids_utils import name_resource
 import sys
-from dipy.io.dpy import Dpy
+from nibabel.streamlines import Tractogram, save
 
 os.environ["MPLCONFIGDIR"] = "/tmp/"
 
