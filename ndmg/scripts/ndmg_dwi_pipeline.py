@@ -100,21 +100,22 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
 
     qc_dwi = qa_mri(namer, 'dwi')  # for quality control
     # -------- Preprocessing Steps --------------------------------- #
-    # Check orientation
-#    if nib.aff2axcodes(img.affine)[0] == 'L':
+    # Check orientation (dwi)
+    img = nib.load(dwi)
+    if nib.aff2axcodes(img.affine)[0] == 'L':
         # Orient dwi to std
-#	dwi_orig = dwi
-#	dwi = "{}/dwi_reoriented.nii.gz".format(namer.dirs['output']['prep_m'])
-#	shutil.copyfile(dwi_orig, dwi)
-#        cmd='fslreorient2std ' + dwi
-#        os.system(cmd)
+	dwi_orig = dwi
+	dwi = "{}/dwi_reoriented.nii.gz".format(namer.dirs['output']['prep_m'])
+	shutil.copyfile(dwi_orig, dwi)
+        cmd='fslreorient2std ' + dwi
+        os.system(cmd)
 	# Swap x-y axis in bvecs
-#	bvecs_orig = bvecs
-#	bvec = "{}/bvec_reoriented.bvec".format(namer.dirs['output']['prep_m'])
-#	shutil.copyfile(bvecs_orig, bvecs)
-#	bvecs_mat = np.genfromtxt(bvecs)
-#	bvecs_mat[[0, 1]] = bvecs_mat[[1, 0]]
-#	np.savetxt(bvecs, bvecs_mat)
+	bvecs_orig = bvecs
+	bvecs = "{}/bvec_reoriented.bvec".format(namer.dirs['output']['prep_m'])
+	shutil.copyfile(bvecs_orig, bvecs)
+	bvecs_mat = np.genfromtxt(bvecs)
+	bvecs_mat[[0, 1]] = bvecs_mat[[1, 0]]
+	np.savetxt(bvecs, bvecs_mat)
 
     # Perform eddy correction
     start_time = time.time()
@@ -136,12 +137,15 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
     # Rescale bvecs
     mgp.rescale_bvec(bvec_rotated, bvec_scaled)
 
-    # Orient t1w to std
-#    t1w_orig = t1w
-#    t1w = "{}/t1w_reoriented.nii.gz".format(namer.dirs['output']['prep_m'])
-#    shutil.copyfile(t1w_orig, t1w)
-#    cmd='fslreorient2std ' + t1w
-#    os.system(cmd)
+    # Check orientation (t1w)
+    img = nib.load(t1w):
+    if nib.aff2axcodes(img.affine)[0] == 'L':
+        # Orient t1w to std
+        t1w_orig = t1w
+        t1w = "{}/t1w_reoriented.nii.gz".format(namer.dirs['output']['prep_m'])
+        shutil.copyfile(t1w_orig, t1w)
+        cmd='fslreorient2std ' + t1w
+        os.system(cmd)
 
     [gtab, nodif_B0, nodif_B0_mask] = mgu.make_gtab_and_bmask(bvals, bvec_scaled, dwi_prep, namer.dirs['output']['prep_m'])
     print("%s%s%s" % ('Preprocessing runtime: ', str(np.round(time.time() - start_time, 1)), 's'))
