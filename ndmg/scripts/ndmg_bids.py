@@ -70,23 +70,38 @@ def get_atlas(atlas_dir, modality='dwi'):
     we have all the atlases and parcellations.
     """ 
     if modality == 'dwi':
-        atlas = op.join(atlas_dir, 'atlas/MNI152NLin6_res-1x1x1_T1w.nii.gz')
+#        atlas = op.join(atlas_dir, 'atlas/MNI152NLin6_res-1x1x1_T1w.nii.gz')
+#        atlas_mask = op.join(atlas_dir,
+#                             'mask/MNI152NLin6_res-1x1x1_T1w_brainmask.nii.gz')
+#        labels= ['HarvardOxfordcort-maxprob-thr25_res-1x1x1.nii.gz',
+#                 'HarvardOxfordsub-maxprob-thr25_res-1x1x1.nii.gz',
+#                 'slab1068_res-1x1x1.nii.gz', 'slab907_res-1x1x1.nii.gz',
+#                 'aal_res-1x1x1.nii.gz', 'brodmann_res-1x1x1.nii.gz',
+#                 'desikan_res-1x1x1.nii.gz',
+#                 'CPAC200_res-1x1x1.nii.gz', 'DS00071_res-1x1x1.nii.gz',
+#                 'DS00096_res-1x1x1.nii.gz', 'DS00108_res-1x1x1.nii.gz',
+#                 'DS00140_res-1x1x1.nii.gz', 'DS00195_res-1x1x1.nii.gz',
+#                 'DS00278_res-1x1x1.nii.gz', 'DS00350_res-1x1x1.nii.gz',
+#                 'DS00446_res-1x1x1.nii.gz', 'DS00583_res-1x1x1.nii.gz',
+#                 'DS00833_res-1x1x1.nii.gz', 'DS01216_res-1x1x1.nii.gz',
+#                 'DK_res-1x1x1.nii.gz', 'JHU_res-1x1x1.nii.gz',
+#                 'tissue_res-1x1x1.nii.gz', 'hemispheric_res-1x1x1.nii.gz']
+        atlas = op.join(atlas_dir, 'atlas/MNI152NLin6_res-2x2x2_T1w.nii.gz')
         atlas_mask = op.join(atlas_dir,
-                             'mask/MNI152NLin6_res-1x1x1_T1w_brainmask.nii.gz')
-        labels= ['HarvardOxfordcort-maxprob-thr25_res-1x1x1.nii.gz',
-                 'HarvardOxfordsub-maxprob-thr25_res-1x1x1.nii.gz',
-                 'slab1068_res-1x1x1.nii.gz', 'slab907_res-1x1x1.nii.gz',
-                 'aal_res-1x1x1.nii.gz', 'brodmann_res-1x1x1.nii.gz',
-                 'desikan_res-1x1x1.nii.gz',
-                 'CPAC200_res-1x1x1.nii.gz', 'DS00071_res-1x1x1.nii.gz',
-                 'DS00096_res-1x1x1.nii.gz', 'DS00108_res-1x1x1.nii.gz',
-                 'DS00140_res-1x1x1.nii.gz', 'DS00195_res-1x1x1.nii.gz',
-                 'DS00278_res-1x1x1.nii.gz', 'DS00350_res-1x1x1.nii.gz',
-                 'DS00446_res-1x1x1.nii.gz', 'DS00583_res-1x1x1.nii.gz',
-                 'DS00833_res-1x1x1.nii.gz', 'DS01216_res-1x1x1.nii.gz',
-                 'DK_res-1x1x1.nii.gz', 'JHU_res-1x1x1.nii.gz',
-                 'tissue_res-1x1x1.nii.gz', 'hemispheric_res-1x1x1.nii.gz']
- 
+                             'mask/MNI152NLin6_res-2x2x2_T1w_brainmask.nii.gz')
+        labels= ['HarvardOxfordcort-maxprob-thr25_res-2x2x2.nii.gz',
+                 'HarvardOxfordsub-maxprob-thr25_res-2x2x2.nii.gz',
+                 'aal_res-2x2x2.nii.gz', 'brodmann_res-2x2x2.nii.gz',
+                 'desikan_res-2x2x2.nii.gz',
+                 'CPAC200_res-2x2x2.nii.gz', 'DS00071_res-2x2x2.nii.gz',
+                 'DS00096_res-2x2x2.nii.gz', 'DS00108_res-2x2x2.nii.gz',
+                 'DS00140_res-2x2x2.nii.gz', 'DS00195_res-2x2x2.nii.gz',
+                 'DS00278_res-2x2x2.nii.gz', 'DS00350_res-2x2x2.nii.gz',
+                 'DS00446_res-2x2x2.nii.gz', 'DS00583_res-2x2x2.nii.gz',
+                 'DS00833_res-2x2x2.nii.gz', 'DS01216_res-2x2x2.nii.gz',
+                 'DK_res-2x2x2.nii.gz', 'JHU_res-2x2x2.nii.gz',
+                 'tissue_res-2x2x2.nii.gz', 'hemispheric_res-2x2x2.nii.gz']
+
         labels = [op.join(atlas_dir, 'label', l) for l in labels]
         fils = labels + [atlas, atlas_mask]
     if modality == 'func':

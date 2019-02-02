@@ -109,6 +109,6 @@ class run_track(object):
 
     def det_connectometry(self):
         print('Running deterministic tractography...')
-        self.streamline_generator = EuDX(self.fa.astype('f8'), self.ind, odf_vertices=self.sphere.vertices, a_low=float(0.2), seeds=int(1000000))
+        self.streamline_generator = EuDX(self.fa.astype('f8'), self.ind, odf_vertices=self.sphere.vertices, a_low=float(0.02), seeds=int(1000000), affine=self.dwi_img.affine)
         self.streamlines = Streamlines(self.streamline_generator, buffer_size=512)
         return self.streamlines, self.ten

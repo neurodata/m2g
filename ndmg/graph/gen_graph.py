@@ -170,6 +170,6 @@ class graph_tools(object):
         """
         User friendly wrapping and display of graph properties
         """
-        print("\n Graph Summary:")
+        print("\nGraph Summary:")
         print(nx.info(self.g))
         pass
