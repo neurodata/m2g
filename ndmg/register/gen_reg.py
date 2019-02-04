@@ -15,9 +15,9 @@
 # limitations under the License.
 #
 # register.py
-# Created by Eric Bridgeford.
 # Repackaged for native space registrations by Derek Pisner on 2019-01-16
 # Email: dpisner@utexas.edu.
+# epi_register created by Eric Bridgeford.
 
 from __future__ import print_function
 import warnings
@@ -68,8 +68,9 @@ class dmri_reg(object):
         self.t1w_brain = "{}/{}_brain.nii.gz".format(self.outdir['reg_a'], self.t1w.split('.nii.gz')[0].split('/')[-1])
         self.dwi2t1w_xfm = "{}/dwi2t1w_xfm.mat".format(self.outdir['reg_m'])
         self.t1w2dwi_xfm = "{}/t1w2dwi_xfm.mat".format(self.outdir['reg_m'])
-        self.t1wmni_dwi_bbr_xfm = "{}/t1wmni_dwi_bbr_xfm.mat".format(self.outdir['reg_m'])
-        self.dwi2t1w_bbr_xfm = "{}/dwi2t1w_bbr_xfm.mat".format(self.outdir['reg_m'])
+        self.t1w2dwi_bbr_xfm = "{}/t1w2dwi_bbr_xfm.mat".format(self.outdir['reg_m'])
+	self.dwi2t1w_bbr_xfm = "{}/dwi2t1w_bbr_xfm.mat".format(self.outdir['reg_m'])
+	self.t1wtissue2dwi_xfm = "{}/t1wtissue2dwi_xfm.mat".format(self.outdir['reg_m'])
         self.xfm_atlas2t1w_init = "{}/{}_xfm_atlas2t1w_init.mat".format(self.outdir['reg_m'], self.t1w_name)
         self.xfm_atlas2t1w = "{}/{}_xfm_atlas2t1w.mat".format(self.outdir['reg_m'], self.t1w_name)
         self.temp2dwi_xfm = "{}/{}_xfm_temp2dwi.mat".format(self.outdir['reg_m'], self.dwi_name)
@@ -92,6 +93,7 @@ class dmri_reg(object):
         self.vent_mask_t1w = "{}/vent_mask_t1w.nii.gz".format(self.outdir['reg_a'])
         self.wm_in_dwi = "{}/{}_wm_in_dwi.nii.gz".format(self.outdir['reg_a'], self.t1w_name)
         self.wm_in_dwi_bin = "{}/{}_wm_in_dwi_bin.nii.gz".format(self.outdir['reg_a'], self.t1w_name)
+	self.wm_in_dwi_binv = "{}/{}_wm_in_dwi_binv.nii.gz".format(self.outdir['reg_a'], self.t1w_name)
         self.mni_atlas = "%s%s%s%s" % (FSLDIR, '/data/atlases/HarvardOxford/HarvardOxford-sub-prob-', vox_size, '.nii.gz')
         self.input_mni = "%s%s%s%s" % (FSLDIR, '/data/standard/MNI152_T1_', vox_size, '_brain.nii.gz')
         self.gm_in_dwi_bin = "{}/{}_gm_in_dwi_bin.nii.gz".format(self.outdir['reg_a'], self.t1w_name)
@@ -127,7 +129,7 @@ class dmri_reg(object):
             try:
                 print('Running non-linear registration: T1w-->MNI ...')
                 # Use FNIRT to nonlinearly align T1 to MNI template
-                mgru.align_nonlinear(self.t1w_brain, self.input_mni, xfm=self.t12mni_xfm_init, out=self.t1_aligned_mni, warp=self.warp_t1w2mni, mask=None)
+                #mgru.align_nonlinear(self.t1w_brain, self.input_mni, xfm=self.t12mni_xfm_init, out=self.t1_aligned_mni, warp=self.warp_t1w2mni, mask=None)
 
                 # Get warp from MNI -> T1
                 mgru.inverse_warp(self.t1w_brain, self.mni2t1w_warp, self.warp_t1w2mni)
@@ -138,24 +140,25 @@ class dmri_reg(object):
             mgru.align(self.t1w_brain, self.input_mni, xfm=self.t12mni_xfm, init=self.t12mni_xfm_init, bins=None, dof=12, cost='mutualinfo', searchrad=True, interp="spline", out=self.t1_aligned_mni, sch=None)
 
         # Align T1w-->DWI
-        mgru.align(self.nodif_B0, self.t1w_brain, xfm=self.dwi2t1w_xfm, bins=None, interp="spline", dof=7, cost='mutualinfo', out=None, searchrad=True, sch=None)
-        cmd = 'convert_xfm -omat ' + self.t1w2dwi_xfm + ' -inverse ' + self.dwi2t1w_xfm
+        mgru.align(self.nodif_B0, self.t1w_brain, xfm=self.t1w2dwi_xfm, bins=None, interp="spline", dof=7, cost='mutualinfo', out=None, searchrad=True, sch=None)
+        cmd = 'convert_xfm -omat ' + self.dwi2t1w_xfm + ' -inverse ' + self.t1w2dwi_xfm
         os.system(cmd)
 
         if self.simple is False:
             # Flirt bbr
             try:
-                mgru.align(self.nodif_B0, self.t1w_brain, wmseg=self.wm_mask, xfm=self.t1wmni_dwi_bbr_xfm, init=self.t1w2dwi_xfm, bins=256, dof=7, searchrad=True, interp="spline", out=None, cost='bbr', finesearch=5, sch="${FSLDIR}/etc/flirtsch/bbr.sch")
-                cmd = 'convert_xfm -omat ' + self.dwi2t1w_bbr_xfm + ' -inverse ' + self.t1wmni_dwi_bbr_xfm
+		print('Running FLIRT BBR registration: T1w-->DWI ...')
+                mgru.align(self.nodif_B0, self.t1w_brain, wmseg=self.wm_mask, xfm=self.dwi2t1w_bbr_xfm, init=self.dwi2t1w_xfm, bins=256, dof=7, searchrad=True, interp="spline", out=None, cost='bbr', finesearch=5, sch="${FSLDIR}/etc/flirtsch/bbr.sch")
+                cmd = 'convert_xfm -omat ' + self.t1w2dwi_bbr_xfm + ' -inverse ' + self.dwi2t1w_bbr_xfm
                 os.system(cmd)
 
                 # Apply the alignment
-                mgru.align(self.t1w_brain, self.nodif_B0, init=self.dwi2t1w_bbr_xfm, bins=None, interp="spline", dof=7, cost='mutualinfo', out=self.t1w2dwi, searchrad=True, sch=None)
+                mgru.align(self.t1w_brain, self.nodif_B0, init=self.t1w2dwi_bbr_xfm, xfm=self.t1wtissue2dwi_xfm, bins=None, interp="spline", dof=7, cost='mutualinfo', out=self.t1w2dwi, searchrad=True, sch=None)
             except RuntimeError('FLIRT BBR failed!'):
                 pass
         else:
             # Apply the alignment
-            mgru.align(self.t1w_brain, self.nodif_B0, init=self.t1w2dwi_xfm, bins=None, interp="spline", dof=7, cost='mutualinfo', out=self.t1w2dwi, searchrad=True, sch=None)
+            mgru.align(self.t1w_brain, self.nodif_B0, init=self.t1w2dwi_xfm, xfm=self.t1wtissue2dwi_xfm, bins=None, interp="spline", dof=7, cost='mutualinfo', out=self.t1w2dwi, searchrad=True, sch=None)
 
         return
 
@@ -175,13 +178,15 @@ class dmri_reg(object):
 
         if (nib.load(self.atlas).get_data().shape in [(91, 109, 91), (182, 218, 182)] and (self.simple is False)):
             try:
-                # Apply warp resulting from the inverse MNI->T1w created earlier
+		# Apply warp resulting from the inverse of T1w-->MNI created earlier
                 mgru.apply_warp(self.t1w_brain, self.atlas, self.aligned_atlas_skull, warp=self.mni2t1w_warp)
-
+	
                 # Apply transform to dwi space
-                mgru.applyxfm(self.nodif_B0, self.aligned_atlas_skull, self.t1w2dwi_xfm, self.dwi_aligned_atlas)
+		if self.simple is False:
+		    mgru.applyxfm(self.nodif_B0, self.aligned_atlas_skull, self.t1wtissue2dwi_xfm, self.dwi_aligned_atlas)
+		else:
+                    mgru.applyxfm(self.nodif_B0, self.aligned_atlas_skull, self.t1wtissue2dwi_xfm, self.dwi_aligned_atlas)
             except:
-                # If we dont have 2mm MNI or a low quality t1w, FNIRT is unsuitable
                 print("Atlas is not in correct dimensions, or input is low quality,\nusing linear template registration.")
 
                 # Create transform to align atlas to T1w using flirt
@@ -189,7 +194,10 @@ class dmri_reg(object):
                 mgru.align(self.atlas, self.t1_aligned_mni, xfm=self.xfm_atlas2t1w, out=None, dof=6, searchrad=True, bins=None, interp="spline", cost='mutualinfo', wmseg=None, init=self.xfm_atlas2t1w_init)
 
                 # Combine our linear transform from t1w to template with our transform from dwi to t1w space to get a transform from atlas ->(-> t1w ->)-> dwi
-                mgru.combine_xfms(self.xfm_atlas2t1w, self.t1w2dwi_xfm, self.temp2dwi_xfm)
+		if self.simple is False:
+		    mgru.combine_xfms(self.xfm_atlas2t1w, self.t1wtissue2dwi_xfm, self.temp2dwi_xfm)
+		else:
+                    mgru.combine_xfms(self.xfm_atlas2t1w, self.t1wtissue2dwi_xfm, self.temp2dwi_xfm)
 
                 # Apply linear transformation from template to dwi space
                 mgru.applyxfm(self.nodif_B0, self.atlas, self.temp2dwi_xfm, self.dwi_aligned_atlas)
@@ -199,7 +207,7 @@ class dmri_reg(object):
             mgru.align(self.atlas, self.t1w_brain, xfm=self.xfm_atlas2t1w, out=None, dof=6, searchrad=True, bins=None, interp="spline", cost='mutualinfo', wmseg=None, init=self.xfm_atlas2t1w_init)
 
             # Combine our linear transform from t1w to template with our transform from dwi to t1w space to get a transform from atlas ->(-> t1w ->)-> dwi
-            mgru.combine_xfms(self.xfm_atlas2t1w, self.t1w2dwi_xfm, self.temp2dwi_xfm)
+            mgru.combine_xfms(self.xfm_atlas2t1w, self.t1wtissue2dwi_xfm, self.temp2dwi_xfm)
 
             # Apply linear transformation from template to dwi space
             mgru.applyxfm(self.nodif_B0, self.atlas, self.temp2dwi_xfm, self.dwi_aligned_atlas)
@@ -242,12 +250,12 @@ class dmri_reg(object):
         if self.simple is False:
             # Apply warp resulting from the inverse MNI->T1w created earlier
             mgru.apply_warp(self.t1w_brain, self.vent_mask_mni, self.vent_mask_t1w, warp=self.mni2t1w_warp)
-
-        # Applyxfm tissue maps to dwi space
-        mgru.applyxfm(self.nodif_B0, self.vent_mask_t1w, self.t1w2dwi_xfm, self.vent_mask_dwi)
-        mgru.applyxfm(self.nodif_B0, self.csf_mask, self.t1w2dwi_xfm, self.csf_mask_dwi)
-        mgru.applyxfm(self.nodif_B0, self.gm_mask, self.t1w2dwi_xfm, self.gm_in_dwi)
-        mgru.applyxfm(self.nodif_B0, self.wm_mask, self.t1w2dwi_xfm, self.wm_in_dwi)
+            
+	# Applyxfm tissue maps to dwi space
+        mgru.applyxfm(self.nodif_B0, self.vent_mask_t1w, self.t1wtissue2dwi_xfm, self.vent_mask_dwi)
+        mgru.applyxfm(self.nodif_B0, self.csf_mask, self.t1wtissue2dwi_xfm, self.csf_mask_dwi)
+        mgru.applyxfm(self.nodif_B0, self.gm_mask, self.t1wtissue2dwi_xfm, self.gm_in_dwi)
+        mgru.applyxfm(self.nodif_B0, self.wm_mask, self.t1wtissue2dwi_xfm, self.wm_in_dwi)	
 
         # Threshold WM to binary in dwi space
         self.t_img = load_img(self.wm_in_dwi)
@@ -258,7 +266,9 @@ class dmri_reg(object):
         print('Masking CSF with ventricle mask...')
         cmd='fslmaths ' + self.vent_mask_dwi + ' -bin ' + self.vent_mask_dwi
         os.system(cmd)
-        cmd='fslmaths ' + self.csf_mask_dwi + ' -mas ' + self.vent_mask_dwi + ' -mas ' + self.wm_in_dwi_bin + ' ' + self.vent_csf_in_dwi
+	cmd='fslmaths ' + self.wm_in_dwi_bin + ' -binv ' + self.wm_in_dwi_binv
+        os.system(cmd)
+        cmd='fslmaths ' + self.csf_mask_dwi + ' -mas ' + self.vent_mask_dwi + ' -mas ' + self.wm_in_dwi_binv + ' ' + self.vent_csf_in_dwi
         os.system(cmd)
         cmd='fslmaths ' + self.vent_csf_in_dwi + ' -bin ' + self.vent_csf_in_dwi_bin
         os.system(cmd)

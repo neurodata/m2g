@@ -318,9 +318,9 @@ def main():
 			help='Whether to produce \
                         big graphs for DWI, or voxelwise timeseries for fMRI.',
                          default=False)
-    parser.add_argument("--vox", action="store", default='1mm',
+    parser.add_argument("--vox", action="store", default='2mm',
                         help="Voxel size to use for template registrations \
-                        (e.g. default is '1mm')")
+                        (e.g. default is '2mm')")
     parser.add_argument("-c", "--clean", action="store_true", default=False,
                         help="Whether or not to delete intemediates")
     parser.add_argument("--nproc", action="store", help="The number of "

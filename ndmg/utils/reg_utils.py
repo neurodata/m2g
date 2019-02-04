@@ -532,11 +532,10 @@ def combine_xfms(xfm1, xfm2, xfmout):
     os.system(cmd)
 
 
-def reslice_to_xmm(infile, vox_sz):
-    img = nib.load(infile)
-    targ_aff = img.affine/(np.array([[int(abs(vox_sz)),1,1,1],[1,int(abs(vox_sz)),1,1],[1,1,int(abs(vox_sz)),1],[1,1,1,1]]))
-    new_file_atlas_res = nl.resample_img(infile, target_affine=targ_aff)
-    out_file = "%s%s%s%s%s%s" % (os.path.dirname(infile), '/', os.path.basename(infile).split('.nii')[0], '_', vox_sz ,'mm.nii.gz')
-    nib.save(new_file_atlas_res, out_file)
-    return out_file
-
+def reslice_to_xmm(infile, vox_sz):                                     
+     img = nib.load(infile)
+     img.affine[:3,:3] = np.eye(3) * float(vox_sz)
+     new_file_atlas_res = nl.resample_img(infile, target_affine=img.affine)
+     out_file = "%s%s%s%s%s%s" % (os.path.dirname(infile), '/', os.path.basename(infile).split('.nii')[0], '_', vox_sz ,'mm.nii.gz')
+     nib.save(new_file_atlas_res, out_file)
+     return out_file
