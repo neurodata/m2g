@@ -21,6 +21,8 @@
 # Edited by Eric Bridgeford.
 
 from __future__ import print_function
+import warnings
+warnings.filterwarnings("ignore", message="numpy.dtype size changed")
 from dipy.io import read_bvals_bvecs
 from dipy.core.gradients import gradient_table
 from subprocess import Popen, PIPE
@@ -28,8 +30,6 @@ import numpy as np
 import nibabel as nb
 import os.path as op
 import sys
-import warnings
-warnings.filterwarnings("ignore", message="numpy.dtype size changed")
 from networkx import to_numpy_matrix as graph2np
 import pyximport
 try:
@@ -152,7 +152,7 @@ def make_gtab_and_bmask(fbval, fbvec, dwi_file, outdir):
 
     # Get B0 indices
     B0s = np.where(gtab.bvals == gtab.b0_threshold)[0]
-    print('B0\'s found at: ' + str(B0s))
+    print("%s%s" % ('B0\'s found at: ', B0s))
 
     # Extract and Combine all B0s collected
     print('Extracting B0\'s...')

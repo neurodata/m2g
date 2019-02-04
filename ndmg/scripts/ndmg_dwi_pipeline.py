@@ -15,7 +15,7 @@
 #
 
 # ndmg_dwi_pipeline.py
-# Repackaged for native space tractography by Derek Pisner
+# Repackaged for native space tractography by Derek Pisner in 2019
 # Email: dpisner@utexas.edu
 # Originally created by Greg Kiar and Will Gray Roncal on 2016-01-27.
 
@@ -31,6 +31,7 @@ from ndmg.stats.qa_tensor import *
 from ndmg.stats.qa_fibers import *
 from ndmg.stats.qa_mri import qa_mri
 from ndmg.utils import gen_utils as mgu
+from ndmg.utils import reg_utils as rgu
 from ndmg.register import gen_reg as mgr
 from ndmg.track import gen_track as mgt
 from ndmg.graph import gen_graph as mgg
@@ -48,7 +49,7 @@ os.environ["MPLCONFIGDIR"] = "/tmp/"
 
 
 def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
-                    clean=False, big=True):
+                    vox_size, clean, big):
     """
     Creates a brain graph from MRI data
     """
@@ -98,30 +99,56 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
     print("Connectomes downsampled to given labels: " +
           ", ".join(connectomes))
 
+    if vox_size == '1mm':
+	zoom_set = (1.0,1.0,1.0)
+    elif vox_size == '2mm':
+	zoom_set = (2.0,2.0,2.0)
+    else:
+	raise ValueError('Voxel size not supported. Use 2mm or 1mm')
+
     qc_dwi = qa_mri(namer, 'dwi')  # for quality control
     # -------- Preprocessing Steps --------------------------------- #
-    # Check orientation (dwi)
-    img = nib.load(dwi)
-    if nib.aff2axcodes(img.affine)[0] == 'L':
-        # Orient dwi to std
-	dwi_orig = dwi
-	dwi = "{}/dwi_reoriented.nii.gz".format(namer.dirs['output']['prep_m'])
-	shutil.copyfile(dwi_orig, dwi)
-        cmd='fslreorient2std ' + dwi
-        os.system(cmd)
-	# Swap x-y axis in bvecs
-	bvecs_orig = bvecs
-	bvecs = "{}/bvec_reoriented.bvec".format(namer.dirs['output']['prep_m'])
-	shutil.copyfile(bvecs_orig, bvecs)
-	bvecs_mat = np.genfromtxt(bvecs)
-	bvecs_mat[[0, 1]] = bvecs_mat[[1, 0]]
-	np.savetxt(bvecs, bvecs_mat)
-
     # Perform eddy correction
     start_time = time.time()
     dwi_prep = "{}/eddy_corrected_data.nii.gz".format(namer.dirs['output']['prep_m'])
     cmd='eddy_correct ' + dwi + ' ' + dwi_prep + ' 0'
     os.system(cmd)
+  
+    # Check orientation (dwi_prep)
+    img = nib.load(dwi_prep)
+    if nib.aff2axcodes(img.affine)[0] == 'L':
+        start_time = time.time()
+        print('Reorienting dwi image to RAS+ canonical...')
+        # Orient dwi to std
+        dwi_orig = dwi_prep
+        dwi_prep = "{}/dwi_prep_reor.nii.gz".format(namer.dirs['output']['prep_m'])
+        shutil.copyfile(dwi_orig, dwi_prep)
+        canonical_dwi_img = nib.as_closest_canonical(img)
+        nib.save(canonical_dwi_img, dwi_prep)
+        # Swap x-y axis in bvecs
+        bvecs_orig = bvecs
+        bvecs = "{}/bvec_reor.bvec".format(namer.dirs['output']['prep_m'])
+        shutil.copyfile(bvecs_orig, bvecs)
+        bvecs_mat = np.genfromtxt(bvecs)
+        bvecs_mat[[0, 1]] = bvecs_mat[[1, 0]]
+        np.savetxt(bvecs, bvecs_mat)
+        print("%s%s%s" % ('Reorienting runtime: ', str(np.round(time.time() - start_time, 1)), 's'))
+
+    # Check dimensions
+    hdr = img.get_header()
+    zooms = hdr.get_zooms()
+    if (abs(zooms[0]), abs(zooms[1]), abs(zooms[2])) is not zoom_set:
+        start_time = time.time()
+        dwi_orig = dwi_prep
+        dwi_prep = "{}/dwi_prep_reslice.nii.gz".format(namer.dirs['output']['prep_m'])
+        shutil.copyfile(dwi_orig, dwi_prep)
+	if vox_size == '1mm':
+	    print('Reslicing preprocessed dwi to 1mm...')
+            dwi_prep = rgu.reslice_to_xmm(dwi_prep, 1.0)
+	elif vox_size == '2mm':
+            print('Reslicing preprocessed dwi to 2mm...')
+            dwi_prep = rgu.reslice_to_xmm(dwi_prep, 2.0)
+        print("%s%s%s" % ('Reslicing runtime: ', str(np.round(time.time() - start_time, 1)), 's'))
 
     print("Rotating b-vectors and generating gradient table...")
     eddy_rot_param = "{}/eddy_corrected_data.ecclog".format(namer.dirs['output']['prep_m'])
@@ -131,26 +158,47 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
     shutil.copyfile(bvals, bval)
 
     # Rotate bvecs
-    cmd='bash fdt_rotate_bvecs ' + bvecs + ' ' + bvec_rotated + ' ' + eddy_rot_param
+    cmd='bash fdt_rotate_bvecs ' + bvecs + ' ' + bvec_rotated + ' ' + eddy_rot_param + ' 2>/dev/null'
     os.system(cmd)
 
     # Rescale bvecs
     mgp.rescale_bvec(bvec_rotated, bvec_scaled)
 
-    # Check orientation (t1w)
-    img = nib.load(t1w):
-    if nib.aff2axcodes(img.affine)[0] == 'L':
-        # Orient t1w to std
-        t1w_orig = t1w
-        t1w = "{}/t1w_reoriented.nii.gz".format(namer.dirs['output']['prep_m'])
-        shutil.copyfile(t1w_orig, t1w)
-        cmd='fslreorient2std ' + t1w
-        os.system(cmd)
-
+    # Build gradient table
     [gtab, nodif_B0, nodif_B0_mask] = mgu.make_gtab_and_bmask(bvals, bvec_scaled, dwi_prep, namer.dirs['output']['prep_m'])
+
     print("%s%s%s" % ('Preprocessing runtime: ', str(np.round(time.time() - start_time, 1)), 's'))
     # -------- Registration Steps ----------------------------------- #
-    vox_size = '2mm'
+    # Check orientation (t1w)
+    img = nib.load(t1w)
+    if nib.aff2axcodes(img.affine)[0] == 'L':
+	start_time = time.time()
+	print('Reorienting t1w image to RAS+ canonical...')
+        # Orient t1w to std
+        t1w_orig = t1w
+        t1w = "{}/t1w_reor.nii.gz".format(namer.dirs['output']['prep_m'])
+        shutil.copyfile(t1w_orig, t1w)
+        canonical_t1w_img = nib.as_closest_canonical(img)
+        nib.save(canonical_t1w_img, t1w)
+	print("%s%s%s" % ('Reorienting runtime: ', str(np.round(time.time() - start_time, 1)), 's'))	
+
+    # Check dimensions
+    hdr = img.get_header()
+    zooms = hdr.get_zooms()
+    if (abs(zooms[0]), abs(zooms[1]), abs(zooms[2])) is not zoom_set:
+	start_time = time.time()
+        t1w_orig = t1w
+        t1w = "{}/t1w_reslice.nii.gz".format(namer.dirs['output']['prep_m'])
+        shutil.copyfile(t1w_orig, t1w)
+        if vox_size == '1mm':
+            print('Reslicing preprocessed t1w to 1mm...')
+            t1w = rgu.reslice_to_xmm(t1w, 1.0)
+        elif vox_size == '2mm':
+            print('Reslicing preprocessed t1w to 2mm...')
+            t1w = rgu.reslice_to_xmm(t1w, 2.0)
+	print("%s%s%s" % ('Reslicing runtime: ', str(np.round(time.time() - start_time, 1)), 's'))
+
+    # Instantiate registration
     reg = mgr.dmri_reg(outdir, nodif_B0, nodif_B0_mask, t1w, vox_size, simple=False)
     # Perform anatomical segmentation
     start_time = time.time()
@@ -178,7 +226,7 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
     tractogram = Tractogram(streamlines, affine_to_rasmm=nib.load(dwi_prep).affine)
     save(tractogram, streams)
 
-    # As we've only tested VTK plotting on MNI152 aligned data...
+    # Visualize fibers using VTK
     if nib.load(mask).get_data().shape == (182, 218, 182):
         try:
             visualize_fibs(streamlines, streams, aligned_atlas, namer.dirs['qa']['fiber'], 0.02, 2000)
@@ -224,13 +272,13 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
 
 
 def ndmg_dwi_pipeline(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
-                      clean=False, big=False):
+                      vox_size, clean, big):
     """
     A wrapper for the worker to make our pipeline more robust to errors.
     """
     try:
         ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
-                        clean, big)
+                        vox_size, clean, big)
     except Exception, e:
         print(traceback.format_exc())
         os.exit()
@@ -256,6 +304,9 @@ def main():
                         derivatives will be stored")
     parser.add_argument("labels", action="store", nargs="*", help="Nifti \
                         labels of regions of interest in atlas space")
+    parser.add_argument("vox_size", action="store", nargs="*", default='1mm', 
+			help="Voxel size to use for template registrations \
+			(e.g. '1mm')")
     parser.add_argument("-c", "--clean", action="store_true", default=False,
                         help="Whether or not to delete intemediates")
     parser.add_argument("-b", "--big", action="store_true", default=False,
@@ -269,7 +320,7 @@ def main():
 
     ndmg_dwi_pipeline(result.dwi, result.bval, result.bvec, result.t1w,
                       result.atlas, result.mask, result.labels, result.outdir,
-                      result.clean, result.big)
+                      result.vox_size, result.clean, result.big)
 
 
 if __name__ == "__main__":

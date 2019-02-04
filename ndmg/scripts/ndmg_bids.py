@@ -43,7 +43,7 @@ import sys
 from multiprocessing import Pool
 from functools import partial
 import traceback
-
+import nibabel as nib
 
 atlas_dir = '/ndmg_atlases'  # This location bc it is convenient for containers
 
@@ -64,68 +64,59 @@ skippers = ['slab907', 'slab1068', 'DS01216', 'DS01876',
             'tissue_res-1x1x1', 'tissue_res-2x2x2']
 
 
-def get_atlas(atlas_dir, modality='dwi'):
+def get_atlas(atlas_dir, modality, vox_size):
     """
     Given the desired location for atlases and the type of processing, ensure
     we have all the atlases and parcellations.
-    """ 
+    """
+    if vox_size == '2mm':
+        dims = '2x2x2'
+    elif vox_size == '1mm':
+        dims = '1x1x1'
+    else:
+        raise ValueError('Voxel dimensions of input t1w image not currently supported by ndmg.')
+
     if modality == 'dwi':
-#        atlas = op.join(atlas_dir, 'atlas/MNI152NLin6_res-1x1x1_T1w.nii.gz')
-#        atlas_mask = op.join(atlas_dir,
-#                             'mask/MNI152NLin6_res-1x1x1_T1w_brainmask.nii.gz')
-#        labels= ['HarvardOxfordcort-maxprob-thr25_res-1x1x1.nii.gz',
-#                 'HarvardOxfordsub-maxprob-thr25_res-1x1x1.nii.gz',
-#                 'slab1068_res-1x1x1.nii.gz', 'slab907_res-1x1x1.nii.gz',
-#                 'aal_res-1x1x1.nii.gz', 'brodmann_res-1x1x1.nii.gz',
-#                 'desikan_res-1x1x1.nii.gz',
-#                 'CPAC200_res-1x1x1.nii.gz', 'DS00071_res-1x1x1.nii.gz',
-#                 'DS00096_res-1x1x1.nii.gz', 'DS00108_res-1x1x1.nii.gz',
-#                 'DS00140_res-1x1x1.nii.gz', 'DS00195_res-1x1x1.nii.gz',
-#                 'DS00278_res-1x1x1.nii.gz', 'DS00350_res-1x1x1.nii.gz',
-#                 'DS00446_res-1x1x1.nii.gz', 'DS00583_res-1x1x1.nii.gz',
-#                 'DS00833_res-1x1x1.nii.gz', 'DS01216_res-1x1x1.nii.gz',
-#                 'DK_res-1x1x1.nii.gz', 'JHU_res-1x1x1.nii.gz',
-#                 'tissue_res-1x1x1.nii.gz', 'hemispheric_res-1x1x1.nii.gz']
-        atlas = op.join(atlas_dir, 'atlas/MNI152NLin6_res-2x2x2_T1w.nii.gz')
+        atlas = op.join(atlas_dir, 'atlas/MNI152NLin6_res-' + dims + '_T1w.nii.gz')
         atlas_mask = op.join(atlas_dir,
-                             'mask/MNI152NLin6_res-2x2x2_T1w_brainmask.nii.gz')
-        labels= ['HarvardOxfordcort-maxprob-thr25_res-2x2x2.nii.gz',
-                 'HarvardOxfordsub-maxprob-thr25_res-2x2x2.nii.gz',
-                 'aal_res-2x2x2.nii.gz', 'brodmann_res-2x2x2.nii.gz',
-                 'desikan_res-2x2x2.nii.gz',
-                 'CPAC200_res-2x2x2.nii.gz', 'DS00071_res-2x2x2.nii.gz',
-                 'DS00096_res-2x2x2.nii.gz', 'DS00108_res-2x2x2.nii.gz',
-                 'DS00140_res-2x2x2.nii.gz', 'DS00195_res-2x2x2.nii.gz',
-                 'DS00278_res-2x2x2.nii.gz', 'DS00350_res-2x2x2.nii.gz',
-                 'DS00446_res-2x2x2.nii.gz', 'DS00583_res-2x2x2.nii.gz',
-                 'DS00833_res-2x2x2.nii.gz', 'DS01216_res-2x2x2.nii.gz',
-                 'DK_res-2x2x2.nii.gz', 'JHU_res-2x2x2.nii.gz',
-                 'tissue_res-2x2x2.nii.gz', 'hemispheric_res-2x2x2.nii.gz']
+                             'mask/MNI152NLin6_res-' + dims + '_T1w_brainmask.nii.gz')
+        labels= ['HarvardOxfordcort-maxprob-thr25_res-' + dims + '.nii.gz',
+                 'HarvardOxfordsub-maxprob-thr25_res-' + dims + '.nii.gz',
+                 'aal_res-' + dims + '.nii.gz', 'brodmann_res-' + dims + '.nii.gz',
+                 'desikan_res-' + dims + '.nii.gz',
+                 'CPAC200_res-' + dims + '.nii.gz', 'DS00071_res-' + dims + '.nii.gz',
+                 'DS00096_res-' + dims + '.nii.gz', 'DS00108_res-' + dims + '.nii.gz',
+                 'DS00140_res-' + dims + '.nii.gz', 'DS00195_res-' + dims + '.nii.gz',
+                 'DS00278_res-' + dims + '.nii.gz', 'DS00350_res-' + dims + '.nii.gz',
+                 'DS00446_res-' + dims + '.nii.gz', 'DS00583_res-' + dims + '.nii.gz',
+                 'DS00833_res-' + dims + '.nii.gz', 'DS01216_res-' + dims + '.nii.gz',
+                 'DK_res-' + dims + '.nii.gz', 'JHU_res-' + dims + '.nii.gz',
+                 'tissue_res-' + dims + '.nii.gz', 'hemispheric_res-' + dims + '.nii.gz']
 
         labels = [op.join(atlas_dir, 'label', l) for l in labels]
         fils = labels + [atlas, atlas_mask]
     if modality == 'func':
-        atlas = op.join(atlas_dir, 'atlas/MNI152NLin6_res-2x2x2_T1w.nii.gz')
+        atlas = op.join(atlas_dir, 'atlas/MNI152NLin6_res-' + dims + '_T1w.nii.gz')
         atlas_brain = op.join(atlas_dir, 'atlas/' +
-                              'MNI152NLin6_res-2x2x2_T1w_brain.nii.gz')
+                              'MNI152NLin6_res-' + dims + '_T1w_brain.nii.gz')
         atlas_mask = op.join(atlas_dir,
-                             'mask/MNI152NLin6_res-2x2x2_T1w_brainmask.nii.gz')
+                             'mask/MNI152NLin6_res-' + dims + '_T1w_brainmask.nii.gz')
         lv_mask = op.join(atlas_dir, "mask/HarvardOxford_variant-" +
                           "lateral-ventricles-thr25" +
-                          "_res-2x2x2_brainmask.nii.gz")
-        labels= ['HarvardOxfordcort-maxprob-thr25_res-2x2x2.nii.gz',
-                 'HarvardOxfordsub-maxprob-thr25_res-2x2x2.nii.gz',
-                 'aal_res-2x2x2.nii.gz', 'brodmann_res-2x2x2.nii.gz',
-                 'desikan_res-2x2x2.nii.gz', 'pp264_res-2x2x2.nii.gz',
-                 'CPAC200_res-2x2x2.nii.gz', 'DS00071_res-2x2x2.nii.gz',
-                 'DS00096_res-2x2x2.nii.gz', 'DS00108_res-2x2x2.nii.gz',
-                 'DS00140_res-2x2x2.nii.gz', 'DS00195_res-2x2x2.nii.gz',
-                 'DS00278_res-2x2x2.nii.gz', 'DS00350_res-2x2x2.nii.gz',
-                 'DS00446_res-2x2x2.nii.gz', 'DS00583_res-2x2x2.nii.gz',
-                 'DS00833_res-2x2x2.nii.gz', 'DS01216_res-2x2x2.nii.gz',
-                 'DK_res-2x2x2.nii.gz', 'JHU_res-2x2x2.nii.gz',
-                 'tissue_res-2x2x2.nii.gz', 'hemispheric_res-2x2x2.nii.gz']
- 
+                          "_res-' + dims + '_brainmask.nii.gz")
+        labels= ['HarvardOxfordcort-maxprob-thr25_res-' + dims + '.nii.gz',
+                 'HarvardOxfordsub-maxprob-thr25_res-' + dims + '.nii.gz',
+                 'aal_res-' + dims + '.nii.gz', 'brodmann_res-' + dims + '.nii.gz',
+                 'desikan_res-' + dims + '.nii.gz', 'pp264_res-' + dims + '.nii.gz',
+                 'CPAC200_res-' + dims + '.nii.gz', 'DS00071_res-' + dims + '.nii.gz',
+                 'DS00096_res-' + dims + '.nii.gz', 'DS00108_res-' + dims + '.nii.gz',
+                 'DS00140_res-' + dims + '.nii.gz', 'DS00195_res-' + dims + '.nii.gz',
+                 'DS00278_res-' + dims + '.nii.gz', 'DS00350_res-' + dims + '.nii.gz',
+                 'DS00446_res-' + dims + '.nii.gz', 'DS00583_res-' + dims + '.nii.gz',
+                 'DS00833_res-' + dims + '.nii.gz', 'DS01216_res-' + dims + '.nii.gz',
+                 'DK_res-' + dims + '.nii.gz', 'JHU_res-' + dims + '.nii.gz',
+                 'tissue_res-' + dims + '.nii.gz', 'hemispheric_res-' + dims + '.nii.gz']
+
         labels = [op.join(atlas_dir, 'label', l) for l in labels]
         fils = labels + [atlas, atlas_mask, atlas_brain, lv_mask]
 
@@ -156,19 +147,18 @@ def worker_wrapper((f, args, kwargs)):
     return f(*args, **kwargs)
 
 
-def session_level(inDir, outDir, subjs, sesh=None, task=None, run=None,
-                  debug=False, modality='dwi', nproc=1, big=False,
-                  stc=None):
+def session_level(inDir, outDir, subjs, vox_size, big, clean, stc, sesh=None, task=None, run=None,
+                  debug=False, modality='dwi', nproc=1):
     """
     Crawls the given BIDS organized directory for data pertaining to the given
     subject and session, and passes necessary files to ndmg_dwi_pipeline for
     processing.
     """
     labels, atlas, atlas_mask, atlas_brain, lv_mask = get_atlas(atlas_dir,
-                                                                modality)
+                                                                modality, vox_size)
     mgu.execute_cmd("mkdir -p {} {}/tmp".format(outDir, outDir))
 
-    result = sweep_directory(inDir, subjs, sesh, task, run, modality=modality)
+    result = sweep_directory(inDir, subjs, sesh, task, run, modality)
 
     kwargs = {'clean': (not debug)}  # our keyword arguments
     if modality == 'dwi':
@@ -180,7 +170,9 @@ def session_level(inDir, outDir, subjs, sesh=None, task=None, run=None,
                  labels, outDir] for (dw, bval, bvec, anat)
                 in zip(dwis, bvals, bvecs, anats)]
         f = ndmg_dwi_pipeline  # the function of choice
+	kwargs['vox_size'] = vox_size
         kwargs['big'] = big
+	kwargs['clean'] = clean
     else:
         funcs, anats = result
         assert(len(anats) == len(funcs))
@@ -189,6 +181,7 @@ def session_level(inDir, outDir, subjs, sesh=None, task=None, run=None,
                 zip(funcs, anats)]
         f = ndmg_func_pipeline
         kwargs['stc'] = stc
+    
     # optional args stored in kwargs
     # use worker wrapper to call function f with args arg
     # and keyword args kwargs
@@ -213,7 +206,7 @@ def session_level(inDir, outDir, subjs, sesh=None, task=None, run=None,
     sys.exit(0)  # terminated
 
 
-def group_level(inDir, outDir, dataset=None, atlas=None, minimal=False,
+def group_level(inDir, outDir, vox_size, big, clean, stc, dataset=None, atlas=None, minimal=False,
                 log=False, hemispheres=False, modality='dwi'):
     """
     Crawls the output directory from ndmg and computes qc metrics on the
@@ -296,7 +289,7 @@ def main():
                         'run-<run_label> from the BIDS spec (so it does not '
                         'include "task-"). If this parameter is not provided '
                         'all runs should be analyzed. Multiple runs can be '
-                        'specified with a space separated list.', nargs="+") 
+                        'specified with a space separated list.', nargs="+")
     parser.add_argument('--bucket', action='store', help='The name of '
                         'an S3 bucket which holds BIDS organized data. You '
                         'must have built your bucket with credentials to the '
@@ -321,9 +314,15 @@ def main():
     parser.add_argument('--debug', action='store_true', help='flag to store '
                         'temp files along the path of processing.',
                         default=False)
-    parser.add_argument('--big', action='store_true', help='Whether to produce '
-                        'big graphs for DWI, or voxelwise timeseries for fMRI.',
+    parser.add_argument('--big', action='store_true',
+			help='Whether to produce \
+                        big graphs for DWI, or voxelwise timeseries for fMRI.',
                          default=False)
+    parser.add_argument("--vox", action="store", default='1mm',
+                        help="Voxel size to use for template registrations \
+                        (e.g. default is '1mm')")
+    parser.add_argument("-c", "--clean", action="store_true", default=False,
+                        help="Whether or not to delete intemediates")
     parser.add_argument("--nproc", action="store", help="The number of "
                         "process to launch. Should be approximately "
                         "<min(ncpu*hyperthreads/cpu, maxram/10).", default=1,
@@ -350,8 +349,9 @@ def main():
     debug = result.debug
     modality = result.modality
     nproc = result.nproc
-    big = (True if result.big else False)
-
+    big = result.big
+    clean = result.clean
+    vox_size = result.vox
     minimal = result.minimal
     log = result.log
     atlas = result.atlas
@@ -369,8 +369,8 @@ def main():
             else:
                 s3_get_data(buck, remo, inDir, public=creds)
         modif = 'ndmg_{}'.format(ndmg.version.replace('.', '-'))
-        session_level(inDir, outDir, subj, sesh, task, run, debug,
-                      modality, nproc, big, stc)
+        session_level(inDir, outDir, subj, vox_size, big, clean, stc, 
+	sesh, task, run, debug, modality, nproc)
 
     elif level == 'group':
         gpath = op.join(inDir, modality, 'roi-connectomes')
@@ -385,8 +385,8 @@ def main():
                 tindir = op.join(outDir, gpath)
             s3_get_data(buck, tpath, tindir, public=creds)
         modif = 'qa'
-        group_level(op.join(inDir, gpath), outDir, dataset, atlas, minimal, log,
-            hemi, modality)
+        group_level(op.join(inDir, gpath), outDir, vox_size, big, clean, stc, 
+	dataset, atlas, minimal, log, hemi, modality)
 
 
     if push and buck is not None and remo is not None:

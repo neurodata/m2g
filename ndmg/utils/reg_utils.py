@@ -17,14 +17,14 @@
 # Created by Eric Bridgeford on 2017-06-21.
 # Email: ebridge2@jhu.edu
 from __future__ import print_function
+import warnings
+warnings.filterwarnings("ignore", message="numpy.dtype size changed")
 from ndmg.utils import gen_utils as mgu
 import nibabel as nib
 import numpy as np
 import nilearn.image as nl
 import os
 import os.path as op
-import warnings
-warnings.filterwarnings("ignore", message="numpy.dtype size changed")
 
 def erode_mask(mask, v=0):
     """
@@ -532,11 +532,11 @@ def combine_xfms(xfm1, xfm2, xfmout):
     os.system(cmd)
 
 
-def reslice_to_1mm(infile):
+def reslice_to_xmm(infile, vox_sz):
     img = nib.load(infile)
-    vox_sz = img.affine[0][0]
     targ_aff = img.affine/(np.array([[int(abs(vox_sz)),1,1,1],[1,int(abs(vox_sz)),1,1],[1,1,int(abs(vox_sz)),1],[1,1,1,1]]))
     new_file_atlas_res = nl.resample_img(infile, target_affine=targ_aff)
     out_file = "%s%s%s%s" % (os.path.dirname(infile), '/', os.path.basename(infile).split('.nii')[0], '_1mm.nii.gz')
     nib.save(new_file_atlas_res, out_file)
     return out_file
+

@@ -22,6 +22,7 @@
 from __future__ import print_function
 import warnings
 warnings.filterwarnings("ignore", message="numpy.dtype size changed")
+warnings.filterwarnings("ignore", message="DeprecationWarning")
 import os
 import nibabel as nib
 from nilearn.image import load_img, math_img, resample_img, mean_img, new_img_like
@@ -64,7 +65,7 @@ class dmri_reg(object):
         self.warp_t1w2mni = "{}/warp_t12mni.nii.gz".format(self.outdir['reg_a'])
         self.t1w2dwi = "{}/{}_in_dwi.nii.gz".format(self.outdir['reg_a'], self.t1w_name)
         self.t1_aligned_mni = "{}/{}_aligned_mni.nii.gz".format(self.outdir['reg_a'], self.t1w_name)
-        self.t1w_brain = "{}/{}_brain.nii.gz".format(self.outdir['reg_a'], self.t1w_name)
+        self.t1w_brain = "{}/{}_brain.nii.gz".format(self.outdir['reg_a'], self.t1w.split('.nii.gz')[0].split('/')[-1])
         self.dwi2t1w_xfm = "{}/dwi2t1w_xfm.mat".format(self.outdir['reg_m'])
         self.t1w2dwi_xfm = "{}/t1w2dwi_xfm.mat".format(self.outdir['reg_m'])
         self.t1wmni_dwi_bbr_xfm = "{}/t1wmni_dwi_bbr_xfm.mat".format(self.outdir['reg_m'])
@@ -124,13 +125,13 @@ class dmri_reg(object):
         # Attempt non-linear registration of T1 to MNI template
         if self.simple is False:
             try:
-                print('Attempting non-linear registration: T1w-->MNI ...')
+                print('Running non-linear registration: T1w-->MNI ...')
                 # Use FNIRT to nonlinearly align T1 to MNI template
                 mgru.align_nonlinear(self.t1w_brain, self.input_mni, xfm=self.t12mni_xfm_init, out=self.t1_aligned_mni, warp=self.warp_t1w2mni, mask=None)
 
                 # Get warp from MNI -> T1
                 mgru.inverse_warp(self.t1w_brain, self.mni2t1w_warp, self.warp_t1w2mni)
-            except RuntimeError('fnirt failed!'):
+            except RuntimeError('FNIRT failed!'):
                 pass
         else:
             # Falling back to linear registration
@@ -150,7 +151,7 @@ class dmri_reg(object):
 
                 # Apply the alignment
                 mgru.align(self.t1w_brain, self.nodif_B0, init=self.dwi2t1w_bbr_xfm, bins=None, interp="spline", dof=7, cost='mutualinfo', out=self.t1w2dwi, searchrad=True, sch=None)
-            except RuntimeError('bbr failed!'):
+            except RuntimeError('FLIRT BBR failed!'):
                 pass
         else:
             # Apply the alignment
@@ -257,11 +258,7 @@ class dmri_reg(object):
         print('Masking CSF with ventricle mask...')
         cmd='fslmaths ' + self.vent_mask_dwi + ' -bin ' + self.vent_mask_dwi
         os.system(cmd)
-        #cmd='fslmaths ' + self.dwi_aligned_atlas + ' -binv ' + self.dwi_aligned_atlas_mask
-        #os.system(cmd)
-        #cmd='fslmaths ' + self.csf_mask_dwi + ' -mas ' + self.vent_mask_dwi + ' -mas ' + self.dwi_aligned_atlas_mask + ' ' + self.vent_csf_in_dwi
-        #os.system(cmd)
-        cmd='fslmaths ' + self.csf_mask_dwi + ' -mas ' + self.vent_mask_dwi + ' ' + self.vent_csf_in_dwi
+        cmd='fslmaths ' + self.csf_mask_dwi + ' -mas ' + self.vent_mask_dwi + ' -mas ' + self.wm_in_dwi_bin + ' ' + self.vent_csf_in_dwi
         os.system(cmd)
         cmd='fslmaths ' + self.vent_csf_in_dwi + ' -bin ' + self.vent_csf_in_dwi_bin
         os.system(cmd)

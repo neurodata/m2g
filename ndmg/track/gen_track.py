@@ -19,10 +19,10 @@
 # Email: wgr@jhu.edu
 
 from __future__ import print_function
-import numpy as np
-import nibabel as nib
 import warnings
 warnings.filterwarnings("ignore", message="numpy.dtype size changed")
+import numpy as np
+import nibabel as nib
 from dipy.reconst.dti import TensorModel, fractional_anisotropy, quantize_evecs
 from dipy.tracking.eudx import EuDX
 from dipy.data import get_sphere

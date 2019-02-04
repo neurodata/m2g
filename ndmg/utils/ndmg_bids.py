@@ -19,6 +19,8 @@
 # Created by Greg Kiar on 2016-07-29.
 # Email: gkiar@jhu.edu
 
+import warnings
+warnings.filterwarnings("ignore", message="numpy.dtype size changed")
 from ndmg.utils import utils as mgu
 import os.path as op
 import os
