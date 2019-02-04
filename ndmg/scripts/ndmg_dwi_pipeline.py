@@ -112,7 +112,7 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
     start_time = time.time()
     dwi_prep = "{}/eddy_corrected_data.nii.gz".format(namer.dirs['output']['prep_m'])
     cmd='eddy_correct ' + dwi + ' ' + dwi_prep + ' 0'
-#    os.system(cmd)
+    os.system(cmd)
   
     # Check orientation (dwi_prep)
     img = nib.load(dwi_prep)
@@ -202,7 +202,7 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
     reg = mgr.dmri_reg(outdir, nodif_B0, nodif_B0_mask, t1w, vox_size, simple=False)
     # Perform anatomical segmentation
     start_time = time.time()
-#    reg.gen_tissue()
+    reg.gen_tissue()
     print("%s%s%s" % ('gen_tissue runtime: ', str(np.round(time.time() - start_time, 1)), 's'))
     # align t1w to dwi
     start_time = time.time()
