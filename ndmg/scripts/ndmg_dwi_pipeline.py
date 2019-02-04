@@ -100,9 +100,9 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
           ", ".join(connectomes))
 
     if vox_size == '1mm':
-	zoom_set = (1.0,1.0,1.0)
+	zoom_set = (1.0, 1.0, 1.0)
     elif vox_size == '2mm':
-	zoom_set = (2.0,2.0,2.0)
+	zoom_set = (2.0, 2.0, 2.0)
     else:
 	raise ValueError('Voxel size not supported. Use 2mm or 1mm')
 
