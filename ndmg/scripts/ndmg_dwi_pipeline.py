@@ -115,40 +115,14 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
 #    os.system(cmd)
   
     # Check orientation (dwi_prep)
-    img = nib.load(dwi_prep)
-    if nib.aff2axcodes(img.affine)[0] == 'L':
-        start_time = time.time()
-        print('Reorienting dwi image to RAS+ canonical...')
-        # Orient dwi to std
-        dwi_orig = dwi_prep
-        dwi_prep = "{}/dwi_prep_reor.nii.gz".format(namer.dirs['output']['prep_m'])
-        shutil.copyfile(dwi_orig, dwi_prep)
-	cmd='fslreorient2std ' + dwi_orig + ' ' + dwi_prep
-	os.system(cmd)
-        # Swap x-y axis in bvecs
-        bvecs_orig = bvecs
-        bvecs = "{}/bvec_reor.bvec".format(namer.dirs['output']['prep_m'])
-        shutil.copyfile(bvecs_orig, bvecs)
-        bvecs_mat = np.genfromtxt(bvecs)
-        bvecs_mat[[0, 1]] = bvecs_mat[[1, 0]]
-        np.savetxt(bvecs, bvecs_mat)
-        print("%s%s%s" % ('Reorienting runtime: ', str(np.round(time.time() - start_time, 1)), 's'))
+    start_time = time.time()
+    [dwi_prep, bvecs] = mgu.reorient_dwi(dwi_prep, bvecs, namer)
+    print("%s%s%s" % ('Reorienting runtime: ', str(np.round(time.time() - start_time, 1)), 's'))
 
     # Check dimensions
-    hdr = img.get_header()
-    zooms = hdr.get_zooms()
-    if (round(abs(zooms[0]), 0), round(abs(zooms[1]), 0), round(abs(zooms[2]), 0)) is not zoom_set:
-        start_time = time.time()
-        dwi_orig = dwi_prep
-        dwi_prep = "{}/dwi_prep_reslice.nii.gz".format(namer.dirs['output']['prep_m'])
-        shutil.copyfile(dwi_orig, dwi_prep)
-	if vox_size == '1mm':
-	    print('Reslicing preprocessed dwi to 1mm...')
-            dwi_prep = rgu.reslice_to_xmm(dwi_prep, 1.0)
-	elif vox_size == '2mm':
-            print('Reslicing preprocessed dwi to 2mm...')
-            dwi_prep = rgu.reslice_to_xmm(dwi_prep, 2.0)
-        print("%s%s%s" % ('Reslicing runtime: ', str(np.round(time.time() - start_time, 1)), 's'))
+    start_time = time.time()
+    dwi_prep = mgu.match_target_vox_res(dwi_prep, vox_size, namer, zoom_set)
+    print("%s%s%s" % ('Reslicing runtime: ', str(np.round(time.time() - start_time, 1)), 's'))
 
     print("Rotating b-vectors and generating gradient table...")
     eddy_rot_param = "{}/eddy_corrected_data.ecclog".format(namer.dirs['output']['prep_m'])
@@ -170,33 +144,14 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
     print("%s%s%s" % ('Preprocessing runtime: ', str(np.round(time.time() - start_time, 1)), 's'))
     # -------- Registration Steps ----------------------------------- #
     # Check orientation (t1w)
-    img = nib.load(t1w)
-    if nib.aff2axcodes(img.affine)[0] == 'L':
-	start_time = time.time()
-	print('Reorienting t1w image to RAS+ canonical...')
-        # Orient t1w to std
-        t1w_orig = t1w
-        t1w = "{}/t1w_reor.nii.gz".format(namer.dirs['output']['prep_m'])
-        shutil.copyfile(t1w_orig, t1w)
-        cmd='fslreorient2std ' + t1w_orig + ' ' + t1w
-        os.system(cmd)
-	print("%s%s%s" % ('Reorienting runtime: ', str(np.round(time.time() - start_time, 1)), 's'))	
+    start_time = time.time()
+    t1w = mgu.reorient_t1w(t1w, namer)
+    print("%s%s%s" % ('Reorienting runtime: ', str(np.round(time.time() - start_time, 1)), 's'))
 
     # Check dimensions
-    hdr = img.get_header()
-    zooms = hdr.get_zooms()
-    if (round(abs(zooms[0]), 0), round(abs(zooms[1]), 0), round(abs(zooms[2]), 0)) is not zoom_set:
-	start_time = time.time()
-        t1w_orig = t1w
-        t1w = "{}/t1w_reslice.nii.gz".format(namer.dirs['output']['prep_m'])
-        shutil.copyfile(t1w_orig, t1w)
-        if vox_size == '1mm':
-            print('Reslicing preprocessed t1w to 1mm...')
-            t1w = rgu.reslice_to_xmm(t1w, 1.0)
-        elif vox_size == '2mm':
-            print('Reslicing preprocessed t1w to 2mm...')
-            t1w = rgu.reslice_to_xmm(t1w, 2.0)
-	print("%s%s%s" % ('Reslicing runtime: ', str(np.round(time.time() - start_time, 1)), 's'))
+    start_time = time.time()
+    t1w = mgu.match_target_vox_res(t1w, vox_size, namer, zoom_set)
+    print("%s%s%s" % ('Reslicing runtime: ', str(np.round(time.time() - start_time, 1)), 's'))
 
     # Instantiate registration
     reg = mgr.dmri_reg(outdir, nodif_B0, nodif_B0_mask, t1w, vox_size, simple=False)

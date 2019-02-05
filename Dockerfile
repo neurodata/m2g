@@ -3,7 +3,7 @@ MAINTAINER Derek Pisner <dpisner@utexas.edu>
 
 #--------Environment Variables-----------------------------------------------#
 ENV NDMG_URL https://github.com/neurodata/ndmg.git
-ENV NDMG_ATLASES s3://mrneurodata/resources/ndmg_atlases.zip 
+ENV NDMG_ATLASES https://github.com/neurodata/neuroparc/archive/master.zip 
 ENV AFNI_URL https://files.osf.io/v1/resources/fvuh8/providers/osfstorage/5a0dd9a7b83f69027512a12b
 ENV LIBXP_URL http://mirrors.kernel.org/debian/pool/main/libx/libxp/libxp6_1.0.2-2_amd64.deb 
 ENV LIBPNG_URL http://mirrors.kernel.org/debian/pool/main/libp/libpng/libpng12-0_1.2.49-1%2Bdeb7u2_amd64.deb
@@ -149,8 +149,11 @@ RUN \
 RUN \
     mkdir /ndmg_atlases && \
     cd /ndmg_atlases && \
-    aws s3 cp --no-sign-request $NDMG_ATLASES ./ && \
-    unzip ndmg_atlases.zip
+    wget $NDMG_ATLASES && \
+    unzip master.zip && \
+    mv neuroparc-master/atlases/* . && \
+    rm -rf neuroparc-master/atlases && \
+    rm -rf master.zip    
 
 RUN mkdir /data && \
     chmod -R 777 /data

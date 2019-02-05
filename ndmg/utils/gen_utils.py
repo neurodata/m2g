@@ -27,9 +27,11 @@ from dipy.io import read_bvals_bvecs
 from dipy.core.gradients import gradient_table
 from subprocess import Popen, PIPE
 import numpy as np
-import nibabel as nb
+import nibabel as nib
+import os
 import os.path as op
 import sys
+import shutil
 from networkx import to_numpy_matrix as graph2np
 import pyximport
 try:
@@ -82,8 +84,8 @@ def get_braindata(brain_file):
         braindata = brain_file
     else:
         if type(brain_file) is str or type(brain_file) is unicode:
-            brain = nb.load(str(brain_file))
-        elif type(brain_file) is nb.nifti1.Nifti1Image:
+            brain = nib.load(str(brain_file))
+        elif type(brain_file) is nib.nifti1.Nifti1Image:
             brain = brain_file
         else:
             raise TypeError("Brain file is type: {}".format(type(brain_file)) +
@@ -112,7 +114,7 @@ def get_slice(mri, volid, sli):
         sli:
             - the path to the destination for the slice.
     """
-    mri_im = nb.load(mri)
+    mri_im = nib.load(mri)
     data = mri_im.get_data()
     # get the slice at the desired volume
     vol = np.squeeze(data[:, :, :, volid])
@@ -120,11 +122,11 @@ def get_slice(mri, volid, sli):
     # Wraps volume in new nifti image
     head = mri_im.get_header()
     head.set_data_shape(head.get_data_shape()[0:3])
-    out = nb.Nifti1Image(vol, affine=mri_im.get_affine(),
+    out = nib.Nifti1Image(vol, affine=mri_im.get_affine(),
                          header=head)
     out.update_header()
     # and saved to a new file
-    nb.save(out, sli)
+    nib.save(out, sli)
 
 
 def make_gtab_and_bmask(fbval, fbvec, dwi_file, outdir):
@@ -176,6 +178,86 @@ def make_gtab_and_bmask(fbval, fbvec, dwi_file, outdir):
     cmd = 'fslmaths ' + nodif_B0 + ' -bin ' + nodif_B0_mask
     os.system(cmd)
     return gtab, nodif_B0, nodif_B0_mask
+
+
+def reorient_dwi(dwi_prep, bvecs, namer):
+    # Check orientation (dwi_prep)
+    cmd='fslorient -getorient ' + dwi_prep
+    orient = os.popen(cmd).read().strip('\n')
+    if orient == 'NEUROLOGICAL':
+        print('Reorienting derivative dwi image to RAS+ canonical...')
+        # Orient dwi to RADIOLOGICAL
+        dwi_orig = dwi_prep
+        dwi_prep = "{}/dwi_prep_reor.nii.gz".format(namer.dirs['output']['prep_m'])
+        shutil.copyfile(dwi_orig, dwi_prep)
+        cmd='fslorient -forceradiological ' + dwi_prep
+        os.system(cmd)
+        # Invert bvecs
+        bvecs_orig = bvecs
+        bvecs = "{}/bvecs_reor.bvec".format(namer.dirs['output']['prep_m'])
+        shutil.copyfile(bvecs_orig, bvecs)
+        bvecs_mat = np.genfromtxt(bvecs)
+        bvecs_mat[1] = -bvecs_mat[1]
+        cmd='fslorient -getqform ' + dwi_prep
+        qform = os.popen(cmd).read().strip('\n')
+        # Posterior-Anterior Reorientation
+        if float(qform.split(' ')[:-1][5])<0:
+            cmd='fslswapdim ' + dwi_prep + ' -y x z ' + dwi_prep
+            os.system(cmd)
+            bvecs_mat[0] = -bvecs_mat[0]
+        # Inferior-Superior Reorientation
+        if float(qform.split(' ')[:-1][10])<0:
+            cmd='fslswapdim ' + dwi_prep + ' y x -z ' + dwi_prep
+            os.system(cmd)
+            bvecs_mat[2] = -bvecs_mat[2]
+        np.savetxt(bvecs, bvecs_mat)
+    else:
+        dwi_orig = dwi_prep
+        dwi_prep = "{}/dwi_prep.nii.gz".format(namer.dirs['output']['prep_m'])
+        shutil.copyfile(dwi_orig, dwi_prep)
+        bvecs_orig = bvecs
+        bvecs = "{}/bvecs.bvec".format(namer.dirs['output']['prep_m'])
+        shutil.copyfile(bvecs_orig, bvecs)
+        bvecs_mat = np.genfromtxt(bvecs)
+        np.savetxt(bvecs, bvecs_mat)
+    return dwi_prep, bvecs
+
+def reorient_t1w(t1w, namer):
+    cmd='fslorient -getorient ' + t1w
+    orient = os.popen(cmd).read().strip('\n')
+    if orient == 'NEUROLOGICAL':
+        print('Reorienting derivative t1w image to RAS+ canonical...')
+        # Orient t1w to std
+        t1w_orig = t1w
+        t1w = "{}/t1w_reor.nii.gz".format(namer.dirs['output']['prep_m'])
+        shutil.copyfile(t1w_orig, t1w)
+        cmd='fslorient -forceradiological ' + t1w_orig
+        os.system(cmd)
+        cmd='fslreorient2std ' + t1w_orig + ' ' + t1w
+        os.system(cmd)
+    else:
+        t1w_orig = t1w
+        t1w = "{}/t1w.nii.gz".format(namer.dirs['output']['prep_m'])
+        shutil.copyfile(t1w_orig, t1w)
+    return t1w
+
+def match_target_vox_res(img_file, vox_size, namer, zoom_set):
+    from ndmg.utils import reg_utils as rgu
+    # Check dimensions
+    img = nib.load(img_file)
+    hdr = img.get_header()
+    zooms = hdr.get_zooms()
+    if (round(abs(zooms[0]), 0), round(abs(zooms[1]), 0), round(abs(zooms[2]), 0)) is not zoom_set:
+        dwi_orig = img_file
+        img_file = "{}/img_file_reslice.nii.gz".format(namer.dirs['output']['prep_m'])
+        shutil.copyfile(dwi_orig, img_file)
+        if vox_size == '1mm':
+            print('Reslicing preprocessed dwi to 1mm...')
+            img_file = rgu.reslice_to_xmm(img_file, 1.0)
+        elif vox_size == '2mm':
+            print('Reslicing preprocessed dwi to 2mm...')
+            img_file = rgu.reslice_to_xmm(img_file, 2.0)
+    return img_file
 
 
 def load_bval_bvec(fbval, fbvec):
@@ -234,7 +316,7 @@ def morton_region(parcellation, outpath):
         outpath:
             - the filepath of the matrix.
     """
-    at_dat = nb.load(parcellation).get_data()
+    at_dat = nib.load(parcellation).get_data()
     atlasn = get_filename(parcellation)
     dims = at_dat.shape
     region = {}
@@ -266,8 +348,8 @@ def parcel_overlap(parcellation1, parcellation2, outpath):
         outpath:
             - the path to produce the output.
     """
-    p1_dat = nb.load(parcellation1).get_data()
-    p2_dat = nb.load(parcellation2).get_data()
+    p1_dat = nib.load(parcellation1).get_data()
+    p2_dat = nib.load(parcellation2).get_data()
     p1regs = np.unique(p1_dat)
     p1regs = p1regs[p1regs > 0]
     p2regs = np.unique(p2_dat)
