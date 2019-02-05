@@ -96,7 +96,11 @@ class graph_tools(object):
                     pass
 
                 if loc:
-                    p.add(loc)
+		    try:
+                        p.add(loc)
+		    except:
+			print('Missing roi location. Skipping...')
+			continue
 
             edges = combinations(p, 2)
             for edge in edges:
