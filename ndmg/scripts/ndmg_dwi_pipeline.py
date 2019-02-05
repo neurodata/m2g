@@ -112,7 +112,7 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
     start_time = time.time()
     dwi_prep = "{}/eddy_corrected_data.nii.gz".format(namer.dirs['output']['prep_m'])
     cmd='eddy_correct ' + dwi + ' ' + dwi_prep + ' 0'
-    os.system(cmd)
+#    os.system(cmd)
   
     # Check orientation (dwi_prep)
     img = nib.load(dwi_prep)
@@ -123,8 +123,8 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
         dwi_orig = dwi_prep
         dwi_prep = "{}/dwi_prep_reor.nii.gz".format(namer.dirs['output']['prep_m'])
         shutil.copyfile(dwi_orig, dwi_prep)
-        canonical_dwi_img = nib.as_closest_canonical(img)
-        nib.save(canonical_dwi_img, dwi_prep)
+	cmd='fslreorient2std ' + dwi_orig + ' ' + dwi_prep
+	os.system(cmd)
         # Swap x-y axis in bvecs
         bvecs_orig = bvecs
         bvecs = "{}/bvec_reor.bvec".format(namer.dirs['output']['prep_m'])
@@ -137,7 +137,7 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
     # Check dimensions
     hdr = img.get_header()
     zooms = hdr.get_zooms()
-    if (abs(zooms[0]), abs(zooms[1]), abs(zooms[2])) is not zoom_set:
+    if (round(abs(zooms[0]), 0), round(abs(zooms[1]), 0), round(abs(zooms[2]), 0)) is not zoom_set:
         start_time = time.time()
         dwi_orig = dwi_prep
         dwi_prep = "{}/dwi_prep_reslice.nii.gz".format(namer.dirs['output']['prep_m'])
@@ -178,14 +178,14 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
         t1w_orig = t1w
         t1w = "{}/t1w_reor.nii.gz".format(namer.dirs['output']['prep_m'])
         shutil.copyfile(t1w_orig, t1w)
-        canonical_t1w_img = nib.as_closest_canonical(img)
-        nib.save(canonical_t1w_img, t1w)
+        cmd='fslreorient2std ' + t1w_orig + ' ' + t1w
+        os.system(cmd)
 	print("%s%s%s" % ('Reorienting runtime: ', str(np.round(time.time() - start_time, 1)), 's'))	
 
     # Check dimensions
     hdr = img.get_header()
     zooms = hdr.get_zooms()
-    if (abs(zooms[0]), abs(zooms[1]), abs(zooms[2])) is not zoom_set:
+    if (round(abs(zooms[0]), 0), round(abs(zooms[1]), 0), round(abs(zooms[2]), 0)) is not zoom_set:
 	start_time = time.time()
         t1w_orig = t1w
         t1w = "{}/t1w_reslice.nii.gz".format(namer.dirs['output']['prep_m'])

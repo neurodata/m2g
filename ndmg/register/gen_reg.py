@@ -97,6 +97,7 @@ class dmri_reg(object):
         self.mni_atlas = "%s%s%s%s" % (FSLDIR, '/data/atlases/HarvardOxford/HarvardOxford-sub-prob-', vox_size, '.nii.gz')
         self.input_mni = "%s%s%s%s" % (FSLDIR, '/data/standard/MNI152_T1_', vox_size, '_brain.nii.gz')
         self.gm_in_dwi_bin = "{}/{}_gm_in_dwi_bin.nii.gz".format(self.outdir['reg_a'], self.t1w_name)
+	self.gm_in_dwi_binv = "{}/{}_gm_in_dwi_binv.nii.gz".format(self.outdir['reg_a'], self.t1w_name)
 
     def gen_tissue(self):
         # BET needed for this, as afni 3dautomask only works on 4d volumes
@@ -268,7 +269,9 @@ class dmri_reg(object):
         os.system(cmd)
 	cmd='fslmaths ' + self.wm_in_dwi_bin + ' -binv ' + self.wm_in_dwi_binv
         os.system(cmd)
-        cmd='fslmaths ' + self.csf_mask_dwi + ' -mas ' + self.vent_mask_dwi + ' -mas ' + self.wm_in_dwi_binv + ' ' + self.vent_csf_in_dwi
+        cmd='fslmaths ' + self.gm_in_dwi_bin + ' -binv ' + self.gm_in_dwi_binv
+        os.system(cmd)
+        cmd='fslmaths ' + self.csf_mask_dwi + ' -mas ' + self.vent_mask_dwi + ' -mas ' + self.wm_in_dwi_binv + ' -mas ' + self.gm_in_dwi_binv + ' ' + self.vent_csf_in_dwi
         os.system(cmd)
         cmd='fslmaths ' + self.vent_csf_in_dwi + ' -bin ' + self.vent_csf_in_dwi_bin
         os.system(cmd)

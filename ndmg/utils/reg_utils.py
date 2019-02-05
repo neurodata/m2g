@@ -533,9 +533,13 @@ def combine_xfms(xfm1, xfm2, xfmout):
 
 
 def reslice_to_xmm(infile, vox_sz):                                     
-     img = nib.load(infile)
-     img.affine[:3,:3] = np.eye(3) * float(vox_sz)
-     new_file_atlas_res = nl.resample_img(infile, target_affine=img.affine)
-     out_file = "%s%s%s%s%s%s" % (os.path.dirname(infile), '/', os.path.basename(infile).split('.nii')[0], '_', vox_sz ,'mm.nii.gz')
-     nib.save(new_file_atlas_res, out_file)
-     return out_file
+    try:
+        FSLDIR = os.environ['FSLDIR']
+    except KeyError:
+        print('FSLDIR environment variable not set!')
+    mni_atlas = "%s%s%s%s" % (FSLDIR, '/data/standard/MNI152_T1_', int(vox_sz), 'mm_brain.nii.gz')
+    img = nib.load(mni_atlas)
+    new_file_atlas_res = nl.resample_img(infile, target_affine=img.affine)
+    out_file = "%s%s%s%s%s%s" % (os.path.dirname(infile), '/', os.path.basename(infile).split('.nii')[0], '_', int(vox_sz) ,'mm.nii.gz')
+    nib.save(new_file_atlas_res, out_file)
+    return out_file
