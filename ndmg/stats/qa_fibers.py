@@ -35,7 +35,7 @@ try:
 except ImportError:
     pass
 
-def visualize_fibs(fibs, fibfile, atlasfile, outdir, opacity, num_samples):
+def visualize_fibs(fibs, atlasfile, outdir, opacity, num_samples):
     """
     Takes fiber streamlines and visualizes them using DiPy
     Required Arguments:
@@ -50,7 +50,7 @@ def visualize_fibs(fibs, fibfile, atlasfile, outdir, opacity, num_samples):
         import vtk
         print("VTK found - beginning fiber QA.")
     except ImportError:
-        print("!! VTK not found; skipping fiber QA.")
+        print("VTK not found; skipping fiber QA.")
         return
 
     # loading the fibers
