@@ -139,7 +139,8 @@ def make_gtab_and_bmask(fbval, fbvec, dwi_file, outdir):
     """
     # Use B0's from the DWI to create a more stable DWI image for registration
     nodif_B0 = "{}/nodif_B0.nii.gz".format(outdir)
-    nodif_B0_mask = "{}/nodif_B0_mask.nii.gz".format(outdir)
+    nodif_B0_bet = "{}/nodif_B0_bet.nii.gz".format(outdir)
+    nodif_B0_mask = "{}/nodif_B0_bet_mask.nii.gz".format(outdir)
 
     # loading bvecs/bvals
     print(fbval)
@@ -175,7 +176,7 @@ def make_gtab_and_bmask(fbval, fbvec, dwi_file, outdir):
     nib.save(mean_B0, nodif_B0)
 
     # Get mean B0 brain mask
-    cmd = 'fslmaths ' + nodif_B0 + ' -bin ' + nodif_B0_mask
+    cmd = 'bet ' + nodif_B0 + ' ' + nodif_B0_bet + ' -m -f 0.2'
     os.system(cmd)
     return gtab, nodif_B0, nodif_B0_mask
 
@@ -258,7 +259,6 @@ def match_target_vox_res(img_file, vox_size, namer, zoom_set):
             print('Reslicing preprocessed dwi to 2mm...')
             img_file = rgu.reslice_to_xmm(img_file, 2.0)
     return img_file
-
 
 def load_bval_bvec(fbval, fbvec):
     """
