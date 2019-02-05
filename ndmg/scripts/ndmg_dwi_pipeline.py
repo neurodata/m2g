@@ -112,7 +112,7 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
     start_time = time.time()
     dwi_prep = "{}/eddy_corrected_data.nii.gz".format(namer.dirs['output']['prep_m'])
     cmd='eddy_correct ' + dwi + ' ' + dwi_prep + ' 0'
-    os.system(cmd)
+#    os.system(cmd)
   
     # Check orientation (dwi_prep)
     img = nib.load(dwi_prep)
