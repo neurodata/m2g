@@ -263,6 +263,11 @@ class dmri_reg(object):
         self.mask = math_img('img > 0', img=self.t_img)
         self.mask.to_filename(self.wm_in_dwi_bin)
 
+        # Threshold GM to binary in dwi space
+        self.t_img = load_img(self.gm_in_dwi)
+        self.mask = math_img('img > 0', img=self.t_img)
+        self.mask.to_filename(self.gm_in_dwi_bin)
+
         # Erode and mask CSF with ventricle mask and and subtract atlas
         print('Masking CSF with ventricle mask...')
         cmd='fslmaths ' + self.vent_mask_dwi + ' -bin ' + self.vent_mask_dwi
@@ -276,10 +281,6 @@ class dmri_reg(object):
         cmd='fslmaths ' + self.vent_csf_in_dwi + ' -bin ' + self.vent_csf_in_dwi_bin
         os.system(cmd)
 
-        # Threshold GM to binary in dwi space
-        self.t_img = load_img(self.gm_in_dwi)
-        self.mask = math_img('img > 0', img=self.t_img)
-        self.mask.to_filename(self.gm_in_dwi_bin)
         return
 
 
