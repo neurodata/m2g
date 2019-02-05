@@ -197,14 +197,14 @@ def reorient_dwi(dwi_prep, bvecs, namer):
         bvecs = "{}/bvecs_reor.bvec".format(namer.dirs['output']['prep_m'])
         shutil.copyfile(bvecs_orig, bvecs)
         bvecs_mat = np.genfromtxt(bvecs)
-        bvecs_mat[1] = -bvecs_mat[1]
+        bvecs_mat[0] = -bvecs_mat[0]
         cmd='fslorient -getqform ' + dwi_prep
         qform = os.popen(cmd).read().strip('\n')
         # Posterior-Anterior Reorientation
         if float(qform.split(' ')[:-1][5])<0:
             cmd='fslswapdim ' + dwi_prep + ' -y x z ' + dwi_prep
             os.system(cmd)
-            bvecs_mat[0] = -bvecs_mat[0]
+            bvecs_mat[1] = -bvecs_mat[1]
         # Inferior-Superior Reorientation
         if float(qform.split(' ')[:-1][10])<0:
             cmd='fslswapdim ' + dwi_prep + ' y x -z ' + dwi_prep
