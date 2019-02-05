@@ -250,14 +250,14 @@ def match_target_vox_res(img_file, vox_size, namer, zoom_set):
     zooms = hdr.get_zooms()
     if (round(abs(zooms[0]), 0), round(abs(zooms[1]), 0), round(abs(zooms[2]), 0)) is not zoom_set:
         dwi_orig = img_file
-        img_file = "{}/img_file_reslice.nii.gz".format(namer.dirs['output']['prep_m'])
-        shutil.copyfile(dwi_orig, img_file)
+        img_file_pre = "{}/{}_pre_res.nii.gz".format(namer.dirs['output']['prep_m'], os.path.basename(img_file).split('.nii.gz')[0])
+        shutil.copyfile(dwi_orig, img_file_pre)
         if vox_size == '1mm':
             print('Reslicing preprocessed dwi to 1mm...')
-            img_file = rgu.reslice_to_xmm(img_file, 1.0)
+            img_file = rgu.reslice_to_xmm(img_file_pre, 1.0)
         elif vox_size == '2mm':
             print('Reslicing preprocessed dwi to 2mm...')
-            img_file = rgu.reslice_to_xmm(img_file, 2.0)
+            img_file = rgu.reslice_to_xmm(img_file_pre, 2.0)
     return img_file
 
 def load_bval_bvec(fbval, fbvec):
