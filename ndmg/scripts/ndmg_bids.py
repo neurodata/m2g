@@ -39,6 +39,7 @@ from ndmg.utils import gen_utils as mgu
 import ndmg
 import os.path as op
 import os
+import shutil
 import sys
 from multiprocessing import Pool
 from functools import partial
@@ -104,11 +105,11 @@ def get_atlas(atlas_dir, modality, vox_size):
     if any(not ope(f) for f in fils):
         print("Cannot find atlas information; downloading...")
         mgu.execute_cmd('mkdir -p ' + atlas_dir)
-        cmd = 'aws s3 cp --no-sign-request s3://mrneurodata/data/'
-        cmd += 'resources/ndmg_atlases.zip {}'.format(atlas_dir)
-        mgu.execute_cmd(cmd)
-        cmd = 'unzip {}'.format(op.join(atlas_dir, 'ndmg_atlases.zip'))
-        mgu.execute_cmd(cmd)
+        cmd = 'wget https://github.com/neurodata/neuroparc/archive/master.zip'
+	os.system(cmd)
+	os.rename('/neuroparc-master/atlases', '/ndmg_atlases')
+	shutil.rmtree('/neuroparc-master')
+	os.remove('master.zip')
 
     if modality == 'dwi':
         atlas_brain = None
