@@ -3,7 +3,7 @@ MAINTAINER Derek Pisner <dpisner@utexas.edu>
 
 #--------Environment Variables-----------------------------------------------#
 ENV NDMG_URL https://github.com/neurodata/ndmg.git
-ENV NDMG_ATLASES https://github.com/neurodata/neuroparc/archive/master.zip 
+ENV NDMG_ATLASES https://github.com/neurodata/neuroparc.git 
 ENV AFNI_URL https://files.osf.io/v1/resources/fvuh8/providers/osfstorage/5a0dd9a7b83f69027512a12b
 ENV LIBXP_URL http://mirrors.kernel.org/debian/pool/main/libx/libxp/libxp6_1.0.2-2_amd64.deb 
 ENV LIBPNG_URL http://mirrors.kernel.org/debian/pool/main/libp/libpng/libpng12-0_1.2.49-1%2Bdeb7u2_amd64.deb
@@ -35,6 +35,15 @@ RUN curl -sSL http://neuro.debian.net/lists/stretch.us-tn.full >> /etc/apt/sourc
     apt-get update -qq
 RUN apt-get -f install
 
+# Configure git-lfs
+RUN build_deps="curl" && \
+    apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends ${build_deps} ca-certificates && \
+    curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | bash && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends git-lfs && \
+    git lfs install && \
+    DEBIAN_FRONTEND=noninteractive apt-get purge -y --auto-remove ${build_deps} && \
+    rm -r /var/lib/apt/lists/*
 ###################################################################################################################
 # Download sources & setup supporting libraries that are needed to build VTK
 # Else use pip install vtk pyvtk during later pypi installs
@@ -147,13 +156,9 @@ RUN \
     python setup.py install 
 
 RUN \
-    mkdir /ndmg_atlases && \
-    cd /ndmg_atlases && \
-    wget $NDMG_ATLASES && \
-    unzip master.zip && \
-    mv neuroparc-master/atlases/* . && \
-    rm -rf neuroparc-master/atlases && \
-    rm -rf master.zip    
+    git clone $NDMG_ATLASES && \
+    mv /neuroparc/atlases /ndmg_atlases && \
+    rm -rf neuroparc
 
 RUN mkdir /data && \
     chmod -R 777 /data

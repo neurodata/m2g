@@ -182,7 +182,7 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
     save(tractogram, streams)
 
     # Visualize fibers using VTK
-    if nib.load(mask).get_data().shape == (182, 218, 182):
+    if nib.load(nodif_B0_mask).get_data().shape == (182, 218, 182):
         try:
             visualize_fibs(streamlines, aligned_atlas, namer.dirs['qa']['fiber'], 0.02, 2000)
         except:
