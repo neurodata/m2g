@@ -81,7 +81,7 @@ def get_atlas(atlas_dir, modality, vox_size):
     if modality == 'dwi':
         atlas = op.join(atlas_dir, 'atlas/MNI152NLin6_res-' + dims + '_T1w.nii.gz')
         atlas_mask = op.join(atlas_dir,
-                             'mask/MNI152NLin6_res-' + dims + '_T1w_brainmask.nii.gz')
+                             'mask/MNI152NLin6_res-' + dims + '_T1w_descr-brainmask.nii.gz')
         labels = [i for i in glob.glob(atlas_dir + '/label/*.nii.gz') if dims in i]
         labels = [op.join(atlas_dir, 'label', l) for l in labels]
         fils = labels + [atlas, atlas_mask]
@@ -107,6 +107,8 @@ def get_atlas(atlas_dir, modality, vox_size):
         print("Cannot find atlas information; downloading...")
         mgu.execute_cmd('mkdir -p ' + atlas_dir)
         cmd = 'wget https://github.com/neurodata/neuroparc/archive/master.zip'
+	os.system(cmd)
+	cmd = 'unzip /master.zip'
 	os.system(cmd)
 	os.rename('/neuroparc-master/atlases', '/ndmg_atlases')
 	shutil.rmtree('/neuroparc-master')
