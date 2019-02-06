@@ -80,19 +80,7 @@ def get_atlas(atlas_dir, modality, vox_size):
         atlas = op.join(atlas_dir, 'atlas/MNI152NLin6_res-' + dims + '_T1w.nii.gz')
         atlas_mask = op.join(atlas_dir,
                              'mask/MNI152NLin6_res-' + dims + '_T1w_brainmask.nii.gz')
-        labels= ['HarvardOxfordcort-maxprob-thr25_res-' + dims + '.nii.gz',
-                 'HarvardOxfordsub-maxprob-thr25_res-' + dims + '.nii.gz',
-                 'aal_res-' + dims + '.nii.gz', 'brodmann_res-' + dims + '.nii.gz',
-                 'desikan_res-' + dims + '.nii.gz',
-                 'CPAC200_res-' + dims + '.nii.gz', 'DS00071_res-' + dims + '.nii.gz',
-                 'DS00096_res-' + dims + '.nii.gz', 'DS00108_res-' + dims + '.nii.gz',
-                 'DS00140_res-' + dims + '.nii.gz', 'DS00195_res-' + dims + '.nii.gz',
-                 'DS00278_res-' + dims + '.nii.gz', 'DS00350_res-' + dims + '.nii.gz',
-                 'DS00446_res-' + dims + '.nii.gz', 'DS00583_res-' + dims + '.nii.gz',
-                 'DS00833_res-' + dims + '.nii.gz', 'DS01216_res-' + dims + '.nii.gz',
-                 'DK_res-' + dims + '.nii.gz', 'JHU_res-' + dims + '.nii.gz',
-                 'tissue_res-' + dims + '.nii.gz', 'hemispheric_res-' + dims + '.nii.gz']
-
+        labels = [i for i in glob.glob(atlas_dir + '/label/*.nii.gz') if dims in i]
         labels = [op.join(atlas_dir, 'label', l) for l in labels]
         fils = labels + [atlas, atlas_mask]
     if modality == 'func':
@@ -104,19 +92,8 @@ def get_atlas(atlas_dir, modality, vox_size):
         lv_mask = op.join(atlas_dir, "mask/HarvardOxford_variant-" +
                           "lateral-ventricles-thr25" +
                           "_res-' + dims + '_brainmask.nii.gz")
-        labels= ['HarvardOxfordcort-maxprob-thr25_res-' + dims + '.nii.gz',
-                 'HarvardOxfordsub-maxprob-thr25_res-' + dims + '.nii.gz',
-                 'aal_res-' + dims + '.nii.gz', 'brodmann_res-' + dims + '.nii.gz',
-                 'desikan_res-' + dims + '.nii.gz', 'pp264_res-' + dims + '.nii.gz',
-                 'CPAC200_res-' + dims + '.nii.gz', 'DS00071_res-' + dims + '.nii.gz',
-                 'DS00096_res-' + dims + '.nii.gz', 'DS00108_res-' + dims + '.nii.gz',
-                 'DS00140_res-' + dims + '.nii.gz', 'DS00195_res-' + dims + '.nii.gz',
-                 'DS00278_res-' + dims + '.nii.gz', 'DS00350_res-' + dims + '.nii.gz',
-                 'DS00446_res-' + dims + '.nii.gz', 'DS00583_res-' + dims + '.nii.gz',
-                 'DS00833_res-' + dims + '.nii.gz', 'DS01216_res-' + dims + '.nii.gz',
-                 'DK_res-' + dims + '.nii.gz', 'JHU_res-' + dims + '.nii.gz',
-                 'tissue_res-' + dims + '.nii.gz', 'hemispheric_res-' + dims + '.nii.gz']
 
+	labels = [i for i in glob.glob(atlas_dir + '/label/*.nii.gz') if dims in i]
         labels = [op.join(atlas_dir, 'label', l) for l in labels]
         fils = labels + [atlas, atlas_mask, atlas_brain, lv_mask]
 
