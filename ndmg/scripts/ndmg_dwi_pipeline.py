@@ -159,20 +159,27 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
     start_time = time.time()
     reg.gen_tissue()
     print("%s%s%s" % ('gen_tissue runtime: ', str(np.round(time.time() - start_time, 1)), 's'))
-    # align t1w to dwi
+    # Align t1w to dwi
     start_time = time.time()
     reg.t1w2dwi_align()
     print("%s%s%s" % ('t1w2dwi_align runtime: ', str(np.round(time.time() - start_time, 1)), 's'))
-    # align tissue classifiers
+    # Align tissue classifiers
     start_time = time.time()
     reg.tissue2dwi_align()
     print("%s%s%s" % ('tissue2dwi_align runtime: ', str(np.round(time.time() - start_time, 1)), 's'))
 
     # -------- Tensor Fitting and Fiber Tractography ---------------- #
-    # Compute tensors and track fiber streamlines
+    mod_type='det'
+    track_type='eudx'
+    if mod_type=='det' and track_type=='local':
+	seeds=mgt.build_seed_list(reg.wm_in_dwi_bin)
+    else:
+	seeds=None
+
+    # Compute direction model and track fiber streamlines
     print("Beginning tractography...")
-    trct = mgt.run_track(dwi_prep, nodif_B0_mask, reg.gm_in_dwi, reg.vent_csf_in_dwi, reg.wm_in_dwi, reg.wm_in_dwi_bin, gtab)
-    [streamlines, tens] = trct.run()
+    trct = mgt.run_track(dwi_prep, nodif_B0_mask, reg.gm_in_dwi, reg.vent_csf_in_dwi, reg.wm_in_dwi, reg.wm_in_dwi_bin, gtab, mod_type, track_type, seeds)
+    streamlines = trct.run()
 
     #tracks = [sl for sl in streamlines if len(sl) > 1]
 

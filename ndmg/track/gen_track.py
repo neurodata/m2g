@@ -23,15 +23,18 @@ import warnings
 warnings.filterwarnings("ignore", message="numpy.dtype size changed")
 import numpy as np
 import nibabel as nib
-from dipy.reconst.dti import TensorModel, fractional_anisotropy, quantize_evecs
-from dipy.tracking.eudx import EuDX
-from dipy.data import get_sphere
 from dipy.tracking.streamline import Streamlines
 
+def build_seed_list(wm_in_dwi_bin):
+    from dipy.tracking import utils
+    wm_mask = nib.load(wm_in_dwi_bin)
+    wm_mask_data = wm_mask.get_data().astype('bool')
+    seeds = utils.seeds_from_mask(wm_mask_data, density=2, affine=wm_mask.affine)
+    return seeds
 
 class run_track(object):
     def __init__(self, dwi_in, nodif_B0_mask, gm_in_dwi, vent_csf_in_dwi,
-                 wm_in_dwi, wm_in_dwi_bin, gtab):
+                 wm_in_dwi, wm_in_dwi_bin, gtab, mod_type, track_type, seeds):
         """
         A class for deterministic tractography in native space.
 
@@ -71,14 +74,33 @@ class run_track(object):
         self.wm_in_dwi = wm_in_dwi
         self.wm_in_dwi_bin = wm_in_dwi_bin
         self.gtab = gtab
+	self.mod_type = mod_type
+	self.track_type = track_type
+	self.seeds = seeds
 
     def run(self):
-        self.prep_tracking()
-        self.tens_mod_est()
-        tracks = self.det_connectometry()
+	if self.track_type == 'local':
+	    self.act_classifier = self.prep_tracking()
+	if self.mod_type == 'det':
+	    if self.track_type == 'eudx':
+                self.tens = self.tens_mod_est()
+                tracks = self.eudx_tracking()
+	    elif self.track_type == 'local':
+		if self.seeds is not None and len(self.seeds) > 0:
+		    self.csa_peaks = self.odf_mod_est()
+		    tracks = self.local_tracking()
+		else:
+		    raise ValueError('Error: Either no seeds supplied, or no valid seeds found in white-matter interface')
+	elif self.mod_type == 'prob':
+            if self.seeds is not None and len(self.seeds) > 0:
+                self.pdg = self.csd_mod_est()
+                tracks = self.local_tracking()
+            else:
+                raise ValueError('Error: Either no seeds supplied, or no valid seeds found in white-matter interface')
         return tracks
 
     def prep_tracking(self):
+	from dipy.tracking.local import ActTissueClassifier
         self.dwi_img = nib.load(self.dwi)
         self.data = self.dwi_img.get_data()
         # Loads mask and ensures it's a true binary mask
@@ -96,8 +118,12 @@ class run_track(object):
         self.include_map = self.gm_mask.get_data()
         self.include_map[self.background > 0] = 1
         self.exclude_map = self.vent_csf_mask_data
+	self.act_classifier = ActTissueClassifier(self.include_map, self.exclude_map)
+	return self.act_classifier
 
     def tens_mod_est(self):
+	from dipy.reconst.dti import TensorModel, fractional_anisotropy, quantize_evecs
+	from dipy.data import get_sphere
         print('Fitting tensor model...')
         self.model = TensorModel(self.gtab)
         self.ten = self.model.fit(self.data, self.mask)
@@ -105,10 +131,43 @@ class run_track(object):
 	self.fa[np.isnan(self.fa)] = 0
         self.sphere = get_sphere('symmetric724')
         self.ind = quantize_evecs(self.ten.evecs, self.sphere.vertices)
-        return
+        return self.ten
 
-    def det_connectometry(self):
+    def odf_mod_est(self):
+	from dipy.reconst.shm import CsaOdfModel
+	from dipy.data import default_sphere
+	from dipy.direction import peaks_from_model
+	self.csa_model = CsaOdfModel(self.gtab, sh_order=6)
+	self.csa_peaks = peaks_from_model(self.csa_model, self.data, default_sphere, relative_peak_threshold=.8, min_separation_angle=45, mask=self.mask)
+	return self.csa_peaks
+
+    def csd_mod_est(self):
+	from dipy.reconst.csdeconv import ConstrainedSphericalDeconvModel, recursive_response
+	from dipy.data import default_sphere
+        # Instantiate recursive response
+        self.response = recursive_response(self.gtab, self.data, mask=self.mask, sh_order=8, peak_thr=0.01,
+                                   init_fa=0.08, init_trace=0.0021, iter=8, convergence=0.001, parallel=False)
+	# Instantiate CSD
+	csd_model = ConstrainedSphericalDeconvModel(self.gtab, self.response)
+	# Fit CSD
+	self.csd_fit = csd_model.fit(self.data, mask=self.mask)
+	self.pdg = ProbabilisticDirectionGetter.from_shcoeff(self.csd_fit.shm_coeff,
+                                                    max_angle=30.,
+                                                    sphere=self.default_sphere)
+	return self.pdg
+
+    def local_tracking(self):
+	from dipy.tracking.local import LocalTracking
+	if self.mod_type=='det':
+            self.streamline_generator = LocalTracking(self.csa_peaks, self.act_classifier, self.seeds, self.dwi_img.affine, step_size=.5, return_all=True)
+        elif self.mod_type=='prob':
+            self.streamline_generator = LocalTracking(self.pdg, self.act_classifier, self.seeds, self.dwi_img.affine, step_size=.5, return_all=True)
+	self.streamlines = Streamlines(self.streamline_generator, buffer_size=512)
+	return self.streamlines
+
+    def eudx_tracking(self):
+	from dipy.tracking.eudx import EuDX
         print('Running deterministic tractography...')
         self.streamline_generator = EuDX(self.fa.astype('f8'), self.ind, odf_vertices=self.sphere.vertices, a_low=float(0.02), seeds=int(1000000), affine=self.dwi_img.affine)
         self.streamlines = Streamlines(self.streamline_generator, buffer_size=512)
-        return self.streamlines, self.ten
+        return self.streamlines
