@@ -78,12 +78,12 @@ RUN \
     pandas cython vtk pyvtk awscli requests==2.5.3 scikit-image pybids==0.6.4 ipython
 
 RUN \
-    git lfs clone -b dev-dmri-fmri $NDMG_URL /ndmg && \
+    git clone -b dev-dmri-fmri $NDMG_URL /ndmg && \
     cd /ndmg && \
     python setup.py install
 
 RUN \
-    git clone $NDMG_ATLASES && \
+    git lfs clone $NDMG_ATLASES && \
     mv /neuroparc/atlases /ndmg_atlases && \
     rm -rf /neuroparc
 
