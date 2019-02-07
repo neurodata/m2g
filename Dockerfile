@@ -3,9 +3,9 @@ MAINTAINER Derek Pisner <dpisner@utexas.edu>
 
 #--------Environment Variables-----------------------------------------------#
 ENV NDMG_URL https://github.com/neurodata/ndmg.git
-ENV NDMG_ATLASES https://github.com/neurodata/neuroparc.git 
+ENV NDMG_ATLASES https://github.com/neurodata/neuroparc.git
 ENV AFNI_URL https://files.osf.io/v1/resources/fvuh8/providers/osfstorage/5a0dd9a7b83f69027512a12b
-ENV LIBXP_URL http://mirrors.kernel.org/debian/pool/main/libx/libxp/libxp6_1.0.2-2_amd64.deb 
+ENV LIBXP_URL http://mirrors.kernel.org/debian/pool/main/libx/libxp/libxp6_1.0.2-2_amd64.deb
 ENV LIBPNG_URL http://mirrors.kernel.org/debian/pool/main/libp/libpng/libpng12-0_1.2.49-1%2Bdeb7u2_amd64.deb
 
 #--------Initial Configuration-----------------------------------------------#
@@ -36,83 +36,10 @@ RUN curl -sSL http://neuro.debian.net/lists/stretch.us-tn.full >> /etc/apt/sourc
 RUN apt-get -f install
 
 # Configure git-lfs
-RUN build_deps="curl" && \
+RUN apt-get install -y apt-transport-https debian-archive-keyring
+RUN curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | bash && \
     apt-get update && \
-    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends ${build_deps} ca-certificates && \
-    curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | bash && \
-    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends git-lfs && \
-    git lfs install && \
-    DEBIAN_FRONTEND=noninteractive apt-get purge -y --auto-remove ${build_deps} && \
-    rm -r /var/lib/apt/lists/*
-###################################################################################################################
-# Download sources & setup supporting libraries that are needed to build VTK
-# Else use pip install vtk pyvtk during later pypi installs
-###################################################################################################################
-# Create source & tmp build directory
-RUN mkdir /tmpbuild
-WORKDIR /tmpbuild
-
-# Download & extract VTK
-RUN wget http://www.vtk.org/files/release/7.0/VTK-7.0.0.tar.gz && tar -zxvf VTK-7.0.0.tar.gz
-
-# Download, extract & build CMake
-# http://www.vtk.org/Wiki/VTK/Configure_and_Build
-RUN wget http://www.cmake.org/files/v2.8/cmake-2.8.12.2.tar.gz \
-    && tar xzf cmake-2.8.12.2.tar.gz
-RUN cd cmake-2.8.12.2 \
-    && ./configure --prefix=/usr/local \
-    && make \
-    && make install
-
-# Install OpenGL
-# Debian, Ubuntu
-# https://en.wikibooks.org/wiki/OpenGL_Programming/Installation/Linux
-RUN apt-get update && apt-get install --yes build-essential libgl1-mesa-dev
-
-# Download & build Tcl
-# https://www.tcl.tk/doc/howto/compile.html#unix
-RUN wget http://prdownloads.sourceforge.net/tcl/tcl8.6.6-src.tar.gz && tar -zxvf tcl8.6.6-src.tar.gz
-RUN cd tcl8.6.6/unix && ./configure && make && make install
-
-# Download & build Tk
-# https://www.tcl.tk/doc/howto/compile.html
-RUN wget http://prdownloads.sourceforge.net/tcl/tk8.6.6-src.tar.gz && tar -zxvf tk8.6.6-src.tar.gz
-RUN cd tk8.6.6/unix && ./configure && make && make install
-###################################################################################################################
-# /end setup
-###################################################################################################################
-
-###################################################################################################################
-# Building VTK with python interfaces
-# http://ghoshbishakh.github.io/blog/blogpost/2016/03/05/buid-vtk.html
-###################################################################################################################
-RUN mkdir /vtk-build2
-
-RUN apt-get install -y libxt-dev
-
-RUN cd /vtk-build2/ && cmake \
-  -DCMAKE_BUILD_TYPE:STRING=Release \
-  -DBUILD_TESTING:BOOL=OFF \
-  -DVTK_WRAP_PYTHON:BOOL=ON \
-  -DVTK_WRAP_PYTHON_SIP:BOOL=ON \
-  -DVTK_WRAP_TCL:BOOL=ON \
-  -DVTK_PYTHON_VERSION:STRING=3 \
-  -DVTK_USE_TK:BOOL=ON \
-  /tmpbuild/VTK-7.0.0
-
-# Build VTK
-RUN cd /vtk-build2/ && make
-
-# Now install the python bindings
-RUN cd /vtk-build2/Wrapping/Python && make && make install
-
-# Set environment variable to add the VTK libs to the Shared Libraries
-# http://tldp.org/HOWTO/Program-Library-HOWTO/shared-libraries.html
-# export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib:/vtk-build2/lib
-ENV LD_LIBRARY_PATH $LD_LIBRARY_PATH:/usr/local/lib:/vtk-build2/lib
-###################################################################################################################
-# /end VTK Build
-###################################################################################################################
+    apt-get install -y git-lfs
 
 #---------AFNI INSTALL--------------------------------------------------------#
 # setup of AFNI, which provides robust modifications of many of neuroimaging
@@ -148,17 +75,17 @@ ENV PATH=/opt/afni:$PATH
 RUN \
     pip install numpy networkx>=1.11 nibabel>=2.0 dipy==0.14.0 scipy \
     python-dateutil==2.6.1 boto3 awscli matplotlib==1.5.3 plotly==1.12.9 nilearn>=0.2 sklearn>=0.0 \
-    pandas cython pyvtk awscli requests==2.5.3 scikit-image pybids==0.6.4 ipython
+    pandas cython vtk pyvtk awscli requests==2.5.3 scikit-image pybids==0.6.4 ipython
 
 RUN \
-    git clone -b dev-dmri-fmri $NDMG_URL /ndmg && \
+    git lfs clone -b dev-dmri-fmri $NDMG_URL /ndmg && \
     cd /ndmg && \
-    python setup.py install 
+    python setup.py install
 
 RUN \
     git clone $NDMG_ATLASES && \
     mv /neuroparc/atlases /ndmg_atlases && \
-    rm -rf neuroparc
+    rm -rf /neuroparc
 
 RUN mkdir /data && \
     chmod -R 777 /data
