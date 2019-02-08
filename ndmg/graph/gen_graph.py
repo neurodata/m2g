@@ -31,7 +31,7 @@ import warnings
 warnings.simplefilter("ignore")
 
 class graph_tools(object):
-    def __init__(self, rois, streamlines, attr=None, sens="dmri"):
+    def __init__(self, rois, streamlines, attr=None, sens="dwi"):
         """
         Initializes the graph with nodes corresponding to the number of ROIs
 
