@@ -171,8 +171,8 @@ class graph_tools(object):
                 nx.write_weighted_edgelist(self.g, graphname, delimiter=",", encoding='utf-8')
             elif self.modal == 'func':
                 np.savetxt(graphname, self.g, comments='', delimiter=',', header=','.join([str(n) for n in self.n_ids]))
-        else:
-            raise ValueError("Unsupported Modality.")
+            else:
+                raise ValueError("Unsupported Modality.")
         else:
             raise ValueError('Only edgelist, gpickle, and graphml currently supported')
         pass
