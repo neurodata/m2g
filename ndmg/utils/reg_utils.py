@@ -18,7 +18,7 @@
 # Email: ebridge2@jhu.edu
 from __future__ import print_function
 import warnings
-warnings.filterwarnings("ignore", message="numpy.dtype size changed")
+warnings.simplefilter("ignore")
 from ndmg.utils import gen_utils as mgu
 import nibabel as nib
 import numpy as np

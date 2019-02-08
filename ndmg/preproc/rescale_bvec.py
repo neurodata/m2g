@@ -20,11 +20,10 @@
 # Email: gkiar@jhu.edu
 
 from __future__ import print_function
-
 import numpy as np
 import os.path as op
 import warnings
-warnings.filterwarnings("ignore", message="numpy.dtype size changed")
+warnings.simplefilter("ignore")
 
 def rescale_bvec(bvec, bvec_new):
     """

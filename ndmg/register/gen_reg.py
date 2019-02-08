@@ -21,8 +21,7 @@
 
 from __future__ import print_function
 import warnings
-warnings.filterwarnings("ignore", message="numpy.dtype size changed")
-warnings.filterwarnings("ignore", message="DeprecationWarning")
+warnings.simplefilter("ignore")
 import os
 import nibabel as nib
 from nilearn.image import load_img, math_img, resample_img, mean_img, new_img_like

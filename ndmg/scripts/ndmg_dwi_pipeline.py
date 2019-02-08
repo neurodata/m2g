@@ -22,7 +22,7 @@
 from __future__ import print_function
 import shutil
 import warnings
-warnings.filterwarnings("ignore", message="numpy.dtype size changed")
+warnings.simplefilter("ignore")
 from argparse import ArgumentParser
 from datetime import datetime
 #from ndmg.stats.qa_regdti import *
@@ -58,7 +58,10 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
     fmt = '_adj.csv'
 
     outdir = outdir + '/' + dwi.split('/')[-1].split('sub-')[1].split('_')[0]
-    os.mkdir(outdir)
+    try:
+        os.mkdir(outdir)
+    except:
+	pass
 
     # Create derivative output directories
     namer = name_resource(dwi, t1w, atlas, outdir)

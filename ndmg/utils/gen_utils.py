@@ -22,7 +22,7 @@
 
 from __future__ import print_function
 import warnings
-warnings.filterwarnings("ignore", message="numpy.dtype size changed")
+warnings.simplefilter("ignore")
 from dipy.io import read_bvals_bvecs
 from dipy.core.gradients import gradient_table
 from subprocess import Popen, PIPE
@@ -59,15 +59,6 @@ def execute_cmd(cmd, verb=False):
 
 def name_tmps(basedir, basename, extension):
     return "{}/tmp/{}{}".format(basedir, basename, extension)
-
-def get_b0(gtab, data):
-    """
-    Takes bval and bvec files and produces a structure in dipy format
-    **Positional Arguments:**
-    """
-    b0 = np.where(gtab.b0s_mask)[0]
-    b0_vol = np.squeeze(data[:, :, :, b0[0]])  # if more than 1, use first
-    return b0_vol
 
 
 def get_braindata(brain_file):
@@ -148,7 +139,7 @@ def make_gtab_and_bmask(fbval, fbvec, dwi_file, outdir):
     bvals, bvecs = read_bvals_bvecs(fbval, fbvec)
 
     # Creating the gradient table
-    gtab = gradient_table(bvals, bvecs)
+    gtab = gradient_table(bvals, bvecs, atol=0.01)
 
     # Correct b0 threshold
     gtab.b0_threshold = min(bvals)
@@ -156,6 +147,9 @@ def make_gtab_and_bmask(fbval, fbvec, dwi_file, outdir):
     # Get B0 indices
     B0s = np.where(gtab.bvals == gtab.b0_threshold)[0]
     print("%s%s" % ('B0\'s found at: ', B0s))
+
+    # Show info
+    print(gtab.info)
 
     # Extract and Combine all B0s collected
     print('Extracting B0\'s...')
@@ -259,17 +253,6 @@ def match_target_vox_res(img_file, vox_size, namer, zoom_set):
             print('Reslicing preprocessed dwi to 2mm...')
             img_file = rgu.reslice_to_xmm(img_file_pre, 2.0)
     return img_file
-
-def load_bval_bvec(fbval, fbvec):
-    """
-    Takes bval and bvec files and produces a structure in dipy format
-    **Positional Arguments:**
-    """
-    bvals, bvecs = read_bvals_bvecs(fbval, fbvec)
-    gtab = gradient_table(bvals, bvecs, atol=0.01)
-    print(gtab.info)
-    return gtab
-
 
 def load_timeseries(timeseries_file, ts='roi'):
     """

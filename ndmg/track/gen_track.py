@@ -20,7 +20,7 @@
 
 from __future__ import print_function
 import warnings
-warnings.filterwarnings("ignore", message="numpy.dtype size changed")
+warnings.simplefilter("ignore")
 import numpy as np
 import nibabel as nib
 from dipy.tracking.streamline import Streamlines

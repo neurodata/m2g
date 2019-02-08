@@ -22,7 +22,7 @@
 # big-graph generation.
 
 import warnings
-warnings.filterwarnings("ignore", message="numpy.dtype size changed")
+warnings.simplefilter("ignore")
 from argparse import ArgumentParser
 from subprocess import Popen, PIPE
 from os.path import expanduser

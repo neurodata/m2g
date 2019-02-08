@@ -28,7 +28,7 @@ import nibabel as nb
 import ndmg
 import time
 import warnings
-warnings.filterwarnings("ignore", message="numpy.dtype size changed")
+warnings.simplefilter("ignore")
 
 class graph_tools(object):
     def __init__(self, rois, streamlines, attr=None, sens="dmri"):
@@ -145,7 +145,7 @@ class graph_tools(object):
         g = self.get_graph()
         return nx.to_numpy_matrix(g, nodelist=np.sort(g.nodes()).tolist())
 
-    def save_graph(self, graphname, fmt='txt'):
+    def save_graph(self, graphname, fmt='igraph'):
         """
         Saves the graph to disk
 
@@ -155,19 +155,26 @@ class graph_tools(object):
                     - Filename for the graph
         """
         self.g.graph['ecount'] = nx.number_of_edges(self.g)
-        g = nx.convert_node_labels_to_integers(self.g, first_label=1)
+        self.g = nx.convert_node_labels_to_integers(self.g, first_label=1)
         if fmt == 'edgelist':
-            nx.write_weighted_edgelist(g, graphname, encoding='utf-8')
+            nx.write_weighted_edgelist(self.g, graphname, encoding='utf-8')
         elif fmt == 'gpickle':
-            nx.write_gpickle(g, graphname)
+            nx.write_gpickle(self.g, graphname)
         elif fmt == 'graphml':
-            nx.write_graphml(g, graphname)
+            nx.write_graphml(self.g, graphname)
 	elif fmt == 'txt':
-	    np.savetxt(graphname, nx.to_numpy_matrix(g))
+	    np.savetxt(graphname, nx.to_numpy_matrix(self.g))
         elif fmt == 'npy':
-            np.save(graphname, nx.to_numpy_matrix(g))
+            np.save(graphname, nx.to_numpy_matrix(self.g))
+	elif fmt == 'igraph':
+	    if self.modal == 'dwi':
+                nx.write_weighted_edgelist(self.g, graphname, delimiter=",", encoding='utf-8')
+            elif self.modal == 'func':
+                np.savetxt(graphname, self.g, comments='', delimiter=',', header=','.join([str(n) for n in self.n_ids]))
         else:
-            raise ValueError('edgelist, gpickle, and graphml currently supported')
+            raise ValueError("Unsupported Modality.")
+        else:
+            raise ValueError('Only edgelist, gpickle, and graphml currently supported')
         pass
 
     def summary(self):
