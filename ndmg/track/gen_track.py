@@ -125,6 +125,10 @@ class run_track(object):
 	from dipy.reconst.dti import TensorModel, fractional_anisotropy, quantize_evecs
 	from dipy.data import get_sphere
         print('Fitting tensor model...')
+        self.dwi_img = nib.load(self.dwi)
+        self.data = self.dwi_img.get_data()
+        self.mask_img = nib.load(self.nodif_B0_mask)
+        self.mask = self.mask_img.get_data() > 0
         self.model = TensorModel(self.gtab)
         self.ten = self.model.fit(self.data, self.mask)
         self.fa = self.ten.fa
