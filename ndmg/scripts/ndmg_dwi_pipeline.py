@@ -56,6 +56,10 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
     """
     startTime = datetime.now()
     fmt = '_adj.csv'
+
+    outdir = outdir + '/' + dwi.split('/')[-1].split('sub-')[1].split('_')[0]
+    os.mkdir(outdir)
+
     # Create derivative output directories
     namer = name_resource(dwi, t1w, atlas, outdir)
 
@@ -112,8 +116,6 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
     # Perform eddy correction
     print("Performing eddy correction...")
     start_time = time.time()
-    rand_int = random.randint(1,300)
-    time.sleep(rand_int)
     dwi_prep = "{}/eddy_corrected_data.nii.gz".format(namer.dirs['output']['prep_m'])
     eddy_rot_param = "{}/eddy_corrected_data.ecclog".format(namer.dirs['output']['prep_m'])
     if os.path.isfile(dwi_prep):
