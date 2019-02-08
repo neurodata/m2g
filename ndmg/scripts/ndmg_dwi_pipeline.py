@@ -39,6 +39,7 @@ import ndmg.preproc as mgp
 import numpy as np
 import nibabel as nib
 import os
+import random
 from ndmg.graph import gen_biggraph as ndbg
 import traceback
 from ndmg.utils.bids_utils import name_resource
@@ -109,14 +110,35 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
     qc_dwi = qa_mri(namer, 'dwi')  # for quality control
     # -------- Preprocessing Steps --------------------------------- #
     # Perform eddy correction
+    print("Performing eddy correction...")
     start_time = time.time()
+    rand_int = random.randint(1,300)
+    time.sleep(rand_int)
     dwi_prep = "{}/eddy_corrected_data.nii.gz".format(namer.dirs['output']['prep_m'])
+    eddy_rot_param = "{}/eddy_corrected_data.ecclog".format(namer.dirs['output']['prep_m'])
+    if os.path.isfile(dwi_prep):
+	os.remove(dwi_prep)
+	os.remove(eddy_rot_param)
     cmd='eddy_correct ' + dwi + ' ' + dwi_prep + ' 0'
     os.system(cmd)
-  
+ 
+    bvec_scaled = "{}/bvec_scaled.bvec".format(namer.dirs['output']['prep_m'])
+    bvec_rotated = "{}/bvec_rotated.bvec".format(namer.dirs['output']['prep_m'])
+    bval = "{}/bval.bval".format(namer.dirs['output']['prep_m'])
+    shutil.copyfile(bvals, bval)
+
+    # Rotate bvecs
+    print("Rotating b-vectors and generating gradient table...")
+    cmd='bash fdt_rotate_bvecs ' + bvecs + ' ' + bvec_rotated + ' ' + eddy_rot_param + ' 2>/dev/null'
+    os.system(cmd)
+
+    # Rescale bvecs
+    print("Rescaling b-vectors...")
+    mgp.rescale_bvec(bvec_rotated, bvec_scaled)
+
     # Check orientation (dwi_prep)
     start_time = time.time()
-    [dwi_prep, bvecs] = mgu.reorient_dwi(dwi_prep, bvecs, namer)
+    [dwi_prep, bvecs] = mgu.reorient_dwi(dwi_prep, bvec_scaled, namer)
     print("%s%s%s" % ('Reorienting runtime: ', str(np.round(time.time() - start_time, 1)), 's'))
 
     # Check dimensions
@@ -124,22 +146,8 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
     dwi_prep = mgu.match_target_vox_res(dwi_prep, vox_size, namer, zoom_set)
     print("%s%s%s" % ('Reslicing runtime: ', str(np.round(time.time() - start_time, 1)), 's'))
 
-    print("Rotating b-vectors and generating gradient table...")
-    eddy_rot_param = "{}/eddy_corrected_data.ecclog".format(namer.dirs['output']['prep_m'])
-    bvec_scaled = "{}/bvec_scaled.bvec".format(namer.dirs['output']['prep_m'])
-    bvec_rotated = "{}/bvec_rotated.bvec".format(namer.dirs['output']['prep_m'])
-    bval = "{}/bval.bval".format(namer.dirs['output']['prep_m'])
-    shutil.copyfile(bvals, bval)
-
-    # Rotate bvecs
-    cmd='bash fdt_rotate_bvecs ' + bvecs + ' ' + bvec_rotated + ' ' + eddy_rot_param + ' 2>/dev/null'
-    os.system(cmd)
-
-    # Rescale bvecs
-    mgp.rescale_bvec(bvec_rotated, bvec_scaled)
-
     # Build gradient table
-    [gtab, nodif_B0, nodif_B0_mask] = mgu.make_gtab_and_bmask(bvals, bvec_scaled, dwi_prep, namer.dirs['output']['prep_m'])
+    [gtab, nodif_B0, nodif_B0_mask] = mgu.make_gtab_and_bmask(bval, bvec_scaled, dwi_prep, namer.dirs['output']['prep_m'])
 
     print("%s%s%s" % ('Preprocessing runtime: ', str(np.round(time.time() - start_time, 1)), 's'))
     # -------- Registration Steps ----------------------------------- #
