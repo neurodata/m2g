@@ -37,66 +37,54 @@ from ndmg.utils import reg_utils as mgru
 
 class dmri_reg(object):
 
-    def __init__(self, outdir_base_in, nodif_B0, nodif_B0_mask, t1w_in, vox_size, simple):
+    def __init__(self, namer, nodif_B0, nodif_B0_mask, t1w_in, vox_size, simple):
         self.simple = simple
-        self.outdir_base = outdir_base_in + '/tmp'
-        self.outdir = dict()
-        self.outdir['reg_a'] = "%s%s" % (self.outdir_base, '/reg_a')
-        self.outdir['reg_m'] = "%s%s" % (self.outdir_base, '/reg_m')
-        try:
-            os.mkdir(self.outdir['reg_a'])
-        except:
-            pass
-        try:
-            os.mkdir(self.outdir['reg_m'])
-        except:
-            pass
         self.nodif_B0 = nodif_B0
 	self.nodif_B0_mask = nodif_B0_mask
         self.t1w = t1w_in
         self.vox_size = vox_size
         self.t1w_name = 't1w'
         self.dwi_name = 'dwi'
-        self.t12mni_xfm_init = "{}/xfm_t1w2mni_init.mat".format(self.outdir['reg_m'])
-        self.t12mni_xfm = "{}/xfm_t1w2mni.mat".format(self.outdir['reg_m'])
-        self.mni2t1_xfm = "{}/xfm_mni2t1.mat".format(self.outdir['reg_m'])
-        self.mni2t1w_warp = "{}/mni2t1w_warp.nii.gz".format(self.outdir['reg_a'])
-        self.warp_t1w2mni = "{}/warp_t12mni.nii.gz".format(self.outdir['reg_a'])
-        self.t1w2dwi = "{}/{}_in_dwi.nii.gz".format(self.outdir['reg_a'], self.t1w_name)
-        self.t1_aligned_mni = "{}/{}_aligned_mni.nii.gz".format(self.outdir['reg_a'], self.t1w_name)
-        self.t1w_brain = "{}/{}_brain.nii.gz".format(self.outdir['reg_a'], self.t1w.split('.nii.gz')[0].split('/')[-1])
-        self.dwi2t1w_xfm = "{}/dwi2t1w_xfm.mat".format(self.outdir['reg_m'])
-        self.t1w2dwi_xfm = "{}/t1w2dwi_xfm.mat".format(self.outdir['reg_m'])
-        self.t1w2dwi_bbr_xfm = "{}/t1w2dwi_bbr_xfm.mat".format(self.outdir['reg_m'])
-	self.dwi2t1w_bbr_xfm = "{}/dwi2t1w_bbr_xfm.mat".format(self.outdir['reg_m'])
-	self.t1wtissue2dwi_xfm = "{}/t1wtissue2dwi_xfm.mat".format(self.outdir['reg_m'])
-        self.xfm_atlas2t1w_init = "{}/{}_xfm_atlas2t1w_init.mat".format(self.outdir['reg_m'], self.t1w_name)
-        self.xfm_atlas2t1w = "{}/{}_xfm_atlas2t1w.mat".format(self.outdir['reg_m'], self.t1w_name)
-        self.temp2dwi_xfm = "{}/{}_xfm_temp2dwi.mat".format(self.outdir['reg_m'], self.dwi_name)
+        self.t12mni_xfm_init = "{}/xfm_t1w2mni_init.mat".format(self.namer['reg_m'])
+        self.t12mni_xfm = "{}/xfm_t1w2mni.mat".format(self.namer['reg_m'])
+        self.mni2t1_xfm = "{}/xfm_mni2t1.mat".format(self.namer['reg_m'])
+        self.mni2t1w_warp = "{}/mni2t1w_warp.nii.gz".format(self.namer.dirs['tmp']['reg_a'])
+        self.warp_t1w2mni = "{}/warp_t12mni.nii.gz".format(self.namer.dirs['tmp']['reg_a'])
+        self.t1w2dwi = "{}/{}_in_dwi.nii.gz".format(self.namer.dirs['reg_anat'], self.t1w_name)
+        self.t1_aligned_mni = "{}/{}_aligned_mni.nii.gz".format(self.namer.dirs['prep_anat'], self.t1w_name)
+        self.t1w_brain = "{}/{}_brain.nii.gz".format(self.namer.dirs['prep_anat'], self.t1w.split('.nii.gz')[0].split('/')[-1])
+        self.dwi2t1w_xfm = "{}/dwi2t1w_xfm.mat".format(self.namer['reg_m'])
+        self.t1w2dwi_xfm = "{}/t1w2dwi_xfm.mat".format(self.namer['reg_m'])
+        self.t1w2dwi_bbr_xfm = "{}/t1w2dwi_bbr_xfm.mat".format(self.namer['reg_m'])
+        self.dwi2t1w_bbr_xfm = "{}/dwi2t1w_bbr_xfm.mat".format(self.namer['reg_m'])
+        self.t1wtissue2dwi_xfm = "{}/t1wtissue2dwi_xfm.mat".format(self.namer['reg_m'])
+        self.xfm_atlas2t1w_init = "{}/{}_xfm_atlas2t1w_init.mat".format(self.namer['reg_m'], self.t1w_name)
+        self.xfm_atlas2t1w = "{}/{}_xfm_atlas2t1w.mat".format(self.namer['reg_m'], self.t1w_name)
+        self.temp2dwi_xfm = "{}/{}_xfm_temp2dwi.mat".format(self.namer['reg_m'], self.dwi_name)
         self.input_mni = "%s%s%s%s" % (FSLDIR, '/data/standard/MNI152_T1_', vox_size,'_brain.nii.gz')
-        self.temp2dwi_xfm = "{}/{}_xfm_temp2dwi.mat".format(self.outdir['reg_m'], self.dwi_name)
-        self.map_path = "{}/{}_seg".format(self.outdir['reg_a'], self.t1w_name)
-        self.wm_mask = "{}/{}_wm.nii.gz".format(self.outdir['reg_a'], self.t1w_name)
-        self.csf_mask = "{}/{}_csf.nii.gz".format(self.outdir['reg_a'], self.t1w_name)
-        self.gm_mask = "{}/{}_gm.nii.gz".format(self.outdir['reg_a'], self.t1w_name)
-        self.xfm_roi2mni_init = "{}/roi_2_mni.mat".format(self.outdir['reg_m'])
-        self.lvent_out_file = "{}/LVentricle.nii.gz".format(self.outdir['reg_a'])
-        self.rvent_out_file = "{}/RVentricle.nii.gz".format(self.outdir['reg_a'])
-        self.mni_vent_loc = "{}/VentricleMask.nii.gz".format(self.outdir['reg_a'])
-        self.csf_mask_dwi = "{}/{}_csf_mask_dwi.nii.gz".format(self.outdir['reg_a'], self.t1w_name)
-        self.gm_in_dwi = "{}/{}_gm_in_dwi.nii.gz".format(self.outdir['reg_a'], self.t1w_name)
-        self.vent_csf_in_dwi = "{}/{}_vent_csf_in_dwi.nii.gz".format(self.outdir['reg_a'], self.t1w_name)
-        self.vent_csf_in_dwi_bin = "{}/{}_vent_csf_in_dwi_bin.nii.gz".format(self.outdir['reg_a'], self.t1w_name)
-        self.vent_mask_dwi = "{}/{}_vent_mask_dwi.nii.gz".format(self.outdir['reg_a'], self.t1w_name)
-        self.vent_mask_mni = "{}/vent_mask_mni.nii.gz".format(self.outdir['reg_a'])
-        self.vent_mask_t1w = "{}/vent_mask_t1w.nii.gz".format(self.outdir['reg_a'])
-        self.wm_in_dwi = "{}/{}_wm_in_dwi.nii.gz".format(self.outdir['reg_a'], self.t1w_name)
-        self.wm_in_dwi_bin = "{}/{}_wm_in_dwi_bin.nii.gz".format(self.outdir['reg_a'], self.t1w_name)
-	self.wm_in_dwi_binv = "{}/{}_wm_in_dwi_binv.nii.gz".format(self.outdir['reg_a'], self.t1w_name)
+        self.temp2dwi_xfm = "{}/{}_xfm_temp2dwi.mat".format(self.namer['reg_m'], self.dwi_name)
+        self.map_path = "{}/{}_seg".format(self.namer.dirs['prep_anat'], self.t1w_name)
+        self.wm_mask = "{}/{}_wm.nii.gz".format(self.namer.dirs['prep_anat'], self.t1w_name)
+        self.csf_mask = "{}/{}_csf.nii.gz".format(self.namer.dirs['prep_anat'], self.t1w_name)
+        self.gm_mask = "{}/{}_gm.nii.gz".format(self.namer.dirs['prep_anat'], self.t1w_name)
+        self.xfm_roi2mni_init = "{}/roi_2_mni.mat".format(self.namer['reg_m'])
+        self.lvent_out_file = "{}/LVentricle.nii.gz".format(self.namer.dirs['tmp']['reg_a'])
+        self.rvent_out_file = "{}/RVentricle.nii.gz".format(self.namer.dirs['tmp']['reg_a'])
+        self.mni_vent_loc = "{}/VentricleMask.nii.gz".format(self.namer.dirs['tmp']['reg_a'])
+        self.csf_mask_dwi = "{}/{}_csf_mask_dwi.nii.gz".format(self.namer.dirs['reg_anat'], self.t1w_name)
+        self.gm_in_dwi = "{}/{}_gm_in_dwi.nii.gz".format(self.namer.dirs['reg_anat'], self.t1w_name)
+        self.vent_csf_in_dwi = "{}/{}_vent_csf_in_dwi.nii.gz".format(self.namer.dirs['reg_anat'], self.t1w_name)
+        self.vent_csf_in_dwi_bin = "{}/{}_vent_csf_in_dwi_bin.nii.gz".format(self.namer.dirs['tmp']['reg_a'], self.t1w_name)
+        self.vent_mask_dwi = "{}/{}_vent_mask_dwi.nii.gz".format(self.namer.dirs['tmp']['reg_a'], self.t1w_name)
+        self.vent_mask_mni = "{}/vent_mask_mni.nii.gz".format(self.namer.dirs['tmp']['reg_a'])
+        self.vent_mask_t1w = "{}/vent_mask_t1w.nii.gz".format(self.namer.dirs['tmp']['reg_a'])
+        self.wm_in_dwi = "{}/{}_wm_in_dwi.nii.gz".format(self.namer.dirs['reg_anat'], self.t1w_name)
+        self.wm_in_dwi_bin = "{}/{}_wm_in_dwi_bin.nii.gz".format(self.namer.dirs['tmp']['reg_a'], self.t1w_name)
+        self.wm_in_dwi_binv = "{}/{}_wm_in_dwi_binv.nii.gz".format(self.namer.dirs['tmp']['reg_a'], self.t1w_name)
         self.mni_atlas = "%s%s%s%s" % (FSLDIR, '/data/atlases/HarvardOxford/HarvardOxford-sub-prob-', vox_size, '.nii.gz')
         self.input_mni = "%s%s%s%s" % (FSLDIR, '/data/standard/MNI152_T1_', vox_size, '_brain.nii.gz')
-        self.gm_in_dwi_bin = "{}/{}_gm_in_dwi_bin.nii.gz".format(self.outdir['reg_a'], self.t1w_name)
-	self.gm_in_dwi_binv = "{}/{}_gm_in_dwi_binv.nii.gz".format(self.outdir['reg_a'], self.t1w_name)
+        self.gm_in_dwi_bin = "{}/{}_gm_in_dwi_bin.nii.gz".format(self.namer.dirs['tmp']['reg_a'], self.t1w_name)
+        self.gm_in_dwi_binv = "{}/{}_gm_in_dwi_binv.nii.gz".format(self.namer.dirs['tmp']['reg_a'], self.t1w_name)
 
     def gen_tissue(self):
         # BET needed for this, as afni 3dautomask only works on 4d volumes

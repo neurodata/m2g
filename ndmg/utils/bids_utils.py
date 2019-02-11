@@ -90,6 +90,52 @@ class name_resource:
         mgu.execute_cmd(cmd)  # make the directories
         return
 
+    def add_dirs_dwi(namer, paths, labels, label_dirs):
+        """
+        creates tmp and permanent directories for the desired suffixes.
+
+        **Positional Arguments:
+            - paths:
+                - a dictionary of keys to suffix directories desired.
+        """
+        namer.dirs = {}
+        if not isinstance(labels, list):
+            labels = [labels]
+        dirtypes = ['output']
+        for dirt in dirtypes:
+            olist = [namer.get_outdir()]
+            namer.dirs[dirt] = {}
+            if dirt in ['tmp', 'qa']:
+                olist = olist +[dirt]
+            namer.dirs[dirt]['base'] = os.path.join(*olist)
+            for kwd, path in paths.iteritems():
+                newdir = os.path.join(*[namer.dirs[dirt]['base'], path])
+                if kwd in label_dirs:  # levels with label granularity
+                    namer.dirs[dirt][kwd] = {}
+                    for label in labels:
+                        labname = namer.get_label(label)
+                        namer.dirs[dirt][kwd][labname] = os.path.join(newdir,
+                           labname)
+                else:
+                    namer.dirs[dirt][kwd] = newdir
+        namer.dirs['tmp'] = {}
+        namer.dirs['tmp']['base'] = namer.get_outdir() + '/tmp'
+        namer.dirs['tmp']['reg_a'] = namer.dirs['tmp']['base'] + '/reg_a'
+        namer.dirs['tmp']['reg_m'] = namer.dirs['tmp']['base'] + '/reg_m'
+        namer.dirs['qa'] = {}
+        namer.dirs['qa']['base'] = namer.get_outdir() + '/qa'
+        namer.dirs['qa']['adjacency'] = namer.dirs['qa']['base'] + '/adjacency'
+        namer.dirs['qa']['fibers'] = namer.dirs['qa']['base'] + '/fibers'
+        namer.dirs['qa']['graphs'] = namer.dirs['qa']['base'] + '/graphs'
+        namer.dirs['qa']['graphs_plotting'] = namer.dirs['qa']['base'] + '/graphs_plotting'
+        namer.dirs['qa']['mri'] = namer.dirs['qa']['base'] + '/mri'
+        namer.dirs['qa']['reg'] = namer.dirs['qa']['base'] + '/reg'
+        namer.dirs['qa']['tensor'] = namer.dirs['qa']['base'] + '/tensor'
+        newdirs = flatten(namer.dirs, [])
+        cmd = "mkdir -p {}".format(" ".join(newdirs))
+        mgu.execute_cmd(cmd)  # make the directories
+        return
+        
     def _get_outdir(self):
         """
         Called by constructor to initialize the output directory.

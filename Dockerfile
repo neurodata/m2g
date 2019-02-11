@@ -90,6 +90,9 @@ RUN \
 RUN mkdir /data && \
     chmod -R 777 /data
 
+RUN mkdir /outputs && \
+    chmod -R 777 /outputs
+
 ENV MPLCONFIGDIR /tmp/matplotlib
 ENV PYTHONWARNINGS ignore
 

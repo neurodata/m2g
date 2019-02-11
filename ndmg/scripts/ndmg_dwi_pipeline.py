@@ -57,43 +57,33 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
     startTime = datetime.now()
     fmt = '_adj.csv'
 
-    outdir = outdir + '/' + dwi.split('/')[-1].split('sub-')[1].split('_')[0]
-    try:
-        os.mkdir(outdir)
-    except:
-	pass
-
-    # Create derivative output directories
     namer = name_resource(dwi, t1w, atlas, outdir)
 
-    paths = {'prep_m': "dwi/preproc",
-             'prep_a': "anat/preproc",
-             'reg_m': "dwi/registered",
-             'reg_a': "anat/registered",
+    namer.__outdir__ = namer.__outdir__ + '/' + namer.__sub__ + '/' + namer.__ses__
+
+    paths = {'prep_dwi': "dwi/preproc",
+             'prep_anat': "anat/preproc",
+             'reg_anat': "anat/registered",
              'tensor': "dwi/tensor",
              'fiber': "dwi/fiber",
              'voxelg': "dwi/voxel-connectomes",
              'conn': "dwi/roi-connectomes"}
 
-    opt_dirs = ['prep_m', 'prep_a', 'reg_m', 'reg_a']
+    opt_dirs = ['prep_dwi', 'prep_anat', 'reg_anat']
     clean_dirs = ['tensor', 'fiber']
     label_dirs = ['conn']  # create label level granularity
 
-    namer.add_dirs(paths, labels, label_dirs)
-    qc_stats = "{}/{}_stats.csv".format(namer.dirs['qa']['base'],
+    namer.add_dirs_dwi(paths, labels, label_dirs)
+    qc_stats = "{}/{}_stats.csv".format(namer.dirs['qa']['adjacency'],
         namer.get_mod_source())
 
     # Create derivative output file names
-    reg_dname = "{}_{}".format(namer.get_mod_source(),
-        namer.get_template_info())
-    reg_aname = "{}_{}".format(namer.get_anat_source(),
-        namer.get_template_info())
     streams = namer.name_derivative(namer.dirs['output']['fiber'],
-        "{}_streamlines.trk".format(reg_dname))
+        "streamlines.trk")
 
     if big:
-        voxel = namer.name_derivative(namer.dirs['output']['voxel'],
-            "{}_voxel-connectome.npz".format(reg_dname))
+        voxel = namer.name_derivative(namer.dirs['output']['voxelg'],
+            "voxel-connectome.npz")
         print("Voxelwise Fiber Graph: {}".format(voxel))
 
     # Again, connectomes are different
@@ -119,17 +109,17 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
     # Perform eddy correction
     print("Performing eddy correction...")
     start_time = time.time()
-    dwi_prep = "{}/eddy_corrected_data.nii.gz".format(namer.dirs['output']['prep_m'])
-    eddy_rot_param = "{}/eddy_corrected_data.ecclog".format(namer.dirs['output']['prep_m'])
+    dwi_prep = "{}/eddy_corrected_data.nii.gz".format(namer.dirs['output']['prep_dwi'])
+    eddy_rot_param = "{}/eddy_corrected_data.ecclog".format(namer.dirs['output']['prep_dwi'])
     if os.path.isfile(dwi_prep):
 	os.remove(dwi_prep)
 	os.remove(eddy_rot_param)
     cmd='eddy_correct ' + dwi + ' ' + dwi_prep + ' 0'
     os.system(cmd)
  
-    bvec_scaled = "{}/bvec_scaled.bvec".format(namer.dirs['output']['prep_m'])
-    bvec_rotated = "{}/bvec_rotated.bvec".format(namer.dirs['output']['prep_m'])
-    bval = "{}/bval.bval".format(namer.dirs['output']['prep_m'])
+    bvec_scaled = "{}/bvec_scaled.bvec".format(namer.dirs['output']['prep_dwi'])
+    bvec_rotated = "{}/bvec_rotated.bvec".format(namer.dirs['output']['prep_dwi'])
+    bval = "{}/bval.bval".format(namer.dirs['output']['prep_dwi'])
     shutil.copyfile(bvals, bval)
 
     # Rotate bvecs
@@ -152,7 +142,7 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
     print("%s%s%s" % ('Reslicing runtime: ', str(np.round(time.time() - start_time, 1)), 's'))
 
     # Build gradient table
-    [gtab, nodif_B0, nodif_B0_mask] = mgu.make_gtab_and_bmask(bval, bvec_scaled, dwi_prep, namer.dirs['output']['prep_m'])
+    [gtab, nodif_B0, nodif_B0_mask] = mgu.make_gtab_and_bmask(bval, bvec_scaled, dwi_prep, namer.dirs['output']['prep_dwi'])
 
     print("%s%s%s" % ('Preprocessing runtime: ', str(np.round(time.time() - start_time, 1)), 's'))
     # -------- Registration Steps ----------------------------------- #
@@ -167,7 +157,7 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
     print("%s%s%s" % ('Reslicing runtime: ', str(np.round(time.time() - start_time, 1)), 's'))
 
     # Instantiate registration
-    reg = mgr.dmri_reg(outdir, nodif_B0, nodif_B0_mask, t1w, vox_size, simple=False)
+    reg = mgr.dmri_reg(namer, nodif_B0, nodif_B0_mask, t1w, vox_size, simple=False)
     # Perform anatomical segmentation
     start_time = time.time()
     reg.gen_tissue()
