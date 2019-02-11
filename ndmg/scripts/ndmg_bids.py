@@ -137,7 +137,7 @@ def session_level(inDir, outDir, subjs, vox_size, big, clean, stc, sesh=None, ta
     """
     labels, atlas, atlas_mask, atlas_brain, lv_mask = get_atlas(atlas_dir,
                                                                 modality, vox_size)
-    mgu.execute_cmd("mkdir -p {} {}/tmp".format(outDir, outDir))
+    #mgu.execute_cmd("mkdir -p {} {}/tmp".format(outDir, outDir))
 
     result = sweep_directory(inDir, subjs, sesh, task, run, modality)
 
