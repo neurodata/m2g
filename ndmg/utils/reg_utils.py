@@ -255,7 +255,7 @@ def resample_fsl(base, res, goal_res, interp='spline'):
     pass
 
 
-def t1w_skullstrip(t1w, out, frac=0.2):
+def t1w_skullstrip(t1w, out):
     """
     A function that skull-strips T1w images using AFNI's 3dSkullStrip
     algorithm, which is a modification of FSL's BET specialized to T1w
@@ -273,7 +273,7 @@ def t1w_skullstrip(t1w, out, frac=0.2):
 	- frac:
 	    - fractional intensity threshold to apply.
     """
-    cmd = "3dSkullStrip -prefix {} -input {} -exp_frac {}".format(out, t1w, frac)
+    cmd = "3dSkullStrip -prefix {} -input {}".format(out, t1w)
     mgu.execute_cmd(cmd, verb=True)
     pass
 
