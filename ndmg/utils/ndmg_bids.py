@@ -20,7 +20,7 @@
 # Email: gkiar@jhu.edu
 
 import warnings
-warnings.filterwarnings("ignore", message="numpy.dtype size changed")
+warnings.simplefilter("ignore")
 from ndmg.utils import utils as mgu
 import os.path as op
 import os

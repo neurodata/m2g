@@ -20,7 +20,8 @@
 # Email: ebridge2@jhu.edu
 
 from __future__ import print_function
-
+import warnings
+warnings.simplefilter("ignore")
 from itertools import combinations
 from collections import defaultdict
 import numpy as np
@@ -28,8 +29,6 @@ import networkx as nx
 import nibabel as nb
 import ndmg
 import time
-import warnings
-warnings.filterwarnings("ignore", message="numpy.dtype size changed")
 import pyximport
 try:
     from ndmg.graph.zindex import XYZMorton

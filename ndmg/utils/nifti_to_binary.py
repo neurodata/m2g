@@ -20,7 +20,8 @@
 # Email: gkiar@jhu.edu
 
 from argparse import ArgumentParser
-
+import warnings
+warnings.simplefilter("ignore")
 import os
 import nibabel as nb
 import numpy as np

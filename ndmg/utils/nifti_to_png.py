@@ -18,7 +18,8 @@
 # nifti_to_png.py
 # Created by Greg Kiar on 2016-06-13.
 # Email: gkiar@jhu.edu
-
+import warnings
+warnings.simplefilter("ignore")
 from argparse import ArgumentParser
 from scipy.misc import imsave
 import nibabel as nb

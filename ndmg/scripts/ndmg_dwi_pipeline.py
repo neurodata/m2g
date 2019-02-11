@@ -111,11 +111,11 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
     start_time = time.time()
     dwi_prep = "{}/eddy_corrected_data.nii.gz".format(namer.dirs['output']['prep_dwi'])
     eddy_rot_param = "{}/eddy_corrected_data.ecclog".format(namer.dirs['output']['prep_dwi'])
-    if os.path.isfile(dwi_prep):
-	os.remove(dwi_prep)
-	os.remove(eddy_rot_param)
-    cmd='eddy_correct ' + dwi + ' ' + dwi_prep + ' 0'
-    os.system(cmd)
+#    if os.path.isfile(dwi_prep):
+#	os.remove(dwi_prep)
+#	os.remove(eddy_rot_param)
+#    cmd='eddy_correct ' + dwi + ' ' + dwi_prep + ' 0'
+#    os.system(cmd)
  
     bvec_scaled = "{}/bvec_scaled.bvec".format(namer.dirs['output']['prep_dwi'])
     bvec_rotated = "{}/bvec_rotated.bvec".format(namer.dirs['output']['prep_dwi'])
@@ -138,7 +138,7 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
 
     # Check dimensions
     start_time = time.time()
-    dwi_prep = mgu.match_target_vox_res(dwi_prep, vox_size, namer, zoom_set)
+    dwi_prep = mgu.match_target_vox_res(dwi_prep, vox_size, namer, zoom_set, sens='dwi')
     print("%s%s%s" % ('Reslicing runtime: ', str(np.round(time.time() - start_time, 1)), 's'))
 
     # Build gradient table
@@ -153,7 +153,7 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
 
     # Check dimensions
     start_time = time.time()
-    t1w = mgu.match_target_vox_res(t1w, vox_size, namer, zoom_set)
+    t1w = mgu.match_target_vox_res(t1w, vox_size, namer, zoom_set, sens='t1w')
     print("%s%s%s" % ('Reslicing runtime: ', str(np.round(time.time() - start_time, 1)), 's'))
 
     # Instantiate registration

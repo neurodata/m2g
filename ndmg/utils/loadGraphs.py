@@ -21,7 +21,8 @@
 # Edited by Eric Bridgeford.
 
 from __future__ import print_function
-
+import warnings
+warnings.simplefilter("ignore")
 from collections import OrderedDict
 import numpy as np
 import networkx as nx

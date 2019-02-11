@@ -19,6 +19,8 @@
 # Created by Eric Bridgeford on 2017-08-09.
 # Email: ebridge2@jhu.edu
 
+import warnings
+warnings.simplefilter("ignore")
 from bids import BIDSLayout
 import re
 from itertools import product
@@ -105,7 +107,7 @@ class name_resource:
         for dirt in dirtypes:
             olist = [namer.get_outdir()]
             namer.dirs[dirt] = {}
-            if dirt in ['tmp', 'qa']:
+            if dirt in ['tmp']:
                 olist = olist +[dirt]
             namer.dirs[dirt]['base'] = os.path.join(*olist)
             for kwd, path in paths.iteritems():

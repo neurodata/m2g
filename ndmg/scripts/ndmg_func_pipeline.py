@@ -32,7 +32,7 @@ from ndmg.timeseries import timeseries as mgts
 from ndmg.stats.qa_mri import qa_mri
 from ndmg.preproc import preproc_func as mgfp
 from ndmg.preproc import preproc_anat as mgap
-from ndmg.nuis import nuis as mgn
+from ndmg.nuis import gen_nuis as mgn
 from ndmg.stats.qa_reg import *
 import traceback
 from ndmg.utils.bids_utils import name_resource

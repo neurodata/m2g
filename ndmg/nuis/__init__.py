@@ -1,3 +1,4 @@
 from __future__ import absolute_import
-
-from .nuis import nuis
+import warnings
+warnings.simplefilter("ignore")
+from .gen_nuis import nuis

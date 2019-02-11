@@ -20,10 +20,10 @@
 # Email: gkiar@jhu.edu
 
 from __future__ import print_function
-import numpy as np
-import os.path as op
 import warnings
 warnings.simplefilter("ignore")
+import numpy as np
+import os.path as op
 
 def rescale_bvec(bvec, bvec_new):
     """

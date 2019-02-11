@@ -183,13 +183,13 @@ def reorient_dwi(dwi_prep, bvecs, namer):
         print('Reorienting derivative dwi image to RAS+ canonical...')
         # Orient dwi to RADIOLOGICAL
         dwi_orig = dwi_prep
-        dwi_prep = "{}/dwi_prep_reor.nii.gz".format(namer.dirs['output']['prep_m'])
+        dwi_prep = "{}/dwi_prep_reor.nii.gz".format(namer.dirs['output']['prep_dwi'])
         shutil.copyfile(dwi_orig, dwi_prep)
         cmd='fslorient -forceradiological ' + dwi_prep
         os.system(cmd)
         # Invert bvecs
         bvecs_orig = bvecs
-        bvecs = "{}/bvecs_reor.bvec".format(namer.dirs['output']['prep_m'])
+        bvecs = "{}/bvecs_reor.bvec".format(namer.dirs['output']['prep_dwi'])
         shutil.copyfile(bvecs_orig, bvecs)
         bvecs_mat = np.genfromtxt(bvecs)
         bvecs_mat[0] = -bvecs_mat[0]
@@ -208,10 +208,10 @@ def reorient_dwi(dwi_prep, bvecs, namer):
         np.savetxt(bvecs, bvecs_mat)
     else:
         dwi_orig = dwi_prep
-        dwi_prep = "{}/dwi_prep.nii.gz".format(namer.dirs['output']['prep_m'])
+        dwi_prep = "{}/dwi_prep.nii.gz".format(namer.dirs['output']['prep_dwi'])
         shutil.copyfile(dwi_orig, dwi_prep)
         bvecs_orig = bvecs
-        bvecs = "{}/bvecs.bvec".format(namer.dirs['output']['prep_m'])
+        bvecs = "{}/bvecs.bvec".format(namer.dirs['output']['prep_dwi'])
         shutil.copyfile(bvecs_orig, bvecs)
         bvecs_mat = np.genfromtxt(bvecs)
         np.savetxt(bvecs, bvecs_mat)
@@ -224,7 +224,7 @@ def reorient_t1w(t1w, namer):
         print('Reorienting derivative t1w image to RAS+ canonical...')
         # Orient t1w to std
         t1w_orig = t1w
-        t1w = "{}/t1w_reor.nii.gz".format(namer.dirs['output']['prep_m'])
+        t1w = "{}/t1w_reor.nii.gz".format(namer.dirs['output']['prep_anat'])
         shutil.copyfile(t1w_orig, t1w)
         cmd='fslorient -forceradiological ' + t1w_orig
         os.system(cmd)
@@ -232,20 +232,22 @@ def reorient_t1w(t1w, namer):
         os.system(cmd)
     else:
         t1w_orig = t1w
-        t1w = "{}/t1w.nii.gz".format(namer.dirs['output']['prep_m'])
+        t1w = "{}/t1w.nii.gz".format(namer.dirs['output']['prep_anat'])
         shutil.copyfile(t1w_orig, t1w)
     return t1w
 
-def match_target_vox_res(img_file, vox_size, namer, zoom_set):
+def match_target_vox_res(img_file, vox_size, namer, zoom_set, sens):
     from ndmg.utils import reg_utils as rgu
     # Check dimensions
     img = nib.load(img_file)
     hdr = img.get_header()
     zooms = hdr.get_zooms()
     if (round(abs(zooms[0]), 0), round(abs(zooms[1]), 0), round(abs(zooms[2]), 0)) is not zoom_set:
-        dwi_orig = img_file
-        img_file_pre = "{}/{}_pre_res.nii.gz".format(namer.dirs['output']['prep_m'], os.path.basename(img_file).split('.nii.gz')[0])
-        shutil.copyfile(dwi_orig, img_file_pre)
+	if sens == 'dwi':
+            img_file_pre = "{}/{}_pre_res.nii.gz".format(namer.dirs['output']['prep_dwi'], os.path.basename(img_file).split('.nii.gz')[0])
+	elif sens == 't1w':
+	    img_file_pre = "{}/{}_pre_res.nii.gz".format(namer.dirs['output']['prep_anat'], os.path.basename(img_file).split('.nii.gz')[0])
+        shutil.copyfile(img_file, img_file_pre)
         if vox_size == '1mm':
             print('Reslicing preprocessed dwi to 1mm...')
             img_file = rgu.reslice_to_xmm(img_file_pre, 1.0)

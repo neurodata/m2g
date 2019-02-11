@@ -1,4 +1,6 @@
 from __future__ import absolute_import
+import warnings
+warnings.simplefilter("ignore")
 # Prevent typing multilevel imports
 from . import *
 from .preproc_func import preproc_func as preproc_func

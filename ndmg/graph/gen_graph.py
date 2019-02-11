@@ -20,6 +20,8 @@
 # Email: gkiar@jhu.edu
 
 from __future__ import print_function
+import warnings
+warnings.simplefilter("ignore")
 from itertools import combinations, product
 from collections import defaultdict
 import numpy as np
@@ -27,8 +29,6 @@ import networkx as nx
 import nibabel as nb
 import ndmg
 import time
-import warnings
-warnings.simplefilter("ignore")
 
 class graph_tools(object):
     def __init__(self, rois, streamlines, attr=None, sens="dwi"):
