@@ -161,8 +161,8 @@ class dmri_reg(object):
         """
         self.atlas = atlas
         self.atlas_name = self.atlas.split('/')[-1].split('.')[0]
-        self.aligned_atlas_skull = "{}/{}_aligned_atlas_skull.nii.gz".format(self.outdir['reg_a'], self.atlas_name)
-        self.dwi_aligned_atlas = "{}/{}_aligned_atlas.nii.gz".format(self.outdir['reg_a'], self.atlas_name)
+        self.aligned_atlas_skull = "{}/{}_aligned_atlas_skull.nii.gz".format(self.namer.dirs['tmp']['reg_a'], self.atlas_name)
+        self.dwi_aligned_atlas = "{}/{}_aligned_atlas.nii.gz".format(self.namer.dirs['tmp']['reg_a'], self.atlas_name)
         #self.dwi_aligned_atlas_mask = "{}/{}_aligned_atlas_mask.nii.gz".format(self.outdir['reg_a'], self.atlas_name)
 
         if (nib.load(self.atlas).get_data().shape in [(91, 109, 91), (182, 218, 182)] and (self.simple is False)):
@@ -183,10 +183,7 @@ class dmri_reg(object):
                 mgru.align(self.atlas, self.t1_aligned_mni, xfm=self.xfm_atlas2t1w, out=None, dof=6, searchrad=True, bins=None, interp="spline", cost='mutualinfo', wmseg=None, init=self.xfm_atlas2t1w_init)
 
                 # Combine our linear transform from t1w to template with our transform from dwi to t1w space to get a transform from atlas ->(-> t1w ->)-> dwi
-		if self.simple is False:
-		    mgru.combine_xfms(self.xfm_atlas2t1w, self.t1wtissue2dwi_xfm, self.temp2dwi_xfm)
-		else:
-                    mgru.combine_xfms(self.xfm_atlas2t1w, self.t1wtissue2dwi_xfm, self.temp2dwi_xfm)
+                mgru.combine_xfms(self.xfm_atlas2t1w, self.t1wtissue2dwi_xfm, self.temp2dwi_xfm)
 
                 # Apply linear transformation from template to dwi space
                 mgru.applyxfm(self.nodif_B0, self.atlas, self.temp2dwi_xfm, self.dwi_aligned_atlas)
