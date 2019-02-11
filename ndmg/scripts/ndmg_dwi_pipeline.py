@@ -61,6 +61,11 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
 
     namer.__outdir__ = namer.__outdir__ + '/' + namer.__sub__ + '/' + namer.__ses__
 
+    print('Output directory: ' + namer.__outdir__)
+    if not os.path.isdir(namer.__outdir__):
+	cmd = "mkdir -p {}".format(namer.__outdir__)
+        os.system(cmd)
+
     paths = {'prep_dwi': "dwi/preproc",
              'prep_anat': "anat/preproc",
              'reg_anat': "anat/registered",
@@ -73,6 +78,7 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
     clean_dirs = ['tensor', 'fiber']
     label_dirs = ['conn']  # create label level granularity
 
+    print('Adding directory tree...')
     namer.add_dirs_dwi(paths, labels, label_dirs)
     qc_stats = "{}/{}_stats.csv".format(namer.dirs['qa']['adjacency'],
         namer.get_mod_source())
@@ -82,6 +88,7 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
         "streamlines.trk")
 
     if big:
+	print('Generating voxelwise connectome...')
         voxel = namer.name_derivative(namer.dirs['output']['voxelg'],
             "voxel-connectome.npz")
         print("Voxelwise Fiber Graph: {}".format(voxel))
