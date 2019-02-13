@@ -59,11 +59,9 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
 
     namer = name_resource(dwi, t1w, atlas, outdir)
 
-    namer.__outdir__ = namer.__outdir__ + '/' + namer.__sub__ + '/' + namer.__ses__
-
-    print('Output directory: ' + namer.__outdir__)
-    if not os.path.isdir(namer.__outdir__):
-	cmd = "mkdir -p {}".format(namer.__outdir__)
+    print('Output directory: ' + outdir)
+    if not os.path.isdir(outdir):
+	cmd = "mkdir -p {}".format(outdir)
         os.system(cmd)
 
     paths = {'prep_dwi': "dwi/preproc",

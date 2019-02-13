@@ -252,6 +252,12 @@ def sweep_directory(bdir, subj=None, sesh=None, task=None, run=None, modality='d
         else:
             runs = as_list(run)
 
+	print(sub)
+	print("%s%s" % ('Subject:', sub))
+	print("%s%s" % ('Sessions:', seshs))
+	print("%s%s" % ('Tasks:', tasks))
+	print("%s%s" % ('Runs:', runs))
+	print('\n\n')
         # all the combinations of sessions and tasks that are possible
         for (ses, tas, ru) in product(seshs, tasks, runs):
             # the attributes for our modality img

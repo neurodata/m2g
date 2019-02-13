@@ -148,7 +148,7 @@ def session_level(inDir, outDir, subjs, vox_size, big, clean, stc, sesh=None, ta
         assert(len(bvecs) == len(dwis))
         assert(len(bvals) == len(dwis))
         args = [[dw, bval, bvec, anat, atlas, atlas_mask,
-                 labels, outDir] for (dw, bval, bvec, anat)
+                 labels, "%s%s%s%s%s" % (outDir, '/sub', bval.split('sub')[1].split('/')[0], '/ses', bval.split('ses')[1].split('/')[0])] for (dw, bval, bvec, anat)
                 in zip(dwis, bvals, bvecs, anats)]
         f = ndmg_dwi_pipeline  # the function of choice
 	kwargs['vox_size'] = vox_size
