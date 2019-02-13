@@ -20,6 +20,8 @@
 # Edited by Greg Kiar.
 # Email: Greg Kiar @ gkiar@jhu.edu
 
+import warnings
+warnings.simplefilter("ignore")
 from dipy.reconst.dti import fractional_anisotropy, color_fa
 from argparse import ArgumentParser
 from scipy import ndimage
@@ -29,8 +31,6 @@ import numpy as np
 import nibabel as nb
 import sys
 import matplotlib
-import warnings
-warnings.filterwarnings("ignore", message="numpy.dtype size changed")
 matplotlib.use('Agg')  # very important above pyplot import
 import matplotlib.pyplot as plt
 

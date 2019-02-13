@@ -17,6 +17,8 @@
 # Created by Eric W Bridgeford on 2016-06-08.
 # Email: ebridge2@jhu.edu
 
+import warnings
+warnings.simplefilter("ignore")
 from numpy import ndarray as nar
 from scipy.stats import gaussian_kde
 from ndmg.utils import gen_utils as mgu

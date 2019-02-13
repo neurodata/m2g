@@ -17,6 +17,8 @@
 # Created by Eric W Bridgeford on 2016-04-03.
 # Email: ebridge2@jhu.edu
 
+import warnings
+warnings.simplefilter("ignore")
 import pickle
 from ndmg.stats.qa_mri import qa_mri as mqa
 import numpy as np

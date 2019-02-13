@@ -19,6 +19,8 @@
 # Created by Eric Bridgeford on 2016-06-20.
 # Email: ebridge2@jhu.edu
 
+import warnings
+warnings.simplefilter("ignore")
 import numpy as np
 import nibabel as nb
 import sys

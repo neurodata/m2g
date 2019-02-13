@@ -18,6 +18,8 @@
 # nuis.py
 # Created by Eric Bridgeford on 2016-06-20-16.
 # Email: ebridge2@jhu.edu
+import warnings
+warnings.simplefilter("ignore")
 from ndmg.utils import gen_utils as mgu
 from ndmg.utils import reg_utils as mgru
 import nibabel as nb

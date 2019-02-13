@@ -20,6 +20,8 @@
 # Email: gkiar@jhu.edu
 # Edited by Eric Bridgeford.
 
+import warnings
+warnings.simplefilter("ignore")
 from argparse import ArgumentParser
 from collections import OrderedDict
 from subprocess import Popen
@@ -32,8 +34,6 @@ import networkx as nx
 import pickle
 import sys
 import os
-import warnings
-warnings.filterwarnings("ignore", message="numpy.dtype size changed")
 
 
 def compute_metrics(fs, outdir, atlas, verb=False, modality='dwi'):

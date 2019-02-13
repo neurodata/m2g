@@ -21,7 +21,7 @@
 # Email: Greg Kiar @ gkiar@jhu.edu
 
 import warnings
-warnings.filterwarnings("ignore", message="numpy.dtype size changed")
+warnings.simplefilter("ignore")
 import os
 import re
 import sys

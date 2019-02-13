@@ -17,15 +17,14 @@
 # ndmg_dwi_pipeline.py
 # Repackaged for native space tractography by Derek Pisner in 2019
 # Email: dpisner@utexas.edu
-# Originally created by Greg Kiar and Will Gray Roncal on 2016-01-27.
 
 from __future__ import print_function
+import glob
 import shutil
 import warnings
 warnings.simplefilter("ignore")
 from argparse import ArgumentParser
 from datetime import datetime
-#from ndmg.stats.qa_regdti import *
 import time
 from ndmg.stats.qa_tensor import *
 from ndmg.stats.qa_fibers import *
@@ -121,7 +120,13 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
 	os.remove(eddy_rot_param)
     cmd='eddy_correct ' + dwi + ' ' + dwi_prep + ' 0'
     os.system(cmd)
- 
+
+    # Check for outliers from eddy correction
+    os.chdir(namer.dirs['output']['prep_dwi'])
+    cmd='/ndmg/ndmg/shell/ec_plot.sh ' + eddy_rot_param
+    os.system(cmd)
+
+    # Handle bvecs 
     bvec_scaled = "{}/bvec_scaled.bvec".format(namer.dirs['output']['prep_dwi'])
     bvec_rotated = "{}/bvec_rotated.bvec".format(namer.dirs['output']['prep_dwi'])
     bval = "{}/bval.bval".format(namer.dirs['output']['prep_dwi'])
@@ -240,8 +245,8 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
         cmd = "rm -rf {}".format(" ".format(del_dirs))
         mgu.execute_cmd(cmd)
 
-    print("Execution took: {}".format(exe_time))
-    print("Complete!")
+    print("Total execution time: {}".format(exe_time))
+    print("NDMG Complete!")
     sys.exit(0)
 
 

@@ -19,12 +19,12 @@
 # Created by Vikram Chandrashekhar.
 # Email: Greg Kiar @ gkiar@jhu.edu
 
+import warnings
+warnings.simplefilter("ignore")
 import os
 import networkx as nx
 import matplotlib
 import numpy as np
-import warnings
-warnings.filterwarnings("ignore", message="numpy.dtype size changed")
 from argparse import ArgumentParser
 
 matplotlib.use('Agg')  # very important above pyplot import

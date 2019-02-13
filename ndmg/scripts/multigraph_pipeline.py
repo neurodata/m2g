@@ -19,6 +19,8 @@
 # Created by Greg Kiar and Will Gray Roncal on 2016-01-27.
 # Email: gkiar@jhu.edu, wgr@jhu.edu
 
+import warnings
+warnings.simplefilter("ignore")
 from argparse import ArgumentParser
 from datetime import datetime
 from subprocess import Popen, PIPE

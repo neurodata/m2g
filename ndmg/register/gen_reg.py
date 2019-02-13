@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python -W ignore::DeprecationWarning
 
 # Copyright 2019 NeuroData (http://neurodata.io)
 #

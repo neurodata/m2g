@@ -19,6 +19,8 @@
 # Created by Greg Kiar on 2016-09-19.
 # Email: gkiar@jhu.edu
 
+import warnings
+warnings.simplefilter("ignore")
 import numpy as np
 from scipy.stats import gaussian_kde
 from itertools import product

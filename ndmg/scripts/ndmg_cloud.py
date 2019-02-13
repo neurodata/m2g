@@ -19,6 +19,8 @@
 # Created by Greg Kiar on 2017-02-02.
 # Email: gkiar@jhu.edu
 
+import warnings
+warnings.simplefilter("ignore")
 from argparse import ArgumentParser
 from collections import OrderedDict
 from copy import deepcopy

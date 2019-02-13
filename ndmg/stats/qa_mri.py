@@ -17,15 +17,14 @@
 # Created by Eric W Bridgeford on 2016-06-08.
 # Email: ebridge2@jhu.edu
 
+import warnings
+warnings.simplefilter("ignore")
 import nibabel as nb
 import sys
 import re
 import os.path
 import matplotlib
 import numpy as np
-np.warnings.filterwarnings('ignore')
-import warnings
-warnings.filterwarnings("ignore", message="numpy.dtype size changed")
 from ndmg.utils import gen_utils as mgu
 from ndmg.stats.func_qa_utils import plot_timeseries, plot_signals, \
     registration_score, plot_connectome

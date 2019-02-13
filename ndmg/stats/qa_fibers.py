@@ -20,13 +20,13 @@
 # Edited by Greg Kiar.
 # Email: Greg Kiar @ gkiar@jhu.edu
 
+import warnings
+warnings.simplefilter("ignore")
 import numpy as np
 import random
 import os
 import getpass
 import subprocess
-import warnings
-warnings.filterwarnings("ignore", message="numpy.dtype size changed")
 from dipy.viz import window, actor
 from argparse import ArgumentParser
 

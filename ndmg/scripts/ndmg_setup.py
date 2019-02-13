@@ -20,6 +20,8 @@
 # Email: gkiar@jhu.edu
 # Copyright (c) 2016. All rights reserved
 
+import warnings
+warnings.simplefilter("ignore")
 from argparse import ArgumentParser
 import os
 import sys

@@ -19,6 +19,8 @@
 # Created by Greg Kiar on 2016-09-19.
 # Email: gkiar@jhu.edu
 
+import warnings
+warnings.simplefilter("ignore")
 from argparse import ArgumentParser
 from plotly.offline import download_plotlyjs, init_notebook_mode, plot
 import pickle

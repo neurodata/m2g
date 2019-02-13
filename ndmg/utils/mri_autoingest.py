@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import warnings
+warnings.simplefilter("ignore")
 import ndio.remote.ndingest as NI
 
 

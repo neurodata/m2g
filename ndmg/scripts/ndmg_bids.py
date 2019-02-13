@@ -16,8 +16,9 @@
 #
 
 # ndmg_bids.py
-# Created by Greg Kiar on 2016-07-25.
-# Email: gkiar@jhu.edu
+# Repackaged and maintained by Derek Pisner and Eric Bridgeford 2019
+# Email: dpisner@utexas.edu
+# Originally created by Greg Kiar on 2016-07-25.
 # edited by Eric Bridgeford to incorporate fMRI, multi-threading, and
 # big-graph generation.
 
@@ -128,7 +129,7 @@ def worker_wrapper((f, args, kwargs)):
     return f(*args, **kwargs)
 
 
-def session_level(inDir, outDir, subjs, vox_size, big, clean, stc, sesh=None, task=None, run=None,
+def session_level(inDir, outDir, subjs, vox_size, big, clean, stc, atlas_select, sesh=None, task=None, run=None,
                   debug=False, modality='dwi', nproc=1):
     """
     Crawls the given BIDS organized directory for data pertaining to the given
@@ -137,6 +138,8 @@ def session_level(inDir, outDir, subjs, vox_size, big, clean, stc, sesh=None, ta
     """
     labels, atlas, atlas_mask, atlas_brain, lv_mask = get_atlas(atlas_dir,
                                                                 modality, vox_size)
+
+    labels = [i for i in labels if atlas_select in i]
     #mgu.execute_cmd("mkdir -p {} {}/tmp".format(outDir, outDir))
 
     result = sweep_directory(inDir, subjs, sesh, task, run, modality)
@@ -335,7 +338,7 @@ def main():
     vox_size = result.vox
     minimal = result.minimal
     log = result.log
-    atlas = result.atlas
+    atlas_select = result.atlas
     dataset = result.dataset
     hemi = result.hemispheres
 
@@ -351,7 +354,7 @@ def main():
                 s3_get_data(buck, remo, inDir, public=creds)
         modif = 'ndmg_{}'.format(ndmg.version.replace('.', '-'))
         session_level(inDir, outDir, subj, vox_size, big, clean, stc, 
-	sesh, task, run, debug, modality, nproc)
+	atlas_select, sesh, task, run, debug, modality, nproc)
 
     elif level == 'group':
         gpath = op.join(inDir, modality, 'roi-connectomes')
