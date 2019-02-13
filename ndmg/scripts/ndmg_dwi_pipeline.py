@@ -217,13 +217,17 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
         print("Generating graph for {} parcellation...".format(label))
 	print("%s%s" % ('Applying native-space alignment to ', labels[idx]))
 	# align atlas to t1w to dwi
-        labels_im_file = reg.atlas2t1w2dwi_align(labels[idx])
-	print('Aligned Atlas: ' + labels_im_file)
-	labels_im = nib.load(labels_im_file)
-	g1 = mgg.graph_tools(attr=len(np.unique(labels_im.get_data()))-1, rois=labels[idx], streamlines=streamlines)
-        g1.make_graph()
-        g1.summary()
-        g1.save_graph(connectomes[idx])
+	try:
+            labels_im_file = reg.atlas2t1w2dwi_align(labels[idx])
+	    print('Aligned Atlas: ' + labels_im_file)
+	    labels_im = nib.load(labels_im_file)
+	    g1 = mgg.graph_tools(attr=len(np.unique(labels_im.get_data()))-1, rois=labels[idx], streamlines=streamlines)
+            g1.make_graph()
+            g1.summary()
+            g1.save_graph(connectomes[idx])
+	except:
+	    print(labels_im_file + ' failed. Skipping...')
+	    continue
 
     exe_time = datetime.now() - startTime
     qc_dwi.save(qc_stats, exe_time)
