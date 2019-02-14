@@ -207,6 +207,7 @@ def reorient_dwi(dwi_prep, bvecs, namer):
             bvecs_mat[2] = -bvecs_mat[2]
         np.savetxt(bvecs, bvecs_mat)
     else:
+	print('No reorientation of derivative dwi needed...')
         dwi_orig = dwi_prep
         dwi_prep = "{}/dwi_prep.nii.gz".format(namer.dirs['output']['prep_dwi'])
         shutil.copyfile(dwi_orig, dwi_prep)
@@ -231,6 +232,7 @@ def reorient_t1w(t1w, namer):
         cmd='fslreorient2std ' + t1w_orig + ' ' + t1w
         os.system(cmd)
     else:
+	print('No reorientation of derivative t1w image needed...')
         t1w_orig = t1w
         t1w = "{}/t1w.nii.gz".format(namer.dirs['output']['prep_anat'])
         shutil.copyfile(t1w_orig, t1w)
@@ -249,10 +251,10 @@ def match_target_vox_res(img_file, vox_size, namer, zoom_set, sens):
 	    img_file_pre = "{}/{}_pre_res.nii.gz".format(namer.dirs['output']['prep_anat'], os.path.basename(img_file).split('.nii.gz')[0])
         shutil.copyfile(img_file, img_file_pre)
         if vox_size == '1mm':
-            print('Reslicing preprocessed dwi to 1mm...')
+            print('Reslicing image to 1mm...')
             img_file = rgu.reslice_to_xmm(img_file_pre, 1.0)
         elif vox_size == '2mm':
-            print('Reslicing preprocessed dwi to 2mm...')
+            print('Reslicing image to 2mm...')
             img_file = rgu.reslice_to_xmm(img_file_pre, 2.0)
     return img_file
 

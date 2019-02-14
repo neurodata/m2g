@@ -161,17 +161,21 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
     t1w = mgu.reorient_t1w(t1w, namer)
     print("%s%s%s" % ('Reorienting runtime: ', str(np.round(time.time() - start_time, 1)), 's'))
 
-    # Check dimensions
-    start_time = time.time()
-    t1w = mgu.match_target_vox_res(t1w, vox_size, namer, zoom_set, sens='t1w')
-    print("%s%s%s" % ('Reslicing runtime: ', str(np.round(time.time() - start_time, 1)), 's'))
-
     # Instantiate registration
     reg = mgr.dmri_reg(namer, nodif_B0, nodif_B0_mask, t1w, vox_size, simple=False)
     # Perform anatomical segmentation
     start_time = time.time()
     reg.gen_tissue()
     print("%s%s%s" % ('gen_tissue runtime: ', str(np.round(time.time() - start_time, 1)), 's'))
+
+    # Check dimensions
+    start_time = time.time()
+    reg.t1w_brain = mgu.match_target_vox_res(reg.t1w_brain, vox_size, namer, zoom_set, sens='t1w')
+    reg.wm_mask = mgu.match_target_vox_res(reg.wm_mask, vox_size, namer, zoom_set, sens='t1w')
+    reg.gm_mask = mgu.match_target_vox_res(reg.gm_mask, vox_size, namer, zoom_set, sens='t1w')
+    reg.csf_mask = mgu.match_target_vox_res(reg.csf_mask, vox_size, namer, zoom_set, sens='t1w')
+    print("%s%s%s" % ('Reslicing runtime: ', str(np.round(time.time() - start_time, 1)), 's'))
+
     # Align t1w to dwi
     start_time = time.time()
     reg.t1w2dwi_align()

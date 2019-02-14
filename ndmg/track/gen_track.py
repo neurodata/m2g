@@ -141,30 +141,36 @@ class run_track(object):
 	from dipy.reconst.shm import CsaOdfModel
 	from dipy.data import default_sphere
 	from dipy.direction import peaks_from_model
-	self.csa_model = CsaOdfModel(self.gtab, sh_order=6)
-	self.csa_peaks = peaks_from_model(self.csa_model, self.data, default_sphere, relative_peak_threshold=.8, min_separation_angle=45, mask=self.mask)
-	return self.csa_peaks
+	self.mask_img = nib.load(self.nodif_B0_mask)
+        self.mask = self.mask_img.get_data() > 0
+	self.mod = CsaOdfModel(self.gtab, sh_order=6)
+	return self.mod
 
     def csd_mod_est(self):
 	from dipy.reconst.csdeconv import ConstrainedSphericalDeconvModel, recursive_response
-	from dipy.data import default_sphere
         # Instantiate recursive response
         self.response = recursive_response(self.gtab, self.data, mask=self.mask, sh_order=8, peak_thr=0.01,
                                    init_fa=0.08, init_trace=0.0021, iter=8, convergence=0.001, parallel=False)
 	# Instantiate CSD
 	csd_model = ConstrainedSphericalDeconvModel(self.gtab, self.response)
 	# Fit CSD
-	self.csd_fit = csd_model.fit(self.data, mask=self.mask)
-	self.pdg = ProbabilisticDirectionGetter.from_shcoeff(self.csd_fit.shm_coeff,
-                                                    max_angle=30.,
-                                                    sphere=self.default_sphere)
-	return self.pdg
+	self.mod = csd_model.fit(self.data, mask=self.mask)
+	return self.mod
 
     def local_tracking(self):
 	from dipy.tracking.local import LocalTracking
+	from dipy.data import default_sphere
 	if self.mod_type=='det':
-            self.streamline_generator = LocalTracking(self.csa_peaks, self.act_classifier, self.seeds, self.dwi_img.affine, step_size=.5, return_all=True)
+	    self.csa_peaks = peaks_from_model(self.mod, self.data, default_sphere, relative_peak_threshold=.8, min_separation_angle=45, mask=self.mask)
+            self.streamline_generator = LocalTracking(self.mod_peaks, self.act_classifier, self.seeds, self.dwi_img.affine, step_size=.5, return_all=True)
         elif self.mod_type=='prob':
+	    try:
+                self.pdg = ProbabilisticDirectionGetter.from_shcoeff(self.mod.shm_coeff, max_angle=30., sphere=self.default_sphere)
+	    except:
+		print('Failed to obtain spherical harmonic from csd model fit. Proceeding using FOD PMF estimation instead...')
+		self.fod = self.mod.odf(default_sphere)
+		self.pmf = self.fod.clip(min=0)
+		self.pdg = prob_dg = ProbabilisticDirectionGetter.from_pmf(self.pmf, max_angle=30., sphere=default_sphere) 
             self.streamline_generator = LocalTracking(self.pdg, self.act_classifier, self.seeds, self.dwi_img.affine, step_size=.5, return_all=True)
 	self.streamlines = Streamlines(self.streamline_generator, buffer_size=512)
 	return self.streamlines
