@@ -147,7 +147,6 @@ class run_track(object):
     def odf_mod_est(self):
 	from dipy.reconst.shm import CsaOdfModel
 	from dipy.data import default_sphere
-	from dipy.direction import peaks_from_model
 	self.mask_img = nib.load(self.nodif_B0_mask)
         self.mask = self.mask_img.get_data() > 0
 	self.mod = CsaOdfModel(self.gtab, sh_order=6)
@@ -167,6 +166,7 @@ class run_track(object):
     def local_tracking(self):
 	from dipy.tracking.local import LocalTracking
 	from dipy.data import default_sphere
+	from dipy.direction import peaks_from_model
 	if self.mod_type=='det':
 	    self.csa_peaks = peaks_from_model(self.mod, self.data, default_sphere, relative_peak_threshold=.8, min_separation_angle=45, mask=self.mask)
             self.streamline_generator = LocalTracking(self.mod_peaks, self.act_classifier, self.seeds, self.dwi_img.affine, step_size=.5, return_all=True)
