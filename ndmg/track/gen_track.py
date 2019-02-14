@@ -34,7 +34,7 @@ def build_seed_list(wm_in_dwi_bin):
 
 class run_track(object):
     def __init__(self, dwi_in, nodif_B0_mask, gm_in_dwi, vent_csf_in_dwi,
-                 wm_in_dwi, wm_in_dwi_bin, gtab, mod_type, track_type, seeds):
+                 wm_in_dwi, wm_in_dwi_bin, gtab, mod_type, track_type, mod_func, seeds):
         """
         A class for deterministic tractography in native space.
 
@@ -77,6 +77,7 @@ class run_track(object):
 	self.mod_type = mod_type
 	self.track_type = track_type
 	self.seeds = seeds
+	self.mod_func = mod_func
 
     def run(self):
 	if self.track_type == 'local':
@@ -87,13 +88,19 @@ class run_track(object):
                 tracks = self.eudx_tracking()
 	    elif self.track_type == 'local':
 		if self.seeds is not None and len(self.seeds) > 0:
-		    self.csa_peaks = self.odf_mod_est()
+		    if self.mod_func == 'csa':
+		    	self.mod = self.odf_mod_est()
+		    elif self.mod_func == 'csd':
+			self.mod = self.csd_mod_est()
 		    tracks = self.local_tracking()
 		else:
 		    raise ValueError('Error: Either no seeds supplied, or no valid seeds found in white-matter interface')
 	elif self.mod_type == 'prob':
             if self.seeds is not None and len(self.seeds) > 0:
-                self.pdg = self.csd_mod_est()
+                if self.mod_func == 'csa':
+                    self.mod = self.odf_mod_est()
+                elif self.mod_func == 'csd':
+                    self.mod = self.csd_mod_est()
                 tracks = self.local_tracking()
             else:
                 raise ValueError('Error: Either no seeds supplied, or no valid seeds found in white-matter interface')
