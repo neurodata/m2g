@@ -122,9 +122,9 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
     os.system(cmd)
 
     # Check for outliers from eddy correction
-    os.chdir(namer.dirs['output']['prep_dwi'])
-    cmd='/ndmg/ndmg/shell/ec_plot.sh ' + eddy_rot_param
-    os.system(cmd)
+    #os.chdir(namer.dirs['output']['prep_dwi'])
+    #cmd='/ndmg/ndmg/shell/ec_plot.sh ' + eddy_rot_param
+    #os.system(cmd)
 
     # Handle bvecs 
     bvec_scaled = "{}/bvec_scaled.bvec".format(namer.dirs['output']['prep_dwi'])
