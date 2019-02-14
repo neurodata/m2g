@@ -115,6 +115,8 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
     if len(os.listdir(namer.dirs['output']['prep_dwi'])) != 0:
 	print('Pre-existing preprocessed dwi files found. Deleting these...')
 	shutil.rmtree(namer.dirs['output']['prep_dwi'])
+	os.mkdir(namer.dirs['output']['prep_dwi'])
+
     dwi_prep = "{}/eddy_corrected_data.nii.gz".format(namer.dirs['output']['prep_dwi'])
     eddy_rot_param = "{}/eddy_corrected_data.ecclog".format(namer.dirs['output']['prep_dwi'])
     print("Performing eddy correction...")
@@ -161,9 +163,11 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
     if len(os.listdir(namer.dirs['output']['prep_anat'])) != 0:
 	print('Pre-existing preprocessed t1w files found. Deleting these...')
         shutil.rmtree(namer.dirs['output']['prep_anat'])
+	os.mkdir(namer.dirs['output']['prep_anat'])
     if len(os.listdir(namer.dirs['output']['reg_anat'])) != 0:
 	print('Pre-existing registered t1w files found. Deleting these...')
         shutil.rmtree(namer.dirs['output']['reg_anat'])
+	os.mkdir(namer.dirs['output']['reg_anat'])
 
     # Check orientation (t1w)
     start_time = time.time()
