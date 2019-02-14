@@ -111,13 +111,13 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
     qc_dwi = qa_mri(namer, 'dwi')  # for quality control
     # -------- Preprocessing Steps --------------------------------- #
     # Perform eddy correction
-    print("Performing eddy correction...")
     start_time = time.time()
+    if len(os.listdir(namer.dirs['output']['prep_dwi'])) == 0:
+	print('Pre-existing preprocessed dwi files found. Deleting these...')
+	shutil.rmtree(namer.dirs['output']['prep_dwi'])
     dwi_prep = "{}/eddy_corrected_data.nii.gz".format(namer.dirs['output']['prep_dwi'])
     eddy_rot_param = "{}/eddy_corrected_data.ecclog".format(namer.dirs['output']['prep_dwi'])
-    if os.path.isfile(dwi_prep):
-	os.remove(dwi_prep)
-	os.remove(eddy_rot_param)
+    print("Performing eddy correction...")
     cmd='eddy_correct ' + dwi + ' ' + dwi_prep + ' 0'
     os.system(cmd)
 
@@ -156,6 +156,13 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
 
     print("%s%s%s" % ('Preprocessing runtime: ', str(np.round(time.time() - start_time, 1)), 's'))
     # -------- Registration Steps ----------------------------------- #
+    if len(os.listdir(namer.dirs['output']['prep_anat'])) == 0:
+	print('Pre-existing preprocessed t1w files found. Deleting these...')
+        shutil.rmtree(namer.dirs['output']['prep_anat'])
+    if len(os.listdir(namer.dirs['output']['reg_anat'])) == 0:
+	print('Pre-existing registered t1w files found. Deleting these...')
+        shutil.rmtree(namer.dirs['output']['reg_anat'])
+
     # Check orientation (t1w)
     start_time = time.time()
     t1w = mgu.reorient_t1w(t1w, namer)
