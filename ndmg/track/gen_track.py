@@ -111,19 +111,19 @@ class run_track(object):
 	from dipy.tracking.local import ActTissueClassifier
 	from dipy.tracking.local import BinaryTissueClassifier
 	tiss_class = 'bin'
+        self.dwi_img = nib.load(self.dwi)
+        self.data = self.dwi_img.get_data()
+        # Loads mask and ensures it's a true binary mask
+        self.mask_img = nib.load(self.nodif_B0_mask)
+        self.mask = self.mask_img.get_data() > 0
+        # Load tissue maps and prepare tissue classifier
+        self.gm_mask = nib.load(self.gm_in_dwi)
+        self.gm_mask_data = self.gm_mask.get_data().astype('bool')
+        self.vent_csf_mask = nib.load(self.vent_csf_in_dwi)
+        self.vent_csf_mask_data = self.vent_csf_mask.get_data().astype('bool')
+        self.wm_mask = nib.load(self.wm_in_dwi)
+        self.wm_mask_data = self.wm_mask.get_data().astype('bool')
 	if tiss_class == 'act':
-            self.dwi_img = nib.load(self.dwi)
-            self.data = self.dwi_img.get_data()
-            # Loads mask and ensures it's a true binary mask
-            self.mask_img = nib.load(self.nodif_B0_mask)
-            self.mask = self.mask_img.get_data() > 0
-            # Load tissue maps and prepare tissue classifier
-            self.gm_mask = nib.load(self.gm_in_dwi)
-            self.gm_mask_data = self.gm_mask.get_data().astype('bool')
-            self.vent_csf_mask = nib.load(self.vent_csf_in_dwi)
-            self.vent_csf_mask_data = self.vent_csf_mask.get_data().astype('bool')
-            self.wm_mask = nib.load(self.wm_in_dwi)
-            self.wm_mask_data = self.wm_mask.get_data().astype('bool')
             self.background = np.ones(self.gm_mask.shape)
             self.background[(self.gm_mask_data + self.wm_mask_data + self.vent_csf_mask_data) > 0] = 0
             self.include_map = self.gm_mask.get_data()
