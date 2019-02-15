@@ -86,6 +86,7 @@ class dmri_reg(object):
         self.input_mni = "%s%s%s%s" % (FSLDIR, '/data/standard/MNI152_T1_', vox_size, '_brain.nii.gz')
         self.gm_in_dwi_bin = "{}/{}_gm_in_dwi_bin.nii.gz".format(self.namer.dirs['tmp']['reg_a'], self.t1w_name)
         self.gm_in_dwi_binv = "{}/{}_gm_in_dwi_binv.nii.gz".format(self.namer.dirs['tmp']['reg_a'], self.t1w_name)
+	self.wm_gm_int_in_dwi = "{}/t1w_wm_gm_interf_in_dwi.nii.gz".format(namer.dirs['output']['reg_anat'])
 
     def gen_tissue(self):
         # BET needed for this, as afni 3dautomask only works on 4d volumes
@@ -264,6 +265,10 @@ class dmri_reg(object):
         cmd='fslmaths ' + self.csf_mask_dwi + ' -mas ' + self.vent_mask_dwi + ' -mas ' + self.wm_in_dwi_binv + ' -mas ' + self.gm_in_dwi_binv + ' ' + self.vent_csf_in_dwi
         os.system(cmd)
         cmd='fslmaths ' + self.vent_csf_in_dwi + ' -bin ' + self.vent_csf_in_dwi_bin
+        os.system(cmd)
+
+	# Create gm-wm interface image
+        cmd = 'fslmaths ' + self.gm_in_dwi + ' -mul ' + self.wm_in_dwi + ' -bin ' + self.wm_gm_int_in_dwi
         os.system(cmd)
 
         return

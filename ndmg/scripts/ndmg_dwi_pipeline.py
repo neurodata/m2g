@@ -203,10 +203,7 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
     track_type='local'
     mod_func = 'csd'
     if mod_type=='det' and track_type=='local':
-	wm_gm_int_in_dwi = "{}/t1w_wm_gm_interf_in_dwi.nii.gz".format(namer.dirs['output']['reg_anat'])
-	cmd = 'fslmaths ' + gm_in_dwi + ' -mul ' + wm_in_dwi + ' -bin ' + wm_gm_int_in_dwi
-	os.system(cmd)
-	seeds = build_seed_list(wm_gm_int_in_dwi)
+	seeds = build_seed_list(reg.wm_gm_int_in_dwi)
     else:
 	seeds=None
 
