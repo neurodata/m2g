@@ -203,7 +203,10 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
     track_type='local'
     mod_func = 'csd'
     if mod_type=='det' and track_type=='local':
-	seeds=mgt.build_seed_list(reg.wm_in_dwi_bin)
+	wm_gm_int_in_dwi = "{}/t1w_wm_gm_interf_in_dwi.nii.gz".format(namer.dirs['output']['reg_anat'])
+	cmd = 'fslmaths ' + gm_in_dwi + ' -mul ' + wm_in_dwi + ' -bin ' + wm_gm_int_in_dwi
+	os.system(cmd)
+	seeds = build_seed_list(wm_gm_int_in_dwi)
     else:
 	seeds=None
 
@@ -212,7 +215,7 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
     trct = mgt.run_track(dwi_prep, nodif_B0_mask, reg.gm_in_dwi, reg.vent_csf_in_dwi, reg.wm_in_dwi, reg.wm_in_dwi_bin, gtab, mod_type, track_type, mod_func, seeds)
     streamlines = trct.run()
 
-    #tracks = [sl for sl in streamlines if len(sl) > 1]
+    tracks = [sl for sl in streamlines if len(sl) > 1]
 
     # Save streamlines to disk
     print('Saving streamlines: ' + streams)
@@ -244,7 +247,7 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
             labels_im_file = reg.atlas2t1w2dwi_align(labels[idx])
 	    print('Aligned Atlas: ' + labels_im_file)
 	    labels_im = nib.load(labels_im_file)
-	    g1 = mgg.graph_tools(attr=len(np.unique(labels_im.get_data()))-1, rois=labels[idx], streamlines=streamlines)
+	    g1 = mgg.graph_tools(attr=len(np.unique(labels_im.get_data()))-1, rois=labels_im_file, streamlines=tracks)
             g1.make_graph()
             g1.summary()
             g1.save_graph(connectomes[idx])
