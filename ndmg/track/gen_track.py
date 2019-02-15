@@ -154,30 +154,26 @@ class run_track(object):
 
     def csd_mod_est(self):
 	from dipy.reconst.csdeconv import ConstrainedSphericalDeconvModel, recursive_response
-        # Instantiate recursive response
         self.response = recursive_response(self.gtab, self.data, mask=self.mask, sh_order=8, peak_thr=0.01,
                                    init_fa=0.08, init_trace=0.0021, iter=8, convergence=0.001, parallel=False)
-	# Instantiate CSD
-	csd_model = ConstrainedSphericalDeconvModel(self.gtab, self.response)
-	# Fit CSD
-	self.mod = csd_model.fit(self.data, mask=self.mask)
+	self.mod = ConstrainedSphericalDeconvModel(self.gtab, self.response)
 	return self.mod
 
     def local_tracking(self):
 	from dipy.tracking.local import LocalTracking
 	from dipy.data import default_sphere
-	from dipy.direction import peaks_from_model
+	from dipy.direction import peaks_from_model, ProbabilisticDirectionGetter
 	if self.mod_type=='det':
-	    self.csa_peaks = peaks_from_model(self.mod, self.data, default_sphere, relative_peak_threshold=.8, min_separation_angle=45, mask=self.mask)
+	    self.mod_peaks = peaks_from_model(self.mod, self.data, default_sphere, relative_peak_threshold=.8, min_separation_angle=45, mask=self.mask)
             self.streamline_generator = LocalTracking(self.mod_peaks, self.act_classifier, self.seeds, self.dwi_img.affine, step_size=.5, return_all=True)
         elif self.mod_type=='prob':
 	    try:
                 self.pdg = ProbabilisticDirectionGetter.from_shcoeff(self.mod.shm_coeff, max_angle=30., sphere=self.default_sphere)
 	    except:
-		print('Failed to obtain spherical harmonic from csd model fit. Proceeding using FOD PMF estimation instead...')
+		print('Failed to obtain spherical harmonic from csd estimator. Proceeding using FOD PMF from csd estimation instead...')
 		self.fod = self.mod.odf(default_sphere)
 		self.pmf = self.fod.clip(min=0)
-		self.pdg = prob_dg = ProbabilisticDirectionGetter.from_pmf(self.pmf, max_angle=30., sphere=default_sphere) 
+		self.pdg = ProbabilisticDirectionGetter.from_pmf(self.pmf, max_angle=30., sphere=default_sphere) 
             self.streamline_generator = LocalTracking(self.pdg, self.act_classifier, self.seeds, self.dwi_img.affine, step_size=.5, return_all=True)
 	self.streamlines = Streamlines(self.streamline_generator, buffer_size=512)
 	return self.streamlines
