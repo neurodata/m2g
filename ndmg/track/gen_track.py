@@ -82,7 +82,7 @@ class run_track(object):
 
     def run(self):
 	if self.track_type == 'local':
-	    self.act_classifier = self.prep_tracking()
+	    self.tiss_classifier = self.prep_tracking()
 	if self.mod_type == 'det':
 	    if self.track_type == 'eudx':
                 self.tens = self.tens_mod_est()
@@ -110,6 +110,7 @@ class run_track(object):
     def prep_tracking(self):
 	from dipy.tracking.local import ActTissueClassifier
 	from dipy.tracking.local import BinaryTissueClassifier
+	tiss_class = 'bin'
 	if tiss_class == 'act':
             self.dwi_img = nib.load(self.dwi)
             self.data = self.dwi_img.get_data()
