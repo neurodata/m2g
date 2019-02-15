@@ -203,7 +203,7 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
     track_type='local'
     mod_func = 'csd'
     if mod_type=='det' and track_type=='local':
-	seeds = build_seed_list(reg.wm_gm_int_in_dwi)
+	seeds = mgt.build_seed_list(reg.wm_gm_int_in_dwi)
     else:
 	seeds=None
 
