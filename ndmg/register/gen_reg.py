@@ -86,7 +86,7 @@ class dmri_reg(object):
         self.input_mni = "%s%s%s%s" % (FSLDIR, '/data/standard/MNI152_T1_', vox_size, '_brain.nii.gz')
         self.gm_in_dwi_bin = "{}/{}_gm_in_dwi_bin.nii.gz".format(self.namer.dirs['tmp']['reg_a'], self.t1w_name)
         self.gm_in_dwi_binv = "{}/{}_gm_in_dwi_binv.nii.gz".format(self.namer.dirs['tmp']['reg_a'], self.t1w_name)
-	self.wm_gm_int_in_dwi = "{}/t1w_wm_gm_interf_in_dwi.nii.gz".format(namer.dirs['output']['reg_anat'])
+	self.wm_gm_int_in_dwi = "{}/{}_wm_gm_int_in_dwi.nii.gz".format(namer.dirs['output']['reg_anat'], self.t1w_name)
 
     def gen_tissue(self):
         # BET needed for this, as afni 3dautomask only works on 4d volumes

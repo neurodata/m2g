@@ -200,8 +200,8 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
 
     # -------- Tensor Fitting and Fiber Tractography ---------------- #
     mod_type='det'
-    track_type='local'
-    mod_func = 'csd'
+    track_type='eudx'
+    mod_func = 'tensor'
     if mod_type=='det' and track_type=='local':
 	seeds = mgt.build_seed_list(reg.wm_gm_int_in_dwi)
     else:
@@ -210,13 +210,13 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
     # Compute direction model and track fiber streamlines
     print("Beginning tractography...")
     trct = mgt.run_track(dwi_prep, nodif_B0_mask, reg.gm_in_dwi, reg.vent_csf_in_dwi, reg.wm_in_dwi, reg.wm_in_dwi_bin, gtab, mod_type, track_type, mod_func, seeds)
-    streamlines = trct.run()
+    [streamlines, stream_affine] = trct.run()
 
     tracks = [sl for sl in streamlines if len(sl) > 1]
 
     # Save streamlines to disk
     print('Saving streamlines: ' + streams)
-    tractogram = Tractogram(streamlines, affine_to_rasmm=nib.load(dwi_prep).affine)
+    tractogram = Tractogram(streamlines, affine_to_rasmm=stream_affine)
     save(tractogram, streams)
 
     # Visualize fibers using VTK
@@ -244,7 +244,7 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
             labels_im_file = reg.atlas2t1w2dwi_align(labels[idx])
 	    print('Aligned Atlas: ' + labels_im_file)
 	    labels_im = nib.load(labels_im_file)
-	    g1 = mgg.graph_tools(attr=len(np.unique(labels_im.get_data()))-1, rois=labels_im_file, tracks=tracks)
+	    g1 = mgg.graph_tools(attr=len(np.unique(labels_im.get_data()))-1, rois=labels_im_file, tracks=tracks, stream_affine=stream_affine)
             g1.make_graph()
             g1.summary()
             g1.save_graph(connectomes[idx])
