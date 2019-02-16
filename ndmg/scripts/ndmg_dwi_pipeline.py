@@ -202,16 +202,14 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
     mod_type='det'
     track_type='eudx'
     mod_func = 'tensor'
-    if mod_type=='det' and track_type=='local':
-	seeds = mgt.build_seed_list(reg.wm_gm_int_in_dwi)
-    else:
-	seeds=None
+    stream_affine = nib.load(dwi_prep).affine
+    #seeds = mgt.build_seed_list(reg.wm_gm_int_in_dwi, stream_affine)
+    seeds = int(1000000)
 
     # Compute direction model and track fiber streamlines
     print("Beginning tractography...")
-    trct = mgt.run_track(dwi_prep, nodif_B0_mask, reg.gm_in_dwi, reg.vent_csf_in_dwi, reg.wm_in_dwi, reg.wm_in_dwi_bin, gtab, mod_type, track_type, mod_func, seeds)
-    [streamlines, stream_affine] = trct.run()
-
+    trct = mgt.run_track(dwi_prep, nodif_B0_mask, reg.gm_in_dwi, reg.vent_csf_in_dwi, reg.wm_in_dwi, reg.wm_in_dwi_bin, gtab, mod_type, track_type, mod_func, seeds, stream_affine)
+    streamlines = trct.run()
     tracks = [sl for sl in streamlines if len(sl) > 1]
 
     # Save streamlines to disk

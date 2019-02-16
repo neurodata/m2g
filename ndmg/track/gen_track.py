@@ -26,16 +26,16 @@ import nibabel as nib
 from dipy.tracking.streamline import Streamlines
 
 
-def build_seed_list(wm_gm_int_in_dwi):
+def build_seed_list(wm_gm_int_in_dwi, stream_affine):
     from dipy.tracking import utils
     wm_gm_mask = nib.load(wm_gm_int_in_dwi)
     wm_gm_mask_data = wm_gm_mask.get_data().astype('bool')
-    seeds = utils.seeds_from_mask(wm_gm_mask_data, density=5, affine=wm_gm_mask.affine)
+    seeds = utils.seeds_from_mask(wm_gm_mask_data, density=6, affine=stream_affine)
     return seeds
 
 class run_track(object):
     def __init__(self, dwi_in, nodif_B0_mask, gm_in_dwi, vent_csf_in_dwi,
-                 wm_in_dwi, wm_in_dwi_bin, gtab, mod_type, track_type, mod_func, seeds):
+                 wm_in_dwi, wm_in_dwi_bin, gtab, mod_type, track_type, mod_func, seeds, stream_affine):
         """
         A class for deterministic tractography in native space.
 
@@ -79,32 +79,31 @@ class run_track(object):
 	self.track_type = track_type
 	self.seeds = seeds
 	self.mod_func = mod_func
+	self.stream_affine = stream_affine
 
     def run(self):
 	self.tiss_classifier = self.prep_tracking()
 	if self.mod_type == 'det':
 	    if self.track_type == 'eudx':
                 self.tens = self.tens_mod_est()
-                [tracks, stream_affine] = self.eudx_tracking()
+                tracks = self.eudx_tracking()
 	    elif self.track_type == 'local':
-		if self.seeds is not None and len(self.seeds) > 0:
-		    if self.mod_func == 'csa':
-		    	self.mod = self.odf_mod_est()
-		    elif self.mod_func == 'csd':
-			self.mod = self.csd_mod_est()
-		    [tracks, stream_affine] = self.local_tracking()
-		else:
-		    raise ValueError('Error: Either no seeds supplied, or no valid seeds found in white-matter interface')
+		if self.mod_func == 'csa':
+		    self.mod = self.odf_mod_est()
+		elif self.mod_func == 'csd':
+		    self.mod = self.csd_mod_est()
+		tracks = self.local_tracking()
+	    else:
+		raise ValueError('Error: Either no seeds supplied, or no valid seeds found in white-matter interface')
 	elif self.mod_type == 'prob':
-            if self.seeds is not None and len(self.seeds) > 0:
-                if self.mod_func == 'csa':
-                    self.mod = self.odf_mod_est()
-                elif self.mod_func == 'csd':
-                    self.mod = self.csd_mod_est()
-                [tracks, stream_affine] = self.local_tracking()
-            else:
-                raise ValueError('Error: Either no seeds supplied, or no valid seeds found in white-matter interface')
-        return tracks, stream_affine
+             if self.mod_func == 'csa':
+                self.mod = self.odf_mod_est()
+             elif self.mod_func == 'csd':
+                self.mod = self.csd_mod_est()
+             tracks = self.local_tracking()
+        else:
+             raise ValueError('Error: Either no seeds supplied, or no valid seeds found in white-matter interface')
+        return tracks
 
     def prep_tracking(self):
 	from dipy.tracking.local import ActTissueClassifier
@@ -173,7 +172,7 @@ class run_track(object):
 	if self.mod_type=='det':
 	    print('Obtaining peaks from model...')
 	    self.mod_peaks = peaks_from_model(self.mod, self.data, default_sphere, normalize_peaks=True, relative_peak_threshold=.8, min_separation_angle=45, mask=self.mask)
-            self.streamline_generator = LocalTracking(self.mod_peaks, self.tiss_classifier, self.seeds, self.dwi_img.affine, step_size=.5, return_all=True)
+            self.streamline_generator = LocalTracking(self.mod_peaks, self.tiss_classifier, self.seeds, self.stream_affine, step_size=.5, return_all=True)
         elif self.mod_type=='prob':
 	    print('Preparing probabilistic tracking...')
 	    try:
@@ -183,16 +182,14 @@ class run_track(object):
 		self.fod = self.mod.odf(default_sphere)
 		self.pmf = self.fod.clip(min=0)
 		self.pdg = ProbabilisticDirectionGetter.from_pmf(self.pmf, max_angle=30., sphere=default_sphere) 
-            self.streamline_generator = LocalTracking(self.pdg, self.tiss_classifier, self.seeds, self.dwi_img.affine, step_size=.5, return_all=True)
+            self.streamline_generator = LocalTracking(self.pdg, self.tiss_classifier, self.seeds, self.stream_affine, step_size=.5, return_all=True)
 	print('Reconstructing tractogram...')
-	self.stream_affine = self.streamline_generator.affine
 	self.streamlines = Streamlines(self.streamline_generator, buffer_size=512)
-	return self.streamlines, self.stream_affine
+	return self.streamlines
 
     def eudx_tracking(self):
 	from dipy.tracking.eudx import EuDX
         print('Running EuDX tracking...')
-        self.streamline_generator = EuDX(self.fa.astype('f8'), self.ind, odf_vertices=self.sphere.vertices, a_low=float(0.02), seeds=int(1000000), affine=self.dwi_img.affine)
-	self.stream_affine = self.streamline_generator.affine
+        self.streamline_generator = EuDX(self.fa.astype('f8'), self.ind, odf_vertices=self.sphere.vertices, a_low=float(0.02), seeds=self.seeds, affine=self.stream_affine)
         self.streamlines = Streamlines(self.streamline_generator, buffer_size=512)
-        return self.streamlines, self.stream_affine
+        return self.streamlines

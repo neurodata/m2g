@@ -48,7 +48,7 @@ class graph_tools(object):
         """
         self.edge_dict = defaultdict(int)
 	self.roi_img = nb.load(rois)
-        self.rois = roi_img.get_data().astype('int')
+        self.rois = self.roi_img.get_data().astype('int')
         n_ids = np.unique(self.rois)
         self.n_ids = n_ids[n_ids > 0]
         self.N = len(self.n_ids)
@@ -70,6 +70,7 @@ class graph_tools(object):
                       or compatible format.
         """
 	from dipy.tracking import utils
+	print('Building connectivity matrix...')
 	self.conn_matrix, _ = utils.connectivity_matrix(self.tracks, self.rois, affine=self.stream_affine, return_mapping=True, mapping_as_streamlines=True)
 	np.seterr(divide='ignore', invalid='ignore')
 	self.conn_matrix = np.divide(self.conn_matrix, np.array(np.sum(self.conn_matrix.sum(axis=0)), dtype='f8'))
