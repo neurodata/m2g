@@ -102,5 +102,8 @@ ENV PYTHONWARNINGS ignore
 RUN ldconfig
 RUN chmod -R 777 /usr/local/bin/ndmg_bids
 
+# Delete buggy line in dipy
+RUN sed -i -e '189d;190d' /usr/local/lib/python2.7/dist-packages/dipy/tracking/eudx.py
+
 # and add it as an entrypoint
 ENTRYPOINT ["ndmg_bids"]
