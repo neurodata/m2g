@@ -108,7 +108,7 @@ class run_track(object):
     def prep_tracking(self):
 	from dipy.tracking.local import ActTissueClassifier
 	from dipy.tracking.local import BinaryTissueClassifier
-	tiss_class = 'bin'
+	tiss_class = 'act'
         self.dwi_img = nib.load(self.dwi)
         self.data = self.dwi_img.get_data()
         # Loads mask and ensures it's a true binary mask
@@ -129,7 +129,7 @@ class run_track(object):
             self.exclude_map = self.vent_csf_mask_data
 	    self.tiss_classifier = ActTissueClassifier(self.include_map, self.exclude_map)
 	elif tiss_class == 'bin':
-	    self.tiss_classifier = BinaryTissueClassifier(self.mask)
+	    self.tiss_classifier = BinaryTissueClassifier(self.wm_mask_data)
 	else:
 	    pass
 	return self.tiss_classifier
@@ -171,15 +171,16 @@ class run_track(object):
 	from dipy.direction import peaks_from_model, ProbabilisticDirectionGetter
 	if self.mod_type=='det':
 	    print('Obtaining peaks from model...')
-	    self.mod_peaks = peaks_from_model(self.mod, self.data, default_sphere, normalize_peaks=True, relative_peak_threshold=.8, min_separation_angle=45, mask=self.mask)
+	    self.mod_peaks = peaks_from_model(self.mod, self.data, default_sphere, relative_peak_threshold=.8, min_separation_angle=45, mask=self.mask)
             self.streamline_generator = LocalTracking(self.mod_peaks, self.tiss_classifier, self.seeds, self.stream_affine, step_size=.5, return_all=True)
         elif self.mod_type=='prob':
 	    print('Preparing probabilistic tracking...')
+	    self.csd_fit = self.mod.fit(self.data)
 	    try:
-                self.pdg = ProbabilisticDirectionGetter.from_shcoeff(self.mod.shm_coeff, max_angle=30., sphere=self.default_sphere)
+                self.pdg = ProbabilisticDirectionGetter.from_shcoeff(self.csd_fit.shm_coeff, max_angle=30., sphere=self.default_sphere)
 	    except:
 		print('Failed to obtain spherical harmonic from csd estimator. Proceeding using FOD PMF from csd estimation instead...')
-		self.fod = self.mod.odf(default_sphere)
+		self.fod = self.csd_fit.odf(default_sphere)
 		self.pmf = self.fod.clip(min=0)
 		self.pdg = ProbabilisticDirectionGetter.from_pmf(self.pmf, max_angle=30., sphere=default_sphere) 
             self.streamline_generator = LocalTracking(self.pdg, self.tiss_classifier, self.seeds, self.stream_affine, step_size=.5, return_all=True)
@@ -190,6 +191,6 @@ class run_track(object):
     def eudx_tracking(self):
 	from dipy.tracking.eudx import EuDX
         print('Running EuDX tracking...')
-        self.streamline_generator = EuDX(self.fa.astype('f8'), self.ind, odf_vertices=self.sphere.vertices, a_low=float(0.02), seeds=self.seeds, affine=self.stream_affine)
+        self.streamline_generator = EuDX(self.fa.astype('f8'), self.ind, odf_vertices=self.sphere.vertices, max_points=2000, ang_thr=60.0, a_low=float(0.02), seeds=self.seeds, affine=self.stream_affine)
         self.streamlines = Streamlines(self.streamline_generator, buffer_size=512)
         return self.streamlines

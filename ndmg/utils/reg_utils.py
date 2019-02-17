@@ -120,7 +120,7 @@ def segment_t1w(t1w, basename, opts=''):
     """
     print("Segmenting Anatomical Image into WM, GM, and CSF...")
     # run FAST, with options -t for the image type and -n to
-    # segment into CSF (pve_0), WM (pve_1), GM (pve_2)
+    # segment into CSF (pve_0), GM (pve_1), WM (pve_2)
     cmd = "fast -t 1 {} -n 3 -o {} {}".format(opts, basename, t1w)
     mgu.execute_cmd(cmd, verb=True)
     out = {}  # the outputs

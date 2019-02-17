@@ -129,7 +129,7 @@ def worker_wrapper((f, args, kwargs)):
     return f(*args, **kwargs)
 
 
-def session_level(inDir, outDir, subjs, vox_size, big, clean, stc, atlas_select, sesh=None, task=None, run=None,
+def session_level(inDir, outDir, subjs, vox_size, big, clean, stc, atlas_select, mod_type, track_type, mod_func, sesh=None, task=None, run=None,
                   debug=False, modality='dwi', nproc=1):
     """
     Crawls the given BIDS organized directory for data pertaining to the given
@@ -157,6 +157,9 @@ def session_level(inDir, outDir, subjs, vox_size, big, clean, stc, atlas_select,
 	kwargs['vox_size'] = vox_size
         kwargs['big'] = big
 	kwargs['clean'] = clean
+	kwargs['mod_type'] = mod_type
+	kwargs['track_type'] = track_type
+	kwargs['mod_func'] = mod_func
     else:
         funcs, anats = result
         assert(len(anats) == len(funcs))
@@ -316,6 +319,9 @@ def main():
                         '(where each line is the shift in TRs), '
                         'up (ie, bottom to top), down (ie, top to bottom), '
                         'or interleaved.', default=None)
+    parser.add_argument("--mod", action="store", help='Determinstic (det) or probabilistic (prob) tracking. Default is det.', default='det')
+    parser.add_argument("--tt", action="store", help='Tracking approach: eudx or local. Default is eudx.', default='eudx')
+    parser.add_argument("--mf", action="store", help='Diffusion model: csd, csa, or tensor. Default is tensor.', default='tensor')
 
     result = parser.parse_args()
 
@@ -341,6 +347,9 @@ def main():
     atlas_select = result.atlas
     dataset = result.dataset
     hemi = result.hemispheres
+    mod_type = result.mod
+    track_type = result.tt
+    mod_func = result.mf
 
     creds = bool(os.getenv("AWS_ACCESS_KEY_ID", 0) and
                  os.getenv("AWS_SECRET_ACCESS_KEY", 0))
@@ -354,7 +363,8 @@ def main():
                 s3_get_data(buck, remo, inDir, public=creds)
         modif = 'ndmg_{}'.format(ndmg.version.replace('.', '-'))
         session_level(inDir, outDir, subj, vox_size, big, clean, stc, 
-	atlas_select, sesh, task, run, debug, modality, nproc)
+	atlas_select, mod_type, track_type, mod_func, sesh, task, run, 
+	debug, modality, nproc)
 
     elif level == 'group':
         gpath = op.join(inDir, modality, 'roi-connectomes')
