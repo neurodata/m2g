@@ -155,11 +155,11 @@ def session_level(inDir, outDir, subjs, vox_size, big, clean, stc, atlas_select,
                 in zip(dwis, bvals, bvecs, anats)]
         f = ndmg_dwi_pipeline  # the function of choice
 	kwargs['vox_size'] = vox_size
+        kwargs['mod_type'] = mod_type
+        kwargs['track_type'] = track_type
+        kwargs['mod_func'] = mod_func
         kwargs['big'] = big
 	kwargs['clean'] = clean
-	kwargs['mod_type'] = mod_type
-	kwargs['track_type'] = track_type
-	kwargs['mod_func'] = mod_func
     else:
         funcs, anats = result
         assert(len(anats) == len(funcs))

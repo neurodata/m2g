@@ -15,8 +15,8 @@
 # limitations under the License.
 #
 # track.py
-# Created by derek Pisner on 10/20/2018.
-# Email: wgr@jhu.edu
+# Created by derek Pisner on 02/17/2019.
+# Email: dpisner@utexas.edu
 
 from __future__ import print_function
 import warnings
@@ -30,7 +30,7 @@ def build_seed_list(wm_gm_int_in_dwi, stream_affine):
     from dipy.tracking import utils
     wm_gm_mask = nib.load(wm_gm_int_in_dwi)
     wm_gm_mask_data = wm_gm_mask.get_data().astype('bool')
-    seeds = utils.seeds_from_mask(wm_gm_mask_data, density=6, affine=stream_affine)
+    seeds = utils.seeds_from_mask(wm_gm_mask_data, density=5, affine=stream_affine)
     return seeds
 
 class run_track(object):
@@ -108,7 +108,7 @@ class run_track(object):
     def prep_tracking(self):
 	from dipy.tracking.local import ActTissueClassifier
 	from dipy.tracking.local import BinaryTissueClassifier
-	tiss_class = 'act'
+	tiss_class = 'bin'
         self.dwi_img = nib.load(self.dwi)
         self.data = self.dwi_img.get_data()
         # Loads mask and ensures it's a true binary mask
@@ -129,7 +129,8 @@ class run_track(object):
             self.exclude_map = self.vent_csf_mask_data
 	    self.tiss_classifier = ActTissueClassifier(self.include_map, self.exclude_map)
 	elif tiss_class == 'bin':
-	    self.tiss_classifier = BinaryTissueClassifier(self.wm_mask_data)
+	    self.wm_in_dwi_bin_data = nib.load(self.wm_in_dwi_bin).get_data().astype('bool')
+	    self.tiss_classifier = BinaryTissueClassifier(self.wm_in_dwi_bin_data)
 	else:
 	    pass
 	return self.tiss_classifier
@@ -150,19 +151,22 @@ class run_track(object):
 	from dipy.reconst.shm import CsaOdfModel
 	from dipy.data import default_sphere
 	self.mask_img = nib.load(self.nodif_B0_mask)
-        self.mask = self.mask_img.get_data() > 0
+        self.mask = self.mask_img.get_data().astype('bool')
+	print('Fitting CSA ODF model...')
 	self.mod = CsaOdfModel(self.gtab, sh_order=6)
 	return self.mod
 
     def csd_mod_est(self):
-	from dipy.reconst.csdeconv import auto_response
 	from dipy.reconst.csdeconv import ConstrainedSphericalDeconvModel, recursive_response
-	response, ratio = auto_response(self.gtab, self.data, roi_radius=10, fa_thr=0.7)
-	print('CSD Reponse: ' + str(response))
-	print('CSD Ratio: ' + str(ratio))
 	print('Fitting CSD model...')
-        self.response = recursive_response(self.gtab, self.data, mask=self.mask, sh_order=8, peak_thr=0.01, init_fa=0.08, init_trace=0.0021, iter=8, convergence=0.001, parallel=False)
-	self.mod = ConstrainedSphericalDeconvModel(self.gtab, self.response)
+	try:
+	    print('Attempting to use spherical harmonic basis first...')
+	    self.mod = ConstrainedSphericalDeconvModel(self.gtab, None, sh_order=6)
+	except:
+	    print('Falling back to estimating recursive response...')
+            self.response = recursive_response(self.gtab, self.data, mask=self.mask, sh_order=8, peak_thr=0.01, init_fa=0.08, init_trace=0.0021, iter=8, convergence=0.001, parallel=False)
+	    print('CSD Reponse: ' + str(self.response))
+	    self.mod = ConstrainedSphericalDeconvModel(self.gtab, self.response)
 	return self.mod
 
     def local_tracking(self):
@@ -175,16 +179,19 @@ class run_track(object):
             self.streamline_generator = LocalTracking(self.mod_peaks, self.tiss_classifier, self.seeds, self.stream_affine, step_size=.5, return_all=True)
         elif self.mod_type=='prob':
 	    print('Preparing probabilistic tracking...')
-	    self.csd_fit = self.mod.fit(self.data)
+	    print('Fitting model to data...')
+	    self.mod_fit = self.mod.fit(self.data, self.mask)
+	    print('Building direction-getter...')
 	    try:
-                self.pdg = ProbabilisticDirectionGetter.from_shcoeff(self.csd_fit.shm_coeff, max_angle=30., sphere=self.default_sphere)
+		print('Proceeding using spherical harmonic coefficient from model estimation...')
+                self.pdg = ProbabilisticDirectionGetter.from_shcoeff(self.mod_fit.shm_coeff, max_angle=30., sphere=default_sphere)
 	    except:
-		print('Failed to obtain spherical harmonic from csd estimator. Proceeding using FOD PMF from csd estimation instead...')
-		self.fod = self.csd_fit.odf(default_sphere)
+		print('Proceeding using FOD PMF from model estimation...')
+		self.fod = self.mod_fit.odf(default_sphere)
 		self.pmf = self.fod.clip(min=0)
-		self.pdg = ProbabilisticDirectionGetter.from_pmf(self.pmf, max_angle=30., sphere=default_sphere) 
+		self.pdg = ProbabilisticDirectionGetter.from_pmf(self.pmf, max_angle=30., sphere=default_sphere)
             self.streamline_generator = LocalTracking(self.pdg, self.tiss_classifier, self.seeds, self.stream_affine, step_size=.5, return_all=True)
-	print('Reconstructing tractogram...')
+	print('Reconstructing tractogram streamlines...')
 	self.streamlines = Streamlines(self.streamline_generator, buffer_size=512)
 	return self.streamlines
 

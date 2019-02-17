@@ -49,7 +49,7 @@ os.environ["MPLCONFIGDIR"] = "/tmp/"
 
 
 def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
-                    vox_size, clean, big, mod_type, track_type, mod_func):
+                    vox_size, mod_type, track_type, mod_func, clean, big):
     """
     Creates a brain graph from MRI data
     """
@@ -264,13 +264,13 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
 
 
 def ndmg_dwi_pipeline(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
-                      vox_size, clean, big):
+                      vox_size, mod_type, track_type, mod_func, clean, big):
     """
     A wrapper for the worker to make our pipeline more robust to errors.
     """
     try:
         ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
-                        vox_size, clean, big)
+                        vox_size, mod_type, track_type, mod_func, clean, big)
     except Exception, e:
         print(traceback.format_exc())
         os.exit()
@@ -299,6 +299,9 @@ def main():
     parser.add_argument("vox_size", action="store", nargs="*", default='1mm', 
 			help="Voxel size to use for template registrations \
 			(e.g. '1mm')")
+    parser.add_argument("--mod", action="store", help='Determinstic (det) or probabilistic (prob) tracking. Default is det.', default='det')
+    parser.add_argument("--tt", action="store", help='Tracking approach: eudx or local. Default is eudx.', default='eudx')
+    parser.add_argument("--mf", action="store", help='Diffusion model: csd, csa, or tensor. Default is tensor.', default='tensor')
     parser.add_argument("-c", "--clean", action="store_true", default=False,
                         help="Whether or not to delete intemediates")
     parser.add_argument("-b", "--big", action="store_true", default=False,
@@ -312,8 +315,7 @@ def main():
 
     ndmg_dwi_pipeline(result.dwi, result.bval, result.bvec, result.t1w,
                       result.atlas, result.mask, result.labels, result.outdir,
-                      result.vox_size, result.clean, result.big)
-
+                      result.vox_size, result.mod_type, result.track_type, result.mod_func, result.clean, result.big)
 
 if __name__ == "__main__":
     main()
