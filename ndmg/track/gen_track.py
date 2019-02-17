@@ -26,11 +26,11 @@ import nibabel as nib
 from dipy.tracking.streamline import Streamlines
 
 
-def build_seed_list(wm_gm_int_in_dwi, stream_affine):
+def build_seed_list(wm_gm_int_in_dwi, stream_affine, dens):
     from dipy.tracking import utils
     wm_gm_mask = nib.load(wm_gm_int_in_dwi)
     wm_gm_mask_data = wm_gm_mask.get_data().astype('bool')
-    seeds = utils.seeds_from_mask(wm_gm_mask_data, density=5, affine=stream_affine)
+    seeds = utils.seeds_from_mask(wm_gm_mask_data, density=int(dens), affine=stream_affine)
     return seeds
 
 class run_track(object):

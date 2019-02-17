@@ -81,7 +81,7 @@ class graph_tools(object):
 
 	print('Building connectivity matrix...')
 	self.conn_matrix, self.grouping = utils.connectivity_matrix(self.tracks, self.rois, affine=self.stream_affine, return_mapping=True, mapping_as_streamlines=True)
-	print(self.grouping)
+	#print(self.grouping)
         self.fibers_out = self.namer.name_derivative(self.namer.dirs['output']['fiber'], "fiber_vector.npy")
 	np.save(self.fibers_out, self.grouping) 
 	self.conn_matrix = self.conn_matrix[1:,1:]
