@@ -201,3 +201,46 @@ class run_track(object):
         self.streamline_generator = EuDX(self.fa.astype('f8'), self.ind, odf_vertices=self.sphere.vertices, max_points=2000, ang_thr=60.0, a_low=float(0.02), seeds=self.seeds, affine=self.stream_affine)
         self.streamlines = Streamlines(self.streamline_generator, buffer_size=512)
         return self.streamlines
+
+def eudx_basic(dwi_file, gtab, stop_val=0.1):
+    import os
+    from dipy.reconst.dti import TensorModel, fractional_anisotropy, quantize_evecs
+    from dipy.tracking.eudx import EuDX
+    from dipy.data import get_sphere
+    from dipy.segment.mask import median_otsu
+    """
+    Tracking with basic tensors and basic eudx - experimental
+    We now force seeding at every voxel in the provided mask for
+    simplicity.  Future functionality will extend these options.
+    **Positional Arguments:**
+            dwi_file:
+                - File (registered) to use for tensor/fiber tracking
+            mask:
+                - Brain mask to keep tensors inside the brain
+            gtab:
+                - dipy formatted bval/bvec Structure
+    **Optional Arguments:**
+            stop_val:
+                - Value to cutoff fiber track
+    """
+
+    img = nib.load(dwi_file)
+    data = img.get_data()
+
+    data_sqz = np.squeeze(data)
+    b0_mask, mask_data = median_otsu(data_sqz, 2, 1)
+    mask_img = nib.Nifti1Image(mask_data.astype(np.float32), img.affine)
+    mask_out_file = os.path.dirname(dwi_file) + '/dwi_bin_mask.nii.gz'
+    nib.save(mask_img, mask_out_file)
+
+    # use all points in mask
+    seedIdx = np.where(mask_data > 0)  # seed everywhere not equal to zero
+    seedIdx = np.transpose(seedIdx)
+
+    model = TensorModel(gtab)
+    ten = model.fit(data, mask_data)
+    sphere = get_sphere('symmetric724')
+    ind = quantize_evecs(ten.evecs, sphere.vertices)
+    streamlines = EuDX(a=ten.fa, ind=ind, seeds=seedIdx,
+              odf_vertices=sphere.vertices, a_low=stop_val)
+    return (ten, streamlines, mask_out_file)

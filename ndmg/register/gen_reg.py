@@ -24,6 +24,7 @@ import warnings
 warnings.simplefilter("ignore")
 import os
 import nibabel as nib
+import numpy as np
 from nilearn.image import load_img, math_img, resample_img, mean_img, new_img_like
 from dipy.core.gradients import gradient_table
 from dipy.io import read_bvals_bvecs
@@ -272,6 +273,74 @@ class dmri_reg(object):
         os.system(cmd)
 
         return
+
+class dmri_reg_old(object):
+
+    def __init__(self, dwi, gtab, t1w, atlas, aligned_dwi, namer, clean=False):
+	"""
+        Aligns two images and stores the transform between them
+        **Positional Arguments:**
+                dwi:
+                    - Input impage to be aligned as a nifti image file
+                gtab:
+                    - object containing gradient directions and strength
+                t1w:
+                    - Intermediate image being aligned to as a nifti image file
+                atlas:
+                    - Terminal image being aligned to as a nifti image file
+                aligned_dwi:
+                    - Aligned output dwi image as a nifti image file
+                outdir:
+                    - Directory for derivatives to be stored
+        """
+	self.dwi = dwi
+	self.t1w = t1w
+	self.atlas = atlas
+	self.gtab = gtab
+	self.aligned_dwi = aligned_dwi
+	self.namer = namer
+
+	# Creates names for all intermediate files used
+        self.dwi_name = mgu.get_filename(dwi)
+        self.t1w_name = mgu.get_filename(t1w)
+        self.atlas_name = mgu.get_filename(atlas)
+
+        self.temp_aligned = "{}/temp_aligned.nii.gz".format(self.namer.dirs['tmp']['reg_a'])
+	self.temp_aligned2 = "{}/temp_aligned2.nii.gz".format(self.namer.dirs['tmp']['reg_a'])
+        self.b0 = "{}/b0.nii.gz".format(self.namer.dirs['tmp']['reg_a'])
+        self.t1w_brain = "{}/t1w_brain.nii.gz".format(self.namer.dirs['tmp']['reg_a'])
+        self.xfm = "{}/{}_{}_xfm.mat".format(self.namer.dirs['tmp']['reg_m'], self.t1w_name, self.atlas_name)
+	
+    def dwi2atlas(self, clean=False):
+        # Loads DTI image in as data and extracts B0 volume
+        self.dwi_im = nib.load(self.dwi)
+	self.b0s = np.where(self.gtab.b0s_mask)[0]
+        self.b0_im = np.squeeze(self.dwi_im.get_data()[:, :, :, self.b0s[0]])  # if more than 1, use first
+
+        # Wraps B0 volume in new nifti image
+        self.b0_head = self.dwi_im.header
+        self.b0_head.set_data_shape(self.b0_head.get_data_shape()[0:3])
+        self.b0_out = nib.Nifti1Image(self.b0_im, affine=self.dwi_im.affine,
+                                header=self.b0_head)
+        self.b0_out.update_header()
+        nib.save(self.b0_out, self.b0)
+
+        # Applies skull stripping to T1 volume, then EPI alignment to T1
+        mgru.extract_brain(self.t1w, self.t1w_brain, ' -B')
+        mgru.align_epi(self.dwi, self.t1w, self.t1w_brain, self.temp_aligned)
+
+        # Applies linear registration from T1 to template
+        mgru.align(self.t1w, self.atlas, self.xfm)
+
+        # Applies combined transform to dwi image volume
+        mgru.applyxfm(self.atlas, self.temp_aligned, self.xfm, self.temp_aligned2)
+	mgru.resample(self.temp_aligned2, self.aligned_dwi, self.atlas)
+
+        if clean:
+            cmd = "rm -f {} {} {} {} {}*".format(self.dwi, self.temp_aligned, self.b0,
+                                                self.xfm, self.t1w_name)
+            print("Cleaning temporary registration files...")
+            mgu.execute_cmd(cmd)
 
 
 class epi_register(object):

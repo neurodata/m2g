@@ -129,8 +129,7 @@ def worker_wrapper((f, args, kwargs)):
     return f(*args, **kwargs)
 
 
-def session_level(inDir, outDir, subjs, vox_size, big, clean, stc, atlas_select, mod_type, track_type, mod_func, sesh=None, task=None, run=None,
-                  debug=False, modality='dwi', nproc=1):
+def session_level(inDir, outDir, subjs, vox_size, big, clean, stc, atlas_select, mod_type, track_type, mod_func, reg_style, sesh=None, task=None, run=None, debug=False, modality='dwi', nproc=1):
     """
     Crawls the given BIDS organized directory for data pertaining to the given
     subject and session, and passes necessary files to ndmg_dwi_pipeline for
@@ -158,6 +157,7 @@ def session_level(inDir, outDir, subjs, vox_size, big, clean, stc, atlas_select,
         kwargs['mod_type'] = mod_type
         kwargs['track_type'] = track_type
         kwargs['mod_func'] = mod_func
+	kwargs['reg_style'] = reg_style
         kwargs['big'] = big
 	kwargs['clean'] = clean
     else:
@@ -322,7 +322,7 @@ def main():
     parser.add_argument("--mod", action="store", help='Determinstic (det) or probabilistic (prob) tracking. Default is det.', default='det')
     parser.add_argument("--tt", action="store", help='Tracking approach: eudx or local. Default is eudx.', default='eudx')
     parser.add_argument("--mf", action="store", help='Diffusion model: csd, csa, or tensor. Default is tensor.', default='tensor')
-
+    parser.add_argument("--sp", action="store", help='Space for tractography. Default is native.', default='native')
     result = parser.parse_args()
 
     inDir = result.bids_dir
@@ -350,6 +350,7 @@ def main():
     mod_type = result.mod
     track_type = result.tt
     mod_func = result.mf
+    reg_style = result.sp
 
     creds = bool(os.getenv("AWS_ACCESS_KEY_ID", 0) and
                  os.getenv("AWS_SECRET_ACCESS_KEY", 0))
@@ -363,7 +364,7 @@ def main():
                 s3_get_data(buck, remo, inDir, public=creds)
         modif = 'ndmg_{}'.format(ndmg.version.replace('.', '-'))
         session_level(inDir, outDir, subj, vox_size, big, clean, stc, 
-	atlas_select, mod_type, track_type, mod_func, sesh, task, run, 
+	atlas_select, mod_type, track_type, mod_func, reg_style, sesh, task, run, 
 	debug, modality, nproc)
 
     elif level == 'group':

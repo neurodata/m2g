@@ -49,7 +49,7 @@ os.environ["MPLCONFIGDIR"] = "/tmp/"
 
 
 def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
-                    vox_size, mod_type, track_type, mod_func, clean, big):
+                    vox_size, mod_type, track_type, mod_func, reg_style, clean, big):
     """
     Creates a brain graph from MRI data
     """
@@ -152,12 +152,14 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
 
     # Check dimensions
     start_time = time.time()
-    dwi_prep = mgu.match_target_vox_res(dwi_prep, vox_size, namer, zoom_set, sens='dwi')
-    print("%s%s%s" % ('Reslicing runtime: ', str(np.round(time.time() - start_time, 1)), 's'))
+    if reg_style == 'native':
+        dwi_prep = mgu.match_target_vox_res(dwi_prep, vox_size, namer, zoom_set, sens='dwi')
+        print("%s%s%s" % ('Reslicing runtime: ', str(np.round(time.time() - start_time, 1)), 's'))
 
     # Build gradient table
     [gtab, nodif_B0, nodif_B0_mask] = mgu.make_gtab_and_bmask(bval, bvec_scaled, dwi_prep, namer.dirs['output']['prep_dwi'])
 
+    stream_affine = nib.load(dwi_prep).affine
     print("%s%s%s" % ('Preprocessing runtime: ', str(np.round(time.time() - start_time, 1)), 's'))
     # -------- Registration Steps ----------------------------------- #
     if len(os.listdir(namer.dirs['output']['prep_anat'])) != 0:
@@ -174,48 +176,72 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
     t1w = mgu.reorient_t1w(t1w, namer)
     print("%s%s%s" % ('Reorienting runtime: ', str(np.round(time.time() - start_time, 1)), 's'))
 
-    # Instantiate registration
-    reg = mgr.dmri_reg(namer, nodif_B0, nodif_B0_mask, t1w, vox_size, simple=False)
-    # Perform anatomical segmentation
-    start_time = time.time()
-    reg.gen_tissue()
-    print("%s%s%s" % ('gen_tissue runtime: ', str(np.round(time.time() - start_time, 1)), 's'))
+    if reg_style == 'native':
+	print('Running tractography in native space...')
+        # Instantiate registration
+        reg = mgr.dmri_reg(namer, nodif_B0, nodif_B0_mask, t1w, vox_size, simple=False)
+        # Perform anatomical segmentation
+        start_time = time.time()
+        reg.gen_tissue()
+        print("%s%s%s" % ('gen_tissue runtime: ', str(np.round(time.time() - start_time, 1)), 's'))
 
-    # Check dimensions
-    start_time = time.time()
-    reg.t1w_brain = mgu.match_target_vox_res(reg.t1w_brain, vox_size, namer, zoom_set, sens='t1w')
-    reg.wm_mask = mgu.match_target_vox_res(reg.wm_mask, vox_size, namer, zoom_set, sens='t1w')
-    reg.gm_mask = mgu.match_target_vox_res(reg.gm_mask, vox_size, namer, zoom_set, sens='t1w')
-    reg.csf_mask = mgu.match_target_vox_res(reg.csf_mask, vox_size, namer, zoom_set, sens='t1w')
-    print("%s%s%s" % ('Reslicing runtime: ', str(np.round(time.time() - start_time, 1)), 's'))
+        # Check dimensions
+        start_time = time.time()
+        reg.t1w_brain = mgu.match_target_vox_res(reg.t1w_brain, vox_size, namer, zoom_set, sens='t1w')
+        reg.wm_mask = mgu.match_target_vox_res(reg.wm_mask, vox_size, namer, zoom_set, sens='t1w')
+        reg.gm_mask = mgu.match_target_vox_res(reg.gm_mask, vox_size, namer, zoom_set, sens='t1w')
+        reg.csf_mask = mgu.match_target_vox_res(reg.csf_mask, vox_size, namer, zoom_set, sens='t1w')
+        print("%s%s%s" % ('Reslicing runtime: ', str(np.round(time.time() - start_time, 1)), 's'))
 
-    # Align t1w to dwi
-    start_time = time.time()
-    reg.t1w2dwi_align()
-    print("%s%s%s" % ('t1w2dwi_align runtime: ', str(np.round(time.time() - start_time, 1)), 's'))
-    # Align tissue classifiers
-    start_time = time.time()
-    reg.tissue2dwi_align()
-    print("%s%s%s" % ('tissue2dwi_align runtime: ', str(np.round(time.time() - start_time, 1)), 's'))
+        # Align t1w to dwi
+        start_time = time.time()
+        reg.t1w2dwi_align()
+        print("%s%s%s" % ('t1w2dwi_align runtime: ', str(np.round(time.time() - start_time, 1)), 's'))
+        # Align tissue classifiers
+        start_time = time.time()
+        reg.tissue2dwi_align()
+        print("%s%s%s" % ('tissue2dwi_align runtime: ', str(np.round(time.time() - start_time, 1)), 's'))
 
-    # -------- Tensor Fitting and Fiber Tractography ---------------- #
-    stream_affine = nib.load(dwi_prep).affine
-    if track_type == 'eudx':
-	#seeds = int(1000000)
-	seeds = mgt.build_seed_list(reg.wm_gm_int_in_dwi, stream_affine, dens=1)
-    else:
-        seeds = mgt.build_seed_list(reg.wm_gm_int_in_dwi, stream_affine, dens=4)
+        # -------- Tensor Fitting and Fiber Tractography ---------------- #
+        if track_type == 'eudx':
+	    #seeds = int(1000000)
+	    seeds = mgt.build_seed_list(reg.wm_gm_int_in_dwi, stream_affine, dens=1)
+        else:
+            seeds = mgt.build_seed_list(reg.wm_gm_int_in_dwi, stream_affine, dens=4)
 
-    # Compute direction model and track fiber streamlines
-    print("Beginning tractography...")
-    trct = mgt.run_track(dwi_prep, nodif_B0_mask, reg.gm_in_dwi, reg.vent_csf_in_dwi, reg.wm_in_dwi, reg.wm_in_dwi_bin, gtab, mod_type, track_type, mod_func, seeds, stream_affine)
-    streamlines = trct.run()
+        # Compute direction model and track fiber streamlines
+        print("Beginning tractography...")
+        trct = mgt.run_track(dwi_prep, nodif_B0_mask, reg.gm_in_dwi, reg.vent_csf_in_dwi, reg.wm_in_dwi, reg.wm_in_dwi_bin, gtab, mod_type, track_type, mod_func, seeds, stream_affine)
+        streamlines = trct.run()
+
+	# Save streamlines to disk
+        print('Saving streamlines: ' + streams)
+        tractogram = Tractogram(streamlines, affine_to_rasmm=stream_affine)
+        save(tractogram, streams)
+
+    elif reg_style == 'mni':
+	print('Running tractography in MNI-space...')
+	aligned_dwi = "{}/dwi_mni_aligned.nii.gz".format(namer.dirs['output']['prep_dwi'])
+
+	# Align DWI volumes to Atlas
+        print("Aligning volumes...")
+	reg = mgr.dmri_reg_old(dwi_prep, gtab, t1w, atlas, aligned_dwi, namer, clean)
+	print('Registering DWI image to atlas...')
+        reg.dwi2atlas()
+
+        print("Beginning tractography...")
+        # Compute tensors and track fiber streamlines
+        [tens, streamlines, align_dwi_mask] = mgt.eudx_basic(aligned_dwi, gtab, stop_val=0.2)
+	tensors = "{}/tensors.nii.gz".format(namer.dirs['output']['tensor'])
+        tensor2fa(tens, tensors, aligned_dwi, namer.dirs['output']['tensor'], namer.dirs['qa']['tensor'])
+
+        # Save streamlines to disk
+        print('Saving streamlines: ' + streams)
+	affine = nib.load(aligned_dwi).affine
+        tractogram = Tractogram(streamlines, affine_to_rasmm=affine)
+        save(tractogram, streams)
+
     tracks = [sl for sl in streamlines if len(sl) > 1]
-
-    # Save streamlines to disk
-    print('Saving streamlines: ' + streams)
-    tractogram = Tractogram(streamlines, affine_to_rasmm=stream_affine)
-    save(tractogram, streams)
 
     # Visualize fibers using VTK
     if nib.load(nodif_B0_mask).get_data().shape == (182, 218, 182):
@@ -236,18 +262,27 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
     # Generate graphs from streamlines for each parcellation
     for idx, label in enumerate(labels):
         print("Generating graph for {} parcellation...".format(label))
-	print("%s%s" % ('Applying native-space alignment to ', labels[idx]))
-	# align atlas to t1w to dwi
 	try:
-            labels_im_file = reg.atlas2t1w2dwi_align(labels[idx])
-	    print('Aligned Atlas: ' + labels_im_file)
-	    labels_im = nib.load(labels_im_file)
-	    g1 = mgg.graph_tools(attr=len(np.unique(labels_im.get_data()))-1, rois=labels_im_file, tracks=tracks, stream_affine=stream_affine, namer=namer)
-            g1.make_graph()
+	    if reg_style == 'native':
+	        # align atlas to t1w to dwi
+	        print("%s%s" % ('Applying native-space alignment to ', labels[idx]))
+                labels_im_file = reg.atlas2t1w2dwi_align(labels[idx])
+	        print('Aligned Atlas: ' + labels_im_file)
+	        labels_im = nib.load(labels_im_file)
+	        g1 = mgg.graph_tools(attr=len(np.unique(labels_im.get_data()))-1, rois=labels_im_file, tracks=tracks, affine=stream_affine, namer=namer)
+		g1.make_graph()
+	    elif reg_style == 'mni':
+		atlas_name = labels[idx].split('/')[-1].split('.')[0]
+		labels_im_file = "{}/{}_masked_atlas.nii.gz".format(namer.dirs['tmp']['reg_a'], atlas_name)
+		cmd = 'fslmaths ' + labels[idx] + ' -mas ' + align_dwi_mask + ' ' + labels_im_file 
+		os.system(cmd)
+                labels_im = nib.load(labels_im_file)
+		g1 = mgg.graph_tools(attr=len(np.unique(labels_im.get_data().astype('int')))-1, rois=labels_im_file, tracks=tracks, affine=affine, namer=namer)
+                g1.make_graph_old()
             g1.summary()
             g1.save_graph(connectomes[idx])
 	except:
-	    print(labels_im_file + ' failed. Skipping...')
+	    print(label + ' failed. Skipping...')
 	    continue
 
     exe_time = datetime.now() - startTime
@@ -267,13 +302,13 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
 
 
 def ndmg_dwi_pipeline(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
-                      vox_size, mod_type, track_type, mod_func, clean, big):
+                      vox_size, mod_type, track_type, mod_func, reg_style, clean, big):
     """
     A wrapper for the worker to make our pipeline more robust to errors.
     """
     try:
         ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
-                        vox_size, mod_type, track_type, mod_func, clean, big)
+                        vox_size, mod_type, track_type, mod_func, reg_style, clean, big)
     except Exception, e:
         print(traceback.format_exc())
         os.exit()
@@ -299,12 +334,13 @@ def main():
                         derivatives will be stored")
     parser.add_argument("labels", action="store", nargs="*", help="Nifti \
                         labels of regions of interest in atlas space")
-    parser.add_argument("vox_size", action="store", nargs="*", default='1mm', 
+    parser.add_argument("--vox", action="store", nargs="*", default='1mm', 
 			help="Voxel size to use for template registrations \
 			(e.g. '1mm')")
     parser.add_argument("--mod", action="store", help='Determinstic (det) or probabilistic (prob) tracking. Default is det.', default='det')
     parser.add_argument("--tt", action="store", help='Tracking approach: eudx or local. Default is eudx.', default='eudx')
     parser.add_argument("--mf", action="store", help='Diffusion model: csd, csa, or tensor. Default is tensor.', default='tensor')
+    parser.add_argument("--sp", action="store", help='Space for tractography. Default is native.', default='native')
     parser.add_argument("-c", "--clean", action="store_true", default=False,
                         help="Whether or not to delete intemediates")
     parser.add_argument("-b", "--big", action="store_true", default=False,
@@ -318,7 +354,7 @@ def main():
 
     ndmg_dwi_pipeline(result.dwi, result.bval, result.bvec, result.t1w,
                       result.atlas, result.mask, result.labels, result.outdir,
-                      result.vox_size, result.mod_type, result.track_type, result.mod_func, result.clean, result.big)
+                      result.vox, result.mod, result.tt, result.mf, result.sp, result.clean, result.big)
 
 if __name__ == "__main__":
     main()

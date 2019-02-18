@@ -65,6 +65,19 @@ def erode_mask(mask, v=0):
         mask = erode_mask
     return mask
 
+def align_slices(dwi, corrected_dwi, idx):
+    """
+    Performs eddy-correction (or self-alignment) of a stack of 3D images
+    **Positional Arguments:**
+            dwi:
+                - 4D (DTI) image volume as a nifti file
+            corrected_dwi:
+                - Corrected and aligned DTI volume in a nifti file
+            idx:
+                - Index of the first B0 volume in the stack
+    """
+    cmd = "eddy_correct {} {} {}".format(dwi, corrected_dwi, idx)
+    status = mgu.execute_cmd(cmd, verb=True)
 
 def probmap2mask(prob_map, mask_path, t, erode=0):
     """
