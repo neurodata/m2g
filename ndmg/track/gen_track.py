@@ -141,7 +141,6 @@ class run_track(object):
         print('Fitting tensor model...')
         self.model = TensorModel(self.gtab)
         self.ten = self.model.fit(self.data, self.mask)
-        self.fa = self.ten.fa > 0.02
 	self.fa[np.isnan(self.fa)] = 0
         self.sphere = get_sphere('symmetric724')
         self.ind = quantize_evecs(self.ten.evecs, self.sphere.vertices)
@@ -192,14 +191,14 @@ class run_track(object):
 		self.pdg = ProbabilisticDirectionGetter.from_pmf(self.pmf, max_angle=30., sphere=default_sphere)
             self.streamline_generator = LocalTracking(self.pdg, self.tiss_classifier, self.seeds, self.stream_affine, step_size=.5, return_all=True)
 	print('Reconstructing tractogram streamlines...')
-	self.streamlines = Streamlines(self.streamline_generator, buffer_size=512)
+	self.streamlines = Streamlines(self.streamline_generator)
 	return self.streamlines
 
     def eudx_tracking(self):
 	from dipy.tracking.eudx import EuDX
         print('Running EuDX tracking...')
-        self.streamline_generator = EuDX(self.fa.astype('f8'), self.ind, odf_vertices=self.sphere.vertices, max_points=2000, ang_thr=60.0, a_low=float(0.02), seeds=self.seeds, affine=self.stream_affine)
-        self.streamlines = Streamlines(self.streamline_generator, buffer_size=512)
+        self.streamline_generator = EuDX(self.fa.astype('f8'), self.ind, odf_vertices=self.sphere.vertices, a_low=float(0.2), seeds=self.seeds, affine=self.stream_affine)
+        self.streamlines = Streamlines(self.streamline_generator)
         return self.streamlines
 
 def eudx_basic(dwi_file, gtab, stop_val=0.1):

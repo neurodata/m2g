@@ -205,9 +205,13 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
         # -------- Tensor Fitting and Fiber Tractography ---------------- #
         if track_type == 'eudx':
 	    #seeds = int(1000000)
-	    seeds = mgt.build_seed_list(reg.wm_gm_int_in_dwi, stream_affine, dens=1)
+	    seeds_wm_gm_int = mgt.build_seed_list(reg.wm_gm_int_in_dwi, stream_affine, dens=3)
+	    seeds_wm = mgt.build_seed_list(reg.wm_in_dwi_bin, stream_affine, dens=1)
+	    seeds = seeds_wm_gm_int + seeds_wm
         else:
-            seeds = mgt.build_seed_list(reg.wm_gm_int_in_dwi, stream_affine, dens=4)
+            seeds_wm_gm_int = mgt.build_seed_list(reg.wm_gm_int_in_dwi, stream_affine, dens=3)
+	    seeds_wm = mgt.build_seed_list(reg.wm_in_dwi_bin, stream_affine, dens=1)
+	    seeds = seeds_wm_gm_int + seeds_wm
 
         # Compute direction model and track fiber streamlines
         print("Beginning tractography...")
@@ -291,8 +295,7 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
     # Clean temp files
     if clean is True:
         print("Cleaning up intermediate files... ")
-        del_dirs = [namer.dirs['tmp']['base']] + \
-            [namer.dirs['output'][k] for k in opt_dirs]
+        del_dirs = [namer.dirs['tmp']['base']] + [namer.dirs['output'][k] for k in opt_dirs]
         cmd = "rm -rf {}".format(" ".format(del_dirs))
         mgu.execute_cmd(cmd)
 
