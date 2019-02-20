@@ -96,32 +96,33 @@ class graph_tools(object):
                 points.append(tuple(point))
 
         print('Counting fiber waytotals and # voxels for each ROI...')
-        self.fibers = {}
-        self.rois = {}
+        fibers = {}
+        rois = {}
         img_ix = 0
-        for roi_img in img_list[1:]:
-            roi_data = roi_img.get_data().astype('int')
+        for img in img_list[1:]:
+            data = img.get_data()
             img_ix = img_ix + 1
-            self.rois[img_ix] = np.sum(roi_data.astype('bool'))
+            rois[img_ix] = np.sum(data.astype('bool'))
             for point in set(points):
                 try:
-                    loc = self.roi_data[point[0], point[1], point[2]]
-                except:
+                    loc = data[point[0], point[1], point[2]]
+                except IndexError:
                     loc = None
-                if loc is not None:
+                    pass
+                if loc:
                     try:
-                        self.fibers[img_ix] = self.fibers[img_ix] + 1
+                        fibers[img_ix] = fibers[img_ix] + 1
                     except:
-                        self.fibers[img_ix] = 1
+                        fibers[img_ix] = 1
                 else:
                     continue
-	    try:
-		self.fibers[img_ix]
-	    except:
-		self.fibers[img_ix] = 0
-            print(str(img_ix) + ': Fibers - ' + str(self.fibers[img_ix]) + '  Voxels - ' + str(self.rois[img_ix]))
+            try:
+                fibers[img_ix]
+            except:
+                fibers[img_ix] = 0
+            print(str(img_ix) + ': Fibers - ' + str(fibers[img_ix]) + '  Voxels: ' + str(rois[img_ix]))
 
-        self.df_regressors = pd.DataFrame({'fiber_count':pd.Series(self.fibers), 'roi_size':pd.Series(self.rois)})
+        self.df_regressors = pd.DataFrame({'fiber_count':pd.Series(fibers), 'roi_size':pd.Series(rois)})
 	self.df_out = self.namer.name_derivative(self.namer.dirs['output']['fiber'], "roi_regressors.csv")
 	self.df_regressors.to_csv(self.df_out, sep='\t')
 
