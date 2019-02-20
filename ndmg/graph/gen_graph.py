@@ -86,37 +86,39 @@ class graph_tools(object):
                 img_list.append(roi_img_nifti)
             return(img_list)
 
-        self.img_list = get_parcel_list(self.roi_file)
+        img_list = get_parcel_list(self.roi_file)
 
         print('Compiling voxel coordinates of all streamlines...')
-        self.points = []
+        points = []
         for _, streamline in enumerate(self.tracks):
             point_set = np.round(streamline).astype('int')
             for point in point_set:
-                self.points.append(tuple(point))
+                points.append(tuple(point))
 
         print('Counting fiber waytotals and # voxels for each ROI...')
         self.fibers = {}
         self.rois = {}
-	global loc
         img_ix = 0
-        for roi_img in self.img_list[1:]:
-            roi_data = roi_img.get_data()
+        for roi_img in img_list[1:]:
+            roi_data = roi_img.get_data().astype('int')
             img_ix = img_ix + 1
             self.rois[img_ix] = np.sum(roi_data.astype('bool'))
-            for point in set(self.points):
+            for point in set(points):
                 try:
-                    loc = roi_data[point[0], point[1], point[2]]
-                except IndexError:
-                    pass
-                if loc:
+                    loc = self.roi_data[point[0], point[1], point[2]]
+                except:
+                    loc = None
+                if loc is not None:
                     try:
                         self.fibers[img_ix] = self.fibers[img_ix] + 1
                     except:
                         self.fibers[img_ix] = 1
                 else:
-		    self.fibers[img_ix] = 0
                     continue
+	    try:
+		self.fibers[img_ix]
+	    except:
+		self.fibers[img_ix] = 0
             print(str(img_ix) + ': Fibers - ' + str(self.fibers[img_ix]) + '  Voxels - ' + str(self.rois[img_ix]))
 
         self.df_regressors = pd.DataFrame({'fiber_count':pd.Series(self.fibers), 'roi_size':pd.Series(self.rois)})
