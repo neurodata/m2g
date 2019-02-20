@@ -98,14 +98,15 @@ class graph_tools(object):
         print('Counting fiber waytotals and # voxels for each ROI...')
         self.fibers = {}
         self.rois = {}
+	global loc
         img_ix = 0
         for img in self.img_list[1:]:
-            data = img.get_data()
+            roi_data = roi_img.get_data()
             img_ix = img_ix + 1
-            self.rois[img_ix] = np.sum(data.astype('bool'))
+            self.rois[img_ix] = np.sum(roi_data.astype('bool'))
             for point in set(self.points):
                 try:
-                    loc = data[point[0], point[1], point[2]]
+                    loc = roi_data[point[0], point[1], point[2]]
                 except IndexError:
                     pass
                 if loc:
@@ -117,7 +118,6 @@ class graph_tools(object):
 		    self.fibers[img_ix] = 0
                     continue
             print(str(img_ix) + ': Fibers - ' + str(self.fibers[img_ix]) + '  Voxels - ' + str(self.rois[img_ix]))
-
 
         self.df_regressors = pd.DataFrame({'fiber_count':pd.Series(self.fibers), 'roi_size':pd.Series(self.rois)})
 	self.df_out = self.namer.name_derivative(self.namer.dirs['output']['fiber'], "roi_regressors.csv")
