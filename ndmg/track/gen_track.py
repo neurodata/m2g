@@ -141,6 +141,7 @@ class run_track(object):
         print('Fitting tensor model...')
         self.model = TensorModel(self.gtab)
         self.ten = self.model.fit(self.data, self.mask)
+	self.fa = self.ten.fa
 	self.fa[np.isnan(self.fa)] = 0
         self.sphere = get_sphere('symmetric724')
         self.ind = quantize_evecs(self.ten.evecs, self.sphere.vertices)

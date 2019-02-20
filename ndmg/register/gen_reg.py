@@ -69,18 +69,22 @@ class dmri_reg(object):
         self.wm_mask = "{}/{}_wm.nii.gz".format(self.namer.dirs['output']['prep_anat'], self.t1w_name)
         self.csf_mask = "{}/{}_csf.nii.gz".format(self.namer.dirs['output']['prep_anat'], self.t1w_name)
         self.gm_mask = "{}/{}_gm.nii.gz".format(self.namer.dirs['output']['prep_anat'], self.t1w_name)
+        self.wm_mask_thr = "{}/{}_wm_thr.nii.gz".format(self.namer.dirs['tmp']['reg_a'], self.t1w_name)
+        self.gm_mask_thr = "{}/{}_gm_thr.nii.gz".format(self.namer.dirs['tmp']['reg_a'], self.t1w_name)
         self.xfm_roi2mni_init = "{}/roi_2_mni.mat".format(self.namer.dirs['tmp']['reg_m'])
         self.lvent_out_file = "{}/LVentricle.nii.gz".format(self.namer.dirs['tmp']['reg_a'])
         self.rvent_out_file = "{}/RVentricle.nii.gz".format(self.namer.dirs['tmp']['reg_a'])
         self.mni_vent_loc = "{}/VentricleMask.nii.gz".format(self.namer.dirs['tmp']['reg_a'])
         self.csf_mask_dwi = "{}/{}_csf_mask_dwi.nii.gz".format(self.namer.dirs['output']['reg_anat'], self.t1w_name)
         self.gm_in_dwi = "{}/{}_gm_in_dwi.nii.gz".format(self.namer.dirs['output']['reg_anat'], self.t1w_name)
+        self.wm_in_dwi = "{}/{}_wm_in_dwi.nii.gz".format(self.namer.dirs['output']['reg_anat'], self.t1w_name)
+        self.gm_in_dwi_thr = "{}/{}_gm_in_dwi_thr.nii.gz".format(self.namer.dirs['output']['reg_anat'], self.t1w_name)
+        self.wm_in_dwi_thr = "{}/{}_wm_in_dwi_thr.nii.gz".format(self.namer.dirs['output']['reg_anat'], self.t1w_name)
         self.vent_csf_in_dwi = "{}/{}_vent_csf_in_dwi.nii.gz".format(self.namer.dirs['output']['reg_anat'], self.t1w_name)
         self.vent_csf_in_dwi_bin = "{}/{}_vent_csf_in_dwi_bin.nii.gz".format(self.namer.dirs['tmp']['reg_a'], self.t1w_name)
         self.vent_mask_dwi = "{}/{}_vent_mask_dwi.nii.gz".format(self.namer.dirs['tmp']['reg_a'], self.t1w_name)
         self.vent_mask_mni = "{}/vent_mask_mni.nii.gz".format(self.namer.dirs['tmp']['reg_a'])
         self.vent_mask_t1w = "{}/vent_mask_t1w.nii.gz".format(self.namer.dirs['tmp']['reg_a'])
-        self.wm_in_dwi = "{}/{}_wm_in_dwi.nii.gz".format(self.namer.dirs['output']['reg_anat'], self.t1w_name)
         self.wm_in_dwi_bin = "{}/{}_wm_in_dwi_bin.nii.gz".format(self.namer.dirs['tmp']['reg_a'], self.t1w_name)
         self.wm_in_dwi_binv = "{}/{}_wm_in_dwi_binv.nii.gz".format(self.namer.dirs['tmp']['reg_a'], self.t1w_name)
         self.mni_atlas = "%s%s%s%s" % (FSLDIR, '/data/atlases/HarvardOxford/HarvardOxford-sub-prob-', vox_size, '.nii.gz')
@@ -101,9 +105,8 @@ class dmri_reg(object):
 	self.csf_mask = self.maps['csf_prob']
 
         # Use the probability maps to extract white matter mask
-        #mgru.probmap2mask(self.maps['wm_prob'], self.wm_mask)
-        #mgru.probmap2mask(self.maps['gm_prob'], self.gm_mask)
-        #mgru.probmap2mask(self.maps['csf_prob'], self.csf_mask)
+        mgru.probmap2mask(self.maps['wm_prob'], self.wm_mask_thr, 0.5)
+        mgru.probmap2mask(self.maps['gm_prob'], self.gm_mask_thr, 0.3)
         return
 
     def t1w2dwi_align(self):
@@ -167,7 +170,7 @@ class dmri_reg(object):
         self.atlas = atlas
         self.atlas_name = self.atlas.split('/')[-1].split('.')[0]
         self.aligned_atlas_skull = "{}/{}_aligned_atlas_skull.nii.gz".format(self.namer.dirs['tmp']['reg_a'], self.atlas_name)
-        self.dwi_aligned_atlas = "{}/{}_aligned_atlas.nii.gz".format(self.namer.dirs['tmp']['reg_a'], self.atlas_name)
+        self.dwi_aligned_atlas = "{}/{}_aligned_atlas.nii.gz".format(self.namer.dirs['output']['reg_anat'], self.atlas_name)
         #self.dwi_aligned_atlas_mask = "{}/{}_aligned_atlas_mask.nii.gz".format(self.outdir['reg_a'], self.atlas_name)
 
         if self.simple is False:
@@ -245,6 +248,9 @@ class dmri_reg(object):
         mgru.applyxfm(self.nodif_B0, self.gm_mask, self.t1wtissue2dwi_xfm, self.gm_in_dwi)
         mgru.applyxfm(self.nodif_B0, self.wm_mask, self.t1wtissue2dwi_xfm, self.wm_in_dwi)	
 
+        mgru.applyxfm(self.nodif_B0, self.gm_mask_thr, self.t1wtissue2dwi_xfm, self.gm_in_dwi_thr)
+        mgru.applyxfm(self.nodif_B0, self.wm_mask_thr, self.t1wtissue2dwi_xfm, self.wm_in_dwi_thr)
+
         # Threshold WM to binary in dwi space
         self.t_img = load_img(self.wm_in_dwi)
         self.mask = math_img('img > 0', img=self.t_img)
@@ -269,7 +275,7 @@ class dmri_reg(object):
         os.system(cmd)
 
 	# Create gm-wm interface image
-        cmd = 'fslmaths ' + self.gm_in_dwi + ' -mul ' + self.wm_in_dwi + ' -bin ' + self.wm_gm_int_in_dwi
+        cmd = 'fslmaths ' + self.gm_in_dwi_thr + ' -mul ' + self.wm_in_dwi_thr + ' -bin ' + self.wm_gm_int_in_dwi
         os.system(cmd)
 
         return
