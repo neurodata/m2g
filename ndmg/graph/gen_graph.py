@@ -100,7 +100,7 @@ class graph_tools(object):
         self.rois = {}
 	global loc
         img_ix = 0
-        for img in self.img_list[1:]:
+        for roi_img in self.img_list[1:]:
             roi_data = roi_img.get_data()
             img_ix = img_ix + 1
             self.rois[img_ix] = np.sum(roi_data.astype('bool'))
