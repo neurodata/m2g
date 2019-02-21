@@ -99,7 +99,7 @@ class graph_tools(object):
         fibers = {}
         rois = {}
         img_ix = 0
-        for img in img_list[1:]:
+        for img in img_list:
             data = img.get_data()
             img_ix = img_ix + 1
             rois[img_ix] = np.sum(data.astype('bool'))
@@ -123,7 +123,7 @@ class graph_tools(object):
             print(str(img_ix) + ': Fibers - ' + str(fibers[img_ix]) + '  Voxels: ' + str(rois[img_ix]))
 
         self.df_regressors = pd.DataFrame({'fiber_count':pd.Series(fibers), 'roi_size':pd.Series(rois)})
-	self.df_out = self.namer.name_derivative(self.namer.dirs['output']['fiber'], "roi_regressors.csv")
+	self.df_out = self.namer.name_derivative(self.namer.dirs['output']['conn'], "roi_regressors.csv")
 	self.df_regressors.to_csv(self.df_out, sep='\t')
 
         return
