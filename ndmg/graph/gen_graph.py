@@ -86,41 +86,44 @@ class graph_tools(object):
 
         self.img_list = get_parcel_list(self.roi_file)
 
-        print('Compiling voxel coordinates of all streamlines...')
-        self.points = []
-        for _, streamline in enumerate(self.tracks):
-            point_set = np.round(streamline).astype('int')
-            for point in point_set:
-                self.points.append(tuple(point))
+        #print('Compiling voxel coordinates of all streamlines...')
+        #self.points = []
+        #for _, streamline in enumerate(self.tracks):
+        #    point_set = np.round(streamline).astype('int')
+        #    for point in point_set:
+        #        self.points.append(tuple(point))
 
-        print('Counting fiber waytotals and # voxels for each ROI...')
-        fibers = {}
+	print('Counting # voxels for each ROI...')
+        #print('Counting fiber waytotals and # voxels for each ROI...')
+        #fibers = {}
         rois = {}
         img_ix = 0
         for img in self.img_list:
             data = img.get_data()
             img_ix = img_ix + 1
-            rois[img_ix] = np.sum(data.astype('bool'))
-            for point in set(self.points):
-                try:
-                    loc = data[point[0], point[1], point[2]]
-                except:
-                    loc = None
-                    pass
-                if loc:
-                    try:
-                        fibers[img_ix] = fibers[img_ix] + 1
-                    except:
-                        fibers[img_ix] = 1
-		else:
-		    continue
-            try:
-                fibers[img_ix]
-            except:
-                fibers[img_ix] = 0
-            print(str(img_ix) + ': Fibers - ' + str(fibers[img_ix]) + '  Voxels: ' + str(rois[img_ix]))
+            rois[img_ix] = np.count_nonzero(data.astype('bool'))
+        #    for point in set(self.points):
+        #        try:
+        #            loc = data[point[0], point[1], point[2]]
+        #        except:
+        #            loc = None
+        #            pass
+        #        if loc:
+        #            try:
+        #                fibers[img_ix] = fibers[img_ix] + 1
+        #            except:
+        #                fibers[img_ix] = 1
+	#	else:
+	#	    continue
+        #    try:
+        #        fibers[img_ix]
+        #    except:
+        #        fibers[img_ix] = 0
+        #    print(str(img_ix) + ': Fibers - ' + str(fibers[img_ix]) + '  Voxels: ' + str(rois[img_ix]))
+	print('Voxels: ' + str(rois[img_ix]))
 
-        self.df_regressors = pd.DataFrame({'fiber_count':pd.Series(fibers), 'roi_size':pd.Series(rois)})
+	self.df_regressors = pd.DataFrame({'roi_size':pd.Series(rois)})
+        #self.df_regressors = pd.DataFrame({'fiber_count':pd.Series(fibers), 'roi_size':pd.Series(rois)})
 	self.df_out = self.namer.name_derivative(self.connectome_path, "roi_regressors.csv")
 	self.df_regressors.to_csv(self.df_out, sep='\t')
 
