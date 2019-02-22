@@ -212,6 +212,7 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
             seeds_wm_gm_int = mgt.build_seed_list(reg.wm_gm_int_in_dwi, stream_affine, dens=3)
 	    seeds_wm = mgt.build_seed_list(reg.wm_in_dwi_bin, stream_affine, dens=1)
 	    seeds = np.vstack((seeds_wm_gm_int, seeds_wm))
+	print('Using ' + str(len(seeds)) + ' seeds...')
 
         # Compute direction model and track fiber streamlines
         print("Beginning tractography...")
@@ -219,9 +220,9 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
         streamlines = trct.run()
 
 	# Save streamlines to disk
-        print('Saving streamlines: ' + streams)
-        tractogram = Tractogram(streamlines, affine_to_rasmm=stream_affine)
-        save(tractogram, streams)
+        #print('Saving streamlines: ' + streams)
+        #tractogram = Tractogram(streamlines, affine_to_rasmm=stream_affine)
+        #save(tractogram, streams)
 
     elif reg_style == 'mni':
 	print('Running tractography in MNI-space...')
@@ -240,10 +241,10 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
         tensor2fa(tens, tensors, aligned_dwi, namer.dirs['output']['tensor'], namer.dirs['qa']['tensor'])
 
         # Save streamlines to disk
-        print('Saving streamlines: ' + streams)
+        #print('Saving streamlines: ' + streams)
 	affine = nib.load(aligned_dwi).affine
-        tractogram = Tractogram(streamlines, affine_to_rasmm=affine)
-        save(tractogram, streams)
+        #tractogram = Tractogram(streamlines, affine_to_rasmm=affine)
+        #save(tractogram, streams)
 
     tracks = [sl for sl in streamlines if len(sl) > 1]
 
@@ -265,8 +266,8 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
     # ------- Connectome Estimation --------------------------------- #
     # Generate graphs from streamlines for each parcellation
     for idx, label in enumerate(labels):
-        print("Generating graph for {} parcellation...".format(label))
-	try:
+#        print("Generating graph for {} parcellation...".format(label))
+#	try:
 	    if reg_style == 'native':
 	        # align atlas to t1w to dwi
 	        print("%s%s" % ('Applying native-space alignment to ', labels[idx]))
@@ -286,9 +287,9 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
                 g1.make_graph_old()
             g1.summary()
             g1.save_graph(connectomes[idx])
-	except:
-	    print(label + ' FAILED. Skipping...')
-	    continue
+#	except:
+#	    print(label + ' FAILED. Skipping...')
+#	    continue
 
     exe_time = datetime.now() - startTime
     qc_dwi.save(qc_stats, exe_time)
