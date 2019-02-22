@@ -177,7 +177,7 @@ class graph_tools(object):
 
         edge_list = [(k[0], k[1], v) for k, v in self.edge_dict.items()]
         self.g.add_weighted_edges_from(edge_list)
-	return self.g
+	return self.g, self.edge_dict
 
     def cor_graph(self, timeseries, attr=None):
         """
