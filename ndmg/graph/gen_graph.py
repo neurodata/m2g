@@ -59,7 +59,7 @@ class graph_tools(object):
 	self.tracks = tracks
 	self.affine = affine
 	self.namer = namer
-	self.connectome_path = connectome_path
+	self.connectome_path = os.path.dirname(connectome_path)
         pass
 
     def make_regressors(self, attr=None):
@@ -102,6 +102,7 @@ class graph_tools(object):
             data = img.get_data()
             img_ix = img_ix + 1
             rois[img_ix] = np.count_nonzero(data.astype('bool'))
+	    print('Voxels: ' + str(rois[img_ix]))
         #    for point in set(self.points):
         #        try:
         #            loc = data[point[0], point[1], point[2]]
@@ -120,7 +121,6 @@ class graph_tools(object):
         #    except:
         #        fibers[img_ix] = 0
         #    print(str(img_ix) + ': Fibers - ' + str(fibers[img_ix]) + '  Voxels: ' + str(rois[img_ix]))
-	print('Voxels: ' + str(rois[img_ix]))
 
 	self.df_regressors = pd.DataFrame({'roi_size':pd.Series(rois)})
         #self.df_regressors = pd.DataFrame({'fiber_count':pd.Series(fibers), 'roi_size':pd.Series(rois)})
