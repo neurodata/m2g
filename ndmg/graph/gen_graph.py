@@ -66,13 +66,10 @@ class graph_tools(object):
 	from nilearn.image import new_img_like
         import pandas as pd
 
-
         def get_parcel_list(parlistfile):
             bna_img = nib.load(parlistfile)
             bna_data = np.round(bna_img.get_data(),1)
-            ##Get an array of unique parcels
             bna_data_for_coords_uniq = np.unique(bna_data)
-            ##Number of parcels:
             par_max = len(bna_data_for_coords_uniq) - 1
             bna_data = bna_data.astype('int16')
             img_stack = []
@@ -87,27 +84,27 @@ class graph_tools(object):
                 img_list.append(roi_img_nifti)
             return(img_list)
 
-        img_list = get_parcel_list(self.roi_file)
+        self.img_list = get_parcel_list(self.roi_file)
 
         print('Compiling voxel coordinates of all streamlines...')
-        points = []
+        self.points = []
         for _, streamline in enumerate(self.tracks):
             point_set = np.round(streamline).astype('int')
             for point in point_set:
-                points.append(tuple(point))
+                self.points.append(tuple(point))
 
         print('Counting fiber waytotals and # voxels for each ROI...')
         fibers = {}
         rois = {}
         img_ix = 0
-        for img in img_list:
+        for img in self.img_list:
             data = img.get_data()
             img_ix = img_ix + 1
             rois[img_ix] = np.sum(data.astype('bool'))
-            for point in set(points):
+            for point in set(self.points):
                 try:
                     loc = data[point[0], point[1], point[2]]
-                except IndexError:
+                except:
                     loc = None
                     pass
                 if loc:
@@ -115,8 +112,8 @@ class graph_tools(object):
                         fibers[img_ix] = fibers[img_ix] + 1
                     except:
                         fibers[img_ix] = 1
-                else:
-                    continue
+		else:
+		    continue
             try:
                 fibers[img_ix]
             except:

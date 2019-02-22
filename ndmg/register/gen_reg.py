@@ -106,7 +106,7 @@ class dmri_reg(object):
 
         # Use the probability maps to extract white matter mask
         mgru.probmap2mask(self.maps['wm_prob'], self.wm_mask_thr, 0.5)
-        mgru.probmap2mask(self.maps['gm_prob'], self.gm_mask_thr, 0.3)
+        mgru.probmap2mask(self.maps['gm_prob'], self.gm_mask_thr, 0.5)
         return
 
     def t1w2dwi_align(self):
@@ -171,7 +171,7 @@ class dmri_reg(object):
         self.atlas_name = self.atlas.split('/')[-1].split('.')[0]
         self.aligned_atlas_skull = "{}/{}_aligned_atlas_skull.nii.gz".format(self.namer.dirs['tmp']['reg_a'], self.atlas_name)
         self.dwi_aligned_atlas = "{}/{}_aligned_atlas.nii.gz".format(self.namer.dirs['output']['reg_anat'], self.atlas_name)
-        #self.dwi_aligned_atlas_mask = "{}/{}_aligned_atlas_mask.nii.gz".format(self.outdir['reg_a'], self.atlas_name)
+        #self.dwi_aligned_atlas_mask = "{}/{}_aligned_atlas_mask.nii.gz".format(self.namer.dirs['tmp']['reg_a'], self.atlas_name)
 
         if self.simple is False:
             try:
@@ -209,6 +209,12 @@ class dmri_reg(object):
         nib.save(nib.Nifti1Image(self.atlas_data.astype('int'), affine=self.atlas_img.affine, header=self.atlas_img.header), self.dwi_aligned_atlas)
         cmd='fslmaths ' + self.dwi_aligned_atlas + ' -mas ' + self.nodif_B0_mask + ' ' + self.dwi_aligned_atlas
         os.system(cmd)
+
+	# Binarize atlas
+        #self.t_img = load_img(self.dwi_aligned_atlas)
+        #self.mask = math_img('img > 0', img=self.t_img)
+        #self.mask.to_filename(self.dwi_aligned_atlas_mask)
+
         return self.dwi_aligned_atlas
 
     def tissue2dwi_align(self):
@@ -275,7 +281,7 @@ class dmri_reg(object):
         os.system(cmd)
 
 	# Create gm-wm interface image
-        cmd = 'fslmaths ' + self.gm_in_dwi_thr + ' -mul ' + self.wm_in_dwi_thr + ' -bin ' + self.wm_gm_int_in_dwi
+        cmd = 'fslmaths ' + self.gm_in_dwi_thr + ' -mul ' + self.wm_in_dwi_thr + ' -mas ' + self.nodif_B0_mask + ' -bin ' + self.wm_gm_int_in_dwi
         os.system(cmd)
 
         return
