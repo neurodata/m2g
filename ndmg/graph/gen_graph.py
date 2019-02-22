@@ -33,7 +33,7 @@ import time
 import os
 
 class graph_tools(object):
-    def __init__(self, rois, tracks, affine, namer, attr=None, sens="dwi"):
+    def __init__(self, rois, tracks, affine, namer, connectome_path, attr=None, sens="dwi"):
         """
         Initializes the graph with nodes corresponding to the number of ROIs
 
@@ -59,6 +59,7 @@ class graph_tools(object):
 	self.tracks = tracks
 	self.affine = affine
 	self.namer = namer
+	self.connectome_path = connectome_path
         pass
 
     def make_regressors(self, attr=None):
@@ -123,7 +124,7 @@ class graph_tools(object):
             print(str(img_ix) + ': Fibers - ' + str(fibers[img_ix]) + '  Voxels: ' + str(rois[img_ix]))
 
         self.df_regressors = pd.DataFrame({'fiber_count':pd.Series(fibers), 'roi_size':pd.Series(rois)})
-	self.df_out = self.namer.name_derivative(self.namer.dirs['output']['conn'], "roi_regressors.csv")
+	self.df_out = self.namer.name_derivative(self.connectome_path, "roi_regressors.csv")
 	self.df_regressors.to_csv(self.df_out, sep='\t')
 
         return
