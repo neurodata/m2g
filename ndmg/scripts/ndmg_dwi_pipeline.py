@@ -219,9 +219,9 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
         streamlines = trct.run()
 
 	# Save streamlines to disk
-        print('Saving streamlines: ' + streams)
-        tractogram = Tractogram(streamlines, affine_to_rasmm=stream_affine)
-        save(tractogram, streams)
+        #print('Saving streamlines: ' + streams)
+        #tractogram = Tractogram(streamlines, affine_to_rasmm=stream_affine)
+        #save(tractogram, streams)
 
     elif reg_style == 'mni':
 	print('Running tractography in MNI-space...')
@@ -240,10 +240,10 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
         tensor2fa(tens, tensors, aligned_dwi, namer.dirs['output']['tensor'], namer.dirs['qa']['tensor'])
 
         # Save streamlines to disk
-        print('Saving streamlines: ' + streams)
+        #print('Saving streamlines: ' + streams)
 	affine = nib.load(aligned_dwi).affine
-        tractogram = Tractogram(streamlines, affine_to_rasmm=affine)
-        save(tractogram, streams)
+        #tractogram = Tractogram(streamlines, affine_to_rasmm=affine)
+        #save(tractogram, streams)
 
     tracks = [sl for sl in streamlines if len(sl) > 1]
 
@@ -273,7 +273,7 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
                 labels_im_file = reg.atlas2t1w2dwi_align(labels[idx])
 	        print('Aligned Atlas: ' + labels_im_file)
 	        labels_im = nib.load(labels_im_file)
-	        g1 = mgg.graph_tools(attr=len(np.unique(labels_im.get_data()))-1, rois=labels_im_file, tracks=tracks, affine=stream_affine, namer=namer)
+	        g1 = mgg.graph_tools(attr=len(np.unique(labels_im.get_data()))-1, rois=labels_im_file, tracks=tracks, affine=stream_affine, namer=namer, connectome_path=connectomes[idx])
 		g1.make_graph_old()
 		g1.make_regressors()
 	    elif reg_style == 'mni':
@@ -282,7 +282,7 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
 		cmd = 'fslmaths ' + labels[idx] + ' -mas ' + align_dwi_mask + ' ' + labels_im_file 
 		os.system(cmd)
                 labels_im = nib.load(labels_im_file)
-		g1 = mgg.graph_tools(attr=len(np.unique(labels_im.get_data().astype('int')))-1, rois=labels_im_file, tracks=tracks, affine=affine, namer=namer)
+		g1 = mgg.graph_tools(attr=len(np.unique(labels_im.get_data().astype('int')))-1, rois=labels_im_file, tracks=tracks, affine=affine, namer=namer, connectome_path=connectomes[idx])
                 g1.make_graph_old()
             g1.summary()
             g1.save_graph(connectomes[idx])
