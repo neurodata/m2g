@@ -26,15 +26,15 @@ import nibabel as nib
 from dipy.tracking.streamline import Streamlines
 
 
-def build_seed_list(wm_gm_int_in_dwi, stream_affine, dens):
+def build_seed_list(mask_img_file, stream_affine, dens):
     from dipy.tracking import utils
-    wm_gm_mask = nib.load(wm_gm_int_in_dwi)
-    wm_gm_mask_data = wm_gm_mask.get_data().astype('bool')
-    seeds = utils.seeds_from_mask(wm_gm_mask_data, density=int(dens), affine=stream_affine)
+    mask_img = nib.load(mask_img_file)
+    mask_img_data = mask_img.get_data().astype('bool')
+    seeds = utils.seeds_from_mask(mask_img_data, density=int(dens), affine=stream_affine)
     return seeds
 
 class run_track(object):
-    def __init__(self, dwi_in, nodif_B0_mask, gm_in_dwi, vent_csf_in_dwi,
+    def __init__(self, dwi_in, nodif_B0_mask, gm_in_dwi, vent_csf_in_dwi, vent_csf_in_dwi_bin,
                  wm_in_dwi, wm_in_dwi_bin, gtab, mod_type, track_type, mod_func, seeds, stream_affine):
         """
         A class for deterministic tractography in native space.
@@ -72,6 +72,7 @@ class run_track(object):
         self.nodif_B0_mask = nodif_B0_mask
         self.gm_in_dwi = gm_in_dwi
         self.vent_csf_in_dwi = vent_csf_in_dwi
+	self.vent_csf_in_dwi_bin = vent_csf_in_dwi_bin
         self.wm_in_dwi = wm_in_dwi
         self.wm_in_dwi_bin = wm_in_dwi_bin
         self.gtab = gtab
@@ -129,6 +130,8 @@ class run_track(object):
             self.exclude_map = self.vent_csf_mask_data
 	    self.tiss_classifier = ActTissueClassifier(self.include_map, self.exclude_map)
 	elif tiss_class == 'bin':
+	    cmd='fslmaths ' + self.wm_in_dwi_bin + ' -sub ' + vent_csf_in_dwi_bin + ' ' + self.wm_in_dwi_bin
+ 	    os.system(cmd)
 	    self.wm_in_dwi_bin_data = nib.load(self.wm_in_dwi_bin).get_data().astype('bool')
 	    self.tiss_classifier = BinaryTissueClassifier(self.wm_in_dwi_bin_data)
 	else:
