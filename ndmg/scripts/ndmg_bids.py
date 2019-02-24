@@ -138,7 +138,8 @@ def session_level(inDir, outDir, subjs, vox_size, big, clean, stc, atlas_select,
     labels, atlas, atlas_mask, atlas_brain, lv_mask = get_atlas(atlas_dir,
                                                                 modality, vox_size)
 
-    labels = [i for i in labels if atlas_select in i]
+    if atlas_select:
+        labels = [i for i in labels if atlas_select in i]
     #mgu.execute_cmd("mkdir -p {} {}/tmp".format(outDir, outDir))
 
     result = sweep_directory(inDir, subjs, sesh, task, run, modality)
@@ -289,7 +290,7 @@ def main():
     parser.add_argument('--dataset', action='store', help='The name of '
                         'the dataset you are perfoming QC on.')
     parser.add_argument('--atlas', action='store', help='The atlas '
-                        'being analyzed in QC (if you only want one).')
+                        'being analyzed in QC (if you only want one).', default=None)
     parser.add_argument('--minimal', action='store_true', help='Determines '
                         'whether to show a minimal or full set of plots.',
                         default=False)
