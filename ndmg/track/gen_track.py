@@ -130,7 +130,7 @@ class run_track(object):
             self.exclude_map = self.vent_csf_mask_data
 	    self.tiss_classifier = ActTissueClassifier(self.include_map, self.exclude_map)
 	elif tiss_class == 'bin':
-	    cmd='fslmaths ' + self.wm_in_dwi_bin + ' -sub ' + vent_csf_in_dwi_bin + ' ' + self.wm_in_dwi_bin
+	    cmd='fslmaths ' + self.wm_in_dwi_bin + ' -sub ' + self.vent_csf_in_dwi_bin + ' ' + self.wm_in_dwi_bin
  	    os.system(cmd)
 	    self.wm_in_dwi_bin_data = nib.load(self.wm_in_dwi_bin).get_data().astype('bool')
 	    self.tiss_classifier = BinaryTissueClassifier(self.wm_in_dwi_bin_data)
