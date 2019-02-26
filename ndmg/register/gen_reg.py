@@ -176,7 +176,7 @@ class dmri_reg(object):
         if self.simple is False:
             try:
 		# Apply warp resulting from the inverse of T1w-->MNI created earlier
-                mgru.apply_warp(self.t1w_brain, self.atlas, self.aligned_atlas_skull, warp=self.mni2t1w_warp)
+                mgru.apply_warp(self.t1w_brain, self.atlas, self.aligned_atlas_skull, warp=self.mni2t1w_warp, interp='nn', sup=True)
 	
                 # Apply transform to dwi space
                 mgru.applyxfm(self.nodif_B0, self.aligned_atlas_skull, self.t1wtissue2dwi_xfm, self.dwi_aligned_atlas)
@@ -205,8 +205,9 @@ class dmri_reg(object):
 
         # Set intensities to int
         self.atlas_img = nib.load(self.dwi_aligned_atlas)
-        self.atlas_data = self.atlas_img.get_data()
-        nib.save(nib.Nifti1Image(self.atlas_data.astype('int'), affine=self.atlas_img.affine, header=self.atlas_img.header), self.dwi_aligned_atlas)
+        self.atlas_data = self.atlas_img.get_data().astype('int')
+        self.atlas_data[self.atlas_data>node_num] = 0
+        nib.save(nib.Nifti1Image(self.atlas_data.astype(np.int32), affine=self.atlas_img.affine, header=self.atlas_img.header), self.dwi_aligned_atlas)
         cmd='fslmaths ' + self.dwi_aligned_atlas + ' -mas ' + self.nodif_B0_mask + ' ' + self.dwi_aligned_atlas
         os.system(cmd)
 
@@ -246,7 +247,7 @@ class dmri_reg(object):
 
         if self.simple is False:
             # Apply warp resulting from the inverse MNI->T1w created earlier
-            mgru.apply_warp(self.t1w_brain, self.vent_mask_mni, self.vent_mask_t1w, warp=self.mni2t1w_warp)
+            mgru.apply_warp(self.t1w_brain, self.vent_mask_mni, self.vent_mask_t1w, warp=self.mni2t1w_warp, interp='nn', sup=True)
             
 	# Applyxfm tissue maps to dwi space
         mgru.applyxfm(self.nodif_B0, self.vent_mask_t1w, self.t1wtissue2dwi_xfm, self.vent_mask_dwi)
@@ -267,15 +268,11 @@ class dmri_reg(object):
         self.mask = math_img('img > 0', img=self.t_img)
         self.mask.to_filename(self.gm_in_dwi_bin)
 
-        # Erode and mask CSF with ventricle mask and and subtract atlas
+        # Erode and mask CSF with ventricles
         print('Masking CSF with ventricle mask...')
         cmd='fslmaths ' + self.vent_mask_dwi + ' -bin ' + self.vent_mask_dwi
         os.system(cmd)
-	cmd='fslmaths ' + self.wm_in_dwi_bin + ' -binv ' + self.wm_in_dwi_binv
-        os.system(cmd)
-        cmd='fslmaths ' + self.gm_in_dwi_bin + ' -binv ' + self.gm_in_dwi_binv
-        os.system(cmd)
-        cmd='fslmaths ' + self.csf_mask_dwi + ' -mas ' + self.vent_mask_dwi + ' -mas ' + self.gm_in_dwi_binv + ' ' + self.vent_csf_in_dwi
+        cmd='fslmaths ' + self.csf_mask_dwi + ' -mas ' + self.vent_mask_dwi + ' ' + self.vent_csf_in_dwi
         os.system(cmd)
         cmd='fslmaths ' + self.vent_csf_in_dwi + ' -bin ' + self.vent_csf_in_dwi_bin
         os.system(cmd)
