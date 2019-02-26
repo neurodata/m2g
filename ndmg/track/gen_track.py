@@ -21,6 +21,7 @@
 from __future__ import print_function
 import warnings
 warnings.simplefilter("ignore")
+import os
 import numpy as np
 import nibabel as nib
 from dipy.tracking.streamline import Streamlines
