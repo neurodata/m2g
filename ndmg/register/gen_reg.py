@@ -48,6 +48,7 @@ class dmri_reg(object):
         self.dwi_name = 'dwi'
 	self.namer = namer
         self.t12mni_xfm_init = "{}/xfm_t1w2mni_init.mat".format(self.namer.dirs['tmp']['reg_m'])
+	self.mni2t1_xfm_init = "{}/xfm_mni2t1w_init.mat".format(self.namer.dirs['tmp']['reg_m'])
         self.t12mni_xfm = "{}/xfm_t1w2mni.mat".format(self.namer.dirs['tmp']['reg_m'])
         self.mni2t1_xfm = "{}/xfm_mni2t1.mat".format(self.namer.dirs['tmp']['reg_m'])
         self.mni2t1w_warp = "{}/mni2t1w_warp.nii.gz".format(self.namer.dirs['tmp']['reg_a'])
@@ -55,6 +56,7 @@ class dmri_reg(object):
         self.t1w2dwi = "{}/{}_in_dwi.nii.gz".format(self.namer.dirs['output']['reg_anat'], self.t1w_name)
         self.t1_aligned_mni = "{}/{}_aligned_mni.nii.gz".format(self.namer.dirs['output']['prep_anat'], self.t1w_name)
         self.t1w_brain = "{}/{}_brain.nii.gz".format(self.namer.dirs['output']['prep_anat'], self.t1w_name)
+	self.t1w_brain_mask = "{}/{}_brain_mask.nii.gz".format(self.namer.dirs['output']['prep_anat'], self.t1w_name)
         self.dwi2t1w_xfm = "{}/dwi2t1w_xfm.mat".format(self.namer.dirs['tmp']['reg_m'])
         self.t1w2dwi_xfm = "{}/t1w2dwi_xfm.mat".format(self.namer.dirs['tmp']['reg_m'])
         self.t1w2dwi_bbr_xfm = "{}/t1w2dwi_bbr_xfm.mat".format(self.namer.dirs['tmp']['reg_m'])
@@ -67,6 +69,7 @@ class dmri_reg(object):
         self.temp2dwi_xfm = "{}/{}_xfm_temp2dwi.mat".format(self.namer.dirs['tmp']['reg_m'], self.dwi_name)
         self.map_path = "{}/{}_seg".format(self.namer.dirs['output']['prep_anat'], self.t1w_name)
         self.wm_mask = "{}/{}_wm.nii.gz".format(self.namer.dirs['output']['prep_anat'], self.t1w_name)
+	self.wm_edge = "{}/{}_wm_edge.nii.gz".format(self.namer.dirs['tmp']['reg_a'], self.t1w_name)
         self.csf_mask = "{}/{}_csf.nii.gz".format(self.namer.dirs['output']['prep_anat'], self.t1w_name)
         self.gm_mask = "{}/{}_gm.nii.gz".format(self.namer.dirs['output']['prep_anat'], self.t1w_name)
         self.wm_mask_thr = "{}/{}_wm_thr.nii.gz".format(self.namer.dirs['tmp']['reg_a'], self.t1w_name)
@@ -89,6 +92,7 @@ class dmri_reg(object):
         self.wm_in_dwi_binv = "{}/{}_wm_in_dwi_binv.nii.gz".format(self.namer.dirs['tmp']['reg_a'], self.t1w_name)
         self.mni_atlas = "%s%s%s%s" % (FSLDIR, '/data/atlases/HarvardOxford/HarvardOxford-sub-prob-', vox_size, '.nii.gz')
         self.input_mni = "%s%s%s%s" % (FSLDIR, '/data/standard/MNI152_T1_', vox_size, '_brain.nii.gz')
+	self.input_mni_mask = "%s%s%s%s" % (FSLDIR, '/data/standard/MNI152_T1_', vox_size, '_brain_mask_dil.nii.gz')
         self.gm_in_dwi_bin = "{}/{}_gm_in_dwi_bin.nii.gz".format(self.namer.dirs['tmp']['reg_a'], self.t1w_name)
         self.gm_in_dwi_binv = "{}/{}_gm_in_dwi_binv.nii.gz".format(self.namer.dirs['tmp']['reg_a'], self.t1w_name)
 	self.wm_gm_int_in_dwi = "{}/{}_wm_gm_int_in_dwi.nii.gz".format(namer.dirs['output']['reg_anat'], self.t1w_name)
@@ -98,11 +102,18 @@ class dmri_reg(object):
         print('Extracting brain from raw T1w image...')
         mgru.t1w_skullstrip(self.t1w, self.t1w_brain)
 
+	# Extract brain mask
+	mgru.extract_mask(self.t1w_brain, self.t1w_brain_mask)
+
         # Segment the t1w brain into probability maps
         self.maps = mgru.segment_t1w(self.t1w_brain, self.map_path)
 	self.wm_mask = self.maps['wm_prob']
 	self.gm_mask = self.maps['gm_prob']
 	self.csf_mask = self.maps['csf_prob']
+
+	# Extract wm edge
+	cmd='fslmaths ' + self.wm_mask + ' -edge -bin -mas ' + self.wm_mask  + ' ' + self.wm_edge
+	os.system(cmd)
 
         # Use the probability maps to extract white matter mask
         mgru.probmap2mask(self.maps['wm_prob'], self.wm_mask_thr, 0.2)
@@ -119,17 +130,23 @@ class dmri_reg(object):
         """
 
         # Create linear transform/ initializer T1w-->MNI
-        mgru.align(self.t1w_brain, self.input_mni, xfm=self.t12mni_xfm_init, bins=None, interp="spline", out=None, dof=12, cost='mutualinfo', searchrad=True, sch=None)
+        mgru.align(self.t1w_brain, self.input_mni, xfm=self.t12mni_xfm_init, bins=None, interp="spline", out=None, dof=12, cost='mutualinfo', searchrad=True)
 
         # Attempt non-linear registration of T1 to MNI template
         if self.simple is False:
             try:
                 print('Running non-linear registration: T1w-->MNI ...')
                 # Use FNIRT to nonlinearly align T1 to MNI template
-                mgru.align_nonlinear(self.t1w_brain, self.input_mni, xfm=self.t12mni_xfm_init, out=self.t1_aligned_mni, warp=self.warp_t1w2mni, mask=None)
+                mgru.align_nonlinear(self.t1w_brain, self.input_mni, xfm=self.t12mni_xfm_init, out=self.t1_aligned_mni, warp=self.warp_t1w2mni, ref_mask=self.input_mni_mask, in_mask=self.t1w_brain_mask, config="%s%s%s" % ('T1_2_MNI152_', vox_size, 'mm.cnf'))
 
                 # Get warp from MNI -> T1
                 mgru.inverse_warp(self.t1w_brain, self.mni2t1w_warp, self.warp_t1w2mni)
+
+		# Get mat from MNI -> T1
+		cmd = 'convert_xfm -omat ' + self.mni2t1_xfm_init + ' -inverse ' + self.t12mni_xfm_init
+        	print(cmd)
+        	os.system(cmd)
+
             except RuntimeError('Error: FNIRT failed!'):
                 pass
         else:
@@ -139,18 +156,19 @@ class dmri_reg(object):
         # Align T1w-->DWI
         mgru.align(self.nodif_B0, self.t1w_brain, xfm=self.t1w2dwi_xfm, bins=None, interp="spline", dof=7, cost='mutualinfo', out=None, searchrad=True, sch=None)
         cmd = 'convert_xfm -omat ' + self.dwi2t1w_xfm + ' -inverse ' + self.t1w2dwi_xfm
+	print(cmd)
         os.system(cmd)
 
         if self.simple is False:
             # Flirt bbr
             try:
 		print('Running FLIRT BBR registration: T1w-->DWI ...')
-                mgru.align(self.nodif_B0, self.t1w_brain, wmseg=self.wm_mask, xfm=self.dwi2t1w_bbr_xfm, init=self.dwi2t1w_xfm, bins=256, dof=7, searchrad=True, interp="spline", out=None, cost='bbr', finesearch=5, sch="${FSLDIR}/etc/flirtsch/bbr.sch")
+                mgru.align(self.nodif_B0, self.t1w_brain, wmseg=self.wm_edge, xfm=self.dwi2t1w_bbr_xfm, init=self.dwi2t1w_xfm, bins=256, dof=7, searchrad=True, interp="spline", out=None, cost='bbr', finesearch=5, sch="${FSLDIR}/etc/flirtsch/bbr.sch")
                 cmd = 'convert_xfm -omat ' + self.t1w2dwi_bbr_xfm + ' -inverse ' + self.dwi2t1w_bbr_xfm
                 os.system(cmd)
 
                 # Apply the alignment
-                mgru.align(self.t1w_brain, self.nodif_B0, init=self.t1w2dwi_bbr_xfm, xfm=self.t1wtissue2dwi_xfm, bins=None, interp="spline", dof=7, cost='mutualinfo', out=self.t1w2dwi, searchrad=True, sch=None)
+                mgru.align(self.t1w_brain, self.nodif_B0, init=self.t1w2dwi_bbr_xfm, xfm=self.t1wtissue2dwi_xfm, bins=None, interp="nearestneighbor", dof=7, cost='mutualinfo', out=self.t1w2dwi, searchrad=True, sch=None)
             except RuntimeError('Error: FLIRT BBR failed!'):
                 pass
         else:
@@ -176,10 +194,12 @@ class dmri_reg(object):
         if self.simple is False:
             try:
 		# Apply warp resulting from the inverse of T1w-->MNI created earlier
-                mgru.apply_warp(self.t1w_brain, self.atlas, self.aligned_atlas_skull, warp=self.mni2t1w_warp, interp='nn', sup=True)
+                mgru.apply_warp(self.t1w_brain, self.atlas, self.aligned_atlas_skull, warp=self.mni2t1w_warp, mask=self.t1w_brain_mask, interp='nn', sup=True, xfm=self.mni2t1_xfm_init)
+
 	
                 # Apply transform to dwi space
-                mgru.applyxfm(self.nodif_B0, self.aligned_atlas_skull, self.t1wtissue2dwi_xfm, self.dwi_aligned_atlas)
+                mgru.applyxfm(self.nodif_B0, self.aligned_atlas_skull, self.t1wtissue2dwi_xfm, self.dwi_aligned_atlas, interp="nearestneighbor", dof=7)
+
             except:
                 print("Warning: Atlas is not in correct dimensions, or input is low quality,\nusing linear template registration.")
 
@@ -195,7 +215,7 @@ class dmri_reg(object):
         else:
             # Create transform to align atlas to T1w using flirt
             mgru.align(self.atlas, self.t1w_brain, xfm=self.xfm_atlas2t1w_init, init=None, bins=None, dof=6, cost='mutualinfo', searchrad=None, interp="spline", out=None, sch=None)
-            mgru.align(self.atlas, self.t1w_brain, xfm=self.xfm_atlas2t1w, out=None, dof=6, searchrad=True, bins=None, interp="spline", cost='mutualinfo', wmseg=None, init=self.xfm_atlas2t1w_init)
+            mgru.align(self.atlas, self.t1w_brain, xfm=self.xfm_atlas2t1w, out=None, dof=6, searchrad=True, bins=None, interp="spline", cost='mutualinfo', init=self.xfm_atlas2t1w_init)
 
             # Combine our linear transform from t1w to template with our transform from dwi to t1w space to get a transform from atlas ->(-> t1w ->)-> dwi
             mgru.combine_xfms(self.xfm_atlas2t1w, self.t1wtissue2dwi_xfm, self.temp2dwi_xfm)
@@ -206,6 +226,7 @@ class dmri_reg(object):
         # Set intensities to int
         self.atlas_img = nib.load(self.dwi_aligned_atlas)
         self.atlas_data = self.atlas_img.get_data().astype('int')
+	node_num = len(np.unique(self.atlas_data))
         self.atlas_data[self.atlas_data>node_num] = 0
         nib.save(nib.Nifti1Image(self.atlas_data.astype(np.int32), affine=self.atlas_img.affine, header=self.atlas_img.header), self.dwi_aligned_atlas)
         cmd='fslmaths ' + self.dwi_aligned_atlas + ' -mas ' + self.nodif_B0_mask + ' ' + self.dwi_aligned_atlas

@@ -394,6 +394,7 @@ def align(inp, ref, xfm=None, out=None, dof=12, searchrad=True,
         cmd += " -wmseg {}".format(wmseg)
     if init is not None:
         cmd += " -init {}".format(init)
+    print(cmd)
     os.system(cmd)
 
 
@@ -406,7 +407,7 @@ def align_epi(epi, t1, brain, out):
     os.system(cmd)
 
 
-def align_nonlinear(inp, ref, xfm, out, warp, mask=None):
+def align_nonlinear(inp, ref, xfm, out, warp, ref_mask=None, in_mask=None, config=None):
     """
     Aligns two images using nonlinear methods and stores the
     transform between them.
@@ -425,14 +426,19 @@ def align_nonlinear(inp, ref, xfm, out, warp, mask=None):
             - a mask in which voxels will be extracted
             during nonlinear alignment.
     """
-    cmd = "fnirt --in={} --ref={} --aff={} --iout={} --cout={} --subsamp=4,2,1,1"
-    cmd = cmd.format(inp, ref, xfm, out, warp)
-    if mask is not None:
-        cmd += " --refmask={}".format(mask)
+    cmd = "fnirt --in={} --ref={} --aff={} --iout={} --cout={}"
+    cmd = cmd.format(inp, ref, xfm, out, warp, config)
+    if ref_mask is not None:
+        cmd += " --refmask={} --applyrefmask=1".format(ref_mask)
+    if in_mask is not None:
+        cmd += " --inmask={} --applyinmask=1".format(in_mask)
+    if config is not None:
+	cmd += " --config={}".format(config)
+    print(cmd)
     os.system(cmd)
 
 
-def applyxfm(ref, inp, xfm, aligned):
+def applyxfm(ref, inp, xfm, aligned, interp='trilinear', dof=6):
     """
     Aligns two images with a given transform
 
@@ -447,8 +453,9 @@ def applyxfm(ref, inp, xfm, aligned):
             aligned:
                 - Aligned output image as a nifti image file
     """
-    cmd = "flirt -in {} -ref {} -out {} -init {} -interp trilinear -applyxfm"
-    cmd = cmd.format(inp, ref, aligned, xfm)
+    cmd = "flirt -in {} -ref {} -out {} -init {} -interp {} -dof {} -applyxfm"
+    cmd = cmd.format(inp, ref, aligned, xfm, interp, dof)
+    print(cmd)
     os.system(cmd)
 
 def apply_warp(ref, inp, out, warp, xfm=None, mask=None, interp=None, sup=False):
@@ -481,6 +488,7 @@ def apply_warp(ref, inp, out, warp, xfm=None, mask=None, interp=None, sup=False)
         cmd += " --interp=" + interp
     if sup is True:
         cmd += " --super --superlevel=a"
+    print(cmd)
     os.system(cmd)
 
 def inverse_warp(ref, out, warp):
@@ -504,6 +512,7 @@ def inverse_warp(ref, out, warp):
             structural space.
     """
     cmd = "invwarp --warp=" + warp + " --out=" + out + " --ref=" + ref
+    print(cmd)
     os.system(cmd)
 
 
@@ -546,6 +555,7 @@ def combine_xfms(xfm1, xfm2, xfmout):
             - the path to the output transformation
     """
     cmd = "convert_xfm -omat {} -concat {} {}".format(xfmout, xfm1, xfm2)
+    print(cmd)
     os.system(cmd)
 
 def reslice_to_xmm(infile, vox_sz=2):
