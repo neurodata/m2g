@@ -135,6 +135,7 @@ def session_level(inDir, outDir, subjs, vox_size, big, clean, stc, atlas_select,
     subject and session, and passes necessary files to ndmg_dwi_pipeline for
     processing.
     """
+
     labels, atlas, atlas_mask, atlas_brain, lv_mask = get_atlas(atlas_dir,
                                                                 modality, vox_size)
 
