@@ -115,14 +115,14 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
     start_time = time.time()
     if len(os.listdir(namer.dirs['output']['prep_dwi'])) != 0:
 	print('Pre-existing preprocessed dwi files found. Deleting these...')
-#	shutil.rmtree(namer.dirs['output']['prep_dwi'])
-#	os.mkdir(namer.dirs['output']['prep_dwi'])
+	shutil.rmtree(namer.dirs['output']['prep_dwi'])
+	os.mkdir(namer.dirs['output']['prep_dwi'])
 
     dwi_prep = "{}/eddy_corrected_data.nii.gz".format(namer.dirs['output']['prep_dwi'])
     eddy_rot_param = "{}/eddy_corrected_data.ecclog".format(namer.dirs['output']['prep_dwi'])
     print("Performing eddy correction...")
     cmd='eddy_correct ' + dwi + ' ' + dwi_prep + ' 0'
-#    os.system(cmd)
+    os.system(cmd)
 
     # Check for outliers from eddy correction
     #os.chdir(namer.dirs['output']['prep_dwi'])
@@ -134,17 +134,17 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
     bvec_rotated = "{}/bvec_rotated.bvec".format(namer.dirs['output']['prep_dwi'])
     bval = "{}/bval.bval".format(namer.dirs['output']['prep_dwi'])
     bvec = "{}/bvec.bvec".format(namer.dirs['output']['prep_dwi'])
-#    shutil.copyfile(bvecs, bvec)
-#    shutil.copyfile(bvals, bval)
+    shutil.copyfile(bvecs, bvec)
+    shutil.copyfile(bvals, bval)
 
     # Rotate bvecs
     print("Rotating b-vectors and generating gradient table...")
     cmd='bash fdt_rotate_bvecs ' + bvec + ' ' + bvec_rotated + ' ' + eddy_rot_param + ' 2>/dev/null'
-#    os.system(cmd)
+    os.system(cmd)
 
     # Rescale bvecs
     print("Rescaling b-vectors...")
-#    mgp.rescale_bvec(bvec_rotated, bvec_scaled)
+    mgp.rescale_bvec(bvec_rotated, bvec_scaled)
 
     # Check orientation (dwi_prep)
     start_time = time.time()
@@ -165,22 +165,22 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
     # -------- Registration Steps ----------------------------------- #
     if len(os.listdir(namer.dirs['output']['prep_anat'])) != 0:
 	print('Pre-existing preprocessed t1w files found. Deleting these...')
-#        shutil.rmtree(namer.dirs['output']['prep_anat'])
-#	os.mkdir(namer.dirs['output']['prep_anat'])
+        shutil.rmtree(namer.dirs['output']['prep_anat'])
+	os.mkdir(namer.dirs['output']['prep_anat'])
     if len(os.listdir(namer.dirs['output']['reg_anat'])) != 0:
 	print('Pre-existing registered t1w files found. Deleting these...')
-#        shutil.rmtree(namer.dirs['output']['reg_anat'])
-#	os.mkdir(namer.dirs['output']['reg_anat'])
+        shutil.rmtree(namer.dirs['output']['reg_anat'])
+	os.mkdir(namer.dirs['output']['reg_anat'])
     if (len(os.listdir(namer.dirs['tmp']['reg_a'])) != 0) or (len(os.listdir(namer.dirs['tmp']['reg_m'])) != 0):
         print('Pre-existing temporary files found. Deleting these...')
-#        shutil.rmtree(namer.dirs['tmp']['reg_a'])
-#        os.mkdir(namer.dirs['tmp']['reg_a'])
-#        shutil.rmtree(namer.dirs['tmp']['reg_m'])
-#        os.mkdir(namer.dirs['tmp']['reg_m'])
+        shutil.rmtree(namer.dirs['tmp']['reg_a'])
+        os.mkdir(namer.dirs['tmp']['reg_a'])
+        shutil.rmtree(namer.dirs['tmp']['reg_m'])
+        os.mkdir(namer.dirs['tmp']['reg_m'])
 
     # Check orientation (t1w)
     start_time = time.time()
-#    t1w = mgu.reorient_t1w(t1w, namer)
+    t1w = mgu.reorient_t1w(t1w, namer)
     print("%s%s%s" % ('Reorienting runtime: ', str(np.round(time.time() - start_time, 1)), 's'))
 
     if reg_style == 'native':
@@ -189,27 +189,27 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
         reg = mgr.dmri_reg(namer, nodif_B0, nodif_B0_mask, t1w, vox_size, simple=False)
         # Perform anatomical segmentation
         start_time = time.time()
-#        reg.gen_tissue()
+        reg.gen_tissue()
         print("%s%s%s" % ('gen_tissue runtime: ', str(np.round(time.time() - start_time, 1)), 's'))
 
         # Align t1w to dwi
         start_time = time.time()
-#        reg.t1w2dwi_align()
+        reg.t1w2dwi_align()
         print("%s%s%s" % ('t1w2dwi_align runtime: ', str(np.round(time.time() - start_time, 1)), 's'))
 
         # Align tissue classifiers
         start_time = time.time()
-#        reg.tissue2dwi_align()
+        reg.tissue2dwi_align()
         print("%s%s%s" % ('tissue2dwi_align runtime: ', str(np.round(time.time() - start_time, 1)), 's'))
 
         # -------- Tensor Fitting and Fiber Tractography ---------------- #
         if track_type == 'eudx':
 	    #seeds = int(1000000)
-	    seeds_wm_gm_int = mgt.build_seed_list(reg.wm_gm_int_in_dwi, stream_affine, dens=2)
+	    seeds_wm_gm_int = mgt.build_seed_list(reg.wm_gm_int_in_dwi, stream_affine, dens=3)
 	    seeds_wm = mgt.build_seed_list(reg.wm_in_dwi_bin, stream_affine, dens=1)
 	    seeds = np.vstack((seeds_wm_gm_int, seeds_wm))
         else:
-            seeds_wm_gm_int = mgt.build_seed_list(reg.wm_gm_int_in_dwi, stream_affine, dens=2)
+            seeds_wm_gm_int = mgt.build_seed_list(reg.wm_gm_int_in_dwi, stream_affine, dens=3)
 	    seeds_wm = mgt.build_seed_list(reg.wm_in_dwi_bin, stream_affine, dens=1)
 	    seeds = np.vstack((seeds_wm_gm_int, seeds_wm))
 	print('Using ' + str(len(seeds)) + ' seeds...')
@@ -220,9 +220,9 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
         streamlines = trct.run()
 
 	# Save streamlines to disk
-        print('Saving streamlines: ' + streams)
-        tractogram = Tractogram(streamlines, affine_to_rasmm=stream_affine)
-        save(tractogram, streams)
+        #print('Saving streamlines: ' + streams)
+        #tractogram = Tractogram(streamlines, affine_to_rasmm=stream_affine)
+        #save(tractogram, streams)
 
     elif reg_style == 'mni':
 	print('Running tractography in MNI-space...')
@@ -242,9 +242,9 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
 
         # Save streamlines to disk
         print('Saving streamlines: ' + streams)
-	affine = nib.load(aligned_dwi).affine
-        tractogram = Tractogram(streamlines, affine_to_rasmm=affine)
-        save(tractogram, streams)
+	#affine = nib.load(aligned_dwi).affine
+        #tractogram = Tractogram(streamlines, affine_to_rasmm=affine)
+        #save(tractogram, streams)
 
     tracks = [sl for sl in streamlines if len(sl) > 1]
 
@@ -266,8 +266,8 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
     # ------- Connectome Estimation --------------------------------- #
     # Generate graphs from streamlines for each parcellation
     for idx, label in enumerate(labels):
-#        print("Generating graph for {} parcellation...".format(label))
-#	try:
+        print("Generating graph for {} parcellation...".format(label))
+	try:
 	    if reg_style == 'native':
 	        # align atlas to t1w to dwi
 	        print("%s%s" % ('Applying native-space alignment to ', labels[idx]))
@@ -287,9 +287,9 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
                 g1.make_graph_old()
             g1.summary()
             g1.save_graph(connectomes[idx])
-#	except:
-#	    print(label + ' FAILED. Skipping...')
-#	    continue
+	except:
+	    print(label + ' FAILED. Skipping...')
+	    continue
 
     exe_time = datetime.now() - startTime
     qc_dwi.save(qc_stats, exe_time)
