@@ -108,8 +108,8 @@ class dmri_reg(object):
 	self.csf_mask = self.maps['csf_prob']
 
         # Use the probability maps to extract white matter mask
-        mgru.probmap2mask(self.maps['wm_prob'], self.wm_mask_thr, 0.2)
-        mgru.probmap2mask(self.maps['gm_prob'], self.gm_mask_thr, 0.2)
+        mgru.probmap2mask(self.maps['wm_prob'], self.wm_mask_thr, 0.5)
+        mgru.probmap2mask(self.maps['gm_prob'], self.gm_mask_thr, 0.5)
 
         # Check dimensions
 	if self.vox_size == '1mm':
@@ -180,7 +180,7 @@ class dmri_reg(object):
                 os.system(cmd)
 
                 # Apply the alignment
-                mgru.align(self.t1w_brain, self.nodif_B0, init=self.t1w2dwi_bbr_xfm, xfm=self.t1wtissue2dwi_xfm, bins=None, interp="nearestneighbour", dof=7, cost='mutualinfo', out=self.t1w2dwi, searchrad=True, sch=None)
+                mgru.align(self.t1w_brain, self.nodif_B0, init=self.t1w2dwi_bbr_xfm, xfm=self.t1wtissue2dwi_xfm, bins=None, interp="spline", dof=7, cost='mutualinfo', out=self.t1w2dwi, searchrad=True, sch=None)
             except RuntimeError('Error: FLIRT BBR failed!'):
                 pass
         else:
