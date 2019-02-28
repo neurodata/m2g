@@ -205,17 +205,17 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
         if track_type == 'eudx':
 	    #seeds = int(1000000)
 	    seeds_wm_gm_int = mgt.build_seed_list(reg.wm_gm_int_in_dwi, stream_affine, dens=4)
-	    seeds_wm = mgt.build_seed_list(reg.wm_in_dwi_bin, stream_affine, dens=2)
+	    seeds_wm = mgt.build_seed_list(reg.wm_in_dwi, stream_affine, dens=2)
 	    seeds = np.vstack((seeds_wm_gm_int, seeds_wm))
         else:
             seeds_wm_gm_int = mgt.build_seed_list(reg.wm_gm_int_in_dwi, stream_affine, dens=4)
-	    seeds_wm = mgt.build_seed_list(reg.wm_in_dwi_bin, stream_affine, dens=2)
+	    seeds_wm = mgt.build_seed_list(reg.wm_in_dwi, stream_affine, dens=2)
 	    seeds = np.vstack((seeds_wm_gm_int, seeds_wm))
 	print('Using ' + str(len(seeds)) + ' seeds...')
 
         # Compute direction model and track fiber streamlines
         print("Beginning tractography...")
-        trct = mgt.run_track(dwi_prep, nodif_B0_mask, reg.gm_in_dwi, reg.vent_csf_in_dwi_bin, reg.csf_mask_dwi, reg.wm_in_dwi, reg.wm_in_dwi_bin, gtab, mod_type, track_type, mod_func, seeds, stream_affine)
+        trct = mgt.run_track(dwi_prep, nodif_B0_mask, reg.gm_in_dwi, reg.vent_csf_in_dwi, reg.csf_mask_dwi, reg.wm_in_dwi, gtab, mod_type, track_type, mod_func, seeds, stream_affine)
         streamlines = trct.run()
 
 	# Save streamlines to disk

@@ -35,8 +35,8 @@ def build_seed_list(mask_img_file, stream_affine, dens):
     return seeds
 
 class run_track(object):
-    def __init__(self, dwi_in, nodif_B0_mask, gm_in_dwi, vent_csf_in_dwi_bin, csf_in_dwi,
-                 wm_in_dwi, wm_in_dwi_bin, gtab, mod_type, track_type, mod_func, seeds, stream_affine):
+    def __init__(self, dwi_in, nodif_B0_mask, gm_in_dwi, vent_csf_in_dwi, csf_in_dwi,
+                 wm_in_dwi, gtab, mod_type, track_type, mod_func, seeds, stream_affine):
         """
         A class for deterministic tractography in native space.
 
@@ -72,10 +72,9 @@ class run_track(object):
         self.dwi = dwi_in
         self.nodif_B0_mask = nodif_B0_mask
         self.gm_in_dwi = gm_in_dwi
-        self.vent_csf_in_dwi_bin = vent_csf_in_dwi_bin
+        self.vent_csf_in_dwi = vent_csf_in_dwi
 	self.csf_in_dwi = csf_in_dwi
         self.wm_in_dwi = wm_in_dwi
-        self.wm_in_dwi_bin = wm_in_dwi_bin
         self.gtab = gtab
 	self.mod_type = mod_type
 	self.track_type = track_type
@@ -131,10 +130,10 @@ class run_track(object):
             self.exclude_map = self.csf_mask_data
 	    self.tiss_classifier = ActTissueClassifier(self.include_map, self.exclude_map)
 	elif tiss_class == 'bin':
-	    cmd='fslmaths ' + self.wm_in_dwi_bin + ' -sub ' + self.vent_csf_in_dwi_bin + ' ' + self.wm_in_dwi_bin
+	    cmd='fslmaths ' + self.wm_in_dwi + ' -sub ' + self.vent_csf_in_dwi + ' ' + self.wm_in_dwi
  	    os.system(cmd)
-	    self.wm_in_dwi_bin_data = nib.load(self.wm_in_dwi_bin).get_data().astype('bool')
-	    self.tiss_classifier = BinaryTissueClassifier(self.wm_in_dwi_bin_data)
+	    self.wm_in_dwi_data = nib.load(self.wm_in_dwi).get_data().astype('bool')
+	    self.tiss_classifier = BinaryTissueClassifier(self.wm_in_dwi_data)
 	else:
 	    pass
 	return self.tiss_classifier

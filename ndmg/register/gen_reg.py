@@ -78,16 +78,12 @@ class dmri_reg(object):
         self.csf_mask_dwi = "{}/{}_csf_mask_dwi.nii.gz".format(self.namer.dirs['output']['reg_anat'], self.t1w_name)
         self.gm_in_dwi = "{}/{}_gm_in_dwi.nii.gz".format(self.namer.dirs['output']['reg_anat'], self.t1w_name)
         self.wm_in_dwi = "{}/{}_wm_in_dwi.nii.gz".format(self.namer.dirs['output']['reg_anat'], self.t1w_name)
-        self.vent_csf_in_dwi_bin = "{}/{}_vent_csf_in_dwi_bin.nii.gz".format(self.namer.dirs['tmp']['reg_a'], self.t1w_name)
         self.vent_mask_dwi = "{}/{}_vent_mask_dwi.nii.gz".format(self.namer.dirs['tmp']['reg_a'], self.t1w_name)
+	self.vent_csf_in_dwi = "{}/{}_vent_csf_in_dwi.nii.gz".format(self.namer.dirs['tmp']['reg_a'], self.t1w_name)
         self.vent_mask_mni = "{}/vent_mask_mni.nii.gz".format(self.namer.dirs['tmp']['reg_a'])
         self.vent_mask_t1w = "{}/vent_mask_t1w.nii.gz".format(self.namer.dirs['tmp']['reg_a'])
-        self.wm_in_dwi_bin = "{}/{}_wm_in_dwi_bin.nii.gz".format(self.namer.dirs['tmp']['reg_a'], self.t1w_name)
-        self.wm_in_dwi_binv = "{}/{}_wm_in_dwi_binv.nii.gz".format(self.namer.dirs['tmp']['reg_a'], self.t1w_name)
         self.mni_atlas = "%s%s%s%s" % (FSLDIR, '/data/atlases/HarvardOxford/HarvardOxford-sub-prob-', vox_size, '.nii.gz')
         self.input_mni = "%s%s%s%s" % (FSLDIR, '/data/standard/MNI152_T1_', vox_size, '_brain.nii.gz')
-        self.gm_in_dwi_bin = "{}/{}_gm_in_dwi_bin.nii.gz".format(self.namer.dirs['tmp']['reg_a'], self.t1w_name)
-        self.gm_in_dwi_binv = "{}/{}_gm_in_dwi_binv.nii.gz".format(self.namer.dirs['tmp']['reg_a'], self.t1w_name)
 	self.wm_gm_int_in_dwi = "{}/{}_wm_gm_int_in_dwi.nii.gz".format(namer.dirs['output']['reg_anat'], self.t1w_name)
 	self.input_mni_sched = "%s%s" % (FSLDIR, '/etc/flirtsch/T1_2_MNI152_2mm.cnf')
 
@@ -286,7 +282,7 @@ class dmri_reg(object):
         print('Creating ventricular CSF mask...')
 	cmd='fslmaths ' + self.vent_mask_dwi + ' -kernel sphere 10 -ero -bin ' + self.vent_mask_dwi
 	os.system(cmd)
-        cmd='fslmaths ' + self.csf_mask_dwi + ' -add ' + self.vent_mask_dwi + ' -bin ' + self.vent_csf_in_dwi_bin
+        cmd='fslmaths ' + self.csf_mask_dwi + ' -add ' + self.vent_mask_dwi + ' -bin ' + self.vent_csf_in_dwi
         os.system(cmd)
 
 	# Create gm-wm interface image
