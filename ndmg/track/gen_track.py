@@ -35,7 +35,7 @@ def build_seed_list(mask_img_file, stream_affine, dens):
     return seeds
 
 class run_track(object):
-    def __init__(self, dwi_in, nodif_B0_mask, gm_in_dwi, vent_csf_in_dwi, vent_csf_in_dwi_bin,
+    def __init__(self, dwi_in, nodif_B0_mask, gm_in_dwi, vent_csf_in_dwi_bin, csf_in_dwi,
                  wm_in_dwi, wm_in_dwi_bin, gtab, mod_type, track_type, mod_func, seeds, stream_affine):
         """
         A class for deterministic tractography in native space.
@@ -72,8 +72,8 @@ class run_track(object):
         self.dwi = dwi_in
         self.nodif_B0_mask = nodif_B0_mask
         self.gm_in_dwi = gm_in_dwi
-        self.vent_csf_in_dwi = vent_csf_in_dwi
-	self.vent_csf_in_dwi_bin = vent_csf_in_dwi_bin
+        self.vent_csf_in_dwi_bin = vent_csf_in_dwi_bin
+	self.csf_in_dwi = csf_in_dwi
         self.wm_in_dwi = wm_in_dwi
         self.wm_in_dwi_bin = wm_in_dwi_bin
         self.gtab = gtab
@@ -110,7 +110,7 @@ class run_track(object):
     def prep_tracking(self):
 	from dipy.tracking.local import ActTissueClassifier
 	from dipy.tracking.local import BinaryTissueClassifier
-	tiss_class = 'bin'
+	tiss_class = 'act'
         self.dwi_img = nib.load(self.dwi)
         self.data = self.dwi_img.get_data()
         # Loads mask and ensures it's a true binary mask
@@ -119,16 +119,16 @@ class run_track(object):
         # Load tissue maps and prepare tissue classifier
         self.gm_mask = nib.load(self.gm_in_dwi)
         self.gm_mask_data = self.gm_mask.get_data().astype('bool')
-        self.vent_csf_mask = nib.load(self.vent_csf_in_dwi)
-        self.vent_csf_mask_data = self.vent_csf_mask.get_data().astype('bool')
         self.wm_mask = nib.load(self.wm_in_dwi)
         self.wm_mask_data = self.wm_mask.get_data().astype('bool')
 	if tiss_class == 'act':
+            self.csf_mask = nib.load(self.csf_in_dwi)
+            self.csf_mask_data = self.csf_mask.get_data().astype('bool')
             self.background = np.ones(self.gm_mask.shape)
-            self.background[(self.gm_mask_data + self.wm_mask_data + self.vent_csf_mask_data) > 0] = 0
-            self.include_map = self.gm_mask.get_data()
+            self.background[(self.gm_mask_data + self.wm_mask_data + self.csf_mask_data) > 0] = 0
+            self.include_map = self.gm_mask_data
             self.include_map[self.background > 0] = 1
-            self.exclude_map = self.vent_csf_mask_data
+            self.exclude_map = self.csf_mask_data
 	    self.tiss_classifier = ActTissueClassifier(self.include_map, self.exclude_map)
 	elif tiss_class == 'bin':
 	    cmd='fslmaths ' + self.wm_in_dwi_bin + ' -sub ' + self.vent_csf_in_dwi_bin + ' ' + self.wm_in_dwi_bin

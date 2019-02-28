@@ -82,7 +82,6 @@ class dmri_reg(object):
         self.wm_in_dwi = "{}/{}_wm_in_dwi.nii.gz".format(self.namer.dirs['output']['reg_anat'], self.t1w_name)
         self.gm_in_dwi_thr = "{}/{}_gm_in_dwi_thr.nii.gz".format(self.namer.dirs['output']['reg_anat'], self.t1w_name)
         self.wm_in_dwi_thr = "{}/{}_wm_in_dwi_thr.nii.gz".format(self.namer.dirs['output']['reg_anat'], self.t1w_name)
-        self.vent_csf_in_dwi = "{}/{}_vent_csf_in_dwi.nii.gz".format(self.namer.dirs['output']['reg_anat'], self.t1w_name)
         self.vent_csf_in_dwi_bin = "{}/{}_vent_csf_in_dwi_bin.nii.gz".format(self.namer.dirs['tmp']['reg_a'], self.t1w_name)
         self.vent_mask_dwi = "{}/{}_vent_mask_dwi.nii.gz".format(self.namer.dirs['tmp']['reg_a'], self.t1w_name)
         self.vent_mask_mni = "{}/vent_mask_mni.nii.gz".format(self.namer.dirs['tmp']['reg_a'])
@@ -108,8 +107,12 @@ class dmri_reg(object):
 	self.csf_mask = self.maps['csf_prob']
 
         # Use the probability maps to extract white matter mask
-        mgru.probmap2mask(self.maps['wm_prob'], self.wm_mask_thr, 0.5)
-        mgru.probmap2mask(self.maps['gm_prob'], self.gm_mask_thr, 0.5)
+	cmd='fslmaths ' + self.maps['wm_prob'] + ' -thr 0.3 -uthr 1 ' + self.wm_mask
+	os.system(cmd)
+        cmd='fslmaths ' + self.maps['gm_prob'] + ' -thr 0.3 -uthr 1 ' + self.gm_mask
+        os.system(cmd)
+        cmd='fslmaths ' + self.maps['csf_prob'] + ' -thr 0.6 -uthr 1 ' + self.csf_mask
+        os.system(cmd)
 
         # Check dimensions
 	if self.vox_size == '1mm':
@@ -123,8 +126,6 @@ class dmri_reg(object):
         self.wm_mask = mgu.match_target_vox_res(self.wm_mask, self.vox_size, self.namer, self.zoom_set, sens='t1w')
         self.gm_mask = mgu.match_target_vox_res(self.gm_mask, self.vox_size, self.namer, self.zoom_set, sens='t1w')
         self.csf_mask = mgu.match_target_vox_res(self.csf_mask, self.vox_size, self.namer, self.zoom_set, sens='t1w')
-        self.wm_mask_thr = mgu.match_target_vox_res(self.wm_mask_thr, self.vox_size, self.namer, self.zoom_set, sens='t1w')
-        self.gm_mask_thr = mgu.match_target_vox_res(self.gm_mask_thr, self.vox_size, self.namer, self.zoom_set, sens='t1w')
 
         # Extract wm edge
         cmd='fslmaths ' + self.wm_mask + ' -edge -bin -mas ' + self.wm_mask  + ' ' + self.wm_edge
@@ -265,7 +266,7 @@ class dmri_reg(object):
         os.system(cmd)
         cmd='fslroi ' + self.mni_atlas + ' ' + self.lvent_out_file + ' 13 1'
         os.system(cmd)
-        self.args = "%s%s%s" % (' -add ', self.rvent_out_file, ' -thr 0.1 -bin -dilF ')
+        self.args = "%s%s%s" % (' -add ', self.rvent_out_file, ' -thr 0.1 -bin ')
         cmd='fslmaths ' + self.lvent_out_file + self.args + self.mni_vent_loc
         os.system(cmd)
 
@@ -285,9 +286,6 @@ class dmri_reg(object):
         mgru.applyxfm(self.nodif_B0, self.gm_mask, self.t1wtissue2dwi_xfm, self.gm_in_dwi)
         mgru.applyxfm(self.nodif_B0, self.wm_mask, self.t1wtissue2dwi_xfm, self.wm_in_dwi)	
 
-        mgru.applyxfm(self.nodif_B0, self.gm_mask_thr, self.t1wtissue2dwi_xfm, self.gm_in_dwi_thr)
-        mgru.applyxfm(self.nodif_B0, self.wm_mask_thr, self.t1wtissue2dwi_xfm, self.wm_in_dwi_thr)
-
         # Threshold WM to binary in dwi space
         self.t_img = load_img(self.wm_in_dwi)
         self.mask = math_img('img > 0', img=self.t_img)
@@ -298,17 +296,15 @@ class dmri_reg(object):
         self.mask = math_img('img > 0', img=self.t_img)
         self.mask.to_filename(self.gm_in_dwi_bin)
 
-        # Erode and mask CSF with ventricles
-        print('Masking CSF with ventricle mask...')
-        cmd='fslmaths ' + self.vent_mask_dwi + ' -bin ' + self.vent_mask_dwi
-        os.system(cmd)
-        cmd='fslmaths ' + self.csf_mask_dwi + ' -mas ' + self.vent_mask_dwi + ' ' + self.vent_csf_in_dwi
-        os.system(cmd)
-        cmd='fslmaths ' + self.vent_csf_in_dwi + ' -bin ' + self.vent_csf_in_dwi_bin
+        # Create ventricular CSF mask
+        print('Creating ventricular CSF mask...')
+	cmd='fslmaths ' + self.self.vent_mask_dwi + ' -kernel sphere 10 -ero -bin ' + self.self.vent_mask_dwi
+	os.system(cmd)
+        cmd='fslmaths ' + self.csf_mask_dwi + ' -add ' + self.vent_mask_dwi + ' -bin ' + self.vent_csf_in_dwi_bin
         os.system(cmd)
 
 	# Create gm-wm interface image
-        cmd = 'fslmaths ' + self.gm_in_dwi_thr + ' -mul ' + self.wm_in_dwi_thr + ' -mas ' + self.nodif_B0_mask + ' -bin ' + self.wm_gm_int_in_dwi
+        cmd = 'fslmaths ' + self.gm_in_dwi + ' -mul ' + self.wm_in_dwi + ' -mas ' + self.nodif_B0_mask + ' -bin ' + self.wm_gm_int_in_dwi
         os.system(cmd)
 
         return

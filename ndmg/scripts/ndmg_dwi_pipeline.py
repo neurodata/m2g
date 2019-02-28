@@ -28,7 +28,7 @@ from datetime import datetime
 import time
 from ndmg.stats.qa_tensor import *
 from ndmg.stats.qa_fibers import *
-from ndmg.stats.qa_mri import qa_mri
+#from ndmg.stats.qa_mri import qa_mri
 from ndmg.utils import gen_utils as mgu
 from ndmg.utils import reg_utils as rgu
 from ndmg.register import gen_reg as mgr
@@ -109,7 +109,7 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
     else:
 	raise ValueError('Voxel size not supported. Use 2mm or 1mm')
 
-    qc_dwi = qa_mri(namer, 'dwi')  # for quality control
+#    qc_dwi = qa_mri(namer, 'dwi')  # for quality control
     # -------- Preprocessing Steps --------------------------------- #
     # Perform eddy correction
     start_time = time.time()
@@ -205,18 +205,18 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
         # -------- Tensor Fitting and Fiber Tractography ---------------- #
         if track_type == 'eudx':
 	    #seeds = int(1000000)
-	    seeds_wm_gm_int = mgt.build_seed_list(reg.wm_gm_int_in_dwi, stream_affine, dens=3)
+	    seeds_wm_gm_int = mgt.build_seed_list(reg.wm_gm_int_in_dwi, stream_affine, dens=4)
 	    seeds_wm = mgt.build_seed_list(reg.wm_in_dwi_bin, stream_affine, dens=2)
 	    seeds = np.vstack((seeds_wm_gm_int, seeds_wm))
         else:
-            seeds_wm_gm_int = mgt.build_seed_list(reg.wm_gm_int_in_dwi, stream_affine, dens=3)
+            seeds_wm_gm_int = mgt.build_seed_list(reg.wm_gm_int_in_dwi, stream_affine, dens=4)
 	    seeds_wm = mgt.build_seed_list(reg.wm_in_dwi_bin, stream_affine, dens=2)
 	    seeds = np.vstack((seeds_wm_gm_int, seeds_wm))
 	print('Using ' + str(len(seeds)) + ' seeds...')
 
         # Compute direction model and track fiber streamlines
         print("Beginning tractography...")
-        trct = mgt.run_track(dwi_prep, nodif_B0_mask, reg.gm_in_dwi, reg.vent_csf_in_dwi, reg.vent_csf_in_dwi_bin, reg.wm_in_dwi, reg.wm_in_dwi_bin, gtab, mod_type, track_type, mod_func, seeds, stream_affine)
+        trct = mgt.run_track(dwi_prep, nodif_B0_mask, reg.gm_in_dwi, reg.vent_csf_in_dwi_bin, reg.csf_in_dwi, reg.wm_in_dwi, reg.wm_in_dwi_bin, gtab, mod_type, track_type, mod_func, seeds, stream_affine)
         streamlines = trct.run()
 
 	# Save streamlines to disk
@@ -292,7 +292,7 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
 	    continue
 
     exe_time = datetime.now() - startTime
-    qc_dwi.save(qc_stats, exe_time)
+#    qc_dwi.save(qc_stats, exe_time)
 
     # Clean temp files
     if clean is True:
