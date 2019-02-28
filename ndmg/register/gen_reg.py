@@ -298,7 +298,7 @@ class dmri_reg(object):
 
         # Create ventricular CSF mask
         print('Creating ventricular CSF mask...')
-	cmd='fslmaths ' + self.self.vent_mask_dwi + ' -kernel sphere 10 -ero -bin ' + self.self.vent_mask_dwi
+	cmd='fslmaths ' + self.self.vent_mask_dwi + ' -kernel sphere 10 -ero -bin ' + self.vent_mask_dwi
 	os.system(cmd)
         cmd='fslmaths ' + self.csf_mask_dwi + ' -add ' + self.vent_mask_dwi + ' -bin ' + self.vent_csf_in_dwi_bin
         os.system(cmd)
