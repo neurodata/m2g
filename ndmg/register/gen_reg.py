@@ -98,14 +98,6 @@ class dmri_reg(object):
 	self.gm_mask = self.maps['gm_prob']
 	self.csf_mask = self.maps['csf_prob']
 
-        # Use the probability maps to extract white matter mask
-	cmd='fslmaths ' + self.wm_mask + ' -thr 0.3 -bin ' + self.wm_mask
-	os.system(cmd)
-        cmd='fslmaths ' + self.gm_mask + ' -thr 0.3 -bin ' + self.gm_mask
-        os.system(cmd)
-        cmd='fslmaths ' + self.csf_mask + ' -thr 0.6 -bin ' + self.csf_mask
-        os.system(cmd)
-
         # Check dimensions
 	if self.vox_size == '1mm':
             self.zoom_set = (1.0, 1.0, 1.0)
@@ -277,6 +269,21 @@ class dmri_reg(object):
         mgru.applyxfm(self.nodif_B0, self.csf_mask, self.t1wtissue2dwi_xfm, self.csf_mask_dwi)
         mgru.applyxfm(self.nodif_B0, self.gm_mask, self.t1wtissue2dwi_xfm, self.gm_in_dwi)
         mgru.applyxfm(self.nodif_B0, self.wm_mask, self.t1wtissue2dwi_xfm, self.wm_in_dwi)	
+
+        # Threshold WM to binary in dwi space
+        self.t_img = load_img(self.wm_in_dwi)
+        self.mask = math_img('img > 0.3', img=self.t_img)
+        self.mask.to_filename(self.wm_in_dwi)
+
+        # Threshold GM to binary in dwi space
+        self.t_img = load_img(self.gm_in_dwi)
+        self.mask = math_img('img > 0.3', img=self.t_img)
+        self.mask.to_filename(self.gm_in_dwi)
+
+        # Threshold CSF to binary in dwi space
+        self.t_img = load_img(self.csf_mask_dwi)
+        self.mask = math_img('img > 0.6', img=self.t_img)
+        self.mask.to_filename(self.csf_mask_dwi)
 
         # Create ventricular CSF mask
         print('Creating ventricular CSF mask...')
