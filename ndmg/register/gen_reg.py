@@ -255,7 +255,7 @@ class dmri_reg(object):
         os.system(cmd)
 
         # Create transform to MNI atlas to T1w using flirt. This will be use to transform the ventricles to dwi space.
-        mgru.align(self.mni_atlas, self.input_mni, xfm=self.xfm_roi2mni_init, init=None, bins=None, dof=7, cost='mutualinfo', searchrad=True, interp="spline", out=None)
+        mgru.align(self.mni_atlas, self.input_mni, xfm=self.xfm_roi2mni_init, init=None, bins=None, dof=6, cost='mutualinfo', searchrad=True, interp="spline", out=None)
 
         # Create transform to align roi to mni and T1w using flirt
         mgru.applyxfm(self.input_mni, self.mni_vent_loc, self.xfm_roi2mni_init, self.vent_mask_mni)
@@ -272,17 +272,17 @@ class dmri_reg(object):
 
         # Threshold WM to binary in dwi space
         self.t_img = load_img(self.wm_in_dwi)
-        self.mask = math_img('img > 0.25', img=self.t_img)
+        self.mask = math_img('img > 0.2', img=self.t_img)
         self.mask.to_filename(self.wm_in_dwi)
 
         # Threshold GM to binary in dwi space
         self.t_img = load_img(self.gm_in_dwi)
-        self.mask = math_img('img > 0.3', img=self.t_img)
+        self.mask = math_img('img > 0.2', img=self.t_img)
         self.mask.to_filename(self.gm_in_dwi)
 
         # Threshold CSF to binary in dwi space
         self.t_img = load_img(self.csf_mask_dwi)
-        self.mask = math_img('img > 0.7', img=self.t_img)
+        self.mask = math_img('img > 0.8', img=self.t_img)
         self.mask.to_filename(self.csf_mask_dwi)
 
         # Create ventricular CSF mask
