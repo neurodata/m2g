@@ -71,8 +71,6 @@ class dmri_reg(object):
 	self.wm_edge = "{}/{}_wm_edge.nii.gz".format(self.namer.dirs['tmp']['reg_a'], self.t1w_name)
         self.csf_mask = "{}/{}_csf.nii.gz".format(self.namer.dirs['output']['prep_anat'], self.t1w_name)
         self.gm_mask = "{}/{}_gm.nii.gz".format(self.namer.dirs['output']['prep_anat'], self.t1w_name)
-        self.wm_mask_thr = "{}/{}_wm_thr.nii.gz".format(self.namer.dirs['tmp']['reg_a'], self.t1w_name)
-        self.gm_mask_thr = "{}/{}_gm_thr.nii.gz".format(self.namer.dirs['tmp']['reg_a'], self.t1w_name)
         self.xfm_roi2mni_init = "{}/roi_2_mni.mat".format(self.namer.dirs['tmp']['reg_m'])
         self.lvent_out_file = "{}/LVentricle.nii.gz".format(self.namer.dirs['tmp']['reg_a'])
         self.rvent_out_file = "{}/RVentricle.nii.gz".format(self.namer.dirs['tmp']['reg_a'])
@@ -80,8 +78,6 @@ class dmri_reg(object):
         self.csf_mask_dwi = "{}/{}_csf_mask_dwi.nii.gz".format(self.namer.dirs['output']['reg_anat'], self.t1w_name)
         self.gm_in_dwi = "{}/{}_gm_in_dwi.nii.gz".format(self.namer.dirs['output']['reg_anat'], self.t1w_name)
         self.wm_in_dwi = "{}/{}_wm_in_dwi.nii.gz".format(self.namer.dirs['output']['reg_anat'], self.t1w_name)
-        self.gm_in_dwi_thr = "{}/{}_gm_in_dwi_thr.nii.gz".format(self.namer.dirs['output']['reg_anat'], self.t1w_name)
-        self.wm_in_dwi_thr = "{}/{}_wm_in_dwi_thr.nii.gz".format(self.namer.dirs['output']['reg_anat'], self.t1w_name)
         self.vent_csf_in_dwi_bin = "{}/{}_vent_csf_in_dwi_bin.nii.gz".format(self.namer.dirs['tmp']['reg_a'], self.t1w_name)
         self.vent_mask_dwi = "{}/{}_vent_mask_dwi.nii.gz".format(self.namer.dirs['tmp']['reg_a'], self.t1w_name)
         self.vent_mask_mni = "{}/vent_mask_mni.nii.gz".format(self.namer.dirs['tmp']['reg_a'])
@@ -107,11 +103,11 @@ class dmri_reg(object):
 	self.csf_mask = self.maps['csf_prob']
 
         # Use the probability maps to extract white matter mask
-	cmd='fslmaths ' + self.maps['wm_prob'] + ' -thr 0.3 -uthr 1 ' + self.wm_mask
+	cmd='fslmaths ' + self.wm_mask + ' -thr 0.3 -bin ' + self.wm_mask
 	os.system(cmd)
-        cmd='fslmaths ' + self.maps['gm_prob'] + ' -thr 0.3 -uthr 1 ' + self.gm_mask
+        cmd='fslmaths ' + self.gm_mask + ' -thr 0.3 -bin ' + self.gm_mask
         os.system(cmd)
-        cmd='fslmaths ' + self.maps['csf_prob'] + ' -thr 0.6 -uthr 1 ' + self.csf_mask
+        cmd='fslmaths ' + self.csf_mask + ' -thr 0.6 -bin ' + self.csf_mask
         os.system(cmd)
 
         # Check dimensions
@@ -286,19 +282,9 @@ class dmri_reg(object):
         mgru.applyxfm(self.nodif_B0, self.gm_mask, self.t1wtissue2dwi_xfm, self.gm_in_dwi)
         mgru.applyxfm(self.nodif_B0, self.wm_mask, self.t1wtissue2dwi_xfm, self.wm_in_dwi)	
 
-        # Threshold WM to binary in dwi space
-        self.t_img = load_img(self.wm_in_dwi)
-        self.mask = math_img('img > 0', img=self.t_img)
-        self.mask.to_filename(self.wm_in_dwi_bin)
-
-        # Threshold GM to binary in dwi space
-        self.t_img = load_img(self.gm_in_dwi)
-        self.mask = math_img('img > 0', img=self.t_img)
-        self.mask.to_filename(self.gm_in_dwi_bin)
-
         # Create ventricular CSF mask
         print('Creating ventricular CSF mask...')
-	cmd='fslmaths ' + self.self.vent_mask_dwi + ' -kernel sphere 10 -ero -bin ' + self.vent_mask_dwi
+	cmd='fslmaths ' + self.vent_mask_dwi + ' -kernel sphere 10 -ero -bin ' + self.vent_mask_dwi
 	os.system(cmd)
         cmd='fslmaths ' + self.csf_mask_dwi + ' -add ' + self.vent_mask_dwi + ' -bin ' + self.vent_csf_in_dwi_bin
         os.system(cmd)
