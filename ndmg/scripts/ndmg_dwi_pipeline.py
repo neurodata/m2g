@@ -204,11 +204,11 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
         # -------- Tensor Fitting and Fiber Tractography ---------------- #
         if track_type == 'eudx':
 	    #seeds = int(1000000)
-	    seeds_wm_gm_int = mgt.build_seed_list(reg.wm_gm_int_in_dwi, stream_affine, dens=4)
+	    seeds_wm_gm_int = mgt.build_seed_list(reg.wm_gm_int_in_dwi, stream_affine, dens=5)
 	    seeds_wm = mgt.build_seed_list(reg.wm_in_dwi, stream_affine, dens=2)
 	    seeds = np.vstack((seeds_wm_gm_int, seeds_wm))
         else:
-            seeds_wm_gm_int = mgt.build_seed_list(reg.wm_gm_int_in_dwi, stream_affine, dens=4)
+            seeds_wm_gm_int = mgt.build_seed_list(reg.wm_gm_int_in_dwi, stream_affine, dens=5)
 	    seeds_wm = mgt.build_seed_list(reg.wm_in_dwi, stream_affine, dens=2)
 	    seeds = np.vstack((seeds_wm_gm_int, seeds_wm))
 	print('Using ' + str(len(seeds)) + ' seeds...')
