@@ -117,12 +117,12 @@ class run_track(object):
         self.mask = self.mask_img.get_data() > 0
         # Load tissue maps and prepare tissue classifier
         self.gm_mask = nib.load(self.gm_in_dwi)
-        self.gm_mask_data = self.gm_mask.get_data().astype('bool')
+        self.gm_mask_data = self.gm_mask.get_data()
         self.wm_mask = nib.load(self.wm_in_dwi)
-        self.wm_mask_data = self.wm_mask.get_data().astype('bool')
+        self.wm_mask_data = self.wm_mask.get_data()
 	if tiss_class == 'act':
             self.csf_mask = nib.load(self.csf_in_dwi)
-            self.csf_mask_data = self.csf_mask.get_data().astype('bool')
+            self.csf_mask_data = self.csf_mask.get_data()
             self.background = np.ones(self.gm_mask.shape)
             self.background[(self.gm_mask_data + self.wm_mask_data + self.csf_mask_data) > 0] = 0
             self.include_map = self.gm_mask_data
@@ -130,8 +130,6 @@ class run_track(object):
             self.exclude_map = self.csf_mask_data
 	    self.tiss_classifier = ActTissueClassifier(self.include_map, self.exclude_map)
 	elif tiss_class == 'bin':
-	    cmd='fslmaths ' + self.wm_in_dwi + ' -sub ' + self.vent_csf_in_dwi + ' ' + self.wm_in_dwi
- 	    os.system(cmd)
 	    self.wm_in_dwi_data = nib.load(self.wm_in_dwi).get_data().astype('bool')
 	    self.tiss_classifier = BinaryTissueClassifier(self.wm_in_dwi_data)
 	else:

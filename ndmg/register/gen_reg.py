@@ -25,7 +25,7 @@ warnings.simplefilter("ignore")
 import os
 import nibabel as nib
 import numpy as np
-from nilearn.image import load_img, math_img, resample_img, mean_img, new_img_like
+from nilearn.image import load_img, math_img, resample_img, mean_img, new_img_like, threshold_img
 from dipy.core.gradients import gradient_table
 from dipy.io import read_bvals_bvecs
 try:
@@ -79,6 +79,9 @@ class dmri_reg(object):
         self.csf_mask_dwi = "{}/{}_csf_mask_dwi.nii.gz".format(self.namer.dirs['output']['reg_anat'], self.t1w_name)
         self.gm_in_dwi = "{}/{}_gm_in_dwi.nii.gz".format(self.namer.dirs['output']['reg_anat'], self.t1w_name)
         self.wm_in_dwi = "{}/{}_wm_in_dwi.nii.gz".format(self.namer.dirs['output']['reg_anat'], self.t1w_name)
+        self.csf_mask_dwi_bin = "{}/{}_csf_mask_dwi_bin.nii.gz".format(self.namer.dirs['tmp']['reg_a'], self.t1w_name)
+        self.gm_in_dwi_bin = "{}/{}_gm_in_dwi_bin.nii.gz".format(self.namer.dirs['tmp']['reg_a'], self.t1w_name)
+        self.wm_in_dwi_bin = "{}/{}_wm_in_dwi_bin.nii.gz".format(self.namer.dirs['tmp']['reg_a'], self.t1w_name)
         self.vent_mask_dwi = "{}/{}_vent_mask_dwi.nii.gz".format(self.namer.dirs['tmp']['reg_a'], self.t1w_name)
 	self.vent_csf_in_dwi = "{}/{}_vent_csf_in_dwi.nii.gz".format(self.namer.dirs['tmp']['reg_a'], self.t1w_name)
         self.vent_mask_mni = "{}/vent_mask_mni.nii.gz".format(self.namer.dirs['tmp']['reg_a'])
@@ -279,30 +282,45 @@ class dmri_reg(object):
         mgru.applyxfm(self.nodif_B0, self.gm_mask, self.t1wtissue2dwi_xfm, self.gm_in_dwi)
         mgru.applyxfm(self.nodif_B0, self.wm_mask, self.t1wtissue2dwi_xfm, self.wm_in_dwi)	
 
+	# Threshold WM to binary in dwi space
+	self.thr_img = load_img(self.wm_in_dwi)
+	self.wm_in_dwi_img = threshold_img(self.thr_img, threshold='20%')
+	self.wm_in_dwi_img.to_filename(self.wm_in_dwi)
+
+	# Threshold GM to binary in dwi space
+        self.thr_img = load_img(self.gm_in_dwi)
+        self.gm_in_dwi_img = threshold_img(self.thr_img, threshold='20%')
+        self.gm_in_dwi_img.to_filename(self.gm_in_dwi)
+
+	# Threshold CSF to binary in dwi space
+        self.thr_img = load_img(self.csf_in_dwi)
+        self.csf_in_dwi_img = threshold_img(self.thr_img, threshold='90%')
+        self.csf_in_dwi_img.to_filename(self.csf_in_dwi)
+
         # Threshold WM to binary in dwi space
         self.t_img = load_img(self.wm_in_dwi)
-        self.mask = math_img('img > 0.2', img=self.t_img)
-        self.mask.to_filename(self.wm_in_dwi)
+        self.mask = math_img('img > 0', img=self.t_img)
+        self.mask.to_filename(self.wm_in_dwi_bin)
 
         # Threshold GM to binary in dwi space
         self.t_img = load_img(self.gm_in_dwi)
-        self.mask = math_img('img > 0.2', img=self.t_img)
-        self.mask.to_filename(self.gm_in_dwi)
+        self.mask = math_img('img > 0', img=self.t_img)
+        self.mask.to_filename(self.gm_in_dwi_bin)
 
         # Threshold CSF to binary in dwi space
         self.t_img = load_img(self.csf_mask_dwi)
-        self.mask = math_img('img > 0.9', img=self.t_img)
-        self.mask.to_filename(self.csf_mask_dwi)
+        self.mask = math_img('img > 0', img=self.t_img)
+        self.mask.to_filename(self.csf_mask_dwi_bin)
 
         # Create ventricular CSF mask
         print('Creating ventricular CSF mask...')
 	cmd='fslmaths ' + self.vent_mask_dwi + ' -kernel sphere 10 -ero -bin ' + self.vent_mask_dwi
 	os.system(cmd)
-        cmd='fslmaths ' + self.csf_mask_dwi + ' -add ' + self.vent_mask_dwi + ' -bin ' + self.vent_csf_in_dwi
+        cmd='fslmaths ' + self.csf_mask_dwi_bin + ' -add ' + self.vent_mask_dwi + ' -bin ' + self.vent_csf_in_dwi
         os.system(cmd)
 
 	# Create gm-wm interface image
-        cmd = 'fslmaths ' + self.gm_in_dwi + ' -mul ' + self.wm_in_dwi + ' -mas ' + self.nodif_B0_mask + ' -bin ' + self.wm_gm_int_in_dwi
+        cmd = 'fslmaths ' + self.gm_in_dwi_bin + ' -mul ' + self.wm_in_dwi_bin + ' -mas ' + self.nodif_B0_mask + ' -bin ' + self.wm_gm_int_in_dwi
         os.system(cmd)
 
         return
