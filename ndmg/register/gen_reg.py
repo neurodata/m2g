@@ -143,7 +143,7 @@ class dmri_reg(object):
             try:
                 print('Running non-linear registration: T1w-->MNI ...')
                 # Use FNIRT to nonlinearly align T1 to MNI template
-                mgru.align_nonlinear(self.t1w_brain, self.input_mni, xfm=self.t12mni_xfm_init, out=self.t1_aligned_mni, warp=self.warp_t1w2mni, config=self.input_mni_sched)
+                mgru.align_nonlinear(self.t1w_brain, self.input_mni, xfm=self.t12mni_xfm_init, out=self.t1_aligned_mni, warp=self.warp_t1w2mni)
 
                 # Get warp from MNI -> T1
                 mgru.inverse_warp(self.t1w_brain, self.mni2t1w_warp, self.warp_t1w2mni)
@@ -293,9 +293,9 @@ class dmri_reg(object):
         self.gm_in_dwi_img.to_filename(self.gm_in_dwi)
 
 	# Threshold CSF to binary in dwi space
-        self.thr_img = load_img(self.csf_in_dwi)
+        self.thr_img = load_img(self.csf_mask_dwi)
         self.csf_in_dwi_img = threshold_img(self.thr_img, threshold='90%')
-        self.csf_in_dwi_img.to_filename(self.csf_in_dwi)
+        self.csf_in_dwi_img.to_filename(self.csf_mask_dwi)
 
         # Threshold WM to binary in dwi space
         self.t_img = load_img(self.wm_in_dwi)

@@ -426,7 +426,7 @@ def align_nonlinear(inp, ref, xfm, out, warp, ref_mask=None, in_mask=None, confi
             - a mask in which voxels will be extracted
             during nonlinear alignment.
     """
-    cmd = "fnirt --in={} --ref={} --aff={} --iout={} --cout={} --warpres=8,8,8 --subsamp=4,4,2,2,1,1 --applyrefmask=0,0,0,0,1,1"
+    cmd = "fnirt --in={} --ref={} --aff={} --iout={} --cout={} --warpres=8,8,8 --subsamp=4,2,2,1,1 --refmask=/usr/share/fsl/5.0/data/standard/MNI152_T1_2mm_brain_mask_dil.nii.gz --applyrefmask=0,0,0,0,1 --infwhm=6,5,4,2,2 --intmod=global_non_linear_with_bias --lambda=250,100,50,40,30 --estint=1,1,1,1,0 --miter=5,5,5,5,10"
     cmd = cmd.format(inp, ref, xfm, out, warp, config)
     if ref_mask is not None:
         cmd += " --refmask={} --applyrefmask=1".format(ref_mask)
