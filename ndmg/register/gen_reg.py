@@ -190,14 +190,17 @@ class dmri_reg(object):
         """
         self.atlas = atlas
         self.atlas_name = self.atlas.split('/')[-1].split('.')[0]
+        self.aligned_atlas_t1mni = "{}/{}_aligned_atlas_t1w_mni.nii.gz".format(self.namer.dirs['tmp']['reg_a'], self.atlas_name)
         self.aligned_atlas_skull = "{}/{}_aligned_atlas_skull.nii.gz".format(self.namer.dirs['tmp']['reg_a'], self.atlas_name)
         self.dwi_aligned_atlas = "{}/{}_aligned_atlas.nii.gz".format(self.namer.dirs['output']['reg_anat'], self.atlas_name)
         #self.dwi_aligned_atlas_mask = "{}/{}_aligned_atlas_mask.nii.gz".format(self.namer.dirs['tmp']['reg_a'], self.atlas_name)
 
+        mgru.align(self.atlas, self.t1_aligned_mni, init=None, xfm=None, out=self.aligned_atlas_t1mni, dof=6, searchrad=True, interp="nearestneighbour", cost='mutualinfo')
+
         if self.simple is False:
             try:
 		# Apply warp resulting from the inverse of T1w-->MNI created earlier
-                mgru.apply_warp(self.t1w_brain, self.atlas, self.aligned_atlas_skull, warp=self.mni2t1w_warp, interp='nn', sup=True)
+                mgru.apply_warp(self.t1w_brain, self.aligned_atlas_t1mni, self.aligned_atlas_skull, warp=self.mni2t1w_warp, interp='nn', sup=True)
 
                 # Apply transform to dwi space
 		mgru.align(self.aligned_atlas_skull, self.nodif_B0, init=self.t1wtissue2dwi_xfm, xfm=None, out=self.dwi_aligned_atlas, dof=6, searchrad=True, interp="nearestneighbour", cost='mutualinfo')
