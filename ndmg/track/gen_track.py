@@ -121,13 +121,13 @@ class run_track(object):
         self.wm_mask = nib.load(self.wm_in_dwi)
         self.wm_mask_data = self.wm_mask.get_data()
 	if tiss_class == 'act':
-            self.csf_mask = nib.load(self.csf_in_dwi)
-            self.csf_mask_data = self.csf_mask.get_data()
+            self.vent_csf_in_dwi = nib.load(self.vent_csf_in_dwi)
+            self.vent_csf_in_dwi_data = self.vent_csf_in_dwi.get_data()
             self.background = np.ones(self.gm_mask.shape)
-            self.background[(self.gm_mask_data + self.wm_mask_data + self.csf_mask_data) > 0] = 0
+            self.background[(self.gm_mask_data + self.wm_mask_data + self.vent_csf_in_dwi_data) > 0] = 0
             self.include_map = self.gm_mask_data
             self.include_map[self.background > 0] = 1
-            self.exclude_map = self.csf_mask_data
+            self.exclude_map = self.vent_csf_in_dwi_data
 	    self.tiss_classifier = ActTissueClassifier(self.include_map, self.exclude_map)
 	elif tiss_class == 'bin':
 	    self.wm_in_dwi_data = nib.load(self.wm_in_dwi).get_data().astype('bool')

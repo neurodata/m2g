@@ -88,6 +88,7 @@ class dmri_reg(object):
         self.vent_mask_t1w = "{}/vent_mask_t1w.nii.gz".format(self.namer.dirs['tmp']['reg_a'])
         self.mni_atlas = "%s%s%s%s" % (FSLDIR, '/data/atlases/HarvardOxford/HarvardOxford-sub-prob-', vox_size, '.nii.gz')
         self.input_mni = "%s%s%s%s" % (FSLDIR, '/data/standard/MNI152_T1_', vox_size, '_brain.nii.gz')
+	self.input_mni_mask = "%s%s%s%s" % (FSLDIR, '/data/standard/MNI152_T1_', vox_size, '_brain_mask.nii.gz')
 	self.wm_gm_int_in_dwi = "{}/{}_wm_gm_int_in_dwi.nii.gz".format(namer.dirs['output']['reg_anat'], self.t1w_name)
 	self.input_mni_sched = "%s%s" % (FSLDIR, '/etc/flirtsch/T1_2_MNI152_2mm.cnf')
 
@@ -143,7 +144,7 @@ class dmri_reg(object):
             try:
                 print('Running non-linear registration: T1w-->MNI ...')
                 # Use FNIRT to nonlinearly align T1 to MNI template
-                mgru.align_nonlinear(self.t1w_brain, self.input_mni, xfm=self.t12mni_xfm_init, out=self.t1_aligned_mni, warp=self.warp_t1w2mni, config=self.input_mni_sched)
+                mgru.align_nonlinear(self.t1w_brain, self.input_mni_mask, xfm=self.t12mni_xfm_init, out=self.t1_aligned_mni, warp=self.warp_t1w2mni, ref_mask=self.input_mni, config=self.input_mni_sched)
 
                 # Get warp from MNI -> T1
                 mgru.inverse_warp(self.t1w_brain, self.mni2t1w_warp, self.warp_t1w2mni)
@@ -198,7 +199,7 @@ class dmri_reg(object):
         self.dwi_aligned_atlas = "{}/{}_aligned_atlas.nii.gz".format(self.namer.dirs['output']['reg_anat'], self.atlas_name)
         #self.dwi_aligned_atlas_mask = "{}/{}_aligned_atlas_mask.nii.gz".format(self.namer.dirs['tmp']['reg_a'], self.atlas_name)
 
-        mgru.align(self.atlas, self.t1_aligned_mni, init=None, xfm=None, out=self.aligned_atlas_t1mni, dof=6, searchrad=True, interp="nearestneighbour", cost='corratio')
+        mgru.align(self.atlas, self.t1_aligned_mni, init=None, xfm=None, out=self.aligned_atlas_t1mni, dof=6, searchrad=True, interp="nearestneighbour", cost='mutualinfo')
 
         if self.simple is False:
             try:
@@ -206,7 +207,7 @@ class dmri_reg(object):
                 mgru.apply_warp(self.t1w_brain, self.aligned_atlas_t1mni, self.aligned_atlas_skull, warp=self.mni2t1w_warp, interp='nn', sup=True)
 
                 # Apply transform to dwi space
-		mgru.align(self.aligned_atlas_skull, self.nodif_B0, init=self.t1wtissue2dwi_xfm, xfm=None, out=self.dwi_aligned_atlas, dof=6, searchrad=True, interp="nearestneighbour", cost='corratio')
+		mgru.align(self.aligned_atlas_skull, self.nodif_B0, init=self.t1wtissue2dwi_xfm, xfm=None, out=self.dwi_aligned_atlas, dof=6, searchrad=True, interp="nearestneighbour", cost='mutualinfo')
             except:
                 print("Warning: Atlas is not in correct dimensions, or input is low quality,\nusing linear template registration.")
                 # Create transform to align atlas to T1w using flirt
@@ -283,19 +284,19 @@ class dmri_reg(object):
         mgru.applyxfm(self.nodif_B0, self.wm_mask, self.t1wtissue2dwi_xfm, self.wm_in_dwi)	
 
 	# Threshold WM to binary in dwi space
-	self.thr_img = load_img(self.wm_in_dwi)
-	self.wm_in_dwi_img = threshold_img(self.thr_img, threshold='20%')
-	self.wm_in_dwi_img.to_filename(self.wm_in_dwi)
+	thr_img = nib.load(self.wm_in_dwi)                                                                            
+	thr_img.get_data()[thr_img.get_data() < 0.2] = 0                                                              
+	nib.save(thr_img, self.wm_in_dwi)  
 
 	# Threshold GM to binary in dwi space
-        self.thr_img = load_img(self.gm_in_dwi)
-        self.gm_in_dwi_img = threshold_img(self.thr_img, threshold='20%')
-        self.gm_in_dwi_img.to_filename(self.gm_in_dwi)
+        thr_img = nib.load(self.gm_in_dwi)                                                                            
+        thr_img.get_data()[thr_img.get_data() < 0.2] = 0
+        nib.save(thr_img, self.gm_in_dwi)
 
 	# Threshold CSF to binary in dwi space
-        self.thr_img = load_img(self.csf_mask_dwi)
-        self.csf_in_dwi_img = threshold_img(self.thr_img, threshold='90%')
-        self.csf_in_dwi_img.to_filename(self.csf_mask_dwi)
+        thr_img = nib.load(self.csf_mask_dwi)
+        thr_img.get_data()[thr_img.get_data() < 0.9] = 0
+        nib.save(thr_img, self.csf_mask_dwi)
 
         # Threshold WM to binary in dwi space
         self.t_img = load_img(self.wm_in_dwi)
@@ -316,7 +317,7 @@ class dmri_reg(object):
         print('Creating ventricular CSF mask...')
 	cmd='fslmaths ' + self.vent_mask_dwi + ' -kernel sphere 10 -ero -bin ' + self.vent_mask_dwi
 	os.system(cmd)
-        cmd='fslmaths ' + self.csf_mask_dwi_bin + ' -add ' + self.vent_mask_dwi + ' -bin ' + self.vent_csf_in_dwi
+        cmd='fslmaths ' + self.csf_mask_dwi + ' -add ' + self.vent_mask_dwi + ' -bin ' + self.vent_csf_in_dwi
         os.system(cmd)
 
 	# Create gm-wm interface image
