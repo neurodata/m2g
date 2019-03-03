@@ -205,11 +205,11 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
         # -------- Tensor Fitting and Fiber Tractography ---------------- #
         if track_type == 'eudx':
 	    #seeds = int(1000000)
-	    seeds_wm_gm_int = mgt.build_seed_list(reg.wm_gm_int_in_dwi, stream_affine, dens=5)
+	    seeds_wm_gm_int = mgt.build_seed_list(reg.wm_gm_int_in_dwi, stream_affine, dens=4)
 	    seeds_wm = mgt.build_seed_list(reg.wm_in_dwi, stream_affine, dens=2)
 	    seeds = np.vstack((seeds_wm_gm_int, seeds_wm))
         else:
-            seeds_wm_gm_int = mgt.build_seed_list(reg.wm_gm_int_in_dwi, stream_affine, dens=5)
+            seeds_wm_gm_int = mgt.build_seed_list(reg.wm_gm_int_in_dwi, stream_affine, dens=4)
 	    seeds_wm = mgt.build_seed_list(reg.wm_in_dwi, stream_affine, dens=2)
 	    seeds = np.vstack((seeds_wm_gm_int, seeds_wm))
 	print('Using ' + str(len(seeds)) + ' seeds...')
@@ -223,8 +223,8 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
         #print('Saving streamlines: ' + streams)
         #tractogram = Tractogram(streamlines, affine_to_rasmm=stream_affine)
         #save(tractogram, streams)
-        dpw = Dpy(streams, 'w')
-        dpw.write_tracks(streamlines)
+        #dpw = Dpy(streams, 'w')
+        #dpw.write_tracks(streamlines)
 
     elif reg_style == 'mni':
 	print('Running tractography in MNI-space...')
@@ -247,8 +247,8 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
 	#affine = nib.load(aligned_dwi).affine
         #tractogram = Tractogram(streamlines, affine_to_rasmm=affine)
         #save(tractogram, streams)
-	dpw = Dpy(streams, 'w')
-	dpw.write_tracks(streamlines)
+	#dpw = Dpy(streams, 'w')
+	#dpw.write_tracks(streamlines)
 
     tracks = [sl for sl in streamlines if len(sl) > 1]
 
