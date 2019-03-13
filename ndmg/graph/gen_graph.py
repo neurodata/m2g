@@ -163,12 +163,13 @@ class graph_tools(object):
                 try:
                     loc = self.rois[point[0], point[1], point[2]]
                 except IndexError:
-                    pass
-                else:
+		    loc = ""
                     pass
 
                 if loc:
                     p.add(loc)
+		else:
+		   pass
 
             edges = combinations(p, 2)
             for edge in edges:
