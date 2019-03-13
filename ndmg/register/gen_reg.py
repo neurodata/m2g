@@ -172,7 +172,7 @@ class Warp(object):
         print ("Finished " + self.file_out) 
 
 
-def direct_streamline_norm(streams, streams_mni, nodif_B0, namer, namer):
+def direct_streamline_norm(streams, streams_mni, nodif_B0, namer):
     template_path = '/usr/share/data/fsl-mni152-templates/MNI152_T1_2mm_brain.nii.gz'
     ants_path = '/opt/ants'
     
