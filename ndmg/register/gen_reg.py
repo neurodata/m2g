@@ -36,6 +36,22 @@ from ndmg.utils import gen_utils as mgu
 from ndmg.utils import reg_utils as mgru
 
 
+def direct_streamline_norm(streams, streams_mni, nodif_B0, namer, namer):
+    from warp import Warp
+    template_path = '/usr/share/data/fsl-mni152-templates/MNI152_T1_2mm_brain.nii.gz'
+    ants_path = '/opt/ants'
+    
+    cmd='antsRegistrationSyNQuick.sh -d 3 -f /usr/share/data/fsl-mni152-templates/MNI152_T1_2mm_brain.nii.gz -m ' + nodif_B0 + ' -o ' + namer.dirs['tmp']
+
+    t_aff = namer.dirs['tmp'] + '/output0GenericAffine.mat'
+    t_warp = namer.dirs['tmp'] + '/output1Warp.nii.gz'
+
+    wS = Warp(ants_path, streams, streams_mni, template_path, t_aff, t_warp, nodif_B0)
+    wS.streamlines()
+    
+    return 
+
+
 class dmri_reg(object):
 
     def __init__(self, namer, nodif_B0, nodif_B0_mask, t1w_in, vox_size, simple):
@@ -286,12 +302,12 @@ class dmri_reg(object):
 	# Threshold WM to binary in dwi space
 	thr_img = nib.load(self.wm_in_dwi)                                                                            
 	thr_img.get_data()[thr_img.get_data() < 0.2] = 0                                                              
-	nib.save(thr_img, self.wm_in_dwi)  
+	nib.save(thr_img, self.wm_in_dwi_bin)  
 
 	# Threshold GM to binary in dwi space
         thr_img = nib.load(self.gm_in_dwi)                                                                            
         thr_img.get_data()[thr_img.get_data() < 0.2] = 0
-        nib.save(thr_img, self.gm_in_dwi)
+        nib.save(thr_img, self.gm_in_dwi_bin)
 
 	# Threshold CSF to binary in dwi space
         thr_img = nib.load(self.csf_mask_dwi)
@@ -299,12 +315,12 @@ class dmri_reg(object):
         nib.save(thr_img, self.csf_mask_dwi)
 
         # Threshold WM to binary in dwi space
-        self.t_img = load_img(self.wm_in_dwi)
+        self.t_img = load_img(self.wm_in_dwi_bin)
         self.mask = math_img('img > 0', img=self.t_img)
         self.mask.to_filename(self.wm_in_dwi_bin)
 
         # Threshold GM to binary in dwi space
-        self.t_img = load_img(self.gm_in_dwi)
+        self.t_img = load_img(self.gm_in_dwi_bin)
         self.mask = math_img('img > 0', img=self.t_img)
         self.mask.to_filename(self.gm_in_dwi_bin)
 
@@ -372,8 +388,7 @@ class dmri_reg_old(object):
         # Wraps B0 volume in new nifti image
         self.b0_head = self.dwi_im.header
         self.b0_head.set_data_shape(self.b0_head.get_data_shape()[0:3])
-        self.b0_out = nib.Nifti1Image(self.b0_im, affine=self.dwi_im.affine,
-                                header=self.b0_head)
+        self.b0_out = nib.Nifti1Image(self.b0_im, affine=self.dwi_im.affine, header=self.b0_head)
         self.b0_out.update_header()
         nib.save(self.b0_out, self.b0)
 

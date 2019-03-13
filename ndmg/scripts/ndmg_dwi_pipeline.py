@@ -43,8 +43,8 @@ from ndmg.graph import gen_biggraph as ndbg
 import traceback
 from ndmg.utils.bids_utils import name_resource
 import sys
-from nibabel.streamlines import Tractogram, save
-from dipy.io.dpy import Dpy
+from dipy.io.streamline import load_trk, save_trk
+from dipy.tracking.streamline import Streamlines
 
 os.environ["MPLCONFIGDIR"] = "/tmp/"
 
@@ -83,8 +83,8 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
         namer.get_mod_source())
 
     # Create derivative output file names
-    #streams = namer.name_derivative(namer.dirs['output']['fiber'], "streamlines.trk")
-    streams = namer.name_derivative(namer.dirs['output']['fiber'], "streamlines.dpy")
+    streams = namer.name_derivative(namer.dirs['output']['fiber'], "streamlines.trk")
+    streams_mni = namer.name_derivative(namer.dirs['output']['fiber'], "streamlines_mni.trk")
 
     if big:
 	print('Generating voxelwise connectome...')
@@ -132,14 +132,25 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
     # Instantiate bvec/bval naming variations and copy to derivative director
     bvec_scaled = "{}/bvec_scaled.bvec".format(namer.dirs['output']['prep_dwi'])
     bvec_rotated = "{}/bvec_rotated.bvec".format(namer.dirs['output']['prep_dwi'])
-    bval = "{}/bval.bval".format(namer.dirs['output']['prep_dwi'])
-    bvec = "{}/bvec.bvec".format(namer.dirs['output']['prep_dwi'])
-    shutil.copyfile(bvecs, bvec)
-    shutil.copyfile(bvals, bval)
+    fbval = "{}/bval.bval".format(namer.dirs['output']['prep_dwi'])
+    fbvec = "{}/bvec.bvec".format(namer.dirs['output']['prep_dwi'])
+    shutil.copyfile(bvecs, fbvec)
+    shutil.copyfile(bvals, fbval)
+
+    # Correct any corrupted bvecs/bvals
+    from dipy.io import read_bvals_bvecs
+    bvals, bvecs = read_bvals_bvecs(fbval, fbvec)
+    bvecs[np.where(np.any(abs(bvecs) >= 10, axis=1) == True)] = 0
+    bvals[np.where(np.any(abs(bvecs) >= 10, axis=1) == True)] = 0
+    bvecs[np.where(np.any(bvecs == 0, axis=1) == True)] = 0
+    bvals[np.where(np.any(bvecs == 0, axis=1) == True)] = 0
+    bvecs[np.where(np.any(bvals == 0, axis=0) == True)] = 0
+    np.savetxt(fbval, bvals)
+    np.savetxt(fbvec, bvecs)
 
     # Rotate bvecs
     print("Rotating b-vectors and generating gradient table...")
-    cmd='bash fdt_rotate_bvecs ' + bvec + ' ' + bvec_rotated + ' ' + eddy_rot_param + ' 2>/dev/null'
+    cmd='bash fdt_rotate_bvecs ' + fbvec + ' ' + bvec_rotated + ' ' + eddy_rot_param + ' 2>/dev/null'
     os.system(cmd)
 
     # Rescale bvecs
@@ -158,7 +169,7 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
         print("%s%s%s" % ('Reslicing runtime: ', str(np.round(time.time() - start_time, 1)), 's'))
 
     # Build gradient table
-    [gtab, nodif_B0, nodif_B0_mask] = mgu.make_gtab_and_bmask(bval, bvec_scaled, dwi_prep, namer.dirs['output']['prep_dwi'])
+    [gtab, nodif_B0, nodif_B0_mask] = mgu.make_gtab_and_bmask(fbval, bvec_scaled, dwi_prep, namer.dirs['output']['prep_dwi'])
 
     stream_affine = nib.load(dwi_prep).affine
     print("%s%s%s" % ('Preprocessing runtime: ', str(np.round(time.time() - start_time, 1)), 's'))
@@ -220,11 +231,8 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
         streamlines = trct.run()
 
 	# Save streamlines to disk
-        #print('Saving streamlines: ' + streams)
-        #tractogram = Tractogram(streamlines, affine_to_rasmm=stream_affine)
-        #save(tractogram, streams)
-        #dpw = Dpy(streams, 'w')
-        #dpw.write_tracks(streamlines)
+        print('Saving streamlines: ' + streams)
+	save_trk(streams, streamlines=streamlines, affine=stream_affine)
 
     elif reg_style == 'mni':
 	print('Running tractography in MNI-space...')
@@ -244,11 +252,14 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
 
         # Save streamlines to disk
         print('Saving streamlines: ' + streams)
-	#affine = nib.load(aligned_dwi).affine
-        #tractogram = Tractogram(streamlines, affine_to_rasmm=affine)
-        #save(tractogram, streams)
-	#dpw = Dpy(streams, 'w')
-	#dpw.write_tracks(streamlines)
+        save_trk(streams, streamlines=streamlines, affine=stream_affine)
+
+    # Normalize streamlines
+    mgr.direct_streamline_norm(streams, streams_mni, nodif_B0, namer, namer)
+
+    # Read Streamlines
+    streams, hdr = load_trk(streams_mni)
+    streamlines = Streamlines(streams)
 
     tracks = [sl for sl in streamlines if len(sl) > 1]
 
