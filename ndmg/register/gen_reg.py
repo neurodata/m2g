@@ -34,7 +34,6 @@ except KeyError:
     print('FSLDIR environment variable not set!')
 from ndmg.utils import gen_utils as mgu
 from ndmg.utils import reg_utils as mgru
-from ndmg.register import gen_reg as mgr
 
 def transform_pts(pts, t_aff, t_warp, ref_img_path, ants_path, template_path,
         out_volume="",output_space="ras_voxels"):
@@ -181,7 +180,7 @@ def direct_streamline_norm(streams, streams_mni, nodif_B0, namer):
     t_aff = namer.dirs['tmp'] + '/output0GenericAffine.mat'
     t_warp = namer.dirs['tmp'] + '/output1Warp.nii.gz'
 
-    wS = mgr.Warp(ants_path, streams, streams_mni, template_path, t_aff, t_warp, nodif_B0)
+    wS = Warp(ants_path, streams, streams_mni, template_path, t_aff, t_warp, nodif_B0)
     wS.streamlines()
     
     return 
