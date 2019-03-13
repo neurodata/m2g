@@ -34,10 +34,145 @@ except KeyError:
     print('FSLDIR environment variable not set!')
 from ndmg.utils import gen_utils as mgu
 from ndmg.utils import reg_utils as mgru
+from ndmg.register import gen_reg as mgr
+
+def transform_pts(pts, t_aff, t_warp, ref_img_path, ants_path, template_path,
+        out_volume="",output_space="ras_voxels"):
+    from scipy.io.matlab import savemat
+    """
+    return coordinates in 
+    "ras_voxels" if you want to streamlines in ras ijk coordinates or 
+    "lps_voxmm" if you want dsi studio streamline coordinates relative to the template
+    """
+    if not output_space in ("ras_voxels","lps_voxmm"):
+        raise ValueError("Must specify output space")
+    orig_dir = os.getcwd()
+
+    warped_csv_out = "warped_output.csv"
+    transforms = "-t [" + str(t_aff) + ", 1] " + "-t " + str(t_warp)
+
+    # Load the volume from DSI Studio
+    ref_img = nib.load(ref_img_path)
+    voxel_size = np.array(ref_img.header.get_zooms())
+    extents = np.array(ref_img.shape)
+    extents[-1] = 0
+
+    # Convert the streamlines to voxel indices, then to ants points
+    voxel_coords =  abs(extents - pts / voxel_size ) 
+    ants_mult = np.array([voxel_size[0],voxel_size[1],voxel_size[2]])
+    ants_coord = voxel_coords * ants_mult - voxel_size[0]
+    ants_coord[:,0] = -ants_coord[:,0]
+    ants_coord[:,1] = -ants_coord[:,1]
+
+    # Save the ants coordinates to a csv, then warp them
+    np.savetxt(warped_csv_out,np.hstack([ants_coord,np.zeros((ants_coord.shape[0],1))]),
+              header="x,y,z,t",delimiter=",",fmt="%f")
+
+    # Apply the trandforms to
+    os.system(ants_path + "/antsApplyTransformsToPoints " + \
+              "-d 3 " + \
+              "-i " + warped_csv_out + \
+              " -o " + orig_dir + "/aattp.csv " + transforms
+              )
+    # Load template to get output space
+    template = nib.load(template_path)
+    warped_affine = template.affine
+
+    adjusted_affine = warped_affine.copy()
+    adjusted_affine[0] = -adjusted_affine[0]
+    adjusted_affine[1] = -adjusted_affine[1]
+
+    ants_warped_coords = np.loadtxt(orig_dir + "/aattp.csv", 
+            skiprows=1, delimiter=",")[:,:3]
+    os.remove("aattp.csv")
+    to_transform = np.hstack([ants_warped_coords,np.ones((ants_warped_coords.shape[0],1))])
+    new_voxels = (np.dot(np.linalg.inv(adjusted_affine),to_transform.T) + warped_affine[0,0])[:3]
+
+    # Write out an image
+    if out_volume:
+        newdata = np.zeros(template.get_shape())
+        ti, tj, tk = new_voxels.astype(np.int)
+        newdata[ti,tj,tk] = 1
+        warped_out = nib.Nifti1Image(newdata,warped_affine).to_filename(out_volume)
+    os.chdir(orig_dir)
+    if output_space == "ras_voxels":
+        return new_voxels.astype(np.int).T
+
+    elif output_space == "lps_voxmm":
+        template_extents = template.get_shape()
+        lps_voxels = new_voxels.copy()
+        lps_voxels[0] = template_extents[0] - lps_voxels[0]
+        lps_voxels[1] = template_extents[1] - lps_voxels[1]
+        lps_voxmm = lps_voxels.T * np.array(template.header.get_zooms())[:3]
+        return lps_voxmm
+
+
+class Warp(object):
+    def __init__(self,ants_path="",file_in="",file_out="",template_path="",t_aff="",t_warp="",ref_img_path=""):
+        self.ants_path = ants_path
+        self.file_in = file_in
+        self.file_out = file_out
+        self.template_path = template_path
+        self.ref_img_path = ref_img_path
+        self.t_aff = t_aff
+        self.t_warp = t_warp
+    
+    def streamlines(self):
+        if not self.file_in.endswith((".trk",".trk.gz")):
+            print ("File format currently unsupported.")
+            return
+        
+        if self.ref_img_path == "":
+            print ("Specify reference image path: .ref_img_path = path to reference image")
+            return
+            
+        print ("Warping streamline file " + self.file_in)
+        template = nib.load(self.template_path)
+        warped_affine = template.affine
+        dims = template.header.get_data_shape()
+        
+        template_trk_header = np.array(('TRACK', 
+        [dims[0],dims[1],dims[2]], 
+        [warped_affine[0][0], warped_affine[1][1], warped_affine[2][2]], 
+        [0.0, 0.0, 0.0], 0, ['', '', '', '', '', '', '', '', '', ''], 
+        0, ['', '', '', '', '', '', '', '', '', ''], 
+        [[-warped_affine[0][0], 0.0, 0.0, 0.0], 
+         [0.0, -warped_affine[1][1], 0.0, 0.0], 
+         [0.0, 0.0, warped_affine[2][2], 0.0], 
+         [0.0, 0.0, 0.0, 1.0]], '', 'LPS', 'LPS', 
+        [1.0, 0.0, 0.0, 0.0, 1.0, 0.0], 
+        '', '', '', '', '', '', '', 10000, 2, 1000), 
+         dtype=[('id_string', 'S6'), ('dim', '<i2', (3,)), 
+             ('voxel_size', '<f4', (3,)), ('origin', '<f4', (3,)), 
+             ('n_scalars', '<i2'), ('scalar_name', 'S20', (10,)), 
+             ('n_properties', '<i2'), ('property_name', 'S20', (10,)), 
+             ('vox_to_ras', '<f4', (4, 4)), ('reserved', 'S444'), 
+             ('voxel_order', 'S4'), ('pad2', 'S4'), 
+             ('image_orientation_patient', '<f4', (6,)), 
+             ('pad1', 'S2'), ('invert_x', 'S1'), ('invert_y', 'S1'), 
+             ('invert_z', 'S1'), ('swap_xy', 'S1'), ('swap_yz', 'S1'), 
+             ('swap_zx', 'S1'), ('n_count', '<i4'), ('version', '<i4'), 
+             ('hdr_size', '<i4')]
+             )
+            
+        streams,hdr = nib.trackvis.read(self.file_in)
+        offsets = []
+        _streams = []
+        for sl in streams:
+            _streams.append(sl[0])
+            offsets.append(_streams[-1].shape[0])
+        allpoints = np.vstack(_streams)
+        tx_points = transform_pts(allpoints, self.t_aff, self.t_warp, self.ref_img_path, self.ants_path, self.template_path, output_space="lps_voxmm")
+        offsets = np.cumsum([0]+offsets)
+        starts = offsets[:-1]
+        stops = offsets[1:]
+        new_hdr = template_trk_header.copy()
+        new_hdr["n_count"] = len(_streams)
+        nib.trackvis.write(self.file_out,[(tx_points[a:b],None,None) for a,b in zip(starts,stops)],hdr_mapping=new_hdr)
+        print ("Finished " + self.file_out) 
 
 
 def direct_streamline_norm(streams, streams_mni, nodif_B0, namer, namer):
-    from warp import Warp
     template_path = '/usr/share/data/fsl-mni152-templates/MNI152_T1_2mm_brain.nii.gz'
     ants_path = '/opt/ants'
     
@@ -46,7 +181,7 @@ def direct_streamline_norm(streams, streams_mni, nodif_B0, namer, namer):
     t_aff = namer.dirs['tmp'] + '/output0GenericAffine.mat'
     t_warp = namer.dirs['tmp'] + '/output1Warp.nii.gz'
 
-    wS = Warp(ants_path, streams, streams_mni, template_path, t_aff, t_warp, nodif_B0)
+    wS = mgr.Warp(ants_path, streams, streams_mni, template_path, t_aff, t_warp, nodif_B0)
     wS.streamlines()
     
     return 
