@@ -35,7 +35,8 @@ except KeyError:
 from ndmg.utils import gen_utils as mgu
 from ndmg.utils import reg_utils as mgru
 
-def transform_pts(pts, t_aff, t_warp, ref_img_path, ants_path, template_path,
+
+def transform_pts(pts, t_aff, t_warp, ref_img_path, ants_path, template_path, namer,
         out_volume="",output_space="ras_voxels"):
     from scipy.io.matlab import savemat
     """
@@ -45,9 +46,10 @@ def transform_pts(pts, t_aff, t_warp, ref_img_path, ants_path, template_path,
     """
     if not output_space in ("ras_voxels","lps_voxmm"):
         raise ValueError("Must specify output space")
-    orig_dir = os.getcwd()
 
-    warped_csv_out = "warped_output.csv"
+    orig_dir = namer.dirs['tmp']['base']
+
+    warped_csv_out = namer.dirs['tmp']['base'] + "/warped_output.csv"
     transforms = "-t [" + str(t_aff) + ", 1] " + "-t " + str(t_warp)
 
     # Load the volume from DSI Studio
@@ -68,11 +70,9 @@ def transform_pts(pts, t_aff, t_warp, ref_img_path, ants_path, template_path,
               header="x,y,z,t",delimiter=",",fmt="%f")
 
     # Apply the trandforms to
-    os.system(ants_path + "/antsApplyTransformsToPoints " + \
-              "-d 3 " + \
-              "-i " + warped_csv_out + \
-              " -o " + orig_dir + "/aattp.csv " + transforms
-              )
+    cmd = ants_path + "/antsApplyTransformsToPoints " + "-d 3 -i " + warped_csv_out + " -o " + orig_dir + "/aattp.csv " + transforms
+    os.system(cmd)
+
     # Load template to get output space
     template = nib.load(template_path)
     warped_affine = template.affine
@@ -81,9 +81,8 @@ def transform_pts(pts, t_aff, t_warp, ref_img_path, ants_path, template_path,
     adjusted_affine[0] = -adjusted_affine[0]
     adjusted_affine[1] = -adjusted_affine[1]
 
-    ants_warped_coords = np.loadtxt(orig_dir + "/aattp.csv", 
-            skiprows=1, delimiter=",")[:,:3]
-    os.remove("aattp.csv")
+    ants_warped_coords = np.loadtxt(orig_dir + "/aattp.csv", skiprows=1, delimiter=",")[:,:3]
+    os.remove(orig_dir + "/aattp.csv")
     to_transform = np.hstack([ants_warped_coords,np.ones((ants_warped_coords.shape[0],1))])
     new_voxels = (np.dot(np.linalg.inv(adjusted_affine),to_transform.T) + warped_affine[0,0])[:3]
 
@@ -107,14 +106,15 @@ def transform_pts(pts, t_aff, t_warp, ref_img_path, ants_path, template_path,
 
 
 class Warp(object):
-    def __init__(self,ants_path="",file_in="",file_out="",template_path="",t_aff="",t_warp="",ref_img_path=""):
+    def __init__(self,ants_path="",file_in="",file_out="",template_path="",t_aff="",t_warp="",ref_img_path="", namer=""):
         self.ants_path = ants_path
         self.file_in = file_in
         self.file_out = file_out
         self.template_path = template_path
-        self.ref_img_path = ref_img_path
         self.t_aff = t_aff
         self.t_warp = t_warp
+      	self.ref_img_path = ref_img_path
+      	self.namer = namer
     
     def streamlines(self):
         if not self.file_in.endswith((".trk",".trk.gz")):
@@ -161,7 +161,7 @@ class Warp(object):
             _streams.append(sl[0])
             offsets.append(_streams[-1].shape[0])
         allpoints = np.vstack(_streams)
-        tx_points = transform_pts(allpoints, self.t_aff, self.t_warp, self.ref_img_path, self.ants_path, self.template_path, output_space="lps_voxmm")
+        tx_points = transform_pts(allpoints, self.t_aff, self.t_warp, self.ref_img_path, self.ants_path, self.template_path, self.namer, output_space="lps_voxmm")
         offsets = np.cumsum([0]+offsets)
         starts = offsets[:-1]
         stops = offsets[1:]
@@ -172,15 +172,17 @@ class Warp(object):
 
 
 def direct_streamline_norm(streams, streams_mni, nodif_B0, namer):
+    '''Greene, C., Cieslak, M., & Grafton, S. T. (2017). Effect of different spatial normalization approaches on tractography and structural brain networks. Network Neuroscience, 1-19.'''
     template_path = '/usr/share/data/fsl-mni152-templates/MNI152_T1_2mm_brain.nii.gz'
     ants_path = '/opt/ants'
     
-    cmd='antsRegistrationSyNQuick.sh -d 3 -f /usr/share/data/fsl-mni152-templates/MNI152_T1_2mm_brain.nii.gz -m ' + nodif_B0 + ' -o ' + namer.dirs['tmp']
+    cmd='antsRegistrationSyNQuick.sh -d 3 -f /usr/share/data/fsl-mni152-templates/MNI152_T1_2mm_brain.nii.gz -m ' + nodif_B0 + ' -o ' + namer.dirs['tmp']['base'] + '/'
+    os.system(cmd)
+    
+    t_aff = namer.dirs['tmp']['base'] + '/0GenericAffine.mat'
+    t_warp = namer.dirs['tmp']['base'] + '/1Warp.nii.gz'
 
-    t_aff = namer.dirs['tmp'] + '/output0GenericAffine.mat'
-    t_warp = namer.dirs['tmp'] + '/output1Warp.nii.gz'
-
-    wS = Warp(ants_path, streams, streams_mni, template_path, t_aff, t_warp, nodif_B0)
+    wS = Warp(ants_path, streams, streams_mni, template_path, t_aff, t_warp, nodif_B0, namer)
     wS.streamlines()
     
     return 

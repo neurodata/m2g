@@ -192,7 +192,7 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
 
     # Check orientation (t1w)
     start_time = time.time()
-    t1w = mgu.reorient_t1w(t1w, namer)
+#    t1w = mgu.reorient_t1w(t1w, namer)
     print("%s%s%s" % ('Reorienting runtime: ', str(np.round(time.time() - start_time, 1)), 's'))
 
     if reg_style == 'native':
@@ -221,8 +221,8 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
 	    seeds_wm = mgt.build_seed_list(reg.wm_in_dwi, stream_affine, dens=2)
 	    seeds = np.vstack((seeds_wm_gm_int, seeds_wm))
         else:
-            seeds_wm_gm_int = mgt.build_seed_list(reg.wm_gm_int_in_dwi, stream_affine, dens=4)
-	    seeds_wm = mgt.build_seed_list(reg.wm_in_dwi, stream_affine, dens=2)
+            seeds_wm_gm_int = mgt.build_seed_list(reg.wm_gm_int_in_dwi, stream_affine, dens=1)
+	    seeds_wm = mgt.build_seed_list(reg.wm_in_dwi, stream_affine, dens=1)
 	    seeds = np.vstack((seeds_wm_gm_int, seeds_wm))
 	print('Using ' + str(len(seeds)) + ' seeds...')
 
@@ -256,6 +256,7 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
         save_trk(streams, streamlines=streamlines, affine=stream_affine)
 
     # Normalize streamlines
+    print('Running DSN...')
     mgr.direct_streamline_norm(streams, streams_mni, nodif_B0, namer)
 
     # Read Streamlines
