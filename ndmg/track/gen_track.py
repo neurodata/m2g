@@ -142,7 +142,7 @@ class run_track(object):
             self.vent_csf_in_dwi_data = self.vent_csf_in_dwi.get_data()
 	    voxel_size = np.average(self.wm_mask.get_header()['pixdim'][1:4])
 	    step_size = 0.2
-	    tiss_classifier = CmcTissueClassifier.from_pve(self.wm_mask_data, self.gm_mask_data, self.vent_csf_in_dwi_data, step_size=step_size, average_voxel_size=voxel_size)
+	    self.tiss_classifier = CmcTissueClassifier.from_pve(self.wm_mask_data, self.gm_mask_data, self.vent_csf_in_dwi_data, step_size=step_size, average_voxel_size=voxel_size)
 	else:
 	    pass
 	return self.tiss_classifier

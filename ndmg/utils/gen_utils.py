@@ -139,7 +139,7 @@ def make_gtab_and_bmask(fbval, fbvec, dwi_file, outdir):
     bvals, bvecs = read_bvals_bvecs(fbval, fbvec)
 
     # Creating the gradient table
-    gtab = gradient_table(bvals, bvecs, atol=0.01)
+    gtab = gradient_table(bvals, bvecs, atol=1.0)
 
     # Correct b0 threshold
     gtab.b0_threshold = min(bvals)
