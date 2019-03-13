@@ -284,7 +284,7 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
     # ------- Connectome Estimation --------------------------------- #
     # Generate graphs from streamlines for each parcellation
     for idx, label in enumerate(labels):
-        print("Generating graph for {} parcellation...".format(label))
+#        print("Generating graph for {} parcellation...".format(label))
 #	try:
 	    if reg_style == 'native':
 	        # align atlas to t1w to dwi
@@ -307,7 +307,7 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
             g1.save_graph(connectomes[idx])
 #	except:
 #	    print(label + ' FAILED. Skipping...')
-	    continue
+#	    continue
 
     exe_time = datetime.now() - startTime
 #    qc_dwi.save(qc_stats, exe_time)
