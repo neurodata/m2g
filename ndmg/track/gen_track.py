@@ -209,7 +209,7 @@ class run_track(object):
 
 
     def particle_tracking(self):
-        from dipy.tracking.local import LocalTracking
+        from dipy.tracking.local import ParticleFilteringTracking
         from dipy.data import get_sphere
         from dipy.direction import peaks_from_model, ProbabilisticDirectionGetter
         self.sphere = get_sphere('repulsion724')

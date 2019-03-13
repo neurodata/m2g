@@ -138,33 +138,33 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
     shutil.copyfile(bvals, fbval)
 
     # Correct any corrupted bvecs/bvals
-#    from dipy.io import read_bvals_bvecs
-#    bvals, bvecs = read_bvals_bvecs(fbval, fbvec)
-#    if np.any(abs(bvecs) >= 1) == True:
-#	no_rotate = True
-#    bvecs[np.where(np.any(abs(bvecs) >= 10, axis=1) == True)] = [1, 0, 0]
-#    bvecs[np.where(np.any(bvals == 0, axis=0) == True)] = 0
-#    np.savetxt(fbval, bvals)
-#    np.savetxt(fbvec, bvecs)
+    from dipy.io import read_bvals_bvecs
+    bvals, bvecs = read_bvals_bvecs(fbval, fbvec)
+    if np.any(abs(bvecs) >= 1) == True:
+	no_rotate = True
+    bvecs[np.where(np.any(abs(bvecs) >= 10, axis=1) == True)] = [1, 0, 0]
+    bvecs[np.where(np.any(bvals == 0, axis=0) == True)] = 0
+    np.savetxt(fbval, bvals)
+    np.savetxt(fbvec, bvecs)
 
     # Rescale bvecs
     print("Rescaling b-vectors...")
-#    mgp.rescale_bvec(fbvec, bvec_scaled)
+    mgp.rescale_bvec(fbvec, bvec_scaled)
 
     # Rotate bvecs
     print("Rotating b-vectors and generating gradient table...")
     cmd='bash fdt_rotate_bvecs ' + bvec_scaled + ' ' + bvec_rotated + ' ' + eddy_rot_param + ' 2>/dev/null'
-#    os.system(cmd)
+    os.system(cmd)
 
     # Check orientation (dwi_prep)
     start_time = time.time()
-#    [dwi_prep, bvecs] = mgu.reorient_dwi(dwi_prep, bvec_rotated, namer)
+    [dwi_prep, bvecs] = mgu.reorient_dwi(dwi_prep, bvec_rotated, namer)
     print("%s%s%s" % ('Reorienting runtime: ', str(np.round(time.time() - start_time, 1)), 's'))
 
     # Check dimensions
     start_time = time.time()
     if reg_style == 'native':
-#        dwi_prep = mgu.match_target_vox_res(dwi_prep, vox_size, namer, zoom_set, sens='dwi')
+        dwi_prep = mgu.match_target_vox_res(dwi_prep, vox_size, namer, zoom_set, sens='dwi')
         print("%s%s%s" % ('Reslicing runtime: ', str(np.round(time.time() - start_time, 1)), 's'))
 
     # Build gradient table
