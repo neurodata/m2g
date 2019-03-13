@@ -70,12 +70,33 @@ RUN mkdir -p /opt/afni && \
     rm -rf afni.tar.gz
 ENV PATH=/opt/afni:$PATH
 
+#--------ANTS SETUP-----------------------------------------------------------#
+RUN wget -qO- "https://cmake.org/files/v3.12/cmake-3.12.1-Linux-x86_64.tar.gz" | \
+  tar --strip-components=1 -xz -C /usr/local
+
+ENV ANTS_VERSION=2.2.0
+WORKDIR /tmp
+RUN git clone git://github.com/stnava/ANTs.git ants \
+    && cd ants \
+    && mkdir build \
+    && cd build \
+    && cmake .. \
+    && make -j1 \
+    && mkdir -p /opt/ants \
+    && mv bin/* /opt/ants && mv ../Scripts/* /opt/ants \
+    && cd .. \
+    && rm -rf build
+
+ENV ANTSPATH=/opt/ants/ \
+    PATH=/opt/ants:$PATH
 #--------NDMG SETUP-----------------------------------------------------------#
 # setup of python dependencies for ndmg itself, as well as file dependencies
 RUN \
     pip install numpy networkx>=1.11 nibabel>=2.0 dipy==0.14.0 scipy \
     python-dateutil==2.6.1 boto3 awscli matplotlib==1.5.3 plotly==1.12.9 nilearn>=0.2 sklearn>=0.0 \
     pandas cython vtk pyvtk awscli requests==2.5.3 scikit-image pybids==0.6.4 ipython
+
+WORKDIR /
 
 RUN \
     git clone -b dev-dmri-fmri $NDMG_URL /ndmg && \
