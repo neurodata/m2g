@@ -176,11 +176,11 @@ def direct_streamline_norm(streams, streams_mni, nodif_B0, namer):
     template_path = '/usr/share/data/fsl-mni152-templates/MNI152_T1_2mm_brain.nii.gz'
     ants_path = '/opt/ants'
     
-    cmd='antsRegistrationSyNQuick.sh -d 3 -f ' + nodif_B0 + ' -m /usr/share/data/fsl-mni152-templates/MNI152_T1_2mm_brain.nii.gz -o ' + namer.dirs['tmp']['base'] + '/'
+    cmd='antsRegistrationSyNQuick.sh -d 3 -f ' + template_path + ' -m ' + nodif_B0 + ' -o ' + namer.dirs['tmp']['base'] + '/'
     os.system(cmd)
     
     t_aff = namer.dirs['tmp']['base'] + '/0GenericAffine.mat'
-    t_warp = namer.dirs['tmp']['base'] + '/1Warp.nii.gz'
+    t_warp = namer.dirs['tmp']['base'] + '/1InverseWarp.nii.gz'
 
     wS = Warp(ants_path, streams, streams_mni, template_path, t_aff, t_warp, nodif_B0, namer)
     wS.streamlines()
