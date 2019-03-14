@@ -27,7 +27,7 @@ import nibabel as nib
 from dipy.tracking.streamline import Streamlines
 
 
-def build_seed_list(mask_img_file, stream_affine, dens):
+def build_seed_list(mask_img_file, stream_affine=np.eye(4), dens):
     from dipy.tracking import utils
     mask_img = nib.load(mask_img_file)
     mask_img_data = mask_img.get_data().astype('bool')
@@ -36,7 +36,7 @@ def build_seed_list(mask_img_file, stream_affine, dens):
 
 class run_track(object):
     def __init__(self, dwi_in, nodif_B0_mask, gm_in_dwi, vent_csf_in_dwi, csf_in_dwi,
-                 wm_in_dwi, gtab, mod_type, track_type, mod_func, seeds, stream_affine):
+                 wm_in_dwi, gtab, mod_type, track_type, mod_func, seeds, stream_affine=np.eye(4)):
         """
         A class for deterministic tractography in native space.
 
