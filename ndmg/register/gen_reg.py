@@ -242,6 +242,7 @@ class dmri_reg(object):
         self.input_mni = "%s%s%s%s" % (FSLDIR, '/data/standard/MNI152_T1_', vox_size, '_brain.nii.gz')
 	self.input_mni_mask = "%s%s%s%s" % (FSLDIR, '/data/standard/MNI152_T1_', vox_size, '_brain_mask.nii.gz')
 	self.wm_gm_int_in_dwi = "{}/{}_wm_gm_int_in_dwi.nii.gz".format(namer.dirs['output']['reg_anat'], self.t1w_name)
+	self.wm_gm_int_in_dwi_bin = "{}/{}_wm_gm_int_in_dwi_bin.nii.gz".format(namer.dirs['output']['reg_anat'], self.t1w_name)
 	self.input_mni_sched = "%s%s" % (FSLDIR, '/etc/flirtsch/T1_2_MNI152_2mm.cnf')
 
     def gen_tissue(self):
@@ -387,8 +388,13 @@ class dmri_reg(object):
         self.atlas_data = self.atlas_img.get_data().astype('int')
 	node_num = len(np.unique(self.atlas_data))
         self.atlas_data[self.atlas_data>node_num] = 0
+	
+	t_img = load_img(self.wm_gm_int_in_dwi)
+	mask = math_img('img > 0', img=t_img)
+	mask.to_filename(self.wm_gm_int_in_dwi_bin)
+
         nib.save(nib.Nifti1Image(self.atlas_data.astype(np.int32), affine=self.atlas_img.affine, header=self.atlas_img.header), self.dwi_aligned_atlas)
-        cmd='fslmaths ' + self.dwi_aligned_atlas + ' -mas ' + self.nodif_B0_mask + ' ' + self.dwi_aligned_atlas
+        cmd='fslmaths ' + self.dwi_aligned_atlas + ' -mas ' + self.nodif_B0_mask + ' -mas ' + self.wm_gm_int_in_dwi_bin + ' ' + self.dwi_aligned_atlas
         os.system(cmd)
 
 	# Binarize atlas

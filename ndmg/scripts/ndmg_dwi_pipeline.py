@@ -219,11 +219,11 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
         # -------- Tensor Fitting and Fiber Tractography ---------------- #
         if track_type == 'eudx':
 	    #seeds = int(1000000)
-	    seeds_wm_gm_int = mgt.build_seed_list(reg.wm_gm_int_in_dwi, stream_affine, dens=3)
+	    seeds_wm_gm_int = mgt.build_seed_list(reg.wm_gm_int_in_dwi, stream_affine, dens=4)
 	    seeds_wm = mgt.build_seed_list(reg.wm_in_dwi, stream_affine, dens=1)
 	    seeds = np.vstack((seeds_wm_gm_int, seeds_wm))
         else:
-            seeds_wm_gm_int = mgt.build_seed_list(reg.wm_gm_int_in_dwi, stream_affine, dens=3)
+            seeds_wm_gm_int = mgt.build_seed_list(reg.wm_gm_int_in_dwi, stream_affine, dens=4)
 	    seeds_wm = mgt.build_seed_list(reg.wm_in_dwi, stream_affine, dens=1)
 	    seeds = np.vstack((seeds_wm_gm_int, seeds_wm))
 	print('Using ' + str(len(seeds)) + ' seeds...')
@@ -258,13 +258,13 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
         save_trk(streams, streamlines=streamlines, affine=stream_affine)
 
     # Normalize streamlines
-    print('Running DSN...')
-    mgr.direct_streamline_norm(streams, streams_mni, nodif_B0, namer)
+    #print('Running DSN...')
+    #mgr.direct_streamline_norm(streams, streams_mni, nodif_B0, namer)
 
     # Read Streamlines
-    streamlines_mni, hdr = load_trk(streams_mni)
-    affine = hdr['voxel_to_rasmm']
-    streamlines = Streamlines(streamlines_mni)
+    #streamlines_mni, hdr = load_trk(streams_mni)
+    #affine = hdr['voxel_to_rasmm']
+    #streamlines = Streamlines(streamlines_mni)
 
     tracks = [sl for sl in streamlines if len(sl) > 1]
 
@@ -294,7 +294,7 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
 		labels_im_file = mgu.match_target_vox_res(labels[idx], vox_size, namer, zoom_set, sens='t1w')
                 #labels_im_file = reg.atlas2t1w2dwi_align(labels_im_file)
 	        labels_im = nib.load(labels_im_file)
-	        g1 = mgg.graph_tools(attr=len(np.unique(labels_im.get_data().astype('int')))-1, rois=labels_im_file, tracks=tracks, affine=affine, namer=namer, connectome_path=connectomes[idx])
+	        g1 = mgg.graph_tools(attr=len(np.unique(labels_im.get_data().astype('int')))-1, rois=labels_im_file, tracks=tracks, affine=np.eye(4), namer=namer, connectome_path=connectomes[idx])
 		g1.make_graph_old()
 		#g1.make_regressors()
 	    elif reg_style == 'mni':
