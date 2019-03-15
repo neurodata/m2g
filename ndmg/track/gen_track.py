@@ -27,7 +27,7 @@ import nibabel as nib
 from dipy.tracking.streamline import Streamlines
 
 
-def build_seed_list(mask_img_file, stream_affine=np.eye(4), dens):
+def build_seed_list(mask_img_file, stream_affine, dens):
     from dipy.tracking import utils
     mask_img = nib.load(mask_img_file)
     mask_img_data = mask_img.get_data().astype('bool')
