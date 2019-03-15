@@ -258,13 +258,13 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
         save_trk(streams, streamlines=streamlines, affine=stream_affine)
 
     # Normalize streamlines
-    print('Running DSN...')
-    [t_aff, t_warp, ants_path, template_path] = mgr.direct_streamline_norm(streams, streams_mni, nodif_B0, namer)
+#    print('Running DSN...')
+#    [t_aff, t_warp, ants_path, template_path] = mgr.direct_streamline_norm(streams, streams_mni, nodif_B0, namer)
 
     # Read Streamlines
-    streamlines_mni, hdr = load_trk(streams_mni)
-    affine = hdr['voxel_to_rasmm']
-    streamlines = Streamlines(streamlines_mni)
+#    streamlines_mni, hdr = load_trk(streams_mni)
+#    affine = hdr['voxel_to_rasmm']
+#    streamlines = Streamlines(streamlines_mni)
 
     tracks = [sl for sl in streamlines if len(sl) > 1]
 
@@ -286,16 +286,16 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
     # ------- Connectome Estimation --------------------------------- #
     # Generate graphs from streamlines for each parcellation
     for idx, label in enumerate(labels):
-        print("Generating graph for {} parcellation...".format(label))
-	try:
+            print("Generating graph for {} parcellation...".format(label))
 	    if reg_style == 'native':
 	        # align atlas to t1w to dwi
 	        print("%s%s" % ('Applying native-space alignment to ', labels[idx]))
 		labels_im_file = mgu.match_target_vox_res(labels[idx], vox_size, namer, zoom_set, sens='t1w')
                 labels_im_file = reg.atlas2t1w2dwi_align(labels_im_file)
-		labels_im_file_norm = labels_im_file.split('.nii.gz')[0] + '_norm.nii.gz'
-		reg.warp_parcels(labels_im_file, labels_im_file_norm, t_aff, t_warp, ants_path, template_path, namer)
-	        labels_im = nib.load(labels_im_file_norm)
+		labels_im = nib.load(labels_im_file)
+#		labels_im_file_norm = labels_im_file.split('.nii.gz')[0] + '_norm.nii.gz'
+#		mgr.warp_parcels(labels_im_file, labels_im_file_norm, t_aff, t_warp, ants_path, template_path, namer)
+#	        labels_im = nib.load(labels_im_file_norm)
 	        g1 = mgg.graph_tools(attr=len(np.unique(labels_im.get_data().astype('int')))-1, rois=labels_im_file, tracks=tracks, affine=np.eye(4), namer=namer, connectome_path=connectomes[idx])
 		g1.make_graph_old()
 		#g1.make_regressors()
@@ -309,9 +309,7 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
                 g1.make_graph_old()
             g1.summary()
             g1.save_graph(connectomes[idx])
-	except:
-	    print(label + ' FAILED. Skipping...')
-	    continue
+
 
     exe_time = datetime.now() - startTime
 #    qc_dwi.save(qc_stats, exe_time)
