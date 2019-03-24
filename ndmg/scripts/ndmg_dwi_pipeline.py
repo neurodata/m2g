@@ -43,7 +43,6 @@ from ndmg.graph import gen_biggraph as ndbg
 import traceback
 from ndmg.utils.bids_utils import name_resource
 import sys
-from dipy.io.streamline import load_trk, save_trk
 from dipy.tracking.streamline import Streamlines
 
 os.environ["MPLCONFIGDIR"] = "/tmp/"
@@ -235,7 +234,7 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
 
 	# Save streamlines to disk
         print('Saving streamlines: ' + streams)
-	save_trk(streams, streamlines=streamlines, affine=stream_affine)
+	nib.streamlines.save(streamlines, streams)
 
     elif reg_style == 'mni':
 	print('Running tractography in MNI-space...')
@@ -255,16 +254,16 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
 
         # Save streamlines to disk
         print('Saving streamlines: ' + streams)
-        save_trk(streams, streamlines=streamlines, affine=stream_affine)
+        nib.streamlines.save(streamlines, streams)
 
     # Normalize streamlines
-#    print('Running DSN...')
-#    [t_aff, t_warp, ants_path, template_path] = mgr.direct_streamline_norm(streams, streams_mni, nodif_B0, namer)
+    print('Running DSN...')
+    [t_aff, t_warp, ants_path, template_path] = mgr.direct_streamline_norm(streams, streams_mni, nodif_B0, namer)
 
     # Read Streamlines
-#    streamlines_mni, hdr = load_trk(streams_mni)
-#    affine = hdr['voxel_to_rasmm']
-#    streamlines = Streamlines(streamlines_mni)
+    streamlines_mni, hdr = nib.streamlines.load(streams_mni, lazy_load=True)
+    affine = hdr['voxel_to_rasmm']
+    streamlines = Streamlines(streamlines_mni)
 
     tracks = [sl for sl in streamlines if len(sl) > 1]
 

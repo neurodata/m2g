@@ -107,7 +107,11 @@ RUN \
     git lfs clone $NDMG_ATLASES && \
     mv /neuroparc/atlases /ndmg_atlases && \
     rm -rf /neuroparc && \
-    rm -rf /ndmg_atlases/label/DS*
+    rm -rf /ndmg_atlases/label/DS* && \
+    rm -rf /ndmg_atlases/label/pp264* && \
+    rm -rf /ndmg_atlases/label/princeton* && \
+    rm -rf /ndmg_atlases/label/slab* && \
+    rm -rf /ndmg_atlases/label/hemispheric
 
 RUN mkdir /data && \
     chmod -R 777 /data
