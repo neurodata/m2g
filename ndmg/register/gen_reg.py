@@ -105,53 +105,6 @@ def transform_pts(pts, t_aff, t_warp, ref_img_path, ants_path, template_path, na
         return lps_voxmm
 
 
-def warp_parcels(par_path,par_out,t_aff,t_warp,ants_path,template_path, namer):
-    print ("Warping parcellation " + par_path)
-    GM = nib.load(par_path)
-    gm = GM.get_data()
-
-    orig_dir = namer.dirs['tmp']['base']
-    orig_csv_out = namer.dirs['tmp']['base'] + "/orig_par_coords.csv"
-    transforms = "-t [" + str(t_aff) + ", 1] " + "-t " + str(t_warp)
-
-    o_coords = np.array(np.unravel_index(np.flatnonzero(gm), gm.shape, order="C"))
-    # convert to world coords
-    vox_transform = np.vstack([o_coords[:3,:],np.zeros((1,o_coords.shape[1]))])
-    orig_aff = GM.affine
-    orig_world_coords = (np.dot(orig_aff,vox_transform) - orig_aff[0,0])[:3]
-    orig_world_coords[1,:] = -orig_world_coords[1,:]
-    orig_world_coords[0,:] = -orig_world_coords[0,:]
-    
-    np.savetxt(orig_csv_out,np.hstack([orig_world_coords.T,np.zeros((o_coords.shape[1],1))]),header="x,y,z,t",delimiter=",",fmt="%f")
-    # Apply the trandforms to
-    os.system(ants_path + "/antsApplyTransformsToPoints " + \
-                  "-d 3 " + \
-                  "-i " + orig_csv_out + \
-                  " -o " + orig_dir + "/parcel.csv " + transforms
-                  )
-    ants_warped_coords = np.loadtxt(orig_dir + "/parcel.csv", skiprows=1, delimiter=",")[:,:3]
-    template = nib.load(template_path)
-    warped_affine = template.affine
-    adjusted_affine = warped_affine.copy()
-    adjusted_affine[0] = -adjusted_affine[0]
-    adjusted_affine[1] = -adjusted_affine[1]
-    to_transform = np.hstack([ants_warped_coords,np.ones((ants_warped_coords.shape[0],1))])
-    new_voxels = (np.dot(np.linalg.inv(adjusted_affine),to_transform.T) + warped_affine[0,0])[:3]
-    new_voxels = np.round(new_voxels).astype(np.int16)
-    flatgm = gm.reshape(-1)
-    gm_inds = np.flatnonzero(gm)
-    o_label = flatgm[gm_inds]
-    os.chdir(orig_dir)
-    
-    new_wp = np.zeros_like(gm) # assign native space labels to appropriate template spac voxels
-    for l in range(o_label.shape[0]):   
-        new_wp[new_voxels[0,l]-1,new_voxels[1,l]-1,new_voxels[2,l]-1] = o_label[l] 
-
-    new_wp_nib = nib.Nifti1Image(new_wp, GM.affine)
-    nib.save(new_wp_nib,par_out)
-    print ("Finished " + par_out)
-
-
 class Warp(object):
     def __init__(self,ants_path="",file_in="",file_out="",template_path="",t_aff="",t_warp="",ref_img_path="", namer=""):
         self.ants_path = ants_path
@@ -232,7 +185,7 @@ def direct_streamline_norm(streams, streams_mni, nodif_B0, namer):
     wS = Warp(ants_path, streams, streams_mni, template_path, t_aff, t_warp, nodif_B0, namer)
     wS.streamlines()
     
-    return t_aff, t_warp, ants_path, template_path 
+    return
 
 
 class dmri_reg(object):
@@ -384,7 +337,7 @@ class dmri_reg(object):
 
         return
 
-    def atlas2t1w2dwi_align(self, atlas):
+    def atlas2t1w2dwi_align(self, atlas, dsn=True):
         """
         alignment from atlas --> T1 --> dwi
         A function to perform atlas alignment.
@@ -399,9 +352,9 @@ class dmri_reg(object):
         self.dwi_aligned_atlas = "{}/{}_aligned_atlas.nii.gz".format(self.namer.dirs['output']['reg_anat'], self.atlas_name)
         #self.dwi_aligned_atlas_mask = "{}/{}_aligned_atlas_mask.nii.gz".format(self.namer.dirs['tmp']['reg_a'], self.atlas_name)
 
-        mgru.align(self.atlas, self.t1_aligned_mni, init=None, xfm=None, out=self.aligned_atlas_t1mni, dof=6, searchrad=True, interp="nearestneighbour", cost='mutualinfo')
+        mgru.align(self.atlas, self.t1_aligned_mni, init=None, xfm=None, out=self.aligned_atlas_t1mni, dof=12, searchrad=True, interp="nearestneighbour", cost='mutualinfo')
 
-        if self.simple is False:
+        if ((self.simple is False) and (dsn is False)):
             try:
 		# Apply warp resulting from the inverse of T1w-->MNI created earlier
                 mgru.apply_warp(self.t1w_brain, self.aligned_atlas_t1mni, self.aligned_atlas_skull, warp=self.mni2t1w_warp, interp='nn', sup=True)
@@ -419,7 +372,7 @@ class dmri_reg(object):
 
                 # Apply linear transformation from template to dwi space
                 mgru.applyxfm(self.nodif_B0, self.atlas, self.temp2dwi_xfm, self.dwi_aligned_atlas)
-        else:
+        elif dsn is False:
             # Create transform to align atlas to T1w using flirt
             mgru.align(self.atlas, self.t1w_brain, xfm=self.xfm_atlas2t1w_init, init=None, bins=None, dof=6, cost='mutualinfo', searchrad=None, interp="spline", out=None, sch=None)
             mgru.align(self.atlas, self.t1w_brain, xfm=self.xfm_atlas2t1w, out=None, dof=6, searchrad=True, bins=None, interp="spline", cost='mutualinfo', init=self.xfm_atlas2t1w_init)
@@ -429,27 +382,31 @@ class dmri_reg(object):
 
             # Apply linear transformation from template to dwi space
             mgru.applyxfm(self.nodif_B0, self.atlas, self.temp2dwi_xfm, self.dwi_aligned_atlas)
+        else:
+	    pass
 
         # Set intensities to int
-        self.atlas_img = nib.load(self.dwi_aligned_atlas)
+	if dsn is False:
+            self.atlas_img = nib.load(self.dwi_aligned_atlas)
+        else:
+	    self.atlas_img = nib.load(self.aligned_atlas_t1mni)
         self.atlas_data = self.atlas_img.get_data().astype('int')
 	node_num = len(np.unique(self.atlas_data))
         self.atlas_data[self.atlas_data>node_num] = 0
-	
-	t_img = load_img(self.wm_gm_int_in_dwi)
-	mask = math_img('img > 0', img=t_img)
-	mask.to_filename(self.wm_gm_int_in_dwi_bin)
 
-        nib.save(nib.Nifti1Image(self.atlas_data.astype(np.int32), affine=self.atlas_img.affine, header=self.atlas_img.header), self.dwi_aligned_atlas)
-        cmd='fslmaths ' + self.dwi_aligned_atlas + ' -mas ' + self.nodif_B0_mask + ' -mas ' + self.wm_gm_int_in_dwi_bin + ' ' + self.dwi_aligned_atlas
-        os.system(cmd)
+	if dsn is False:	
+	    t_img = load_img(self.wm_gm_int_in_dwi)
+	    mask = math_img('img > 0', img=t_img)
+	    mask.to_filename(self.wm_gm_int_in_dwi_bin)
 
-	# Binarize atlas
-        #self.t_img = load_img(self.dwi_aligned_atlas)
-        #self.mask = math_img('img > 0', img=self.t_img)
-        #self.mask.to_filename(self.dwi_aligned_atlas_mask)
+            nib.save(nib.Nifti1Image(self.atlas_data.astype(np.int32), affine=self.atlas_img.affine, header=self.atlas_img.header), self.dwi_aligned_atlas)
+            cmd='fslmaths ' + self.dwi_aligned_atlas + ' -mas ' + self.nodif_B0_mask + ' -mas ' + self.wm_gm_int_in_dwi_bin + ' ' + self.dwi_aligned_atlas
+            os.system(cmd)
+	    return self.dwi_aligned_atlas
+	else:
+            nib.save(nib.Nifti1Image(self.atlas_data.astype(np.int32), affine=self.atlas_img.affine, header=self.atlas_img.header), self.aligned_atlas_t1mni)
+	    return self.aligned_atlas_t1mni
 
-        return self.dwi_aligned_atlas
 
     def tissue2dwi_align(self):
         """

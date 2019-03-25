@@ -258,10 +258,12 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
 
     # Normalize streamlines
     print('Running DSN...')
-    [t_aff, t_warp, ants_path, template_path] = mgr.direct_streamline_norm(streams, streams_mni, nodif_B0, namer)
+    mgr.direct_streamline_norm(streams, streams_mni, nodif_B0, namer)
 
     # Read Streamlines
-    streamlines_mni, hdr = nib.streamlines.load(streams_mni, lazy_load=True)
+    streamlines_mni_obj = nib.streamlines.load(streams_mni)
+    hdr = streamlines_mni_obj.header
+    streamlines_mni = streamlines_mni_obj.streamlines
     affine = hdr['voxel_to_rasmm']
     streamlines = Streamlines(streamlines_mni)
 
@@ -292,9 +294,6 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
 		labels_im_file = mgu.match_target_vox_res(labels[idx], vox_size, namer, zoom_set, sens='t1w')
                 labels_im_file = reg.atlas2t1w2dwi_align(labels_im_file)
 		labels_im = nib.load(labels_im_file)
-#		labels_im_file_norm = labels_im_file.split('.nii.gz')[0] + '_norm.nii.gz'
-#		mgr.warp_parcels(labels_im_file, labels_im_file_norm, t_aff, t_warp, ants_path, template_path, namer)
-#	        labels_im = nib.load(labels_im_file_norm)
 	        g1 = mgg.graph_tools(attr=len(np.unique(labels_im.get_data().astype('int')))-1, rois=labels_im_file, tracks=tracks, affine=np.eye(4), namer=namer, connectome_path=connectomes[idx])
 		g1.make_graph_old()
 		#g1.make_regressors()
