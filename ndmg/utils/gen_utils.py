@@ -180,7 +180,7 @@ def reorient_dwi(dwi_prep, bvecs, namer):
     cmd='fslorient -getorient ' + dwi_prep
     orient = os.popen(cmd).read().strip('\n')
     if orient == 'NEUROLOGICAL':
-        print('Reorienting derivative dwi image to RAS+ canonical...')
+        print('Neurological (dwi), reorienting to radiological...')
         # Orient dwi to RADIOLOGICAL
         dwi_orig = dwi_prep
         dwi_prep = "{}/dwi_prep_reor.nii.gz".format(namer.dirs['output']['prep_dwi'])
@@ -197,17 +197,19 @@ def reorient_dwi(dwi_prep, bvecs, namer):
         qform = os.popen(cmd).read().strip('\n')
         # Posterior-Anterior Reorientation
         if float(qform.split(' ')[:-1][5])<0:
+	    print('Reorienting P-A flip (dwi)...')
             cmd='fslswapdim ' + dwi_prep + ' -y x z ' + dwi_prep
             os.system(cmd)
             bvecs_mat[1] = -bvecs_mat[1]
         # Inferior-Superior Reorientation
         if float(qform.split(' ')[:-1][10])<0:
+	    print('Reorienting I-S flip (dwi)...')
             cmd='fslswapdim ' + dwi_prep + ' y x -z ' + dwi_prep
             os.system(cmd)
             bvecs_mat[2] = -bvecs_mat[2]
         np.savetxt(bvecs, bvecs_mat)
     else:
-	print('No reorientation of derivative dwi needed...')
+	print('Radiological (dwi)...')
         dwi_orig = dwi_prep
         dwi_prep = "{}/dwi_prep.nii.gz".format(namer.dirs['output']['prep_dwi'])
         shutil.copyfile(dwi_orig, dwi_prep)
@@ -215,6 +217,20 @@ def reorient_dwi(dwi_prep, bvecs, namer):
         bvecs = "{}/bvecs.bvec".format(namer.dirs['output']['prep_dwi'])
         shutil.copyfile(bvecs_orig, bvecs)
         bvecs_mat = np.genfromtxt(bvecs)
+        cmd='fslorient -getqform ' + dwi_prep
+        qform = os.popen(cmd).read().strip('\n')
+        # Posterior-Anterior Reorientation
+        if float(qform.split(' ')[:-1][5])<0:
+            print('Reorienting P-A flip (dwi)...')
+            cmd='fslswapdim ' + dwi_prep + ' -y x z ' + dwi_prep
+            os.system(cmd)
+            bvecs_mat[1] = -bvecs_mat[1]
+        # Inferior-Superior Reorientation
+        if float(qform.split(' ')[:-1][10])<0:
+            print('Reorienting I-S flip (dwi)...')
+            cmd='fslswapdim ' + dwi_prep + ' y x -z ' + dwi_prep
+            os.system(cmd)
+            bvecs_mat[2] = -bvecs_mat[2]
         np.savetxt(bvecs, bvecs_mat)
     return dwi_prep, bvecs
 
@@ -222,7 +238,7 @@ def reorient_t1w(t1w, namer):
     cmd='fslorient -getorient ' + t1w
     orient = os.popen(cmd).read().strip('\n')
     if orient == 'NEUROLOGICAL':
-        print('Reorienting derivative t1w image to RAS+ canonical...')
+	print('Neurological (t1w), reorienting to radiological...')
         # Orient t1w to std
         t1w_orig = t1w
         t1w = "{}/t1w_reor.nii.gz".format(namer.dirs['output']['prep_anat'])
@@ -232,10 +248,25 @@ def reorient_t1w(t1w, namer):
         cmd='fslreorient2std ' + t1w_orig + ' ' + t1w
         os.system(cmd)
     else:
-	print('No reorientation of derivative t1w image needed...')
+	print('Radiological (t1w)...')
         t1w_orig = t1w
         t1w = "{}/t1w.nii.gz".format(namer.dirs['output']['prep_anat'])
         shutil.copyfile(t1w_orig, t1w)
+
+    cmd='fslorient -getqform ' + t1w
+    qform = os.popen(cmd).read().strip('\n')
+    # Posterior-Anterior Reorientation
+    if float(qform.split(' ')[:-1][5])<0:
+        print('Reorienting P-A flip (t1w)...')
+        cmd='fslswapdim ' + t1w + ' -y x z ' + t1w
+        os.system(cmd)
+
+    # Inferior-Superior Reorientation
+    if float(qform.split(' ')[:-1][10])<0:
+        print('Reorienting I-S flip (t1w)...')
+        cmd='fslswapdim ' + t1w + ' y x -z ' + t1w
+        os.system(cmd)
+
     return t1w
 
 def match_target_vox_res(img_file, vox_size, namer, zoom_set, sens):
@@ -251,10 +282,10 @@ def match_target_vox_res(img_file, vox_size, namer, zoom_set, sens):
 	    img_file_pre = "{}/{}_pre_res.nii.gz".format(namer.dirs['output']['prep_anat'], os.path.basename(img_file).split('.nii.gz')[0])
         shutil.copyfile(img_file, img_file_pre)
         if vox_size == '1mm':
-            print('Reslicing image(s) to 1mm...')
+            print('Reslicing image ' + img_file + ' to 1mm...')
             img_file = rgu.reslice_to_xmm(img_file_pre, 1.0)
         elif vox_size == '2mm':
-            print('Reslicing image(s) to 2mm...')
+            print('Reslicing image ' + img_file + ' to 2mm...')
             img_file = rgu.reslice_to_xmm(img_file_pre, 2.0)
     return img_file
 
