@@ -84,6 +84,7 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
 
     # Create derivative output file names
     streams = namer.name_derivative(namer.dirs['output']['fiber'], "streamlines.trk")
+    streams_tmp = namer.name_derivative(namer.dirs['output']['fiber'], "streamlines_tmp.trk")
     streams_mni = namer.name_derivative(namer.dirs['output']['fiber'], "streamlines_mni.trk")
 
     if big:
@@ -115,14 +116,14 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
     start_time = time.time()
     if len(os.listdir(namer.dirs['output']['prep_dwi'])) != 0:
 	print('Pre-existing preprocessed dwi files found. Deleting these...')
-	shutil.rmtree(namer.dirs['output']['prep_dwi'])
-	os.mkdir(namer.dirs['output']['prep_dwi'])
+#	shutil.rmtree(namer.dirs['output']['prep_dwi'])
+#	os.mkdir(namer.dirs['output']['prep_dwi'])
 
     dwi_prep = "{}/eddy_corrected_data.nii.gz".format(namer.dirs['output']['prep_dwi'])
     eddy_rot_param = "{}/eddy_corrected_data.ecclog".format(namer.dirs['output']['prep_dwi'])
     print("Performing eddy correction...")
-    cmd='eddy_correct ' + dwi + ' ' + dwi_prep + ' 0'
-    os.system(cmd)
+#    cmd='eddy_correct ' + dwi + ' ' + dwi_prep + ' 0'
+#    os.system(cmd)
 
     # Check for outliers from eddy correction
     #os.chdir(namer.dirs['output']['prep_dwi'])
@@ -131,19 +132,14 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
 
     # Instantiate bvec/bval naming variations and copy to derivative director
     bvec_scaled = "{}/bvec_scaled.bvec".format(namer.dirs['output']['prep_dwi'])
-    bvec_rotated = "{}/bvec_rotated.bvec".format(namer.dirs['output']['prep_dwi'])
     fbval = "{}/bval.bval".format(namer.dirs['output']['prep_dwi'])
     fbvec = "{}/bvec.bvec".format(namer.dirs['output']['prep_dwi'])
-    shutil.copyfile(bvecs, fbvec)
-    shutil.copyfile(bvals, fbval)
+#    shutil.copyfile(bvecs, fbvec)
+#    shutil.copyfile(bvals, fbval)
 
     # Correct any corrupted bvecs/bvals
     from dipy.io import read_bvals_bvecs
     bvals, bvecs = read_bvals_bvecs(fbval, fbvec)
-    if np.any(abs(bvecs) >= 1) == True:
-	no_rotate = True
-    else:
-	no_rotate = False
     bvecs[np.where(np.any(abs(bvecs) >= 10, axis=1) == True)] = [1, 0, 0]
     bvecs[np.where(np.any(bvals == 0, axis=0) == True)] = 0
     np.savetxt(fbval, bvals)
@@ -153,14 +149,9 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
     print("Rescaling b-vectors...")
     mgp.rescale_bvec(fbvec, bvec_scaled)
 
-    # Rotate bvecs
-    print("Rotating b-vectors and generating gradient table...")
-    cmd='bash fdt_rotate_bvecs ' + bvec_scaled + ' ' + bvec_rotated + ' ' + eddy_rot_param + ' 2>/dev/null'
-    os.system(cmd)
-
     # Check orientation (dwi_prep)
     start_time = time.time()
-    [dwi_prep, bvecs] = mgu.reorient_dwi(dwi_prep, bvec_rotated, namer)
+    [dwi_prep, bvecs] = mgu.reorient_dwi(dwi_prep, bvec_scaled, namer)
     print("%s%s%s" % ('Reorienting runtime: ', str(np.round(time.time() - start_time, 1)), 's'))
 
     # Check dimensions
@@ -170,10 +161,9 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
         print("%s%s%s" % ('Reslicing runtime: ', str(np.round(time.time() - start_time, 1)), 's'))
 
     # Build gradient table
-    if no_rotate is False:
-        [gtab, nodif_B0, nodif_B0_mask] = mgu.make_gtab_and_bmask(fbval, bvecs, dwi_prep, namer.dirs['output']['prep_dwi'])
-    else:
-	[gtab, nodif_B0, nodif_B0_mask] = mgu.make_gtab_and_bmask(fbval, fbvec, dwi_prep, namer.dirs['output']['prep_dwi'])
+    [gtab, nodif_B0, nodif_B0_mask] = mgu.make_gtab_and_bmask(fbval, bvecs, dwi_prep, namer.dirs['output']['prep_dwi'])
+
+    # Get B0 header and affine
     dwi_prep_img = nib.load(dwi_prep)
     stream_affine = dwi_prep_img.affine
     hdr = dwi_prep_img.header
@@ -181,18 +171,18 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
     # -------- Registration Steps ----------------------------------- #
     if len(os.listdir(namer.dirs['output']['prep_anat'])) != 0:
 	print('Pre-existing preprocessed t1w files found. Deleting these...')
-        shutil.rmtree(namer.dirs['output']['prep_anat'])
-	os.mkdir(namer.dirs['output']['prep_anat'])
+#        shutil.rmtree(namer.dirs['output']['prep_anat'])
+#	os.mkdir(namer.dirs['output']['prep_anat'])
     if len(os.listdir(namer.dirs['output']['reg_anat'])) != 0:
 	print('Pre-existing registered t1w files found. Deleting these...')
-        shutil.rmtree(namer.dirs['output']['reg_anat'])
-	os.mkdir(namer.dirs['output']['reg_anat'])
+#        shutil.rmtree(namer.dirs['output']['reg_anat'])
+#	os.mkdir(namer.dirs['output']['reg_anat'])
     if (len(os.listdir(namer.dirs['tmp']['reg_a'])) != 0) or (len(os.listdir(namer.dirs['tmp']['reg_m'])) != 0):
         print('Pre-existing temporary files found. Deleting these...')
-        shutil.rmtree(namer.dirs['tmp']['reg_a'])
-        os.mkdir(namer.dirs['tmp']['reg_a'])
-        shutil.rmtree(namer.dirs['tmp']['reg_m'])
-        os.mkdir(namer.dirs['tmp']['reg_m'])
+#        shutil.rmtree(namer.dirs['tmp']['reg_a'])
+#        os.mkdir(namer.dirs['tmp']['reg_a'])
+#        shutil.rmtree(namer.dirs['tmp']['reg_m'])
+#        os.mkdir(namer.dirs['tmp']['reg_m'])
 
     # Check orientation (t1w)
     start_time = time.time()
@@ -205,34 +195,33 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
         reg = mgr.dmri_reg(namer, nodif_B0, nodif_B0_mask, t1w, vox_size, simple=False)
         # Perform anatomical segmentation
         start_time = time.time()
-        reg.gen_tissue()
+#        reg.gen_tissue()
         print("%s%s%s" % ('gen_tissue runtime: ', str(np.round(time.time() - start_time, 1)), 's'))
 
         # Align t1w to dwi
         start_time = time.time()
-        reg.t1w2dwi_align()
+#        reg.t1w2dwi_align()
         print("%s%s%s" % ('t1w2dwi_align runtime: ', str(np.round(time.time() - start_time, 1)), 's'))
 
         # Align tissue classifiers
         start_time = time.time()
-        reg.tissue2dwi_align()
+#        reg.tissue2dwi_align()
         print("%s%s%s" % ('tissue2dwi_align runtime: ', str(np.round(time.time() - start_time, 1)), 's'))
 
         # -------- Tensor Fitting and Fiber Tractography ---------------- #
         if track_type == 'eudx':
-	    #seeds = int(1000000)
-	    seeds_wm_gm_int = mgt.build_seed_list(reg.wm_gm_int_in_dwi, np.eye(4), dens=4)
+	    seeds_wm_gm_int = mgt.build_seed_list(reg.wm_gm_int_in_dwi, np.eye(4), dens=1)
 	    seeds_wm = mgt.build_seed_list(reg.wm_in_dwi, np.eye(4), dens=1)
 	    seeds = np.vstack((seeds_wm_gm_int, seeds_wm))
         else:
-            seeds_wm_gm_int = mgt.build_seed_list(reg.wm_gm_int_in_dwi, np.eye(4), dens=4)
+            seeds_wm_gm_int = mgt.build_seed_list(reg.wm_gm_int_in_dwi, np.eye(4), dens=1)
 	    seeds_wm = mgt.build_seed_list(reg.wm_in_dwi, np.eye(4), dens=1)
 	    seeds = np.vstack((seeds_wm_gm_int, seeds_wm))
 	print('Using ' + str(len(seeds)) + ' seeds...')
 
         # Compute direction model and track fiber streamlines
         print("Beginning tractography...")
-        trct = mgt.run_track(dwi_prep, nodif_B0_mask, reg.gm_in_dwi, reg.vent_csf_in_dwi, reg.csf_mask_dwi, reg.wm_in_dwi, gtab, mod_type, track_type, mod_func, seeds, stream_affine)
+        trct = mgt.run_track(dwi_prep, nodif_B0_mask, reg.gm_in_dwi, reg.vent_csf_in_dwi, reg.csf_mask_dwi, reg.wm_in_dwi, gtab, mod_type, track_type, mod_func, seeds, np.eye(4))
         streamlines = trct.run()
 
 	# Save streamlines to disk
@@ -245,20 +234,22 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
             streams = move_streamlines(streams, scale)
             return streams
 
-        affine = np.dot(stream_affine, np.diag(1. / np.array([zoom_set[0], zoom_set[1], zoom_set[2], 1])))
+	streamlines = Streamlines([sl for sl in streamlines if len(sl) > 1])
+        affine = np.eye(4)*np.array([-zoom_set[0],zoom_set[1],zoom_set[2],1])
+	tract_affine = np.eye(4)*np.array([zoom_set[0],zoom_set[1],zoom_set[2],1])
         trk_hdr = nib.streamlines.trk.TrkFile.create_empty_header()
         trk_hdr['hdr_size'] = 1000
         trk_hdr['dimensions'] = hdr['dim'][1:4].astype('float32')
         trk_hdr['voxel_sizes'] = hdr['pixdim'][1:4]
-        trk_hdr['voxel_to_rasmm'] = affine
+        trk_hdr['voxel_to_rasmm'] = tract_affine
         trk_hdr['voxel_order'] = 'LPS'
         trk_hdr['pad2'] = 'LPS'
         trk_hdr['image_orientation_patient'] = np.array([1., 0., 0., 0., 1., 0.]).astype('float32')
         trk_hdr['endianness'] = '<'
         trk_hdr['_offset_data'] = 1000
-        trk_hdr['nb_streamlines'] = len(streamlines)
+        trk_hdr['nb_streamlines'] = streamlines.total_nb_rows
         streamlines_trans = Streamlines(transform_to_affine(streamlines, trk_hdr, affine))
-        tractogram = nib.streamlines.Tractogram(streamlines_trans, affine_to_rasmm=np.eye(4))
+        tractogram = nib.streamlines.Tractogram(streamlines_trans, affine_to_rasmm=affine)
         trkfile = nib.streamlines.trk.TrkFile(tractogram, header=trk_hdr)
         nib.streamlines.save(trkfile, streams)
 
@@ -284,23 +275,28 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
 
     # Normalize streamlines
     print('Running DSN...')
+    #nodif_B0_img =  nib.load(nodif_B0)
+    #data = nodif_B0_img.get_data()
+    #nodif_B0_isocentered = "{}/nodif_B0_isocentered.nii.gz".format(namer.dirs['output']['prep_dwi'])
+    #nodif_B0_img = nib.nifti1.Nifti1Image(data, affine=nodif_B0_img.affine, header=nodif_B0_img.header)
+    #nib.save(nodif_B0_img, nodif_B0_isocentered) 
     mgr.direct_streamline_norm(streams, streams_mni, nodif_B0, namer)
 
     # Read Streamlines
-    streamlines_mni_obj = nib.streamlines.load(streams_mni)
-    hdr = streamlines_mni_obj.header
-    streamlines_mni = streamlines_mni_obj.streamlines
-    affine = hdr['voxel_to_rasmm']
+    streamlines_mni = nib.streamlines.load(streams_mni).streamlines
     streamlines = Streamlines(streamlines_mni)
-
-    tracks = [sl for sl in streamlines if len(sl) > 1]
 
     # Visualize fibers using VTK
     if nib.load(nodif_B0_mask).get_data().shape == (182, 218, 182):
-        try:
-            visualize_fibs(streamlines, aligned_atlas, namer.dirs['qa']['fiber'], 0.02, 2000)
-        except:
-            print("Fiber QA failed - VTK for Python not configured properly.")
+        from dipy.viz import window, actor, colormap as cmap 
+        renderer = window.Renderer()
+        renderer.clear()
+        renderer.add(actor.line(streamlines, cmap.line_colors(streamlines)))
+        window.record(renderer, out_path='streamlines.png', size=(600, 600))
+#        try:
+#            visualize_fibs(streamlines, aligned_atlas, namer.dirs['qa']['fiber'], 0.02, 2000)
+#        except:
+#            print("Fiber QA failed - VTK for Python not configured properly.")
 
     # -------- Big Graph Generation --------------------------------- #
     # Generate big graphs from streamlines
@@ -320,7 +316,7 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
 		labels_im_file = mgu.match_target_vox_res(labels[idx], vox_size, namer, zoom_set, sens='t1w')
                 labels_im_file = reg.atlas2t1w2dwi_align(labels_im_file)
 		labels_im = nib.load(labels_im_file)
-	        g1 = mgg.graph_tools(attr=len(np.unique(labels_im.get_data().astype('int')))-1, rois=labels_im_file, tracks=tracks, affine=np.eye(4), namer=namer, connectome_path=connectomes[idx])
+	        g1 = mgg.graph_tools(attr=len(np.unique(labels_im.get_data().astype('int')))-1, rois=labels_im_file, tracks=streamlines, affine=affine, namer=namer, connectome_path=connectomes[idx])
 		g1.make_graph_old()
 		#g1.make_regressors()
 	    elif reg_style == 'mni':

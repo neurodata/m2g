@@ -31,12 +31,12 @@ def build_seed_list(mask_img_file, stream_affine, dens):
     from dipy.tracking import utils
     mask_img = nib.load(mask_img_file)
     mask_img_data = mask_img.get_data().astype('bool')
-    seeds = utils.seeds_from_mask(mask_img_data, density=int(dens), affine=stream_affine)
+    seeds = utils.random_seeds_from_mask(mask_img_data, seeds_count=int(dens), seed_count_per_voxel=True, affine=stream_affine)
     return seeds
 
 class run_track(object):
     def __init__(self, dwi_in, nodif_B0_mask, gm_in_dwi, vent_csf_in_dwi, csf_in_dwi,
-                 wm_in_dwi, gtab, mod_type, track_type, mod_func, seeds, stream_affine=np.eye(4)):
+                 wm_in_dwi, gtab, mod_type, track_type, mod_func, seeds, stream_affine):
         """
         A class for deterministic tractography in native space.
 
@@ -114,7 +114,7 @@ class run_track(object):
 
     def prep_tracking(self):
 	from dipy.tracking.local import ActTissueClassifier, CmcTissueClassifier, BinaryTissueClassifier
-	tiss_class = 'cmc'
+	tiss_class = 'act'
         self.dwi_img = nib.load(self.dwi)
         self.data = self.dwi_img.get_data()
         # Loads mask and ensures it's a true binary mask
@@ -125,6 +125,7 @@ class run_track(object):
         self.gm_mask_data = self.gm_mask.get_data()
         self.wm_mask = nib.load(self.wm_in_dwi)
         self.wm_mask_data = self.wm_mask.get_data()
+	self.wm_in_dwi_data = nib.load(self.wm_in_dwi).get_data().astype('bool')
 	if tiss_class == 'act':
             self.vent_csf_in_dwi = nib.load(self.vent_csf_in_dwi)
             self.vent_csf_in_dwi_data = self.vent_csf_in_dwi.get_data()
@@ -135,7 +136,6 @@ class run_track(object):
             self.exclude_map = self.vent_csf_in_dwi_data
 	    self.tiss_classifier = ActTissueClassifier(self.include_map, self.exclude_map)
 	elif tiss_class == 'bin':
-	    self.wm_in_dwi_data = nib.load(self.wm_in_dwi).get_data().astype('bool')
 	    self.tiss_classifier = BinaryTissueClassifier(self.wm_in_dwi_data)
 	elif tiss_class == 'cmc':
             self.vent_csf_in_dwi = nib.load(self.vent_csf_in_dwi)
@@ -152,8 +152,9 @@ class run_track(object):
 	from dipy.data import get_sphere
         print('Fitting tensor model...')
         self.model = TensorModel(self.gtab)
-        self.ten = self.model.fit(self.data, self.mask)
+        self.ten = self.model.fit(self.data, self.wm_in_dwi_data)
 	self.fa = self.ten.fa
+	self.fa = self.fa[self.fa>0.01]
 	self.fa[np.isnan(self.fa)] = 0
         self.sphere = get_sphere('repulsion724')
         self.ind = quantize_evecs(self.ten.evecs, self.sphere.vertices)
@@ -175,7 +176,7 @@ class run_track(object):
 	    self.mod = ConstrainedSphericalDeconvModel(self.gtab, None, sh_order=6)
 	except:
 	    print('Falling back to estimating recursive response...')
-            self.response = recursive_response(self.gtab, self.data, mask=self.mask, sh_order=6, peak_thr=0.01, init_fa=0.08, init_trace=0.0021, iter=8, convergence=0.001, parallel=False)
+            self.response = recursive_response(self.gtab, self.data, mask=self.wm_in_dwi_data, sh_order=6, peak_thr=0.01, init_fa=0.08, init_trace=0.0021, iter=8, convergence=0.001, parallel=False)
 	    print('CSD Reponse: ' + str(self.response))
 	    self.mod = ConstrainedSphericalDeconvModel(self.gtab, self.response)
 	return self.mod
@@ -187,12 +188,12 @@ class run_track(object):
 	self.sphere = get_sphere('repulsion724')
 	if self.mod_type=='det':
 	    print('Obtaining peaks from model...')
-	    self.mod_peaks = peaks_from_model(self.mod, self.data, self.sphere, relative_peak_threshold=.8, min_separation_angle=45, mask=self.mask, npeaks=5, normalize_peaks=True)
+	    self.mod_peaks = peaks_from_model(self.mod, self.data, self.sphere, relative_peak_threshold=.5, min_separation_angle=25, mask=self.wm_in_dwi_data, npeaks=5, normalize_peaks=True)
             self.streamline_generator = LocalTracking(self.mod_peaks, self.tiss_classifier, self.seeds, self.stream_affine, step_size=.5, return_all=True)
         elif self.mod_type=='prob':
 	    print('Preparing probabilistic tracking...')
 	    print('Fitting model to data...')
-	    self.mod_fit = self.mod.fit(self.data, self.mask)
+	    self.mod_fit = self.mod.fit(self.data, self.wm_in_dwi_data)
 	    print('Building direction-getter...')
 	    try:
 		print('Proceeding using spherical harmonic coefficient from model estimation...')
@@ -216,13 +217,13 @@ class run_track(object):
         if self.mod_type=='det':
 	    maxcrossing = 1
             print('Obtaining peaks from model...')
-            self.mod_peaks = peaks_from_model(self.mod, self.data, self.sphere, relative_peak_threshold=.8, min_separation_angle=45, mask=self.mask, npeaks=5, normalize_peaks=True)
+            self.mod_peaks = peaks_from_model(self.mod, self.data, self.sphere, relative_peak_threshold=.5, min_separation_angle=25, mask=self.wm_in_dwi_data, npeaks=5, normalize_peaks=True)
 	    self.streamline_generator = ParticleFilteringTracking(self.mod_peaks, self.tiss_classifier, self.seeds, self.stream_affine, max_cross=maxcrossing, step_size=.5, maxlen=1000, pft_back_tracking_dist=2, pft_front_tracking_dist=1, particle_count=15, return_all=True)
         elif self.mod_type=='prob':
 	    maxcrossing = 4
             print('Preparing probabilistic tracking...')
             print('Fitting model to data...')
-            self.mod_fit = self.mod.fit(self.data, self.mask)
+            self.mod_fit = self.mod.fit(self.data, self.wm_in_dwi_data)
             print('Building direction-getter...')
             try:
                 print('Proceeding using spherical harmonic coefficient from model estimation...')

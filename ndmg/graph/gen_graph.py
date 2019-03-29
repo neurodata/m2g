@@ -57,7 +57,7 @@ class graph_tools(object):
         self.N = len(self.n_ids)
         self.modal = sens
 	self.tracks = tracks
-	self.affine = np.eye(4)
+	self.affine = affine
 	self.namer = namer
 	self.connectome_path = os.path.dirname(connectome_path)
         pass
