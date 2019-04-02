@@ -138,11 +138,11 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
 
     # Correct any corrupted bvecs/bvals
     from dipy.io import read_bvals_bvecs
-#    bvals, bvecs = read_bvals_bvecs(fbval, fbvec)
-#    bvecs[np.where(np.any(abs(bvecs) >= 10, axis=1) == True)] = [1, 0, 0]
-#    bvecs[np.where(np.any(bvals == 0, axis=0) == True)] = 0
-#    np.savetxt(fbval, bvals)
-#    np.savetxt(fbvec, bvecs)
+    bvals, bvecs = read_bvals_bvecs(fbval, fbvec)
+    bvecs[np.where(np.any(abs(bvecs) >= 10, axis=1) == True)] = [1, 0, 0]
+    bvecs[np.where(np.any(bvals == 0, axis=0) == True)] = 0
+    np.savetxt(fbval, bvals)
+    np.savetxt(fbvec, bvecs)
 
     # Rescale bvecs
     print("Rescaling b-vectors...")
@@ -209,13 +209,13 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
 
         # -------- Tensor Fitting and Fiber Tractography ---------------- #
         if track_type == 'eudx':
-	    seeds_wm_gm_int = mgt.build_seed_list(reg.wm_gm_int_in_dwi, np.eye(4), dens=1)
-	    seeds_wm = mgt.build_seed_list(reg.wm_in_dwi, np.eye(4), dens=1)
-	    seeds = np.vstack((seeds_wm_gm_int, seeds_wm))
+	    seeds = mgt.build_seed_list(reg.wm_gm_int_in_dwi, np.eye(4), dens=1)
+	    #seeds_wm = mgt.build_seed_list(reg.wm_in_dwi, np.eye(4), dens=1)
+	    #seeds = np.vstack((seeds_wm_gm_int, seeds_wm))
         else:
-            seeds_wm_gm_int = mgt.build_seed_list(reg.wm_gm_int_in_dwi, np.eye(4), dens=1)
-	    seeds_wm = mgt.build_seed_list(reg.wm_in_dwi, np.eye(4), dens=1)
-	    seeds = np.vstack((seeds_wm_gm_int, seeds_wm))
+            seeds = mgt.build_seed_list(reg.wm_gm_int_in_dwi, np.eye(4), dens=1)
+	    #seeds_wm = mgt.build_seed_list(reg.wm_in_dwi, np.eye(4), dens=1)
+	    #seeds = np.vstack((seeds_wm_gm_int, seeds_wm))
 	print('Using ' + str(len(seeds)) + ' seeds...')
 
         # Compute direction model and track fiber streamlines
@@ -233,7 +233,7 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
             streams = move_streamlines(streams, scale)
             return streams
 
-	streamlines = Streamlines([sl for sl in streamlines if len(sl) > 50])
+	streamlines = Streamlines([sl for sl in streamlines if len(sl) > 60])
         affine = np.eye(4)*np.array([-zoom_set[0],zoom_set[1],zoom_set[2],1])
 	tract_affine = np.eye(4)*np.array([zoom_set[0],zoom_set[1],zoom_set[2],1])
         trk_hdr = nib.streamlines.trk.TrkFile.create_empty_header()
