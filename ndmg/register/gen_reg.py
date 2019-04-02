@@ -80,6 +80,7 @@ def transform_pts(pts, t_aff, t_warp, ref_img_path, ants_path, template_path, na
     adjusted_affine = warped_affine.copy()
     adjusted_affine[0] = -adjusted_affine[0]
     adjusted_affine[1] = -adjusted_affine[1]
+    adjusted_affine[2] = -adjusted_affine[2]
 
     ants_warped_coords = np.loadtxt(orig_dir + "/aattp.csv", skiprows=1, delimiter=",")[:,:3]
     os.remove(orig_dir + "/aattp.csv")
@@ -99,8 +100,9 @@ def transform_pts(pts, t_aff, t_warp, ref_img_path, ants_path, template_path, na
     elif output_space == "lps_voxmm":
         template_extents = template.get_shape()
         lps_voxels = new_voxels.copy()
-        lps_voxels[0] = lps_voxels[0]
-        lps_voxels[1] = lps_voxels[1]
+	lps_voxels[0] = template_extents[0] + lps_voxels[0]
+	lps_voxels[1] = template_extents[1] + lps_voxels[1]
+        lps_voxels[2] = template_extents[2] - lps_voxels[2]
         lps_voxmm = lps_voxels.T * np.array(template.header.get_zooms())[:3]
         return lps_voxmm
 

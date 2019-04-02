@@ -162,8 +162,6 @@ class run_track(object):
 
     def odf_mod_est(self):
 	from dipy.reconst.shm import CsaOdfModel
-	self.mask_img = nib.load(self.nodif_B0_mask)
-        self.mask = self.mask_img.get_data().astype('bool')
 	print('Fitting CSA ODF model...')
 	self.mod = CsaOdfModel(self.gtab, sh_order=6)
 	return self.mod
@@ -220,7 +218,7 @@ class run_track(object):
             self.mod_peaks = peaks_from_model(self.mod, self.data, self.sphere, relative_peak_threshold=.5, min_separation_angle=25, mask=self.wm_in_dwi_data, npeaks=5, normalize_peaks=True)
 	    self.streamline_generator = ParticleFilteringTracking(self.mod_peaks, self.tiss_classifier, self.seeds, self.stream_affine, max_cross=maxcrossing, step_size=.5, maxlen=1000, pft_back_tracking_dist=2, pft_front_tracking_dist=1, particle_count=15, return_all=True)
         elif self.mod_type=='prob':
-	    maxcrossing = 4
+	    maxcrossing = 2
             print('Preparing probabilistic tracking...')
             print('Fitting model to data...')
             self.mod_fit = self.mod.fit(self.data, self.wm_in_dwi_data)
