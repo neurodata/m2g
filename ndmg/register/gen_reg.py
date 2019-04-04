@@ -78,9 +78,6 @@ def transform_pts(pts, t_aff, t_warp, ref_img_path, ants_path, template_path, na
     warped_affine = template.affine
 
     adjusted_affine = warped_affine.copy()
-    adjusted_affine[0] = adjusted_affine[0]
-    adjusted_affine[1] = adjusted_affine[1]
-    adjusted_affine[2] = adjusted_affine[2]
 
     ants_warped_coords = np.loadtxt(orig_dir + "/aattp.csv", skiprows=1, delimiter=",")[:,:3]
     os.remove(orig_dir + "/aattp.csv")
