@@ -154,7 +154,6 @@ class run_track(object):
         self.model = TensorModel(self.gtab)
         self.ten = self.model.fit(self.data, self.wm_in_dwi_data)
 	self.fa = self.ten.fa
-	self.fa = self.fa[self.fa>0.01]
 	self.fa[np.isnan(self.fa)] = 0
         self.sphere = get_sphere('repulsion724')
         self.ind = quantize_evecs(self.ten.evecs, self.sphere.vertices)
