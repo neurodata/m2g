@@ -103,7 +103,7 @@ def transform_pts(pts, t_aff, t_warp, ref_img_path, ants_path, template_path, na
         lps_voxels = new_voxels.copy()
         lps_voxels[0] = template_extents[0]-lps_voxels[0]
 	lps_voxels[1] = template_extents[1]-lps_voxels[1]
-	lps_voxels[2] = lps_voxels[2]
+	lps_voxels[2] = -lps_voxels[2]
 	print(lps_voxels)
 
         lps_voxmm = lps_voxels.T * np.array(template.header.get_zooms())[:3]
