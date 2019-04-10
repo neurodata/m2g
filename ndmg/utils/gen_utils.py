@@ -34,6 +34,7 @@ import sys
 import shutil
 from networkx import to_numpy_matrix as graph2np
 import pyximport
+from nilearn.image import resample_img
 try:
    from ndmg.graph.zindex import XYZMorton
 except:
@@ -269,6 +270,28 @@ def reorient_t1w(t1w, namer):
 
     return t1w
 
+def reorient(in_file, newpath=None):
+    """Reorient Nifti files to LPS."""
+    out_file = fname_presuffix(in_file, suffix='_lps', newpath=newpath)
+    to_lps(nib.load(in_file)).to_filename(out_file)
+    return out_file
+
+
+def to_lps(input_img):
+    new_axcodes = ("L", "P", "S")
+    input_axcodes = nib.aff2axcodes(input_img.affine)
+    # Is the input image oriented how we want?
+    if not input_axcodes == new_axcodes:
+        # Re-orient
+        input_orientation = nib.orientations.axcodes2ornt(input_axcodes)
+        desired_orientation = nib.orientations.axcodes2ornt(new_axcodes)
+        transform_orientation = nib.orientations.ornt_transform(input_orientation,
+                                                               desired_orientation)
+        reoriented_img = input_img.as_reoriented(transform_orientation)
+        return reoriented_img
+    else:
+        return input_img
+
 def match_target_vox_res(img_file, vox_size, namer, zoom_set, sens):
     from ndmg.utils import reg_utils as rgu
     # Check dimensions
@@ -285,18 +308,18 @@ def match_target_vox_res(img_file, vox_size, namer, zoom_set, sens):
             print('Reslicing image ' + img_file + ' to 1mm...')
             img_file = rgu.reslice_to_xmm(img_file_pre, 1.0)
             #Correct offsets
-            img = nib.load(img_file)
-            new_offs = img.affine[:3,3]*np.abs(zooms[0])
+            #img = nib.load(img_file)
+            #new_offs = img.affine[:3,3]*(1/np.abs(zooms[0]))
         elif vox_size == '2mm':
             print('Reslicing image ' + img_file + ' to 2mm...')
             img_file = rgu.reslice_to_xmm(img_file_pre, 2.0)
             #Correct offsets
-            img = nib.load(img_file)
-            new_offs = img.affine[:3,3]*np.abs(zooms[0])
-        img.affine[:3,3][2] = new_offs[2]
-        img.set_sform(img.affine, code='scanner')
-        img.update_header()
-        nib.save(nib.Nifti1Image(img.get_data(), affine=img.affine, header=hdr), img_file)
+            #img = nib.load(img_file)
+            #new_offs = img.affine[:3,3]*(2/np.abs(zooms[0]))
+	#img.affine[:3,3] = new_offs
+        #img.set_sform(img.affine, code='scanner')
+        #img.update_header()
+        #nib.save(nib.Nifti1Image(img.get_data(), affine=img.affine, header=hdr), img_file)
 
     return img_file
 

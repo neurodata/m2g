@@ -48,7 +48,7 @@ def transform_pts(pts, t_aff, t_warp, ref_img_path, ants_path, template_path, na
         raise ValueError("Must specify output space")
 
     orig_dir = namer.dirs['tmp']['base']
-
+    aattp_out = namer.dirs['tmp']['base'] + "/aattp.csv"
     warped_csv_out = namer.dirs['tmp']['base'] + "/warped_output.csv"
     transforms = "-t [" + str(t_aff) + ", 1] " + "-t " + str(t_warp)
 
@@ -70,7 +70,7 @@ def transform_pts(pts, t_aff, t_warp, ref_img_path, ants_path, template_path, na
               header="x,y,z,t",delimiter=",",fmt="%f")
 
     # Apply the trandforms to
-    cmd = ants_path + "/antsApplyTransformsToPoints " + "-d 3 -i " + warped_csv_out + " -o " + orig_dir + "/aattp.csv " + transforms
+    cmd = ants_path + "/antsApplyTransformsToPoints " + "-d 3 -i " + warped_csv_out + " -o " + aattp_out + " " + transforms
     os.system(cmd)
 
     # Load template to get output space
@@ -83,8 +83,8 @@ def transform_pts(pts, t_aff, t_warp, ref_img_path, ants_path, template_path, na
     adjusted_affine[2] = -adjusted_affine[2]
     print(adjusted_affine)
 
-    ants_warped_coords = np.loadtxt(orig_dir + "/aattp.csv", skiprows=1, delimiter=",")[:,:3]
-    os.remove(orig_dir + "/aattp.csv")
+    ants_warped_coords = np.loadtxt(aattp_out, skiprows=1, delimiter=",")[:,:3]
+    os.remove(aattp_out)
     to_transform = np.hstack([ants_warped_coords,np.ones((ants_warped_coords.shape[0],1))])
     new_voxels = (np.dot(np.linalg.inv(adjusted_affine),to_transform.T) + warped_affine[0,0])[:3]
 
@@ -182,7 +182,7 @@ def direct_streamline_norm(streams, streams_mni, nodif_B0, namer):
     ants_path = '/opt/ants'
     
     cmd='antsRegistrationSyNQuick.sh -d 3 -f ' + template_path + ' -m ' + nodif_B0 + ' -o ' + namer.dirs['tmp']['base'] + '/'
-#    os.system(cmd)
+    os.system(cmd)
     
     t_aff = namer.dirs['tmp']['base'] + '/0GenericAffine.mat'
     t_warp = namer.dirs['tmp']['base'] + '/1InverseWarp.nii.gz'

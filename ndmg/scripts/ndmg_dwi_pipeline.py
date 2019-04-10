@@ -226,9 +226,10 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
             return streams
 
 	streamlines = Streamlines([sl for sl in streamlines if len(sl) > 60])
-        tract_affine = np.eye(4)*np.array([1,1,1,1])
-	#tract_affine = np.eye(4)*np.array([-1,1,1,1])
+        #tract_affine = np.eye(4)*np.array([1,1,1,1])
+	tract_affine = np.eye(4)*np.array([-1,1,1,1])
 	trk_affine = np.eye(4)*np.array([1,1,1,1])
+	#iso_affine = np.eye(4)*np.array([zoom_set[0],zoom_set[1],zoom_set[2],1])
         iso_affine = np.eye(4)*np.array([-zoom_set[0],zoom_set[1],zoom_set[2],1])
 	B0_img = nib.load(nodif_B0)
 	B0_iso_img = new_img_like(B0_img, B0_img.get_data(), affine=iso_affine)
