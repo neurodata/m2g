@@ -293,11 +293,13 @@ def to_lps(input_img):
         return input_img
 
 def match_target_vox_res(img_file, vox_size, namer, zoom_set, sens):
-    from ndmg.utils import reg_utils as rgu
+    from dipy.align.reslice import reslice
     # Check dimensions
     img = nib.load(img_file)
+    data = img.get_data()
+    affine = img.get_affine()
     hdr = img.get_header()
-    zooms = hdr.get_zooms()
+    zooms = hdr.get_zooms()[:3]
     if (round(abs(zooms[0]), 0), round(abs(zooms[1]), 0), round(abs(zooms[2]), 0)) is not zoom_set:
 	if sens == 'dwi':
             img_file_pre = "{}/{}_pre_res.nii.gz".format(namer.dirs['output']['prep_dwi'], os.path.basename(img_file).split('.nii.gz')[0])
@@ -306,20 +308,20 @@ def match_target_vox_res(img_file, vox_size, namer, zoom_set, sens):
         shutil.copyfile(img_file, img_file_pre)
         if vox_size == '1mm':
             print('Reslicing image ' + img_file + ' to 1mm...')
-            img_file = rgu.reslice_to_xmm(img_file_pre, 1.0)
-            #Correct offsets
-            #img = nib.load(img_file)
-            #new_offs = img.affine[:3,3]*(1/np.abs(zooms[0]))
+	    new_zooms=(1.,1.,1.)
         elif vox_size == '2mm':
             print('Reslicing image ' + img_file + ' to 2mm...')
-            img_file = rgu.reslice_to_xmm(img_file_pre, 2.0)
-            #Correct offsets
-            #img = nib.load(img_file)
-            #new_offs = img.affine[:3,3]*(2/np.abs(zooms[0]))
-	#img.affine[:3,3] = new_offs
-        #img.set_sform(img.affine, code='scanner')
-        #img.update_header()
-        #nib.save(nib.Nifti1Image(img.get_data(), affine=img.affine, header=hdr), img_file)
+	    new_zooms=(2.,2.,2.)
+	
+	data2, affine2 = reslice(data, affine, zooms, new_zooms)
+	#iso-center offsets
+	affine2[0:3,3] = np.array([0, 0, 0])
+	img2 = nib.Nifti1Image(data2, affine=affine2, header=hdr)
+	print(affine2)
+        img2.set_sform(affine2, code='scanner')
+	img2.set_qform(affine2, code='scanner')
+        img2.update_header()
+        nib.save(img2, img_file)
 
     return img_file
 

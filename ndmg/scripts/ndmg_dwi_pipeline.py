@@ -45,7 +45,7 @@ from ndmg.utils.bids_utils import name_resource
 import sys
 from dipy.tracking.streamline import Streamlines
 from dipy.tracking.utils import move_streamlines
-from nilearn.image import new_img_like
+from nilearn.image import new_img_like, resample_img
 os.environ["MPLCONFIGDIR"] = "/tmp/"
 
 
@@ -226,16 +226,10 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
             return streams
 
 	streamlines = Streamlines([sl for sl in streamlines if len(sl) > 60])
-        #tract_affine = np.eye(4)*np.array([1,1,1,1])
-	tract_affine = np.eye(4)*np.array([-1,1,1,1])
-	trk_affine = np.eye(4)*np.array([1,1,1,1])
-	#iso_affine = np.eye(4)*np.array([zoom_set[0],zoom_set[1],zoom_set[2],1])
-        iso_affine = np.eye(4)*np.array([-zoom_set[0],zoom_set[1],zoom_set[2],1])
+	trk_affine = np.eye(4)
+	tractogram_affine = np.eye(4) * np.array([1, 1, 1, 1])
 	B0_img = nib.load(nodif_B0)
-	B0_iso_img = new_img_like(B0_img, B0_img.get_data(), affine=iso_affine)
-	nib.save(B0_iso_img, nodif_B0_iso_path)
-
-	print(tract_affine)
+	B0_affine = B0_img.affine
         trk_hdr = nib.streamlines.trk.TrkFile.create_empty_header()
         trk_hdr['hdr_size'] = 1000
         trk_hdr['dimensions'] = hdr['dim'][1:4].astype('float32')
@@ -247,8 +241,8 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
         trk_hdr['endianness'] = '<'
         trk_hdr['_offset_data'] = 1000
         trk_hdr['nb_streamlines'] = streamlines.total_nb_rows
-        streamlines_trans = Streamlines(transform_to_affine(streamlines, trk_hdr, iso_affine))
-        tractogram = nib.streamlines.Tractogram(streamlines_trans, affine_to_rasmm=tract_affine)
+        streamlines_trans = Streamlines(transform_to_affine(streamlines, trk_hdr, B0_affine))
+	tractogram = nib.streamlines.Tractogram(streamlines, affine_to_rasmm=tractogram_affine)
         trkfile = nib.streamlines.trk.TrkFile(tractogram, header=trk_hdr)
         nib.streamlines.save(trkfile, streams)
 
@@ -274,7 +268,7 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
 
     # Normalize streamlines
     print('Running DSN...')
-    mgr.direct_streamline_norm(streams, streams_mni, nodif_B0_iso_path, namer)
+    mgr.direct_streamline_norm(streams, streams_mni, nodif_B0, namer)
 
     # Read Streamlines
     streamlines_mni = nib.streamlines.load(streams_mni).streamlines
@@ -310,7 +304,7 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
 		labels_im_file = mgu.match_target_vox_res(labels[idx], vox_size, namer, zoom_set, sens='t1w')
                 labels_im_file = reg.atlas2t1w2dwi_align(labels_im_file)
 		labels_im = nib.load(labels_im_file)
-	        g1 = mgg.graph_tools(attr=len(np.unique(labels_im.get_data().astype('int')))-1, rois=labels_im_file, tracks=streamlines, affine=iso_affine, namer=namer, connectome_path=connectomes[idx])
+	        g1 = mgg.graph_tools(attr=len(np.unique(labels_im.get_data().astype('int')))-1, rois=labels_im_file, tracks=streamlines, affine=np.eye(4), namer=namer, connectome_path=connectomes[idx])
 		g1.make_graph_old()
 		#g1.make_regressors()
 	    elif reg_style == 'mni':
