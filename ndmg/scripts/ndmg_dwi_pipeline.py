@@ -227,7 +227,7 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
 
 	streamlines = Streamlines([sl for sl in streamlines if len(sl) > 60])
 	trk_affine = np.eye(4)
-	tractogram_affine = np.eye(4) * np.array([1, 1, 1, 1])
+	tractogram_affine = np.eye(4)
 	B0_img = nib.load(nodif_B0)
 	B0_affine = B0_img.affine
         trk_hdr = nib.streamlines.trk.TrkFile.create_empty_header()
