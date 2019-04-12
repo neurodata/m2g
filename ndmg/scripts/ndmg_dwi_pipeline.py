@@ -116,14 +116,14 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
     start_time = time.time()
     if len(os.listdir(namer.dirs['output']['prep_dwi'])) != 0:
 	print('Pre-existing preprocessed dwi files found. Deleting these...')
-#	shutil.rmtree(namer.dirs['output']['prep_dwi'])
-#	os.mkdir(namer.dirs['output']['prep_dwi'])
+	shutil.rmtree(namer.dirs['output']['prep_dwi'])
+	os.mkdir(namer.dirs['output']['prep_dwi'])
 
     dwi_prep = "{}/eddy_corrected_data.nii.gz".format(namer.dirs['output']['prep_dwi'])
     eddy_rot_param = "{}/eddy_corrected_data.ecclog".format(namer.dirs['output']['prep_dwi'])
     print("Performing eddy correction...")
     cmd='eddy_correct ' + dwi + ' ' + dwi_prep + ' 0'
-#    os.system(cmd)
+    os.system(cmd)
 
     # Instantiate bvec/bval naming variations and copy to derivative director
     bvec_scaled = "{}/bvec_scaled.bvec".format(namer.dirs['output']['prep_dwi'])
@@ -227,7 +227,6 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
 
 	streamlines = Streamlines([sl for sl in streamlines if len(sl) > 60])
 	trk_affine = np.eye(4)
-	tractogram_affine = np.eye(4)
 	B0_img = nib.load(nodif_B0)
 	B0_affine = B0_img.affine
         trk_hdr = nib.streamlines.trk.TrkFile.create_empty_header()
@@ -242,7 +241,7 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
         trk_hdr['_offset_data'] = 1000
         trk_hdr['nb_streamlines'] = streamlines.total_nb_rows
         streamlines_trans = Streamlines(transform_to_affine(streamlines, trk_hdr, B0_affine))
-	tractogram = nib.streamlines.Tractogram(streamlines, affine_to_rasmm=tractogram_affine)
+	tractogram = nib.streamlines.Tractogram(streamlines, affine_to_rasmm=trk_affine)
         trkfile = nib.streamlines.trk.TrkFile(tractogram, header=trk_hdr)
         nib.streamlines.save(trkfile, streams)
 
@@ -268,10 +267,10 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
 
     # Normalize streamlines
     print('Running DSN...')
-    mgr.direct_streamline_norm(streams, streams_mni, nodif_B0, namer)
+    streams_warp = mgr.direct_streamline_norm(streams, streams_mni, nodif_B0, namer)
 
     # Read Streamlines
-    streamlines_mni = nib.streamlines.load(streams_mni).streamlines
+    streamlines_mni = nib.streamlines.load(streams_warp).streamlines
     streamlines = Streamlines(streamlines_mni)
 
     # Visualize fibers using VTK

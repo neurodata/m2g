@@ -34,7 +34,8 @@ except KeyError:
     print('FSLDIR environment variable not set!')
 from ndmg.utils import gen_utils as mgu
 from ndmg.utils import reg_utils as mgru
-
+from dipy.tracking.streamline import Streamlines
+from dipy.tracking.utils import move_streamlines
 
 def transform_pts(pts, t_aff, t_warp, ref_img_path, ants_path, template_path, namer,
         out_volume="",output_space="ras_voxels"):
@@ -78,10 +79,8 @@ def transform_pts(pts, t_aff, t_warp, ref_img_path, ants_path, template_path, na
     warped_affine = template.affine
 
     adjusted_affine = warped_affine.copy()
-    adjusted_affine[0] = adjusted_affine[0]
-    adjusted_affine[1] = -adjusted_affine[1]
-    adjusted_affine[2] = -adjusted_affine[2]
     print(adjusted_affine)
+    adjusted_affine[0] = adjusted_affine[0]
 
     ants_warped_coords = np.loadtxt(aattp_out, skiprows=1, delimiter=",")[:,:3]
     os.remove(aattp_out)
@@ -101,9 +100,9 @@ def transform_pts(pts, t_aff, t_warp, ref_img_path, ants_path, template_path, na
     elif output_space == "lps_voxmm":
         template_extents = template.get_shape()
         lps_voxels = new_voxels.copy()
-        lps_voxels[0] = template_extents[0]-lps_voxels[0]
-	lps_voxels[1] = template_extents[1]-lps_voxels[1]
-	lps_voxels[2] = -lps_voxels[2]
+ 	lps_voxels[0] = template_extents[0] - lps_voxels[0]
+	lps_voxels[1] = -(template_extents[1] - lps_voxels[1])
+	lps_voxels[1] = template_extents[1] + lps_voxels[1]
 	print(lps_voxels)
 
         lps_voxmm = lps_voxels.T * np.array(template.header.get_zooms())[:3]
@@ -132,7 +131,7 @@ class Warp(object):
             
         print ("Warping streamline file " + self.file_in)
         template = nib.load(self.template_path)
-        warped_affine = template.affine
+	warped_affine = template.affine
         dims = template.header.get_data_shape()
         template_extents = template.get_shape()
         template_trk_header = np.array(('TRACK', 
@@ -142,7 +141,7 @@ class Warp(object):
         0, ['', '', '', '', '', '', '', '', '', ''], 
         [[1.0, 0.0, 0.0, 0.0], 
          [0.0, 1.0, 0.0, 0.0], 
-         [0.0, 0.0, 1.0, -template.affine[2][3]], 
+         [0.0, 0.0, 1.0, 0.0], 
          [0.0, 0.0, 0.0, 1.0]], '', 'LPS', 'LPS', 
         [1.0, 0.0, 0.0, 0.0, 1.0, 0.0], 
         '', '', '', '', '', '', '', 10000, 2, 1000), 
@@ -174,10 +173,18 @@ class Warp(object):
         new_hdr["n_count"] = len(_streams)
         nib.trackvis.write(self.file_out,[(tx_points[a:b],None,None) for a,b in zip(starts,stops)],hdr_mapping=new_hdr)
         print ("Finished " + self.file_out) 
-
+	
+def transform_to_affine(streams, header, affine):
+    rotation, scale = np.linalg.qr(affine)
+    streams = move_streamlines(streams, rotation)
+    scale[0:3, 0:3] = np.dot(scale[0:3, 0:3], np.diag(1. / header['voxel_sizes']))
+    scale[0:3, 3] = abs(scale[0:3, 3])
+    streams = move_streamlines(streams, scale)
+    return streams
 
 def direct_streamline_norm(streams, streams_mni, nodif_B0, namer):
     '''Greene, C., Cieslak, M., & Grafton, S. T. (2017). Effect of different spatial normalization approaches on tractography and structural brain networks. Network Neuroscience, 1-19.'''
+    from ndmg.register.gen_reg import transform_to_affine
     template_path = '/usr/share/data/fsl-mni152-templates/MNI152_T1_2mm_brain.nii.gz'
     ants_path = '/opt/ants'
     
@@ -190,7 +197,17 @@ def direct_streamline_norm(streams, streams_mni, nodif_B0, namer):
     wS = Warp(ants_path, streams, streams_mni, template_path, t_aff, t_warp, nodif_B0, namer)
     wS.streamlines()
     
-    return
+    nodif_B0_img = nib.load(nodif_B0)
+    s_aff = nodif_B0_img.affine
+    s_aff[:3,3] = np.array([0.5*nodif_B0_img.affine[:3,3][0],  0,   0.75*nodif_B0_img.affine[:3,3][2]]) 
+    streamlines_mni_s = nib.streamlines.load(streams_mni)
+    streamlines_trans = Streamlines(transform_to_affine(streamlines_mni_s.streamlines, streamlines_mni_s.header, s_aff))
+    streams_warp = streams_mni.split('.trk')[0] + '_warped.trk'
+    tractogram = nib.streamlines.Tractogram(streamlines_trans, affine_to_rasmm=np.eye(4))
+    trkfile = nib.streamlines.trk.TrkFile(tractogram, header=streamlines_mni_s.header)
+    nib.streamlines.save(trkfile, streams_warp)
+
+    return streams_warp
 
 
 class dmri_reg(object):

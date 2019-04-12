@@ -312,27 +312,28 @@ def match_target_vox_res(img_file, vox_size, namer, zoom_set, sens):
         elif vox_size == '2mm':
             print('Reslicing image ' + img_file + ' to 2mm...')
 	    new_zooms=(2.,2.,2.)
-	
+
 	data2, affine2 = reslice(data, affine, zooms, new_zooms)
-	#iso-center offsets
-	affine2[0:3,3] = np.array([0, 0, 0])
+	# iso-center offsets
+	affine2[0:3,3] = affine2[0:3,3] - np.sign(affine2[0:3,3]) * [128, 128, 128]
         hdr['qoffset_x'] = affine[0:3,3][0]
         hdr['qoffset_y'] = affine[0:3,3][1]
         hdr['qoffset_z'] = affine[0:3,3][2]
 	img2 = nib.Nifti1Image(data2, affine=affine2, header=hdr)
 	print(affine2)
-        #img2.set_sform(affine2)
-        #img2.update_header()
+        img2.set_sform(affine2)
+        img2.update_header()
         nib.save(img2, img_file)
     else:
-	affine[0:3,3] = np.array([0, 0, 0])
+	# iso-center offsets
+        affine[0:3,3] = affine[0:3,3] - np.sign(affine[0:3,3]) * [128, 128, 128]
 	hdr['qoffset_x'] = affine[0:3,3][0]
         hdr['qoffset_y'] = affine[0:3,3][1]
         hdr['qoffset_z'] = affine[0:3,3][2]
 	img = nib.Nifti1Image(data, affine=affine, header=hdr)
-	#img.set_sform(affine, code='scanner')
-        #img.set_qform(affine, code='scanner')
-        #img.update_header()
+	img.set_sform(affine, code='scanner')
+        img.set_qform(affine, code='scanner')
+        img.update_header()
         nib.save(img, img_file)
     return img_file
 
