@@ -300,7 +300,7 @@ def match_target_vox_res(img_file, vox_size, namer, zoom_set, sens):
     affine = img.get_affine()
     hdr = img.get_header()
     zooms = hdr.get_zooms()[:3]
-    if (round(abs(zooms[0]), 0), round(abs(zooms[1]), 0), round(abs(zooms[2]), 0)) is not zoom_set:
+    if (round(abs(zooms[0]), 1), round(abs(zooms[1]), 1), round(abs(zooms[2]), 1)) != zoom_set:
 	if sens == 'dwi':
             img_file_pre = "{}/{}_pre_res.nii.gz".format(namer.dirs['output']['prep_dwi'], os.path.basename(img_file).split('.nii.gz')[0])
 	elif sens == 't1w':
@@ -314,10 +314,11 @@ def match_target_vox_res(img_file, vox_size, namer, zoom_set, sens):
 	    new_zooms=(2.,2.,2.)
 
 	data2, affine2 = reslice(data, affine, zooms, new_zooms)
-	fov_scale = zoom_set[0]/zooms[0]
 	# iso-center offsets
-	affine2[0:3,3] = (fov_scale*affine2[0:3,3] - np.sign(fov_scale*affine2[0:3,3]) * [128, 128, 128])
-	#affine2[0:3,3] = affine2[0:3,3] - np.sign(affine2[0:3,3]) * [128, 128, 128]
+	if 128 not in affine2[0:3,3]:
+	    affine2[0:3,3] = (affine2[0:3,3] - np.sign(affine2[0:3,3]) * [128, 128, 128])
+	else:
+	    affine2[0:3,3] = affine2[0:3,3]
 	img2 = nib.Nifti1Image(data2, affine=affine2, header=hdr)
 	print(affine2)
         img2.set_qform(affine2)
@@ -326,7 +327,8 @@ def match_target_vox_res(img_file, vox_size, namer, zoom_set, sens):
         nib.save(img2, img_file)
     else:
 	# iso-center offsets
-        affine[0:3,3] = affine[0:3,3] - np.sign(affine[0:3,3]) * [128, 128, 128]
+	if 128 not in affine[0:3,3]:
+            affine[0:3,3] = affine[0:3,3] - np.sign(affine[0:3,3]) * [128, 128, 128]	    
 	img = nib.Nifti1Image(data, affine=affine, header=hdr)
 	img.set_sform(affine)
         img.set_qform(affine)

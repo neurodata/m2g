@@ -80,9 +80,9 @@ def transform_pts(pts, t_aff, t_warp, ref_img_path, ants_path, template_path, na
 
     adjusted_affine = warped_affine.copy()
     print(adjusted_affine)
-    if study == 'HNU':
-    	adjusted_affine[1] = -adjusted_affine[1]
-    adjusted_affine[2] = -adjusted_affine[2]
+    adjusted_affine[0] = -np.abs(adjusted_affine[0])
+    adjusted_affine[1] = np.abs(adjusted_affine[1])
+    adjusted_affine[2] = np.abs(adjusted_affine[2])
 
     ants_warped_coords = np.loadtxt(aattp_out, skiprows=1, delimiter=",")[:,:3]
     os.remove(aattp_out)
@@ -103,11 +103,8 @@ def transform_pts(pts, t_aff, t_warp, ref_img_path, ants_path, template_path, na
         template_extents = template.get_shape()
         lps_voxels = new_voxels.copy()
  	lps_voxels[0] = template_extents[0] - lps_voxels[0]
-        if study == 'HNU':
-           lps_voxels[1] = -(-template_extents[1] - lps_voxels[1])
-	elif study == 'NKI':	   
-	   lps_voxels[1] = template_extents[1] + lps_voxels[1]
-	lps_voxels[2] = -(-template_extents[2] + lps_voxels[2])
+	lps_voxels[1] = template_extents[1] - lps_voxels[1]
+	lps_voxels[2] = template_extents[2] - lps_voxels[2]
 	print(lps_voxels)
 
         lps_voxmm = lps_voxels.T * np.array(template.header.get_zooms())[:3]
@@ -139,7 +136,7 @@ class Warp(object):
         template = nib.load(self.template_path)
 	warped_affine = template.affine
         dims = template.header.get_data_shape()
-        template_extents = template.get_shape()
+        template_extents = template.shape
         template_trk_header = np.array(('TRACK', 
         [dims[0],dims[1],dims[2]], 
         [warped_affine[0][0], warped_affine[1][1], warped_affine[2][2]], 
@@ -195,7 +192,7 @@ def direct_streamline_norm(streams, streams_mni, nodif_B0, namer):
     ants_path = '/opt/ants'
     
     cmd='antsRegistrationSyNQuick.sh -d 3 -f ' + template_path + ' -m ' + nodif_B0 + ' -o ' + namer.dirs['tmp']['base'] + '/'
-#    os.system(cmd)
+    os.system(cmd)
     
     t_aff = namer.dirs['tmp']['base'] + '/0GenericAffine.mat'
     t_warp = namer.dirs['tmp']['base'] + '/1InverseWarp.nii.gz'
@@ -206,7 +203,10 @@ def direct_streamline_norm(streams, streams_mni, nodif_B0, namer):
         study = 'HNU'
     elif np.array_equal(np.sign(s_aff), np.array([[-1.,  0.,  0., -1.], [ 0.,  1.,  0.,  -1.], [ 0.,  0.,  1.,  1.], [ 0.,  0.,  0.,  1.]])) is True:
         study = 'NKI'
-
+    elif np.array_equal(np.sign(s_aff), np.array([[-1.,  0.,  0., 1.], [ 0.,  1.,  0.,  -1.], [ 0.,  0.,  1.,  -1.], [ 0.,  0.,  0.,  1.]])) is True:
+        study = 'BNU'
+    elif np.array_equal(np.sign(s_aff), np.array([[0,  1.,  0., -1.], [ 1.,  0.,  0.,  -1.], [ 0.,  0.,  1.,  0.], [ 0.,  0.,  0.,  1.]])) is True:
+        study = 'KKI'
     wS = Warp(ants_path, streams, streams_mni, template_path, t_aff, t_warp, nodif_B0, namer, study)
     wS.streamlines()
 
@@ -214,6 +214,8 @@ def direct_streamline_norm(streams, streams_mni, nodif_B0, namer):
     study_scalars = dict()
     study_scalars['NKI'] = np.array([0.5, 1.5, 0.25])
     study_scalars['HNU'] = np.array([0.5, 0.5, 0.25])
+    study_scalars['BNU'] = np.array([0.5, 0.5, 0.25])
+    study_scalars['KKI'] = np.array([0.5, 0.5, 0.25])
     s_aff[:3,3] = np.array([study_scalars[study][0]*nodif_B0_img.affine[:3,3][0],  study_scalars[study][1]*nodif_B0_img.affine[:3,3][1],   study_scalars[study][2]*nodif_B0_img.affine[:3,3][2]]) 
     print(s_aff)
     streamlines_mni = nib.streamlines.load(streams_mni)
