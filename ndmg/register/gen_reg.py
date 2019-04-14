@@ -37,8 +37,8 @@ from ndmg.utils import reg_utils as mgru
 from dipy.tracking.streamline import Streamlines
 from dipy.tracking.utils import move_streamlines
 
-def transform_pts(pts, t_aff, t_warp, ref_img_path, ants_path, template_path, namer,
-        out_volume="",output_space="ras_voxels"):
+def transform_pts(pts, t_aff, t_warp, ref_img_path, ants_path, template_path, namer, study,
+        out_volume="",output_space="lps_voxmm"):
     from scipy.io.matlab import savemat
     """
     return coordinates in 
@@ -80,7 +80,8 @@ def transform_pts(pts, t_aff, t_warp, ref_img_path, ants_path, template_path, na
 
     adjusted_affine = warped_affine.copy()
     print(adjusted_affine)
-    adjusted_affine[1] = -adjusted_affine[1]
+    if study == 'HNU':
+    	adjusted_affine[1] = -adjusted_affine[1]
     adjusted_affine[2] = -adjusted_affine[2]
 
     ants_warped_coords = np.loadtxt(aattp_out, skiprows=1, delimiter=",")[:,:3]
@@ -102,7 +103,10 @@ def transform_pts(pts, t_aff, t_warp, ref_img_path, ants_path, template_path, na
         template_extents = template.get_shape()
         lps_voxels = new_voxels.copy()
  	lps_voxels[0] = template_extents[0] - lps_voxels[0]
-	lps_voxels[1] = -(-template_extents[1] + lps_voxels[1])
+        if study == 'HNU':
+           lps_voxels[1] = -(-template_extents[1] - lps_voxels[1])
+	elif study == 'NKI':	   
+	   lps_voxels[1] = template_extents[1] + lps_voxels[1]
 	lps_voxels[2] = -(-template_extents[2] + lps_voxels[2])
 	print(lps_voxels)
 
@@ -111,7 +115,7 @@ def transform_pts(pts, t_aff, t_warp, ref_img_path, ants_path, template_path, na
 
 
 class Warp(object):
-    def __init__(self,ants_path="",file_in="",file_out="",template_path="",t_aff="",t_warp="",ref_img_path="", namer=""):
+    def __init__(self,ants_path="",file_in="",file_out="",template_path="",t_aff="",t_warp="",ref_img_path="", namer="", study=""):
         self.ants_path = ants_path
         self.file_in = file_in
         self.file_out = file_out
@@ -120,6 +124,7 @@ class Warp(object):
         self.t_warp = t_warp
       	self.ref_img_path = ref_img_path
       	self.namer = namer
+	self.study = study
     
     def streamlines(self):
         if not self.file_in.endswith((".trk",".trk.gz")):
@@ -166,7 +171,7 @@ class Warp(object):
             _streams.append(sl[0])
             offsets.append(_streams[-1].shape[0])
         allpoints = np.vstack(_streams)
-        tx_points = transform_pts(allpoints, self.t_aff, self.t_warp, self.ref_img_path, self.ants_path, self.template_path, self.namer, output_space="lps_voxmm")
+        tx_points = transform_pts(allpoints, self.t_aff, self.t_warp, self.ref_img_path, self.ants_path, self.template_path, self.namer, self.study, output_space="lps_voxmm")
         offsets = np.cumsum([0]+offsets)
         starts = offsets[:-1]
         stops = offsets[1:]
@@ -195,21 +200,19 @@ def direct_streamline_norm(streams, streams_mni, nodif_B0, namer):
     t_aff = namer.dirs['tmp']['base'] + '/0GenericAffine.mat'
     t_warp = namer.dirs['tmp']['base'] + '/1InverseWarp.nii.gz'
 
-    wS = Warp(ants_path, streams, streams_mni, template_path, t_aff, t_warp, nodif_B0, namer)
-    wS.streamlines()
-    
     nodif_B0_img = nib.load(nodif_B0)
     s_aff = nodif_B0_img.affine
-    if np.array_equal(np.sign(s_aff), np.array([[-1.,  0.,  0., -1.], [ 0.,  1.,  0.,  0.], [ 0.,  0.,  1.,  1.], [ 0.,  0.,  0.,  1.]])) is True:
-	study = 'HNU'
-    elif np.array_equal(np.sign(s_aff), np.array([[-1.,  0.,  0., -1.], [ 0.,  -1.,  0.,  0.], [ 0.,  0.,  1.,  1.], [ 0.,  0.,  0.,  1.]])) is True:
-	study = 'NKI'
-    else:
-	study = 'HNU'
+    if np.array_equal(np.sign(s_aff), np.array([[-1.,  0.,  0., -1.], [ 0.,  1.,  0.,  1.], [ 0.,  0.,  1.,  1.], [ 0.,  0.,  0.,  1.]])) is True:
+        study = 'HNU'
+    elif np.array_equal(np.sign(s_aff), np.array([[-1.,  0.,  0., -1.], [ 0.,  1.,  0.,  -1.], [ 0.,  0.,  1.,  1.], [ 0.,  0.,  0.,  1.]])) is True:
+        study = 'NKI'
+
+    wS = Warp(ants_path, streams, streams_mni, template_path, t_aff, t_warp, nodif_B0, namer, study)
+    wS.streamlines()
 
     print(study)
     study_scalars = dict()
-    study_scalars['NKI'] = np.array([0.5, 0, 0.75])
+    study_scalars['NKI'] = np.array([0.5, 1.5, 0.25])
     study_scalars['HNU'] = np.array([0.5, 0.5, 0.25])
     s_aff[:3,3] = np.array([study_scalars[study][0]*nodif_B0_img.affine[:3,3][0],  study_scalars[study][1]*nodif_B0_img.affine[:3,3][1],   study_scalars[study][2]*nodif_B0_img.affine[:3,3][2]]) 
     print(s_aff)

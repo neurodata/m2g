@@ -116,14 +116,14 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
     start_time = time.time()
     if len(os.listdir(namer.dirs['output']['prep_dwi'])) != 0:
 	print('Pre-existing preprocessed dwi files found. Deleting these...')
-#	shutil.rmtree(namer.dirs['output']['prep_dwi'])
-#	os.mkdir(namer.dirs['output']['prep_dwi'])
+	shutil.rmtree(namer.dirs['output']['prep_dwi'])
+	os.mkdir(namer.dirs['output']['prep_dwi'])
 
     dwi_prep = "{}/eddy_corrected_data.nii.gz".format(namer.dirs['output']['prep_dwi'])
     eddy_rot_param = "{}/eddy_corrected_data.ecclog".format(namer.dirs['output']['prep_dwi'])
     print("Performing eddy correction...")
     cmd='eddy_correct ' + dwi + ' ' + dwi_prep + ' 0'
-#    os.system(cmd)
+    os.system(cmd)
 
     # Instantiate bvec/bval naming variations and copy to derivative director
     bvec_scaled = "{}/bvec_scaled.bvec".format(namer.dirs['output']['prep_dwi'])
@@ -166,18 +166,18 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
     # -------- Registration Steps ----------------------------------- #
     if len(os.listdir(namer.dirs['output']['prep_anat'])) != 0:
 	print('Pre-existing preprocessed t1w files found. Deleting these...')
-#        shutil.rmtree(namer.dirs['output']['prep_anat'])
-#	os.mkdir(namer.dirs['output']['prep_anat'])
+        shutil.rmtree(namer.dirs['output']['prep_anat'])
+	os.mkdir(namer.dirs['output']['prep_anat'])
     if len(os.listdir(namer.dirs['output']['reg_anat'])) != 0:
 	print('Pre-existing registered t1w files found. Deleting these...')
-#        shutil.rmtree(namer.dirs['output']['reg_anat'])
-#	os.mkdir(namer.dirs['output']['reg_anat'])
+        shutil.rmtree(namer.dirs['output']['reg_anat'])
+	os.mkdir(namer.dirs['output']['reg_anat'])
     if (len(os.listdir(namer.dirs['tmp']['reg_a'])) != 0) or (len(os.listdir(namer.dirs['tmp']['reg_m'])) != 0):
         print('Pre-existing temporary files found. Deleting these...')
-#        shutil.rmtree(namer.dirs['tmp']['reg_a'])
-#        os.mkdir(namer.dirs['tmp']['reg_a'])
-#        shutil.rmtree(namer.dirs['tmp']['reg_m'])
-#        os.mkdir(namer.dirs['tmp']['reg_m'])
+        shutil.rmtree(namer.dirs['tmp']['reg_a'])
+        os.mkdir(namer.dirs['tmp']['reg_a'])
+        shutil.rmtree(namer.dirs['tmp']['reg_m'])
+        os.mkdir(namer.dirs['tmp']['reg_m'])
 
     # Check orientation (t1w)
     start_time = time.time()
@@ -190,30 +190,30 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
         reg = mgr.dmri_reg(namer, nodif_B0, nodif_B0_mask, t1w, vox_size, simple=False)
         # Perform anatomical segmentation
         start_time = time.time()
-#        reg.gen_tissue()
+        reg.gen_tissue()
         print("%s%s%s" % ('gen_tissue runtime: ', str(np.round(time.time() - start_time, 1)), 's'))
 
         # Align t1w to dwi
         start_time = time.time()
-#        reg.t1w2dwi_align()
+        reg.t1w2dwi_align()
         print("%s%s%s" % ('t1w2dwi_align runtime: ', str(np.round(time.time() - start_time, 1)), 's'))
 
         # Align tissue classifiers
         start_time = time.time()
-#        reg.tissue2dwi_align()
+        reg.tissue2dwi_align()
         print("%s%s%s" % ('tissue2dwi_align runtime: ', str(np.round(time.time() - start_time, 1)), 's'))
 
         # -------- Tensor Fitting and Fiber Tractography ---------------- #
-#        if track_type == 'eudx':
-#	    seeds = mgt.build_seed_list(reg.wm_gm_int_in_dwi, np.eye(4), dens=1)
-#        else:
-#            seeds = mgt.build_seed_list(reg.wm_gm_int_in_dwi, np.eye(4), dens=1)
-#	print('Using ' + str(len(seeds)) + ' seeds...')
+        if track_type == 'eudx':
+	    seeds = mgt.build_seed_list(reg.wm_gm_int_in_dwi, np.eye(4), dens=1)
+        else:
+            seeds = mgt.build_seed_list(reg.wm_gm_int_in_dwi, np.eye(4), dens=1)
+	print('Using ' + str(len(seeds)) + ' seeds...')
 
         # Compute direction model and track fiber streamlines
         print("Beginning tractography...")
-#        trct = mgt.run_track(dwi_prep, nodif_B0_mask, reg.gm_in_dwi, reg.vent_csf_in_dwi, reg.csf_mask_dwi, reg.wm_in_dwi, gtab, mod_type, track_type, mod_func, seeds, np.eye(4))
-#        streamlines = trct.run()
+        trct = mgt.run_track(dwi_prep, nodif_B0_mask, reg.gm_in_dwi, reg.vent_csf_in_dwi, reg.csf_mask_dwi, reg.wm_in_dwi, gtab, mod_type, track_type, mod_func, seeds, np.eye(4))
+        streamlines = trct.run()
 
 	# Save streamlines to disk
         print('Saving streamlines: ' + streams)
@@ -225,25 +225,25 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
             streams = move_streamlines(streams, scale)
             return streams
 
-#	streamlines = Streamlines([sl for sl in streamlines if len(sl) > 60])
-#	trk_affine = np.eye(4)
-#	B0_img = nib.load(nodif_B0)
-#	B0_affine = B0_img.affine
-#        trk_hdr = nib.streamlines.trk.TrkFile.create_empty_header()
-#        trk_hdr['hdr_size'] = 1000
-#        trk_hdr['dimensions'] = hdr['dim'][1:4].astype('float32')
-#        trk_hdr['voxel_sizes'] = hdr['pixdim'][1:4]
-#        trk_hdr['voxel_to_rasmm'] = trk_affine
-#        trk_hdr['voxel_order'] = 'LPS'
-#        trk_hdr['pad2'] = 'LPS'
-#        trk_hdr['image_orientation_patient'] = np.array([1., 0., 0., 0., 1., 0.]).astype('float32')
-#        trk_hdr['endianness'] = '<'
-#        trk_hdr['_offset_data'] = 1000
-#        trk_hdr['nb_streamlines'] = streamlines.total_nb_rows
-#        streamlines_trans = Streamlines(transform_to_affine(streamlines, trk_hdr, B0_affine))
-#	tractogram = nib.streamlines.Tractogram(streamlines, affine_to_rasmm=trk_affine)
-#        trkfile = nib.streamlines.trk.TrkFile(tractogram, header=trk_hdr)
-#        nib.streamlines.save(trkfile, streams)
+	streamlines = Streamlines([sl for sl in streamlines if len(sl) > 60])
+	trk_affine = np.eye(4)
+	B0_img = nib.load(nodif_B0)
+	B0_affine = B0_img.affine
+        trk_hdr = nib.streamlines.trk.TrkFile.create_empty_header()
+        trk_hdr['hdr_size'] = 1000
+        trk_hdr['dimensions'] = hdr['dim'][1:4].astype('float32')
+        trk_hdr['voxel_sizes'] = hdr['pixdim'][1:4]
+        trk_hdr['voxel_to_rasmm'] = trk_affine
+        trk_hdr['voxel_order'] = 'LPS'
+        trk_hdr['pad2'] = 'LPS'
+        trk_hdr['image_orientation_patient'] = np.array([1., 0., 0., 0., 1., 0.]).astype('float32')
+        trk_hdr['endianness'] = '<'
+        trk_hdr['_offset_data'] = 1000
+        trk_hdr['nb_streamlines'] = streamlines.total_nb_rows
+        streamlines_trans = Streamlines(transform_to_affine(streamlines, trk_hdr, B0_affine))
+	tractogram = nib.streamlines.Tractogram(streamlines, affine_to_rasmm=trk_affine)
+        trkfile = nib.streamlines.trk.TrkFile(tractogram, header=trk_hdr)
+        nib.streamlines.save(trkfile, streams)
 
     elif reg_style == 'mni':
 	print('Running tractography in MNI-space...')
