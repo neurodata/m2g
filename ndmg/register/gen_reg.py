@@ -80,7 +80,8 @@ def transform_pts(pts, t_aff, t_warp, ref_img_path, ants_path, template_path, na
 
     adjusted_affine = warped_affine.copy()
     print(adjusted_affine)
-    adjusted_affine[0] = adjusted_affine[0]
+    adjusted_affine[1] = -adjusted_affine[1]
+    adjusted_affine[2] = -adjusted_affine[2]
 
     ants_warped_coords = np.loadtxt(aattp_out, skiprows=1, delimiter=",")[:,:3]
     os.remove(aattp_out)
@@ -101,8 +102,8 @@ def transform_pts(pts, t_aff, t_warp, ref_img_path, ants_path, template_path, na
         template_extents = template.get_shape()
         lps_voxels = new_voxels.copy()
  	lps_voxels[0] = template_extents[0] - lps_voxels[0]
-	lps_voxels[1] = -(template_extents[1] - lps_voxels[1])
-	lps_voxels[1] = template_extents[1] + lps_voxels[1]
+	lps_voxels[1] = -(-template_extents[1] + lps_voxels[1])
+	lps_voxels[2] = -(-template_extents[2] + lps_voxels[2])
 	print(lps_voxels)
 
         lps_voxmm = lps_voxels.T * np.array(template.header.get_zooms())[:3]
@@ -189,7 +190,7 @@ def direct_streamline_norm(streams, streams_mni, nodif_B0, namer):
     ants_path = '/opt/ants'
     
     cmd='antsRegistrationSyNQuick.sh -d 3 -f ' + template_path + ' -m ' + nodif_B0 + ' -o ' + namer.dirs['tmp']['base'] + '/'
-    os.system(cmd)
+#    os.system(cmd)
     
     t_aff = namer.dirs['tmp']['base'] + '/0GenericAffine.mat'
     t_warp = namer.dirs['tmp']['base'] + '/1InverseWarp.nii.gz'
@@ -199,14 +200,27 @@ def direct_streamline_norm(streams, streams_mni, nodif_B0, namer):
     
     nodif_B0_img = nib.load(nodif_B0)
     s_aff = nodif_B0_img.affine
-    s_aff[:3,3] = np.array([0.5*nodif_B0_img.affine[:3,3][0],  0,   0.75*nodif_B0_img.affine[:3,3][2]]) 
-    streamlines_mni_s = nib.streamlines.load(streams_mni)
-    streamlines_trans = Streamlines(transform_to_affine(streamlines_mni_s.streamlines, streamlines_mni_s.header, s_aff))
+    if np.array_equal(np.sign(s_aff), np.array([[-1.,  0.,  0., -1.], [ 0.,  1.,  0.,  0.], [ 0.,  0.,  1.,  1.], [ 0.,  0.,  0.,  1.]])) is True:
+	study = 'HNU'
+    elif np.array_equal(np.sign(s_aff), np.array([[-1.,  0.,  0., -1.], [ 0.,  -1.,  0.,  0.], [ 0.,  0.,  1.,  1.], [ 0.,  0.,  0.,  1.]])) is True:
+	study = 'NKI'
+    else:
+	study = 'HNU'
+
+    print(study)
+    study_scalars = dict()
+    study_scalars['NKI'] = np.array([0.5, 0, 0.75])
+    study_scalars['HNU'] = np.array([0.5, 0.5, 0.25])
+    s_aff[:3,3] = np.array([study_scalars[study][0]*nodif_B0_img.affine[:3,3][0],  study_scalars[study][1]*nodif_B0_img.affine[:3,3][1],   study_scalars[study][2]*nodif_B0_img.affine[:3,3][2]]) 
+    print(s_aff)
+    streamlines_mni = nib.streamlines.load(streams_mni)
+    streamlines_mni_s = streamlines_mni.streamlines
+    streamlines_trans = Streamlines(transform_to_affine(streamlines_mni_s, streamlines_mni.header, s_aff))
     streams_warp = streams_mni.split('.trk')[0] + '_warped.trk'
     tractogram = nib.streamlines.Tractogram(streamlines_trans, affine_to_rasmm=np.eye(4))
-    trkfile = nib.streamlines.trk.TrkFile(tractogram, header=streamlines_mni_s.header)
+    trkfile = nib.streamlines.trk.TrkFile(tractogram, header=streamlines_mni.header)
     nib.streamlines.save(trkfile, streams_warp)
-
+    print(streams_warp)
     return streams_warp
 
 
