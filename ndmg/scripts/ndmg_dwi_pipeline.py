@@ -116,14 +116,14 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
     start_time = time.time()
     if len(os.listdir(namer.dirs['output']['prep_dwi'])) != 0:
 	print('Pre-existing preprocessed dwi files found. Deleting these...')
-#	shutil.rmtree(namer.dirs['output']['prep_dwi'])
-#	os.mkdir(namer.dirs['output']['prep_dwi'])
+	shutil.rmtree(namer.dirs['output']['prep_dwi'])
+	os.mkdir(namer.dirs['output']['prep_dwi'])
 
     dwi_prep = "{}/eddy_corrected_data.nii.gz".format(namer.dirs['output']['prep_dwi'])
     eddy_rot_param = "{}/eddy_corrected_data.ecclog".format(namer.dirs['output']['prep_dwi'])
     print("Performing eddy correction...")
     cmd='eddy_correct ' + dwi + ' ' + dwi_prep + ' 0'
-#    os.system(cmd)
+    os.system(cmd)
 
     # Instantiate bvec/bval naming variations and copy to derivative director
     bvec_scaled = "{}/bvec_scaled.bvec".format(namer.dirs['output']['prep_dwi'])
@@ -186,7 +186,7 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
 
     if reg_style == 'native':
 	print('Running tractography in native space...')
-       # Instantiate registration
+        # Instantiate registration
         reg = mgr.dmri_reg(namer, nodif_B0, nodif_B0_mask, t1w, vox_size, simple=False)
         # Perform anatomical segmentation
         start_time = time.time()

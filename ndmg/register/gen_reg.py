@@ -80,9 +80,12 @@ def transform_pts(pts, t_aff, t_warp, ref_img_path, ants_path, template_path, na
 
     adjusted_affine = warped_affine.copy()
     print(adjusted_affine)
-    adjusted_affine[0] = -np.abs(adjusted_affine[0])
-    adjusted_affine[1] = np.abs(adjusted_affine[1])
-    adjusted_affine[2] = np.abs(adjusted_affine[2])
+    adjusted_affine[:3,3][0] = np.abs(adjusted_affine[:3,3][0])
+    adjusted_affine[0][0] = np.abs(adjusted_affine[0][0])
+    adjusted_affine[:3,3][1] = -np.abs(adjusted_affine[:3,3][1])
+    adjusted_affine[1][1] = -np.abs(adjusted_affine[1][1])
+    adjusted_affine[:3,3][2] = np.abs(adjusted_affine[:3,3][2])
+    adjusted_affine[2][2] = np.abs(adjusted_affine[2][2])
 
     ants_warped_coords = np.loadtxt(aattp_out, skiprows=1, delimiter=",")[:,:3]
     os.remove(aattp_out)
@@ -102,9 +105,9 @@ def transform_pts(pts, t_aff, t_warp, ref_img_path, ants_path, template_path, na
     elif output_space == "lps_voxmm":
         template_extents = template.get_shape()
         lps_voxels = new_voxels.copy()
- 	lps_voxels[0] = template_extents[0] - lps_voxels[0]
+ 	lps_voxels[0] = -template_extents[0] + lps_voxels[0]
 	lps_voxels[1] = template_extents[1] - lps_voxels[1]
-	lps_voxels[2] = template_extents[2] - lps_voxels[2]
+	lps_voxels[2] = -template_extents[2] + lps_voxels[2]
 	print(lps_voxels)
 
         lps_voxmm = lps_voxels.T * np.array(template.header.get_zooms())[:3]
@@ -199,23 +202,27 @@ def direct_streamline_norm(streams, streams_mni, nodif_B0, namer):
 
     nodif_B0_img = nib.load(nodif_B0)
     s_aff = nodif_B0_img.affine
-    if np.array_equal(np.sign(s_aff), np.array([[-1.,  0.,  0., -1.], [ 0.,  1.,  0.,  1.], [ 0.,  0.,  1.,  1.], [ 0.,  0.,  0.,  1.]])) is True:
+    if nodif_B0_img.shape == (96, 96, 51):
         study = 'HNU'
-    elif np.array_equal(np.sign(s_aff), np.array([[-1.,  0.,  0., -1.], [ 0.,  1.,  0.,  -1.], [ 0.,  0.,  1.,  1.], [ 0.,  0.,  0.,  1.]])) is True:
+    elif nodif_B0_img.shape == (106, 90, 64):
         study = 'NKI'
-    elif np.array_equal(np.sign(s_aff), np.array([[-1.,  0.,  0., 1.], [ 0.,  1.,  0.,  -1.], [ 0.,  0.,  1.,  -1.], [ 0.,  0.,  0.,  1.]])) is True:
+    elif nodif_B0_img.shape == (128, 124, 60):
+        study = 'SWU'
+    elif nodif_B0_img.shape == (141, 141, 68):
         study = 'BNU'
-    elif np.array_equal(np.sign(s_aff), np.array([[0,  1.,  0., -1.], [ 1.,  0.,  0.,  -1.], [ 0.,  0.,  1.,  0.], [ 0.,  0.,  0.,  1.]])) is True:
-        study = 'KKI'
+    else:
+	study = 'KKI'
+
     wS = Warp(ants_path, streams, streams_mni, template_path, t_aff, t_warp, nodif_B0, namer, study)
     wS.streamlines()
 
     print(study)
     study_scalars = dict()
-    study_scalars['NKI'] = np.array([0.5, 1.5, 0.25])
-    study_scalars['HNU'] = np.array([0.5, 0.5, 0.25])
-    study_scalars['BNU'] = np.array([0.5, 0.5, 0.25])
-    study_scalars['KKI'] = np.array([0.5, 0.5, 0.25])
+    study_scalars['NKI'] = np.array([9.0, 1.5, 3.0])
+    study_scalars['HNU'] = np.array([5.8, 2.9, 1.9])
+    study_scalars['BNU'] = np.array([17.1, 9.0, 2.6])
+    study_scalars['SWU'] = np.array([29.0, 7.6, 2.18])
+    study_scalars['KKI'] = np.array([0.5, 1.5, 0.25])
     s_aff[:3,3] = np.array([study_scalars[study][0]*nodif_B0_img.affine[:3,3][0],  study_scalars[study][1]*nodif_B0_img.affine[:3,3][1],   study_scalars[study][2]*nodif_B0_img.affine[:3,3][2]]) 
     print(s_aff)
     streamlines_mni = nib.streamlines.load(streams_mni)
