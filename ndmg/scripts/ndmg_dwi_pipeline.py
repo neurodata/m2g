@@ -205,9 +205,9 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
 
         # -------- Tensor Fitting and Fiber Tractography ---------------- #
         if track_type == 'eudx':
-	    seeds = mgt.build_seed_list(reg.wm_gm_int_in_dwi, np.eye(4), dens=1)
+	    seeds = mgt.build_seed_list(reg.wm_gm_int_in_dwi, np.eye(4), dens=3)
         else:
-            seeds = mgt.build_seed_list(reg.wm_gm_int_in_dwi, np.eye(4), dens=1)
+            seeds = mgt.build_seed_list(reg.wm_gm_int_in_dwi, np.eye(4), dens=3)
 	print('Using ' + str(len(seeds)) + ' seeds...')
 
         # Compute direction model and track fiber streamlines

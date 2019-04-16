@@ -314,11 +314,9 @@ def match_target_vox_res(img_file, vox_size, namer, zoom_set, sens):
 	    new_zooms=(2.,2.,2.)
 
 	data2, affine2 = reslice(data, affine, zooms, new_zooms)
-	# iso-center offsets
-	if 128 not in affine2[0:3,3]:
-	    affine2[0:3,3] = (affine2[0:3,3] - np.sign(affine2[0:3,3]) * [128, 128, 128])
-	else:
-	    affine2[0:3,3] = affine2[0:3,3]
+	# Use MNI template FOV
+	affine2[0:3,3] = np.zeros(3)
+	affine2 = np.abs(affine2)
 	img2 = nib.Nifti1Image(data2, affine=affine2, header=hdr)
 	print(affine2)
         img2.set_qform(affine2)
@@ -326,9 +324,9 @@ def match_target_vox_res(img_file, vox_size, namer, zoom_set, sens):
         img2.update_header()
         nib.save(img2, img_file)
     else:
-	# iso-center offsets
-	if 128 not in affine[0:3,3]:
-            affine[0:3,3] = affine[0:3,3] - np.sign(affine[0:3,3]) * [128, 128, 128]	    
+	# Use MNI template FOV
+	affine[0:3,3] = np.zeros(3)
+	affine = np.abs(affine)
 	img = nib.Nifti1Image(data, affine=affine, header=hdr)
 	img.set_sform(affine)
         img.set_qform(affine)
