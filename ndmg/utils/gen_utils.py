@@ -186,8 +186,6 @@ def reorient_dwi(dwi_prep, bvecs, namer):
         dwi_orig = dwi_prep
         dwi_prep = "{}/dwi_prep_reor.nii.gz".format(namer.dirs['output']['prep_dwi'])
         shutil.copyfile(dwi_orig, dwi_prep)
-        cmd='fslorient -forceradiological ' + dwi_prep
-        os.system(cmd)
         # Invert bvecs
         bvecs_orig = bvecs
         bvecs = "{}/bvecs_reor.bvec".format(namer.dirs['output']['prep_dwi'])
@@ -197,17 +195,31 @@ def reorient_dwi(dwi_prep, bvecs, namer):
         cmd='fslorient -getqform ' + dwi_prep
         qform = os.popen(cmd).read().strip('\n')
         # Posterior-Anterior Reorientation
-        if float(qform.split(' ')[:-1][5])<0:
+        if float(qform.split(' ')[:-1][5])<=0:
+            dwi_prep_PA = "{}/dwi_reor_PA.nii.gz".format(namer.dirs['output']['prep_dwi'])
 	    print('Reorienting P-A flip (dwi)...')
-            cmd='fslswapdim ' + dwi_prep + ' -y x z ' + dwi_prep
+            cmd='fslswapdim ' + dwi_prep + ' -x -y z ' + dwi_prep_PA
             os.system(cmd)
             bvecs_mat[1] = -bvecs_mat[1]
+	    cmd='fslorient -getqform ' + dwi_prep_PA
+            qform = os.popen(cmd).read().strip('\n')
+	    dwi_prep = dwi_prep_PA
         # Inferior-Superior Reorientation
-        if float(qform.split(' ')[:-1][10])<0:
+        if float(qform.split(' ')[:-1][10])<=0:
+	    dwi_prep_IS = "{}/dwi_reor_IS.nii.gz".format(namer.dirs['output']['prep_dwi'])
 	    print('Reorienting I-S flip (dwi)...')
-            cmd='fslswapdim ' + dwi_prep + ' y x -z ' + dwi_prep
+            cmd='fslswapdim ' + dwi_prep + ' -x y -z ' + dwi_prep_IS
             os.system(cmd)
             bvecs_mat[2] = -bvecs_mat[2]
+	    dwi_prep = dwi_prep_IS
+        cmd='fslorient -forceradiological ' + dwi_prep
+        os.system(cmd)
+	cmd='fslorient -getorient ' + dwi_prep
+        orient = os.popen(cmd).read().strip('\n')
+	if orient == 'NEUROLOGICAL':
+	    cmd='fslorient -swaporient ' + dwi_prep
+            os.system(cmd)
+	    
         np.savetxt(bvecs, bvecs_mat)
     else:
 	print('Radiological (dwi)...')
@@ -221,19 +233,27 @@ def reorient_dwi(dwi_prep, bvecs, namer):
         cmd='fslorient -getqform ' + dwi_prep
         qform = os.popen(cmd).read().strip('\n')
         # Posterior-Anterior Reorientation
-        if float(qform.split(' ')[:-1][5])<0:
+        if float(qform.split(' ')[:-1][5])<=0:
+	    dwi_prep_PA = "{}/dwi_reor_PA.nii.gz".format(namer.dirs['output']['prep_dwi'])
             print('Reorienting P-A flip (dwi)...')
-            cmd='fslswapdim ' + dwi_prep + ' -y x z ' + dwi_prep
+            cmd='fslswapdim ' + dwi_prep + ' x -y z ' + dwi_prep_PA
             os.system(cmd)
             bvecs_mat[1] = -bvecs_mat[1]
+	    cmd='fslorient -getqform ' + dwi_prep_PA
+            qform = os.popen(cmd).read().strip('\n')
+            dwi_prep = dwi_prep_PA
         # Inferior-Superior Reorientation
-        if float(qform.split(' ')[:-1][10])<0:
+        if float(qform.split(' ')[:-1][10])<=0:
+	    dwi_prep_IS = "{}/dwi_reor_IS.nii.gz".format(namer.dirs['output']['prep_dwi'])
             print('Reorienting I-S flip (dwi)...')
-            cmd='fslswapdim ' + dwi_prep + ' y x -z ' + dwi_prep
+            cmd='fslswapdim ' + dwi_prep + ' x y -z ' + dwi_prep_IS
             os.system(cmd)
             bvecs_mat[2] = -bvecs_mat[2]
+	    dwi_prep = dwi_prep_IS
         np.savetxt(bvecs, bvecs_mat)
+
     return dwi_prep, bvecs
+
 
 def reorient_t1w(t1w, namer):
     cmd='fslorient -getorient ' + t1w
@@ -242,31 +262,58 @@ def reorient_t1w(t1w, namer):
 	print('Neurological (t1w), reorienting to radiological...')
         # Orient t1w to std
         t1w_orig = t1w
-        t1w = "{}/t1w_reor.nii.gz".format(namer.dirs['output']['prep_anat'])
+        t1w = "{}/t1w_pre_reor.nii.gz".format(namer.dirs['output']['prep_anat'])
         shutil.copyfile(t1w_orig, t1w)
-        cmd='fslorient -forceradiological ' + t1w_orig
+	cmd='fslorient -getqform ' + t1w
+        qform = os.popen(cmd).read().strip('\n')
+        # Posterior-Anterior Reorientation
+        if float(qform.split(' ')[:-1][5])<=0:
+	    t1w_PA = "{}/t1w_reor_PA.nii.gz".format(namer.dirs['output']['prep_anat'])
+            print('Reorienting P-A flip (t1w)...')
+            cmd='fslswapdim ' + t1w + ' -x -y z ' + t1w_PA
+            os.system(cmd)
+	    cmd='fslorient -getqform ' + t1w_PA
+            qform = os.popen(cmd).read().strip('\n')
+	    t1w = t1w_PA
+        # Inferior-Superior Reorientation
+        if float(qform.split(' ')[:-1][10])<=0:
+	    t1w_IS = "{}/t1w_reor_IS.nii.gz".format(namer.dirs['output']['prep_anat'])
+            print('Reorienting I-S flip (t1w)...')
+            cmd='fslswapdim ' + t1w + ' -x y -z ' + t1w_IS
+            os.system(cmd)
+            t1w = t1w_IS
+        cmd='fslorient -forceradiological ' + t1w
         os.system(cmd)
-        cmd='fslreorient2std ' + t1w_orig + ' ' + t1w
+        cmd='fslreorient2std ' + t1w + ' ' + t1w
         os.system(cmd)
+        cmd='fslorient -getorient ' + t1w
+        orient = os.popen(cmd).read().strip('\n')
+        if orient == 'NEUROLOGICAL':
+            cmd='fslorient -swaporient ' + t1w
+            os.system(cmd)
     else:
 	print('Radiological (t1w)...')
         t1w_orig = t1w
         t1w = "{}/t1w.nii.gz".format(namer.dirs['output']['prep_anat'])
         shutil.copyfile(t1w_orig, t1w)
-
-    cmd='fslorient -getqform ' + t1w
-    qform = os.popen(cmd).read().strip('\n')
-    # Posterior-Anterior Reorientation
-    if float(qform.split(' ')[:-1][5])<0:
-        print('Reorienting P-A flip (t1w)...')
-        cmd='fslswapdim ' + t1w + ' -y x z ' + t1w
-        os.system(cmd)
-
-    # Inferior-Superior Reorientation
-    if float(qform.split(' ')[:-1][10])<0:
-        print('Reorienting I-S flip (t1w)...')
-        cmd='fslswapdim ' + t1w + ' y x -z ' + t1w
-        os.system(cmd)
+        cmd='fslorient -getqform ' + t1w
+        qform = os.popen(cmd).read().strip('\n')
+        # Posterior-Anterior Reorientation
+        if float(qform.split(' ')[:-1][5])<=0:
+	    t1w_PA = "{}/t1w_reor_PA.nii.gz".format(namer.dirs['output']['prep_anat'])
+            print('Reorienting P-A flip (t1w)...')
+            cmd='fslswapdim ' + t1w + ' x -y z ' + t1w_PA
+            os.system(cmd)
+            cmd='fslorient -getqform ' + t1w_PA
+            qform = os.popen(cmd).read().strip('\n')
+            t1w = t1w_PA
+        # Inferior-Superior Reorientation
+        if float(qform.split(' ')[:-1][10])<=0:
+	    t1w_IS = "{}/t1w_reor_IS.nii.gz".format(namer.dirs['output']['prep_anat'])
+            print('Reorienting I-S flip (t1w)...')
+            cmd='fslswapdim ' + t1w + ' x y -z ' + t1w_IS
+            os.system(cmd)
+	    t1w = t1w_IS
 
     return t1w
 
@@ -300,7 +347,7 @@ def match_target_vox_res(img_file, vox_size, namer, zoom_set, sens):
     affine = img.get_affine()
     hdr = img.get_header()
     zooms = hdr.get_zooms()[:3]
-    if (round(abs(zooms[0]), 1), round(abs(zooms[1]), 1), round(abs(zooms[2]), 1)) != zoom_set:
+    if (abs(zooms[0]), abs(zooms[1]), abs(zooms[2])) != zoom_set:
 	if sens == 'dwi':
             img_file_pre = "{}/{}_pre_res.nii.gz".format(namer.dirs['output']['prep_dwi'], os.path.basename(img_file).split('.nii.gz')[0])
 	elif sens == 't1w':
@@ -314,9 +361,9 @@ def match_target_vox_res(img_file, vox_size, namer, zoom_set, sens):
 	    new_zooms=(2.,2.,2.)
 
 	data2, affine2 = reslice(data, affine, zooms, new_zooms)
-	# Use MNI template FOV
 	affine2[0:3,3] = np.zeros(3)
 	affine2 = np.abs(affine2)
+	affine2[0:3,0:3] = np.eye(3) * np.array(new_zooms)
 	img2 = nib.Nifti1Image(data2, affine=affine2, header=hdr)
 	print(affine2)
         img2.set_qform(affine2)
@@ -324,7 +371,6 @@ def match_target_vox_res(img_file, vox_size, namer, zoom_set, sens):
         img2.update_header()
         nib.save(img2, img_file)
     else:
-	# Use MNI template FOV
 	affine[0:3,3] = np.zeros(3)
 	affine = np.abs(affine)
 	img = nib.Nifti1Image(data, affine=affine, header=hdr)
@@ -332,6 +378,7 @@ def match_target_vox_res(img_file, vox_size, namer, zoom_set, sens):
         img.set_qform(affine)
         img.update_header()
         nib.save(img, img_file)
+
     return img_file
 
 def load_timeseries(timeseries_file, ts='roi'):
