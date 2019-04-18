@@ -20,6 +20,7 @@
 # Email: ebridge2@jhu.edu
 
 import warnings
+
 warnings.simplefilter("ignore")
 import numpy as np
 import nibabel as nb
@@ -119,17 +120,16 @@ class preproc_func():
         if tr == 0:
             raise ZeroDivisionError('Failed to determine number of frames to'
                                     ' trim due to tr=0.')
-        nvol_trim = int(np.floor(15/float(tr)))
+        nvol_trim = int(np.floor(15 / float(tr)))
         # remove the first nvol_trim timesteps
         mssg = ("Scrubbing first 15 seconds ({0:d} volumes due"
                 " to tr={1: .3f}s)")
         print(mssg.format(nvol_trim, tr))
-        trimmed_dat = func_im.get_data()[:,:,:, nvol_trim:]
+        trimmed_dat = func_im.get_data()[:, :, :, nvol_trim:]
         trimmed_im = nb.Nifti1Image(dataobj=trimmed_dat,
                                     header=func_im.header,
                                     affine=func_im.affine)
         nb.save(img=trimmed_im, filename=trim_func)
-
 
         # use slicetimer if user passes slicetiming information
         if (stc is not None):

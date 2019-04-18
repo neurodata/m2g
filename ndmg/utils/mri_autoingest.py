@@ -13,12 +13,12 @@
 # limitations under the License.
 
 import warnings
+
 warnings.simplefilter("ignore")
 import ndio.remote.ndingest as NI
 
 
 def main():
-
     ni = NI.NDIngest()
 
     """

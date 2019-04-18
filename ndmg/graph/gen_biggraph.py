@@ -21,6 +21,7 @@
 
 from __future__ import print_function
 import warnings
+
 warnings.simplefilter("ignore")
 from itertools import combinations
 from collections import defaultdict
@@ -30,6 +31,7 @@ import nibabel as nb
 import ndmg
 import time
 import pyximport
+
 try:
     from ndmg.graph.zindex import XYZMorton
 except:
@@ -66,11 +68,11 @@ class biggraph(object):
         nlines = np.shape(streamlines)[0]
         print("# of Streamlines: " + str(nlines))
 
-        print_id = np.max((int(nlines*0.05), 1))  # in case nlines*.05=0
+        print_id = np.max((int(nlines * 0.05), 1))  # in case nlines*.05=0
         for idx, streamline in enumerate(streamlines):
             if (idx % print_id) == 0:
                 print(idx)
- 
+
             points = np.round(streamline).astype(int)
             p = set()
             for point in points:

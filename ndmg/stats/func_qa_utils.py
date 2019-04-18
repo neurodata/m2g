@@ -18,6 +18,7 @@
 # Email: ebridge2@jhu.edu
 
 import warnings
+
 warnings.simplefilter("ignore")
 from numpy import ndarray as nar
 from scipy.stats import gaussian_kde
@@ -25,6 +26,7 @@ from ndmg.utils import gen_utils as mgu
 import numpy as np
 import nibabel as nb
 import matplotlib
+
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from ndmg.stats.qa_reg import plot_overlays
@@ -56,16 +58,16 @@ def dice_coefficient(a, b):
         b = b + u'.'
 
     a_bigram_list = []
-    for i in range(len(a)-1):
-        a_bigram_list.append(a[i:i+2])
+    for i in range(len(a) - 1):
+        a_bigram_list.append(a[i:i + 2])
     b_bigram_list = []
-    for i in range(len(b)-1):
-        b_bigram_list.append(b[i:i+2])
+    for i in range(len(b) - 1):
+        b_bigram_list.append(b[i:i + 2])
 
     a_bigrams = set(a_bigram_list)
     b_bigrams = set(b_bigram_list)
     overlap = len(a_bigrams & b_bigrams)
-    dice_coeff = overlap * 2.0/float(len(a_bigrams) + len(b_bigrams))
+    dice_coeff = overlap * 2.0 / float(len(a_bigrams) + len(b_bigrams))
     return dice_coeff
 
 
@@ -123,7 +125,7 @@ def hdist(array1, array2):
             - the second array.
     """
     return np.sqrt(np.sum((np.sqrt(array1) -
-                          np.sqrt(array2)) ** 2)) / float(np.sqrt(2))
+                           np.sqrt(array2)) ** 2)) / float(np.sqrt(2))
 
 
 def jaccard_index(array1, array2):
@@ -149,7 +151,7 @@ def jaccard_index(array1, array2):
     # definition of the jaccard index is |(A & B)|/|(A | B)|
     overlap = np.logical_and(array1, array2)
     occupied_space = np.logical_or(array1, array2)
-    return overlap.sum()/float(occupied_space.sum())
+    return overlap.sum() / float(occupied_space.sum())
 
 
 def registration_score(aligned_func, reference, edge=False):
@@ -253,18 +255,19 @@ def plot_timeseries(timeseries, fname_ts, sub, label_name):
     # roi
     for d in range(0, timeseries.T.shape[1]):
         fts_list.append(py.graph_objs.Scatter(
-                        x=range(0, timeseries.T.shape[0]),
-                        y=timeseries.T[:, d], mode='lines'))
-    # use plotly so that users can select which rois to display
-    # easily with a html
-	layout = dict(title="Functional Timeseries, {} Parcellation".format(label_name),
-                  xaxis=dict(title='Time Point (TRs)',
-                             range=[0, timeseries.T.shape[0]]),
-                  yaxis=dict(title='Intensity'),
-                  showlegend=False)  # height=405, width=720)
+            x=range(0, timeseries.T.shape[0]),
+            y=timeseries.T[:, d], mode='lines'))
+        # use plotly so that users can select which rois to display
+        # easily with a html
+        layout = dict(title="Functional Timeseries, {} Parcellation".format(label_name),
+                      xaxis=dict(title='Time Point (TRs)',
+                                 range=[0, timeseries.T.shape[0]]),
+                      yaxis=dict(title='Intensity'),
+                      showlegend=False)  # height=405, width=720)
     fts = dict(data=fts_list, layout=layout)
     offline.plot(fts, filename=fname_ts, auto_open=False)
     pass
+
 
 def plot_connectome(connectome, fname_corr, sub, label_name):
     """
@@ -281,15 +284,15 @@ def plot_connectome(connectome, fname_corr, sub, label_name):
     # plot correlation matrix as the absolute correlation
     # of the timeseries for each roi
     dims = connectome.shape[0]
-    fig = pp.plot_heatmap(connectome/np.max(connectome),
-        name = "Functional Connectome, {} Parcellation".format(label_name),
-        scale = True, scaletit='Normalized Rank')
+    fig = pp.plot_heatmap(connectome / np.max(connectome),
+                          name="Functional Connectome, {} Parcellation".format(label_name),
+                          scale=True, scaletit='Normalized Rank')
     fig.layout['xaxis']['title'] = 'ROI'
     fig.layout['yaxis']['title'] = 'ROI'
     fig.layout['yaxis']['autorange'] = 'reversed'
-    fig.layout['xaxis']['tickvals'] = [0, dims/2-1, dims-1]
-    fig.layout['yaxis']['tickvals'] = [0, dims/2-1, dims-1]
-    fig.layout['xaxis']['ticktext'] = [1, dims/2, dims]
-    fig.layout['yaxis']['ticktext'] = [1, dims/2, dims]
+    fig.layout['xaxis']['tickvals'] = [0, dims / 2 - 1, dims - 1]
+    fig.layout['yaxis']['tickvals'] = [0, dims / 2 - 1, dims - 1]
+    fig.layout['xaxis']['ticktext'] = [1, dims / 2, dims]
+    fig.layout['yaxis']['ticktext'] = [1, dims / 2, dims]
     offline.plot(fig, filename=fname_corr, auto_open=False)
     pass

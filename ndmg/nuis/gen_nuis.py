@@ -19,6 +19,7 @@
 # Created by Eric Bridgeford on 2016-06-20-16.
 # Email: ebridge2@jhu.edu
 import warnings
+
 warnings.simplefilter("ignore")
 from ndmg.utils import gen_utils as mgu
 from ndmg.utils import reg_utils as mgru
@@ -240,18 +241,18 @@ class nuis(object):
                   for m regressors.
         """
         (t, m) = mc_params.shape
-        friston = np.zeros((t, 4*m))
+        friston = np.zeros((t, 4 * m))
         # the motion parameters themselves
         friston[:, 0:m] = mc_params
         # square the motion parameters
-        friston[:, m:2*m] = np.square(mc_params)
+        friston[:, m:2 * m] = np.square(mc_params)
 
         # use the motion estimated at the preceding timepoint
         # as a regressor
-        friston[1:, 2*m:3*m] = mc_params[:-1, :]
+        friston[1:, 2 * m:3 * m] = mc_params[:-1, :]
         # use the motion estimated at the preceding timepoint
         # squared as a regressor
-        friston[:, 3*m:4*m] = np.square(friston[:, 2*m:3*m])
+        friston[:, 3 * m:4 * m] = np.square(friston[:, 2 * m:3 * m])
         return friston
 
     def linear_reg(self, voxel, mc_params, wm_ts=None, csf_ts=None, cc=5,
@@ -284,7 +285,7 @@ class nuis(object):
         # linear drift regressor
         lin_reg = np.array(range(0, time))
         # quadratic drift regressor
-        quad_reg = np.array(range(0, time))**2
+        quad_reg = np.array(range(0, time)) ** 2
 
         # use GLM model given regressors to approximate the weight we want
         # to regress out
@@ -295,7 +296,6 @@ class nuis(object):
         if trend == 'quad':
             print "Adding quadratic trendline to GLM..."
             R = np.column_stack((R, quad_reg))
-
 
         if csf_mean is not False:
             print "Adding csf mean signal to GLM..."
@@ -424,7 +424,7 @@ class nuis(object):
 
         # GLM for nuisance correction
         if (cc is not None or csf_mean is not False or wm_mean is not False
-            or mot is not None or trend is not None):
+                or mot is not None or trend is not None):
             voxel = self.linear_reg(voxel, mc_params, wm_ts=wm_ts, csf_ts=lv_ts,
                                     csf_mean=csf_mean, wm_mean=wm_mean,
                                     mot=mot, trend=trend, cc=cc)

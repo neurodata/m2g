@@ -21,6 +21,7 @@
 # Email: Greg Kiar @ gkiar@jhu.edu
 
 import warnings
+
 warnings.simplefilter("ignore")
 import os
 import re
@@ -32,6 +33,7 @@ from argparse import ArgumentParser
 from scipy import ndimage
 from matplotlib.colors import LinearSegmentedColormap
 import matplotlib as mpl
+
 mpl.use('Agg')  # very important above pyplot import
 from nilearn.plotting.edge_detect import _edge_map as edge_map
 import matplotlib.pyplot as plt
@@ -45,11 +47,11 @@ def reg_mri_pngs(mri, atlas, outdir, loc=0, mean=False, minthr=2,
     """
     atlas_data = nb.load(atlas).get_data()
     mri_data = nb.load(mri).get_data()
-    if mri_data.ndim==4:  # 4d data, so we need to reduce a dimension
+    if mri_data.ndim == 4:  # 4d data, so we need to reduce a dimension
         if mean:
             mr_data = mri_data.mean(axis=3)
         else:
-            mr_data = mri_data[:,:,:,loc]
+            mr_data = mri_data[:, :, :, loc]
     else:  # dim=3
         mr_data = mri_data
 
@@ -83,7 +85,7 @@ def opaque_colorscale(basemap, reference, vmin=None, vmax=None, alpha=1):
     cmap = basemap(reference)
     maxval = np.nanmax(reference)
     # all values beteween 0 opacity and 1
-    opaque_scale = alpha*reference/float(maxval)
+    opaque_scale = alpha * reference / float(maxval)
     # remaps intensities
     cmap[:, :, 3] = opaque_scale
     return cmap
@@ -101,9 +103,9 @@ def plot_brain(brain, minthr=2, maxthr=95, edge=False):
         z = [88, 103, 107]
     else:
         shap = brain.shape
-        x = [int(shap[0]*0.35), int(shap[0]*0.51), int(shap[0]*0.65)]
-        y = [int(shap[1]*0.35), int(shap[1]*0.51), int(shap[1]*0.65)]
-        z = [int(shap[2]*0.35), int(shap[2]*0.51), int(shap[2]*0.65)]
+        x = [int(shap[0] * 0.35), int(shap[0] * 0.51), int(shap[0] * 0.65)]
+        y = [int(shap[1] * 0.35), int(shap[1] * 0.51), int(shap[1] * 0.65)]
+        z = [int(shap[2] * 0.35), int(shap[2] * 0.51), int(shap[2] * 0.65)]
     coords = (x, y, z)
 
     labs = ['Sagittal Slice (YZ fixed)',
@@ -129,8 +131,8 @@ def plot_brain(brain, minthr=2, maxthr=95, edge=False):
 
             if idx % 3 == 1:
                 ax.set_ylabel(labs[i])
-                ax.yaxis.set_ticks([0, image.shape[0]/2, image.shape[0] - 1])
-                ax.xaxis.set_ticks([0, image.shape[1]/2, image.shape[1] - 1])
+                ax.yaxis.set_ticks([0, image.shape[0] / 2, image.shape[0] - 1])
+                ax.xaxis.set_ticks([0, image.shape[1] / 2, image.shape[1] - 1])
 
             if edge:
                 image = edge_map(image).data
@@ -164,9 +166,9 @@ def plot_overlays(atlas, b0, cmaps=None, minthr=2, maxthr=95, edge=False):
         z = [88, 103, 107]
     else:
         shap = b0.shape
-        x = [int(shap[0]*0.35), int(shap[0]*0.51), int(shap[0]*0.65)]
-        y = [int(shap[1]*0.35), int(shap[1]*0.51), int(shap[1]*0.65)]
-        z = [int(shap[2]*0.35), int(shap[2]*0.51), int(shap[2]*0.65)]
+        x = [int(shap[0] * 0.35), int(shap[0] * 0.51), int(shap[0] * 0.65)]
+        y = [int(shap[1] * 0.35), int(shap[1] * 0.51), int(shap[1] * 0.65)]
+        z = [int(shap[2] * 0.35), int(shap[2] * 0.51), int(shap[2] * 0.65)]
     coords = (x, y, z)
 
     labs = ['Sagittal Slice (YZ fixed)',
@@ -199,16 +201,16 @@ def plot_overlays(atlas, b0, cmaps=None, minthr=2, maxthr=95, edge=False):
 
             if idx % 3 == 1:
                 ax.set_ylabel(labs[i])
-                ax.yaxis.set_ticks([0, image.shape[0]/2, image.shape[0] - 1])
-                ax.xaxis.set_ticks([0, image.shape[1]/2, image.shape[1] - 1])
-            if edge: 
+                ax.yaxis.set_ticks([0, image.shape[0] / 2, image.shape[0] - 1])
+                ax.xaxis.set_ticks([0, image.shape[1] / 2, image.shape[1] - 1])
+            if edge:
                 image = edge_map(image).data
                 image[image > 0] = max_val
                 image[image == 0] = min_val
 
             ax.imshow(atl, interpolation='none', cmap=cmaps[0], alpha=.9)
             ax.imshow(opaque_colorscale(cmaps[1], image, alpha=.9,
-                      vmin=min_val, vmax=max_val))
+                                        vmin=min_val, vmax=max_val))
 
     foverlay.set_size_inches(12.5, 10.5, forward=True)
     foverlay.tight_layout()

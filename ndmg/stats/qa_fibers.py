@@ -21,6 +21,7 @@
 # Email: Greg Kiar @ gkiar@jhu.edu
 
 import warnings
+
 warnings.simplefilter("ignore")
 import numpy as np
 import random
@@ -34,6 +35,7 @@ try:
     import pyvtk
 except ImportError:
     pass
+
 
 def visualize_fibs(fibs, atlasfile, outdir, opacity, num_samples):
     """

@@ -1,10 +1,10 @@
-networkx>=1.11
-nibabel>=2.0
-nilearn>=0.2
-sklearn>=0.0
+networkx
+nibabel
+nilearn
+sklearn
 numpy
 scipy>=0.13.3
-dipy==0.14.0
+dipy
 boto3
 matplotlib
 plotly==1.12.1

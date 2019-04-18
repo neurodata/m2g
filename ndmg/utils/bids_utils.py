@@ -20,6 +20,7 @@
 # Email: ebridge2@jhu.edu
 
 import warnings
+
 warnings.simplefilter("ignore")
 from bids import BIDSLayout
 import re
@@ -33,11 +34,12 @@ class name_resource:
     """
     A class for naming derivatives under the BIDs spec.
     """
+
     def __init__(self, modf, t1wf, tempf, opath):
         self.__subi__ = os.path.basename(modf).split('.')[0]
         self.__anati__ = os.path.basename(t1wf).split('.')[0]
         self.__sub__ = re.search(r'(sub-)(?!.*sub-).*?(?=[_])', modf).group()
-        self.__suball__  = "sub-{}".format(self.__sub__)
+        self.__suball__ = "sub-{}".format(self.__sub__)
         self.__ses__ = re.search(r'(ses-)(?!.*ses-).*?(?=[_])', modf)
         if self.__ses__:
             self.__ses__ = self.__ses__.group()
@@ -75,7 +77,7 @@ class name_resource:
             olist = [self.get_outdir()]
             self.dirs[dirt] = {}
             if dirt in ['tmp', 'qa']:
-                olist = olist +[dirt] + self.get_sub_info()
+                olist = olist + [dirt] + self.get_sub_info()
             self.dirs[dirt]['base'] = os.path.join(*olist)
             for kwd, path in paths.iteritems():
                 newdir = os.path.join(*[self.dirs[dirt]['base'], path])
@@ -84,7 +86,7 @@ class name_resource:
                     for label in labels:
                         labname = self.get_label(label)
                         self.dirs[dirt][kwd][labname] = os.path.join(newdir,
-                           labname)
+                                                                     labname)
                 else:
                     self.dirs[dirt][kwd] = newdir
         newdirs = flatten(self.dirs, [])
@@ -108,7 +110,7 @@ class name_resource:
             olist = [namer.get_outdir()]
             namer.dirs[dirt] = {}
             if dirt in ['tmp']:
-                olist = olist +[dirt]
+                olist = olist + [dirt]
             namer.dirs[dirt]['base'] = os.path.join(*olist)
             for kwd, path in paths.iteritems():
                 newdir = os.path.join(*[namer.dirs[dirt]['base'], path])
@@ -117,7 +119,7 @@ class name_resource:
                     for label in labels:
                         labname = namer.get_label(label)
                         namer.dirs[dirt][kwd][labname] = os.path.join(newdir,
-                           labname)
+                                                                      labname)
                 else:
                     namer.dirs[dirt][kwd] = newdir
         namer.dirs['tmp'] = {}
@@ -137,14 +139,14 @@ class name_resource:
         cmd = "mkdir -p {}".format(" ".join(newdirs))
         mgu.execute_cmd(cmd)  # make the directories
         return
-        
+
     def _get_outdir(self):
         """
         Called by constructor to initialize the output directory.
         """
         olist = [self.__basepath__]
-        #olist.append(self.__sub__)
-        #if self.__ses__:
+        # olist.append(self.__sub__)
+        # if self.__ses__:
         #    olist.append(self.__ses__)
         return os.path.join(*olist)
 
@@ -163,13 +165,13 @@ class name_resource:
 
     def get_template_space(self):
         return "space-{}_{}".format(self.__space__, self.__res__)
-    
+
     def get_label(self, label):
         """
         return the formatted label information for the parcellation.
         """
         return mgu.get_filename(label)
-        #return "label-{}".format(re.split(r'[._]',
+        # return "label-{}".format(re.split(r'[._]',
         #                         os.path.basename(label))[0])
 
     def name_derivative(self, folder, derivative):
@@ -206,6 +208,7 @@ class name_resource:
             olist.append(self.__ses__)
         return olist
 
+
 def flatten(current, result=[]):
     if isinstance(current, dict):
         for key in current:
@@ -213,6 +216,7 @@ def flatten(current, result=[]):
     else:
         result.append(current)
     return result
+
 
 def sweep_directory(bdir, subj=None, sesh=None, task=None, run=None, modality='dwi'):
     """
@@ -252,12 +256,12 @@ def sweep_directory(bdir, subj=None, sesh=None, task=None, run=None, modality='d
         else:
             runs = as_list(run)
 
-	print(sub)
-	print("%s%s" % ('Subject:', sub))
-	print("%s%s" % ('Sessions:', seshs))
-	print("%s%s" % ('Tasks:', tasks))
-	print("%s%s" % ('Runs:', runs))
-	print('\n\n')
+        print(sub)
+        print("%s%s" % ('Subject:', sub))
+        print("%s%s" % ('Sessions:', seshs))
+        print("%s%s" % ('Tasks:', tasks))
+        print("%s%s" % ('Runs:', runs))
+        print('\n\n')
         # all the combinations of sessions and tasks that are possible
         for (ses, tas, ru) in product(seshs, tasks, runs):
             # the attributes for our modality img
@@ -343,6 +347,7 @@ def merge_dicts(x, y):
     z = x.copy()
     z.update(y)
     return z
+
 
 def s3_get_data(bucket, remote, local, public=True):
     """

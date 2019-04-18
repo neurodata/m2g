@@ -21,6 +21,7 @@
 # Edited by Eric Bridgeford.
 
 import warnings
+
 warnings.simplefilter("ignore")
 from argparse import ArgumentParser
 from collections import OrderedDict
@@ -59,7 +60,7 @@ def compute_metrics(fs, outdir, atlas, verb=False, modality='dwi'):
         graphs = binGraphs(gr)
     else:
         graphs = gr
- 
+
     nodes = nx.number_of_nodes(graphs.values()[0])
     #  Number of non-zero edges (i.e. binary edge count)
     print("Computing: NNZ")
@@ -93,18 +94,18 @@ def compute_metrics(fs, outdir, atlas, verb=False, modality='dwi'):
     print("Computing: Degree Sequence")
     test = OrderedDict()
     total_deg = OrderedDict((subj, np.array(dict(nx.degree(graphs[subj],
-                                                      **wt_args)).values()))
+                                                           **wt_args)).values()))
                             for subj in graphs)
     ipso_deg = OrderedDict()
     contra_deg = OrderedDict()
     for subj in graphs:  # TODO GK: remove forloop and use comprehension maybe?
         g = graphs[subj]
         N = len(list(g.nodes()))
-        LLnodes = list(g.nodes())[0:N/2]  # TODO GK: don't assume hemispheres
+        LLnodes = list(g.nodes())[0:N / 2]  # TODO GK: don't assume hemispheres
         LL = g.subgraph(LLnodes)
         LLdegs = [LL.degree(**wt_args)[n] for n in LLnodes]
 
-        RRnodes = list(g.nodes())[N/2:N]  # TODO GK: don't assume hemispheres
+        RRnodes = list(g.nodes())[N / 2:N]  # TODO GK: don't assume hemispheres
         RR = g.subgraph(RRnodes)
         RRdegs = [RR.degree(**wt_args)[n] for n in RRnodes]
 
@@ -124,7 +125,7 @@ def compute_metrics(fs, outdir, atlas, verb=False, modality='dwi'):
     if modality == 'dwi':
         print("Computing: Edge Weight Sequence")
         temp_ew = OrderedDict((s, [graphs[s].get_edge_data(e[0], e[1])['weight']
-                               for e in graphs[s].edges()]) for s in graphs)
+                                   for e in graphs[s].edges()]) for s in graphs)
         ew = temp_ew
         write(outdir, 'edge_weight', ew, atlas)
         show_means(temp_ew)
@@ -168,13 +169,14 @@ def compute_metrics(fs, outdir, atlas, verb=False, modality='dwi'):
     mat = np.zeros(adj.values()[0].shape)
     for subj in adj:
         mat += adj[subj]
-    mat = mat/len(adj.keys())
+    mat = mat / len(adj.keys())
     write(outdir, 'study_mean_connectome', mat, atlas)
 
 
 def show_means(data):
     print("Subject Means: " + ", ".join(["%.2f" % np.mean(data[key])
                                          for key in data.keys()]))
+
 
 def binGraphs(graphs, thr=0.1):
     """
@@ -233,7 +235,7 @@ def scan_statistic(mygs, i):
         for n in g.nodes():
             sg = nx.ego_graph(g, n, radius=i)
             tmp = np.append(tmp, np.sum([sg.get_edge_data(e[0], e[1])['weight']
-                            for e in sg.edges()]))
+                                         for e in sg.edges()]))
         ss[key] = tmp
     return ss
 
@@ -256,7 +258,7 @@ def density(data, nbins=500, rng=None):
             xs[subj] = np.linspace(rng[0], rng[1], nbins)
         else:
             xs[subj] = np.linspace(0, np.max(data[subj]), nbins)
-        density[subj] = dens.evaluate(xs[subj])*np.max(data[subj]*hist)
+        density[subj] = dens.evaluate(xs[subj]) * np.max(data[subj] * hist)
     return {"xs": xs, "pdfs": density}
 
 

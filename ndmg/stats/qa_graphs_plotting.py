@@ -20,6 +20,7 @@
 # Email: gkiar@jhu.edu
 
 import warnings
+
 warnings.simplefilter("ignore")
 from argparse import ArgumentParser
 from plotly.offline import download_plotlyjs, init_notebook_mode, plot
@@ -50,7 +51,7 @@ def make_panel_plot(basepath, outf, dataset=None, atlas=None, minimal=True,
         modtit = "fMRI"
         order = [0, 1, 2, 6, 4, 3, 5, 7]
         keys = [keys[o] for o in order]
-        paths = [paths[o] for o in  order]
+        paths = [paths[o] for o in order]
 
         labs = ['Betweenness Centrality', 'Clustering Coefficient', 'Degree',
                 'Average Path Length', 'Locality Statistic-1', 'Eigenvalue',
@@ -71,16 +72,16 @@ def make_panel_plot(basepath, outf, dataset=None, atlas=None, minimal=True,
                 maxdat = np.max([np.max(dat[key][k])
                                  for key in dat.keys()
                                  for k in dat[key]])
-                anno = [dict(x=dims/3,
-                             y=4*float(maxdat/7),
+                anno = [dict(x=dims / 3,
+                             y=4 * float(maxdat / 7),
                              xref='x3',
                              yref='y3',
                              text='ipsilateral',
                              showarrow=False,
                              font=dict(color='rgba(0.0,0.0,0.0,0.6)',
                                        size=14)),
-                        dict(x=dims/3,
-                             y=3.7*float(maxdat/7),
+                        dict(x=dims / 3,
+                             y=3.7 * float(maxdat / 7),
                              xref='x3',
                              yref='y3',
                              text='contralateral',
@@ -89,7 +90,7 @@ def make_panel_plot(basepath, outf, dataset=None, atlas=None, minimal=True,
                                        size=14))]
         elif keys[idx] == 'study_mean_connectome':
             if log:
-                dat = np.log10(dat+1)
+                dat = np.log10(dat + 1)
             fig = pp.plot_heatmap(dat, name=labs[idx])
         else:
             dims = len(dat.values()[0])
@@ -98,51 +99,51 @@ def make_panel_plot(basepath, outf, dataset=None, atlas=None, minimal=True,
 
     multi = pp.traces_to_panels(traces)
     for idx, curr, in enumerate(paths):
-        key = 'axis%d' % (idx+1)
-        d = multi.layout['x'+key]['domain']
-        multi.layout['x'+key]['domain'] = [d[0], d[1]-0.0125]
-        multi.layout['x'+key]['zeroline'] = False
-        multi.layout['y'+key]['zeroline'] = False
-        multi.layout['y'+key]['title'] = ''
-        multi.layout['x'+key]['title'] = 'Node'
-        multi.layout['x'+key]['nticks'] = 3
-        multi.layout['y'+key]['nticks'] = 3
+        key = 'axis%d' % (idx + 1)
+        d = multi.layout['x' + key]['domain']
+        multi.layout['x' + key]['domain'] = [d[0], d[1] - 0.0125]
+        multi.layout['x' + key]['zeroline'] = False
+        multi.layout['y' + key]['zeroline'] = False
+        multi.layout['y' + key]['title'] = ''
+        multi.layout['x' + key]['title'] = 'Node'
+        multi.layout['x' + key]['nticks'] = 3
+        multi.layout['y' + key]['nticks'] = 3
         if (idx in [0, 1, 2, 3, 4, 5] and modality == 'func') or (idx in [0, 1, 2, 3, 4, 5] and modality == 'dwi'):
-            multi.layout['x'+key]['range'] = [1, dims]
-            multi.layout['x'+key]['tickvals'] = [1, dims/2, dims]
+            multi.layout['x' + key]['range'] = [1, dims]
+            multi.layout['x' + key]['tickvals'] = [1, dims / 2, dims]
             if idx in [2]:
                 if hemispheres:
                     multi.layout['annotations'] = anno
             elif log:
-                multi.layout['y'+key]['type'] = 'log'
-                multi.layout['y'+key]['title'] += 'log'
+                multi.layout['y' + key]['type'] = 'log'
+                multi.layout['y' + key]['title'] += 'log'
         if idx in [5] and modality == 'dwi':
-            multi.layout['x'+key]['range'] = [1, edges]
-            multi.layout['x'+key]['tickvals'] = [1, edges/2, edges]
-            multi.layout['x'+key]['title'] = 'Edge'
+            multi.layout['x' + key]['range'] = [1, edges]
+            multi.layout['x' + key]['tickvals'] = [1, edges / 2, edges]
+            multi.layout['x' + key]['title'] = 'Edge'
         if (idx in [4] and modality == 'dwi') or (idx in [5] and modality == 'func'):
-            multi.layout['x'+key]['range'] = [1, dims]
-            multi.layout['x'+key]['tickvals'] = [1, dims/2, dims]
-            multi.layout['x'+key]['title'] = 'Dimension'
-        multi.layout['y'+key]['title'] += labs[idx]
+            multi.layout['x' + key]['range'] = [1, dims]
+            multi.layout['x' + key]['tickvals'] = [1, dims / 2, dims]
+            multi.layout['x' + key]['title'] = 'Dimension'
+        multi.layout['y' + key]['title'] += labs[idx]
         if (idx in [6]):
-            multi.layout['y'+key]['title'] = 'Relative Probability'
-            multi.layout['x'+key]['title'] = labs[idx]
+            multi.layout['y' + key]['title'] = 'Relative Probability'
+            multi.layout['x' + key]['title'] = labs[idx]
         if idx in [7]:
-            multi.layout['y'+key]['title'] = None
-            multi.layout['x'+key]['title'] = labs[idx]
-            multi.layout['y'+key]['autorange'] = 'reversed'
-            multi.layout['x'+key]['tickvals'] = [0, dims/2-1, dims-1]
-            multi.layout['y'+key]['tickvals'] = [0, dims/2-1, dims-1]
-            multi.layout['x'+key]['ticktext'] = [1, dims/2, dims]
-            multi.layout['y'+key]['ticktext'] = [1, dims/2, dims]
+            multi.layout['y' + key]['title'] = None
+            multi.layout['x' + key]['title'] = labs[idx]
+            multi.layout['y' + key]['autorange'] = 'reversed'
+            multi.layout['x' + key]['tickvals'] = [0, dims / 2 - 1, dims - 1]
+            multi.layout['y' + key]['tickvals'] = [0, dims / 2 - 1, dims - 1]
+            multi.layout['x' + key]['ticktext'] = [1, dims / 2, dims]
+            multi.layout['y' + key]['ticktext'] = [1, dims / 2, dims]
             if log:
-                multi.layout['x'+key]['title'] += ' (log10)'
+                multi.layout['x' + key]['title'] += ' (log10)'
     if dataset is not None and atlas is not None:
         if atlas == 'desikan':
             atlas = atlas.capitalize()
         tit = "{} Dataset ({} parcellation), {} Group Analysis".format(dataset,
-                atlas, modtit)
+                                                                       atlas, modtit)
     else:
         tit = "{} Group Analysis".format(modtit)
     multi.layout['title'] = tit
@@ -152,11 +153,11 @@ def make_panel_plot(basepath, outf, dataset=None, atlas=None, minimal=True,
         locs = [idx for idx, d in enumerate(multi.data) if d['yaxis'] == 'y8']
         for l in locs:
             multi.data[l] = {}
-        multi.layout['x'+key]['title'] = ''
-        multi.layout['y'+key]['title'] = ''
+        multi.layout['x' + key]['title'] = ''
+        multi.layout['y' + key]['title'] = ''
         multi = pp.panel_invisible(multi, 8)
 
-    plot(multi, validate=False, filename=outf+'.html')
+    plot(multi, validate=False, filename=outf + '.html')
 
 
 def main():
@@ -168,6 +169,7 @@ def main():
     r = parser.parse_args()
 
     make_panel_plot(r.basepath, r.outf, r.dataset, r.atlas)
+
 
 if __name__ == "__main__":
     main()

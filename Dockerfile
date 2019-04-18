@@ -51,19 +51,6 @@ RUN apt-get update -qq && apt-get install -yq --no-install-recommends ed gsl-bin
            ln $libs_path/libgsl.so.19 $libs_path/libgsl.so.0; \
     fi
 
-RUN echo "Install libxp (not in all ubuntu/debian repositories)" && \
-    apt-get install -yq --no-install-recommends libxp6 \
-    || /bin/bash -c " \
-       curl --retry 5 -o /tmp/libxp6.deb -sSL \
-       && dpkg -i /tmp/libxp6.deb && rm -f /tmp/libxp6.deb $LIBXP_URL" && \
-    echo "Install libpng12 (not in all ubuntu/debian repositories" && \
-    apt-get install -yq --no-install-recommends libpng12-0 \
-    || /bin/bash -c " \
-       curl -o /tmp/libpng12.deb -sSL $LIBPNG_URL \
-       && dpkg -i /tmp/libpng12.deb && rm -f /tmp/libpng12.deb" && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
-
 RUN mkdir -p /opt/afni && \
     curl -o afni.tar.gz -sSLO "$AFNI_URL" && \
     tar zxv -C /opt/afni --strip-components=1 -f afni.tar.gz && \
@@ -81,7 +68,7 @@ RUN git clone git://github.com/stnava/ANTs.git ants \
     && mkdir build \
     && cd build \
     && cmake .. \
-    && make -j1 \
+    && make -j8 \
     && mkdir -p /opt/ants \
     && mv bin/* /opt/ants && mv ../Scripts/* /opt/ants \
     && cd .. \
@@ -95,6 +82,9 @@ RUN \
     pip install numpy networkx>=1.11 nibabel>=2.0 dipy==0.14.0 scipy \
     python-dateutil==2.6.1 boto3 awscli matplotlib==1.5.3 plotly==1.12.9 nilearn>=0.2 sklearn>=0.0 \
     pandas cython vtk pyvtk fury awscli requests==2.5.3 scikit-image pybids==0.6.4 ipython
+
+# Delete buggy line in dipy
+RUN sed -i -e '189d;190d' /usr/local/lib/python2.7/dist-packages/dipy/tracking/eudx.py
 
 WORKDIR /
 
@@ -113,6 +103,8 @@ RUN \
     rm -rf /ndmg_atlases/label/slab* && \
     rm -rf /ndmg_atlases/label/hemispheric
 
+RUN chmod -R 777 /ndmg_atlases
+
 RUN mkdir /data && \
     chmod -R 777 /data
 
@@ -127,8 +119,5 @@ ENV PYTHONWARNINGS ignore
 RUN ldconfig
 RUN chmod -R 777 /usr/local/bin/ndmg_bids
 
-# Delete buggy line in dipy
-RUN sed -i -e '189d;190d' /usr/local/lib/python2.7/dist-packages/dipy/tracking/eudx.py
-
 # and add it as an entrypoint
-ENTRYPOINT ["ndmg_bids"]
+#ENTRYPOINT ["ndmg_bids"]

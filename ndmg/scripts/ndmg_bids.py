@@ -23,6 +23,7 @@
 # big-graph generation.
 
 import warnings
+
 warnings.simplefilter("ignore")
 from argparse import ArgumentParser
 from subprocess import Popen, PIPE
@@ -96,7 +97,7 @@ def get_atlas(atlas_dir, modality, vox_size):
                           "lateral-ventricles-thr25" +
                           "_res-' + dims + '_brainmask.nii.gz")
 
-	labels = [i for i in glob.glob(atlas_dir + '/label/*.nii.gz') if dims in i]
+        labels = [i for i in glob.glob(atlas_dir + '/label/*.nii.gz') if dims in i]
         labels = [op.join(atlas_dir, 'label', l) for l in labels]
         fils = labels + [atlas, atlas_mask, atlas_brain, lv_mask]
 
@@ -108,12 +109,12 @@ def get_atlas(atlas_dir, modality, vox_size):
         print("Cannot find atlas information; downloading...")
         mgu.execute_cmd('mkdir -p ' + atlas_dir)
         cmd = 'wget https://github.com/neurodata/neuroparc/archive/master.zip'
-	os.system(cmd)
-	cmd = 'unzip /master.zip'
-	os.system(cmd)
-	os.rename('/neuroparc-master/atlases', '/ndmg_atlases')
-	shutil.rmtree('/neuroparc-master')
-	os.remove('master.zip')
+        os.system(cmd)
+        cmd = 'unzip /master.zip'
+        os.system(cmd)
+        os.rename('/neuroparc-master/atlases', '/ndmg_atlases')
+        shutil.rmtree('/neuroparc-master')
+        os.remove('master.zip')
 
     if modality == 'dwi':
         atlas_brain = None
@@ -129,7 +130,8 @@ def worker_wrapper((f, args, kwargs)):
     return f(*args, **kwargs)
 
 
-def session_level(inDir, outDir, subjs, vox_size, big, clean, stc, atlas_select, mod_type, track_type, mod_func, reg_style, sesh=None, task=None, run=None, debug=False, modality='dwi', nproc=1):
+def session_level(inDir, outDir, subjs, vox_size, big, clean, stc, atlas_select, mod_type, track_type, mod_func,
+                  reg_style, sesh=None, task=None, run=None, debug=False, modality='dwi', nproc=1):
     """
     Crawls the given BIDS organized directory for data pertaining to the given
     subject and session, and passes necessary files to ndmg_dwi_pipeline for
@@ -141,36 +143,39 @@ def session_level(inDir, outDir, subjs, vox_size, big, clean, stc, atlas_select,
 
     if atlas_select:
         labels = [i for i in labels if atlas_select in i]
-    #mgu.execute_cmd("mkdir -p {} {}/tmp".format(outDir, outDir))
+    # mgu.execute_cmd("mkdir -p {} {}/tmp".format(outDir, outDir))
 
     result = sweep_directory(inDir, subjs, sesh, task, run, modality)
 
     kwargs = {'clean': (not debug)}  # our keyword arguments
     if modality == 'dwi':
         dwis, bvals, bvecs, anats = result
-        assert(len(anats) == len(dwis))
-        assert(len(bvecs) == len(dwis))
-        assert(len(bvals) == len(dwis))
+        assert (len(anats) == len(dwis))
+        assert (len(bvecs) == len(dwis))
+        assert (len(bvals) == len(dwis))
         args = [[dw, bval, bvec, anat, atlas, atlas_mask,
-                 labels, "%s%s%s%s%s" % (outDir, '/sub', bval.split('sub')[1].split('/')[0], '/ses', bval.split('ses')[1].split('/')[0])] for (dw, bval, bvec, anat)
+                 labels, "%s%s%s%s%s" % (
+                     outDir, '/sub', bval.split('sub')[1].split('/')[0], '/ses', bval.split('ses')[1].split('/')[0])]
+                for
+                (dw, bval, bvec, anat)
                 in zip(dwis, bvals, bvecs, anats)]
         f = ndmg_dwi_pipeline  # the function of choice
-	kwargs['vox_size'] = vox_size
+        kwargs['vox_size'] = vox_size
         kwargs['mod_type'] = mod_type
         kwargs['track_type'] = track_type
         kwargs['mod_func'] = mod_func
-	kwargs['reg_style'] = reg_style
+        kwargs['reg_style'] = reg_style
         kwargs['big'] = big
-	kwargs['clean'] = clean
+        kwargs['clean'] = clean
     else:
         funcs, anats = result
-        assert(len(anats) == len(funcs))
+        assert (len(anats) == len(funcs))
         args = [[func, anat, atlas, atlas_brain, atlas_mask,
                  lv_mask, labels, outDir] for (func, anat) in
                 zip(funcs, anats)]
         f = ndmg_func_pipeline
         kwargs['stc'] = stc
-    
+
     # optional args stored in kwargs
     # use worker wrapper to call function f with args arg
     # and keyword args kwargs
@@ -185,8 +190,8 @@ def session_level(inDir, outDir, subjs, vox_size, big, clean, stc, atlas_select,
         p.join()
     rmflds = []
     if modality == 'func' and not debug:
-       rmflds += [os.path.join(outDir, 'func', modal) for modal in ['clean', 'preproc', 'registered']]
-       rmflds += [os.path.join(outDir, 'anat')]
+        rmflds += [os.path.join(outDir, 'func', modal) for modal in ['clean', 'preproc', 'registered']]
+        rmflds += [os.path.join(outDir, 'anat')]
     if not big:
         rmflds += [os.path.join(outDir, 'func', 'voxel-timeseries')]
     if len(rmflds) > 0:
@@ -241,89 +246,92 @@ def main():
     parser = ArgumentParser(description="This is an end-to-end connectome \
                             estimation pipeline from M3r Images.")
     parser.add_argument('bids_dir', help='The directory with the input dataset'
-                        ' formatted according to the BIDS standard.')
+                                         ' formatted according to the BIDS standard.')
     parser.add_argument('output_dir', help='The directory where the output '
-                        'files should be stored. If you are running group '
-                        'level analysis this folder should be prepopulated '
-                        'with the results of the participant level analysis.')
+                                           'files should be stored. If you are running group '
+                                           'level analysis this folder should be prepopulated '
+                                           'with the results of the participant level analysis.')
     parser.add_argument('analysis_level', help='Level of the analysis that '
-                        'will be performed. Multiple participant level '
-                        'analyses can be run independently (in parallel) '
-                        'using the same output_dir.',
+                                               'will be performed. Multiple participant level '
+                                               'analyses can be run independently (in parallel) '
+                                               'using the same output_dir.',
                         choices=['participant', 'group'], default='participant')
     parser.add_argument('--modality', help='Modality of MRI scans that \
                         are being evaluated.', choices=['dwi', 'func'], default='dwi')
     parser.add_argument('--participant_label', help='The label(s) of the '
-                        'participant(s) that should be analyzed. The label '
-                        'corresponds to sub-<participant_label> from the BIDS '
-                        'spec (so it does not include "sub-"). If this '
-                        'parameter is not provided all subjects should be '
-                        'analyzed. Multiple participants can be specified '
-                        'with a space separated list.', nargs="+")
+                                                    'participant(s) that should be analyzed. The label '
+                                                    'corresponds to sub-<participant_label> from the BIDS '
+                                                    'spec (so it does not include "sub-"). If this '
+                                                    'parameter is not provided all subjects should be '
+                                                    'analyzed. Multiple participants can be specified '
+                                                    'with a space separated list.', nargs="+")
     parser.add_argument('--session_label', help='The label(s) of the '
-                        'session that should be analyzed. The label '
-                        'corresponds to ses-<participant_label> from the BIDS '
-                        'spec (so it does not include "ses-"). If this '
-                        'parameter is not provided all sessions should be '
-                        'analyzed. Multiple sessions can be specified '
-                        'with a space separated list.', nargs="+")
+                                                'session that should be analyzed. The label '
+                                                'corresponds to ses-<participant_label> from the BIDS '
+                                                'spec (so it does not include "ses-"). If this '
+                                                'parameter is not provided all sessions should be '
+                                                'analyzed. Multiple sessions can be specified '
+                                                'with a space separated list.', nargs="+")
     parser.add_argument('--task_label', help='The label(s) of the task '
-                        'that should be analyzed. The label corresponds to '
-                        'task-<task_label> from the BIDS spec (so it does not '
-                        'include "task-"). If this parameter is not provided '
-                        'all tasks should be analyzed. Multiple tasks can be '
-                        'specified with a space separated list.', nargs="+")
+                                             'that should be analyzed. The label corresponds to '
+                                             'task-<task_label> from the BIDS spec (so it does not '
+                                             'include "task-"). If this parameter is not provided '
+                                             'all tasks should be analyzed. Multiple tasks can be '
+                                             'specified with a space separated list.', nargs="+")
     parser.add_argument('--run_label', help='The label(s) of the run '
-                        'that should be analyzed. The label corresponds to '
-                        'run-<run_label> from the BIDS spec (so it does not '
-                        'include "task-"). If this parameter is not provided '
-                        'all runs should be analyzed. Multiple runs can be '
-                        'specified with a space separated list.', nargs="+")
+                                            'that should be analyzed. The label corresponds to '
+                                            'run-<run_label> from the BIDS spec (so it does not '
+                                            'include "task-"). If this parameter is not provided '
+                                            'all runs should be analyzed. Multiple runs can be '
+                                            'specified with a space separated list.', nargs="+")
     parser.add_argument('--bucket', action='store', help='The name of '
-                        'an S3 bucket which holds BIDS organized data. You '
-                        'must have built your bucket with credentials to the '
-                        'S3 bucket you wish to access.')
+                                                         'an S3 bucket which holds BIDS organized data. You '
+                                                         'must have built your bucket with credentials to the '
+                                                         'S3 bucket you wish to access.')
     parser.add_argument('--remote_path', action='store', help='The path to '
-                        'the data on your S3 bucket. The data will be '
-                        'downloaded to the provided bids_dir on your machine.')
+                                                              'the data on your S3 bucket. The data will be '
+                                                              'downloaded to the provided bids_dir on your machine.')
     parser.add_argument('--push_data', action='store_true', help='flag to '
-                        'push derivatives back up to S3.', default=False)
+                                                                 'push derivatives back up to S3.', default=False)
     parser.add_argument('--dataset', action='store', help='The name of '
-                        'the dataset you are perfoming QC on.')
+                                                          'the dataset you are perfoming QC on.')
     parser.add_argument('--atlas', action='store', help='The atlas '
-                        'being analyzed in QC (if you only want one).', default=None)
+                                                        'being analyzed in QC (if you only want one).', default=None)
     parser.add_argument('--minimal', action='store_true', help='Determines '
-                        'whether to show a minimal or full set of plots.',
+                                                               'whether to show a minimal or full set of plots.',
                         default=False)
     parser.add_argument('--hemispheres', action='store_true', help='Whether '
-                        'or not to break degrees into hemispheres or not',
+                                                                   'or not to break degrees into hemispheres or not',
                         default=False)
     parser.add_argument('--log', action='store_true', help='Determines '
-                        'axis scale for plotting.', default=False)
+                                                           'axis scale for plotting.', default=False)
     parser.add_argument('--debug', action='store_true', help='flag to store '
-                        'temp files along the path of processing.',
+                                                             'temp files along the path of processing.',
                         default=False)
     parser.add_argument('--big', action='store_true',
-			help='Whether to produce \
+                        help='Whether to produce \
                         big graphs for DWI, or voxelwise timeseries for fMRI.',
-                         default=False)
+                        default=False)
     parser.add_argument("--vox", action="store", default='2mm',
                         help="Voxel size to use for template registrations \
                         (e.g. default is '2mm')")
     parser.add_argument("-c", "--clean", action="store_true", default=False,
                         help="Whether or not to delete intemediates")
     parser.add_argument("--nproc", action="store", help="The number of "
-                        "process to launch. Should be approximately "
-                        "<min(ncpu*hyperthreads/cpu, maxram/10).", default=1,
+                                                        "process to launch. Should be approximately "
+                                                        "<min(ncpu*hyperthreads/cpu, maxram/10).", default=1,
                         type=int)
     parser.add_argument("--stc", action="store", help='A file for slice '
-                        'timing correction. Options are a TR sequence file '
-                        '(where each line is the shift in TRs), '
-                        'up (ie, bottom to top), down (ie, top to bottom), '
-                        'or interleaved.', default=None)
-    parser.add_argument("--mod", action="store", help='Determinstic (det) or probabilistic (prob) tracking. Default is det.', default='det')
-    parser.add_argument("--tt", action="store", help='Tracking approach: eudx or local. Default is eudx.', default='eudx')
-    parser.add_argument("--mf", action="store", help='Diffusion model: csd, csa, or tensor. Default is tensor.', default='tensor')
+                                                      'timing correction. Options are a TR sequence file '
+                                                      '(where each line is the shift in TRs), '
+                                                      'up (ie, bottom to top), down (ie, top to bottom), '
+                                                      'or interleaved.', default=None)
+    parser.add_argument("--mod", action="store",
+                        help='Determinstic (det) or probabilistic (prob) tracking. Default is det.', default='det')
+    parser.add_argument("--tt", action="store", help='Tracking approach: eudx or local. Default is eudx.',
+                        default='eudx')
+    parser.add_argument("--mf", action="store", help='Diffusion model: csd, csa, or tensor. Default is tensor.',
+                        default='tensor')
     parser.add_argument("--sp", action="store", help='Space for tractography. Default is native.', default='native')
     result = parser.parse_args()
 
@@ -365,9 +373,9 @@ def main():
             else:
                 s3_get_data(buck, remo, inDir, public=creds)
         modif = 'ndmg_{}'.format(ndmg.version.replace('.', '-'))
-        session_level(inDir, outDir, subj, vox_size, big, clean, stc, 
-	atlas_select, mod_type, track_type, mod_func, reg_style, sesh, task, run, 
-	debug, modality, nproc)
+        session_level(inDir, outDir, subj, vox_size, big, clean, stc,
+                      atlas_select, mod_type, track_type, mod_func, reg_style, sesh, task, run,
+                      debug, modality, nproc)
 
     elif level == 'group':
         gpath = op.join(inDir, modality, 'roi-connectomes')
@@ -382,9 +390,8 @@ def main():
                 tindir = op.join(outDir, gpath)
             s3_get_data(buck, tpath, tindir, public=creds)
         modif = 'qa'
-        group_level(op.join(inDir, gpath), outDir, vox_size, big, clean, stc, 
-	dataset, atlas, minimal, log, hemi, modality)
-
+        group_level(op.join(inDir, gpath), outDir, vox_size, big, clean, stc,
+                    dataset, atlas, minimal, log, hemi, modality)
 
     if push and buck is not None and remo is not None:
         print("Pushing results to S3...")

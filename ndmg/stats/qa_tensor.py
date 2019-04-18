@@ -21,6 +21,7 @@
 # Email: Greg Kiar @ gkiar@jhu.edu
 
 import warnings
+
 warnings.simplefilter("ignore")
 from dipy.reconst.dti import fractional_anisotropy, color_fa
 from argparse import ArgumentParser
@@ -31,6 +32,7 @@ import numpy as np
 import nibabel as nb
 import sys
 import matplotlib
+
 matplotlib.use('Agg')  # very important above pyplot import
 import matplotlib.pyplot as plt
 
@@ -80,9 +82,9 @@ def plot_rgb(im):
         z = [88, 103, 107]
     else:
         shap = im.shape
-        x = [int(shap[0]*0.35), int(shap[0]*0.51), int(shap[0]*0.65)]
-        y = [int(shap[1]*0.35), int(shap[1]*0.51), int(shap[1]*0.65)]
-        z = [int(shap[2]*0.35), int(shap[2]*0.51), int(shap[2]*0.65)]
+        x = [int(shap[0] * 0.35), int(shap[0] * 0.51), int(shap[0] * 0.65)]
+        y = [int(shap[1] * 0.35), int(shap[1] * 0.51), int(shap[1] * 0.65)]
+        z = [int(shap[2] * 0.35), int(shap[2] * 0.51), int(shap[2] * 0.65)]
     coords = (x, y, z)
 
     labs = ['Sagittal Slice (YZ fixed)',
@@ -105,8 +107,8 @@ def plot_rgb(im):
 
             if idx % 3 == 1:
                 ax.set_ylabel(labs[i])
-                ax.yaxis.set_ticks([0, image.shape[0]/2, image.shape[0] - 1])
-                ax.xaxis.set_ticks([0, image.shape[1]/2, image.shape[1] - 1])
+                ax.yaxis.set_ticks([0, image.shape[0] / 2, image.shape[0] - 1])
+                ax.xaxis.set_ticks([0, image.shape[1] / 2, image.shape[1] - 1])
 
             plt.imshow(image)
 

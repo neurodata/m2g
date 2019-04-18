@@ -20,6 +20,7 @@
 # Email: gkiar@jhu.edu
 
 import warnings
+
 warnings.simplefilter("ignore")
 import numpy as np
 from scipy.stats import gaussian_kde
@@ -31,14 +32,14 @@ from plotly import tools
 def plot_heatmap(dats, name=None, ylab=None, xlab=None, scale=False,
                  scaletit=''):
     data = [
-            Heatmap(
-                    z=dats,
-                    name=name,
-                    showscale=scale,
-                    colorscale='Reds',
-                    colorbar=dict(title=scaletit)
-                   )
-           ]
+        Heatmap(
+            z=dats,
+            name=name,
+            showscale=scale,
+            colorscale='Reds',
+            colorbar=dict(title=scaletit)
+        )
+    ]
     layout = std_layout(name, ylab, xlab)
     fig = Figure(data=data, layout=layout)
     return fig
@@ -51,33 +52,33 @@ def plot_degrees(dats, name=None, ylab=None, xlab=None, hemi=True):
         contra = dats['contra_deg']
     else:
         main = dats['total_deg']
-    al = (4.0/len(main.keys()))
+    al = (4.0 / len(main.keys()))
 
     for key in main.keys():
         lgth = len(main[key])
         data += [
-                 Scatter(
-                         x=np.linspace(1, lgth, lgth),
-                         y=main[key],
-                         line=Line(
-                                   color='rgba(0,0,0,%1.2f)' % al
-                                  ),
-                         hoverinfo='x',
-                         name=name,
-                        )
-                ]
+            Scatter(
+                x=np.linspace(1, lgth, lgth),
+                y=main[key],
+                line=Line(
+                    color='rgba(0,0,0,%1.2f)' % al
+                ),
+                hoverinfo='x',
+                name=name,
+            )
+        ]
         if hemi:
             data += [
-                     Scatter(
-                             x=np.linspace(1, lgth, lgth),
-                             y=contra[key],
-                             line=Line(
-                                       color='rgba(0.11,0.62,0.47,%1.2f)' % al
-                                      ),
-                             hoverinfo='x',
-                             name=name,
-                            )
-                    ]
+                Scatter(
+                    x=np.linspace(1, lgth, lgth),
+                    y=contra[key],
+                    line=Line(
+                        color='rgba(0.11,0.62,0.47,%1.2f)' % al
+                    ),
+                    hoverinfo='x',
+                    name=name,
+                )
+            ]
     layout = std_layout(name, ylab, xlab)
     fig = Figure(data=data, layout=layout)
     return fig
@@ -89,16 +90,16 @@ def plot_series(dats, name=None, ylab=None, xlab=None, sort=False):
         if sort:
             ys = np.sort(ys)
         data += [
-                 Scatter(
-                         x=np.linspace(1, len(ys), len(ys)),
-                         y=ys,
-                         line=Line(
-                                   color='rgba(0,0,0,%1.2f)' % (4.0/len(dats))
-                                  ),
-                         hoverinfo='x',
-                         name=name,
-                        )
-                ]
+            Scatter(
+                x=np.linspace(1, len(ys), len(ys)),
+                y=ys,
+                line=Line(
+                    color='rgba(0,0,0,%1.2f)' % (4.0 / len(dats))
+                ),
+                hoverinfo='x',
+                name=name,
+            )
+        ]
     layout = std_layout(name, ylab, xlab)
     fig = Figure(data=data, layout=layout)
     return fig
@@ -108,16 +109,16 @@ def plot_density(xs, ys, name=None, ylab=None, xlab=None):
     data = list()
     for idx, x in enumerate(xs):
         data += [
-                 Scatter(
-                         x=xs[idx],
-                         y=ys[idx],
-                         line=Line(
-                                   color='rgba(0,0,0,%1.2f)' % (4.0/len(ys))
-                                  ),
-                         hoverinfo='x',
-                         name=name,
-                        )
-                ]
+            Scatter(
+                x=xs[idx],
+                y=ys[idx],
+                line=Line(
+                    color='rgba(0,0,0,%1.2f)' % (4.0 / len(ys))
+                ),
+                hoverinfo='x',
+                name=name,
+            )
+        ]
     layout = std_layout(name, ylab, xlab)
     fig = Figure(data=data, layout=layout)
     return fig
@@ -127,33 +128,33 @@ def plot_rugdensity(series, name=None, ylab=None, xlab=None):
     if len(series) > 1:
         dens = gaussian_kde(series)
         x = np.linspace(np.min(series), np.max(series), 100)
-        y = dens.evaluate(x)*np.max(series)
+        y = dens.evaluate(x) * np.max(series)
 
         d_rug = Scatter(
-                    x=series,
-                    y=[0]*len(series),
-                    mode='markers',
-                    marker=Marker(
-                             color='rgba(0,0,0,0.9)',
-                             symbol='line-ns-open',
-                             size=10,
-                             opacity=0.5
-                           ),
-                    name=name
-              )
+            x=series,
+            y=[0] * len(series),
+            mode='markers',
+            marker=Marker(
+                color='rgba(0,0,0,0.9)',
+                symbol='line-ns-open',
+                size=10,
+                opacity=0.5
+            ),
+            name=name
+        )
     else:
         x = 0
         y = series
 
     d_dens = Scatter(
-                x=x,
-                y=y,
-                line=Line(
-                       color='rgba(0,0,0,0.9)'
-                     ),
-                hoverinfo='x',
-                name=name,
-           )
+        x=x,
+        y=y,
+        line=Line(
+            color='rgba(0,0,0,0.9)'
+        ),
+        hoverinfo='x',
+        name=name,
+    )
     if len(series) > 1:
         data = [d_dens, d_rug]
     else:
@@ -165,13 +166,13 @@ def plot_rugdensity(series, name=None, ylab=None, xlab=None):
 
 def std_layout(name=None, ylab=None, xlab=None):
     return Layout(
-            title=name,
-            showlegend=False,
-            xaxis={'nticks': 5,
-                   'title': xlab},
-            yaxis={'nticks': 3,
-                   'title': ylab}
-          )
+        title=name,
+        showlegend=False,
+        xaxis={'nticks': 5,
+               'title': xlab},
+        yaxis={'nticks': 3,
+               'title': ylab}
+    )
 
 
 def fig_to_trace(fig):
@@ -190,7 +191,7 @@ def traces_to_panels(traces, names=[], ylabs=None, xlabs=None):
             for component in traces[idx]:
                 multi.append_trace(component, *loc)
         else:
-            multi = panel_invisible(multi, idx+1)
+            multi = panel_invisible(multi, idx + 1)
     multi.layout['showlegend'] = False
     return multi
 
@@ -199,7 +200,7 @@ def panel_arrangement(num):
     dims = list()
     count = 0
     while len(dims) == 0:
-        dims = list(factors(num+count))
+        dims = list(factors(num + count))
         count += 1
 
     if len(dims) == 1:
@@ -208,13 +209,13 @@ def panel_arrangement(num):
         row = dims[0]
         col = dims[-1]
 
-    locations = [(a+1, b+1) for a, b in product(range(row), range(col))]
+    locations = [(a + 1, b + 1) for a, b in product(range(row), range(col))]
     return row, col, locations
 
 
 def panel_invisible(plot, idx):
     for c in ['x', 'y']:
-        axe = c+'axis'+str(idx)
+        axe = c + 'axis' + str(idx)
         plot.layout[axe]['showgrid'] = False
         plot.layout[axe]['zeroline'] = False
         plot.layout[axe]['showline'] = False
@@ -223,12 +224,12 @@ def panel_invisible(plot, idx):
 
 
 def rand_jitter(arr):
-    stdev = .03*(max(arr)-min(arr)+2)
+    stdev = .03 * (max(arr) - min(arr) + 2)
     return arr + np.random.randn(len(arr)) * stdev
 
 
 def factors(N):
     return set([item for subitem in
-                [(i, N//i) for i in range(1, int(N**0.5) + 1)
+                [(i, N // i) for i in range(1, int(N ** 0.5) + 1)
                  if N % i == 0 and i > 1]
-               for item in subitem])
+                for item in subitem])

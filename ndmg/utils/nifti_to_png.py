@@ -19,6 +19,7 @@
 # Created by Greg Kiar on 2016-06-13.
 # Email: gkiar@jhu.edu
 import warnings
+
 warnings.simplefilter("ignore")
 from argparse import ArgumentParser
 from scipy.misc import imsave
@@ -26,7 +27,7 @@ import nibabel as nb
 import os
 
 
-def convert(indir, outdir,  verbose=False):
+def convert(indir, outdir, verbose=False):
     """
     Takes in nifti images, creates directory structure desired by ndstore
     ingest, and then converts niftis to png stacks. This script should be
@@ -36,13 +37,13 @@ def convert(indir, outdir,  verbose=False):
     # Create output directory structure
     if verbose:
         print "Creating", outdir, "..."
-    os.system('mkdir -p '+outdir)
+    os.system('mkdir -p ' + outdir)
 
     for path, dirs, files in os.walk(indir):
         for idx, fl in enumerate(files):
             if verbose:
                 print "Loading subject to learn number of time points..."
-            im = nb.load(path+fl)
+            im = nb.load(path + fl)
             dat = im.get_data()
             ntime = dat.shape[3]
 
@@ -70,7 +71,7 @@ def convert(indir, outdir,  verbose=False):
 def main():
     parser = ArgumentParser(description="")
     parser.add_argument("indir", action="store", help="directory for niftis")
-    parser.add_argument("outdir",  action="store", help="directory for pngs")
+    parser.add_argument("outdir", action="store", help="directory for pngs")
     parser.add_argument("-v", "--verbose", action="store_true", default=False,
                         help="Toggles output text")
     result = parser.parse_args()

@@ -20,6 +20,7 @@
 # Email: Greg Kiar @ gkiar@jhu.edu
 
 import warnings
+
 warnings.simplefilter("ignore")
 import os
 import networkx as nx
@@ -61,15 +62,16 @@ def main():
             - Path to derivative save location
     """
     parser = ArgumentParser(description="Generates a visual representation of"
-                            " adjacency matrix")
+                                        " adjacency matrix")
     parser.add_argument("infile", action="store", help="base directory loc")
     parser.add_argument("outdir", action="store", help="save output file"
-                        " location")
+                                                       " location")
     result = parser.parse_args()
 
     if (not os.path.isdir(result.outdir)):
         os.mkdir(result.outdir)
     graph2png(result.infile, result.outdir)
+
 
 if __name__ == "__main__":
     main()

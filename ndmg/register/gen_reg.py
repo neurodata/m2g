@@ -21,6 +21,7 @@
 
 from __future__ import print_function
 import warnings
+
 warnings.simplefilter("ignore")
 import os
 import nibabel as nib
@@ -28,6 +29,7 @@ import numpy as np
 from nilearn.image import load_img, math_img, resample_img, mean_img, new_img_like, threshold_img
 from dipy.core.gradients import gradient_table
 from dipy.io import read_bvals_bvecs
+
 try:
     FSLDIR = os.environ['FSLDIR']
 except KeyError:
@@ -37,15 +39,16 @@ from ndmg.utils import reg_utils as mgru
 from dipy.tracking.streamline import Streamlines
 from dipy.tracking.utils import move_streamlines
 
+
 def transform_pts(pts, t_aff, t_warp, ref_img_path, ants_path, template_path, namer,
-        out_volume="",output_space="lps_voxmm"):
+                  out_volume="", output_space="lps_voxmm"):
     from scipy.io.matlab import savemat
     """
     return coordinates in 
     "ras_voxels" if you want to streamlines in ras ijk coordinates or 
     "lps_voxmm" if you want dsi studio streamline coordinates relative to the template
     """
-    if not output_space in ("ras_voxels","lps_voxmm"):
+    if not output_space in ("ras_voxels", "lps_voxmm"):
         raise ValueError("Must specify output space")
 
     orig_dir = namer.dirs['tmp']['base']
@@ -60,15 +63,15 @@ def transform_pts(pts, t_aff, t_warp, ref_img_path, ants_path, template_path, na
     extents[-1] = 0
 
     # Convert the streamlines to voxel indices, then to ants points
-    voxel_coords =  abs(extents - pts / voxel_size ) 
-    ants_mult = np.array([voxel_size[0],voxel_size[1],voxel_size[2]])
+    voxel_coords = abs(extents - pts / voxel_size)
+    ants_mult = np.array([voxel_size[0], voxel_size[1], voxel_size[2]])
     ants_coord = voxel_coords * ants_mult - voxel_size[0]
-    ants_coord[:,0] = -ants_coord[:,0]
-    ants_coord[:,1] = -ants_coord[:,1]
+    ants_coord[:, 0] = -ants_coord[:, 0]
+    ants_coord[:, 1] = -ants_coord[:, 1]
 
     # Save the ants coordinates to a csv, then warp them
-    np.savetxt(warped_csv_out,np.hstack([ants_coord,np.zeros((ants_coord.shape[0],1))]),
-              header="x,y,z,t",delimiter=",",fmt="%f")
+    np.savetxt(warped_csv_out, np.hstack([ants_coord, np.zeros((ants_coord.shape[0], 1))]),
+               header="x,y,z,t", delimiter=",", fmt="%f")
 
     # Apply the trandforms to
     cmd = ants_path + "/antsApplyTransformsToPoints " + "-d 3 -i " + warped_csv_out + " -o " + aattp_out + " " + transforms
@@ -83,17 +86,17 @@ def transform_pts(pts, t_aff, t_warp, ref_img_path, ants_path, template_path, na
     adjusted_affine[1] = -adjusted_affine[1]
     print(adjusted_affine)
 
-    ants_warped_coords = np.loadtxt(aattp_out, skiprows=1, delimiter=",")[:,:3]
+    ants_warped_coords = np.loadtxt(aattp_out, skiprows=1, delimiter=",")[:, :3]
     os.remove(aattp_out)
-    to_transform = np.hstack([ants_warped_coords,np.ones((ants_warped_coords.shape[0],1))])
-    new_voxels = (np.dot(np.linalg.inv(adjusted_affine),to_transform.T) + warped_affine[0,0])[:3]
+    to_transform = np.hstack([ants_warped_coords, np.ones((ants_warped_coords.shape[0], 1))])
+    new_voxels = (np.dot(np.linalg.inv(adjusted_affine), to_transform.T) + warped_affine[0, 0])[:3]
 
     # Write out an image
     if out_volume:
         newdata = np.zeros(template.get_shape())
         ti, tj, tk = new_voxels.astype(np.int)
-        newdata[ti,tj,tk] = 1
-        warped_out = nib.Nifti1Image(newdata,warped_affine).to_filename(out_volume)
+        newdata[ti, tj, tk] = 1
+        warped_out = nib.Nifti1Image(newdata, warped_affine).to_filename(out_volume)
     os.chdir(orig_dir)
     if output_space == "ras_voxels":
         return new_voxels.astype(np.int).T
@@ -101,79 +104,83 @@ def transform_pts(pts, t_aff, t_warp, ref_img_path, ants_path, template_path, na
     elif output_space == "lps_voxmm":
         template_extents = template.get_shape()
         lps_voxels = new_voxels.copy()
- 	lps_voxels[0] = template_extents[0] - lps_voxels[0]
-	lps_voxels[1] = template_extents[1] - lps_voxels[1]
-	print(lps_voxels)
+        lps_voxels[0] = template_extents[0] - lps_voxels[0]
+        lps_voxels[1] = template_extents[1] - lps_voxels[1]
+        print(lps_voxels)
 
         lps_voxmm = lps_voxels.T * np.array(template.header.get_zooms())[:3]
         return lps_voxmm
 
 
 class Warp(object):
-    def __init__(self,ants_path="",file_in="",file_out="",template_path="",t_aff="",t_warp="",ref_img_path="", namer=""):
+    def __init__(self, ants_path="", file_in="", file_out="", template_path="", t_aff="", t_warp="", ref_img_path="",
+                 namer=""):
         self.ants_path = ants_path
         self.file_in = file_in
         self.file_out = file_out
         self.template_path = template_path
         self.t_aff = t_aff
         self.t_warp = t_warp
-      	self.ref_img_path = ref_img_path
-      	self.namer = namer
-    
+        self.ref_img_path = ref_img_path
+        self.namer = namer
+
     def streamlines(self):
-        if not self.file_in.endswith((".trk",".trk.gz")):
-            print ("File format currently unsupported.")
+        if not self.file_in.endswith((".trk", ".trk.gz")):
+            print("File format currently unsupported.")
             return
-        
+
         if self.ref_img_path == "":
-            print ("Specify reference image path: .ref_img_path = path to reference image")
+            print("Specify reference image path: .ref_img_path = path to reference image")
             return
-            
-        print ("Warping streamline file " + self.file_in)
+
+        print("Warping streamline file " + self.file_in)
         template = nib.load(self.template_path)
-	warped_affine = template.affine
+        warped_affine = template.affine
         dims = template.header.get_data_shape()
         template_extents = template.shape
-        template_trk_header = np.array(('TRACK', 
-        [dims[0],dims[1],dims[2]], 
-        [warped_affine[0][0], warped_affine[1][1], warped_affine[2][2]], 
-        [0.0, 0.0, 0.0], 0, ['', '', '', '', '', '', '', '', '', ''], 
-        0, ['', '', '', '', '', '', '', '', '', ''], 
-        [[1.0, 0.0, 0.0, 0.0], 
-         [0.0, 1.0, 0.0, 0.0], 
-         [0.0, 0.0, 1.0, 0.0], 
-         [0.0, 0.0, 0.0, 1.0]], '', 'LPS', 'LPS', 
-        [1.0, 0.0, 0.0, 0.0, 1.0, 0.0], 
-        '', '', '', '', '', '', '', 10000, 2, 1000), 
-         dtype=[('id_string', 'S6'), ('dim', '<i2', (3,)), 
-             ('voxel_size', '<f4', (3,)), ('origin', '<f4', (3,)), 
-             ('n_scalars', '<i2'), ('scalar_name', 'S20', (10,)), 
-             ('n_properties', '<i2'), ('property_name', 'S20', (10,)), 
-             ('vox_to_ras', '<f4', (4, 4)), ('reserved', 'S444'), 
-             ('voxel_order', 'S4'), ('pad2', 'S4'), 
-             ('image_orientation_patient', '<f4', (6,)), 
-             ('pad1', 'S2'), ('invert_x', 'S1'), ('invert_y', 'S1'), 
-             ('invert_z', 'S1'), ('swap_xy', 'S1'), ('swap_yz', 'S1'), 
-             ('swap_zx', 'S1'), ('n_count', '<i4'), ('version', '<i4'), 
-             ('hdr_size', '<i4')]
-             )
-            
-        streams,hdr = nib.trackvis.read(self.file_in)
+        template_trk_header = np.array(('TRACK',
+                                        [dims[0], dims[1], dims[2]],
+                                        [warped_affine[0][0], warped_affine[1][1], warped_affine[2][2]],
+                                        [0.0, 0.0, 0.0], 0, ['', '', '', '', '', '', '', '', '', ''],
+                                        0, ['', '', '', '', '', '', '', '', '', ''],
+                                        [[1.0, 0.0, 0.0, 0.0],
+                                         [0.0, 1.0, 0.0, 0.0],
+                                         [0.0, 0.0, 1.0, 0.0],
+                                         [0.0, 0.0, 0.0, 1.0]], '', 'LPS', 'LPS',
+                                        [1.0, 0.0, 0.0, 0.0, 1.0, 0.0],
+                                        '', '', '', '', '', '', '', 10000, 2, 1000),
+                                       dtype=[('id_string', 'S6'), ('dim', '<i2', (3,)),
+                                              ('voxel_size', '<f4', (3,)), ('origin', '<f4', (3,)),
+                                              ('n_scalars', '<i2'), ('scalar_name', 'S20', (10,)),
+                                              ('n_properties', '<i2'), ('property_name', 'S20', (10,)),
+                                              ('vox_to_ras', '<f4', (4, 4)), ('reserved', 'S444'),
+                                              ('voxel_order', 'S4'), ('pad2', 'S4'),
+                                              ('image_orientation_patient', '<f4', (6,)),
+                                              ('pad1', 'S2'), ('invert_x', 'S1'), ('invert_y', 'S1'),
+                                              ('invert_z', 'S1'), ('swap_xy', 'S1'), ('swap_yz', 'S1'),
+                                              ('swap_zx', 'S1'), ('n_count', '<i4'), ('version', '<i4'),
+                                              ('hdr_size', '<i4')]
+                                       )
+
+        streams, hdr = nib.trackvis.read(self.file_in)
         offsets = []
         _streams = []
         for sl in streams:
             _streams.append(sl[0])
             offsets.append(_streams[-1].shape[0])
         allpoints = np.vstack(_streams)
-        tx_points = transform_pts(allpoints, self.t_aff, self.t_warp, self.ref_img_path, self.ants_path, self.template_path, self.namer, output_space="lps_voxmm")
-        offsets = np.cumsum([0]+offsets)
+        tx_points = transform_pts(allpoints, self.t_aff, self.t_warp, self.ref_img_path, self.ants_path,
+                                  self.template_path, self.namer, output_space="lps_voxmm")
+        offsets = np.cumsum([0] + offsets)
         starts = offsets[:-1]
         stops = offsets[1:]
         new_hdr = template_trk_header.copy()
         new_hdr["n_count"] = len(_streams)
-        nib.trackvis.write(self.file_out,[(tx_points[a:b],None,None) for a,b in zip(starts,stops)],hdr_mapping=new_hdr)
-        print ("Finished " + self.file_out) 
-	
+        nib.trackvis.write(self.file_out, [(tx_points[a:b], None, None) for a, b in zip(starts, stops)],
+                           hdr_mapping=new_hdr)
+        print("Finished " + self.file_out)
+
+
 def transform_to_affine(streams, header, affine):
     rotation, scale = np.linalg.qr(affine)
     streams = move_streamlines(streams, rotation)
@@ -182,15 +189,17 @@ def transform_to_affine(streams, header, affine):
     streams = move_streamlines(streams, scale)
     return streams
 
+
 def direct_streamline_norm(streams, streams_mni, nodif_B0, namer):
     '''Greene, C., Cieslak, M., & Grafton, S. T. (2017). Effect of different spatial normalization approaches on tractography and structural brain networks. Network Neuroscience, 1-19.'''
     from ndmg.register.gen_reg import transform_to_affine
     template_path = '/usr/share/data/fsl-mni152-templates/MNI152_T1_2mm_brain.nii.gz'
     ants_path = '/opt/ants'
-    
-    cmd='antsRegistrationSyNQuick.sh -d 3 -f ' + template_path + ' -m ' + nodif_B0 + ' -o ' + namer.dirs['tmp']['base'] + '/'
+
+    cmd = 'antsRegistrationSyNQuick.sh -d 3 -f ' + template_path + ' -m ' + nodif_B0 + ' -o ' + namer.dirs['tmp'][
+        'base'] + '/'
     os.system(cmd)
-    
+
     t_aff = namer.dirs['tmp']['base'] + '/0GenericAffine.mat'
     t_warp = namer.dirs['tmp']['base'] + '/1InverseWarp.nii.gz'
 
@@ -200,7 +209,7 @@ def direct_streamline_norm(streams, streams_mni, nodif_B0, namer):
     wS = Warp(ants_path, streams, streams_mni, template_path, t_aff, t_warp, nodif_B0, namer)
     wS.streamlines()
 
-    s_aff[:3,3] = np.array([180, 0, 0])
+    s_aff[:3, 3] = np.array([180, 0, 0])
     streamlines_mni = nib.streamlines.load(streams_mni)
     streamlines_mni_s = streamlines_mni.streamlines
     streamlines_trans = Streamlines(transform_to_affine(streamlines_mni_s, streamlines_mni.header, s_aff))
@@ -217,14 +226,14 @@ class dmri_reg(object):
     def __init__(self, namer, nodif_B0, nodif_B0_mask, t1w_in, vox_size, simple):
         self.simple = simple
         self.nodif_B0 = nodif_B0
-	self.nodif_B0_mask = nodif_B0_mask
+        self.nodif_B0_mask = nodif_B0_mask
         self.t1w = t1w_in
         self.vox_size = vox_size
         self.t1w_name = 't1w'
         self.dwi_name = 'dwi'
-	self.namer = namer
+        self.namer = namer
         self.t12mni_xfm_init = "{}/xfm_t1w2mni_init.mat".format(self.namer.dirs['tmp']['reg_m'])
-	self.mni2t1_xfm_init = "{}/xfm_mni2t1w_init.mat".format(self.namer.dirs['tmp']['reg_m'])
+        self.mni2t1_xfm_init = "{}/xfm_mni2t1w_init.mat".format(self.namer.dirs['tmp']['reg_m'])
         self.t12mni_xfm = "{}/xfm_t1w2mni.mat".format(self.namer.dirs['tmp']['reg_m'])
         self.mni2t1_xfm = "{}/xfm_mni2t1.mat".format(self.namer.dirs['tmp']['reg_m'])
         self.mni2t1w_warp = "{}/mni2t1w_warp.nii.gz".format(self.namer.dirs['tmp']['reg_a'])
@@ -240,12 +249,12 @@ class dmri_reg(object):
         self.xfm_atlas2t1w_init = "{}/{}_xfm_atlas2t1w_init.mat".format(self.namer.dirs['tmp']['reg_m'], self.t1w_name)
         self.xfm_atlas2t1w = "{}/{}_xfm_atlas2t1w.mat".format(self.namer.dirs['tmp']['reg_m'], self.t1w_name)
         self.temp2dwi_xfm = "{}/{}_xfm_temp2dwi.mat".format(self.namer.dirs['tmp']['reg_m'], self.dwi_name)
-        self.input_mni = "%s%s%s%s" % (FSLDIR, '/data/standard/MNI152_T1_', vox_size,'_brain.nii.gz')
+        self.input_mni = "%s%s%s%s" % (FSLDIR, '/data/standard/MNI152_T1_', vox_size, '_brain.nii.gz')
         self.temp2dwi_xfm = "{}/{}_xfm_temp2dwi.mat".format(self.namer.dirs['tmp']['reg_m'], self.dwi_name)
         self.map_path = "{}/{}_seg".format(self.namer.dirs['output']['prep_anat'], self.t1w_name)
         self.wm_mask = "{}/{}_wm.nii.gz".format(self.namer.dirs['output']['prep_anat'], self.t1w_name)
-	self.wm_mask_thr = "{}/{}_wm_thr.nii.gz".format(self.namer.dirs['output']['prep_anat'], self.t1w_name)
-	self.wm_edge = "{}/{}_wm_edge.nii.gz".format(self.namer.dirs['tmp']['reg_a'], self.t1w_name)
+        self.wm_mask_thr = "{}/{}_wm_thr.nii.gz".format(self.namer.dirs['output']['prep_anat'], self.t1w_name)
+        self.wm_edge = "{}/{}_wm_edge.nii.gz".format(self.namer.dirs['tmp']['reg_a'], self.t1w_name)
         self.csf_mask = "{}/{}_csf.nii.gz".format(self.namer.dirs['output']['prep_anat'], self.t1w_name)
         self.gm_mask = "{}/{}_gm.nii.gz".format(self.namer.dirs['output']['prep_anat'], self.t1w_name)
         self.xfm_roi2mni_init = "{}/roi_2_mni.mat".format(self.namer.dirs['tmp']['reg_m'])
@@ -259,15 +268,17 @@ class dmri_reg(object):
         self.gm_in_dwi_bin = "{}/{}_gm_in_dwi_bin.nii.gz".format(self.namer.dirs['tmp']['reg_a'], self.t1w_name)
         self.wm_in_dwi_bin = "{}/{}_wm_in_dwi_bin.nii.gz".format(self.namer.dirs['tmp']['reg_a'], self.t1w_name)
         self.vent_mask_dwi = "{}/{}_vent_mask_dwi.nii.gz".format(self.namer.dirs['tmp']['reg_a'], self.t1w_name)
-	self.vent_csf_in_dwi = "{}/{}_vent_csf_in_dwi.nii.gz".format(self.namer.dirs['tmp']['reg_a'], self.t1w_name)
+        self.vent_csf_in_dwi = "{}/{}_vent_csf_in_dwi.nii.gz".format(self.namer.dirs['tmp']['reg_a'], self.t1w_name)
         self.vent_mask_mni = "{}/vent_mask_mni.nii.gz".format(self.namer.dirs['tmp']['reg_a'])
         self.vent_mask_t1w = "{}/vent_mask_t1w.nii.gz".format(self.namer.dirs['tmp']['reg_a'])
-        self.mni_atlas = "%s%s%s%s" % (FSLDIR, '/data/atlases/HarvardOxford/HarvardOxford-sub-prob-', vox_size, '.nii.gz')
+        self.mni_atlas = "%s%s%s%s" % (
+            FSLDIR, '/data/atlases/HarvardOxford/HarvardOxford-sub-prob-', vox_size, '.nii.gz')
         self.input_mni = "%s%s%s%s" % (FSLDIR, '/data/standard/MNI152_T1_', vox_size, '_brain.nii.gz')
-	self.input_mni_mask = "%s%s%s%s" % (FSLDIR, '/data/standard/MNI152_T1_', vox_size, '_brain_mask.nii.gz')
-	self.wm_gm_int_in_dwi = "{}/{}_wm_gm_int_in_dwi.nii.gz".format(namer.dirs['output']['reg_anat'], self.t1w_name)
-	self.wm_gm_int_in_dwi_bin = "{}/{}_wm_gm_int_in_dwi_bin.nii.gz".format(namer.dirs['output']['reg_anat'], self.t1w_name)
-	self.input_mni_sched = "%s%s" % (FSLDIR, '/etc/flirtsch/T1_2_MNI152_2mm.cnf')
+        self.input_mni_mask = "%s%s%s%s" % (FSLDIR, '/data/standard/MNI152_T1_', vox_size, '_brain_mask.nii.gz')
+        self.wm_gm_int_in_dwi = "{}/{}_wm_gm_int_in_dwi.nii.gz".format(namer.dirs['output']['reg_anat'], self.t1w_name)
+        self.wm_gm_int_in_dwi_bin = "{}/{}_wm_gm_int_in_dwi_bin.nii.gz".format(namer.dirs['output']['reg_anat'],
+                                                                               self.t1w_name)
+        self.input_mni_sched = "%s%s" % (FSLDIR, '/etc/flirtsch/T1_2_MNI152_2mm.cnf')
 
     def gen_tissue(self):
         # BET needed for this, as afni 3dautomask only works on 4d volumes
@@ -276,12 +287,12 @@ class dmri_reg(object):
 
         # Segment the t1w brain into probability maps
         self.maps = mgru.segment_t1w(self.t1w_brain, self.map_path)
-	self.wm_mask = self.maps['wm_prob']
-	self.gm_mask = self.maps['gm_prob']
-	self.csf_mask = self.maps['csf_prob']
+        self.wm_mask = self.maps['wm_prob']
+        self.gm_mask = self.maps['gm_prob']
+        self.csf_mask = self.maps['csf_prob']
 
         # Check dimensions
-	if self.vox_size == '1mm':
+        if self.vox_size == '1mm':
             self.zoom_set = (1.0, 1.0, 1.0)
         elif self.vox_size == '2mm':
             self.zoom_set = (2.0, 2.0, 2.0)
@@ -299,7 +310,7 @@ class dmri_reg(object):
         self.mask.to_filename(self.wm_mask_thr)
 
         # Extract wm edge
-        cmd='fslmaths ' + self.wm_mask_thr + ' -edge -bin -mas ' + self.wm_mask_thr  + ' ' + self.wm_edge
+        cmd = 'fslmaths ' + self.wm_mask_thr + ' -edge -bin -mas ' + self.wm_mask_thr + ' ' + self.wm_edge
         os.system(cmd)
 
         return
@@ -314,50 +325,59 @@ class dmri_reg(object):
         """
 
         # Create linear transform/ initializer T1w-->MNI
-        mgru.align(self.t1w_brain, self.input_mni, xfm=self.t12mni_xfm_init, bins=None, interp="spline", out=None, dof=12, cost='mutualinfo', searchrad=True)
+        mgru.align(self.t1w_brain, self.input_mni, xfm=self.t12mni_xfm_init, bins=None, interp="spline", out=None,
+                   dof=12, cost='mutualinfo', searchrad=True)
 
         # Attempt non-linear registration of T1 to MNI template
         if self.simple is False:
             try:
                 print('Running non-linear registration: T1w-->MNI ...')
                 # Use FNIRT to nonlinearly align T1 to MNI template
-                mgru.align_nonlinear(self.t1w_brain, self.input_mni, xfm=self.t12mni_xfm_init, out=self.t1_aligned_mni, warp=self.warp_t1w2mni, ref_mask=self.input_mni_mask, config=self.input_mni_sched)
+                mgru.align_nonlinear(self.t1w_brain, self.input_mni, xfm=self.t12mni_xfm_init, out=self.t1_aligned_mni,
+                                     warp=self.warp_t1w2mni, ref_mask=self.input_mni_mask, config=self.input_mni_sched)
 
                 # Get warp from MNI -> T1
                 mgru.inverse_warp(self.t1w_brain, self.mni2t1w_warp, self.warp_t1w2mni)
 
-		# Get mat from MNI -> T1
-		cmd = 'convert_xfm -omat ' + self.mni2t1_xfm_init + ' -inverse ' + self.t12mni_xfm_init
-        	print(cmd)
-        	os.system(cmd)
+                # Get mat from MNI -> T1
+                cmd = 'convert_xfm -omat ' + self.mni2t1_xfm_init + ' -inverse ' + self.t12mni_xfm_init
+                print(cmd)
+                os.system(cmd)
 
             except RuntimeError('Error: FNIRT failed!'):
                 pass
         else:
             # Falling back to linear registration
-            mgru.align(self.t1w_brain, self.input_mni, xfm=self.t12mni_xfm, init=self.t12mni_xfm_init, bins=None, dof=12, cost='mutualinfo', searchrad=True, interp="spline", out=self.t1_aligned_mni, sch=None)
+            mgru.align(self.t1w_brain, self.input_mni, xfm=self.t12mni_xfm, init=self.t12mni_xfm_init, bins=None,
+                       dof=12, cost='mutualinfo', searchrad=True, interp="spline", out=self.t1_aligned_mni, sch=None)
 
         # Align T1w-->DWI
-        mgru.align(self.nodif_B0, self.t1w_brain, xfm=self.t1w2dwi_xfm, bins=None, interp="spline", dof=6, cost='mutualinfo', out=None, searchrad=True, sch=None)
+        mgru.align(self.nodif_B0, self.t1w_brain, xfm=self.t1w2dwi_xfm, bins=None, interp="spline", dof=6,
+                   cost='mutualinfo', out=None, searchrad=True, sch=None)
         cmd = 'convert_xfm -omat ' + self.dwi2t1w_xfm + ' -inverse ' + self.t1w2dwi_xfm
-	print(cmd)
+        print(cmd)
         os.system(cmd)
 
         if self.simple is False:
             # Flirt bbr
             try:
-		print('Running FLIRT BBR registration: T1w-->DWI ...')
-                mgru.align(self.nodif_B0, self.t1w_brain, wmseg=self.wm_edge, xfm=self.dwi2t1w_bbr_xfm, init=self.dwi2t1w_xfm, bins=256, dof=7, searchrad=True, interp="spline", out=None, cost='bbr', finesearch=5, sch="${FSLDIR}/etc/flirtsch/bbr.sch")
+                print('Running FLIRT BBR registration: T1w-->DWI ...')
+                mgru.align(self.nodif_B0, self.t1w_brain, wmseg=self.wm_edge, xfm=self.dwi2t1w_bbr_xfm,
+                           init=self.dwi2t1w_xfm, bins=256, dof=7, searchrad=True, interp="spline", out=None,
+                           cost='bbr', finesearch=5, sch="${FSLDIR}/etc/flirtsch/bbr.sch")
                 cmd = 'convert_xfm -omat ' + self.t1w2dwi_bbr_xfm + ' -inverse ' + self.dwi2t1w_bbr_xfm
                 os.system(cmd)
 
                 # Apply the alignment
-                mgru.align(self.t1w_brain, self.nodif_B0, init=self.t1w2dwi_bbr_xfm, xfm=self.t1wtissue2dwi_xfm, bins=None, interp="spline", dof=7, cost='mutualinfo', out=self.t1w2dwi, searchrad=True, sch=None)
+                mgru.align(self.t1w_brain, self.nodif_B0, init=self.t1w2dwi_bbr_xfm, xfm=self.t1wtissue2dwi_xfm,
+                           bins=None, interp="spline", dof=7, cost='mutualinfo', out=self.t1w2dwi, searchrad=True,
+                           sch=None)
             except RuntimeError('Error: FLIRT BBR failed!'):
                 pass
         else:
             # Apply the alignment
-            mgru.align(self.t1w_brain, self.nodif_B0, init=self.t1w2dwi_xfm, xfm=self.t1wtissue2dwi_xfm, bins=None, interp="spline", dof=6, cost='mutualinfo', out=self.t1w2dwi, searchrad=True, sch=None)
+            mgru.align(self.t1w_brain, self.nodif_B0, init=self.t1w2dwi_xfm, xfm=self.t1wtissue2dwi_xfm, bins=None,
+                       interp="spline", dof=6, cost='mutualinfo', out=self.t1w2dwi, searchrad=True, sch=None)
 
         return
 
@@ -371,25 +391,35 @@ class dmri_reg(object):
         """
         self.atlas = atlas
         self.atlas_name = self.atlas.split('/')[-1].split('.')[0]
-        self.aligned_atlas_t1mni = "{}/{}_aligned_atlas_t1w_mni.nii.gz".format(self.namer.dirs['tmp']['reg_a'], self.atlas_name)
-        self.aligned_atlas_skull = "{}/{}_aligned_atlas_skull.nii.gz".format(self.namer.dirs['tmp']['reg_a'], self.atlas_name)
-        self.dwi_aligned_atlas = "{}/{}_aligned_atlas.nii.gz".format(self.namer.dirs['output']['reg_anat'], self.atlas_name)
-        #self.dwi_aligned_atlas_mask = "{}/{}_aligned_atlas_mask.nii.gz".format(self.namer.dirs['tmp']['reg_a'], self.atlas_name)
+        self.aligned_atlas_t1mni = "{}/{}_aligned_atlas_t1w_mni.nii.gz".format(self.namer.dirs['tmp']['reg_a'],
+                                                                               self.atlas_name)
+        self.aligned_atlas_skull = "{}/{}_aligned_atlas_skull.nii.gz".format(self.namer.dirs['tmp']['reg_a'],
+                                                                             self.atlas_name)
+        self.dwi_aligned_atlas = "{}/{}_aligned_atlas.nii.gz".format(self.namer.dirs['output']['reg_anat'],
+                                                                     self.atlas_name)
+        # self.dwi_aligned_atlas_mask = "{}/{}_aligned_atlas_mask.nii.gz".format(self.namer.dirs['tmp']['reg_a'], self.atlas_name)
 
-        mgru.align(self.atlas, self.t1_aligned_mni, init=None, xfm=None, out=self.aligned_atlas_t1mni, dof=12, searchrad=True, interp="nearestneighbour", cost='mutualinfo')
+        mgru.align(self.atlas, self.t1_aligned_mni, init=None, xfm=None, out=self.aligned_atlas_t1mni, dof=12,
+                   searchrad=True, interp="nearestneighbour", cost='mutualinfo')
 
         if ((self.simple is False) and (dsn is False)):
             try:
-		# Apply warp resulting from the inverse of T1w-->MNI created earlier
-                mgru.apply_warp(self.t1w_brain, self.aligned_atlas_t1mni, self.aligned_atlas_skull, warp=self.mni2t1w_warp, interp='nn', sup=True)
+                # Apply warp resulting from the inverse of T1w-->MNI created earlier
+                mgru.apply_warp(self.t1w_brain, self.aligned_atlas_t1mni, self.aligned_atlas_skull,
+                                warp=self.mni2t1w_warp, interp='nn', sup=True)
 
                 # Apply transform to dwi space
-		mgru.align(self.aligned_atlas_skull, self.nodif_B0, init=self.t1wtissue2dwi_xfm, xfm=None, out=self.dwi_aligned_atlas, dof=6, searchrad=True, interp="nearestneighbour", cost='mutualinfo')
+                mgru.align(self.aligned_atlas_skull, self.nodif_B0, init=self.t1wtissue2dwi_xfm, xfm=None,
+                           out=self.dwi_aligned_atlas, dof=6, searchrad=True, interp="nearestneighbour",
+                           cost='mutualinfo')
             except:
-                print("Warning: Atlas is not in correct dimensions, or input is low quality,\nusing linear template registration.")
+                print(
+                    "Warning: Atlas is not in correct dimensions, or input is low quality,\nusing linear template registration.")
                 # Create transform to align atlas to T1w using flirt
-                mgru.align(self.atlas, self.t1w_brain, xfm=self.xfm_atlas2t1w_init, init=None, bins=None, dof=6, cost='mutualinfo', searchrad=True, interp="spline", out=None, sch=None)
-                mgru.align(self.atlas, self.t1_aligned_mni, xfm=self.xfm_atlas2t1w, out=None, dof=6, searchrad=True, bins=None, interp="spline", cost='mutualinfo', init=self.xfm_atlas2t1w_init)
+                mgru.align(self.atlas, self.t1w_brain, xfm=self.xfm_atlas2t1w_init, init=None, bins=None, dof=6,
+                           cost='mutualinfo', searchrad=True, interp="spline", out=None, sch=None)
+                mgru.align(self.atlas, self.t1_aligned_mni, xfm=self.xfm_atlas2t1w, out=None, dof=6, searchrad=True,
+                           bins=None, interp="spline", cost='mutualinfo', init=self.xfm_atlas2t1w_init)
 
                 # Combine our linear transform from t1w to template with our transform from dwi to t1w space to get a transform from atlas ->(-> t1w ->)-> dwi
                 mgru.combine_xfms(self.xfm_atlas2t1w, self.t1wtissue2dwi_xfm, self.temp2dwi_xfm)
@@ -398,8 +428,10 @@ class dmri_reg(object):
                 mgru.applyxfm(self.nodif_B0, self.atlas, self.temp2dwi_xfm, self.dwi_aligned_atlas)
         elif dsn is False:
             # Create transform to align atlas to T1w using flirt
-            mgru.align(self.atlas, self.t1w_brain, xfm=self.xfm_atlas2t1w_init, init=None, bins=None, dof=6, cost='mutualinfo', searchrad=None, interp="spline", out=None, sch=None)
-            mgru.align(self.atlas, self.t1w_brain, xfm=self.xfm_atlas2t1w, out=None, dof=6, searchrad=True, bins=None, interp="spline", cost='mutualinfo', init=self.xfm_atlas2t1w_init)
+            mgru.align(self.atlas, self.t1w_brain, xfm=self.xfm_atlas2t1w_init, init=None, bins=None, dof=6,
+                       cost='mutualinfo', searchrad=None, interp="spline", out=None, sch=None)
+            mgru.align(self.atlas, self.t1w_brain, xfm=self.xfm_atlas2t1w, out=None, dof=6, searchrad=True, bins=None,
+                       interp="spline", cost='mutualinfo', init=self.xfm_atlas2t1w_init)
 
             # Combine our linear transform from t1w to template with our transform from dwi to t1w space to get a transform from atlas ->(-> t1w ->)-> dwi
             mgru.combine_xfms(self.xfm_atlas2t1w, self.t1wtissue2dwi_xfm, self.temp2dwi_xfm)
@@ -407,30 +439,31 @@ class dmri_reg(object):
             # Apply linear transformation from template to dwi space
             mgru.applyxfm(self.nodif_B0, self.atlas, self.temp2dwi_xfm, self.dwi_aligned_atlas)
         else:
-	    pass
+            pass
 
         # Set intensities to int
-	if dsn is False:
+        if dsn is False:
             self.atlas_img = nib.load(self.dwi_aligned_atlas)
         else:
-	    self.atlas_img = nib.load(self.aligned_atlas_t1mni)
+            self.atlas_img = nib.load(self.aligned_atlas_t1mni)
         self.atlas_data = self.atlas_img.get_data().astype('int')
-	node_num = len(np.unique(self.atlas_data))
-        self.atlas_data[self.atlas_data>node_num] = 0
+        node_num = len(np.unique(self.atlas_data))
+        self.atlas_data[self.atlas_data > node_num] = 0
 
-	if dsn is False:	
-	    t_img = load_img(self.wm_gm_int_in_dwi)
-	    mask = math_img('img > 0', img=t_img)
-	    mask.to_filename(self.wm_gm_int_in_dwi_bin)
+        if dsn is False:
+            t_img = load_img(self.wm_gm_int_in_dwi)
+            mask = math_img('img > 0', img=t_img)
+            mask.to_filename(self.wm_gm_int_in_dwi_bin)
 
-            nib.save(nib.Nifti1Image(self.atlas_data.astype(np.int32), affine=self.atlas_img.affine, header=self.atlas_img.header), self.dwi_aligned_atlas)
-            cmd='fslmaths ' + self.dwi_aligned_atlas + ' -mas ' + self.nodif_B0_mask + ' -mas ' + self.wm_gm_int_in_dwi_bin + ' ' + self.dwi_aligned_atlas
+            nib.save(nib.Nifti1Image(self.atlas_data.astype(np.int32), affine=self.atlas_img.affine,
+                                     header=self.atlas_img.header), self.dwi_aligned_atlas)
+            cmd = 'fslmaths ' + self.dwi_aligned_atlas + ' -mas ' + self.nodif_B0_mask + ' -mas ' + self.wm_gm_int_in_dwi_bin + ' ' + self.dwi_aligned_atlas
             os.system(cmd)
-	    return self.dwi_aligned_atlas
-	else:
-            nib.save(nib.Nifti1Image(self.atlas_data.astype(np.int32), affine=self.atlas_img.affine, header=self.atlas_img.header), self.aligned_atlas_t1mni)
-	    return self.aligned_atlas_t1mni
-
+            return self.dwi_aligned_atlas
+        else:
+            nib.save(nib.Nifti1Image(self.atlas_data.astype(np.int32), affine=self.atlas_img.affine,
+                                     header=self.atlas_img.header), self.aligned_atlas_t1mni)
+            return self.aligned_atlas_t1mni
 
     def tissue2dwi_align(self):
         """
@@ -445,41 +478,43 @@ class dmri_reg(object):
         print('Creating MNI-space ventricle ROI...')
         if not os.path.isfile(self.mni_atlas):
             raise ValueError('FSL atlas for ventricle reference not found!')
-        cmd='fslroi ' + self.mni_atlas + ' ' + self.rvent_out_file + ' 2 1'
+        cmd = 'fslroi ' + self.mni_atlas + ' ' + self.rvent_out_file + ' 2 1'
         os.system(cmd)
-        cmd='fslroi ' + self.mni_atlas + ' ' + self.lvent_out_file + ' 13 1'
+        cmd = 'fslroi ' + self.mni_atlas + ' ' + self.lvent_out_file + ' 13 1'
         os.system(cmd)
         self.args = "%s%s%s" % (' -add ', self.rvent_out_file, ' -thr 0.1 -bin ')
-        cmd='fslmaths ' + self.lvent_out_file + self.args + self.mni_vent_loc
+        cmd = 'fslmaths ' + self.lvent_out_file + self.args + self.mni_vent_loc
         os.system(cmd)
 
         # Create transform to MNI atlas to T1w using flirt. This will be use to transform the ventricles to dwi space.
-        mgru.align(self.mni_atlas, self.input_mni, xfm=self.xfm_roi2mni_init, init=None, bins=None, dof=6, cost='mutualinfo', searchrad=True, interp="spline", out=None)
+        mgru.align(self.mni_atlas, self.input_mni, xfm=self.xfm_roi2mni_init, init=None, bins=None, dof=6,
+                   cost='mutualinfo', searchrad=True, interp="spline", out=None)
 
         # Create transform to align roi to mni and T1w using flirt
         mgru.applyxfm(self.input_mni, self.mni_vent_loc, self.xfm_roi2mni_init, self.vent_mask_mni)
 
         if self.simple is False:
             # Apply warp resulting from the inverse MNI->T1w created earlier
-            mgru.apply_warp(self.t1w_brain, self.vent_mask_mni, self.vent_mask_t1w, warp=self.mni2t1w_warp, interp='nn', sup=True)
-            
-	# Applyxfm tissue maps to dwi space
+            mgru.apply_warp(self.t1w_brain, self.vent_mask_mni, self.vent_mask_t1w, warp=self.mni2t1w_warp, interp='nn',
+                            sup=True)
+
+        # Applyxfm tissue maps to dwi space
         mgru.applyxfm(self.nodif_B0, self.vent_mask_t1w, self.t1wtissue2dwi_xfm, self.vent_mask_dwi)
         mgru.applyxfm(self.nodif_B0, self.csf_mask, self.t1wtissue2dwi_xfm, self.csf_mask_dwi)
         mgru.applyxfm(self.nodif_B0, self.gm_mask, self.t1wtissue2dwi_xfm, self.gm_in_dwi)
-        mgru.applyxfm(self.nodif_B0, self.wm_mask, self.t1wtissue2dwi_xfm, self.wm_in_dwi)	
+        mgru.applyxfm(self.nodif_B0, self.wm_mask, self.t1wtissue2dwi_xfm, self.wm_in_dwi)
 
-	# Threshold WM to binary in dwi space
-	thr_img = nib.load(self.wm_in_dwi)                                                                            
-	thr_img.get_data()[thr_img.get_data() < 0.2] = 0                                                              
-	nib.save(thr_img, self.wm_in_dwi_bin)  
+        # Threshold WM to binary in dwi space
+        thr_img = nib.load(self.wm_in_dwi)
+        thr_img.get_data()[thr_img.get_data() < 0.2] = 0
+        nib.save(thr_img, self.wm_in_dwi_bin)
 
-	# Threshold GM to binary in dwi space
-        thr_img = nib.load(self.gm_in_dwi)                                                                            
+        # Threshold GM to binary in dwi space
+        thr_img = nib.load(self.gm_in_dwi)
         thr_img.get_data()[thr_img.get_data() < 0.2] = 0
         nib.save(thr_img, self.gm_in_dwi_bin)
 
-	# Threshold CSF to binary in dwi space
+        # Threshold CSF to binary in dwi space
         thr_img = nib.load(self.csf_mask_dwi)
         thr_img.get_data()[thr_img.get_data() < 0.9] = 0
         nib.save(thr_img, self.csf_mask_dwi)
@@ -501,58 +536,59 @@ class dmri_reg(object):
 
         # Create ventricular CSF mask
         print('Creating ventricular CSF mask...')
-	cmd='fslmaths ' + self.vent_mask_dwi + ' -kernel sphere 10 -ero -bin ' + self.vent_mask_dwi
-	os.system(cmd)
-        cmd='fslmaths ' + self.csf_mask_dwi + ' -add ' + self.vent_mask_dwi + ' -bin ' + self.vent_csf_in_dwi
+        cmd = 'fslmaths ' + self.vent_mask_dwi + ' -kernel sphere 10 -ero -bin ' + self.vent_mask_dwi
+        os.system(cmd)
+        cmd = 'fslmaths ' + self.csf_mask_dwi + ' -add ' + self.vent_mask_dwi + ' -bin ' + self.vent_csf_in_dwi
         os.system(cmd)
 
-	# Create gm-wm interface image
+        # Create gm-wm interface image
         cmd = 'fslmaths ' + self.gm_in_dwi_bin + ' -mul ' + self.wm_in_dwi_bin + ' -mas ' + self.nodif_B0_mask + ' -bin ' + self.wm_gm_int_in_dwi
         os.system(cmd)
 
         return
 
+
 class dmri_reg_old(object):
 
     def __init__(self, dwi, gtab, t1w, atlas, aligned_dwi, namer, clean=False):
-	"""
-        Aligns two images and stores the transform between them
-        **Positional Arguments:**
-                dwi:
-                    - Input impage to be aligned as a nifti image file
-                gtab:
-                    - object containing gradient directions and strength
-                t1w:
-                    - Intermediate image being aligned to as a nifti image file
-                atlas:
-                    - Terminal image being aligned to as a nifti image file
-                aligned_dwi:
-                    - Aligned output dwi image as a nifti image file
-                outdir:
-                    - Directory for derivatives to be stored
         """
-	self.dwi = dwi
-	self.t1w = t1w
-	self.atlas = atlas
-	self.gtab = gtab
-	self.aligned_dwi = aligned_dwi
-	self.namer = namer
+            Aligns two images and stores the transform between them
+            **Positional Arguments:**
+                    dwi:
+                        - Input impage to be aligned as a nifti image file
+                    gtab:
+                        - object containing gradient directions and strength
+                    t1w:
+                        - Intermediate image being aligned to as a nifti image file
+                    atlas:
+                        - Terminal image being aligned to as a nifti image file
+                    aligned_dwi:
+                        - Aligned output dwi image as a nifti image file
+                    outdir:
+                        - Directory for derivatives to be stored
+            """
+        self.dwi = dwi
+        self.t1w = t1w
+        self.atlas = atlas
+        self.gtab = gtab
+        self.aligned_dwi = aligned_dwi
+        self.namer = namer
 
-	# Creates names for all intermediate files used
+        # Creates names for all intermediate files used
         self.dwi_name = mgu.get_filename(dwi)
         self.t1w_name = mgu.get_filename(t1w)
         self.atlas_name = mgu.get_filename(atlas)
 
         self.temp_aligned = "{}/temp_aligned.nii.gz".format(self.namer.dirs['tmp']['reg_a'])
-	self.temp_aligned2 = "{}/temp_aligned2.nii.gz".format(self.namer.dirs['tmp']['reg_a'])
+        self.temp_aligned2 = "{}/temp_aligned2.nii.gz".format(self.namer.dirs['tmp']['reg_a'])
         self.b0 = "{}/b0.nii.gz".format(self.namer.dirs['tmp']['reg_a'])
         self.t1w_brain = "{}/t1w_brain.nii.gz".format(self.namer.dirs['tmp']['reg_a'])
         self.xfm = "{}/{}_{}_xfm.mat".format(self.namer.dirs['tmp']['reg_m'], self.t1w_name, self.atlas_name)
-	
+
     def dwi2atlas(self, clean=False):
         # Loads DTI image in as data and extracts B0 volume
         self.dwi_im = nib.load(self.dwi)
-	self.b0s = np.where(self.gtab.b0s_mask)[0]
+        self.b0s = np.where(self.gtab.b0s_mask)[0]
         self.b0_im = np.squeeze(self.dwi_im.get_data()[:, :, :, self.b0s[0]])  # if more than 1, use first
 
         # Wraps B0 volume in new nifti image
@@ -571,11 +607,11 @@ class dmri_reg_old(object):
 
         # Applies combined transform to dwi image volume
         mgru.applyxfm(self.atlas, self.temp_aligned, self.xfm, self.temp_aligned2)
-	mgru.resample(self.temp_aligned2, self.aligned_dwi, self.atlas)
+        mgru.resample(self.temp_aligned2, self.aligned_dwi, self.atlas)
 
         if clean:
             cmd = "rm -f {} {} {} {} {}*".format(self.dwi, self.temp_aligned, self.b0,
-                                                self.xfm, self.t1w_name)
+                                                 self.xfm, self.t1w_name)
             print("Cleaning temporary registration files...")
             mgu.execute_cmd(cmd)
 

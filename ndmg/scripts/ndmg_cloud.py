@@ -20,6 +20,7 @@
 # Email: gkiar@jhu.edu
 
 import warnings
+
 warnings.simplefilter("ignore")
 from argparse import ArgumentParser
 from collections import OrderedDict
@@ -67,7 +68,7 @@ def crawl_bucket(bucket, path, group=False, mode='dwi'):
             cmd = 'aws s3 ls s3://{}/{}/graphs/'.format(bucket, path)
         else:
             cmd = 'aws s3 ls s3://{}/{}/connectomes/'.format(bucket, path)
-	out, err = mgu.execute_cmd(cmd)
+        out, err = mgu.execute_cmd(cmd)
         atlases = re.findall('PRE (.+)/', out)
         print("Atlas IDs: " + ", ".join(atlases))
         return atlases
@@ -81,7 +82,7 @@ def crawl_bucket(bucket, path, group=False, mode='dwi'):
             out, err = mgu.execute_cmd(cmd.format(bucket, path, subj))
             sesh = re.findall('ses-(.+)/', out)
             seshs[subj] = sesh if sesh != [] else [None]
-        print("Session IDs: " + ", ".join([subj+'-'+sesh if sesh is not None
+        print("Session IDs: " + ", ".join([subj + '-' + sesh if sesh is not None
                                            else subj
                                            for subj in subjs
                                            for sesh in seshs[subj]]))
@@ -158,7 +159,7 @@ def create_json(bucket, path, threads, jobdir, group=False, credentials=None,
                 name = 'ndmg_{}_{}'.format(ver, atlas)
             job_json['jobName'] = name
             job_json['containerOverrides']['command'] = job_cmd
-            job = os.path.join(jobdir, 'jobs', name+'.json')
+            job = os.path.join(jobdir, 'jobs', name + '.json')
             with open(job, 'w') as outfile:
                 json.dump(job_json, outfile)
             jobs += [job]
@@ -186,7 +187,7 @@ def create_json(bucket, path, threads, jobdir, group=False, credentials=None,
                 print(job_cmd)
                 job_json['jobName'] = name
                 job_json['containerOverrides']['command'] = job_cmd
-                job = os.path.join(jobdir, 'jobs', name+'.json')
+                job = os.path.join(jobdir, 'jobs', name + '.json')
                 with open(job, 'w') as outfile:
                     json.dump(job_json, outfile)
                 jobs += [job]
@@ -206,7 +207,7 @@ def submit_jobs(jobs, jobdir):
         submission = ast.literal_eval(out)
         print("Job Name: {}, Job ID: {}".format(submission['jobName'],
                                                 submission['jobId']))
-        sub_file = os.path.join(jobdir, 'ids', submission['jobName']+'.json')
+        sub_file = os.path.join(jobdir, 'ids', submission['jobName'] + '.json')
         with open(sub_file, 'w') as outfile:
             json.dump(submission, outfile)
     return 0
@@ -220,7 +221,7 @@ def get_status(jobdir, jobid=None):
 
     if jobid is None:
         print("Describing jobs in {}/ids/...".format(jobdir))
-        jobs = os.listdir(jobdir+'/ids/')
+        jobs = os.listdir(jobdir + '/ids/')
         for job in jobs:
             with open('{}/ids/{}'.format(jobdir, job), 'r') as inf:
                 submission = json.load(inf)
@@ -247,7 +248,7 @@ def kill_jobs(jobdir, reason='"Killing job"'):
     cmd_template2 = 'aws batch terminate-job --job-id {} --reason {}'
 
     print("Canelling/Terminating jobs in {}/ids/...".format(jobdir))
-    jobs = os.listdir(jobdir+'/ids/')
+    jobs = os.listdir(jobdir + '/ids/')
     for job in jobs:
         with open('{}/ids/{}'.format(jobdir, job), 'r') as inf:
             submission = json.load(inf)
@@ -277,26 +278,26 @@ def main():
                                           'status',
                                           'kill'], default='paricipant',
                         help='determines the function to be performed by '
-                        'this function.')
+                             'this function.')
     parser.add_argument('--bucket', help='The S3 bucket with the input dataset'
-                        ' formatted according to the BIDS standard.')
+                                         ' formatted according to the BIDS standard.')
     parser.add_argument('--bidsdir', help='The directory where the dataset'
-                        ' lives on the S3 bucket should be stored. If you'
-                        ' level analysis this folder should be prepopulated'
-                        ' with the results of the participant level analysis.')
+                                          ' lives on the S3 bucket should be stored. If you'
+                                          ' level analysis this folder should be prepopulated'
+                                          ' with the results of the participant level analysis.')
     parser.add_argument('--jobdir', action='store', help='Dir of batch jobs to'
-                        ' generate/check up on.')
+                                                         ' generate/check up on.')
     parser.add_argument('--credentials', action='store', help='AWS formatted'
-                        ' csv of credentials.')
+                                                              ' csv of credentials.')
     parser.add_argument('--log', action='store_true', help='flag to indicate'
-                        ' log plotting in group analysis.', default=False)
+                                                           ' log plotting in group analysis.', default=False)
     parser.add_argument('--debug', action='store_true', help='flag to store '
-                        'temp files along the path of processing.',
+                                                             'temp files along the path of processing.',
                         default=False)
     parser.add_argument('--dataset', action='store', help='Dataset name')
     parser.add_argument('--stc', action='store', choices=['None', 'interleaved',
-                        'up', 'down'], default='None', help="The slice timing "
-                        "direction to correct. Not necessary.")
+                                                          'up', 'down'], default='None', help="The slice timing "
+                                                                                              "direction to correct. Not necessary.")
     parser.add_argument('--modality', action='store', choices=['func', 'dwi'],
                         help='Pipeline to run', default='dwi')
     parser.add_argument("-b", "--big", action="store", default='False',
@@ -320,7 +321,7 @@ def main():
         jobdir = './'
 
     if (bucket is None or path is None) and \
-       (state != 'status' and state != 'kill'):
+            (state != 'status' and state != 'kill'):
         sys.exit('Requires either path to bucket and data, or the status flag'
                  ' and job IDs to query.\n  Try:\n    ndmg_cloud --help')
 

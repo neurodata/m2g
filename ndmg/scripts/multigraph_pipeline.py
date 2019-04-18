@@ -20,6 +20,7 @@
 # Email: gkiar@jhu.edu, wgr@jhu.edu
 
 import warnings
+
 warnings.simplefilter("ignore")
 from argparse import ArgumentParser
 from datetime import datetime
@@ -47,7 +48,7 @@ def multigraphs(fibers, labels, outdir):
     # Create names of files to be produced
     graphs = [outdir + "/graphs/" + x + '/' + base + "_" + x + "_elist.csv"
               for x in label_name]
-    print "Graphs of streamlines downsampled to given labels: " +\
+    print "Graphs of streamlines downsampled to given labels: " + \
           (", ".join([x for x in graphs]))
 
     # Load fibers
@@ -59,7 +60,7 @@ def multigraphs(fibers, labels, outdir):
     for idx, label in enumerate(label_name):
         print "Generating graph for " + label + " parcellation..."
         labels_im = nb.load(labels[idx])
-        g1 = mgg(len(np.unique(labels_im.get_data()))-1, labels[idx])
+        g1 = mgg(len(np.unique(labels_im.get_data())) - 1, labels[idx])
         g1.make_graph(tracks)
         g1.summary()
         g1.save_graph(graphs[idx])

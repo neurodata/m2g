@@ -22,6 +22,7 @@
 
 from __future__ import print_function
 import warnings
+
 warnings.simplefilter("ignore")
 from collections import OrderedDict
 import numpy as np
@@ -60,6 +61,7 @@ def loadGraphs(filenames, modality='dwi', verb=False):
         [gstruct[k].add_node(vtx) for vtx in vtx_to_add]
     return gstruct
 
+
 def loadGraph(filename, modality='dwi', verb=False):
     if modality == 'dwi':
         graph = nx.read_weighted_edgelist(filename, delimiter=',')
@@ -71,10 +73,10 @@ def loadGraph(filename, modality='dwi', verb=False):
             labs = [int(x) for x in next(reader)]
         # read second line onwards to numpy array
         data = np.genfromtxt(filename, dtype=float,
-            delimiter=',', skip_header=True)
+                             delimiter=',', skip_header=True)
         lab_map = dict(zip(range(0, len(labs)), labs))
         graph = nx.from_numpy_matrix(data)
         graph = nx.relabel_nodes(graph, lab_map)
     else:
         raise ValueError("Unsupported modality.")
-    return graph 
+    return graph

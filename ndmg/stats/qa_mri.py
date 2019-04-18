@@ -18,6 +18,7 @@
 # Email: ebridge2@jhu.edu
 
 import warnings
+
 warnings.simplefilter("ignore")
 import nibabel as nb
 import sys
@@ -29,6 +30,7 @@ from ndmg.utils import gen_utils as mgu
 from ndmg.stats.func_qa_utils import plot_timeseries, plot_signals, \
     registration_score, plot_connectome
 from ndmg.stats.qa_reg import reg_mri_pngs, plot_brain, plot_overlays
+
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import csv
@@ -98,7 +100,7 @@ class qa_mri(object):
         rawfig = plot_brain(raw_dat.mean(axis=3), minthr=10)
         rawfig.savefig(
             "{}/{}_raw.png".format(self.namer.dirs['qa']['prep_m'],
-                func_name)
+                                   func_name)
         )
 
         prep_im = nb.load(prep.preproc_func)
@@ -111,7 +113,7 @@ class qa_mri(object):
         nvols = prep_dat.shape[3]
         prepfig.savefig(
             "{}/{}_preproc.png".format(self.namer.dirs['qa']['prep_m'],
-                func_name)
+                                       func_name)
         )
 
         # get the functional preprocessing motion parameters
@@ -123,7 +125,7 @@ class qa_mri(object):
         # coords translate back to euclidian space so our displacement of
         # the x, y, z rotations is the displacement of the outer edge
         # of the brain
-        mc_params[:, 0:3] = 500*np.pi*mc_params[:, 0:3]/180
+        mc_params[:, 0:3] = 500 * np.pi * mc_params[:, 0:3] / 180
 
         vd_pars = np.zeros(mc_params.shape)
 
@@ -168,7 +170,7 @@ class qa_mri(object):
 
             fname_reg = "{}/{}_{}_parameters.png".format(
                 self.namer.dirs['qa']['prep_m'], func_name, name
-                )
+            )
             fig.savefig(fname_reg, format='png')
             plt.close(fig)
 
@@ -204,7 +206,7 @@ class qa_mri(object):
         # save iterator
         for plotname, fig in figs.iteritems():
             fname = "{}/{}_{}.png".format(self.namer.dirs['qa']['prep_a'],
-                prep.anat_name, plotname)
+                                          prep.anat_name, plotname)
             fig.tight_layout()
             fig.savefig(fname)
             plt.close(fig)
@@ -232,18 +234,18 @@ class qa_mri(object):
         sreg_m_final = "{}/space-T1w/{}_jaccard_{:.0f}".format(
             self.namer.dirs['qa']['reg_m'],
             reg.sreg_strat,
-            self.self_reg_sc*1000
+            self.self_reg_sc * 1000
         )
         sreg_a_final = "{}/space-T1w/{}_jaccard_{:.0f}".format(
             self.namer.dirs['qa']['reg_a'],
             reg.sreg_strat,
-            self.self_reg_sc*1000
+            self.self_reg_sc * 1000
         )
         cmd = "mkdir -p {} {}".format(sreg_m_final, sreg_a_final)
         mgu.execute_cmd(cmd)
         sreg_fig.savefig(
             "{}/{}_bold_t1w_overlap.png".format(sreg_m_final,
-                self.namer.get_mod_source())
+                                                self.namer.get_mod_source())
         )
         # produce plot of the white-matter mask used during bbr
         if mreg.wm_mask is not None:
@@ -264,14 +266,14 @@ class qa_mri(object):
         A util to return aligned func name.
         """
         return "{}_{}".format(self.namer.get_mod_source(),
-            self.namer.get_template_info())
+                              self.namer.get_template_info())
 
     def aligned_anat_name(self):
         """
         A util to return aligned func name.
         """
         return "{}_{}".format(self.namer.get_anat_source(),
-            self.namer.get_template_info())
+                              self.namer.get_template_info())
 
     def temp_reg_qa(self, reg):
         """
@@ -296,19 +298,19 @@ class qa_mri(object):
         treg_m_final = "{}/template/{}_jaccard_{:.0f}".format(
             self.namer.dirs['qa']['reg_m'],
             reg.treg_strat,
-            self.temp_reg_sc*1000
+            self.temp_reg_sc * 1000
         )
         treg_a_final = "{}/template/{}_jaccard_{:.0f}".format(
             self.namer.dirs['qa']['reg_a'],
             reg.treg_strat,
-            self.temp_reg_sc*1000
+            self.temp_reg_sc * 1000
         )
         cmd = "mkdir -p {} {}".format(treg_m_final, treg_a_final)
         mgu.execute_cmd(cmd)
         mri_name = self.aligned_mri_name()
         treg_fig.savefig(
             "{}/{}_epi2temp_overlap.png".format(treg_m_final,
-                mri_name)
+                                                mri_name)
         )
         plt.close(treg_fig)
         t1w_name = self.aligned_anat_name()
@@ -352,8 +354,8 @@ class qa_mri(object):
         mean_brain = brain.mean()  # mean of each brain voxel (signal)
         std_nonbrain = np.nanstd(non_brain)  # std of nonbrain voxels (noise)
         std_brain = np.nanstd(brain)  # std of brain voxels (contrast)
-        self.snr = mean_brain/std_nonbrain  # definition of snr
-        self.cnr = std_brain/std_nonbrain  # definition of cnr
+        self.snr = mean_brain / std_nonbrain  # definition of snr
+        self.cnr = std_brain / std_nonbrain  # definition of cnr
 
         func_name = self.aligned_mri_name()
 
@@ -413,7 +415,7 @@ class qa_mri(object):
 
         # GLM regressors we could have
         glm_regs = [nuisobj.csf_reg, nuisobj.wm_reg, nuisobj.mot_reg,
-                   nuisobj.cc_reg]
+                    nuisobj.cc_reg]
         glm_names = ["csf", "wm", "friston", "compcor"]
         glm_titles = ["CSF Regressors", "White-Matter Regressors",
                       "Motion Regressors", "aCompCor Regressors"]
@@ -428,7 +430,7 @@ class qa_mri(object):
                 regs = []
                 labels = []
                 nreg = reg.shape[1]  # number of regressors for a particular
-                                     # nuisance variable
+                # nuisance variable
                 # store each regressor as a element of our list
                 regs = [reg[:, i] for i in range(0, nreg)]
                 # store labels in case they are plotted
@@ -517,9 +519,9 @@ class qa_mri(object):
         reg_mri_pngs(func, label, qcdir, minthr=10, maxthr=95)
         # plot the timeseries for each ROI and the connectivity matrix
         fname_ts = "{}/{}_{}_timeseries.html".format(qcdir,
-            self.aligned_mri_name(), label_name)
+                                                     self.aligned_mri_name(), label_name)
         fname_con = "{}/{}_{}_measure-correlation.html".format(qcdir,
-            self.aligned_mri_name(), label_name)
+                                                               self.aligned_mri_name(), label_name)
         if (self.modality == "func"):
             plot_timeseries(timeseries, fname_ts, self.aligned_mri_name(),
                             label_name)

@@ -21,6 +21,7 @@
 # Email: gkiar@jhu.edu, ebridge2@jhu.edu
 
 import warnings
+
 warnings.simplefilter("ignore")
 import numpy as np
 import nibabel as nb
@@ -93,30 +94,30 @@ def ndmg_func_worker(func, t1w, atlas, atlas_brain, atlas_mask, lv_mask,
 
     namer.add_dirs(paths, labels, label_dirs)
     qc_stats = "{}/{}_stats.csv".format(namer.dirs['qa']['base'],
-        namer.get_mod_source())
+                                        namer.get_mod_source())
 
     # Create derivative output file names
     reg_fname = "{}_{}".format(namer.get_mod_source(),
-        namer.get_template_info())
+                               namer.get_template_info())
     reg_aname = "{}_{}".format(namer.get_anat_source(),
-        namer.get_template_info())
-    
+                               namer.get_template_info())
+
     preproc_func = namer.name_derivative(namer.dirs['output']['prep_m'],
-        "{}_preproc.nii.gz".format(namer.get_mod_source()))
+                                         "{}_preproc.nii.gz".format(namer.get_mod_source()))
     motion_func = namer.name_derivative(namer.dirs['tmp']['prep_m'],
-        "{}_variant-mc_preproc.nii.gz".format(namer.get_mod_source()))
+                                        "{}_variant-mc_preproc.nii.gz".format(namer.get_mod_source()))
     preproc_t1w_brain = namer.name_derivative(namer.dirs['output']['prep_a'],
-        "{}_preproc_brain.nii.gz".format(namer.get_anat_source()))
+                                              "{}_preproc_brain.nii.gz".format(namer.get_anat_source()))
 
     aligned_func = namer.name_derivative(namer.dirs['output']['reg_m'],
-        "{}_registered.nii.gz".format(reg_fname))
+                                         "{}_registered.nii.gz".format(reg_fname))
     aligned_t1w = namer.name_derivative(namer.dirs['output']['reg_a'],
-        "{}_registered.nii.gz".format(reg_aname))
-    
+                                        "{}_registered.nii.gz".format(reg_aname))
+
     nuis_func = namer.name_derivative(namer.dirs['output']['nuis_f'],
-        "{}_clean.nii.gz".format(reg_fname))
+                                      "{}_clean.nii.gz".format(reg_fname))
     voxel_ts = namer.name_derivative(namer.dirs['output']['ts_voxel'],
-        "{}_timeseries.nii.gz".format(reg_fname))
+                                     "{}_timeseries.nii.gz".format(reg_fname))
 
     print("This pipeline will produce the following derivatives...")
     if not clean:
@@ -136,7 +137,7 @@ def ndmg_func_worker(func, t1w, atlas, atlas_brain, atlas_mask, lv_mask,
     connectomes = [namer.name_derivative(
         namer.dirs['output']['conn'][namer.get_label(lab)],
         "{}_{}_measure-correlation.{}".format(namer.get_mod_source(),
-            namer.get_label(lab), fmt)) for lab in labels]
+                                              namer.get_label(lab), fmt)) for lab in labels]
 
     roi_ts = [namer.name_derivative(
         namer.dirs['output']['ts_roi'][namer.get_label(lab)],
@@ -223,7 +224,7 @@ def ndmg_func_worker(func, t1w, atlas, atlas_brain, atlas_mask, lv_mask,
     if clean:
         print("Cleaning up intermediate files... ")
         del_dirs = [namer.dirs['tmp']['base']] + \
-            [namer.dirs['output'][k] for k in opt_dirs]
+                   [namer.dirs['output'][k] for k in opt_dirs]
         cmd = "rm -rf {}".format(" ".format(del_dirs))
         mgu.execute_cmd(cmd)
 
@@ -267,7 +268,7 @@ def ndmg_func_pipeline(func, t1w, atlas, atlas_brain, atlas_mask, lv_mask,
                          big=big)
     except Exception, e:
         print(traceback.format_exc())
-        os.exit() 
+        os.exit()
     finally:
         try:
             os.exit()
@@ -278,24 +279,24 @@ def ndmg_func_pipeline(func, t1w, atlas, atlas_brain, atlas_mask, lv_mask,
 
 def main():
     parser = ArgumentParser(description="This is an end-to-end connectome"
-                            " estimation pipeline from sMRI and DTI images")
+                                        " estimation pipeline from sMRI and DTI images")
     parser.add_argument("func", action="store", help="Nifti fMRI 4d EPI.")
     parser.add_argument("t1w", action="store", help="Nifti aMRI T1w image.")
     parser.add_argument("atlas", action="store", help="Nifti T1 MRI atlas")
     parser.add_argument("atlas_brain", action="store", help="Nifti T1 MRI"
-                        " brain only atlas")
+                                                            " brain only atlas")
     parser.add_argument("atlas_mask", action="store", help="Nifti binary mask"
-                        " of brain space in the atlas")
+                                                           " of brain space in the atlas")
     parser.add_argument("lv_mask", action="store", help="Nifti binary mask of"
-                        " lateral ventricles in atlas space.")
+                                                        " lateral ventricles in atlas space.")
     parser.add_argument("outdir", action="store", help="Path to which"
-                        " derivatives will be stored")
+                                                       " derivatives will be stored")
     parser.add_argument("stc", action="store", help="A file or setting for"
-                        " slice timing correction. If file option selected,"
-                        " must provide path as well.",
+                                                    " slice timing correction. If file option selected,"
+                                                    " must provide path as well.",
                         choices=["none", "interleaved", "up", "down", "file"])
     parser.add_argument("labels", action="store", nargs="*", help="Nifti"
-                        " labels of regions of interest in atlas space")
+                                                                  " labels of regions of interest in atlas space")
     parser.add_argument("-s", "--stc_file", action="store",
                         help="File for STC.")
     parser.add_argument("-c", "--clean", action="store_true", default=False,
@@ -326,6 +327,7 @@ def main():
                        result.atlas_brain, result.atlas_mask,
                        result.lv_mask, result.labels, result.outdir,
                        result.clean, result.stc, result.big)
+
 
 if __name__ == "__main__":
     main()

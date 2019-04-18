@@ -18,6 +18,7 @@
 # Email: ebridge2@jhu.edu
 
 import warnings
+
 warnings.simplefilter("ignore")
 import pickle
 from ndmg.stats.qa_mri import qa_mri as mqa
@@ -141,7 +142,7 @@ class group_func(object):
         ylab = ['Density', 'Density', 'Density', 'Density']
         xlab = ['Ratio', 'Ratio', 'Score', 'Score']
         traces = [fig_to_trace(fig) for fig in figs]
- 
+
         fname_multi = "registration_qa.html"
         # if a dataset name is provided, add it to the name
         if self.dataset is not None:
@@ -191,6 +192,5 @@ class group_func(object):
         fname_multi = "{}/{}".format(mcdir, fname_multi)
 
         multi = traces_to_panels(traces, names=names, ylabs=ylab, xlabs=xlab)
-        pyo.plot(multi, validate=False, filename=fname_multi) 
+        pyo.plot(multi, validate=False, filename=fname_multi)
         pass
-

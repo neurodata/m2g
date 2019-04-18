@@ -21,6 +21,7 @@
 # Copyright (c) 2016. All rights reserved
 
 import warnings
+
 warnings.simplefilter("ignore")
 from argparse import ArgumentParser
 import os
@@ -73,6 +74,7 @@ def main():
 
     setup(result.inDir, result.dtiListFile, result.bvalListFile,
           result.bvecListFile, result.mprageListFile)
+
 
 if __name__ == "__main__":
     main()

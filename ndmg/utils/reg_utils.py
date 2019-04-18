@@ -18,6 +18,7 @@
 # Email: ebridge2@jhu.edu
 from __future__ import print_function
 import warnings
+
 warnings.simplefilter("ignore")
 from ndmg.utils import gen_utils as mgu
 import nibabel as nib
@@ -25,6 +26,7 @@ import numpy as np
 import nilearn.image as nl
 import os
 import os.path as op
+
 
 def erode_mask(mask, v=0):
     """
@@ -53,17 +55,18 @@ def erode_mask(mask, v=0):
                 # if so, add to the new mask
                 md = mask.shape
                 if (mask[x[j], y[j], z[j]] and
-                        mask[np.min((x[j]+1, md[0]-1)), y[j], z[j]] and
-                        mask[x[j], np.min((y[j]+1, md[1]-1)), z[j]] and
-                        mask[x[j], y[j], np.min((z[j]+1, md[2]-1))] and
-                        mask[np.max((x[j]-1, 0)), y[j], z[j]] and
-                        mask[x[j], np.max((y[j]-1, 0)), z[j]] and
-                        mask[x[j], y[j], np.max((z[j]-1, 0))]):
+                        mask[np.min((x[j] + 1, md[0] - 1)), y[j], z[j]] and
+                        mask[x[j], np.min((y[j] + 1, md[1] - 1)), z[j]] and
+                        mask[x[j], y[j], np.min((z[j] + 1, md[2] - 1))] and
+                        mask[np.max((x[j] - 1, 0)), y[j], z[j]] and
+                        mask[x[j], np.max((y[j] - 1, 0)), z[j]] and
+                        mask[x[j], y[j], np.max((z[j] - 1, 0))]):
                     erode_mask[x[j], y[j], z[j]] = 1
         else:
             raise ValueError('Your mask erosion has an invalid shape.')
         mask = erode_mask
     return mask
+
 
 def align_slices(dwi, corrected_dwi, idx):
     """
@@ -78,6 +81,7 @@ def align_slices(dwi, corrected_dwi, idx):
     """
     cmd = "eddy_correct {} {} {}".format(dwi, corrected_dwi, idx)
     status = mgu.execute_cmd(cmd, verb=True)
+
 
 def probmap2mask(prob_map, mask_path, t, erode=0):
     """
@@ -345,7 +349,7 @@ def segment_t1w(t1w, basename, opts=''):
 
 def align(inp, ref, xfm=None, out=None, dof=12, searchrad=True,
           bins=256, interp=None, cost="mutualinfo", sch=None,
-              wmseg=None, init=None, finesearch=None):
+          wmseg=None, init=None, finesearch=None):
     """
     Aligns two images and stores the transform between them
     **Positional Arguments:**
@@ -386,7 +390,7 @@ def align(inp, ref, xfm=None, out=None, dof=12, searchrad=True,
     if cost is not None:
         cmd += " -cost {}".format(cost)
     if searchrad is not None:
-        cmd += " -searchrx -180 180 -searchry -180 180 " +\
+        cmd += " -searchrx -180 180 -searchry -180 180 " + \
                "-searchrz -180 180"
     if sch is not None:
         cmd += " -schedule {}".format(sch)
@@ -433,7 +437,7 @@ def align_nonlinear(inp, ref, xfm, out, warp, ref_mask=None, in_mask=None, confi
     if in_mask is not None:
         cmd += " --inmask={} --applyinmask=1".format(in_mask)
     if config is not None:
-	cmd += " --config={}".format(config)
+        cmd += " --config={}".format(config)
     print(cmd)
     os.system(cmd)
 
@@ -458,6 +462,7 @@ def applyxfm(ref, inp, xfm, aligned, interp='trilinear', dof=6):
     print(cmd)
     os.system(cmd)
 
+
 def apply_warp(ref, inp, out, warp, xfm=None, mask=None, interp=None, sup=False):
     """
     Applies a warp from the functional to reference space
@@ -478,7 +483,7 @@ def apply_warp(ref, inp, out, warp, xfm=None, mask=None, interp=None, sup=False)
             - the affine transformation from functional to
             structural space.
     """
-    cmd = "applywarp --ref=" + ref + " --in=" + inp + " --out=" + out +\
+    cmd = "applywarp --ref=" + ref + " --in=" + inp + " --out=" + out + \
           " --warp=" + warp
     if xfm is not None:
         cmd += " --premat=" + xfm
@@ -490,6 +495,7 @@ def apply_warp(ref, inp, out, warp, xfm=None, mask=None, interp=None, sup=False)
         cmd += " --super --superlevel=a"
     print(cmd)
     os.system(cmd)
+
 
 def inverse_warp(ref, out, warp):
     """
@@ -558,9 +564,11 @@ def combine_xfms(xfm1, xfm2, xfmout):
     print(cmd)
     os.system(cmd)
 
+
 def reslice_to_xmm(infile, vox_sz=2):
     cmd = "flirt -in {} -ref {} -out {} -nosearch -applyisoxfm {}"
-    out_file = "%s%s%s%s%s%s" % (os.path.dirname(infile), '/', os.path.basename(infile).split('_pre_res')[0], '_res_', int(vox_sz) ,'mm.nii.gz')
+    out_file = "%s%s%s%s%s%s" % (
+        os.path.dirname(infile), '/', os.path.basename(infile).split('_pre_res')[0], '_res_', int(vox_sz), 'mm.nii.gz')
     cmd = cmd.format(infile, infile, out_file, vox_sz)
     os.system(cmd)
     return out_file

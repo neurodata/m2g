@@ -19,6 +19,7 @@
 # Email: ericwb95@gmail.com
 
 import warnings
+
 warnings.simplefilter("ignore")
 import numpy as np
 import nibabel as nb
