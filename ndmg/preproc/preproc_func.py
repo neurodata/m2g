@@ -102,7 +102,7 @@ class preproc_func():
             cmd += " -r {}".format(tr)
             mgu.execute_cmd(cmd, verb=True)
         else:
-            print "Skipping slice timing correction."
+            print("Skipping slice timing correction.")
 
     def preprocess(self, stc=None, trim=15):
         """
@@ -124,7 +124,7 @@ class preproc_func():
         # remove the first nvol_trim timesteps
         mssg = ("Scrubbing first 15 seconds ({0:d} volumes due"
                 " to tr={1: .3f}s)")
-        print(mssg.format(nvol_trim, tr))
+        print((mssg.format(nvol_trim, tr)))
         trimmed_dat = func_im.get_data()[:, :, :, nvol_trim:]
         trimmed_im = nb.Nifti1Image(dataobj=trimmed_dat,
                                     header=func_im.header,

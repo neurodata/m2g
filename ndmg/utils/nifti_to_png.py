@@ -36,13 +36,13 @@ def convert(indir, outdir, verbose=False):
 
     # Create output directory structure
     if verbose:
-        print "Creating", outdir, "..."
+        print("Creating", outdir, "...")
     os.system('mkdir -p ' + outdir)
 
     for path, dirs, files in os.walk(indir):
         for idx, fl in enumerate(files):
             if verbose:
-                print "Loading subject to learn number of time points..."
+                print("Loading subject to learn number of time points...")
             im = nb.load(path + fl)
             dat = im.get_data()
             ntime = dat.shape[3]
@@ -50,20 +50,20 @@ def convert(indir, outdir, verbose=False):
             base = os.path.splitext(os.path.splitext(fl)[0])[0]
             chan = "_".join(base.split('_')[1:3])
             if verbose:
-                print "File:", fl
-                print "Channel:", chan
-                print "Time steps:", ntime
-                print "Creating", outdir + "/" + chan, "..."
+                print("File:", fl)
+                print("Channel:", chan)
+                print("Time steps:", ntime)
+                print("Creating", outdir + "/" + chan, "...")
             os.system('mkdir -p ' + outdir + "/" + chan)
 
             for count in range(int(ntime)):
                 dirname = outdir + "/" + chan + "/time%04d" % count
                 if verbose:
-                    print "Creating", dirname, "..."
+                    print("Creating", dirname, "...")
                 os.system('mkdir -p ' + dirname)
                 for slices in range(dat.shape[2]):
                     if verbose:
-                        print "Saving slice:", slices
+                        print("Saving slice:", slices)
                     imsave(dirname + '/%04d.png' % slices,
                            dat[:, :, slices, count].astype('float32').T)
 

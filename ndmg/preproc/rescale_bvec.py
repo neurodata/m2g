@@ -19,7 +19,7 @@
 # Created by Greg Kiar on 2016-02-12.
 # Email: gkiar@jhu.edu
 
-from __future__ import print_function
+
 import warnings
 
 warnings.simplefilter("ignore")

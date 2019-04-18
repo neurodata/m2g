@@ -19,7 +19,7 @@
 # Email: dpisner@utexas.edu.
 # epi_register created by Eric Bridgeford.
 
-from __future__ import print_function
+
 import warnings
 
 warnings.simplefilter("ignore")
@@ -813,9 +813,9 @@ class epi_register(object):
             self.treg_strat = 'fnirt'  # strategy details
         else:
             # if we dont have 2mm mni or a low quality t1w, FNIRT is unsuitable
-            print
+            print()
             "Atlas is not 2mm MNI, or input is low quality."
-            print
+            print()
             "Using linear template registration."
 
             xfm_epi2temp = "{}/{}_xfm_epi2temp.mat".format(

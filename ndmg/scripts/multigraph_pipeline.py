@@ -48,25 +48,25 @@ def multigraphs(fibers, labels, outdir):
     # Create names of files to be produced
     graphs = [outdir + "/graphs/" + x + '/' + base + "_" + x + "_elist.csv"
               for x in label_name]
-    print "Graphs of streamlines downsampled to given labels: " + \
-          (", ".join([x for x in graphs]))
+    print("Graphs of streamlines downsampled to given labels: " + \
+          (", ".join([x for x in graphs])))
 
     # Load fibers
-    print "Loading fibers..."
+    print("Loading fibers...")
     fiber_npz = np.load(fibers)
-    tracks = fiber_npz[fiber_npz.keys()[0]]
+    tracks = fiber_npz[list(fiber_npz.keys())[0]]
 
     # Generate graphs from streamlines for each parcellation
     for idx, label in enumerate(label_name):
-        print "Generating graph for " + label + " parcellation..."
+        print("Generating graph for " + label + " parcellation...")
         labels_im = nb.load(labels[idx])
         g1 = mgg(len(np.unique(labels_im.get_data())) - 1, labels[idx])
         g1.make_graph(tracks)
         g1.summary()
         g1.save_graph(graphs[idx])
 
-    print "Execution took: " + str(datetime.now() - startTime)
-    print "Complete!"
+    print("Execution took: " + str(datetime.now() - startTime))
+    print("Complete!")
     pass
 
 
@@ -82,8 +82,8 @@ def main():
 
     # Create output directory
     cmd = "mkdir -p " + result.outdir + " " + result.outdir + "/tmp"
-    print "Creating output directory: " + result.outdir
-    print "Creating output temp directory: " + result.outdir + "/tmp"
+    print("Creating output directory: " + result.outdir)
+    print("Creating output temp directory: " + result.outdir + "/tmp")
     p = Popen(cmd, stdout=PIPE, stderr=PIPE, shell=True)
     p.communicate()
 

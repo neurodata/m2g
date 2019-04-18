@@ -33,7 +33,7 @@ from ndmg.stats.qa_reg import plot_overlays
 import plotly as py
 import plotly.offline as offline
 from plotly.graph_objs import Heatmap
-import plotly_helper as pp
+from . import plotly_helper as pp
 
 
 def dice_coefficient(a, b):
@@ -53,9 +53,9 @@ def dice_coefficient(a, b):
     if not len(a) or not len(b):
         return 0.0
     if len(a) == 1:
-        a = a + u'.'
+        a = a + '.'
     if len(b) == 1:
-        b = b + u'.'
+        b = b + '.'
 
     a_bigram_list = []
     for i in range(len(a) - 1):
@@ -255,7 +255,7 @@ def plot_timeseries(timeseries, fname_ts, sub, label_name):
     # roi
     for d in range(0, timeseries.T.shape[1]):
         fts_list.append(py.graph_objs.Scatter(
-            x=range(0, timeseries.T.shape[0]),
+            x=list(range(0, timeseries.T.shape[0])),
             y=timeseries.T[:, d], mode='lines'))
         # use plotly so that users can select which rois to display
         # easily with a html

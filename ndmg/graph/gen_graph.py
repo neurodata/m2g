@@ -20,7 +20,7 @@
 # Originally created by Greg Kiar on 2016-01-27.
 # Email: dpisner@utexas.edu
 
-from __future__ import print_function
+
 import warnings
 
 warnings.simplefilter("ignore")
@@ -178,7 +178,7 @@ class graph_tools(object):
                 lst = tuple([int(node) for node in edge])
                 self.edge_dict[tuple(sorted(lst))] += 1
 
-        edge_list = [(k[0], k[1], v) for k, v in self.edge_dict.items()]
+        edge_list = [(k[0], k[1], v) for k, v in list(self.edge_dict.items())]
         self.g.add_weighted_edges_from(edge_list)
         return self.g, self.edge_dict
 

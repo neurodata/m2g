@@ -47,7 +47,7 @@ def graph2png(infile, outdir, fname=None):
         fname = os.path.split(infile)[1].split('.')[0] + '.png'
     save_location = outdir + fname
     plt.savefig(save_location, format='png')
-    print(fname + ' done!')
+    print((fname + ' done!'))
 
 
 def main():

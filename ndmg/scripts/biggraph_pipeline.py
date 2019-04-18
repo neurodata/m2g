@@ -47,16 +47,16 @@ def biggraphs(fibers, outdir):
     bgname = outdir + "/biggraphs/" + base + "_biggraph.csv"
 
     # Load fibers
-    print "Loading fibers..."
+    print("Loading fibers...")
     fiber_npz = np.load(fibers)
-    tracks = fiber_npz[fiber_npz.keys()[0]]
+    tracks = fiber_npz[list(fiber_npz.keys())[0]]
 
     g1 = mgg()
     g1.make_graph(tracks)
     g1.save_graph(bgname)
 
-    print "Execution took: " + str(datetime.now() - startTime)
-    print "Complete!"
+    print("Execution took: " + str(datetime.now() - startTime))
+    print("Complete!")
     pass
 
 
@@ -70,8 +70,8 @@ def main():
 
     # Create output directory
     cmd = "mkdir -p " + result.outdir + " " + result.outdir + "/tmp"
-    print "Creating output directory: " + result.outdir
-    print "Creating output temp directory: " + result.outdir + "/tmp"
+    print("Creating output directory: " + result.outdir)
+    print("Creating output temp directory: " + result.outdir + "/tmp")
     p = Popen(cmd, stdout=PIPE, stderr=PIPE, shell=True)
     p.communicate()
 

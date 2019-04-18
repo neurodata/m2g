@@ -79,7 +79,7 @@ class name_resource:
             if dirt in ['tmp', 'qa']:
                 olist = olist + [dirt] + self.get_sub_info()
             self.dirs[dirt]['base'] = os.path.join(*olist)
-            for kwd, path in paths.iteritems():
+            for kwd, path in paths.items():
                 newdir = os.path.join(*[self.dirs[dirt]['base'], path])
                 if kwd in label_dirs:  # levels with label granularity
                     self.dirs[dirt][kwd] = {}
@@ -112,7 +112,7 @@ class name_resource:
             if dirt in ['tmp']:
                 olist = olist + [dirt]
             namer.dirs[dirt]['base'] = os.path.join(*olist)
-            for kwd, path in paths.iteritems():
+            for kwd, path in paths.items():
                 newdir = os.path.join(*[namer.dirs[dirt]['base'], path])
                 if kwd in label_dirs:  # levels with label granularity
                     namer.dirs[dirt][kwd] = {}
@@ -257,10 +257,10 @@ def sweep_directory(bdir, subj=None, sesh=None, task=None, run=None, modality='d
             runs = as_list(run)
 
         print(sub)
-        print("%s%s" % ('Subject:', sub))
-        print("%s%s" % ('Sessions:', seshs))
-        print("%s%s" % ('Tasks:', tasks))
-        print("%s%s" % ('Runs:', runs))
+        print(("%s%s" % ('Subject:', sub)))
+        print(("%s%s" % ('Sessions:', seshs)))
+        print(("%s%s" % ('Tasks:', tasks)))
+        print(("%s%s" % ('Runs:', runs)))
         print('\n\n')
         # all the combinations of sessions and tasks that are possible
         for (ses, tas, ru) in product(seshs, tasks, runs):

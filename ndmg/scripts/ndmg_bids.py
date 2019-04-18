@@ -122,11 +122,12 @@ def get_atlas(atlas_dir, modality, vox_size):
     return (labels, atlas, atlas_mask, atlas_brain, lv_mask)
 
 
-def worker_wrapper((f, args, kwargs)):
+def worker_wrapper(xxx_todo_changeme):
     # allows us to wrap the per-subject module and remap the arguments
     # so that we can take lists of args since f in this case can be
     # ndmg_dwi_pipeline or ndmg_func_pipeline, and each takes slightly
     # different arguments
+    (f, args, kwargs) = xxx_todo_changeme
     return f(*args, **kwargs)
 
 
@@ -215,13 +216,13 @@ def group_level(inDir, outDir, vox_size, big, clean, stc, dataset=None, atlas=No
 
     for skip in skippers:
         if skip in labels_used:
-            print("Skipping {} parcellation".format(skip))
+            print(("Skipping {} parcellation".format(skip)))
             labels_used.remove(skip)
             continue
 
     gfmt = '_elist.csv' if modality == 'dwi' else '_adj.csv'
     for label in labels_used:
-        print("Parcellation: {}".format(label))
+        print(("Parcellation: {}".format(label)))
         tmp_in = op.join(inDir, label)
         fs = [op.join(tmp_in, fl)
               for root, dirs, files in os.walk(tmp_in)
@@ -236,7 +237,7 @@ def group_level(inDir, outDir, vox_size, big, clean, stc, dataset=None, atlas=No
                             minimal=minimal, log=log, hemispheres=hemispheres,
                             modality=modality)
         except Exception as e:
-            print("Failed group analysis for {} parcellation.".format(label))
+            print(("Failed group analysis for {} parcellation.".format(label)))
             print(e)
             continue
     sys.exit(0)

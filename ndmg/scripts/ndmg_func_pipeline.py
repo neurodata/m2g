@@ -121,15 +121,15 @@ def ndmg_func_worker(func, t1w, atlas, atlas_brain, atlas_mask, lv_mask,
 
     print("This pipeline will produce the following derivatives...")
     if not clean:
-        print("fMRI volumes preprocessed: {}".format(preproc_func))
-        print("T1w volume preprocessed: {}".format(preproc_t1w_brain))
-        print("fMRI volume registered to template: {}".format(aligned_func))
-        print("T1w volume registered to template: {}".format(aligned_func))
-        print("fMRI volumes preprocessed: {}".format(preproc_func))
-    print("fMRI Cleaned of Nuisance Variables: {}".format(nuis_func))
+        print(("fMRI volumes preprocessed: {}".format(preproc_func)))
+        print(("T1w volume preprocessed: {}".format(preproc_t1w_brain)))
+        print(("fMRI volume registered to template: {}".format(aligned_func)))
+        print(("T1w volume registered to template: {}".format(aligned_func)))
+        print(("fMRI volumes preprocessed: {}".format(preproc_func)))
+    print(("fMRI Cleaned of Nuisance Variables: {}".format(nuis_func)))
 
     if big:
-        print("Voxel timecourse in template space: {}".format(voxel_ts))
+        print(("Voxel timecourse in template space: {}".format(voxel_ts)))
 
     # Again, connectomes are different
     if not isinstance(labels, list):
@@ -145,15 +145,15 @@ def ndmg_func_worker(func, t1w, atlas, atlas_brain, atlas_mask, lv_mask,
                                                    namer.get_label(lab)))
         for lab in labels]
 
-    print("ROI timeseries downsampled to given labels: " +
-          ", ".join(roi_ts))
-    print("Connectomes downsampled to given labels: " +
-          ", ".join(connectomes))
+    print(("ROI timeseries downsampled to given labels: " +
+          ", ".join(roi_ts)))
+    print(("Connectomes downsampled to given labels: " +
+          ", ".join(connectomes)))
 
     qc_func = qa_mri(namer, 'func')  # for quality control
     # Align fMRI volumes to Atlas
     # -------- Preprocessing Steps --------------------------------- #
-    print "Preprocessing volumes..."
+    print("Preprocessing volumes...")
     f_prep = mgfp(func, preproc_func, motion_func, namer.dirs['tmp']['prep_m'])
     f_prep.preprocess(stc=stc)
     try:
@@ -168,7 +168,7 @@ def ndmg_func_worker(func, t1w, atlas, atlas_brain, atlas_mask, lv_mask,
         print("Exception in Preprocessing QA.")
 
     # ------- Alignment Steps -------------------------------------- #
-    print "Aligning volumes..."
+    print("Aligning volumes...")
     func_reg = mgreg(preproc_func, t1w, preproc_t1w_brain,
                      atlas, atlas_brain, atlas_mask, aligned_func,
                      aligned_t1w, namer)
@@ -184,7 +184,7 @@ def ndmg_func_worker(func, t1w, atlas, atlas_brain, atlas_mask, lv_mask,
         print("Exception in Template Registration QA.")
 
     # ------- Nuisance Correction Steps ---------------------------- #
-    print "Correcting Nuisance Variables..."
+    print("Correcting Nuisance Variables...")
     nuis = mgn(aligned_func, aligned_t1w, nuis_func, namer.dirs['tmp'],
                lv_mask=lv_mask, mc_params=f_prep.mc_params)
     nuis.nuis_correct()
@@ -195,7 +195,7 @@ def ndmg_func_worker(func, t1w, atlas, atlas_brain, atlas_mask, lv_mask,
 
     # ------ Voxelwise Timeseries Steps ---------------------------- #
     if big:
-        print "Extracting Voxelwise Timeseries..."
+        print("Extracting Voxelwise Timeseries...")
         voxel = mgts().voxel_timeseries(nuis_func, atlas_mask, voxel_ts)
         try:
             qc_func.voxel_ts_qa(voxel, nuis_func, atlas_mask)
@@ -204,7 +204,7 @@ def ndmg_func_worker(func, t1w, atlas, atlas_brain, atlas_mask, lv_mask,
 
     # ------ ROI Timeseries Steps ---------------------------------- #
     for idx, label in enumerate(labels):
-        print("Extracting ROI timeseries for {} parcellation...".format(label))
+        print(("Extracting ROI timeseries for {} parcellation...".format(label)))
         ts = mgts().roi_timeseries(nuis_func, labels[idx], roi_ts[idx])
         connectome = mgg(ts[0].shape[0], labels[idx], sens="func")
         conn = connectome.cor_graph(ts)
@@ -214,7 +214,7 @@ def ndmg_func_worker(func, t1w, atlas, atlas_brain, atlas_mask, lv_mask,
                                  aligned_t1w, labels[idx])
         except Exception as e:
             erm = "Exception in Connectome Extraction for {} parcellation."
-            print(erm.format(labels[idx]))
+            print((erm.format(labels[idx])))
 
     # save our statistics so that we can do group level
     exe_time = datetime.now() - startTime
@@ -228,7 +228,7 @@ def ndmg_func_worker(func, t1w, atlas, atlas_brain, atlas_mask, lv_mask,
         cmd = "rm -rf {}".format(" ".format(del_dirs))
         mgu.execute_cmd(cmd)
 
-    print("Execution took: {}".format(exe_time))
+    print(("Execution took: {}".format(exe_time)))
     print("Complete!")
     sys.exit(0)
 
@@ -266,13 +266,13 @@ def ndmg_func_pipeline(func, t1w, atlas, atlas_brain, atlas_mask, lv_mask,
         ndmg_func_worker(func, t1w, atlas, atlas_brain, atlas_mask, lv_mask,
                          labels, outdir, clean=clean, stc=stc,
                          big=big)
-    except Exception, e:
-        print(traceback.format_exc())
+    except Exception as e:
+        print((traceback.format_exc()))
         os.exit()
     finally:
         try:
             os.exit()
-        except Exception, e:
+        except Exception as e:
             os.exit()
     return
 
@@ -319,8 +319,8 @@ def main():
                 result.stc = result.stc_file
 
     # Create output directory
-    print "Creating output directory: {}".format(result.outdir)
-    print "Creating output temp directory: {}/tmp".format(result.outdir)
+    print("Creating output directory: {}".format(result.outdir))
+    print("Creating output temp directory: {}/tmp".format(result.outdir))
     mgu.execute_cmd("mkdir -p {} {}/tmp".format(result.outdir, result.outdir))
 
     ndmg_func_pipeline(result.func, result.t1w, result.atlas,

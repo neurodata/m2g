@@ -18,7 +18,7 @@
 # Repackaged for native space tractography by Derek Pisner in 2019
 # Email: dpisner@utexas.edu
 
-from __future__ import print_function
+
 import glob
 import shutil
 import warnings
@@ -346,13 +346,13 @@ def ndmg_dwi_pipeline(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
     try:
         ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
                         vox_size, mod_type, track_type, mod_func, reg_style, clean, big)
-    except Exception, e:
+    except Exception as e:
         print(traceback.format_exc())
         os.exit()
     finally:
         try:
             os.exit()
-        except Exception, e:
+        except Exception as e:
             os.exit()
     return
 

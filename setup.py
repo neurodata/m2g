@@ -25,12 +25,6 @@ setup(
         'ndmg.scripts'
     ],
     version=VERSION,
-    scripts = [
-        'ndmg/scripts/ndmg_demo-dwi',
-        'ndmg/scripts/ndmg_demo-qa',
-        'ndmg/scripts/ndmg_demo-mrilab',
-        'ndmg/scripts/ndmg_demo-func'
-    ],
     entry_points = {
         'console_scripts': [
             'ndmg_dwi_pipeline=ndmg.scripts.ndmg_dwi_pipeline:main',
@@ -51,17 +45,18 @@ setup(
     ],
     classifiers=[],
     install_requires=[  # We didnt put versions for numpy, scipy, b/c travis-ci
-        'networkx>=1.11',
-        'nibabel>=2.0',
-        'nilearn>=0.2',
-        'sklearn>=0.0',
+        'networkx',
+        'nibabel',
+        'nilearn',
+        'sklearn',
         'numpy',  # We use nump v1.10.4
         'scipy>=0.13.3',  # We use 0.17.0
-        'dipy==0.14.0',
+        'dipy',
         'boto3',
         'matplotlib',
         'plotly==1.12.1',
         'cython',
-        'pybids==0.6.4'
+        'pybids==0.6.4',
+	'duecredit'
     ]
 )

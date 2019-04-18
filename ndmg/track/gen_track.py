@@ -18,7 +18,7 @@
 # Created by derek Pisner on 02/17/2019.
 # Email: dpisner@utexas.edu
 
-from __future__ import print_function
+
 import warnings
 
 warnings.simplefilter("ignore")

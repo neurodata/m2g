@@ -116,7 +116,7 @@ def random_sample(fibs, num_samples):
     if (len(fibs) <= num_samples):
         num_samples = len(fibs)
     # generate the random sample indices
-    samples = random.sample(range(len(fibs)), num_samples)
+    samples = random.sample(list(range(len(fibs))), num_samples)
     return [fibs[i] for i in samples]
 
 

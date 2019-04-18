@@ -111,7 +111,7 @@ class nuis(object):
                 - the fMRI data. Should be passed as an ndarray,
                   with dimensions [xdim, ydim, zdim, ntimesteps].
         """
-        print "Centering Signal..."
+        print("Centering Signal...")
         data = data - data.mean(axis=3, keepdims=True)
         return data
 
@@ -129,7 +129,7 @@ class nuis(object):
                 - the fMRI data. Should be an array, with dimensions
                   [ntimesteps, nvoxels].
         """
-        print "Normalizing Signal by Standard Deviation..."
+        print("Normalizing Signal by Standard Deviation...")
         # normalize the signal
         data = np.divide(data, data.std(axis=0))
         # returns the normalized signal
@@ -149,7 +149,7 @@ class nuis(object):
            n:
                 - the number of components to use.
         """
-        print "Extracting Nuisance Components..."
+        print("Extracting Nuisance Components...")
         # singular value decomposition to get the ordered
         # principal components
         U, s, V = np.linalg.svd(masked_ts)
@@ -189,12 +189,12 @@ class nuis(object):
         bpra = np.zeros(freq_ra.shape, dtype=bool)
         # figure out which positions we will exclude
         if highpass is not None:
-            print "filtering below " + str(highpass) + " Hz..."
+            print("filtering below " + str(highpass) + " Hz...")
             bpra[np.abs(freq_ra) < highpass] = True
         if lowpass is not None:
-            print "filtering above " + str(lowpass) + " Hz..."
+            print("filtering above " + str(lowpass) + " Hz...")
             bpra[np.abs(freq_ra) > lowpass] = True
-        print "Applying Frequency Filtering..."
+        print("Applying Frequency Filtering...")
         filtered_ra = np.logical_not(bpra)
         filtered_fft = passed_fft.copy()
         filtered_fft[filtered_ra, :] = 0
@@ -222,7 +222,7 @@ class nuis(object):
                 - a numpy ndarray of regressors to
                   regress to.
         """
-        print "GLM with Design Matrix of Dimensions " + str(R.shape) + "..."
+        print("GLM with Design Matrix of Dimensions " + str(R.shape) + "...")
         # OLS solution for GLM B = (X^TX)^(-1)X^TY
         coefs = np.linalg.inv(R.T.dot(R)).dot(R.T).dot(data)
         return R.dot(coefs)
@@ -283,44 +283,44 @@ class nuis(object):
         # time dimension is now the 0th dim
         time = voxel.shape[0]
         # linear drift regressor
-        lin_reg = np.array(range(0, time))
+        lin_reg = np.array(list(range(0, time)))
         # quadratic drift regressor
-        quad_reg = np.array(range(0, time)) ** 2
+        quad_reg = np.array(list(range(0, time))) ** 2
 
         # use GLM model given regressors to approximate the weight we want
         # to regress out
         R = np.column_stack((np.ones(time))).T
         if trend is not None:
-            print "Adding linear trendline to GLM..."
+            print("Adding linear trendline to GLM...")
             R = np.column_stack((R, lin_reg))
         if trend == 'quad':
-            print "Adding quadratic trendline to GLM..."
+            print("Adding quadratic trendline to GLM...")
             R = np.column_stack((R, quad_reg))
 
         if csf_mean is not False:
-            print "Adding csf mean signal to GLM..."
+            print("Adding csf mean signal to GLM...")
             csf_reg = csf_ts.mean(axis=1, keepdims=True)
             self.csf_reg = csf_reg  # save for qa later
             # add coefficients to our regression
             R = np.column_stack((R, csf_reg))
 
         if wm_mean is not False:
-            print "Adding wm mean signal to GLM..."
+            print("Adding wm mean signal to GLM...")
             self.wm_reg = wm_ts.mean(axis=1, keepdims=True)
             R = np.column_stack((R, self.wm_reg))
 
         if cc is not None and wm_ts is not None and csf_ts is not None:
-            print "Adding {} acompcor regressors to GLM...".format(cc)
+            print("Adding {} acompcor regressors to GLM...".format(cc))
             self.cc_reg = self.compcor(np.column_stack((csf_ts, wm_ts)),
                                        n=cc)[0]
             R = np.column_stack((R, self.cc_reg))
 
         if mot == 6 and mc_params is not None:
-            print "Adding 6 motion parameters to GLM..."
+            print("Adding 6 motion parameters to GLM...")
             self.mot_Reg = mc_params
             R = np.column_stack((R, mc_params))
         elif mot == 24 and mc_params is not None:
-            print "Adding 24 Friston parameters to GLM..."
+            print("Adding 24 Friston parameters to GLM...")
             self.mot_reg = self.friston_model(mc_params)
             R = np.column_stack((R, self.mot_reg))
 

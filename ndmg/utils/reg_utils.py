@@ -16,7 +16,7 @@
 # reg_utils.py
 # Created by Eric Bridgeford on 2017-06-21.
 # Email: ebridge2@jhu.edu
-from __future__ import print_function
+
 import warnings
 
 warnings.simplefilter("ignore")

@@ -48,7 +48,7 @@ def batch_submit(bucket, path, jobdir, credentials=None, state='participant',
     upon later.
     """
     group = state == 'group'
-    print("Getting list from s3://{}/{}/...".format(bucket, path))
+    print(("Getting list from s3://{}/{}/...".format(bucket, path)))
     threads = crawl_bucket(bucket, path, group, mode=mode)
 
     print("Generating job for each subject...")
@@ -70,7 +70,7 @@ def crawl_bucket(bucket, path, group=False, mode='dwi'):
             cmd = 'aws s3 ls s3://{}/{}/connectomes/'.format(bucket, path)
         out, err = mgu.execute_cmd(cmd)
         atlases = re.findall('PRE (.+)/', out)
-        print("Atlas IDs: " + ", ".join(atlases))
+        print(("Atlas IDs: " + ", ".join(atlases)))
         return atlases
     else:
         cmd = 'aws s3 ls s3://{}/{}/'.format(bucket, path)
@@ -82,10 +82,10 @@ def crawl_bucket(bucket, path, group=False, mode='dwi'):
             out, err = mgu.execute_cmd(cmd.format(bucket, path, subj))
             sesh = re.findall('ses-(.+)/', out)
             seshs[subj] = sesh if sesh != [] else [None]
-        print("Session IDs: " + ", ".join([subj + '-' + sesh if sesh is not None
+        print(("Session IDs: " + ", ".join([subj + '-' + sesh if sesh is not None
                                            else subj
                                            for subj in subjs
-                                           for sesh in seshs[subj]]))
+                                           for sesh in seshs[subj]])))
         return seshs
 
 
@@ -141,9 +141,9 @@ def create_json(bucket, path, threads, jobdir, group=False, credentials=None,
         batlas = ['slab907', 'DS03231', 'DS06481', 'DS16784', 'DS72784']
         for atlas in atlases:
             if atlas in batlas:
-                print("... Skipping {} parcellation".format(atlas))
+                print(("... Skipping {} parcellation".format(atlas)))
                 continue
-            print("... Generating job for {} parcellation".format(atlas))
+            print(("... Generating job for {} parcellation".format(atlas)))
             job_cmd = deepcopy(cmd)
             job_cmd[11] = re.sub('(<ATLAS>)', atlas, job_cmd[11])
             if log:
@@ -165,16 +165,16 @@ def create_json(bucket, path, threads, jobdir, group=False, credentials=None,
             jobs += [job]
 
     else:
-        for subj in seshs.keys():
-            print("... Generating job for sub-{}".format(subj))
+        for subj in list(seshs.keys()):
+            print(("... Generating job for sub-{}".format(subj)))
             for sesh in seshs[subj]:
                 job_cmd = deepcopy(cmd)
                 job_cmd[9] = re.sub('(<SUBJ>)', subj, job_cmd[9])
                 if sesh is not None:
-                    job_cmd += [u'--session_label']
-                    job_cmd += [u'{}'.format(sesh)]
+                    job_cmd += ['--session_label']
+                    job_cmd += ['{}'.format(sesh)]
                 if debug:
-                    job_cmd += [u'--debug']
+                    job_cmd += ['--debug']
 
                 job_json = deepcopy(template)
                 ver = ndmg.version.replace('.', '-')
@@ -202,11 +202,11 @@ def submit_jobs(jobs, jobdir):
 
     for job in jobs:
         cmd = cmd_template.format(job)
-        print("... Submitting job {}...".format(job))
+        print(("... Submitting job {}...".format(job)))
         out, err = mgu.execute_cmd(cmd)
         submission = ast.literal_eval(out)
-        print("Job Name: {}, Job ID: {}".format(submission['jobName'],
-                                                submission['jobId']))
+        print(("Job Name: {}, Job ID: {}".format(submission['jobName'],
+                                                submission['jobId'])))
         sub_file = os.path.join(jobdir, 'ids', submission['jobName'] + '.json')
         with open(sub_file, 'w') as outfile:
             json.dump(submission, outfile)
@@ -220,23 +220,23 @@ def get_status(jobdir, jobid=None):
     cmd_template = 'aws batch describe-jobs --jobs {}'
 
     if jobid is None:
-        print("Describing jobs in {}/ids/...".format(jobdir))
+        print(("Describing jobs in {}/ids/...".format(jobdir)))
         jobs = os.listdir(jobdir + '/ids/')
         for job in jobs:
             with open('{}/ids/{}'.format(jobdir, job), 'r') as inf:
                 submission = json.load(inf)
             cmd = cmd_template.format(submission['jobId'])
-            print("... Checking job {}...".format(submission['jobName']))
+            print(("... Checking job {}...".format(submission['jobName'])))
             out, err = mgu.execute_cmd(cmd)
             status = re.findall('"status": "([A-Za-z]+)",', out)[0]
-            print("... ... Status: {}".format(status))
+            print(("... ... Status: {}".format(status)))
         return 0
     else:
-        print("Describing job id {}...".format(jobid))
+        print(("Describing job id {}...".format(jobid)))
         cmd = cmd_template.format(jobid)
         out, err = mgu.execute_cmd(cmd)
         status = re.findall('"status": "([A-Za-z]+)",', out)[0]
-        print("... Status: {}".format(status))
+        print(("... Status: {}".format(status)))
         return status
 
 
@@ -247,7 +247,7 @@ def kill_jobs(jobdir, reason='"Killing job"'):
     cmd_template1 = 'aws batch cancel-job --job-id {} --reason {}'
     cmd_template2 = 'aws batch terminate-job --job-id {} --reason {}'
 
-    print("Canelling/Terminating jobs in {}/ids/...".format(jobdir))
+    print(("Canelling/Terminating jobs in {}/ids/...".format(jobdir)))
     jobs = os.listdir(jobdir + '/ids/')
     for job in jobs:
         with open('{}/ids/{}'.format(jobdir, job), 'r') as inf:
@@ -256,14 +256,14 @@ def kill_jobs(jobdir, reason='"Killing job"'):
         name = submission['jobName']
         status = get_status(jobdir, jid)
         if status in ['SUCCEEDED', 'FAILED']:
-            print("... No action needed for {}...".format(name))
+            print(("... No action needed for {}...".format(name)))
         elif status in ['SUBMITTED', 'PENDING', 'RUNNABLE']:
             cmd = cmd_template1.format(jid, reason)
-            print("... Cancelling job {}...".format(name))
+            print(("... Cancelling job {}...".format(name)))
             out, err = mgu.execute_cmd(cmd)
         elif status in ['STARTING', 'RUNNING']:
             cmd = cmd_template2.format(jid, reason)
-            print("... Terminating job {}...".format(name))
+            print(("... Terminating job {}...".format(name)))
             out, err = mgu.execute_cmd(cmd)
         else:
             print("... Unknown status??")

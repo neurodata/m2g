@@ -55,7 +55,7 @@ class timeseries(object):
                 Must be string. If None, don't save and just return
                 the voxel timeseries.
         """
-        print "Extracting Voxel Timeseries for " + str(func_file) + "..."
+        print("Extracting Voxel Timeseries for " + str(func_file) + "...")
 
         # load the mask data
         maskdata = mgu.get_braindata(mask_file)

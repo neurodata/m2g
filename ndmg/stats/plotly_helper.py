@@ -52,9 +52,9 @@ def plot_degrees(dats, name=None, ylab=None, xlab=None, hemi=True):
         contra = dats['contra_deg']
     else:
         main = dats['total_deg']
-    al = (4.0 / len(main.keys()))
+    al = (4.0 / len(list(main.keys())))
 
-    for key in main.keys():
+    for key in list(main.keys()):
         lgth = len(main[key])
         data += [
             Scatter(
@@ -209,7 +209,7 @@ def panel_arrangement(num):
         row = dims[0]
         col = dims[-1]
 
-    locations = [(a + 1, b + 1) for a, b in product(range(row), range(col))]
+    locations = [(a + 1, b + 1) for a, b in product(list(range(row)), list(range(col)))]
     return row, col, locations
 
 

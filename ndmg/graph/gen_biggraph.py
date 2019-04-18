@@ -19,7 +19,7 @@
 # Created by Eric Bridgeford on 2017-07-13.
 # Email: ebridge2@jhu.edu
 
-from __future__ import print_function
+
 import warnings
 
 warnings.simplefilter("ignore")
@@ -92,7 +92,7 @@ class biggraph(object):
                 lst = tuple([str(node) for node in edge])
                 self.edge_dict[tuple(sorted(lst))] += 1
 
-        self.edge_list = [(k[0], k[1], v) for k, v in self.edge_dict.items()]
+        self.edge_list = [(k[0], k[1], v) for k, v in list(self.edge_dict.items())]
         pass
 
     def get_graph(self):

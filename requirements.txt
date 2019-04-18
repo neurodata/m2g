@@ -9,4 +9,5 @@ boto3
 matplotlib
 plotly==1.12.1
 cython
+duecredit
 pybids==0.6.4

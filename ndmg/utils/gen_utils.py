@@ -20,7 +20,7 @@
 # Email: wgr@jhu.edu
 # Edited by Eric Bridgeford.
 
-from __future__ import print_function
+
 import warnings
 
 warnings.simplefilter("ignore")
@@ -78,7 +78,7 @@ def get_braindata(brain_file):
     if type(brain_file) is np.ndarray:  # if brain passed as matrix
         braindata = brain_file
     else:
-        if type(brain_file) is str or type(brain_file) is unicode:
+        if type(brain_file) is str or type(brain_file) is str:
             brain = nib.load(str(brain_file))
         elif type(brain_file) is nib.nifti1.Nifti1Image:
             brain = brain_file
@@ -445,7 +445,7 @@ def morton_region(parcellation, outpath):
                     region[XYZMorton((int(x), int(y), int(z)))] = at_dat[x, y, z]
     outf = op.join(outpath, atlasn + '_morton.csv')
     with open(outf, 'w')  as f:
-        for key, val in region.iteritems():
+        for key, val in region.items():
             f.write('{},{}\n'.format(key, val))
         f.close()
     return

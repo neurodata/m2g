@@ -25,7 +25,7 @@ warnings.simplefilter("ignore")
 from argparse import ArgumentParser
 from plotly.offline import download_plotlyjs, init_notebook_mode, plot
 import pickle
-import plotly_helper as pp
+from . import plotly_helper as pp
 import numpy as np
 import os
 
@@ -62,15 +62,15 @@ def make_panel_plot(basepath, outf, dataset=None, atlas=None, minimal=True,
         dat = pickle.load(f)[keys[idx]]
         f.close()
         if keys[idx] == 'number_non_zeros':
-            fig = pp.plot_rugdensity(dat.values())
+            fig = pp.plot_rugdensity(list(dat.values()))
         elif keys[idx] == 'edge_weight':
-            edges = np.max([len(dat[i]) for i in dat.keys()])
-            fig = pp.plot_series(dat.values(), sort=True)
+            edges = np.max([len(dat[i]) for i in list(dat.keys())])
+            fig = pp.plot_series(list(dat.values()), sort=True)
         elif keys[idx] == 'degree_distribution':
             fig = pp.plot_degrees(dat, hemi=hemispheres)
             if hemispheres:
                 maxdat = np.max([np.max(dat[key][k])
-                                 for key in dat.keys()
+                                 for key in list(dat.keys())
                                  for k in dat[key]])
                 anno = [dict(x=dims / 3,
                              y=4 * float(maxdat / 7),
@@ -93,8 +93,8 @@ def make_panel_plot(basepath, outf, dataset=None, atlas=None, minimal=True,
                 dat = np.log10(dat + 1)
             fig = pp.plot_heatmap(dat, name=labs[idx])
         else:
-            dims = len(dat.values()[0])
-            fig = pp.plot_series(dat.values())
+            dims = len(list(dat.values())[0])
+            fig = pp.plot_series(list(dat.values()))
         traces += [pp.fig_to_trace(fig)]
 
     multi = pp.traces_to_panels(traces)

@@ -49,7 +49,7 @@ class group_func(object):
                 - an optional parameter for the name of the dataset
                   to be present in the quality control output filenames.
         """
-        print atlas
+        print(atlas)
         self.ndmgdir = basedir
         self.qadir = "{}/qa".format(self.ndmgdir)
         self.outdir = outdir
@@ -85,7 +85,7 @@ class group_func(object):
         """
         connectomes = {}
         for label in os.listdir(self.conn_dir):
-            print label
+            print(label)
             this_label = []
             label_dir = "{}/{}".format(self.conn_dir, label)
             for connectome in os.listdir(label_dir):

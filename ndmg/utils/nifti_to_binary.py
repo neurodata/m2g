@@ -21,6 +21,7 @@
 
 from argparse import ArgumentParser
 import warnings
+from functools import reduce
 
 warnings.simplefilter("ignore")
 import os
@@ -47,9 +48,9 @@ def main():
     dats = [os.path.splitext(os.path.splitext(fn)[0])[0] + '.dat' for fn in niis]
 
     for idx, fn in enumerate(niis):
-        print "Converting: ", os.path.basename(fn)
+        print("Converting: ", os.path.basename(fn))
         nib_to_bin(fn, dats[idx])
-        print "Success!"
+        print("Success!")
 
 
 if __name__ == "__main__":
