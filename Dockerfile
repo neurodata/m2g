@@ -79,8 +79,8 @@ ENV ANTSPATH=/opt/ants/ \
 #--------NDMG SETUP-----------------------------------------------------------#
 # setup of python dependencies for ndmg itself, as well as file dependencies
 RUN \
-    pip install numpy networkx>=1.11 nibabel>=2.0 dipy==0.14.0 scipy \
-    python-dateutil==2.6.1 boto3 awscli matplotlib==1.5.3 plotly==1.12.9 nilearn>=0.2 sklearn>=0.0 \
+    pip install numpy networkx nibabel dipy scipy \
+    python-dateutil==2.6.1 boto3 awscli matplotlib==1.5.3 plotly==1.12.9 nilearn sklearn \
     pandas cython vtk pyvtk fury awscli requests==2.5.3 scikit-image pybids==0.6.4 ipython
 
 # Delete buggy line in dipy
