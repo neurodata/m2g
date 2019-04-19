@@ -34,10 +34,9 @@ import csv
 import boto3
 import json
 import ast
+import subprocess
 
-participant_templ = 'https://raw.githubusercontent.com/neurodata/ndmg/m3r-release/templates/ndmg_cloud_participant.json'
-group_templ = 'https://raw.githubusercontent.com/neurodata/ndmg/m3r-release/templates/ndmg_cloud_group.json'
-
+participant_templ = 'https://github.com/neurodata/ndmg/blob/dev-dmri-fmri/templates/ndmg_cloud_participant.json'
 
 def batch_submit(bucket, path, jobdir, credentials=None, state='participant',
                  debug=False, dataset=None, log=False, stc=None, mode='dwi',
@@ -68,19 +67,19 @@ def crawl_bucket(bucket, path, group=False, mode='dwi'):
             cmd = 'aws s3 ls s3://{}/{}/graphs/'.format(bucket, path)
         else:
             cmd = 'aws s3 ls s3://{}/{}/connectomes/'.format(bucket, path)
-        out, err = mgu.execute_cmd(cmd)
+        out = subprocess.check_output(cmd, shell=True)
         atlases = re.findall('PRE (.+)/', out)
         print(("Atlas IDs: " + ", ".join(atlases)))
         return atlases
     else:
         cmd = 'aws s3 ls s3://{}/{}/'.format(bucket, path)
-        out, err = mgu.execute_cmd(cmd)
-        subjs = re.findall('PRE sub-(.+)/', out)
+        out = subprocess.check_output(cmd, shell=True)
+        subjs = re.findall('PRE sub-(.+)/', out.decode('utf-8'))
         cmd = 'aws s3 ls s3://{}/{}/sub-{}/'
         seshs = OrderedDict()
         for subj in subjs:
-            out, err = mgu.execute_cmd(cmd.format(bucket, path, subj))
-            sesh = re.findall('ses-(.+)/', out)
+            out = subprocess.check_output(cmd.format(bucket, path, subj), shell=True)
+            sesh = re.findall('ses-(.+)/', out.decode('utf-8'))
             seshs[subj] = sesh if sesh != [] else [None]
         print(("Session IDs: " + ", ".join([subj + '-' + sesh if sesh is not None
                                            else subj
@@ -95,9 +94,9 @@ def create_json(bucket, path, threads, jobdir, group=False, credentials=None,
     """
     Takes parameters to make jsons
     """
-    mgu.execute_cmd("mkdir -p {}".format(jobdir))
-    mgu.execute_cmd("mkdir -p {}/jobs/".format(jobdir))
-    mgu.execute_cmd("mkdir -p {}/ids/".format(jobdir))
+    out = subprocess.check_output("mkdir -p {}".format(jobdir), shell=True)
+    out = subprocess.check_output("mkdir -p {}/jobs/".format(jobdir), shell=True)
+    out = subprocess.check_output("mkdir -p {}/ids/".format(jobdir), shell=True)
     if group:
         template = group_templ
         atlases = threads
@@ -106,11 +105,12 @@ def create_json(bucket, path, threads, jobdir, group=False, credentials=None,
         seshs = threads
     if not os.path.isfile('{}/{}'.format(jobdir, template.split('/')[-1])):
         cmd = 'wget --quiet -P {} {}'.format(jobdir, template)
-        mgu.execute_cmd(cmd)
+        subprocess.check_output(cmd, shell=True)
 
     with open('{}/{}'.format(jobdir, template.split('/')[-1]), 'r') as inf:
         template = json.load(inf)
-    cmd = template['containerOverrides']['command']
+
+    cmd = ['ndmg_bids '] + template['containerOverrides']['command']
     env = template['containerOverrides']['environment']
 
     if credentials is not None:
@@ -125,72 +125,50 @@ def create_json(bucket, path, threads, jobdir, group=False, credentials=None,
         env = []
     template['containerOverrides']['environment'] = env
 
+    # edit mode, bucket, path
     jobs = list()
-    cmd[3] = re.sub('(<MODE>)', mode, cmd[3])
-    cmd[5] = re.sub('(<BUCKET>)', bucket, cmd[5])
-    cmd[7] = re.sub('(<PATH>)', path, cmd[7])
-    cmd[12] = re.sub('(<STC>)', stc, cmd[12])
+    cmd[cmd.index('<MODE>')] = mode
+    cmd[cmd.index('<BUCKET>')] = bucket
+    cmd[cmd.index('<PATH>')] = path
     if bg:
         cmd.append('--big')
-    if group:
-        if dataset is not None:
-            cmd[10] = re.sub('(<DATASET>)', dataset, cmd[10])
-        else:
-            cmd[10] = re.sub('(<DATASET>)', '', cmd[10])
 
-        batlas = ['slab907', 'DS03231', 'DS06481', 'DS16784', 'DS72784']
-        for atlas in atlases:
-            if atlas in batlas:
-                print(("... Skipping {} parcellation".format(atlas)))
-                continue
-            print(("... Generating job for {} parcellation".format(atlas)))
+    # edit participant-specific values ()
+    # loop over every session of every participant
+    for subj in seshs.keys():
+        print("... Generating job for sub-{}".format(subj))
+        # and for each subject number in each participant number,
+        for sesh in seshs[subj]:
+            # add format-specific commands,
             job_cmd = deepcopy(cmd)
-            job_cmd[11] = re.sub('(<ATLAS>)', atlas, job_cmd[11])
-            if log:
-                job_cmd += ['--log']
-            if atlas == 'desikan':
-                job_cmd += ['--hemispheres']
+            job_cmd[job_cmd.index('<SUBJ>')] = subj
+            if sesh is not None:
+                job_cmd += [u'--session_label']
+                job_cmd += [u'{}'.format(sesh)]
+            if debug:
+                job_cmd += [u'--debug']
 
+            # then, grab the template,
+            # add additional parameters,
+            # make the json file for this iteration,
+            # and add the path to its json file to `jobs`.
             job_json = deepcopy(template)
             ver = ndmg.version.replace('.', '-')
             if dataset:
-                name = 'ndmg_{}_{}_{}'.format(ver, dataset, atlas)
+                name = 'ndmg_{}_{}_sub-{}'.format(ver, dataset, subj)
             else:
-                name = 'ndmg_{}_{}'.format(ver, atlas)
+                name = 'ndmg_{}_sub-{}'.format(ver, subj)
+            if sesh is not None:
+                name = '{}_ses-{}'.format(name, sesh)
+            print(job_cmd)
             job_json['jobName'] = name
             job_json['containerOverrides']['command'] = job_cmd
-            job = os.path.join(jobdir, 'jobs', name + '.json')
+            job = os.path.join(jobdir, 'jobs', name+'.json')
             with open(job, 'w') as outfile:
                 json.dump(job_json, outfile)
             jobs += [job]
 
-    else:
-        for subj in list(seshs.keys()):
-            print(("... Generating job for sub-{}".format(subj)))
-            for sesh in seshs[subj]:
-                job_cmd = deepcopy(cmd)
-                job_cmd[9] = re.sub('(<SUBJ>)', subj, job_cmd[9])
-                if sesh is not None:
-                    job_cmd += ['--session_label']
-                    job_cmd += ['{}'.format(sesh)]
-                if debug:
-                    job_cmd += ['--debug']
-
-                job_json = deepcopy(template)
-                ver = ndmg.version.replace('.', '-')
-                if dataset:
-                    name = 'ndmg_{}_{}_sub-{}'.format(ver, dataset, subj)
-                else:
-                    name = 'ndmg_{}_sub-{}'.format(ver, subj)
-                if sesh is not None:
-                    name = '{}_ses-{}'.format(name, sesh)
-                print(job_cmd)
-                job_json['jobName'] = name
-                job_json['containerOverrides']['command'] = job_cmd
-                job = os.path.join(jobdir, 'jobs', name + '.json')
-                with open(job, 'w') as outfile:
-                    json.dump(job_json, outfile)
-                jobs += [job]
+    # return list of job jsons
     return jobs
 
 
@@ -203,8 +181,8 @@ def submit_jobs(jobs, jobdir):
     for job in jobs:
         cmd = cmd_template.format(job)
         print(("... Submitting job {}...".format(job)))
-        out, err = mgu.execute_cmd(cmd)
-        submission = ast.literal_eval(out)
+        out = subprocess.check_output(cmd, shell=True)
+        submission = ast.literal_eval(out.decode('utf-8'))
         print(("Job Name: {}, Job ID: {}".format(submission['jobName'],
                                                 submission['jobId'])))
         sub_file = os.path.join(jobdir, 'ids', submission['jobName'] + '.json')
@@ -227,15 +205,15 @@ def get_status(jobdir, jobid=None):
                 submission = json.load(inf)
             cmd = cmd_template.format(submission['jobId'])
             print(("... Checking job {}...".format(submission['jobName'])))
-            out, err = mgu.execute_cmd(cmd)
-            status = re.findall('"status": "([A-Za-z]+)",', out)[0]
+            out = subprocess.check_output(cmd, shell=True)
+            status = re.findall('"status": "([A-Za-z]+)",', out.decode('utf-8'))[0]
             print(("... ... Status: {}".format(status)))
         return 0
     else:
         print(("Describing job id {}...".format(jobid)))
         cmd = cmd_template.format(jobid)
-        out, err = mgu.execute_cmd(cmd)
-        status = re.findall('"status": "([A-Za-z]+)",', out)[0]
+        out = subprocess.check_output(cmd, shell=True)
+        status = re.findall('"status": "([A-Za-z]+)",', out.decode('utf-8'))[0]
         print(("... Status: {}".format(status)))
         return status
 
@@ -260,13 +238,44 @@ def kill_jobs(jobdir, reason='"Killing job"'):
         elif status in ['SUBMITTED', 'PENDING', 'RUNNABLE']:
             cmd = cmd_template1.format(jid, reason)
             print(("... Cancelling job {}...".format(name)))
-            out, err = mgu.execute_cmd(cmd)
+            out = subprocess.check_output(cmd, shell=True)
         elif status in ['STARTING', 'RUNNING']:
             cmd = cmd_template2.format(jid, reason)
             print(("... Terminating job {}...".format(name)))
-            out, err = mgu.execute_cmd(cmd)
+            out = subprocess.check_output(cmd, shell=True)
         else:
             print("... Unknown status??")
+
+
+def s3_get_data(bucket, remote, local, public=True):
+    """
+    Given an s3 bucket, data location on the bucket, and a download location,
+    crawls the bucket and recursively pulls all data.
+    """
+    client = boto3.client('s3')
+    if not public:
+        bkts = [bk['Name'] for bk in client.list_buckets()['Buckets']]
+        if bucket not in bkts:
+            sys.exit("Error: could not locate bucket. Available buckets: " +
+                     ", ".join(bkts))
+
+    cmd = 'aws s3 cp --recursive s3://{}/{}/ {}'.format(bucket, remote, local)
+    if public:
+        cmd += ' --no-sign-request --region=us-east-1'
+
+    out = subprocess.check_output('mkdir -p {}'.format(local), shell=True)
+    out = subprocess.check_output(cmd, shell=True)
+
+
+
+def s3_push_data(bucket, remote, outDir, modifier, creds=True):
+    cmd = 'aws s3 cp --exclude "tmp/*" {} s3://{}/{}/{} --recursive --acl public-read'
+    cmd = cmd.format(outDir, bucket, remote, modifier)
+    if not creds:
+        print("Note: no credentials provided, may fail to push big files.")
+        cmd += ' --no-sign-request'
+    subprocess.check_output(cmd, shell=True)
+
 
 
 def main():

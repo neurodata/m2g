@@ -1,19 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="BookmarkManager">
+    <bookmark url="file://$PROJECT_DIR$/ndmg/scripts/ndmg_cloud.py" description="    print(&quot;Generating job for each subject...&quot;)&#10;  ..." line="52" />
+  </component>
   <component name="ChangeListManager">
     <list default="true" id="2a59942d-22e5-4a24-accd-8b788e71fa1f" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/Dockerfile" beforeDir="false" afterPath="$PROJECT_DIR$/Dockerfile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/_build/html/_static/documentation_options.js" beforeDir="false" afterPath="$PROJECT_DIR$/docs/_build/html/_static/documentation_options.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/_build/html/_static/jquery-3.2.1.js" beforeDir="false" afterPath="$PROJECT_DIR$/docs/_build/html/_static/jquery-3.2.1.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/_build/html/_static/searchtools.js" beforeDir="false" afterPath="$PROJECT_DIR$/docs/_build/html/_static/searchtools.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ndmg/graph/gen_graph.py" beforeDir="false" afterPath="$PROJECT_DIR$/ndmg/graph/gen_graph.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ndmg/register/gen_reg.py" beforeDir="false" afterPath="$PROJECT_DIR$/ndmg/register/gen_reg.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ndmg/scripts/ndmg_bids.py" beforeDir="false" afterPath="$PROJECT_DIR$/ndmg/scripts/ndmg_bids.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ndmg/scripts/ndmg_dwi_pipeline.py" beforeDir="false" afterPath="$PROJECT_DIR$/ndmg/scripts/ndmg_dwi_pipeline.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ndmg/track/gen_track.py" beforeDir="false" afterPath="$PROJECT_DIR$/ndmg/track/gen_track.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ndmg/utils/gen_utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/ndmg/utils/gen_utils.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ndmg/utils/reg_utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/ndmg/utils/reg_utils.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ndmg/scripts/ndmg_cloud.py" beforeDir="false" afterPath="$PROJECT_DIR$/ndmg/scripts/ndmg_cloud.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ndmg/utils/bids_utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/ndmg/utils/bids_utils.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -22,72 +18,47 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="FileEditorManager">
-    <leaf>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Dockerfile">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="495">
-              <caret line="69" column="17" selection-start-line="69" selection-start-column="17" selection-end-line="69" selection-end-column="17" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/ndmg/register/gen_reg.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-11781" />
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/ndmg/graph/gen_graph.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-677" />
-          </provider>
-        </entry>
-      </file>
+    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
       <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/ndmg/scripts/ndmg_dwi_pipeline.py">
+        <entry file="file://$PROJECT_DIR$/ndmg/scripts/ndmg_cloud.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-4536">
-              <caret line="42" column="31" selection-start-line="42" selection-start-column="31" selection-end-line="42" selection-end-column="31" />
+            <state relative-caret-position="380">
+              <caret line="53" column="20" selection-start-line="53" selection-start-column="20" selection-end-line="53" selection-end-column="20" />
             </state>
           </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/ndmg/track/gen_track.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="480">
-              <caret line="34" column="24" selection-start-line="34" selection-start-column="24" selection-end-line="34" selection-end-column="24" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/ndmg/utils/reg_utils.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="465">
-              <caret line="34" column="19" selection-start-line="34" selection-start-column="19" selection-end-line="34" selection-end-column="19" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/ndmg/utils/gen_utils.py">
-          <provider selected="true" editor-type-id="text-editor" />
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/ndmg/scripts/ndmg_bids.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="480">
-              <caret line="33" column="15" selection-start-line="33" selection-start-column="15" selection-end-line="33" selection-end-column="15" />
+            <state relative-caret-position="430">
+              <caret line="369" column="63" selection-start-line="369" selection-start-column="63" selection-end-line="369" selection-end-column="63" />
             </state>
           </provider>
         </entry>
       </file>
     </leaf>
+  </component>
+  <component name="FindInProjectRecents">
+    <findStrings>
+      <find>mgu.execute_cmd</find>
+      <find>out, err</find>
+      <find>err</find>
+      <find>os.system(cmd)</find>
+      <find>out)</find>
+      <find>os.subprocess(</find>
+      <find>batch_submit</find>
+      <find>data</find>
+      <find>session_level</find>
+      <find>queue</find>
+    </findStrings>
+    <replaceStrings>
+      <replace>os.system</replace>
+      <replace>subprocess.check_output(cmd, shell=True)</replace>
+      <replace>out).decode('utf-8')</replace>
+      <replace>b</replace>
+      <replace>subprocess.check_output(</replace>
+    </replaceStrings>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -97,13 +68,15 @@
       <list>
         <option value="$PROJECT_DIR$/requirements.txt" />
         <option value="$PROJECT_DIR$/Dockerfile" />
-        <option value="$PROJECT_DIR$/ndmg/register/gen_reg.py" />
         <option value="$PROJECT_DIR$/ndmg/graph/gen_graph.py" />
         <option value="$PROJECT_DIR$/ndmg/scripts/ndmg_dwi_pipeline.py" />
         <option value="$PROJECT_DIR$/ndmg/track/gen_track.py" />
         <option value="$PROJECT_DIR$/ndmg/utils/reg_utils.py" />
         <option value="$PROJECT_DIR$/ndmg/utils/gen_utils.py" />
+        <option value="$PROJECT_DIR$/ndmg/register/gen_reg.py" />
+        <option value="$PROJECT_DIR$/ndmg/utils/bids_utils.py" />
         <option value="$PROJECT_DIR$/ndmg/scripts/ndmg_bids.py" />
+        <option value="$PROJECT_DIR$/ndmg/scripts/ndmg_cloud.py" />
       </list>
     </option>
   </component>
@@ -119,16 +92,17 @@
     </option>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="155" />
+    <option name="x" value="213" />
     <option name="y" value="23" />
     <option name="width" value="1276" />
-    <option name="height" value="1105" />
+    <option name="height" value="1104" />
   </component>
   <component name="ProjectView">
     <navigator proportions="" version="1">
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -136,37 +110,14 @@
               <item name="ndmg" type="b2602c69:ProjectViewProjectNode" />
               <item name="ndmg" type="462c0819:PsiDirectoryNode" />
             </path>
-            <path>
-              <item name="ndmg" type="b2602c69:ProjectViewProjectNode" />
-              <item name="ndmg" type="462c0819:PsiDirectoryNode" />
-              <item name="ndmg" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="ndmg" type="b2602c69:ProjectViewProjectNode" />
-              <item name="ndmg" type="462c0819:PsiDirectoryNode" />
-              <item name="ndmg" type="462c0819:PsiDirectoryNode" />
-              <item name="graph" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="ndmg" type="b2602c69:ProjectViewProjectNode" />
-              <item name="ndmg" type="462c0819:PsiDirectoryNode" />
-              <item name="ndmg" type="462c0819:PsiDirectoryNode" />
-              <item name="register" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="ndmg" type="b2602c69:ProjectViewProjectNode" />
-              <item name="ndmg" type="462c0819:PsiDirectoryNode" />
-              <item name="ndmg" type="462c0819:PsiDirectoryNode" />
-              <item name="scripts" type="462c0819:PsiDirectoryNode" />
-            </path>
           </expand>
           <select />
         </subPane>
       </pane>
-      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
+    <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
@@ -195,26 +146,21 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1555606251141</updated>
-      <workItem from="1555606252609" duration="710000" />
+      <workItem from="1555606252609" duration="1965000" />
+      <workItem from="1555621726196" duration="7489000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="710000" />
+    <option name="totallyTimeSpent" value="9454000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="155" y="23" width="1276" height="1105" extended-state="0" />
+    <frame x="213" y="23" width="1276" height="1104" extended-state="0" />
     <editor active="true" />
     <layout>
-      <window_info id="Favorites" side_tool="true" />
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.24959481" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.25364667" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
-      <window_info anchor="bottom" id="Docker" />
-      <window_info anchor="bottom" id="Database Changes" />
-      <window_info anchor="bottom" id="Version Control" />
-      <window_info anchor="bottom" id="Python Console" />
-      <window_info anchor="bottom" id="Terminal" />
-      <window_info anchor="bottom" id="Event Log" side_tool="true" weight="0.3299363" />
+      <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" />
       <window_info anchor="bottom" id="Run" order="2" />
@@ -222,43 +168,25 @@
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" />
-      <window_info anchor="right" id="Database" />
-      <window_info anchor="right" id="R Packages" />
-      <window_info anchor="right" id="SciView" />
-      <window_info anchor="right" id="R Graphics" />
+      <window_info anchor="bottom" id="Docker" order="7" />
+      <window_info anchor="bottom" id="Version Control" order="8" />
+      <window_info anchor="bottom" id="Database Changes" order="9" />
+      <window_info anchor="bottom" id="Event Log" order="10" side_tool="true" weight="0.3299363" />
+      <window_info anchor="bottom" id="Terminal" order="11" />
+      <window_info anchor="bottom" id="Python Console" order="12" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
+      <window_info anchor="right" id="SciView" order="3" />
+      <window_info anchor="right" id="R Graphics" order="4" />
+      <window_info anchor="right" id="R Packages" order="5" />
+      <window_info anchor="right" id="Database" order="6" />
     </layout>
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="1" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/requirements.txt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <caret column="8" selection-start-column="8" selection-end-column="8" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Dockerfile">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="495">
-          <caret line="69" column="17" selection-start-line="69" selection-start-column="17" selection-end-line="69" selection-end-column="17" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/ndmg/register/gen_reg.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-11781" />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/ndmg/graph/gen_graph.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-677" />
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/ndmg/track/gen_track.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="480">
@@ -276,17 +204,71 @@
     <entry file="file://$PROJECT_DIR$/ndmg/utils/gen_utils.py">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
-    <entry file="file://$PROJECT_DIR$/ndmg/scripts/ndmg_bids.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="480">
-          <caret line="33" column="15" selection-start-line="33" selection-start-column="15" selection-end-line="33" selection-end-column="15" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/ndmg/scripts/ndmg_dwi_pipeline.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-4536">
           <caret line="42" column="31" selection-start-line="42" selection-start-column="31" selection-end-line="42" selection-end-column="31" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ndmg/graph/gen_graph.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-677" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Dockerfile">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="495">
+          <caret line="69" column="17" selection-start-line="69" selection-start-column="17" selection-end-line="69" selection-end-column="17" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/requirements.txt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <caret column="8" selection-start-column="8" selection-end-column="8" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ndmg/register/gen_reg.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="645">
+          <caret line="43" column="36" lean-forward="true" selection-start-line="43" selection-start-column="36" selection-end-line="43" selection-end-column="36" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ndmg/preproc/rescale_bvec.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="365">
+          <caret line="26" column="20" selection-start-line="26" selection-start-column="20" selection-end-line="26" selection-end-column="20" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ndmg/utils/bids_utils.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="848">
+          <caret line="349" selection-start-line="349" selection-end-line="349" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ndmg/scripts/ndmg_bids.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="430">
+          <caret line="369" column="63" selection-start-line="369" selection-start-column="63" selection-end-line="369" selection-end-column="63" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/templates/ndmg_cloud_participant.json">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="495">
+          <caret line="33" column="1" lean-forward="true" selection-start-line="33" selection-start-column="1" selection-end-line="33" selection-end-column="1" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ndmg/scripts/ndmg_cloud.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="380">
+          <caret line="53" column="20" selection-start-line="53" selection-start-column="20" selection-end-line="53" selection-end-column="20" />
         </state>
       </provider>
     </entry>

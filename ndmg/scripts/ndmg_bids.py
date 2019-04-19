@@ -25,17 +25,11 @@
 import warnings
 
 warnings.simplefilter("ignore")
-from argparse import ArgumentParser
-from subprocess import Popen, PIPE
-from os.path import expanduser
-from ndmg.scripts.ndmg_setup import get_files
-from ndmg.utils.bids_utils import *
 from ndmg.scripts.ndmg_dwi_pipeline import ndmg_dwi_pipeline
 from ndmg.scripts.ndmg_func_pipeline import ndmg_func_pipeline
 from ndmg.utils.bids_utils import *
 from ndmg.stats.qa_graphs import *
 from ndmg.stats.qa_graphs_plotting import *
-from ndmg.stats.group_func import group_func
 from glob import glob
 from ndmg.utils import gen_utils as mgu
 import ndmg
@@ -45,9 +39,7 @@ import os
 import shutil
 import sys
 from multiprocessing import Pool
-from functools import partial
-import traceback
-import nibabel as nib
+from ndmg.scripts import ndmg_cloud as nc
 
 atlas_dir = '/ndmg_atlases'  # This location bc it is convenient for containers
 
@@ -370,33 +362,36 @@ def main():
         if buck is not None and remo is not None:
             print("Retrieving data from S3...")
             if subj is not None:
-                [s3_get_data(buck, remo, inDir, s, True) for s in subj]
+                print(buck)
+                print(remo)
+                print(inDir)
+                [nc.s3_get_data(buck, remo, inDir) for s in subj]
             else:
-                s3_get_data(buck, remo, inDir, public=creds)
+                nc.s3_get_data(buck, remo, inDir, public=creds)
         modif = 'ndmg_{}'.format(ndmg.version.replace('.', '-'))
         session_level(inDir, outDir, subj, vox_size, big, clean, stc,
                       atlas_select, mod_type, track_type, mod_func, reg_style, sesh, task, run,
                       debug, modality, nproc)
 
-    elif level == 'group':
-        gpath = op.join(inDir, modality, 'roi-connectomes')
-        if buck is not None and remo is not None:
-            print("Retrieving data from S3...")
-            if atlas is not None:
-                tpath = op.join(remo, gpath, atlas)
-                tindir = op.join(outDir, gpath, atlas)
-                # Using outDir as input location for group level since
-            else:
-                tpath = op.join(remo, gpath)
-                tindir = op.join(outDir, gpath)
-            s3_get_data(buck, tpath, tindir, public=creds)
-        modif = 'qa'
-        group_level(op.join(inDir, gpath), outDir, vox_size, big, clean, stc,
-                    dataset, atlas, minimal, log, hemi, modality)
+    # elif level == 'group':
+    #     gpath = op.join(inDir, modality, 'roi-connectomes')
+    #     if buck is not None and remo is not None:
+    #         print("Retrieving data from S3...")
+    #         if atlas is not None:
+    #             tpath = op.join(remo, gpath, atlas)
+    #             tindir = op.join(outDir, gpath, atlas)
+    #             # Using outDir as input location for group level since
+    #         else:
+    #             tpath = op.join(remo, gpath)
+    #             tindir = op.join(outDir, gpath)
+    #         nc.s3_get_data(buck, tpath, tindir, public=creds)
+    #     modif = 'qa'
+    #     group_level(op.join(inDir, gpath), outDir, vox_size, big, clean, stc,
+    #                 dataset, atlas, minimal, log, hemi, modality)
 
     if push and buck is not None and remo is not None:
         print("Pushing results to S3...")
-        s3_push_data(buck, remo, outDir, modif, creds)
+        nc.s3_push_data(buck, remo, outDir, modif, creds)
 
 
 if __name__ == "__main__":
