@@ -38,14 +38,24 @@ from ndmg.preproc import preproc_anat as mgap
 from ndmg.nuis import gen_nuis as mgn
 from ndmg.stats.qa_reg import *
 import traceback
-from ndmg.utils.bids_utils import name_resource
+from ndmg.utils.bids_utils import NameResource
 import sys
 import os
 
 
-def ndmg_func_worker(func, t1w, atlas, atlas_brain, atlas_mask, lv_mask,
-                     labels, outdir, clean=False, stc=None,
-                     big=False):
+def ndmg_func_worker(
+    func,
+    t1w,
+    atlas,
+    atlas_brain,
+    atlas_mask,
+    lv_mask,
+    labels,
+    outdir,
+    clean=False,
+    stc=None,
+    big=False,
+):
     """
     analyzes fmri images and produces subject-specific derivatives.
 
@@ -75,49 +85,60 @@ def ndmg_func_worker(func, t1w, atlas, atlas_brain, atlas_mask, lv_mask,
             - whether to produce voxelwise timeseries.
     """
     startTime = datetime.now()
-    fmt = '_adj.csv'
-    namer = name_resource(func, t1w, atlas, outdir)
+    fmt = "_adj.csv"
+    namer = NameResource(func, t1w, atlas, outdir)
 
-    paths = {'prep_m': "func/preproc",
-             'prep_a': "anat/preproc",
-             'reg_m': "func/registered",
-             'reg_a': "anat/registered",
-             'nuis_f': "func/clean",
-             'nuis_a': "func/clean",
-             'ts_voxel': "func/voxel-timeseries",
-             'ts_roi': "func/roi-timeseries",
-             'conn': "func/roi-connectomes"}
+    paths = {
+        "prep_m": "func/preproc",
+        "prep_a": "anat/preproc",
+        "reg_m": "func/registered",
+        "reg_a": "anat/registered",
+        "nuis_f": "func/clean",
+        "nuis_a": "func/clean",
+        "ts_voxel": "func/voxel-timeseries",
+        "ts_roi": "func/roi-timeseries",
+        "conn": "func/roi-connectomes",
+    }
 
-    opt_dirs = ['prep_m', 'prep_a', 'reg_m', 'reg_a', 'nuis_a']
-    clean_dirs = ['nuis_m']
-    label_dirs = ['ts_roi', 'conn']  # create label level granularity
+    opt_dirs = ["prep_m", "prep_a", "reg_m", "reg_a", "nuis_a"]
+    clean_dirs = ["nuis_m"]
+    label_dirs = ["ts_roi", "conn"]  # create label level granularity
 
     namer.add_dirs(paths, labels, label_dirs)
-    qc_stats = "{}/{}_stats.csv".format(namer.dirs['qa']['base'],
-                                        namer.get_mod_source())
+    qc_stats = "{}/{}_stats.csv".format(
+        namer.dirs["qa"]["base"], namer.get_mod_source()
+    )
 
     # Create derivative output file names
-    reg_fname = "{}_{}".format(namer.get_mod_source(),
-                               namer.get_template_info())
-    reg_aname = "{}_{}".format(namer.get_anat_source(),
-                               namer.get_template_info())
+    reg_fname = "{}_{}".format(namer.get_mod_source(), namer.get_template_info())
+    reg_aname = "{}_{}".format(namer.get_anat_source(), namer.get_template_info())
 
-    preproc_func = namer.name_derivative(namer.dirs['output']['prep_m'],
-                                         "{}_preproc.nii.gz".format(namer.get_mod_source()))
-    motion_func = namer.name_derivative(namer.dirs['tmp']['prep_m'],
-                                        "{}_variant-mc_preproc.nii.gz".format(namer.get_mod_source()))
-    preproc_t1w_brain = namer.name_derivative(namer.dirs['output']['prep_a'],
-                                              "{}_preproc_brain.nii.gz".format(namer.get_anat_source()))
+    preproc_func = namer.name_derivative(
+        namer.dirs["output"]["prep_m"],
+        "{}_preproc.nii.gz".format(namer.get_mod_source()),
+    )
+    motion_func = namer.name_derivative(
+        namer.dirs["tmp"]["prep_m"],
+        "{}_variant-mc_preproc.nii.gz".format(namer.get_mod_source()),
+    )
+    preproc_t1w_brain = namer.name_derivative(
+        namer.dirs["output"]["prep_a"],
+        "{}_preproc_brain.nii.gz".format(namer.get_anat_source()),
+    )
 
-    aligned_func = namer.name_derivative(namer.dirs['output']['reg_m'],
-                                         "{}_registered.nii.gz".format(reg_fname))
-    aligned_t1w = namer.name_derivative(namer.dirs['output']['reg_a'],
-                                        "{}_registered.nii.gz".format(reg_aname))
+    aligned_func = namer.name_derivative(
+        namer.dirs["output"]["reg_m"], "{}_registered.nii.gz".format(reg_fname)
+    )
+    aligned_t1w = namer.name_derivative(
+        namer.dirs["output"]["reg_a"], "{}_registered.nii.gz".format(reg_aname)
+    )
 
-    nuis_func = namer.name_derivative(namer.dirs['output']['nuis_f'],
-                                      "{}_clean.nii.gz".format(reg_fname))
-    voxel_ts = namer.name_derivative(namer.dirs['output']['ts_voxel'],
-                                     "{}_timeseries.nii.gz".format(reg_fname))
+    nuis_func = namer.name_derivative(
+        namer.dirs["output"]["nuis_f"], "{}_clean.nii.gz".format(reg_fname)
+    )
+    voxel_ts = namer.name_derivative(
+        namer.dirs["output"]["ts_voxel"], "{}_timeseries.nii.gz".format(reg_fname)
+    )
 
     print("This pipeline will produce the following derivatives...")
     if not clean:
@@ -134,33 +155,40 @@ def ndmg_func_worker(func, t1w, atlas, atlas_brain, atlas_mask, lv_mask,
     # Again, connectomes are different
     if not isinstance(labels, list):
         labels = [labels]
-    connectomes = [namer.name_derivative(
-        namer.dirs['output']['conn'][namer.get_label(lab)],
-        "{}_{}_measure-correlation.{}".format(namer.get_mod_source(),
-                                              namer.get_label(lab), fmt)) for lab in labels]
+    connectomes = [
+        namer.name_derivative(
+            namer.dirs["output"]["conn"][namer.get_label(lab)],
+            "{}_{}_measure-correlation.{}".format(
+                namer.get_mod_source(), namer.get_label(lab), fmt
+            ),
+        )
+        for lab in labels
+    ]
 
-    roi_ts = [namer.name_derivative(
-        namer.dirs['output']['ts_roi'][namer.get_label(lab)],
-        "{}_{}_variant-mean_timeseries.npz".format(namer.get_mod_source(),
-                                                   namer.get_label(lab)))
-        for lab in labels]
+    roi_ts = [
+        namer.name_derivative(
+            namer.dirs["output"]["ts_roi"][namer.get_label(lab)],
+            "{}_{}_variant-mean_timeseries.npz".format(
+                namer.get_mod_source(), namer.get_label(lab)
+            ),
+        )
+        for lab in labels
+    ]
 
-    print(("ROI timeseries downsampled to given labels: " +
-          ", ".join(roi_ts)))
-    print(("Connectomes downsampled to given labels: " +
-          ", ".join(connectomes)))
+    print(("ROI timeseries downsampled to given labels: " + ", ".join(roi_ts)))
+    print(("Connectomes downsampled to given labels: " + ", ".join(connectomes)))
 
-    qc_func = qa_mri(namer, 'func')  # for quality control
+    qc_func = qa_mri(namer, "func")  # for quality control
     # Align fMRI volumes to Atlas
     # -------- Preprocessing Steps --------------------------------- #
     print("Preprocessing volumes...")
-    f_prep = mgfp(func, preproc_func, motion_func, namer.dirs['tmp']['prep_m'])
+    f_prep = mgfp(func, preproc_func, motion_func, namer.dirs["tmp"]["prep_m"])
     f_prep.preprocess(stc=stc)
     try:
         qc_func.func_preproc_qa(f_prep)
     except Exception as e:
         print("Exception in Preprocessing QA.")
-    a_prep = mgap(t1w, preproc_t1w_brain, namer.dirs['tmp']['prep_a'])
+    a_prep = mgap(t1w, preproc_t1w_brain, namer.dirs["tmp"]["prep_a"])
     a_prep.preprocess()
     try:
         qc_func.anat_preproc_qa(a_prep)
@@ -169,9 +197,17 @@ def ndmg_func_worker(func, t1w, atlas, atlas_brain, atlas_mask, lv_mask,
 
     # ------- Alignment Steps -------------------------------------- #
     print("Aligning volumes...")
-    func_reg = mgreg(preproc_func, t1w, preproc_t1w_brain,
-                     atlas, atlas_brain, atlas_mask, aligned_func,
-                     aligned_t1w, namer)
+    func_reg = mgreg(
+        preproc_func,
+        t1w,
+        preproc_t1w_brain,
+        atlas,
+        atlas_brain,
+        atlas_mask,
+        aligned_func,
+        aligned_t1w,
+        namer,
+    )
     func_reg.self_align()
     try:
         qc_func.self_reg_qa(func_reg)
@@ -185,8 +221,14 @@ def ndmg_func_worker(func, t1w, atlas, atlas_brain, atlas_mask, lv_mask,
 
     # ------- Nuisance Correction Steps ---------------------------- #
     print("Correcting Nuisance Variables...")
-    nuis = mgn(aligned_func, aligned_t1w, nuis_func, namer.dirs['tmp'],
-               lv_mask=lv_mask, mc_params=f_prep.mc_params)
+    nuis = mgn(
+        aligned_func,
+        aligned_t1w,
+        nuis_func,
+        namer.dirs["tmp"],
+        lv_mask=lv_mask,
+        mc_params=f_prep.mc_params,
+    )
     nuis.nuis_correct()
     try:
         qc_func.nuisance_qa(nuis)
@@ -210,8 +252,7 @@ def ndmg_func_worker(func, t1w, atlas, atlas_brain, atlas_mask, lv_mask,
         conn = connectome.cor_graph(ts)
         connectome.save_graph(connectomes[idx])
         try:
-            qc_func.roi_graph_qa(ts[0], conn, aligned_func,
-                                 aligned_t1w, labels[idx])
+            qc_func.roi_graph_qa(ts[0], conn, aligned_func, aligned_t1w, labels[idx])
         except Exception as e:
             erm = "Exception in Connectome Extraction for {} parcellation."
             print((erm.format(labels[idx])))
@@ -223,8 +264,9 @@ def ndmg_func_worker(func, t1w, atlas, atlas_brain, atlas_mask, lv_mask,
     # Clean temp files
     if clean:
         print("Cleaning up intermediate files... ")
-        del_dirs = [namer.dirs['tmp']['base']] + \
-                   [namer.dirs['output'][k] for k in opt_dirs]
+        del_dirs = [namer.dirs["tmp"]["base"]] + [
+            namer.dirs["output"][k] for k in opt_dirs
+        ]
         cmd = "rm -rf {}".format(" ".format(del_dirs))
         mgu.execute_cmd(cmd)
 
@@ -233,9 +275,19 @@ def ndmg_func_worker(func, t1w, atlas, atlas_brain, atlas_mask, lv_mask,
     sys.exit(0)
 
 
-def ndmg_func_pipeline(func, t1w, atlas, atlas_brain, atlas_mask, lv_mask,
-                       labels, outdir, clean=False, stc=None,
-                       big=False):
+def ndmg_func_pipeline(
+    func,
+    t1w,
+    atlas,
+    atlas_brain,
+    atlas_mask,
+    lv_mask,
+    labels,
+    outdir,
+    clean=False,
+    stc=None,
+    big=False,
+):
     """
     analyzes fmri images and produces subject-specific derivatives.
 
@@ -263,9 +315,19 @@ def ndmg_func_pipeline(func, t1w, atlas, atlas_brain, atlas_mask, lv_mask,
             - a flag whether or not to clean out directories once finished.
     """
     try:
-        ndmg_func_worker(func, t1w, atlas, atlas_brain, atlas_mask, lv_mask,
-                         labels, outdir, clean=clean, stc=stc,
-                         big=big)
+        ndmg_func_worker(
+            func,
+            t1w,
+            atlas,
+            atlas_brain,
+            atlas_mask,
+            lv_mask,
+            labels,
+            outdir,
+            clean=clean,
+            stc=stc,
+            big=big,
+        )
     except Exception as e:
         print((traceback.format_exc()))
         os.exit()
@@ -278,40 +340,69 @@ def ndmg_func_pipeline(func, t1w, atlas, atlas_brain, atlas_mask, lv_mask,
 
 
 def main():
-    parser = ArgumentParser(description="This is an end-to-end connectome"
-                                        " estimation pipeline from sMRI and DTI images")
+    parser = ArgumentParser(
+        description="This is an end-to-end connectome"
+        " estimation pipeline from sMRI and DTI images"
+    )
     parser.add_argument("func", action="store", help="Nifti fMRI 4d EPI.")
     parser.add_argument("t1w", action="store", help="Nifti aMRI T1w image.")
     parser.add_argument("atlas", action="store", help="Nifti T1 MRI atlas")
-    parser.add_argument("atlas_brain", action="store", help="Nifti T1 MRI"
-                                                            " brain only atlas")
-    parser.add_argument("atlas_mask", action="store", help="Nifti binary mask"
-                                                           " of brain space in the atlas")
-    parser.add_argument("lv_mask", action="store", help="Nifti binary mask of"
-                                                        " lateral ventricles in atlas space.")
-    parser.add_argument("outdir", action="store", help="Path to which"
-                                                       " derivatives will be stored")
-    parser.add_argument("stc", action="store", help="A file or setting for"
-                                                    " slice timing correction. If file option selected,"
-                                                    " must provide path as well.",
-                        choices=["none", "interleaved", "up", "down", "file"])
-    parser.add_argument("labels", action="store", nargs="*", help="Nifti"
-                                                                  " labels of regions of interest in atlas space")
-    parser.add_argument("-s", "--stc_file", action="store",
-                        help="File for STC.")
-    parser.add_argument("-c", "--clean", action="store_true", default=False,
-                        help="Whether or not to delete intemediates")
-    parser.add_argument("-b", "--big", action="store_true", default=False,
-                        help="Whether to produce voxelwise timeseries.")
+    parser.add_argument(
+        "atlas_brain", action="store", help="Nifti T1 MRI" " brain only atlas"
+    )
+    parser.add_argument(
+        "atlas_mask",
+        action="store",
+        help="Nifti binary mask" " of brain space in the atlas",
+    )
+    parser.add_argument(
+        "lv_mask",
+        action="store",
+        help="Nifti binary mask of" " lateral ventricles in atlas space.",
+    )
+    parser.add_argument(
+        "outdir", action="store", help="Path to which" " derivatives will be stored"
+    )
+    parser.add_argument(
+        "stc",
+        action="store",
+        help="A file or setting for"
+        " slice timing correction. If file option selected,"
+        " must provide path as well.",
+        choices=["none", "interleaved", "up", "down", "file"],
+    )
+    parser.add_argument(
+        "labels",
+        action="store",
+        nargs="*",
+        help="Nifti" " labels of regions of interest in atlas space",
+    )
+    parser.add_argument("-s", "--stc_file", action="store", help="File for STC.")
+    parser.add_argument(
+        "-c",
+        "--clean",
+        action="store_true",
+        default=False,
+        help="Whether or not to delete intemediates",
+    )
+    parser.add_argument(
+        "-b",
+        "--big",
+        action="store_true",
+        default=False,
+        help="Whether to produce voxelwise timeseries.",
+    )
     result = parser.parse_args()
 
     result.stc = None if result.stc == "none" else result.stc
 
     if result.stc == "file":
         if result.stc_file is None:
-            sys.exit("Selected 'file' option for slice timing correction but"
-                     " did not pass a file. Please select another option or"
-                     " provide a file.")
+            sys.exit(
+                "Selected 'file' option for slice timing correction but"
+                " did not pass a file. Please select another option or"
+                " provide a file."
+            )
         else:
             if not op.isfile(result.stc_file):
                 sys.exit("Invalid file for STC provided.")
@@ -323,10 +414,19 @@ def main():
     print("Creating output temp directory: {}/tmp".format(result.outdir))
     mgu.execute_cmd("mkdir -p {} {}/tmp".format(result.outdir, result.outdir))
 
-    ndmg_func_pipeline(result.func, result.t1w, result.atlas,
-                       result.atlas_brain, result.atlas_mask,
-                       result.lv_mask, result.labels, result.outdir,
-                       result.clean, result.stc, result.big)
+    ndmg_func_pipeline(
+        result.func,
+        result.t1w,
+        result.atlas,
+        result.atlas_brain,
+        result.atlas_mask,
+        result.lv_mask,
+        result.labels,
+        result.outdir,
+        result.clean,
+        result.stc,
+        result.big,
+    )
 
 
 if __name__ == "__main__":
