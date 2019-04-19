@@ -43,6 +43,7 @@ import os
 import random
 from ndmg.graph import gen_biggraph as ndbg
 import traceback
+from ndmg.utils import bids_utils
 from ndmg.utils.bids_utils import NameResource
 import sys
 from dipy.tracking.streamline import Streamlines
@@ -76,7 +77,7 @@ def ndmg_dwi_worker(
     startTime = datetime.now()
     fmt = "_adj.ssv"
 
-    namer = NameResource(dwi, t1w, atlas, outdir)
+    namer = bids_utils.NameResource(dwi, t1w, atlas, outdir)
 
     print("Output directory: " + outdir)
     if not os.path.isdir(outdir):

@@ -229,14 +229,14 @@ def session_level(
     # use worker wrapper to call function f with args arg
     # and keyword args kwargs
     arg_list = [(f, arg, kwargs) for arg in args]
-    p = Pool(processes=nproc)  # start nproc in parallel
-    try:
-        result = p.map(worker_wrapper, arg_list)  # run them
-        p.close()
-    except:
-        p.close()
-    finally:
-        p.join()
+    # p = Pool(processes=nproc)  # start nproc in parallel
+    # try:
+    result = map(worker_wrapper, arg_list)  # run them
+    # p.close()
+    # except:
+    #     p.close()
+    # finally:
+    #     p.join()
     rmflds = []
     if modality == "func" and not debug:
         rmflds += [
@@ -248,7 +248,7 @@ def session_level(
         rmflds += [os.path.join(outDir, "func", "voxel-timeseries")]
     if len(rmflds) > 0:
         cmd = "rm -rf {}".format(" ".join(rmflds))
-        mgu.execute_cmd(cmd)
+        os.system(cmd)
     sys.exit(0)  # terminated
 
 
