@@ -16,3 +16,6 @@ env/
 dist/
 .vscode
 *.ipynb_checkpoints/
+*pycache
+
+.pytest_cache
