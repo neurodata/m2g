@@ -44,16 +44,20 @@ def rescale_bvec(bvec, bvec_new):
     bv1 = bv1.T if bv1.shape[0] == 3 else bv1
 
     # Normalize values not close to norm 1
-    bv2 = [b / np.linalg.norm(b) if not np.isclose(np.linalg.norm(b), 0)
-           else b for b in bv1]
+    bv2 = [
+        b / np.linalg.norm(b) if not np.isclose(np.linalg.norm(b), 0) else b
+        for b in bv1
+    ]
 
     try:
-        assert ('bvec' in bvec_new)
+        assert "bvec" in bvec_new
         np.savetxt(bvec_new, bv2)
         pass
     except AssertionError:
-        print('Error: your new b-vector file must have extension .bvec to' +
-              ' be compatible with the the pipeline.')
+        print(
+            "Error: your new b-vector file must have extension .bvec to"
+            + " be compatible with the the pipeline."
+        )
         pass
     else:
         pass

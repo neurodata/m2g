@@ -32,8 +32,7 @@ from ndmg.utils import gen_utils as mgu
 from scipy import signal
 
 
-class preproc_func():
-
+class preproc_func:
     def __init__(self, func, preproc_func, motion_func, outdir):
         """
         Enables preprocessing of single images for single images. Has options
@@ -89,14 +88,14 @@ class preproc_func():
                   in your data (nb.load(mri).header.get_zooms()), otherwise
                   this function will throw an error.
         """
-        if (stc is not None):
+        if stc is not None:
             cmd = "slicetimer -i {} -o {}".format(func, corrected_func)
             if stc == "down":
                 cmd += " --down"
             elif stc == "interleaved":
                 cmd += " --odd"
             elif stc == "up":
-                cmd += ''  # default of slicetimer
+                cmd += ""  # default of slicetimer
             elif op.isfile(stc):
                 cmd += " --tcustom {}".format(stc)
             cmd += " -r {}".format(tr)
@@ -118,21 +117,21 @@ class preproc_func():
         func_im = nb.load(self.func)
         tr = func_im.header.get_zooms()[3]
         if tr == 0:
-            raise ZeroDivisionError('Failed to determine number of frames to'
-                                    ' trim due to tr=0.')
+            raise ZeroDivisionError(
+                "Failed to determine number of frames to" " trim due to tr=0."
+            )
         nvol_trim = int(np.floor(15 / float(tr)))
         # remove the first nvol_trim timesteps
-        mssg = ("Scrubbing first 15 seconds ({0:d} volumes due"
-                " to tr={1: .3f}s)")
+        mssg = "Scrubbing first 15 seconds ({0:d} volumes due" " to tr={1: .3f}s)"
         print((mssg.format(nvol_trim, tr)))
         trimmed_dat = func_im.get_data()[:, :, :, nvol_trim:]
-        trimmed_im = nb.Nifti1Image(dataobj=trimmed_dat,
-                                    header=func_im.header,
-                                    affine=func_im.affine)
+        trimmed_im = nb.Nifti1Image(
+            dataobj=trimmed_dat, header=func_im.header, affine=func_im.affine
+        )
         nb.save(img=trimmed_im, filename=trim_func)
 
         # use slicetimer if user passes slicetiming information
-        if (stc is not None):
+        if stc is not None:
             self.slice_time_correct(trim_func, stc_func, tr, stc)
         else:
             stc_func = trim_func

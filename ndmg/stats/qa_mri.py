@@ -27,11 +27,15 @@ import os.path
 import matplotlib
 import numpy as np
 from ndmg.utils import gen_utils as mgu
-from ndmg.stats.func_qa_utils import plot_timeseries, plot_signals, \
-    registration_score, plot_connectome
+from ndmg.stats.func_qa_utils import (
+    plot_timeseries,
+    plot_signals,
+    registration_score,
+    plot_connectome,
+)
 from ndmg.stats.qa_reg import reg_mri_pngs, plot_brain, plot_overlays
 
-matplotlib.use('Agg')
+matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import csv
 
@@ -68,9 +72,9 @@ class qa_mri(object):
                 - the runtime in seconds.
         """
         self.runtime = exetime
-        attributes = [a for a in dir(self) if not a.startswith('__')]
-        with open(filename, 'w') as file:
-            wr = csv.writer(file, delimiter=':')
+        attributes = [a for a in dir(self) if not a.startswith("__")]
+        with open(filename, "w") as file:
+            wr = csv.writer(file, delimiter=":")
             for key, value in list(self.__dict__.items()):
                 wr.writerow([key, value])
         pass
@@ -99,8 +103,7 @@ class qa_mri(object):
         # since the brain will be moving in time
         rawfig = plot_brain(raw_dat.mean(axis=3), minthr=10)
         rawfig.savefig(
-            "{}/{}_raw.png".format(self.namer.dirs['qa']['prep_m'],
-                                   func_name)
+            "{}/{}_raw.png".format(self.namer.dirs["qa"]["prep_m"], func_name)
         )
 
         prep_im = nb.load(prep.preproc_func)
@@ -112,8 +115,7 @@ class qa_mri(object):
         prepfig = plot_brain(prep_dat.mean(axis=3), minthr=10)
         nvols = prep_dat.shape[3]
         prepfig.savefig(
-            "{}/{}_preproc.png".format(self.namer.dirs['qa']['prep_m'],
-                                       func_name)
+            "{}/{}_preproc.png".format(self.namer.dirs["qa"]["prep_m"], func_name)
         )
 
         # get the functional preprocessing motion parameters
@@ -149,29 +151,35 @@ class qa_mri(object):
         # names to append to plots so they can be found easily
         mp_names = ["trans", "rot", "FD"]
         # titles for the plots
-        mp_titles = ["Translational Parameters",
-                     "Rotational Parameters", "Framewise Displacement"]
+        mp_titles = [
+            "Translational Parameters",
+            "Rotational Parameters",
+            "Framewise Displacement",
+        ]
         # list of lists of the line labels
-        linelegs = [['x trans', 'y trans', 'z trans'],
-                    ['x rot', 'y rot', 'z rot'], ['framewise']]
-        xlab = 'Timepoint (TR)'
-        ylab = 'Displacement (mm)'
+        linelegs = [
+            ["x trans", "y trans", "z trans"],
+            ["x rot", "y rot", "z rot"],
+            ["framewise"],
+        ]
+        xlab = "Timepoint (TR)"
+        ylab = "Displacement (mm)"
         # iterate over tuples of the lists we store our plot variables in
-        for (param_type, name, title, legs) in zip(mc_pars, mp_names,
-                                                   mp_titles, linelegs):
+        for (param_type, name, title, legs) in zip(
+            mc_pars, mp_names, mp_titles, linelegs
+        ):
             params = []
             labels = []
             # iterate over the parameters while iterating over the legend
             # labels for each param
             params = [param for param in param_type]
-            labels = [' {} displacement'.format(leg) for leg in legs]
-            fig = plot_signals(params, labels, title=title,
-                               xlabel=xlab, ylabel=ylab)
+            labels = [" {} displacement".format(leg) for leg in legs]
+            fig = plot_signals(params, labels, title=title, xlabel=xlab, ylabel=ylab)
 
             fname_reg = "{}/{}_{}_parameters.png".format(
-                self.namer.dirs['qa']['prep_m'], func_name, name
+                self.namer.dirs["qa"]["prep_m"], func_name, name
             )
-            fig.savefig(fname_reg, format='png')
+            fig.savefig(fname_reg, format="png")
             plt.close(fig)
 
         # framewise-displacement statistics
@@ -179,9 +187,9 @@ class qa_mri(object):
         prep.mean_fd = np.mean(fd_pars)
         prep.std_fd = np.std(fd_pars)
         # number of framewise displacements greater than .2 mm
-        prep.num_fd_gt_200um = np.sum(fd_pars > .2)
+        prep.num_fd_gt_200um = np.sum(fd_pars > 0.2)
         # number of framewise displacements greater than .5 mm
-        prep.num_fd_gt_500um = np.sum(fd_pars > .5)
+        prep.num_fd_gt_500um = np.sum(fd_pars > 0.5)
         pass
 
     def anat_preproc_qa(self, prep):
@@ -199,14 +207,14 @@ class qa_mri(object):
         print("Performing QA for Anatoical Preprocessing...")
         figs = {}
         # produce plots for the raw anatomical image
-        figs['raw_anat'] = plot_brain(prep.anat)
+        figs["raw_anat"] = plot_brain(prep.anat)
         # produce the preprocessed skullstripped anatomical image plot
-        figs['preproc_brain'] = plot_overlays(prep.anat,
-                                              prep.anat_preproc_brain)
+        figs["preproc_brain"] = plot_overlays(prep.anat, prep.anat_preproc_brain)
         # save iterator
         for plotname, fig in figs.items():
-            fname = "{}/{}_{}.png".format(self.namer.dirs['qa']['prep_a'],
-                                          prep.anat_name, plotname)
+            fname = "{}/{}_{}.png".format(
+                self.namer.dirs["qa"]["prep_a"], prep.anat_name, plotname
+            )
             fig.tight_layout()
             fig.savefig(fname)
             plt.close(fig)
@@ -224,38 +232,32 @@ class qa_mri(object):
         print("Performing QA for Self-Registration...")
         # overlap statistic for the functional and anatomical
         # skull-off brains
-        (sreg_sc, sreg_fig) = registration_score(
-            reg.sreg_brain,
-            reg.t1w_brain
-        )
+        (sreg_sc, sreg_fig) = registration_score(reg.sreg_brain, reg.t1w_brain)
         self.self_reg_sc = sreg_sc
         # use the jaccard score in the filepath to easily
         # identify failed subjects
         sreg_m_final = "{}/space-T1w/{}_jaccard_{:.0f}".format(
-            self.namer.dirs['qa']['reg_m'],
-            reg.sreg_strat,
-            self.self_reg_sc * 1000
+            self.namer.dirs["qa"]["reg_m"], reg.sreg_strat, self.self_reg_sc * 1000
         )
         sreg_a_final = "{}/space-T1w/{}_jaccard_{:.0f}".format(
-            self.namer.dirs['qa']['reg_a'],
-            reg.sreg_strat,
-            self.self_reg_sc * 1000
+            self.namer.dirs["qa"]["reg_a"], reg.sreg_strat, self.self_reg_sc * 1000
         )
         cmd = "mkdir -p {} {}".format(sreg_m_final, sreg_a_final)
         mgu.execute_cmd(cmd)
         sreg_fig.savefig(
-            "{}/{}_bold_t1w_overlap.png".format(sreg_m_final,
-                                                self.namer.get_mod_source())
+            "{}/{}_bold_t1w_overlap.png".format(
+                sreg_m_final, self.namer.get_mod_source()
+            )
         )
         # produce plot of the white-matter mask used during bbr
         if mreg.wm_mask is not None:
             mask_dat = nb.load(reg.wm_mask).get_data()
             t1w_dat = nb.load(reg.t1w_brain).get_data()
             m_mask = plot_overlays(t1w_dat, mask_dat, minthr=0, maxthr=100)
-            fname_mask = "{}/{}_{}.png".format(sreg_a_final,
-                                               self.namer.get_anat_source(),
-                                               "wmm")
-            m_mask.savefig(fname_mask, format='png')
+            fname_mask = "{}/{}_{}.png".format(
+                sreg_a_final, self.namer.get_anat_source(), "wmm"
+            )
+            m_mask.savefig(fname_mask, format="png")
             plt.close(m_mask)
 
         plt.close(sreg_fig)
@@ -265,15 +267,17 @@ class qa_mri(object):
         """
         A util to return aligned func name.
         """
-        return "{}_{}".format(self.namer.get_mod_source(),
-                              self.namer.get_template_info())
+        return "{}_{}".format(
+            self.namer.get_mod_source(), self.namer.get_template_info()
+        )
 
     def aligned_anat_name(self):
         """
         A util to return aligned func name.
         """
-        return "{}_{}".format(self.namer.get_anat_source(),
-                              self.namer.get_template_info())
+        return "{}_{}".format(
+            self.namer.get_anat_source(), self.namer.get_template_info()
+        )
 
     def temp_reg_qa(self, reg):
         """
@@ -288,39 +292,29 @@ class qa_mri(object):
         # overlap statistic and plot btwn template-aligned fmri
         # and the atlas brain that we are aligning to
         (treg_sc, treg_fig) = registration_score(
-            reg.taligned_epi,
-            reg.atlas_brain,
-            edge=True
+            reg.taligned_epi, reg.atlas_brain, edge=True
         )
         # use the registration score in the filepath for easy
         # identification of failed subjects
         self.temp_reg_sc = treg_sc
         treg_m_final = "{}/template/{}_jaccard_{:.0f}".format(
-            self.namer.dirs['qa']['reg_m'],
-            reg.treg_strat,
-            self.temp_reg_sc * 1000
+            self.namer.dirs["qa"]["reg_m"], reg.treg_strat, self.temp_reg_sc * 1000
         )
         treg_a_final = "{}/template/{}_jaccard_{:.0f}".format(
-            self.namer.dirs['qa']['reg_a'],
-            reg.treg_strat,
-            self.temp_reg_sc * 1000
+            self.namer.dirs["qa"]["reg_a"], reg.treg_strat, self.temp_reg_sc * 1000
         )
         cmd = "mkdir -p {} {}".format(treg_m_final, treg_a_final)
         mgu.execute_cmd(cmd)
         mri_name = self.aligned_mri_name()
-        treg_fig.savefig(
-            "{}/{}_epi2temp_overlap.png".format(treg_m_final,
-                                                mri_name)
-        )
+        treg_fig.savefig("{}/{}_epi2temp_overlap.png".format(treg_m_final, mri_name))
         plt.close(treg_fig)
         t1w_name = self.aligned_anat_name()
         # overlap between the template-aligned t1w and the atlas brain
         # that we are aligning to
-        t1w2temp_fig = plot_overlays(reg.taligned_t1w, freg.atlas_brain,
-                                     edge=True, minthr=0, maxthr=100)
-        t1w2temp_fig.savefig(
-            "{}/{}_t1w2temp.png".format(treg_a_final, t1w_name)
+        t1w2temp_fig = plot_overlays(
+            reg.taligned_t1w, freg.atlas_brain, edge=True, minthr=0, maxthr=100
         )
+        t1w2temp_fig.savefig("{}/{}_t1w2temp.png".format(treg_a_final, t1w_name))
         plt.close(t1w2temp_fig)
         # produce cnr, snr, and mean plots for temporal voxelwise statistics
         self.voxel_qa(reg.epi_aligned_skull, reg.atlas_mask, treg_m_final)
@@ -359,7 +353,7 @@ class qa_mri(object):
 
         func_name = self.aligned_mri_name()
 
-        np.seterr(divide='ignore', invalid='ignore')
+        np.seterr(divide="ignore", invalid="ignore")
         mean_ts = fmri_dat.mean(axis=3)  # temporal mean
         snr_ts = np.divide(mean_ts, std_nonbrain)  # temporal snr
         # temporal cnr
@@ -371,7 +365,7 @@ class qa_mri(object):
         plots["cnr"] = plot_brain(cnr_ts, minthr=10)
         for plotname, plot in plots.items():
             fname = "{}/{}_{}.png".format(qadir, func_name, plotname)
-            plot.savefig(fname, format='png')
+            plot.savefig(fname, format="png")
             plt.close(plot)
         pass
 
@@ -385,8 +379,8 @@ class qa_mri(object):
                 - the nuisance correction object.
         """
         print("Performing QA for Nuisance...")
-        qcadir = self.namer.dirs['qa']['nuis_a']
-        qcfdir = self.namer.dirs['qa']['nuis_f']
+        qcadir = self.namer.dirs["qa"]["nuis_a"]
+        qcfdir = self.namer.dirs["qa"]["nuis_f"]
         maskdir = "{}/{}".format(qcadir, "masks")
         glmdir = "{}/{}".format(qcfdir, "glm_correction")
         fftdir = "{}/{}".format(qcfdir, "filtering")
@@ -397,8 +391,7 @@ class qa_mri(object):
         anat_name = self.aligned_anat_name()
         t1w_dat = nb.load(nuisobj.smri).get_data()
         # list of all possible masks
-        masks = [nuisobj.lv_mask, nuisobj.wm_mask, nuisobj.gm_mask,
-                 nuisobj.er_wm_mask]
+        masks = [nuisobj.lv_mask, nuisobj.wm_mask, nuisobj.gm_mask, nuisobj.er_wm_mask]
         masknames = ["csf_mask", "wm_mask", "gm_mask", "eroded_wm_mask"]
         # iterate over masks for existence and plot overlay if they exist
         # since that means they were used at some point
@@ -408,23 +401,26 @@ class qa_mri(object):
                 # produce overlay figure between the t1w image that has
                 # segmentation performed on it and the respective mask
                 f_mask = plot_overlays(t1w_dat, mask_dat, minthr=0, maxthr=100)
-                fname_mask = "{}/{}_{}.png".format(maskdir, anat_name,
-                                                   maskname)
-                f_mask.savefig(fname_mask, format='png')
+                fname_mask = "{}/{}_{}.png".format(maskdir, anat_name, maskname)
+                f_mask.savefig(fname_mask, format="png")
                 plt.close(f_mask)
 
         # GLM regressors we could have
-        glm_regs = [nuisobj.csf_reg, nuisobj.wm_reg, nuisobj.mot_reg,
-                    nuisobj.cc_reg]
+        glm_regs = [nuisobj.csf_reg, nuisobj.wm_reg, nuisobj.mot_reg, nuisobj.cc_reg]
         glm_names = ["csf", "wm", "friston", "compcor"]
-        glm_titles = ["CSF Regressors", "White-Matter Regressors",
-                      "Motion Regressors", "aCompCor Regressors"]
+        glm_titles = [
+            "CSF Regressors",
+            "White-Matter Regressors",
+            "Motion Regressors",
+            "aCompCor Regressors",
+        ]
         # whether we should include legend labels
         label_include = [True, True, False, True]
         func_name = self.aligned_mri_name()
         # iterate over tuples of our plotting variables
-        for (reg, name, title, lab) in zip(glm_regs, glm_names, glm_titles,
-                                           label_include):
+        for (reg, name, title, lab) in zip(
+            glm_regs, glm_names, glm_titles, label_include
+        ):
             # if we have a particular regressor
             if reg is not None:
                 regs = []
@@ -434,27 +430,30 @@ class qa_mri(object):
                 # store each regressor as a element of our list
                 regs = [reg[:, i] for i in range(0, nreg)]
                 # store labels in case they are plotted
-                labels = ['{} reg {}'.format(name, i) for i in range(0, nreg)]
+                labels = ["{} reg {}".format(name, i) for i in range(0, nreg)]
                 # plot each regressor as a line
-                fig = plot_signals(regs, labels, title=title,
-                                   xlabel='Timepoint', ylabel='Intensity',
-                                   lab_incl=lab)
-                fname_reg = "{}/{}_{}_regressors.png".format(glmdir,
-                                                             func_name,
-                                                             name)
-                fig.savefig(fname_reg, format='png')
+                fig = plot_signals(
+                    regs,
+                    labels,
+                    title=title,
+                    xlabel="Timepoint",
+                    ylabel="Intensity",
+                    lab_incl=lab,
+                )
+                fname_reg = "{}/{}_{}_regressors.png".format(glmdir, func_name, name)
+                fig.savefig(fname_reg, format="png")
                 plt.close(fig)
         # signal before compared with the signal removed and
         # signal after correction
         fig_glm_sig = plot_signals(
             [nuisobj.cent_nuis, nuisobj.glm_sig, nuisobj.glm_nuis],
-            ['Before', 'Regressed Sig', 'After'],
-            title='Impact of GLM Regression on Average GM Signal',
-            xlabel='Timepoint',
-            ylabel='Intensity'
+            ["Before", "Regressed Sig", "After"],
+            title="Impact of GLM Regression on Average GM Signal",
+            xlabel="Timepoint",
+            ylabel="Intensity",
         )
-        fname_glm_sig = '{}/{}_glm_signal_cmp.png'.format(glmdir, func_name)
-        fig_glm_sig.savefig(fname_glm_sig, format='png')
+        fname_glm_sig = "{}/{}_glm_signal_cmp.png".format(glmdir, func_name)
+        fig_glm_sig.savefig(fname_glm_sig, format="png")
         plt.close(fig_glm_sig)
 
         # Frequency Filtering
@@ -465,26 +464,25 @@ class qa_mri(object):
             # compare with average fft after frequency filtering
             fig_fft_pow = plot_signals(
                 [nuisobj.fft_bef, nuisobj.fft_reg],
-                ['Before', 'After'],
-                title='Average Gray Matter Power Spectrum',
-                xlabel='Frequency',
-                ylabel='Power',
-                xax=nuisobj.freq_ra)
-            fname_fft_pow = '{}/{}_fft_power.png'.format(fftdir, func_name)
-            fig_fft_pow.savefig(fname_fft_pow, format='png')
+                ["Before", "After"],
+                title="Average Gray Matter Power Spectrum",
+                xlabel="Frequency",
+                ylabel="Power",
+                xax=nuisobj.freq_ra,
+            )
+            fname_fft_pow = "{}/{}_fft_power.png".format(fftdir, func_name)
+            fig_fft_pow.savefig(fname_fft_pow, format="png")
             plt.close(fig_fft_pow)
             # plot the signal vs the regressed signal vs signal after
             fig_fft_sig = plot_signals(
                 [nuisobj.glm_nuis, nuisobj.fft_sig, nuisobj.fft_nuis],
-                ['Before', 'Regressed Sig', 'After'],
-                title='Impact of Frequency Filtering on Average GM Signal',
-                xlabel='Timepoint',
-                ylabel='Intensity')
-            fname_fft_sig = '{}/{}_fft_signal_cmp.png'.format(
-                fftdir,
-                func_name
+                ["Before", "Regressed Sig", "After"],
+                title="Impact of Frequency Filtering on Average GM Signal",
+                xlabel="Timepoint",
+                ylabel="Intensity",
             )
-            fig_fft_sig.savefig(fname_fft_sig, format='png')
+            fname_fft_sig = "{}/{}_fft_signal_cmp.png".format(fftdir, func_name)
+            fig_fft_sig.savefig(fname_fft_sig, format="png")
             plt.close(fig_fft_sig)
         pass
 
@@ -508,7 +506,7 @@ class qa_mri(object):
                 - the quality control directory to place outputs.
         """
         label_name = self.namer.get_label(label)
-        qcdir = self.namer.dirs['qa']['conn'][label_name]
+        qcdir = self.namer.dirs["qa"]["conn"][label_name]
         print("Performing QA for ROI Analysis...")
         cmd = "mkdir -p {}".format(qcdir)
         mgu.execute_cmd(cmd)
@@ -518,15 +516,15 @@ class qa_mri(object):
         # overlap between the temp-aligned fmri and the labelled parcellation
         reg_mri_pngs(func, label, qcdir, minthr=10, maxthr=95)
         # plot the timeseries for each ROI and the connectivity matrix
-        fname_ts = "{}/{}_{}_timeseries.html".format(qcdir,
-                                                     self.aligned_mri_name(), label_name)
-        fname_con = "{}/{}_{}_measure-correlation.html".format(qcdir,
-                                                               self.aligned_mri_name(), label_name)
-        if (self.modality == "func"):
-            plot_timeseries(timeseries, fname_ts, self.aligned_mri_name(),
-                            label_name)
-        plot_connectome(connectome, fname_con, self.aligned_mri_name(),
-                        label_name)
+        fname_ts = "{}/{}_{}_timeseries.html".format(
+            qcdir, self.aligned_mri_name(), label_name
+        )
+        fname_con = "{}/{}_{}_measure-correlation.html".format(
+            qcdir, self.aligned_mri_name(), label_name
+        )
+        if self.modality == "func":
+            plot_timeseries(timeseries, fname_ts, self.aligned_mri_name(), label_name)
+        plot_connectome(connectome, fname_con, self.aligned_mri_name(), label_name)
         pass
 
     def voxel_ts_qa(self, timeseries, voxel_func, atlas_mask):
@@ -545,9 +543,8 @@ class qa_mri(object):
                 - the directory to place qc in.
         """
         print("Performing QA for Voxel Timeseries...")
-        qcdir = self.namer.dirs['qa']['ts_voxel']
+        qcdir = self.namer.dirs["qa"]["ts_voxel"]
         # plot the voxelwise signal with respect to the atlas to
         # get an idea of how well the fmri is masked
-        reg_mri_pngs(voxel_func, atlas_mask, qcdir,
-                     loc=0, minthr=10, maxthr=95)
+        reg_mri_pngs(voxel_func, atlas_mask, qcdir, loc=0, minthr=10, maxthr=95)
         pass

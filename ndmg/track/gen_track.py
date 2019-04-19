@@ -30,16 +30,34 @@ from dipy.tracking.streamline import Streamlines
 
 def build_seed_list(mask_img_file, stream_affine, dens):
     from dipy.tracking import utils
+
     mask_img = nib.load(mask_img_file)
-    mask_img_data = mask_img.get_data().astype('bool')
-    seeds = utils.random_seeds_from_mask(mask_img_data, seeds_count=int(dens), seed_count_per_voxel=True,
-                                         affine=stream_affine)
+    mask_img_data = mask_img.get_data().astype("bool")
+    seeds = utils.random_seeds_from_mask(
+        mask_img_data,
+        seeds_count=int(dens),
+        seed_count_per_voxel=True,
+        affine=stream_affine,
+    )
     return seeds
 
 
 class run_track(object):
-    def __init__(self, dwi_in, nodif_B0_mask, gm_in_dwi, vent_csf_in_dwi, csf_in_dwi,
-                 wm_in_dwi, gtab, mod_type, track_type, mod_func, seeds, stream_affine):
+    def __init__(
+        self,
+        dwi_in,
+        nodif_B0_mask,
+        gm_in_dwi,
+        vent_csf_in_dwi,
+        csf_in_dwi,
+        wm_in_dwi,
+        gtab,
+        mod_type,
+        track_type,
+        mod_func,
+        seeds,
+        stream_affine,
+    ):
         """
         A class for deterministic tractography in native space.
 
@@ -87,37 +105,46 @@ class run_track(object):
 
     def run(self):
         self.tiss_classifier = self.prep_tracking()
-        if self.mod_type == 'det':
-            if self.track_type == 'eudx':
+        if self.mod_type == "det":
+            if self.track_type == "eudx":
                 self.tens = self.tens_mod_est()
                 tracks = self.eudx_tracking()
-            elif (self.track_type == 'local') or (self.track_type == 'particle'):
-                if self.mod_func == 'csa':
+            elif (self.track_type == "local") or (self.track_type == "particle"):
+                if self.mod_func == "csa":
                     self.mod = self.odf_mod_est()
-                elif self.mod_func == 'csd':
+                elif self.mod_func == "csd":
                     self.mod = self.csd_mod_est()
-                if self.track_type == 'local':
+                if self.track_type == "local":
                     tracks = self.local_tracking()
-                elif self.track_type == 'particle':
+                elif self.track_type == "particle":
                     tracks = self.particle_tracking()
             else:
-                raise ValueError('Error: Either no seeds supplied, or no valid seeds found in white-matter interface')
-        elif self.mod_type == 'prob':
-            if self.mod_func == 'csa':
+                raise ValueError(
+                    "Error: Either no seeds supplied, or no valid seeds found in white-matter interface"
+                )
+        elif self.mod_type == "prob":
+            if self.mod_func == "csa":
                 self.mod = self.odf_mod_est()
-            elif self.mod_func == 'csd':
+            elif self.mod_func == "csd":
                 self.mod = self.csd_mod_est()
-            if self.track_type == 'local':
+            if self.track_type == "local":
                 tracks = self.local_tracking()
-            elif self.track_type == 'particle':
+            elif self.track_type == "particle":
                 tracks = self.particle_tracking()
         else:
-            raise ValueError('Error: Either no seeds supplied, or no valid seeds found in white-matter interface')
+            raise ValueError(
+                "Error: Either no seeds supplied, or no valid seeds found in white-matter interface"
+            )
         return tracks
 
     def prep_tracking(self):
-        from dipy.tracking.local import ActTissueClassifier, CmcTissueClassifier, BinaryTissueClassifier
-        tiss_class = 'act'
+        from dipy.tracking.local import (
+            ActTissueClassifier,
+            CmcTissueClassifier,
+            BinaryTissueClassifier,
+        )
+
+        tiss_class = "act"
         self.dwi_img = nib.load(self.dwi)
         self.data = self.dwi_img.get_data()
         # Loads mask and ensures it's a true binary mask
@@ -128,26 +155,34 @@ class run_track(object):
         self.gm_mask_data = self.gm_mask.get_data()
         self.wm_mask = nib.load(self.wm_in_dwi)
         self.wm_mask_data = self.wm_mask.get_data()
-        self.wm_in_dwi_data = nib.load(self.wm_in_dwi).get_data().astype('bool')
-        if tiss_class == 'act':
+        self.wm_in_dwi_data = nib.load(self.wm_in_dwi).get_data().astype("bool")
+        if tiss_class == "act":
             self.vent_csf_in_dwi = nib.load(self.vent_csf_in_dwi)
             self.vent_csf_in_dwi_data = self.vent_csf_in_dwi.get_data()
             self.background = np.ones(self.gm_mask.shape)
-            self.background[(self.gm_mask_data + self.wm_mask_data + self.vent_csf_in_dwi_data) > 0] = 0
+            self.background[
+                (self.gm_mask_data + self.wm_mask_data + self.vent_csf_in_dwi_data) > 0
+            ] = 0
             self.include_map = self.gm_mask_data
             self.include_map[self.background > 0] = 1
             self.exclude_map = self.vent_csf_in_dwi_data
-            self.tiss_classifier = ActTissueClassifier(self.include_map, self.exclude_map)
-        elif tiss_class == 'bin':
+            self.tiss_classifier = ActTissueClassifier(
+                self.include_map, self.exclude_map
+            )
+        elif tiss_class == "bin":
             self.tiss_classifier = BinaryTissueClassifier(self.wm_in_dwi_data)
-        elif tiss_class == 'cmc':
+        elif tiss_class == "cmc":
             self.vent_csf_in_dwi = nib.load(self.vent_csf_in_dwi)
             self.vent_csf_in_dwi_data = self.vent_csf_in_dwi.get_data()
-            voxel_size = np.average(self.wm_mask.get_header()['pixdim'][1:4])
+            voxel_size = np.average(self.wm_mask.get_header()["pixdim"][1:4])
             step_size = 0.2
-            self.tiss_classifier = CmcTissueClassifier.from_pve(self.wm_mask_data, self.gm_mask_data,
-                                                                self.vent_csf_in_dwi_data, step_size=step_size,
-                                                                average_voxel_size=voxel_size)
+            self.tiss_classifier = CmcTissueClassifier.from_pve(
+                self.wm_mask_data,
+                self.gm_mask_data,
+                self.vent_csf_in_dwi_data,
+                step_size=step_size,
+                average_voxel_size=voxel_size,
+            )
         else:
             pass
         return self.tiss_classifier
@@ -155,33 +190,48 @@ class run_track(object):
     def tens_mod_est(self):
         from dipy.reconst.dti import TensorModel, fractional_anisotropy, quantize_evecs
         from dipy.data import get_sphere
-        print('Fitting tensor model...')
+
+        print("Fitting tensor model...")
         self.model = TensorModel(self.gtab)
         self.ten = self.model.fit(self.data, self.wm_in_dwi_data)
         self.fa = self.ten.fa
         self.fa[np.isnan(self.fa)] = 0
-        self.sphere = get_sphere('repulsion724')
+        self.sphere = get_sphere("repulsion724")
         self.ind = quantize_evecs(self.ten.evecs, self.sphere.vertices)
         return self.ten
 
     def odf_mod_est(self):
         from dipy.reconst.shm import CsaOdfModel
-        print('Fitting CSA ODF model...')
+
+        print("Fitting CSA ODF model...")
         self.mod = CsaOdfModel(self.gtab, sh_order=6)
         return self.mod
 
     def csd_mod_est(self):
-        from dipy.reconst.csdeconv import ConstrainedSphericalDeconvModel, recursive_response
-        print('Fitting CSD model...')
+        from dipy.reconst.csdeconv import (
+            ConstrainedSphericalDeconvModel,
+            recursive_response,
+        )
+
+        print("Fitting CSD model...")
         try:
-            print('Attempting to use spherical harmonic basis first...')
+            print("Attempting to use spherical harmonic basis first...")
             self.mod = ConstrainedSphericalDeconvModel(self.gtab, None, sh_order=6)
         except:
-            print('Falling back to estimating recursive response...')
-            self.response = recursive_response(self.gtab, self.data, mask=self.wm_in_dwi_data, sh_order=6,
-                                               peak_thr=0.01, init_fa=0.08, init_trace=0.0021, iter=8,
-                                               convergence=0.001, parallel=False)
-            print('CSD Reponse: ' + str(self.response))
+            print("Falling back to estimating recursive response...")
+            self.response = recursive_response(
+                self.gtab,
+                self.data,
+                mask=self.wm_in_dwi_data,
+                sh_order=6,
+                peak_thr=0.01,
+                init_fa=0.08,
+                init_trace=0.0021,
+                iter=8,
+                convergence=0.001,
+                parallel=False,
+            )
+            print("CSD Reponse: " + str(self.response))
             self.mod = ConstrainedSphericalDeconvModel(self.gtab, self.response)
         return self.mod
 
@@ -189,31 +239,56 @@ class run_track(object):
         from dipy.tracking.local import LocalTracking
         from dipy.data import get_sphere
         from dipy.direction import peaks_from_model, ProbabilisticDirectionGetter
-        self.sphere = get_sphere('repulsion724')
-        if self.mod_type == 'det':
-            print('Obtaining peaks from model...')
-            self.mod_peaks = peaks_from_model(self.mod, self.data, self.sphere, relative_peak_threshold=.5,
-                                              min_separation_angle=25, mask=self.wm_in_dwi_data, npeaks=5,
-                                              normalize_peaks=True)
-            self.streamline_generator = LocalTracking(self.mod_peaks, self.tiss_classifier, self.seeds,
-                                                      self.stream_affine, step_size=.5, return_all=True)
-        elif self.mod_type == 'prob':
-            print('Preparing probabilistic tracking...')
-            print('Fitting model to data...')
+
+        self.sphere = get_sphere("repulsion724")
+        if self.mod_type == "det":
+            print("Obtaining peaks from model...")
+            self.mod_peaks = peaks_from_model(
+                self.mod,
+                self.data,
+                self.sphere,
+                relative_peak_threshold=0.5,
+                min_separation_angle=25,
+                mask=self.wm_in_dwi_data,
+                npeaks=5,
+                normalize_peaks=True,
+            )
+            self.streamline_generator = LocalTracking(
+                self.mod_peaks,
+                self.tiss_classifier,
+                self.seeds,
+                self.stream_affine,
+                step_size=0.5,
+                return_all=True,
+            )
+        elif self.mod_type == "prob":
+            print("Preparing probabilistic tracking...")
+            print("Fitting model to data...")
             self.mod_fit = self.mod.fit(self.data, self.wm_in_dwi_data)
-            print('Building direction-getter...')
+            print("Building direction-getter...")
             try:
-                print('Proceeding using spherical harmonic coefficient from model estimation...')
-                self.pdg = ProbabilisticDirectionGetter.from_shcoeff(self.mod_fit.shm_coeff, max_angle=30.,
-                                                                     sphere=self.sphere)
+                print(
+                    "Proceeding using spherical harmonic coefficient from model estimation..."
+                )
+                self.pdg = ProbabilisticDirectionGetter.from_shcoeff(
+                    self.mod_fit.shm_coeff, max_angle=30.0, sphere=self.sphere
+                )
             except:
-                print('Proceeding using FOD PMF from model estimation...')
+                print("Proceeding using FOD PMF from model estimation...")
                 self.fod = self.mod_fit.odf(self.sphere)
                 self.pmf = self.fod.clip(min=0)
-                self.pdg = ProbabilisticDirectionGetter.from_pmf(self.pmf, max_angle=30., sphere=self.sphere)
-            self.streamline_generator = LocalTracking(self.pdg, self.tiss_classifier, self.seeds, self.stream_affine,
-                                                      step_size=.5, return_all=True)
-        print('Reconstructing tractogram streamlines...')
+                self.pdg = ProbabilisticDirectionGetter.from_pmf(
+                    self.pmf, max_angle=30.0, sphere=self.sphere
+                )
+            self.streamline_generator = LocalTracking(
+                self.pdg,
+                self.tiss_classifier,
+                self.seeds,
+                self.stream_affine,
+                step_size=0.5,
+                return_all=True,
+            )
+        print("Reconstructing tractogram streamlines...")
         self.streamlines = Streamlines(self.streamline_generator)
         return self.streamlines
 
@@ -221,48 +296,83 @@ class run_track(object):
         from dipy.tracking.local import ParticleFilteringTracking
         from dipy.data import get_sphere
         from dipy.direction import peaks_from_model, ProbabilisticDirectionGetter
-        self.sphere = get_sphere('repulsion724')
-        if self.mod_type == 'det':
+
+        self.sphere = get_sphere("repulsion724")
+        if self.mod_type == "det":
             maxcrossing = 1
-            print('Obtaining peaks from model...')
-            self.mod_peaks = peaks_from_model(self.mod, self.data, self.sphere, relative_peak_threshold=.5,
-                                              min_separation_angle=25, mask=self.wm_in_dwi_data, npeaks=5,
-                                              normalize_peaks=True)
-            self.streamline_generator = ParticleFilteringTracking(self.mod_peaks, self.tiss_classifier, self.seeds,
-                                                                  self.stream_affine, max_cross=maxcrossing,
-                                                                  step_size=.5, maxlen=1000, pft_back_tracking_dist=2,
-                                                                  pft_front_tracking_dist=1, particle_count=15,
-                                                                  return_all=True)
-        elif self.mod_type == 'prob':
+            print("Obtaining peaks from model...")
+            self.mod_peaks = peaks_from_model(
+                self.mod,
+                self.data,
+                self.sphere,
+                relative_peak_threshold=0.5,
+                min_separation_angle=25,
+                mask=self.wm_in_dwi_data,
+                npeaks=5,
+                normalize_peaks=True,
+            )
+            self.streamline_generator = ParticleFilteringTracking(
+                self.mod_peaks,
+                self.tiss_classifier,
+                self.seeds,
+                self.stream_affine,
+                max_cross=maxcrossing,
+                step_size=0.5,
+                maxlen=1000,
+                pft_back_tracking_dist=2,
+                pft_front_tracking_dist=1,
+                particle_count=15,
+                return_all=True,
+            )
+        elif self.mod_type == "prob":
             maxcrossing = 2
-            print('Preparing probabilistic tracking...')
-            print('Fitting model to data...')
+            print("Preparing probabilistic tracking...")
+            print("Fitting model to data...")
             self.mod_fit = self.mod.fit(self.data, self.wm_in_dwi_data)
-            print('Building direction-getter...')
+            print("Building direction-getter...")
             try:
-                print('Proceeding using spherical harmonic coefficient from model estimation...')
-                self.pdg = ProbabilisticDirectionGetter.from_shcoeff(self.mod_fit.shm_coeff, max_angle=30.,
-                                                                     sphere=self.sphere)
+                print(
+                    "Proceeding using spherical harmonic coefficient from model estimation..."
+                )
+                self.pdg = ProbabilisticDirectionGetter.from_shcoeff(
+                    self.mod_fit.shm_coeff, max_angle=30.0, sphere=self.sphere
+                )
             except:
-                print('Proceeding using FOD PMF from model estimation...')
+                print("Proceeding using FOD PMF from model estimation...")
                 self.fod = self.mod_fit.odf(self.sphere)
                 self.pmf = self.fod.clip(min=0)
-                self.pdg = ProbabilisticDirectionGetter.from_pmf(self.pmf, max_angle=30., sphere=self.sphere)
-                self.streamline_generator = ParticleFilteringTracking(self.pdg, self.tiss_classifier, self.seeds,
-                                                                      self.stream_affine, max_cross=maxcrossing,
-                                                                      step_size=.5, maxlen=1000,
-                                                                      pft_back_tracking_dist=2,
-                                                                      pft_front_tracking_dist=1, particle_count=15,
-                                                                      return_all=True)
-        print('Reconstructing tractogram streamlines...')
+                self.pdg = ProbabilisticDirectionGetter.from_pmf(
+                    self.pmf, max_angle=30.0, sphere=self.sphere
+                )
+                self.streamline_generator = ParticleFilteringTracking(
+                    self.pdg,
+                    self.tiss_classifier,
+                    self.seeds,
+                    self.stream_affine,
+                    max_cross=maxcrossing,
+                    step_size=0.5,
+                    maxlen=1000,
+                    pft_back_tracking_dist=2,
+                    pft_front_tracking_dist=1,
+                    particle_count=15,
+                    return_all=True,
+                )
+        print("Reconstructing tractogram streamlines...")
         self.streamlines = Streamlines(self.streamline_generator)
         return self.streamlines
 
     def eudx_tracking(self):
         from dipy.tracking.eudx import EuDX
-        print('Running EuDX tracking...')
-        self.streamline_generator = EuDX(self.fa.astype('f8'), self.ind, odf_vertices=self.sphere.vertices,
-                                         a_low=float(0.2), seeds=self.seeds, affine=self.stream_affine)
+
+        print("Running EuDX tracking...")
+        self.streamline_generator = EuDX(
+            self.fa.astype("f8"),
+            self.ind,
+            odf_vertices=self.sphere.vertices,
+            a_low=float(0.2),
+            seeds=self.seeds,
+            affine=self.stream_affine,
+        )
         self.streamlines = Streamlines(self.streamline_generator)
         return self.streamlines
 
@@ -273,6 +383,7 @@ def eudx_basic(dwi_file, gtab, stop_val=0.1):
     from dipy.tracking.eudx import EuDX
     from dipy.data import get_sphere
     from dipy.segment.mask import median_otsu
+
     """
     Tracking with basic tensors and basic eudx - experimental
     We now force seeding at every voxel in the provided mask for
@@ -295,7 +406,7 @@ def eudx_basic(dwi_file, gtab, stop_val=0.1):
     data_sqz = np.squeeze(data)
     b0_mask, mask_data = median_otsu(data_sqz, 2, 1)
     mask_img = nib.Nifti1Image(mask_data.astype(np.float32), img.affine)
-    mask_out_file = os.path.dirname(dwi_file) + '/dwi_bin_mask.nii.gz'
+    mask_out_file = os.path.dirname(dwi_file) + "/dwi_bin_mask.nii.gz"
     nib.save(mask_img, mask_out_file)
 
     # use all points in mask
@@ -304,8 +415,9 @@ def eudx_basic(dwi_file, gtab, stop_val=0.1):
 
     model = TensorModel(gtab)
     ten = model.fit(data, mask_data)
-    sphere = get_sphere('symmetric724')
+    sphere = get_sphere("symmetric724")
     ind = quantize_evecs(ten.evecs, sphere.vertices)
-    streamlines = EuDX(a=ten.fa, ind=ind, seeds=seedIdx,
-                       odf_vertices=sphere.vertices, a_low=stop_val)
+    streamlines = EuDX(
+        a=ten.fa, ind=ind, seeds=seedIdx, odf_vertices=sphere.vertices, a_low=stop_val
+    )
     return (ten, streamlines, mask_out_file)

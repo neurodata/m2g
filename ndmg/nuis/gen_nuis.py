@@ -29,9 +29,7 @@ from scipy.fftpack import rfft, irfft, rfftfreq
 
 
 class nuis(object):
-
-    def __init__(self, fmri, smri, nuis_mri, outdir, lv_mask,
-                 mc_params=None):
+    def __init__(self, fmri, smri, nuis_mri, outdir, lv_mask, mc_params=None):
         """
         A class for nuisance correction of fMRI.
 
@@ -60,8 +58,8 @@ class nuis(object):
         self.er_wm_mask = None  # eroded white-matter mask
 
         # places to place intermediates
-        self.foutdir = outdir['nuis_f']
-        self.aoutdir = outdir['nuis_a']
+        self.foutdir = outdir["nuis_f"]
+        self.aoutdir = outdir["nuis_a"]
         self.anat_name = mgu.get_filename(smri)
         # store temporary path for segmentation step
         nuisname = "{}_nuis".format(self.anat_name)
@@ -73,11 +71,11 @@ class nuis(object):
         self.gm_mask = "{}/{}_gmm.nii.gz".format(self.aoutdir, nuisname)
         self.map_path = "{}/{}_seg".format(self.aoutdir, nuisname)
         # segment the brain for quality control purposes
-        maps = mgru.segment_t1w(self.smri, self.map_path, opts='-P')
+        maps = mgru.segment_t1w(self.smri, self.map_path, opts="-P")
         # extract the masks
-        self.wm_prob = maps['wm_prob']
-        mgru.probmap2mask(maps['wm_prob'], self.wm_mask, .99)
-        mgru.probmap2mask(maps['gm_prob'], self.gm_mask, .95)
+        self.wm_prob = maps["wm_prob"]
+        mgru.probmap2mask(maps["wm_prob"], self.wm_mask, 0.99)
+        mgru.probmap2mask(maps["gm_prob"], self.gm_mask, 0.95)
         # the centered brain
         self.cent_nuis = None
         # the brain after glm
@@ -184,8 +182,7 @@ class nuis(object):
         # free for memory purposes
         mri = None
 
-        self.fft_bef = np.square(
-            passed_fft[:, self.voxel_gm_mask].mean(axis=1))[order]
+        self.fft_bef = np.square(passed_fft[:, self.voxel_gm_mask].mean(axis=1))[order]
         bpra = np.zeros(freq_ra.shape, dtype=bool)
         # figure out which positions we will exclude
         if highpass is not None:
@@ -198,15 +195,13 @@ class nuis(object):
         filtered_ra = np.logical_not(bpra)
         filtered_fft = passed_fft.copy()
         filtered_fft[filtered_ra, :] = 0
-        filt_sig = np.apply_along_axis(irfft, 0,
-                                       filtered_fft)
+        filt_sig = np.apply_along_axis(irfft, 0, filtered_fft)
         filtered_fft = None
         self.fft_sig = filt_sig[:, self.voxel_gm_mask].mean(axis=1)
         filt_sig = None
 
         passed_fft[bpra, :] = 0
-        self.fft_reg = np.square(
-            passed_fft[:, self.voxel_gm_mask].mean(axis=1))[order]
+        self.fft_reg = np.square(passed_fft[:, self.voxel_gm_mask].mean(axis=1))[order]
         # go back to time domain
         return np.apply_along_axis(irfft, 0, passed_fft)
 
@@ -245,18 +240,28 @@ class nuis(object):
         # the motion parameters themselves
         friston[:, 0:m] = mc_params
         # square the motion parameters
-        friston[:, m:2 * m] = np.square(mc_params)
+        friston[:, m : 2 * m] = np.square(mc_params)
 
         # use the motion estimated at the preceding timepoint
         # as a regressor
-        friston[1:, 2 * m:3 * m] = mc_params[:-1, :]
+        friston[1:, 2 * m : 3 * m] = mc_params[:-1, :]
         # use the motion estimated at the preceding timepoint
         # squared as a regressor
-        friston[:, 3 * m:4 * m] = np.square(friston[:, 2 * m:3 * m])
+        friston[:, 3 * m : 4 * m] = np.square(friston[:, 2 * m : 3 * m])
         return friston
 
-    def linear_reg(self, voxel, mc_params, wm_ts=None, csf_ts=None, cc=5,
-                   wm_mean=False, csf_mean=False, mot=24, trend='quad'):
+    def linear_reg(
+        self,
+        voxel,
+        mc_params,
+        wm_ts=None,
+        csf_ts=None,
+        cc=5,
+        wm_mean=False,
+        csf_mean=False,
+        mot=24,
+        trend="quad",
+    ):
         """
         A function to perform quadratic detrending of fMRI data.
 
@@ -293,7 +298,7 @@ class nuis(object):
         if trend is not None:
             print("Adding linear trendline to GLM...")
             R = np.column_stack((R, lin_reg))
-        if trend == 'quad':
+        if trend == "quad":
             print("Adding quadratic trendline to GLM...")
             R = np.column_stack((R, quad_reg))
 
@@ -311,8 +316,7 @@ class nuis(object):
 
         if cc is not None and wm_ts is not None and csf_ts is not None:
             print("Adding {} acompcor regressors to GLM...".format(cc))
-            self.cc_reg = self.compcor(np.column_stack((csf_ts, wm_ts)),
-                                       n=cc)[0]
+            self.cc_reg = self.compcor(np.column_stack((csf_ts, wm_ts)), n=cc)[0]
             R = np.column_stack((R, self.cc_reg))
 
         if mot == 6 and mc_params is not None:
@@ -329,11 +333,18 @@ class nuis(object):
 
         # corr'd ts is the difference btwn the original timeseries and
         # our regressors, and then we transpose back
-        return (voxel - WR)
+        return voxel - WR
 
-    def nuis_correct(self, highpass=.01, lowpass=None, cc=5,
-                     csf_mean=False, wm_mean=False, mot=24,
-                     trend='quad'):
+    def nuis_correct(
+        self,
+        highpass=0.01,
+        lowpass=None,
+        cc=5,
+        csf_mean=False,
+        wm_mean=False,
+        mot=24,
+        trend="quad",
+    ):
         """
         Removes Nuisance Signals from brain images, using a combination
         of Frequency filtering, and mean csf/quadratic regression.
@@ -394,12 +405,10 @@ class nuis(object):
         # we need to erode our wm mask by 2 voxels to avoid potential
         # signal intensity distortions from adjaceny tissue
         if cc is not None or wm_mean is not False:
-            self.er_wm_mask = '{}_{}.nii.gz'.format(self.map_path,
-                                                    "wm_mask_eroded")
+            self.er_wm_mask = "{}_{}.nii.gz".format(self.map_path, "wm_mask_eroded")
             # extract the mask where prob map for wm has at least p>.99
             # and erode by 2 voxels
-            mgru.probmap2mask(self.wm_prob, self.er_wm_mask,
-                              .99, erode=2)
+            mgru.probmap2mask(self.wm_prob, self.er_wm_mask, 0.99, erode=2)
             # load whitematter mask as binary array of 0 for exclude,
             # 1 for include
             wmm = nb.load(self.er_wm_mask).get_data()
@@ -423,17 +432,29 @@ class nuis(object):
         self.cent_nuis = voxel[:, self.voxel_gm_mask].mean(axis=1)
 
         # GLM for nuisance correction
-        if (cc is not None or csf_mean is not False or wm_mean is not False
-                or mot is not None or trend is not None):
-            voxel = self.linear_reg(voxel, mc_params, wm_ts=wm_ts, csf_ts=lv_ts,
-                                    csf_mean=csf_mean, wm_mean=wm_mean,
-                                    mot=mot, trend=trend, cc=cc)
+        if (
+            cc is not None
+            or csf_mean is not False
+            or wm_mean is not False
+            or mot is not None
+            or trend is not None
+        ):
+            voxel = self.linear_reg(
+                voxel,
+                mc_params,
+                wm_ts=wm_ts,
+                csf_ts=lv_ts,
+                csf_mean=csf_mean,
+                wm_mean=wm_mean,
+                mot=mot,
+                trend=trend,
+                cc=cc,
+            )
             self.glm_nuis = voxel[:, self.voxel_gm_mask].mean(axis=1)
 
         # Frequency Filtering for Nuisance Correction
         if highpass is not None or lowpass is not None:
-            voxel = self.freq_filter(voxel, tr, highpass=highpass,
-                                     lowpass=lowpass)
+            voxel = self.freq_filter(voxel, tr, highpass=highpass, lowpass=lowpass)
             self.fft_nuis = voxel[:, self.voxel_gm_mask].mean(axis=1)
 
         # normalize the signal to account for anatomical
@@ -445,9 +466,7 @@ class nuis(object):
 
         # free for memory purposes
         voxel = None
-        img = nb.Nifti1Image(fmri_dat,
-                             header=fmri_im.header,
-                             affine=fmri_im.affine)
+        img = nb.Nifti1Image(fmri_dat, header=fmri_im.header, affine=fmri_im.affine)
         # save the corrected image
         nb.save(img, self.nuis_mri)
         pass

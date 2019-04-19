@@ -27,7 +27,7 @@ import numpy as np
 import nibabel as nb
 import matplotlib
 
-matplotlib.use('Agg')
+matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from ndmg.stats.qa_reg import plot_overlays
 import plotly as py
@@ -53,16 +53,16 @@ def dice_coefficient(a, b):
     if not len(a) or not len(b):
         return 0.0
     if len(a) == 1:
-        a = a + '.'
+        a = a + "."
     if len(b) == 1:
-        b = b + '.'
+        b = b + "."
 
     a_bigram_list = []
     for i in range(len(a) - 1):
-        a_bigram_list.append(a[i:i + 2])
+        a_bigram_list.append(a[i : i + 2])
     b_bigram_list = []
     for i in range(len(b) - 1):
-        b_bigram_list.append(b[i:i + 2])
+        b_bigram_list.append(b[i : i + 2])
 
     a_bigrams = set(a_bigram_list)
     b_bigrams = set(b_bigram_list)
@@ -90,7 +90,7 @@ def mse(imageA, imageB):
             - the second image.
     """
     err = np.sum((imageA.astype("float") - imageB.astype("float")) ** 2)
-    err /= (float(imageA.shape[0] * imageA.shape[1]))
+    err /= float(imageA.shape[0] * imageA.shape[1])
     return float(err)
 
 
@@ -124,8 +124,7 @@ def hdist(array1, array2):
         array2:
             - the second array.
     """
-    return np.sqrt(np.sum((np.sqrt(array1) -
-                           np.sqrt(array2)) ** 2)) / float(np.sqrt(2))
+    return np.sqrt(np.sum((np.sqrt(array1) - np.sqrt(array2)) ** 2)) / float(np.sqrt(2))
 
 
 def jaccard_index(array1, array2):
@@ -188,9 +187,16 @@ def registration_score(aligned_func, reference, edge=False):
     return (reg_score, freg_qual)
 
 
-def plot_signals(signals, labels, title=None, xlabel=None,
-                 ylabel=None, xax=None, lab_incl=True,
-                 lwidth=3.0):
+def plot_signals(
+    signals,
+    labels,
+    title=None,
+    xlabel=None,
+    ylabel=None,
+    xax=None,
+    lab_incl=True,
+    lwidth=3.0,
+):
     """
     A utility to plot and return a figure for
     multiple signals.
@@ -229,7 +235,7 @@ def plot_signals(signals, labels, title=None, xlabel=None,
         legs.append(label)  # add the label to our legend
     if lab_incl:
         # if we want to include labels, then plot them
-        ax_sig.legend(lines, legs, loc='lower right')
+        ax_sig.legend(lines, legs, loc="lower right")
     ax_sig.set_title(title)
     ax_sig.set_ylabel(ylabel)
     ax_sig.set_xlabel(xlabel)
@@ -254,16 +260,21 @@ def plot_timeseries(timeseries, fname_ts, sub, label_name):
     # iterate over the roi timeseries to plot a line for each
     # roi
     for d in range(0, timeseries.T.shape[1]):
-        fts_list.append(py.graph_objs.Scatter(
-            x=list(range(0, timeseries.T.shape[0])),
-            y=timeseries.T[:, d], mode='lines'))
+        fts_list.append(
+            py.graph_objs.Scatter(
+                x=list(range(0, timeseries.T.shape[0])),
+                y=timeseries.T[:, d],
+                mode="lines",
+            )
+        )
         # use plotly so that users can select which rois to display
         # easily with a html
-        layout = dict(title="Functional Timeseries, {} Parcellation".format(label_name),
-                      xaxis=dict(title='Time Point (TRs)',
-                                 range=[0, timeseries.T.shape[0]]),
-                      yaxis=dict(title='Intensity'),
-                      showlegend=False)  # height=405, width=720)
+        layout = dict(
+            title="Functional Timeseries, {} Parcellation".format(label_name),
+            xaxis=dict(title="Time Point (TRs)", range=[0, timeseries.T.shape[0]]),
+            yaxis=dict(title="Intensity"),
+            showlegend=False,
+        )  # height=405, width=720)
     fts = dict(data=fts_list, layout=layout)
     offline.plot(fts, filename=fname_ts, auto_open=False)
     pass
@@ -284,15 +295,18 @@ def plot_connectome(connectome, fname_corr, sub, label_name):
     # plot correlation matrix as the absolute correlation
     # of the timeseries for each roi
     dims = connectome.shape[0]
-    fig = pp.plot_heatmap(connectome / np.max(connectome),
-                          name="Functional Connectome, {} Parcellation".format(label_name),
-                          scale=True, scaletit='Normalized Rank')
-    fig.layout['xaxis']['title'] = 'ROI'
-    fig.layout['yaxis']['title'] = 'ROI'
-    fig.layout['yaxis']['autorange'] = 'reversed'
-    fig.layout['xaxis']['tickvals'] = [0, dims / 2 - 1, dims - 1]
-    fig.layout['yaxis']['tickvals'] = [0, dims / 2 - 1, dims - 1]
-    fig.layout['xaxis']['ticktext'] = [1, dims / 2, dims]
-    fig.layout['yaxis']['ticktext'] = [1, dims / 2, dims]
+    fig = pp.plot_heatmap(
+        connectome / np.max(connectome),
+        name="Functional Connectome, {} Parcellation".format(label_name),
+        scale=True,
+        scaletit="Normalized Rank",
+    )
+    fig.layout["xaxis"]["title"] = "ROI"
+    fig.layout["yaxis"]["title"] = "ROI"
+    fig.layout["yaxis"]["autorange"] = "reversed"
+    fig.layout["xaxis"]["tickvals"] = [0, dims / 2 - 1, dims - 1]
+    fig.layout["yaxis"]["tickvals"] = [0, dims / 2 - 1, dims - 1]
+    fig.layout["xaxis"]["ticktext"] = [1, dims / 2, dims]
+    fig.layout["yaxis"]["ticktext"] = [1, dims / 2, dims]
     offline.plot(fig, filename=fname_corr, auto_open=False)
     pass

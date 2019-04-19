@@ -83,9 +83,11 @@ def get_braindata(brain_file):
         elif type(brain_file) is nib.nifti1.Nifti1Image:
             brain = brain_file
         else:
-            raise TypeError("Brain file is type: {}".format(type(brain_file)) +
-                            "; accepted types are numpy.ndarray, "
-                            "string, and nibabel.nifti1.Nifti1Image.")
+            raise TypeError(
+                "Brain file is type: {}".format(type(brain_file))
+                + "; accepted types are numpy.ndarray, "
+                "string, and nibabel.nifti1.Nifti1Image."
+            )
         braindata = brain.get_data()
     return braindata
 
@@ -117,8 +119,7 @@ def get_slice(mri, volid, sli):
     # Wraps volume in new nifti image
     head = mri_im.get_header()
     head.set_data_shape(head.get_data_shape()[0:3])
-    out = nib.Nifti1Image(vol, affine=mri_im.get_affine(),
-                          header=head)
+    out = nib.Nifti1Image(vol, affine=mri_im.get_affine(), header=head)
     out.update_header()
     # and saved to a new file
     nib.save(out, sli)
@@ -128,6 +129,7 @@ def make_gtab_and_bmask(fbval, fbvec, dwi_file, outdir):
     import nibabel as nib
     import os
     from nilearn.image import mean_img
+
     """
     Takes bval and bvec files and produces a structure in dipy format
     **Positional Arguments:**
@@ -150,19 +152,19 @@ def make_gtab_and_bmask(fbval, fbvec, dwi_file, outdir):
 
     # Get B0 indices
     B0s = np.where(gtab.bvals == gtab.b0_threshold)[0]
-    print("%s%s" % ('B0\'s found at: ', B0s))
+    print("%s%s" % ("B0's found at: ", B0s))
 
     # Show info
     print(gtab.info)
 
     # Extract and Combine all B0s collected
-    print('Extracting B0\'s...')
+    print("Extracting B0's...")
     cmds = []
     B0s_bbr = []
     for B0 in B0s:
         print(B0)
         B0_bbr = "{}/{}_B0.nii.gz".format(outdir, str(B0))
-        cmd = 'fslroi ' + dwi_file + ' ' + B0_bbr + ' ' + str(B0) + ' 1'
+        cmd = "fslroi " + dwi_file + " " + B0_bbr + " " + str(B0) + " 1"
         cmds.append(cmd)
         B0s_bbr.append(B0_bbr)
 
@@ -174,82 +176,90 @@ def make_gtab_and_bmask(fbval, fbvec, dwi_file, outdir):
     nib.save(mean_B0, nodif_B0)
 
     # Get mean B0 brain mask
-    cmd = 'bet ' + nodif_B0 + ' ' + nodif_B0_bet + ' -m -f 0.2'
+    cmd = "bet " + nodif_B0 + " " + nodif_B0_bet + " -m -f 0.2"
     os.system(cmd)
     return gtab, nodif_B0, nodif_B0_mask
 
 
 def reorient_dwi(dwi_prep, bvecs, namer):
     # Check orientation (dwi_prep)
-    cmd = 'fslorient -getorient ' + dwi_prep
-    orient = os.popen(cmd).read().strip('\n')
-    if orient == 'NEUROLOGICAL':
-        print('Neurological (dwi), reorienting to radiological...')
+    cmd = "fslorient -getorient " + dwi_prep
+    orient = os.popen(cmd).read().strip("\n")
+    if orient == "NEUROLOGICAL":
+        print("Neurological (dwi), reorienting to radiological...")
         # Orient dwi to RADIOLOGICAL
         dwi_orig = dwi_prep
-        dwi_prep = "{}/dwi_prep_reor.nii.gz".format(namer.dirs['output']['prep_dwi'])
+        dwi_prep = "{}/dwi_prep_reor.nii.gz".format(namer.dirs["output"]["prep_dwi"])
         shutil.copyfile(dwi_orig, dwi_prep)
         # Invert bvecs
         bvecs_orig = bvecs
-        bvecs = "{}/bvecs_reor.bvec".format(namer.dirs['output']['prep_dwi'])
+        bvecs = "{}/bvecs_reor.bvec".format(namer.dirs["output"]["prep_dwi"])
         shutil.copyfile(bvecs_orig, bvecs)
         bvecs_mat = np.genfromtxt(bvecs)
         bvecs_mat[0] = -bvecs_mat[0]
-        cmd = 'fslorient -getqform ' + dwi_prep
-        qform = os.popen(cmd).read().strip('\n')
+        cmd = "fslorient -getqform " + dwi_prep
+        qform = os.popen(cmd).read().strip("\n")
         # Posterior-Anterior Reorientation
-        if float(qform.split(' ')[:-1][5]) <= 0:
-            dwi_prep_PA = "{}/dwi_reor_PA.nii.gz".format(namer.dirs['output']['prep_dwi'])
-            print('Reorienting P-A flip (dwi)...')
-            cmd = 'fslswapdim ' + dwi_prep + ' -x -y z ' + dwi_prep_PA
+        if float(qform.split(" ")[:-1][5]) <= 0:
+            dwi_prep_PA = "{}/dwi_reor_PA.nii.gz".format(
+                namer.dirs["output"]["prep_dwi"]
+            )
+            print("Reorienting P-A flip (dwi)...")
+            cmd = "fslswapdim " + dwi_prep + " -x -y z " + dwi_prep_PA
             os.system(cmd)
             bvecs_mat[1] = -bvecs_mat[1]
-            cmd = 'fslorient -getqform ' + dwi_prep_PA
-            qform = os.popen(cmd).read().strip('\n')
+            cmd = "fslorient -getqform " + dwi_prep_PA
+            qform = os.popen(cmd).read().strip("\n")
             dwi_prep = dwi_prep_PA
         # Inferior-Superior Reorientation
-        if float(qform.split(' ')[:-1][10]) <= 0:
-            dwi_prep_IS = "{}/dwi_reor_IS.nii.gz".format(namer.dirs['output']['prep_dwi'])
-            print('Reorienting I-S flip (dwi)...')
-            cmd = 'fslswapdim ' + dwi_prep + ' -x y -z ' + dwi_prep_IS
+        if float(qform.split(" ")[:-1][10]) <= 0:
+            dwi_prep_IS = "{}/dwi_reor_IS.nii.gz".format(
+                namer.dirs["output"]["prep_dwi"]
+            )
+            print("Reorienting I-S flip (dwi)...")
+            cmd = "fslswapdim " + dwi_prep + " -x y -z " + dwi_prep_IS
             os.system(cmd)
             bvecs_mat[2] = -bvecs_mat[2]
             dwi_prep = dwi_prep_IS
-        cmd = 'fslorient -forceradiological ' + dwi_prep
+        cmd = "fslorient -forceradiological " + dwi_prep
         os.system(cmd)
-        cmd = 'fslorient -getorient ' + dwi_prep
-        orient = os.popen(cmd).read().strip('\n')
-        if orient == 'NEUROLOGICAL':
-            cmd = 'fslorient -swaporient ' + dwi_prep
+        cmd = "fslorient -getorient " + dwi_prep
+        orient = os.popen(cmd).read().strip("\n")
+        if orient == "NEUROLOGICAL":
+            cmd = "fslorient -swaporient " + dwi_prep
             os.system(cmd)
 
         np.savetxt(bvecs, bvecs_mat)
     else:
-        print('Radiological (dwi)...')
+        print("Radiological (dwi)...")
         dwi_orig = dwi_prep
-        dwi_prep = "{}/dwi_prep.nii.gz".format(namer.dirs['output']['prep_dwi'])
+        dwi_prep = "{}/dwi_prep.nii.gz".format(namer.dirs["output"]["prep_dwi"])
         shutil.copyfile(dwi_orig, dwi_prep)
         bvecs_orig = bvecs
-        bvecs = "{}/bvecs.bvec".format(namer.dirs['output']['prep_dwi'])
+        bvecs = "{}/bvecs.bvec".format(namer.dirs["output"]["prep_dwi"])
         shutil.copyfile(bvecs_orig, bvecs)
         bvecs_mat = np.genfromtxt(bvecs)
-        cmd = 'fslorient -getqform ' + dwi_prep
-        qform = os.popen(cmd).read().strip('\n')
+        cmd = "fslorient -getqform " + dwi_prep
+        qform = os.popen(cmd).read().strip("\n")
         # Posterior-Anterior Reorientation
-        if float(qform.split(' ')[:-1][5]) <= 0:
-            dwi_prep_PA = "{}/dwi_reor_PA.nii.gz".format(namer.dirs['output']['prep_dwi'])
-            print('Reorienting P-A flip (dwi)...')
-            cmd = 'fslswapdim ' + dwi_prep + ' x -y z ' + dwi_prep_PA
+        if float(qform.split(" ")[:-1][5]) <= 0:
+            dwi_prep_PA = "{}/dwi_reor_PA.nii.gz".format(
+                namer.dirs["output"]["prep_dwi"]
+            )
+            print("Reorienting P-A flip (dwi)...")
+            cmd = "fslswapdim " + dwi_prep + " x -y z " + dwi_prep_PA
             os.system(cmd)
             bvecs_mat[1] = -bvecs_mat[1]
-            cmd = 'fslorient -getqform ' + dwi_prep_PA
-            qform = os.popen(cmd).read().strip('\n')
+            cmd = "fslorient -getqform " + dwi_prep_PA
+            qform = os.popen(cmd).read().strip("\n")
             dwi_prep = dwi_prep_PA
         # Inferior-Superior Reorientation
-        if float(qform.split(' ')[:-1][10]) <= 0:
-            dwi_prep_IS = "{}/dwi_reor_IS.nii.gz".format(namer.dirs['output']['prep_dwi'])
-            print('Reorienting I-S flip (dwi)...')
-            cmd = 'fslswapdim ' + dwi_prep + ' x y -z ' + dwi_prep_IS
+        if float(qform.split(" ")[:-1][10]) <= 0:
+            dwi_prep_IS = "{}/dwi_reor_IS.nii.gz".format(
+                namer.dirs["output"]["prep_dwi"]
+            )
+            print("Reorienting I-S flip (dwi)...")
+            cmd = "fslswapdim " + dwi_prep + " x y -z " + dwi_prep_IS
             os.system(cmd)
             bvecs_mat[2] = -bvecs_mat[2]
             dwi_prep = dwi_prep_IS
@@ -259,62 +269,62 @@ def reorient_dwi(dwi_prep, bvecs, namer):
 
 
 def reorient_t1w(t1w, namer):
-    cmd = 'fslorient -getorient ' + t1w
-    orient = os.popen(cmd).read().strip('\n')
-    if orient == 'NEUROLOGICAL':
-        print('Neurological (t1w), reorienting to radiological...')
+    cmd = "fslorient -getorient " + t1w
+    orient = os.popen(cmd).read().strip("\n")
+    if orient == "NEUROLOGICAL":
+        print("Neurological (t1w), reorienting to radiological...")
         # Orient t1w to std
         t1w_orig = t1w
-        t1w = "{}/t1w_pre_reor.nii.gz".format(namer.dirs['output']['prep_anat'])
+        t1w = "{}/t1w_pre_reor.nii.gz".format(namer.dirs["output"]["prep_anat"])
         shutil.copyfile(t1w_orig, t1w)
-        cmd = 'fslorient -getqform ' + t1w
-        qform = os.popen(cmd).read().strip('\n')
+        cmd = "fslorient -getqform " + t1w
+        qform = os.popen(cmd).read().strip("\n")
         # Posterior-Anterior Reorientation
-        if float(qform.split(' ')[:-1][5]) <= 0:
-            t1w_PA = "{}/t1w_reor_PA.nii.gz".format(namer.dirs['output']['prep_anat'])
-            print('Reorienting P-A flip (t1w)...')
-            cmd = 'fslswapdim ' + t1w + ' -x -y z ' + t1w_PA
+        if float(qform.split(" ")[:-1][5]) <= 0:
+            t1w_PA = "{}/t1w_reor_PA.nii.gz".format(namer.dirs["output"]["prep_anat"])
+            print("Reorienting P-A flip (t1w)...")
+            cmd = "fslswapdim " + t1w + " -x -y z " + t1w_PA
             os.system(cmd)
-            cmd = 'fslorient -getqform ' + t1w_PA
-            qform = os.popen(cmd).read().strip('\n')
+            cmd = "fslorient -getqform " + t1w_PA
+            qform = os.popen(cmd).read().strip("\n")
             t1w = t1w_PA
         # Inferior-Superior Reorientation
-        if float(qform.split(' ')[:-1][10]) <= 0:
-            t1w_IS = "{}/t1w_reor_IS.nii.gz".format(namer.dirs['output']['prep_anat'])
-            print('Reorienting I-S flip (t1w)...')
-            cmd = 'fslswapdim ' + t1w + ' -x y -z ' + t1w_IS
+        if float(qform.split(" ")[:-1][10]) <= 0:
+            t1w_IS = "{}/t1w_reor_IS.nii.gz".format(namer.dirs["output"]["prep_anat"])
+            print("Reorienting I-S flip (t1w)...")
+            cmd = "fslswapdim " + t1w + " -x y -z " + t1w_IS
             os.system(cmd)
             t1w = t1w_IS
-        cmd = 'fslorient -forceradiological ' + t1w
+        cmd = "fslorient -forceradiological " + t1w
         os.system(cmd)
-        cmd = 'fslreorient2std ' + t1w + ' ' + t1w
+        cmd = "fslreorient2std " + t1w + " " + t1w
         os.system(cmd)
-        cmd = 'fslorient -getorient ' + t1w
-        orient = os.popen(cmd).read().strip('\n')
-        if orient == 'NEUROLOGICAL':
-            cmd = 'fslorient -swaporient ' + t1w
+        cmd = "fslorient -getorient " + t1w
+        orient = os.popen(cmd).read().strip("\n")
+        if orient == "NEUROLOGICAL":
+            cmd = "fslorient -swaporient " + t1w
             os.system(cmd)
     else:
-        print('Radiological (t1w)...')
+        print("Radiological (t1w)...")
         t1w_orig = t1w
-        t1w = "{}/t1w.nii.gz".format(namer.dirs['output']['prep_anat'])
+        t1w = "{}/t1w.nii.gz".format(namer.dirs["output"]["prep_anat"])
         shutil.copyfile(t1w_orig, t1w)
-        cmd = 'fslorient -getqform ' + t1w
-        qform = os.popen(cmd).read().strip('\n')
+        cmd = "fslorient -getqform " + t1w
+        qform = os.popen(cmd).read().strip("\n")
         # Posterior-Anterior Reorientation
-        if float(qform.split(' ')[:-1][5]) <= 0:
-            t1w_PA = "{}/t1w_reor_PA.nii.gz".format(namer.dirs['output']['prep_anat'])
-            print('Reorienting P-A flip (t1w)...')
-            cmd = 'fslswapdim ' + t1w + ' x -y z ' + t1w_PA
+        if float(qform.split(" ")[:-1][5]) <= 0:
+            t1w_PA = "{}/t1w_reor_PA.nii.gz".format(namer.dirs["output"]["prep_anat"])
+            print("Reorienting P-A flip (t1w)...")
+            cmd = "fslswapdim " + t1w + " x -y z " + t1w_PA
             os.system(cmd)
-            cmd = 'fslorient -getqform ' + t1w_PA
-            qform = os.popen(cmd).read().strip('\n')
+            cmd = "fslorient -getqform " + t1w_PA
+            qform = os.popen(cmd).read().strip("\n")
             t1w = t1w_PA
         # Inferior-Superior Reorientation
-        if float(qform.split(' ')[:-1][10]) <= 0:
-            t1w_IS = "{}/t1w_reor_IS.nii.gz".format(namer.dirs['output']['prep_anat'])
-            print('Reorienting I-S flip (t1w)...')
-            cmd = 'fslswapdim ' + t1w + ' x y -z ' + t1w_IS
+        if float(qform.split(" ")[:-1][10]) <= 0:
+            t1w_IS = "{}/t1w_reor_IS.nii.gz".format(namer.dirs["output"]["prep_anat"])
+            print("Reorienting I-S flip (t1w)...")
+            cmd = "fslswapdim " + t1w + " x y -z " + t1w_IS
             os.system(cmd)
             t1w = t1w_IS
 
@@ -323,7 +333,7 @@ def reorient_t1w(t1w, namer):
 
 def reorient(in_file, newpath=None):
     """Reorient Nifti files to LPS."""
-    out_file = fname_presuffix(in_file, suffix='_lps', newpath=newpath)
+    out_file = fname_presuffix(in_file, suffix="_lps", newpath=newpath)
     to_lps(nib.load(in_file)).to_filename(out_file)
     return out_file
 
@@ -336,8 +346,9 @@ def to_lps(input_img):
         # Re-orient
         input_orientation = nib.orientations.axcodes2ornt(input_axcodes)
         desired_orientation = nib.orientations.axcodes2ornt(new_axcodes)
-        transform_orientation = nib.orientations.ornt_transform(input_orientation,
-                                                                desired_orientation)
+        transform_orientation = nib.orientations.ornt_transform(
+            input_orientation, desired_orientation
+        )
         reoriented_img = input_img.as_reoriented(transform_orientation)
         return reoriented_img
     else:
@@ -346,6 +357,7 @@ def to_lps(input_img):
 
 def match_target_vox_res(img_file, vox_size, namer, zoom_set, sens):
     from dipy.align.reslice import reslice
+
     # Check dimensions
     img = nib.load(img_file)
     data = img.get_data()
@@ -353,19 +365,23 @@ def match_target_vox_res(img_file, vox_size, namer, zoom_set, sens):
     hdr = img.get_header()
     zooms = hdr.get_zooms()[:3]
     if (abs(zooms[0]), abs(zooms[1]), abs(zooms[2])) != zoom_set:
-        if sens == 'dwi':
-            img_file_pre = "{}/{}_pre_res.nii.gz".format(namer.dirs['output']['prep_dwi'],
-                                                         os.path.basename(img_file).split('.nii.gz')[0])
-        elif sens == 't1w':
-            img_file_pre = "{}/{}_pre_res.nii.gz".format(namer.dirs['output']['prep_anat'],
-                                                         os.path.basename(img_file).split('.nii.gz')[0])
+        if sens == "dwi":
+            img_file_pre = "{}/{}_pre_res.nii.gz".format(
+                namer.dirs["output"]["prep_dwi"],
+                os.path.basename(img_file).split(".nii.gz")[0],
+            )
+        elif sens == "t1w":
+            img_file_pre = "{}/{}_pre_res.nii.gz".format(
+                namer.dirs["output"]["prep_anat"],
+                os.path.basename(img_file).split(".nii.gz")[0],
+            )
         shutil.copyfile(img_file, img_file_pre)
-        if vox_size == '1mm':
-            print('Reslicing image ' + img_file + ' to 1mm...')
-            new_zooms = (1., 1., 1.)
-        elif vox_size == '2mm':
-            print('Reslicing image ' + img_file + ' to 2mm...')
-            new_zooms = (2., 2., 2.)
+        if vox_size == "1mm":
+            print("Reslicing image " + img_file + " to 1mm...")
+            new_zooms = (1.0, 1.0, 1.0)
+        elif vox_size == "2mm":
+            print("Reslicing image " + img_file + " to 2mm...")
+            new_zooms = (2.0, 2.0, 2.0)
 
         data2, affine2 = reslice(data, affine, zooms, new_zooms)
         affine2[0:3, 3] = np.zeros(3)
@@ -389,7 +405,7 @@ def match_target_vox_res(img_file, vox_size, namer, zoom_set, sens):
     return img_file
 
 
-def load_timeseries(timeseries_file, ts='roi'):
+def load_timeseries(timeseries_file, ts="roi"):
     """
     A function to load timeseries data. Exists to standardize
     formatting in case changes are made with how timeseries are
@@ -397,12 +413,14 @@ def load_timeseries(timeseries_file, ts='roi'):
      **Positional Arguments**
          timeseries_file: the file to load timeseries data from.
     """
-    if (ts == 'roi') or (ts == 'voxel'):
-        timeseries = np.load(timeseries_file)['roi']
+    if (ts == "roi") or (ts == "voxel"):
+        timeseries = np.load(timeseries_file)["roi"]
         return timeseries
     else:
-        print('You have not selected a valid timeseries type.' +
-              'options are ts=\'roi\' or ts=\'voxel\'.')
+        print(
+            "You have not selected a valid timeseries type."
+            + "options are ts='roi' or ts='voxel'."
+        )
     pass
 
 
@@ -443,10 +461,10 @@ def morton_region(parcellation, outpath):
             for z in range(0, dims[2]):
                 if at_dat[x, y, z] > 0:
                     region[XYZMorton((int(x), int(y), int(z)))] = at_dat[x, y, z]
-    outf = op.join(outpath, atlasn + '_morton.csv')
-    with open(outf, 'w')  as f:
+    outf = op.join(outpath, atlasn + "_morton.csv")
+    with open(outf, "w") as f:
         for key, val in region.items():
-            f.write('{},{}\n'.format(key, val))
+            f.write("{},{}\n".format(key, val))
         f.close()
     return
 
@@ -477,17 +495,17 @@ def parcel_overlap(parcellation1, parcellation2, outpath):
 
     overlapdat = lil_matrix((p1regs.shape[0], p2regs.shape[0]), dtype=np.float32)
     for p1idx, p1reg in enumerate(p1regs):
-        p1seq = (p1_dat == p1reg)
+        p1seq = p1_dat == p1reg
         N = p1seq.sum()
         poss_regs = np.unique(p2_dat[p1seq])
         for p2idx, p2reg in enumerate(p2regs):
-            if (p2reg in poss_regs):
+            if p2reg in poss_regs:
                 # percent overlap is p1seq and'd with the anatomical region voxelspace, summed and normalized
                 pover = np.logical_and(p1seq, p2_dat == p2reg).sum() / float(N)
                 overlapdat[p1idx, p2idx] = pover
 
     outf = op.join(outpath, "{}_{}.csv".format(p1n, p2n))
-    with open(outf, 'w')  as f:
+    with open(outf, "w") as f:
         p2str = ["%s" % x for x in p2regs]
         f.write("p1reg," + ",".join(p2str) + "\n")
         for idx, p1reg in enumerate(p1regs):

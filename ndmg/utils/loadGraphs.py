@@ -31,7 +31,7 @@ import os
 import csv
 
 
-def loadGraphs(filenames, modality='dwi', verb=False):
+def loadGraphs(filenames, modality="dwi", verb=False):
     """
     Given a list of files, returns a dictionary of graphs
     Required parameters:
@@ -62,18 +62,17 @@ def loadGraphs(filenames, modality='dwi', verb=False):
     return gstruct
 
 
-def loadGraph(filename, modality='dwi', verb=False):
-    if modality == 'dwi':
-        graph = nx.read_weighted_edgelist(filename, delimiter=',')
-    elif modality == 'func':
+def loadGraph(filename, modality="dwi", verb=False):
+    if modality == "dwi":
+        graph = nx.read_weighted_edgelist(filename, delimiter=",")
+    elif modality == "func":
         # read first line to int list
-        with open(filename, 'r') as fl:
+        with open(filename, "r") as fl:
             reader = csv.reader(fl)
             # labels
             labs = [int(x) for x in next(reader)]
         # read second line onwards to numpy array
-        data = np.genfromtxt(filename, dtype=float,
-                             delimiter=',', skip_header=True)
+        data = np.genfromtxt(filename, dtype=float, delimiter=",", skip_header=True)
         lab_map = dict(list(zip(list(range(0, len(labs))), labs)))
         graph = nx.from_numpy_matrix(data)
         graph = nx.relabel_nodes(graph, lab_map)

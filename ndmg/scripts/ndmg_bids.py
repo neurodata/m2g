@@ -16,7 +16,7 @@
 #
 
 # ndmg_bids.py
-# Repackaged and maintained by Derek Pisner and Eric Bridgeford 2019
+# Repackaged and maintained by Derek Pisner, Alex Loftus, and Eric Bridgeford 2019
 # Email: dpisner@utexas.edu
 # Originally created by Greg Kiar on 2016-07-25.
 # edited by Eric Bridgeford to incorporate fMRI, multi-threading, and

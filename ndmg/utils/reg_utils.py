@@ -48,22 +48,24 @@ def erode_mask(mask, v=0):
         # wherever mask is nonzero
         erode_mask = np.zeros(mask.shape)
         x, y, z = np.where(mask != 0)
-        if (x.shape == y.shape and y.shape == z.shape):
+        if x.shape == y.shape and y.shape == z.shape:
             # iterated over all the nonzero voxels
             for j in range(0, x.shape[0]):
                 # check that the 3d voxels within 1 voxel are 1
                 # if so, add to the new mask
                 md = mask.shape
-                if (mask[x[j], y[j], z[j]] and
-                        mask[np.min((x[j] + 1, md[0] - 1)), y[j], z[j]] and
-                        mask[x[j], np.min((y[j] + 1, md[1] - 1)), z[j]] and
-                        mask[x[j], y[j], np.min((z[j] + 1, md[2] - 1))] and
-                        mask[np.max((x[j] - 1, 0)), y[j], z[j]] and
-                        mask[x[j], np.max((y[j] - 1, 0)), z[j]] and
-                        mask[x[j], y[j], np.max((z[j] - 1, 0))]):
+                if (
+                    mask[x[j], y[j], z[j]]
+                    and mask[np.min((x[j] + 1, md[0] - 1)), y[j], z[j]]
+                    and mask[x[j], np.min((y[j] + 1, md[1] - 1)), z[j]]
+                    and mask[x[j], y[j], np.min((z[j] + 1, md[2] - 1))]
+                    and mask[np.max((x[j] - 1, 0)), y[j], z[j]]
+                    and mask[x[j], np.max((y[j] - 1, 0)), z[j]]
+                    and mask[x[j], y[j], np.max((z[j] - 1, 0))]
+                ):
                     erode_mask[x[j], y[j], z[j]] = 1
         else:
-            raise ValueError('Your mask erosion has an invalid shape.')
+            raise ValueError("Your mask erosion has an invalid shape.")
         mask = erode_mask
     return mask
 
@@ -106,15 +108,13 @@ def probmap2mask(prob_map, mask_path, t, erode=0):
     mask = (prob_dat > t).astype(int)
     if erode > 0:
         mask = erode_mask(mask, v=erode)
-    img = nib.Nifti1Image(mask,
-                          header=prob.header,
-                          affine=prob.get_affine())
+    img = nib.Nifti1Image(mask, header=prob.header, affine=prob.get_affine())
     # save the corrected image
     nib.save(img, mask_path)
     return mask_path
 
 
-def segment_t1w(t1w, basename, opts=''):
+def segment_t1w(t1w, basename, opts=""):
     """
     A function to use FSL's FAST to segment an anatomical
     image into GM, WM, and CSF prob maps.
@@ -141,9 +141,9 @@ def segment_t1w(t1w, basename, opts=''):
     cmd = "fast -t 1 {} -n 3 -o {} {}".format(opts, basename, t1w)
     mgu.execute_cmd(cmd, verb=True)
     out = {}  # the outputs
-    out['wm_prob'] = "{}_{}".format(basename, "pve_2.nii.gz")
-    out['gm_prob'] = "{}_{}".format(basename, "pve_1.nii.gz")
-    out['csf_prob'] = "{}_{}".format(basename, "pve_0.nii.gz")
+    out["wm_prob"] = "{}_{}".format(basename, "pve_2.nii.gz")
+    out["gm_prob"] = "{}_{}".format(basename, "pve_1.nii.gz")
+    out["csf_prob"] = "{}_{}".format(basename, "pve_0.nii.gz")
     return out
 
 
@@ -250,7 +250,7 @@ def normalize_t1w(inp, out):
     pass
 
 
-def resample_fsl(base, res, goal_res, interp='spline'):
+def resample_fsl(base, res, goal_res, interp="spline"):
     """
     A function to resample a base image in fsl to that of a template.
 
@@ -316,7 +316,7 @@ def get_filename(label):
     return op.splitext(op.splitext(op.basename(label))[0])[0]
 
 
-def segment_t1w(t1w, basename, opts=''):
+def segment_t1w(t1w, basename, opts=""):
     """
     A function to use FSL's FAST to segment an anatomical
     image into GM, WM, and CSF prob maps.
@@ -341,15 +341,27 @@ def segment_t1w(t1w, basename, opts=''):
     cmd = "fast -t 1 {} -n 3 -o {} {}".format(opts, basename, t1w)
     os.system(cmd)
     out = {}  # the outputs
-    out['wm_prob'] = "{}_{}".format(basename, "pve_2.nii.gz")
-    out['gm_prob'] = "{}_{}".format(basename, "pve_1.nii.gz")
-    out['csf_prob'] = "{}_{}".format(basename, "pve_0.nii.gz")
+    out["wm_prob"] = "{}_{}".format(basename, "pve_2.nii.gz")
+    out["gm_prob"] = "{}_{}".format(basename, "pve_1.nii.gz")
+    out["csf_prob"] = "{}_{}".format(basename, "pve_0.nii.gz")
     return out
 
 
-def align(inp, ref, xfm=None, out=None, dof=12, searchrad=True,
-          bins=256, interp=None, cost="mutualinfo", sch=None,
-          wmseg=None, init=None, finesearch=None):
+def align(
+    inp,
+    ref,
+    xfm=None,
+    out=None,
+    dof=12,
+    searchrad=True,
+    bins=256,
+    interp=None,
+    cost="mutualinfo",
+    sch=None,
+    wmseg=None,
+    init=None,
+    finesearch=None,
+):
     """
     Aligns two images and stores the transform between them
     **Positional Arguments:**
@@ -390,8 +402,7 @@ def align(inp, ref, xfm=None, out=None, dof=12, searchrad=True,
     if cost is not None:
         cmd += " -cost {}".format(cost)
     if searchrad is not None:
-        cmd += " -searchrx -180 180 -searchry -180 180 " + \
-               "-searchrz -180 180"
+        cmd += " -searchrx -180 180 -searchry -180 180 " + "-searchrz -180 180"
     if sch is not None:
         cmd += " -schedule {}".format(sch)
     if wmseg is not None:
@@ -406,7 +417,7 @@ def align_epi(epi, t1, brain, out):
     """
     Algins EPI images to T1w image
     """
-    cmd = 'epi_reg --epi={} --t1={} --t1brain={} --out={}'
+    cmd = "epi_reg --epi={} --t1={} --t1brain={} --out={}"
     cmd = cmd.format(epi, t1, brain, out)
     os.system(cmd)
 
@@ -442,7 +453,7 @@ def align_nonlinear(inp, ref, xfm, out, warp, ref_mask=None, in_mask=None, confi
     os.system(cmd)
 
 
-def applyxfm(ref, inp, xfm, aligned, interp='trilinear', dof=6):
+def applyxfm(ref, inp, xfm, aligned, interp="trilinear", dof=6):
     """
     Aligns two images with a given transform
 
@@ -483,8 +494,9 @@ def apply_warp(ref, inp, out, warp, xfm=None, mask=None, interp=None, sup=False)
             - the affine transformation from functional to
             structural space.
     """
-    cmd = "applywarp --ref=" + ref + " --in=" + inp + " --out=" + out + \
-          " --warp=" + warp
+    cmd = (
+        "applywarp --ref=" + ref + " --in=" + inp + " --out=" + out + " --warp=" + warp
+    )
     if xfm is not None:
         cmd += " --premat=" + xfm
     if mask is not None:
@@ -539,10 +551,12 @@ def resample(base, ingested, template):
     template_im = nib.load(template)
     base_im = nib.load(base)
     # Aligns images
-    target_im = nl.resample_img(base_im,
-                                target_affine=template_im.get_affine(),
-                                target_shape=template_im.get_data().shape,
-                                interpolation="nearest")
+    target_im = nl.resample_img(
+        base_im,
+        target_affine=template_im.get_affine(),
+        target_shape=template_im.get_data().shape,
+        interpolation="nearest",
+    )
     # Saves new image
     nib.save(target_im, ingested)
 
@@ -568,7 +582,13 @@ def combine_xfms(xfm1, xfm2, xfmout):
 def reslice_to_xmm(infile, vox_sz=2):
     cmd = "flirt -in {} -ref {} -out {} -nosearch -applyisoxfm {}"
     out_file = "%s%s%s%s%s%s" % (
-        os.path.dirname(infile), '/', os.path.basename(infile).split('_pre_res')[0], '_res_', int(vox_sz), 'mm.nii.gz')
+        os.path.dirname(infile),
+        "/",
+        os.path.basename(infile).split("_pre_res")[0],
+        "_res_",
+        int(vox_sz),
+        "mm.nii.gz",
+    )
     cmd = cmd.format(infile, infile, out_file, vox_sz)
     os.system(cmd)
     return out_file
