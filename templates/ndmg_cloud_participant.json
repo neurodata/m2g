@@ -26,7 +26,7 @@
             "--mf",
             "tensor",
             "--sp",
-            "native"
+            "native",
             "/data/raw",
             "/data/outputs",
             "participant"
