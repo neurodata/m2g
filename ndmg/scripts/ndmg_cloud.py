@@ -39,70 +39,53 @@ import subprocess
 participant_templ = 'https://github.com/neurodata/ndmg/blob/dev-dmri-fmri/templates/ndmg_cloud_participant.json'
 
 def batch_submit(bucket, path, jobdir, credentials=None, state='participant',
-                 debug=False, dataset=None, log=False, stc=None, mode='dwi',
-                 bg=False):
+                 debug=False, dataset=None, log=False,  bg=False):
     """
     Searches through an S3 bucket, gets all subject-ids, creates json files
     for each, submits batch jobs, and returns list of job ids to query status
     upon later.
     """
-    group = state == 'group'
     print(("Getting list from s3://{}/{}/...".format(bucket, path)))
-    threads = crawl_bucket(bucket, path, group, mode=mode)
+    threads = crawl_bucket(bucket, path)
 
     print("Generating job for each subject...")
-    jobs = create_json(bucket, path, threads, jobdir, group, credentials,
-                       debug, dataset, log, stc, mode, bg)
+    jobs = create_json(bucket, path, threads, jobdir, credentials,
+                       debug, dataset, bg)
 
     print("Submitting jobs to the queue...")
     ids = submit_jobs(jobs, jobdir)
 
 
-def crawl_bucket(bucket, path, group=False, mode='dwi'):
+def crawl_bucket(bucket, path):
     """
     Gets subject list for a given S3 bucket and path
     """
-    if group:
-        if mode == 'dwi':
-            cmd = 'aws s3 ls s3://{}/{}/graphs/'.format(bucket, path)
-        else:
-            cmd = 'aws s3 ls s3://{}/{}/connectomes/'.format(bucket, path)
-        out = subprocess.check_output(cmd, shell=True)
-        atlases = re.findall('PRE (.+)/', out)
-        print(("Atlas IDs: " + ", ".join(atlases)))
-        return atlases
-    else:
-        cmd = 'aws s3 ls s3://{}/{}/'.format(bucket, path)
-        out = subprocess.check_output(cmd, shell=True)
-        subjs = re.findall('PRE sub-(.+)/', out.decode('utf-8'))
-        cmd = 'aws s3 ls s3://{}/{}/sub-{}/'
-        seshs = OrderedDict()
-        for subj in subjs:
-            out = subprocess.check_output(cmd.format(bucket, path, subj), shell=True)
-            sesh = re.findall('ses-(.+)/', out.decode('utf-8'))
-            seshs[subj] = sesh if sesh != [] else [None]
-        print(("Session IDs: " + ", ".join([subj + '-' + sesh if sesh is not None
-                                           else subj
-                                           for subj in subjs
-                                           for sesh in seshs[subj]])))
-        return seshs
+    cmd = 'aws s3 ls s3://{}/{}/'.format(bucket, path)
+    out = subprocess.check_output(cmd, shell=True)
+    subjs = re.findall('PRE sub-(.+)/', out.decode('utf-8'))
+    cmd = 'aws s3 ls s3://{}/{}/sub-{}/'
+    seshs = OrderedDict()
+    for subj in subjs:
+        out = subprocess.check_output(cmd.format(bucket, path, subj), shell=True)
+        sesh = re.findall('ses-(.+)/', out.decode('utf-8'))
+        seshs[subj] = sesh if sesh != [] else [None]
+    print(("Session IDs: " + ", ".join([subj + '-' + sesh if sesh is not None
+                                       else subj
+                                       for subj in subjs
+                                       for sesh in seshs[subj]])))
+    return seshs
 
 
-def create_json(bucket, path, threads, jobdir, group=False, credentials=None,
-                debug=False, dataset=None, log=False, stc=None, mode='dwi',
-                bg=False):
+def create_json(bucket, path, threads, jobdir, credentials=None,
+                debug=False, dataset=None, bg=False):
     """
     Takes parameters to make jsons
     """
     out = subprocess.check_output("mkdir -p {}".format(jobdir), shell=True)
     out = subprocess.check_output("mkdir -p {}/jobs/".format(jobdir), shell=True)
     out = subprocess.check_output("mkdir -p {}/ids/".format(jobdir), shell=True)
-    if group:
-        template = group_templ
-        atlases = threads
-    else:
-        template = participant_templ
-        seshs = threads
+    template = participant_templ
+    seshs = threads
     if not os.path.isfile('{}/{}'.format(jobdir, template.split('/')[-1])):
         cmd = 'wget --quiet -P {} {}'.format(jobdir, template)
         subprocess.check_output(cmd, shell=True)
@@ -125,9 +108,8 @@ def create_json(bucket, path, threads, jobdir, group=False, credentials=None,
         env = []
     template['containerOverrides']['environment'] = env
 
-    # edit mode, bucket, path
+    # edit bucket, path
     jobs = list()
-    cmd[cmd.index('<MODE>')] = mode
     cmd[cmd.index('<BUCKET>')] = bucket
     cmd[cmd.index('<PATH>')] = path
     if bg:
@@ -282,10 +264,8 @@ def main():
     parser = ArgumentParser(description="This is an end-to-end connectome \
                             estimation pipeline from sMRI and DTI images")
 
-    parser.add_argument('state', choices=['participant',
-                                          'group',
-                                          'status',
-                                          'kill'], default='paricipant',
+    parser.add_argument('state', choices=['participant', 'status',
+                                          'kill'], default='participant',
                         help='determines the function to be performed by '
                              'this function.')
     parser.add_argument('--bucket', help='The S3 bucket with the input dataset'
@@ -304,11 +284,6 @@ def main():
                                                              'temp files along the path of processing.',
                         default=False)
     parser.add_argument('--dataset', action='store', help='Dataset name')
-    parser.add_argument('--stc', action='store', choices=['None', 'interleaved',
-                                                          'up', 'down'], default='None', help="The slice timing "
-                                                                                              "direction to correct. Not necessary.")
-    parser.add_argument('--modality', action='store', choices=['func', 'dwi'],
-                        help='Pipeline to run', default='dwi')
     parser.add_argument("-b", "--big", action="store", default='False',
                         help="whether or not to produce voxelwise big graph")
     result = parser.parse_args()
@@ -322,8 +297,6 @@ def main():
     jobdir = result.jobdir
     dset = result.dataset
     log = result.log
-    stc = result.stc
-    mode = result.modality
     bg = (result.big != 'False')
 
     if jobdir is None:
@@ -340,10 +313,9 @@ def main():
     elif state == 'kill':
         print("Killing jobs...")
         kill_jobs(jobdir)
-    elif state == 'group' or state == 'participant':
+    elif state == 'participant':
         print("Beginning batch submission process...")
-        batch_submit(bucket, path, jobdir, creds, state, debug, dset, log,
-                     stc, mode, bg)
+        batch_submit(bucket, path, jobdir, creds, state, debug, dset, log, bg)
 
     sys.exit(0)
 

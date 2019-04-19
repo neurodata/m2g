@@ -29,7 +29,7 @@
             "native"
             "/data/raw",
             "/data/outputs",
-            "participant",
+            "participant"
         ],
         "environment": [
             {
