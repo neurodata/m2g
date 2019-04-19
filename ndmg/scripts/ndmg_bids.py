@@ -27,9 +27,9 @@ import warnings
 warnings.simplefilter("ignore")
 from ndmg.scripts.ndmg_dwi_pipeline import ndmg_dwi_pipeline
 from ndmg.scripts.ndmg_func_pipeline import ndmg_func_pipeline
-from ndmg.utils.bids_utils import *
-from ndmg.stats.qa_graphs import *
-from ndmg.stats.qa_graphs_plotting import *
+from ndmg.utils import bids_utils
+from ndmg.stats import qa_graphs
+from ndmg.stats import qa_graphs_plotting
 from glob import glob
 from ndmg.utils import gen_utils as mgu
 import ndmg
@@ -148,7 +148,7 @@ def session_level(
     inDir,
     outDir,
     subjs,
-    vox_size,
+    vox_size,  # TODO (alex): maybe all of these that currently don't have default values should?
     big,
     clean,
     stc,
@@ -178,14 +178,12 @@ def session_level(
         labels = [i for i in labels if atlas_select in i]
     # mgu.execute_cmd("mkdir -p {} {}/tmp".format(outDir, outDir))
 
-    result = sweep_directory(inDir, subjs, sesh, task, run, modality)
+    result = bids_utils.sweep_directory(inDir, subjs, sesh, task, run, modality)
 
     kwargs = {"clean": (not debug)}  # our keyword arguments
     if modality == "dwi":
         dwis, bvals, bvecs, anats = result
-        assert len(anats) == len(dwis)
-        assert len(bvecs) == len(dwis)
-        assert len(bvals) == len(dwis)
+        assert len(dwis) == len(bvals) == len(bvecs) == len(anats)
         args = [
             [
                 dw,
@@ -295,9 +293,9 @@ def group_level(
         tmp_out = op.join(outDir, label)
         mgu.execute_cmd("mkdir -p {}".format(tmp_out))
         try:
-            compute_metrics(fs, tmp_out, label, modality=modality)
+            qa_graphs.compute_metrics(fs, tmp_out, label, modality=modality)
             outf = op.join(tmp_out, "{}_plot".format(label))
-            make_panel_plot(
+            qa_graphs_plotting.make_panel_plot(
                 tmp_out,
                 outf,
                 dataset=dataset,
