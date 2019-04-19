@@ -25,21 +25,24 @@
 import warnings
 
 warnings.simplefilter("ignore")
-from ndmg.scripts.ndmg_dwi_pipeline import ndmg_dwi_pipeline
-from ndmg.scripts.ndmg_func_pipeline import ndmg_func_pipeline
-from ndmg.utils import bids_utils
-from ndmg.stats import qa_graphs
-from ndmg.stats import qa_graphs_plotting
+
+from argparse import ArgumentParser
 from glob import glob
-from ndmg.utils import gen_utils as mgu
-import ndmg
 import os.path as op
 import glob
 import os
 import shutil
 import sys
 from multiprocessing import Pool
-from ndmg.scripts import ndmg_cloud as nc
+
+from ndmg.utils import gen_utils as mgu
+import ndmg
+from ndmg.scripts import ndmg_cloud
+from ndmg.scripts.ndmg_dwi_pipeline import ndmg_dwi_pipeline
+from ndmg.scripts.ndmg_func_pipeline import ndmg_func_pipeline
+from ndmg.utils import bids_utils
+from ndmg.stats import qa_graphs
+from ndmg.stats import qa_graphs_plotting
 
 atlas_dir = "/tmp/ndmg_atlases"  # This location bc it is convenient for containers
 
@@ -547,9 +550,9 @@ def main():
                 print(buck)
                 print(remo)
                 print(inDir)
-                [nc.s3_get_data(buck, remo, inDir) for s in subj]
+                [ndmg_cloud.s3_get_data(buck, remo, inDir) for s in subj]
             else:
-                nc.s3_get_data(buck, remo, inDir, public=creds)
+                ndmg_cloud.s3_get_data(buck, remo, inDir, public=creds)
         modif = "ndmg_{}".format(ndmg.version.replace(".", "-"))
         session_level(
             inDir,
@@ -583,14 +586,14 @@ def main():
     #         else:
     #             tpath = op.join(remo, gpath)
     #             tindir = op.join(outDir, gpath)
-    #         nc.s3_get_data(buck, tpath, tindir, public=creds)
+    #         ndmg_cloud.s3_get_data(buck, tpath, tindir, public=creds)
     #     modif = 'qa'
     #     group_level(op.join(inDir, gpath), outDir, vox_size, big, clean, stc,
     #                 dataset, atlas, minimal, log, hemi, modality)
 
     if push and buck is not None and remo is not None:
         print("Pushing results to S3...")
-        nc.s3_push_data(buck, remo, outDir, modif, creds)
+        ndmg_cloud.s3_push_data(buck, remo, outDir, modif, creds)
 
 
 if __name__ == "__main__":
