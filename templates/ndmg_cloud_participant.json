@@ -18,7 +18,23 @@
             "<SUBJ>",
             "--push_data",
             "--stc",
-            "<STC>"
+            "<STC>",
+            "--modality",
+            "dwi",
+            "--session_label",
+            "1",
+            "--nproc",
+            "1",
+            "--atlas",
+            "desikan",
+            "--mod",
+            "det",
+            "--tt",
+            "eudx",
+            "--mf",
+            "tensor",
+            "--sp",
+            "native"
         ],
         "environment": [
             {
