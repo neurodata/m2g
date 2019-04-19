@@ -1,15 +1,11 @@
 {
-    "jobName": "<JOBNAME>", 
-    "jobQueue": "ndmg-queue", 
-    "dependsOn": [], 
-    "jobDefinition": "ndmg", 
+    "jobName": "<JOBNAME>",
+    "jobQueue": "ndmg-queue",
+    "dependsOn": [],
+    "jobDefinition": "ndmg",
     "parameters": {},
     "containerOverrides": {
         "command": [
-            "/data/raw",
-            "/data/outputs",
-            "participant",
-            "<MODE>",
             "--bucket",
             "<BUCKET>",
             "--remote_path",
@@ -17,12 +13,8 @@
             "--participant_label",
             "<SUBJ>",
             "--push_data",
-            "--stc",
-            "<STC>",
             "--modality",
             "dwi",
-            "--session_label",
-            "1",
             "--nproc",
             "1",
             "--atlas",
@@ -35,6 +27,9 @@
             "tensor",
             "--sp",
             "native"
+            "/data/raw",
+            "/data/outputs",
+            "participant",
         ],
         "environment": [
             {

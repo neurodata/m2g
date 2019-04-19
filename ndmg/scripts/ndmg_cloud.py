@@ -110,7 +110,7 @@ def create_json(bucket, path, threads, jobdir, group=False, credentials=None,
     with open('{}/{}'.format(jobdir, template.split('/')[-1]), 'r') as inf:
         template = json.load(inf)
 
-    cmd = ['ndmg_bids '] + template['containerOverrides']['command']
+    cmd = ['/bin/bash python /usr/local/bin/ndmg_bids '] + template['containerOverrides']['command']
     env = template['containerOverrides']['environment']
 
     if credentials is not None:
