@@ -79,9 +79,7 @@ ENV ANTSPATH=/opt/ants/ \
 #--------NDMG SETUP-----------------------------------------------------------#
 # setup of python dependencies for ndmg itself, as well as file dependencies
 RUN \
-    pip install numpy networkx nibabel dipy scipy \
-    python-dateutil==2.6.1 boto3 awscli matplotlib plotly==1.12.9 nilearn sklearn \
-    pandas cython vtk pyvtk fury awscli requests scikit-image pybids==0.6.4 ipython
+    pip install numpy networkx nibabel dipy scipy python-dateutil boto3 awscli matplotlib plotly==1.12.9 nilearn sklearn pandas cython vtk pyvtk fury awscli requests scikit-image pybids==0.6.4 ipython setuptools duecredit
 
 # Delete buggy line in dipy
 RUN sed -i -e '189d;190d' /usr/local/lib/python2.7/dist-packages/dipy/tracking/eudx.py
