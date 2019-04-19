@@ -5,11 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="2a59942d-22e5-4a24-accd-8b788e71fa1f" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ndmg/register/gen_reg.py" beforeDir="false" afterPath="$PROJECT_DIR$/ndmg/register/gen_reg.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ndmg/scripts/ndmg_bids.py" beforeDir="false" afterPath="$PROJECT_DIR$/ndmg/scripts/ndmg_bids.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ndmg/scripts/ndmg_cloud.py" beforeDir="false" afterPath="$PROJECT_DIR$/ndmg/scripts/ndmg_cloud.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ndmg/utils/bids_utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/ndmg/utils/bids_utils.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/ndmg_cloud_participant.json" beforeDir="false" afterPath="$PROJECT_DIR$/templates/ndmg_cloud_participant.json" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -19,11 +15,20 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/ndmg/scripts/ndmg_cloud.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="380">
-              <caret line="53" column="20" selection-start-line="53" selection-start-column="20" selection-end-line="53" selection-end-column="20" />
+            <state relative-caret-position="612">
+              <caret line="83" column="23" selection-start-line="83" selection-start-column="16" selection-end-line="83" selection-end-column="23" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/templates/ndmg_cloud_participant.json">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="300">
+              <caret line="20" column="20" lean-forward="true" selection-start-line="20" selection-start-column="20" selection-end-line="20" selection-end-column="20" />
             </state>
           </provider>
         </entry>
@@ -47,10 +52,11 @@
       <find>os.system(cmd)</find>
       <find>out)</find>
       <find>os.subprocess(</find>
-      <find>batch_submit</find>
       <find>data</find>
       <find>session_level</find>
       <find>queue</find>
+      <find>batch_submit</find>
+      <find>session</find>
     </findStrings>
     <replaceStrings>
       <replace>os.system</replace>
@@ -77,6 +83,7 @@
         <option value="$PROJECT_DIR$/ndmg/utils/bids_utils.py" />
         <option value="$PROJECT_DIR$/ndmg/scripts/ndmg_bids.py" />
         <option value="$PROJECT_DIR$/ndmg/scripts/ndmg_cloud.py" />
+        <option value="$PROJECT_DIR$/templates/ndmg_cloud_participant.json" />
       </list>
     </option>
   </component>
@@ -92,7 +99,7 @@
     </option>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="213" />
+    <option name="x" value="346" />
     <option name="y" value="23" />
     <option name="width" value="1276" />
     <option name="height" value="1104" />
@@ -109,6 +116,11 @@
             <path>
               <item name="ndmg" type="b2602c69:ProjectViewProjectNode" />
               <item name="ndmg" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="ndmg" type="b2602c69:ProjectViewProjectNode" />
+              <item name="ndmg" type="462c0819:PsiDirectoryNode" />
+              <item name="templates" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
@@ -147,15 +159,15 @@
       <option name="presentableId" value="Default" />
       <updated>1555606251141</updated>
       <workItem from="1555606252609" duration="1965000" />
-      <workItem from="1555621726196" duration="7489000" />
+      <workItem from="1555621726196" duration="9501000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="9454000" />
+    <option name="totallyTimeSpent" value="11466000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="213" y="23" width="1276" height="1104" extended-state="0" />
+    <frame x="346" y="23" width="1276" height="1104" extended-state="0" />
     <editor active="true" />
     <layout>
       <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.25364667" />
@@ -258,17 +270,17 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/templates/ndmg_cloud_participant.json">
+    <entry file="file://$PROJECT_DIR$/ndmg/scripts/ndmg_cloud.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="495">
-          <caret line="33" column="1" lean-forward="true" selection-start-line="33" selection-start-column="1" selection-end-line="33" selection-end-column="1" />
+        <state relative-caret-position="612">
+          <caret line="83" column="23" selection-start-line="83" selection-start-column="16" selection-end-line="83" selection-end-column="23" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/ndmg/scripts/ndmg_cloud.py">
+    <entry file="file://$PROJECT_DIR$/templates/ndmg_cloud_participant.json">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="380">
-          <caret line="53" column="20" selection-start-line="53" selection-start-column="20" selection-end-line="53" selection-end-column="20" />
+        <state relative-caret-position="300">
+          <caret line="20" column="20" lean-forward="true" selection-start-line="20" selection-start-column="20" selection-end-line="20" selection-end-column="20" />
         </state>
       </provider>
     </entry>
