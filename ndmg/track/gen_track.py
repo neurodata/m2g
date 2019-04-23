@@ -303,6 +303,16 @@ def eudx_basic(dwi_file, gtab, stop_val=0.1):
     seedIdx = np.transpose(seedIdx)
 
     model = TensorModel(gtab)
+
+    print('data: {}').format(data)
+    print('data shape: {}').format(data.shape)
+    print('data type: {}').format(type(data))
+    print('mask data: {}').format(mask_data)
+    print('mask data shape: {}').format(mask_data.shape)
+    print('mask data type: {}').format(type(mask_data))
+
+    print('data location: {}').format(dwi_file)
+    print('mask location: {}').format(mask_out_file)
     ten = model.fit(data, mask_data)
     sphere = get_sphere('symmetric724')
     ind = quantize_evecs(ten.evecs, sphere.vertices)

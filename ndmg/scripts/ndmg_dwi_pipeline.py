@@ -116,16 +116,16 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
     # -------- Preprocessing Steps --------------------------------- #
     # Perform eddy correction
     start_time = time.time()
-    if len(os.listdir(namer.dirs['output']['prep_dwi'])) != 0:
-        print('Pre-existing preprocessed dwi files found. Deleting these...')
-        shutil.rmtree(namer.dirs['output']['prep_dwi'])
-        os.mkdir(namer.dirs['output']['prep_dwi'])
+    #if len(os.listdir(namer.dirs['output']['prep_dwi'])) != 0:
+    #    print('Pre-existing preprocessed dwi files found. Deleting these...')
+    #    shutil.rmtree(namer.dirs['output']['prep_dwi'])
+    #    os.mkdir(namer.dirs['output']['prep_dwi'])
 
     dwi_prep = "{}/eddy_corrected_data.nii.gz".format(namer.dirs['output']['prep_dwi'])
     eddy_rot_param = "{}/eddy_corrected_data.ecclog".format(namer.dirs['output']['prep_dwi'])
     print("Performing eddy correction...")
     cmd = 'eddy_correct ' + dwi + ' ' + dwi_prep + ' 0'
-    os.system(cmd)
+    #os.system(cmd)
 
     # Instantiate bvec/bval naming variations and copy to derivative director
     bvec_scaled = "{}/bvec_scaled.bvec".format(namer.dirs['output']['prep_dwi'])
@@ -150,15 +150,19 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
     start_time = time.time()
     [dwi_prep, bvecs] = mgu.reorient_dwi(dwi_prep, bvec_scaled, namer)
     print("%s%s%s" % ('Reorienting runtime: ', str(np.round(time.time() - start_time, 1)), 's'))
-
+        
     # Check dimensions
     start_time = time.time()
-    if reg_style == 'native':
-        dwi_prep = mgu.match_target_vox_res(dwi_prep, vox_size, namer, zoom_set, sens='dwi')
-        print("%s%s%s" % ('Reslicing runtime: ', str(np.round(time.time() - start_time, 1)), 's'))
+    dwi_prep = mgu.match_target_vox_res(dwi_prep, vox_size, namer, zoom_set, sens='dwi')
+    print("%s%s%s" % ('Reslicing runtime: ', str(np.round(time.time() - start_time, 1)), 's'))
 
     # Build gradient table
-    [gtab, nodif_B0, nodif_B0_mask] = mgu.make_gtab_and_bmask(fbval, bvecs, dwi_prep, namer.dirs['output']['prep_dwi'])
+    print('fbval: ', fbval)
+    print('bvecs: ', bvecs)
+    print('fbvec: ', fbvec)
+    print('dwi_prep: ', dwi_prep)
+    print('namer.dirs: ', namer.dirs['output']['prep_dwi'])
+    [gtab, nodif_B0, nodif_B0_mask] = mgu.make_gtab_and_bmask(fbval, fbvec, dwi_prep, namer.dirs['output']['prep_dwi'])
 
     # Get B0 header and affine
     dwi_prep_img = nib.load(dwi_prep)
@@ -187,6 +191,7 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
     print("%s%s%s" % ('Reorienting runtime: ', str(np.round(time.time() - start_time, 1)), 's'))
 
     if reg_style == 'native':
+
         print('Running tractography in native space...')
         # Instantiate registration
         reg = mgr.dmri_reg(namer, nodif_B0, nodif_B0_mask, t1w, vox_size, simple=False)
@@ -249,7 +254,20 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
         trkfile = nib.streamlines.trk.TrkFile(tractogram, header=trk_hdr)
         nib.streamlines.save(trkfile, streams)
 
+        # Normalize streamlines
+        print('Running DSN...')
+        streams_warp = mgr.direct_streamline_norm(streams, streams_mni, nodif_B0, namer)
+
+        # Read Streamlines
+        streamlines_mni = nib.streamlines.load(streams_warp).streamlines
+        streamlines = Streamlines(streamlines_mni)
+
     elif reg_style == 'mni':
+
+        # Check dimensions
+        start_time = time.time()
+        t1w = mgu.match_target_vox_res(t1w, vox_size, namer, zoom_set, sens='t1w')
+        print("%s%s%s" % ('Reslicing runtime: ', str(np.round(time.time() - start_time, 1)), 's'))
         print('Running tractography in MNI-space...')
         aligned_dwi = "{}/dwi_mni_aligned.nii.gz".format(namer.dirs['output']['prep_dwi'])
 
@@ -261,33 +279,21 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
 
         print("Beginning tractography...")
         # Compute tensors and track fiber streamlines
+        print('aligned_dwi: {}').format(aligned_dwi)
+        print('gtab: {}').format(gtab)
         [tens, streamlines, align_dwi_mask] = mgt.eudx_basic(aligned_dwi, gtab, stop_val=0.2)
         tensors = "{}/tensors.nii.gz".format(namer.dirs['output']['tensor'])
         tensor2fa(tens, tensors, aligned_dwi, namer.dirs['output']['tensor'], namer.dirs['qa']['tensor'])
 
         # Save streamlines to disk
         print('Saving streamlines: ' + streams)
-        nib.streamlines.save(streamlines, streams)
-
-    # Normalize streamlines
-    print('Running DSN...')
-    streams_warp = mgr.direct_streamline_norm(streams, streams_mni, nodif_B0, namer)
-
-    # Read Streamlines
-    streamlines_mni = nib.streamlines.load(streams_warp).streamlines
-    streamlines = Streamlines(streamlines_mni)
-
-    # Visualize fibers using VTK
-    if nib.load(nodif_B0_mask).get_data().shape == (182, 218, 182):
-        from dipy.viz import window, actor, colormap as cmap
-        renderer = window.Renderer()
-        renderer.clear()
-        renderer.add(actor.line(streamlines, cmap.line_colors(streamlines)))
-        window.record(renderer, out_path='streamlines.png', size=(600, 600))
-    #        try:
-    #            visualize_fibs(streamlines, aligned_atlas, namer.dirs['qa']['fiber'], 0.02, 2000)
-    #        except:
-    #            print("Fiber QA failed - VTK for Python not configured properly.")
+        print('streamlines: {}').format(streamlines)
+        print('streams: {}').format(streams)
+        tractogram_list = [i for i in streamlines]
+        trk_affine = nib.load(atlas).get_affine()  # alex  # TODO: make sure this is the right affine
+        tractogram = nib.streamlines.Tractogram(tractogram_list, affine_to_rasmm=trk_affine)  # alex
+        nib.streamlines.save(tractogram, streams)
+        streamlines = Streamlines(streamlines)  # alex  # to try to make the streamlines variable be the same thing as the native space one
 
     # -------- Big Graph Generation --------------------------------- #
     # Generate big graphs from streamlines
@@ -317,8 +323,7 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
             cmd = 'fslmaths ' + labels[idx] + ' -mas ' + align_dwi_mask + ' ' + labels_im_file
             os.system(cmd)
             labels_im = nib.load(labels_im_file)
-            g1 = mgg.graph_tools(attr=len(np.unique(labels_im.get_data().astype('int'))) - 1, rois=labels_im_file,
-                                 tracks=tracks, affine=affine, namer=namer, connectome_path=connectomes[idx])
+            g1 = mgg.graph_tools(attr=len(np.unique(labels_im.get_data().astype('int'))) - 1, rois=labels_im_file, tracks=streamlines, affine=trk_affine, namer=namer, connectome_path=connectomes[idx])  # alex  # TODO: make sure affine and stuff is in the right thing
             g1.make_graph_old()
         g1.summary()
         g1.save_graph(connectomes[idx])
