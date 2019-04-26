@@ -56,7 +56,21 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
     """
     Creates a brain graph from MRI data
     """
-
+    print('dwi = "{}"').format(dwi)
+    print('bvals = "{}"').format(bvals)
+    print('bvecs = "{}"').format(bvecs)
+    print('t1w = "{}"').format(t1w)
+    print('atlas = "{}"').format(atlas)
+    print('mask = "{}"').format(mask)
+    print('labels = {}').format(labels)
+    print('outdir = "{}"').format(outdir)
+    print('vox_size = "{}"').format(vox_size)
+    print('mod_type = "{}"').format(mod_type)
+    print('track_type = "{}"').format(track_type)
+    print('mod_func = "{}"').format(mod_func)
+    print('reg_style = "{}"').format(reg_style)
+    print('clean = {}').format(clean)
+    print('big = {}').format(big)
     startTime = datetime.now()
     fmt = '_adj.ssv'
 
@@ -114,7 +128,9 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
         raise ValueError('Voxel size not supported. Use 2mm or 1mm')
 
     # -------- Preprocessing Steps --------------------------------- #
-    # Perform eddy correction
+    
+
+    #Perform eddy correction
     start_time = time.time()
     #if len(os.listdir(namer.dirs['output']['prep_dwi'])) != 0:
     #    print('Pre-existing preprocessed dwi files found. Deleting these...')
@@ -128,6 +144,7 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
     #os.system(cmd)
 
     # Instantiate bvec/bval naming variations and copy to derivative director
+    print('Instantiate bvec/bval naming variations, copy to derivative director')
     bvec_scaled = "{}/bvec_scaled.bvec".format(namer.dirs['output']['prep_dwi'])
     fbval = "{}/bval.bval".format(namer.dirs['output']['prep_dwi'])
     fbvec = "{}/bvec.bvec".format(namer.dirs['output']['prep_dwi'])
@@ -135,6 +152,7 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
     shutil.copyfile(bvals, fbval)
 
     # Correct any corrupted bvecs/bvals
+    print('Correcting corrupted bvals and bvecs')
     from dipy.io import read_bvals_bvecs
     bvals, bvecs = read_bvals_bvecs(fbval, fbvec)
     bvecs[np.where(np.any(abs(bvecs) >= 10, axis=1) == True)] = [1, 0, 0]
@@ -274,7 +292,7 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
         # Align DWI volumes to Atlas
         print("Aligning volumes...")
         reg = mgr.dmri_reg_old(dwi_prep, gtab, t1w, atlas, aligned_dwi, namer, clean)
-        print('Registering DWI image to atlas...')
+        print('Registering DWI image at {} to atlas; aligned dwi at {}...').format(dwi_prep, aligned_dwi)  # alex  # TODO: make sure dwi_prep is what is being registered
         reg.dwi2atlas()
 
         print("Beginning tractography...")
@@ -289,11 +307,13 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
         print('Saving streamlines: ' + streams)
         print('streamlines: {}').format(streamlines)
         print('streams: {}').format(streams)
-        tractogram_list = [i for i in streamlines]
-        trk_affine = nib.load(atlas).get_affine()  # alex  # TODO: make sure this is the right affine
+        tractogram_list = [i for i in streamlines]  # alex
+        trk_affine = np.diagflat([1, 1, 1, 1])  # alex  # TODO: remove in favor of something not hardcoded
         tractogram = nib.streamlines.Tractogram(tractogram_list, affine_to_rasmm=trk_affine)  # alex
-        nib.streamlines.save(tractogram, streams)
+        nib.streamlines.save(tractogram, streams)  # alex
         streamlines = Streamlines(streamlines)  # alex  # to try to make the streamlines variable be the same thing as the native space one
+        print('atlas location: {}').format(atlas)
+        print('affine: {}').format(trk_affine)
 
     # -------- Big Graph Generation --------------------------------- #
     # Generate big graphs from streamlines
@@ -317,13 +337,20 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
                                  tracks=streamlines, affine=np.eye(4), namer=namer, connectome_path=connectomes[idx])
             g1.make_graph_old()
         # g1.make_regressors()
+        #elif reg_style == 'mni':
+            #print("Generating graph for {} parcellation...").format(label)
+            #atlas_name = labels[idx].split('/')[-1].split('.')[0]
+            #labels_im_file = "{}/{}_masked_atlas.nii.gz".format(namer.dirs['tmp']['reg_a'], atlas_name)
+            #cmd = 'fslmaths ' + labels[idx] + ' -mas ' + align_dwi_mask + ' ' + labels_im_file
+            #os.system(cmd)
+            #labels_im = nib.load(labels_im_file)
+            #g1 = mgg.graph_tools(attr=len(np.unique(labels_im.get_data().astype('int'))) - 1, rois=labels_im_file, tracks=streamlines, affine=trk_affine, namer=namer, connectome_path=connectomes[idx])  # alex  # TODO: make sure affine is right
+            #g1.make_graph_old()
         elif reg_style == 'mni':
-            atlas_name = labels[idx].split('/')[-1].split('.')[0]
-            labels_im_file = "{}/{}_masked_atlas.nii.gz".format(namer.dirs['tmp']['reg_a'], atlas_name)
-            cmd = 'fslmaths ' + labels[idx] + ' -mas ' + align_dwi_mask + ' ' + labels_im_file
-            os.system(cmd)
+            labels_im_file = mgu.match_target_vox_res(labels[idx], vox_size, namer, zoom_set, sens='t1w')
             labels_im = nib.load(labels_im_file)
-            g1 = mgg.graph_tools(attr=len(np.unique(labels_im.get_data().astype('int'))) - 1, rois=labels_im_file, tracks=streamlines, affine=trk_affine, namer=namer, connectome_path=connectomes[idx])  # alex  # TODO: make sure affine and stuff is in the right thing
+            g1 = mgg.graph_tools(attr=len(np.unique(labels_im.get_data().astype('int'))) - 1, rois=labels_im_file,
+            tracks=streamlines, affine=np.eye(4), namer=namer, connectome_path=connectomes[idx])
             g1.make_graph_old()
         g1.summary()
         g1.save_graph(connectomes[idx])

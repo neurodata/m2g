@@ -598,7 +598,7 @@ class dmri_reg_old(object):
         nib.save(self.b0_out, self.b0)
 
         # Applies skull stripping to T1 volume, then EPI alignment to T1
-        print('calling mgru.extract_brain on {}, {}').format(self.t1w, self.t1w_brain)
+        print('calling mgru.extract_brain on {}, {}').format(self.t1w, self.t1w_brain)  # t1w = in, t1w_brain = out
         mgru.extract_brain(self.t1w, self.t1w_brain, '-B')
         print('calling align_epi')
         print(self.t1w)
