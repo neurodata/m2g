@@ -351,7 +351,7 @@ def match_target_vox_res(img_file, vox_size, namer, zoom_set, sens):
     affine = img.get_affine()
     hdr = img.get_header()
     zooms = hdr.get_zooms()[:3]
-    if (abs(zooms[0]), abs(zooms[1]), abs(zooms[2])) != zoom_set:
+    if (zooms[0], zooms[1], zooms[2]) != zoom_set:
         if sens == 'dwi':
             img_file_pre = "{}/{}_pre_res.nii.gz".format(namer.dirs['output']['prep_dwi'],
                                                          os.path.basename(img_file).split('.nii.gz')[0])

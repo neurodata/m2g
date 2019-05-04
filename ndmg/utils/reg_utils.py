@@ -147,6 +147,19 @@ def segment_t1w(t1w, basename, opts=''):
     return out
 
 
+def extract_brain(inp, out, opts=""):
+    """
+    A function to extract the brain from an image using FSL's BET.
+    **Positional Arguments:**
+        inp:
+            - the input image.
+        out:
+            - the output brain extracted image.
+    """
+    print('extracting brain')
+    cmd = "bet {} {} {}".format(inp, out, opts)
+    os.system(cmd)
+
 def apply_mask(inp, mask, out):
     """
     A function to generate a brain-only mask for an input image.

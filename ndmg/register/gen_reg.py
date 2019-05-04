@@ -584,6 +584,7 @@ class dmri_reg_old(object):
         self.xfm = "{}/{}_{}_xfm.mat".format(self.namer.dirs['tmp']['reg_m'], self.t1w_name, self.atlas_name)
 
     def dwi2atlas(self, clean=False):
+        print('running dwi2atlas ...')
         # Loads DTI image in as data and extracts B0 volume
         self.dwi_im = nib.load(self.dwi)
         self.b0s = np.where(self.gtab.b0s_mask)[0]
@@ -597,21 +598,29 @@ class dmri_reg_old(object):
         nib.save(self.b0_out, self.b0)
 
         # Applies skull stripping to T1 volume, then EPI alignment to T1
-        mgru.extract_brain(self.t1w, self.t1w_brain, ' -B')
+        print('calling mgru.extract_brain on {}, {}').format(self.t1w, self.t1w_brain)  # t1w = in, t1w_brain = out
+        mgru.extract_brain(self.t1w, self.t1w_brain, '-B')
+        print('calling align_epi')
+        print(self.t1w)
+        print(self.t1w_brain)
+        print(self.temp_aligned)
         mgru.align_epi(self.dwi, self.t1w, self.t1w_brain, self.temp_aligned)
 
         # Applies linear registration from T1 to template
+        print('calling mgru.align on {}, {}, {}').format(self.t1w, self.atlas, self.xfm)
         mgru.align(self.t1w, self.atlas, self.xfm)
 
         # Applies combined transform to dwi image volume
+        print('calling mgru.applyxfm on {}, {}, {}, {}').format(self.atlas, self.temp_aligned, self.xfm, self.temp_aligned2)
         mgru.applyxfm(self.atlas, self.temp_aligned, self.xfm, self.temp_aligned2)
+        print('calling mgru.resample on {}, {}, {}').format(self.temp_aligned2, self.aligned_dwi, self.atlas) 
         mgru.resample(self.temp_aligned2, self.aligned_dwi, self.atlas)
 
         if clean:
             cmd = "rm -f {} {} {} {} {}*".format(self.dwi, self.temp_aligned, self.b0,
                                                  self.xfm, self.t1w_name)
             print("Cleaning temporary registration files...")
-            mgu.execute_cmd(cmd)
+            os.system(cmd)
 
 
 class epi_register(object):
