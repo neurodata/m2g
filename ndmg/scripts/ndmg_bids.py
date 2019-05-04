@@ -73,12 +73,11 @@ def get_atlas(atlas_dir, modality, vox_size):
         raise ValueError('Voxel dimensions of input t1w image not currently supported by ndmg.')
 
     if modality == 'dwi':
-        atlas = op.join(atlas_dir, 'atlas/MNI152NLin6_res-' + dims + '_T1w.nii.gz')
-        atlas_mask = op.join(atlas_dir,
-                             'mask/MNI152NLin6_res-' + dims + '_T1w_descr-brainmask.nii.gz')
-        labels = [i for i in glob.glob(atlas_dir + '/label/*.nii.gz') if dims in i]
-        labels = [op.join(atlas_dir, 'label', l) for l in labels]
-        fils = labels + [atlas, atlas_mask]
+	atlas = op.join(atlas_dir, 'reference_brains/MNI152NLin6_res-' + dims + '_T1w.nii.gz')
+	atlas_mask = op.join(atlas_dir, 'mask/MNI152NLin6_res-' + dims + '_T1w_descr-brainmask.nii.gz')
+	labels = [i for i in glob.glob(atlas_dir + '/label/Human/*.nii.gz') if dims in i]
+	labels = [op.join(atlas_dir, 'label/Human/', l) for l in labels]
+	fils = labels + [atlas, atlas_mask]
     if modality == 'func':
         atlas = op.join(atlas_dir, 'atlas/MNI152NLin6_res-' + dims + '_T1w.nii.gz')
         atlas_brain = op.join(atlas_dir, 'atlas/' +
@@ -173,14 +172,22 @@ def session_level(inDir, outDir, subjs, vox_size, big, clean, stc, atlas_select,
     # use worker wrapper to call function f with args arg
     # and keyword args kwargs
     arg_list = [(f, arg, kwargs) for arg in args]
-    p = Pool(processes=nproc)  # start nproc in parallel
-    try:
-        result = p.map(worker_wrapper, arg_list)  # run them
-        p.close()
-    except:
-        p.close()
-    finally:
-        p.join()
+    p = Pool(processes=1)
+    result = p.map(worker_wrapper, arg_list) 
+    p.close()
+    p.join()
+#    print(worker_wrapper)
+#    print(arg_list)
+#    import sys
+#    sys.exit(0)
+#    p = Pool(processes=nproc)  # start nproc in parallel
+#    try:
+#        result = p.map(worker_wrapper, arg_list)  # run them
+#        p.close()
+#    except:
+#        p.close()
+#    finally:
+#        p.join()
     rmflds = []
     if modality == 'func' and not debug:
         rmflds += [os.path.join(outDir, 'func', modal) for modal in ['clean', 'preproc', 'registered']]
