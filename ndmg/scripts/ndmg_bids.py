@@ -25,7 +25,7 @@
 import warnings
 
 warnings.simplefilter("ignore")
-from ndmg.scripts.ndmg_dwi_pipeline import ndmg_dwi_pipeline
+from ndmg.scripts.ndmg_dwi_pipeline import ndmg_dwi_pipeline, ndmg_dwi_worker
 from ndmg.scripts.ndmg_func_pipeline import ndmg_func_pipeline
 from ndmg.utils.bids_utils import *
 from ndmg.stats.qa_graphs import *
@@ -139,7 +139,6 @@ def session_level(inDir, outDir, subjs, vox_size, big, clean, stc, atlas_select,
 
     result = sweep_directory(inDir, subjs, sesh, task, run, modality)
 
-    kwargs = {'clean': (not debug)}  # our keyword arguments
     if modality == 'dwi':
         dwis, bvals, bvecs, anats = result
         assert (len(anats) == len(dwis))
@@ -151,43 +150,17 @@ def session_level(inDir, outDir, subjs, vox_size, big, clean, stc, atlas_select,
                 for
                 (dw, bval, bvec, anat)
                 in zip(dwis, bvals, bvecs, anats)]
-        f = ndmg_dwi_pipeline  # the function of choice
-        kwargs['vox_size'] = vox_size
-        kwargs['mod_type'] = mod_type
-        kwargs['track_type'] = track_type
-        kwargs['mod_func'] = mod_func
-        kwargs['reg_style'] = reg_style
-        kwargs['big'] = big
-        kwargs['clean'] = clean
     else:
         funcs, anats = result
         assert (len(anats) == len(funcs))
         args = [[func, anat, atlas, atlas_brain, atlas_mask,
                  lv_mask, labels, outDir] for (func, anat) in
                 zip(funcs, anats)]
-        f = ndmg_func_pipeline
-        kwargs['stc'] = stc
 
     # optional args stored in kwargs
     # use worker wrapper to call function f with args arg
     # and keyword args kwargs
-    arg_list = [(f, arg, kwargs) for arg in args]
-    p = Pool(processes=1)
-    result = p.map(worker_wrapper, arg_list) 
-    p.close()
-    p.join()
-#    print(worker_wrapper)
-#    print(arg_list)
-#    import sys
-#    sys.exit(0)
-#    p = Pool(processes=nproc)  # start nproc in parallel
-#    try:
-#        result = p.map(worker_wrapper, arg_list)  # run them
-#        p.close()
-#    except:
-#        p.close()
-#    finally:
-#        p.join()
+    ndmg_dwi_worker(args[0][0], args[0][1], args[0][2], args[0][3], atlas, atlas_mask, labels, outDir, vox_size, mod_type, track_type, mod_func, reg_style, clean, big)
     rmflds = []
     if modality == 'func' and not debug:
         rmflds += [os.path.join(outDir, 'func', modal) for modal in ['clean', 'preproc', 'registered']]
