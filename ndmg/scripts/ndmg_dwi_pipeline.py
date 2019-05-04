@@ -208,7 +208,7 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
     t1w = mgu.reorient_t1w(t1w, namer)
     print("%s%s%s" % ('Reorienting runtime: ', str(np.round(time.time() - start_time, 1)), 's'))
 
-    if reg_style == 'native':
+    if reg_style == 'native' or reg_style == 'native_dsn':
 
         print('Running tractography in native space...')
         # Instantiate registration
@@ -241,44 +241,45 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
                              reg.wm_in_dwi, gtab, mod_type, track_type, mod_func, seeds, np.eye(4))
         streamlines = trct.run()
 
-        # Save streamlines to disk
-        print('Saving streamlines: ' + streams)
+	if reg_style == 'native_dsn':
+            # Save streamlines to disk
+            print('Saving streamlines: ' + streams)
 
-        def transform_to_affine(streams, header, affine):
-            rotation, scale = np.linalg.qr(affine)
-            streams = move_streamlines(streams, rotation)
-            scale[0:3, 0:3] = np.dot(scale[0:3, 0:3], np.diag(1. / header['voxel_sizes']))
-            scale[0:3, 3] = abs(scale[0:3, 3])
-            streams = move_streamlines(streams, scale)
-            return streams
+            def transform_to_affine(streams, header, affine):
+                rotation, scale = np.linalg.qr(affine)
+                streams = move_streamlines(streams, rotation)
+                scale[0:3, 0:3] = np.dot(scale[0:3, 0:3], np.diag(1. / header['voxel_sizes']))
+                scale[0:3, 3] = abs(scale[0:3, 3])
+                streams = move_streamlines(streams, scale)
+                return streams
 
-        streamlines = Streamlines([sl for sl in streamlines if len(sl) > 60])
-        trk_affine = np.eye(4)
-        B0_img = nib.load(nodif_B0)
-        B0_affine = B0_img.affine
-        trk_hdr = nib.streamlines.trk.TrkFile.create_empty_header()
-        trk_hdr['hdr_size'] = 1000
-        trk_hdr['dimensions'] = hdr['dim'][1:4].astype('float32')
-        trk_hdr['voxel_sizes'] = hdr['pixdim'][1:4]
-        trk_hdr['voxel_to_rasmm'] = trk_affine
-        trk_hdr['voxel_order'] = 'LPS'
-        trk_hdr['pad2'] = 'LPS'
-        trk_hdr['image_orientation_patient'] = np.array([1., 0., 0., 0., 1., 0.]).astype('float32')
-        trk_hdr['endianness'] = '<'
-        trk_hdr['_offset_data'] = 1000
-        trk_hdr['nb_streamlines'] = streamlines.total_nb_rows
-        streamlines_trans = Streamlines(transform_to_affine(streamlines, trk_hdr, B0_affine))
-        tractogram = nib.streamlines.Tractogram(streamlines, affine_to_rasmm=trk_affine)
-        trkfile = nib.streamlines.trk.TrkFile(tractogram, header=trk_hdr)
-        nib.streamlines.save(trkfile, streams)
+            streamlines = Streamlines([sl for sl in streamlines if len(sl) > 60])
+            trk_affine = np.eye(4)
+            B0_img = nib.load(nodif_B0)
+            B0_affine = B0_img.affine
+            trk_hdr = nib.streamlines.trk.TrkFile.create_empty_header()
+            trk_hdr['hdr_size'] = 1000
+            trk_hdr['dimensions'] = hdr['dim'][1:4].astype('float32')
+            trk_hdr['voxel_sizes'] = hdr['pixdim'][1:4]
+            trk_hdr['voxel_to_rasmm'] = trk_affine
+            trk_hdr['voxel_order'] = 'LPS'
+            trk_hdr['pad2'] = 'LPS'
+            trk_hdr['image_orientation_patient'] = np.array([1., 0., 0., 0., 1., 0.]).astype('float32')
+            trk_hdr['endianness'] = '<'
+            trk_hdr['_offset_data'] = 1000
+            trk_hdr['nb_streamlines'] = streamlines.total_nb_rows
+            streamlines_trans = Streamlines(transform_to_affine(streamlines, trk_hdr, B0_affine))
+            tractogram = nib.streamlines.Tractogram(streamlines, affine_to_rasmm=trk_affine)
+            trkfile = nib.streamlines.trk.TrkFile(tractogram, header=trk_hdr)
+            nib.streamlines.save(trkfile, streams)
 
-        # Normalize streamlines
-        print('Running DSN...')
-        streams_warp = mgr.direct_streamline_norm(streams, streams_mni, nodif_B0, namer)
+            # Normalize streamlines
+            print('Running DSN...')
+            streams_warp = mgr.direct_streamline_norm(streams, streams_mni, nodif_B0, namer)
 
-        # Read Streamlines
-        streamlines_mni = nib.streamlines.load(streams_warp).streamlines
-        streamlines = Streamlines(streamlines_mni)
+            # Read Streamlines
+            streamlines_mni = nib.streamlines.load(streams_warp).streamlines
+            streamlines = Streamlines(streamlines_mni)
 
     elif reg_style == 'mni':
 
@@ -327,25 +328,24 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
     # Generate graphs from streamlines for each parcellation
     for idx, label in enumerate(labels):
         print("Generating graph for {} parcellation...".format(label))
-        if reg_style == 'native':
+        if reg_style == 'native_dsn':
             # align atlas to t1w to dwi
             print("%s%s" % ('Applying native-space alignment to ', labels[idx]))
             labels_im_file = mgu.match_target_vox_res(labels[idx], vox_size, namer, zoom_set, sens='t1w')
-            labels_im_file = reg.atlas2t1w2dwi_align(labels_im_file)
-            labels_im = nib.load(labels_im_file)
-            g1 = mgg.graph_tools(attr=len(np.unique(labels_im.get_data().astype('int'))) - 1, rois=labels_im_file,
+            labels_im_file_mni = reg.atlas2t1w2dwi_align(labels_im_file, dsn=True)
+            labels_im = nib.load(labels_im_file_mni)
+            g1 = mgg.graph_tools(attr=len(np.unique(labels_im.get_data().astype('int'))) - 1, rois=labels_im_file_mni,
                                  tracks=streamlines, affine=np.eye(4), namer=namer, connectome_path=connectomes[idx])
             g1.make_graph_old()
-        # g1.make_regressors()
-        #elif reg_style == 'mni':
-            #print("Generating graph for {} parcellation...").format(label)
-            #atlas_name = labels[idx].split('/')[-1].split('.')[0]
-            #labels_im_file = "{}/{}_masked_atlas.nii.gz".format(namer.dirs['tmp']['reg_a'], atlas_name)
-            #cmd = 'fslmaths ' + labels[idx] + ' -mas ' + align_dwi_mask + ' ' + labels_im_file
-            #os.system(cmd)
-            #labels_im = nib.load(labels_im_file)
-            #g1 = mgg.graph_tools(attr=len(np.unique(labels_im.get_data().astype('int'))) - 1, rois=labels_im_file, tracks=streamlines, affine=trk_affine, namer=namer, connectome_path=connectomes[idx])  # alex  # TODO: make sure affine is right
-            #g1.make_graph_old()
+        elif reg_style == 'native':
+            # align atlas to t1w to dwi
+            print("%s%s" % ('Applying native-space alignment to ', labels[idx]))
+            labels_im_file = mgu.match_target_vox_res(labels[idx], vox_size, namer, zoom_set, sens='t1w')
+            labels_im_file_dwi = reg.atlas2t1w2dwi_align(labels_im_file, dsn=False)
+            labels_im = nib.load(labels_im_file_dwi)
+            g1 = mgg.graph_tools(attr=len(np.unique(labels_im.get_data().astype('int'))) - 1, rois=labels_im_file_dwi,
+                                 tracks=streamlines, affine=np.eye(4), namer=namer, connectome_path=connectomes[idx])
+            g1.make_graph_old()
         elif reg_style == 'mni':
             labels_im_file = mgu.match_target_vox_res(labels[idx], vox_size, namer, zoom_set, sens='t1w')
             labels_im = nib.load(labels_im_file)
