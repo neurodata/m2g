@@ -30,10 +30,10 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from ndmg.stats.qa_reg import plot_overlays
-import plotly as py
-import plotly.offline as offline
-from plotly.graph_objs import Heatmap
-from . import plotly_helper as pp
+#import plotly as py
+#import plotly.offline as offline
+#from plotly.graph_objs import Heatmap
+#from . import plotly_helper as pp
 
 
 def dice_coefficient(a, b):

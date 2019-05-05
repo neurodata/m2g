@@ -134,8 +134,11 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
     start_time = time.time()
     if len(os.listdir(namer.dirs['output']['prep_dwi'])) != 0:
         print('Pre-existing preprocessed dwi files found. Deleting these...')
-        shutil.rmtree(namer.dirs['output']['prep_dwi'])
-        os.mkdir(namer.dirs['output']['prep_dwi'])
+	try:
+            shutil.rmtree(namer.dirs['output']['prep_dwi'])
+            os.mkdir(namer.dirs['output']['prep_dwi'])
+        except:
+            pass
 
     dwi_prep = "{}/eddy_corrected_data.nii.gz".format(namer.dirs['output']['prep_dwi'])
     eddy_rot_param = "{}/eddy_corrected_data.ecclog".format(namer.dirs['output']['prep_dwi'])
@@ -190,18 +193,27 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
     # -------- Registration Steps ----------------------------------- #
     if len(os.listdir(namer.dirs['output']['prep_anat'])) != 0:
         print('Pre-existing preprocessed t1w files found. Deleting these...')
-        shutil.rmtree(namer.dirs['output']['prep_anat'])
-        os.mkdir(namer.dirs['output']['prep_anat'])
+	try:
+            shutil.rmtree(namer.dirs['output']['prep_anat'])
+            os.mkdir(namer.dirs['output']['prep_anat'])
+	except:
+	    pass
     if len(os.listdir(namer.dirs['output']['reg_anat'])) != 0:
         print('Pre-existing registered t1w files found. Deleting these...')
-        shutil.rmtree(namer.dirs['output']['reg_anat'])
-        os.mkdir(namer.dirs['output']['reg_anat'])
+	try:
+            shutil.rmtree(namer.dirs['output']['reg_anat'])
+            os.mkdir(namer.dirs['output']['reg_anat'])
+	except:
+	    pass
     if (len(os.listdir(namer.dirs['tmp']['reg_a'])) != 0) or (len(os.listdir(namer.dirs['tmp']['reg_m'])) != 0):
         print('Pre-existing temporary files found. Deleting these...')
-        shutil.rmtree(namer.dirs['tmp']['reg_a'])
-        os.mkdir(namer.dirs['tmp']['reg_a'])
-        shutil.rmtree(namer.dirs['tmp']['reg_m'])
-        os.mkdir(namer.dirs['tmp']['reg_m'])
+	try:
+            shutil.rmtree(namer.dirs['tmp']['reg_a'])
+            os.mkdir(namer.dirs['tmp']['reg_a'])
+            shutil.rmtree(namer.dirs['tmp']['reg_m'])
+            os.mkdir(namer.dirs['tmp']['reg_m'])
+	except:
+	    pass
 
     # Check orientation (t1w)
     start_time = time.time()
@@ -356,14 +368,6 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
         g1.save_graph(connectomes[idx])
 
     exe_time = datetime.now() - startTime
-    #    qc_dwi.save(qc_stats, exe_time)
-
-    # Clean temp files
-    if clean is True:
-        print("Cleaning up intermediate files... ")
-        del_dirs = [namer.dirs['tmp']['base']] + [namer.dirs['output'][k] for k in opt_dirs]
-        cmd = "rm -rf {}".format(" ".format(del_dirs))
-        mgu.execute_cmd(cmd)
 
     print("Total execution time: {}".format(exe_time))
     print("NDMG Complete!")

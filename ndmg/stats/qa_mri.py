@@ -27,10 +27,9 @@ import os.path
 import matplotlib
 import numpy as np
 from ndmg.utils import gen_utils as mgu
-from ndmg.stats.func_qa_utils import plot_timeseries, plot_signals, \
-    registration_score, plot_connectome
-from ndmg.stats.qa_reg import reg_mri_pngs, plot_brain, plot_overlays
-
+#from ndmg.stats.func_qa_utils import plot_timeseries, plot_signals, \
+#    registration_score, plot_connectome
+#from ndmg.stats.qa_reg import reg_mri_pngs, plot_brain, plot_overlays
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import csv

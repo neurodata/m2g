@@ -32,7 +32,6 @@ from ndmg.utils import gen_utils as mgu
 from ndmg import epi_register as mgreg
 from ndmg.graph import gen_graph as mgg
 from ndmg.timeseries import timeseries as mgts
-from ndmg.stats.qa_mri import qa_mri
 from ndmg.preproc import preproc_func as mgfp
 from ndmg.preproc import preproc_anat as mgap
 from ndmg.nuis import gen_nuis as mgn
@@ -216,9 +215,7 @@ def ndmg_func_worker(func, t1w, atlas, atlas_brain, atlas_mask, lv_mask,
             erm = "Exception in Connectome Extraction for {} parcellation."
             print((erm.format(labels[idx])))
 
-    # save our statistics so that we can do group level
     exe_time = datetime.now() - startTime
-    qc_func.save(qc_stats, exe_time)
 
     # Clean temp files
     if clean:
