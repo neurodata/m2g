@@ -217,11 +217,6 @@ def reorient_dwi(dwi_prep, bvecs, namer):
             dwi_prep = dwi_prep_IS
         cmd = 'fslorient -forceradiological ' + dwi_prep
         os.system(cmd)
-        #cmd = 'fslorient -getorient ' + dwi_prep
-        #orient = os.popen(cmd).read().strip('\n')
-        #if orient == 'NEUROLOGICAL':
-        #    cmd = 'fslorient -swaporient ' + dwi_prep
-        #    os.system(cmd)
         np.savetxt(bvecs, bvecs_mat)
     else:
         print('Radiological (dwi)...')
@@ -353,7 +348,7 @@ def match_target_vox_res(img_file, vox_size, namer, zoom_set, sens):
         print('Reslicing image ' + img_file + ' to 2mm...')
         new_zooms = (2., 2., 2.)
 
-   if (abs(zooms[0]), abs(zooms[1]), abs(zooms[2])) != new_zooms:
+    if (abs(zooms[0]), abs(zooms[1]), abs(zooms[2])) != new_zooms:
         if sens == 'dwi':
             img_file_pre = "{}/{}_pre_res.nii.gz".format(namer.dirs['output']['prep_dwi'],
                                                          os.path.basename(img_file).split('.nii.gz')[0])
