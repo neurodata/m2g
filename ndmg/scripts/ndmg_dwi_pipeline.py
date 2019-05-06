@@ -134,11 +134,11 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
     start_time = time.time()
     if len(os.listdir(namer.dirs['output']['prep_dwi'])) != 0:
         print('Pre-existing preprocessed dwi files found. Deleting these...')
-	try:
-            shutil.rmtree(namer.dirs['output']['prep_dwi'])
-            os.mkdir(namer.dirs['output']['prep_dwi'])
-        except:
-            pass
+    try:
+        shutil.rmtree(namer.dirs['output']['prep_dwi'])
+        os.mkdir(namer.dirs['output']['prep_dwi'])
+    except:
+        pass
 
     dwi_prep = "{}/eddy_corrected_data.nii.gz".format(namer.dirs['output']['prep_dwi'])
     eddy_rot_param = "{}/eddy_corrected_data.ecclog".format(namer.dirs['output']['prep_dwi'])
