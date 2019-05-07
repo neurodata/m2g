@@ -103,7 +103,7 @@ def get_atlas(atlas_dir, modality, vox_size):
         os.system(cmd)
         cmd = 'unzip /master.zip'
         os.system(cmd)
-        os.rename('/neuroparc-master/atlases', '/ndmg_atlases')
+        shutil.move('/neuroparc-master/atlases', '/ndmg_atlases')
         shutil.rmtree('/neuroparc-master')
         os.remove('master.zip')
 
