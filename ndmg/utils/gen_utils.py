@@ -217,11 +217,6 @@ def reorient_dwi(dwi_prep, bvecs, namer):
             dwi_prep = dwi_prep_IS
         cmd = 'fslorient -forceradiological ' + dwi_prep
         os.system(cmd)
-        #cmd = 'fslorient -getorient ' + dwi_prep
-        #orient = os.popen(cmd).read().strip('\n')
-        #if orient == 'NEUROLOGICAL':
-        #    cmd = 'fslorient -swaporient ' + dwi_prep
-        #    os.system(cmd)
         np.savetxt(bvecs, bvecs_mat)
     else:
         print('Radiological (dwi)...')
