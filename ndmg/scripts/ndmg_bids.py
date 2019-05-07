@@ -96,7 +96,7 @@ def get_atlas(atlas_dir, modality, vox_size):
     for f in fils:
         if not ope(f):
             print(f)
-    if any(not ope(f) for f in fils):
+    if not os.path.exists('/ndmg_atlases'):  # TODO: stop hardcoding variables
         print("Cannot find atlas information; downloading...")
         mgu.execute_cmd('mkdir -p ' + atlas_dir)
         cmd = 'wget https://github.com/neurodata/neuroparc/archive/master.zip'

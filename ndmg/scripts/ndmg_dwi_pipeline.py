@@ -306,7 +306,7 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
         print("Aligning volumes...")
         reg = mgr.dmri_reg_old(dwi_prep, gtab, t1w, atlas, aligned_dwi, namer, clean)
         print('Registering DWI image at {} to atlas; aligned dwi at {}...').format(dwi_prep, aligned_dwi)  # alex  # TODO: make sure dwi_prep is what is being registered
-        reg.dwi2atlas()
+        reg.dwi2atlas()  # TODO: fix pulling from wrong directory in /ndmg_atlases after neuroparc changes
 
         print("Beginning tractography...")
         # Compute tensors and track fiber streamlines
