@@ -101,11 +101,11 @@ def get_atlas(atlas_dir, modality, vox_size):
         # mgu.execute_cmd('mkdir -p ' + atlas_dir)  # TODO: python3.2 and above has `exist_ok`, we should use that when we switch to 3 to avoid subprocess calls: os.makedirs(path, exist_ok=True)  # actually we don't need this, cause `shutil.move` will just make it for us
         cmd = 'wget https://github.com/neurodata/neuroparc/archive/v0.1.0.zip -O /neuroparc.zip'
         os.system(cmd)
-        cmd = 'unzip /neuroparc.zip'
+        cmd = 'unzip /neuroparc.zip -d /neuroparc'
         os.system(cmd)
-        shutil.move('/neuroparc-0.1.0/atlases', atlas_dir)
-        shutil.rmtree('/neuroparc-0.1.0')
+        shutil.move('/neuroparc/neuroparc-0.1.0/atlases', atlas_dir)
         os.remove('/neuroparc.zip')
+        shutil.rmtree('/neuroparc')
 
     if modality == 'dwi':
         atlas_brain = None
