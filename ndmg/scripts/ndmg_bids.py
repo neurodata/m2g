@@ -75,7 +75,7 @@ def get_atlas(atlas_dir, modality, vox_size):
     if modality == 'dwi':
 	atlas = op.join(atlas_dir, 'reference_brains/MNI152NLin6_res-' + dims + '_T1w.nii.gz')
 	atlas_mask = op.join(atlas_dir, 'mask/MNI152NLin6_res-' + dims + '_T1w_descr-brainmask.nii.gz')
-	labels = [i for i in glob.glob(atlas_dir + '/label/Human/*.nii.gz') if dims in i]
+	labels = [i for i in glob.glob(atlas_dir + 'label/Human/*.nii.gz') if dims in i]
 	labels = [op.join(atlas_dir, 'label/Human/', l) for l in labels]
 	fils = labels + [atlas, atlas_mask]
     if modality == 'func':
