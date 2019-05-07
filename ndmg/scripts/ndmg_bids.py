@@ -92,20 +92,20 @@ def get_atlas(atlas_dir, modality, vox_size):
         labels = [op.join(atlas_dir, 'label', l) for l in labels]
         fils = labels + [atlas, atlas_mask, atlas_brain, lv_mask]
 
-    ope = op.exists
+    ope = op.exists  # TODO: should probs just use os.path.exists for readability
     for f in fils:
         if not ope(f):
             print(f)
-    if not os.path.exists(atlas_dir):  # TODO: stop hardcoding variables
+    if not os.path.exists(atlas_dir):  # alex: old check wasn't working, and this code was running even if ndmg_atlases exists
         print("Cannot find atlas information; downloading...")
-        mgu.execute_cmd('mkdir -p ' + atlas_dir)
-        cmd = 'wget https://github.com/neurodata/neuroparc/archive/master.zip'
+        mgu.execute_cmd('mkdir -p ' + atlas_dir)  # TODO: python3.2 and above has `exist_ok`, we should use that when we switch to 3 to avoid subprocess calls: os.makedirs(path, exist_ok=True)
+        cmd = 'wget https://github.com/neurodata/neuroparc/archive/v0.1.0.zip -O /neuroparc.zip'
         os.system(cmd)
-        cmd = 'unzip /master.zip'
+        cmd = 'unzip /neuroparc.zip'
         os.system(cmd)
-        shutil.move('/neuroparc-master/atlases', atlas_dir)
-        shutil.rmtree('/neuroparc-master')
-        os.remove('master.zip')
+        shutil.move('/neuroparc-0.1.0/atlases', atlas_dir)
+        shutil.rmtree('/neuroparc-0.1.0')
+        os.remove('/neuroparc.zip')
 
     if modality == 'dwi':
         atlas_brain = None
