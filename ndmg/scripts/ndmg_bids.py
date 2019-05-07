@@ -96,14 +96,14 @@ def get_atlas(atlas_dir, modality, vox_size):
     for f in fils:
         if not ope(f):
             print(f)
-    if not os.path.exists('/ndmg_atlases'):  # TODO: stop hardcoding variables
+    if not os.path.exists(atlas_dir):  # TODO: stop hardcoding variables
         print("Cannot find atlas information; downloading...")
         mgu.execute_cmd('mkdir -p ' + atlas_dir)
         cmd = 'wget https://github.com/neurodata/neuroparc/archive/master.zip'
         os.system(cmd)
         cmd = 'unzip /master.zip'
         os.system(cmd)
-        shutil.move('/neuroparc-master/atlases', '/ndmg_atlases')
+        shutil.move('/neuroparc-master/atlases', atlas_dir)
         shutil.rmtree('/neuroparc-master')
         os.remove('master.zip')
 
