@@ -41,7 +41,7 @@ import sys
 from multiprocessing import Pool
 from ndmg.scripts import ndmg_cloud as nc
 
-atlas_dir = '/ndmg_atlases'  # This location bc it is convenient for containers
+atlas_dir = '/ndmg_atlases/atlases/'  # This location bc it is convenient for containers
 
 # Data structure:
 # sub-<subject id>/
@@ -103,7 +103,7 @@ def get_atlas(atlas_dir, modality, vox_size):
         os.system(cmd)
         cmd = 'unzip /neuroparc.zip -d /neuroparc'
         os.system(cmd)
-        shutil.move('/neuroparc/neuroparc-0.1.0/atlases', atlas_dir + '/atlases')
+        shutil.move('/neuroparc/neuroparc-0.1.0/atlases', atlas_dir)
         os.remove('/neuroparc.zip')
         shutil.rmtree('/neuroparc')
 
