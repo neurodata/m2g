@@ -33,7 +33,6 @@ import os
 import os.path as op
 import sys
 import shutil
-from networkx import to_numpy_matrix as graph2np
 import pyximport
 from nilearn.image import resample_img
 
@@ -392,19 +391,6 @@ def load_timeseries(timeseries_file, ts='roi'):
         print('You have not selected a valid timeseries type.' +
               'options are ts=\'roi\' or ts=\'voxel\'.')
     pass
-
-
-def graph2mtx(graph):
-    """
-    A function to convert a networkx graph to an appropriate
-    numpy matrix that is ordered properly from smallest
-    ROI to largest.
-    **Positional Arguments:**
-        graph:
-            - a networkx graph.
-    """
-    return graph2np(graph, nodelist=np.sort(graph.nodes()).tolist())
-
 
 def name_tmps(basedir, basename, extension):
     return "{}/tmp/{}{}".format(basedir, basename, extension)

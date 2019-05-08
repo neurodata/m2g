@@ -28,8 +28,6 @@ warnings.simplefilter("ignore")
 from ndmg.scripts.ndmg_dwi_pipeline import ndmg_dwi_pipeline, ndmg_dwi_worker
 from ndmg.scripts.ndmg_func_pipeline import ndmg_func_pipeline
 from ndmg.utils.bids_utils import *
-from ndmg.stats.qa_graphs import *
-from ndmg.stats.qa_graphs_plotting import *
 from glob import glob
 from ndmg.utils import gen_utils as mgu
 import ndmg
@@ -96,16 +94,16 @@ def get_atlas(atlas_dir, modality, vox_size):
     for f in fils:
         if not ope(f):
             print(f)
-    if any(not ope(f) for f in fils):
+
+    if not os.path.exists(atlas_dir):
         print("Cannot find atlas information; downloading...")
-        mgu.execute_cmd('mkdir -p ' + atlas_dir)
-        cmd = 'wget https://github.com/neurodata/neuroparc/archive/master.zip'
+        cmd = 'wget https://github.com/neurodata/neuroparc/archive/v0.1.0.zip -O /neuroparc.zip'
         os.system(cmd)
-        cmd = 'unzip /master.zip'
+        cmd = 'unzip /neuroparc.zip -d /neuroparc'
         os.system(cmd)
-        os.rename('/neuroparc-master/atlases', '/ndmg_atlases')
-        shutil.rmtree('/neuroparc-master')
-        os.remove('master.zip')
+        shutil.move('/neuroparc/neuroparc-0.1.0/atlases', atlas_dir)
+        os.remove('/neuroparc.zip')
+        shutil.rmtree('/neuroparc')
 
     if modality == 'dwi':
         atlas_brain = None
@@ -171,48 +169,6 @@ def session_level(inDir, outDir, subjs, vox_size, big, clean, stc, atlas_select,
         cmd = "rm -rf {}".format(" ".join(rmflds))
         mgu.execute_cmd(cmd)
     sys.exit(0)  # terminated
-
-
-def group_level(inDir, outDir, vox_size, big, clean, stc, dataset=None, atlas=None, minimal=False,
-                log=False, hemispheres=False, modality='dwi'):
-    """
-    Crawls the output directory from ndmg and computes qc metrics on the
-    derivatives produced
-    """
-    outDir = op.join(outDir, 'qa', 'roi-connectomes')
-    mgu.execute_cmd("mkdir -p {}".format(outDir))
-    labels_used = next(os.walk(inDir))[1]
-
-    if atlas is not None:
-        labels_used = [atlas]
-
-    for skip in skippers:
-        if skip in labels_used:
-            print(("Skipping {} parcellation".format(skip)))
-            labels_used.remove(skip)
-            continue
-
-    gfmt = '_elist.csv' if modality == 'dwi' else '_adj.csv'
-    for label in labels_used:
-        print(("Parcellation: {}".format(label)))
-        tmp_in = op.join(inDir, label)
-        fs = [op.join(tmp_in, fl)
-              for root, dirs, files in os.walk(tmp_in)
-              for fl in files
-              if fl.endswith(gfmt)]
-        tmp_out = op.join(outDir, label)
-        mgu.execute_cmd("mkdir -p {}".format(tmp_out))
-        try:
-            compute_metrics(fs, tmp_out, label, modality=modality)
-            outf = op.join(tmp_out, '{}_plot'.format(label))
-            make_panel_plot(tmp_out, outf, dataset=dataset, atlas=label,
-                            minimal=minimal, log=log, hemispheres=hemispheres,
-                            modality=modality)
-        except Exception as e:
-            print(("Failed group analysis for {} parcellation.".format(label)))
-            print(e)
-            continue
-    sys.exit(0)
 
 
 def main():
@@ -352,23 +308,8 @@ def main():
         session_level(inDir, outDir, subj, vox_size, big, clean, stc,
                       atlas_select, mod_type, track_type, mod_func, reg_style, sesh, task, run,
                       debug, modality, nproc)
-
-    # elif level == 'group':
-    #     gpath = op.join(inDir, modality, 'roi-connectomes')
-    #     if buck is not None and remo is not None:
-    #         print("Retrieving data from S3...")
-    #         if atlas is not None:
-    #             tpath = op.join(remo, gpath, atlas)
-    #             tindir = op.join(outDir, gpath, atlas)
-    #             # Using outDir as input location for group level since
-    #         else:
-    #             tpath = op.join(remo, gpath)
-    #             tindir = op.join(outDir, gpath)
-    #         nc.s3_get_data(buck, tpath, tindir, public=creds)
-    #     modif = 'qa'
-    #     group_level(op.join(inDir, gpath), outDir, vox_size, big, clean, stc,
-    #                 dataset, atlas, minimal, log, hemi, modality)
-
+    else:
+	print('Specified level not valid')
     if push and buck is not None and remo is not None:
         print("Pushing results to S3...")
         nc.s3_push_data(buck, remo, outDir, modif, creds)

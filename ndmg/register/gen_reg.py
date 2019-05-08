@@ -24,8 +24,11 @@ import warnings
 
 warnings.simplefilter("ignore")
 import os
+import nibabel
 import nibabel as nib
 import numpy as np
+import sklearn
+import nilearn
 from nilearn.image import load_img, math_img, resample_img, mean_img, new_img_like, threshold_img
 from dipy.core.gradients import gradient_table
 from dipy.io import read_bvals_bvecs
