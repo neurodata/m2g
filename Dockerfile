@@ -79,35 +79,39 @@ ENV ANTSPATH=/opt/ants/ \
 #--------NDMG SETUP-----------------------------------------------------------#
 # setup of python dependencies for ndmg itself, as well as file dependencies
 RUN \
-    pip install numpy networkx nibabel dipy scipy python-dateutil boto3 awscli matplotlib plotly==1.12.9 nilearn sklearn pandas cython vtk pyvtk fury awscli requests scikit-image pybids==0.6.4 ipython setuptools duecredit
+    pip install setuptools numpy networkx nibabel dipy scipy python-dateutil pandas boto3 awscli matplotlib nilearn sklearn pandas cython vtk pyvtk fury awscli requests scikit-image ipython duecredit --upgrade
 
-# Delete buggy line in dipy
-RUN sed -i -e '189d;190d' /usr/local/lib/python2.7/dist-packages/dipy/tracking/eudx.py
+RUN \
+    pip install plotly==1.12.9 pybids==0.6.4
 
 WORKDIR /
 
-RUN \
-    git clone -b dev-dmri-fmri $NDMG_URL /ndmg && \
-    cd /ndmg && \
-    python setup.py install
-
-RUN \
-    git lfs clone $NDMG_ATLASES && \
-    mv /neuroparc/atlases /ndmg_atlases && \
-    rm -rf /neuroparc && \
-    rm -rf /ndmg_atlases/label/DS* && \
-    rm -rf /ndmg_atlases/label/pp264* && \
-    rm -rf /ndmg_atlases/label/princeton* && \
-    rm -rf /ndmg_atlases/label/slab* && \
-    rm -rf /ndmg_atlases/label/hemispheric
-
-RUN chmod -R 777 /ndmg_atlases
+# Delete buggy line in dipy
+RUN sed -i -e '189d;190d' /usr/local/lib/python2.7/dist-packages/dipy/tracking/eudx.py
 
 RUN mkdir /data && \
     chmod -R 777 /data
 
 RUN mkdir /outputs && \
     chmod -R 777 /outputs
+
+RUN git clone -b dev-dmri-fmri $NDMG_URL /ndmg && \
+    cd /ndmg && \
+    python setup.py install
+
+RUN mkdir /ndmg_atlases
+
+RUN \
+    git lfs clone $NDMG_ATLASES && \
+    mv /neuroparc/atlases /ndmg_atlases && \
+    rm -rf /neuroparc && \
+    rm -rf /ndmg_atlases/label/Human/DS* && \
+    rm -rf /ndmg_atlases/label/Human/pp264* && \
+    rm -rf /ndmg_atlases/label/Human/princeton* && \
+    rm -rf /ndmg_atlases/label/Human/slab* && \
+    rm -rf /ndmg_atlases/label/Human/hemispheric
+
+RUN chmod -R 777 /ndmg_atlases
 
 ENV MPLCONFIGDIR /tmp/matplotlib
 ENV PYTHONWARNINGS ignore
@@ -118,4 +122,4 @@ RUN ldconfig
 RUN chmod -R 777 /usr/local/bin/ndmg_bids
 
 # and add it as an entrypoint
-#ENTRYPOINT ["ndmg_bids"]
+ENTRYPOINT ["ndmg_bids"]
