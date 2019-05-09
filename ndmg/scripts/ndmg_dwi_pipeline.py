@@ -144,6 +144,7 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
     eddy_rot_param = "{}/eddy_corrected_data.ecclog".format(namer.dirs['output']['prep_dwi'])
     print("Performing eddy correction...")
     cmd = 'eddy_correct ' + dwi + ' ' + dwi_prep + ' 0'
+    print(cmd)
     os.system(cmd)
 
     # Instantiate bvec/bval naming variations and copy to derivative director

@@ -23,8 +23,9 @@
 # big-graph generation.
 
 import warnings
-
+from argparse import ArgumentParser
 warnings.simplefilter("ignore")
+from argparse import ArgumentParser
 from ndmg.scripts.ndmg_dwi_pipeline import ndmg_dwi_pipeline, ndmg_dwi_worker
 from ndmg.scripts.ndmg_func_pipeline import ndmg_func_pipeline
 from ndmg.utils.bids_utils import *
@@ -158,6 +159,7 @@ def session_level(inDir, outDir, subjs, vox_size, big, clean, stc, atlas_select,
     # optional args stored in kwargs
     # use worker wrapper to call function f with args arg
     # and keyword args kwargs
+    print(args)
     ndmg_dwi_worker(args[0][0], args[0][1], args[0][2], args[0][3], atlas, atlas_mask, labels, outDir, vox_size, mod_type, track_type, mod_func, reg_style, clean, big)
     rmflds = []
     if modality == 'func' and not debug:

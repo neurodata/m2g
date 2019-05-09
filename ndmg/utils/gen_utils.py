@@ -34,7 +34,7 @@ import os.path as op
 import sys
 import shutil
 import pyximport
-from nilearn.image import resample_img
+from nilearn.image import resample_img, mean_img
 
 try:
     from ndmg.graph.zindex import XYZMorton
@@ -124,9 +124,6 @@ def get_slice(mri, volid, sli):
 
 
 def make_gtab_and_bmask(fbval, fbvec, dwi_file, outdir):
-    import nibabel as nib
-    import os
-    from nilearn.image import mean_img
     """
     Takes bval and bvec files and produces a structure in dipy format
     **Positional Arguments:**
@@ -166,10 +163,15 @@ def make_gtab_and_bmask(fbval, fbvec, dwi_file, outdir):
         B0s_bbr.append(B0_bbr)
 
     for cmd in cmds:
+	print(cmd)
         os.system(cmd)
 
     # Get mean B0
-    mean_B0 = mean_img(B0s_bbr)
+    B0s_bbr_imgs = []
+    for B0 in B0s_bbr:
+	B0s_bbr_imgs.append(nib.load(B0))
+
+    mean_B0 = mean_img(B0s_bbr_imgs)
     nib.save(mean_B0, nodif_B0)
 
     # Get mean B0 brain mask
