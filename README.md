@@ -203,7 +203,7 @@ Derivatives have been produced on a variety of datasets, all of which are made a
 
 ## Documentation
 
-Check out some [resources](http://m2g.io) on our website, or our [function reference](http://docs.neurodata.io/ndmg/) for more information about **ndmg**.
+Check out some [resources](http://m2g.io) on our website, or our [function reference](https://ndmg.neurodata.io/) for more information about **ndmg**.
 
 ## License
 
