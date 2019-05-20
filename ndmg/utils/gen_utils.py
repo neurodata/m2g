@@ -33,9 +33,8 @@ import os
 import os.path as op
 import sys
 import shutil
-from networkx import to_numpy_matrix as graph2np
 import pyximport
-from nilearn.image import resample_img
+from nilearn.image import resample_img, mean_img
 
 try:
     from ndmg.graph.zindex import XYZMorton
@@ -125,9 +124,6 @@ def get_slice(mri, volid, sli):
 
 
 def make_gtab_and_bmask(fbval, fbvec, dwi_file, outdir):
-    import nibabel as nib
-    import os
-    from nilearn.image import mean_img
     """
     Takes bval and bvec files and produces a structure in dipy format
     **Positional Arguments:**
@@ -167,10 +163,15 @@ def make_gtab_and_bmask(fbval, fbvec, dwi_file, outdir):
         B0s_bbr.append(B0_bbr)
 
     for cmd in cmds:
+	print(cmd)
         os.system(cmd)
 
     # Get mean B0
-    mean_B0 = mean_img(B0s_bbr)
+    B0s_bbr_imgs = []
+    for B0 in B0s_bbr:
+	B0s_bbr_imgs.append(nib.load(B0))
+
+    mean_B0 = mean_img(B0s_bbr_imgs)
     nib.save(mean_B0, nodif_B0)
 
     # Get mean B0 brain mask
@@ -392,19 +393,6 @@ def load_timeseries(timeseries_file, ts='roi'):
         print('You have not selected a valid timeseries type.' +
               'options are ts=\'roi\' or ts=\'voxel\'.')
     pass
-
-
-def graph2mtx(graph):
-    """
-    A function to convert a networkx graph to an appropriate
-    numpy matrix that is ordered properly from smallest
-    ROI to largest.
-    **Positional Arguments:**
-        graph:
-            - a networkx graph.
-    """
-    return graph2np(graph, nodelist=np.sort(graph.nodes()).tolist())
-
 
 def name_tmps(basedir, basename, extension):
     return "{}/tmp/{}{}".format(basedir, basename, extension)
