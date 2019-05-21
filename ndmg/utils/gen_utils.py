@@ -195,7 +195,7 @@ def reorient_dwi(dwi_prep, bvecs, namer):
         bvecs = "{}/bvecs_reor.bvec".format(namer.dirs['output']['prep_dwi'])
         shutil.copyfile(bvecs_orig, bvecs)
         bvecs_mat = np.genfromtxt(bvecs)
-        bvecs_mat[0] = -bvecs_mat[0]
+	bvecs_mat[:,0] = -bvecs_mat[:,0]
         cmd = 'fslorient -getqform ' + dwi_prep
         qform = os.popen(cmd).read().strip('\n')
         # Posterior-Anterior Reorientation
@@ -204,7 +204,7 @@ def reorient_dwi(dwi_prep, bvecs, namer):
             print('Reorienting P-A flip (dwi)...')
             cmd = 'fslswapdim ' + dwi_prep + ' -x -y z ' + dwi_prep_PA
             os.system(cmd)
-            bvecs_mat[1] = -bvecs_mat[1]
+            bvecs_mat[:,1] = -bvecs_mat[:,1]
             cmd = 'fslorient -getqform ' + dwi_prep_PA
             qform = os.popen(cmd).read().strip('\n')
             dwi_prep = dwi_prep_PA
@@ -214,7 +214,7 @@ def reorient_dwi(dwi_prep, bvecs, namer):
             print('Reorienting I-S flip (dwi)...')
             cmd = 'fslswapdim ' + dwi_prep + ' -x y -z ' + dwi_prep_IS
             os.system(cmd)
-            bvecs_mat[2] = -bvecs_mat[2]
+	    bvecs_mat[:,2] = -bvecs_mat[:,2]
             dwi_prep = dwi_prep_IS
         cmd = 'fslorient -forceradiological ' + dwi_prep
         os.system(cmd)
@@ -234,9 +234,9 @@ def reorient_dwi(dwi_prep, bvecs, namer):
         if float(qform.split(' ')[:-1][5]) <= 0:
             dwi_prep_PA = "{}/dwi_reor_PA.nii.gz".format(namer.dirs['output']['prep_dwi'])
             print('Reorienting P-A flip (dwi)...')
-            cmd = 'fslswapdim ' + dwi_prep + ' x -y z ' + dwi_prep_PA
+            cmd = 'fslswapdim ' + dwi_prep + ' -x -y z ' + dwi_prep_PA
             os.system(cmd)
-            bvecs_mat[1] = -bvecs_mat[1]
+            bvecs_mat[:,1] = -bvecs_mat[:,1]
             cmd = 'fslorient -getqform ' + dwi_prep_PA
             qform = os.popen(cmd).read().strip('\n')
             dwi_prep = dwi_prep_PA
@@ -244,9 +244,9 @@ def reorient_dwi(dwi_prep, bvecs, namer):
         if float(qform.split(' ')[:-1][10]) <= 0:
             dwi_prep_IS = "{}/dwi_reor_IS.nii.gz".format(namer.dirs['output']['prep_dwi'])
             print('Reorienting I-S flip (dwi)...')
-            cmd = 'fslswapdim ' + dwi_prep + ' x y -z ' + dwi_prep_IS
+            cmd = 'fslswapdim ' + dwi_prep + ' -x y -z ' + dwi_prep_IS
             os.system(cmd)
-            bvecs_mat[2] = -bvecs_mat[2]
+            bvecs_mat[:,2] = -bvecs_mat[:,2]
             dwi_prep = dwi_prep_IS
         np.savetxt(bvecs, bvecs_mat)
 
@@ -282,8 +282,6 @@ def reorient_t1w(t1w, namer):
             t1w = t1w_IS
         cmd = 'fslorient -forceradiological ' + t1w
         os.system(cmd)
-        cmd = 'fslreorient2std ' + t1w + ' ' + t1w
-        os.system(cmd)
     else:
         print('Radiological (t1w)...')
         t1w_orig = t1w
@@ -295,7 +293,7 @@ def reorient_t1w(t1w, namer):
         if float(qform.split(' ')[:-1][5]) <= 0:
             t1w_PA = "{}/t1w_reor_PA.nii.gz".format(namer.dirs['output']['prep_anat'])
             print('Reorienting P-A flip (t1w)...')
-            cmd = 'fslswapdim ' + t1w + ' x -y z ' + t1w_PA
+            cmd = 'fslswapdim ' + t1w + ' -x -y z ' + t1w_PA
             os.system(cmd)
             cmd = 'fslorient -getqform ' + t1w_PA
             qform = os.popen(cmd).read().strip('\n')
@@ -304,7 +302,7 @@ def reorient_t1w(t1w, namer):
         if float(qform.split(' ')[:-1][10]) <= 0:
             t1w_IS = "{}/t1w_reor_IS.nii.gz".format(namer.dirs['output']['prep_anat'])
             print('Reorienting I-S flip (t1w)...')
-            cmd = 'fslswapdim ' + t1w + ' x y -z ' + t1w_IS
+            cmd = 'fslswapdim ' + t1w + ' -x y -z ' + t1w_IS
             os.system(cmd)
             t1w = t1w_IS
 
@@ -356,13 +354,11 @@ def match_target_vox_res(img_file, vox_size, namer, zoom_set, sens):
         elif sens == 't1w':
             img_file_pre = "{}/{}_pre_res.nii.gz".format(namer.dirs['output']['prep_anat'],
                                                          os.path.basename(img_file).split('.nii.gz')[0])
-        shutil.copyfile(img_file, img_file_pre)
         data2, affine2 = reslice(data, affine, zooms, new_zooms)
         affine2[0:3,3] = np.zeros(3)
         affine2 = np.abs(affine2)
-        affine2[0:3,0:3] = np.eye(3) * np.array([-1, 1, 1]) * np.array(new_zooms)
+        affine2[0:3, 0:3] = np.eye(3) * np.array(new_zooms)
         img2 = nib.Nifti1Image(data2, affine=affine2, header=hdr)
-        print(affine2)
         img2.set_qform(affine2)
         img2.set_sform(affine2)
         img2.update_header()
@@ -375,6 +371,10 @@ def match_target_vox_res(img_file, vox_size, namer, zoom_set, sens):
         img.set_qform(affine)
         img.update_header()
         nib.save(img, img_file)
+
+    print('Resliced affine: ')
+    print(nib.load(img_file).affine)
+
     return img_file
 
 

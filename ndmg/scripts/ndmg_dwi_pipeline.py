@@ -133,10 +133,10 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
     #Perform eddy correction
     start_time = time.time()
     if len(os.listdir(namer.dirs['output']['prep_dwi'])) != 0:
-        print('Pre-existing preprocessed dwi files found. Deleting these...')
 	try:
-            shutil.rmtree(namer.dirs['output']['prep_dwi'])
-            os.mkdir(namer.dirs['output']['prep_dwi'])
+	     print('Pre-existing preprocessed dwi files found. Deleting these...')
+#            shutil.rmtree(namer.dirs['output']['prep_dwi'])
+#            os.mkdir(namer.dirs['output']['prep_dwi'])
         except:
             pass
 
@@ -145,7 +145,7 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
     print("Performing eddy correction...")
     cmd = 'eddy_correct ' + dwi + ' ' + dwi_prep + ' 0'
     print(cmd)
-    os.system(cmd)
+#    os.system(cmd)
 
     # Instantiate bvec/bval naming variations and copy to derivative director
     print('Instantiate bvec/bval naming variations, copy to derivative director')
@@ -160,7 +160,10 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
     from dipy.io import read_bvals_bvecs
     bvals, bvecs = read_bvals_bvecs(fbval, fbvec)
     bvecs[np.where(np.any(abs(bvecs) >= 10, axis=1) == True)] = [1, 0, 0]
-    bvecs[np.where(np.any(bvals == 0, axis=0) == True)] = 0
+    bvecs[np.where(bvals == 0)] = 0
+    if len(bvecs[np.where(np.logical_and(bvals > 50, np.all(abs(bvecs)==np.array([0, 0, 0]), axis=1)))]) > 0:
+        raise ValueError('WARNING: Encountered potentially corrupted bval/bvecs. Check to ensure volumes with a '
+                         'diffusion weighting are not being treated as B0\'s along the bvecs')
     np.savetxt(fbval, bvals)
     np.savetxt(fbvec, bvecs)
 
@@ -193,22 +196,22 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
     print("%s%s%s" % ('Preprocessing runtime: ', str(np.round(time.time() - start_time, 1)), 's'))
     # -------- Registration Steps ----------------------------------- #
     if len(os.listdir(namer.dirs['output']['prep_anat'])) != 0:
-        print('Pre-existing preprocessed t1w files found. Deleting these...')
 	try:
+	    print('Pre-existing preprocessed t1w files found. Deleting these...')
             shutil.rmtree(namer.dirs['output']['prep_anat'])
             os.mkdir(namer.dirs['output']['prep_anat'])
 	except:
 	    pass
     if len(os.listdir(namer.dirs['output']['reg_anat'])) != 0:
-        print('Pre-existing registered t1w files found. Deleting these...')
 	try:
+	    print('Pre-existing registered t1w files found. Deleting these...')
             shutil.rmtree(namer.dirs['output']['reg_anat'])
             os.mkdir(namer.dirs['output']['reg_anat'])
 	except:
 	    pass
     if (len(os.listdir(namer.dirs['tmp']['reg_a'])) != 0) or (len(os.listdir(namer.dirs['tmp']['reg_m'])) != 0):
-        print('Pre-existing temporary files found. Deleting these...')
 	try:
+	    print('Pre-existing temporary files found. Deleting these...')
             shutil.rmtree(namer.dirs['tmp']['reg_a'])
             os.mkdir(namer.dirs['tmp']['reg_a'])
             shutil.rmtree(namer.dirs['tmp']['reg_m'])
@@ -253,6 +256,8 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
         trct = mgt.run_track(dwi_prep, nodif_B0_mask, reg.gm_in_dwi, reg.vent_csf_in_dwi, reg.csf_mask_dwi,
                              reg.wm_in_dwi, gtab, mod_type, track_type, mod_func, seeds, np.eye(4))
         streamlines = trct.run()
+        streamlines = Streamlines([sl for sl in streamlines if len(sl) > 60])
+	print('Streamlines complete')
 
 	if reg_style == 'native_dsn':
             # Save streamlines to disk
@@ -266,7 +271,6 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
                 streams = move_streamlines(streams, scale)
                 return streams
 
-            streamlines = Streamlines([sl for sl in streamlines if len(sl) > 60])
             trk_affine = np.eye(4)
             B0_img = nib.load(nodif_B0)
             B0_affine = B0_img.affine
