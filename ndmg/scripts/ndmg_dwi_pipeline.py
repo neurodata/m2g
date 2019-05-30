@@ -133,10 +133,10 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
     #Perform eddy correction
     start_time = time.time()
     if len(os.listdir(namer.dirs['output']['prep_dwi'])) != 0:
-	try:
-	     print('Pre-existing preprocessed dwi files found. Deleting these...')
-#            shutil.rmtree(namer.dirs['output']['prep_dwi'])
-#            os.mkdir(namer.dirs['output']['prep_dwi'])
+        try:
+            print('Pre-existing preprocessed dwi files found. Deleting these...')
+            shutil.rmtree(namer.dirs['output']['prep_dwi'])
+            os.mkdir(namer.dirs['output']['prep_dwi'])
         except:
             pass
 
@@ -145,7 +145,7 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
     print("Performing eddy correction...")
     cmd = 'eddy_correct ' + dwi + ' ' + dwi_prep + ' 0'
     print(cmd)
-#    os.system(cmd)
+    os.system(cmd)
 
     # Instantiate bvec/bval naming variations and copy to derivative director
     print('Instantiate bvec/bval naming variations, copy to derivative director')
@@ -196,28 +196,28 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
     print("%s%s%s" % ('Preprocessing runtime: ', str(np.round(time.time() - start_time, 1)), 's'))
     # -------- Registration Steps ----------------------------------- #
     if len(os.listdir(namer.dirs['output']['prep_anat'])) != 0:
-	try:
-	    print('Pre-existing preprocessed t1w files found. Deleting these...')
+        try:
+            print('Pre-existing preprocessed t1w files found. Deleting these...')
             shutil.rmtree(namer.dirs['output']['prep_anat'])
             os.mkdir(namer.dirs['output']['prep_anat'])
-	except:
-	    pass
+        except:
+            pass
     if len(os.listdir(namer.dirs['output']['reg_anat'])) != 0:
-	try:
-	    print('Pre-existing registered t1w files found. Deleting these...')
+        try:
+            print('Pre-existing registered t1w files found. Deleting these...')
             shutil.rmtree(namer.dirs['output']['reg_anat'])
             os.mkdir(namer.dirs['output']['reg_anat'])
-	except:
-	    pass
+        except:
+            pass
     if (len(os.listdir(namer.dirs['tmp']['reg_a'])) != 0) or (len(os.listdir(namer.dirs['tmp']['reg_m'])) != 0):
-	try:
-	    print('Pre-existing temporary files found. Deleting these...')
+        try:
+            print('Pre-existing temporary files found. Deleting these...')
             shutil.rmtree(namer.dirs['tmp']['reg_a'])
             os.mkdir(namer.dirs['tmp']['reg_a'])
             shutil.rmtree(namer.dirs['tmp']['reg_m'])
             os.mkdir(namer.dirs['tmp']['reg_m'])
-	except:
-	    pass
+        except:
+            pass
 
     # Check orientation (t1w)
     start_time = time.time()
@@ -257,9 +257,9 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
                              reg.wm_in_dwi, gtab, mod_type, track_type, mod_func, seeds, np.eye(4))
         streamlines = trct.run()
         streamlines = Streamlines([sl for sl in streamlines if len(sl) > 60])
-	print('Streamlines complete')
+        print('Streamlines complete')
 
-	if reg_style == 'native_dsn':
+        if reg_style == 'native_dsn':
             # Save streamlines to disk
             print('Saving streamlines: ' + streams)
 
@@ -414,7 +414,7 @@ def main():
                         labels of regions of interest in atlas space")
     parser.add_argument("--vox", action="store", nargs="*", default='1mm',
                         help="Voxel size to use for template registrations \
-			(e.g. '1mm')")
+                        (e.g. '1mm')")
     parser.add_argument("--mod", action="store",
                         help='Determinstic (det) or probabilistic (prob) tracking. Default is det.', default='det')
     parser.add_argument("--tt", action="store", help='Tracking approach: eudx or local. Default is eudx.',
