@@ -72,11 +72,11 @@ def get_atlas(atlas_dir, modality, vox_size):
         raise ValueError('Voxel dimensions of input t1w image not currently supported by ndmg.')
 
     if modality == 'dwi':
-	atlas = op.join(atlas_dir, 'reference_brains/MNI152NLin6_res-' + dims + '_T1w.nii.gz')
-	atlas_mask = op.join(atlas_dir, 'mask/MNI152NLin6_res-' + dims + '_T1w_descr-brainmask.nii.gz')
-	labels = [i for i in glob.glob(atlas_dir + '/label/Human/*.nii.gz') if dims in i]
-	labels = [op.join(atlas_dir, 'label/Human/', l) for l in labels]
-	fils = labels + [atlas, atlas_mask]
+        atlas = op.join(atlas_dir, 'reference_brains/MNI152NLin6_res-' + dims + '_T1w.nii.gz')
+        atlas_mask = op.join(atlas_dir, 'mask/MNI152NLin6_res-' + dims + '_T1w_descr-brainmask.nii.gz')
+        labels = [i for i in glob.glob(atlas_dir + '/atlases/label/Human/*.nii.gz') if dims in i]
+        labels = [op.join(atlas_dir, 'label/Human/', l) for l in labels]
+        fils = labels + [atlas, atlas_mask]
     if modality == 'func':
         atlas = op.join(atlas_dir, 'atlas/MNI152NLin6_res-' + dims + '_T1w.nii.gz')
         atlas_brain = op.join(atlas_dir, 'atlas/' +
