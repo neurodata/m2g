@@ -15,4 +15,5 @@ scratch/
 env/
 dist/
 .vscode
-*.ipynb_checkpoints/pytest*
+*.ipynb_checkpoints/
+pytest*
