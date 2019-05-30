@@ -73,7 +73,7 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
     print('big = {}').format(big)
     startTime = datetime.now()
     fmt = '_adj.ssv'
-    assert all(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir, vox_size, mod_type, track_type, mod_func, reg_style), "Missing a default argument."
+    assert all([dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir, vox_size, mod_type, track_type, mod_func, reg_style]), "Missing a default argument."
 
     namer = name_resource(dwi, t1w, atlas, outdir)
 
@@ -138,7 +138,8 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
             print('Pre-existing preprocessed dwi files found. Deleting these...')
             shutil.rmtree(namer.dirs['output']['prep_dwi'])
             os.mkdir(namer.dirs['output']['prep_dwi'])
-        except:
+        except Exception as e:
+            print("Exception when trying to execute eddy correction: {}".format(e))
             pass
 
     dwi_prep = "{}/eddy_corrected_data.nii.gz".format(namer.dirs['output']['prep_dwi'])
