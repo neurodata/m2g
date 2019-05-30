@@ -73,6 +73,7 @@ def ndmg_dwi_worker(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir,
     print('big = {}').format(big)
     startTime = datetime.now()
     fmt = '_adj.ssv'
+    assert all(dwi, bvals, bvecs, t1w, atlas, mask, labels, outdir, vox_size, mod_type, track_type, mod_func, reg_style), "Missing a default argument."
 
     namer = name_resource(dwi, t1w, atlas, outdir)
 
