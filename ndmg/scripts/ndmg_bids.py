@@ -109,6 +109,9 @@ def get_atlas(atlas_dir, modality, vox_size):
     if modality == 'dwi':
         atlas_brain = None
         lv_mask = None
+    
+    assert all(map(os.path.exists, labels)), "Some parcellations do not exist."
+    assert all(map(os.path.exists, [atlas, atlas_mask, atlas_brain, lv_mask])), "atlas, atlas_mask, atlas_brain, or lv_mask does not exist."
     return (labels, atlas, atlas_mask, atlas_brain, lv_mask)
 
 
