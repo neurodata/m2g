@@ -71,9 +71,10 @@ def get_atlas(atlas_dir, modality, vox_size):
     else:
         raise ValueError('Voxel dimensions of input t1w image not currently supported by ndmg.')
 
+    # TODO: use glob to get these, not hardcoded paths
     if modality == 'dwi':
-        atlas = op.join(atlas_dir, 'reference_brains/MNI152NLin6_res-' + dims + '_T1w.nii.gz')
-        atlas_mask = op.join(atlas_dir, 'mask/MNI152NLin6_res-' + dims + '_T1w_descr-brainmask.nii.gz')
+        atlas = op.join(atlas_dir, 'atlases/reference_brains/MNI152NLin6_res-' + dims + '_T1w.nii.gz')
+        atlas_mask = op.join(atlas_dir, 'atlases/mask/MNI152NLin6_res-' + dims + '_T1w_descr-brainmask.nii.gz')
         labels = [i for i in glob.glob(atlas_dir + '/atlases/label/Human/*.nii.gz') if dims in i]
         labels = [op.join(atlas_dir, 'label/Human/', l) for l in labels]
         fils = labels + [atlas, atlas_mask]
@@ -96,6 +97,7 @@ def get_atlas(atlas_dir, modality, vox_size):
         if not ope(f):
             print(f)
 
+    # TODO: fix, currently broken due to git-lfs
     if not os.path.exists(atlas_dir):
         print("Cannot find atlas information; downloading...")
         cmd = 'wget https://github.com/neurodata/neuroparc/archive/v0.1.0.zip -O /neuroparc.zip'
@@ -111,7 +113,7 @@ def get_atlas(atlas_dir, modality, vox_size):
         lv_mask = None
     
     assert all(map(os.path.exists, labels)), "Some parcellations do not exist."
-    assert all(map(os.path.exists, [atlas, atlas_mask, atlas_brain, lv_mask])), "atlas, atlas_mask, atlas_brain, or lv_mask does not exist."
+    assert all(map(os.path.exists, [atlas, atlas_mask])), "atlas or atlas_mask, does not exist."
     return (labels, atlas, atlas_mask, atlas_brain, lv_mask)
 
 
