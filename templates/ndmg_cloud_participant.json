@@ -15,8 +15,6 @@
             "--push_data",
             "--modality",
             "dwi",
-            "--nproc",
-            "1",
             "--atlas",
             "desikan",
             "--mod",
