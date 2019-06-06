@@ -234,7 +234,7 @@ def kill_jobs(jobdir, reason='"Killing job"'):
             print("... Unknown status??")
 
 
-def s3_get_data(bucket, remote, local, public=True):
+def s3_get_data(bucket, remote, local, public=False):
     """
     Given an s3 bucket, data location on the bucket, and a download location,
     crawls the bucket and recursively pulls all data.
