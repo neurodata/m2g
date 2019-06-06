@@ -19,24 +19,27 @@
 # Created by Greg Kiar on 2017-02-02.
 # Email: gkiar@jhu.edu
 
+
+import subprocess
+import ast
+import json
+import boto3
+import csv
+import re
+import os
+import sys
+import ndmg
+import ndmg.utils as mgu
+import shutil
+from copy import deepcopy
+from collections import OrderedDict
+from argparse import ArgumentParser
 import warnings
 
 warnings.simplefilter("ignore")
-from argparse import ArgumentParser
-from collections import OrderedDict
-from copy import deepcopy
-import ndmg.utils as mgu
-import ndmg
-import sys
-import os
-import re
-import csv
-import boto3
-import json
-import ast
-import subprocess
 
-participant_templ = 'https://github.com/neurodata/ndmg/blob/dev-dmri-fmri/templates/ndmg_cloud_participant.json'
+participant_templ = 'https://raw.githubusercontent.com/neurodata/ndmg/dev-dmri-fmri/templates/ndmg_cloud_participant.json'
+
 
 def batch_submit(bucket, path, jobdir, credentials=None, state='participant',
                  debug=False, dataset=None, log=False,  bg=False):
@@ -60,19 +63,21 @@ def crawl_bucket(bucket, path):
     """
     Gets subject list for a given S3 bucket and path
     """
-    cmd = 'aws s3 ls s3://{}/{}/'.format(bucket, path)
+    cmd = 'aws s3 ls s3://{}/{}/ --no-sign-request'.format(bucket, path)
     out = subprocess.check_output(cmd, shell=True)
-    subjs = re.findall('PRE sub-(.+)/', out.decode('utf-8'))
-    cmd = 'aws s3 ls s3://{}/{}/sub-{}/'
+    pattern = r"(?<=sub-)(\w*)"
+    subjs = re.findall(pattern, out.decode('utf-8'))
+    cmd = 'aws s3 ls s3://{}/{}/sub-{}/ --no-sign-request'
     seshs = OrderedDict()
     for subj in subjs:
-        out = subprocess.check_output(cmd.format(bucket, path, subj), shell=True)
+        cmd = cmd.format(bucket, path, subj)
+        out = subprocess.check_output(cmd, shell=True)
         sesh = re.findall('ses-(.+)/', out.decode('utf-8'))
         seshs[subj] = sesh if sesh != [] else [None]
     print(("Session IDs: " + ", ".join([subj + '-' + sesh if sesh is not None
-                                       else subj
-                                       for subj in subjs
-                                       for sesh in seshs[subj]])))
+                                        else subj
+                                        for subj in subjs
+                                        for sesh in seshs[subj]])))
     return seshs
 
 
@@ -82,8 +87,10 @@ def create_json(bucket, path, threads, jobdir, credentials=None,
     Takes parameters to make jsons
     """
     out = subprocess.check_output("mkdir -p {}".format(jobdir), shell=True)
-    out = subprocess.check_output("mkdir -p {}/jobs/".format(jobdir), shell=True)
-    out = subprocess.check_output("mkdir -p {}/ids/".format(jobdir), shell=True)
+    out = subprocess.check_output(
+        "mkdir -p {}/jobs/".format(jobdir), shell=True)
+    out = subprocess.check_output(
+        "mkdir -p {}/ids/".format(jobdir), shell=True)
     template = participant_templ
     seshs = threads
     if not os.path.isfile('{}/{}'.format(jobdir, template.split('/')[-1])):
@@ -93,17 +100,15 @@ def create_json(bucket, path, threads, jobdir, credentials=None,
     with open('{}/{}'.format(jobdir, template.split('/')[-1]), 'r') as inf:
         template = json.load(inf)
 
-    cmd = ['/bin/bash python /usr/local/bin/ndmg_bids '] + template['containerOverrides']['command']
+    cmd = ['/bin/bash python /usr/local/bin/ndmg_bids '] + \
+        template['containerOverrides']['command']
     env = template['containerOverrides']['environment']
 
     if credentials is not None:
+        pattern = r"(?<==)(\w*)"
         cred = [line for line in csv.reader(open(credentials))]
-        env[0]['value'] = [cred[1][idx]
-                           for idx, val in enumerate(cred[0])
-                           if "ID" in val][0]  # Adds public key ID to env
-        env[1]['value'] = [cred[1][idx]
-                           for idx, val in enumerate(cred[0])
-                           if "Secret" in val][0]  # Adds secret key to env
+        env[0]['value'] = re.findall(pattern, cred[0][0])[0]
+        env[1]['value'] = re.findall(pattern, cred[1][0])[0]
     else:
         env = []
     template['containerOverrides']['environment'] = env
@@ -166,7 +171,7 @@ def submit_jobs(jobs, jobdir):
         out = subprocess.check_output(cmd, shell=True)
         submission = ast.literal_eval(out.decode('utf-8'))
         print(("Job Name: {}, Job ID: {}".format(submission['jobName'],
-                                                submission['jobId'])))
+                                                 submission['jobId'])))
         sub_file = os.path.join(jobdir, 'ids', submission['jobName'] + '.json')
         with open(sub_file, 'w') as outfile:
             json.dump(submission, outfile)
@@ -188,7 +193,8 @@ def get_status(jobdir, jobid=None):
             cmd = cmd_template.format(submission['jobId'])
             print(("... Checking job {}...".format(submission['jobName'])))
             out = subprocess.check_output(cmd, shell=True)
-            status = re.findall('"status": "([A-Za-z]+)",', out.decode('utf-8'))[0]
+            status = re.findall(
+                '"status": "([A-Za-z]+)",', out.decode('utf-8'))[0]
             print(("... ... Status: {}".format(status)))
         return 0
     else:
@@ -249,7 +255,6 @@ def s3_get_data(bucket, remote, local, public=True):
     out = subprocess.check_output(cmd, shell=True)
 
 
-
 def s3_push_data(bucket, remote, outDir, modifier, creds=True):
     cmd = 'aws s3 cp --exclude "tmp/*" {} s3://{}/{}/{} --recursive --acl public-read'
     cmd = cmd.format(outDir, bucket, remote, modifier)
@@ -257,7 +262,6 @@ def s3_push_data(bucket, remote, outDir, modifier, creds=True):
         print("Note: no credentials provided, may fail to push big files.")
         cmd += ' --no-sign-request'
     subprocess.check_output(cmd, shell=True)
-
 
 
 def main():
