@@ -15,8 +15,6 @@
             "--push_data",
             "--modality",
             "dwi",
-            "--nproc",
-            "1",
             "--atlas",
             "desikan",
             "--mod",
@@ -35,6 +33,10 @@
             {
                 "name": "AWS_ACCESS_KEY_ID",
                 "value": "<KEYID>"
+            },
+            {
+                "name": "AWS_DEFAULT_REGION",
+                "value": "eu-central-1"
             },
             {
                 "name": "AWS_SECRET_ACCESS_KEY",
