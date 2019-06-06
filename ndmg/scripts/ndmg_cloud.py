@@ -100,15 +100,14 @@ def create_json(bucket, path, threads, jobdir, credentials=None,
     with open('{}/{}'.format(jobdir, template.split('/')[-1]), 'r') as inf:
         template = json.load(inf)
 
-    cmd = ['/bin/bash python /usr/local/bin/ndmg_bids '] + \
+    cmd = ['ndmg_bids'] + \
         template['containerOverrides']['command']
     env = template['containerOverrides']['environment']
 
     if credentials is not None:
-        pattern = r"(?<==)(\w*)"
-        cred = [line for line in csv.reader(open(credentials))]
-        env[0]['value'] = re.findall(pattern, cred[0][0])[0]
-        env[1]['value'] = re.findall(pattern, cred[1][0])[0]
+        cred = list(csv.reader(open(credentials)))
+        env[0]['value'] = cred[1][0]
+        env[1]['value'] = cred[1][1]
     else:
         env = []
     template['containerOverrides']['environment'] = env
@@ -130,8 +129,8 @@ def create_json(bucket, path, threads, jobdir, credentials=None,
             job_cmd = deepcopy(cmd)
             job_cmd[job_cmd.index('<SUBJ>')] = subj
             if sesh is not None:
-                job_cmd += [u'--session_label']
-                job_cmd += [u'{}'.format(sesh)]
+                job_cmd.insert(-3, u"--session_label")
+                job_cmd.insert(-3, u"{}".format(sesh))
             if debug:
                 job_cmd += [u'--debug']
 
