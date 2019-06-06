@@ -35,6 +35,10 @@
                 "value": "<KEYID>"
             },
             {
+                "name": "AWS_DEFAULT_REGION",
+                "value": "eu-central-1"
+            },
+            {
                 "name": "AWS_SECRET_ACCESS_KEY",
                 "value": "<SECRET>"
             }
