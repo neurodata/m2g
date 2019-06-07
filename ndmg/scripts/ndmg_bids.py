@@ -149,6 +149,11 @@ def session_level(inDir, outDir, subjs, vox_size, big, clean, stc, atlas_select,
     result = sweep_directory(inDir, subjs, sesh, task, run, modality)
 
     if modality == 'dwi':
+        if not debug:
+            print("Cleaning output directory tree ...")
+            files = glob.glob(outDir / '*')
+            for f in files:
+                os.remove(f)
         dwis, bvals, bvecs, anats = result
         assert (len(anats) == len(dwis))
         assert (len(bvecs) == len(dwis))
@@ -248,8 +253,7 @@ def main():
                         default=False)
     parser.add_argument('--log', action='store_true', help='Determines '
                                                            'axis scale for plotting.', default=False)
-    parser.add_argument('--debug', action='store_true', help='flag to store '
-                                                             'temp files along the path of processing.',
+    parser.add_argument('--debug', action='store_true', help='If False, remove any old files in the output directory.',
                         default=False)
     parser.add_argument('--big', action='store_true',
                         help='Whether to produce \
@@ -306,10 +310,6 @@ def main():
     mod_func = result.mf
     reg_style = result.sp
 
-    # temporary for debugging
-    # TODO : copy only particular subject we need.
-    os.environ["AWS_ACCESS_KEY_ID"] = "AKIASIOGM3ZUSPXN4MYK"
-    os.environ["AWS_SECRET_ACCESS_KEY"] = "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"
     public = not bool(os.getenv("AWS_ACCESS_KEY_ID", 0) and
                       os.getenv("AWS_SECRET_ACCESS_KEY", 0))
 
