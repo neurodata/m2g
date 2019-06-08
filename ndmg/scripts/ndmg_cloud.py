@@ -35,6 +35,7 @@ from copy import deepcopy
 from collections import OrderedDict
 from argparse import ArgumentParser
 import warnings
+from ConfigParser import ConfigParser
 
 warnings.simplefilter("ignore")
 
@@ -81,6 +82,12 @@ def crawl_bucket(bucket, path):
     return seshs
 
 
+def get_credentials():
+    config = ConfigParser()
+    config.read(os.getenv("HOME") + "/.aws/credentials")
+    return [config.get("default", "aws_access_key_id"), config.get("default", "aws_secret_access_key")]
+
+
 def create_json(bucket, path, threads, jobdir, credentials=None,
                 debug=False, dataset=None, bg=False):
     """
@@ -105,9 +112,11 @@ def create_json(bucket, path, threads, jobdir, credentials=None,
     env = template['containerOverrides']['environment']
 
     if credentials is not None:
-        cred = list(csv.reader(open(credentials)))
-        env[0]['value'] = cred[1][0]
-        env[1]['value'] = cred[1][1]
+        env[0]['value'], env[1]['value'] = get_credentials(credentials)
+
+        # cred = list(csv.reader(open(credentials)))
+        # env[0]['value'] = cred[1][0]
+        # env[1]['value'] = cred[1][e]
     else:
         env = []
     template['containerOverrides']['environment'] = env
@@ -236,17 +245,27 @@ def kill_jobs(jobdir, reason='"Killing job"'):
 
 def s3_get_data(bucket, remote, local, public=False):
     """
-    Given an s3 bucket, data location on the bucket, and a download location,
-    crawls the bucket and recursively pulls all data.
+    given an s3 directory,
+    copies in that directory to local.
     """
-    client = boto3.client('s3')
+
+    if os.path.exists(local):
+        pass
     if not public:
+        try:
+            ACCESS, SECRET = get_credentials()
+            client = boto3.client(
+                's3', aws_access_key_id=ACCESS, aws_secret_access_key=SECRET)
+        except:
+            client = boto3.client('s3')
+
         bkts = [bk['Name'] for bk in client.list_buckets()['Buckets']]
         if bucket not in bkts:
             sys.exit("Error: could not locate bucket. Available buckets: " +
                      ", ".join(bkts))
 
-    cmd = 'aws s3 cp --recursive s3://{}/{}/ {}'.format(bucket, remote, local)
+        cmd = 'aws s3 cp --recursive s3://{}/{}/ {}'.format(
+            bucket, remote, local)
     if public:
         cmd += ' --no-sign-request --region=us-east-1'
 

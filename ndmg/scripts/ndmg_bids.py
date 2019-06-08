@@ -151,7 +151,7 @@ def session_level(inDir, outDir, subjs, vox_size, big, clean, stc, atlas_select,
     if modality == 'dwi':
         if not debug:
             print("Cleaning output directory tree ...")
-            files = glob.glob(outDir / '*')
+            files = glob.glob(outDir + '/*')
             for f in files:
                 os.remove(f)
         dwis, bvals, bvecs, anats = result
@@ -310,8 +310,11 @@ def main():
     mod_func = result.mf
     reg_style = result.sp
 
-    public = not bool(os.getenv("AWS_ACCESS_KEY_ID", 0) and
-                      os.getenv("AWS_SECRET_ACCESS_KEY", 0))
+    try:
+        creds = bool(nc.get_credentials())
+    except:
+        creds = bool(os.getenv("AWS_ACCESS_KEY_ID", 0) and
+                     os.getenv("AWS_SECRET_ACCESS_KEY", 0))
 
     if level == 'participant':
         if buck is not None and remo is not None:
@@ -327,18 +330,19 @@ def main():
                     else:
                         tpath = op.join(remo, 'sub-{}'.format(sub))
                         tindir = op.join(inDir, 'sub-{}'.format(sub))
-                    nc.s3_get_data(buck, tpath, tindir, public=public)
+                    nc.s3_get_data(buck, tpath, tindir, public=not creds)
             else:
-                s3_get_data(buck, remo, inDir, public=public)
+                s3_get_data(buck, remo, inDir, public=not creds)
         modif = 'ndmg_{}'.format(ndmg.version.replace('.', '-'))
         session_level(inDir, outDir, subj, vox_size, big, clean, stc,
                       atlas_select, mod_type, track_type, mod_func, reg_style, sesh, task, run,
                       debug, modality, nproc)
     else:
         print('Specified level not valid')
-    if push and buck is not None and remo is not None:
+    if push and buck and remo is not None:
         print("Pushing results to S3...")
         nc.s3_push_data(buck, remo, outDir, modif, creds)
+        print("Pushing Complete!")
 
 
 if __name__ == "__main__":
