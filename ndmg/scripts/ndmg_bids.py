@@ -22,23 +22,21 @@
 # edited by Eric Bridgeford to incorporate fMRI, multi-threading, and
 # big-graph generation.
 
+from ndmg.scripts import ndmg_cloud as nc
+from multiprocessing import Pool
+import sys
+import shutil
+import os
+import glob
+import os.path as op
+import ndmg
+from ndmg.utils import gen_utils as mgu
+from ndmg.utils.bids_utils import *
+from ndmg.scripts.ndmg_func_pipeline import ndmg_func_pipeline
+from ndmg.scripts.ndmg_dwi_pipeline import ndmg_dwi_pipeline, ndmg_dwi_worker
 import warnings
 from argparse import ArgumentParser
 warnings.simplefilter("ignore")
-from argparse import ArgumentParser
-from ndmg.scripts.ndmg_dwi_pipeline import ndmg_dwi_pipeline, ndmg_dwi_worker
-from ndmg.scripts.ndmg_func_pipeline import ndmg_func_pipeline
-from ndmg.utils.bids_utils import *
-from glob import glob
-from ndmg.utils import gen_utils as mgu
-import ndmg
-import os.path as op
-import glob
-import os
-import shutil
-import sys
-from multiprocessing import Pool
-from ndmg.scripts import ndmg_cloud as nc
 
 atlas_dir = '/ndmg_atlases'  # This location bc it is convenient for containers
 
@@ -69,17 +67,22 @@ def get_atlas(atlas_dir, modality, vox_size):
     elif vox_size == '1mm':
         dims = '1x1x1'
     else:
-        raise ValueError('Voxel dimensions of input t1w image not currently supported by ndmg.')
+        raise ValueError(
+            'Voxel dimensions of input t1w image not currently supported by ndmg.')
 
     # TODO: use glob to get these, not hardcoded paths
     if modality == 'dwi':
-        atlas = op.join(atlas_dir, 'atlases/reference_brains/MNI152NLin6_res-' + dims + '_T1w.nii.gz')
-        atlas_mask = op.join(atlas_dir, 'atlases/mask/MNI152NLin6_res-' + dims + '_T1w_descr-brainmask.nii.gz')
-        labels = [i for i in glob.glob(atlas_dir + '/atlases/label/Human/*.nii.gz') if dims in i]
+        atlas = op.join(
+            atlas_dir, 'atlases/reference_brains/MNI152NLin6_res-' + dims + '_T1w.nii.gz')
+        atlas_mask = op.join(
+            atlas_dir, 'atlases/mask/MNI152NLin6_res-' + dims + '_T1w_descr-brainmask.nii.gz')
+        labels = [i for i in glob.glob(
+            atlas_dir + "/atlases/label/Human/*.nii.gz") if dims in i]
         labels = [op.join(atlas_dir, 'label/Human/', l) for l in labels]
         fils = labels + [atlas, atlas_mask]
     if modality == 'func':
-        atlas = op.join(atlas_dir, 'atlas/MNI152NLin6_res-' + dims + '_T1w.nii.gz')
+        atlas = op.join(atlas_dir, 'atlas/MNI152NLin6_res-' +
+                        dims + '_T1w.nii.gz')
         atlas_brain = op.join(atlas_dir, 'atlas/' +
                               'MNI152NLin6_res-' + dims + '_T1w_brain.nii.gz')
         atlas_mask = op.join(atlas_dir,
@@ -88,7 +91,8 @@ def get_atlas(atlas_dir, modality, vox_size):
                           "lateral-ventricles-thr25" +
                           "_res-' + dims + '_brainmask.nii.gz")
 
-        labels = [i for i in glob.glob(atlas_dir + '/label/*.nii.gz') if dims in i]
+        labels = [i for i in glob.glob(
+            atlas_dir + '/label/*.nii.gz') if dims in i]
         labels = [op.join(atlas_dir, 'label', l) for l in labels]
         fils = labels + [atlas, atlas_mask, atlas_brain, lv_mask]
 
@@ -111,9 +115,10 @@ def get_atlas(atlas_dir, modality, vox_size):
     if modality == 'dwi':
         atlas_brain = None
         lv_mask = None
-    
+
     assert all(map(os.path.exists, labels)), "Some parcellations do not exist."
-    assert all(map(os.path.exists, [atlas, atlas_mask])), "atlas or atlas_mask, does not exist."
+    assert all(map(os.path.exists, [atlas, atlas_mask])
+               ), "atlas or atlas_mask, does not exist."
     return (labels, atlas, atlas_mask, atlas_brain, lv_mask)
 
 
@@ -144,6 +149,11 @@ def session_level(inDir, outDir, subjs, vox_size, big, clean, stc, atlas_select,
     result = sweep_directory(inDir, subjs, sesh, task, run, modality)
 
     if modality == 'dwi':
+        if not debug:
+            print("Cleaning output directory tree ...")
+            files = glob.glob(outDir + '/*')
+            for f in files:
+                os.remove(f)
         dwis, bvals, bvecs, anats = result
         assert (len(anats) == len(dwis))
         assert (len(bvecs) == len(dwis))
@@ -165,10 +175,12 @@ def session_level(inDir, outDir, subjs, vox_size, big, clean, stc, atlas_select,
     # use worker wrapper to call function f with args arg
     # and keyword args kwargs
     print(args)
-    ndmg_dwi_worker(args[0][0], args[0][1], args[0][2], args[0][3], atlas, atlas_mask, labels, outDir, vox_size, mod_type, track_type, mod_func, reg_style, clean, big)
+    ndmg_dwi_worker(args[0][0], args[0][1], args[0][2], args[0][3], atlas, atlas_mask,
+                    labels, outDir, vox_size, mod_type, track_type, mod_func, reg_style, clean, big)
     rmflds = []
     if modality == 'func' and not debug:
-        rmflds += [os.path.join(outDir, 'func', modal) for modal in ['clean', 'preproc', 'registered']]
+        rmflds += [os.path.join(outDir, 'func', modal)
+                   for modal in ['clean', 'preproc', 'registered']]
         rmflds += [os.path.join(outDir, 'anat')]
     if not big:
         rmflds += [os.path.join(outDir, 'func', 'voxel-timeseries')]
@@ -241,8 +253,7 @@ def main():
                         default=False)
     parser.add_argument('--log', action='store_true', help='Determines '
                                                            'axis scale for plotting.', default=False)
-    parser.add_argument('--debug', action='store_true', help='flag to store '
-                                                             'temp files along the path of processing.',
+    parser.add_argument('--debug', action='store_true', help='If False, remove any old files in the output directory.',
                         default=False)
     parser.add_argument('--big', action='store_true',
                         help='Whether to produce \
@@ -268,7 +279,8 @@ def main():
                         default='eudx')
     parser.add_argument("--mf", action="store", help='Diffusion model: csd, csa, or tensor. Default is tensor.',
                         default='tensor')
-    parser.add_argument("--sp", action="store", help='Space for tractography. Default is native.', default='native')
+    parser.add_argument("--sp", action="store",
+                        help='Space for tractography. Default is native.', default='native')
     result = parser.parse_args()
 
     inDir = result.bids_dir
@@ -298,28 +310,40 @@ def main():
     mod_func = result.mf
     reg_style = result.sp
 
-    creds = bool(os.getenv("AWS_ACCESS_KEY_ID", 0) and
-                 os.getenv("AWS_SECRET_ACCESS_KEY", 0))
+    try:
+        creds = bool(nc.get_credentials())
+    except:
+        creds = bool(os.getenv("AWS_ACCESS_KEY_ID", 0) and
+                     os.getenv("AWS_SECRET_ACCESS_KEY", 0))
 
+    # TODO : `Flat is better than nested`. Make the logic for this cleaner.
     if level == 'participant':
         if buck is not None and remo is not None:
-            print("Retrieving data from S3...")
             if subj is not None:
-                print(buck)
-                print(remo)
-                print(inDir)
-                [nc.s3_get_data(buck, remo, inDir) for s in subj]
+                if len(sesh) == 1:
+                    sesh = sesh[0]
+                for sub in subj:
+                    if sesh is not None:
+                        tpath = op.join(
+                            remo, 'sub-{}'.format(sub), 'ses-{}'.format(sesh))
+                        tindir = op.join(
+                            inDir, 'sub-{}'.format(sub), 'ses-{}'.format(sesh))
+                    else:
+                        tpath = op.join(remo, 'sub-{}'.format(sub))
+                        tindir = op.join(inDir, 'sub-{}'.format(sub))
+                    nc.s3_get_data(buck, tpath, tindir, public=not creds)
             else:
-                nc.s3_get_data(buck, remo, inDir, public=creds)
+                s3_get_data(buck, remo, inDir, public=not creds)
         modif = 'ndmg_{}'.format(ndmg.version.replace('.', '-'))
         session_level(inDir, outDir, subj, vox_size, big, clean, stc,
                       atlas_select, mod_type, track_type, mod_func, reg_style, sesh, task, run,
                       debug, modality, nproc)
     else:
-	print('Specified level not valid')
-    if push and buck is not None and remo is not None:
+        print('Specified level not valid')
+    if push and buck and remo is not None:
         print("Pushing results to S3...")
-        nc.s3_push_data(buck, remo, outDir, modif, creds)
+        nc.s3_push_data(buck, remo, outDir, modif, creds, debug=debug)
+        print("Pushing Complete!")
 
 
 if __name__ == "__main__":
