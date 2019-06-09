@@ -273,7 +273,7 @@ def s3_get_data(bucket, remote, local, public=False):
     out = subprocess.check_output(cmd, shell=True)
 
 
-def s3_push_data(bucket, remote, outDir, modifier, creds=True):
+def s3_push_data(bucket, remote, outDir, modifier, creds=True, debug=True):
     cmd = 'aws s3 cp --exclude "tmp/*" {} s3://{}/{}/{} --recursive --acl public-read'
     cmd = cmd.format(outDir, bucket, remote, modifier)
     if not creds:

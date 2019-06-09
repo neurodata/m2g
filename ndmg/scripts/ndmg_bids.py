@@ -316,6 +316,7 @@ def main():
         creds = bool(os.getenv("AWS_ACCESS_KEY_ID", 0) and
                      os.getenv("AWS_SECRET_ACCESS_KEY", 0))
 
+    # TODO : `Flat is better than nested`. Make the logic for this cleaner.
     if level == 'participant':
         if buck is not None and remo is not None:
             if subj is not None:
@@ -341,7 +342,7 @@ def main():
         print('Specified level not valid')
     if push and buck and remo is not None:
         print("Pushing results to S3...")
-        nc.s3_push_data(buck, remo, outDir, modif, creds)
+        nc.s3_push_data(buck, remo, outDir, modif, creds, debug=debug)
         print("Pushing Complete!")
 
 
