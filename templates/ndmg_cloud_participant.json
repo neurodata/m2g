@@ -25,8 +25,8 @@
             "tensor",
             "--sp",
             "native",
-            "/data/raw",
-            "/data/outputs",
+            "/input",
+            "/output",
             "participant"
         ],
         "environment": [
