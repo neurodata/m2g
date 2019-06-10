@@ -38,10 +38,11 @@ def biggraphs(fibers, outdir):
     """
     startTime = datetime.now()
     fiber_name = mgu.get_filename(fibers)
-    base = fiber_name.split('_fibers', 1)[0]
+    base = fiber_name.split("_fibers", 1)[0]
     # Create output directories for graphs
-    p = Popen("mkdir -p " + outdir + "/biggraphs/",
-              stdout=PIPE, stderr=PIPE, shell=True)
+    p = Popen(
+        "mkdir -p " + outdir + "/biggraphs/", stdout=PIPE, stderr=PIPE, shell=True
+    )
 
     # Create names of files to be produced
     bgname = outdir + "/biggraphs/" + base + "_biggraph.csv"
@@ -61,11 +62,17 @@ def biggraphs(fibers, outdir):
 
 
 def main():
-    parser = ArgumentParser(description="This is an end-to-end connectome \
-                            estimation pipeline from sMRI and DTI images")
+    parser = ArgumentParser(
+        description="This is an end-to-end connectome \
+                            estimation pipeline from sMRI and DTI images"
+    )
     parser.add_argument("fibers", action="store", help="DTI streamlines")
-    parser.add_argument("outdir", action="store", help="Path to which \
-                        derivatives will be stored")
+    parser.add_argument(
+        "outdir",
+        action="store",
+        help="Path to which \
+                        derivatives will be stored",
+    )
     result = parser.parse_args()
 
     # Create output directory

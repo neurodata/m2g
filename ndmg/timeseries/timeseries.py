@@ -28,7 +28,6 @@ from ndmg.utils import gen_utils as mgu
 
 
 class timeseries(object):
-
     def __init__(self):
         """
         Timeseries extraction class
@@ -59,7 +58,7 @@ class timeseries(object):
 
         # load the mask data
         maskdata = mgu.get_braindata(mask_file)
-        maskbool = (maskdata > 0)  # extract timeseries for any labelled voxels
+        maskbool = maskdata > 0  # extract timeseries for any labelled voxels
 
         # load the MRI data
         funcdata = mgu.get_braindata(func_file)

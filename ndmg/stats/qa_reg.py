@@ -34,13 +34,14 @@ from scipy import ndimage
 from matplotlib.colors import LinearSegmentedColormap
 import matplotlib as mpl
 
-mpl.use('Agg')  # very important above pyplot import
+mpl.use("Agg")  # very important above pyplot import
 from nilearn.plotting.edge_detect import _edge_map as edge_map
 import matplotlib.pyplot as plt
 
 
-def reg_mri_pngs(mri, atlas, outdir, loc=0, mean=False, minthr=2,
-                 maxthr=95, edge=False):
+def reg_mri_pngs(
+    mri, atlas, outdir, loc=0, mean=False, minthr=2, maxthr=95, edge=False
+):
     """
     outdir: directory where output png file is saved
     fname: name of output file WITHOUT FULL PATH. Path provided in outdir.
@@ -55,15 +56,14 @@ def reg_mri_pngs(mri, atlas, outdir, loc=0, mean=False, minthr=2,
     else:  # dim=3
         mr_data = mri_data
 
-    cmap1 = LinearSegmentedColormap.from_list('mycmap1', ['black', 'magenta'])
-    cmap2 = LinearSegmentedColormap.from_list('mycmap2', ['black', 'green'])
+    cmap1 = LinearSegmentedColormap.from_list("mycmap1", ["black", "magenta"])
+    cmap2 = LinearSegmentedColormap.from_list("mycmap2", ["black", "green"])
 
-    fig = plot_overlays(atlas_data, mr_data, [cmap1, cmap2], minthr, maxthr,
-                        edge)
+    fig = plot_overlays(atlas_data, mr_data, [cmap1, cmap2], minthr, maxthr, edge)
 
     # name and save the file
-    fname = os.path.split(mri)[1].split(".")[0] + '.png'
-    fig.savefig(outdir + '/' + fname, format='png')
+    fname = os.path.split(mri)[1].split(".")[0] + ".png"
+    fig.savefig(outdir + "/" + fname, format="png")
     plt.close()
 
 
@@ -93,9 +93,8 @@ def opaque_colorscale(basemap, reference, vmin=None, vmax=None, alpha=1):
 
 def plot_brain(brain, minthr=2, maxthr=95, edge=False):
     brain = mgu.get_braindata(brain)
-    cmap = LinearSegmentedColormap.from_list('mycmap2', ['black', 'green'])
-    plt.rcParams.update({'axes.labelsize': 'x-large',
-                         'axes.titlesize': 'x-large'})
+    cmap = LinearSegmentedColormap.from_list("mycmap2", ["black", "green"])
+    plt.rcParams.update({"axes.labelsize": "x-large", "axes.titlesize": "x-large"})
     fbr = plt.figure()
     if brain.shape == (182, 218, 182):
         x = [78, 90, 100]
@@ -108,10 +107,12 @@ def plot_brain(brain, minthr=2, maxthr=95, edge=False):
         z = [int(shap[2] * 0.35), int(shap[2] * 0.51), int(shap[2] * 0.65)]
     coords = (x, y, z)
 
-    labs = ['Sagittal Slice (YZ fixed)',
-            'Coronal Slice (XZ fixed)',
-            'Axial Slice (XY fixed)']
-    var = ['X', 'Y', 'Z']
+    labs = [
+        "Sagittal Slice (YZ fixed)",
+        "Coronal Slice (XZ fixed)",
+        "Axial Slice (XY fixed)",
+    ]
+    var = ["X", "Y", "Z"]
     # create subplot for first slice
     # and customize all labels
     idx = 0
@@ -120,7 +121,7 @@ def plot_brain(brain, minthr=2, maxthr=95, edge=False):
         for pos in coord:
             idx += 1
             ax = fbr.add_subplot(3, 3, idx)
-            ax.set_axis_bgcolor('black')
+            ax.set_axis_bgcolor("black")
             ax.set_title(var[i] + " = " + str(pos))
             if i == 0:
                 image = ndimage.rotate(brain[pos, :, :], 90)
@@ -136,8 +137,14 @@ def plot_brain(brain, minthr=2, maxthr=95, edge=False):
 
             if edge:
                 image = edge_map(image).data
-            ax.imshow(image, interpolation='none', cmap=cmap, alpha=1,
-                      vmin=min_val, vmax=max_val)
+            ax.imshow(
+                image,
+                interpolation="none",
+                cmap=cmap,
+                alpha=1,
+                vmin=min_val,
+                vmax=max_val,
+            )
 
     fbr.set_size_inches(12.5, 10.5, forward=True)
     fbr.tight_layout()
@@ -145,19 +152,16 @@ def plot_brain(brain, minthr=2, maxthr=95, edge=False):
 
 
 def plot_overlays(atlas, b0, cmaps=None, minthr=2, maxthr=95, edge=False):
-    plt.rcParams.update({'axes.labelsize': 'x-large',
-                         'axes.titlesize': 'x-large'})
+    plt.rcParams.update({"axes.labelsize": "x-large", "axes.titlesize": "x-large"})
     foverlay = plt.figure()
 
     atlas = mgu.get_braindata(atlas)
     b0 = mgu.get_braindata(b0)
     if atlas.shape != b0.shape:
-        raise ValueError('Brains are not the same shape.')
+        raise ValueError("Brains are not the same shape.")
     if cmaps is None:
-        cmap1 = LinearSegmentedColormap.from_list('mycmap1',
-                                                  ['black', 'magenta'])
-        cmap2 = LinearSegmentedColormap.from_list('mycmap2',
-                                                  ['black', 'green'])
+        cmap1 = LinearSegmentedColormap.from_list("mycmap1", ["black", "magenta"])
+        cmap2 = LinearSegmentedColormap.from_list("mycmap2", ["black", "green"])
         cmaps = [cmap1, cmap2]
 
     if b0.shape == (182, 218, 182):
@@ -171,10 +175,12 @@ def plot_overlays(atlas, b0, cmaps=None, minthr=2, maxthr=95, edge=False):
         z = [int(shap[2] * 0.35), int(shap[2] * 0.51), int(shap[2] * 0.65)]
     coords = (x, y, z)
 
-    labs = ['Sagittal Slice (YZ fixed)',
-            'Coronal Slice (XZ fixed)',
-            'Axial Slice (XY fixed)']
-    var = ['X', 'Y', 'Z']
+    labs = [
+        "Sagittal Slice (YZ fixed)",
+        "Coronal Slice (XZ fixed)",
+        "Axial Slice (XY fixed)",
+    ]
+    var = ["X", "Y", "Z"]
     # create subplot for first slice
     # and customize all labels
     idx = 0
@@ -208,9 +214,12 @@ def plot_overlays(atlas, b0, cmaps=None, minthr=2, maxthr=95, edge=False):
                 image[image > 0] = max_val
                 image[image == 0] = min_val
 
-            ax.imshow(atl, interpolation='none', cmap=cmaps[0], alpha=.9)
-            ax.imshow(opaque_colorscale(cmaps[1], image, alpha=.9,
-                                        vmin=min_val, vmax=max_val))
+            ax.imshow(atl, interpolation="none", cmap=cmaps[0], alpha=0.9)
+            ax.imshow(
+                opaque_colorscale(
+                    cmaps[1], image, alpha=0.9, vmin=min_val, vmax=max_val
+                )
+            )
 
     foverlay.set_size_inches(12.5, 10.5, forward=True)
     foverlay.tight_layout()
@@ -218,9 +227,9 @@ def plot_overlays(atlas, b0, cmaps=None, minthr=2, maxthr=95, edge=False):
 
 
 def get_min_max(data, minthr=2, maxthr=95):
-    '''
+    """
     data: regmri data to threshold.
-    '''
+    """
     min_val = np.percentile(data, minthr)
     max_val = np.percentile(data, maxthr)
     return (min_val.astype(float), max_val.astype(float))

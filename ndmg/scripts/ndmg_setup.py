@@ -31,17 +31,17 @@ import glob
 
 def setup(inDir, dtiListFile, bvalListFile, bvecListFile, mprageListFile):
     # Create lists of files
-    dti_types = ('*DTI.nii', '*DTI.nii.gz')
+    dti_types = ("*DTI.nii", "*DTI.nii.gz")
 
     dtiFiles = get_files(dti_types, inDir)
 
-    bval_types = ('*.b', '*.bval')
+    bval_types = ("*.b", "*.bval")
     bvalFiles = get_files(bval_types, inDir)
 
-    bvec_types = ('*.bvec', '*.grad')
+    bvec_types = ("*.bvec", "*.grad")
     bvecFiles = get_files(bvec_types, inDir)
 
-    mprage_types = ('*MPRAGE.nii', '*MPRAGE.nii.gz')
+    mprage_types = ("*MPRAGE.nii", "*MPRAGE.nii.gz")
     mprageFiles = get_files(mprage_types, inDir)
 
     # Writes lists to disk
@@ -52,28 +52,36 @@ def setup(inDir, dtiListFile, bvalListFile, bvecListFile, mprageListFile):
 
 
 def get_files(ftypes, inDir):
-    return [y for x in os.walk(inDir) for z in ftypes
-            for y in glob.glob(os.path.join(x[0], z))]
+    return [
+        y
+        for x in os.walk(inDir)
+        for z in ftypes
+        for y in glob.glob(os.path.join(x[0], z))
+    ]
 
 
 def write_files(outfile, filelist):
-    with open(outfile, 'wb') as thefile:
+    with open(outfile, "wb") as thefile:
         for item in filelist:
             thefile.write("%s\n" % item)
 
 
 def main():
     parser = ArgumentParser(description="")
-    parser.add_argument("inDir", action="store",
-                        help="Input directory for raw data")
+    parser.add_argument("inDir", action="store", help="Input directory for raw data")
     parser.add_argument("dtiListFile", action="store", help="")
     parser.add_argument("bvalListFile", action="store", help="")
     parser.add_argument("bvecListFile", action="store", help="")
     parser.add_argument("mprageListFile", action="store", help="")
     result = parser.parse_args()
 
-    setup(result.inDir, result.dtiListFile, result.bvalListFile,
-          result.bvecListFile, result.mprageListFile)
+    setup(
+        result.inDir,
+        result.dtiListFile,
+        result.bvalListFile,
+        result.bvecListFile,
+        result.mprageListFile,
+    )
 
 
 if __name__ == "__main__":

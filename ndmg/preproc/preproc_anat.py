@@ -27,8 +27,7 @@ from ndmg.utils import reg_utils as mgru
 import nibabel as nb
 
 
-class preproc_anat():
-
+class preproc_anat:
     def __init__(self, anat, anat_preproc_brain, outdir):
         """
         Enables preprocessing of anatomical images, using AFNI.
@@ -58,6 +57,5 @@ class preproc_anat():
             - res:
                 - the resampling resolution to use if the input is high res.
         """
-        mgru.extract_t1w_brain(self.anat, self.anat_preproc_brain,
-                               self.outdir)
+        mgru.extract_t1w_brain(self.anat, self.anat_preproc_brain, self.outdir)
         pass

@@ -38,18 +38,26 @@ def multigraphs(fibers, labels, outdir):
     """
     startTime = datetime.now()
     fiber_name = mgu.get_filename(fibers)
-    base = fiber_name.split('_fibers', 1)[0]
+    base = fiber_name.split("_fibers", 1)[0]
     # Create output directories for graphs
     label_name = [mgu.get_filename(x) for x in labels]
     for label in label_name:
-        p = Popen("mkdir -p " + outdir + "/graphs/" + label,
-                  stdout=PIPE, stderr=PIPE, shell=True)
+        p = Popen(
+            "mkdir -p " + outdir + "/graphs/" + label,
+            stdout=PIPE,
+            stderr=PIPE,
+            shell=True,
+        )
 
     # Create names of files to be produced
-    graphs = [outdir + "/graphs/" + x + '/' + base + "_" + x + "_elist.csv"
-              for x in label_name]
-    print("Graphs of streamlines downsampled to given labels: " + \
-          (", ".join([x for x in graphs])))
+    graphs = [
+        outdir + "/graphs/" + x + "/" + base + "_" + x + "_elist.csv"
+        for x in label_name
+    ]
+    print(
+        "Graphs of streamlines downsampled to given labels: "
+        + (", ".join([x for x in graphs]))
+    )
 
     # Load fibers
     print("Loading fibers...")
@@ -71,13 +79,24 @@ def multigraphs(fibers, labels, outdir):
 
 
 def main():
-    parser = ArgumentParser(description="This is an end-to-end connectome \
-                            estimation pipeline from sMRI and DTI images")
+    parser = ArgumentParser(
+        description="This is an end-to-end connectome \
+                            estimation pipeline from sMRI and DTI images"
+    )
     parser.add_argument("fibers", action="store", help="DTI streamlines")
-    parser.add_argument("outdir", action="store", help="Path to which \
-                        derivatives will be stored")
-    parser.add_argument("labels", action="store", nargs="*", help="Nifti \
-                        labels of regions of interest in atlas space")
+    parser.add_argument(
+        "outdir",
+        action="store",
+        help="Path to which \
+                        derivatives will be stored",
+    )
+    parser.add_argument(
+        "labels",
+        action="store",
+        nargs="*",
+        help="Nifti \
+                        labels of regions of interest in atlas space",
+    )
     result = parser.parse_args()
 
     # Create output directory

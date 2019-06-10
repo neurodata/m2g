@@ -37,7 +37,7 @@ def convert(indir, outdir, verbose=False):
     # Create output directory structure
     if verbose:
         print("Creating", outdir, "...")
-    os.system('mkdir -p ' + outdir)
+    os.system("mkdir -p " + outdir)
 
     for path, dirs, files in os.walk(indir):
         for idx, fl in enumerate(files):
@@ -48,32 +48,39 @@ def convert(indir, outdir, verbose=False):
             ntime = dat.shape[3]
 
             base = os.path.splitext(os.path.splitext(fl)[0])[0]
-            chan = "_".join(base.split('_')[1:3])
+            chan = "_".join(base.split("_")[1:3])
             if verbose:
                 print("File:", fl)
                 print("Channel:", chan)
                 print("Time steps:", ntime)
                 print("Creating", outdir + "/" + chan, "...")
-            os.system('mkdir -p ' + outdir + "/" + chan)
+            os.system("mkdir -p " + outdir + "/" + chan)
 
             for count in range(int(ntime)):
                 dirname = outdir + "/" + chan + "/time%04d" % count
                 if verbose:
                     print("Creating", dirname, "...")
-                os.system('mkdir -p ' + dirname)
+                os.system("mkdir -p " + dirname)
                 for slices in range(dat.shape[2]):
                     if verbose:
                         print("Saving slice:", slices)
-                    imsave(dirname + '/%04d.png' % slices,
-                           dat[:, :, slices, count].astype('float32').T)
+                    imsave(
+                        dirname + "/%04d.png" % slices,
+                        dat[:, :, slices, count].astype("float32").T,
+                    )
 
 
 def main():
     parser = ArgumentParser(description="")
     parser.add_argument("indir", action="store", help="directory for niftis")
     parser.add_argument("outdir", action="store", help="directory for pngs")
-    parser.add_argument("-v", "--verbose", action="store_true", default=False,
-                        help="Toggles output text")
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        action="store_true",
+        default=False,
+        help="Toggles output text",
+    )
     result = parser.parse_args()
 
     convert(result.indir, result.outdir, result.verbose)

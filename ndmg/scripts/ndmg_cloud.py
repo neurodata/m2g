@@ -39,11 +39,20 @@ from ConfigParser import ConfigParser
 
 warnings.simplefilter("ignore")
 
-participant_templ = 'https://raw.githubusercontent.com/neurodata/ndmg/dev-dmri-fmri/templates/ndmg_cloud_participant.json'
+participant_templ = "https://raw.githubusercontent.com/neurodata/ndmg/dev-dmri-fmri/templates/ndmg_cloud_participant.json"
 
 
-def batch_submit(bucket, path, jobdir, credentials=None, state='participant',
-                 debug=False, dataset=None, log=False,  bg=False):
+def batch_submit(
+    bucket,
+    path,
+    jobdir,
+    credentials=None,
+    state="participant",
+    debug=False,
+    dataset=None,
+    log=False,
+    bg=False,
+):
     """
     Searches through an S3 bucket, gets all subject-ids, creates json files
     for each, submits batch jobs, and returns list of job ids to query status
@@ -53,8 +62,7 @@ def batch_submit(bucket, path, jobdir, credentials=None, state='participant',
     threads = crawl_bucket(bucket, path)
 
     print("Generating job for each subject...")
-    jobs = create_json(bucket, path, threads, jobdir, credentials,
-                       debug, dataset, bg)
+    jobs = create_json(bucket, path, threads, jobdir, credentials, debug, dataset, bg)
 
     print("Submitting jobs to the queue...")
     ids = submit_jobs(jobs, jobdir)
@@ -64,69 +72,78 @@ def crawl_bucket(bucket, path):
     """
     Gets subject list for a given S3 bucket and path
     """
-    cmd = 'aws s3 ls s3://{}/{}/ --no-sign-request'.format(bucket, path)
+    cmd = "aws s3 ls s3://{}/{}/ --no-sign-request".format(bucket, path)
     out = subprocess.check_output(cmd, shell=True)
     pattern = r"(?<=sub-)(\w*)"
-    subjs = re.findall(pattern, out.decode('utf-8'))
-    cmd = 'aws s3 ls s3://{}/{}/sub-{}/ --no-sign-request'
+    subjs = re.findall(pattern, out.decode("utf-8"))
+    cmd = "aws s3 ls s3://{}/{}/sub-{}/ --no-sign-request"
     seshs = OrderedDict()
     for subj in subjs:
         cmd = cmd.format(bucket, path, subj)
         out = subprocess.check_output(cmd, shell=True)
-        sesh = re.findall('ses-(.+)/', out.decode('utf-8'))
+        sesh = re.findall("ses-(.+)/", out.decode("utf-8"))
         seshs[subj] = sesh if sesh != [] else [None]
-    print(("Session IDs: " + ", ".join([subj + '-' + sesh if sesh is not None
-                                        else subj
-                                        for subj in subjs
-                                        for sesh in seshs[subj]])))
+    print(
+        (
+            "Session IDs: "
+            + ", ".join(
+                [
+                    subj + "-" + sesh if sesh is not None else subj
+                    for subj in subjs
+                    for sesh in seshs[subj]
+                ]
+            )
+        )
+    )
     return seshs
 
 
 def get_credentials():
     config = ConfigParser()
     config.read(os.getenv("HOME") + "/.aws/credentials")
-    return [config.get("default", "aws_access_key_id"), config.get("default", "aws_secret_access_key")]
+    return [
+        config.get("default", "aws_access_key_id"),
+        config.get("default", "aws_secret_access_key"),
+    ]
 
 
-def create_json(bucket, path, threads, jobdir, credentials=None,
-                debug=False, dataset=None, bg=False):
+def create_json(
+    bucket, path, threads, jobdir, credentials=None, debug=False, dataset=None, bg=False
+):
     """
     Takes parameters to make jsons
     """
     out = subprocess.check_output("mkdir -p {}".format(jobdir), shell=True)
-    out = subprocess.check_output(
-        "mkdir -p {}/jobs/".format(jobdir), shell=True)
-    out = subprocess.check_output(
-        "mkdir -p {}/ids/".format(jobdir), shell=True)
+    out = subprocess.check_output("mkdir -p {}/jobs/".format(jobdir), shell=True)
+    out = subprocess.check_output("mkdir -p {}/ids/".format(jobdir), shell=True)
     template = participant_templ
     seshs = threads
-    if not os.path.isfile('{}/{}'.format(jobdir, template.split('/')[-1])):
-        cmd = 'wget --quiet -P {} {}'.format(jobdir, template)
+    if not os.path.isfile("{}/{}".format(jobdir, template.split("/")[-1])):
+        cmd = "wget --quiet -P {} {}".format(jobdir, template)
         subprocess.check_output(cmd, shell=True)
 
-    with open('{}/{}'.format(jobdir, template.split('/')[-1]), 'r') as inf:
+    with open("{}/{}".format(jobdir, template.split("/")[-1]), "r") as inf:
         template = json.load(inf)
 
-    cmd = ['ndmg_bids'] + \
-        template['containerOverrides']['command']
-    env = template['containerOverrides']['environment']
+    cmd = ["ndmg_bids"] + template["containerOverrides"]["command"]
+    env = template["containerOverrides"]["environment"]
 
     if credentials is not None:
-        env[0]['value'], env[1]['value'] = get_credentials(credentials)
+        env[0]["value"], env[1]["value"] = get_credentials(credentials)
 
         # cred = list(csv.reader(open(credentials)))
         # env[0]['value'] = cred[1][0]
         # env[1]['value'] = cred[1][e]
     else:
         env = []
-    template['containerOverrides']['environment'] = env
+    template["containerOverrides"]["environment"] = env
 
     # edit bucket, path
     jobs = list()
-    cmd[cmd.index('<BUCKET>')] = bucket
-    cmd[cmd.index('<PATH>')] = path
+    cmd[cmd.index("<BUCKET>")] = bucket
+    cmd[cmd.index("<PATH>")] = path
     if bg:
-        cmd.append('--big')
+        cmd.append("--big")
 
     # edit participant-specific values ()
     # loop over every session of every participant
@@ -136,30 +153,30 @@ def create_json(bucket, path, threads, jobdir, credentials=None,
         for sesh in seshs[subj]:
             # add format-specific commands,
             job_cmd = deepcopy(cmd)
-            job_cmd[job_cmd.index('<SUBJ>')] = subj
+            job_cmd[job_cmd.index("<SUBJ>")] = subj
             if sesh is not None:
                 job_cmd.insert(-3, u"--session_label")
                 job_cmd.insert(-3, u"{}".format(sesh))
             if debug:
-                job_cmd += [u'--debug']
+                job_cmd += [u"--debug"]
 
             # then, grab the template,
             # add additional parameters,
             # make the json file for this iteration,
             # and add the path to its json file to `jobs`.
             job_json = deepcopy(template)
-            ver = ndmg.version.replace('.', '-')
+            ver = ndmg.version.replace(".", "-")
             if dataset:
-                name = 'ndmg_{}_{}_sub-{}'.format(ver, dataset, subj)
+                name = "ndmg_{}_{}_sub-{}".format(ver, dataset, subj)
             else:
-                name = 'ndmg_{}_sub-{}'.format(ver, subj)
+                name = "ndmg_{}_sub-{}".format(ver, subj)
             if sesh is not None:
-                name = '{}_ses-{}'.format(name, sesh)
+                name = "{}_ses-{}".format(name, sesh)
             print(job_cmd)
-            job_json['jobName'] = name
-            job_json['containerOverrides']['command'] = job_cmd
-            job = os.path.join(jobdir, 'jobs', name+'.json')
-            with open(job, 'w') as outfile:
+            job_json["jobName"] = name
+            job_json["containerOverrides"]["command"] = job_cmd
+            job = os.path.join(jobdir, "jobs", name + ".json")
+            with open(job, "w") as outfile:
                 json.dump(job_json, outfile)
             jobs += [job]
 
@@ -171,17 +188,22 @@ def submit_jobs(jobs, jobdir):
     """
     Give list of jobs to submit, submits them to AWS Batch
     """
-    cmd_template = 'aws batch submit-job --cli-input-json file://{}'
+    cmd_template = "aws batch submit-job --cli-input-json file://{}"
 
     for job in jobs:
         cmd = cmd_template.format(job)
         print(("... Submitting job {}...".format(job)))
         out = subprocess.check_output(cmd, shell=True)
-        submission = ast.literal_eval(out.decode('utf-8'))
-        print(("Job Name: {}, Job ID: {}".format(submission['jobName'],
-                                                 submission['jobId'])))
-        sub_file = os.path.join(jobdir, 'ids', submission['jobName'] + '.json')
-        with open(sub_file, 'w') as outfile:
+        submission = ast.literal_eval(out.decode("utf-8"))
+        print(
+            (
+                "Job Name: {}, Job ID: {}".format(
+                    submission["jobName"], submission["jobId"]
+                )
+            )
+        )
+        sub_file = os.path.join(jobdir, "ids", submission["jobName"] + ".json")
+        with open(sub_file, "w") as outfile:
             json.dump(submission, outfile)
     return 0
 
@@ -190,26 +212,25 @@ def get_status(jobdir, jobid=None):
     """
     Given list of jobs, returns status of each.
     """
-    cmd_template = 'aws batch describe-jobs --jobs {}'
+    cmd_template = "aws batch describe-jobs --jobs {}"
 
     if jobid is None:
         print(("Describing jobs in {}/ids/...".format(jobdir)))
-        jobs = os.listdir(jobdir + '/ids/')
+        jobs = os.listdir(jobdir + "/ids/")
         for job in jobs:
-            with open('{}/ids/{}'.format(jobdir, job), 'r') as inf:
+            with open("{}/ids/{}".format(jobdir, job), "r") as inf:
                 submission = json.load(inf)
-            cmd = cmd_template.format(submission['jobId'])
-            print(("... Checking job {}...".format(submission['jobName'])))
+            cmd = cmd_template.format(submission["jobId"])
+            print(("... Checking job {}...".format(submission["jobName"])))
             out = subprocess.check_output(cmd, shell=True)
-            status = re.findall(
-                '"status": "([A-Za-z]+)",', out.decode('utf-8'))[0]
+            status = re.findall('"status": "([A-Za-z]+)",', out.decode("utf-8"))[0]
             print(("... ... Status: {}".format(status)))
         return 0
     else:
         print(("Describing job id {}...".format(jobid)))
         cmd = cmd_template.format(jobid)
         out = subprocess.check_output(cmd, shell=True)
-        status = re.findall('"status": "([A-Za-z]+)",', out.decode('utf-8'))[0]
+        status = re.findall('"status": "([A-Za-z]+)",', out.decode("utf-8"))[0]
         print(("... Status: {}".format(status)))
         return status
 
@@ -218,24 +239,24 @@ def kill_jobs(jobdir, reason='"Killing job"'):
     """
     Given a list of jobs, kills them all.
     """
-    cmd_template1 = 'aws batch cancel-job --job-id {} --reason {}'
-    cmd_template2 = 'aws batch terminate-job --job-id {} --reason {}'
+    cmd_template1 = "aws batch cancel-job --job-id {} --reason {}"
+    cmd_template2 = "aws batch terminate-job --job-id {} --reason {}"
 
     print(("Canelling/Terminating jobs in {}/ids/...".format(jobdir)))
-    jobs = os.listdir(jobdir + '/ids/')
+    jobs = os.listdir(jobdir + "/ids/")
     for job in jobs:
-        with open('{}/ids/{}'.format(jobdir, job), 'r') as inf:
+        with open("{}/ids/{}".format(jobdir, job), "r") as inf:
             submission = json.load(inf)
-        jid = submission['jobId']
-        name = submission['jobName']
+        jid = submission["jobId"]
+        name = submission["jobName"]
         status = get_status(jobdir, jid)
-        if status in ['SUCCEEDED', 'FAILED']:
+        if status in ["SUCCEEDED", "FAILED"]:
             print(("... No action needed for {}...".format(name)))
-        elif status in ['SUBMITTED', 'PENDING', 'RUNNABLE']:
+        elif status in ["SUBMITTED", "PENDING", "RUNNABLE"]:
             cmd = cmd_template1.format(jid, reason)
             print(("... Cancelling job {}...".format(name)))
             out = subprocess.check_output(cmd, shell=True)
-        elif status in ['STARTING', 'RUNNING']:
+        elif status in ["STARTING", "RUNNING"]:
             cmd = cmd_template2.format(jid, reason)
             print(("... Terminating job {}...".format(name)))
             out = subprocess.check_output(cmd, shell=True)
@@ -255,21 +276,22 @@ def s3_get_data(bucket, remote, local, public=False):
         try:
             ACCESS, SECRET = get_credentials()
             client = boto3.client(
-                's3', aws_access_key_id=ACCESS, aws_secret_access_key=SECRET)
+                "s3", aws_access_key_id=ACCESS, aws_secret_access_key=SECRET
+            )
         except:
-            client = boto3.client('s3')
+            client = boto3.client("s3")
 
-        bkts = [bk['Name'] for bk in client.list_buckets()['Buckets']]
+        bkts = [bk["Name"] for bk in client.list_buckets()["Buckets"]]
         if bucket not in bkts:
-            sys.exit("Error: could not locate bucket. Available buckets: " +
-                     ", ".join(bkts))
+            sys.exit(
+                "Error: could not locate bucket. Available buckets: " + ", ".join(bkts)
+            )
 
-        cmd = 'aws s3 cp --recursive s3://{}/{}/ {}'.format(
-            bucket, remote, local)
+        cmd = "aws s3 cp --recursive s3://{}/{}/ {}".format(bucket, remote, local)
     if public:
-        cmd += ' --no-sign-request --region=us-east-1'
+        cmd += " --no-sign-request --region=us-east-1"
 
-    out = subprocess.check_output('mkdir -p {}'.format(local), shell=True)
+    out = subprocess.check_output("mkdir -p {}".format(local), shell=True)
     out = subprocess.check_output(cmd, shell=True)
 
 
@@ -278,64 +300,89 @@ def s3_push_data(bucket, remote, outDir, modifier, creds=True, debug=True):
     cmd = cmd.format(outDir, bucket, remote, modifier)
     if not creds:
         print("Note: no credentials provided, may fail to push big files.")
-        cmd += ' --no-sign-request'
+        cmd += " --no-sign-request"
     subprocess.check_output(cmd, shell=True)
 
 
 def main():
-    parser = ArgumentParser(description="This is an end-to-end connectome \
-                            estimation pipeline from sMRI and DTI images")
+    parser = ArgumentParser(
+        description="This is an end-to-end connectome \
+                            estimation pipeline from sMRI and DTI images"
+    )
 
-    parser.add_argument('state', choices=['participant', 'status',
-                                          'kill'], default='participant',
-                        help='determines the function to be performed by '
-                             'this function.')
-    parser.add_argument('--bucket', help='The S3 bucket with the input dataset'
-                                         ' formatted according to the BIDS standard.')
-    parser.add_argument('--bidsdir', help='The directory where the dataset'
-                                          ' lives on the S3 bucket should be stored. If you'
-                                          ' level analysis this folder should be prepopulated'
-                                          ' with the results of the participant level analysis.')
-    parser.add_argument('--jobdir', action='store', help='Dir of batch jobs to'
-                                                         ' generate/check up on.')
-    parser.add_argument('--credentials', action='store', help='AWS formatted'
-                                                              ' csv of credentials.')
-    parser.add_argument('--log', action='store_true', help='flag to indicate'
-                                                           ' log plotting in group analysis.', default=False)
-    parser.add_argument('--debug', action='store_true', help='flag to store '
-                                                             'temp files along the path of processing.',
-                        default=False)
-    parser.add_argument('--dataset', action='store', help='Dataset name')
-    parser.add_argument("-b", "--big", action="store", default='False',
-                        help="whether or not to produce voxelwise big graph")
+    parser.add_argument(
+        "state",
+        choices=["participant", "status", "kill"],
+        default="participant",
+        help="determines the function to be performed by " "this function.",
+    )
+    parser.add_argument(
+        "--bucket",
+        help="The S3 bucket with the input dataset"
+        " formatted according to the BIDS standard.",
+    )
+    parser.add_argument(
+        "--bidsdir",
+        help="The directory where the dataset"
+        " lives on the S3 bucket should be stored. If you"
+        " level analysis this folder should be prepopulated"
+        " with the results of the participant level analysis.",
+    )
+    parser.add_argument(
+        "--jobdir", action="store", help="Dir of batch jobs to" " generate/check up on."
+    )
+    parser.add_argument(
+        "--credentials", action="store", help="AWS formatted" " csv of credentials."
+    )
+    parser.add_argument(
+        "--log",
+        action="store_true",
+        help="flag to indicate" " log plotting in group analysis.",
+        default=False,
+    )
+    parser.add_argument(
+        "--debug",
+        action="store_true",
+        help="flag to store " "temp files along the path of processing.",
+        default=False,
+    )
+    parser.add_argument("--dataset", action="store", help="Dataset name")
+    parser.add_argument(
+        "-b",
+        "--big",
+        action="store",
+        default="False",
+        help="whether or not to produce voxelwise big graph",
+    )
     result = parser.parse_args()
 
     bucket = result.bucket
     path = result.bidsdir
-    path = path.strip('/') if path is not None else path
+    path = path.strip("/") if path is not None else path
     debug = result.debug
     state = result.state
     creds = result.credentials
     jobdir = result.jobdir
     dset = result.dataset
     log = result.log
-    bg = (result.big != 'False')
+    bg = result.big != "False"
 
     if jobdir is None:
-        jobdir = './'
+        jobdir = "./"
 
-    if (bucket is None or path is None) and \
-            (state != 'status' and state != 'kill'):
-        sys.exit('Requires either path to bucket and data, or the status flag'
-                 ' and job IDs to query.\n  Try:\n    ndmg_cloud --help')
+    if (bucket is None or path is None) and (state != "status" and state != "kill"):
+        sys.exit(
+            "Requires either path to bucket and data, or the status flag"
+            " and job IDs to query.\n  Try:\n    ndmg_cloud --help"
+        )
 
-    if state == 'status':
+    if state == "status":
         print("Checking job status...")
         get_status(jobdir)
-    elif state == 'kill':
+    elif state == "kill":
         print("Killing jobs...")
         kill_jobs(jobdir)
-    elif state == 'participant':
+    elif state == "participant":
         print("Beginning batch submission process...")
         batch_submit(bucket, path, jobdir, creds, state, debug, dset, log, bg)
 
