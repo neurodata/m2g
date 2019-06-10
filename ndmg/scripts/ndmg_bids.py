@@ -496,6 +496,7 @@ def main():
         )
 
     # TODO : `Flat is better than nested`. Make the logic for this cleaner.
+    # this block of logic essentially just gets data we need from s3.
     if level == "participant":
         if buck is not None and remo is not None:
             if subj is not None:
@@ -516,6 +517,8 @@ def main():
             else:
                 nc.s3_get_data(buck, remo, inDir, public=not creds)
         modif = "ndmg_{}".format(ndmg.version.replace(".", "-"))
+
+        # run ndmg.
         session_level(
             inDir,
             outDir,

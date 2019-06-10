@@ -306,8 +306,7 @@ def s3_push_data(bucket, remote, outDir, modifier, creds=True, debug=True):
 
 def main():
     parser = ArgumentParser(
-        description="This is an end-to-end connectome \
-                            estimation pipeline from sMRI and DTI images"
+        description="This is a pipeline for running BIDs-formatted diffusion MRI datasets through AWS S3 to produce connectomes."
     )
 
     parser.add_argument(
