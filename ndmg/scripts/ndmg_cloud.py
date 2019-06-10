@@ -62,7 +62,8 @@ def batch_submit(
     threads = crawl_bucket(bucket, path)
 
     print("Generating job for each subject...")
-    jobs = create_json(bucket, path, threads, jobdir, credentials, debug, dataset, bg)
+    jobs = create_json(bucket, path, threads, jobdir,
+                       credentials, debug, dataset, bg)
 
     print("Submitting jobs to the queue...")
     ids = submit_jobs(jobs, jobdir)
@@ -72,11 +73,19 @@ def crawl_bucket(bucket, path):
     """
     Gets subject list for a given S3 bucket and path
     """
-    cmd = "aws s3 ls s3://{}/{}/ --no-sign-request".format(bucket, path)
+    cmd = "aws s3 ls s3://{}/{}/".format(bucket, path)
+    try:
+        ACCESS, SECRET = get_credentials()
+        os.environ["AWS_ACCESS_KEY_ID"] = ACCESS
+        os.environ["AWS_SECRET_ACCESS_KEY"] = SECRET
+    except:
+        cmd += " --no-sign-request"
     out = subprocess.check_output(cmd, shell=True)
     pattern = r"(?<=sub-)(\w*)"
     subjs = re.findall(pattern, out.decode("utf-8"))
-    cmd = "aws s3 ls s3://{}/{}/sub-{}/ --no-sign-request"
+    cmd = "aws s3 ls s3://{}/{}/sub-{}/"
+    if not ACCESS:
+        cmd += " --no-sign-request"
     seshs = OrderedDict()
     for subj in subjs:
         cmd = cmd.format(bucket, path, subj)
@@ -114,8 +123,10 @@ def create_json(
     Takes parameters to make jsons
     """
     out = subprocess.check_output("mkdir -p {}".format(jobdir), shell=True)
-    out = subprocess.check_output("mkdir -p {}/jobs/".format(jobdir), shell=True)
-    out = subprocess.check_output("mkdir -p {}/ids/".format(jobdir), shell=True)
+    out = subprocess.check_output(
+        "mkdir -p {}/jobs/".format(jobdir), shell=True)
+    out = subprocess.check_output(
+        "mkdir -p {}/ids/".format(jobdir), shell=True)
     template = participant_templ
     seshs = threads
     if not os.path.isfile("{}/{}".format(jobdir, template.split("/")[-1])):
@@ -223,7 +234,8 @@ def get_status(jobdir, jobid=None):
             cmd = cmd_template.format(submission["jobId"])
             print(("... Checking job {}...".format(submission["jobName"])))
             out = subprocess.check_output(cmd, shell=True)
-            status = re.findall('"status": "([A-Za-z]+)",', out.decode("utf-8"))[0]
+            status = re.findall(
+                '"status": "([A-Za-z]+)",', out.decode("utf-8"))[0]
             print(("... ... Status: {}".format(status)))
         return 0
     else:
@@ -271,7 +283,7 @@ def s3_get_data(bucket, remote, local, public=False):
     """
 
     if os.path.exists(local):
-        pass
+        return  # TODO: make sure this doesn't add None a bunch of times in a loop on this function
     if not public:
         try:
             ACCESS, SECRET = get_credentials()
@@ -284,10 +296,12 @@ def s3_get_data(bucket, remote, local, public=False):
         bkts = [bk["Name"] for bk in client.list_buckets()["Buckets"]]
         if bucket not in bkts:
             sys.exit(
-                "Error: could not locate bucket. Available buckets: " + ", ".join(bkts)
+                "Error: could not locate bucket. Available buckets: " +
+                ", ".join(bkts)
             )
 
-        cmd = "aws s3 cp --recursive s3://{}/{}/ {}".format(bucket, remote, local)
+        cmd = "aws s3 cp --recursive s3://{}/{}/ {}".format(
+            bucket, remote, local)
     if public:
         cmd += " --no-sign-request --region=us-east-1"
 
