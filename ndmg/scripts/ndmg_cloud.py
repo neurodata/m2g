@@ -39,7 +39,8 @@ from ConfigParser import ConfigParser
 
 warnings.simplefilter("ignore")
 
-participant_templ = "https://raw.githubusercontent.com/neurodata/ndmg/dev-dmri-fmri/templates/ndmg_cloud_participant.json"
+# TODO
+participant_templ = "https://raw.githubusercontent.com/neurodata/ndmg/alex-batch/templates/ndmg_cloud_participant.json"
 
 
 def batch_submit(
@@ -108,12 +109,19 @@ def crawl_bucket(bucket, path):
 
 
 def get_credentials():
-    config = ConfigParser()
-    config.read(os.getenv("HOME") + "/.aws/credentials")
-    return [
-        config.get("default", "aws_access_key_id"),
-        config.get("default", "aws_secret_access_key"),
-    ]
+    try:
+        config = ConfigParser()
+        config.read(os.getenv("HOME") + "/.aws/credentials")
+        return (
+            config.get("default", "aws_access_key_id"),
+            config.get("default", "aws_secret_access_key"),
+        )
+    except:
+        ACCESS = os.getenv("AWS_ACCESS_KEY_ID")
+        SECRET = os.getenv("AWS_SECRET_ACCESS_KEY")
+    if not ACCESS and SECRET:
+        raise AttributeError("No AWS credentials found.")
+    return (ACCESS, SECRET)
 
 
 def create_json(
@@ -139,6 +147,7 @@ def create_json(
     cmd = ["ndmg_bids"] + template["containerOverrides"]["command"]
     env = template["containerOverrides"]["environment"]
 
+    # TODO : This checks for any credentials csv file, rather than `/.aws/credentials`.
     if credentials is not None:
         env[0]["value"], env[1]["value"] = get_credentials()
 
@@ -166,8 +175,8 @@ def create_json(
             job_cmd = deepcopy(cmd)
             job_cmd[job_cmd.index("<SUBJ>")] = subj
             if sesh is not None:
-                job_cmd.insert(-3, u"--session_label")
-                job_cmd.insert(-3, u"{}".format(sesh))
+                job_cmd.insert(7, u"--session_label")
+                job_cmd.insert(8, u"{}".format(sesh))
             if debug:
                 job_cmd += [u"--debug"]
 
