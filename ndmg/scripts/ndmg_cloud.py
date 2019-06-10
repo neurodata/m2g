@@ -140,7 +140,7 @@ def create_json(
     env = template["containerOverrides"]["environment"]
 
     if credentials is not None:
-        env[0]["value"], env[1]["value"] = get_credentials(credentials)
+        env[0]["value"], env[1]["value"] = get_credentials()
 
         # cred = list(csv.reader(open(credentials)))
         # env[0]['value'] = cred[1][0]
