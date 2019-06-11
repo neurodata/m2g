@@ -33,16 +33,16 @@ import nibabel as nb
 import sys
 import matplotlib
 
-matplotlib.use('Agg')  # very important above pyplot import
+matplotlib.use("Agg")  # very important above pyplot import
 import matplotlib.pyplot as plt
 
 
 def tensor2fa(tensors, tensor_name, dti, derivdir, qcdir):
-    '''
+    """
     outdir: location of output directory.
     fname: name of output fa map file. default is none (name created based on
     input file)
-    '''
+    """
     dti_data = nb.load(dti)
     affine = dti_data.get_affine()
     dti_data = dti_data.get_data()
@@ -55,26 +55,25 @@ def tensor2fa(tensors, tensor_name, dti, derivdir, qcdir):
     FA = np.clip(FA, 0, 1)
     RGB = color_fa(FA, tensors.evecs)
 
-    fname = os.path.split(tensor_name)[1].split(".")[0] + '_fa_rgb.nii.gz'
-    fa = nb.Nifti1Image(np.array(255 * RGB, 'uint8'), affine)
+    fname = os.path.split(tensor_name)[1].split(".")[0] + "_fa_rgb.nii.gz"
+    fa = nb.Nifti1Image(np.array(255 * RGB, "uint8"), affine)
     nb.save(fa, os.path.join(derivdir, fname))
 
     fa_pngs(fa, fname, qcdir)
 
 
 def fa_pngs(data, fname, outdir):
-    '''
+    """
     data: fa map
-    '''
+    """
     im = data.get_data()
     fig = plot_rgb(im)
-    fname = os.path.split(fname)[1].split(".")[0] + '.png'
-    plt.savefig(outdir + fname, format='png')
+    fname = os.path.split(fname)[1].split(".")[0] + ".png"
+    plt.savefig(outdir + fname, format="png")
 
 
 def plot_rgb(im):
-    plt.rcParams.update({'axes.labelsize': 'x-large',
-                         'axes.titlesize': 'x-large'})
+    plt.rcParams.update({"axes.labelsize": "x-large", "axes.titlesize": "x-large"})
 
     if im.shape == (182, 218, 182):
         x = [78, 90, 100]
@@ -87,10 +86,12 @@ def plot_rgb(im):
         z = [int(shap[2] * 0.35), int(shap[2] * 0.51), int(shap[2] * 0.65)]
     coords = (x, y, z)
 
-    labs = ['Sagittal Slice (YZ fixed)',
-            'Coronal Slice (XZ fixed)',
-            'Axial Slice (XY fixed)']
-    var = ['X', 'Y', 'Z']
+    labs = [
+        "Sagittal Slice (YZ fixed)",
+        "Coronal Slice (XZ fixed)",
+        "Axial Slice (XY fixed)",
+    ]
+    var = ["X", "Y", "Z"]
 
     idx = 0
     for i, coord in enumerate(coords):

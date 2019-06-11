@@ -36,9 +36,10 @@ from ndmg.scripts.ndmg_func_pipeline import ndmg_func_pipeline
 from ndmg.scripts.ndmg_dwi_pipeline import ndmg_dwi_pipeline, ndmg_dwi_worker
 import warnings
 from argparse import ArgumentParser
+
 warnings.simplefilter("ignore")
 
-atlas_dir = '/ndmg_atlases'  # This location bc it is convenient for containers
+atlas_dir = "/ndmg_atlases"  # This location bc it is convenient for containers
 
 # Data structure:
 # sub-<subject id>/
@@ -51,10 +52,20 @@ atlas_dir = '/ndmg_atlases'  # This location bc it is convenient for containers
 #   *   sub-<subject id>_ses-<session id>_dwi.bvec
 #
 # *these files can be anywhere up stream of the dwi data, and are inherited.
-skippers = ['slab907', 'slab1068', 'DS01216', 'DS01876',
-            'DS03231', 'DS06481', 'DS16784', 'DS72784',
-            'hemispheric_res-1x1x1', 'hemispheric_res-2x2x2',
-            'tissue_res-1x1x1', 'tissue_res-2x2x2']
+skippers = [
+    "slab907",
+    "slab1068",
+    "DS01216",
+    "DS01876",
+    "DS03231",
+    "DS06481",
+    "DS16784",
+    "DS72784",
+    "hemispheric_res-1x1x1",
+    "hemispheric_res-2x2x2",
+    "tissue_res-1x1x1",
+    "tissue_res-2x2x2",
+]
 
 
 def get_atlas(atlas_dir, modality, vox_size):
@@ -62,38 +73,49 @@ def get_atlas(atlas_dir, modality, vox_size):
     Given the desired location for atlases and the type of processing, ensure
     we have all the atlases and parcellations.
     """
-    if vox_size == '2mm':
-        dims = '2x2x2'
-    elif vox_size == '1mm':
-        dims = '1x1x1'
+    if vox_size == "2mm":
+        dims = "2x2x2"
+    elif vox_size == "1mm":
+        dims = "1x1x1"
     else:
         raise ValueError(
-            'Voxel dimensions of input t1w image not currently supported by ndmg.')
+            "Voxel dimensions of input t1w image not currently supported by ndmg."
+        )
 
     # TODO: use glob to get these, not hardcoded paths
-    if modality == 'dwi':
+    if modality == "dwi":
         atlas = op.join(
-            atlas_dir, 'atlases/reference_brains/MNI152NLin6_res-' + dims + '_T1w.nii.gz')
+            atlas_dir,
+            "atlases/reference_brains/MNI152NLin6_res-" + dims + "_T1w.nii.gz",
+        )
         atlas_mask = op.join(
-            atlas_dir, 'atlases/mask/MNI152NLin6_res-' + dims + '_T1w_descr-brainmask.nii.gz')
-        labels = [i for i in glob.glob(
-            atlas_dir + "/atlases/label/Human/*.nii.gz") if dims in i]
-        labels = [op.join(atlas_dir, 'label/Human/', l) for l in labels]
+            atlas_dir,
+            "atlases/mask/MNI152NLin6_res-" + dims + "_T1w_descr-brainmask.nii.gz",
+        )
+        labels = [
+            i
+            for i in glob.glob(atlas_dir + "/atlases/label/Human/*.nii.gz")
+            if dims in i
+        ]
+        labels = [op.join(atlas_dir, "label/Human/", l) for l in labels]
         fils = labels + [atlas, atlas_mask]
-    if modality == 'func':
-        atlas = op.join(atlas_dir, 'atlas/MNI152NLin6_res-' +
-                        dims + '_T1w.nii.gz')
-        atlas_brain = op.join(atlas_dir, 'atlas/' +
-                              'MNI152NLin6_res-' + dims + '_T1w_brain.nii.gz')
-        atlas_mask = op.join(atlas_dir,
-                             'mask/MNI152NLin6_res-' + dims + '_T1w_brainmask.nii.gz')
-        lv_mask = op.join(atlas_dir, "mask/HarvardOxford_variant-" +
-                          "lateral-ventricles-thr25" +
-                          "_res-' + dims + '_brainmask.nii.gz")
+    if modality == "func":
+        atlas = op.join(atlas_dir, "atlas/MNI152NLin6_res-" + dims + "_T1w.nii.gz")
+        atlas_brain = op.join(
+            atlas_dir, "atlas/" + "MNI152NLin6_res-" + dims + "_T1w_brain.nii.gz"
+        )
+        atlas_mask = op.join(
+            atlas_dir, "mask/MNI152NLin6_res-" + dims + "_T1w_brainmask.nii.gz"
+        )
+        lv_mask = op.join(
+            atlas_dir,
+            "mask/HarvardOxford_variant-"
+            + "lateral-ventricles-thr25"
+            + "_res-' + dims + '_brainmask.nii.gz",
+        )
 
-        labels = [i for i in glob.glob(
-            atlas_dir + '/label/*.nii.gz') if dims in i]
-        labels = [op.join(atlas_dir, 'label', l) for l in labels]
+        labels = [i for i in glob.glob(atlas_dir + "/label/*.nii.gz") if dims in i]
+        labels = [op.join(atlas_dir, "label", l) for l in labels]
         fils = labels + [atlas, atlas_mask, atlas_brain, lv_mask]
 
     ope = op.exists
@@ -104,21 +126,22 @@ def get_atlas(atlas_dir, modality, vox_size):
     # TODO: fix, currently broken due to git-lfs
     if not os.path.exists(atlas_dir):
         print("Cannot find atlas information; downloading...")
-        cmd = 'wget https://github.com/neurodata/neuroparc/archive/v0.1.0.zip -O /neuroparc.zip'
+        cmd = "wget https://github.com/neurodata/neuroparc/archive/v0.1.0.zip -O /neuroparc.zip"
         os.system(cmd)
-        cmd = 'unzip /neuroparc.zip -d /neuroparc'
+        cmd = "unzip /neuroparc.zip -d /neuroparc"
         os.system(cmd)
-        shutil.move('/neuroparc/neuroparc-0.1.0/atlases', atlas_dir)
-        os.remove('/neuroparc.zip')
-        shutil.rmtree('/neuroparc')
+        shutil.move("/neuroparc/neuroparc-0.1.0/atlases", atlas_dir)
+        os.remove("/neuroparc.zip")
+        shutil.rmtree("/neuroparc")
 
-    if modality == 'dwi':
+    if modality == "dwi":
         atlas_brain = None
         lv_mask = None
 
     assert all(map(os.path.exists, labels)), "Some parcellations do not exist."
-    assert all(map(os.path.exists, [atlas, atlas_mask])
-               ), "atlas or atlas_mask, does not exist."
+    assert all(
+        map(os.path.exists, [atlas, atlas_mask])
+    ), "atlas or atlas_mask, does not exist."
     return (labels, atlas, atlas_mask, atlas_brain, lv_mask)
 
 
@@ -131,16 +154,35 @@ def worker_wrapper(xxx_todo_changeme):
     return f(*args, **kwargs)
 
 
-def session_level(inDir, outDir, subjs, vox_size, big, clean, stc, atlas_select, mod_type, track_type, mod_func,
-                  reg_style, sesh=None, task=None, run=None, debug=False, modality='dwi', nproc=1):
+def session_level(
+    inDir,
+    outDir,
+    subjs,
+    vox_size,
+    big,
+    clean,
+    stc,
+    atlas_select,
+    mod_type,
+    track_type,
+    mod_func,
+    reg_style,
+    sesh=None,
+    task=None,
+    run=None,
+    debug=False,
+    modality="dwi",
+    nproc=1,
+):
     """
     Crawls the given BIDS organized directory for data pertaining to the given
     subject and session, and passes necessary files to ndmg_dwi_pipeline for
     processing.
     """
 
-    labels, atlas, atlas_mask, atlas_brain, lv_mask = get_atlas(atlas_dir,
-                                                                modality, vox_size)
+    labels, atlas, atlas_mask, atlas_brain, lv_mask = get_atlas(
+        atlas_dir, modality, vox_size
+    )
 
     if atlas_select:
         labels = [i for i in labels if atlas_select in i]
@@ -148,42 +190,74 @@ def session_level(inDir, outDir, subjs, vox_size, big, clean, stc, atlas_select,
 
     result = sweep_directory(inDir, subjs, sesh, task, run, modality)
 
-    if modality == 'dwi':
+    if modality == "dwi":
         if not debug:
             print("Cleaning output directory tree ...")
-            files = glob.glob(outDir + '/*')
+            files = glob.glob(outDir + "/*")
             for f in files:
                 os.remove(f)
         dwis, bvals, bvecs, anats = result
-        assert (len(anats) == len(dwis))
-        assert (len(bvecs) == len(dwis))
-        assert (len(bvals) == len(dwis))
-        args = [[dw, bval, bvec, anat, atlas, atlas_mask,
-                 labels, "%s%s%s%s%s" % (
-                     outDir, '/sub', bval.split('sub')[1].split('/')[0], '/ses', bval.split('ses')[1].split('/')[0])]
-                for
-                (dw, bval, bvec, anat)
-                in zip(dwis, bvals, bvecs, anats)]
+        assert len(anats) == len(dwis)
+        assert len(bvecs) == len(dwis)
+        assert len(bvals) == len(dwis)
+        args = [
+            [
+                dw,
+                bval,
+                bvec,
+                anat,
+                atlas,
+                atlas_mask,
+                labels,
+                "%s%s%s%s%s"
+                % (
+                    outDir,
+                    "/sub",
+                    bval.split("sub")[1].split("/")[0],
+                    "/ses",
+                    bval.split("ses")[1].split("/")[0],
+                ),
+            ]
+            for (dw, bval, bvec, anat) in zip(dwis, bvals, bvecs, anats)
+        ]
     else:
         funcs, anats = result
-        assert (len(anats) == len(funcs))
-        args = [[func, anat, atlas, atlas_brain, atlas_mask,
-                 lv_mask, labels, outDir] for (func, anat) in
-                zip(funcs, anats)]
+        assert len(anats) == len(funcs)
+        args = [
+            [func, anat, atlas, atlas_brain, atlas_mask, lv_mask, labels, outDir]
+            for (func, anat) in zip(funcs, anats)
+        ]
 
     # optional args stored in kwargs
     # use worker wrapper to call function f with args arg
     # and keyword args kwargs
     print(args)
-    ndmg_dwi_worker(args[0][0], args[0][1], args[0][2], args[0][3], atlas, atlas_mask,
-                    labels, outDir, vox_size, mod_type, track_type, mod_func, reg_style, clean, big)
+    ndmg_dwi_worker(
+        args[0][0],
+        args[0][1],
+        args[0][2],
+        args[0][3],
+        atlas,
+        atlas_mask,
+        labels,
+        outDir,
+        vox_size,
+        mod_type,
+        track_type,
+        mod_func,
+        reg_style,
+        clean,
+        big,
+    )
     rmflds = []
-    if modality == 'func' and not debug:
-        rmflds += [os.path.join(outDir, 'func', modal)
-                   for modal in ['clean', 'preproc', 'registered']]
-        rmflds += [os.path.join(outDir, 'anat')]
+    if modality == "func" and not debug:
+        rmflds += [
+            os.path.join(outDir, "func", modal)
+            for modal in ["clean", "preproc", "registered"]
+        ]
+        rmflds += [os.path.join(outDir, "anat")]
     if not big:
-        rmflds += [os.path.join(outDir, 'func', 'voxel-timeseries')]
+        rmflds += [os.path.join(outDir, "func", "voxel-timeseries")]
     if len(rmflds) > 0:
         cmd = "rm -rf {}".format(" ".join(rmflds))
         mgu.execute_cmd(cmd)
@@ -191,96 +265,200 @@ def session_level(inDir, outDir, subjs, vox_size, big, clean, stc, atlas_select,
 
 
 def main():
-    parser = ArgumentParser(description="This is an end-to-end connectome \
-                            estimation pipeline from M3r Images.")
-    parser.add_argument('bids_dir', help='The directory with the input dataset'
-                                         ' formatted according to the BIDS standard.')
-    parser.add_argument('output_dir', help='The directory where the output '
-                                           'files should be stored. If you are running group '
-                                           'level analysis this folder should be prepopulated '
-                                           'with the results of the participant level analysis.')
-    parser.add_argument('analysis_level', help='Level of the analysis that '
-                                               'will be performed. Multiple participant level '
-                                               'analyses can be run independently (in parallel) '
-                                               'using the same output_dir.',
-                        choices=['participant', 'group'], default='participant')
-    parser.add_argument('--modality', help='Modality of MRI scans that \
-                        are being evaluated.', choices=['dwi', 'func'], default='dwi')
-    parser.add_argument('--participant_label', help='The label(s) of the '
-                                                    'participant(s) that should be analyzed. The label '
-                                                    'corresponds to sub-<participant_label> from the BIDS '
-                                                    'spec (so it does not include "sub-"). If this '
-                                                    'parameter is not provided all subjects should be '
-                                                    'analyzed. Multiple participants can be specified '
-                                                    'with a space separated list.', nargs="+")
-    parser.add_argument('--session_label', help='The label(s) of the '
-                                                'session that should be analyzed. The label '
-                                                'corresponds to ses-<participant_label> from the BIDS '
-                                                'spec (so it does not include "ses-"). If this '
-                                                'parameter is not provided all sessions should be '
-                                                'analyzed. Multiple sessions can be specified '
-                                                'with a space separated list.', nargs="+")
-    parser.add_argument('--task_label', help='The label(s) of the task '
-                                             'that should be analyzed. The label corresponds to '
-                                             'task-<task_label> from the BIDS spec (so it does not '
-                                             'include "task-"). If this parameter is not provided '
-                                             'all tasks should be analyzed. Multiple tasks can be '
-                                             'specified with a space separated list.', nargs="+")
-    parser.add_argument('--run_label', help='The label(s) of the run '
-                                            'that should be analyzed. The label corresponds to '
-                                            'run-<run_label> from the BIDS spec (so it does not '
-                                            'include "task-"). If this parameter is not provided '
-                                            'all runs should be analyzed. Multiple runs can be '
-                                            'specified with a space separated list.', nargs="+")
-    parser.add_argument('--bucket', action='store', help='The name of '
-                                                         'an S3 bucket which holds BIDS organized data. You '
-                                                         'must have built your bucket with credentials to the '
-                                                         'S3 bucket you wish to access.')
-    parser.add_argument('--remote_path', action='store', help='The path to '
-                                                              'the data on your S3 bucket. The data will be '
-                                                              'downloaded to the provided bids_dir on your machine.')
-    parser.add_argument('--push_data', action='store_true', help='flag to '
-                                                                 'push derivatives back up to S3.', default=False)
-    parser.add_argument('--dataset', action='store', help='The name of '
-                                                          'the dataset you are perfoming QC on.')
-    parser.add_argument('--atlas', action='store', help='The atlas '
-                                                        'being analyzed in QC (if you only want one).', default=None)
-    parser.add_argument('--minimal', action='store_true', help='Determines '
-                                                               'whether to show a minimal or full set of plots.',
-                        default=False)
-    parser.add_argument('--hemispheres', action='store_true', help='Whether '
-                                                                   'or not to break degrees into hemispheres or not',
-                        default=False)
-    parser.add_argument('--log', action='store_true', help='Determines '
-                                                           'axis scale for plotting.', default=False)
-    parser.add_argument('--debug', action='store_true', help='If False, remove any old files in the output directory.',
-                        default=False)
-    parser.add_argument('--big', action='store_true',
-                        help='Whether to produce \
-                        big graphs for DWI, or voxelwise timeseries for fMRI.',
-                        default=False)
-    parser.add_argument("--vox", action="store", default='2mm',
-                        help="Voxel size to use for template registrations \
-                        (e.g. default is '2mm')")
-    parser.add_argument("-c", "--clean", action="store_true", default=False,
-                        help="Whether or not to delete intemediates")
-    parser.add_argument("--nproc", action="store", help="The number of "
-                                                        "process to launch. Should be approximately "
-                                                        "<min(ncpu*hyperthreads/cpu, maxram/10).", default=1,
-                        type=int)
-    parser.add_argument("--stc", action="store", help='A file for slice '
-                                                      'timing correction. Options are a TR sequence file '
-                                                      '(where each line is the shift in TRs), '
-                                                      'up (ie, bottom to top), down (ie, top to bottom), '
-                                                      'or interleaved.', default=None)
-    parser.add_argument("--mod", action="store",
-                        help='Determinstic (det) or probabilistic (prob) tracking. Default is det.', default='det')
-    parser.add_argument("--tt", action="store", help='Tracking approach: eudx or local. Default is eudx.',
-                        default='eudx')
-    parser.add_argument("--mf", action="store", help='Diffusion model: csd, csa, or tensor. Default is tensor.',
-                        default='tensor')
-    parser.add_argument("--sp", action="store",
-                        help='Space for tractography. Default is native.', default='native')
+    parser = ArgumentParser(
+        description="This is an end-to-end connectome \
+                            estimation pipeline from M3r Images."
+    )
+    parser.add_argument(
+        "bids_dir",
+        help="The directory with the input dataset"
+        " formatted according to the BIDS standard.",
+    )
+    parser.add_argument(
+        "output_dir",
+        help="The directory where the output "
+        "files should be stored. If you are running group "
+        "level analysis this folder should be prepopulated "
+        "with the results of the participant level analysis.",
+    )
+    parser.add_argument(
+        "analysis_level",
+        help="Level of the analysis that "
+        "will be performed. Multiple participant level "
+        "analyses can be run independently (in parallel) "
+        "using the same output_dir.",
+        choices=["participant", "group"],
+        default="participant",
+    )
+    parser.add_argument(
+        "--modality",
+        help="Modality of MRI scans that \
+                        are being evaluated.",
+        choices=["dwi", "func"],
+        default="dwi",
+    )
+    parser.add_argument(
+        "--participant_label",
+        help="The label(s) of the "
+        "participant(s) that should be analyzed. The label "
+        "corresponds to sub-<participant_label> from the BIDS "
+        'spec (so it does not include "sub-"). If this '
+        "parameter is not provided all subjects should be "
+        "analyzed. Multiple participants can be specified "
+        "with a space separated list.",
+        nargs="+",
+    )
+    parser.add_argument(
+        "--session_label",
+        help="The label(s) of the "
+        "session that should be analyzed. The label "
+        "corresponds to ses-<participant_label> from the BIDS "
+        'spec (so it does not include "ses-"). If this '
+        "parameter is not provided all sessions should be "
+        "analyzed. Multiple sessions can be specified "
+        "with a space separated list.",
+        nargs="+",
+    )
+    parser.add_argument(
+        "--task_label",
+        help="The label(s) of the task "
+        "that should be analyzed. The label corresponds to "
+        "task-<task_label> from the BIDS spec (so it does not "
+        'include "task-"). If this parameter is not provided '
+        "all tasks should be analyzed. Multiple tasks can be "
+        "specified with a space separated list.",
+        nargs="+",
+    )
+    parser.add_argument(
+        "--run_label",
+        help="The label(s) of the run "
+        "that should be analyzed. The label corresponds to "
+        "run-<run_label> from the BIDS spec (so it does not "
+        'include "task-"). If this parameter is not provided '
+        "all runs should be analyzed. Multiple runs can be "
+        "specified with a space separated list.",
+        nargs="+",
+    )
+    parser.add_argument(
+        "--bucket",
+        action="store",
+        help="The name of "
+        "an S3 bucket which holds BIDS organized data. You "
+        "must have built your bucket with credentials to the "
+        "S3 bucket you wish to access.",
+    )
+    parser.add_argument(
+        "--remote_path",
+        action="store",
+        help="The path to "
+        "the data on your S3 bucket. The data will be "
+        "downloaded to the provided bids_dir on your machine.",
+    )
+    parser.add_argument(
+        "--push_data",
+        action="store_true",
+        help="flag to " "push derivatives back up to S3.",
+        default=False,
+    )
+    parser.add_argument(
+        "--dataset",
+        action="store",
+        help="The name of " "the dataset you are perfoming QC on.",
+    )
+    parser.add_argument(
+        "--atlas",
+        action="store",
+        help="The atlas " "being analyzed in QC (if you only want one).",
+        default=None,
+    )
+    parser.add_argument(
+        "--minimal",
+        action="store_true",
+        help="Determines " "whether to show a minimal or full set of plots.",
+        default=False,
+    )
+    parser.add_argument(
+        "--hemispheres",
+        action="store_true",
+        help="Whether " "or not to break degrees into hemispheres or not",
+        default=False,
+    )
+    parser.add_argument(
+        "--log",
+        action="store_true",
+        help="Determines " "axis scale for plotting.",
+        default=False,
+    )
+    parser.add_argument(
+        "--debug",
+        action="store_true",
+        help="If False, remove any old files in the output directory.",
+        default=False,
+    )
+    parser.add_argument(
+        "--big",
+        action="store_true",
+        help="Whether to produce \
+                        big graphs for DWI, or voxelwise timeseries for fMRI.",
+        default=False,
+    )
+    parser.add_argument(
+        "--vox",
+        action="store",
+        default="2mm",
+        help="Voxel size to use for template registrations \
+                        (e.g. default is '2mm')",
+    )
+    parser.add_argument(
+        "-c",
+        "--clean",
+        action="store_true",
+        default=False,
+        help="Whether or not to delete intemediates",
+    )
+    parser.add_argument(
+        "--nproc",
+        action="store",
+        help="The number of "
+        "process to launch. Should be approximately "
+        "<min(ncpu*hyperthreads/cpu, maxram/10).",
+        default=1,
+        type=int,
+    )
+    parser.add_argument(
+        "--stc",
+        action="store",
+        help="A file for slice "
+        "timing correction. Options are a TR sequence file "
+        "(where each line is the shift in TRs), "
+        "up (ie, bottom to top), down (ie, top to bottom), "
+        "or interleaved.",
+        default=None,
+    )
+    parser.add_argument(
+        "--mod",
+        action="store",
+        help="Determinstic (det) or probabilistic (prob) tracking. Default is det.",
+        default="det",
+    )
+    parser.add_argument(
+        "--tt",
+        action="store",
+        help="Tracking approach: eudx or local. Default is eudx.",
+        default="eudx",
+    )
+    parser.add_argument(
+        "--mf",
+        action="store",
+        help="Diffusion model: csd, csa, or tensor. Default is tensor.",
+        default="tensor",
+    )
+    parser.add_argument(
+        "--sp",
+        action="store",
+        help="Space for tractography. Default is native.",
+        default="native",
+    )
     result = parser.parse_args()
 
     inDir = result.bids_dir
@@ -313,11 +491,12 @@ def main():
     try:
         creds = bool(nc.get_credentials())
     except:
-        creds = bool(os.getenv("AWS_ACCESS_KEY_ID", 0) and
-                     os.getenv("AWS_SECRET_ACCESS_KEY", 0))
+        creds = bool(
+            os.getenv("AWS_ACCESS_KEY_ID", 0) and os.getenv("AWS_SECRET_ACCESS_KEY", 0)
+        )
 
     # TODO : `Flat is better than nested`. Make the logic for this cleaner.
-    if level == 'participant':
+    if level == "participant":
         if buck is not None and remo is not None:
             if subj is not None:
                 if len(sesh) == 1:
@@ -325,21 +504,40 @@ def main():
                 for sub in subj:
                     if sesh is not None:
                         tpath = op.join(
-                            remo, 'sub-{}'.format(sub), 'ses-{}'.format(sesh))
+                            remo, "sub-{}".format(sub), "ses-{}".format(sesh)
+                        )
                         tindir = op.join(
-                            inDir, 'sub-{}'.format(sub), 'ses-{}'.format(sesh))
+                            inDir, "sub-{}".format(sub), "ses-{}".format(sesh)
+                        )
                     else:
-                        tpath = op.join(remo, 'sub-{}'.format(sub))
-                        tindir = op.join(inDir, 'sub-{}'.format(sub))
+                        tpath = op.join(remo, "sub-{}".format(sub))
+                        tindir = op.join(inDir, "sub-{}".format(sub))
                     nc.s3_get_data(buck, tpath, tindir, public=not creds)
             else:
-                s3_get_data(buck, remo, inDir, public=not creds)
-        modif = 'ndmg_{}'.format(ndmg.version.replace('.', '-'))
-        session_level(inDir, outDir, subj, vox_size, big, clean, stc,
-                      atlas_select, mod_type, track_type, mod_func, reg_style, sesh, task, run,
-                      debug, modality, nproc)
+                nc.s3_get_data(buck, remo, inDir, public=not creds)
+        modif = "ndmg_{}".format(ndmg.version.replace(".", "-"))
+        session_level(
+            inDir,
+            outDir,
+            subj,
+            vox_size,
+            big,
+            clean,
+            stc,
+            atlas_select,
+            mod_type,
+            track_type,
+            mod_func,
+            reg_style,
+            sesh,
+            task,
+            run,
+            debug,
+            modality,
+            nproc,
+        )
     else:
-        print('Specified level not valid')
+        print("Specified level not valid")
     if push and buck and remo is not None:
         print("Pushing results to S3...")
         nc.s3_push_data(buck, remo, outDir, modif, creds, debug=debug)

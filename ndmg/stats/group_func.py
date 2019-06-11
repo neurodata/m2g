@@ -137,10 +137,14 @@ class group_func(object):
         fig_treg = plot_rugdensity(temp_reg_sc)
 
         figs = [fig_cnr, fig_snr, fig_sreg, fig_treg]
-        names = ['temporal Contrast to Noise Ratio', 'temporal Signal to Noise Ratio',
-                 'Self Registration Score', 'Template Registration Score']
-        ylab = ['Density', 'Density', 'Density', 'Density']
-        xlab = ['Ratio', 'Ratio', 'Score', 'Score']
+        names = [
+            "temporal Contrast to Noise Ratio",
+            "temporal Signal to Noise Ratio",
+            "Self Registration Score",
+            "Template Registration Score",
+        ]
+        ylab = ["Density", "Density", "Density", "Density"]
+        xlab = ["Ratio", "Ratio", "Score", "Score"]
         traces = [fig_to_trace(fig) for fig in figs]
 
         fname_multi = "registration_qa.html"
@@ -176,19 +180,26 @@ class group_func(object):
         fig_gt_200um = plot_rugdensity(FD_gt_200um)
 
         figs = [fig_mean, fig_max, fig_gt_100um, fig_gt_200um]
-        names = ['Average FD KDE', 'Max FD KDE',
-                 'Number of FD > 0.1 mm KDE', 'Number of FD > 0.2 mm KDE']
-        ylab = ['Density', 'Density', 'Density', 'Density']
-        xlab = ['Average FD (mm)', 'Average Motion (mm)',
-                'Number of Volumes', 'Number of Volumes']
+        names = [
+            "Average FD KDE",
+            "Max FD KDE",
+            "Number of FD > 0.1 mm KDE",
+            "Number of FD > 0.2 mm KDE",
+        ]
+        ylab = ["Density", "Density", "Density", "Density"]
+        xlab = [
+            "Average FD (mm)",
+            "Average Motion (mm)",
+            "Number of Volumes",
+            "Number of Volumes",
+        ]
         traces = [fig_to_trace(fig) for fig in figs]
 
         fname_multi = "motion_correction.html"
 
         # if a dataset name is provided, add it to the name
         if self.dataset is not None:
-            fname_multi = "{}_{}".format(self.dataset,
-                                         fname_multi)
+            fname_multi = "{}_{}".format(self.dataset, fname_multi)
         fname_multi = "{}/{}".format(mcdir, fname_multi)
 
         multi = traces_to_panels(traces, names=names, ylabs=ylab, xlabs=xlab)

@@ -28,26 +28,26 @@ import matplotlib
 import numpy as np
 from argparse import ArgumentParser
 
-matplotlib.use('Agg')  # very important above pyplot import
+matplotlib.use("Agg")  # very important above pyplot import
 import matplotlib.pyplot as plt
 
 
 def graph2png(infile, outdir, fname=None):
-    '''
+    """
     infile: input .csv file
     outdir: path to directory to store output png files
-    '''
+    """
     graph = loadGraph(infile)
     # get numpy array equivalent of adjacency matrix
     g = nx.adj_matrix(graph).todense()
     fig = plt.figure(figsize=(7, 7))
     # plot adjacency matrix
-    p = plt.imshow(g, interpolation='None', cmap='jet')
+    p = plt.imshow(g, interpolation="None", cmap="jet")
     if fname is None:
-        fname = os.path.split(infile)[1].split('.')[0] + '.png'
+        fname = os.path.split(infile)[1].split(".")[0] + ".png"
     save_location = outdir + fname
-    plt.savefig(save_location, format='png')
-    print((fname + ' done!'))
+    plt.savefig(save_location, format="png")
+    print((fname + " done!"))
 
 
 def main():
@@ -61,14 +61,14 @@ def main():
         outdir:
             - Path to derivative save location
     """
-    parser = ArgumentParser(description="Generates a visual representation of"
-                                        " adjacency matrix")
+    parser = ArgumentParser(
+        description="Generates a visual representation of" " adjacency matrix"
+    )
     parser.add_argument("infile", action="store", help="base directory loc")
-    parser.add_argument("outdir", action="store", help="save output file"
-                                                       " location")
+    parser.add_argument("outdir", action="store", help="save output file" " location")
     result = parser.parse_args()
 
-    if (not os.path.isdir(result.outdir)):
+    if not os.path.isdir(result.outdir):
         os.mkdir(result.outdir)
     graph2png(result.infile, result.outdir)
 
