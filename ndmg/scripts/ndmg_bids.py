@@ -545,6 +545,7 @@ def main():
         print("Pushing results to S3...")
         nc.s3_push_data(buck, remo, outDir, modif, creds, debug=debug)
         print("Pushing Complete!")
+    sys.exit(0)
 
 
 if __name__ == "__main__":

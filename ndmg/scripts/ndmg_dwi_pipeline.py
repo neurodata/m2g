@@ -538,7 +538,6 @@ def ndmg_dwi_worker(
 
     print("Total execution time: {}".format(exe_time))
     print("NDMG Complete!")
-    sys.exit(0)
 
 
 def ndmg_dwi_pipeline(
