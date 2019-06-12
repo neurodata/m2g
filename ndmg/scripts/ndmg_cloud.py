@@ -60,7 +60,7 @@ def batch_submit(
     upon later.
     """
     print(("Getting list from s3://{}/{}/...".format(bucket, path)))
-    threads = crawl_bucket(bucket, path)
+    threads = crawl_bucket(bucket, path, creds=None)
 
     print("Generating job for each subject...")
     jobs = create_json(bucket, path, threads, jobdir,
