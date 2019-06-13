@@ -220,7 +220,7 @@ def session_level(
                     bval.split("sub")[1].split("/")[0],
                     "/ses",
                     bval.split("ses")[1].split("/")[0],
-                ),
+                ),  # TODO: this forces data to have session numbers.
             ]
             for (dw, bval, bvec, anat) in zip(dwis, bvals, bvecs, anats)
         ]

@@ -548,7 +548,6 @@ def ndmg_dwi_worker(
     print("NDMG Complete.")
 
     if push and buck and remo is not None:
-        print("Pushing results to S3...")
         modif = "ndmg_{}".format(ndmg.version.replace(".", "-"))
         nc.s3_push_data(buck, remo, outdir, modif, creds, debug=debug)
         print("Pushing Complete!")

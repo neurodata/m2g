@@ -320,11 +320,15 @@ def s3_get_data(bucket, remote, local, public=False):
 
 
 def s3_push_data(bucket, remote, outDir, modifier, creds=True, debug=True):
-    cmd = 'aws s3 cp --exclude "tmp/*" {} s3://{}/{}/{} --recursive --acl public-read'
-    cmd = cmd.format(outDir, bucket, remote, modifier)
+    cmd = 'aws s3 cp --exclude "tmp/*" {} s3://{}/{}/{}/{}/ --recursive --acl public-read'
+    dataset = remote.split('/')[0]
+    rest_of_path_list = remote.split('/')[1:]
+    rest_of_path = os.path.join(*rest_of_path_list)
+    cmd = cmd.format(outDir, bucket, dataset, modifier, rest_of_path)
     if not creds:
         print("Note: no credentials provided, may fail to push big files.")
         cmd += " --no-sign-request"
+    print("Pushing results to S3: {}".format(cmd))
     subprocess.check_output(cmd, shell=True)
 
 
