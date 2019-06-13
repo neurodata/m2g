@@ -513,16 +513,16 @@ def main():
                     sesh = sesh[0]
                 for sub in subj:
                     if sesh is not None:
-                        tpath = op.join(
+                        remo = op.join(
                             remo, "sub-{}".format(sub), "ses-{}".format(sesh)
                         )
                         tindir = op.join(
                             inDir, "sub-{}".format(sub), "ses-{}".format(sesh)
                         )
                     else:
-                        tpath = op.join(remo, "sub-{}".format(sub))
+                        remo = op.join(remo, "sub-{}".format(sub))
                         tindir = op.join(inDir, "sub-{}".format(sub))
-                    nc.s3_get_data(buck, tpath, tindir, public=not creds)
+                    nc.s3_get_data(buck, remo, tindir, public=not creds)
             else:
                 nc.s3_get_data(buck, remo, inDir, public=not creds)
 
