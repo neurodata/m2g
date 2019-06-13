@@ -170,9 +170,13 @@ def session_level(
     sesh=None,
     task=None,
     run=None,
-    debug=False,
     modality="dwi",
     nproc=1,
+    buck=None,
+    remo=None,
+    push=False,
+    creds=None,
+    debug=False,
 ):
     """
     Crawls the given BIDS organized directory for data pertaining to the given
@@ -248,6 +252,11 @@ def session_level(
         reg_style,
         clean,
         big,
+        buck=buck,
+        remo=remo,
+        push=push,
+        creds=creds,
+        debug=debug,
     )
     rmflds = []
     if modality == "func" and not debug:
@@ -516,7 +525,6 @@ def main():
                     nc.s3_get_data(buck, tpath, tindir, public=not creds)
             else:
                 nc.s3_get_data(buck, remo, inDir, public=not creds)
-        modif = "ndmg_{}".format(ndmg.version.replace(".", "-"))
 
         # run ndmg.
         session_level(
@@ -535,17 +543,16 @@ def main():
             sesh,
             task,
             run,
-            debug,
             modality,
             nproc,
+            buck=buck,
+            remo=remo,
+            push=push,
+            creds=creds,
+            debug=debug
         )
     else:
         print("Specified level not valid")
-    if push and buck and remo is not None:
-        print("Pushing results to S3...")
-        nc.s3_push_data(buck, remo, outDir, modif, creds, debug=debug)
-        print("Pushing Complete!")
-    sys.exit(0)
 
 
 if __name__ == "__main__":

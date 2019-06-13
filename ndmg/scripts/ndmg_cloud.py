@@ -60,7 +60,7 @@ def batch_submit(
     upon later.
     """
     print(("Getting list from s3://{}/{}/...".format(bucket, path)))
-    threads = crawl_bucket(bucket, path, creds=None)
+    threads = crawl_bucket(bucket, path)
 
     print("Generating job for each subject...")
     jobs = create_json(bucket, path, threads, jobdir,
@@ -144,7 +144,8 @@ def create_json(
     with open("{}/{}".format(jobdir, template.split("/")[-1]), "r") as inf:
         template = json.load(inf)
 
-    cmd = ["ndmg_bids"] + template["containerOverrides"]["command"]
+    cmd = template["containerOverrides"]["command"]
+    # cmd = ["ndmg_bids"] + template["containerOverrides"]["command"]
     env = template["containerOverrides"]["environment"]
 
     # TODO : This checks for any credentials csv file, rather than `/.aws/credentials`.

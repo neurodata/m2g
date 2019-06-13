@@ -31,6 +31,7 @@ from ndmg.stats.qa_tensor import *
 from ndmg.stats.qa_fibers import *
 
 # from ndmg.stats.qa_mri import qa_mri
+import ndmg
 from ndmg.utils import gen_utils as mgu
 from ndmg.utils import reg_utils as rgu
 from ndmg.register import gen_reg as mgr
@@ -48,6 +49,7 @@ import sys
 from dipy.tracking.streamline import Streamlines
 from dipy.tracking.utils import move_streamlines
 from nilearn.image import new_img_like, resample_img
+from ndmg.scripts import ndmg_cloud as nc
 
 os.environ["MPLCONFIGDIR"] = "/tmp/"
 
@@ -68,6 +70,12 @@ def ndmg_dwi_worker(
     reg_style,
     clean,
     big,
+    buck=None,
+    remo=None,
+    push=False,
+    creds=None,
+    debug=False
+
 ):
     """
     Creates a brain graph from MRI data
@@ -537,8 +545,14 @@ def ndmg_dwi_worker(
     exe_time = datetime.now() - startTime
 
     print("Total execution time: {}".format(exe_time))
-    print("NDMG Complete!")
+    print("NDMG Complete.")
 
+    if push and buck and remo is not None:
+        print("Pushing results to S3...")
+        modif = "ndmg_{}".format(ndmg.version.replace(".", "-"))
+        nc.s3_push_data(buck, remo, outdir, modif, creds, debug=debug)
+        print("Pushing Complete!")
+    sys.exit(0)
 
 def ndmg_dwi_pipeline(
     dwi,
@@ -556,6 +570,11 @@ def ndmg_dwi_pipeline(
     reg_style,
     clean,
     big,
+    buck=None,
+    remo=None,
+    push=False,
+    creds=None,
+    debug=False
 ):
     """
     A wrapper for the worker to make our pipeline more robust to errors.
@@ -577,6 +596,11 @@ def ndmg_dwi_pipeline(
             reg_style,
             clean,
             big,
+            buck=None,
+            remo=None,
+            push=False,
+            creds=None,
+            debug=False
         )
     except Exception as e:
         print(traceback.format_exc())
@@ -671,6 +695,7 @@ def main():
     print("Creating output temp directory: {}/tmp".format(result.outdir))
     mgu.utils.execute_cmd("mkdir -p {} {}/tmp".format(result.outdir, result.outdir))
 
+    # TODO : add s3 stuff
     ndmg_dwi_pipeline(
         result.dwi,
         result.bval,
