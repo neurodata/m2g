@@ -310,11 +310,12 @@ def s3_get_data(bucket, remote, local, public=False):
                 ", ".join(bkts)
             )
 
-        cmd = "aws s3 cp --recursive s3://{}/{}/ {}".format(
+        cmd = "aws s3 cp --exclude 'ndmg_*' --recursive s3://{}/{}/ {}".format(
             bucket, remote, local)
     if public:
         cmd += " --no-sign-request --region=us-east-1"
 
+    print("Calling {} to get data from S3 ...".format(cmd))
     out = subprocess.check_output("mkdir -p {}".format(local), shell=True)
     out = subprocess.check_output(cmd, shell=True)
 
@@ -330,6 +331,14 @@ def s3_push_data(bucket, remote, outDir, modifier, creds=True, debug=True):
         cmd += " --no-sign-request"
     print("Pushing results to S3: {}".format(cmd))
     subprocess.check_output(cmd, shell=True)
+
+def clear_system(directory):
+    """ Clear output directory to prevent S3 from getting overloaded. """
+    # TODO: add logging
+    print("Removing {}".format(directory))
+    shutil.rmtree(directory, ignore_errors=True)
+    os.mkdir(directory)
+    print("{} removed.".format(directory))
 
 
 def main():

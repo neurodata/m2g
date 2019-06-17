@@ -22,6 +22,7 @@
 # edited by Eric Bridgeford to incorporate fMRI, multi-threading, and
 # big-graph generation.
 
+print("Beginning ndmg ...")
 from ndmg.scripts import ndmg_cloud as nc
 from multiprocessing import Pool
 import sys
@@ -195,11 +196,12 @@ def session_level(
     result = sweep_directory(inDir, subjs, sesh, task, run, modality)
 
     if modality == "dwi":
-        if not debug:
-            print("Cleaning output directory tree ...")
-            files = glob.glob(outDir + "/*")
-            for f in files:
-                os.remove(f)
+        # TODO : os.remove doesn't work on directories.
+        # if not debug:
+        #     print("Cleaning output directory tree ...")
+        #     files = glob.glob(outDir + "/*")
+        #     for f in files:
+        #         os.remove(f)
         dwis, bvals, bvecs, anats = result
         assert len(anats) == len(dwis)
         assert len(bvecs) == len(dwis)
