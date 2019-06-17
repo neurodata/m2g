@@ -212,6 +212,7 @@ def submit_jobs(jobs, jobdir):
     cmd_template = "aws batch submit-job --cli-input-json file://{}"
 
     for job in jobs:
+        # if jobs.index(job) >= 220:  # use this to start wherever
         cmd = cmd_template.format(job)
         print(("... Submitting job {}...".format(job)))
         out = subprocess.check_output(cmd, shell=True)
@@ -226,6 +227,7 @@ def submit_jobs(jobs, jobdir):
         sub_file = os.path.join(jobdir, "ids", submission["jobName"] + ".json")
         with open(sub_file, "w") as outfile:
             json.dump(submission, outfile)
+        print("Submitted.")
     return 0
 
 
@@ -332,13 +334,13 @@ def s3_push_data(bucket, remote, outDir, modifier, creds=True, debug=True):
     print("Pushing results to S3: {}".format(cmd))
     subprocess.check_output(cmd, shell=True)
 
-def clear_system(directory):
-    """ Clear output directory to prevent S3 from getting overloaded. """
-    # TODO: add logging
-    print("Removing {}".format(directory))
-    shutil.rmtree(directory, ignore_errors=True)
-    os.mkdir(directory)
-    print("{} removed.".format(directory))
+# def clear_system(directory):
+#     """ Clear output directory to prevent S3 from getting overloaded. """
+#     # TODO: add logging
+#     print("Removing {}".format(directory))
+#     shutil.rmtree(directory, ignore_errors=True)
+#     os.mkdir(directory)
+#     print("{} removed.".format(directory))
 
 
 def main():

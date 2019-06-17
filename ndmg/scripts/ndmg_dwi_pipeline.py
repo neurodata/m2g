@@ -552,9 +552,8 @@ def ndmg_dwi_worker(
         nc.s3_push_data(buck, remo, outdir, modif, creds, debug=debug)
         print("Pushing Complete!")
         if not debug:
-            print("Removing excess files ...")
-            nc.clear_system(outdir)
-            print("Excess Files cleared!")
+            print("Listing contents of output directory ...")
+            print(os.listdir(outdir))
     sys.exit(0)
 
 def ndmg_dwi_pipeline(
