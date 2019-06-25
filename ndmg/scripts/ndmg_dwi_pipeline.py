@@ -697,7 +697,6 @@ def main():
     print("Creating output temp directory: {}/tmp".format(result.outdir))
     mgu.utils.execute_cmd("mkdir -p {} {}/tmp".format(result.outdir, result.outdir))
 
-    # TODO : add s3 stuff
     ndmg_dwi_pipeline(
         result.dwi,
         result.bval,

@@ -57,6 +57,5 @@ setup(
         'plotly==1.12.1',
         'cython',
         'pybids==0.6.4',
-        'duecredit'
     ]
 )

@@ -40,7 +40,7 @@
             },
             {
                 "name": "AWS_DEFAULT_REGION",
-                "value": "eu-central-1"
+                "value": "us-east-1"
             }
         ]
     }

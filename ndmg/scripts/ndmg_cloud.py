@@ -145,22 +145,17 @@ def create_json(
         template = json.load(inf)
 
     cmd = template["containerOverrides"]["command"]
-    # cmd = ["ndmg_bids"] + template["containerOverrides"]["command"]
     env = template["containerOverrides"]["environment"]
 
     # TODO : This checks for any credentials csv file, rather than `/.aws/credentials`.
     if credentials is not None:
         env[0]["value"], env[1]["value"] = get_credentials()
-
-        # cred = list(csv.reader(open(credentials)))
-        # env[0]['value'] = cred[1][0]
-        # env[1]['value'] = cred[1][e]
     else:
         env = []
     template["containerOverrides"]["environment"] = env
 
     # edit bucket, path
-    jobs = list()
+    jobs = []
     cmd[cmd.index("<BUCKET>")] = bucket
     cmd[cmd.index("<PATH>")] = path
     if bg:
@@ -295,7 +290,7 @@ def s3_get_data(bucket, remote, local, public=False):
     """
 
     if os.path.exists(local):
-        return  # TODO: make sure this doesn't add None a bunch of times in a loop on this function
+        return  # TODO: make sure this doesn't append None a bunch of times to a list in a loop on this function
     if not public:
         try:
             ACCESS, SECRET = get_credentials()
@@ -333,14 +328,6 @@ def s3_push_data(bucket, remote, outDir, modifier, creds=True, debug=True):
         cmd += " --no-sign-request"
     print("Pushing results to S3: {}".format(cmd))
     subprocess.check_output(cmd, shell=True)
-
-# def clear_system(directory):
-#     """ Clear output directory to prevent S3 from getting overloaded. """
-#     # TODO: add logging
-#     print("Removing {}".format(directory))
-#     shutil.rmtree(directory, ignore_errors=True)
-#     os.mkdir(directory)
-#     print("{} removed.".format(directory))
 
 
 def main():
