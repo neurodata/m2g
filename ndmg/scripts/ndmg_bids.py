@@ -34,7 +34,7 @@ import ndmg
 from ndmg.utils import gen_utils as mgu
 from ndmg.utils.bids_utils import *
 from ndmg.scripts.ndmg_func_pipeline import ndmg_func_pipeline
-from ndmg.scripts.ndmg_dwi_pipeline import ndmg_dwi_pipeline, ndmg_dwi_worker
+from ndmg.scripts.ndmg_dwi_pipeline import ndmg_dwi_pipeline
 import warnings
 from argparse import ArgumentParser
 
@@ -238,7 +238,7 @@ def session_level(
     # use worker wrapper to call function f with args arg
     # and keyword args kwargs
     print(args)
-    ndmg_dwi_worker(
+    ndmg_dwi_pipeline(
         args[0][0],
         args[0][1],
         args[0][2],
