@@ -547,6 +547,7 @@ def ndmg_dwi_pipeline(
     print("Total execution time: {}".format(exe_time))
     print("NDMG Complete.")
 
+    # TODO : putting this block of code here for now because it wouldn't run in `ndmg_bids`. Figure out how to put it somewhere else.
     if push and buck and remo is not None:
         modif = "ndmg_{}".format(ndmg.version.replace(".", "-"))
         nc.s3_push_data(buck, remo, outdir, modif, creds, debug=debug)
@@ -557,6 +558,11 @@ def ndmg_dwi_pipeline(
             print("clearing contents of output directory ...")
             shutil.rmtree(outdir)
             print("Clearing complete. Output directory exists: {}".format(os.path.exists(outdir)))
+            # # Log docker info in EC2 containers, assuming we're using AWS Batch
+            # f = subprocess.check_output('docker info', shell=True)
+            # info_we_care_about = f[f.find(
+            #     'Data Space Used'):f.find('Metadata Space Used')]
+            # print("docker info on space: {}".format(info_we_care_about))
     sys.exit(0)
 
 

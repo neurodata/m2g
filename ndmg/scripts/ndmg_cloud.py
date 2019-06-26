@@ -22,20 +22,23 @@
 
 import subprocess
 import ast
-import json
-import boto3
 import csv
 import re
 import os
 import sys
-import ndmg
-import ndmg.utils as mgu
-import shutil
+import json
 from copy import deepcopy
 from collections import OrderedDict
 from argparse import ArgumentParser
 import warnings
 from ConfigParser import ConfigParser
+import shutil
+import time
+
+import boto3
+
+import ndmg
+import ndmg.utils as mgu
 
 warnings.simplefilter("ignore")
 
@@ -60,7 +63,7 @@ def batch_submit(
     upon later.
     """
     print(("Getting list from s3://{}/{}/...".format(bucket, path)))
-    threads = crawl_bucket(bucket, path)
+    threads = crawl_bucket(bucket, path, jobdir)
 
     print("Generating job for each subject...")
     jobs = create_json(bucket, path, threads, jobdir,
@@ -70,10 +73,19 @@ def batch_submit(
     ids = submit_jobs(jobs, jobdir)
 
 
-def crawl_bucket(bucket, path):
+def crawl_bucket(bucket, path, jobdir):
     """
     Gets subject list for a given S3 bucket and path
     """
+    # if jobdir has seshs info file in it, use that instead
+    sesh_path = "{}/seshs.json".format(jobdir)
+    if os.path.isfile(sesh_path):
+        print("seshs.json found -- loading bucket info from there")
+        with open(sesh_path, "r") as f:
+            seshs = json.load(f)
+        print("Information obtained from s3.")
+        return seshs
+
     cmd = "aws s3 ls s3://{}/{}/".format(bucket, path)
     try:
         ACCESS, SECRET = get_credentials()
@@ -90,9 +102,15 @@ def crawl_bucket(bucket, path):
     seshs = OrderedDict()
     for subj in subjs:
         cmd = cmd.format(bucket, path, subj)
-        out = subprocess.check_output(cmd, shell=True)
+        out = subprocess.check_output(cmd, shell=True)  # TODO: get this information outside of a loop
         sesh = re.findall("ses-(.+)/", out.decode("utf-8"))
-        seshs[subj] = sesh if sesh != [] else [None]
+        if sesh != []:
+            seshs[subj] = sesh
+            print("{} added to seshs.".format(subj))
+        else:
+            seshs[subj] = None
+            print("{} not added (no sessions).".format(subj))
+        # seshs[subj] = sesh if sesh != [] else [None]
     print(
         (
             "Session IDs: "
@@ -105,23 +123,13 @@ def crawl_bucket(bucket, path):
             )
         )
     )
+    with open(sesh_path, "w") as f:
+        json.dump(seshs, f)
+    print("{} created.".format(sesh_path))
+    print ("Information obtained from s3.")
     return seshs
 
 
-def get_credentials():
-    try:
-        config = ConfigParser()
-        config.read(os.getenv("HOME") + "/.aws/credentials")
-        return (
-            config.get("default", "aws_access_key_id"),
-            config.get("default", "aws_secret_access_key"),
-        )
-    except:
-        ACCESS = os.getenv("AWS_ACCESS_KEY_ID")
-        SECRET = os.getenv("AWS_SECRET_ACCESS_KEY")
-    if not ACCESS and SECRET:
-        raise AttributeError("No AWS credentials found.")
-    return (ACCESS, SECRET)
 
 
 def create_json(
@@ -130,6 +138,12 @@ def create_json(
     """
     Takes parameters to make jsons
     """
+    jobsjson = "{}/jobs.json".format(jobdir)
+    if os.path.isfile(jobsjson):
+        with open(jobsjson, "r") as f:
+            jobs = json.load(f)
+        return jobs 
+
     out = subprocess.check_output("mkdir -p {}".format(jobdir), shell=True)
     out = subprocess.check_output(
         "mkdir -p {}/jobs/".format(jobdir), shell=True)
@@ -197,6 +211,9 @@ def create_json(
             jobs += [job]
 
     # return list of job jsons
+    
+    with open(jobsjson, "w") as f:
+        json.dump(jobs, f)
     return jobs
 
 
@@ -207,10 +224,12 @@ def submit_jobs(jobs, jobdir):
     cmd_template = "aws batch submit-job --cli-input-json file://{}"
 
     for job in jobs:
-        # if jobs.index(job) >= 220:  # use this to start wherever
+        # use this to start wherever
+        # if jobs.index(job) >= jobs.index('/jobs/jobs/ndmg_0-1-2_SWU4_sub-0025768_ses-1.json'):
         cmd = cmd_template.format(job)
         print(("... Submitting job {}...".format(job)))
         out = subprocess.check_output(cmd, shell=True)
+        time.sleep(0.1)  # jobs sometimes hang, seeing if this helps
         submission = ast.literal_eval(out.decode("utf-8"))
         print(
             (
@@ -225,6 +244,20 @@ def submit_jobs(jobs, jobdir):
         print("Submitted.")
     return 0
 
+def get_credentials():
+    try:
+        config = ConfigParser()
+        config.read(os.getenv("HOME") + "/.aws/credentials")
+        return (
+            config.get("default", "aws_access_key_id"),
+            config.get("default", "aws_secret_access_key"),
+        )
+    except:
+        ACCESS = os.getenv("AWS_ACCESS_KEY_ID")
+        SECRET = os.getenv("AWS_SECRET_ACCESS_KEY")
+    if not ACCESS and SECRET:
+        raise AttributeError("No AWS credentials found.")
+    return (ACCESS, SECRET)
 
 def get_status(jobdir, jobid=None):
     """
@@ -409,6 +442,12 @@ def main():
         kill_jobs(jobdir)
     elif state == "participant":
         print("Beginning batch submission process...")
+        if not os.path.exists(jobdir):
+            print("job directory not found. Creating...")
+            os.mkdir(jobdir)
+        # else:
+        #     print("Jobdir {} exists. Clearing.".format(jobdir))
+        #     shutil.rmtree(jobdir)
         batch_submit(bucket, path, jobdir, creds, state, debug, dset, log, bg)
 
     sys.exit(0)
