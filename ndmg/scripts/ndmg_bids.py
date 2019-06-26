@@ -22,6 +22,7 @@
 # edited by Eric Bridgeford to incorporate fMRI, multi-threading, and
 # big-graph generation.
 
+print("Beginning ndmg ...")
 from ndmg.scripts import ndmg_cloud as nc
 from multiprocessing import Pool
 import sys
@@ -33,7 +34,7 @@ import ndmg
 from ndmg.utils import gen_utils as mgu
 from ndmg.utils.bids_utils import *
 from ndmg.scripts.ndmg_func_pipeline import ndmg_func_pipeline
-from ndmg.scripts.ndmg_dwi_pipeline import ndmg_dwi_pipeline, ndmg_dwi_worker
+from ndmg.scripts.ndmg_dwi_pipeline import ndmg_dwi_pipeline
 import warnings
 from argparse import ArgumentParser
 
@@ -170,9 +171,13 @@ def session_level(
     sesh=None,
     task=None,
     run=None,
-    debug=False,
     modality="dwi",
     nproc=1,
+    buck=None,
+    remo=None,
+    push=False,
+    creds=None,
+    debug=False,
 ):
     """
     Crawls the given BIDS organized directory for data pertaining to the given
@@ -191,11 +196,12 @@ def session_level(
     result = sweep_directory(inDir, subjs, sesh, task, run, modality)
 
     if modality == "dwi":
-        if not debug:
-            print("Cleaning output directory tree ...")
-            files = glob.glob(outDir + "/*")
-            for f in files:
-                os.remove(f)
+        # TODO : os.remove doesn't work on directories.
+        # if not debug:
+        #     print("Cleaning output directory tree ...")
+        #     files = glob.glob(outDir + "/*")
+        #     for f in files:
+        #         os.remove(f)
         dwis, bvals, bvecs, anats = result
         assert len(anats) == len(dwis)
         assert len(bvecs) == len(dwis)
@@ -216,7 +222,7 @@ def session_level(
                     bval.split("sub")[1].split("/")[0],
                     "/ses",
                     bval.split("ses")[1].split("/")[0],
-                ),
+                ),  # TODO: this forces data to have session numbers.
             ]
             for (dw, bval, bvec, anat) in zip(dwis, bvals, bvecs, anats)
         ]
@@ -232,7 +238,7 @@ def session_level(
     # use worker wrapper to call function f with args arg
     # and keyword args kwargs
     print(args)
-    ndmg_dwi_worker(
+    ndmg_dwi_pipeline(
         args[0][0],
         args[0][1],
         args[0][2],
@@ -248,6 +254,11 @@ def session_level(
         reg_style,
         clean,
         big,
+        buck=buck,
+        remo=remo,
+        push=push,
+        creds=creds,
+        debug=debug,
     )
     rmflds = []
     if modality == "func" and not debug:
@@ -496,6 +507,7 @@ def main():
         )
 
     # TODO : `Flat is better than nested`. Make the logic for this cleaner.
+    # this block of logic essentially just gets data we need from s3.
     if level == "participant":
         if buck is not None and remo is not None:
             if subj is not None:
@@ -503,19 +515,20 @@ def main():
                     sesh = sesh[0]
                 for sub in subj:
                     if sesh is not None:
-                        tpath = op.join(
+                        remo = op.join(
                             remo, "sub-{}".format(sub), "ses-{}".format(sesh)
                         )
                         tindir = op.join(
                             inDir, "sub-{}".format(sub), "ses-{}".format(sesh)
                         )
                     else:
-                        tpath = op.join(remo, "sub-{}".format(sub))
+                        remo = op.join(remo, "sub-{}".format(sub))
                         tindir = op.join(inDir, "sub-{}".format(sub))
-                    nc.s3_get_data(buck, tpath, tindir, public=not creds)
+                    nc.s3_get_data(buck, remo, tindir, public=not creds)
             else:
                 nc.s3_get_data(buck, remo, inDir, public=not creds)
-        modif = "ndmg_{}".format(ndmg.version.replace(".", "-"))
+
+        # run ndmg.
         session_level(
             inDir,
             outDir,
@@ -532,16 +545,16 @@ def main():
             sesh,
             task,
             run,
-            debug,
             modality,
             nproc,
+            buck=buck,
+            remo=remo,
+            push=push,
+            creds=creds,
+            debug=debug
         )
     else:
         print("Specified level not valid")
-    if push and buck and remo is not None:
-        print("Pushing results to S3...")
-        nc.s3_push_data(buck, remo, outDir, modif, creds, debug=debug)
-        print("Pushing Complete!")
 
 
 if __name__ == "__main__":

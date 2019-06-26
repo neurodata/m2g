@@ -21,38 +21,40 @@
 
 import glob
 import shutil
-import warnings
-
-warnings.simplefilter("ignore")
+import os
+import random
 from argparse import ArgumentParser
 from datetime import datetime
 import time
-from ndmg.stats.qa_tensor import *
-from ndmg.stats.qa_fibers import *
+import traceback
+import sys
+import warnings
+warnings.simplefilter("ignore")
 
 # from ndmg.stats.qa_mri import qa_mri
+import numpy as np
+import nibabel as nib
+from dipy.tracking.streamline import Streamlines
+from dipy.tracking.utils import move_streamlines
+from nilearn.image import new_img_like, resample_img
+
+import ndmg
+import ndmg.preproc as mgp
+from ndmg.scripts import ndmg_cloud as nc
 from ndmg.utils import gen_utils as mgu
 from ndmg.utils import reg_utils as rgu
 from ndmg.register import gen_reg as mgr
 from ndmg.track import gen_track as mgt
 from ndmg.graph import gen_graph as mgg
-import ndmg.preproc as mgp
-import numpy as np
-import nibabel as nib
-import os
-import random
 from ndmg.graph import gen_biggraph as ndbg
-import traceback
 from ndmg.utils.bids_utils import name_resource
-import sys
-from dipy.tracking.streamline import Streamlines
-from dipy.tracking.utils import move_streamlines
-from nilearn.image import new_img_like, resample_img
+from ndmg.stats.qa_tensor import *
+from ndmg.stats.qa_fibers import *
 
 os.environ["MPLCONFIGDIR"] = "/tmp/"
 
 
-def ndmg_dwi_worker(
+def ndmg_dwi_pipeline(
     dwi,
     bvals,
     bvecs,
@@ -68,6 +70,12 @@ def ndmg_dwi_worker(
     reg_style,
     clean,
     big,
+    buck=None,
+    remo=None,
+    push=False,
+    creds=None,
+    debug=False
+
 ):
     """
     Creates a brain graph from MRI data
@@ -537,57 +545,25 @@ def ndmg_dwi_worker(
     exe_time = datetime.now() - startTime
 
     print("Total execution time: {}".format(exe_time))
-    print("NDMG Complete!")
+    print("NDMG Complete.")
+
+    # TODO : putting this block of code here for now because it wouldn't run in `ndmg_bids`. Figure out how to put it somewhere else.
+    if push and buck and remo is not None:
+        modif = "ndmg_{}".format(ndmg.version.replace(".", "-"))
+        nc.s3_push_data(buck, remo, outdir, modif, creds, debug=debug)
+        print("Pushing Complete!")
+        if not debug:
+            print("Listing contents of output directory ...")
+            print(os.listdir(outdir))
+            print("clearing contents of output directory ...")
+            shutil.rmtree(outdir)
+            print("Clearing complete. Output directory exists: {}".format(os.path.exists(outdir)))
+            # # Log docker info in EC2 containers, assuming we're using AWS Batch
+            # f = subprocess.check_output('docker info', shell=True)
+            # info_we_care_about = f[f.find(
+            #     'Data Space Used'):f.find('Metadata Space Used')]
+            # print("docker info on space: {}".format(info_we_care_about))
     sys.exit(0)
-
-
-def ndmg_dwi_pipeline(
-    dwi,
-    bvals,
-    bvecs,
-    t1w,
-    atlas,
-    mask,
-    labels,
-    outdir,
-    vox_size,
-    mod_type,
-    track_type,
-    mod_func,
-    reg_style,
-    clean,
-    big,
-):
-    """
-    A wrapper for the worker to make our pipeline more robust to errors.
-    """
-    try:
-        ndmg_dwi_worker(
-            dwi,
-            bvals,
-            bvecs,
-            t1w,
-            atlas,
-            mask,
-            labels,
-            outdir,
-            vox_size,
-            mod_type,
-            track_type,
-            mod_func,
-            reg_style,
-            clean,
-            big,
-        )
-    except Exception as e:
-        print(traceback.format_exc())
-        os.exit()
-    finally:
-        try:
-            os.exit()
-        except Exception as e:
-            os.exit()
-    return
 
 
 def main():

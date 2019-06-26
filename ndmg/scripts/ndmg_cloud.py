@@ -22,24 +22,28 @@
 
 import subprocess
 import ast
-import json
-import boto3
 import csv
 import re
 import os
 import sys
-import ndmg
-import ndmg.utils as mgu
-import shutil
+import json
 from copy import deepcopy
 from collections import OrderedDict
 from argparse import ArgumentParser
 import warnings
 from ConfigParser import ConfigParser
+import shutil
+import time
+
+import boto3
+
+import ndmg
+import ndmg.utils as mgu
 
 warnings.simplefilter("ignore")
 
-participant_templ = "https://raw.githubusercontent.com/neurodata/ndmg/dev-dmri-fmri/templates/ndmg_cloud_participant.json"
+# TODO
+participant_templ = "https://raw.githubusercontent.com/neurodata/ndmg/alex-batch/templates/ndmg_cloud_participant.json"
 
 
 def batch_submit(
@@ -59,30 +63,54 @@ def batch_submit(
     upon later.
     """
     print(("Getting list from s3://{}/{}/...".format(bucket, path)))
-    threads = crawl_bucket(bucket, path)
+    threads = crawl_bucket(bucket, path, jobdir)
 
     print("Generating job for each subject...")
-    jobs = create_json(bucket, path, threads, jobdir, credentials, debug, dataset, bg)
+    jobs = create_json(bucket, path, threads, jobdir,
+                       credentials, debug, dataset, bg)
 
     print("Submitting jobs to the queue...")
     ids = submit_jobs(jobs, jobdir)
 
 
-def crawl_bucket(bucket, path):
+def crawl_bucket(bucket, path, jobdir):
     """
     Gets subject list for a given S3 bucket and path
     """
-    cmd = "aws s3 ls s3://{}/{}/ --no-sign-request".format(bucket, path)
+    # if jobdir has seshs info file in it, use that instead
+    sesh_path = "{}/seshs.json".format(jobdir)
+    if os.path.isfile(sesh_path):
+        print("seshs.json found -- loading bucket info from there")
+        with open(sesh_path, "r") as f:
+            seshs = json.load(f)
+        print("Information obtained from s3.")
+        return seshs
+
+    cmd = "aws s3 ls s3://{}/{}/".format(bucket, path)
+    try:
+        ACCESS, SECRET = get_credentials()
+        os.environ["AWS_ACCESS_KEY_ID"] = ACCESS
+        os.environ["AWS_SECRET_ACCESS_KEY"] = SECRET
+    except:
+        cmd += " --no-sign-request"
     out = subprocess.check_output(cmd, shell=True)
     pattern = r"(?<=sub-)(\w*)"
     subjs = re.findall(pattern, out.decode("utf-8"))
-    cmd = "aws s3 ls s3://{}/{}/sub-{}/ --no-sign-request"
+    cmd = "aws s3 ls s3://{}/{}/sub-{}/"
+    if not ACCESS:
+        cmd += " --no-sign-request"
     seshs = OrderedDict()
     for subj in subjs:
         cmd = cmd.format(bucket, path, subj)
-        out = subprocess.check_output(cmd, shell=True)
+        out = subprocess.check_output(cmd, shell=True)  # TODO: get this information outside of a loop
         sesh = re.findall("ses-(.+)/", out.decode("utf-8"))
-        seshs[subj] = sesh if sesh != [] else [None]
+        if sesh != []:
+            seshs[subj] = sesh
+            print("{} added to seshs.".format(subj))
+        else:
+            seshs[subj] = None
+            print("{} not added (no sessions).".format(subj))
+        # seshs[subj] = sesh if sesh != [] else [None]
     print(
         (
             "Session IDs: "
@@ -95,16 +123,13 @@ def crawl_bucket(bucket, path):
             )
         )
     )
+    with open(sesh_path, "w") as f:
+        json.dump(seshs, f)
+    print("{} created.".format(sesh_path))
+    print ("Information obtained from s3.")
     return seshs
 
 
-def get_credentials():
-    config = ConfigParser()
-    config.read(os.getenv("HOME") + "/.aws/credentials")
-    return [
-        config.get("default", "aws_access_key_id"),
-        config.get("default", "aws_secret_access_key"),
-    ]
 
 
 def create_json(
@@ -113,9 +138,17 @@ def create_json(
     """
     Takes parameters to make jsons
     """
+    jobsjson = "{}/jobs.json".format(jobdir)
+    if os.path.isfile(jobsjson):
+        with open(jobsjson, "r") as f:
+            jobs = json.load(f)
+        return jobs 
+
     out = subprocess.check_output("mkdir -p {}".format(jobdir), shell=True)
-    out = subprocess.check_output("mkdir -p {}/jobs/".format(jobdir), shell=True)
-    out = subprocess.check_output("mkdir -p {}/ids/".format(jobdir), shell=True)
+    out = subprocess.check_output(
+        "mkdir -p {}/jobs/".format(jobdir), shell=True)
+    out = subprocess.check_output(
+        "mkdir -p {}/ids/".format(jobdir), shell=True)
     template = participant_templ
     seshs = threads
     if not os.path.isfile("{}/{}".format(jobdir, template.split("/")[-1])):
@@ -125,21 +158,18 @@ def create_json(
     with open("{}/{}".format(jobdir, template.split("/")[-1]), "r") as inf:
         template = json.load(inf)
 
-    cmd = ["ndmg_bids"] + template["containerOverrides"]["command"]
+    cmd = template["containerOverrides"]["command"]
     env = template["containerOverrides"]["environment"]
 
+    # TODO : This checks for any credentials csv file, rather than `/.aws/credentials`.
     if credentials is not None:
-        env[0]["value"], env[1]["value"] = get_credentials(credentials)
-
-        # cred = list(csv.reader(open(credentials)))
-        # env[0]['value'] = cred[1][0]
-        # env[1]['value'] = cred[1][e]
+        env[0]["value"], env[1]["value"] = get_credentials()
     else:
         env = []
     template["containerOverrides"]["environment"] = env
 
     # edit bucket, path
-    jobs = list()
+    jobs = []
     cmd[cmd.index("<BUCKET>")] = bucket
     cmd[cmd.index("<PATH>")] = path
     if bg:
@@ -155,8 +185,8 @@ def create_json(
             job_cmd = deepcopy(cmd)
             job_cmd[job_cmd.index("<SUBJ>")] = subj
             if sesh is not None:
-                job_cmd.insert(-3, u"--session_label")
-                job_cmd.insert(-3, u"{}".format(sesh))
+                job_cmd.insert(7, u"--session_label")
+                job_cmd.insert(8, u"{}".format(sesh))
             if debug:
                 job_cmd += [u"--debug"]
 
@@ -181,6 +211,9 @@ def create_json(
             jobs += [job]
 
     # return list of job jsons
+    
+    with open(jobsjson, "w") as f:
+        json.dump(jobs, f)
     return jobs
 
 
@@ -191,9 +224,12 @@ def submit_jobs(jobs, jobdir):
     cmd_template = "aws batch submit-job --cli-input-json file://{}"
 
     for job in jobs:
+        # use this to start wherever
+        # if jobs.index(job) >= jobs.index('/jobs/jobs/ndmg_0-1-2_SWU4_sub-0025768_ses-1.json'):
         cmd = cmd_template.format(job)
         print(("... Submitting job {}...".format(job)))
         out = subprocess.check_output(cmd, shell=True)
+        time.sleep(0.1)  # jobs sometimes hang, seeing if this helps
         submission = ast.literal_eval(out.decode("utf-8"))
         print(
             (
@@ -205,8 +241,23 @@ def submit_jobs(jobs, jobdir):
         sub_file = os.path.join(jobdir, "ids", submission["jobName"] + ".json")
         with open(sub_file, "w") as outfile:
             json.dump(submission, outfile)
+        print("Submitted.")
     return 0
 
+def get_credentials():
+    try:
+        config = ConfigParser()
+        config.read(os.getenv("HOME") + "/.aws/credentials")
+        return (
+            config.get("default", "aws_access_key_id"),
+            config.get("default", "aws_secret_access_key"),
+        )
+    except:
+        ACCESS = os.getenv("AWS_ACCESS_KEY_ID")
+        SECRET = os.getenv("AWS_SECRET_ACCESS_KEY")
+    if not ACCESS and SECRET:
+        raise AttributeError("No AWS credentials found.")
+    return (ACCESS, SECRET)
 
 def get_status(jobdir, jobid=None):
     """
@@ -223,7 +274,8 @@ def get_status(jobdir, jobid=None):
             cmd = cmd_template.format(submission["jobId"])
             print(("... Checking job {}...".format(submission["jobName"])))
             out = subprocess.check_output(cmd, shell=True)
-            status = re.findall('"status": "([A-Za-z]+)",', out.decode("utf-8"))[0]
+            status = re.findall(
+                '"status": "([A-Za-z]+)",', out.decode("utf-8"))[0]
             print(("... ... Status: {}".format(status)))
         return 0
     else:
@@ -271,7 +323,7 @@ def s3_get_data(bucket, remote, local, public=False):
     """
 
     if os.path.exists(local):
-        pass
+        return  # TODO: make sure this doesn't append None a bunch of times to a list in a loop on this function
     if not public:
         try:
             ACCESS, SECRET = get_credentials()
@@ -284,30 +336,36 @@ def s3_get_data(bucket, remote, local, public=False):
         bkts = [bk["Name"] for bk in client.list_buckets()["Buckets"]]
         if bucket not in bkts:
             sys.exit(
-                "Error: could not locate bucket. Available buckets: " + ", ".join(bkts)
+                "Error: could not locate bucket. Available buckets: " +
+                ", ".join(bkts)
             )
 
-        cmd = "aws s3 cp --recursive s3://{}/{}/ {}".format(bucket, remote, local)
+        cmd = "aws s3 cp --exclude 'ndmg_*' --recursive s3://{}/{}/ {}".format(
+            bucket, remote, local)
     if public:
         cmd += " --no-sign-request --region=us-east-1"
 
+    print("Calling {} to get data from S3 ...".format(cmd))
     out = subprocess.check_output("mkdir -p {}".format(local), shell=True)
     out = subprocess.check_output(cmd, shell=True)
 
 
 def s3_push_data(bucket, remote, outDir, modifier, creds=True, debug=True):
-    cmd = 'aws s3 cp --exclude "tmp/*" {} s3://{}/{}/{} --recursive --acl public-read'
-    cmd = cmd.format(outDir, bucket, remote, modifier)
+    cmd = 'aws s3 cp --exclude "tmp/*" {} s3://{}/{}/{}/{}/ --recursive --acl public-read'
+    dataset = remote.split('/')[0]
+    rest_of_path_list = remote.split('/')[1:]
+    rest_of_path = os.path.join(*rest_of_path_list)
+    cmd = cmd.format(outDir, bucket, dataset, modifier, rest_of_path)
     if not creds:
         print("Note: no credentials provided, may fail to push big files.")
         cmd += " --no-sign-request"
+    print("Pushing results to S3: {}".format(cmd))
     subprocess.check_output(cmd, shell=True)
 
 
 def main():
     parser = ArgumentParser(
-        description="This is an end-to-end connectome \
-                            estimation pipeline from sMRI and DTI images"
+        description="This is a pipeline for running BIDs-formatted diffusion MRI datasets through AWS S3 to produce connectomes."
     )
 
     parser.add_argument(
@@ -384,6 +442,12 @@ def main():
         kill_jobs(jobdir)
     elif state == "participant":
         print("Beginning batch submission process...")
+        if not os.path.exists(jobdir):
+            print("job directory not found. Creating...")
+            os.mkdir(jobdir)
+        # else:
+        #     print("Jobdir {} exists. Clearing.".format(jobdir))
+        #     shutil.rmtree(jobdir)
         batch_submit(bucket, path, jobdir, creds, state, debug, dset, log, bg)
 
     sys.exit(0)
