@@ -142,10 +142,9 @@ def transform_pts(
     elif output_space == "lps_voxmm":
         template_extents = template.get_shape()
         lps_voxels = new_voxels.copy()
-        lps_voxels[0] = template_extents[0] - lps_voxels[0]
+        lps_voxels[0] = template_extents[0] + lps_voxels[0]
         lps_voxels[1] = template_extents[1] - lps_voxels[1]
         print(lps_voxels)
-
         lps_voxmm = lps_voxels.T * np.array(template.header.get_zooms())[:3]
         return lps_voxmm
 
@@ -182,68 +181,33 @@ class Warp(object):
             )
             return
 
-        print("Warping streamline file " + self.file_in)
+        print("%s%s" % ("Warping streamline file ", self.file_in))
         template = nib.load(self.template_path)
         warped_affine = template.affine
         dims = template.header.get_data_shape()
-        template_extents = template.shape
-        template_trk_header = np.array(
-            (
-                "TRACK",
-                [dims[0], dims[1], dims[2]],
-                [warped_affine[0][0], warped_affine[1][1], warped_affine[2][2]],
-                [0.0, 0.0, 0.0],
-                0,
-                ["", "", "", "", "", "", "", "", "", ""],
-                0,
-                ["", "", "", "", "", "", "", "", "", ""],
-                [
-                    [1.0, 0.0, 0.0, 0.0],
-                    [0.0, 1.0, 0.0, 0.0],
-                    [0.0, 0.0, 1.0, 0.0],
-                    [0.0, 0.0, 0.0, 1.0],
-                ],
-                "",
-                "LPS",
-                "LPS",
-                [1.0, 0.0, 0.0, 0.0, 1.0, 0.0],
-                "",
-                "",
-                "",
-                "",
-                "",
-                "",
-                "",
-                10000,
-                2,
-                1000,
-            ),
-            dtype=[
-                ("id_string", "S6"),
-                ("dim", "<i2", (3,)),
-                ("voxel_size", "<f4", (3,)),
-                ("origin", "<f4", (3,)),
-                ("n_scalars", "<i2"),
-                ("scalar_name", "S20", (10,)),
-                ("n_properties", "<i2"),
-                ("property_name", "S20", (10,)),
-                ("vox_to_ras", "<f4", (4, 4)),
-                ("reserved", "S444"),
-                ("voxel_order", "S4"),
-                ("pad2", "S4"),
-                ("image_orientation_patient", "<f4", (6,)),
-                ("pad1", "S2"),
-                ("invert_x", "S1"),
-                ("invert_y", "S1"),
-                ("invert_z", "S1"),
-                ("swap_xy", "S1"),
-                ("swap_yz", "S1"),
-                ("swap_zx", "S1"),
-                ("n_count", "<i4"),
-                ("version", "<i4"),
-                ("hdr_size", "<i4"),
-            ],
-        )
+        template_trk_header = np.array(('TRACK',
+                                        [dims[0], dims[1], dims[2]],
+                                        [warped_affine[0][0], warped_affine[1][1], warped_affine[2][2]],
+                                        [0.0, 0.0, 0.0], 0, ['', '', '', '', '', '', '', '', '', ''],
+                                        0, ['', '', '', '', '', '', '', '', '', ''],
+                                        [[1.0, 0.0, 0.0, 0.0],
+                                         [0.0, 1.0, 0.0, 0.0],
+                                         [0.0, 0.0, 1.0, 0.0],
+                                         [0.0, 0.0, 0.0, 1.0]], '', 'LPS', 'LPS',
+                                        [1.0, 0.0, 0.0, 0.0, 1.0, 0.0],
+                                        '', '', '', '', '', '', '', 10000, 2, 1000),
+                                       dtype=[('id_string', 'S6'), ('dim', '<i2', (3,)),
+                                              ('voxel_size', '<f4', (3,)), ('origin', '<f4', (3,)),
+                                              ('n_scalars', '<i2'), ('scalar_name', 'S20', (10,)),
+                                              ('n_properties', '<i2'), ('property_name', 'S20', (10,)),
+                                              ('vox_to_ras', '<f4', (4, 4)), ('reserved', 'S444'),
+                                              ('voxel_order', 'S4'), ('pad2', 'S4'),
+                                              ('image_orientation_patient', '<f4', (6,)),
+                                              ('pad1', 'S2'), ('invert_x', 'S1'), ('invert_y', 'S1'),
+                                              ('invert_z', 'S1'), ('swap_xy', 'S1'), ('swap_yz', 'S1'),
+                                              ('swap_zx', 'S1'), ('n_count', '<i4'), ('version', '<i4'),
+                                              ('hdr_size', '<i4')]
+                                       )
 
         streams, hdr = nib.trackvis.read(self.file_in)
         offsets = []
@@ -285,47 +249,50 @@ def transform_to_affine(streams, header, affine):
 
 
 def direct_streamline_norm(streams, streams_mni, nodif_B0, namer):
-    """Greene, C., Cieslak, M., & Grafton, S. T. (2017). Effect of different spatial normalization approaches on tractography and structural brain networks. Network Neuroscience, 1-19."""
+    """Greene, C., Cieslak, M., & Grafton, S. T. (2017). Effect of different spatial normalization approaches on
+    tractography and structural brain networks. Network Neuroscience, 1-19."""
     from ndmg.register.gen_reg import transform_to_affine
+    from dipy.tracking.streamline import Streamlines
 
     template_path = "/usr/share/data/fsl-mni152-templates/MNI152_T1_2mm_brain.nii.gz"
     ants_path = "/opt/ants"
+
+    t_aff = namer.dirs["tmp"]["base"] + "/0GenericAffine.mat"
+    t_warp = namer.dirs["tmp"]["base"] + "/1InverseWarp.nii.gz"
+
+    nodif_B0_img = nib.load(nodif_B0)
+    nodif_B0_flip_path = "%s%s" % (nodif_B0_img.split('.nii.gz')[0], '_flip.nii.gz')
+    s_aff = nodif_B0_img.affine
+    s_aff[0][0] = -s_aff[0][0]
+    nodif_B0_img.set_sform(s_aff)
+    nodif_B0_img.set_qform(s_aff)
+    nodif_B0_img.update_header()
+    nib.save(nodif_B0_img, nodif_B0_flip_path)
 
     cmd = (
         "antsRegistrationSyNQuick.sh -d 3 -f "
         + template_path
         + " -m "
-        + nodif_B0
+        + nodif_B0_flip_path
         + " -o "
         + namer.dirs["tmp"]["base"]
         + "/"
     )
     os.system(cmd)
 
-    t_aff = namer.dirs["tmp"]["base"] + "/0GenericAffine.mat"
-    t_warp = namer.dirs["tmp"]["base"] + "/1InverseWarp.nii.gz"
-
-    nodif_B0_img = nib.load(nodif_B0)
-    s_aff = nodif_B0_img.affine
-
     wS = Warp(
         ants_path, streams, streams_mni, template_path, t_aff, t_warp, nodif_B0, namer
     )
     wS.streamlines()
 
-    s_aff[:3, 3] = np.array([180, 0, 0])
+    s_aff[:3, 3] = np.array([270, 0, 0])
     streamlines_mni = nib.streamlines.load(streams_mni)
     streamlines_mni_s = streamlines_mni.streamlines
-    streamlines_trans = Streamlines(
-        transform_to_affine(streamlines_mni_s, streamlines_mni.header, s_aff)
-    )
-    streams_warp = streams_mni.split(".trk")[0] + "_warped.trk"
-    tractogram = nib.streamlines.Tractogram(
-        streamlines_trans, affine_to_rasmm=np.eye(4)
-    )
+    streamlines_trans = Streamlines(transform_to_affine(streamlines_mni_s, streamlines_mni.header, s_aff))
+    streams_warp = "%s%s" % (streams_mni.split('.trk')[0], '_warped.trk')
+    tractogram = nib.streamlines.Tractogram(streamlines_trans, affine_to_rasmm=np.eye(4))
     trkfile = nib.streamlines.trk.TrkFile(tractogram, header=streamlines_mni.header)
     nib.streamlines.save(trkfile, streams_warp)
-    print(streams_warp)
     return streams_warp
 
 
