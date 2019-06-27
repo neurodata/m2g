@@ -4,11 +4,7 @@
     <bookmark url="file://$PROJECT_DIR$/ndmg/scripts/ndmg_cloud.py" description="    print(&quot;Generating job for each subject...&quot;)&#10;  ..." line="70" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="2a59942d-22e5-4a24-accd-8b788e71fa1f" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ndmg/register/gen_reg.py" beforeDir="false" afterPath="$PROJECT_DIR$/ndmg/register/gen_reg.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ndmg/utils/gen_utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/ndmg/utils/gen_utils.py" afterDir="false" />
-    </list>
+    <list default="true" id="2a59942d-22e5-4a24-accd-8b788e71fa1f" name="Default Changelist" comment="" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -20,8 +16,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/ndmg/register/gen_reg.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="3840">
-              <caret line="256" column="83" selection-start-line="256" selection-start-column="83" selection-end-line="256" selection-end-column="83" />
+            <state relative-caret-position="555">
+              <caret line="37" column="18" lean-forward="true" selection-start-line="37" selection-start-column="18" selection-end-line="37" selection-end-column="18" />
             </state>
           </provider>
         </entry>
@@ -165,12 +161,12 @@
       <workItem from="1555606252609" duration="1965000" />
       <workItem from="1555621726196" duration="9668000" />
       <workItem from="1555696087142" duration="3404000" />
-      <workItem from="1561593317307" duration="1502000" />
+      <workItem from="1561593317307" duration="2103000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="16539000" />
+    <option name="totallyTimeSpent" value="17140000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="404" y="23" width="1276" height="978" extended-state="0" />
@@ -290,8 +286,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/ndmg/register/gen_reg.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="3840">
-          <caret line="256" column="83" selection-start-line="256" selection-start-column="83" selection-end-line="256" selection-end-column="83" />
+        <state relative-caret-position="555">
+          <caret line="37" column="18" lean-forward="true" selection-start-line="37" selection-start-column="18" selection-end-line="37" selection-end-column="18" />
         </state>
       </provider>
     </entry>

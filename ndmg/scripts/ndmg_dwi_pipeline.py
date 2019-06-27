@@ -250,7 +250,7 @@ def ndmg_dwi_pipeline(
 
     # Check dimensions
     start_time = time.time()
-    dwi_prep = mgu.match_target_vox_res(dwi_prep, vox_size, namer, zoom_set, sens="dwi")
+    dwi_prep = mgu.match_target_vox_res(dwi_prep, vox_size, namer, sens="dwi")
     print(
         "%s%s%s"
         % ("Reslicing runtime: ", str(np.round(time.time() - start_time, 1)), "s")
@@ -427,7 +427,7 @@ def ndmg_dwi_pipeline(
 
         # Check dimensions
         start_time = time.time()
-        t1w = mgu.match_target_vox_res(t1w, vox_size, namer, zoom_set, sens="t1w")
+        t1w = mgu.match_target_vox_res(t1w, vox_size, namer, sens="t1w")
         print(
             "%s%s%s"
             % ("Reslicing runtime: ", str(np.round(time.time() - start_time, 1)), "s")
@@ -495,7 +495,7 @@ def ndmg_dwi_pipeline(
             # align atlas to t1w to dwi
             print("%s%s" % ("Applying native-space alignment to ", labels[idx]))
             labels_im_file = mgu.match_target_vox_res(
-                labels[idx], vox_size, namer, zoom_set, sens="t1w"
+                labels[idx], vox_size, namer, sens="t1w"
             )
             labels_im_file_mni = reg.atlas2t1w2dwi_align(labels_im_file, dsn=True)
             labels_im = nib.load(labels_im_file_mni)
@@ -512,7 +512,7 @@ def ndmg_dwi_pipeline(
             # align atlas to t1w to dwi
             print("%s%s" % ("Applying native-space alignment to ", labels[idx]))
             labels_im_file = mgu.match_target_vox_res(
-                labels[idx], vox_size, namer, zoom_set, sens="t1w"
+                labels[idx], vox_size, namer, sens="t1w"
             )
             labels_im_file_dwi = reg.atlas2t1w2dwi_align(labels_im_file, dsn=False)
             labels_im = nib.load(labels_im_file_dwi)
@@ -527,7 +527,7 @@ def ndmg_dwi_pipeline(
             g1.make_graph_old()
         elif reg_style == "mni":
             labels_im_file = mgu.match_target_vox_res(
-                labels[idx], vox_size, namer, zoom_set, sens="t1w"
+                labels[idx], vox_size, namer, sens="t1w"
             )
             labels_im = nib.load(labels_im_file)
             g1 = mgg.graph_tools(
