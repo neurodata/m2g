@@ -31,7 +31,7 @@ from copy import deepcopy
 from collections import OrderedDict
 from argparse import ArgumentParser
 import warnings
-from ConfigParser import ConfigParser
+from configparser import ConfigParser
 import shutil
 import time
 

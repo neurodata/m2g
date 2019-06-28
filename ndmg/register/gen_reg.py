@@ -64,8 +64,8 @@ def transform_pts(
     from scipy.io.matlab import savemat
 
     """
-    return coordinates in 
-    "ras_voxels" if you want to streamlines in ras ijk coordinates or 
+    return coordinates in
+    "ras_voxels" if you want to streamlines in ras ijk coordinates or
     "lps_voxmm" if you want dsi studio streamline coordinates relative to the template
     """
     if not output_space in ("ras_voxels", "lps_voxmm"):
@@ -455,25 +455,17 @@ class dmri_reg(object):
         self.gm_mask = self.maps["gm_prob"]
         self.csf_mask = self.maps["csf_prob"]
 
-        # Check dimensions
-        if self.vox_size == "1mm":
-            self.zoom_set = (1.0, 1.0, 1.0)
-        elif self.vox_size == "2mm":
-            self.zoom_set = (2.0, 2.0, 2.0)
-        else:
-            raise ValueError("Voxel size not supported. Use 2mm or 1mm")
-
         self.t1w_brain = mgu.match_target_vox_res(
-            self.t1w_brain, self.vox_size, self.namer, self.zoom_set, sens="t1w"
+            self.t1w_brain, self.vox_size, self.namer, sens="t1w"
         )
         self.wm_mask = mgu.match_target_vox_res(
-            self.wm_mask, self.vox_size, self.namer, self.zoom_set, sens="t1w"
+            self.wm_mask, self.vox_size, self.namer, sens="t1w"
         )
         self.gm_mask = mgu.match_target_vox_res(
-            self.gm_mask, self.vox_size, self.namer, self.zoom_set, sens="t1w"
+            self.gm_mask, self.vox_size, self.namer, sens="t1w"
         )
         self.csf_mask = mgu.match_target_vox_res(
-            self.csf_mask, self.vox_size, self.namer, self.zoom_set, sens="t1w"
+            self.csf_mask, self.vox_size, self.namer, sens="t1w"
         )
 
         # Threshold WM to binary in dwi space
