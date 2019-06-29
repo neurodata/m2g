@@ -58,5 +58,6 @@ setup(
         'plotly==1.12.1',
         'cython',
         'pybids==0.6.4',
+	'configparser>=3.7.4'
     ]
 )

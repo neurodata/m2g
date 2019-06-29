@@ -21,8 +21,6 @@
 # Originally created by Greg Kiar on 2016-07-25.
 # edited by Eric Bridgeford to incorporate fMRI, multi-threading, and
 # big-graph generation.
-
-print("Beginning ndmg ...")
 from ndmg.scripts import ndmg_cloud as nc
 from multiprocessing import Pool
 import sys
@@ -37,10 +35,15 @@ from ndmg.scripts.ndmg_func_pipeline import ndmg_func_pipeline
 from ndmg.scripts.ndmg_dwi_pipeline import ndmg_dwi_pipeline
 import warnings
 from argparse import ArgumentParser
-
+import pkg_resources
 warnings.simplefilter("ignore")
 
-atlas_dir = "/ndmg_atlases"  # This location bc it is convenient for containers
+print("Beginning ndmg ...")
+
+if os.path.isdir('/ndmg_atlases'):
+    atlas_dir = '/ndmg_atlases'
+else:
+    atlas_dir = pkg_resources.resource_filename("ndmg", "ndmg_atlases")
 
 # Data structure:
 # sub-<subject id>/
@@ -53,21 +56,6 @@ atlas_dir = "/ndmg_atlases"  # This location bc it is convenient for containers
 #   *   sub-<subject id>_ses-<session id>_dwi.bvec
 #
 # *these files can be anywhere up stream of the dwi data, and are inherited.
-skippers = [
-    "slab907",
-    "slab1068",
-    "DS01216",
-    "DS01876",
-    "DS03231",
-    "DS06481",
-    "DS16784",
-    "DS72784",
-    "hemispheric_res-1x1x1",
-    "hemispheric_res-2x2x2",
-    "tissue_res-1x1x1",
-    "tissue_res-2x2x2",
-]
-
 
 def get_atlas(atlas_dir, modality, vox_size):
     """
@@ -123,17 +111,6 @@ def get_atlas(atlas_dir, modality, vox_size):
     for f in fils:
         if not ope(f):
             print(f)
-
-    # TODO: fix, currently broken due to git-lfs
-    if not os.path.exists(atlas_dir):
-        print("Cannot find atlas information; downloading...")
-        cmd = "wget https://github.com/neurodata/neuroparc/archive/v0.1.0.zip -O /neuroparc.zip"
-        os.system(cmd)
-        cmd = "unzip /neuroparc.zip -d /neuroparc"
-        os.system(cmd)
-        shutil.move("/neuroparc/neuroparc-0.1.0/atlases", atlas_dir)
-        os.remove("/neuroparc.zip")
-        shutil.rmtree("/neuroparc")
 
     if modality == "dwi":
         atlas_brain = None

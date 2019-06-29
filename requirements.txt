@@ -11,3 +11,4 @@ plotly==1.12.1
 cython
 duecredit
 pybids==0.6.4
+configparser>=3.7.4

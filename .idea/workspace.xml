@@ -1,12 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="BookmarkManager">
-    <bookmark url="file://$PROJECT_DIR$/ndmg/scripts/ndmg_cloud.py" description="    print(&quot;Generating job for each subject...&quot;)&#10;  ..." line="50" />
+    <bookmark url="file://$PROJECT_DIR$/ndmg/scripts/ndmg_cloud.py" description="    print(&quot;Generating job for each subject...&quot;)&#10;  ..." line="70" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="2a59942d-22e5-4a24-accd-8b788e71fa1f" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/templates/ndmg_cloud_participant.json" beforeDir="false" afterPath="$PROJECT_DIR$/templates/ndmg_cloud_participant.json" afterDir="false" />
-    </list>
+    <list default="true" id="2a59942d-22e5-4a24-accd-8b788e71fa1f" name="Default Changelist" comment="" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -15,29 +13,20 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/ndmg/scripts/ndmg_cloud.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="530">
-              <caret line="107" column="16" selection-start-line="92" selection-start-column="14" selection-end-line="92" selection-end-column="60" />
-            </state>
-          </provider>
-        </entry>
-      </file>
       <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/templates/ndmg_cloud_participant.json">
+        <entry file="file://$PROJECT_DIR$/ndmg/register/gen_reg.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="465">
-              <caret line="31" column="25" lean-forward="true" selection-start-line="31" selection-start-column="25" selection-end-line="31" selection-end-column="25" />
+            <state relative-caret-position="555">
+              <caret line="37" column="18" lean-forward="true" selection-start-line="37" selection-start-column="18" selection-end-line="37" selection-end-column="18" />
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/ndmg/scripts/ndmg_bids.py">
+        <entry file="file://$PROJECT_DIR$/ndmg/utils/gen_utils.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="242">
-              <caret line="115" selection-start-line="115" selection-end-line="115" />
+            <state relative-caret-position="223">
+              <caret line="380" column="50" selection-start-line="380" selection-start-column="50" selection-end-line="380" selection-end-column="50" />
             </state>
           </provider>
         </entry>
@@ -59,6 +48,8 @@
       <find>session</find>
       <find>mode</find>
       <find>group</find>
+      <find>fname_presuffix</find>
+      <find>img</find>
     </findStrings>
     <replaceStrings>
       <replace>os.system</replace>
@@ -80,12 +71,12 @@
         <option value="$PROJECT_DIR$/ndmg/scripts/ndmg_dwi_pipeline.py" />
         <option value="$PROJECT_DIR$/ndmg/track/gen_track.py" />
         <option value="$PROJECT_DIR$/ndmg/utils/reg_utils.py" />
-        <option value="$PROJECT_DIR$/ndmg/utils/gen_utils.py" />
-        <option value="$PROJECT_DIR$/ndmg/register/gen_reg.py" />
         <option value="$PROJECT_DIR$/ndmg/utils/bids_utils.py" />
         <option value="$PROJECT_DIR$/ndmg/scripts/ndmg_bids.py" />
         <option value="$PROJECT_DIR$/ndmg/scripts/ndmg_cloud.py" />
         <option value="$PROJECT_DIR$/templates/ndmg_cloud_participant.json" />
+        <option value="$PROJECT_DIR$/ndmg/utils/gen_utils.py" />
+        <option value="$PROJECT_DIR$/ndmg/register/gen_reg.py" />
       </list>
     </option>
   </component>
@@ -101,17 +92,16 @@
     </option>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="654" />
-    <option name="y" value="51" />
+    <option name="x" value="404" />
+    <option name="y" value="23" />
     <option name="width" value="1276" />
-    <option name="height" value="1104" />
+    <option name="height" value="978" />
   </component>
   <component name="ProjectView">
     <navigator proportions="" version="1">
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -122,12 +112,19 @@
             <path>
               <item name="ndmg" type="b2602c69:ProjectViewProjectNode" />
               <item name="ndmg" type="462c0819:PsiDirectoryNode" />
-              <item name="templates" type="462c0819:PsiDirectoryNode" />
+              <item name="ndmg" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="ndmg" type="b2602c69:ProjectViewProjectNode" />
+              <item name="ndmg" type="462c0819:PsiDirectoryNode" />
+              <item name="ndmg" type="462c0819:PsiDirectoryNode" />
+              <item name="register" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
         </subPane>
       </pane>
+      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -164,17 +161,19 @@
       <workItem from="1555606252609" duration="1965000" />
       <workItem from="1555621726196" duration="9668000" />
       <workItem from="1555696087142" duration="3404000" />
+      <workItem from="1561593317307" duration="2103000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="15037000" />
+    <option name="totallyTimeSpent" value="17140000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="654" y="51" width="1276" height="1104" extended-state="0" />
+    <frame x="404" y="23" width="1276" height="978" extended-state="0" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.25769854" />
+      <window_info id="aws.explorer" side_tool="true" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.1904376" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
@@ -217,9 +216,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/ndmg/utils/gen_utils.py">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
     <entry file="file://$PROJECT_DIR$/ndmg/scripts/ndmg_dwi_pipeline.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-4536">
@@ -246,13 +242,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/ndmg/register/gen_reg.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="645">
-          <caret line="43" column="36" lean-forward="true" selection-start-line="43" selection-start-column="36" selection-end-line="43" selection-end-column="36" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/ndmg/preproc/rescale_bvec.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="365">
@@ -267,24 +256,38 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/ndmg/scripts/ndmg_bids.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="242">
-          <caret line="115" selection-start-line="115" selection-end-line="115" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/ndmg/scripts/ndmg_cloud.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="530">
-          <caret line="107" column="16" selection-start-line="92" selection-start-column="14" selection-end-line="92" selection-end-column="60" />
+        <state relative-caret-position="2550">
+          <caret line="170" column="16" selection-start-line="170" selection-start-column="16" selection-end-line="170" selection-end-column="16" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/templates/ndmg_cloud_participant.json">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="465">
-          <caret line="31" column="25" lean-forward="true" selection-start-line="31" selection-start-column="25" selection-end-line="31" selection-end-column="25" />
+        <state relative-caret-position="435">
+          <caret line="29" column="25" selection-start-line="29" selection-start-column="25" selection-end-line="29" selection-end-column="25" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ndmg/scripts/ndmg_bids.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="242">
+          <caret line="147" selection-start-line="147" selection-end-line="147" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ndmg/utils/gen_utils.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="223">
+          <caret line="380" column="50" selection-start-line="380" selection-start-column="50" selection-end-line="380" selection-end-column="50" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ndmg/register/gen_reg.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="555">
+          <caret line="37" column="18" lean-forward="true" selection-start-line="37" selection-start-column="18" selection-end-line="37" selection-end-column="18" />
         </state>
       </provider>
     </entry>
