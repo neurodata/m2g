@@ -43,7 +43,7 @@ import ndmg.utils as mgu
 warnings.simplefilter("ignore")
 
 # TODO
-participant_templ = "https://raw.githubusercontent.com/neurodata/ndmg/alex-batch/templates/ndmg_cloud_participant.json"
+participant_templ = "https://raw.githubusercontent.com/neurodata/ndmg/staging/templates/ndmg_cloud_participant.json"
 
 
 def batch_submit(
