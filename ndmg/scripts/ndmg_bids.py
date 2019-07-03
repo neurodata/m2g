@@ -107,11 +107,6 @@ def get_atlas(atlas_dir, modality, vox_size):
         labels = [op.join(atlas_dir, "label", l) for l in labels]
         fils = labels + [atlas, atlas_mask, atlas_brain, lv_mask]
 
-    ope = op.exists
-    for f in fils:
-        if not ope(f):
-            print(f)
-
     if modality == "dwi":
         atlas_brain = None
         lv_mask = None
@@ -121,16 +116,6 @@ def get_atlas(atlas_dir, modality, vox_size):
         map(os.path.exists, [atlas, atlas_mask])
     ), "atlas or atlas_mask, does not exist."
     return (labels, atlas, atlas_mask, atlas_brain, lv_mask)
-
-
-def worker_wrapper(xxx_todo_changeme):
-    # allows us to wrap the per-subject module and remap the arguments
-    # so that we can take lists of args since f in this case can be
-    # ndmg_dwi_pipeline or ndmg_func_pipeline, and each takes slightly
-    # different arguments
-    (f, args, kwargs) = xxx_todo_changeme
-    return f(*args, **kwargs)
-
 
 def session_level(
     inDir,
