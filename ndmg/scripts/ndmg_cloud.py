@@ -234,14 +234,13 @@ def submit_jobs(jobs, jobdir):
         # out = subprocess.check_output(cmd, shell=True)
         # time.sleep(0.1)  # jobs sometimes hang, seeing if this helps
         # submission = ast.literal_eval(out.decode("utf-8"))
-        # print(
-        #     (
-        #         "Job Name: {}, Job ID: {}".format(
-        #             submission["jobName"], submission["jobId"]
-        #         )
-        #     )
-        # )
-        print(submission)
+        print(
+            (
+                "Job Name: {}, Job ID: {}".format(
+                    submission["jobName"], submission["jobId"]
+                )
+            )
+        )
         sub_file = os.path.join(jobdir, "ids", submission["jobName"] + ".json")
         with open(sub_file, "w") as outfile:
             json.dump(submission, outfile)
