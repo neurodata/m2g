@@ -19,6 +19,7 @@
 # Email: dpisner@utexas.edu
 
 
+# standard library imports
 import glob
 import shutil
 import os
@@ -31,6 +32,7 @@ import sys
 import warnings
 warnings.simplefilter("ignore")
 
+# pypi imports
 # from ndmg.stats.qa_mri import qa_mri
 import numpy as np
 import nibabel as nib
@@ -38,11 +40,13 @@ from dipy.tracking.streamline import Streamlines
 from dipy.tracking.utils import move_streamlines
 from nilearn.image import new_img_like, resample_img
 
+# local imports
 import ndmg
-import ndmg.preproc as mgp
+from ndmg import preproc as mgp
 from ndmg.scripts import ndmg_cloud as nc
 from ndmg.utils import gen_utils as mgu
 from ndmg.utils import reg_utils as rgu
+from ndmg.utils import s3_utils
 from ndmg.register import gen_reg as mgr
 from ndmg.track import gen_track as mgt
 from ndmg.graph import gen_graph as mgg
@@ -74,7 +78,8 @@ def ndmg_dwi_pipeline(
     remo=None,
     push=False,
     creds=None,
-    debug=False
+    debug=False,
+    modif=""
 
 ):
     """
@@ -549,8 +554,9 @@ def ndmg_dwi_pipeline(
 
     # TODO : putting this block of code here for now because it wouldn't run in `ndmg_bids`. Figure out how to put it somewhere else.
     if push and buck and remo is not None:
-        modif = "ndmg_{}".format(ndmg.version.replace(".", "-"))
-        nc.s3_push_data(buck, remo, outdir, modif, creds, debug=debug)
+        if not modif:
+            modif = "ndmg_{}".format(ndmg.version.replace(".", "-"))
+        s3_utils.s3_push_data(buck, remo, outdir, modif, creds, debug=debug)
         print("Pushing Complete!")
         if not debug:
             print("Listing contents of output directory ...")
