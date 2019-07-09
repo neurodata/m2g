@@ -92,6 +92,7 @@ def s3_get_data(bucket, remote, local, public=False):
     copies in that directory to local.
     """
 
+    # TODO : use boto3 for this
     if os.path.exists(local):
         return  # TODO: make sure this doesn't append None a bunch of times to a list in a loop on this function
     if not public:
@@ -119,6 +120,7 @@ def s3_get_data(bucket, remote, local, public=False):
 
 
 def s3_push_data(bucket, remote, outDir, modifier, creds=True, debug=True):
+    # TODO : use boto3 for this instead
     cmd = 'aws s3 cp --exclude "tmp/*" {} s3://{}/{}/{}/{}/ --recursive --acl public-read'
     dataset = remote.split('/')[0]
     rest_of_path_list = remote.split('/')[1:]
