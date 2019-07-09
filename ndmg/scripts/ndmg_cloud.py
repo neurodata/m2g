@@ -175,8 +175,8 @@ def create_json(
     if bg:
         cmd.append("--big")
     if modif:
-        cmd[0] = "--modif"
-        cmd[1] = modif
+        cmd.insert(19, u"--modif")
+        cmd.insert(20, modif)
 
     # edit participant-specific values ()
     # loop over every session of every participant
