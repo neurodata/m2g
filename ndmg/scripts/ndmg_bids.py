@@ -21,22 +21,27 @@
 # Originally created by Greg Kiar on 2016-07-25.
 # edited by Eric Bridgeford to incorporate fMRI, multi-threading, and
 # big-graph generation.
-from ndmg.scripts import ndmg_cloud as nc
+
+# standard library imports
 from multiprocessing import Pool
 import sys
 import shutil
 import os
 import glob
 import os.path as op
-import ndmg
-from ndmg.utils import gen_utils as mgu
-from ndmg.utils.bids_utils import *
-from ndmg.scripts.ndmg_func_pipeline import ndmg_func_pipeline
-from ndmg.scripts.ndmg_dwi_pipeline import ndmg_dwi_pipeline
 import warnings
 from argparse import ArgumentParser
 import pkg_resources
 warnings.simplefilter("ignore")
+
+# local imports
+import ndmg
+from ndmg.scripts import ndmg_cloud as nc
+from ndmg.utils import s3_utils
+from ndmg.utils import gen_utils as mgu
+from ndmg.utils.bids_utils import *
+from ndmg.scripts.ndmg_func_pipeline import ndmg_func_pipeline
+from ndmg.scripts.ndmg_dwi_pipeline import ndmg_dwi_pipeline
 
 print("Beginning ndmg ...")
 
@@ -477,7 +482,7 @@ def main():
     reg_style = result.sp
 
     try:
-        creds = bool(nc.get_credentials())
+        creds = bool(s3_utils.get_credentials())
     except:
         creds = bool(
             os.getenv("AWS_ACCESS_KEY_ID", 0) and os.getenv("AWS_SECRET_ACCESS_KEY", 0)
@@ -501,9 +506,9 @@ def main():
                     else:
                         remo = op.join(remo, "sub-{}".format(sub))
                         tindir = op.join(inDir, "sub-{}".format(sub))
-                    nc.s3_get_data(buck, remo, tindir, public=not creds)
+                    s3_utils.s3_get_data(buck, remo, tindir, public=not creds)
             else:
-                nc.s3_get_data(buck, remo, inDir, public=not creds)
+                s3_utils.s3_get_data(buck, remo, inDir, public=not creds)
 
         # run ndmg.
         session_level(

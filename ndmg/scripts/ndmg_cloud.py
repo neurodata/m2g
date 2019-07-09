@@ -19,7 +19,7 @@
 # Created by Greg Kiar on 2017-02-02.
 # Email: gkiar@jhu.edu
 
-
+#%%
 import subprocess
 import ast
 import csv
@@ -31,7 +31,6 @@ from copy import deepcopy
 from collections import OrderedDict
 from argparse import ArgumentParser
 import warnings
-from configparser import ConfigParser
 import shutil
 import time
 
@@ -39,10 +38,10 @@ import boto3
 
 import ndmg
 import ndmg.utils as mgu
+from ndmg.utils.s3_utils import get_credentials, get_matching_s3_objects, s3_client
 
 warnings.simplefilter("ignore")
 
-# TODO
 participant_templ = "https://raw.githubusercontent.com/neurodata/ndmg/staging/templates/ndmg_cloud_participant.json"
 
 
@@ -221,43 +220,37 @@ def submit_jobs(jobs, jobdir):
     """
     Give list of jobs to submit, submits them to AWS Batch
     """
-    cmd_template = "aws batch submit-job --cli-input-json file://{}"
+    batch = s3_client(service="batch")
+    cmd_template = "--cli-input-json file://{}"
+    # cmd_template = batch.submit_jobs
 
     for job in jobs:
         # use this to start wherever
         # if jobs.index(job) >= jobs.index('/jobs/jobs/ndmg_0-1-2_SWU4_sub-0025768_ses-1.json'):
-        cmd = cmd_template.format(job)
+        with open(job, 'r') as f:
+            kwargs = json.load(f)
         print(("... Submitting job {}...".format(job)))
-        out = subprocess.check_output(cmd, shell=True)
-        time.sleep(0.1)  # jobs sometimes hang, seeing if this helps
-        submission = ast.literal_eval(out.decode("utf-8"))
-        print(
-            (
-                "Job Name: {}, Job ID: {}".format(
-                    submission["jobName"], submission["jobId"]
-                )
-            )
-        )
+        submission = batch.submit_job(**kwargs)
+        # out = subprocess.check_output(cmd, shell=True)
+        # time.sleep(0.1)  # jobs sometimes hang, seeing if this helps
+        # submission = ast.literal_eval(out.decode("utf-8"))
+        # print(
+        #     (
+        #         "Job Name: {}, Job ID: {}".format(
+        #             submission["jobName"], submission["jobId"]
+        #         )
+        #     )
+        # )
+        print(submission)
         sub_file = os.path.join(jobdir, "ids", submission["jobName"] + ".json")
         with open(sub_file, "w") as outfile:
             json.dump(submission, outfile)
         print("Submitted.")
     return 0
 
-def get_credentials():
-    try:
-        config = ConfigParser()
-        config.read(os.getenv("HOME") + "/.aws/credentials")
-        return (
-            config.get("default", "aws_access_key_id"),
-            config.get("default", "aws_secret_access_key"),
-        )
-    except:
-        ACCESS = os.getenv("AWS_ACCESS_KEY_ID")
-        SECRET = os.getenv("AWS_SECRET_ACCESS_KEY")
-    if not ACCESS and SECRET:
-        raise AttributeError("No AWS credentials found.")
-    return (ACCESS, SECRET)
+#%%
+
+
 
 def get_status(jobdir, jobid=None):
     """
@@ -316,51 +309,7 @@ def kill_jobs(jobdir, reason='"Killing job"'):
             print("... Unknown status??")
 
 
-def s3_get_data(bucket, remote, local, public=False):
-    """
-    given an s3 directory,
-    copies in that directory to local.
-    """
 
-    if os.path.exists(local):
-        return  # TODO: make sure this doesn't append None a bunch of times to a list in a loop on this function
-    if not public:
-        try:
-            ACCESS, SECRET = get_credentials()
-            client = boto3.client(
-                "s3", aws_access_key_id=ACCESS, aws_secret_access_key=SECRET
-            )
-        except:
-            client = boto3.client("s3")
-
-        bkts = [bk["Name"] for bk in client.list_buckets()["Buckets"]]
-        if bucket not in bkts:
-            sys.exit(
-                "Error: could not locate bucket. Available buckets: " +
-                ", ".join(bkts)
-            )
-
-        cmd = "aws s3 cp --exclude 'ndmg_*' --recursive s3://{}/{}/ {}".format(
-            bucket, remote, local)
-    if public:
-        cmd += " --no-sign-request --region=us-east-1"
-
-    print("Calling {} to get data from S3 ...".format(cmd))
-    out = subprocess.check_output("mkdir -p {}".format(local), shell=True)
-    out = subprocess.check_output(cmd, shell=True)
-
-
-def s3_push_data(bucket, remote, outDir, modifier, creds=True, debug=True):
-    cmd = 'aws s3 cp --exclude "tmp/*" {} s3://{}/{}/{}/{}/ --recursive --acl public-read'
-    dataset = remote.split('/')[0]
-    rest_of_path_list = remote.split('/')[1:]
-    rest_of_path = os.path.join(*rest_of_path_list)
-    cmd = cmd.format(outDir, bucket, dataset, modifier, rest_of_path)
-    if not creds:
-        print("Note: no credentials provided, may fail to push big files.")
-        cmd += " --no-sign-request"
-    print("Pushing results to S3: {}".format(cmd))
-    subprocess.check_output(cmd, shell=True)
 
 
 def main():
