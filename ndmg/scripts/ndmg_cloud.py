@@ -55,6 +55,7 @@ def batch_submit(
     dataset=None,
     log=False,
     bg=False,
+    modif=""
 ):
     """
     Searches through an S3 bucket, gets all subject-ids, creates json files
@@ -66,7 +67,7 @@ def batch_submit(
 
     print("Generating job for each subject...")
     jobs = create_json(bucket, path, threads, jobdir,
-                       credentials, debug, dataset, bg)
+                       credentials, debug, dataset, bg, modif=modif)
 
     print("Submitting jobs to the queue...")
     ids = submit_jobs(jobs, jobdir)
@@ -132,7 +133,7 @@ def crawl_bucket(bucket, path, jobdir):
 
 
 def create_json(
-    bucket, path, threads, jobdir, credentials=None, debug=False, dataset=None, bg=False
+    bucket, path, threads, jobdir, credentials=None, debug=False, dataset=None, bg=False, modif=""
 ):
     """
     Takes parameters to make jsons
@@ -173,6 +174,9 @@ def create_json(
     cmd[cmd.index("<PATH>")] = path
     if bg:
         cmd.append("--big")
+    if modif:
+        cmd[0] = "--modif"
+        cmd[1] = modif
 
     # edit participant-specific values ()
     # loop over every session of every participant
@@ -360,6 +364,13 @@ def main():
         default="False",
         help="whether or not to produce voxelwise big graph",
     )
+    parser.add_argument(
+    "--modif",
+    action="store",
+    help="Name of folder on s3 to push to. If empty, push to a folder with ndmg's version number.",
+    default="",
+    )
+
     result = parser.parse_args()
 
     bucket = result.bucket
@@ -372,6 +383,7 @@ def main():
     dset = result.dataset
     log = result.log
     bg = result.big != "False"
+    modif = result.modif
 
     if jobdir is None:
         jobdir = "./"
@@ -396,7 +408,7 @@ def main():
         # else:
         #     print("Jobdir {} exists. Clearing.".format(jobdir))
         #     shutil.rmtree(jobdir)
-        batch_submit(bucket, path, jobdir, creds, state, debug, dset, log, bg)
+        batch_submit(bucket, path, jobdir, creds, state, debug, dset, log, bg, modif=modif)
 
     sys.exit(0)
 

@@ -160,6 +160,7 @@ def session_level(
     push=False,
     creds=None,
     debug=False,
+    modif=""
 ):
     """
     Crawls the given BIDS organized directory for data pertaining to the given
@@ -241,6 +242,7 @@ def session_level(
         push=push,
         creds=creds,
         debug=debug,
+        modif=modif
     )
     rmflds = []
     if modality == "func" and not debug:
@@ -452,6 +454,12 @@ def main():
         help="Space for tractography. Default is native.",
         default="native",
     )
+    parser.add_argument(
+        "--modif",
+        action="store",
+        help="Name of folder on s3 to push to. If empty, push to a folder with ndmg's version number.",
+        default="",
+    )
     result = parser.parse_args()
 
     inDir = result.bids_dir
@@ -480,6 +488,7 @@ def main():
     track_type = result.tt
     mod_func = result.mf
     reg_style = result.sp
+    modif = result.modif
 
     try:
         creds = bool(s3_utils.get_credentials())
@@ -490,6 +499,7 @@ def main():
 
     # TODO : `Flat is better than nested`. Make the logic for this cleaner.
     # this block of logic essentially just gets data we need from s3.
+    # it's super gross.
     if level == "participant":
         if buck is not None and remo is not None:
             if subj is not None:
@@ -533,7 +543,8 @@ def main():
             remo=remo,
             push=push,
             creds=creds,
-            debug=debug
+            debug=debug,
+            modif=modif
         )
     else:
         print("Specified level not valid")

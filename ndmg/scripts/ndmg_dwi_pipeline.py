@@ -42,7 +42,7 @@ from nilearn.image import new_img_like, resample_img
 
 # local imports
 import ndmg
-import ndmg.preproc as mgp
+from ndmg import preproc as mgp
 from ndmg.scripts import ndmg_cloud as nc
 from ndmg.utils import gen_utils as mgu
 from ndmg.utils import reg_utils as rgu
@@ -78,7 +78,8 @@ def ndmg_dwi_pipeline(
     remo=None,
     push=False,
     creds=None,
-    debug=False
+    debug=False,
+    modif=""
 
 ):
     """
@@ -553,7 +554,8 @@ def ndmg_dwi_pipeline(
 
     # TODO : putting this block of code here for now because it wouldn't run in `ndmg_bids`. Figure out how to put it somewhere else.
     if push and buck and remo is not None:
-        modif = "ndmg_{}".format(ndmg.version.replace(".", "-"))
+        if not modif:
+            modif = "ndmg_{}".format(ndmg.version.replace(".", "-"))
         s3_utils.s3_push_data(buck, remo, outdir, modif, creds, debug=debug)
         print("Pushing Complete!")
         if not debug:
