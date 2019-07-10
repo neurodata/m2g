@@ -21,23 +21,28 @@
 # Originally created by Greg Kiar on 2016-07-25.
 # edited by Eric Bridgeford to incorporate fMRI, multi-threading, and
 # big-graph generation.
-from ndmg.scripts import ndmg_cloud as nc
+
+# standard library imports
 from multiprocessing import Pool
 import sys
 import shutil
 import os
 import glob
 import os.path as op
-import ndmg
-from ndmg.utils import gen_utils as mgu
-from ndmg.utils.bids_utils import *
-from ndmg.scripts.ndmg_func_pipeline import ndmg_func_pipeline
-from ndmg.scripts.ndmg_dwi_pipeline import ndmg_dwi_pipeline
 import warnings
 from argparse import ArgumentParser
 import pkg_resources
 
 warnings.simplefilter("ignore")
+
+# local imports
+import ndmg
+from ndmg.scripts import ndmg_cloud as nc
+from ndmg.utils import s3_utils
+from ndmg.utils import gen_utils as mgu
+from ndmg.utils.bids_utils import *
+from ndmg.scripts.ndmg_func_pipeline import ndmg_func_pipeline
+from ndmg.scripts.ndmg_dwi_pipeline import ndmg_dwi_pipeline
 
 print("Beginning ndmg ...")
 
@@ -177,6 +182,7 @@ def session_level(
     push=False,
     creds=None,
     debug=False,
+    modif="",
 ):
     """
     Crawls the given BIDS organized directory for data pertaining to the given
@@ -258,6 +264,7 @@ def session_level(
         push=push,
         creds=creds,
         debug=debug,
+        modif=modif,
     )
     rmflds = []
     if modality == "func" and not debug:
@@ -469,6 +476,12 @@ def main():
         help="Space for tractography. Default is native.",
         default="native",
     )
+    parser.add_argument(
+        "--modif",
+        action="store",
+        help="Name of folder on s3 to push to. If empty, push to a folder with ndmg's version number.",
+        default="",
+    )
     result = parser.parse_args()
 
     inDir = result.bids_dir
@@ -497,9 +510,10 @@ def main():
     track_type = result.tt
     mod_func = result.mf
     reg_style = result.sp
+    modif = result.modif
 
     try:
-        creds = bool(nc.get_credentials())
+        creds = bool(s3_utils.get_credentials())
     except:
         creds = bool(
             os.getenv("AWS_ACCESS_KEY_ID", 0) and os.getenv("AWS_SECRET_ACCESS_KEY", 0)
@@ -507,6 +521,7 @@ def main():
 
     # TODO : `Flat is better than nested`. Make the logic for this cleaner.
     # this block of logic essentially just gets data we need from s3.
+    # it's super gross.
     if level == "participant":
         if buck is not None and remo is not None:
             if subj is not None:
@@ -523,9 +538,9 @@ def main():
                     else:
                         remo = op.join(remo, "sub-{}".format(sub))
                         tindir = op.join(inDir, "sub-{}".format(sub))
-                    nc.s3_get_data(buck, remo, tindir, public=not creds)
+                    s3_utils.s3_get_data(buck, remo, tindir, public=not creds)
             else:
-                nc.s3_get_data(buck, remo, inDir, public=not creds)
+                s3_utils.s3_get_data(buck, remo, inDir, public=not creds)
 
         # run ndmg.
         session_level(
@@ -551,6 +566,7 @@ def main():
             push=push,
             creds=creds,
             debug=debug,
+            modif=modif,
         )
     else:
         print("Specified level not valid")
