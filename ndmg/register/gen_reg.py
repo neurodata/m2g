@@ -483,6 +483,7 @@ class dmri_reg(object):
             + self.wm_edge
         )
         os.system(cmd)
+        print(cmd)
 
         return
 

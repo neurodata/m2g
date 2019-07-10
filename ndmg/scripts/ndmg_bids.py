@@ -32,6 +32,7 @@ import os.path as op
 import warnings
 from argparse import ArgumentParser
 import pkg_resources
+
 warnings.simplefilter("ignore")
 
 # local imports
@@ -45,27 +46,56 @@ from ndmg.scripts.ndmg_dwi_pipeline import ndmg_dwi_pipeline
 
 print("Beginning ndmg ...")
 
-if os.path.isdir('/ndmg_atlases'):
-    atlas_dir = '/ndmg_atlases'
+if os.path.isdir("/ndmg_atlases"):
+    # in docker
+    atlas_dir = "/ndmg_atlases"
 else:
-    atlas_dir = pkg_resources.resource_filename("ndmg", "ndmg_atlases")
+    # local
+    atlas_dir = op.expanduser("~") + "/.ndmg/ndmg_atlases"
 
-# Data structure:
-# sub-<subject id>/
-#   ses-<session id>/
-#     anat/
-#       sub-<subject id>_ses-<session id>_T1w.nii.gz
-#     dwi/
-#       sub-<subject id>_ses-<session id>_dwi.nii.gz
-#   *   sub-<subject id>_ses-<session id>_dwi.bval
-#   *   sub-<subject id>_ses-<session id>_dwi.bvec
-#
-# *these files can be anywhere up stream of the dwi data, and are inherited.
+    # Data structure:
+    # sub-<subject id>/
+    #   ses-<session id>/
+    #     anat/
+    #       sub-<subject id>_ses-<session id>_T1w.nii.gz
+    #     dwi/
+    #       sub-<subject id>_ses-<session id>_dwi.nii.gz
+    #   *   sub-<subject id>_ses-<session id>_dwi.bval
+    #   *   sub-<subject id>_ses-<session id>_dwi.bvec
+    #
+    # *these files can be anywhere up stream of the dwi data, and are inherited.
 
-def get_atlas(atlas_dir, modality, vox_size):
     """
     Given the desired location for atlases and the type of processing, ensure
     we have all the atlases and parcellations.
+    """
+
+
+def get_atlas(atlas_dir, modality, vox_size):
+    """
+    Given the desired location fot aslses and the type of processing, ensure
+    we have all the atlases and parcellations.
+    
+    Parameters
+    ----------
+    atlas_dir : str
+        directory containing atlases.
+    modality : str
+        dwi or fmri.
+    vox_size : str
+        Resolution.
+    
+    Returns
+    -------
+    tuple
+        filepaths corresponding to the human parcellations, the atlas, and the atlas's mask. atals_brain and lv_mask is None if not fmri.
+    
+    Raises
+    ------
+    ValueError
+        raised if dimensionality is wrong.
+    NotImplementedError
+        currently raised in lieu of atlas pulling capabilities.
     """
     if vox_size == "2mm":
         dims = "2x2x2"
@@ -76,8 +106,14 @@ def get_atlas(atlas_dir, modality, vox_size):
             "Voxel dimensions of input t1w image not currently supported by ndmg."
         )
 
-    # TODO: use glob to get these, not hardcoded paths
     if modality == "dwi":
+        # grab atlases if they don't exist
+        if not op.exists(atlas_dir):
+            # TODO : re-implement this pythonically with shutil and requests in python3.
+            print("atlas directory not found. Cloning ...")
+            clone = "https://github.com/neurodata/neuroparc.git"
+            os.system("git clone {} {}".format(clone, atlas_dir))
+
         atlas = op.join(
             atlas_dir,
             "atlases/reference_brains/MNI152NLin6_res-" + dims + "_T1w.nii.gz",
@@ -93,29 +129,24 @@ def get_atlas(atlas_dir, modality, vox_size):
         ]
         labels = [op.join(atlas_dir, "label/Human/", l) for l in labels]
         fils = labels + [atlas, atlas_mask]
-    if modality == "func":
-        atlas = op.join(atlas_dir, "atlas/MNI152NLin6_res-" + dims + "_T1w.nii.gz")
-        atlas_brain = op.join(
-            atlas_dir, "atlas/" + "MNI152NLin6_res-" + dims + "_T1w_brain.nii.gz"
-        )
-        atlas_mask = op.join(
-            atlas_dir, "mask/MNI152NLin6_res-" + dims + "_T1w_brainmask.nii.gz"
-        )
-        lv_mask = op.join(
-            atlas_dir,
-            "mask/HarvardOxford_variant-"
-            + "lateral-ventricles-thr25"
-            + "_res-' + dims + '_brainmask.nii.gz",
-        )
+    # if modality == "func":
+    #     atlas = op.join(atlas_dir, "atlas/MNI152NLin6_res-" + dims + "_T1w.nii.gz")
+    #     atlas_brain = op.join(
+    #         atlas_dir, "atlas/" + "MNI152NLin6_res-" + dims + "_T1w_brain.nii.gz"
+    #     )
+    #     atlas_mask = op.join(
+    #         atlas_dir, "mask/MNI152NLin6_res-" + dims + "_T1w_brainmask.nii.gz"
+    #     )
+    #     lv_mask = op.join(
+    #         atlas_dir,
+    #         "mask/HarvardOxford_variant-"
+    #         + "lateral-ventricles-thr25"
+    #         + "_res-' + dims + '_brainmask.nii.gz",
+    #     )
 
-        labels = [i for i in glob.glob(atlas_dir + "/label/*.nii.gz") if dims in i]
-        labels = [op.join(atlas_dir, "label", l) for l in labels]
-        fils = labels + [atlas, atlas_mask, atlas_brain, lv_mask]
-
-    ope = op.exists
-    for f in fils:
-        if not ope(f):
-            print(f)
+    #     labels = [i for i in glob.glob(atlas_dir + "/label/*.nii.gz") if dims in i]
+    #     labels = [op.join(atlas_dir, "label", l) for l in labels]
+    #     fils = labels + [atlas, atlas_mask, atlas_brain, lv_mask]
 
     if modality == "dwi":
         atlas_brain = None
@@ -126,15 +157,6 @@ def get_atlas(atlas_dir, modality, vox_size):
         map(os.path.exists, [atlas, atlas_mask])
     ), "atlas or atlas_mask, does not exist."
     return (labels, atlas, atlas_mask, atlas_brain, lv_mask)
-
-
-def worker_wrapper(xxx_todo_changeme):
-    # allows us to wrap the per-subject module and remap the arguments
-    # so that we can take lists of args since f in this case can be
-    # ndmg_dwi_pipeline or ndmg_func_pipeline, and each takes slightly
-    # different arguments
-    (f, args, kwargs) = xxx_todo_changeme
-    return f(*args, **kwargs)
 
 
 def session_level(
@@ -160,7 +182,7 @@ def session_level(
     push=False,
     creds=None,
     debug=False,
-    modif=""
+    modif="",
 ):
     """
     Crawls the given BIDS organized directory for data pertaining to the given
@@ -242,7 +264,7 @@ def session_level(
         push=push,
         creds=creds,
         debug=debug,
-        modif=modif
+        modif=modif,
     )
     rmflds = []
     if modality == "func" and not debug:
@@ -544,7 +566,7 @@ def main():
             push=push,
             creds=creds,
             debug=debug,
-            modif=modif
+            modif=modif,
         )
     else:
         print("Specified level not valid")

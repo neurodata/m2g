@@ -349,10 +349,11 @@ def segment_t1w(t1w, basename, opts=""):
               prior probability maps if the input T1w MRI is in
               standard space.
     """
-    print("Segmenting Anatomical Image into WM, GM, and CSF...")
+    print("Segmenting Anatomical Image into WM, GM, and CSF with FSL's FAST:")
     # run FAST, with options -t for the image type and -n to
     # segment into CSF (pve_0), WM (pve_1), GM (pve_2)
     cmd = "fast -t 1 {} -n 3 -o {} {}".format(opts, basename, t1w)
+    print("Executing fast: {}".format(cmd))
     os.system(cmd)
     out = {}  # the outputs
     out["wm_prob"] = "{}_{}".format(basename, "pve_2.nii.gz")

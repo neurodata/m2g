@@ -30,6 +30,7 @@ import time
 import traceback
 import sys
 import warnings
+
 warnings.simplefilter("ignore")
 
 # pypi imports
@@ -79,8 +80,7 @@ def ndmg_dwi_pipeline(
     push=False,
     creds=None,
     debug=False,
-    modif=""
-
+    modif="",
 ):
     """
     Creates a brain graph from MRI data
@@ -563,7 +563,11 @@ def ndmg_dwi_pipeline(
             print(os.listdir(outdir))
             print("clearing contents of output directory ...")
             shutil.rmtree(outdir)
-            print("Clearing complete. Output directory exists: {}".format(os.path.exists(outdir)))
+            print(
+                "Clearing complete. Output directory exists: {}".format(
+                    os.path.exists(outdir)
+                )
+            )
             # # Log docker info in EC2 containers, assuming we're using AWS Batch
             # f = subprocess.check_output('docker info', shell=True)
             # info_we_care_about = f[f.find(
