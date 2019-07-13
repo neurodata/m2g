@@ -1,3 +1,5 @@
+[![Downloads shield](https://img.shields.io/ndmg/dm/ndmg.svg)]
+
 # ndmg
 
 [![](https://img.shields.io/pypi/v/ndmg.svg)](https://pypi.python.org/pypi/ndmg)
