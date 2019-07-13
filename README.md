@@ -1,4 +1,4 @@
-[![Downloads shield](https://img.shields.io/pypi/dm/ndmg.svg)]
+![Downloads shield](https://img.shields.io/pypi/dm/ndmg.svg)
 
 # ndmg
 
