@@ -1,7 +1,8 @@
-![Downloads shield](https://img.shields.io/pypi/dm/ndio.svg)
+
 
 # ndmg
 
+![Downloads shield](https://img.shields.io/pypi/dm/ndio.svg)
 [![](https://img.shields.io/pypi/v/ndmg.svg)](https://pypi.python.org/pypi/ndmg)
 ![](https://travis-ci.org/neurodata/ndmg.svg?branch=master)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1161284.svg)](https://doi.org/10.5281/zenodo.1161284)
