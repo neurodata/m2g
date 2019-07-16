@@ -1,31 +1,19 @@
-language: python
-python:
-    - "2.7"
 virtualenv:
   system_site_packages: true
+
+language: python
+
+python:
+    - "2.7"
+
+services:
+    - docker
+
+before_install:
+    - docker pull neurodata/ndmg_dev:latest
+
 install:
-    - sudo apt-get update
-    - sudo apt-get install python-dev
-    - sudo apt-get install python-setuptools
-    - sudo apt-get install python-numpy python-scipy
-    - sudo apt-get install zlib1g-dev
-    - sudo apt-get install python-matplotlib python-nose
-    - sudo apt-get install python-vtk
-    - sudo easy_install pip
-    - sudo pip install cython
-    - pip install numpy
-    - pip install coveralls
-    - pip install wget
-    - pip install nibabel
-    - pip install scikit-learn
-    - pip install scikit-image
-    - pip install nilearn
-    - pip install dipy
-    - pip install networkx
-    - pip install multiprocessing
-    - pip install pyvtk
-    - pip install plotly==1.12
-    - pip install .
+    - pip install -r requirements.txt
+
 script:
-    - coverage run -m unittest discover
-after_success: coveralls
+    - pytest
