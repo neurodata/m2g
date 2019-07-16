@@ -20,7 +20,7 @@
 
 
 # this is a test
-# as well
+# as wel
 
 # standard library imports
 import glob
