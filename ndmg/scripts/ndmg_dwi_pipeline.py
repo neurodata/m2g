@@ -19,8 +19,6 @@
 # Email: dpisner@utexas.edu
 
 
-# this is a test
-# as wel
 
 # standard library imports
 import glob
