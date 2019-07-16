@@ -11,9 +11,14 @@ services:
 
 before_install:
     - docker pull neurodata/ndmg_dev:latest
+    - docker run -it --entrypoint /bin/bash neurodata/ndmg_dev:latest
 
 install:
+    - cd ndmg
+    - git checkout $TRAVIS_PULL_REQUEST_BRANCH
+    - pip uninstall ndmg
     - pip install -r requirements.txt
+    - pip install .
 
 script:
-    - pytest
+    - ndmg_bids
