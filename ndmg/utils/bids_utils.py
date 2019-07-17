@@ -36,6 +36,19 @@ class name_resource:
     """
 
     def __init__(self, modf, t1wf, tempf, opath):
+        """__init__ containing relevant BIDS specified paths for relevant data
+        
+        Parameters
+        ----------
+        modf : str
+            Location of MRI data to be analyzed
+        t1wf : str
+            Location of t1w anatomical data
+        tempf : str
+            Location of atlas file(s) to be used during analysis
+        opath : str
+            Output directory
+        """
         self.__subi__ = os.path.basename(modf).split(".")[0]
         self.__anati__ = os.path.basename(t1wf).split(".")[0]
         self.__sub__ = re.search(r"(sub-)(?!.*sub-).*?(?=[_])", modf).group()
@@ -219,11 +232,35 @@ def flatten(current, result=[]):
 
 
 def sweep_directory(bdir, subj=None, sesh=None, task=None, run=None, modality="dwi"):
+    """Given a BIDs formatted directory, crawls the BIDs dir and prepares the necessary inputs for the NDMG pipeline. Uses regexes to check matches for BIDs compliance.
+    
+    Parameters
+    ----------
+    bdir : str
+        input directory
+    subj : list, optional
+        subject label. Default = None
+    sesh : list, optional
+        session label. Default = None
+    task : list, optional
+        task label. Default = None
+    run : list, optional
+        run label. Default = None
+    modality : str, optional
+        Data type being analyzed. Default = "dwi"
+    
+    Returns
+    -------
+    tuple
+        contining location of dwi, bval, bvec, and anat
+    
+    Raises
+    ------
+    ValueError
+        Raised if incorrect mobility passed
     """
-    Given a BIDs formatted directory, crawls the BIDs dir and prepares the
-    necessary inputs for the NDMG pipeline. Uses regexes to check matches for
-    BIDs compliance.
-    """
+
+    
     if modality == "dwi":
         dwis = []
         bvals = []

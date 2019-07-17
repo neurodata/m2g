@@ -72,16 +72,14 @@ else:
 
 
 def get_atlas(atlas_dir, modality, vox_size):
-    """
-    Given the desired location fot aslses and the type of processing, ensure
-    we have all the atlases and parcellations.
+    """Given the desired location of atlases and the type of processing, ensure we have all the atlases and parcellations.
     
     Parameters
     ----------
     atlas_dir : str
         directory containing atlases.
     modality : str
-        dwi or fmri.
+        dwi or func.
     vox_size : str
         Resolution.
     
@@ -184,10 +182,56 @@ def session_level(
     debug=False,
     modif="",
 ):
-    """
-    Crawls the given BIDS organized directory for data pertaining to the given
-    subject and session, and passes necessary files to ndmg_dwi_pipeline for
-    processing.
+    """Crawls the given BIDS organized directory for data pertaining to the given subject and session, and passes necessary files to ndmg_dwi_pipeline for processing.
+    
+    Parameters
+    ----------
+    inDir : str
+        BIDS input directory
+    outDir : str
+        output directory
+    subjs : list
+        subject label
+    vox_size : str
+        Voxel size to use for template registrations.
+    big : bool
+        Whether to produce big graphs for DWI, or voxelwise timeseries for fMRI.
+    clean : bool
+        Whether or not to delete intermediates
+    stc : str
+        A file for slice timing correction. Options are a TR sequence file (where each line is the shift in TRs), up (ie, bottom to top), down (ie, top to bottom), or interleaved
+    atlas_select : str
+        [description]
+    mod_type : str
+        Determinstic (det) or probabilistic (prob) tracking
+    track_type : str
+        Tracking approach: eudx or local. Default is eudx
+    mod_func : [type]
+        [description]
+    reg_style : str
+        Space for tractography.
+    sesh : str, optional
+        session label. Default is None
+    task : str, optional
+        task label. Default is None
+    run : str, optional
+        run label. Default is None
+    modality : str, optional
+        Data type being analyzed. Default = "dwi"
+    nproc : int, optional
+        [description], by default 1
+    buck : str, optional
+        The name of an S3 bucket which holds BIDS organized data. You musht have build your bucket with credentials to the S3 bucket you wish to access. Default is None
+    remo : str, optional
+        The path to the data on your S3 bucket. The data will be downloaded to the provided bids_dir on your machine. Default is None.
+    push : bool, optional
+        Flag to push derivatives back to S3. Default is False
+    creds : bool, optional
+        Determine if you have S3 credentials. Default is None
+    debug : bool, optional
+        If False, remove any old filed in the output directory. Default is False
+    modif : str, optional
+        Name of the folder on s3 to push to. If empty, push to a folder with ndmg's version number. Default is ""
     """
 
     labels, atlas, atlas_mask, atlas_brain, lv_mask = get_atlas(
@@ -282,6 +326,8 @@ def session_level(
 
 
 def main():
+    """Starting point of the ndmg pipeline, assuming that you are using a BIDS organized dataset
+    """
     parser = ArgumentParser(
         description="This is an end-to-end connectome \
                             estimation pipeline from M3r Images."
@@ -512,6 +558,7 @@ def main():
     reg_style = result.sp
     modif = result.modif
 
+    # Check to see if user has provided direction to an existing s3 bucket they wish to use
     try:
         creds = bool(s3_utils.get_credentials())
     except:
