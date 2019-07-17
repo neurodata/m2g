@@ -23,7 +23,6 @@ before_install:
 
     # grab correct branch, update it to the new branch version
     - docker version
-    - echo $TRAVIS_BRANCH
     - echo $TRAVIS_PULL_REQUEST_BRANCH
     - mkdir input
     - mkdir output
@@ -33,7 +32,7 @@ before_install:
     - docker run -t -d --name travis -v $(readlink -f input):/input -v $(readlink -f output):/output --entrypoint /bin/bash neurodata/ndmg_dev:latest
     - docker ps
     - docker exec -w /ndmg travis git fetch --all
-    - docker exec -w /ndmg travis git checkout $TRAVIS_BRANCH
+    - docker exec -w /ndmg travis git checkout $TRAVIS_PULL_REQUEST_BRANCH
     - docker exec -w /ndmg travis git branch
 
 install:
