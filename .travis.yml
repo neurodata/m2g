@@ -10,8 +10,14 @@ services:
     - docker
 
 before_install:
-    # might need to update docker version: https://docs.travis-ci.com/user/docker/
+    # update docker version: https://docs.travis-ci.com/user/docker/
+    - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+    - sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+    - sudo apt-get update
+    - sudo apt-get -y -o Dpkg::Options::="--force-confnew" install docker-ce
+
     # grab correct branch, update it to the new branch version
+    - docker version
     - mkdir input
     - mkdir output
     - readlink -f input
