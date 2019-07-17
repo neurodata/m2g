@@ -12,8 +12,11 @@ services:
 before_install:
     - mkdir input
     - mkdir output
+    - readlink -f input
     - docker pull neurodata/ndmg_dev:latest
-    - docker run -v $(realpath input):/input -v $(realpath output):/output -e "TRAVIS_PULL_REQUEST_BRANCH=$TRAVIS_PULL_REQUEST_BRANCH" -it --entrypoint /bin/bash neurodata/ndmg_dev:latest
+    - docker images
+    - docker run -v $(readlink -f input):/input -v $(readlink -f output):/output -e "TRAVIS_PULL_REQUEST_BRANCH=$TRAVIS_PULL_REQUEST_BRANCH" -it --entrypoint /bin/bash neurodata/ndmg_dev:latest
+    - ls -lah
 
 install:
     - cd ndmg
