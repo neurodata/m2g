@@ -23,6 +23,8 @@ before_install:
 
     # grab correct branch, update it to the new branch version
     - docker version
+    - echo $TRAVIS_BRANCH
+    - echo $TRAVIS_PULL_REQUEST_BRANCH
     - mkdir input
     - mkdir output
     - readlink -f input
