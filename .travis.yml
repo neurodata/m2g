@@ -4,6 +4,7 @@ virtualenv:
 language: python
 
 python:
+    # TODO: change this when ndmg is updated to python 3.
     - "2.7"
 
 services:
@@ -12,15 +13,10 @@ services:
 addons:
   apt:
     packages:
+      # use correct docker version: https://docs.travis-ci.com/user/docker/
       - docker-ce
 
 before_install:
-    # update docker version: https://docs.travis-ci.com/user/docker/
-    # - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
-    # - sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
-    # - sudo apt-get update
-    # - sudo apt-get -y -o Dpkg::Options::="--force-confnew" install docker-ce
-
     # grab correct branch, update it to the new branch version
     - docker version
     - echo $TRAVIS_PULL_REQUEST_BRANCH
@@ -36,9 +32,12 @@ before_install:
     - docker exec -w /ndmg travis git branch
 
 install:
+    # grab the package
     - docker exec -w /ndmg travis pip uninstall ndmg -y
     - docker exec -w /ndmg travis pip install -r requirements.txt
     - docker exec -w /ndmg travis pip install .
 
 script:
+    # run ndmg and pytest
     - docker exec -w /ndmg travis ndmg_bids --bucket ndmg-data --remote_path HNU1t --participant_label 0025427 --session_label 1 --modality dwi --atlas desikan --mod det --tt eudx --mf tensor --sp native /input /output participant
+    - docker exec -w /ndmg travis pytest

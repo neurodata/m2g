@@ -85,6 +85,7 @@ def ndmg_dwi_pipeline(
     """
     Creates a brain graph from MRI data
     """
+    assert False  # For testing travis build -- DO NOT PR INTO STAGING
     print('dwi = "{}"').format(dwi)
     print('bvals = "{}"').format(bvals)
     print('bvecs = "{}"').format(bvecs)
