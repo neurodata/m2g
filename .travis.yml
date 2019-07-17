@@ -15,6 +15,9 @@ before_install:
     - readlink -f input
     - docker pull neurodata/ndmg_dev:latest
     - docker images
+    - docker run -d --name travis -v $(readlink -f input):/input -v $(readlink -f output):/output neurodata/ndmg_dev:latest
+    - docker ps
+    - 
     - docker run -v $(readlink -f input):/input -v $(readlink -f output):/output -e "TRAVIS_PULL_REQUEST_BRANCH=$TRAVIS_PULL_REQUEST_BRANCH" -it --entrypoint /bin/bash neurodata/ndmg_dev:latest
     - ls -lah
 
