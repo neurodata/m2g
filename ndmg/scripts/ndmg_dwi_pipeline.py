@@ -41,6 +41,7 @@ import nibabel as nib
 from dipy.tracking.streamline import Streamlines
 from dipy.tracking.utils import move_streamlines
 from nilearn.image import new_img_like, resample_img
+from dipy.io import read_bvals_bvecs
 
 # local imports
 import ndmg
@@ -276,7 +277,7 @@ def ndmg_dwi_pipeline(
 
     # Correct any corrupted bvecs/bvals
     print("Correcting corrupted bvals and bvecs")
-    from dipy.io import read_bvals_bvecs
+    #from dipy.io import read_bvals_bvecs
 
     bvals, bvecs = read_bvals_bvecs(fbval, fbvec)
     bvecs[np.where(np.any(abs(bvecs) >= 10, axis=1) == True)] = [1, 0, 0]

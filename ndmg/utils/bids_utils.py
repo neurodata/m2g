@@ -107,13 +107,20 @@ class name_resource:
         return
 
     def add_dirs_dwi(namer, paths, labels, label_dirs):
+        """Creates tmp and permanent directories for the desired suffixes
+        
+        Parameters
+        ----------
+        namer : name_resource
+            varibale of the name_resource class created by name_resource() containing path and settings information for the desired run. It includes: subject, anatomical scan, session, run number, task, resolution, output directory 
+        paths : dict
+            a dictionary of keys to suffix directories
+        labels : list
+            path to desired atlas labeling file
+        label_dirs : list
+            N/A
         """
-        creates tmp and permanent directories for the desired suffixes.
 
-        **Positional Arguments:
-            - paths:
-                - a dictionary of keys to suffix directories desired.
-        """
         namer.dirs = {}
         if not isinstance(labels, list):
             labels = [labels]
@@ -154,9 +161,14 @@ class name_resource:
         return
 
     def _get_outdir(self):
+        """Called by constructor to initialize the output directory
+        
+        Returns
+        -------
+        list
+            path to output directory
         """
-        Called by constructor to initialize the output directory.
-        """
+        
         olist = [self.__basepath__]
         # olist.append(self.__sub__)
         # if self.__ses__:
@@ -223,6 +235,20 @@ class name_resource:
 
 
 def flatten(current, result=[]):
+    """
+    
+    Parameters
+    ----------
+    current : dict
+        [description]
+    result : list, optional
+        Default is []
+    
+    Returns
+    -------
+    list
+        [description]
+    """
     if isinstance(current, dict):
         for key in current:
             flatten(current[key], result)
@@ -364,10 +390,20 @@ def sweep_directory(bdir, subj=None, sesh=None, task=None, run=None, modality="d
 
 
 def as_list(x):
+    """A function to convert an item to a list if it is not, or pass it through otherwise
+    
+    Parameters
+    ----------
+    x : any object
+        anything that can be entered into a list that you want to be converted into a list
+    
+    Returns
+    -------
+    list
+        a list containing x
     """
-    A function to convert an item to a list if it is not, or pass
-    it through otherwise.
-    """
+    
+    
     if not isinstance(x, list):
         return [x]
     else:
@@ -375,11 +411,23 @@ def as_list(x):
 
 
 def merge_dicts(x, y):
+    """A function to merge two dictionaries, making it easier for us to make modality specific queries
+    for dwi images (since they have variable extensions due to having an nii.gz, bval, and bvec file)
+    
+    Parameters
+    ----------
+    x : dict
+        dictionary you want merged with y
+    y : dict
+        dictionary you want merged with x
+    
+    Returns
+    -------
+    dict
+        combined dictionary with {x content,y content}
     """
-    A function to merge two dictionaries, making it easier for us to make
-    modality specific queries for dwi images (since they have variable
-    extensions due to having an nii.gz, bval, and bvec file).
-    """
+
+    
     z = x.copy()
     z.update(y)
     return z

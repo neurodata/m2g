@@ -33,6 +33,8 @@ import sys
 import shutil
 import pyximport
 from nilearn.image import mean_img
+from dipy.align.reslice import reslice
+import random
 
 try:
     from ndmg.graph.zindex import XYZMorton
@@ -122,10 +124,29 @@ def get_slice(mri, volid, sli):
 
 
 def make_gtab_and_bmask(fbval, fbvec, dwi_file, outdir):
+    """Takes bval and bvec files and produces a structure in dipy format
+    
+    Parameters
+    ----------
+    fbval : str
+        b-value file
+    fbvec : str
+        b-vector file
+    dwi_file : str
+        dwi file being analyzed
+    outdir : str
+        output directory
+    
+    Returns
+    -------
+    GradientTable
+        gradient table created from bval and bvec files
+    str
+        location of averaged b0 image file
+    str
+        location of b0 brain mask file
     """
-    Takes bval and bvec files and produces a structure in dipy format
-    **Positional Arguments:**
-    """
+    
     # Use B0's from the DWI to create a more stable DWI image for registration
     nodif_B0 = "{}/nodif_B0.nii.gz".format(outdir)
     nodif_B0_bet = "{}/nodif_B0_bet.nii.gz".format(outdir)
@@ -179,7 +200,25 @@ def make_gtab_and_bmask(fbval, fbvec, dwi_file, outdir):
 
 
 def reorient_dwi(dwi_prep, bvecs, namer):
-    import shutil
+    """Orients dwi data to the proper orientation (RADIOLOGICAL) through Posterior-Anterior and Inferior-Superior flipping
+    
+    Parameters
+    ----------
+    dwi_prep : str
+        Location of eddy corrected dwi file
+    bvecs : str
+        Location of the resaled b-vector file
+    namer : name_resource
+        name_resource variable containing relevant directory tree information
+    
+    Returns
+    -------
+    str
+        location of potentially reoriented eddy corrected dwi file
+    str
+        location of potentially reoriented b-vector file
+    """
+    #import shutil
     # Check orientation (dwi_prep)
     cmd = 'fslorient -getorient ' + dwi_prep
     cmd_run = os.popen(cmd)
@@ -273,8 +312,22 @@ def reorient_dwi(dwi_prep, bvecs, namer):
 
 
 def reorient_t1w(t1w, namer):
-    import shutil
-    import random
+    """Orients t1w data to the proper orientation (RADIOLOGICAL) through Posterior-Anterior and Inferior-Superior flipping
+    
+    Parameters
+    ----------
+    t1w : str
+        Location of t1w file
+    namer : name_resource
+        name_resource variable containing relevant directory tree information
+    
+    Returns
+    -------
+    str
+        location of reoriented t1w file
+    """
+    #import shutil
+    #import random
     cmd = 'fslorient -getorient ' + t1w
     cmd_run = os.popen(cmd)
     orient = cmd_run.read().strip('\n')
@@ -357,7 +410,25 @@ def reorient_t1w(t1w, namer):
 
 
 def match_target_vox_res(img_file, vox_size, namer, sens):
-    from dipy.align.reslice import reslice
+    """Reslices input MRI file if it doesn’t match the targeted voxel resolution. Can take dwi or t1w scans.
+    
+    Parameters
+    ----------
+    img_file : str
+        location of file to be resliced
+    vox_size : str
+        target voxel resolution ('2mm' or '1mm')
+    namer : name_resource
+        name_resource variable containing relevant directory tree information
+    sens : str
+        type of data being analyzed ('dwi' or 'func')
+    
+    Returns
+    -------
+    str
+        location of potentially resliced image
+    """
+    #from dipy.align.reslice import reslice
     # Check dimensions
     img = nib.load(img_file)
     data = img.get_fdata()
