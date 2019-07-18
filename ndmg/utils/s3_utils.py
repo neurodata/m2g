@@ -94,6 +94,7 @@ def s3_get_data(bucket, remote, local, public=False):
 
     # TODO : use boto3 for this
     if os.path.exists(local):
+        print("Local directory already exists. Not pulling s3 data.")
         return  # TODO: make sure this doesn't append None a bunch of times to a list in a loop on this function
     if not public:
         # get client with credentials if they exist
