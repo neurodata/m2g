@@ -14,3 +14,4 @@ pybids==0.6.4
 configparser>=3.7.4
 fury
 pytest
+pathlib2
