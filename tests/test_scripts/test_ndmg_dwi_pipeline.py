@@ -79,6 +79,6 @@ def test_for_outputs(edgelists):
 
 def test_for_content(edgelists):
     for filename in edgelists:
-        with open(filename) as f:
+        with filename.open() as f:
             lines = f.readlines()
             assert lines

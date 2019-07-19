@@ -3,6 +3,7 @@
 # TODO : run ndmg with `pytest`, rather than travis.
 # TODO : travis breaks if you make edits directly from github, because the branch name is wrong.
 
+
 virtualenv:
   system_site_packages: true
 
@@ -47,7 +48,9 @@ script:
   - docker exec -w /ndmg travis pytest -v --disable-warnings
 
 after_success:
+  # Given build succeeds, push ndmg_dev image to dockerhub
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
   - docker exec travis rm -r /input/*
   - docker exec travis rm -r /output/*
   - docker commit -c 'ENTRYPOINT ["ndmg_bids"]' travis neurodata/ndmg_dev:latest
-  - docker push neurodata/ndmg_dev:latest
+  - if [ "$TRAVIS_BRANCH" == "staging" ]; then docker push neurodata/ndmg_dev:latest; fi
