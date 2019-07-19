@@ -1,5 +1,6 @@
 # This travis build simply tests to see if the ndmg pipeline runs to completion.
 # Note that this does not mean the ndmg pipeline is *correct* -- just that it ran to completion!
+# TODO : run ndmg with `pytest`, rather than travis.
 
 virtualenv:
   system_site_packages: true
