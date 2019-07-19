@@ -44,7 +44,7 @@ setup(
     download_url="https://github.com/neurodata/ndmg/tarball/" + VERSION,
     keywords=["connectome", "mri", "pipeline"],
     classifiers=[],
-    install_requires=[  # We didnt put versions for numpy, scipy, b/c travis-ci
+    install_requires=[
         "networkx",
         "nibabel",
         "nilearn",
@@ -58,5 +58,6 @@ setup(
         "cython",
         "pybids==0.6.4",
         "configparser>=3.7.4",
+        "pytest"
     ],
 )
