@@ -56,23 +56,29 @@ def filter_graph_files(file_list, **kwargs):
 
 
 def get_files(output_directory, suffix="ssv", atlas="desikan"):
-        output = []
-        for dirname, _, files in os.walk(output_directory):
-                file_ends = list(filter_graph_files(files, suffix=suffix, atlas=atlas))
-                graphnames = [Path(dirname) / Path(graphname) for graphname in file_ends]
-                if all(graphname.exists for graphname in graphnames):
-                        output.extend(graphnames)
-        return output
+    output = []
+    for dirname, _, files in os.walk(output_directory):
+            file_ends = list(filter_graph_files(files, suffix=suffix, atlas=atlas))
+            graphnames = [Path(dirname) / Path(graphname) for graphname in file_ends]
+            if all(graphname.exists for graphname in graphnames):
+                    output.extend(graphnames)
+    return output
 
 
 @pytest.fixture
 def edgelists():
-        """ Only works when the output directory is "/output", which it is in the travis build. """
-        return get_files("/output")
+    """ Only works when the output directory is "/output", which it is in the travis build. """
+    return get_files("/output")
 
 
 def test_for_outputs(edgelists):
-        """
-        Test that, within the output directory on this subject, there is a graph.
-        """
-        assert edgelists
+    """
+    Test that, within the output directory on this subject, there is a graph.
+    """
+    assert edgelists
+
+def test_for_content(edgelists):
+    for filename in edgelists:
+        with filename.open() as f:
+            lines = f.readlines()
+            assert lines
