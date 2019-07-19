@@ -20,28 +20,34 @@ addons:
       - docker-ce
 
 before_install:
-    # grab correct branch, update it to the new branch version
-    - docker version
-    - export BRANCH=$(if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then echo $TRAVIS_BRANCH; else echo $TRAVIS_PULL_REQUEST_BRANCH; fi)
-    - echo $BRANCH
-    - mkdir input
-    - mkdir output
-    - readlink -f input
-    - docker pull neurodata/ndmg_dev:latest
-    - docker images
-    - docker run -t -d --name travis -v $(readlink -f input):/input -v $(readlink -f output):/output --entrypoint /bin/bash neurodata/ndmg_dev:latest
-    - docker ps
-    - docker exec -w /ndmg travis git fetch --all
-    - docker exec -w /ndmg travis git checkout $BRANCH
-    - docker exec -w /ndmg travis git branch
+  # grab correct branch, update it to the new branch version
+  - docker version
+  - export BRANCH=$(if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then echo $TRAVIS_BRANCH; else echo $TRAVIS_PULL_REQUEST_BRANCH; fi)
+  - echo $BRANCH
+  - mkdir input
+  - mkdir output
+  - readlink -f input
+  - docker pull neurodata/ndmg_dev:latest
+  - docker images
+  - docker run -t -d --name travis -v $(readlink -f input):/input -v $(readlink -f output):/output --entrypoint /bin/bash neurodata/ndmg_dev:latest
+  - docker ps
+  - docker exec -w /ndmg travis git fetch --all
+  - docker exec -w /ndmg travis git checkout $BRANCH
+  - docker exec -w /ndmg travis git branch
 
 install:
-    - docker exec -w /ndmg travis pip uninstall ndmg -y
-    - docker exec -w /ndmg travis pip install -r requirements.txt
-    - docker exec -w /ndmg travis pip install pytest
-    - docker exec -w /ndmg travis pip install .
+  - docker exec -w /ndmg travis pip uninstall ndmg -y
+  - docker exec -w /ndmg travis pip install -r requirements.txt
+  - docker exec -w /ndmg travis pip install pytest
+  - docker exec -w /ndmg travis pip install .
 
 script:
-    # Run ndmg in docker, run pytest in docker
-    - docker exec -w /ndmg travis ndmg_bids --bucket ndmg-data --remote_path HNU1t --participant_label 0025427 --session_label 1 --modality dwi --atlas desikan --mod det --tt eudx --mf tensor --sp native /input /output participant
-    - docker exec -w /ndmg travis pytest -v --disable-warnings
+  # Run ndmg in docker, run pytest in docker
+  - docker exec -w /ndmg travis ndmg_bids --bucket ndmg-data --remote_path HNU1t --participant_label 0025427 --session_label 1 --modality dwi --atlas desikan --mod det --tt eudx --mf tensor --sp native /input /output participant
+  - docker exec -w /ndmg travis pytest -v --disable-warnings
+
+after_success:
+  - docker exec travis rm -r /input/*
+  - docker exec travis rm -r /output/*
+  - docker commit -c 'ENTRYPOINT ["ndmg_bids"]' travis neurodata/ndmg_dev:latest
+  - docker push neurodata/ndmg_dev:latest
