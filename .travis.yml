@@ -36,6 +36,7 @@ before_install:
 install:
     - docker exec -w /ndmg travis pip uninstall ndmg -y
     - docker exec -w /ndmg travis pip install -r requirements.txt
+    - docker exec -w /ndmg travis pip install pytest
     - docker exec -w /ndmg travis pip install .
 
 script:

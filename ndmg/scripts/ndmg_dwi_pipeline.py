@@ -353,6 +353,8 @@ def ndmg_dwi_pipeline(
         )
 
         # -------- Tensor Fitting and Fiber Tractography ---------------- #
+
+        # TODO: these are the same commands
         if track_type == "eudx":
             seeds = mgt.build_seed_list(reg.wm_gm_int_in_dwi, np.eye(4), dens=3)
         else:
@@ -450,6 +452,7 @@ def ndmg_dwi_pipeline(
         )  # alex  # TODO: make sure dwi_prep is what is being registered
         reg.dwi2atlas()
 
+        # -------- Tensor Fitting and Fiber Tractography ---------------- #
         print("Beginning tractography...")
         # Compute tensors and track fiber streamlines
         print("aligned_dwi: {}").format(aligned_dwi)
