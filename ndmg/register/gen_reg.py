@@ -297,7 +297,36 @@ def direct_streamline_norm(streams, streams_mni, nodif_B0, namer):
 
 
 class dmri_reg(object):
+    """Class containing relevant paths and class methods for analysing tractography
+    
+    Parameters
+    ----------
+    namer : name_resource
+        name_resource variable containing relevant directory tree information
+    nodif_B0 : str
+        mean b0 image
+    nodif_B0_mask : str
+        mean b0 mask
+    t1w_in : str
+        t1w file
+    vox_size : str
+        voxel resolution ('2mm' or '1mm')
+    simple : bool
+        [description]
+    
+    Returns
+    -------
+    [type]
+        [description]
+    
+    Raises
+    ------
+    ValueError
+        FSL atlas for ventricle reference not found
+    """
     def __init__(self, namer, nodif_B0, nodif_B0_mask, t1w_in, vox_size, simple):
+        """Contents of dmri_reg class
+        """
         self.simple = simple
         self.nodif_B0 = nodif_B0
         self.nodif_B0_mask = nodif_B0_mask
@@ -445,6 +474,9 @@ class dmri_reg(object):
         self.input_mni_sched = "%s%s" % (FSLDIR, "/etc/flirtsch/T1_2_MNI152_2mm.cnf")
 
     def gen_tissue(self):
+        """Extracts the brain from the raw t1w image, uses it to create WM, GM, and CSF masks, reslices all 4 files to the target
+        voxel resolution and extracts the white matter edge
+        """
         # BET needed for this, as afni 3dautomask only works on 4d volumes
         print("Extracting brain from raw T1w image...")
         mgru.t1w_skullstrip(self.t1w, self.t1w_brain)
@@ -488,14 +520,10 @@ class dmri_reg(object):
         return
 
     def t1w2dwi_align(self):
+        """Alignment from t1w to mni, making t1w_mni, and t1w_mni to dwi. A function to perform self alignment. Uses a local optimisation cost function to get the
+        two images close, and then uses bbr to obtain a good alignment of brain boundaries. Assumes input dwi is already preprocessed and brain extracted.
         """
-        alignment from T1w --> MNI and T1w_MNI --> DWI
-        A function to perform self alignment. Uses a local optimisation
-        cost function to get the two images close, and then uses bbr
-        to obtain a good alignment of brain boundaries.
-        Assumes input dwi is already preprocessed and brain extracted.
-        """
-
+        
         # Create linear transform/ initializer T1w-->MNI
         mgru.align(
             self.t1w_brain,
@@ -634,13 +662,23 @@ class dmri_reg(object):
         return
 
     def atlas2t1w2dwi_align(self, atlas, dsn=True):
+        """alignment from atlas to t1w to dwi. A function to perform atlas alignmet. Tries nonlinear registration first, and if that fails, does a liner
+        registration instead.
+        Note: for this to work, must first have called t1w2dwi_align.
+        
+        Parameters
+        ----------
+        atlas : [type]
+            [description]
+        dsn : bool, optional
+            [description], by default True
+        
+        Returns
+        -------
+        [type]
+            [description]
         """
-        alignment from atlas --> T1 --> dwi
-        A function to perform atlas alignment.
-        Tries nonlinear registration first, and if that fails,
-        does a linear registration instead.
-        NOTE: for this to work, must first have called t1w2dwi_align.
-        """
+        
         self.atlas = atlas
         self.atlas_name = self.atlas.split("/")[-1].split(".")[0]
         self.aligned_atlas_t1mni = "{}/{}_aligned_atlas_t1w_mni.nii.gz".format(
@@ -816,13 +854,15 @@ class dmri_reg(object):
             return self.aligned_atlas_t1mni
 
     def tissue2dwi_align(self):
-        """
-        alignment of ventricle ROI's from MNI space --> dwi and
-        CSF from T1w space --> dwi
-        A function to generate and perform dwi space alignment of avoidance/waypoint masks for tractography.
-        First creates ventricle ROI. Then creates transforms from stock MNI template to dwi space.
-        NOTE: for this to work, must first have called both t1w2dwi_align and atlas2t1w2dwi_align.
-        """
+        """alignment of ventricle ROIs from MNI space to dwi and CSF from t1w space to dwi. A function to generate and perform dwi space alignment
+        of avoidance/waypoint masks for tractography. First creates ventricle ROI. Then creates transforms from stock MNI template to dwi space.
+        Note: for this to work, must first have called both t1w2dwi_align and atlas2t1wdwi_align.
+        
+        Raises
+        ------
+        ValueError
+            Raised if FSL atlas for ventricle reference not found
+        """        
 
         # Create MNI-space ventricle mask
         print("Creating MNI-space ventricle ROI...")

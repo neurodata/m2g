@@ -33,8 +33,6 @@ import sys
 import shutil
 import pyximport
 from nilearn.image import mean_img
-from dipy.align.reslice import reslice
-import random
 
 try:
     from ndmg.graph.zindex import XYZMorton
@@ -218,8 +216,8 @@ def reorient_dwi(dwi_prep, bvecs, namer):
     str
         location of potentially reoriented b-vector file
     """
-    #import shutil
-    # Check orientation (dwi_prep)
+    import shutil
+    # Check orientation (dwi_prep) by getting the orientation contained in the dwi file
     cmd = 'fslorient -getorient ' + dwi_prep
     cmd_run = os.popen(cmd)
     orient = cmd_run.read().strip('\n')
@@ -326,8 +324,8 @@ def reorient_t1w(t1w, namer):
     str
         location of reoriented t1w file
     """
-    #import shutil
-    #import random
+    import shutil
+    import random
     cmd = 'fslorient -getorient ' + t1w
     cmd_run = os.popen(cmd)
     orient = cmd_run.read().strip('\n')
@@ -410,7 +408,7 @@ def reorient_t1w(t1w, namer):
 
 
 def match_target_vox_res(img_file, vox_size, namer, sens):
-    """Reslices input MRI file if it doesn’t match the targeted voxel resolution. Can take dwi or t1w scans.
+    """Reslices input MRI file if it does not match the targeted voxel resolution. Can take dwi or t1w scans.
     
     Parameters
     ----------
@@ -428,7 +426,7 @@ def match_target_vox_res(img_file, vox_size, namer, sens):
     str
         location of potentially resliced image
     """
-    #from dipy.align.reslice import reslice
+    from dipy.align.reslice import reslice
     # Check dimensions
     img = nib.load(img_file)
     data = img.get_fdata()

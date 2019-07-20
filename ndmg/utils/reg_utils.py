@@ -287,23 +287,18 @@ def resample_fsl(base, res, goal_res, interp="spline"):
 
 
 def t1w_skullstrip(t1w, out):
+    """Skull-strips the t1w image using AFNIs 3dSkullStrip algorithm, which is a modification of FSLs BET specialized to t1w images.
+    Offers robust skull-stripping with no hyperparameters
+    Note: renormalizes the intensities, call extract_t1w_brain instead if you want the original intensity values
+    
+    Parameters
+    ----------
+    t1w : str
+        the input t1w image file
+    out : str
+        the output skull-stripped image file
     """
-    A function that skull-strips T1w images using AFNI's 3dSkullStrip
-    algorithm, which is a modification of FSL's BET specialized to T1w
-    images. This offers robust skull-stripping with no hyperparameters.
-    Note that this function renormalizes the intensities, so make sure
-    to call extract_t1w_brain if the goal is to retrieve the original
-    intensity values.
-
-    **Positional Arguments:**
-
-        - inp:
-            - the input T1w image.
-        - out:
-            - the output skull-stripped image.
-	- frac:
-	    - fractional intensity threshold to apply.
-    """
+    
     cmd = "3dSkullStrip -prefix {} -input {}".format(out, t1w)
     mgu.execute_cmd(cmd, verb=True)
     pass
@@ -331,24 +326,26 @@ def get_filename(label):
 
 
 def segment_t1w(t1w, basename, opts=""):
+    """Uses FSLs FAST to segment an anatomical image into GM, WM, and CSF probability maps.
+    
+    Parameters
+    ----------
+    t1w : str
+        the path to the t1w image to be segmented
+    basename : str
+        the basename for outputs. Often it will be most convenient for this to be the dataset, followed by the subject,
+        followed by the step of processing. Note that this anticipates a path as well;
+        ie, /path/to/dataset_sub_nuis, with no extension.
+    opts : str, optional
+        additional options that can optionally be passed to fast. Desirable options might be -P, which will use
+        prior probability maps if the input T1w MRI is in standard space, by default ""
+    
+    Returns
+    -------
+    dict
+        dictionary of output files
     """
-    A function to use FSL's FAST to segment an anatomical
-    image into GM, WM, and CSF prob maps.
-    **Positional Arguments:**
-        t1w:
-            - an anatomical T1w image.
-        basename:
-            - the basename for outputs. Often it will be
-              most convenient for this to be the dataset,
-              followed by the subject, followed by the step of
-              processing. Note that this anticipates a path as well;
-              ie, /path/to/dataset_sub_nuis, with no extension.
-        opts:
-            - additional options that can optionally be passed to
-              fast. Desirable options might be -P, which will use
-              prior probability maps if the input T1w MRI is in
-              standard space.
-    """
+    
     print("Segmenting Anatomical Image into WM, GM, and CSF with FSL's FAST:")
     # run FAST, with options -t for the image type and -n to
     # segment into CSF (pve_0), WM (pve_1), GM (pve_2)
@@ -377,32 +374,38 @@ def align(
     init=None,
     finesearch=None,
 ):
+    """Aligns two images using FSLs flirt function and stores the transform between them
+    
+    Parameters
+    ----------
+    inp : str
+        path to input image being altered to align with the reference image as a nifti image file
+    ref : str
+        path to reference image being aligned to as a nifti image file
+    xfm : str, optional
+        where to save the 4x4 affine matrix containing the transform between two images, by default None
+    out : object, optional
+        determines whether the image will be automatically aligned, by default None
+    dof : int, optional
+        the number of degrees of free dome of the alignment, by default 12
+    searchrad : bool, optional
+        whether to use the predefined searchradius parameter (180 degree sweep in x, y, and z), by default True
+    bins : int, optional
+        number of histogram bins, by default 256
+    interp : str, optional
+        interpolation method to be used (trilinear,nearestneighbour,sinc,spline), by default None
+    cost : str, optional
+        cost function to be used in alignment (mutualinfo, corratio, normcorr, normmi, leastsq, labeldiff, or bbr), by default "mutualinfo"
+    sch : str, optional
+        the optional FLIRT schedule, by default None
+    wmseg : str, optional
+        an optional white-matter segmentation for bbr, by default None
+    init : str, optional
+        an initial guess of an alignment in the form of the path to a matrix file, by default None
+    finesearch : int, optional
+        angle in degrees, by default None
     """
-    Aligns two images and stores the transform between them
-    **Positional Arguments:**
-            inp:
-                - Input impage to be aligned as a nifti image file
-            ref:
-                - Image being aligned to as a nifti image file
-            xfm:
-                - Returned transform between two images
-            out:
-                - determines whether the image will be automatically
-                aligned.
-            dof:
-                - the number of degrees of freedom of the alignment.
-            searchrad:
-                - a bool indicating whether to use the predefined
-                searchradius parameter (180 degree sweep in x, y, and z).
-            interp:
-                - the interpolation method to use.
-            sch:
-                - the optional FLIRT schedule file.
-            wmseg:
-                - an optional white-matter segmentation for bbr.
-            init:
-                - an initial guess of an alignment.
-    """
+    
     cmd = "flirt -in {} -ref {}".format(inp, ref)
     if xfm is not None:
         cmd += " -omat {}".format(xfm)
@@ -438,24 +441,28 @@ def align_epi(epi, t1, brain, out):
 
 
 def align_nonlinear(inp, ref, xfm, out, warp, ref_mask=None, in_mask=None, config=None):
+    """Aligns two images using nonlinear methods and stores the transform between them using fnirt
+    
+    Parameters
+    ----------
+    inp : str
+        path to the input image
+    ref : str
+        path to the reference image that the input will be aligned to
+    xfm : str
+        path to the file containing the affine transform matrix created by reg_utils.align()
+    out : str
+        path for the desired output image
+    warp : str
+        the path to store the output file containing the nonlinear warp coefficients/fields
+    ref_mask : str, optional
+        path to the reference image brain_mask, by default None
+    in_mask : str, optional
+        path for the file with mask in input image space, by default None
+    config : str, optional
+        path to the config file specifying command line arguments, by default None
     """
-    Aligns two images using nonlinear methods and stores the
-    transform between them.
 
-    **Positional Arguments:**
-
-        inp:
-            - the input image.
-        ref:
-            - the reference image.
-        affxfm:
-            - the affine transform to use.
-        warp:
-            - the path to store the nonlinear warp.
-        mask:
-            - a mask in which voxels will be extracted
-            during nonlinear alignment.
-    """
     cmd = "fnirt --in={} --ref={} --aff={} --iout={} --cout={} --warpres=8,8,8"
     cmd = cmd.format(inp, ref, xfm, out, warp, config)
     if ref_mask is not None:
@@ -525,25 +532,19 @@ def apply_warp(ref, inp, out, warp, xfm=None, mask=None, interp=None, sup=False)
 
 
 def inverse_warp(ref, out, warp):
+    """Takes a non-linear mapping and finds the inverse. Takes the file conaining warp-coefficients/fields specified in the
+    variable warp (t1w -> mni) and creates its inverse (mni -> t1w) which is saved in the location determined by the variable out
+    
+    Parameters
+    ----------
+    ref : str
+        path to a file in target space, which is a different target space than warp (a image that has not been mapped to mni)
+    out : str
+        path to the output file, containing warps that are now inverted
+    warp : str
+        path to the warp/shiftmap transform volume wanting to be inverted
     """
-    Applies a warp from the functional to reference space
-    in a single step, using information about the structural->ref
-    mapping as well as the functional to structural mapping.
-
-    **Positional Arguments:**
-
-        inp:
-            - the input image to be aligned as a nifti image file.
-        out:
-            - the output aligned image.
-        ref:
-            - the image being aligned to.
-        warp:
-            - the warp from the structural to reference space.
-        premat:
-            - the affine transformation from functional to
-            structural space.
-    """
+    
     cmd = "invwarp --warp=" + warp + " --out=" + out + " --ref=" + ref
     print(cmd)
     os.system(cmd)

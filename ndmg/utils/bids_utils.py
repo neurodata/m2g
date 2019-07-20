@@ -33,21 +33,21 @@ import os
 class name_resource:
     """
     A class for naming derivatives under the BIDs spec.
+
+    Parameters
+    ----------
+    modf : str
+        Path to MRI data to be analyzed
+    t1wf : str
+        Path to t1w anatomical data
+    tempf : str
+        Path to atlas file(s) to be used during analysis
+    opath : str
+        Output directory
     """
 
     def __init__(self, modf, t1wf, tempf, opath):
         """__init__ containing relevant BIDS specified paths for relevant data
-        
-        Parameters
-        ----------
-        modf : str
-            Location of MRI data to be analyzed
-        t1wf : str
-            Location of t1w anatomical data
-        tempf : str
-            Location of atlas file(s) to be used during analysis
-        opath : str
-            Output directory
         """
         self.__subi__ = os.path.basename(modf).split(".")[0]
         self.__anati__ = os.path.basename(t1wf).split(".")[0]
@@ -176,10 +176,14 @@ class name_resource:
         return os.path.join(*olist)
 
     def get_outdir(self):
+        """Returns the base output directory for a particular subject and appropriate granularity.
+        
+        Returns
+        -------
+        str
+            output directory
         """
-        Returns the base  output directory for a particular subject
-        (+ appropriate granularity).
-        """
+        
         return self.__outdir__
 
     def get_template_info(self):
