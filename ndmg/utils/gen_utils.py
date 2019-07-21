@@ -122,7 +122,7 @@ def get_slice(mri, volid, sli):
 
 
 def make_gtab_and_bmask(fbval, fbvec, dwi_file, outdir):
-    """Takes bval and bvec files and produces a structure in dipy format
+    """Takes bval and bvec files and produces a structure in dipy format while also using FSL commands
     
     Parameters
     ----------

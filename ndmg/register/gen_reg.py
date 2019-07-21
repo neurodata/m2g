@@ -856,7 +856,6 @@ class dmri_reg(object):
     def tissue2dwi_align(self):
         """alignment of ventricle ROIs from MNI space to dwi and CSF from t1w space to dwi. A function to generate and perform dwi space alignment
         of avoidance/waypoint masks for tractography. First creates ventricle ROI. Then creates transforms from stock MNI template to dwi space.
-        Note: for this to work, must first have called both t1w2dwi_align and atlas2t1wdwi_align.
         
         Raises
         ------
@@ -876,7 +875,7 @@ class dmri_reg(object):
         cmd = "fslmaths " + self.lvent_out_file + self.args + self.mni_vent_loc
         os.system(cmd)
 
-        # Create transform to MNI atlas to T1w using flirt. This will be use to transform the ventricles to dwi space.
+        # Create a transform from the atlas onto T1w. This will be used to transform the ventricles to dwi space.
         mgru.align(
             self.mni_atlas,
             self.input_mni,

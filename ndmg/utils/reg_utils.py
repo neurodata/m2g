@@ -384,8 +384,8 @@ def align(
         path to reference image being aligned to as a nifti image file
     xfm : str, optional
         where to save the 4x4 affine matrix containing the transform between two images, by default None
-    out : object, optional
-        determines whether the image will be automatically aligned, by default None
+    out : str, optional
+        determines whether the image will be automatically aligned and where the resulting image will be saved, by default None
     dof : int, optional
         the number of degrees of free dome of the alignment, by default 12
     searchrad : bool, optional
@@ -476,20 +476,24 @@ def align_nonlinear(inp, ref, xfm, out, warp, ref_mask=None, in_mask=None, confi
 
 
 def applyxfm(ref, inp, xfm, aligned, interp="trilinear", dof=6):
+    """Aligns two images with a given transform using FSLs flirt command
+    
+    Parameters
+    ----------
+    ref : str
+        path of reference image to be aligned too as a nifti image file
+    inp : str
+        path of input image to be aligned as a nifti image file
+    xfm : str
+        path of the transform matrix between the two images
+    aligned : str
+        path for the output aligned image
+    interp : str, optional
+        interpolation method, by default "trilinear"
+    dof : int, optional
+        degrees of freedom for the alignment, by default 6
     """
-    Aligns two images with a given transform
-
-    **Positional Arguments:**
-
-            inp:
-                - Input impage to be aligned as a nifti image file
-            ref:
-                - Image being aligned to as a nifti image file
-            xfm:
-                - Transform between two images
-            aligned:
-                - Aligned output image as a nifti image file
-    """
+    
     cmd = "flirt -in {} -ref {} -out {} -init {} -interp {} -dof {} -applyxfm"
     cmd = cmd.format(inp, ref, aligned, xfm, interp, dof)
     print(cmd)
@@ -497,25 +501,29 @@ def applyxfm(ref, inp, xfm, aligned, interp="trilinear", dof=6):
 
 
 def apply_warp(ref, inp, out, warp, xfm=None, mask=None, interp=None, sup=False):
+    """Applies a warp from the functional to reference space in a single step using information about
+    the structural -> ref mapping as well as the functional to structural mapping.
+    
+    Parameters
+    ----------
+    ref : str
+        path of the reference image to be aligned to
+    inp : str
+        path of the input image to be aligned
+    out : str
+        path for the resulting warped output image
+    warp : str
+        path for the warp coefficent file to go from inp -> ref
+    xfm : str, optional
+        path of the affine transformation matrix file from inp -> ref, by default None
+    mask : str, optional
+        path of filename for mask image (in reference space), by default None
+    interp : str, optional
+        interpolation method {nn, trilinear, sinc, spline}, by default None
+    sup : bool, optional
+        whether to perform automatic intermediary supersampling, by default False
     """
-    Applies a warp from the functional to reference space
-    in a single step, using information about the structural->ref
-    mapping as well as the functional to structural mapping.
-
-    **Positional Arguments:**
-
-        inp:
-            - the input image to be aligned as a nifti image file.
-        out:
-            - the output aligned image.
-        ref:
-            - the image being aligned to.
-        warp:
-            - the warp from the structural to reference space.
-        premat:
-            - the affine transformation from functional to
-            structural space.
-    """
+    
     cmd = (
         "applywarp --ref=" + ref + " --in=" + inp + " --out=" + out + " --warp=" + warp
     )

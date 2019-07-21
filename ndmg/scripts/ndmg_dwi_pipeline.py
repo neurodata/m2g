@@ -106,7 +106,7 @@ def ndmg_dwi_pipeline(
     vox_size : str
         Voxel size to use for template registrations. Default is '2mm'.
     mod_type : str
-        Dtereminstic (det) or probabilistic (prob) tracking. Default is det.
+        Determinstic (det) or probabilistic (prob) tracking. Default is det.
     track_type : str
         Tracking approach: eudx or local. Default is eudx.
     mod_func : str
