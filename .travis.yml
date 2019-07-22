@@ -1,31 +1,57 @@
-language: python
-python:
-    - "2.7"
+# This travis build simply tests to see if the ndmg pipeline runs to completion.
+# Note that this does not mean the ndmg pipeline is *correct* -- just that it ran to completion!
+# TODO : run ndmg with `pytest`, rather than travis.
+# TODO : travis breaks if you make edits directly from github, because the branch name is wrong.
+
+
 virtualenv:
   system_site_packages: true
+
+language: python
+
+python:
+    - "2.7"
+
+services:
+    - docker
+
+addons:
+  apt:
+    packages:
+      - docker-ce
+
+before_install:
+    # grab correct branch, update it to the new branch version
+    - docker version
+    - export BRANCH=$(if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then echo $TRAVIS_BRANCH; else echo $TRAVIS_PULL_REQUEST_BRANCH; fi)
+    - echo $BRANCH
+    - mkdir input
+    - mkdir output
+    - readlink -f input
+    - docker pull neurodata/ndmg_dev:latest
+    - docker images
+    - docker run -t -d --name travis -v $(readlink -f input):/input -v $(readlink -f output):/output --entrypoint /bin/bash neurodata/ndmg_dev:latest
+    - docker ps
+    - docker exec -w /ndmg travis git fetch --all
+    - docker exec -w /ndmg travis git checkout $BRANCH
+    - docker exec -w /ndmg travis git pull
+    - docker exec -w /ndmg travis git branch
+
 install:
-    - sudo apt-get update
-    - sudo apt-get install python-dev
-    - sudo apt-get install python-setuptools
-    - sudo apt-get install python-numpy python-scipy
-    - sudo apt-get install zlib1g-dev
-    - sudo apt-get install python-matplotlib python-nose
-    - sudo apt-get install python-vtk
-    - sudo easy_install pip
-    - sudo pip install cython
-    - pip install numpy
-    - pip install coveralls
-    - pip install wget
-    - pip install nibabel
-    - pip install scikit-learn
-    - pip install scikit-image
-    - pip install nilearn
-    - pip install dipy
-    - pip install networkx
-    - pip install multiprocessing
-    - pip install pyvtk
-    - pip install plotly==1.12
-    - pip install .
+  - docker exec -w /ndmg travis pip uninstall ndmg -y
+  - docker exec -w /ndmg travis pip install -r requirements.txt
+  - docker exec -w /ndmg travis pip install pytest
+  - docker exec -w /ndmg travis pip install .
+
 script:
-    - coverage run -m unittest discover
-after_success: coveralls
+  # Run ndmg in docker, run pytest in docker
+  - docker exec -w /ndmg travis ndmg_bids --bucket ndmg-data --remote_path HNU1t --participant_label 0025427 --session_label 1 --modality dwi --atlas desikan --mod det --tt eudx --mf tensor --sp native /input /output participant
+  - docker exec -w /ndmg travis pytest -v --disable-warnings
+
+after_success:
+  # Given build succeeds, push ndmg_dev image to dockerhub
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+  - docker exec travis rm -r /input/*
+  - docker exec travis rm -r /output/*
+  - docker commit -c 'ENTRYPOINT ["ndmg_bids"]' travis neurodata/ndmg_dev:latest
+  - if [ "$TRAVIS_BRANCH" == "staging" ]; then docker push neurodata/ndmg_dev:latest; fi
