@@ -24,7 +24,7 @@
             "--mf",
             "tensor",
             "--sp",
-            "native_dsn",
+            "mni",
             "/input",
             "/output",
             "participant"
