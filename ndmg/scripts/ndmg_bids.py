@@ -22,26 +22,12 @@
 # edited by Eric Bridgeford to incorporate fMRI, multi-threading, and
 # big-graph generation.
 
-# standard library imports
-from multiprocessing import Pool
 import sys
-import shutil
-import os
 import glob
 import os.path as op
-import warnings
 from argparse import ArgumentParser
-import pkg_resources
-
-warnings.simplefilter("ignore")
-
-# local imports
-import ndmg
-from ndmg.scripts import ndmg_cloud as nc
 from ndmg.utils import s3_utils
-from ndmg.utils import gen_utils as mgu
 from ndmg.utils.bids_utils import *
-from ndmg.scripts.ndmg_func_pipeline import ndmg_func_pipeline
 from ndmg.scripts.ndmg_dwi_pipeline import ndmg_dwi_pipeline
 
 print("Beginning ndmg ...")
