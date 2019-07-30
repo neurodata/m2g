@@ -26,10 +26,7 @@ warnings.simplefilter("ignore")
 import os
 import nibabel as nib
 import numpy as np
-from nilearn.image import (
-    load_img,
-    math_img
-)
+from nilearn.image import (load_img, math_img)
 
 try:
     FSLDIR = os.environ["FSLDIR"]

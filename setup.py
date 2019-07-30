@@ -28,6 +28,7 @@ setup(
         "ndmg.nuis",
         "ndmg.scripts",
     ],
+    include_package_data = True,
     version=VERSION,
     entry_points={
         "console_scripts": [

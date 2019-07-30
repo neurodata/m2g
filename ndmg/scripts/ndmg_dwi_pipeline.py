@@ -172,8 +172,8 @@ def ndmg_dwi_pipeline(
     if len(os.listdir(namer.dirs["output"]["prep_dwi"])) != 0:
         try:
             print("Pre-existing preprocessed dwi files found. Deleting these...")
-            #shutil.rmtree(namer.dirs["output"]["prep_dwi"])
-            #os.mkdir(namer.dirs["output"]["prep_dwi"])
+            shutil.rmtree(namer.dirs["output"]["prep_dwi"])
+            os.mkdir(namer.dirs["output"]["prep_dwi"])
         except Exception as e:
             print("Exception when trying to execute eddy correction: {}".format(e))
             pass
@@ -185,7 +185,7 @@ def ndmg_dwi_pipeline(
     print("Performing eddy correction...")
     cmd = "eddy_correct " + dwi + " " + dwi_prep + " 0"
     print(cmd)
-    #os.system(cmd)
+    os.system(cmd)
 
     # Instantiate bvec/bval naming variations and copy to derivative director
     print("Instantiate bvec/bval naming variations, copy to derivative director")
@@ -263,15 +263,15 @@ def ndmg_dwi_pipeline(
     if len(os.listdir(namer.dirs["output"]["prep_anat"])) != 0:
         try:
             print("Pre-existing preprocessed t1w files found. Deleting these...")
-            #shutil.rmtree(namer.dirs["output"]["prep_anat"])
-            #os.mkdir(namer.dirs["output"]["prep_anat"])
+            shutil.rmtree(namer.dirs["output"]["prep_anat"])
+            os.mkdir(namer.dirs["output"]["prep_anat"])
         except:
             pass
     if len(os.listdir(namer.dirs["output"]["reg_anat"])) != 0:
         try:
             print("Pre-existing registered t1w files found. Deleting these...")
-            #shutil.rmtree(namer.dirs["output"]["reg_anat"])
-            #os.mkdir(namer.dirs["output"]["reg_anat"])
+            shutil.rmtree(namer.dirs["output"]["reg_anat"])
+            os.mkdir(namer.dirs["output"]["reg_anat"])
         except:
             pass
     if (len(os.listdir(namer.dirs["tmp"]["reg_a"])) != 0) or (
@@ -279,10 +279,10 @@ def ndmg_dwi_pipeline(
     ):
         try:
             print("Pre-existing temporary files found. Deleting these...")
-            #shutil.rmtree(namer.dirs["tmp"]["reg_a"])
-            #os.mkdir(namer.dirs["tmp"]["reg_a"])
-            #shutil.rmtree(namer.dirs["tmp"]["reg_m"])
-            #os.mkdir(namer.dirs["tmp"]["reg_m"])
+            shutil.rmtree(namer.dirs["tmp"]["reg_a"])
+            os.mkdir(namer.dirs["tmp"]["reg_a"])
+            shutil.rmtree(namer.dirs["tmp"]["reg_m"])
+            os.mkdir(namer.dirs["tmp"]["reg_m"])
         except:
             pass
 
@@ -301,7 +301,7 @@ def ndmg_dwi_pipeline(
         reg = mgr.dmri_reg(namer, nodif_B0, nodif_B0_mask, t1w, vox_size, simple=False)
         # Perform anatomical segmentation
         start_time = time.time()
-        #reg.gen_tissue()
+        reg.gen_tissue()
         print(
             "%s%s%s"
             % ("gen_tissue runtime: ", str(np.round(time.time() - start_time, 1)), "s")
@@ -309,7 +309,7 @@ def ndmg_dwi_pipeline(
 
         # Align t1w to dwi
         start_time = time.time()
-        #reg.t1w2dwi_align()
+        reg.t1w2dwi_align()
         print(
             "%s%s%s"
             % (
@@ -321,7 +321,7 @@ def ndmg_dwi_pipeline(
 
         # Align tissue classifiers
         start_time = time.time()
-        #reg.tissue2dwi_align()
+        reg.tissue2dwi_align()
         print(
             "%s%s%s"
             % (
