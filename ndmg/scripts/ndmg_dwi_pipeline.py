@@ -174,7 +174,6 @@ def ndmg_dwi_worker(
         os.system(cmd)
 
     # Instantiate bvec/bval naming variations and copy to derivative director
-    print("Instantiate bvec/bval naming variations, copy to derivative director")
     bvec_scaled = "{}/bvec_scaled.bvec".format(namer.dirs["output"]["prep_dwi"])
     fbval = "{}/bval.bval".format(namer.dirs["output"]["prep_dwi"])
     fbvec = "{}/bvec.bvec".format(namer.dirs["output"]["prep_dwi"])
@@ -182,7 +181,6 @@ def ndmg_dwi_worker(
     shutil.copyfile(bvals, fbval)
 
     # Correct any corrupted bvecs/bvals
-    print("Correcting corrupted bvals and bvecs")
     from dipy.io import read_bvals_bvecs
 
     bvals, bvecs = read_bvals_bvecs(fbval, fbvec)
@@ -275,6 +273,7 @@ def ndmg_dwi_worker(
     # Check orientation (t1w)
     start_time = time.time()
     t1w = mgu.reorient_img(t1w, namer)
+    t1w = mgu.match_target_vox_res(t1w, vox_size, namer, sens="t1w")
     print(
         "%s%s%s"
         % ("Reorienting runtime: ", str(np.round(time.time() - start_time, 1)), "s")
@@ -318,8 +317,6 @@ def ndmg_dwi_worker(
         )
 
         # -------- Tensor Fitting and Fiber Tractography ---------------- #
-
-        # TODO: these are the same commands
         seeds = mgt.build_seed_list(reg.wm_gm_int_in_dwi, np.eye(4), dens=4)
         print("Using " + str(len(seeds)) + " seeds...")
 
@@ -343,40 +340,39 @@ def ndmg_dwi_worker(
         streamlines = Streamlines([sl for sl in streamlines if len(sl) > 60])
         print("Streamlines complete")
 
-        if reg_style == "native_dsn":
-            # Save streamlines to disk
-            print("Saving streamlines: " + streams)
+        trk_affine = np.eye(4)
+        trk_hdr = nib.streamlines.trk.TrkFile.create_empty_header()
+        trk_hdr["hdr_size"] = 1000
+        trk_hdr["dimensions"] = hdr["dim"][1:4].astype("float32")
+        trk_hdr["voxel_sizes"] = hdr["pixdim"][1:4]
+        trk_hdr["voxel_to_rasmm"] = trk_affine
+        trk_hdr["voxel_order"] = "RAS"
+        trk_hdr["pad2"] = "RAS"
+        trk_hdr["image_orientation_patient"] = np.array(
+            [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+        ).astype("float32")
+        trk_hdr["endianness"] = "<"
+        trk_hdr["_offset_data"] = 1000
+        trk_hdr["nb_streamlines"] = streamlines.total_nb_rows
+        tractogram = nib.streamlines.Tractogram(
+            streamlines, affine_to_rasmm=trk_affine
+        )
+        trkfile = nib.streamlines.trk.TrkFile(tractogram, header=trk_hdr)
+        nib.streamlines.save(trkfile, streams)
 
-            fa_path = mgt.tens_mod_fa_est(gtab, dwi_prep, nodif_B0_mask)
+    if reg_style == "native_dsn":
+        # Save streamlines to disk
+        print("Saving streamlines: " + streams)
 
-            trk_affine = np.eye(4)
-            trk_hdr = nib.streamlines.trk.TrkFile.create_empty_header()
-            trk_hdr["hdr_size"] = 1000
-            trk_hdr["dimensions"] = hdr["dim"][1:4].astype("float32")
-            trk_hdr["voxel_sizes"] = hdr["pixdim"][1:4]
-            trk_hdr["voxel_to_rasmm"] = trk_affine
-            trk_hdr["voxel_order"] = "RAS"
-            trk_hdr["pad2"] = "RAS"
-            trk_hdr["image_orientation_patient"] = np.array(
-                [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-            ).astype("float32")
-            trk_hdr["endianness"] = "<"
-            trk_hdr["_offset_data"] = 1000
-            trk_hdr["nb_streamlines"] = streamlines.total_nb_rows
-            tractogram = nib.streamlines.Tractogram(
-                streamlines, affine_to_rasmm=trk_affine
-            )
-            trkfile = nib.streamlines.trk.TrkFile(tractogram, header=trk_hdr)
-            nib.streamlines.save(trkfile, streams)
+        fa_path = mgt.tens_mod_fa_est(gtab, dwi_prep, nodif_B0_mask)
 
-            # Normalize streamlines
-            print("Running DSN...")
-            streamlines_mni = mgr.direct_streamline_norm(
-                streams, fa_path, namer
-            )
+        # Normalize streamlines
+        print("Running DSN...")
+        streamlines_mni = mgr.direct_streamline_norm(
+            streams, fa_path, namer
+        )
 
     elif reg_style == "mni":
-
         # Check dimensions
         start_time = time.time()
         t1w = mgu.match_target_vox_res(t1w, vox_size, namer, sens="t1w")
@@ -418,19 +414,16 @@ def ndmg_dwi_worker(
         print("Saving streamlines: " + streams)
         print("streamlines: {}").format(streamlines)
         print("streams: {}").format(streams)
-        tractogram_list = [i for i in streamlines]  # alex
-        trk_affine = np.diagflat(
-            [1, 1, 1, 1]
-        )  # alex  # TODO: remove in favor of something not hardcoded
+        tractogram_list = [i for i in streamlines]
+        trk_affine = np.eye(4)
         tractogram = nib.streamlines.Tractogram(
             tractogram_list, affine_to_rasmm=trk_affine
-        )  # alex
-        nib.streamlines.save(tractogram, streams)  # alex
+        )
+        nib.streamlines.save(tractogram, streams)
         streamlines = Streamlines(
             streamlines
         )  # alex  # to try to make the streamlines variable be the same thing as the native space one
         print("atlas location: {}").format(atlas)
-        print("affine: {}").format(trk_affine)
 
     # ------- Connectome Estimation --------------------------------- #
     # Generate graphs from streamlines for each parcellation
@@ -455,7 +448,7 @@ def ndmg_dwi_worker(
             )
             g1.make_graph_old()
         elif reg_style == "native":
-                # align atlas to t1w to dwi
+            # align atlas to t1w to dwi
             print("%s%s" % ("Applying native-space alignment to ", labels[idx]))
             labels_im_file = mgu.reorient_img(labels[idx], namer)
             labels_im_file = mgu.match_target_vox_res(
@@ -516,7 +509,6 @@ def ndmg_dwi_worker(
             # info_we_care_about = f[f.find(
             #     'Data Space Used'):f.find('Metadata Space Used')]
             # print("docker info on space: {}".format(info_we_care_about))
-    sys.exit(0)
 
 
 def main():

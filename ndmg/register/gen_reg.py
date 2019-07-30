@@ -27,11 +27,6 @@ import os
 import nibabel as nib
 import numpy as np
 from nilearn.image import (load_img, math_img)
-
-try:
-    FSLDIR = os.environ["FSLDIR"]
-except KeyError:
-    print("FSLDIR environment variable not set!")
 from ndmg.utils import gen_utils as mgu
 from ndmg.utils import reg_utils as mgru
 
@@ -126,6 +121,10 @@ def direct_streamline_norm(streams, fa_path, namer):
 
 class dmri_reg(object):
     def __init__(self, namer, nodif_B0, nodif_B0_mask, t1w_in, vox_size, simple):
+        try:
+            FSLDIR = os.environ["FSLDIR"]
+        except KeyError:
+            print("FSLDIR environment variable not set!")
         self.simple = simple
         self.nodif_B0 = nodif_B0
         self.nodif_B0_mask = nodif_B0_mask
@@ -626,7 +625,7 @@ class dmri_reg(object):
                 + " -mas "
                 + self.nodif_B0_mask
                 + " -mas "
-                + self.wm_gm_int_in_dwi_bin
+                + self.gm_in_dwi_bin
                 + " "
                 + self.dwi_aligned_atlas
             )
