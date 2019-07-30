@@ -20,7 +20,7 @@
 # Email: dpisner@utexas.edu
 # Originally created by Greg Kiar on 2016-07-25.
 # edited by Eric Bridgeford to incorporate fMRI, multi-threading, and
-# big-graph generation.
+# skipeddy-graph generation.
 
 import sys
 import glob
@@ -28,7 +28,7 @@ import os.path as op
 from argparse import ArgumentParser
 from ndmg.utils import s3_utils
 from ndmg.utils.bids_utils import *
-from ndmg.scripts.ndmg_dwi_pipeline import ndmg_dwi_pipeline
+from ndmg.scripts.ndmg_dwi_pipeline import ndmg_dwi_worker
 
 print("Beginning ndmg ...")
 
@@ -150,7 +150,7 @@ def session_level(
     outDir,
     subjs,
     vox_size,
-    # big,
+    skipeddy,
     clean,
     stc,
     atlas_select,
@@ -162,7 +162,6 @@ def session_level(
     task=None,
     run=None,
     modality="dwi",
-    # nproc=1,
     buck=None,
     remo=None,
     push=False,
@@ -229,7 +228,7 @@ def session_level(
     # use worker wrapper to call function f with args arg
     # and keyword args kwargs
     print(args)
-    ndmg_dwi_pipeline(
+    ndmg_dwi_worker(
         args[0][0],
         args[0][1],
         args[0][2],
@@ -244,7 +243,7 @@ def session_level(
         mod_func,
         reg_style,
         clean,
-        # big,
+        skipeddy,
         buck=buck,
         remo=remo,
         push=push,
@@ -259,7 +258,6 @@ def session_level(
             for modal in ["clean", "preproc", "registered"]
         ]
         rmflds += [os.path.join(outDir, "anat")]
-    rmflds += [os.path.join(outDir, "func", "voxel-timeseries")]
     if len(rmflds) > 0:
         cmd = "rm -rf {}".format(" ".join(rmflds))
         mgu.execute_cmd(cmd)
@@ -397,13 +395,12 @@ def main():
         help="If False, remove any old files in the output directory.",
         default=False,
     )
-    # parser.add_argument(
-    #     "--big",
-    #     action="store_true",
-    #     help="Whether to produce \
-    #                     big graphs for DWI, or voxelwise timeseries for fMRI.",
-    #     default=False,
-    # )
+    parser.add_argument(
+        "--sked",
+        action="store_true",
+        help="Whether to skip eddy correction if it has already been run.",
+        default=False,
+    )
     parser.add_argument(
         "--vox",
         action="store",
@@ -418,15 +415,6 @@ def main():
         default=False,
         help="Whether or not to delete intemediates",
     )
-    # parser.add_argument(
-    #     "--nproc",
-    #     action="store",
-    #     help="The number of "
-    #     "process to launch. Should be approximately "
-    #     "<min(ncpu*hyperthreads/cpu, maxram/10).",
-    #     default=1,
-    #     type=int,
-    # )
     parser.add_argument(
         "--stc",
         action="store",
@@ -452,8 +440,8 @@ def main():
     parser.add_argument(
         "--mf",
         action="store",
-        help="Diffusion model: csd, csa, or tensor. Default is tensor.",
-        default="tensor",
+        help="Diffusion model: csd or csa. Default is csd.",
+        default="csd",
     )
     parser.add_argument(
         "--sp",
@@ -482,8 +470,8 @@ def main():
     stc = result.stc
     debug = result.debug
     modality = result.modality
-    # nproc = result.nproc
-    # big = result.big
+    nproc = result.nproc
+    skipeddy = result.sked
     clean = result.clean
     vox_size = result.vox
     minimal = result.minimal
@@ -533,7 +521,7 @@ def main():
             outDir,
             subj,
             vox_size,
-            # big,
+            skipeddy,
             clean,
             stc,
             atlas_select,
