@@ -3,10 +3,6 @@
 *.swp
 *.m~
 *.graphml
-*.nii
-*.nii.gz
-*.so
-*.o
 *.egg*
 build/
 credentials.csv
