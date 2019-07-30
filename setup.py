@@ -1,21 +1,9 @@
 from setuptools import setup, Extension
-from Cython.Distutils import build_ext
-from Cython.Build import cythonize
 from ndmg import VERSION
 
 
-ext_modules = cythonize(
-    Extension(
-        "ndmg.graph.zindex",  # the extension name
-        sources=["ndmg/graph/zindex.pyx"],
-        include_dirs=["."],
-        language="c",
-    )
-)
-
 setup(
     name="ndmg",
-    ext_modules=ext_modules,
     packages=[
         "ndmg",
         "ndmg.preproc",

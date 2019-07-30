@@ -32,12 +32,6 @@ import os.path as op
 import sys
 import pyximport
 from nilearn.image import mean_img
-
-try:
-    from ndmg.graph.zindex import XYZMorton
-except:
-    pyximport.install()
-    from ndmg.graph.zindex import XYZMorton
 from scipy.sparse import lil_matrix
 
 

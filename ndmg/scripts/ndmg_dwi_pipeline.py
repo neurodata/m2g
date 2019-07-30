@@ -36,7 +36,6 @@ from ndmg.utils import s3_utils
 from ndmg.register import gen_reg as mgr
 from ndmg.track import gen_track as mgt
 from ndmg.graph import gen_graph as mgg
-from ndmg.graph import gen_biggraph as ndbg
 from ndmg.utils.bids_utils import name_resource
 from ndmg.stats.qa_tensor import *
 from ndmg.stats.qa_fibers import *
@@ -438,77 +437,56 @@ def ndmg_dwi_pipeline(
     for idx, label in enumerate(labels):
         print("Generating graph for {} parcellation...".format(label))
         if reg_style == "native_dsn":
-            # Generate big graphs from streamlines
-            if big is True:
-                print("Making Voxelwise Graph...")
-                bg1 = ndbg.biggraph()
-                bg1.make_graph(streamlines_mni)
-                bg1.save_graph(voxel)
-            else:
-                # align atlas to t1w to dwi
-                print("%s%s" % ("Applying native-space alignment to ", labels[idx]))
-                labels_im_file = mgu.reorient_img(labels[idx], namer)
-                labels_im_file = mgu.match_target_vox_res(
-                    labels_im_file, vox_size, namer, sens="t1w"
-                )
-                labels_im_file_mni = reg.atlas2t1w2dwi_align(labels_im_file, dsn=True)
-                labels_im = nib.load(labels_im_file_mni)
-                g1 = mgg.graph_tools(
-                    attr=len(np.unique(labels_im.get_data().astype("int"))) - 1,
-                    rois=labels_im_file_mni,
-                    tracks=streamlines_mni,
-                    affine=np.eye(4),
-                    namer=namer,
-                    connectome_path=connectomes[idx],
-                )
-                g1.make_graph_old()
+            # align atlas to t1w to dwi
+            print("%s%s" % ("Applying native-space alignment to ", labels[idx]))
+            labels_im_file = mgu.reorient_img(labels[idx], namer)
+            labels_im_file = mgu.match_target_vox_res(
+                labels_im_file, vox_size, namer, sens="t1w"
+            )
+            labels_im_file_mni = reg.atlas2t1w2dwi_align(labels_im_file, dsn=True)
+            labels_im = nib.load(labels_im_file_mni)
+            g1 = mgg.graph_tools(
+                attr=len(np.unique(labels_im.get_data().astype("int"))) - 1,
+                rois=labels_im_file_mni,
+                tracks=streamlines_mni,
+                affine=np.eye(4),
+                namer=namer,
+                connectome_path=connectomes[idx],
+            )
+            g1.make_graph_old()
         elif reg_style == "native":
-            # Generate big graphs from streamlines
-            if big is True:
-                print("Making Voxelwise Graph...")
-                bg1 = ndbg.biggraph()
-                bg1.make_graph(streamlines)
-                bg1.save_graph(voxel)
-            else:
                 # align atlas to t1w to dwi
-                print("%s%s" % ("Applying native-space alignment to ", labels[idx]))
-                labels_im_file = mgu.reorient_img(labels[idx], namer)
-                labels_im_file = mgu.match_target_vox_res(
-                    labels_im_file, vox_size, namer, sens="t1w"
-                )
-                labels_im_file_dwi = reg.atlas2t1w2dwi_align(labels_im_file, dsn=False)
-                labels_im = nib.load(labels_im_file_dwi)
-                g1 = mgg.graph_tools(
-                    attr=len(np.unique(labels_im.get_data().astype("int"))) - 1,
-                    rois=labels_im_file_dwi,
-                    tracks=streamlines,
-                    affine=np.eye(4),
-                    namer=namer,
-                    connectome_path=connectomes[idx],
-                )
-                g1.make_graph_old()
+            print("%s%s" % ("Applying native-space alignment to ", labels[idx]))
+            labels_im_file = mgu.reorient_img(labels[idx], namer)
+            labels_im_file = mgu.match_target_vox_res(
+                labels_im_file, vox_size, namer, sens="t1w"
+            )
+            labels_im_file_dwi = reg.atlas2t1w2dwi_align(labels_im_file, dsn=False)
+            labels_im = nib.load(labels_im_file_dwi)
+            g1 = mgg.graph_tools(
+                attr=len(np.unique(labels_im.get_data().astype("int"))) - 1,
+                rois=labels_im_file_dwi,
+                tracks=streamlines,
+                affine=np.eye(4),
+                namer=namer,
+                connectome_path=connectomes[idx],
+            )
+            g1.make_graph_old()
         elif reg_style == "mni":
-            # Generate big graphs from streamlines
-            if big is True:
-                print("Making Voxelwise Graph...")
-                bg1 = ndbg.biggraph()
-                bg1.make_graph(streamlines)
-                bg1.save_graph(voxel)
-            else:
-                labels_im_file = mgu.reorient_img(labels[idx], namer)
-                labels_im_file = mgu.match_target_vox_res(
-                    labels_im_file, vox_size, namer, sens="t1w"
-                )
-                labels_im = nib.load(labels_im_file)
-                g1 = mgg.graph_tools(
-                    attr=len(np.unique(labels_im.get_data().astype("int"))) - 1,
-                    rois=labels_im_file,
-                    tracks=streamlines,
-                    affine=np.eye(4),
-                    namer=namer,
-                    connectome_path=connectomes[idx],
-                )
-                g1.make_graph_old()
+            labels_im_file = mgu.reorient_img(labels[idx], namer)
+            labels_im_file = mgu.match_target_vox_res(
+                labels_im_file, vox_size, namer, sens="t1w"
+            )
+            labels_im = nib.load(labels_im_file)
+            g1 = mgg.graph_tools(
+                attr=len(np.unique(labels_im.get_data().astype("int"))) - 1,
+                rois=labels_im_file,
+                tracks=streamlines,
+                affine=np.eye(4),
+                namer=namer,
+                connectome_path=connectomes[idx],
+            )
+            g1.make_graph_old()
         g1.summary()
         g1.save_graph(connectomes[idx])
 
