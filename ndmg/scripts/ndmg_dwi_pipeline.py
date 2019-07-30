@@ -442,7 +442,7 @@ def ndmg_dwi_pipeline(
             if big is True:
                 print("Making Voxelwise Graph...")
                 bg1 = ndbg.biggraph()
-                bg1.make_graph(streamlines)
+                bg1.make_graph(streamlines_mni)
                 bg1.save_graph(voxel)
             else:
                 # align atlas to t1w to dwi
