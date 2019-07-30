@@ -57,25 +57,6 @@ RUN mkdir -p /opt/afni && \
     rm -rf afni.tar.gz
 ENV PATH=/opt/afni:$PATH
 
-#--------ANTS SETUP-----------------------------------------------------------#
-RUN wget -qO- "https://cmake.org/files/v3.12/cmake-3.12.1-Linux-x86_64.tar.gz" | \
-  tar --strip-components=1 -xz -C /usr/local
-
-ENV ANTS_VERSION=2.2.0
-WORKDIR /tmp
-RUN git clone git://github.com/stnava/ANTs.git ants \
-    && cd ants \
-    && mkdir build \
-    && cd build \
-    && cmake .. \
-    && make -j8 \
-    && mkdir -p /opt/ants \
-    && mv bin/* /opt/ants && mv ../Scripts/* /opt/ants \
-    && cd .. \
-    && rm -rf build
-
-ENV ANTSPATH=/opt/ants/ \
-    PATH=/opt/ants:$PATH
 #--------NDMG SETUP-----------------------------------------------------------#
 # setup of python dependencies for ndmg itself, as well as file dependencies
 RUN \

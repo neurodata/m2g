@@ -24,12 +24,11 @@
 import warnings
 
 warnings.simplefilter("ignore")
-from itertools import combinations, product
+from itertools import combinations
 from collections import defaultdict
 import numpy as np
 import networkx as nx
 import nibabel as nib
-import ndmg
 import time
 import os
 

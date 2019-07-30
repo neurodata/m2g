@@ -19,34 +19,19 @@
 # Email: dpisner@utexas.edu
 
 
-# standard library imports
-import glob
 import shutil
-import os
-import random
-from argparse import ArgumentParser
 from datetime import datetime
 import time
-import traceback
-import sys
 import warnings
-
 warnings.simplefilter("ignore")
 
-# pypi imports
 # from ndmg.stats.qa_mri import qa_mri
-import numpy as np
 import nibabel as nib
 from dipy.tracking.streamline import Streamlines
-from dipy.tracking.utils import move_streamlines
-from nilearn.image import new_img_like, resample_img
 
-# local imports
 import ndmg
 from ndmg import preproc as mgp
-from ndmg.scripts import ndmg_cloud as nc
 from ndmg.utils import gen_utils as mgu
-from ndmg.utils import reg_utils as rgu
 from ndmg.utils import s3_utils
 from ndmg.register import gen_reg as mgr
 from ndmg.track import gen_track as mgt
@@ -80,26 +65,27 @@ def ndmg_dwi_pipeline(
     push=False,
     creds=None,
     debug=False,
-    modif="",
+    modif=""
 ):
+
     """
     Creates a brain graph from MRI data
     """
-    print('dwi = "{}"').format(dwi)
-    print('bvals = "{}"').format(bvals)
-    print('bvecs = "{}"').format(bvecs)
-    print('t1w = "{}"').format(t1w)
-    print('atlas = "{}"').format(atlas)
-    print('mask = "{}"').format(mask)
-    print("labels = {}").format(labels)
-    print('outdir = "{}"').format(outdir)
-    print('vox_size = "{}"').format(vox_size)
-    print('mod_type = "{}"').format(mod_type)
-    print('track_type = "{}"').format(track_type)
-    print('mod_func = "{}"').format(mod_func)
-    print('reg_style = "{}"').format(reg_style)
-    print("clean = {}").format(clean)
-    print("big = {}").format(big)
+    print("dwi = {}".format(dwi))
+    print("bvals = {}".format(bvals))
+    print("bvecs = {}".format(bvecs))
+    print("t1w = {}".format(t1w))
+    print("atlas = {}".format(atlas))
+    print("mask = {}".format(mask))
+    print("labels = {}".format(labels))
+    print("outdir = {}".format(outdir))
+    print("vox_size = {}".format(vox_size))
+    print("mod_type = {}".format(mod_type))
+    print("track_type = {}".format(track_type))
+    print("mod_func = {}".format(mod_func))
+    print("reg_style = {}".format(reg_style))
+    print("clean = {}".format(clean))
+    print("big = {}".format(big))
     startTime = datetime.now()
     fmt = "_adj.ssv"
     assert all(
@@ -137,24 +123,13 @@ def ndmg_dwi_pipeline(
         "conn": "dwi/roi-connectomes",
     }
 
-    opt_dirs = ["prep_dwi", "prep_anat", "reg_anat"]
-    clean_dirs = ["tensor", "fiber"]
     label_dirs = ["conn"]  # create label level granularity
 
     print("Adding directory tree...")
     namer.add_dirs_dwi(paths, labels, label_dirs)
-    qc_stats = "{}/{}_stats.csv".format(
-        namer.dirs["qa"]["adjacency"], namer.get_mod_source()
-    )
 
     # Create derivative output file names
     streams = namer.name_derivative(namer.dirs["output"]["fiber"], "streamlines.trk")
-    nodif_B0_iso_path = namer.name_derivative(
-        namer.dirs["output"]["fiber"], "nodif_B0_iso.nii.gz"
-    )
-    streams_mni = namer.name_derivative(
-        namer.dirs["output"]["fiber"], "streamlines_mni.trk"
-    )
 
     if big:
         print("Generating voxelwise connectome...")
@@ -178,17 +153,12 @@ def ndmg_dwi_pipeline(
 
     print("Connectomes downsampled to given labels: " + ", ".join(connectomes))
 
-    if vox_size == "1mm":
-        zoom_set = (1.0, 1.0, 1.0)
-    elif vox_size == "2mm":
-        zoom_set = (2.0, 2.0, 2.0)
-    else:
+    if vox_size != "1mm" and vox_size != "2mm":
         raise ValueError("Voxel size not supported. Use 2mm or 1mm")
 
     # -------- Preprocessing Steps --------------------------------- #
 
     # Perform eddy correction
-    start_time = time.time()
     if len(os.listdir(namer.dirs["output"]["prep_dwi"])) != 0:
         try:
             print("Pre-existing preprocessed dwi files found. Deleting these...")
@@ -199,9 +169,6 @@ def ndmg_dwi_pipeline(
             pass
 
     dwi_prep = "{}/eddy_corrected_data.nii.gz".format(namer.dirs["output"]["prep_dwi"])
-    eddy_rot_param = "{}/eddy_corrected_data.ecclog".format(
-        namer.dirs["output"]["prep_dwi"]
-    )
     print("Performing eddy correction...")
     cmd = "eddy_correct " + dwi + " " + dwi_prep + " 0"
     print(cmd)
@@ -273,7 +240,6 @@ def ndmg_dwi_pipeline(
 
     # Get B0 header and affine
     dwi_prep_img = nib.load(dwi_prep)
-    stream_affine = dwi_prep_img.affine
     hdr = dwi_prep_img.header
     print(
         "%s%s%s"
@@ -309,7 +275,7 @@ def ndmg_dwi_pipeline(
 
     # Check orientation (t1w)
     start_time = time.time()
-    t1w = mgu.reorient_t1w(t1w, namer)
+    t1w = mgu.reorient_img(t1w, namer)
     print(
         "%s%s%s"
         % ("Reorienting runtime: ", str(np.round(time.time() - start_time, 1)), "s")
@@ -355,10 +321,7 @@ def ndmg_dwi_pipeline(
         # -------- Tensor Fitting and Fiber Tractography ---------------- #
 
         # TODO: these are the same commands
-        if track_type == "eudx":
-            seeds = mgt.build_seed_list(reg.wm_gm_int_in_dwi, np.eye(4), dens=3)
-        else:
-            seeds = mgt.build_seed_list(reg.wm_gm_int_in_dwi, np.eye(4), dens=3)
+        seeds = mgt.build_seed_list(reg.wm_gm_int_in_dwi, np.eye(4), dens=4)
         print("Using " + str(len(seeds)) + " seeds...")
 
         # Compute direction model and track fiber streamlines
@@ -385,35 +348,22 @@ def ndmg_dwi_pipeline(
             # Save streamlines to disk
             print("Saving streamlines: " + streams)
 
-            def transform_to_affine(streams, header, affine):
-                rotation, scale = np.linalg.qr(affine)
-                streams = move_streamlines(streams, rotation)
-                scale[0:3, 0:3] = np.dot(
-                    scale[0:3, 0:3], np.diag(1.0 / header["voxel_sizes"])
-                )
-                scale[0:3, 3] = abs(scale[0:3, 3])
-                streams = move_streamlines(streams, scale)
-                return streams
+            fa_path = mgt.tens_mod_fa_est(gtab, dwi_prep, nodif_B0_mask)
 
             trk_affine = np.eye(4)
-            B0_img = nib.load(nodif_B0)
-            B0_affine = B0_img.affine
             trk_hdr = nib.streamlines.trk.TrkFile.create_empty_header()
             trk_hdr["hdr_size"] = 1000
             trk_hdr["dimensions"] = hdr["dim"][1:4].astype("float32")
             trk_hdr["voxel_sizes"] = hdr["pixdim"][1:4]
             trk_hdr["voxel_to_rasmm"] = trk_affine
-            trk_hdr["voxel_order"] = "LPS"
-            trk_hdr["pad2"] = "LPS"
+            trk_hdr["voxel_order"] = "RAS"
+            trk_hdr["pad2"] = "RAS"
             trk_hdr["image_orientation_patient"] = np.array(
-                [1.0, 0.0, 0.0, 0.0, 1.0, 0.0]
+                [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
             ).astype("float32")
             trk_hdr["endianness"] = "<"
             trk_hdr["_offset_data"] = 1000
             trk_hdr["nb_streamlines"] = streamlines.total_nb_rows
-            streamlines_trans = Streamlines(
-                transform_to_affine(streamlines, trk_hdr, B0_affine)
-            )
             tractogram = nib.streamlines.Tractogram(
                 streamlines, affine_to_rasmm=trk_affine
             )
@@ -422,13 +372,9 @@ def ndmg_dwi_pipeline(
 
             # Normalize streamlines
             print("Running DSN...")
-            streams_warp = mgr.direct_streamline_norm(
-                streams, streams_mni, nodif_B0, namer
+            streamlines_mni = mgr.direct_streamline_norm(
+                streams, fa_path, namer
             )
-
-            # Read Streamlines
-            streamlines_mni = nib.streamlines.load(streams_warp).streamlines
-            streamlines = Streamlines(streamlines_mni)
 
     elif reg_style == "mni":
 
@@ -487,66 +433,82 @@ def ndmg_dwi_pipeline(
         print("atlas location: {}").format(atlas)
         print("affine: {}").format(trk_affine)
 
-    # -------- Big Graph Generation --------------------------------- #
-    # Generate big graphs from streamlines
-    if big is True:
-        print("Making Voxelwise Graph...")
-        bg1 = ndbg.biggraph()
-        bg1.make_graph(streamlines)
-        bg1.save_graph(voxel)
-
     # ------- Connectome Estimation --------------------------------- #
     # Generate graphs from streamlines for each parcellation
     for idx, label in enumerate(labels):
         print("Generating graph for {} parcellation...".format(label))
         if reg_style == "native_dsn":
-            # align atlas to t1w to dwi
-            print("%s%s" % ("Applying native-space alignment to ", labels[idx]))
-            labels_im_file = mgu.match_target_vox_res(
-                labels[idx], vox_size, namer, sens="t1w"
-            )
-            labels_im_file_mni = reg.atlas2t1w2dwi_align(labels_im_file, dsn=True)
-            labels_im = nib.load(labels_im_file_mni)
-            g1 = mgg.graph_tools(
-                attr=len(np.unique(labels_im.get_data().astype("int"))) - 1,
-                rois=labels_im_file_mni,
-                tracks=streamlines,
-                affine=np.eye(4),
-                namer=namer,
-                connectome_path=connectomes[idx],
-            )
-            g1.make_graph_old()
+            # Generate big graphs from streamlines
+            if big is True:
+                print("Making Voxelwise Graph...")
+                bg1 = ndbg.biggraph()
+                bg1.make_graph(streamlines)
+                bg1.save_graph(voxel)
+            else:
+                # align atlas to t1w to dwi
+                print("%s%s" % ("Applying native-space alignment to ", labels[idx]))
+                labels_im_file = mgu.reorient_img(labels[idx], namer)
+                labels_im_file = mgu.match_target_vox_res(
+                    labels_im_file, vox_size, namer, sens="t1w"
+                )
+                labels_im_file_mni = reg.atlas2t1w2dwi_align(labels_im_file, dsn=True)
+                labels_im = nib.load(labels_im_file_mni)
+                g1 = mgg.graph_tools(
+                    attr=len(np.unique(labels_im.get_data().astype("int"))) - 1,
+                    rois=labels_im_file_mni,
+                    tracks=streamlines_mni,
+                    affine=np.eye(4),
+                    namer=namer,
+                    connectome_path=connectomes[idx],
+                )
+                g1.make_graph_old()
         elif reg_style == "native":
-            # align atlas to t1w to dwi
-            print("%s%s" % ("Applying native-space alignment to ", labels[idx]))
-            labels_im_file = mgu.match_target_vox_res(
-                labels[idx], vox_size, namer, sens="t1w"
-            )
-            labels_im_file_dwi = reg.atlas2t1w2dwi_align(labels_im_file, dsn=False)
-            labels_im = nib.load(labels_im_file_dwi)
-            g1 = mgg.graph_tools(
-                attr=len(np.unique(labels_im.get_data().astype("int"))) - 1,
-                rois=labels_im_file_dwi,
-                tracks=streamlines,
-                affine=np.eye(4),
-                namer=namer,
-                connectome_path=connectomes[idx],
-            )
-            g1.make_graph_old()
+            # Generate big graphs from streamlines
+            if big is True:
+                print("Making Voxelwise Graph...")
+                bg1 = ndbg.biggraph()
+                bg1.make_graph(streamlines)
+                bg1.save_graph(voxel)
+            else:
+                # align atlas to t1w to dwi
+                print("%s%s" % ("Applying native-space alignment to ", labels[idx]))
+                labels_im_file = mgu.reorient_img(labels[idx], namer)
+                labels_im_file = mgu.match_target_vox_res(
+                    labels_im_file, vox_size, namer, sens="t1w"
+                )
+                labels_im_file_dwi = reg.atlas2t1w2dwi_align(labels_im_file, dsn=False)
+                labels_im = nib.load(labels_im_file_dwi)
+                g1 = mgg.graph_tools(
+                    attr=len(np.unique(labels_im.get_data().astype("int"))) - 1,
+                    rois=labels_im_file_dwi,
+                    tracks=streamlines,
+                    affine=np.eye(4),
+                    namer=namer,
+                    connectome_path=connectomes[idx],
+                )
+                g1.make_graph_old()
         elif reg_style == "mni":
-            labels_im_file = mgu.match_target_vox_res(
-                labels[idx], vox_size, namer, sens="t1w"
-            )
-            labels_im = nib.load(labels_im_file)
-            g1 = mgg.graph_tools(
-                attr=len(np.unique(labels_im.get_data().astype("int"))) - 1,
-                rois=labels_im_file,
-                tracks=streamlines,
-                affine=np.eye(4),
-                namer=namer,
-                connectome_path=connectomes[idx],
-            )
-            g1.make_graph_old()
+            # Generate big graphs from streamlines
+            if big is True:
+                print("Making Voxelwise Graph...")
+                bg1 = ndbg.biggraph()
+                bg1.make_graph(streamlines)
+                bg1.save_graph(voxel)
+            else:
+                labels_im_file = mgu.reorient_img(labels[idx], namer)
+                labels_im_file = mgu.match_target_vox_res(
+                    labels_im_file, vox_size, namer, sens="t1w"
+                )
+                labels_im = nib.load(labels_im_file)
+                g1 = mgg.graph_tools(
+                    attr=len(np.unique(labels_im.get_data().astype("int"))) - 1,
+                    rois=labels_im_file,
+                    tracks=streamlines,
+                    affine=np.eye(4),
+                    namer=namer,
+                    connectome_path=connectomes[idx],
+                )
+                g1.make_graph_old()
         g1.summary()
         g1.save_graph(connectomes[idx])
 
@@ -581,10 +543,9 @@ def ndmg_dwi_pipeline(
 
 def main():
     parser = ArgumentParser(
-        description="This is an end-to-end connectome \
-                            estimation pipeline from sMRI and DTI images"
+        description="This is an end-to-end connectome estimation pipeline from sMRI and DTI images"
     )
-    parser.add_argument("dwi", action="store", help="Nifti DTI image stack")
+    parser.add_argument("dwi", action="store", help="Nifti dMRI image stack")
     parser.add_argument("bval", action="store", help="DTI scanner b-values")
     parser.add_argument("bvec", action="store", help="DTI scanner b-vectors")
     parser.add_argument("t1w", action="store", help="Nifti T1w MRI image")

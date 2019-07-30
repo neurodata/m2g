@@ -24,21 +24,9 @@ import warnings
 
 warnings.simplefilter("ignore")
 import os
-import nibabel
 import nibabel as nib
 import numpy as np
-import sklearn
-import nilearn
-from nilearn.image import (
-    load_img,
-    math_img,
-    resample_img,
-    mean_img,
-    new_img_like,
-    threshold_img,
-)
-from dipy.core.gradients import gradient_table
-from dipy.io import read_bvals_bvecs
+from nilearn.image import (load_img, math_img)
 
 try:
     FSLDIR = os.environ["FSLDIR"]
@@ -46,254 +34,94 @@ except KeyError:
     print("FSLDIR environment variable not set!")
 from ndmg.utils import gen_utils as mgu
 from ndmg.utils import reg_utils as mgru
-from dipy.tracking.streamline import Streamlines
-from dipy.tracking.utils import move_streamlines
 
 
-def transform_pts(
-    pts,
-    t_aff,
-    t_warp,
-    ref_img_path,
-    ants_path,
-    template_path,
-    namer,
-    out_volume="",
-    output_space="lps_voxmm",
-):
-    from scipy.io.matlab import savemat
+def direct_streamline_norm(streams, fa_path, namer):
+    from dipy.tracking.streamline import deform_streamlines
+    from dipy.io.streamline import load_trk
+    from ndmg.utils import reg_utils as regutils
+    import pkg_resources
+    from dipy.tracking import utils
 
-    """
-    return coordinates in
-    "ras_voxels" if you want to streamlines in ras ijk coordinates or
-    "lps_voxmm" if you want dsi studio streamline coordinates relative to the template
-    """
-    if not output_space in ("ras_voxels", "lps_voxmm"):
-        raise ValueError("Must specify output space")
+    template_path = pkg_resources.resource_filename("ndmg", "register/FSL_HCP1065_FA_2mm.nii.gz")
 
-    orig_dir = namer.dirs["tmp"]["base"]
-    aattp_out = namer.dirs["tmp"]["base"] + "/aattp.csv"
-    warped_csv_out = namer.dirs["tmp"]["base"] + "/warped_output.csv"
-    transforms = "-t [" + str(t_aff) + ", 1] " + "-t " + str(t_warp)
+    streams_warp_png = namer.dirs["tmp"]["base"] + '/warp_qc.png'
 
-    # Load the volume from DSI Studio
-    ref_img = nib.load(ref_img_path)
-    voxel_size = np.array(ref_img.header.get_zooms())
-    extents = np.array(ref_img.shape)
-    extents[-1] = 0
+    # Run SyN and normalize streamlines
+    fa_img = nib.load(fa_path)
+    vox_size = fa_img.get_header().get_zooms()[0]
+    template_img = nib.load(template_path)
+    template_data = template_img.get_data().astype('bool')
 
-    # Convert the streamlines to voxel indices, then to ants points
-    voxel_coords = abs(extents - pts / voxel_size)
-    ants_mult = np.array([voxel_size[0], voxel_size[1], voxel_size[2]])
-    ants_coord = voxel_coords * ants_mult - voxel_size[0]
-    ants_coord[:, 0] = -ants_coord[:, 0]
-    ants_coord[:, 1] = -ants_coord[:, 1]
+    # SyN FA->Template
+    [mapping, affine_map] = regutils.wm_syn(template_path, fa_path, namer.dirs["tmp"]["base"])
+    [streamlines, _] = load_trk(streams)
 
-    # Save the ants coordinates to a csv, then warp them
-    np.savetxt(
-        warped_csv_out,
-        np.hstack([ants_coord, np.zeros((ants_coord.shape[0], 1))]),
-        header="x,y,z,t",
-        delimiter=",",
-        fmt="%f",
-    )
+    # Warp streamlines
+    # Create an isocentered affine
+    target_isocenter = np.diag(np.array([-vox_size, vox_size, vox_size, 1]))
 
-    # Apply the trandforms to
-    cmd = (
-        ants_path
-        + "/antsApplyTransformsToPoints "
-        + "-d 3 -i "
-        + warped_csv_out
-        + " -o "
-        + aattp_out
-        + " "
-        + transforms
-    )
-    os.system(cmd)
+    # Take the off-origin affine capturing the extent contrast between fa image and the template
+    adjusted_affine = affine_map.affine.copy()
 
-    # Load template to get output space
-    template = nib.load(template_path)
-    warped_affine = template.affine
+    # Now we flip the sign in the x and y planes so that we get the mirror image of the forward deformation field.
+    adjusted_affine[0][3] = -adjusted_affine[0][3]
+    adjusted_affine[1][3] = -adjusted_affine[1][3]
 
-    adjusted_affine = warped_affine.copy()
-    adjusted_affine[0] = -adjusted_affine[0]
-    adjusted_affine[1] = -adjusted_affine[1]
-    print(adjusted_affine)
+    # Scale z by the voxel size
+    adjusted_affine[2][3] = adjusted_affine[2][3]/vox_size
 
-    ants_warped_coords = np.loadtxt(aattp_out, skiprows=1, delimiter=",")[:, :3]
-    os.remove(aattp_out)
-    to_transform = np.hstack(
-        [ants_warped_coords, np.ones((ants_warped_coords.shape[0], 1))]
-    )
-    new_voxels = (
-        np.dot(np.linalg.inv(adjusted_affine), to_transform.T) + warped_affine[0, 0]
-    )[:3]
+    # Apply the deformation and correct for the extents
+    mni_streamlines = deform_streamlines(streamlines, deform_field=mapping.get_forward_field(),
+                                         stream_to_current_grid=target_isocenter,
+                                         current_grid_to_world=adjusted_affine,
+                                         stream_to_ref_grid=target_isocenter,
+                                         ref_grid_to_world=np.eye(4))
 
-    # Write out an image
-    if out_volume:
-        newdata = np.zeros(template.get_shape())
-        ti, tj, tk = new_voxels.astype(np.int)
-        newdata[ti, tj, tk] = 1
-        warped_out = nib.Nifti1Image(newdata, warped_affine).to_filename(out_volume)
-    os.chdir(orig_dir)
-    if output_space == "ras_voxels":
-        return new_voxels.astype(np.int).T
+    # Check DSN quality, attempt y-flip if DSN fails. Occasionally, orientation affine may be corrupted and this tweak
+    # should handle the inverse case.
+    dm = utils.density_map(mni_streamlines, template_img.shape, affine=np.eye(4)).astype('bool')
+    in_brain = len(np.unique(np.where((template_data.astype('uint8') > 0) & (dm.astype('uint8') > 0))))
+    out_brain = len(np.unique(np.where((template_data.astype('uint8') == 0) & (dm.astype('uint8') > 0))))
+    if in_brain < out_brain:
+        adjusted_affine[1][3] = -adjusted_affine[1][3]
+        mni_streamlines = deform_streamlines(streamlines, deform_field=mapping.get_forward_field(),
+                                             stream_to_current_grid=target_isocenter,
+                                             current_grid_to_world=adjusted_affine,
+                                             stream_to_ref_grid=target_isocenter,
+                                             ref_grid_to_world=np.eye(4))
+        dm = utils.density_map(mni_streamlines, template_img.shape, affine=np.eye(4)).astype('bool')
+        in_brain = len(np.unique(np.where((template_data.astype('uint8') > 0) & (dm.astype('uint8') > 0))))
+        out_brain = len(np.unique(np.where((template_data.astype('uint8') == 0) & (dm.astype('uint8') > 0))))
+        if in_brain > out_brain:
+            print('Warning: Direct Streamline Normalization completed successfully only after inverting the y-plane '
+                  'voxel-to-world. This may not be correct, so manual check for corrupted header orientations is '
+                  'recommended.')
+        else:
+            raise ValueError('ERROR: Direct Streamline Normalization failed. Check for corrupted header/affine.')
 
-    elif output_space == "lps_voxmm":
-        template_extents = template.get_shape()
-        lps_voxels = new_voxels.copy()
-        lps_voxels[0] = template_extents[0] + lps_voxels[0]
-        lps_voxels[1] = template_extents[1] - lps_voxels[1]
-        print(lps_voxels)
-        lps_voxmm = lps_voxels.T * np.array(template.header.get_zooms())[:3]
-        return lps_voxmm
+    # Save streamlines
+    hdr = fa_img.header
+    trk_affine = np.eye(4)
+    trk_hdr = nib.streamlines.trk.TrkFile.create_empty_header()
+    trk_hdr['hdr_size'] = 1000
+    trk_hdr['dimensions'] = hdr['dim'][1:4].astype('float32')
+    trk_hdr['voxel_sizes'] = hdr['pixdim'][1:4]
+    trk_hdr['voxel_to_rasmm'] = trk_affine
+    trk_hdr['voxel_order'] = 'RAS'
+    trk_hdr['pad2'] = 'RAS'
+    trk_hdr['image_orientation_patient'] = np.array([1., 0., 0., 0., 1., 0.]).astype('float32')
+    trk_hdr['endianness'] = '<'
+    trk_hdr['_offset_data'] = 1000
+    trk_hdr['nb_streamlines'] = len(streamlines)
+    tractogram = nib.streamlines.Tractogram(streamlines, affine_to_rasmm=trk_affine)
+    trkfile = nib.streamlines.trk.TrkFile(tractogram, header=trk_hdr)
+    nib.streamlines.save(trkfile, streams)
 
+    # DSN QC plotting
+    mgu.show_template_bundles(mni_streamlines, template_path, streams_warp_png)
 
-class Warp(object):
-    def __init__(
-        self,
-        ants_path="",
-        file_in="",
-        file_out="",
-        template_path="",
-        t_aff="",
-        t_warp="",
-        ref_img_path="",
-        namer="",
-    ):
-        self.ants_path = ants_path
-        self.file_in = file_in
-        self.file_out = file_out
-        self.template_path = template_path
-        self.t_aff = t_aff
-        self.t_warp = t_warp
-        self.ref_img_path = ref_img_path
-        self.namer = namer
-
-    def streamlines(self):
-        if not self.file_in.endswith((".trk", ".trk.gz")):
-            print("File format currently unsupported.")
-            return
-
-        if self.ref_img_path == "":
-            print(
-                "Specify reference image path: .ref_img_path = path to reference image"
-            )
-            return
-
-        print("%s%s" % ("Warping streamline file ", self.file_in))
-        template = nib.load(self.template_path)
-        warped_affine = template.affine
-        dims = template.header.get_data_shape()
-        template_trk_header = np.array(('TRACK',
-                                        [dims[0], dims[1], dims[2]],
-                                        [warped_affine[0][0], warped_affine[1][1], warped_affine[2][2]],
-                                        [0.0, 0.0, 0.0], 0, ['', '', '', '', '', '', '', '', '', ''],
-                                        0, ['', '', '', '', '', '', '', '', '', ''],
-                                        [[1.0, 0.0, 0.0, 0.0],
-                                         [0.0, 1.0, 0.0, 0.0],
-                                         [0.0, 0.0, 1.0, 0.0],
-                                         [0.0, 0.0, 0.0, 1.0]], '', 'LPS', 'LPS',
-                                        [1.0, 0.0, 0.0, 0.0, 1.0, 0.0],
-                                        '', '', '', '', '', '', '', 10000, 2, 1000),
-                                       dtype=[('id_string', 'S6'), ('dim', '<i2', (3,)),
-                                              ('voxel_size', '<f4', (3,)), ('origin', '<f4', (3,)),
-                                              ('n_scalars', '<i2'), ('scalar_name', 'S20', (10,)),
-                                              ('n_properties', '<i2'), ('property_name', 'S20', (10,)),
-                                              ('vox_to_ras', '<f4', (4, 4)), ('reserved', 'S444'),
-                                              ('voxel_order', 'S4'), ('pad2', 'S4'),
-                                              ('image_orientation_patient', '<f4', (6,)),
-                                              ('pad1', 'S2'), ('invert_x', 'S1'), ('invert_y', 'S1'),
-                                              ('invert_z', 'S1'), ('swap_xy', 'S1'), ('swap_yz', 'S1'),
-                                              ('swap_zx', 'S1'), ('n_count', '<i4'), ('version', '<i4'),
-                                              ('hdr_size', '<i4')]
-                                       )
-
-        streams, hdr = nib.trackvis.read(self.file_in)
-        offsets = []
-        _streams = []
-        for sl in streams:
-            _streams.append(sl[0])
-            offsets.append(_streams[-1].shape[0])
-        allpoints = np.vstack(_streams)
-        tx_points = transform_pts(
-            allpoints,
-            self.t_aff,
-            self.t_warp,
-            self.ref_img_path,
-            self.ants_path,
-            self.template_path,
-            self.namer,
-            output_space="lps_voxmm",
-        )
-        offsets = np.cumsum([0] + offsets)
-        starts = offsets[:-1]
-        stops = offsets[1:]
-        new_hdr = template_trk_header.copy()
-        new_hdr["n_count"] = len(_streams)
-        nib.trackvis.write(
-            self.file_out,
-            [(tx_points[a:b], None, None) for a, b in zip(starts, stops)],
-            hdr_mapping=new_hdr,
-        )
-        print("Finished " + self.file_out)
-
-
-def transform_to_affine(streams, header, affine):
-    rotation, scale = np.linalg.qr(affine)
-    streams = move_streamlines(streams, rotation)
-    scale[0:3, 0:3] = np.dot(scale[0:3, 0:3], np.diag(1.0 / header["voxel_sizes"]))
-    scale[0:3, 3] = abs(scale[0:3, 3])
-    streams = move_streamlines(streams, scale)
-    return streams
-
-
-def direct_streamline_norm(streams, streams_mni, nodif_B0, namer):
-    """Greene, C., Cieslak, M., & Grafton, S. T. (2017). Effect of different spatial normalization approaches on
-    tractography and structural brain networks. Network Neuroscience, 1-19."""
-    from ndmg.register.gen_reg import transform_to_affine
-    from dipy.tracking.streamline import Streamlines
-
-    template_path = "/usr/share/data/fsl-mni152-templates/MNI152_T1_2mm_brain.nii.gz"
-    ants_path = "/opt/ants"
-
-    t_aff = namer.dirs["tmp"]["base"] + "/0GenericAffine.mat"
-    t_warp = namer.dirs["tmp"]["base"] + "/1InverseWarp.nii.gz"
-
-    nodif_B0_img = nib.load(nodif_B0)
-    nodif_B0_flip_path = "%s%s" % (nodif_B0_img.split('.nii.gz')[0], '_flip.nii.gz')
-    s_aff = nodif_B0_img.affine
-    s_aff[0][0] = -s_aff[0][0]
-    nodif_B0_img.set_sform(s_aff)
-    nodif_B0_img.set_qform(s_aff)
-    nodif_B0_img.update_header()
-    nib.save(nodif_B0_img, nodif_B0_flip_path)
-
-    cmd = (
-        "antsRegistrationSyNQuick.sh -d 3 -f "
-        + template_path
-        + " -m "
-        + nodif_B0_flip_path
-        + " -o "
-        + namer.dirs["tmp"]["base"]
-        + "/"
-    )
-    os.system(cmd)
-
-    wS = Warp(
-        ants_path, streams, streams_mni, template_path, t_aff, t_warp, nodif_B0, namer
-    )
-    wS.streamlines()
-
-    s_aff[:3, 3] = np.array([270, 0, 0])
-    streamlines_mni = nib.streamlines.load(streams_mni)
-    streamlines_mni_s = streamlines_mni.streamlines
-    streamlines_trans = Streamlines(transform_to_affine(streamlines_mni_s, streamlines_mni.header, s_aff))
-    streams_warp = "%s%s" % (streams_mni.split('.trk')[0], '_warped.trk')
-    tractogram = nib.streamlines.Tractogram(streamlines_trans, affine_to_rasmm=np.eye(4))
-    trkfile = nib.streamlines.trk.TrkFile(tractogram, header=streamlines_mni.header)
-    nib.streamlines.save(trkfile, streams_warp)
-    return streams_warp
+    return mni_streamlines
 
 
 class dmri_reg(object):

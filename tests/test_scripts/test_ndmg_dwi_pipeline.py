@@ -14,12 +14,12 @@ KEYWORDS = ["sub", "ses"]
 def is_graph(filename, atlas="", suffix=""):
     """
     Check if `filename` is a ndmg graph file.
-    
+
     Parameters
     ----------
     filename : str or Path
         location of the file.
-    
+
     Returns
     -------
     bool
@@ -41,10 +41,10 @@ def is_graph(filename, atlas="", suffix=""):
 
 def filter_graph_files(file_list, **kwargs):
     """
-    Generator. 
+    Generator.
     Check if each file in `file_list` is a ndmg edgelist,
     yield it if it is.
-    
+
     Parameters
     ----------
     file_list : iterator
