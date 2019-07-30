@@ -60,7 +60,7 @@ ENV PATH=/opt/afni:$PATH
 #--------NDMG SETUP-----------------------------------------------------------#
 # setup of python dependencies for ndmg itself, as well as file dependencies
 RUN \
-    pip install setuptools numpy networkx nibabel dipy scipy python-dateutil pandas boto3 awscli matplotlib nilearn sklearn pandas cython vtk pyvtk fury awscli requests scikit-image ipython duecredit --upgrade
+    pip install setuptools numpy networkx nibabel dipy scipy python-dateutil pandas boto3 awscli matplotlib nilearn sklearn pandas vthetk pyvtk fury awscli requests scikit-image ipython duecredit --upgrade
 
 RUN \
     pip install plotly==1.12.9 pybids==0.6.4

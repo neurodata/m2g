@@ -162,7 +162,6 @@ def session_level(
     task=None,
     run=None,
     modality="dwi",
-    nproc=1,
     buck=None,
     remo=None,
     push=False,
@@ -213,7 +212,7 @@ def session_level(
                     bval.split("sub")[1].split("/")[0],
                     "/ses",
                     bval.split("ses")[1].split("/")[0],
-                ),  # TODO: this forces data to have session numbers.
+                ),
             ]
             for (dw, bval, bvec, anat) in zip(dwis, bvals, bvecs, anats)
         ]
@@ -259,8 +258,6 @@ def session_level(
             for modal in ["clean", "preproc", "registered"]
         ]
         rmflds += [os.path.join(outDir, "anat")]
-    if not skipeddy:
-        rmflds += [os.path.join(outDir, "func", "voxel-timeseries")]
     if len(rmflds) > 0:
         cmd = "rm -rf {}".format(" ".join(rmflds))
         mgu.execute_cmd(cmd)
@@ -419,15 +416,6 @@ def main():
         help="Whether or not to delete intemediates",
     )
     parser.add_argument(
-        "--nproc",
-        action="store",
-        help="The number of "
-        "process to launch. Should be approximately "
-        "<min(ncpu*hyperthreads/cpu, maxram/10).",
-        default=1,
-        type=int,
-    )
-    parser.add_argument(
         "--stc",
         action="store",
         help="A file for slice "
@@ -545,7 +533,7 @@ def main():
             task,
             run,
             modality,
-            nproc,
+            # nproc,
             buck=buck,
             remo=remo,
             push=push,

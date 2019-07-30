@@ -30,7 +30,7 @@ setup(
     author="Derek Pisner, Greg Kiar, Eric Bridgeford, Alex Loftus, and Will Gray Roncal",
     author_email="gkiar@jhu.edu, wgr@jhu.edu, ebridge2@jhu.edu",
     url="https://github.com/neurodata/ndmg",
-    download_url="https://github.com/neurodata/ndmg/tarball/" + VERSION,
+    download_url="https://github.com/neurodata/ndmg/tarball/" + VERSION,  # I don't think we need this (this download url is a 404)
     keywords=["connectome", "mri", "pipeline"],
     classifiers=[],
     install_requires=[
@@ -44,7 +44,7 @@ setup(
         "boto3",
         "matplotlib",
         "plotly==1.12.1",
-        "cython",
+        # "cython",
         "pybids==0.6.4",
         "configparser>=3.7.4",
         "pytest"

@@ -322,7 +322,7 @@ def load_timeseries(timeseries_file, ts='roi'):
 def name_tmps(basedir, basename, extension):
     return "{}/tmp/{}{}".format(basedir, basename, extension)
 
-
+  
 def parcel_overlap(parcellation1, parcellation2, outpath):
     """
     A function to compute the percent composition of each parcel in
