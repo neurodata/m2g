@@ -14,7 +14,7 @@
 # limitations under the License.
 #
 
-# ndmg_dwi_pipeline.py
+# ndmg_dwi_worker.py
 # Repackaged for native space tractography by Derek Pisner in 2019
 # Email: dpisner@utexas.edu
 
@@ -43,7 +43,7 @@ from ndmg.stats.qa_fibers import *
 os.environ["MPLCONFIGDIR"] = "/tmp/"
 
 
-def ndmg_dwi_pipeline(
+def ndmg_dwi_worker(
     dwi,
     bvals,
     bvecs,
@@ -58,7 +58,7 @@ def ndmg_dwi_pipeline(
     mod_func,
     reg_style,
     clean,
-    big,
+    skipeddy=False,
     buck=None,
     remo=None,
     push=False,
@@ -84,7 +84,7 @@ def ndmg_dwi_pipeline(
     print("mod_func = {}".format(mod_func))
     print("reg_style = {}".format(reg_style))
     print("clean = {}".format(clean))
-    print("big = {}".format(big))
+    print("skip eddy = {}".format(skipeddy))
     startTime = datetime.now()
     fmt = "_adj.ssv"
     assert all(
@@ -116,9 +116,7 @@ def ndmg_dwi_pipeline(
         "prep_dwi": "dwi/preproc",
         "prep_anat": "anat/preproc",
         "reg_anat": "anat/registered",
-        "tensor": "dwi/tensor",
         "fiber": "dwi/fiber",
-        "voxelg": "dwi/voxel-connectomes",
         "conn": "dwi/roi-connectomes",
     }
 
@@ -129,13 +127,6 @@ def ndmg_dwi_pipeline(
 
     # Create derivative output file names
     streams = namer.name_derivative(namer.dirs["output"]["fiber"], "streamlines.trk")
-
-    if big:
-        print("Generating voxelwise connectome...")
-        voxel = namer.name_derivative(
-            namer.dirs["output"]["voxelg"], "voxel-connectome.npz"
-        )
-        print("Voxelwise Fiber Graph: {}".format(voxel))
 
     # Again, connectomes are different
     if not isinstance(labels, list):
@@ -158,20 +149,29 @@ def ndmg_dwi_pipeline(
     # -------- Preprocessing Steps --------------------------------- #
 
     # Perform eddy correction
-    if len(os.listdir(namer.dirs["output"]["prep_dwi"])) != 0:
-        try:
-            print("Pre-existing preprocessed dwi files found. Deleting these...")
-            shutil.rmtree(namer.dirs["output"]["prep_dwi"])
-            os.mkdir(namer.dirs["output"]["prep_dwi"])
-        except Exception as e:
-            print("Exception when trying to execute eddy correction: {}".format(e))
-            pass
-
     dwi_prep = "{}/eddy_corrected_data.nii.gz".format(namer.dirs["output"]["prep_dwi"])
-    print("Performing eddy correction...")
-    cmd = "eddy_correct " + dwi + " " + dwi_prep + " 0"
-    print(cmd)
-    os.system(cmd)
+
+    if len(os.listdir(namer.dirs["output"]["prep_dwi"])) != 0:
+        if skipeddy is False:
+            try:
+                print("Pre-existing preprocessed dwi files found. Deleting these...")
+                shutil.rmtree(namer.dirs["output"]["prep_dwi"])
+                os.mkdir(namer.dirs["output"]["prep_dwi"])
+            except Exception as e:
+                print("Exception when trying to delete existing data: {}".format(e))
+                pass
+            print("Performing eddy correction...")
+            cmd = "eddy_correct " + dwi + " " + dwi_prep + " 0"
+            print(cmd)
+            os.system(cmd)
+        else:
+            if not os.path.isfile(dwi_prep):
+                raise ValueError('ERROR: Cannot skip eddy correction if it has not already been run!')
+    else:
+        print("Performing eddy correction...")
+        cmd = "eddy_correct " + dwi + " " + dwi_prep + " 0"
+        print(cmd)
+        os.system(cmd)
 
     # Instantiate bvec/bval naming variations and copy to derivative director
     print("Instantiate bvec/bval naming variations, copy to derivative director")
@@ -588,10 +588,10 @@ def main():
     )
     parser.add_argument(
         "-b",
-        "--big",
+        "--skipeddy",
         action="store_true",
         default=False,
-        help="whether or not to produce voxelwise big graph",
+        help="whether or not to produce voxelwise skipeddy graph",
     )
     result = parser.parse_args()
 
@@ -600,7 +600,7 @@ def main():
     print("Creating output temp directory: {}/tmp".format(result.outdir))
     mgu.utils.execute_cmd("mkdir -p {} {}/tmp".format(result.outdir, result.outdir))
 
-    ndmg_dwi_pipeline(
+    ndmg_dwi_worker(
         result.dwi,
         result.bval,
         result.bvec,
@@ -615,7 +615,7 @@ def main():
         result.mf,
         result.sp,
         result.clean,
-        result.big,
+        result.skipeddy,
     )
 
 

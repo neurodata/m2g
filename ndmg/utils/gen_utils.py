@@ -323,35 +323,6 @@ def name_tmps(basedir, basename, extension):
     return "{}/tmp/{}{}".format(basedir, basename, extension)
 
 
-def morton_region(parcellation, outpath):
-    """
-    A function to compute which region each morton index is in.
-    Col1 is the morton index. Col2 is the corresponding region
-    the particular morton index falls into. 0 means it falls into
-    a region unmapped in the parcellation.
-    **Positional Arguments:**
-        parcellation:
-            - the input parcellation to compute over.
-        outpath:
-            - the filepath of the matrix.
-    """
-    at_dat = nib.load(parcellation).get_data()
-    atlasn = get_filename(parcellation)
-    dims = at_dat.shape
-    region = {}
-    for x in range(0, dims[0]):
-        for y in range(0, dims[1]):
-            for z in range(0, dims[2]):
-                if at_dat[x, y, z] > 0:
-                    region[XYZMorton((int(x), int(y), int(z)))] = at_dat[x, y, z]
-    outf = op.join(outpath, atlasn + '_morton.csv')
-    with open(outf, 'w')  as f:
-        for key, val in region.items():
-            f.write('{},{}\n'.format(key, val))
-        f.close()
-    return
-
-
 def parcel_overlap(parcellation1, parcellation2, outpath):
     """
     A function to compute the percent composition of each parcel in
