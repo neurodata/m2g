@@ -58,7 +58,7 @@ def ndmg_dwi_pipeline(
     mod_func,
     reg_style,
     clean,
-    big,
+    # big,
     buck=None,
     remo=None,
     push=False,
@@ -84,7 +84,7 @@ def ndmg_dwi_pipeline(
     print("mod_func = {}".format(mod_func))
     print("reg_style = {}".format(reg_style))
     print("clean = {}".format(clean))
-    print("big = {}".format(big))
+    # print("big = {}".format(big))
     startTime = datetime.now()
     fmt = "_adj.ssv"
     assert all(
@@ -130,12 +130,12 @@ def ndmg_dwi_pipeline(
     # Create derivative output file names
     streams = namer.name_derivative(namer.dirs["output"]["fiber"], "streamlines.trk")
 
-    if big:
-        print("Generating voxelwise connectome...")
-        voxel = namer.name_derivative(
-            namer.dirs["output"]["voxelg"], "voxel-connectome.npz"
-        )
-        print("Voxelwise Fiber Graph: {}".format(voxel))
+    # if big:
+    #     print("Generating voxelwise connectome...")
+    #     voxel = namer.name_derivative(
+    #         namer.dirs["output"]["voxelg"], "voxel-connectome.npz"
+    #     )
+    #     print("Voxelwise Fiber Graph: {}".format(voxel))
 
     # Again, connectomes are different
     if not isinstance(labels, list):

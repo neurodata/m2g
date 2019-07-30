@@ -150,7 +150,7 @@ def session_level(
     outDir,
     subjs,
     vox_size,
-    big,
+    # big,
     clean,
     stc,
     atlas_select,
@@ -162,7 +162,7 @@ def session_level(
     task=None,
     run=None,
     modality="dwi",
-    nproc=1,
+    # nproc=1,
     buck=None,
     remo=None,
     push=False,
@@ -213,7 +213,7 @@ def session_level(
                     bval.split("sub")[1].split("/")[0],
                     "/ses",
                     bval.split("ses")[1].split("/")[0],
-                ),  # TODO: this forces data to have session numbers.
+                ),
             ]
             for (dw, bval, bvec, anat) in zip(dwis, bvals, bvecs, anats)
         ]
@@ -244,7 +244,7 @@ def session_level(
         mod_func,
         reg_style,
         clean,
-        big,
+        # big,
         buck=buck,
         remo=remo,
         push=push,
@@ -259,8 +259,7 @@ def session_level(
             for modal in ["clean", "preproc", "registered"]
         ]
         rmflds += [os.path.join(outDir, "anat")]
-    if not big:
-        rmflds += [os.path.join(outDir, "func", "voxel-timeseries")]
+    rmflds += [os.path.join(outDir, "func", "voxel-timeseries")]
     if len(rmflds) > 0:
         cmd = "rm -rf {}".format(" ".join(rmflds))
         mgu.execute_cmd(cmd)
@@ -398,13 +397,13 @@ def main():
         help="If False, remove any old files in the output directory.",
         default=False,
     )
-    parser.add_argument(
-        "--big",
-        action="store_true",
-        help="Whether to produce \
-                        big graphs for DWI, or voxelwise timeseries for fMRI.",
-        default=False,
-    )
+    # parser.add_argument(
+    #     "--big",
+    #     action="store_true",
+    #     help="Whether to produce \
+    #                     big graphs for DWI, or voxelwise timeseries for fMRI.",
+    #     default=False,
+    # )
     parser.add_argument(
         "--vox",
         action="store",
@@ -419,15 +418,15 @@ def main():
         default=False,
         help="Whether or not to delete intemediates",
     )
-    parser.add_argument(
-        "--nproc",
-        action="store",
-        help="The number of "
-        "process to launch. Should be approximately "
-        "<min(ncpu*hyperthreads/cpu, maxram/10).",
-        default=1,
-        type=int,
-    )
+    # parser.add_argument(
+    #     "--nproc",
+    #     action="store",
+    #     help="The number of "
+    #     "process to launch. Should be approximately "
+    #     "<min(ncpu*hyperthreads/cpu, maxram/10).",
+    #     default=1,
+    #     type=int,
+    # )
     parser.add_argument(
         "--stc",
         action="store",
@@ -447,8 +446,8 @@ def main():
     parser.add_argument(
         "--tt",
         action="store",
-        help="Tracking approach: eudx or local. Default is eudx.",
-        default="eudx",
+        help="Tracking approach: local or particle. Default is local.",
+        default="local",
     )
     parser.add_argument(
         "--mf",
@@ -483,8 +482,8 @@ def main():
     stc = result.stc
     debug = result.debug
     modality = result.modality
-    nproc = result.nproc
-    big = result.big
+    # nproc = result.nproc
+    # big = result.big
     clean = result.clean
     vox_size = result.vox
     minimal = result.minimal
@@ -534,7 +533,7 @@ def main():
             outDir,
             subj,
             vox_size,
-            big,
+            # big,
             clean,
             stc,
             atlas_select,
@@ -546,7 +545,7 @@ def main():
             task,
             run,
             modality,
-            nproc,
+            # nproc,
             buck=buck,
             remo=remo,
             push=push,
