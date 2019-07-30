@@ -4,6 +4,7 @@
 *.m~
 *.graphml
 *.egg*
+*.so
 build/
 credentials.csv
 my_credentials.csv
