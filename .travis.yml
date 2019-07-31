@@ -33,7 +33,7 @@ before_install:
   # grab graphutils
   - git clone https://github.com/neurodata/graphutils.git
   - cd graphutils
-  - python3.6 -m pip3 install .
+  - python3.6.3 -m pip3 install .
   - cd ..
 
   # grab correct git branch, update it to the new branch version
