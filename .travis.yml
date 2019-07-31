@@ -62,9 +62,5 @@ script:
   - docker exec -w /ndmg travis pytest -v --disable-warnings
 
 after_success:
-  # Given build succeeds, push ndmg_dev image to dockerhub
-  # - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-  # - docker exec travis rm -r /input/*
-  # - docker exec travis rm -r /output/*
-  # - docker commit -c 'ENTRYPOINT ["ndmg_bids"]' travis neurodata/ndmg_dev:latest
-  # - if [ "$TRAVIS_BRANCH" == "staging" ]; then docker push neurodata/ndmg_dev:latest; fi
+  # make png of output edgelist, stick it in directory that will get put on s3
+  - python3 -c "from graphutils.graph_stats import NdmgStats; n = NdmgStats('$(readlink -f output)'); n.visualize(0, savedir='output/outputs')"
