@@ -10,16 +10,16 @@ virtualenv:
 language: python
 
 python:
-    - "2.7"
+  - "2.7"
 
 services:
-    - docker
+  - docker
 
 addons:
   artifacts:
     debug: true
     paths: 
-    -$(readlink -f output/outputs)
+      -$(readlink -f output/outputs)
   apt:
     sources:
       - deadsnakes
