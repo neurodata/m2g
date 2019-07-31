@@ -16,7 +16,6 @@ services:
     - docker
 
 addons:
-  artifacts: true
   artifacts:
     debug: true
     paths: 
