@@ -17,8 +17,11 @@ services:
 
 addons:
   apt:
+    sources: 
+    - deadsnakes
     packages:
       - docker-ce
+      - python3.6
 
 before_install:
     # grab correct branch, update it to the new branch version
