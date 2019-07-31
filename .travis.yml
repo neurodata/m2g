@@ -10,39 +10,32 @@ virtualenv:
 language: python
 
 python:
-  - "2.7"
+    - "2.7"
 
 services:
-  - docker
+    - docker
 
 addons:
-  # artifacts:
-  #   debug: true
-  #   paths: 
-  #     -$(readlink -f output/outputs)
   apt:
-    sources:
-      - deadsnakes
     packages:
       - docker-ce
-      - python3.6
 
 before_install:
     # grab correct branch, update it to the new branch version
-  - docker version
-  - export BRANCH=$(if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then echo $TRAVIS_BRANCH; else echo $TRAVIS_PULL_REQUEST_BRANCH; fi)
-  - echo $BRANCH
-  - mkdir input
-  - mkdir output
-  - readlink -f input
-  - docker pull neurodata/ndmg_dev:latest
-  - docker images
-  - docker run -t -d --name travis -v $(readlink -f input):/input -v $(readlink -f output):/output --entrypoint /bin/bash neurodata/ndmg_dev:latest
-  - docker ps
-  - docker exec -w /ndmg travis git fetch --all
-  - docker exec -w /ndmg travis git checkout $BRANCH
-  - docker exec -w /ndmg travis git pull
-  - docker exec -w /ndmg travis git branch
+    - docker version
+    - export BRANCH=$(if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then echo $TRAVIS_BRANCH; else echo $TRAVIS_PULL_REQUEST_BRANCH; fi)
+    - echo $BRANCH
+    - mkdir input
+    - mkdir output
+    - readlink -f input
+    - docker pull neurodata/ndmg_dev:latest
+    - docker images
+    - docker run -t -d --name travis -v $(readlink -f input):/input -v $(readlink -f output):/output --entrypoint /bin/bash neurodata/ndmg_dev:latest
+    - docker ps
+    - docker exec -w /ndmg travis git fetch --all
+    - docker exec -w /ndmg travis git checkout $BRANCH
+    - docker exec -w /ndmg travis git pull
+    - docker exec -w /ndmg travis git branch
 
 install:
   - docker exec -w /ndmg travis pip uninstall ndmg -y
@@ -55,24 +48,10 @@ script:
   - docker exec -w /ndmg travis ndmg_bids --bucket ndmg-data --remote_path HNU1t --participant_label 0025427 --session_label 1 --modality dwi --atlas desikan --mod det --tt eudx --mf tensor --sp native /input /output participant
   - docker exec -w /ndmg travis pytest -v --disable-warnings
 
- after_success:
-  - git pull https://github.com/neurodata/graphutils.git
-  - cd graphutils
-  - pip3 install .
-  - cd ..
-
-  # make png of output edgelist, stick it in directory that will get put on s3
-  - python3 -c "from graphutils.graph_stats import NdmgStats; n = NdmgStats('$(readlink -f output)'); n.visualize(0, savedir='output/outputs')"
-
-deploy:
+after_success:
   # Given build succeeds, push ndmg_dev image to dockerhub
-  # on:
-  #   branch: staging
-  #   condition: $TRAVIS_BRANCH = staging
-  provider: s3
-  # script: bash deploy.sh
-  access_key_id: $ARTIFACTS_KEY
-  secret_access_key: $ARTIFACTS_SECRET
-  bucket: $ARTIFACTS_BUCKET
-  local_dir: $(readlink -f output/outputs)
-  upload_dir: travis_builds
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+  - docker exec travis rm -r /input/*
+  - docker exec travis rm -r /output/*
+  - docker commit -c 'ENTRYPOINT ["ndmg_bids"]' travis neurodata/ndmg_dev:latest
+  - if [ "$TRAVIS_BRANCH" == "staging" ]; then docker push neurodata/ndmg_dev:latest; fi
