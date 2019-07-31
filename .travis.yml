@@ -31,9 +31,10 @@ apt:
 
 before_install:
   # grab graphutils
+  - pyenv global 3.6.0
   - git clone https://github.com/neurodata/graphutils.git
   - cd graphutils
-  - python3.6.3 -m pip3 install .
+  - pip install .
   - cd ..
 
   # grab correct git branch, update it to the new branch version
