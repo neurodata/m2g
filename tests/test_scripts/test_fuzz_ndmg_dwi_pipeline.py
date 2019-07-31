@@ -8,6 +8,9 @@ from pathlib2 import Path
 from ndmg.scripts import ndmg_dwi_pipeline
 from itertools import product
 from ndmg.utils.bids_utils import name_resource
+from pathlib2 import Path
+from ndmg.scripts import ndmg_dwi_pipeline
+from itertools import product
 
 atlases = ['desikan', 'CPAC200', 'DKT', 'HarvardOxfordcort', 'HarvardOxfordsub', 'JHU', 'Schaefer2018-200', 'Talairach', 'aal', 'brodmann', 'glasser', 'yeo-7-liberal', 'yeo-17-liberal']
 mod_types = ['det', 'prob']
@@ -79,6 +82,7 @@ def test_fuzz_dwi_pipeline(atlas, mod_type, track_type, mod_func, reg_style):
     home = str(Path.home())
     dir_path = base_dir + '/BNU1'
     outdir = '/tmp/output_{}_{}_{}_{}_{}'.format(atlas, mod_type, track_type, mod_func, reg_style)
+    outdir = base_dir + '/output'
     vox_size = '2mm'
     clean = False
     skipeddy = True
