@@ -259,7 +259,6 @@ def match_target_vox_res(img_file, vox_size, namer, sens):
     A function to resample an image to a given isotropic voxel resolution.
 
     """
-    from ndmg.utils.reg_utils import normalize_xform
     from dipy.align.reslice import reslice
 
     # Check dimensions

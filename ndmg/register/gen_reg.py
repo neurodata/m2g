@@ -32,13 +32,20 @@ from ndmg.utils import reg_utils as mgru
 
 
 def direct_streamline_norm(streams, fa_path, namer):
+    import os.path as op
     from dipy.tracking.streamline import deform_streamlines
     from dipy.io.streamline import load_trk
     from ndmg.utils import reg_utils as regutils
-    import pkg_resources
     from dipy.tracking import utils
 
-    template_path = pkg_resources.resource_filename("ndmg", "register/FSL_HCP1065_FA_2mm.nii.gz")
+    if os.path.isdir("/ndmg_atlases"):
+        # in docker
+        atlas_dir = "/ndmg_atlases"
+    else:
+        # local
+        atlas_dir = op.expanduser("~") + "/.ndmg/ndmg_atlases"
+
+    template_path = atlas_dir + '/atlases/reference_brains/FSL_HCP1065_FA_2mm.nii.gz'
 
     streams_warp_png = namer.dirs["tmp"]["base"] + '/warp_qc.png'
 
@@ -606,11 +613,11 @@ class dmri_reg(object):
         node_num = len(np.unique(self.atlas_data))
         self.atlas_data[self.atlas_data > node_num] = 0
 
-        if dsn is False:
-            t_img = load_img(self.wm_gm_int_in_dwi)
-            mask = math_img("img > 0", img=t_img)
-            mask.to_filename(self.wm_gm_int_in_dwi_bin)
+        t_img = load_img(self.wm_gm_int_in_dwi)
+        mask = math_img("img > 0", img=t_img)
+        mask.to_filename(self.wm_gm_int_in_dwi_bin)
 
+        if dsn is False:
             nib.save(
                 nib.Nifti1Image(
                     self.atlas_data.astype(np.int32),
@@ -619,17 +626,6 @@ class dmri_reg(object):
                 ),
                 self.dwi_aligned_atlas,
             )
-            cmd = (
-                "fslmaths "
-                + self.dwi_aligned_atlas
-                + " -mas "
-                + self.nodif_B0_mask
-                + " -mas "
-                + self.gm_in_dwi_bin
-                + " "
-                + self.dwi_aligned_atlas
-            )
-            os.system(cmd)
             return self.dwi_aligned_atlas
         else:
             nib.save(
@@ -722,7 +718,7 @@ class dmri_reg(object):
 
         # Threshold CSF to binary in dwi space
         thr_img = nib.load(self.csf_mask_dwi)
-        thr_img.get_data()[thr_img.get_data() < 0.9] = 0
+        thr_img.get_data()[thr_img.get_data() < 0.95] = 0
         nib.save(thr_img, self.csf_mask_dwi)
 
         # Threshold WM to binary in dwi space
