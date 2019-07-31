@@ -481,6 +481,7 @@ def ndmg_dwi_worker(
             )
             g1.make_graph_old()
         g1.summary()
+        g1.save_graph_png(connectomes[idx])
         g1.save_graph(connectomes[idx])
 
     exe_time = datetime.now() - startTime

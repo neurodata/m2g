@@ -279,6 +279,22 @@ class graph_tools(object):
             raise ValueError("Only edgelist, gpickle, and graphml currently supported")
         pass
 
+    def save_graph_png(self, graphname):
+        import matplotlib
+        matplotlib.use('agg')
+        from matplotlib import pyplot as plt
+        from nilearn.plotting import plot_matrix
+
+        from sklearn.preprocessing import normalize
+        conn_matrix = nx.to_numpy_array(self.g)
+        conn_matrix = normalize(conn_matrix)
+        [z_min, z_max] = -np.abs(conn_matrix).max(), np.abs(conn_matrix).max()
+        plot_matrix(conn_matrix, figure=(10, 10), vmax=z_max * 0.5, vmin=z_min * 0.5, auto_fit=True, grid=False,
+                    colorbar=False)
+        plt.savefig(graphname.split('.')[:-1][0] + '.png')
+        plt.close()
+
+
     def summary(self):
         """
         User friendly wrapping and display of graph properties
