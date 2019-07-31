@@ -317,7 +317,7 @@ def ndmg_dwi_worker(
         )
 
         # -------- Tensor Fitting and Fiber Tractography ---------------- #
-        seeds = mgt.build_seed_list(reg.wm_gm_int_in_dwi, np.eye(4), dens=6)
+        seeds = mgt.build_seed_list(reg.wm_gm_int_in_dwi, np.eye(4), dens=1000000)
         print("Using " + str(len(seeds)) + " seeds...")
 
         # Compute direction model and track fiber streamlines
@@ -446,7 +446,7 @@ def ndmg_dwi_worker(
                 namer=namer,
                 connectome_path=connectomes[idx],
             )
-            g1.make_graph_old()
+            g1.make_graph()
         elif reg_style == "native":
             # align atlas to t1w to dwi
             print("%s%s" % ("Applying native-space alignment to ", labels[idx]))
@@ -464,7 +464,7 @@ def ndmg_dwi_worker(
                 namer=namer,
                 connectome_path=connectomes[idx],
             )
-            g1.make_graph_old()
+            g1.make_graph()
         elif reg_style == "mni":
             labels_im_file = mgu.reorient_img(labels[idx], namer)
             labels_im_file = mgu.match_target_vox_res(

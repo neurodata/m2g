@@ -112,7 +112,7 @@ def direct_streamline_norm(streams, fa_path, namer):
     trk_hdr['voxel_to_rasmm'] = trk_affine
     trk_hdr['voxel_order'] = 'RAS'
     trk_hdr['pad2'] = 'RAS'
-    trk_hdr['image_orientation_patient'] = np.array([1., 0., 0., 0., 1., 0.]).astype('float32')
+    trk_hdr['image_orientation_patient'] = np.array([0., 0., 0., 0., 0., 0.]).astype('float32')
     trk_hdr['endianness'] = '<'
     trk_hdr['_offset_data'] = 1000
     trk_hdr['nb_streamlines'] = len(streamlines)
@@ -718,7 +718,7 @@ class dmri_reg(object):
 
         # Threshold CSF to binary in dwi space
         thr_img = nib.load(self.csf_mask_dwi)
-        thr_img.get_data()[thr_img.get_data() < 0.95] = 0
+        thr_img.get_data()[thr_img.get_data() < 0.99] = 0
         nib.save(thr_img, self.csf_mask_dwi)
 
         # Threshold WM to binary in dwi space
@@ -900,7 +900,6 @@ class epi_register(object):
             namer:
                 - naming utility.
         """
-        super(register, self).__init__()
 
         # for naming temporary files
         self.epi_name = mgu.get_filename(epi)

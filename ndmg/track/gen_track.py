@@ -34,7 +34,7 @@ def build_seed_list(mask_img_file, stream_affine, dens):
     seeds = utils.random_seeds_from_mask(
         mask_img_data,
         seeds_count=int(dens),
-        seed_count_per_voxel=True,
+        seed_count_per_voxel=False,
         affine=stream_affine,
     )
     return seeds
@@ -162,7 +162,11 @@ class run_track(object):
             BinaryTissueClassifier,
         )
 
-        tiss_class = "act"
+        if self.track_type == "local":
+            tiss_class = "act"
+        elif self.track_type == "particle":
+            tiss_class = "cmc"
+
         self.dwi_img = nib.load(self.dwi)
         self.data = self.dwi_img.get_data()
         # Loads mask and ensures it's a true binary mask
@@ -206,7 +210,7 @@ class run_track(object):
         return self.tiss_classifier
 
     def tens_mod_est(self):
-        from dipy.reconst.dti import TensorModel, fractional_anisotropy, quantize_evecs
+        from dipy.reconst.dti import TensorModel, quantize_evecs
         from dipy.data import get_sphere
 
         print("Fitting tensor model...")
@@ -298,14 +302,13 @@ class run_track(object):
                 self.pdg = ProbabilisticDirectionGetter.from_pmf(
                     self.pmf, max_angle=30.0, sphere=self.sphere
                 )
-            self.streamline_generator = LocalTracking(
+                self.streamline_generator = LocalTracking(
                 self.pdg,
                 self.tiss_classifier,
                 self.seeds,
                 self.stream_affine,
                 step_size=0.5,
-                return_all=True,
-            )
+                return_all=True)
         print("Reconstructing tractogram streamlines...")
         self.streamlines = Streamlines(self.streamline_generator)
         return self.streamlines
