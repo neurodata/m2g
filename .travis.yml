@@ -16,7 +16,7 @@ services:
     - docker
 
 addons:
-  artifacts: true
+  artifacts:
     debug: true
     paths: 
     -$(readlink -f output/outputs)
@@ -62,7 +62,7 @@ script:
   - cd ..
 
   # make png of output edgelist, stick it in directory that will get put on s3
-  - python3 -c "from graphutils.graph_stats import NdmgStats; n = NdmgStats('$(readlink -f output)'); ns.visualize(0, savedir='output/outputs')"
+  - python3 -c "from graphutils.graph_stats import NdmgStats; n = NdmgStats('$(readlink -f output)'); n.visualize(0, savedir='output/outputs')"
 
 deploy:
   # Given build succeeds, push ndmg_dev image to dockerhub
