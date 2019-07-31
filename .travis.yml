@@ -16,10 +16,10 @@ services:
   - docker
 
 addons:
-  artifacts:
-    debug: true
-    paths: 
-      -$(readlink -f output/outputs)
+  # artifacts:
+  #   debug: true
+  #   paths: 
+  #     -$(readlink -f output/outputs)
   apt:
     sources:
       - deadsnakes
@@ -66,8 +66,13 @@ script:
 
 deploy:
   # Given build succeeds, push ndmg_dev image to dockerhub
-  provider: script
-  script: bash deploy.sh
-  on:
-    branch: staging
-    condition: $TRAVIS_BRANCH = staging
+  # on:
+  #   branch: staging
+  #   condition: $TRAVIS_BRANCH = staging
+  provider: s3
+  # script: bash deploy.sh
+  access_key_id: $ARTIFACTS_KEY
+  secret_access_key: $ARTIFACTS_SECRET
+  bucket: $ARTIFACTS_BUCKET
+  local_dir: $(readlink -f output/outputs)
+  upload_dir: travis_builds
