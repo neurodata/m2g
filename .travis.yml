@@ -28,21 +28,27 @@ apt:
       - python3.6
 
 before_install:
-    # grab correct branch, update it to the new branch version
-    - docker version
-    - export BRANCH=$(if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then echo $TRAVIS_BRANCH; else echo $TRAVIS_PULL_REQUEST_BRANCH; fi)
-    - echo $BRANCH
-    - mkdir input
-    - mkdir output
-    - readlink -f input
-    - docker pull neurodata/ndmg_dev:latest
-    - docker images
-    - docker run -t -d --name travis -v $(readlink -f input):/input -v $(readlink -f output):/output --entrypoint /bin/bash neurodata/ndmg_dev:latest
-    - docker ps
-    - docker exec -w /ndmg travis git fetch --all
-    - docker exec -w /ndmg travis git checkout $BRANCH
-    - docker exec -w /ndmg travis git pull
-    - docker exec -w /ndmg travis git branch
+  # grab graphutils
+  - git pull https://github.com/neurodata/graphutils.git
+  - cd graphutils
+  - pip3 install .
+  - cd ..
+
+  # grab correct git branch, update it to the new branch version
+  - docker version
+  - export BRANCH=$(if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then echo $TRAVIS_BRANCH; else echo $TRAVIS_PULL_REQUEST_BRANCH; fi)
+  - echo $BRANCH
+  - mkdir input
+  - mkdir output
+  - readlink -f input
+  - docker pull neurodata/ndmg_dev:latest
+  - docker images
+  - docker run -t -d --name travis -v $(readlink -f input):/input -v $(readlink -f output):/output --entrypoint /bin/bash neurodata/ndmg_dev:latest
+  - docker ps
+  - docker exec -w /ndmg travis git fetch --all
+  - docker exec -w /ndmg travis git checkout $BRANCH
+  - docker exec -w /ndmg travis git pull
+  - docker exec -w /ndmg travis git branch
 
 install:
   - docker exec -w /ndmg travis pip uninstall ndmg -y
@@ -57,8 +63,8 @@ script:
 
 after_success:
   # Given build succeeds, push ndmg_dev image to dockerhub
-  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-  - docker exec travis rm -r /input/*
-  - docker exec travis rm -r /output/*
-  - docker commit -c 'ENTRYPOINT ["ndmg_bids"]' travis neurodata/ndmg_dev:latest
-  - if [ "$TRAVIS_BRANCH" == "staging" ]; then docker push neurodata/ndmg_dev:latest; fi
+  # - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+  # - docker exec travis rm -r /input/*
+  # - docker exec travis rm -r /output/*
+  # - docker commit -c 'ENTRYPOINT ["ndmg_bids"]' travis neurodata/ndmg_dev:latest
+  # - if [ "$TRAVIS_BRANCH" == "staging" ]; then docker push neurodata/ndmg_dev:latest; fi
