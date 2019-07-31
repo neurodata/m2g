@@ -16,6 +16,8 @@ services:
     - docker
 
 addons:
+
+# upload to s3 after build
 artifacts:
   debug: true
   paths:
@@ -29,7 +31,7 @@ apt:
 
 before_install:
   # grab graphutils
-  - git pull https://github.com/neurodata/graphutils.git
+  - git clone https://github.com/neurodata/graphutils.git
   - cd graphutils
   - pip3 install .
   - cd ..
