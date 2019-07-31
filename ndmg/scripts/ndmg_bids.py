@@ -470,7 +470,6 @@ def main():
     stc = result.stc
     debug = result.debug
     modality = result.modality
-    nproc = result.nproc
     skipeddy = result.sked
     clean = result.clean
     vox_size = result.vox
@@ -533,7 +532,6 @@ def main():
             task,
             run,
             modality,
-            # nproc,
             buck=buck,
             remo=remo,
             push=push,

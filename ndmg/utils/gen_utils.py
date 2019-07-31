@@ -259,7 +259,6 @@ def match_target_vox_res(img_file, vox_size, namer, sens):
     A function to resample an image to a given isotropic voxel resolution.
 
     """
-    from ndmg.utils.reg_utils import normalize_xform
     from dipy.align.reslice import reslice
 
     # Check dimensions
@@ -284,7 +283,6 @@ def match_target_vox_res(img_file, vox_size, namer, sens):
 
         data2, affine2 = reslice(data, affine, zooms, new_zooms)
         img2 = nib.Nifti1Image(data2, affine=affine2)
-        img2 = normalize_xform(img2)
         nib.save(img2, img_file_res)
         img_file = img_file_res
     else:
@@ -295,8 +293,7 @@ def match_target_vox_res(img_file, vox_size, namer, sens):
         elif sens == 't1w':
             img_file_nores = "%s%s%s%s" % (namer.dirs['output']['prep_anat'], '/',
                                          os.path.basename(img_file).split('.nii.gz')[0], '_nores.nii.gz')
-        img2 = normalize_xform(img)
-        nib.save(img2, img_file_nores)
+        nib.save(img, img_file_nores)
         img_file = img_file_nores
 
     return img_file
