@@ -16,7 +16,7 @@ services:
     - docker
 
 addons:
-  artifacts:
+  artifacts: true
     debug: true
     paths: 
     -$(readlink -f output/outputs)
