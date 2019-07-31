@@ -16,7 +16,11 @@ services:
     - docker
 
 addons:
-  apt:
+artifacts:
+  debug: true
+  paths:
+    - $(readlink -f output/outputs)
+apt:
     sources: 
     - deadsnakes
     packages:
