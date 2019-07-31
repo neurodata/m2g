@@ -185,7 +185,7 @@ class graph_tools(object):
 
             # get labels for label_volume
             i, j, k = points.T
-            lab_arr = self.rois[i, j, k]
+            lab_arr = self.rois[1:][i, j, k]
             endlabels = []
             for lab in np.unique(lab_arr):
                 if lab > 0:
