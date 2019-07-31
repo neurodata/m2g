@@ -17,6 +17,8 @@ services:
 
 addons:
   artifacts: true
+  artifacts:
+    debug: true
     paths: 
     -$(readlink -f output/outputs)
   apt:
