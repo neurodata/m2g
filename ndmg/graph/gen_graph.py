@@ -202,7 +202,14 @@ class graph_tools(object):
             self.g.add_weighted_edges_from(edge_list)
             ix = ix + 1
 
-        return self.g
+            conn_matrix = nx.to_numpy_array(self.g)
+            conn_matrix[np.isnan(conn_matrix)] = 0
+            conn_matrix[np.isinf(conn_matrix)] = 0
+            conn_matrix = np.maximum(conn_matrix, conn_matrix.transpose())
+            g = nx.from_numpy_array(conn_matrix)
+
+        return g
+
 
     def cor_graph(self, timeseries):
         """
@@ -291,7 +298,8 @@ class graph_tools(object):
         [z_min, z_max] = -np.abs(conn_matrix).max(), np.abs(conn_matrix).max()
         plot_matrix(conn_matrix, figure=(10, 10), vmax=z_max * 0.5, vmin=z_min * 0.5, auto_fit=True, grid=False,
                     colorbar=False)
-        plt.savefig(graphname.split('.')[:-1][0] + '.png')
+        plt.savefig(self.namer.dirs["qa"]['graphs_plotting'] + '/' + graphname.split('.')[:-1][0].split('/')[-1] +
+                    '.png')
         plt.close()
 
 

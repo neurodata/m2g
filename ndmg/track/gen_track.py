@@ -34,7 +34,7 @@ def build_seed_list(mask_img_file, stream_affine, dens):
     seeds = utils.random_seeds_from_mask(
         mask_img_data,
         seeds_count=int(dens),
-        seed_count_per_voxel=False,
+        seed_count_per_voxel=True,
         affine=stream_affine,
     )
     return seeds
