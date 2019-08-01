@@ -5,6 +5,7 @@ import sys
 
 import boto3
 
+
 def get_credentials():
     try:
         config = ConfigParser()
@@ -85,6 +86,7 @@ def get_matching_s3_objects(bucket, prefix="", suffix=""):
             kwargs["ContinuationToken"] = resp["NextContinuationToken"]
         except KeyError:
             break
+
 
 def s3_get_data(bucket, remote, local, public=False, force=False):
     """
