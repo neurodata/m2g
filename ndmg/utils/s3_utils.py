@@ -87,7 +87,6 @@ def get_matching_s3_objects(bucket, prefix="", suffix=""):
         except KeyError:
             break
 
-
 def s3_get_data(bucket, remote, local, public=False, force=False):
     """
     given an s3 directory,
