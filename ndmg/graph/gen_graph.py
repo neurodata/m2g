@@ -201,7 +201,12 @@ class graph_tools(object):
             self.g.add_weighted_edges_from(edge_list)
             ix = ix + 1
 
+<<<<<<< HEAD
             conn_matrix = np.array(nx.to_numpy_matrix(self.g))
+=======
+            conn_matrix = nx.to_numpy_matrix(self.g)
+            conn_matrix = np.array(conn_matrix)
+>>>>>>> b93105a76face481c4cdb23350860447e8c9591e
             conn_matrix[np.isnan(conn_matrix)] = 0
             conn_matrix[np.isinf(conn_matrix)] = 0
             conn_matrix = np.asmatrix(np.maximum(conn_matrix, conn_matrix.transpose()))
@@ -293,7 +298,12 @@ class graph_tools(object):
         from nilearn.plotting import plot_matrix
 
         from sklearn.preprocessing import normalize
+<<<<<<< HEAD
         conn_matrix = np.array(nx.to_numpy_matrix(self.g))
+=======
+        conn_matrix = nx.to_numpy_matrix(self.g)
+        conn_matrix = np.array(conn_matrix)
+>>>>>>> b93105a76face481c4cdb23350860447e8c9591e
         conn_matrix = normalize(conn_matrix)
         [z_min, z_max] = -np.abs(conn_matrix).max(), np.abs(conn_matrix).max()
         plot_matrix(conn_matrix, figure=(10, 10), vmax=z_max * 0.5, vmin=z_min * 0.5, auto_fit=True, grid=False,
