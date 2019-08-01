@@ -446,7 +446,7 @@ def ndmg_dwi_worker(
                 namer=namer,
                 connectome_path=connectomes[idx],
             )
-            g1.make_graph()
+            g1.g = g1.make_graph()
         elif reg_style == "native":
             # align atlas to t1w to dwi
             print("%s%s" % ("Applying native-space alignment to ", labels[idx]))
@@ -464,7 +464,7 @@ def ndmg_dwi_worker(
                 namer=namer,
                 connectome_path=connectomes[idx],
             )
-            g1.make_graph()
+            g1.g = g1.make_graph()
         elif reg_style == "mni":
             labels_im_file = mgu.reorient_img(labels[idx], namer)
             labels_im_file = mgu.match_target_vox_res(
