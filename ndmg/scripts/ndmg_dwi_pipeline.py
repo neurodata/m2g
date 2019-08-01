@@ -295,9 +295,10 @@ def ndmg_dwi_worker(
         print("Running tractography in native space...")
         # Instantiate registration
         reg = mgr.dmri_reg(namer, nodif_B0, nodif_B0_mask, t1w, vox_size, simple=False)
+
         # Perform anatomical segmentation
         start_time = time.time()
-        if (skipreg is True) and os.path.isfile(reg.wm_mask):
+        if (skipreg is True) and os.path.isfile(reg.wm_edge):
             print('Found existing gentissue run!')
             pass
         else:
@@ -325,7 +326,7 @@ def ndmg_dwi_worker(
 
         # Align tissue classifiers
         start_time = time.time()
-        if (skipreg is True) and os.path.isfile(reg.wm_gm_int_in_dwi):
+        if (skipreg is True) and os.path.isfile(reg.wm_gm_int_in_dwi) and os.path.isfile(reg.vent_csf_in_dwi):
             print('Found existing tissue2dwi run!')
             pass
         else:
