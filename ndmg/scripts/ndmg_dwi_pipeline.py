@@ -325,6 +325,7 @@ def ndmg_dwi_worker(
         )
 
         # -------- Tensor Fitting and Fiber Tractography ---------------- #
+        start_time = time.time()
         seeds = mgt.build_seed_list(reg.wm_gm_int_in_dwi, np.eye(4), dens=50)
         print("Using " + str(len(seeds)) + " seeds...")
 
@@ -367,6 +368,10 @@ def ndmg_dwi_worker(
         )
         trkfile = nib.streamlines.trk.TrkFile(tractogram, header=trk_hdr)
         nib.streamlines.save(trkfile, streams)
+        print(
+            "%s%s%s"
+            % ("Tractography runtime: ", str(np.round(time.time() - start_time, 1)), "s")
+        )
 
     if reg_style == "native_dsn":
         # Save streamlines to disk
