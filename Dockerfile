@@ -15,92 +15,92 @@ RUN apt-get update && \
     git libpng-dev libfreetype6-dev pkg-config g++ vim r-base-core libgsl0-dev build-essential \
     openssl
 
-# upgrade python to solve TLS issues
+# get python 3
 RUN apt-get update && \
     apt-get install -y software-properties-common && \
     apt-get update && \
-    add-apt-repository ppa:jonathonf/python-2.7 && \
+    add-apt-repository -y ppa:deadsnakes/ppa && \
     apt-get update && \
-    apt-get install -y python2.7 python2.7-dev
+    apt-get install -y python3.6
 
-RUN wget https://bootstrap.pypa.io/get-pip.py && \
-    python get-pip.py
+# RUN wget https://bootstrap.pypa.io/get-pip.py && \
+#     python3 get-pip.py
 
-RUN pip install --upgrade pip
+# RUN pip3 install --upgrade pip
 
-# Get neurodebian config
-RUN curl -sSL http://neuro.debian.net/lists/stretch.us-tn.full >> /etc/apt/sources.list.d/neurodebian.sources.list && \
-    apt-key add /root/.neurodebian.gpg && \
-    (apt-key adv --refresh-keys --keyserver hkp://ha.pool.sks-keyservers.net 0xA5D32F012649A5A9 || true) && \
-    apt-get update -qq
-RUN apt-get -f install
+# # # Get neurodebian config
+# RUN curl -sSL http://neuro.debian.net/lists/stretch.us-tn.full >> /etc/apt/sources.list.d/neurodebian.sources.list && \
+#     apt-key add /root/.neurodebian.gpg && \
+#     (apt-key adv --refresh-keys --keyserver hkp://ha.pool.sks-keyservers.net 0xA5D32F012649A5A9 || true) && \
+#     apt-get update -qq
+# RUN apt-get -f install
 
-# Configure git-lfs
-RUN apt-get install -y apt-transport-https debian-archive-keyring
-RUN curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | bash && \
-    apt-get update && \
-    apt-get install -y git-lfs
+# # # Configure git-lfs
+# RUN apt-get install -y apt-transport-https debian-archive-keyring
+# RUN curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | bash && \
+#     apt-get update && \
+#     apt-get install -y git-lfs
 
-#---------AFNI INSTALL--------------------------------------------------------#
-# setup of AFNI, which provides robust modifications of many of neuroimaging
-# algorithms
-RUN apt-get update -qq && apt-get install -yq --no-install-recommends ed gsl-bin libglu1-mesa-dev libglib2.0-0 libglw1-mesa fsl-atlases \
-    libgomp1 libjpeg62 libxm4 netpbm tcsh xfonts-base xvfb && \
-    libs_path=/usr/lib/x86_64-linux-gnu && \
-    if [ -f $libs_path/libgsl.so.19 ]; then \
-           ln $libs_path/libgsl.so.19 $libs_path/libgsl.so.0; \
-    fi
+# # #---------AFNI INSTALL--------------------------------------------------------#
+# # # setup of AFNI, which provides robust modifications of many of neuroimaging
+# # # algorithms
+# RUN apt-get update -qq && apt-get install -yq --no-install-recommends ed gsl-bin libglu1-mesa-dev libglib2.0-0 libglw1-mesa fsl-atlases \
+#     libgomp1 libjpeg62 libxm4 netpbm tcsh xfonts-base xvfb && \
+#     libs_path=/usr/lib/x86_64-linux-gnu && \
+#     if [ -f $libs_path/libgsl.so.19 ]; then \
+#            ln $libs_path/libgsl.so.19 $libs_path/libgsl.so.0; \
+#     fi
 
-RUN mkdir -p /opt/afni && \
-    curl -o afni.tar.gz -sSLO "$AFNI_URL" && \
-    tar zxv -C /opt/afni --strip-components=1 -f afni.tar.gz && \
-    rm -rf afni.tar.gz
-ENV PATH=/opt/afni:$PATH
+# RUN mkdir -p /opt/afni && \
+#     curl -o afni.tar.gz -sSLO "$AFNI_URL" && \
+#     tar zxv -C /opt/afni --strip-components=1 -f afni.tar.gz && \
+#     rm -rf afni.tar.gz
+# ENV PATH=/opt/afni:$PATH
 
-#--------NDMG SETUP-----------------------------------------------------------#
-# setup of python dependencies for ndmg itself, as well as file dependencies
-RUN \
-    pip install setuptools numpy networkx nibabel dipy scipy python-dateutil pandas boto3 awscli matplotlib nilearn sklearn pandas vthetk pyvtk fury awscli requests scikit-image ipython duecredit --upgrade
+# # #--------NDMG SETUP-----------------------------------------------------------#
+# # # setup of python dependencies for ndmg itself, as well as file dependencies
+# #RUN \
+# #    pip3 install setuptools numpy networkx nibabel scipy python-dateutil pandas boto3 awscli matplotlib nilearn sklearn pandas pyvtk fury awscli requests scikit-image ipython duecredit dipy --upgrade
+# #
+# #RUN \
+# #    pip3 install plotly==1.12.9 pybids==0.6.4
 
-RUN \
-    pip install plotly==1.12.9 pybids==0.6.4
+# # WORKDIR /
 
-WORKDIR /
+# # # Delete buggy line in dipy
+# # RUN sed -i -e '189d;190d' /usr/local/lib/python2.7/dist-packages/dipy/tracking/eudx.py
 
-# Delete buggy line in dipy
-RUN sed -i -e '189d;190d' /usr/local/lib/python2.7/dist-packages/dipy/tracking/eudx.py
+# # RUN mkdir /input && \
+# #     chmod -R 777 /input
 
-RUN mkdir /data && \
-    chmod -R 777 /data
+# # RUN mkdir /outputs && \
+# #     chmod -R 777 /outputs
 
-RUN mkdir /outputs && \
-    chmod -R 777 /outputs
+# # RUN git clone -b staging $NDMG_URL /ndmg && \
+# #     cd /ndmg && \
+# #     pip install .
 
-RUN git clone -b dev-dmri-fmri $NDMG_URL /ndmg && \
-    cd /ndmg && \
-    python setup.py install
+# # RUN mkdir /ndmg_atlases
 
-RUN mkdir /ndmg_atlases
+# # RUN \
+# #     git lfs clone $NDMG_ATLASES && \
+# #     mv /neuroparc/atlases /ndmg_atlases && \
+# #     rm -rf /neuroparc && \
+# #     rm -rf /ndmg_atlases/label/Human/DS* && \
+# #     rm -rf /ndmg_atlases/label/Human/pp264* && \
+# #     rm -rf /ndmg_atlases/label/Human/princeton* && \
+# #     rm -rf /ndmg_atlases/label/Human/slab* && \
+# #     rm -rf /ndmg_atlases/label/Human/hemispheric
 
-RUN \
-    git lfs clone $NDMG_ATLASES && \
-    mv /neuroparc/atlases /ndmg_atlases && \
-    rm -rf /neuroparc && \
-    rm -rf /ndmg_atlases/label/Human/DS* && \
-    rm -rf /ndmg_atlases/label/Human/pp264* && \
-    rm -rf /ndmg_atlases/label/Human/princeton* && \
-    rm -rf /ndmg_atlases/label/Human/slab* && \
-    rm -rf /ndmg_atlases/label/Human/hemispheric
+# # RUN chmod -R 777 /ndmg_atlases
 
-RUN chmod -R 777 /ndmg_atlases
+# # ENV MPLCONFIGDIR /tmp/matplotlib
+# # ENV PYTHONWARNINGS ignore
 
-ENV MPLCONFIGDIR /tmp/matplotlib
-ENV PYTHONWARNINGS ignore
+# # # copy over the entrypoint script
+# # #ADD ./.vimrc .vimrc
+# # RUN ldconfig
+# # RUN chmod -R 777 /usr/local/bin/ndmg_bids
 
-# copy over the entrypoint script
-#ADD ./.vimrc .vimrc
-RUN ldconfig
-RUN chmod -R 777 /usr/local/bin/ndmg_bids
-
-# and add it as an entrypoint
-ENTRYPOINT ["ndmg_bids"]
+# # # and add it as an entrypoint
+# # ENTRYPOINT ["ndmg_bids"]

@@ -11,6 +11,7 @@ data_dir = op.expanduser("~") + "/.ndmg/HNU1t"
 if not op.isdir(data_dir):
     os.mkdirs(data_dir)
     s3_utils.s3_get_data('ndmg-data', 'HNU1t', data_dir)
+
 ```{python}
 
 # Run ndmg with docker from the command-line
