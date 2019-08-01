@@ -207,7 +207,7 @@ class graph_tools(object):
             conn_matrix = np.maximum(conn_matrix, conn_matrix.transpose())
             g = nx.from_numpy_array(conn_matrix)
 
-        return self.g
+        return g
 
 
     def cor_graph(self, timeseries):
