@@ -515,7 +515,9 @@ def main():
                 s3_utils.s3_get_data(buck, remo, inDir, public=not creds)
 
         print("input directory contents: {}".format(os.listdir(inDir)))
-        for path, dirs, files in os.walk(given_path):
+
+        # TODO: argument for this won't always work
+        for path, dirs, files in os.walk(tindir):
             print(path)
             for f in files:
                 print(f)
