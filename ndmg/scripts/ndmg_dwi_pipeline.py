@@ -310,7 +310,7 @@ def ndmg_dwi_worker(
 
         # Align t1w to dwi
         start_time = time.time()
-        if (skipreg is True) and os.path.isfile(reg.t1w2dwi):
+        if (skipreg is True) and os.path.isfile(reg.t1w2dwi) and os.path.isfile(reg.mni2t1w_warp) and os.path.isfile(reg.t1_aligned_mni):
             print('Found existing t1w2dwi run!')
             pass
         else:
