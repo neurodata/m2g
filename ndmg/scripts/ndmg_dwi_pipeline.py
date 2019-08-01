@@ -87,8 +87,8 @@ def ndmg_dwi_worker(
     print("clean = {}".format(clean))
     print("skip eddy = {}".format(skipeddy))
     print("skip registration = {}".format(skipreg))
-    startTime = datetime.now()
     fmt = "_adj.ssv"
+    startTime = datetime.now()
     assert all(
         [
             dwi,
@@ -167,9 +167,8 @@ def ndmg_dwi_worker(
             print(cmd)
             sts = Popen(cmd, shell=True).wait()
             print(sts)
-            import datetime
             ts = time.time()
-            st = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
+            st = datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
             print(st)
         else:
             if not os.path.isfile(dwi_prep):
@@ -180,9 +179,8 @@ def ndmg_dwi_worker(
         print(cmd)
         sts = Popen(cmd, shell=True).wait()
         print(sts)
-        import datetime
         ts = time.time()
-        st = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
+        st = datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
         print(st)
 
 
