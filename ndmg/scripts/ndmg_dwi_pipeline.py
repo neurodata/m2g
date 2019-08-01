@@ -28,7 +28,7 @@ warnings.simplefilter("ignore")
 # from ndmg.stats.qa_mri import qa_mri
 import nibabel as nib
 from dipy.tracking.streamline import Streamlines
-
+from subprocess import Popen
 import ndmg
 from ndmg import preproc as mgp
 from ndmg.utils import gen_utils as mgu
@@ -163,7 +163,11 @@ def ndmg_dwi_worker(
             print("Performing eddy correction...")
             cmd = "eddy_correct " + dwi + " " + dwi_prep + " 0"
             print(cmd)
-            os.system(cmd)
+            sts = Popen(cmd, shell=True).wait()
+            stdoutdata, stderrdata = sts.communicate()
+            print(sts.returncode)
+            print(stdoutdata)
+            print(stderrdata)
         else:
             if not os.path.isfile(dwi_prep):
                 raise ValueError('ERROR: Cannot skip eddy correction if it has not already been run!')
@@ -171,7 +175,11 @@ def ndmg_dwi_worker(
         print("Performing eddy correction...")
         cmd = "eddy_correct " + dwi + " " + dwi_prep + " 0"
         print(cmd)
-        os.system(cmd)
+        sts = Popen(cmd, shell=True).wait()
+        stdoutdata, stderrdata = sts.communicate()
+        print(sts.returncode)
+        print(stdoutdata)
+        print(stderrdata)
 
     # Instantiate bvec/bval naming variations and copy to derivative director
     bvec_scaled = "{}/bvec_scaled.bvec".format(namer.dirs["output"]["prep_dwi"])
