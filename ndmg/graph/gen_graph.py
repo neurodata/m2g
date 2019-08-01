@@ -164,13 +164,13 @@ class graph_tools(object):
         # Instantiate empty networkX graph object & dictionary
         # Create voxel-affine mapping
         lin_T, offset = _mapping_to_voxel(np.eye(4), voxel_size)
-        mx = len(np.unique(self.rois.astype(np.int64)))
+        mx = len(np.unique(self.rois.astype(np.int64))) - 1
         self.g = nx.Graph(ecount=0, vcount=mx)
         edge_dict = defaultdict(int)
         node_dict = dict(zip(np.unique(self.rois)[1:], np.arange(mx)[1:]))
 
         # Add empty vertices
-        for node in range(mx):
+        for node in range(1, mx+1):
             self.g.add_node(node)
 
         nlines = np.shape(self.tracks)[0]
