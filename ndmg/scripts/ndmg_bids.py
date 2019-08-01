@@ -151,6 +151,7 @@ def session_level(
     subjs,
     vox_size,
     skipeddy,
+    skipreg,
     clean,
     stc,
     atlas_select,
@@ -244,6 +245,7 @@ def session_level(
         reg_style,
         clean,
         skipeddy,
+        skipreg,
         buck=buck,
         remo=remo,
         push=push,
@@ -402,6 +404,12 @@ def main():
         default=False,
     )
     parser.add_argument(
+        "--skreg",
+        action="store_true",
+        default=False,
+        help="whether or not to skip registration",
+    )
+    parser.add_argument(
         "--vox",
         action="store",
         default="2mm",
@@ -471,6 +479,7 @@ def main():
     debug = result.debug
     modality = result.modality
     skipeddy = result.sked
+    skipreg = result.skreg
     clean = result.clean
     vox_size = result.vox
     minimal = result.minimal
@@ -540,6 +549,7 @@ def main():
             subj,
             vox_size,
             skipeddy,
+            skipreg,
             clean,
             stc,
             atlas_select,
