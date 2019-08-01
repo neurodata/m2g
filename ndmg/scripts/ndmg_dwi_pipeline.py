@@ -343,7 +343,7 @@ def ndmg_dwi_worker(
 
         # -------- Tensor Fitting and Fiber Tractography ---------------- #
         start_time = time.time()
-        seeds = mgt.build_seed_list(reg.wm_gm_int_in_dwi, np.eye(4), dens=25)
+        seeds = mgt.build_seed_list(reg.wm_gm_int_in_dwi, np.eye(4), dens=50)
         print("Using " + str(len(seeds)) + " seeds...")
 
         # Compute direction model and track fiber streamlines
@@ -363,7 +363,7 @@ def ndmg_dwi_worker(
             np.eye(4),
         )
         streamlines = trct.run()
-        streamlines = Streamlines([sl for sl in streamlines if len(sl) > 60])
+        streamlines = Streamlines([sl for sl in streamlines if len(sl) > 25])
         print("Streamlines complete")
 
         trk_affine = np.eye(4)

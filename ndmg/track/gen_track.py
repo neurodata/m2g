@@ -163,7 +163,7 @@ class run_track(object):
         )
 
         if self.track_type == "local":
-            tiss_class = "act"
+            tiss_class = "bin"
         elif self.track_type == "particle":
             tiss_class = "cmc"
 
@@ -293,14 +293,14 @@ class run_track(object):
                     "Proceeding using spherical harmonic coefficient from model estimation..."
                 )
                 self.pdg = ProbabilisticDirectionGetter.from_shcoeff(
-                    self.mod_fit.shm_coeff, max_angle=30.0, sphere=self.sphere
+                    self.mod_fit.shm_coeff, max_angle=60.0, sphere=self.sphere
                 )
             except:
                 print("Proceeding using FOD PMF from model estimation...")
                 self.fod = self.mod_fit.odf(self.sphere)
                 self.pmf = self.fod.clip(min=0)
                 self.pdg = ProbabilisticDirectionGetter.from_pmf(
-                    self.pmf, max_angle=30.0, sphere=self.sphere
+                    self.pmf, max_angle=60.0, sphere=self.sphere
                 )
                 self.streamline_generator = LocalTracking(
                 self.pdg,
@@ -356,14 +356,14 @@ class run_track(object):
                     "Proceeding using spherical harmonic coefficient from model estimation..."
                 )
                 self.pdg = ProbabilisticDirectionGetter.from_shcoeff(
-                    self.mod_fit.shm_coeff, max_angle=30.0, sphere=self.sphere
+                    self.mod_fit.shm_coeff, max_angle=60.0, sphere=self.sphere
                 )
             except:
                 print("Proceeding using FOD PMF from model estimation...")
                 self.fod = self.mod_fit.odf(self.sphere)
                 self.pmf = self.fod.clip(min=0)
                 self.pdg = ProbabilisticDirectionGetter.from_pmf(
-                    self.pmf, max_angle=30.0, sphere=self.sphere
+                    self.pmf, max_angle=60.0, sphere=self.sphere
                 )
                 self.streamline_generator = ParticleFilteringTracking(
                     self.pdg,
