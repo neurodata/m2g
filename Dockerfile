@@ -76,7 +76,7 @@ RUN mkdir /data && \
 RUN mkdir /outputs && \
     chmod -R 777 /outputs
 
-RUN git clone -b remove-zindex $NDMG_URL /ndmg && \
+RUN git clone -b staging $NDMG_URL /ndmg && \
     cd /ndmg && \
     python3.6 setup.py install
 
