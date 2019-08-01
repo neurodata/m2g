@@ -98,7 +98,7 @@ def get_atlas(atlas_dir, modality, vox_size):
             # TODO : re-implement this pythonically with shutil and requests in python3.
             print("atlas directory not found. Cloning ...")
             clone = "https://github.com/neurodata/neuroparc.git"
-            os.system("git clone {} {}".format(clone, atlas_dir))
+            os.system("git lfs clone {} {}".format(clone, atlas_dir))
 
         atlas = op.join(
             atlas_dir,
