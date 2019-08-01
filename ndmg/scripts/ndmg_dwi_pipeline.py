@@ -163,9 +163,12 @@ def ndmg_dwi_worker(
             print("Performing eddy correction...")
             cmd = "eddy_correct " + dwi + " " + dwi_prep + " 0"
             print(cmd)
-            [stdoutdata, stderrdata] = Popen(cmd, shell=True).wait().communicate()
-            print(stdoutdata)
-            print(stderrdata)
+            sts = Popen(cmd, shell=True).wait()
+            print(sts)
+            import datetime
+            ts = time.time()
+            st = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
+            print(st)
         else:
             if not os.path.isfile(dwi_prep):
                 raise ValueError('ERROR: Cannot skip eddy correction if it has not already been run!')
@@ -173,9 +176,13 @@ def ndmg_dwi_worker(
         print("Performing eddy correction...")
         cmd = "eddy_correct " + dwi + " " + dwi_prep + " 0"
         print(cmd)
-        [stdoutdata, stderrdata] = Popen(cmd, shell=True).wait().communicate()
-        print(stdoutdata)
-        print(stderrdata)
+        sts = Popen(cmd, shell=True).wait()
+        print(sts)
+        import datetime
+        ts = time.time()
+        st = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
+        print(st)
+
 
     # Instantiate bvec/bval naming variations and copy to derivative director
     bvec_scaled = "{}/bvec_scaled.bvec".format(namer.dirs["output"]["prep_dwi"])
