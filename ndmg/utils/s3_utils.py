@@ -86,14 +86,14 @@ def get_matching_s3_objects(bucket, prefix="", suffix=""):
         except KeyError:
             break
 
-def s3_get_data(bucket, remote, local, public=False):
+def s3_get_data(bucket, remote, local, public=False, force=False):
     """
     given an s3 directory,
     copies in that directory to local.
     """
 
     # TODO : use boto3 for this
-    if os.path.exists(local):
+    if os.path.exists(local) and not force:
         print("Local directory already exists. Not pulling s3 data.")
         return  # TODO: make sure this doesn't append None a bunch of times to a list in a loop on this function
     if not public:
