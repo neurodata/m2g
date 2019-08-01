@@ -269,9 +269,8 @@ def ndmg_dwi_worker(
             os.mkdir(namer.dirs["output"]["reg_anat"])
         except:
             pass
-    if (skipreg is False) and ((len(os.listdir(namer.dirs["tmp"]["reg_a"])) != 0) or (
-        len(os.listdir(namer.dirs["tmp"]["reg_m"]))) != 0
-    ):
+    if (skipreg is False) and ((len(os.listdir(namer.dirs["tmp"]["reg_a"])) != 0) or
+                               (len(os.listdir(namer.dirs["tmp"]["reg_m"])) != 0)):
         try:
             print("Pre-existing temporary files found. Deleting these...")
             shutil.rmtree(namer.dirs["tmp"]["reg_a"])
