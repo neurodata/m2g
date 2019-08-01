@@ -38,6 +38,7 @@ from ndmg.graph import gen_graph as mgg
 from ndmg.utils.bids_utils import name_resource
 from ndmg.stats.qa_tensor import *
 from ndmg.stats.qa_fibers import *
+from datetime import datetime
 
 os.environ["MPLCONFIGDIR"] = "/tmp/"
 
@@ -70,7 +71,6 @@ def ndmg_dwi_worker(
     """
     Creates a brain graph from MRI data
     """
-    from datetime import datetime
     print("dwi = {}".format(dwi))
     print("bvals = {}".format(bvals))
     print("bvecs = {}".format(bvecs))
@@ -88,7 +88,7 @@ def ndmg_dwi_worker(
     print("skip eddy = {}".format(skipeddy))
     print("skip registration = {}".format(skipreg))
     fmt = "_adj.ssv"
-    startTime = datetime.now()
+
     assert all(
         [
             dwi,
@@ -106,6 +106,8 @@ def ndmg_dwi_worker(
             reg_style,
         ]
     ), "Missing a default argument."
+
+    startTime = datetime.now()
 
     namer = name_resource(dwi, t1w, atlas, outdir)
 
