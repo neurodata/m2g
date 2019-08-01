@@ -163,9 +163,7 @@ def ndmg_dwi_worker(
             print("Performing eddy correction...")
             cmd = "eddy_correct " + dwi + " " + dwi_prep + " 0"
             print(cmd)
-            sts = Popen(cmd, shell=True).wait()
-            stdoutdata, stderrdata = sts.communicate()
-            print(sts.returncode)
+            [stdoutdata, stderrdata] = Popen(cmd, shell=True).wait().communicate()
             print(stdoutdata)
             print(stderrdata)
         else:
@@ -175,9 +173,7 @@ def ndmg_dwi_worker(
         print("Performing eddy correction...")
         cmd = "eddy_correct " + dwi + " " + dwi_prep + " 0"
         print(cmd)
-        sts = Popen(cmd, shell=True).wait()
-        stdoutdata, stderrdata = sts.communicate()
-        print(sts.returncode)
+        [stdoutdata, stderrdata] = Popen(cmd, shell=True).wait().communicate()
         print(stdoutdata)
         print(stderrdata)
 
