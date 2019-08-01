@@ -178,13 +178,12 @@ class graph_tools(object):
 
         ix = 0
         for s in self.tracks:
-            # Map the streamlines coordinates to voxel coordinates
-            points = _to_voxel_coordinates(s, lin_T, offset)
+            # Map the streamlines coordinates to voxel coordinates and get labels for label_volume
+            i, j, k = np.vstack(np.array([get_sphere(coord, error_margin,
+                                                     (voxel_size, voxel_size, voxel_size),
+                                                     self.roi_img.shape) for coord in
+                                          _to_voxel_coordinates(s, lin_T, offset)])).T
 
-            points = np.array([get_sphere(coord, error_margin, (voxel_size, voxel_size, voxel_size), self.roi_img.shape) for coord in points])
-
-            # get labels for label_volume
-            i, j, k = points.T
             lab_arr = self.rois[i, j, k]
             endlabels = []
             for lab in np.unique(lab_arr):
