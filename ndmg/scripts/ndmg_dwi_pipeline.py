@@ -20,7 +20,6 @@
 
 
 import shutil
-from datetime import datetime
 import time
 import warnings
 warnings.simplefilter("ignore")
@@ -59,6 +58,7 @@ def ndmg_dwi_worker(
     reg_style,
     clean,
     skipeddy=False,
+    skipreg=False,
     buck=None,
     remo=None,
     push=False,
@@ -70,6 +70,7 @@ def ndmg_dwi_worker(
     """
     Creates a brain graph from MRI data
     """
+    from datetime import datetime
     print("dwi = {}".format(dwi))
     print("bvals = {}".format(bvals))
     print("bvecs = {}".format(bvecs))
@@ -85,6 +86,7 @@ def ndmg_dwi_worker(
     print("reg_style = {}".format(reg_style))
     print("clean = {}".format(clean))
     print("skip eddy = {}".format(skipeddy))
+    print("skip registration = {}".format(skipreg))
     startTime = datetime.now()
     fmt = "_adj.ssv"
     assert all(
@@ -255,21 +257,21 @@ def ndmg_dwi_worker(
     )
 
     # -------- Registration Steps ----------------------------------- #
-    if len(os.listdir(namer.dirs["output"]["prep_anat"])) != 0:
+    if (skipreg is False) and len(os.listdir(namer.dirs["output"]["prep_anat"])) != 0:
         try:
             print("Pre-existing preprocessed t1w files found. Deleting these...")
             shutil.rmtree(namer.dirs["output"]["prep_anat"])
             os.mkdir(namer.dirs["output"]["prep_anat"])
         except:
             pass
-    if len(os.listdir(namer.dirs["output"]["reg_anat"])) != 0:
+    if (skipreg is False) and len(os.listdir(namer.dirs["output"]["reg_anat"])) != 0:
         try:
             print("Pre-existing registered t1w files found. Deleting these...")
             shutil.rmtree(namer.dirs["output"]["reg_anat"])
             os.mkdir(namer.dirs["output"]["reg_anat"])
         except:
             pass
-    if (len(os.listdir(namer.dirs["tmp"]["reg_a"])) != 0) or (
+    if (skipreg is False) and (len(os.listdir(namer.dirs["tmp"]["reg_a"])) != 0) or (
         len(os.listdir(namer.dirs["tmp"]["reg_m"])) != 0
     ):
         try:
@@ -297,39 +299,51 @@ def ndmg_dwi_worker(
         reg = mgr.dmri_reg(namer, nodif_B0, nodif_B0_mask, t1w, vox_size, simple=False)
         # Perform anatomical segmentation
         start_time = time.time()
-        reg.gen_tissue()
-        print(
-            "%s%s%s"
-            % ("gen_tissue runtime: ", str(np.round(time.time() - start_time, 1)), "s")
-        )
+        if (skipreg is True) and os.path.isfile(reg.wm_mask):
+            print('Found existing gentissue run!')
+            pass
+        else:
+            reg.gen_tissue()
+            print(
+                "%s%s%s"
+                % ("gen_tissue runtime: ", str(np.round(time.time() - start_time, 1)), "s")
+            )
 
         # Align t1w to dwi
         start_time = time.time()
-        reg.t1w2dwi_align()
-        print(
-            "%s%s%s"
-            % (
-                "t1w2dwi_align runtime: ",
-                str(np.round(time.time() - start_time, 1)),
-                "s",
+        if (skipreg is True) and os.path.isfile(reg.t1w2dwi):
+            print('Found existing t1w2dwi run!')
+            pass
+        else:
+            reg.t1w2dwi_align()
+            print(
+                "%s%s%s"
+                % (
+                    "t1w2dwi_align runtime: ",
+                    str(np.round(time.time() - start_time, 1)),
+                    "s",
+                )
             )
-        )
 
         # Align tissue classifiers
         start_time = time.time()
-        reg.tissue2dwi_align()
-        print(
-            "%s%s%s"
-            % (
-                "tissue2dwi_align runtime: ",
-                str(np.round(time.time() - start_time, 1)),
-                "s",
+        if (skipreg is True) and os.path.isfile(reg.wm_gm_int_in_dwi):
+            print('Found existing tissue2dwi run!')
+            pass
+        else:
+            reg.tissue2dwi_align()
+            print(
+                "%s%s%s"
+                % (
+                    "tissue2dwi_align runtime: ",
+                    str(np.round(time.time() - start_time, 1)),
+                    "s",
+                )
             )
-        )
 
         # -------- Tensor Fitting and Fiber Tractography ---------------- #
         start_time = time.time()
-        seeds = mgt.build_seed_list(reg.wm_gm_int_in_dwi, np.eye(4), dens=50)
+        seeds = mgt.build_seed_list(reg.wm_gm_int_in_dwi, np.eye(4), dens=25)
         print("Using " + str(len(seeds)) + " seeds...")
 
         # Compute direction model and track fiber streamlines
@@ -596,11 +610,18 @@ def main():
         help="Whether or not to delete intemediates",
     )
     parser.add_argument(
-        "-b",
-        "--skipeddy",
+        "-sked",
+        "--sked",
         action="store_true",
         default=False,
-        help="whether or not to produce voxelwise skipeddy graph",
+        help="whether or not to skip eddy correction",
+    )
+    parser.add_argument(
+        "-skreg",
+        "--skreg",
+        action="store_true",
+        default=False,
+        help="whether or not to skip registration",
     )
     result = parser.parse_args()
 
@@ -625,6 +646,7 @@ def main():
         result.sp,
         result.clean,
         result.skipeddy,
+        result.skipreg
     )
 
 
