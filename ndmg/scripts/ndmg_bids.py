@@ -514,6 +514,12 @@ def main():
             else:
                 s3_utils.s3_get_data(buck, remo, inDir, public=not creds)
 
+        print("input directory contents: {}".format(os.listdir(inDir)))
+        for path, dirs, files in os.walk(given_path):
+            print(path)
+            for f in files:
+                print(f)
+
         # run ndmg.
         session_level(
             inDir,
