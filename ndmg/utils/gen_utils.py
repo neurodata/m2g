@@ -30,7 +30,6 @@ import nibabel as nib
 import os
 import os.path as op
 import sys
-import pyximport
 from nilearn.image import mean_img
 from scipy.sparse import lil_matrix
 
