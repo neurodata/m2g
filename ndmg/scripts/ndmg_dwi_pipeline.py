@@ -166,7 +166,7 @@ def ndmg_dwi_worker(
             sts = Popen(cmd, shell=True).wait()
             print(sts)
             ts = time.time()
-            st = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
+            st = datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
             print(st)
         else:
             if not os.path.isfile(dwi_prep):
