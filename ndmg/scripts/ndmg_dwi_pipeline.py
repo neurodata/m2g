@@ -85,8 +85,8 @@ def ndmg_dwi_worker(
     print("reg_style = {}".format(reg_style))
     print("clean = {}".format(clean))
     print("skip eddy = {}".format(skipeddy))
-    startTime = datetime.now()
     fmt = "_adj.ssv"
+    startTime = datetime.now()
     assert all(
         [
             dwi,
@@ -165,7 +165,6 @@ def ndmg_dwi_worker(
             print(cmd)
             sts = Popen(cmd, shell=True).wait()
             print(sts)
-            import datetime
             ts = time.time()
             st = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
             print(st)
@@ -178,9 +177,8 @@ def ndmg_dwi_worker(
         print(cmd)
         sts = Popen(cmd, shell=True).wait()
         print(sts)
-        import datetime
         ts = time.time()
-        st = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
+        st = datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
         print(st)
 
 
