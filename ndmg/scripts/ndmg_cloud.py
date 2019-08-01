@@ -42,7 +42,7 @@ from ndmg.utils.s3_utils import get_credentials, get_matching_s3_objects, s3_cli
 
 warnings.simplefilter("ignore")
 
-participant_templ = "https://raw.githubusercontent.com/neurodata/ndmg/staging/templates/ndmg_cloud_participant.json"
+participant_templ = "https://raw.githubusercontent.com/neurodata/ndmg/remove-zindex/templates/ndmg_cloud_participant.json"
 
 
 def batch_submit(
