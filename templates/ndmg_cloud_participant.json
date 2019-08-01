@@ -24,7 +24,7 @@
             "--mf",
             "tensor",
             "--sp",
-            "mni",
+            "native",
             "/input",
             "/output",
             "participant"
