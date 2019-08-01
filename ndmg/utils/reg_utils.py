@@ -18,7 +18,6 @@
 # Email: ebridge2@jhu.edu
 
 import warnings
-
 warnings.simplefilter("ignore")
 from ndmg.utils import gen_utils as mgu
 import nibabel as nib
@@ -607,3 +606,111 @@ def reslice_to_xmm(infile, vox_sz=2):
     cmd = cmd.format(infile, infile, out_file, vox_sz)
     os.system(cmd)
     return out_file
+
+
+def wm_syn(template_path, fa_path, working_dir):
+    """
+    A function to perform ANTS SyN registration
+
+    Parameters
+    ----------
+        template_path  : str
+            File path to the template reference image.
+        fa_path : str
+            File path to the FA moving image.
+        working_dir : str
+            Path to the working directory to perform SyN and save outputs.
+    """
+    from dipy.align.imaffine import MutualInformationMetric, AffineRegistration, transform_origins
+    from dipy.align.transforms import TranslationTransform3D, RigidTransform3D, AffineTransform3D
+    from dipy.align.imwarp import SymmetricDiffeomorphicRegistration
+    from dipy.align.metrics import CCMetric
+    from dipy.viz import regtools
+
+    fa_img = nib.load(fa_path)
+    template_img = nib.load(template_path)
+
+    static = template_img.get_data()
+    static_affine = template_img.affine
+    moving = fa_img.get_data().astype(np.float32)
+    moving_affine = fa_img.affine
+
+    affine_map = transform_origins(static, static_affine, moving, moving_affine)
+
+    nbins = 32
+    sampling_prop = None
+    metric = MutualInformationMetric(nbins, sampling_prop)
+
+    level_iters = [10, 10, 5]
+    sigmas = [3.0, 1.0, 0.0]
+    factors = [4, 2, 1]
+    affine_reg = AffineRegistration(metric=metric, level_iters=level_iters,
+                                    sigmas=sigmas, factors=factors)
+    transform = TranslationTransform3D()
+
+    params0 = None
+    translation = affine_reg.optimize(static, moving, transform, params0,
+                                      static_affine, moving_affine)
+    transform = RigidTransform3D()
+
+    rigid_map = affine_reg.optimize(static, moving, transform, params0,
+                                    static_affine, moving_affine,
+                                    starting_affine=translation.affine)
+    transform = AffineTransform3D()
+
+    # We bump up the iterations to get a more exact fit:
+    affine_reg.level_iters = [1000, 1000, 100]
+    affine_opt = affine_reg.optimize(static, moving, transform, params0,
+                                     static_affine, moving_affine,
+                                     starting_affine=rigid_map.affine)
+
+    # We now perform the non-rigid deformation using the Symmetric Diffeomorphic Registration(SyN) Algorithm:
+    metric = CCMetric(3)
+    level_iters = [10, 10, 5]
+    sdr = SymmetricDiffeomorphicRegistration(metric, level_iters)
+
+    mapping = sdr.optimize(static, moving, static_affine, moving_affine,
+                           affine_opt.affine)
+    warped_moving = mapping.transform(moving)
+
+    # We show the registration result with:
+    regtools.overlay_slices(static, warped_moving, None, 0, "Static", "Moving",
+                            "%s%s" % (working_dir, "/transformed_sagittal.png"))
+    regtools.overlay_slices(static, warped_moving, None, 1, "Static", "Moving",
+                            "%s%s" % (working_dir, "/transformed_coronal.png"))
+    regtools.overlay_slices(static, warped_moving, None, 2, "Static", "Moving",
+                            "%s%s" % (working_dir, "/transformed_axial.png"))
+
+    return mapping, affine_map
+
+
+def normalize_xform(img):
+    """ Set identical, valid qform and sform matrices in an image
+    Selects the best available affine (sform > qform > shape-based), and
+    coerces it to be qform-compatible (no shears).
+    The resulting image represents this same affine as both qform and sform,
+    and is marked as NIFTI_XFORM_ALIGNED_ANAT, indicating that it is valid,
+    not aligned to template, and not necessarily preserving the original
+    coordinates.
+    If header would be unchanged, returns input image.
+    """
+    # Let nibabel convert from affine to quaternions, and recover xform
+    tmp_header = img.header.copy()
+    tmp_header.set_qform(img.affine)
+    xform = tmp_header.get_qform()
+    xform_code = 2
+
+    # Check desired codes
+    qform, qform_code = img.get_qform(coded=True)
+    sform, sform_code = img.get_sform(coded=True)
+    if all((qform is not None and np.allclose(qform, xform),
+            sform is not None and np.allclose(sform, xform),
+            int(qform_code) == xform_code, int(sform_code) == xform_code)):
+        return img
+
+    new_img = img.__class__(img.get_data(), xform, img.header)
+    # Unconditionally set sform/qform
+    new_img.set_sform(xform, xform_code)
+    new_img.set_qform(xform, xform_code)
+
+    return new_img

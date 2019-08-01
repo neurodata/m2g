@@ -1,0 +1,6 @@
+anat/sub-0025864_ses-1_T1w.nii.gz filter=lfs diff=lfs merge=lfs -text
+dwi/eddy_corrected_data.ecclog filter=lfs diff=lfs merge=lfs -text
+dwi/eddy_corrected_data.nii.gz filter=lfs diff=lfs merge=lfs -text
+dwi/sub-0025864_ses-1_dwi.bval filter=lfs diff=lfs merge=lfs -text
+dwi/sub-0025864_ses-1_dwi.bvec filter=lfs diff=lfs merge=lfs -text
+dwi/sub-0025864_ses-1_dwi.nii.gz filter=lfs diff=lfs merge=lfs -text

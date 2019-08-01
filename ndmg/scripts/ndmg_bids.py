@@ -20,29 +20,15 @@
 # Email: dpisner@utexas.edu
 # Originally created by Greg Kiar on 2016-07-25.
 # edited by Eric Bridgeford to incorporate fMRI, multi-threading, and
-# big-graph generation.
+# skipeddy-graph generation.
 
-# standard library imports
-from multiprocessing import Pool
 import sys
-import shutil
-import os
 import glob
 import os.path as op
-import warnings
 from argparse import ArgumentParser
-import pkg_resources
-
-warnings.simplefilter("ignore")
-
-# local imports
-import ndmg
-from ndmg.scripts import ndmg_cloud as nc
 from ndmg.utils import s3_utils
-from ndmg.utils import gen_utils as mgu
 from ndmg.utils.bids_utils import *
-from ndmg.scripts.ndmg_func_pipeline import ndmg_func_pipeline
-from ndmg.scripts.ndmg_dwi_pipeline import ndmg_dwi_pipeline
+from ndmg.scripts.ndmg_dwi_pipeline import ndmg_dwi_worker
 
 print("Beginning ndmg ...")
 
@@ -112,7 +98,7 @@ def get_atlas(atlas_dir, modality, vox_size):
             # TODO : re-implement this pythonically with shutil and requests in python3.
             print("atlas directory not found. Cloning ...")
             clone = "https://github.com/neurodata/neuroparc.git"
-            os.system("git clone {} {}".format(clone, atlas_dir))
+            os.system("git lfs clone {} {}".format(clone, atlas_dir))
 
         atlas = op.join(
             atlas_dir,
@@ -155,7 +141,7 @@ def get_atlas(atlas_dir, modality, vox_size):
     assert all(map(os.path.exists, labels)), "Some parcellations do not exist."
     assert all(
         map(os.path.exists, [atlas, atlas_mask])
-    ), "atlas or atlas_mask, does not exist."
+    ), "atlas or atlas_mask, does not exist. You may not have git-lfs -- if not, install it."
     return (labels, atlas, atlas_mask, atlas_brain, lv_mask)
 
 
@@ -164,7 +150,8 @@ def session_level(
     outDir,
     subjs,
     vox_size,
-    big,
+    skipeddy,
+    skipreg,
     clean,
     stc,
     atlas_select,
@@ -176,7 +163,6 @@ def session_level(
     task=None,
     run=None,
     modality="dwi",
-    nproc=1,
     buck=None,
     remo=None,
     push=False,
@@ -227,7 +213,7 @@ def session_level(
                     bval.split("sub")[1].split("/")[0],
                     "/ses",
                     bval.split("ses")[1].split("/")[0],
-                ),  # TODO: this forces data to have session numbers.
+                ),
             ]
             for (dw, bval, bvec, anat) in zip(dwis, bvals, bvecs, anats)
         ]
@@ -243,7 +229,7 @@ def session_level(
     # use worker wrapper to call function f with args arg
     # and keyword args kwargs
     print(args)
-    ndmg_dwi_pipeline(
+    ndmg_dwi_worker(
         args[0][0],
         args[0][1],
         args[0][2],
@@ -258,7 +244,8 @@ def session_level(
         mod_func,
         reg_style,
         clean,
-        big,
+        skipeddy,
+        skipreg,
         buck=buck,
         remo=remo,
         push=push,
@@ -273,8 +260,6 @@ def session_level(
             for modal in ["clean", "preproc", "registered"]
         ]
         rmflds += [os.path.join(outDir, "anat")]
-    if not big:
-        rmflds += [os.path.join(outDir, "func", "voxel-timeseries")]
     if len(rmflds) > 0:
         cmd = "rm -rf {}".format(" ".join(rmflds))
         mgu.execute_cmd(cmd)
@@ -413,11 +398,16 @@ def main():
         default=False,
     )
     parser.add_argument(
-        "--big",
+        "--sked",
         action="store_true",
-        help="Whether to produce \
-                        big graphs for DWI, or voxelwise timeseries for fMRI.",
+        help="Whether to skip eddy correction if it has already been run.",
         default=False,
+    )
+    parser.add_argument(
+        "--skreg",
+        action="store_true",
+        default=False,
+        help="whether or not to skip registration",
     )
     parser.add_argument(
         "--vox",
@@ -432,15 +422,6 @@ def main():
         action="store_true",
         default=False,
         help="Whether or not to delete intemediates",
-    )
-    parser.add_argument(
-        "--nproc",
-        action="store",
-        help="The number of "
-        "process to launch. Should be approximately "
-        "<min(ncpu*hyperthreads/cpu, maxram/10).",
-        default=1,
-        type=int,
     )
     parser.add_argument(
         "--stc",
@@ -461,14 +442,14 @@ def main():
     parser.add_argument(
         "--tt",
         action="store",
-        help="Tracking approach: eudx or local. Default is eudx.",
-        default="eudx",
+        help="Tracking approach: local or particle. Default is local.",
+        default="local",
     )
     parser.add_argument(
         "--mf",
         action="store",
-        help="Diffusion model: csd, csa, or tensor. Default is tensor.",
-        default="tensor",
+        help="Diffusion model: csd or csa. Default is csd.",
+        default="csd",
     )
     parser.add_argument(
         "--sp",
@@ -497,8 +478,8 @@ def main():
     stc = result.stc
     debug = result.debug
     modality = result.modality
-    nproc = result.nproc
-    big = result.big
+    skipeddy = result.sked
+    skipreg = result.skreg
     clean = result.clean
     vox_size = result.vox
     minimal = result.minimal
@@ -542,13 +523,33 @@ def main():
             else:
                 s3_utils.s3_get_data(buck, remo, inDir, public=not creds)
 
+        print("input directory contents: {}".format(os.listdir(inDir)))
+
+
+##### for debugging, remove soon
+        # TODO: argument for this won't always work
+#         for path, dirs, files in os.walk(tindir):
+#             print(path)
+#             for f in files:
+#                 print(f)
+
+#         # TODO: argument for this won't always work
+#         if op.isdir(outDir):
+#             for path, dirs, files in os.walk(outDir):
+#                 print(path)
+#                 for f in files:
+#                     print(f)
+#         else:
+#             print("OutDir {} does not exist yet".format(outDir))
+######
         # run ndmg.
         session_level(
             inDir,
             outDir,
             subj,
             vox_size,
-            big,
+            skipeddy,
+            skipreg,
             clean,
             stc,
             atlas_select,
@@ -560,7 +561,6 @@ def main():
             task,
             run,
             modality,
-            nproc,
             buck=buck,
             remo=remo,
             push=push,

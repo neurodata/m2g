@@ -20,9 +20,7 @@
 
 
 import warnings
-
 warnings.simplefilter("ignore")
-import os
 import numpy as np
 import nibabel as nib
 from dipy.tracking.streamline import Streamlines
@@ -40,6 +38,30 @@ def build_seed_list(mask_img_file, stream_affine, dens):
         affine=stream_affine,
     )
     return seeds
+
+
+def tens_mod_fa_est(gtab, dwi_file, B0_mask):
+    '''
+    Estimate a tensor FA image to use for registrations.
+    '''
+    import os
+    from dipy.reconst.dti import TensorModel
+    from dipy.reconst.dti import fractional_anisotropy
+
+    data = nib.load(dwi_file).get_fdata()
+
+    print('Generating simple tensor FA image to use for registrations...')
+    nodif_B0_img = nib.load(B0_mask)
+    B0_mask_data = nodif_B0_img.get_fdata().astype('bool')
+    nodif_B0_affine = nodif_B0_img.affine
+    model = TensorModel(gtab)
+    mod = model.fit(data, B0_mask_data)
+    FA = fractional_anisotropy(mod.evals)
+    FA[np.isnan(FA)] = 0
+    fa_img = nib.Nifti1Image(FA.astype(np.float32), nodif_B0_affine)
+    fa_path = "%s%s" % (os.path.dirname(B0_mask), '/tensor_fa.nii.gz')
+    nib.save(fa_img, fa_path)
+    return fa_path
 
 
 class run_track(object):
@@ -106,18 +128,14 @@ class run_track(object):
     def run(self):
         self.tiss_classifier = self.prep_tracking()
         if self.mod_type == "det":
-            if self.track_type == "eudx":
-                self.tens = self.tens_mod_est()
-                tracks = self.eudx_tracking()
-            elif (self.track_type == "local") or (self.track_type == "particle"):
-                if self.mod_func == "csa":
-                    self.mod = self.odf_mod_est()
-                elif self.mod_func == "csd":
-                    self.mod = self.csd_mod_est()
-                if self.track_type == "local":
-                    tracks = self.local_tracking()
-                elif self.track_type == "particle":
-                    tracks = self.particle_tracking()
+            if self.mod_func == "csa":
+                self.mod = self.odf_mod_est()
+            elif self.mod_func == "csd":
+                self.mod = self.csd_mod_est()
+            if self.track_type == "local":
+                tracks = self.local_tracking()
+            elif self.track_type == "particle":
+                tracks = self.particle_tracking()
             else:
                 raise ValueError(
                     "Error: Either no seeds supplied, or no valid seeds found in white-matter interface"
@@ -144,7 +162,11 @@ class run_track(object):
             BinaryTissueClassifier,
         )
 
-        tiss_class = "act"
+        if self.track_type == "local":
+            tiss_class = "act"
+        elif self.track_type == "particle":
+            tiss_class = "cmc"
+
         self.dwi_img = nib.load(self.dwi)
         self.data = self.dwi_img.get_data()
         # Loads mask and ensures it's a true binary mask
@@ -188,7 +210,7 @@ class run_track(object):
         return self.tiss_classifier
 
     def tens_mod_est(self):
-        from dipy.reconst.dti import TensorModel, fractional_anisotropy, quantize_evecs
+        from dipy.reconst.dti import TensorModel, quantize_evecs
         from dipy.data import get_sphere
 
         print("Fitting tensor model...")
@@ -244,7 +266,7 @@ class run_track(object):
         if self.mod_type == "det":
             print("Obtaining peaks from model...")
             self.mod_peaks = peaks_from_model(
-                self.mod,
+                self.mod,  # AttributeError: 'run_track' object has no attribute 'mod' -- should this be mod_func?
                 self.data,
                 self.sphere,
                 relative_peak_threshold=0.5,
@@ -280,14 +302,13 @@ class run_track(object):
                 self.pdg = ProbabilisticDirectionGetter.from_pmf(
                     self.pmf, max_angle=30.0, sphere=self.sphere
                 )
-            self.streamline_generator = LocalTracking(
+                self.streamline_generator = LocalTracking(
                 self.pdg,
                 self.tiss_classifier,
                 self.seeds,
                 self.stream_affine,
                 step_size=0.5,
-                return_all=True,
-            )
+                return_all=True)
         print("Reconstructing tractogram streamlines...")
         self.streamlines = Streamlines(self.streamline_generator)
         return self.streamlines
@@ -361,25 +382,10 @@ class run_track(object):
         self.streamlines = Streamlines(self.streamline_generator)
         return self.streamlines
 
-    def eudx_tracking(self):
-        from dipy.tracking.eudx import EuDX
-
-        print("Running EuDX tracking...")
-        self.streamline_generator = EuDX(
-            self.fa.astype("f8"),
-            self.ind,
-            odf_vertices=self.sphere.vertices,
-            a_low=float(0.2),
-            seeds=self.seeds,
-            affine=self.stream_affine,
-        )
-        self.streamlines = Streamlines(self.streamline_generator)
-        return self.streamlines
-
 
 def eudx_basic(dwi_file, gtab, stop_val=0.1):
     import os
-    from dipy.reconst.dti import TensorModel, fractional_anisotropy, quantize_evecs
+    from dipy.reconst.dti import TensorModel, quantize_evecs
     from dipy.tracking.eudx import EuDX
     from dipy.data import get_sphere
     from dipy.segment.mask import median_otsu
@@ -416,18 +422,18 @@ def eudx_basic(dwi_file, gtab, stop_val=0.1):
     model = TensorModel(gtab)
 
     # print('data: {}').format(data)
-    print("data shape: {}").format(data.shape)
-    print("data type: {}").format(type(data))
+    print("data shape: {}".format(data.shape))
+    print("data type: {}".format(type(data)))
     # print('mask data: {}').format(mask_data)
-    print("mask data shape: {}").format(mask_data.shape)
-    print("mask data type: {}").format(type(mask_data))
+    print("mask data shape: {}".format(mask_data.shape))
+    print("mask data type: {}".format(type(mask_data)))
 
-    print("data location: {}").format(dwi_file)
-    print("mask location: {}").format(mask_out_file)
+    print("data location: {}".format(dwi_file))
+    print("mask location: {}".format(mask_out_file))
     ten = model.fit(data, mask_data)
     sphere = get_sphere("symmetric724")
     ind = quantize_evecs(ten.evecs, sphere.vertices)
     streamlines = EuDX(
         a=ten.fa, ind=ind, seeds=seedIdx, odf_vertices=sphere.vertices, a_low=stop_val
     )
-    return (ten, streamlines, mask_out_file)
+    return ten, streamlines, mask_out_file
