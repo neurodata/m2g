@@ -141,7 +141,7 @@ def get_atlas(atlas_dir, modality, vox_size):
     assert all(map(os.path.exists, labels)), "Some parcellations do not exist."
     assert all(
         map(os.path.exists, [atlas, atlas_mask])
-    ), "atlas or atlas_mask, does not exist."
+    ), "atlas or atlas_mask, does not exist. You may not have git-lfs -- if not, install it."
     return (labels, atlas, atlas_mask, atlas_brain, lv_mask)
 
 

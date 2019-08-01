@@ -522,7 +522,7 @@ def ndmg_dwi_worker(
     # TODO : putting this block of code here for now because it wouldn't run in `ndmg_bids`. Figure out how to put it somewhere else.
     if push and buck and remo is not None:
         if not modif:
-            modif = "ndmg_{}".format(ndmg.version.replace(".", "-"))
+            modif = "ndmg_{}".format(ndmg.VERSION.replace(".", "-"))
         s3_utils.s3_push_data(buck, remo, outdir, modif, creds, debug=debug)
         print("Pushing Complete!")
         if not debug:
