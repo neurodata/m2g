@@ -752,7 +752,7 @@ class dmri_reg(object):
 
         # Threshold CSF to binary in dwi space
         thr_img = nib.load(self.csf_mask_dwi)
-        thr_img.get_data()[thr_img.get_data() < 0.95] = 0
+        thr_img.get_data()[thr_img.get_data() < 0.99] = 0
         nib.save(thr_img, self.csf_mask_dwi)
 
         # Threshold WM to binary in dwi space
