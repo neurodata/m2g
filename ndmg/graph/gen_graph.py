@@ -167,7 +167,7 @@ class graph_tools(object):
         mx = len(np.unique(self.rois.astype(np.int64))) - 1
         self.g = nx.Graph(ecount=0, vcount=mx)
         edge_dict = defaultdict(int)
-        node_dict = dict(zip(np.unique(self.rois)[1:], np.arange(mx)[1:]))
+        node_dict = dict(zip(np.unique(self.rois) + 1, np.arange(mx) + 1))
 
         # Add empty vertices
         for node in range(1, mx+1):
@@ -207,11 +207,11 @@ class graph_tools(object):
             self.g.add_weighted_edges_from(edge_list)
             ix = ix + 1
 
-            conn_matrix = np.array(nx.to_numpy_matrix(self.g))
-            conn_matrix[np.isnan(conn_matrix)] = 0
-            conn_matrix[np.isinf(conn_matrix)] = 0
-            conn_matrix = np.asmatrix(np.maximum(conn_matrix, conn_matrix.transpose()))
-            g = nx.from_numpy_matrix(conn_matrix)
+        conn_matrix = np.array(nx.to_numpy_matrix(self.g))
+        conn_matrix[np.isnan(conn_matrix)] = 0
+        conn_matrix[np.isinf(conn_matrix)] = 0
+        conn_matrix = np.asmatrix(np.maximum(conn_matrix, conn_matrix.transpose()))
+        g = nx.from_numpy_matrix(conn_matrix)
 
         return g
 

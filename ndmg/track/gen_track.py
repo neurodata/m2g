@@ -163,7 +163,7 @@ class run_track(object):
         )
 
         if self.track_type == "local":
-            tiss_class = "bin"
+            tiss_class = "act"
         elif self.track_type == "particle":
             tiss_class = "cmc"
 
@@ -182,17 +182,14 @@ class run_track(object):
             self.vent_csf_in_dwi = nib.load(self.vent_csf_in_dwi)
             self.vent_csf_in_dwi_data = self.vent_csf_in_dwi.get_data()
             self.background = np.ones(self.gm_mask.shape)
-            self.background[
-                (self.gm_mask_data + self.wm_mask_data + self.vent_csf_in_dwi_data) > 0
-            ] = 0
+            self.background[(self.gm_mask_data + self.wm_mask_data + self.vent_csf_in_dwi_data) > 0] = 0
             self.include_map = self.gm_mask_data
             self.include_map[self.background > 0] = 1
             self.exclude_map = self.vent_csf_in_dwi_data
-            self.tiss_classifier = ActTissueClassifier(
-                self.include_map, self.exclude_map
-            )
+            self.tiss_classifier = ActTissueClassifier(self.include_map, self.exclude_map)
         elif tiss_class == "bin":
-            self.tiss_classifier = BinaryTissueClassifier(self.wm_in_dwi_data)
+            #self.tiss_classifier = BinaryTissueClassifier(self.wm_in_dwi_data)
+            self.tiss_classifier = BinaryTissueClassifier(self.mask)
         elif tiss_class == "cmc":
             self.vent_csf_in_dwi = nib.load(self.vent_csf_in_dwi)
             self.vent_csf_in_dwi_data = self.vent_csf_in_dwi.get_data()

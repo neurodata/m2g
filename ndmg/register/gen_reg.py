@@ -128,10 +128,23 @@ def direct_streamline_norm(streams, fa_path, namer):
 
 class dmri_reg(object):
     def __init__(self, namer, nodif_B0, nodif_B0_mask, t1w_in, vox_size, simple):
+        import os.path as op
+        if os.path.isdir("/ndmg_atlases"):
+            # in docker
+            atlas_dir = "/ndmg_atlases"
+        else:
+            # local
+            atlas_dir = op.expanduser("~") + "/.ndmg/ndmg_atlases"
         try:
             FSLDIR = os.environ["FSLDIR"]
         except KeyError:
             print("FSLDIR environment variable not set!")
+
+        if vox_size == '2mm':
+            vox_dims = '2x2x2'
+        elif vox_size == '1mm':
+            vox_dims = '1x1x1'
+
         self.simple = simple
         self.nodif_B0 = nodif_B0
         self.nodif_B0_mask = nodif_B0_mask
@@ -219,9 +232,6 @@ class dmri_reg(object):
         self.rvent_out_file = "{}/RVentricle.nii.gz".format(
             self.namer.dirs["tmp"]["reg_a"]
         )
-        self.mni_vent_loc = "{}/VentricleMask.nii.gz".format(
-            self.namer.dirs["tmp"]["reg_a"]
-        )
         self.csf_mask_dwi = "{}/{}_csf_mask_dwi.nii.gz".format(
             self.namer.dirs["output"]["reg_anat"], self.t1w_name
         )
@@ -252,12 +262,7 @@ class dmri_reg(object):
         self.vent_mask_t1w = "{}/vent_mask_t1w.nii.gz".format(
             self.namer.dirs["tmp"]["reg_a"]
         )
-        self.mni_atlas = "%s%s%s%s" % (
-            FSLDIR,
-            "/data/atlases/HarvardOxford/HarvardOxford-sub-prob-",
-            vox_size,
-            ".nii.gz",
-        )
+
         self.input_mni = "%s%s%s%s" % (
             FSLDIR,
             "/data/standard/MNI152_T1_",
@@ -277,6 +282,18 @@ class dmri_reg(object):
             namer.dirs["output"]["reg_anat"], self.t1w_name
         )
         self.input_mni_sched = "%s%s" % (FSLDIR, "/etc/flirtsch/T1_2_MNI152_2mm.cnf")
+        self.mni_atlas = "%s%s%s%s" % (
+            FSLDIR,
+            "/data/atlases/HarvardOxford/HarvardOxford-sub-prob-",
+            vox_size,
+            ".nii.gz",
+        )
+        self.mni_vent_loc = atlas_dir + '/atlases/mask/HarvardOxford-thr25_space-MNI152NLin6_variant-lateral-ventricles_res-' + vox_dims + '_descr-brainmask.nii.gz'
+        self.corpuscallosum = atlas_dir + '/atlases/mask/CorpusCallosum_res_' + vox_size + '.nii.gz'
+        self.corpuscallosum_mask_t1w = "{}/{}_corpuscallosum.nii.gz".format(self.namer.dirs["output"]["reg_anat"],
+                                                                            self.t1w_name)
+        self.corpuscallosum_dwi = "{}/{}_corpuscallosum_dwi.nii.gz".format(self.namer.dirs["output"]["reg_anat"],
+                                                                           self.t1w_name)
 
     def gen_tissue(self):
         # BET needed for this, as afni 3dautomask only works on 4d volumes
@@ -640,10 +657,10 @@ class dmri_reg(object):
 
     def tissue2dwi_align(self):
         """
-        alignment of ventricle ROI's from MNI space --> dwi and
-        CSF from T1w space --> dwi
+        alignment of ventricle and CC ROI's from MNI space --> dwi and
+        CC and CSF from T1w space --> dwi
         A function to generate and perform dwi space alignment of avoidance/waypoint masks for tractography.
-        First creates ventricle ROI. Then creates transforms from stock MNI template to dwi space.
+        First creates ventricle and CC ROI. Then creates transforms from stock MNI template to dwi space.
         NOTE: for this to work, must first have called both t1w2dwi_align and atlas2t1w2dwi_align.
         """
 
@@ -651,12 +668,13 @@ class dmri_reg(object):
         print("Creating MNI-space ventricle ROI...")
         if not os.path.isfile(self.mni_atlas):
             raise ValueError("FSL atlas for ventricle reference not found!")
-        cmd = "fslroi " + self.mni_atlas + " " + self.rvent_out_file + " 2 1"
+        cmd = "fslmaths " + self.mni_vent_loc + " -thr 0.1 -bin " + self.mni_vent_loc
         os.system(cmd)
-        cmd = "fslroi " + self.mni_atlas + " " + self.lvent_out_file + " 13 1"
+
+        cmd = "fslmaths " + self.corpuscallosum + " -bin " + self.corpuscallosum
         os.system(cmd)
-        self.args = "%s%s%s" % (" -add ", self.rvent_out_file, " -thr 0.1 -bin ")
-        cmd = "fslmaths " + self.lvent_out_file + self.args + self.mni_vent_loc
+
+        cmd = "fslmaths " + self.corpuscallosum + " -sub " + self.mni_vent_loc + " -bin " + self.corpuscallosum
         os.system(cmd)
 
         # Create transform to MNI atlas to T1w using flirt. This will be use to transform the ventricles to dwi space.
@@ -689,12 +707,28 @@ class dmri_reg(object):
                 sup=True,
             )
 
+            # Apply warp resulting from the inverse MNI->T1w created earlier
+            mgru.apply_warp(
+                self.t1w_brain,
+                self.corpuscallosum,
+                self.corpuscallosum_mask_t1w,
+                warp=self.mni2t1w_warp,
+                interp="nn",
+                sup=True,
+            )
+
         # Applyxfm tissue maps to dwi space
         mgru.applyxfm(
             self.nodif_B0,
             self.vent_mask_t1w,
             self.t1wtissue2dwi_xfm,
             self.vent_mask_dwi,
+        )
+        mgru.applyxfm(
+            self.nodif_B0,
+            self.corpuscallosum_mask_t1w,
+            self.t1wtissue2dwi_xfm,
+            self.corpuscallosum_dwi,
         )
         mgru.applyxfm(
             self.nodif_B0, self.csf_mask, self.t1wtissue2dwi_xfm, self.csf_mask_dwi
@@ -745,6 +779,16 @@ class dmri_reg(object):
             + self.vent_mask_dwi
         )
         os.system(cmd)
+        print("Creating Corpus Callosum mask...")
+        cmd = (
+            "fslmaths "
+            + self.corpuscallosum_dwi
+            + " -mas "
+            + self.wm_in_dwi_bin
+            + " -bin "
+            + self.corpuscallosum_dwi
+        )
+        os.system(cmd)
         cmd = (
             "fslmaths "
             + self.csf_mask_dwi
@@ -761,6 +805,10 @@ class dmri_reg(object):
             + self.gm_in_dwi_bin
             + " -mul "
             + self.wm_in_dwi_bin
+            + " -add "
+            + self.corpuscallosum_dwi
+            + " -sub "
+            + self.vent_csf_in_dwi
             + " -mas "
             + self.nodif_B0_mask
             + " -bin "
