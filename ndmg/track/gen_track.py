@@ -299,13 +299,13 @@ class run_track(object):
                 self.pdg = ProbabilisticDirectionGetter.from_pmf(
                     self.pmf, max_angle=60.0, sphere=self.sphere
                 )
-                self.streamline_generator = LocalTracking(
-                self.pdg,
-                self.tiss_classifier,
-                self.seeds,
-                self.stream_affine,
-                step_size=0.5,
-                return_all=True)
+            self.streamline_generator = LocalTracking(
+            self.pdg,
+            self.tiss_classifier,
+            self.seeds,
+            self.stream_affine,
+            step_size=0.5,
+            return_all=True)
         print("Reconstructing tractogram streamlines...")
         self.streamlines = Streamlines(self.streamline_generator)
         return self.streamlines
@@ -362,19 +362,19 @@ class run_track(object):
                 self.pdg = ProbabilisticDirectionGetter.from_pmf(
                     self.pmf, max_angle=60.0, sphere=self.sphere
                 )
-                self.streamline_generator = ParticleFilteringTracking(
-                    self.pdg,
-                    self.tiss_classifier,
-                    self.seeds,
-                    self.stream_affine,
-                    max_cross=maxcrossing,
-                    step_size=0.5,
-                    maxlen=1000,
-                    pft_back_tracking_dist=2,
-                    pft_front_tracking_dist=1,
-                    particle_count=15,
-                    return_all=True,
-                )
+            self.streamline_generator = ParticleFilteringTracking(
+                self.pdg,
+                self.tiss_classifier,
+                self.seeds,
+                self.stream_affine,
+                max_cross=maxcrossing,
+                step_size=0.5,
+                maxlen=1000,
+                pft_back_tracking_dist=2,
+                pft_front_tracking_dist=1,
+                particle_count=15,
+                return_all=True,
+            )
         print("Reconstructing tractogram streamlines...")
         self.streamlines = Streamlines(self.streamline_generator)
         return self.streamlines
