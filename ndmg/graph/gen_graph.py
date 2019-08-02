@@ -301,8 +301,8 @@ class graph_tools(object):
         from sklearn.preprocessing import normalize
         conn_matrix = np.array(nx.to_numpy_matrix(self.g))
         conn_matrix = normalize(conn_matrix)
-        [z_min, z_max] = -np.abs(conn_matrix).max(), np.abs(conn_matrix).max()
-        plot_matrix(conn_matrix, figure=(10, 10), vmax=z_max * 0.5, vmin=z_min * 0.5, auto_fit=True, grid=False,
+        [z_min, z_max] = np.abs(conn_matrix).min(), np.abs(conn_matrix).max()
+        plot_matrix(conn_matrix, figure=(10, 10), vmax=z_max, vmin=z_min * 0.5, auto_fit=True, grid=False,
                     colorbar=False)
         plt.savefig(self.namer.dirs["qa"]['graphs_plotting'] + '/' + graphname.split('.')[:-1][0].split('/')[-1] +
                     '.png')

@@ -188,8 +188,8 @@ class run_track(object):
             self.exclude_map = self.vent_csf_in_dwi_data
             self.tiss_classifier = ActTissueClassifier(self.include_map, self.exclude_map)
         elif tiss_class == "bin":
-            #self.tiss_classifier = BinaryTissueClassifier(self.wm_in_dwi_data)
-            self.tiss_classifier = BinaryTissueClassifier(self.mask)
+            self.tiss_classifier = BinaryTissueClassifier(self.wm_in_dwi_data)
+            #self.tiss_classifier = BinaryTissueClassifier(self.mask)
         elif tiss_class == "cmc":
             self.vent_csf_in_dwi = nib.load(self.vent_csf_in_dwi)
             self.vent_csf_in_dwi_data = self.vent_csf_in_dwi.get_data()
