@@ -68,10 +68,12 @@ def direct_streamline_norm(streams, fa_path, namer):
 
     # Now we flip the sign in the x and y planes so that we get the mirror image of the forward deformation field.
     adjusted_affine[0][3] = -adjusted_affine[0][3]
-    adjusted_affine[1][3] = -adjusted_affine[1][3]
 
     # Scale z by the voxel size
     adjusted_affine[2][3] = adjusted_affine[2][3]/vox_size
+
+    # Scale y by the square of the voxel size since we've already scaled along the z-plane.
+    adjusted_affine[1][3] = adjusted_affine[1][3]/vox_size**vox_size
 
     # Apply the deformation and correct for the extents
     mni_streamlines = deform_streamlines(streamlines, deform_field=mapping.get_forward_field(),
@@ -118,7 +120,8 @@ def direct_streamline_norm(streams, fa_path, namer):
     trk_hdr['nb_streamlines'] = len(streamlines)
     tractogram = nib.streamlines.Tractogram(streamlines, affine_to_rasmm=trk_affine)
     trkfile = nib.streamlines.trk.TrkFile(tractogram, header=trk_hdr)
-    nib.streamlines.save(trkfile, streams)
+    streams_mni = streams.split('.trk')[0] + '_dsn.trk'
+    nib.streamlines.save(trkfile, streams_mni)
 
     # DSN QC plotting
     mgu.show_template_bundles(mni_streamlines, template_path, streams_warp_png)
