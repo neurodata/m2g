@@ -30,17 +30,23 @@ import nibabel as nib
 import os
 import os.path as op
 import sys
-import shutil
-import pyximport
 from nilearn.image import mean_img
-
-try:
-    from ndmg.graph.zindex import XYZMorton
-except:
-    pyximport.install()
-    from ndmg.graph.zindex import XYZMorton
 from scipy.sparse import lil_matrix
 
+
+def show_template_bundles(final_streamlines, template_path, fname):
+    import nibabel as nib
+    from fury import actor, window
+    renderer = window.Renderer()
+    template_img_data = nib.load(template_path).get_data().astype('bool')
+    template_actor = actor.contour_from_roi(template_img_data,
+                                            color=(50, 50, 50), opacity=0.05)
+    renderer.add(template_actor)
+    lines_actor = actor.streamtube(final_streamlines, window.colors.orange,
+                                   linewidth=0.3)
+    renderer.add(lines_actor)
+    window.record(renderer, n_frames=1, out_path=fname, size=(900, 900))
+    return
 
 def execute_cmd(cmd, verb=False):
     """
@@ -198,7 +204,7 @@ def make_gtab_and_bmask(fbval, fbvec, dwi_file, outdir):
 
 
 def reorient_dwi(dwi_prep, bvecs, namer):
-    """Orients dwi data to the proper orientation (RADIOLOGICAL) through Posterior-Anterior and Inferior-Superior flipping
+    """Orients dwi data to the proper orientation (RAS+)
     
     Parameters
     ----------
@@ -212,199 +218,72 @@ def reorient_dwi(dwi_prep, bvecs, namer):
     Returns
     -------
     str
-        location of potentially reoriented eddy corrected dwi file
+        [description]
     str
-        location of potentially reoriented b-vector file
+        [description]
     """
-    import shutil
-    # Check orientation (dwi_prep) by getting the orientation contained in the dwi file
-    cmd = 'fslorient -getorient ' + dwi_prep
-    cmd_run = os.popen(cmd)
-    orient = cmd_run.read().strip('\n')
-    cmd_run.close()
-    dwi_orig = dwi_prep
-    dwi_prep = "{}/{}_pre_reor.nii.gz".format(namer.dirs['output']['prep_dwi'],
-                                              dwi_prep.split('/')[-1].split('.nii.gz')[0])
-    shutil.copyfile(dwi_orig, dwi_prep)
-    bvecs_orig = bvecs
-    bvecs = "{}/bvecs.bvec".format(namer.dirs['output']['prep_dwi'])
-    shutil.copyfile(bvecs_orig, bvecs)
-    bvecs_mat = np.genfromtxt(bvecs)
-    cmd = 'fslorient -getqform ' + dwi_prep
-    cmd_run = os.popen(cmd)
-    qform = cmd_run.read().strip('\n')
-    cmd_run.close()
-    reoriented = False
-    if orient == 'NEUROLOGICAL':
-        reoriented = True
-        print('Neurological (dwi), reorienting to radiological...')
-        # Orient dwi to RADIOLOGICAL
-        # Posterior-Anterior Reorientation
-        if float(qform.split(' ')[:-1][5]) <= 0:
-            dwi_prep_PA = "{}/dwi_reor_PA.nii.gz".format(namer.dirs['output']['prep_dwi'])
-            print('Reorienting P-A flip (dwi)...')
-            cmd = 'fslswapdim ' + dwi_prep + ' -x -y z ' + dwi_prep_PA
-            os.system(cmd)
-            bvecs_mat[:,1] = -bvecs_mat[:,1]
-            cmd = 'fslorient -getqform ' + dwi_prep_PA
-            cmd_run = os.popen(cmd)
-            qform = cmd_run.read().strip('\n')
-            cmd_run.close()
-            dwi_prep = dwi_prep_PA
-        # Inferior-Superior Reorientation
-        if float(qform.split(' ')[:-1][10]) <= 0:
-            dwi_prep_IS = "{}/dwi_reor_IS.nii.gz".format(namer.dirs['output']['prep_dwi'])
-            print('Reorienting I-S flip (dwi)...')
-            cmd = 'fslswapdim ' + dwi_prep + ' -x y -z ' + dwi_prep_IS
-            os.system(cmd)
-            bvecs_mat[:,2] = -bvecs_mat[:,2]
-            dwi_prep = dwi_prep_IS
-        bvecs_mat[:, 0] = -bvecs_mat[:, 0]
-        cmd = 'fslorient -forceradiological ' + dwi_prep
-        os.system(cmd)
-        np.savetxt(bvecs, bvecs_mat)
+    from ndmg.utils.reg_utils import normalize_xform
+    fname = dwi_prep
+    bvec_fname = bvecs
+    out_bvec_fname = "%s%s" % (namer.dirs['output']['prep_dwi'], '/bvecs_reor.bvec')
+
+    input_img = nib.load(fname)
+    input_axcodes = nib.aff2axcodes(input_img.affine)
+    reoriented = nib.as_closest_canonical(input_img)
+    normalized = normalize_xform(reoriented)
+    # Is the input image oriented how we want?
+    new_axcodes = ('R', 'A', 'S')
+    if normalized is not input_img:
+        out_fname = "%s%s%s%s" % (namer.dirs['output']['prep_dwi'],
+                                  '/', dwi_prep.split('/')[-1].split('.nii.gz')[0], '_reor_RAS.nii.gz')
+        print("%s%s%s" % ('Reorienting ', dwi_prep, ' to RAS+...'))
+
+        # Flip the bvecs
+        input_orientation = nib.orientations.axcodes2ornt(input_axcodes)
+        desired_orientation = nib.orientations.axcodes2ornt(new_axcodes)
+        transform_orientation = nib.orientations.ornt_transform(input_orientation, desired_orientation)
+        bvec_array = np.loadtxt(bvec_fname)
+        if bvec_array.shape[0] != 3:
+            bvec_array = bvec_array.T
+        if not bvec_array.shape[0] == transform_orientation.shape[0]:
+            raise ValueError("Unrecognized bvec format")
+        output_array = np.zeros_like(bvec_array)
+        for this_axnum, (axnum, flip) in enumerate(transform_orientation):
+            output_array[this_axnum] = bvec_array[int(axnum)] * float(flip)
+        np.savetxt(out_bvec_fname, output_array, fmt="%.8f ")
     else:
-        print('Radiological (dwi)...')
-        # Posterior-Anterior Reorientation
-        if float(qform.split(' ')[:-1][5]) <= 0:
-            dwi_prep_PA = "{}/dwi_reor_PA.nii.gz".format(namer.dirs['output']['prep_dwi'])
-            print('Reorienting P-A flip (dwi)...')
-            cmd = 'fslswapdim ' + dwi_prep + ' -x -y z ' + dwi_prep_PA
-            os.system(cmd)
-            bvecs_mat[:,1] = -bvecs_mat[:,1]
-            cmd = 'fslorient -getqform ' + dwi_prep_PA
-            cmd_run = os.popen(cmd)
-            qform = cmd_run.read().strip('\n')
-            cmd_run.close()
-            dwi_prep = dwi_prep_PA
-            reoriented = True
-        # Inferior-Superior Reorientation
-        if float(qform.split(' ')[:-1][10]) <= 0:
-            dwi_prep_IS = "{}/dwi_reor_IS.nii.gz".format(namer.dirs['output']['prep_dwi'])
-            print('Reorienting I-S flip (dwi)...')
-            cmd = 'fslswapdim ' + dwi_prep + ' -x y -z ' + dwi_prep_IS
-            os.system(cmd)
-            bvecs_mat[:,2] = -bvecs_mat[:,2]
-            dwi_prep = dwi_prep_IS
-            reoriented = True
-        np.savetxt(bvecs, bvecs_mat)
+        out_fname = "%s%s%s%s" % (namer.dirs['output']['prep_dwi'], '/',
+                                  dwi_prep.split('/')[-1].split('.nii.gz')[0], '_RAS.nii.gz')
+        out_bvec_fname = bvec_fname
 
-    if reoriented is True:
-        imgg = nib.load(dwi_prep)
-        data = imgg.get_fdata()
-        affine = imgg.affine
-        hdr = imgg.header
-        imgg = nib.Nifti1Image(data, affine=affine, header=hdr)
-        imgg.set_sform(affine)
-        imgg.set_qform(affine)
-        imgg.update_header()
-        nib.save(imgg, dwi_prep)
+    normalized.to_filename(out_fname)
 
-        print('Reoriented affine: ')
-        print(affine)
-    else:
-        dwi_prep = dwi_orig
-        print('Image already in RAS+')
-
-    return dwi_prep, bvecs
+    return out_fname, out_bvec_fname
 
 
-def reorient_t1w(t1w, namer):
-    """Orients t1w data to the proper orientation (RADIOLOGICAL) through Posterior-Anterior and Inferior-Superior flipping
-    
-    Parameters
-    ----------
-    t1w : str
-        Location of t1w file
-    namer : name_resource
-        name_resource variable containing relevant directory tree information
-    
-    Returns
-    -------
-    str
-        location of reoriented t1w file
+def reorient_img(img, namer):
     """
-    import shutil
-    import random
-    cmd = 'fslorient -getorient ' + t1w
-    cmd_run = os.popen(cmd)
-    orient = cmd_run.read().strip('\n')
-    cmd_run.close()
-    t1w_orig = t1w
-    hash = str(random.randint(1, 10000))
-    t1w = "{}/{}_pre_reor_{}.nii.gz".format(namer.dirs['output']['prep_anat'],
-                                            t1w.split('/')[-1].split('.nii.gz')[0], hash)
-    shutil.copyfile(t1w_orig, t1w)
-    cmd = 'fslorient -getqform ' + t1w
-    cmd_run = os.popen(cmd)
-    qform = cmd_run.read().strip('\n')
-    cmd_run.close()
-    reoriented = False
-    if orient == 'NEUROLOGICAL':
-        reoriented = True
-        print('Neurological (t1w), reorienting to radiological...')
-        # Orient t1w to std
-        # Posterior-Anterior Reorientation
-        if float(qform.split(' ')[:-1][5]) <= 0:
-            t1w_PA = "{}/t1w_reor_PA.nii.gz".format(namer.dirs['output']['prep_anat'])
-            print('Reorienting P-A flip (t1w)...')
-            cmd = 'fslswapdim ' + t1w + ' -x -y z ' + t1w_PA
-            os.system(cmd)
-            cmd = 'fslorient -getqform ' + t1w_PA
-            cmd_run = os.popen(cmd)
-            qform = cmd_run.read().strip('\n')
-            cmd_run.close()
-            t1w = t1w_PA
-        # Inferior-Superior Reorientation
-        if float(qform.split(' ')[:-1][10]) <= 0:
-            t1w_IS = "{}/t1w_reor_IS.nii.gz".format(namer.dirs['output']['prep_anat'])
-            print('Reorienting I-S flip (t1w)...')
-            cmd = 'fslswapdim ' + t1w + ' -x y -z ' + t1w_IS
-            os.system(cmd)
-            t1w = t1w_IS
-        cmd = 'fslorient -forceradiological ' + t1w
-        os.system(cmd)
+    A function to reorient any non-dwi image to RAS+.
+    """
+    from ndmg.utils.reg_utils import normalize_xform
+
+    # Load image, orient as RAS
+    orig_img = nib.load(img)
+    reoriented = nib.as_closest_canonical(orig_img)
+    normalized = normalize_xform(reoriented)
+
+    # Image may be reoriented
+    if normalized is not orig_img:
+        print("%s%s%s" % ('Reorienting ', img, ' to RAS+...'))
+        out_name = "%s%s%s%s" % (namer.dirs['output']['prep_anat'], '/',
+                                 img.split('/')[-1].split('.nii.gz')[0], '_reor_RAS.nii.gz')
     else:
-        print('Radiological (t1w)...')
-        # Posterior-Anterior Reorientation
-        if float(qform.split(' ')[:-1][5]) <= 0:
-            t1w_PA = "{}/t1w_reor_PA.nii.gz".format(namer.dirs['output']['prep_anat'])
-            print('Reorienting P-A flip (t1w)...')
-            cmd = 'fslswapdim ' + t1w + ' -x -y z ' + t1w_PA
-            os.system(cmd)
-            cmd = 'fslorient -getqform ' + t1w_PA
-            cmd_run = os.popen(cmd)
-            qform = cmd_run.read().strip('\n')
-            cmd_run.close()
-            t1w = t1w_PA
-            reoriented = True
-        # Inferior-Superior Reorientation
-        if float(qform.split(' ')[:-1][10]) <= 0:
-            t1w_IS = "{}/t1w_reor_IS.nii.gz".format(namer.dirs['output']['prep_anat'])
-            print('Reorienting I-S flip (t1w)...')
-            cmd = 'fslswapdim ' + t1w + ' -x y -z ' + t1w_IS
-            os.system(cmd)
-            t1w = t1w_IS
-            reoriented = True
+        out_name = "%s%s%s%s" % (namer.dirs['output']['prep_anat'], '/',
+                                 img.split('/')[-1].split('.nii.gz')[0], '_RAS.nii.gz')
 
-    if reoriented is True:
-        imgg = nib.load(t1w)
-        data = imgg.get_fdata()
-        affine = imgg.affine
-        hdr = imgg.header
-        imgg = nib.Nifti1Image(data, affine=affine, header=hdr)
-        imgg.set_sform(affine)
-        imgg.set_qform(affine)
-        imgg.update_header()
-        nib.save(imgg, t1w)
+    normalized.to_filename(out_name)
 
-        print('Reoriented affine: ')
-        print(affine)
-    else:
-        t1w = t1w_orig
-        print('Image already in RAS+')
-
-    return t1w
+    return out_name
 
 
 def match_target_vox_res(img_file, vox_size, namer, sens):
@@ -427,6 +306,7 @@ def match_target_vox_res(img_file, vox_size, namer, sens):
         location of potentially resliced image
     """
     from dipy.align.reslice import reslice
+
     # Check dimensions
     img = nib.load(img_file)
     data = img.get_fdata()
@@ -441,32 +321,26 @@ def match_target_vox_res(img_file, vox_size, namer, sens):
     if (abs(zooms[0]), abs(zooms[1]), abs(zooms[2])) != new_zooms:
         print('Reslicing image ' + img_file + ' to ' + vox_size + '...')
         if sens == 'dwi':
-            img_file_pre = "{}/{}_pre_res.nii.gz".format(namer.dirs['output']['prep_dwi'],
-                                                         os.path.basename(img_file).split('.nii.gz')[0])
-            shutil.copyfile(img_file, img_file_pre)
+            img_file_res = "%s%s%s%s" % (namer.dirs['output']['prep_dwi'], '/',
+                                         os.path.basename(img_file).split('.nii.gz')[0], '_res.nii.gz')
         elif sens == 't1w':
-            img_file_pre = "{}/{}_pre_res.nii.gz".format(namer.dirs['output']['prep_anat'],
-                                                         os.path.basename(img_file).split('.nii.gz')[0])
-            shutil.copyfile(img_file, img_file_pre)
+            img_file_res = "%s%s%s%s" % (namer.dirs['output']['prep_anat'], '/',
+                                         os.path.basename(img_file).split('.nii.gz')[0], '_res.nii.gz')
+
         data2, affine2 = reslice(data, affine, zooms, new_zooms)
-        if sens == 'dwi':
-            affine2[0:3, 3] = np.zeros(3)
-            affine2[0:3, 0:3] = np.eye(3) * np.array(new_zooms) * np.sign(affine2[0:3, 0:3])
-        img2 = nib.Nifti1Image(data2, affine=affine2, header=hdr)
-        img2.set_qform(affine2)
-        img2.set_sform(affine2)
-        img2.update_header()
-        nib.save(img2, img_file)
-        print('Resliced affine: ')
-        print(nib.load(img_file).affine)
+        img2 = nib.Nifti1Image(data2, affine=affine2)
+        nib.save(img2, img_file_res)
+        img_file = img_file_res
     else:
+        print('Reslicing image ' + img_file + ' to ' + vox_size + '...')
         if sens == 'dwi':
-            affine[0:3,3] = np.zeros(3)
-        img = nib.Nifti1Image(data, affine=affine, header=hdr)
-        img.set_sform(affine)
-        img.set_qform(affine)
-        img.update_header()
-        nib.save(img, img_file)
+            img_file_nores = "%s%s%s%s" % (namer.dirs['output']['prep_dwi'], '/',
+                                         os.path.basename(img_file).split('.nii.gz')[0], '_nores.nii.gz')
+        elif sens == 't1w':
+            img_file_nores = "%s%s%s%s" % (namer.dirs['output']['prep_anat'], '/',
+                                         os.path.basename(img_file).split('.nii.gz')[0], '_nores.nii.gz')
+        nib.save(img, img_file_nores)
+        img_file = img_file_nores
 
     return img_file
 
@@ -491,36 +365,7 @@ def load_timeseries(timeseries_file, ts='roi'):
 def name_tmps(basedir, basename, extension):
     return "{}/tmp/{}{}".format(basedir, basename, extension)
 
-
-def morton_region(parcellation, outpath):
-    """
-    A function to compute which region each morton index is in.
-    Col1 is the morton index. Col2 is the corresponding region
-    the particular morton index falls into. 0 means it falls into
-    a region unmapped in the parcellation.
-    **Positional Arguments:**
-        parcellation:
-            - the input parcellation to compute over.
-        outpath:
-            - the filepath of the matrix.
-    """
-    at_dat = nib.load(parcellation).get_data()
-    atlasn = get_filename(parcellation)
-    dims = at_dat.shape
-    region = {}
-    for x in range(0, dims[0]):
-        for y in range(0, dims[1]):
-            for z in range(0, dims[2]):
-                if at_dat[x, y, z] > 0:
-                    region[XYZMorton((int(x), int(y), int(z)))] = at_dat[x, y, z]
-    outf = op.join(outpath, atlasn + '_morton.csv')
-    with open(outf, 'w')  as f:
-        for key, val in region.items():
-            f.write('{},{}\n'.format(key, val))
-        f.close()
-    return
-
-
+  
 def parcel_overlap(parcellation1, parcellation2, outpath):
     """
     A function to compute the percent composition of each parcel in

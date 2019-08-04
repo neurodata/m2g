@@ -42,7 +42,7 @@ from ndmg.utils.s3_utils import get_credentials, get_matching_s3_objects, s3_cli
 
 warnings.simplefilter("ignore")
 
-participant_templ = "https://raw.githubusercontent.com/neurodata/ndmg/staging/templates/ndmg_cloud_participant.json"
+participant_templ = "https://raw.githubusercontent.com/neurodata/ndmg/remove-zindex/templates/ndmg_cloud_participant.json"
 
 
 def batch_submit(
@@ -55,7 +55,8 @@ def batch_submit(
     dataset=None,
     log=False,
     bg=False,
-    modif=""
+    modif="",
+    reg_style=""
 ):
     """
     Searches through an S3 bucket, gets all subject-ids, creates json files
@@ -67,7 +68,7 @@ def batch_submit(
 
     print("Generating job for each subject...")
     jobs = create_json(bucket, path, threads, jobdir,
-                       credentials, debug, dataset, bg, modif=modif)
+                       credentials, debug, dataset, bg, modif=modif, reg_style=reg_style)
 
     print("Submitting jobs to the queue...")
     ids = submit_jobs(jobs, jobdir)
@@ -142,8 +143,7 @@ def crawl_bucket(bucket, path, jobdir):
 
 
 def create_json(
-    bucket, path, threads, jobdir, credentials=None, debug=False, dataset=None, bg=False, modif=""
-):
+    bucket, path, threads, jobdir, credentials=None, debug=False, dataset=None, bg=False, modif="", reg_style=""):
     """
     Takes parameters to make jsons
     """
@@ -153,6 +153,7 @@ def create_json(
             jobs = json.load(f)
         return jobs 
 
+    # set up infrastructure
     out = subprocess.check_output("mkdir -p {}".format(jobdir), shell=True)
     out = subprocess.check_output(
         "mkdir -p {}/jobs/".format(jobdir), shell=True)
@@ -160,6 +161,8 @@ def create_json(
         "mkdir -p {}/ids/".format(jobdir), shell=True)
     template = participant_templ
     seshs = threads
+
+    # make template
     if not os.path.isfile("{}/{}".format(jobdir, template.split("/")[-1])):
         cmd = "wget --quiet -P {} {}".format(jobdir, template)
         subprocess.check_output(cmd, shell=True)
@@ -171,16 +174,21 @@ def create_json(
     env = template["containerOverrides"]["environment"]
 
     # TODO : This checks for any credentials csv file, rather than `/.aws/credentials`.
+    # modify template
     if credentials is not None:
         env[0]["value"], env[1]["value"] = get_credentials()
     else:
         env = []
     template["containerOverrides"]["environment"] = env
 
-    # edit bucket, path
+    # edit non-defaults
     jobs = []
     cmd[cmd.index("<BUCKET>")] = bucket
     cmd[cmd.index("<PATH>")] = path
+
+    # edit defaults if necessary
+    if reg_style:
+        cmd[cmd.index("--sp") + 1] = reg_style
     if bg:
         cmd.append("--big")
     if modif:
@@ -207,7 +215,7 @@ def create_json(
             # make the json file for this iteration,
             # and add the path to its json file to `jobs`.
             job_json = deepcopy(template)
-            ver = ndmg.version.replace(".", "-")
+            ver = ndmg.VERSION.replace(".", "-")
             if dataset:
                 name = "ndmg_{}_{}_sub-{}".format(ver, dataset, subj)
             else:
@@ -223,7 +231,6 @@ def create_json(
             jobs += [job]
 
     # return list of job jsons
-    
     with open(jobsjson, "w") as f:
         json.dump(jobs, f)
     return jobs
@@ -388,6 +395,12 @@ def main():
     help="Name of folder on s3 to push to. If empty, push to a folder with ndmg's version number.",
     default="",
     )
+    parser.add_argument(
+        "--sp",
+        action="store",
+        help="Space for tractography. Default is native.",
+        default="native",
+    )
 
     result = parser.parse_args()
 
@@ -402,6 +415,7 @@ def main():
     log = result.log
     bg = result.big != "False"
     modif = result.modif
+    reg_style = result.sp
 
     if jobdir is None:
         jobdir = "./"
@@ -423,10 +437,7 @@ def main():
         if not os.path.exists(jobdir):
             print("job directory not found. Creating...")
             os.mkdir(jobdir)
-        # else:
-        #     print("Jobdir {} exists. Clearing.".format(jobdir))
-        #     shutil.rmtree(jobdir)
-        batch_submit(bucket, path, jobdir, creds, state, debug, dset, log, bg, modif=modif)
+        batch_submit(bucket, path, jobdir, creds, state, debug, dset, log, bg, modif=modif, reg_style=reg_style)
 
     sys.exit(0)
 

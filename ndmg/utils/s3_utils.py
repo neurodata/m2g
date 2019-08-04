@@ -5,6 +5,7 @@ import sys
 
 import boto3
 
+
 def get_credentials():
     try:
         config = ConfigParser()
@@ -86,14 +87,14 @@ def get_matching_s3_objects(bucket, prefix="", suffix=""):
         except KeyError:
             break
 
-def s3_get_data(bucket, remote, local, public=False):
+def s3_get_data(bucket, remote, local, public=False, force=False):
     """
     given an s3 directory,
     copies in that directory to local.
     """
 
     # TODO : use boto3 for this
-    if os.path.exists(local):
+    if os.path.exists(local) and not force:
         print("Local directory already exists. Not pulling s3 data.")
         return  # TODO: make sure this doesn't append None a bunch of times to a list in a loop on this function
     if not public:
@@ -110,15 +111,16 @@ def s3_get_data(bucket, remote, local, public=False):
                 ", ".join(bkts)
             )
 
-        cmd = "aws s3 cp --exclude 'ndmg_*' --recursive s3://{}/{}/ {}".format(
+        cmd = "aws s3 cp --exclude 'ndmg_*' --recursive s3://{}/{}/ {};\nwait".format(
             bucket, remote, local)
     if public:
-        cmd += " --no-sign-request --region=us-east-1"
+        cmd += " --no-sign-request --region=us-east-1;\nwait"
 
     print("Calling {} to get data from S3 ...".format(cmd))
     out = subprocess.check_output("mkdir -p {}".format(local), shell=True)
     out = subprocess.check_output(cmd, shell=True)
-
+    out = subprocess.check_output("echo \"\n\n\n\n\n\n\nDATA ARRIVED\n\n\n\n\n\n\" {}".format(local), shell=True)
+    print(out)
 
 def s3_push_data(bucket, remote, outDir, modifier, creds=True, debug=True):
     # TODO : use boto3 for this instead
