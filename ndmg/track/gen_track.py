@@ -130,12 +130,12 @@ class run_track(object):
         self.stream_affine = stream_affine
 
     def run(self):
-        """Creates the tracks using dipy commands
+        """Creates the tracktography tracks using dipy commands and the specified tracking type and approach
         
         Returns
         -------
-        [type]
-            [description]
+        ArraySequence
+            contains the tractography track raw data for further analysis
         
         Raises
         ------
@@ -178,6 +178,14 @@ class run_track(object):
         return tracks
 
     def prep_tracking(self):
+        """Uses nibabel and dipy functions in order to load the grey matter, white matter, and csf masks
+        and use a tissue classifier (act, cmc, or binary) on the include/exclude maps to make a tissueclassifier object
+        
+        Returns
+        -------
+        ActTissueClassifier, CmcTissueClassifier, or BinaryTissueCLassifier
+            The resulting tissue classifier object, depending on which method you use (currently only does act)
+        """
         from dipy.tracking.local import (
             ActTissueClassifier,
             CmcTissueClassifier,

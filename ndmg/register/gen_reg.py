@@ -668,15 +668,15 @@ class dmri_reg(object):
         
         Parameters
         ----------
-        atlas : [type]
-            [description]
+        atlas : str
+            path to atlas file you want to use
         dsn : bool, optional
-            [description], by default True
+            is your space for tractography native-dsn, by default True
         
         Returns
         -------
-        [type]
-            [description]
+        str
+            path to aligned atlas file
         """
         
         self.atlas = atlas
@@ -989,22 +989,28 @@ class dmri_reg(object):
 
 class dmri_reg_old(object):
     def __init__(self, dwi, gtab, t1w, atlas, aligned_dwi, namer, clean=False):
+        """Aligns two images and stores the transform between them
+        
+        Parameters
+        ----------
+        object : [type]
+            [description]
+        dwi : str
+            path to input image to be aligned as a nifti image file
+        gtab : str
+            path to file containing gradient driections and strength
+        t1w : str
+            path to reference image to be aligned to 
+        atlas : str
+            path to roi atlas file
+        aligned_dwi : str
+            path for the output aligned dwi image
+        namer : name_resource
+            variable containing directory tree information for pipeline outputs
+        clean : bool, optional
+            NOT USED IN THIS FUNCTION, by default False
         """
-            Aligns two images and stores the transform between them
-            **Positional Arguments:**
-                    dwi:
-                        - Input impage to be aligned as a nifti image file
-                    gtab:
-                        - object containing gradient directions and strength
-                    t1w:
-                        - Intermediate image being aligned to as a nifti image file
-                    atlas:
-                        - Terminal image being aligned to as a nifti image file
-                    aligned_dwi:
-                        - Aligned output dwi image as a nifti image file
-                    outdir:
-                        - Directory for derivatives to be stored
-            """
+        
         self.dwi = dwi
         self.t1w = t1w
         self.atlas = atlas
