@@ -391,16 +391,17 @@ def ndmg_dwi_worker(
         )
 
     if reg_style == "native_dsn":
-        # Save streamlines to disk
-        print("Saving streamlines: " + streams)
 
         fa_path = mgt.tens_mod_fa_est(gtab, dwi_prep, nodif_B0_mask)
 
         # Normalize streamlines
         print("Running DSN...")
-        streamlines_mni = mgr.direct_streamline_norm(
+        [streamlines_mni, streams_mni] = mgr.direct_streamline_norm(
             streams, fa_path, namer
         )
+
+        # Save streamlines to disk
+        print("Saving DSN-registered streamlines: " + streams_mni)
 
     elif reg_style == "mni":
         # Check dimensions

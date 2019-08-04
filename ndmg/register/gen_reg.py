@@ -53,7 +53,7 @@ def direct_streamline_norm(streams, fa_path, namer):
     fa_img = nib.load(fa_path)
     vox_size = fa_img.get_header().get_zooms()[0]
     template_img = nib.load(template_path)
-    template_data = template_img.get_data().astype('bool')
+    template_data = template_img.get_data()
 
     # SyN FA->Template
     [mapping, affine_map] = regutils.wm_syn(template_path, fa_path, namer.dirs["tmp"]["base"])
@@ -82,28 +82,6 @@ def direct_streamline_norm(streams, fa_path, namer):
                                          stream_to_ref_grid=target_isocenter,
                                          ref_grid_to_world=np.eye(4))
 
-    # Check DSN quality, attempt y-flip if DSN fails. Occasionally, orientation affine may be corrupted and this tweak
-    # should handle the inverse case.
-    dm = utils.density_map(mni_streamlines, template_img.shape, affine=np.eye(4)).astype('bool')
-    in_brain = len(np.unique(np.where((template_data.astype('uint8') > 0) & (dm.astype('uint8') > 0))))
-    out_brain = len(np.unique(np.where((template_data.astype('uint8') == 0) & (dm.astype('uint8') > 0))))
-    if in_brain < out_brain:
-        adjusted_affine[1][3] = -adjusted_affine[1][3]
-        mni_streamlines = deform_streamlines(streamlines, deform_field=mapping.get_forward_field(),
-                                             stream_to_current_grid=target_isocenter,
-                                             current_grid_to_world=adjusted_affine,
-                                             stream_to_ref_grid=target_isocenter,
-                                             ref_grid_to_world=np.eye(4))
-        dm = utils.density_map(mni_streamlines, template_img.shape, affine=np.eye(4)).astype('bool')
-        in_brain = len(np.unique(np.where((template_data.astype('uint8') > 0) & (dm.astype('uint8') > 0))))
-        out_brain = len(np.unique(np.where((template_data.astype('uint8') == 0) & (dm.astype('uint8') > 0))))
-        if in_brain > out_brain:
-            print('Warning: Direct Streamline Normalization completed successfully only after inverting the y-plane '
-                  'voxel-to-world. This may not be correct, so manual check for corrupted header orientations is '
-                  'recommended.')
-        else:
-            raise ValueError('ERROR: Direct Streamline Normalization failed. Check for corrupted header/affine.')
-
     # Save streamlines
     hdr = fa_img.header
     trk_affine = np.eye(4)
@@ -117,8 +95,8 @@ def direct_streamline_norm(streams, fa_path, namer):
     trk_hdr['image_orientation_patient'] = np.array([0., 0., 0., 0., 0., 0.]).astype('float32')
     trk_hdr['endianness'] = '<'
     trk_hdr['_offset_data'] = 1000
-    trk_hdr['nb_streamlines'] = len(streamlines)
-    tractogram = nib.streamlines.Tractogram(streamlines, affine_to_rasmm=trk_affine)
+    trk_hdr['nb_streamlines'] = len(mni_streamlines)
+    tractogram = nib.streamlines.Tractogram(mni_streamlines, affine_to_rasmm=trk_affine)
     trkfile = nib.streamlines.trk.TrkFile(tractogram, header=trk_hdr)
     streams_mni = streams.split('.trk')[0] + '_dsn.trk'
     nib.streamlines.save(trkfile, streams_mni)
@@ -126,7 +104,7 @@ def direct_streamline_norm(streams, fa_path, namer):
     # DSN QC plotting
     mgu.show_template_bundles(mni_streamlines, template_path, streams_warp_png)
 
-    return mni_streamlines
+    return mni_streamlines, streams_mni
 
 
 class dmri_reg(object):
