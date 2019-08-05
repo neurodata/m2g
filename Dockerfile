@@ -1,5 +1,6 @@
 FROM neurodata/fsl_1604:0.0.1
-MAINTAINER Derek Pisner <dpisner@utexas.edu>
+LABEL author="Derek Pisner"
+LABEL maintainer="dpisner@utexas.edu"
 
 #--------Environment Variables-----------------------------------------------#
 ENV NDMG_URL https://github.com/neurodata/ndmg.git
@@ -66,7 +67,7 @@ RUN \
     pip3.6 install nibabel dipy scipy python-dateutil pandas boto3 awscli matplotlib nilearn sklearn pandas cython vtk pyvtk fury awscli requests ipython duecredit graspy
 
 RUN \
-    pip3.6 install plotly==1.12.9 pybids==0.6.4 setuptools>=40.0 scikit-image==0.13.0 networkx==1.9  
+    pip3.6 install plotly==1.12.9 pybids==0.6.4 setuptools>=40.0 scikit-image==0.13.0 networkx==1.9 configparser>=3.7.4
 
 WORKDIR /
 
@@ -78,7 +79,7 @@ RUN mkdir /outputs && \
 
 RUN git clone -b staging $NDMG_URL /ndmg && \
     cd /ndmg && \
-    python3.6 setup.py install
+    pip3.6 install .
 
 RUN mkdir /ndmg_atlases
 
