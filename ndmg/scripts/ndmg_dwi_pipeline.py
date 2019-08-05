@@ -327,7 +327,7 @@ def ndmg_dwi_worker(
 
         # Align tissue classifiers
         start_time = time.time()
-        if (skipreg is True) and os.path.isfile(reg.wm_gm_int_in_dwi) and os.path.isfile(reg.vent_csf_in_dwi):
+        if (skipreg is True) and os.path.isfile(reg.wm_gm_int_in_dwi) and os.path.isfile(reg.vent_csf_in_dwi) and os.path.isfile(reg.corpuscallosum_dwi):
             print('Found existing tissue2dwi run!')
             pass
         else:
@@ -343,7 +343,7 @@ def ndmg_dwi_worker(
 
         # -------- Tensor Fitting and Fiber Tractography ---------------- #
         start_time = time.time()
-        seeds = mgt.build_seed_list(reg.wm_gm_int_in_dwi, np.eye(4), dens=25)
+        seeds = mgt.build_seed_list(reg.wm_gm_int_in_dwi, np.eye(4), dens=15)
         print("Using " + str(len(seeds)) + " seeds...")
 
         # Compute direction model and track fiber streamlines
@@ -363,7 +363,7 @@ def ndmg_dwi_worker(
             np.eye(4),
         )
         streamlines = trct.run()
-        streamlines = Streamlines([sl for sl in streamlines if len(sl) > 60])
+        streamlines = Streamlines([sl for sl in streamlines if len(sl) > 40])
         print("Streamlines complete")
 
         trk_affine = np.eye(4)
@@ -391,16 +391,17 @@ def ndmg_dwi_worker(
         )
 
     if reg_style == "native_dsn":
-        # Save streamlines to disk
-        print("Saving streamlines: " + streams)
 
         fa_path = mgt.tens_mod_fa_est(gtab, dwi_prep, nodif_B0_mask)
 
         # Normalize streamlines
         print("Running DSN...")
-        streamlines_mni = mgr.direct_streamline_norm(
+        [streamlines_mni, streams_mni] = mgr.direct_streamline_norm(
             streams, fa_path, namer
         )
+
+        # Save streamlines to disk
+        print("Saving DSN-registered streamlines: " + streams_mni)
 
     elif reg_style == "mni":
         # Check dimensions

@@ -179,10 +179,16 @@ class graph_tools(object):
         ix = 0
         for s in self.tracks:
             # Map the streamlines coordinates to voxel coordinates and get labels for label_volume
-            i, j, k = np.vstack(np.array([get_sphere(coord, error_margin,
-                                                     (voxel_size, voxel_size, voxel_size),
-                                                     self.roi_img.shape) for coord in
-                                          _to_voxel_coordinates(s, lin_T, offset)])).T
+            # i, j, k = np.vstack(np.array([get_sphere(coord, error_margin,
+            #                                          (voxel_size, voxel_size, voxel_size),
+            #                                          self.roi_img.shape) for coord in
+            #                               _to_voxel_coordinates(s, lin_T, offset)])).T
+
+            # Map the streamlines coordinates to voxel coordinates
+            points = _to_voxel_coordinates(s, lin_T, offset)
+
+            # get labels for label_volume
+            i, j, k = points.T
 
             lab_arr = self.rois[i, j, k]
             endlabels = []
@@ -201,11 +207,11 @@ class graph_tools(object):
             self.g.add_weighted_edges_from(edge_list)
             ix = ix + 1
 
-            conn_matrix = np.array(nx.to_numpy_matrix(self.g))
-            conn_matrix[np.isnan(conn_matrix)] = 0
-            conn_matrix[np.isinf(conn_matrix)] = 0
-            conn_matrix = np.asmatrix(np.maximum(conn_matrix, conn_matrix.transpose()))
-            g = nx.from_numpy_matrix(conn_matrix)
+        conn_matrix = np.array(nx.to_numpy_matrix(self.g))
+        conn_matrix[np.isnan(conn_matrix)] = 0
+        conn_matrix[np.isinf(conn_matrix)] = 0
+        conn_matrix = np.asmatrix(np.maximum(conn_matrix, conn_matrix.transpose()))
+        g = nx.from_numpy_matrix(conn_matrix)
 
         return g
 
@@ -290,14 +296,12 @@ class graph_tools(object):
         import matplotlib
         matplotlib.use('agg')
         from matplotlib import pyplot as plt
-        from nilearn.plotting import plot_matrix
+        from graspy.utils import ptr
+        from graspy.plot import heatmap
 
-        from sklearn.preprocessing import normalize
         conn_matrix = np.array(nx.to_numpy_matrix(self.g))
-        conn_matrix = normalize(conn_matrix)
-        [z_min, z_max] = -np.abs(conn_matrix).max(), np.abs(conn_matrix).max()
-        plot_matrix(conn_matrix, figure=(10, 10), vmax=z_max * 0.5, vmin=z_min * 0.5, auto_fit=True, grid=False,
-                    colorbar=False)
+        conn_matrix = ptr.pass_to_ranks(conn_matrix)
+        heatmap(conn_matrix)
         plt.savefig(self.namer.dirs["qa"]['graphs_plotting'] + '/' + graphname.split('.')[:-1][0].split('/')[-1] +
                     '.png')
         plt.close()
