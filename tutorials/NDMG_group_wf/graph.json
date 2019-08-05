@@ -1,0 +1,98 @@
+[
+    {
+        "group": 1,
+        "imports": [],
+        "name": "00_ndmg_dwi_worker_node",
+        "size": 1
+    },
+    {
+        "group": 2,
+        "imports": [],
+        "name": "01_ndmg_dwi_worker_node",
+        "size": 1
+    },
+    {
+        "group": 3,
+        "imports": [],
+        "name": "02_ndmg_dwi_worker_node",
+        "size": 1
+    },
+    {
+        "group": 4,
+        "imports": [],
+        "name": "03_ndmg_dwi_worker_node",
+        "size": 1
+    },
+    {
+        "group": 5,
+        "imports": [],
+        "name": "04_ndmg_dwi_worker_node",
+        "size": 1
+    },
+    {
+        "group": 6,
+        "imports": [],
+        "name": "05_ndmg_dwi_worker_node",
+        "size": 1
+    },
+    {
+        "group": 7,
+        "imports": [],
+        "name": "06_ndmg_dwi_worker_node",
+        "size": 1
+    },
+    {
+        "group": 8,
+        "imports": [],
+        "name": "07_ndmg_dwi_worker_node",
+        "size": 1
+    },
+    {
+        "group": 9,
+        "imports": [],
+        "name": "08_ndmg_dwi_worker_node",
+        "size": 1
+    },
+    {
+        "group": 10,
+        "imports": [],
+        "name": "09_ndmg_dwi_worker_node",
+        "size": 1
+    },
+    {
+        "group": 11,
+        "imports": [],
+        "name": "10_ndmg_dwi_worker_node",
+        "size": 1
+    },
+    {
+        "group": 12,
+        "imports": [],
+        "name": "11_ndmg_dwi_worker_node",
+        "size": 1
+    },
+    {
+        "group": 13,
+        "imports": [],
+        "name": "12_ndmg_dwi_worker_node",
+        "size": 1
+    },
+    {
+        "group": 14,
+        "imports": [],
+        "name": "13_ndmg_dwi_worker_node",
+        "size": 1
+    },
+    {
+        "group": 15,
+        "imports": [],
+        "name": "14_ndmg_dwi_worker_node",
+        "size": 1
+    },
+    {
+        "group": 16,
+        "imports": [],
+        "name": "15_ndmg_dwi_worker_node",
+        "size": 1
+    }
+]
