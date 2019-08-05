@@ -102,7 +102,7 @@ def direct_streamline_norm(streams, fa_path, namer):
     nib.streamlines.save(trkfile, streams_mni)
 
     # DSN QC plotting
-    mgu.show_template_bundles(mni_streamlines, template_path, streams_warp_png)
+    #mgu.show_template_bundles(mni_streamlines, template_path, streams_warp_png)
 
     return mni_streamlines, streams_mni
 
