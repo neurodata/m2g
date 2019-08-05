@@ -462,7 +462,7 @@ def ndmg_dwi_worker(
     elif reg_style == "mni":
         # Check dimensions
         start_time = time.time()
-        t1w = mgu.match_target_vox_res(t1w, vox_size, namer, sens="t1w")
+        t1w = mgu.match_target_vox_res(t1w, vox_size, namer, sens="t1w") #this is the second time this t1w data has been sent to this function (REMOVE?)
         print(
             "%s%s%s"
             % ("Reslicing runtime: ", str(np.round(time.time() - start_time, 1)), "s")

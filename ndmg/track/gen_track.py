@@ -57,9 +57,23 @@ def build_seed_list(mask_img_file, stream_affine, dens):
 
 
 def tens_mod_fa_est(gtab, dwi_file, B0_mask):
-    '''
-    Estimate a tensor FA image to use for registrations.
-    '''
+    """Estimate a tensor FA image to use for registrations
+    
+    Parameters
+    ----------
+    gtab : [type]
+        [description]
+    dwi_file : [type]
+        [description]
+    B0_mask : [type]
+        [description]
+    
+    Returns
+    -------
+    [type]
+        [description]
+    """
+    
     import os
     from dipy.reconst.dti import TensorModel
     from dipy.reconst.dti import fractional_anisotropy
@@ -129,9 +143,9 @@ class run_track(object):
         mod_type : str
             Determinstic (det) or probabilistic (prob) tracking
         track_type : str
-            Tracking approach: eudx or local
+            Tracking approach: local or particle
         mod_func : str
-            Diffusion model: csd, csa, or tensor
+            Diffusion model: csd or csa
         seeds : ndarray
             ndarray of seeds for tractography
         stream_affine : ndarray

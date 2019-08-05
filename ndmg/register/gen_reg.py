@@ -134,11 +134,11 @@ class dmri_reg(object):
     namer : name_resource
         name_resource variable containing relevant directory tree information
     nodif_B0 : str
-        mean b0 image
+        path to mean b0 image
     nodif_B0_mask : str
-        mean b0 mask
+        path to mean b0 mask (nodif_B0....nii.gz)
     t1w_in : str
-        t1w file
+        path to t1w file
     vox_size : str
         voxel resolution ('2mm' or '1mm')
     simple : bool
@@ -306,8 +306,9 @@ class dmri_reg(object):
         self.input_mni_sched = "%s%s" % (FSLDIR, "/etc/flirtsch/T1_2_MNI152_2mm.cnf")
 
     def gen_tissue(self):
-        """Extracts the brain from the raw t1w image, uses it to create WM, GM, and CSF masks, reslices all 4 files to the target
-        voxel resolution and extracts the white matter edge
+        """Extracts the brain from the raw t1w image (as indicated by self.t1w), uses it to create WM, GM, and CSF masks,
+        reslices all 4 files to the target voxel resolution and extracts the white matter edge. Each mask is saved to 
+        location indicated by self.map_path
         """
         # BET needed for this, as afni 3dautomask only works on 4d volumes
         print("Extracting brain from raw T1w image...")

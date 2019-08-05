@@ -484,7 +484,7 @@ def applyxfm(ref, inp, xfm, aligned, interp="trilinear", dof=6):
     inp : str
         path of input image to be aligned as a nifti image file
     xfm : str
-        path of the transform matrix between the two images
+        path to the transform matrix between the two images
     aligned : str
         path for the output aligned image
     interp : str, optional
