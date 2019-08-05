@@ -30,7 +30,7 @@ setup(
     },
     description="Neuro Data MRI to Graphs Pipeline",
     author="Derek Pisner, Greg Kiar, Eric Bridgeford, Alex Loftus, and Will Gray Roncal",
-    author_email="gkiar@jhu.edu, wgr@jhu.edu, ebridge2@jhu.edu, aloftus2@jhu.edu",
+    author_email="gkiar@jhu.edu, wgr@jhu.edu, ebridge2@jhu.edu, dpisner@utexas.edu, aloftus2@jhu.edu",
     url="https://github.com/neurodata/ndmg",
     download_url="https://github.com/neurodata/ndmg/tarball/" + VERSION,  # I don't think we need this (this download url is a 404)
     keywords=["connectome", "mri", "pipeline"],
