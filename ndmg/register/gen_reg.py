@@ -53,7 +53,7 @@ def direct_streamline_norm(streams, fa_path, namer):
     fa_img = nib.load(fa_path)
     vox_size = fa_img.get_header().get_zooms()[0]
     template_img = nib.load(template_path)
-    template_data = template_img.get_data().astype('bool')
+    template_data = template_img.get_data()
 
     # SyN FA->Template
     [mapping, affine_map] = regutils.wm_syn(template_path, fa_path, namer.dirs["tmp"]["base"])
@@ -68,10 +68,12 @@ def direct_streamline_norm(streams, fa_path, namer):
 
     # Now we flip the sign in the x and y planes so that we get the mirror image of the forward deformation field.
     adjusted_affine[0][3] = -adjusted_affine[0][3]
-    adjusted_affine[1][3] = -adjusted_affine[1][3]
 
     # Scale z by the voxel size
     adjusted_affine[2][3] = adjusted_affine[2][3]/vox_size
+
+    # Scale y by the square of the voxel size since we've already scaled along the z-plane.
+    adjusted_affine[1][3] = adjusted_affine[1][3]/vox_size**vox_size
 
     # Apply the deformation and correct for the extents
     mni_streamlines = deform_streamlines(streamlines, deform_field=mapping.get_forward_field(),
@@ -79,28 +81,6 @@ def direct_streamline_norm(streams, fa_path, namer):
                                          current_grid_to_world=adjusted_affine,
                                          stream_to_ref_grid=target_isocenter,
                                          ref_grid_to_world=np.eye(4))
-
-    # Check DSN quality, attempt y-flip if DSN fails. Occasionally, orientation affine may be corrupted and this tweak
-    # should handle the inverse case.
-    dm = utils.density_map(mni_streamlines, template_img.shape, affine=np.eye(4)).astype('bool')
-    in_brain = len(np.unique(np.where((template_data.astype('uint8') > 0) & (dm.astype('uint8') > 0))))
-    out_brain = len(np.unique(np.where((template_data.astype('uint8') == 0) & (dm.astype('uint8') > 0))))
-    if in_brain < out_brain:
-        adjusted_affine[1][3] = -adjusted_affine[1][3]
-        mni_streamlines = deform_streamlines(streamlines, deform_field=mapping.get_forward_field(),
-                                             stream_to_current_grid=target_isocenter,
-                                             current_grid_to_world=adjusted_affine,
-                                             stream_to_ref_grid=target_isocenter,
-                                             ref_grid_to_world=np.eye(4))
-        dm = utils.density_map(mni_streamlines, template_img.shape, affine=np.eye(4)).astype('bool')
-        in_brain = len(np.unique(np.where((template_data.astype('uint8') > 0) & (dm.astype('uint8') > 0))))
-        out_brain = len(np.unique(np.where((template_data.astype('uint8') == 0) & (dm.astype('uint8') > 0))))
-        if in_brain > out_brain:
-            print('Warning: Direct Streamline Normalization completed successfully only after inverting the y-plane '
-                  'voxel-to-world. This may not be correct, so manual check for corrupted header orientations is '
-                  'recommended.')
-        else:
-            raise ValueError('ERROR: Direct Streamline Normalization failed. Check for corrupted header/affine.')
 
     # Save streamlines
     hdr = fa_img.header
@@ -115,23 +95,37 @@ def direct_streamline_norm(streams, fa_path, namer):
     trk_hdr['image_orientation_patient'] = np.array([0., 0., 0., 0., 0., 0.]).astype('float32')
     trk_hdr['endianness'] = '<'
     trk_hdr['_offset_data'] = 1000
-    trk_hdr['nb_streamlines'] = len(streamlines)
-    tractogram = nib.streamlines.Tractogram(streamlines, affine_to_rasmm=trk_affine)
+    trk_hdr['nb_streamlines'] = len(mni_streamlines)
+    tractogram = nib.streamlines.Tractogram(mni_streamlines, affine_to_rasmm=trk_affine)
     trkfile = nib.streamlines.trk.TrkFile(tractogram, header=trk_hdr)
-    nib.streamlines.save(trkfile, streams)
+    streams_mni = streams.split('.trk')[0] + '_dsn.trk'
+    nib.streamlines.save(trkfile, streams_mni)
 
     # DSN QC plotting
     mgu.show_template_bundles(mni_streamlines, template_path, streams_warp_png)
 
-    return mni_streamlines
+    return mni_streamlines, streams_mni
 
 
 class dmri_reg(object):
     def __init__(self, namer, nodif_B0, nodif_B0_mask, t1w_in, vox_size, simple):
+        import os.path as op
+        if os.path.isdir("/ndmg_atlases"):
+            # in docker
+            atlas_dir = "/ndmg_atlases"
+        else:
+            # local
+            atlas_dir = op.expanduser("~") + "/.ndmg/ndmg_atlases"
         try:
             FSLDIR = os.environ["FSLDIR"]
         except KeyError:
             print("FSLDIR environment variable not set!")
+
+        if vox_size == '2mm':
+            vox_dims = '2x2x2'
+        elif vox_size == '1mm':
+            vox_dims = '1x1x1'
+
         self.simple = simple
         self.nodif_B0 = nodif_B0
         self.nodif_B0_mask = nodif_B0_mask
@@ -219,9 +213,6 @@ class dmri_reg(object):
         self.rvent_out_file = "{}/RVentricle.nii.gz".format(
             self.namer.dirs["tmp"]["reg_a"]
         )
-        self.mni_vent_loc = "{}/VentricleMask.nii.gz".format(
-            self.namer.dirs["tmp"]["reg_a"]
-        )
         self.csf_mask_dwi = "{}/{}_csf_mask_dwi.nii.gz".format(
             self.namer.dirs["output"]["reg_anat"], self.t1w_name
         )
@@ -252,12 +243,7 @@ class dmri_reg(object):
         self.vent_mask_t1w = "{}/vent_mask_t1w.nii.gz".format(
             self.namer.dirs["tmp"]["reg_a"]
         )
-        self.mni_atlas = "%s%s%s%s" % (
-            FSLDIR,
-            "/data/atlases/HarvardOxford/HarvardOxford-sub-prob-",
-            vox_size,
-            ".nii.gz",
-        )
+
         self.input_mni = "%s%s%s%s" % (
             FSLDIR,
             "/data/standard/MNI152_T1_",
@@ -277,6 +263,18 @@ class dmri_reg(object):
             namer.dirs["output"]["reg_anat"], self.t1w_name
         )
         self.input_mni_sched = "%s%s" % (FSLDIR, "/etc/flirtsch/T1_2_MNI152_2mm.cnf")
+        self.mni_atlas = "%s%s%s%s" % (
+            FSLDIR,
+            "/data/atlases/HarvardOxford/HarvardOxford-sub-prob-",
+            vox_size,
+            ".nii.gz",
+        )
+        self.mni_vent_loc = atlas_dir + '/atlases/mask/HarvardOxford-thr25_space-MNI152NLin6_variant-lateral-ventricles_res-' + vox_dims + '_descr-brainmask.nii.gz'
+        self.corpuscallosum = atlas_dir + '/atlases/mask/CorpusCallosum_res_' + vox_size + '.nii.gz'
+        self.corpuscallosum_mask_t1w = "{}/{}_corpuscallosum.nii.gz".format(self.namer.dirs["output"]["reg_anat"],
+                                                                            self.t1w_name)
+        self.corpuscallosum_dwi = "{}/{}_corpuscallosum_dwi.nii.gz".format(self.namer.dirs["output"]["reg_anat"],
+                                                                           self.t1w_name)
 
     def gen_tissue(self):
         # BET needed for this, as afni 3dautomask only works on 4d volumes
@@ -640,10 +638,10 @@ class dmri_reg(object):
 
     def tissue2dwi_align(self):
         """
-        alignment of ventricle ROI's from MNI space --> dwi and
-        CSF from T1w space --> dwi
+        alignment of ventricle and CC ROI's from MNI space --> dwi and
+        CC and CSF from T1w space --> dwi
         A function to generate and perform dwi space alignment of avoidance/waypoint masks for tractography.
-        First creates ventricle ROI. Then creates transforms from stock MNI template to dwi space.
+        First creates ventricle and CC ROI. Then creates transforms from stock MNI template to dwi space.
         NOTE: for this to work, must first have called both t1w2dwi_align and atlas2t1w2dwi_align.
         """
 
@@ -651,12 +649,13 @@ class dmri_reg(object):
         print("Creating MNI-space ventricle ROI...")
         if not os.path.isfile(self.mni_atlas):
             raise ValueError("FSL atlas for ventricle reference not found!")
-        cmd = "fslroi " + self.mni_atlas + " " + self.rvent_out_file + " 2 1"
+        cmd = "fslmaths " + self.mni_vent_loc + " -thr 0.1 -bin " + self.mni_vent_loc
         os.system(cmd)
-        cmd = "fslroi " + self.mni_atlas + " " + self.lvent_out_file + " 13 1"
+
+        cmd = "fslmaths " + self.corpuscallosum + " -bin " + self.corpuscallosum
         os.system(cmd)
-        self.args = "%s%s%s" % (" -add ", self.rvent_out_file, " -thr 0.1 -bin ")
-        cmd = "fslmaths " + self.lvent_out_file + self.args + self.mni_vent_loc
+
+        cmd = "fslmaths " + self.corpuscallosum + " -sub " + self.mni_vent_loc + " -bin " + self.corpuscallosum
         os.system(cmd)
 
         # Create transform to MNI atlas to T1w using flirt. This will be use to transform the ventricles to dwi space.
@@ -689,12 +688,28 @@ class dmri_reg(object):
                 sup=True,
             )
 
+            # Apply warp resulting from the inverse MNI->T1w created earlier
+            mgru.apply_warp(
+                self.t1w_brain,
+                self.corpuscallosum,
+                self.corpuscallosum_mask_t1w,
+                warp=self.mni2t1w_warp,
+                interp="nn",
+                sup=True,
+            )
+
         # Applyxfm tissue maps to dwi space
         mgru.applyxfm(
             self.nodif_B0,
             self.vent_mask_t1w,
             self.t1wtissue2dwi_xfm,
             self.vent_mask_dwi,
+        )
+        mgru.applyxfm(
+            self.nodif_B0,
+            self.corpuscallosum_mask_t1w,
+            self.t1wtissue2dwi_xfm,
+            self.corpuscallosum_dwi,
         )
         mgru.applyxfm(
             self.nodif_B0, self.csf_mask, self.t1wtissue2dwi_xfm, self.csf_mask_dwi
@@ -708,17 +723,17 @@ class dmri_reg(object):
 
         # Threshold WM to binary in dwi space
         thr_img = nib.load(self.wm_in_dwi)
-        thr_img.get_data()[thr_img.get_data() < 0.10] = 0
+        thr_img.get_data()[thr_img.get_data() < 0.15] = 0
         nib.save(thr_img, self.wm_in_dwi_bin)
 
         # Threshold GM to binary in dwi space
         thr_img = nib.load(self.gm_in_dwi)
-        thr_img.get_data()[thr_img.get_data() < 0.10] = 0
+        thr_img.get_data()[thr_img.get_data() < 0.15] = 0
         nib.save(thr_img, self.gm_in_dwi_bin)
 
         # Threshold CSF to binary in dwi space
         thr_img = nib.load(self.csf_mask_dwi)
-        thr_img.get_data()[thr_img.get_data() < 0.95] = 0
+        thr_img.get_data()[thr_img.get_data() < 0.99] = 0
         nib.save(thr_img, self.csf_mask_dwi)
 
         # Threshold WM to binary in dwi space
@@ -745,6 +760,16 @@ class dmri_reg(object):
             + self.vent_mask_dwi
         )
         os.system(cmd)
+        print("Creating Corpus Callosum mask...")
+        cmd = (
+            "fslmaths "
+            + self.corpuscallosum_dwi
+            + " -mas "
+            + self.wm_in_dwi_bin
+            + " -bin "
+            + self.corpuscallosum_dwi
+        )
+        os.system(cmd)
         cmd = (
             "fslmaths "
             + self.csf_mask_dwi
@@ -761,6 +786,10 @@ class dmri_reg(object):
             + self.gm_in_dwi_bin
             + " -mul "
             + self.wm_in_dwi_bin
+            + " -add "
+            + self.corpuscallosum_dwi
+            + " -sub "
+            + self.vent_csf_in_dwi
             + " -mas "
             + self.nodif_B0_mask
             + " -bin "
