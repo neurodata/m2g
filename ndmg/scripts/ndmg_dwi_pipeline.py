@@ -72,11 +72,11 @@ def ndmg_dwi_worker(
     Parameters
     ----------
     dwi : str
-        Location of dwi file(s)
+        Path for the dwi file(s)
     bvals : str
-        Location of bval file(s)
+        Path for the bval file(s)
     bvecs : str
-        Location of bvec file(s)
+        Path for the bvec file(s)
     t1w : str
         Location of anatomical input file(s)
     atlas : str
@@ -99,8 +99,10 @@ def ndmg_dwi_worker(
         Space for tractography. Default is native.
     clean : bool
         Whether or not to delete intermediates. Default is False.
-    big : bool
-        Whether to produce big graphs for DWI, or voxelwise timeseries for fMRI.
+    skipeddy : bool
+        Whether or not to skip the eddy correction if it has already been run. Default is False.
+    skipreg : bool
+        Whether or not to skip registration. Default is False.
     buck : str, optional
         The name of an S3 bucket which holds BIDS organized data. You musht have build your bucket with credentials to the S3 bucket you wish to access. Default is None
     remo : str, optional

@@ -204,23 +204,23 @@ def make_gtab_and_bmask(fbval, fbvec, dwi_file, outdir):
 
 
 def reorient_dwi(dwi_prep, bvecs, namer):
-    """Orients dwi data to the proper orientation (RAS+)
+    """Orients dwi data to the proper orientation (RAS+) using nibabel
     
     Parameters
     ----------
     dwi_prep : str
-        Location of eddy corrected dwi file
+        Path to eddy corrected dwi file
     bvecs : str
-        Location of the resaled b-vector file
+        Path to the resaled b-vector file
     namer : name_resource
         name_resource variable containing relevant directory tree information
     
     Returns
     -------
     str
-        [description]
+        Path to potentially reoriented dwi file
     str
-        [description]
+        Path to b-vector file, potentially reoriented if dwi data was
     """
     from ndmg.utils.reg_utils import normalize_xform
     fname = dwi_prep
@@ -292,7 +292,7 @@ def match_target_vox_res(img_file, vox_size, namer, sens):
     Parameters
     ----------
     img_file : str
-        location of file to be resliced
+        path to file to be resliced
     vox_size : str
         target voxel resolution ('2mm' or '1mm')
     namer : name_resource

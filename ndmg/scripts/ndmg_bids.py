@@ -63,11 +63,11 @@ def get_atlas(atlas_dir, modality, vox_size):
     Parameters
     ----------
     atlas_dir : str
-        directory containing atlases.
+        Path to directory containing atlases.
     modality : str
-        dwi or func.
+        Whether you are analyzing dwi or func.
     vox_size : str
-        Resolution.
+        t1w input image voxel dimensions, either 2mm or 1mm
     
     Returns
     -------
@@ -173,21 +173,23 @@ def session_level(
     Parameters
     ----------
     inDir : str
-        BIDS input directory
+        Path to BIDS input directory
     outDir : str
-        output directory
+        Path to output directory
     subjs : list
         subject label
     vox_size : str
         Voxel size to use for template registrations.
-    big : bool
-        Whether to produce big graphs for DWI, or voxelwise timeseries for fMRI.
+    skipeddy : bool
+        Whether to skip eddy correction if it has already been run. False means don't.
+    skipreg : bool
+        Whether to skip registration if it has already been run. False means don't.
     clean : bool
         Whether or not to delete intermediates
     stc : str
         A file for slice timing correction. Options are a TR sequence file (where each line is the shift in TRs), up (ie, bottom to top), down (ie, top to bottom), or interleaved
     atlas_select : str
-        [description]
+        The atlas being analyzed in QC (if you only want one)
     mod_type : str
         Determinstic (det) or probabilistic (prob) tracking
     track_type : str
@@ -197,15 +199,13 @@ def session_level(
     reg_style : str
         Space for tractography.
     sesh : str, optional
-        session label. Default is None
+        The label of the session that should be analyzed. If not provided all sessions are analyzed. Multiple sessions can be specified with a space separated list. Default is None
     task : str, optional
         task label. Default is None
     run : str, optional
         run label. Default is None
     modality : str, optional
-        Data type being analyzed. Default = "dwi"
-    nproc : int, optional
-        [description], by default 1
+        Data type being analyzed. Default is "dwi"
     buck : str, optional
         The name of an S3 bucket which holds BIDS organized data. You musht have build your bucket with credentials to the S3 bucket you wish to access. Default is None
     remo : str, optional

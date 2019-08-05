@@ -693,7 +693,7 @@ def wm_syn(template_path, fa_path, working_dir):
 
 
 def normalize_xform(img):
-    """ Set identical, valid qform and sform matrices in an image
+    """Set identical, valid qform and sform matrices in an image
     Selects the best available affine (sform > qform > shape-based), and
     coerces it to be qform-compatible (no shears).
     The resulting image represents this same affine as both qform and sform,
@@ -701,7 +701,18 @@ def normalize_xform(img):
     not aligned to template, and not necessarily preserving the original
     coordinates.
     If header would be unchanged, returns input image.
+    
+    Parameters
+    ----------
+    img : Nifti1Image
+        Input image to be normalized
+    
+    Returns
+    -------
+    Nifti1Image
+        normalized image
     """
+    
     # Let nibabel convert from affine to quaternions, and recover xform
     tmp_header = img.header.copy()
     tmp_header.set_qform(img.affine)

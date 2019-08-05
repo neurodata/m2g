@@ -37,13 +37,13 @@ class name_resource:
     Parameters
     ----------
     modf : str
-        Path to MRI data to be analyzed
+        Path to subject MRI (dwi or func) data to be analyzed
     t1wf : str
-        Path to t1w anatomical data
+        Path to subject t1w anatomical data
     tempf : str
         Path to atlas file(s) to be used during analysis
     opath : str
-        Output directory
+        Path to output directory
     """
 
     def __init__(self, modf, t1wf, tempf, opath):
@@ -204,23 +204,21 @@ class name_resource:
         #                         os.path.basename(label))[0])
 
     def name_derivative(self, folder, derivative):
+        """Creates derivative output file paths using os.path.join
+        
+        Parameters
+        ----------
+        folder : str
+            Path of directory that you want the derivative file name appended too
+        derivative : str
+            The name of the file to be produced
+        
+        Returns
+        -------
+        str
+            Derivative output file path
         """
-        names a particular derivative by the following spec:
-
-        self.__opath__/mod/type/[specific/]derivative
-
-        ***Positional Arguments:**
-
-            derivative:
-                - the name of the file to be produced.
-            mod:
-                - the modality. Should be a BIDs-compliant name (bold, t1w,
-                anat).
-            type:
-                - the inner directory to place the file.
-            specific:
-                - an additional, optional layer of granularity.
-        """
+        
         return os.path.join(*[folder, derivative])
 
     def get_mod_source(self):
