@@ -5,7 +5,7 @@ import os
 import pytest
 import ndmg
 from ndmg.utils.s3_utils import s3_get_data
-from pathlib2 import Path
+from pathlib import Path
 
 KEYWORDS = ["sub", "ses"]
 
