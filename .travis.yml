@@ -20,10 +20,10 @@ addons:
     packages:
       - docker-ce
 
-matrix:
-  include:
-    - env: SP=native
-    - env: SP=mni
+# matrix:
+#   include:
+#     - env: SP=native
+#     - env: SP=mni
 
 before_install:
   # make local input and output directories to attach to container
@@ -56,9 +56,9 @@ install:
   - docker exec -w /ndmg travis pip install .
 
 script:
-  # Run ndmg in docker, run pytest in docker
-  - travis_wait docker exec -w /ndmg travis ndmg_bids --sp $SP --participant_label 0025864 --session_label 1 --modality dwi --atlas desikan /input /output participant
+  # Run ndmg in docker, run pytest in docker.
+  # top command is to prevent travis from breaking at eddy_correct
+  - while sleep 9m; do echo "=====[ $SECONDS seconds still running ]====="; done &
+  - docker exec -w /ndmg travis ndmg_bids --participant_label 0025864 --session_label 1 --modality dwi --atlas desikan /input /output participant
+  # - docker exec -w /ndmg travis ndmg_bids --sp $SP --participant_label 0025864 --session_label 1 --modality dwi --atlas desikan /input /output participant
   - docker exec -w /ndmg travis pytest -v --disable-warnings
-
-before_deploy:
-  -
