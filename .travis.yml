@@ -56,7 +56,7 @@ install:
   - docker exec -w /ndmg travis pip install .
 
   # useful log checks for packages whose versions have given us trouble
-  - docker exec -w /ndmg pip show dipy networkx
+  - docker exec -w /ndmg travis pip show dipy networkx
 
 script:
   # Run ndmg in docker, run pytest in docker.
