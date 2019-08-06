@@ -18,7 +18,7 @@ setup(
         "ndmg.nuis",
         "ndmg.scripts",
     ],
-    include_package_data = True,
+    include_package_data=True,
     version=VERSION,
     entry_points={
         "console_scripts": [
@@ -32,13 +32,14 @@ setup(
     author="Derek Pisner, Greg Kiar, Eric Bridgeford, Alex Loftus, and Will Gray Roncal",
     author_email="gkiar@jhu.edu, wgr@jhu.edu, ebridge2@jhu.edu, dpisner@utexas.edu, aloftus2@jhu.edu",
     url="https://github.com/neurodata/ndmg",
-    download_url="https://github.com/neurodata/ndmg/tarball/" + VERSION,  # I don't think we need this (this download url is a 404)
+    download_url="https://github.com/neurodata/ndmg/tarball/"
+    + VERSION,  # I don't think we need this (this download url is a 404)
     keywords=["connectome", "mri", "pipeline"],
-    classifiers=['Programming Language :: Python :: 3.6'],
+    classifiers=["Programming Language :: Python :: 3.6"],
     install_requires=[
         "numpy",
         "nibabel",
-        "dipy",
+        "dipy==0.16.0",
         "scipy",
         "python-dateutil",
         "pandas",
@@ -57,6 +58,6 @@ setup(
         "scikit-image==0.13.0",
         "networkx==1.9",
         "configparser>=3.7.4",
-        "pytest"
+        "pytest",
     ],
 )
