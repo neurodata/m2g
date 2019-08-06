@@ -4,8 +4,9 @@
 # TODO : travis breaks if you make edits directly from github, because the branch name is wrong.
 
 
-virtualenv:
-  system_site_packages: true
+# dist: xenial
+# virtualenv:
+#   system_site_packages: true
 
 language: python
 
