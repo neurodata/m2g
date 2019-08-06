@@ -41,7 +41,7 @@ before_install:
   - cd ndmg
   - docker pull neurodata/ndmg_travis:latest
   - docker images
-  - docker run -t -d --name travis -v `pwd`:/ndmg -v $(readlink -f ../input):/input -v $(readlink -f ../output):/output --entrypoint /bin/bash neurodata/ndmg_travis:latest
+  - docker run -t -d --name travis -v $(pwd):/ndmg -v $(readlink -f ../input):/input -v $(readlink -f ../output):/output --entrypoint /bin/bash neurodata/ndmg_travis:latest
   - docker ps
 
 install:
