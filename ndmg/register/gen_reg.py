@@ -861,9 +861,9 @@ class dmri_reg_old(object):
         nib.save(self.b0_out, self.b0)
 
         # Applies skull stripping to T1 volume, then EPI alignment to T1
-        print("calling mgru.extract_brain on {}, {}").format(
+        print("calling mgru.extract_brain on {}, {}".format(
             self.t1w, self.t1w_brain
-        )  # t1w = in, t1w_brain = out
+        ))  # t1w = in, t1w_brain = out
         mgru.extract_brain(self.t1w, self.t1w_brain, "-B")
         print("calling align_epi")
         print(self.t1w)
@@ -872,17 +872,17 @@ class dmri_reg_old(object):
         mgru.align_epi(self.dwi, self.t1w, self.t1w_brain, self.temp_aligned)
 
         # Applies linear registration from T1 to template
-        print("calling mgru.align on {}, {}, {}").format(self.t1w, self.atlas, self.xfm)
+        print("calling mgru.align on {}, {}, {}".format(self.t1w, self.atlas, self.xfm))
         mgru.align(self.t1w, self.atlas, self.xfm)
 
         # Applies combined transform to dwi image volume
-        print("calling mgru.applyxfm on {}, {}, {}, {}").format(
+        print("calling mgru.applyxfm on {}, {}, {}, {}".format(
             self.atlas, self.temp_aligned, self.xfm, self.temp_aligned2
-        )
+        ))
         mgru.applyxfm(self.atlas, self.temp_aligned, self.xfm, self.temp_aligned2)
-        print("calling mgru.resample on {}, {}, {}").format(
+        print("calling mgru.resample on {}, {}, {}".format(
             self.temp_aligned2, self.aligned_dwi, self.atlas
-        )
+        ))
         mgru.resample(self.temp_aligned2, self.aligned_dwi, self.atlas)
 
         if clean:
