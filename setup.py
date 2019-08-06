@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 from setuptools import setup, Extension
 from ndmg import VERSION
 
@@ -28,24 +30,32 @@ setup(
     },
     description="Neuro Data MRI to Graphs Pipeline",
     author="Derek Pisner, Greg Kiar, Eric Bridgeford, Alex Loftus, and Will Gray Roncal",
-    author_email="gkiar@jhu.edu, wgr@jhu.edu, ebridge2@jhu.edu",
+    author_email="gkiar@jhu.edu, wgr@jhu.edu, ebridge2@jhu.edu, dpisner@utexas.edu, aloftus2@jhu.edu",
     url="https://github.com/neurodata/ndmg",
     download_url="https://github.com/neurodata/ndmg/tarball/" + VERSION,  # I don't think we need this (this download url is a 404)
     keywords=["connectome", "mri", "pipeline"],
-    classifiers=[],
+    classifiers=['Programming Language :: Python :: 3.6'],
     install_requires=[
-        "networkx",
+        "numpy",
         "nibabel",
+        "dipy",
+        "scipy",
+        "python-dateutil",
+        "pandas",
+        "boto3",
+        "awscli",
+        "matplotlib",
         "nilearn",
         "sklearn",
-        "numpy",  # We use nump v1.10.4
-        "scipy>=0.13.3",  # We use 0.17.0
-        "dipy==0.16.0",
-        "boto3",
-        "matplotlib",
-        "plotly==1.12.1",
-        # "cython",
+        "vtk",
+        "pyvtk",
+        "fury",
+        "requests",
+        "plotly==1.12.9",
         "pybids==0.6.4",
+        "setuptools>=40.0",
+        "scikit-image==0.13.0",
+        "networkx==1.9",
         "configparser>=3.7.4",
         "pytest"
     ],
