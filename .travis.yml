@@ -22,30 +22,30 @@ addons:
 
 before_install:
   # make local input and output directories to attach to container
+  - cd ..
   - mkdir input
   - mkdir output
-
-  # checks for the log
-  - readlink -f input
-  - ls
-  - pwd
 
   # grab data from neuroparc
   - git lfs clone https://github.com/neurodata/neuroparc.git
   - mv neuroparc/data/* input
   - rm -rf neuroparc
 
+  # log checks
+  - readlink -f input
+  - ls
+  - pwd
+
   # grab ndmg's travis docker image, run it with local branch attached as a volume
+  - cd ndmg
   - docker pull neurodata/ndmg_travis:latest
   - docker images
-  - docker run -t -d --name travis -v $(echo pwd):/ndmg -v $(readlink -f input):/input -v $(readlink -f output):/output \
+  - docker run -t -d --name travis -v `pwd`:/ndmg -v $(readlink -f ../input):/input -v $(readlink -f ../output):/output \
     --entrypoint /bin/bash neurodata/ndmg_travis:latest
   - docker ps
 
 install:
-  # 
-  - docker exec -w /ndmg travis pip uninstall ndmg -y
-  - docker exec -w /ndmg travis pip install -r requirements.txt
+  # get travis branch installed
   - docker exec -w /ndmg travis pip install pytest
   - docker exec -w /ndmg travis pip install .
 
