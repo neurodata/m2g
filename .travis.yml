@@ -31,11 +31,12 @@ before_install:
   - mv neuroparc/data/* input
   - rm -rf neuroparc
 
-  # log checks
+  # useful log checks
   - readlink -f input
   - ls
   - pwd
   - uname -a
+  - df -h
   - docker version
 
   # grab ndmg's travis docker image, run it with local branch attached as a volume
@@ -52,5 +53,5 @@ install:
 
 script:
   # Run ndmg in docker, run pytest in docker
-  - docker exec -w /ndmg travis ndmg_bids --participant_label 0025864 --session_label 1 --modality dwi --atlas desikan /input /output participant
+  - travis_wait docker exec -w /ndmg travis ndmg_bids --participant_label 0025864 --session_label 1 --modality dwi --atlas desikan /input /output participant
   - docker exec -w /ndmg travis pytest -v --disable-warnings
