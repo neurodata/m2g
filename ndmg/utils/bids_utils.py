@@ -118,7 +118,7 @@ class name_resource:
         labels : list
             path to desired atlas labeling file
         label_dirs : list
-            N/A
+            label directories
         """
 
         namer.dirs = {}
@@ -237,19 +237,19 @@ class name_resource:
 
 
 def flatten(current, result=[]):
-    """
+    """Flatten a folder heirarchy
     
     Parameters
     ----------
     current : dict
-        [description]
+        path to directory you want to flatten
     result : list, optional
         Default is []
     
     Returns
     -------
     list
-        [description]
+        All new directories created by flattening the current directory
     """
     if isinstance(current, dict):
         for key in current:

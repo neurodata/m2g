@@ -203,8 +203,8 @@ def session_level(
         Determinstic (det) or probabilistic (prob) tracking
     track_type : str
         Tracking approach: eudx or local. Default is eudx
-    mod_func : [type]
-        [description]
+    mod_func : str
+        Which diffusion model you want to use, csd or csa
     reg_style : str
         Space for tractography.
     sesh : str, optional

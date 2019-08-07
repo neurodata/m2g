@@ -141,7 +141,7 @@ class dmri_reg(object):
     vox_size : str
         voxel resolution ('2mm' or '1mm')
     simple : bool
-        [description]
+        Whether you want to attempt non-linear registration when transforming between mni, t1w, and dwi space
     
     Raises
     ------
@@ -872,7 +872,7 @@ class dmri_reg_old(object):
         namer : name_resource
             variable containing directory tree information for pipeline outputs
         clean : bool, optional
-            NOT USED IN THIS FUNCTION, by default False
+            Whether to delete intermediate files created by the pipeline, by default False
         """
         
         self.dwi = dwi

@@ -116,11 +116,6 @@ def ndmg_dwi_worker(
     modif : str, optional
         Name of the folder on s3 to push to. If empty, push to a folder with ndmg's version number. Default is ""
     
-    Returns
-    -------
-    [type]
-        [description]
-    
     Raises
     ------
     ValueError
