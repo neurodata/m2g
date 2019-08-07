@@ -41,13 +41,9 @@ import ndmg
 import ndmg.utils as mgu
 from ndmg.utils.s3_utils import get_credentials, get_matching_s3_objects, s3_client
 
-<<<<<<< HEAD
-participant_templ = "https://raw.githubusercontent.com/neurodata/ndmg/remove-zindex/templates/ndmg_cloud_participant.json"
-=======
 warnings.simplefilter("ignore")
 
 participant_templ = "https://raw.githubusercontent.com/neurodata/ndmg/staging/templates/ndmg_cloud_participant.json"
->>>>>>> 763dc47894ad6425f894c4e1a0db2de2c58ff736
 
 
 def batch_submit(
