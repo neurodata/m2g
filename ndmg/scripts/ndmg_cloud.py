@@ -17,7 +17,8 @@
 
 # ndmg_cloud.py
 # Created by Greg Kiar on 2017-02-02.
-# Email: gkiar@jhu.edu
+# Edited a ton by Alex Loftus
+# Email: gkiar@jhu.edu, aloftus2@jhu.edu
 
 #%%
 import subprocess
@@ -40,8 +41,6 @@ import ndmg
 import ndmg.utils as mgu
 from ndmg.utils.s3_utils import get_credentials, get_matching_s3_objects, s3_client
 
-warnings.simplefilter("ignore")
-
 participant_templ = "https://raw.githubusercontent.com/neurodata/ndmg/remove-zindex/templates/ndmg_cloud_participant.json"
 
 
@@ -56,7 +55,7 @@ def batch_submit(
     log=False,
     bg=False,
     modif="",
-    reg_style=""
+    reg_style="",
 ):
     """
     Searches through an S3 bucket, gets all subject-ids, creates json files
@@ -67,8 +66,18 @@ def batch_submit(
     threads = crawl_bucket(bucket, path, jobdir)
 
     print("Generating job for each subject...")
-    jobs = create_json(bucket, path, threads, jobdir,
-                       credentials, debug, dataset, bg, modif=modif, reg_style=reg_style)
+    jobs = create_json(
+        bucket,
+        path,
+        threads,
+        jobdir,
+        credentials,
+        debug,
+        dataset,
+        bg,
+        modif=modif,
+        reg_style=reg_style,
+    )
 
     print("Submitting jobs to the queue...")
     ids = submit_jobs(jobs, jobdir)
@@ -107,7 +116,7 @@ def crawl_bucket(bucket, path, jobdir):
     seshs = OrderedDict()
     # TODO : use boto3 for this.
     for subj in subjs:
-        prefix = path + "/sub-{}/".format(subj) 
+        prefix = path + "/sub-{}/".format(subj)
         all_seshfiles = get_matching_s3_objects(bucket, prefix)
         sesh = list(set([re.findall(sesh_pattern, obj)[0] for obj in all_seshfiles]))
 
@@ -136,14 +145,22 @@ def crawl_bucket(bucket, path, jobdir):
     with open(sesh_path, "w") as f:
         json.dump(seshs, f)
     print("{} created.".format(sesh_path))
-    print ("Information obtained from s3.")
+    print("Information obtained from s3.")
     return seshs
 
 
-
-
 def create_json(
-    bucket, path, threads, jobdir, credentials=None, debug=False, dataset=None, bg=False, modif="", reg_style=""):
+    bucket,
+    path,
+    threads,
+    jobdir,
+    credentials=None,
+    debug=False,
+    dataset=None,
+    bg=False,
+    modif="",
+    reg_style="",
+):
     """
     Takes parameters to make jsons
     """
@@ -151,14 +168,12 @@ def create_json(
     if os.path.isfile(jobsjson):
         with open(jobsjson, "r") as f:
             jobs = json.load(f)
-        return jobs 
+        return jobs
 
     # set up infrastructure
     out = subprocess.check_output("mkdir -p {}".format(jobdir), shell=True)
-    out = subprocess.check_output(
-        "mkdir -p {}/jobs/".format(jobdir), shell=True)
-    out = subprocess.check_output(
-        "mkdir -p {}/ids/".format(jobdir), shell=True)
+    out = subprocess.check_output("mkdir -p {}/jobs/".format(jobdir), shell=True)
+    out = subprocess.check_output("mkdir -p {}/ids/".format(jobdir), shell=True)
     template = participant_templ
     seshs = threads
 
@@ -247,7 +262,7 @@ def submit_jobs(jobs, jobdir):
     for job in jobs:
         # use this to start wherever
         # if jobs.index(job) >= jobs.index('/jobs/jobs/ndmg_0-1-2_SWU4_sub-0025768_ses-1.json'):
-        with open(job, 'r') as f:
+        with open(job, "r") as f:
             kwargs = json.load(f)
         print(("... Submitting job {}...".format(job)))
         submission = batch.submit_job(**kwargs)
@@ -268,7 +283,6 @@ def submit_jobs(jobs, jobdir):
     return 0
 
 
-
 def get_status(jobdir, jobid=None):
     """
     Given list of jobs, returns status of each.
@@ -284,8 +298,7 @@ def get_status(jobdir, jobid=None):
             cmd = cmd_template.format(submission["jobId"])
             print(("... Checking job {}...".format(submission["jobName"])))
             out = subprocess.check_output(cmd, shell=True)
-            status = re.findall(
-                '"status": "([A-Za-z]+)",', out.decode("utf-8"))[0]
+            status = re.findall('"status": "([A-Za-z]+)",', out.decode("utf-8"))[0]
             print(("... ... Status: {}".format(status)))
         return 0
     else:
@@ -318,7 +331,7 @@ def kill_jobs(jobdir, reason='"Killing job"'):
         name = submission["jobName"]
         jids.append(jid)
         names.append(name)
-    
+
     for jid in jids:
         print("Terminating job {}".format(jid))
         batch.terminate_job(jobId=jid, reason=reason)
@@ -335,8 +348,6 @@ def kill_jobs(jobdir, reason='"Killing job"'):
         #     out = subprocess.check_output(cmd, shell=True)
         # else:
         #     print("... Unknown status??")
-
-
 
 
 #%%
@@ -390,10 +401,10 @@ def main():
         help="whether or not to produce voxelwise big graph",
     )
     parser.add_argument(
-    "--modif",
-    action="store",
-    help="Name of folder on s3 to push to. If empty, push to a folder with ndmg's version number.",
-    default="",
+        "--modif",
+        action="store",
+        help="Name of folder on s3 to push to. If empty, push to a folder with ndmg's version number.",
+        default="",
     )
     parser.add_argument(
         "--sp",
@@ -437,7 +448,19 @@ def main():
         if not os.path.exists(jobdir):
             print("job directory not found. Creating...")
             os.mkdir(jobdir)
-        batch_submit(bucket, path, jobdir, creds, state, debug, dset, log, bg, modif=modif, reg_style=reg_style)
+        batch_submit(
+            bucket,
+            path,
+            jobdir,
+            creds,
+            state,
+            debug,
+            dset,
+            log,
+            bg,
+            modif=modif,
+            reg_style=reg_style,
+        )
 
     sys.exit(0)
 

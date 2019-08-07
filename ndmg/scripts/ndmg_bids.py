@@ -25,10 +25,19 @@
 import sys
 import glob
 import os.path as op
+import warnings
 from argparse import ArgumentParser
+
 from ndmg.utils import s3_utils
 from ndmg.utils.bids_utils import *
 from ndmg.scripts.ndmg_dwi_pipeline import ndmg_dwi_worker
+
+print("Python location : {}".format(sys.executable))
+print("Python version : {}".format(sys.version))
+if sys.version_info[0] < 3:
+    warnings.warn(
+        "WARNING : Using python 2. This Python version is no longer maintained. Use at your own risk."
+    )
 
 print("Beginning ndmg ...")
 
@@ -572,23 +581,22 @@ def main():
 
         print("input directory contents: {}".format(os.listdir(inDir)))
 
-
-##### for debugging, remove soon
+        ##### for debugging, remove soon
         # TODO: argument for this won't always work
-#         for path, dirs, files in os.walk(tindir):
-#             print(path)
-#             for f in files:
-#                 print(f)
+        #         for path, dirs, files in os.walk(tindir):
+        #             print(path)
+        #             for f in files:
+        #                 print(f)
 
-#         # TODO: argument for this won't always work
-#         if op.isdir(outDir):
-#             for path, dirs, files in os.walk(outDir):
-#                 print(path)
-#                 for f in files:
-#                     print(f)
-#         else:
-#             print("OutDir {} does not exist yet".format(outDir))
-######
+        #         # TODO: argument for this won't always work
+        #         if op.isdir(outDir):
+        #             for path, dirs, files in os.walk(outDir):
+        #                 print(path)
+        #                 for f in files:
+        #                     print(f)
+        #         else:
+        #             print("OutDir {} does not exist yet".format(outDir))
+        ######
         # run ndmg.
         session_level(
             inDir,

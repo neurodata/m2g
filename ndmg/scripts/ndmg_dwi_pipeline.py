@@ -400,7 +400,7 @@ def ndmg_dwi_worker(
 
         # -------- Tensor Fitting and Fiber Tractography ---------------- #
         start_time = time.time()
-        seeds = mgt.build_seed_list(reg.wm_gm_int_in_dwi, np.eye(4), dens=15)
+        seeds = mgt.build_seed_list(reg.wm_gm_int_in_dwi, np.eye(4), dens=20)
         print("Using " + str(len(seeds)) + " seeds...")
 
         # Compute direction model and track fiber streamlines
@@ -476,16 +476,16 @@ def ndmg_dwi_worker(
         # Align DWI volumes to Atlas
         print("Aligning volumes...")
         reg = mgr.dmri_reg_old(dwi_prep, gtab, t1w, atlas, aligned_dwi, namer, clean)
-        print("Registering DWI image at {} to atlas; aligned dwi at {}...").format(
+        print("Registering DWI image at {} to atlas; aligned dwi at {}...".format(
             dwi_prep, aligned_dwi
-        )  # alex  # TODO: make sure dwi_prep is what is being registered
+        ))  # alex  # TODO: make sure dwi_prep is what is being registered
         reg.dwi2atlas()
 
         # -------- Tensor Fitting and Fiber Tractography ---------------- #
         print("Beginning tractography...")
         # Compute tensors and track fiber streamlines
-        print("aligned_dwi: {}").format(aligned_dwi)
-        print("gtab: {}").format(gtab)
+        print("aligned_dwi: {}".format(aligned_dwi))
+        print("gtab: {}".format(gtab))
         [tens, streamlines, align_dwi_mask] = mgt.eudx_basic(
             aligned_dwi, gtab, stop_val=0.2
         )
@@ -500,8 +500,8 @@ def ndmg_dwi_worker(
 
         # Save streamlines to disk
         print("Saving streamlines: " + streams)
-        print("streamlines: {}").format(streamlines)
-        print("streams: {}").format(streams)
+        print("streamlines: {}".format(streamlines))
+        print("streams: {}".format(streams))
         tractogram_list = [i for i in streamlines]
         trk_affine = np.eye(4)
         tractogram = nib.streamlines.Tractogram(
@@ -511,7 +511,7 @@ def ndmg_dwi_worker(
         streamlines = Streamlines(
             streamlines
         )  # alex  # to try to make the streamlines variable be the same thing as the native space one
-        print("atlas location: {}").format(atlas)
+        print("atlas location: {}".format(atlas))
 
     # ------- Connectome Estimation --------------------------------- #
     # Generate graphs from streamlines for each parcellation
