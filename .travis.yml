@@ -3,57 +3,66 @@
 # TODO : run ndmg with `pytest`, rather than travis.
 # TODO : travis breaks if you make edits directly from github, because the branch name is wrong.
 
-
-virtualenv:
-  system_site_packages: true
+# dist: xenial
+# virtualenv:
+#   system_site_packages: true
 
 language: python
 
 python:
-    - "2.7"
-    - "3.6"
-    - "3.7"
+  - "3.6"
 
 services:
-    - docker
+  - docker
 
 addons:
   apt:
     packages:
       - docker-ce
 
+matrix:
+  include:
+    - env: SP=native
+    - env: SP=mni
+    - env: SP=native_dsn
+
 before_install:
-    # grab correct branch, update it to the new branch version
-    - docker version
-    - export BRANCH=$(if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then echo $TRAVIS_BRANCH; else echo $TRAVIS_PULL_REQUEST_BRANCH; fi)
-    - echo $BRANCH
-    - mkdir input
-    - mkdir output
-    - readlink -f input
-    - docker pull neurodata/ndmg_dev:latest
-    - docker images
-    - docker run -t -d --name travis -v $(readlink -f input):/input -v $(readlink -f output):/output --entrypoint /bin/bash neurodata/ndmg_dev:latest
-    - docker ps
-    - docker exec -w /ndmg travis git fetch --all
-    - docker exec -w /ndmg travis git checkout $BRANCH
-    - docker exec -w /ndmg travis git pull
-    - docker exec -w /ndmg travis git branch
+  # make local input and output directories to attach to container
+  - cd ..
+  - mkdir -m 777 input output
+
+  # grab data from neuroparc
+  - git lfs clone https://github.com/neurodata/neuroparc.git
+  - mv neuroparc/data/* input
+  - rm -rf neuroparc
+
+  # useful log checks
+  - readlink -f input
+  - ls
+  - pwd
+  - uname -a
+  - df -h
+  - docker version
+
+  # grab ndmg's travis docker image, run it with local branch attached as a volume
+  - docker pull neurodata/ndmg_travis:latest
+  - docker images
+  - cd ndmg
+  - docker run -t -d --name travis -v $(pwd):/ndmg -v $(readlink -f ../input):/input -v $(readlink -f ../output):/output --entrypoint /bin/bash neurodata/ndmg_travis:latest
+  - docker ps
 
 install:
-  - docker exec -w /ndmg travis pip uninstall ndmg -y
-  - docker exec -w /ndmg travis pip install -r requirements.txt
+  # get travis branch installed
   - docker exec -w /ndmg travis pip install pytest
   - docker exec -w /ndmg travis pip install .
 
-script:
-  # Run ndmg in docker, run pytest in docker
-  - docker exec -w /ndmg travis ndmg_bids --bucket ndmg-data --remote_path HNU1t --participant_label 0025427 --session_label 1 --modality dwi --atlas desikan /input /output participant
-  - docker exec -w /ndmg travis pytest -v --disable-warnings
+  # useful log checks for packages whose versions have given us trouble
+  - docker exec -w /ndmg travis pip show dipy networkx
 
-deploy:
-  # Given build succeeds, push ndmg_dev image to dockerhub
-  provider: script
-  script: bash docker_push.sh
-  on:
-    branch: staging
-    condition: $TRAVIS_BRANCH = staging
+script:
+  # Run ndmg in docker, run pytest in docker.
+  # top command is to prevent travis from breaking at eddy_correct
+  - while sleep 9m; do echo "=====[ $SECONDS seconds still running ]====="; done &
+  - docker exec -w /ndmg travis ndmg_bids --sp $SP --participant_label 0025864 --session_label 1 --modality dwi --atlas desikan /input /output participant
+  - kill %1
+  - docker exec -w /ndmg travis pytest -v --disable-warnings

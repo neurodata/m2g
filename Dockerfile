@@ -49,7 +49,7 @@ RUN apt-get update -qq && apt-get install -yq --no-install-recommends ed gsl-bin
     libgomp1 libjpeg62 libxm4 netpbm tcsh xfonts-base xvfb && \
     libs_path=/usr/lib/x86_64-linux-gnu && \
     if [ -f $libs_path/libgsl.so.19 ]; then \
-           ln $libs_path/libgsl.so.19 $libs_path/libgsl.so.0; \
+    ln $libs_path/libgsl.so.19 $libs_path/libgsl.so.0; \
     fi
 
 RUN mkdir -p /opt/afni && \
@@ -64,10 +64,10 @@ RUN \
     pip3.6 install numpy
 
 RUN \
-    pip3.6 install nibabel dipy scipy python-dateutil pandas boto3 awscli matplotlib nilearn sklearn pandas cython vtk pyvtk fury awscli requests ipython duecredit graspy
+    pip3.6 install nibabel scipy python-dateutil pandas boto3 awscli matplotlib nilearn sklearn pandas cython vtk pyvtk fury awscli requests ipython duecredit graspy
 
 RUN \
-    pip3.6 install plotly==1.12.9 pybids==0.6.4 setuptools>=40.0 scikit-image==0.13.0 networkx==1.9 configparser>=3.7.4
+    pip3.6 install dipy==0.16.0 plotly==1.12.9 pybids==0.6.4 setuptools>=40.0 scikit-image==0.13.0 networkx==1.9 configparser>=3.7.4
 
 WORKDIR /
 
