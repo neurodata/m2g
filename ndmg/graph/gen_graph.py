@@ -29,7 +29,7 @@ import networkx as nx
 import nibabel as nib
 import time
 import os
-from dipy.tracking._utils import (_mapping_to_voxel, _to_voxel_coordinates)
+from dipy.tracking._utils import _mapping_to_voxel, _to_voxel_coordinates
 from itertools import combinations
 from collections import defaultdict
 
@@ -61,12 +61,17 @@ def get_sphere(coords, r, vox_dims, dims):
     .. Adapted from NeuroSynth
     """
     r = float(r)
-    xx, yy, zz = [slice(-r / vox_dims[i], r / vox_dims[i] + 0.01, 1) for i in range(len(coords))]
+    xx, yy, zz = [
+        slice(-r / vox_dims[i], r / vox_dims[i] + 0.01, 1) for i in range(len(coords))
+    ]
     cube = np.vstack([row.ravel() for row in np.mgrid[xx, yy, zz]])
-    sphere = cube[:, np.sum(np.dot(np.diag(vox_dims), cube) ** 2, 0) ** .5 <= r]
+    sphere = cube[:, np.sum(np.dot(np.diag(vox_dims), cube) ** 2, 0) ** 0.5 <= r]
     sphere = np.round(sphere.T + coords)
-    neighbors = sphere[(np.min(sphere, 1) >= 0) & (np.max(np.subtract(sphere, dims), 1) <= -1), :].astype(int)
+    neighbors = sphere[
+        (np.min(sphere, 1) >= 0) & (np.max(np.subtract(sphere, dims), 1) <= -1), :
+    ].astype(int)
     return neighbors
+
 
 class graph_tools(object):
     def __init__(
@@ -170,7 +175,7 @@ class graph_tools(object):
         node_dict = dict(zip(np.unique(self.rois) + 1, np.arange(mx) + 1))
 
         # Add empty vertices
-        for node in range(1, mx+1):
+        for node in range(1, mx + 1):
             self.g.add_node(node)
 
         nlines = np.shape(self.tracks)[0]
@@ -214,7 +219,6 @@ class graph_tools(object):
         g = nx.from_numpy_matrix(conn_matrix)
 
         return g
-
 
     def cor_graph(self, timeseries):
         """
@@ -291,10 +295,10 @@ class graph_tools(object):
             raise ValueError("Only edgelist, gpickle, and graphml currently supported")
         pass
 
-
     def save_graph_png(self, graphname):
         import matplotlib
-        matplotlib.use('agg')
+
+        matplotlib.use("agg")
         from matplotlib import pyplot as plt
         from graspy.utils import ptr
         from graspy.plot import heatmap
@@ -302,10 +306,13 @@ class graph_tools(object):
         conn_matrix = np.array(nx.to_numpy_matrix(self.g))
         conn_matrix = ptr.pass_to_ranks(conn_matrix)
         heatmap(conn_matrix)
-        plt.savefig(self.namer.dirs["qa"]['graphs_plotting'] + '/' + graphname.split('.')[:-1][0].split('/')[-1] +
-                    '.png')
+        plt.savefig(
+            self.namer.dirs["qa"]["graphs_plotting"]
+            + "/"
+            + graphname.split(".")[:-1][0].split("/")[-1]
+            + ".png"
+        )
         plt.close()
-
 
     def summary(self):
         """

@@ -21,6 +21,7 @@
 # Edited by Eric Bridgeford.
 
 import warnings
+
 warnings.simplefilter("ignore")
 from dipy.io import read_bvals_bvecs
 from dipy.core.gradients import gradient_table
@@ -37,16 +38,20 @@ from scipy.sparse import lil_matrix
 def show_template_bundles(final_streamlines, template_path, fname):
     import nibabel as nib
     from fury import actor, window
+
     renderer = window.Renderer()
-    template_img_data = nib.load(template_path).get_data().astype('bool')
-    template_actor = actor.contour_from_roi(template_img_data,
-                                            color=(50, 50, 50), opacity=0.05)
+    template_img_data = nib.load(template_path).get_data().astype("bool")
+    template_actor = actor.contour_from_roi(
+        template_img_data, color=(50, 50, 50), opacity=0.05
+    )
     renderer.add(template_actor)
-    lines_actor = actor.streamtube(final_streamlines, window.colors.orange,
-                                   linewidth=0.3)
+    lines_actor = actor.streamtube(
+        final_streamlines, window.colors.orange, linewidth=0.3
+    )
     renderer.add(lines_actor)
     window.record(renderer, n_frames=1, out_path=fname, size=(900, 900))
     return
+
 
 def execute_cmd(cmd, verb=False):
     """
@@ -86,9 +91,11 @@ def get_braindata(brain_file):
         elif type(brain_file) is nib.nifti1.Nifti1Image:
             brain = brain_file
         else:
-            raise TypeError("Brain file is type: {}".format(type(brain_file)) +
-                            "; accepted types are numpy.ndarray, "
-                            "string, and nibabel.nifti1.Nifti1Image.")
+            raise TypeError(
+                "Brain file is type: {}".format(type(brain_file))
+                + "; accepted types are numpy.ndarray, "
+                "string, and nibabel.nifti1.Nifti1Image."
+            )
         braindata = brain.get_data()
     return braindata
 
@@ -120,8 +127,7 @@ def get_slice(mri, volid, sli):
     # Wraps volume in new nifti image
     head = mri_im.get_header()
     head.set_data_shape(head.get_data_shape()[0:3])
-    out = nib.Nifti1Image(vol, affine=mri_im.get_affine(),
-                          header=head)
+    out = nib.Nifti1Image(vol, affine=mri_im.get_affine(), header=head)
     out.update_header()
     # and saved to a new file
     nib.save(out, sli)
@@ -150,19 +156,19 @@ def make_gtab_and_bmask(fbval, fbvec, dwi_file, outdir):
 
     # Get B0 indices
     B0s = np.where(gtab.bvals == gtab.b0_threshold)[0]
-    print("%s%s" % ('B0\'s found at: ', B0s))
+    print("%s%s" % ("B0's found at: ", B0s))
 
     # Show info
     print(gtab.info)
 
     # Extract and Combine all B0s collected
-    print('Extracting B0\'s...')
+    print("Extracting B0's...")
     cmds = []
     B0s_bbr = []
     for B0 in B0s:
         print(B0)
         B0_bbr = "{}/{}_B0.nii.gz".format(outdir, str(B0))
-        cmd = 'fslroi ' + dwi_file + ' ' + B0_bbr + ' ' + str(B0) + ' 1'
+        cmd = "fslroi " + dwi_file + " " + B0_bbr + " " + str(B0) + " 1"
         cmds.append(cmd)
         B0s_bbr.append(B0_bbr)
 
@@ -179,7 +185,7 @@ def make_gtab_and_bmask(fbval, fbvec, dwi_file, outdir):
     nib.save(mean_B0, nodif_B0)
 
     # Get mean B0 brain mask
-    cmd = 'bet ' + nodif_B0 + ' ' + nodif_B0_bet + ' -m -f 0.2'
+    cmd = "bet " + nodif_B0 + " " + nodif_B0_bet + " -m -f 0.2"
     os.system(cmd)
     return gtab, nodif_B0, nodif_B0_mask
 
@@ -190,25 +196,32 @@ def reorient_dwi(dwi_prep, bvecs, namer):
 
     """
     from ndmg.utils.reg_utils import normalize_xform
+
     fname = dwi_prep
     bvec_fname = bvecs
-    out_bvec_fname = "%s%s" % (namer.dirs['output']['prep_dwi'], '/bvecs_reor.bvec')
+    out_bvec_fname = "%s%s" % (namer.dirs["output"]["prep_dwi"], "/bvecs_reor.bvec")
 
     input_img = nib.load(fname)
     input_axcodes = nib.aff2axcodes(input_img.affine)
     reoriented = nib.as_closest_canonical(input_img)
     normalized = normalize_xform(reoriented)
     # Is the input image oriented how we want?
-    new_axcodes = ('R', 'A', 'S')
+    new_axcodes = ("R", "A", "S")
     if normalized is not input_img:
-        out_fname = "%s%s%s%s" % (namer.dirs['output']['prep_dwi'],
-                                  '/', dwi_prep.split('/')[-1].split('.nii.gz')[0], '_reor_RAS.nii.gz')
-        print("%s%s%s" % ('Reorienting ', dwi_prep, ' to RAS+...'))
+        out_fname = "%s%s%s%s" % (
+            namer.dirs["output"]["prep_dwi"],
+            "/",
+            dwi_prep.split("/")[-1].split(".nii.gz")[0],
+            "_reor_RAS.nii.gz",
+        )
+        print("%s%s%s" % ("Reorienting ", dwi_prep, " to RAS+..."))
 
         # Flip the bvecs
         input_orientation = nib.orientations.axcodes2ornt(input_axcodes)
         desired_orientation = nib.orientations.axcodes2ornt(new_axcodes)
-        transform_orientation = nib.orientations.ornt_transform(input_orientation, desired_orientation)
+        transform_orientation = nib.orientations.ornt_transform(
+            input_orientation, desired_orientation
+        )
         bvec_array = np.loadtxt(bvec_fname)
         if bvec_array.shape[0] != 3:
             bvec_array = bvec_array.T
@@ -219,8 +232,12 @@ def reorient_dwi(dwi_prep, bvecs, namer):
             output_array[this_axnum] = bvec_array[int(axnum)] * float(flip)
         np.savetxt(out_bvec_fname, output_array, fmt="%.8f ")
     else:
-        out_fname = "%s%s%s%s" % (namer.dirs['output']['prep_dwi'], '/',
-                                  dwi_prep.split('/')[-1].split('.nii.gz')[0], '_RAS.nii.gz')
+        out_fname = "%s%s%s%s" % (
+            namer.dirs["output"]["prep_dwi"],
+            "/",
+            dwi_prep.split("/")[-1].split(".nii.gz")[0],
+            "_RAS.nii.gz",
+        )
         out_bvec_fname = bvec_fname
 
     normalized.to_filename(out_fname)
@@ -241,12 +258,20 @@ def reorient_img(img, namer):
 
     # Image may be reoriented
     if normalized is not orig_img:
-        print("%s%s%s" % ('Reorienting ', img, ' to RAS+...'))
-        out_name = "%s%s%s%s" % (namer.dirs['output']['prep_anat'], '/',
-                                 img.split('/')[-1].split('.nii.gz')[0], '_reor_RAS.nii.gz')
+        print("%s%s%s" % ("Reorienting ", img, " to RAS+..."))
+        out_name = "%s%s%s%s" % (
+            namer.dirs["output"]["prep_anat"],
+            "/",
+            img.split("/")[-1].split(".nii.gz")[0],
+            "_reor_RAS.nii.gz",
+        )
     else:
-        out_name = "%s%s%s%s" % (namer.dirs['output']['prep_anat'], '/',
-                                 img.split('/')[-1].split('.nii.gz')[0], '_RAS.nii.gz')
+        out_name = "%s%s%s%s" % (
+            namer.dirs["output"]["prep_anat"],
+            "/",
+            img.split("/")[-1].split(".nii.gz")[0],
+            "_RAS.nii.gz",
+        )
 
     normalized.to_filename(out_name)
 
@@ -266,39 +291,55 @@ def match_target_vox_res(img_file, vox_size, namer, sens):
     affine = img.affine
     hdr = img.header
     zooms = hdr.get_zooms()[:3]
-    if vox_size == '1mm':
-        new_zooms = (1., 1., 1.)
-    elif vox_size == '2mm':
-        new_zooms = (2., 2., 2.)
+    if vox_size == "1mm":
+        new_zooms = (1.0, 1.0, 1.0)
+    elif vox_size == "2mm":
+        new_zooms = (2.0, 2.0, 2.0)
 
     if (abs(zooms[0]), abs(zooms[1]), abs(zooms[2])) != new_zooms:
-        print('Reslicing image ' + img_file + ' to ' + vox_size + '...')
-        if sens == 'dwi':
-            img_file_res = "%s%s%s%s" % (namer.dirs['output']['prep_dwi'], '/',
-                                         os.path.basename(img_file).split('.nii.gz')[0], '_res.nii.gz')
-        elif sens == 't1w':
-            img_file_res = "%s%s%s%s" % (namer.dirs['output']['prep_anat'], '/',
-                                         os.path.basename(img_file).split('.nii.gz')[0], '_res.nii.gz')
+        print("Reslicing image " + img_file + " to " + vox_size + "...")
+        if sens == "dwi":
+            img_file_res = "%s%s%s%s" % (
+                namer.dirs["output"]["prep_dwi"],
+                "/",
+                os.path.basename(img_file).split(".nii.gz")[0],
+                "_res.nii.gz",
+            )
+        elif sens == "t1w":
+            img_file_res = "%s%s%s%s" % (
+                namer.dirs["output"]["prep_anat"],
+                "/",
+                os.path.basename(img_file).split(".nii.gz")[0],
+                "_res.nii.gz",
+            )
 
         data2, affine2 = reslice(data, affine, zooms, new_zooms)
         img2 = nib.Nifti1Image(data2, affine=affine2)
         nib.save(img2, img_file_res)
         img_file = img_file_res
     else:
-        print('Reslicing image ' + img_file + ' to ' + vox_size + '...')
-        if sens == 'dwi':
-            img_file_nores = "%s%s%s%s" % (namer.dirs['output']['prep_dwi'], '/',
-                                         os.path.basename(img_file).split('.nii.gz')[0], '_nores.nii.gz')
-        elif sens == 't1w':
-            img_file_nores = "%s%s%s%s" % (namer.dirs['output']['prep_anat'], '/',
-                                         os.path.basename(img_file).split('.nii.gz')[0], '_nores.nii.gz')
+        print("Reslicing image " + img_file + " to " + vox_size + "...")
+        if sens == "dwi":
+            img_file_nores = "%s%s%s%s" % (
+                namer.dirs["output"]["prep_dwi"],
+                "/",
+                os.path.basename(img_file).split(".nii.gz")[0],
+                "_nores.nii.gz",
+            )
+        elif sens == "t1w":
+            img_file_nores = "%s%s%s%s" % (
+                namer.dirs["output"]["prep_anat"],
+                "/",
+                os.path.basename(img_file).split(".nii.gz")[0],
+                "_nores.nii.gz",
+            )
         nib.save(img, img_file_nores)
         img_file = img_file_nores
 
     return img_file
 
 
-def load_timeseries(timeseries_file, ts='roi'):
+def load_timeseries(timeseries_file, ts="roi"):
     """
     A function to load timeseries data. Exists to standardize
     formatting in case changes are made with how timeseries are
@@ -306,19 +347,21 @@ def load_timeseries(timeseries_file, ts='roi'):
      **Positional Arguments**
          timeseries_file: the file to load timeseries data from.
     """
-    if (ts == 'roi') or (ts == 'voxel'):
-        timeseries = np.load(timeseries_file)['roi']
+    if (ts == "roi") or (ts == "voxel"):
+        timeseries = np.load(timeseries_file)["roi"]
         return timeseries
     else:
-        print('You have not selected a valid timeseries type.' +
-              'options are ts=\'roi\' or ts=\'voxel\'.')
+        print(
+            "You have not selected a valid timeseries type."
+            + "options are ts='roi' or ts='voxel'."
+        )
     pass
 
 
 def name_tmps(basedir, basename, extension):
     return "{}/tmp/{}{}".format(basedir, basename, extension)
 
-  
+
 def parcel_overlap(parcellation1, parcellation2, outpath):
     """
     A function to compute the percent composition of each parcel in
@@ -345,17 +388,17 @@ def parcel_overlap(parcellation1, parcellation2, outpath):
 
     overlapdat = lil_matrix((p1regs.shape[0], p2regs.shape[0]), dtype=np.float32)
     for p1idx, p1reg in enumerate(p1regs):
-        p1seq = (p1_dat == p1reg)
+        p1seq = p1_dat == p1reg
         N = p1seq.sum()
         poss_regs = np.unique(p2_dat[p1seq])
         for p2idx, p2reg in enumerate(p2regs):
-            if (p2reg in poss_regs):
+            if p2reg in poss_regs:
                 # percent overlap is p1seq and'd with the anatomical region voxelspace, summed and normalized
                 pover = np.logical_and(p1seq, p2_dat == p2reg).sum() / float(N)
                 overlapdat[p1idx, p2idx] = pover
 
     outf = op.join(outpath, "{}_{}.csv".format(p1n, p2n))
-    with open(outf, 'w')  as f:
+    with open(outf, "w") as f:
         p2str = ["%s" % x for x in p2regs]
         f.write("p1reg," + ",".join(p2str) + "\n")
         for idx, p1reg in enumerate(p1regs):

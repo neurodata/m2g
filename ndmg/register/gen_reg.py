@@ -26,7 +26,7 @@ warnings.simplefilter("ignore")
 import os
 import nibabel as nib
 import numpy as np
-from nilearn.image import (load_img, math_img)
+from nilearn.image import load_img, math_img
 from ndmg.utils import gen_utils as mgu
 from ndmg.utils import reg_utils as mgru
 
@@ -45,9 +45,9 @@ def direct_streamline_norm(streams, fa_path, namer):
         # local
         atlas_dir = op.expanduser("~") + "/.ndmg/ndmg_atlases"
 
-    template_path = atlas_dir + '/atlases/reference_brains/FSL_HCP1065_FA_2mm.nii.gz'
+    template_path = atlas_dir + "/atlases/reference_brains/FSL_HCP1065_FA_2mm.nii.gz"
 
-    streams_warp_png = namer.dirs["tmp"]["base"] + '/warp_qc.png'
+    streams_warp_png = namer.dirs["tmp"]["base"] + "/warp_qc.png"
 
     # Run SyN and normalize streamlines
     fa_img = nib.load(fa_path)
@@ -56,7 +56,9 @@ def direct_streamline_norm(streams, fa_path, namer):
     template_data = template_img.get_data()
 
     # SyN FA->Template
-    [mapping, affine_map] = regutils.wm_syn(template_path, fa_path, namer.dirs["tmp"]["base"])
+    [mapping, affine_map] = regutils.wm_syn(
+        template_path, fa_path, namer.dirs["tmp"]["base"]
+    )
     [streamlines, _] = load_trk(streams)
 
     # Warp streamlines
@@ -70,39 +72,44 @@ def direct_streamline_norm(streams, fa_path, namer):
     adjusted_affine[0][3] = -adjusted_affine[0][3]
 
     # Scale z by the voxel size
-    adjusted_affine[2][3] = adjusted_affine[2][3]/vox_size
+    adjusted_affine[2][3] = adjusted_affine[2][3] / vox_size
 
     # Scale y by the square of the voxel size since we've already scaled along the z-plane.
-    adjusted_affine[1][3] = adjusted_affine[1][3]/vox_size**vox_size
+    adjusted_affine[1][3] = adjusted_affine[1][3] / vox_size ** vox_size
 
     # Apply the deformation and correct for the extents
-    mni_streamlines = deform_streamlines(streamlines, deform_field=mapping.get_forward_field(),
-                                         stream_to_current_grid=target_isocenter,
-                                         current_grid_to_world=adjusted_affine,
-                                         stream_to_ref_grid=target_isocenter,
-                                         ref_grid_to_world=np.eye(4))
+    mni_streamlines = deform_streamlines(
+        streamlines,
+        deform_field=mapping.get_forward_field(),
+        stream_to_current_grid=target_isocenter,
+        current_grid_to_world=adjusted_affine,
+        stream_to_ref_grid=target_isocenter,
+        ref_grid_to_world=np.eye(4),
+    )
 
     # Save streamlines
     hdr = fa_img.header
     trk_affine = np.eye(4)
     trk_hdr = nib.streamlines.trk.TrkFile.create_empty_header()
-    trk_hdr['hdr_size'] = 1000
-    trk_hdr['dimensions'] = hdr['dim'][1:4].astype('float32')
-    trk_hdr['voxel_sizes'] = hdr['pixdim'][1:4]
-    trk_hdr['voxel_to_rasmm'] = trk_affine
-    trk_hdr['voxel_order'] = 'RAS'
-    trk_hdr['pad2'] = 'RAS'
-    trk_hdr['image_orientation_patient'] = np.array([0., 0., 0., 0., 0., 0.]).astype('float32')
-    trk_hdr['endianness'] = '<'
-    trk_hdr['_offset_data'] = 1000
-    trk_hdr['nb_streamlines'] = len(mni_streamlines)
+    trk_hdr["hdr_size"] = 1000
+    trk_hdr["dimensions"] = hdr["dim"][1:4].astype("float32")
+    trk_hdr["voxel_sizes"] = hdr["pixdim"][1:4]
+    trk_hdr["voxel_to_rasmm"] = trk_affine
+    trk_hdr["voxel_order"] = "RAS"
+    trk_hdr["pad2"] = "RAS"
+    trk_hdr["image_orientation_patient"] = np.array(
+        [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+    ).astype("float32")
+    trk_hdr["endianness"] = "<"
+    trk_hdr["_offset_data"] = 1000
+    trk_hdr["nb_streamlines"] = len(mni_streamlines)
     tractogram = nib.streamlines.Tractogram(mni_streamlines, affine_to_rasmm=trk_affine)
     trkfile = nib.streamlines.trk.TrkFile(tractogram, header=trk_hdr)
-    streams_mni = streams.split('.trk')[0] + '_dsn.trk'
+    streams_mni = streams.split(".trk")[0] + "_dsn.trk"
     nib.streamlines.save(trkfile, streams_mni)
 
     # DSN QC plotting
-    #mgu.show_template_bundles(mni_streamlines, template_path, streams_warp_png)
+    # mgu.show_template_bundles(mni_streamlines, template_path, streams_warp_png)
 
     return mni_streamlines, streams_mni
 
@@ -110,6 +117,7 @@ def direct_streamline_norm(streams, fa_path, namer):
 class dmri_reg(object):
     def __init__(self, namer, nodif_B0, nodif_B0_mask, t1w_in, vox_size, simple):
         import os.path as op
+
         if os.path.isdir("/ndmg_atlases"):
             # in docker
             atlas_dir = "/ndmg_atlases"
@@ -121,10 +129,10 @@ class dmri_reg(object):
         except KeyError:
             print("FSLDIR environment variable not set!")
 
-        if vox_size == '2mm':
-            vox_dims = '2x2x2'
-        elif vox_size == '1mm':
-            vox_dims = '1x1x1'
+        if vox_size == "2mm":
+            vox_dims = "2x2x2"
+        elif vox_size == "1mm":
+            vox_dims = "1x1x1"
 
         self.simple = simple
         self.nodif_B0 = nodif_B0
@@ -269,12 +277,21 @@ class dmri_reg(object):
             vox_size,
             ".nii.gz",
         )
-        self.mni_vent_loc = atlas_dir + '/atlases/mask/HarvardOxford-thr25_space-MNI152NLin6_variant-lateral-ventricles_res-' + vox_dims + '_descr-brainmask.nii.gz'
-        self.corpuscallosum = atlas_dir + '/atlases/mask/CorpusCallosum_res_' + vox_size + '.nii.gz'
-        self.corpuscallosum_mask_t1w = "{}/{}_corpuscallosum.nii.gz".format(self.namer.dirs["output"]["reg_anat"],
-                                                                            self.t1w_name)
-        self.corpuscallosum_dwi = "{}/{}_corpuscallosum_dwi.nii.gz".format(self.namer.dirs["output"]["reg_anat"],
-                                                                           self.t1w_name)
+        self.mni_vent_loc = (
+            atlas_dir
+            + "/atlases/mask/HarvardOxford-thr25_space-MNI152NLin6_variant-lateral-ventricles_res-"
+            + vox_dims
+            + "_descr-brainmask.nii.gz"
+        )
+        self.corpuscallosum = (
+            atlas_dir + "/atlases/mask/CorpusCallosum_res_" + vox_size + ".nii.gz"
+        )
+        self.corpuscallosum_mask_t1w = "{}/{}_corpuscallosum.nii.gz".format(
+            self.namer.dirs["output"]["reg_anat"], self.t1w_name
+        )
+        self.corpuscallosum_dwi = "{}/{}_corpuscallosum_dwi.nii.gz".format(
+            self.namer.dirs["output"]["reg_anat"], self.t1w_name
+        )
 
     def gen_tissue(self):
         # BET needed for this, as afni 3dautomask only works on 4d volumes
@@ -655,7 +672,14 @@ class dmri_reg(object):
         cmd = "fslmaths " + self.corpuscallosum + " -bin " + self.corpuscallosum
         os.system(cmd)
 
-        cmd = "fslmaths " + self.corpuscallosum + " -sub " + self.mni_vent_loc + " -bin " + self.corpuscallosum
+        cmd = (
+            "fslmaths "
+            + self.corpuscallosum
+            + " -sub "
+            + self.mni_vent_loc
+            + " -bin "
+            + self.corpuscallosum
+        )
         os.system(cmd)
 
         # Create transform to MNI atlas to T1w using flirt. This will be use to transform the ventricles to dwi space.
@@ -861,9 +885,9 @@ class dmri_reg_old(object):
         nib.save(self.b0_out, self.b0)
 
         # Applies skull stripping to T1 volume, then EPI alignment to T1
-        print("calling mgru.extract_brain on {}, {}".format(
-            self.t1w, self.t1w_brain
-        ))  # t1w = in, t1w_brain = out
+        print(
+            "calling mgru.extract_brain on {}, {}".format(self.t1w, self.t1w_brain)
+        )  # t1w = in, t1w_brain = out
         mgru.extract_brain(self.t1w, self.t1w_brain, "-B")
         print("calling align_epi")
         print(self.t1w)
@@ -876,13 +900,17 @@ class dmri_reg_old(object):
         mgru.align(self.t1w, self.atlas, self.xfm)
 
         # Applies combined transform to dwi image volume
-        print("calling mgru.applyxfm on {}, {}, {}, {}".format(
-            self.atlas, self.temp_aligned, self.xfm, self.temp_aligned2
-        ))
+        print(
+            "calling mgru.applyxfm on {}, {}, {}, {}".format(
+                self.atlas, self.temp_aligned, self.xfm, self.temp_aligned2
+            )
+        )
         mgru.applyxfm(self.atlas, self.temp_aligned, self.xfm, self.temp_aligned2)
-        print("calling mgru.resample on {}, {}, {}".format(
-            self.temp_aligned2, self.aligned_dwi, self.atlas
-        ))
+        print(
+            "calling mgru.resample on {}, {}, {}".format(
+                self.temp_aligned2, self.aligned_dwi, self.atlas
+            )
+        )
         mgru.resample(self.temp_aligned2, self.aligned_dwi, self.atlas)
 
         if clean:
