@@ -73,22 +73,21 @@ class graph_tools(object):
     
     Parameters
     ----------
-    object : [type]
-        [description]
-    rois : [type]
-        Set of ROIs as either an array or nifti file
-    tracks : [type]
-        [description]
-    affine : [type]
-        [description]
-    namer : [type]
-        [description]
-    connectome_path : [type]
-        [description]
+    rois : str
+        Path to a set of ROIs as either an array or nifti file
+    tracks : list
+        Streamlines for analysis
+    affine : ndarray
+        a 2-D array with ones on the diagonal and zeros elsewhere (DOESN'T APPEAR TO BE Used)
+    namer : name_resource
+        Name_resource object containing relevant path for the pipeline
+    connectome_path : str
+        Path for the output connectome file (.ssv file)
     attr : [type], optional
-        [description], by default None
+        Node or graph attributes. Can be a list. If 1 dimensional, will be interpretted as a graph attribute. If N dimensional
+        will be interpretted as node attributes. If it is any other dimensional, it will be ignored, by default None
     sens : str, optional
-        type of MRI scan being analyzed (can be dwi or func), by default "dwi"
+        type of MRI scan being analyzed (can be 'dwi' or 'func'), by default "dwi"
         
     Raises
     ------
@@ -100,21 +99,7 @@ class graph_tools(object):
     def __init__(
         self, rois, tracks, affine, namer, connectome_path, attr=None, sens="dwi"
     ):
-        """
-        Initializes the graph with nodes corresponding to the number of ROIs
-
-        **Positional Arguments:**
-                rois:
-                    - Set of ROIs as either an array or niftii file)
-                attr:
-                    - Node or graph attributes. Can be a list. If 1 dimensional
-                      will be interpretted as a graph attribute. If N
-                      dimensional will be interpretted as node attributes. If
-                      it is any other dimensional, it will be ignored.
-                sens: string, Default to 'dmri'
-                    - sensor of acquisition. Can be 'dmri' or 'fmri'
-        """
-
+        
         self.edge_dict = defaultdict(int)
         self.roi_file = rois
         self.roi_img = nib.load(self.roi_file)
@@ -129,12 +114,12 @@ class graph_tools(object):
         pass
 
     def make_graph_old(self):
-        """Takes streamline and produces a graph
-        
-        Returns
-        -------
-        [type]
-            [description]
+        """
+        Takes streamlines and produces a graph
+        **Positional Arguments:**
+                streamlines:
+                    - Fiber streamlines either file or array in a dipy EuDX
+                      or compatible format.
         """
         
         print("Building connectivity matrix...")
@@ -182,13 +167,22 @@ class graph_tools(object):
         return self.g, self.edge_dict
 
     def make_graph(self, error_margin=2, overlap_thr=1, voxel_size=2):
-        """
-        Takes streamlines and produces a graph
-        **Positional Arguments:**
-                streamlines:
-                    - Fiber streamlines either file or array in a dipy EuDX
-                      or compatible format.
-        """
+        """Takes streamlines and produces a graph using Numpy functions
+        
+        Parameters
+        ----------
+        error_margin : int, optional
+            [description], by default 2
+        overlap_thr : int, optional
+            [description], by default 1
+        voxel_size : int, optional
+            [description], by default 2
+        
+        Returns
+        -------
+        Graph
+            networkx Graph object containing the connectome matrix
+        """        
         print("Building connectivity matrix...")
 
         # Instantiate empty networkX graph object & dictionary
@@ -209,10 +203,16 @@ class graph_tools(object):
         ix = 0
         for s in self.tracks:
             # Map the streamlines coordinates to voxel coordinates and get labels for label_volume
-            i, j, k = np.vstack(np.array([get_sphere(coord, error_margin,
-                                                     (voxel_size, voxel_size, voxel_size),
-                                                     self.roi_img.shape) for coord in
-                                          _to_voxel_coordinates(s, lin_T, offset)])).T
+            # i, j, k = np.vstack(np.array([get_sphere(coord, error_margin,
+            #                                          (voxel_size, voxel_size, voxel_size),
+            #                                          self.roi_img.shape) for coord in
+            #                               _to_voxel_coordinates(s, lin_T, offset)])).T
+
+            # Map the streamlines coordinates to voxel coordinates
+            points = _to_voxel_coordinates(s, lin_T, offset)
+
+            # get labels for label_volume
+            i, j, k = points.T
 
             lab_arr = self.rois[i, j, k]
             endlabels = []
@@ -231,11 +231,11 @@ class graph_tools(object):
             self.g.add_weighted_edges_from(edge_list)
             ix = ix + 1
 
-            conn_matrix = np.array(nx.to_numpy_matrix(self.g))
-            conn_matrix[np.isnan(conn_matrix)] = 0
-            conn_matrix[np.isinf(conn_matrix)] = 0
-            conn_matrix = np.asmatrix(np.maximum(conn_matrix, conn_matrix.transpose()))
-            g = nx.from_numpy_matrix(conn_matrix)
+        conn_matrix = np.array(nx.to_numpy_matrix(self.g))
+        conn_matrix[np.isnan(conn_matrix)] = 0
+        conn_matrix[np.isinf(conn_matrix)] = 0
+        conn_matrix = np.asmatrix(np.maximum(conn_matrix, conn_matrix.transpose()))
+        g = nx.from_numpy_matrix(conn_matrix)
 
         return g
 
@@ -275,14 +275,23 @@ class graph_tools(object):
         return nx.to_numpy_matrix(g, nodelist=np.sort(g.nodes()).tolist())
 
     def save_graph(self, graphname, fmt="igraph"):
+        """Saves the graph to disk
+        
+        Parameters
+        ----------
+        graphname : str
+            Filename for the graph
+        fmt : str, optional
+            Format you want the graph saved as [edgelist, gpickle, graphml, txt, npy, igraph], by default "igraph"
+        
+        Raises
+        ------
+        ValueError
+            Unsupported modality (not dwi or func) for saving the graph in igraph format
+        ValueError
+            Unsupported format
         """
-        Saves the graph to disk
-
-        **Positional Arguments:**
-
-                graphname:
-                    - Filename for the graph
-        """
+        
         self.g.graph["ecount"] = nx.number_of_edges(self.g)
         self.g = nx.convert_node_labels_to_integers(self.g, first_label=1)
         print(self.g.graph)
@@ -312,7 +321,7 @@ class graph_tools(object):
             else:
                 raise ValueError("Unsupported Modality.")
         else:
-            raise ValueError("Only edgelist, gpickle, and graphml currently supported")
+            raise ValueError("Only edgelist, gpickle, graphml, txt, and npy are currently supported")
         pass
 
 
@@ -320,14 +329,12 @@ class graph_tools(object):
         import matplotlib
         matplotlib.use('agg')
         from matplotlib import pyplot as plt
-        from nilearn.plotting import plot_matrix
+        from graspy.utils import ptr
+        from graspy.plot import heatmap
 
-        from sklearn.preprocessing import normalize
         conn_matrix = np.array(nx.to_numpy_matrix(self.g))
-        conn_matrix = normalize(conn_matrix)
-        [z_min, z_max] = -np.abs(conn_matrix).max(), np.abs(conn_matrix).max()
-        plot_matrix(conn_matrix, figure=(10, 10), vmax=z_max * 0.5, vmin=z_min * 0.5, auto_fit=True, grid=False,
-                    colorbar=False)
+        conn_matrix = ptr.pass_to_ranks(conn_matrix)
+        heatmap(conn_matrix)
         plt.savefig(self.namer.dirs["qa"]['graphs_plotting'] + '/' + graphname.split('.')[:-1][0].split('/')[-1] +
                     '.png')
         plt.close()

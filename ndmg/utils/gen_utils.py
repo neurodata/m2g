@@ -35,6 +35,17 @@ from scipy.sparse import lil_matrix
 
 
 def show_template_bundles(final_streamlines, template_path, fname):
+    """Displayes the template bundles
+    
+    Parameters
+    ----------
+    final_streamlines : list
+        Generated streamlines
+    template_path : str
+        Path to reference FA nii.gz file
+    fname : str
+        Path of the output file (saved as )
+    """
     import nibabel as nib
     from fury import actor, window
     renderer = window.Renderer()
@@ -262,9 +273,20 @@ def reorient_dwi(dwi_prep, bvecs, namer):
 
 
 def reorient_img(img, namer):
-    """
-    A function to reorient any non-dwi image to RAS+.
-    """
+    """Reorients input image to RAS+
+    
+    Parameters
+    ----------
+    img : str
+        Path to image being reoriented
+    namer : name_resource
+        name_resource object containing all revlevent pathing information for the pipeline
+    
+    Returns
+    -------
+    str
+        Path to reoriented image
+    """    
     from ndmg.utils.reg_utils import normalize_xform
 
     # Load image, orient as RAS

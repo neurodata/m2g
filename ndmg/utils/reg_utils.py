@@ -617,18 +617,25 @@ def reslice_to_xmm(infile, vox_sz=2):
 
 
 def wm_syn(template_path, fa_path, working_dir):
-    """
-    A function to perform ANTS SyN registration
-
+    """A function to perform ANTS SyN registration using dipy functions
+    
     Parameters
     ----------
-        template_path  : str
-            File path to the template reference image.
-        fa_path : str
-            File path to the FA moving image.
-        working_dir : str
-            Path to the working directory to perform SyN and save outputs.
+    template_path  : str
+        File path to the template reference FA image.
+    fa_path : str
+        File path to the FA moving image (image to be fitted to reference)
+    working_dir : str
+        Path to the working directory to perform SyN and save outputs.
+    
+    Returns
+    -------
+    DiffeomorphicMap
+        An object that can be used to register images back and forth between static (template) and moving (FA) domains
+    AffineMap
+        An object used to transform the moving (FA) image towards the static image (template)
     """
+    
     from dipy.align.imaffine import MutualInformationMetric, AffineRegistration, transform_origins
     from dipy.align.transforms import TranslationTransform3D, RigidTransform3D, AffineTransform3D
     from dipy.align.imwarp import SymmetricDiffeomorphicRegistration
@@ -693,7 +700,7 @@ def wm_syn(template_path, fa_path, working_dir):
 
 
 def normalize_xform(img):
-    """Set identical, valid qform and sform matrices in an image
+    """ Set identical, valid qform and sform matrices in an image
     Selects the best available affine (sform > qform > shape-based), and
     coerces it to be qform-compatible (no shears).
     The resulting image represents this same affine as both qform and sform,
