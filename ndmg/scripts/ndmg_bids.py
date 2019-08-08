@@ -67,18 +67,16 @@ else:
 
 
 def get_atlas(atlas_dir, modality, vox_size):
-    """
-    Given the desired location fot aslses and the type of processing, ensure
-    we have all the atlases and parcellations.
+    """Given the desired location of atlases and the type of processing, ensure we have all the atlases and parcellations.
     
     Parameters
     ----------
     atlas_dir : str
-        directory containing atlases.
+        Path to directory containing atlases.
     modality : str
-        dwi or fmri.
+        Whether you are analyzing dwi or func.
     vox_size : str
-        Resolution.
+        t1w input image voxel dimensions, either 2mm or 1mm
     
     Returns
     -------
@@ -179,10 +177,56 @@ def session_level(
     debug=False,
     modif="",
 ):
-    """
-    Crawls the given BIDS organized directory for data pertaining to the given
-    subject and session, and passes necessary files to ndmg_dwi_pipeline for
-    processing.
+    """Crawls the given BIDS organized directory for data pertaining to the given subject and session, and passes necessary files to ndmg_dwi_pipeline for processing.
+    
+    Parameters
+    ----------
+    inDir : str
+        Path to BIDS input directory
+    outDir : str
+        Path to output directory
+    subjs : list
+        subject label
+    vox_size : str
+        Voxel size to use for template registrations.
+    skipeddy : bool
+        Whether to skip eddy correction if it has already been run. False means don't.
+    skipreg : bool
+        Whether to skip registration if it has already been run. False means don't.
+    clean : bool
+        Whether or not to delete intermediates
+    stc : str
+        A file for slice timing correction. Options are a TR sequence file (where each line is the shift in TRs), up (ie, bottom to top), down (ie, top to bottom), or interleaved
+    atlas_select : str
+        The atlas being analyzed in QC (if you only want one)
+    mod_type : str
+        Determinstic (det) or probabilistic (prob) tracking
+    track_type : str
+        Tracking approach: eudx or local. Default is eudx
+    mod_func : str
+        Which diffusion model you want to use, csd or csa
+    reg_style : str
+        Space for tractography.
+    sesh : str, optional
+        The label of the session that should be analyzed. If not provided all sessions are analyzed. Multiple sessions can be specified with a space separated list. Default is None
+    task : str, optional
+        task label. Default is None
+    run : str, optional
+        run label. Default is None
+    modality : str, optional
+        Data type being analyzed. Default is "dwi"
+    buck : str, optional
+        The name of an S3 bucket which holds BIDS organized data. You musht have build your bucket with credentials to the S3 bucket you wish to access. Default is None
+    remo : str, optional
+        The path to the data on your S3 bucket. The data will be downloaded to the provided bids_dir on your machine. Default is None.
+    push : bool, optional
+        Flag to push derivatives back to S3. Default is False
+    creds : bool, optional
+        Determine if you have S3 credentials. Default is None
+    debug : bool, optional
+        If False, remove any old filed in the output directory. Default is False
+    modif : str, optional
+        Name of the folder on s3 to push to. If empty, push to a folder with ndmg's version number. Default is ""
     """
 
     labels, atlas, atlas_mask, atlas_brain, lv_mask = get_atlas(
@@ -276,6 +320,8 @@ def session_level(
 
 
 def main():
+    """Starting point of the ndmg pipeline, assuming that you are using a BIDS organized dataset
+    """
     parser = ArgumentParser(
         description="This is an end-to-end connectome \
                             estimation pipeline from M3r Images."
@@ -502,6 +548,7 @@ def main():
     reg_style = result.sp
     modif = result.modif
 
+    # Check to see if user has provided direction to an existing s3 bucket they wish to use
     try:
         creds = bool(s3_utils.get_credentials())
     except:
