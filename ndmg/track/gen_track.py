@@ -20,6 +20,7 @@
 
 
 import warnings
+
 warnings.simplefilter("ignore")
 import numpy as np
 import nibabel as nib
@@ -41,25 +42,25 @@ def build_seed_list(mask_img_file, stream_affine, dens):
 
 
 def tens_mod_fa_est(gtab, dwi_file, B0_mask):
-    '''
+    """
     Estimate a tensor FA image to use for registrations.
-    '''
+    """
     import os
     from dipy.reconst.dti import TensorModel
     from dipy.reconst.dti import fractional_anisotropy
 
     data = nib.load(dwi_file).get_fdata()
 
-    print('Generating simple tensor FA image to use for registrations...')
+    print("Generating simple tensor FA image to use for registrations...")
     nodif_B0_img = nib.load(B0_mask)
-    B0_mask_data = nodif_B0_img.get_fdata().astype('bool')
+    B0_mask_data = nodif_B0_img.get_fdata().astype("bool")
     nodif_B0_affine = nodif_B0_img.affine
     model = TensorModel(gtab)
     mod = model.fit(data, B0_mask_data)
     FA = fractional_anisotropy(mod.evals)
     FA[np.isnan(FA)] = 0
     fa_img = nib.Nifti1Image(FA.astype(np.float32), nodif_B0_affine)
-    fa_path = "%s%s" % (os.path.dirname(B0_mask), '/tensor_fa.nii.gz')
+    fa_path = "%s%s" % (os.path.dirname(B0_mask), "/tensor_fa.nii.gz")
     nib.save(fa_img, fa_path)
     return fa_path
 
@@ -160,7 +161,7 @@ class run_track(object):
             ActTissueClassifier,
             CmcTissueClassifier,
             BinaryTissueClassifier,
-        )
+        )  # TODO: these classes no longer exist in dipy 1.0.
 
         if self.track_type == "local":
             tiss_class = "bin"
@@ -182,14 +183,18 @@ class run_track(object):
             self.vent_csf_in_dwi = nib.load(self.vent_csf_in_dwi)
             self.vent_csf_in_dwi_data = self.vent_csf_in_dwi.get_data()
             self.background = np.ones(self.gm_mask.shape)
-            self.background[(self.gm_mask_data + self.wm_mask_data + self.vent_csf_in_dwi_data) > 0] = 0
+            self.background[
+                (self.gm_mask_data + self.wm_mask_data + self.vent_csf_in_dwi_data) > 0
+            ] = 0
             self.include_map = self.wm_mask_data
             self.include_map[self.background > 0] = 0
             self.exclude_map = self.vent_csf_in_dwi_data
-            self.tiss_classifier = ActTissueClassifier(self.include_map, self.exclude_map)
+            self.tiss_classifier = ActTissueClassifier(
+                self.include_map, self.exclude_map
+            )
         elif tiss_class == "bin":
             self.tiss_classifier = BinaryTissueClassifier(self.wm_in_dwi_data)
-            #self.tiss_classifier = BinaryTissueClassifier(self.mask)
+            # self.tiss_classifier = BinaryTissueClassifier(self.mask)
         elif tiss_class == "cmc":
             self.vent_csf_in_dwi = nib.load(self.vent_csf_in_dwi)
             self.vent_csf_in_dwi_data = self.vent_csf_in_dwi.get_data()
@@ -300,12 +305,13 @@ class run_track(object):
                     self.pmf, max_angle=60.0, sphere=self.sphere
                 )
             self.streamline_generator = LocalTracking(
-            self.pdg,
-            self.tiss_classifier,
-            self.seeds,
-            self.stream_affine,
-            step_size=0.5,
-            return_all=True)
+                self.pdg,
+                self.tiss_classifier,
+                self.seeds,
+                self.stream_affine,
+                step_size=0.5,
+                return_all=True,
+            )
         print("Reconstructing tractogram streamlines...")
         self.streamlines = Streamlines(self.streamline_generator)
         return self.streamlines
