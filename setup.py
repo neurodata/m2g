@@ -55,7 +55,7 @@ setup(
         "plotly==1.12.9",
         "pybids==0.6.4",
         "setuptools>=40.0",
-        "scikit-image==0.13.0",
+        "scikit-image",
         "networkx==1.9",
         "configparser>=3.7.4",
         "pytest",

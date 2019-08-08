@@ -123,7 +123,8 @@ def ndmg_dwi_worker(
         "prep_anat": "anat/preproc",
         "reg_anat": "anat/registered",
         "fiber": "dwi/fiber",
-        "conn": "dwi/roi-connectomes",
+        "tensor": "dwi/tensor",
+        "conn": "dwi/roi-connectomes"
     }
 
     label_dirs = ["conn"]  # create label level granularity
@@ -382,7 +383,7 @@ def ndmg_dwi_worker(
             np.eye(4),
         )
         streamlines = trct.run()
-        streamlines = Streamlines([sl for sl in streamlines if len(sl) > 40])
+        streamlines = Streamlines([sl for sl in streamlines if len(sl) > 60])
         print("Streamlines complete")
 
         trk_affine = np.eye(4)
@@ -439,7 +440,7 @@ def ndmg_dwi_worker(
 
         # Align DWI volumes to Atlas
         print("Aligning volumes...")
-        reg = mgr.dmri_reg_old(dwi_prep, gtab, t1w, atlas, aligned_dwi, namer, clean)
+        reg = mgr.dmri_reg_old(dwi_prep, gtab, t1w, mask, aligned_dwi, namer, clean)
         print(
             "Registering DWI image at {} to atlas; aligned dwi at {}...".format(
                 dwi_prep, aligned_dwi
