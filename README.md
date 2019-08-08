@@ -36,7 +36,7 @@ The **ndmg** pipeline has been developed as a one-click solution for human conne
 
 The **ndmg** pipeline:
  - was developed and tested primarily on Mac OSX, Ubuntu (12, 14, 16), and CentOS (5, 6);
- - was developed in Python 2.7;
+ - was developed in Python 2.7 and updated to work on Python 3.6;
  - is wrapped in a [Docker container](https://hub.docker.com/r/bids/ndmg/);
  - has install instructions via a [Dockerfile](https://github.com/BIDS-Apps/ndmg/blob/master/Dockerfile#L6);
  - requires no non-standard hardware to run;
@@ -46,10 +46,21 @@ The **ndmg** pipeline:
 While **ndmg** is quite robust to Python package versions (with only few exceptions, mentioned in the [installation guide](#installation-guide)), an *example* of possible versions (taken from the **ndmg** Docker Image with version `v0.0.50`) is shown below. Note: this list excludes many libraries which are standard with a Python distribution, and a complete list with all packages and versions can be produced by running `pip freeze` within the Docker container mentioned above.
 
 ```
-awscli==1.11.128 , boto3==1.4.5 , botocore==1.5.91 , colorama==0.3.7 , dipy==0.12.0 , matplotlib==1.5.1 ,
-networkx==1.11 , nibabel==2.1.0 , nilearn==0.3.1 , numpy==1.8.2 , Pillow==2.3.0 , plotly==1.12.9 ,
-s3transfer==0.1.10 , scikit-image==0.13.0 , scikit-learn==0.18.2 , scipy==0.13.3 .
+awscli==1.11.128 , boto3==1.4.5 , botocore==1.5.91 , colorama==0.3.7 , configparser>=3.7.4, dipy==0.16.0 ,
+matplotlib==1.5.1 , networkx==2.1 , nibabel==2.1.0 , nilearn==0.3.1 , numpy==1.8.2 , Pillow==2.3.0 , plotly==1.12.9,
+pybids==0.6.4 , s3transfer==0.1.10 , setuptools>=40.0 scikit-image==0.13.0 , scikit-learn==0.18.2 , scipy==0.13.3 .
 ```
+^ Notes:
+- pandas and awscli in dockerfile twice
+
+no longer using:
+botocore, colorama, ?
+
+Undefined versions for:
+awscli, boto3, matplotlib,scikit-image
+
+New:
+pandas, sklearn, cython, vtk, pyvtk, fury, requests, ipython, duecredit, graspy
 
 ## Installation Guide
 
@@ -67,16 +78,9 @@ Finally, you can install **ndmg** either from `pip` or Github as shown below. In
 
 ### Install from Github
 
-    git clone https://github.com/neurodata/ndmg
+    git clone https://github.com/neurodata/ndmg.git
     cd ndmg
-    python setup.py install
-    
-Currently, functional processing lives only in a development branch, so if you wish to have functional processing as well you can intervene between the 2nd and 3rd lines above, and install the package as follows:
-
-    git clone https://github.com/neurodata/ndmg
-    cd ndmg
-    git checkout ndmg
-    python setup.py install
+    python install .
 
 ## Docker
 
@@ -84,108 +88,8 @@ Currently, functional processing lives only in a development branch, so if you w
 
     docker run -ti --entrypoint /bin/bash bids/ndmg
 
-## Demo
+## Tutorial
 
-You can run our entire end-to-end pipeline in approximately 3 minutes on downsampled data with the following command:
-
-    ndmg_demo_dwi
-
-The connectome produced may not have neurological significance, as the data has been significantly downsampled, but this test should ensure that all of the pieces of the code and driver script execute properly. The expected output from the demo is shown below. Files will be downloaded and output data generated in `/tmp/small_demo/` and `/tmp/small_demo/outputs/`, respectively. If the graph properties summarized at the end of the execution below match those observed with your installation, the demo ran successfully.
-
-    Getting test data...
-    Archive:  /tmp/ndmg_demo.zip
-       creating: ndmg_demo/
-      inflating: ndmg_demo/MNI152NLin6_res-4x4x4_T1w.nii.gz
-      inflating: ndmg_demo/MNI152NLin6_res-4x4x4_T1w_brain.nii.gz
-       creating: ndmg_demo/sub-0025864/
-       creating: ndmg_demo/sub-0025864/ses-1/
-       creating: ndmg_demo/sub-0025864/ses-1/func/
-      inflating: ndmg_demo/sub-0025864/ses-1/func/sub-0025864_ses-1_bold.nii.gz
-       creating: ndmg_demo/sub-0025864/ses-1/dwi/
-      inflating: ndmg_demo/sub-0025864/ses-1/dwi/sub-0025864_ses-1_dwi.bvec
-      inflating: ndmg_demo/sub-0025864/ses-1/dwi/sub-0025864_ses-1_dwi.bval
-      inflating: ndmg_demo/sub-0025864/ses-1/dwi/sub-0025864_ses-1_dwi.nii.gz
-       creating: ndmg_demo/sub-0025864/ses-1/anat/
-      inflating: ndmg_demo/sub-0025864/ses-1/anat/sub-0025864_ses-1_T1w.nii.gz
-      inflating: ndmg_demo/desikan-res-4x4x4.nii.gz
-      inflating: ndmg_demo/HarvardOxford_variant-thr25_res-4x4x4_lvmask.nii.gz
-      inflating: ndmg_demo/MNI152NLin6_res-4x4x4_T1w_brainmask.nii.gz
-    Creating output directory: /tmp/ndmg_demo/outputs
-    Creating output temp directory: /tmp/ndmg_demo/outputs/tmp
-    This pipeline will produce the following derivatives...
-    DWI volume registered to atlas: /tmp/ndmg_demo/outputs/reg/dwi/sub-0025864_ses-1_dwi_aligned.nii.gz
-    Diffusion tensors in atlas space: /tmp/ndmg_demo/outputs/tensors/sub-0025864_ses-1_dwi_tensors.npz
-    Fiber streamlines in atlas space: /tmp/ndmg_demo/outputs/fibers/sub-0025864_ses-1_dwi_fibers.npz
-    Graphs of streamlines downsampled to given labels: /tmp/ndmg_demo/outputs/graphs/desikan-res-4x4x4/sub-0025864_ses-1_dwi_desikan-res-4x4x4.gpickle
-    Generating gradient table...
-    B-values shape (15,)
-             min 0.000000
-             max 1000.000000
-    B-vectors shape (15, 3)
-             min -0.978756
-             max 0.941755
-    None
-    Aligning volumes...
-    Executing: eddy_correct /tmp/ndmg_demo/outputs/tmp/sub-0025864_ses-1_dwi_t1.nii.gz /tmp/ndmg_demo/outputs/tmp/sub-0025864_ses-1_dwi_t1_t2.nii.gz 0
-    Executing: epi_reg --epi=/tmp/ndmg_demo/outputs/tmp/sub-0025864_ses-1_dwi_t1_t2.nii.gz --t1=/tmp/ndmg_demo/sub-0025864/ses-1/anat/sub-0025864_ses-1_T1w.nii.gz --t1brain=/tmp/ndmg_demo/outputs/tmp/sub-0025864_ses-1_T1w_ss.nii.gz --out=/tmp/ndmg_demo/outputs/tmp/sub-0025864_ses-1_dwi_t1_ta.nii.gz
-    Executing: flirt -in /tmp/ndmg_demo/sub-0025864/ses-1/anat/sub-0025864_ses-1_T1w.nii.gz -ref /tmp/ndmg_demo/MNI152NLin6_res-4x4x4_T1w.nii.gz -omat /tmp/ndmg_demo/outputs/tmp/sub-0025864_ses-1_T1w_MNI152NLin6_res-4x4x4_T1w_xfm.mat -dof 12 -bins 256 -cost mutualinfo -searchrx -180 180 -searchry -180 180 -searchrz -180 180
-    Executing: flirt -in /tmp/ndmg_demo/outputs/tmp/sub-0025864_ses-1_dwi_t1_ta.nii.gz -ref /tmp/ndmg_demo/MNI152NLin6_res-4x4x4_T1w.nii.gz -out /tmp/ndmg_demo/outputs/tmp/sub-0025864_ses-1_dwi_t1_ta2.nii.gz -init /tmp/ndmg_demo/outputs/tmp/sub-0025864_ses-1_T1w_MNI152NLin6_res-4x4x4_T1w_xfm.mat -interp trilinear -applyxfm
-    Beginning tractography...
-    Generating graph for desikan-res-4x4x4 parcellation...
-    {'source': 'http://m2g.io', 'ecount': 0, 'vcount': 70, 'date': 'Fri Jan 19 00:15:32 2018', 'region': 'brain', 'sensor': 'dwi', 'name': "Generated by NeuroData's MRI Graphs (ndmg)"}
-    # of Streamlines: 5772
-    0
-    288
-    576
-    864
-    1152
-    1440
-    1728
-    2016
-    2304
-    2592
-    2880
-    3168
-    3456
-    3744
-    4032
-    4320
-    4608
-    4896
-    5184
-    5472
-    5760
-    
-     Graph Summary:
-    Name: Generated by NeuroData's MRI Graphs (ndmg)
-    Type: Graph
-    Number of nodes: 70
-    Number of edges: 887
-    Average degree:  25.3429
-    Execution took: 0:02:56.343901
-    Complete!
-    
-    Parcellation: desikan-res-4x4x4
-    Computing: NNZ
-    Sample Mean: 887.00
-    Computing: Degree Sequence
-    Subject Means: 25.34
-    Computing: Edge Weight Sequence
-    Subject Means: 68.99
-    Computing: Clustering Coefficient Sequence
-    Subject Means: 0.75
-    Computing: Max Local Statistic Sequence
-    Subject Means: 24948.83
-    Computing: Eigen Value Sequence
-    Subject Maxes: 1.32
-    Computing: Betweenness Centrality Sequence
-    Subject Means: 0.01
-    Computing: Mean Connectome
-    This is the format of your plot grid:
-    [ (1,1) x1,y1 ]  [ (1,2) x2,y2 ]  [ (1,3) x3,y3 ]  [ (1,4) x4,y4 ]
-    [ (2,1) x5,y5 ]  [ (2,2) x6,y6 ]  [ (2,3) x7,y7 ]  [ (2,4) x8,y8 ]
-
-    Path to qc fig: /tmp/ndmg_demo/outputs/qa/graphs/desikan-res-4x4x4/desikan-res-4x4x4_plot.html
 
 
 ## Usage
