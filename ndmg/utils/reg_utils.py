@@ -18,6 +18,7 @@
 # Email: ebridge2@jhu.edu
 
 import warnings
+
 warnings.simplefilter("ignore")
 from ndmg.utils import gen_utils as mgu
 import nibabel as nib
@@ -638,6 +639,16 @@ def wm_syn(template_path, fa_path, working_dir):
     
     from dipy.align.imaffine import MutualInformationMetric, AffineRegistration, transform_origins
     from dipy.align.transforms import TranslationTransform3D, RigidTransform3D, AffineTransform3D
+    from dipy.align.imaffine import (
+        MutualInformationMetric,
+        AffineRegistration,
+        transform_origins,
+    )
+    from dipy.align.transforms import (
+        TranslationTransform3D,
+        RigidTransform3D,
+        AffineTransform3D,
+    )
     from dipy.align.imwarp import SymmetricDiffeomorphicRegistration
     from dipy.align.metrics import CCMetric
     from dipy.viz import regtools
@@ -659,42 +670,78 @@ def wm_syn(template_path, fa_path, working_dir):
     level_iters = [10, 10, 5]
     sigmas = [3.0, 1.0, 0.0]
     factors = [4, 2, 1]
-    affine_reg = AffineRegistration(metric=metric, level_iters=level_iters,
-                                    sigmas=sigmas, factors=factors)
+    affine_reg = AffineRegistration(
+        metric=metric, level_iters=level_iters, sigmas=sigmas, factors=factors
+    )
     transform = TranslationTransform3D()
 
     params0 = None
-    translation = affine_reg.optimize(static, moving, transform, params0,
-                                      static_affine, moving_affine)
+    translation = affine_reg.optimize(
+        static, moving, transform, params0, static_affine, moving_affine
+    )
     transform = RigidTransform3D()
 
-    rigid_map = affine_reg.optimize(static, moving, transform, params0,
-                                    static_affine, moving_affine,
-                                    starting_affine=translation.affine)
+    rigid_map = affine_reg.optimize(
+        static,
+        moving,
+        transform,
+        params0,
+        static_affine,
+        moving_affine,
+        starting_affine=translation.affine,
+    )
     transform = AffineTransform3D()
 
     # We bump up the iterations to get a more exact fit:
     affine_reg.level_iters = [1000, 1000, 100]
-    affine_opt = affine_reg.optimize(static, moving, transform, params0,
-                                     static_affine, moving_affine,
-                                     starting_affine=rigid_map.affine)
+    affine_opt = affine_reg.optimize(
+        static,
+        moving,
+        transform,
+        params0,
+        static_affine,
+        moving_affine,
+        starting_affine=rigid_map.affine,
+    )
 
     # We now perform the non-rigid deformation using the Symmetric Diffeomorphic Registration(SyN) Algorithm:
     metric = CCMetric(3)
     level_iters = [10, 10, 5]
     sdr = SymmetricDiffeomorphicRegistration(metric, level_iters)
 
-    mapping = sdr.optimize(static, moving, static_affine, moving_affine,
-                           affine_opt.affine)
+    mapping = sdr.optimize(
+        static, moving, static_affine, moving_affine, affine_opt.affine
+    )
     warped_moving = mapping.transform(moving)
 
     # We show the registration result with:
-    regtools.overlay_slices(static, warped_moving, None, 0, "Static", "Moving",
-                            "%s%s" % (working_dir, "/transformed_sagittal.png"))
-    regtools.overlay_slices(static, warped_moving, None, 1, "Static", "Moving",
-                            "%s%s" % (working_dir, "/transformed_coronal.png"))
-    regtools.overlay_slices(static, warped_moving, None, 2, "Static", "Moving",
-                            "%s%s" % (working_dir, "/transformed_axial.png"))
+    regtools.overlay_slices(
+        static,
+        warped_moving,
+        None,
+        0,
+        "Static",
+        "Moving",
+        "%s%s" % (working_dir, "/transformed_sagittal.png"),
+    )
+    regtools.overlay_slices(
+        static,
+        warped_moving,
+        None,
+        1,
+        "Static",
+        "Moving",
+        "%s%s" % (working_dir, "/transformed_coronal.png"),
+    )
+    regtools.overlay_slices(
+        static,
+        warped_moving,
+        None,
+        2,
+        "Static",
+        "Moving",
+        "%s%s" % (working_dir, "/transformed_axial.png"),
+    )
 
     return mapping, affine_map
 
@@ -729,9 +776,14 @@ def normalize_xform(img):
     # Check desired codes
     qform, qform_code = img.get_qform(coded=True)
     sform, sform_code = img.get_sform(coded=True)
-    if all((qform is not None and np.allclose(qform, xform),
+    if all(
+        (
+            qform is not None and np.allclose(qform, xform),
             sform is not None and np.allclose(sform, xform),
-            int(qform_code) == xform_code, int(sform_code) == xform_code)):
+            int(qform_code) == xform_code,
+            int(sform_code) == xform_code,
+        )
+    ):
         return img
 
     new_img = img.__class__(img.get_data(), xform, img.header)

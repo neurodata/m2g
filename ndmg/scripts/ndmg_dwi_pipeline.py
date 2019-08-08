@@ -22,6 +22,7 @@
 import shutil
 import time
 import warnings
+
 warnings.simplefilter("ignore")
 
 # from ndmg.stats.qa_mri import qa_mri
@@ -65,7 +66,7 @@ def ndmg_dwi_worker(
     push=False,
     creds=None,
     debug=False,
-    modif=""
+    modif="",
 ):
     """Creates a brain graph from MRI data
     
@@ -163,6 +164,7 @@ def ndmg_dwi_worker(
 
     namer = name_resource(dwi, t1w, atlas, outdir)
 
+    # TODO : do this with shutil instead of an os command
     print("Output directory: " + outdir)
     if not os.path.isdir(outdir):
         cmd = "mkdir -p {}".format(outdir)
@@ -222,11 +224,13 @@ def ndmg_dwi_worker(
             sts = Popen(cmd, shell=True).wait()
             print(sts)
             ts = time.time()
-            st = datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
+            st = datetime.fromtimestamp(ts).strftime("%Y-%m-%d %H:%M:%S")
             print(st)
         else:
             if not os.path.isfile(dwi_prep):
-                raise ValueError('ERROR: Cannot skip eddy correction if it has not already been run!')
+                raise ValueError(
+                    "ERROR: Cannot skip eddy correction if it has not already been run!"
+                )
     else:
         print("Performing eddy correction...")
         cmd = "eddy_correct " + dwi + " " + dwi_prep + " 0"
@@ -234,9 +238,8 @@ def ndmg_dwi_worker(
         sts = Popen(cmd, shell=True).wait()
         print(sts)
         ts = time.time()
-        st = datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
+        st = datetime.fromtimestamp(ts).strftime("%Y-%m-%d %H:%M:%S")
         print(st)
-
 
     # Instantiate bvec/bval naming variations and copy to derivative director
     bvec_scaled = "{}/bvec_scaled.bvec".format(namer.dirs["output"]["prep_dwi"])
@@ -323,8 +326,10 @@ def ndmg_dwi_worker(
             os.mkdir(namer.dirs["output"]["reg_anat"])
         except:
             pass
-    if (skipreg is False) and ((len(os.listdir(namer.dirs["tmp"]["reg_a"])) != 0) or
-                               (len(os.listdir(namer.dirs["tmp"]["reg_m"])) != 0)):
+    if (skipreg is False) and (
+        (len(os.listdir(namer.dirs["tmp"]["reg_a"])) != 0)
+        or (len(os.listdir(namer.dirs["tmp"]["reg_m"])) != 0)
+    ):
         try:
             print("Pre-existing temporary files found. Deleting these...")
             shutil.rmtree(namer.dirs["tmp"]["reg_a"])
@@ -352,19 +357,28 @@ def ndmg_dwi_worker(
         # Perform anatomical segmentation
         start_time = time.time()
         if (skipreg is True) and os.path.isfile(reg.wm_edge):
-            print('Found existing gentissue run!')
+            print("Found existing gentissue run!")
             pass
         else:
             reg.gen_tissue()
             print(
                 "%s%s%s"
-                % ("gen_tissue runtime: ", str(np.round(time.time() - start_time, 1)), "s")
+                % (
+                    "gen_tissue runtime: ",
+                    str(np.round(time.time() - start_time, 1)),
+                    "s",
+                )
             )
 
         # Align t1w to dwi
         start_time = time.time()
-        if (skipreg is True) and os.path.isfile(reg.t1w2dwi) and os.path.isfile(reg.mni2t1w_warp) and os.path.isfile(reg.t1_aligned_mni):
-            print('Found existing t1w2dwi run!')
+        if (
+            (skipreg is True)
+            and os.path.isfile(reg.t1w2dwi)
+            and os.path.isfile(reg.mni2t1w_warp)
+            and os.path.isfile(reg.t1_aligned_mni)
+        ):
+            print("Found existing t1w2dwi run!")
             pass
         else:
             reg.t1w2dwi_align()
@@ -379,8 +393,13 @@ def ndmg_dwi_worker(
 
         # Align tissue classifiers
         start_time = time.time()
-        if (skipreg is True) and os.path.isfile(reg.wm_gm_int_in_dwi) and os.path.isfile(reg.vent_csf_in_dwi) and os.path.isfile(reg.corpuscallosum_dwi):
-            print('Found existing tissue2dwi run!')
+        if (
+            (skipreg is True)
+            and os.path.isfile(reg.wm_gm_int_in_dwi)
+            and os.path.isfile(reg.vent_csf_in_dwi)
+            and os.path.isfile(reg.corpuscallosum_dwi)
+        ):
+            print("Found existing tissue2dwi run!")
             pass
         else:
             reg.tissue2dwi_align()
@@ -432,14 +451,16 @@ def ndmg_dwi_worker(
         trk_hdr["endianness"] = "<"
         trk_hdr["_offset_data"] = 1000
         trk_hdr["nb_streamlines"] = streamlines.total_nb_rows
-        tractogram = nib.streamlines.Tractogram(
-            streamlines, affine_to_rasmm=trk_affine
-        )
+        tractogram = nib.streamlines.Tractogram(streamlines, affine_to_rasmm=trk_affine)
         trkfile = nib.streamlines.trk.TrkFile(tractogram, header=trk_hdr)
         nib.streamlines.save(trkfile, streams)
         print(
             "%s%s%s"
-            % ("Tractography runtime: ", str(np.round(time.time() - start_time, 1)), "s")
+            % (
+                "Tractography runtime: ",
+                str(np.round(time.time() - start_time, 1)),
+                "s",
+            )
         )
 
     if reg_style == "native_dsn":
@@ -471,9 +492,11 @@ def ndmg_dwi_worker(
         # Align DWI volumes to Atlas
         print("Aligning volumes...")
         reg = mgr.dmri_reg_old(dwi_prep, gtab, t1w, atlas, aligned_dwi, namer, clean)
-        print("Registering DWI image at {} to atlas; aligned dwi at {}...".format(
-            dwi_prep, aligned_dwi
-        ))  # alex  # TODO: make sure dwi_prep is what is being registered
+        print(
+            "Registering DWI image at {} to atlas; aligned dwi at {}...".format(
+                dwi_prep, aligned_dwi
+            )
+        )  # alex  # TODO: make sure dwi_prep is what is being registered
         reg.dwi2atlas()
 
         # -------- Tensor Fitting and Fiber Tractography ---------------- #
@@ -490,7 +513,7 @@ def ndmg_dwi_worker(
             tensors,
             aligned_dwi,
             namer.dirs["output"]["tensor"],
-            namer.dirs["qa"]["tensor"]
+            namer.dirs["qa"]["tensor"],
         )
 
         # Save streamlines to disk
@@ -699,7 +722,7 @@ def main():
         result.sp,
         result.clean,
         result.skipeddy,
-        result.skipreg
+        result.skipreg,
     )
 
 
