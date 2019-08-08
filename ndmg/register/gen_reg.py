@@ -32,6 +32,24 @@ from ndmg.utils import reg_utils as mgru
 
 
 def direct_streamline_norm(streams, fa_path, namer):
+    """Applys the Symmetric Diffeomorphic Registration (SyN) Algorithm onto the streamlines to the atlas space defined by .../atlases/reference_brains/FSL_HCP1065_FA_2mm.nii.gz
+    
+    Parameters
+    ----------
+    streams : str
+        Path to streamlines.trk file to be transformed
+    fa_path : str
+        Path to subject's FA tensor image
+    namer : name_resource
+        variable containing all relevant pathing information
+    
+    Returns
+    -------
+    ArraySequence
+        Transformed streamlines
+    str
+        Path to tractogram streamline file: streamlines_dsn.trk
+    """
     import os.path as op
     from dipy.tracking.streamline import deform_streamlines
     from dipy.io.streamline import load_trk
@@ -115,6 +133,28 @@ def direct_streamline_norm(streams, fa_path, namer):
 
 
 class dmri_reg(object):
+    """Class containing relevant paths and class methods for analysing tractography
+    
+    Parameters
+    ----------
+    namer : name_resource
+        name_resource variable containing relevant directory tree information
+    nodif_B0 : str
+        path to mean b0 image
+    nodif_B0_mask : str
+        path to mean b0 mask (nodif_B0....nii.gz)
+    t1w_in : str
+        path to t1w file
+    vox_size : str
+        voxel resolution ('2mm' or '1mm')
+    simple : bool
+        Whether you want to attempt non-linear registration when transforming between mni, t1w, and dwi space
+    
+    Raises
+    ------
+    ValueError
+        FSL atlas for ventricle reference not found
+    """
     def __init__(self, namer, nodif_B0, nodif_B0_mask, t1w_in, vox_size, simple):
         import os.path as op
 
@@ -294,6 +334,10 @@ class dmri_reg(object):
         )
 
     def gen_tissue(self):
+        """Extracts the brain from the raw t1w image (as indicated by self.t1w), uses it to create WM, GM, and CSF masks,
+        reslices all 4 files to the target voxel resolution and extracts the white matter edge. Each mask is saved to 
+        location indicated by self.map_path
+        """
         # BET needed for this, as afni 3dautomask only works on 4d volumes
         print("Extracting brain from raw T1w image...")
         mgru.t1w_skullstrip(self.t1w, self.t1w_brain)
@@ -337,14 +381,10 @@ class dmri_reg(object):
         return
 
     def t1w2dwi_align(self):
+        """Alignment from t1w to mni, making t1w_mni, and t1w_mni to dwi. A function to perform self alignment. Uses a local optimisation cost function to get the
+        two images close, and then uses bbr to obtain a good alignment of brain boundaries. Assumes input dwi is already preprocessed and brain extracted.
         """
-        alignment from T1w --> MNI and T1w_MNI --> DWI
-        A function to perform self alignment. Uses a local optimisation
-        cost function to get the two images close, and then uses bbr
-        to obtain a good alignment of brain boundaries.
-        Assumes input dwi is already preprocessed and brain extracted.
-        """
-
+        
         # Create linear transform/ initializer T1w-->MNI
         mgru.align(
             self.t1w_brain,
@@ -483,13 +523,23 @@ class dmri_reg(object):
         return
 
     def atlas2t1w2dwi_align(self, atlas, dsn=True):
+        """alignment from atlas to t1w to dwi. A function to perform atlas alignmet. Tries nonlinear registration first, and if that fails, does a liner
+        registration instead.
+        Note: for this to work, must first have called t1w2dwi_align.
+        
+        Parameters
+        ----------
+        atlas : str
+            path to atlas file you want to use
+        dsn : bool, optional
+            is your space for tractography native-dsn, by default True
+        
+        Returns
+        -------
+        str
+            path to aligned atlas file
         """
-        alignment from atlas --> T1 --> dwi
-        A function to perform atlas alignment.
-        Tries nonlinear registration first, and if that fails,
-        does a linear registration instead.
-        NOTE: for this to work, must first have called t1w2dwi_align.
-        """
+        
         self.atlas = atlas
         self.atlas_name = self.atlas.split("/")[-1].split(".")[0]
         self.aligned_atlas_t1mni = "{}/{}_aligned_atlas_t1w_mni.nii.gz".format(
@@ -654,13 +704,16 @@ class dmri_reg(object):
             return self.aligned_atlas_t1mni
 
     def tissue2dwi_align(self):
-        """
-        alignment of ventricle and CC ROI's from MNI space --> dwi and
-        CC and CSF from T1w space --> dwi
+        """alignment of ventricle and CC ROI's from MNI space --> dwi and CC and CSF from T1w space --> dwi
         A function to generate and perform dwi space alignment of avoidance/waypoint masks for tractography.
         First creates ventricle and CC ROI. Then creates transforms from stock MNI template to dwi space.
         NOTE: for this to work, must first have called both t1w2dwi_align and atlas2t1w2dwi_align.
-        """
+        
+        Raises
+        ------
+        ValueError
+            Raised if FSL atlas for ventricle reference not found
+        """        
 
         # Create MNI-space ventricle mask
         print("Creating MNI-space ventricle ROI...")
@@ -682,7 +735,7 @@ class dmri_reg(object):
         )
         os.system(cmd)
 
-        # Create transform to MNI atlas to T1w using flirt. This will be use to transform the ventricles to dwi space.
+        # Create a transform from the atlas onto T1w. This will be used to transform the ventricles to dwi space.
         mgru.align(
             self.mni_atlas,
             self.input_mni,
@@ -826,22 +879,26 @@ class dmri_reg(object):
 
 class dmri_reg_old(object):
     def __init__(self, dwi, gtab, t1w, atlas, aligned_dwi, namer, clean=False):
+        """Aligns two images and stores the transform between them
+        
+        Parameters
+        ----------
+        dwi : str
+            path to input image to be aligned as a nifti image file
+        gtab : str
+            path to file containing gradient driections and strength
+        t1w : str
+            path to reference image to be aligned to 
+        atlas : str
+            path to roi atlas file
+        aligned_dwi : str
+            path for the output aligned dwi image
+        namer : name_resource
+            variable containing directory tree information for pipeline outputs
+        clean : bool, optional
+            Whether to delete intermediate files created by the pipeline, by default False
         """
-            Aligns two images and stores the transform between them
-            **Positional Arguments:**
-                    dwi:
-                        - Input impage to be aligned as a nifti image file
-                    gtab:
-                        - object containing gradient directions and strength
-                    t1w:
-                        - Intermediate image being aligned to as a nifti image file
-                    atlas:
-                        - Terminal image being aligned to as a nifti image file
-                    aligned_dwi:
-                        - Aligned output dwi image as a nifti image file
-                    outdir:
-                        - Directory for derivatives to be stored
-            """
+        
         self.dwi = dwi
         self.t1w = t1w
         self.atlas = atlas

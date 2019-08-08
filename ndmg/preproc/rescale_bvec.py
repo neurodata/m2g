@@ -28,17 +28,16 @@ import os.path as op
 
 
 def rescale_bvec(bvec, bvec_new):
+    """Normalizes b-vectors to be of unit length for the non-zero b-values. If the b-value is 0, the vector is untouched
+    
+    Parameters
+    ----------
+    bvec : str
+        Path to the original b-vectors file (bvec)
+    bvec_new : str
+        Path to the new (normalized) b-vectors file. Must have extension '.bvec'
     """
-    Normalizes b-vectors to be of unit length for the non-zero b-values. If the
-    b-value is 0, the vector is untouched.
-
-    Positional Arguments:
-            - bvec:
-                    File name of the original b-vectors file
-            - bvec_new:
-                    File name of the new (normalized) b-vectors file. Must have
-                    extension `.bvec`
-    """
+    
     bv1 = np.array(np.loadtxt(bvec))
     # Enforce proper dimensions
     bv1 = bv1.T if bv1.shape[0] == 3 else bv1

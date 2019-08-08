@@ -33,9 +33,22 @@ import os
 class name_resource:
     """
     A class for naming derivatives under the BIDs spec.
+
+    Parameters
+    ----------
+    modf : str
+        Path to subject MRI (dwi or func) data to be analyzed
+    t1wf : str
+        Path to subject t1w anatomical data
+    tempf : str
+        Path to atlas file(s) to be used during analysis
+    opath : str
+        Path to output directory
     """
 
     def __init__(self, modf, t1wf, tempf, opath):
+        """__init__ containing relevant BIDS specified paths for relevant data
+        """
         self.__subi__ = os.path.basename(modf).split(".")[0]
         self.__anati__ = os.path.basename(t1wf).split(".")[0]
         self.__sub__ = re.search(r"(sub-)(?!.*sub-).*?(?=[_])", modf).group()
@@ -94,13 +107,20 @@ class name_resource:
         return
 
     def add_dirs_dwi(namer, paths, labels, label_dirs):
+        """Creates tmp and permanent directories for the desired suffixes
+        
+        Parameters
+        ----------
+        namer : name_resource
+            varibale of the name_resource class created by name_resource() containing path and settings information for the desired run. It includes: subject, anatomical scan, session, run number, task, resolution, output directory 
+        paths : dict
+            a dictionary of keys to suffix directories
+        labels : list
+            path to desired atlas labeling file
+        label_dirs : list
+            label directories
         """
-        creates tmp and permanent directories for the desired suffixes.
 
-        **Positional Arguments:
-            - paths:
-                - a dictionary of keys to suffix directories desired.
-        """
         namer.dirs = {}
         if not isinstance(labels, list):
             labels = [labels]
@@ -141,9 +161,14 @@ class name_resource:
         return
 
     def _get_outdir(self):
+        """Called by constructor to initialize the output directory
+        
+        Returns
+        -------
+        list
+            path to output directory
         """
-        Called by constructor to initialize the output directory.
-        """
+        
         olist = [self.__basepath__]
         # olist.append(self.__sub__)
         # if self.__ses__:
@@ -151,10 +176,14 @@ class name_resource:
         return os.path.join(*olist)
 
     def get_outdir(self):
+        """Returns the base output directory for a particular subject and appropriate granularity.
+        
+        Returns
+        -------
+        str
+            output directory
         """
-        Returns the base  output directory for a particular subject
-        (+ appropriate granularity).
-        """
+        
         return self.__outdir__
 
     def get_template_info(self):
@@ -175,23 +204,21 @@ class name_resource:
         #                         os.path.basename(label))[0])
 
     def name_derivative(self, folder, derivative):
+        """Creates derivative output file paths using os.path.join
+        
+        Parameters
+        ----------
+        folder : str
+            Path of directory that you want the derivative file name appended too
+        derivative : str
+            The name of the file to be produced
+        
+        Returns
+        -------
+        str
+            Derivative output file path
         """
-        names a particular derivative by the following spec:
-
-        self.__opath__/mod/type/[specific/]derivative
-
-        ***Positional Arguments:**
-
-            derivative:
-                - the name of the file to be produced.
-            mod:
-                - the modality. Should be a BIDs-compliant name (bold, t1w,
-                anat).
-            type:
-                - the inner directory to place the file.
-            specific:
-                - an additional, optional layer of granularity.
-        """
+        
         return os.path.join(*[folder, derivative])
 
     def get_mod_source(self):
@@ -210,6 +237,20 @@ class name_resource:
 
 
 def flatten(current, result=[]):
+    """Flatten a folder heirarchy
+    
+    Parameters
+    ----------
+    current : dict
+        path to directory you want to flatten
+    result : list, optional
+        Default is []
+    
+    Returns
+    -------
+    list
+        All new directories created by flattening the current directory
+    """
     if isinstance(current, dict):
         for key in current:
             flatten(current[key], result)
@@ -219,11 +260,35 @@ def flatten(current, result=[]):
 
 
 def sweep_directory(bdir, subj=None, sesh=None, task=None, run=None, modality="dwi"):
+    """Given a BIDs formatted directory, crawls the BIDs dir and prepares the necessary inputs for the NDMG pipeline. Uses regexes to check matches for BIDs compliance.
+    
+    Parameters
+    ----------
+    bdir : str
+        input directory
+    subj : list, optional
+        subject label. Default = None
+    sesh : list, optional
+        session label. Default = None
+    task : list, optional
+        task label. Default = None
+    run : list, optional
+        run label. Default = None
+    modality : str, optional
+        Data type being analyzed. Default = "dwi"
+    
+    Returns
+    -------
+    tuple
+        contining location of dwi, bval, bvec, and anat
+    
+    Raises
+    ------
+    ValueError
+        Raised if incorrect mobility passed
     """
-    Given a BIDs formatted directory, crawls the BIDs dir and prepares the
-    necessary inputs for the NDMG pipeline. Uses regexes to check matches for
-    BIDs compliance.
-    """
+
+    
     if modality == "dwi":
         dwis = []
         bvals = []
@@ -327,10 +392,20 @@ def sweep_directory(bdir, subj=None, sesh=None, task=None, run=None, modality="d
 
 
 def as_list(x):
+    """A function to convert an item to a list if it is not, or pass it through otherwise
+    
+    Parameters
+    ----------
+    x : any object
+        anything that can be entered into a list that you want to be converted into a list
+    
+    Returns
+    -------
+    list
+        a list containing x
     """
-    A function to convert an item to a list if it is not, or pass
-    it through otherwise.
-    """
+    
+    
     if not isinstance(x, list):
         return [x]
     else:
@@ -338,11 +413,23 @@ def as_list(x):
 
 
 def merge_dicts(x, y):
+    """A function to merge two dictionaries, making it easier for us to make modality specific queries
+    for dwi images (since they have variable extensions due to having an nii.gz, bval, and bvec file)
+    
+    Parameters
+    ----------
+    x : dict
+        dictionary you want merged with y
+    y : dict
+        dictionary you want merged with x
+    
+    Returns
+    -------
+    dict
+        combined dictionary with {x content,y content}
     """
-    A function to merge two dictionaries, making it easier for us to make
-    modality specific queries for dwi images (since they have variable
-    extensions due to having an nii.gz, bval, and bvec file).
-    """
+
+    
     z = x.copy()
     z.update(y)
     return z

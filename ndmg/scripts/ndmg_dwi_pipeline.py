@@ -68,9 +68,61 @@ def ndmg_dwi_worker(
     debug=False,
     modif="",
 ):
-
-    """
-    Creates a brain graph from MRI data
+    """Creates a brain graph from MRI data
+    
+    Parameters
+    ----------
+    dwi : str
+        Path for the dwi file(s)
+    bvals : str
+        Path for the bval file(s)
+    bvecs : str
+        Path for the bvec file(s)
+    t1w : str
+        Location of anatomical input file(s)
+    atlas : str
+        Location of atlas file
+    mask : str
+        Location of T1w brain mask file, make sure the proper voxel size is used
+    labels : list
+        Location of file containing the labels for the atlas file(s)
+    outdir : str
+        The directory where the output files should be stored. Prepopulate this folder with results of participants level analysis if running gorup analysis.
+    vox_size : str
+        Voxel size to use for template registrations. Default is '2mm'.
+    mod_type : str
+        Determinstic (det) or probabilistic (prob) tracking. Default is det.
+    track_type : str
+        Tracking approach: eudx or local. Default is eudx.
+    mod_func : str
+        Diffusion model: csd, csa, or tensor. Default is tensor.
+    reg_style : str
+        Space for tractography. Default is native.
+    clean : bool
+        Whether or not to delete intermediates. Default is False.
+    skipeddy : bool
+        Whether or not to skip the eddy correction if it has already been run. Default is False.
+    skipreg : bool
+        Whether or not to skip registration. Default is False.
+    buck : str, optional
+        The name of an S3 bucket which holds BIDS organized data. You musht have build your bucket with credentials to the S3 bucket you wish to access. Default is None
+    remo : str, optional
+        The path to the data on your S3 bucket. The data will be downloaded to the provided bids_dir on your machine. Default is None.
+    push : bool, optional
+        Flag to push derivatives back to S3. Default is False
+    creds : bool, optional
+        Determine if you have S3 credentials. Default is True
+    debug : bool, optional
+        If False, remove any old filed in the output directory. Default is False
+    modif : str, optional
+        Name of the folder on s3 to push to. If empty, push to a folder with ndmg's version number. Default is ""
+    
+    Raises
+    ------
+    ValueError
+        Raised if downsampling voxel size is not supported
+    ValueError
+        Raised if bval/bvecs are potentially corrupted
     """
     print("dwi = {}".format(dwi))
     print("bvals = {}".format(bvals))
@@ -427,7 +479,7 @@ def ndmg_dwi_worker(
     elif reg_style == "mni":
         # Check dimensions
         start_time = time.time()
-        t1w = mgu.match_target_vox_res(t1w, vox_size, namer, sens="t1w")
+        t1w = mgu.match_target_vox_res(t1w, vox_size, namer, sens="t1w") #this is the second time this t1w data has been sent to this function (REMOVE?)
         print(
             "%s%s%s"
             % ("Reslicing runtime: ", str(np.round(time.time() - start_time, 1)), "s")

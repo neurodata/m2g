@@ -28,6 +28,22 @@ from dipy.tracking.streamline import Streamlines
 
 
 def build_seed_list(mask_img_file, stream_affine, dens):
+    """uses dipy tractography utilities in order to create a seed list for tractography
+    
+    Parameters
+    ----------
+    mask_img_file : str
+        path to mask of area to generate seeds for
+    stream_affine : ndarray
+        4x4 array with 1s diagonally and 0s everywhere else
+    dens : int
+        seed density
+    
+    Returns
+    -------
+    ndarray
+        locations for the seeds
+    """
     from dipy.tracking import utils
 
     mask_img = nib.load(mask_img_file)
@@ -42,8 +58,21 @@ def build_seed_list(mask_img_file, stream_affine, dens):
 
 
 def tens_mod_fa_est(gtab, dwi_file, B0_mask):
-    """
-    Estimate a tensor FA image to use for registrations.
+    """Estimate a tensor FA image to use for registrations using dipy functions
+    
+    Parameters
+    ----------
+    gtab : GradientTable
+        gradient table created from bval and bvec file
+    dwi_file : str
+        Path to eddy-corrected and RAS reoriented dwi image
+    B0_mask : str
+        Path to nodif B0 mask (averaged b0 mask)
+    
+    Returns
+    -------
+    str
+        Path to tensor_fa image file
     """
     import os
     from dipy.reconst.dti import TensorModel
@@ -81,38 +110,46 @@ class run_track(object):
         seeds,
         stream_affine,
     ):
-        """
-        A class for deterministic tractography in native space.
-
+        """A class for deterministic tractography in native space
+        
         Parameters
         ----------
-        dwi_in: string
-            - path to the input dMRI image to perform tractography on.
+        dwi_in : str
+            path to the input dwi image to perform tractography on.
             Should be a nifti, gzipped nifti, or other image that nibabel
             is capable of reading, with data as a 4D object.
-        nodif_B0_mask: string
-            - path to the mask of the b0 mean volume. Should be a nifti,
+        nodif_B0_mask : str
+            path to the mask of the b0 mean volume. Should be a nifti,
             gzipped nifti, or other image file that nibabel is capable of
             reading, with data as a 3D object.
-        gm_in_dwi: string
-            - Path to gray matter segmentation in EPI space. Should be a nifti,
+        gm_in_dwi : str
+            Path to gray matter segmentation in EPI space. Should be a nifti,
+            gzipped nifti, or other image file that nibabel is capable of
+            reading, with data as a 3D object
+        vent_csf_in_dwi : str
+            Ventricular CSF Mask in EPI space. Should be a nifti,
+            gzipped nifti, or other image file that nibabel is capable of
+            reading, with data as a 3D object
+        csf_in_dwi : str
+            Path to CSF mask in EPI space. Should be a nifti, gzipped nifti, or other image file that nibabel compatable
+        wm_in_dwi : str
+            Path to white matter probabilities in EPI space. Should be a nifti,
             gzipped nifti, or other image file that nibabel is capable of
             reading, with data as a 3D object.
-        vent_csf_in_dwi: string
-            - Ventricular CSF Mask in EPI space. Should be a nifti,
-            gzipped nifti, or other image file that nibabel is capable of
-            reading, with data as a 3D object.
-        wm_in_dwi: string
-            - Path to white matter probabilities in EPI space. Should be a nifti,
-            gzipped nifti, or other image file that nibabel is capable of
-            reading, with data as a 3D object.
-        wm_in_dwi_bin: string
-            - Path to a binarized white matter segmentation in EPI space.
-            Should be a nifti, gzipped nifti, or other image file that 
-            nibabel is capable of reading, with data as a 3D object.
-        gtab: string
-            - Gradient table.
+        gtab : gradient table
+            gradient table created from bval and bvec files
+        mod_type : str
+            Determinstic (det) or probabilistic (prob) tracking
+        track_type : str
+            Tracking approach: local or particle
+        mod_func : str
+            Diffusion model: csd or csa
+        seeds : ndarray
+            ndarray of seeds for tractography
+        stream_affine : ndarray
+            4x4 2D array with 1s diagonaly and 0s everywhere else
         """
+        
         self.dwi = dwi_in
         self.nodif_B0_mask = nodif_B0_mask
         self.gm_in_dwi = gm_in_dwi
@@ -127,6 +164,20 @@ class run_track(object):
         self.stream_affine = stream_affine
 
     def run(self):
+        """Creates the tracktography tracks using dipy commands and the specified tracking type and approach
+        
+        Returns
+        -------
+        ArraySequence
+            contains the tractography track raw data for further analysis
+        
+        Raises
+        ------
+        ValueError
+            Raised when no seeds are supplied or no valid seeds were found in white-matter interface
+        ValueError
+            Raised when no seeds are supplied or no valid seeds were found in white-matter interface
+        """
         self.tiss_classifier = self.prep_tracking()
         if self.mod_type == "det":
             if self.mod_func == "csa":
@@ -157,6 +208,14 @@ class run_track(object):
         return tracks
 
     def prep_tracking(self):
+        """Uses nibabel and dipy functions in order to load the grey matter, white matter, and csf masks
+        and use a tissue classifier (act, cmc, or binary) on the include/exclude maps to make a tissueclassifier object
+        
+        Returns
+        -------
+        ActTissueClassifier, CmcTissueClassifier, or BinaryTissueCLassifier
+            The resulting tissue classifier object, depending on which method you use (currently only does act)
+        """
         from dipy.tracking.local import (
             ActTissueClassifier,
             CmcTissueClassifier,

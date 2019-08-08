@@ -36,6 +36,17 @@ from scipy.sparse import lil_matrix
 
 
 def show_template_bundles(final_streamlines, template_path, fname):
+    """Displayes the template bundles
+    
+    Parameters
+    ----------
+    final_streamlines : list
+        Generated streamlines
+    template_path : str
+        Path to reference FA nii.gz file
+    fname : str
+        Path of the output file (saved as )
+    """
     import nibabel as nib
     from fury import actor, window
 
@@ -134,10 +145,29 @@ def get_slice(mri, volid, sli):
 
 
 def make_gtab_and_bmask(fbval, fbvec, dwi_file, outdir):
+    """Takes bval and bvec files and produces a structure in dipy format while also using FSL commands
+    
+    Parameters
+    ----------
+    fbval : str
+        b-value file
+    fbvec : str
+        b-vector file
+    dwi_file : str
+        dwi file being analyzed
+    outdir : str
+        output directory
+    
+    Returns
+    -------
+    GradientTable
+        gradient table created from bval and bvec files
+    str
+        location of averaged b0 image file
+    str
+        location of b0 brain mask file
     """
-    Takes bval and bvec files and produces a structure in dipy format
-    **Positional Arguments:**
-    """
+    
     # Use B0's from the DWI to create a more stable DWI image for registration
     nodif_B0 = "{}/nodif_B0.nii.gz".format(outdir)
     nodif_B0_bet = "{}/nodif_B0_bet.nii.gz".format(outdir)
@@ -191,9 +221,23 @@ def make_gtab_and_bmask(fbval, fbvec, dwi_file, outdir):
 
 
 def reorient_dwi(dwi_prep, bvecs, namer):
-    """
-    A function to reorient any dwi image and associated bvecs to RAS+.
-
+    """Orients dwi data to the proper orientation (RAS+) using nibabel
+    
+    Parameters
+    ----------
+    dwi_prep : str
+        Path to eddy corrected dwi file
+    bvecs : str
+        Path to the resaled b-vector file
+    namer : name_resource
+        name_resource variable containing relevant directory tree information
+    
+    Returns
+    -------
+    str
+        Path to potentially reoriented dwi file
+    str
+        Path to b-vector file, potentially reoriented if dwi data was
     """
     from ndmg.utils.reg_utils import normalize_xform
 
@@ -246,9 +290,20 @@ def reorient_dwi(dwi_prep, bvecs, namer):
 
 
 def reorient_img(img, namer):
-    """
-    A function to reorient any non-dwi image to RAS+.
-    """
+    """Reorients input image to RAS+
+    
+    Parameters
+    ----------
+    img : str
+        Path to image being reoriented
+    namer : name_resource
+        name_resource object containing all revlevent pathing information for the pipeline
+    
+    Returns
+    -------
+    str
+        Path to reoriented image
+    """    
     from ndmg.utils.reg_utils import normalize_xform
 
     # Load image, orient as RAS
@@ -279,9 +334,23 @@ def reorient_img(img, namer):
 
 
 def match_target_vox_res(img_file, vox_size, namer, sens):
-    """
-    A function to resample an image to a given isotropic voxel resolution.
-
+    """Reslices input MRI file if it does not match the targeted voxel resolution. Can take dwi or t1w scans.
+    
+    Parameters
+    ----------
+    img_file : str
+        path to file to be resliced
+    vox_size : str
+        target voxel resolution ('2mm' or '1mm')
+    namer : name_resource
+        name_resource variable containing relevant directory tree information
+    sens : str
+        type of data being analyzed ('dwi' or 'func')
+    
+    Returns
+    -------
+    str
+        location of potentially resliced image
     """
     from dipy.align.reslice import reslice
 
