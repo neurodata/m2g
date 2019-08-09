@@ -334,18 +334,7 @@ def main():
     parser.add_argument(
         "output_dir",
         help="The directory where the output "
-        "files should be stored. If you are running group "
-        "level analysis this folder should be prepopulated "
-        "with the results of the participant level analysis.",
-    )
-    parser.add_argument(
-        "analysis_level",
-        help="Level of the analysis that "
-        "will be performed. Multiple participant level "
-        "analyses can be run independently (in parallel) "
-        "using the same output_dir.",
-        choices=["participant", "group"],
-        default="participant",
+        "files should be stored.",
     )
     parser.add_argument(
         "--modality",
@@ -529,7 +518,6 @@ def main():
     buck = result.bucket
     remo = result.remote_path
     push = result.push_data
-    level = result.analysis_level
     stc = result.stc
     debug = result.debug
     modality = result.modality
@@ -559,27 +547,26 @@ def main():
     # TODO : `Flat is better than nested`. Make the logic for this cleaner.
     # this block of logic essentially just gets data we need from s3.
     # it's super gross.
-    if level == "participant":
-        if buck is not None and remo is not None:
-            if subj is not None:
-                if len(sesh) == 1:
-                    sesh = sesh[0]
-                for sub in subj:
-                    if sesh is not None:
-                        remo = op.join(
-                            remo, "sub-{}".format(sub), "ses-{}".format(sesh)
-                        )
-                        tindir = op.join(
-                            inDir, "sub-{}".format(sub), "ses-{}".format(sesh)
-                        )
-                    else:
-                        remo = op.join(remo, "sub-{}".format(sub))
-                        tindir = op.join(inDir, "sub-{}".format(sub))
-                    s3_utils.s3_get_data(buck, remo, tindir, public=not creds)
-            else:
-                s3_utils.s3_get_data(buck, remo, inDir, public=not creds)
+    if buck is not None and remo is not None:
+        if subj is not None:
+            if len(sesh) == 1:
+                sesh = sesh[0]
+            for sub in subj:
+                if sesh is not None:
+                    remo = op.join(
+                        remo, "sub-{}".format(sub), "ses-{}".format(sesh)
+                    )
+                    tindir = op.join(
+                        inDir, "sub-{}".format(sub), "ses-{}".format(sesh)
+                    )
+                else:
+                    remo = op.join(remo, "sub-{}".format(sub))
+                    tindir = op.join(inDir, "sub-{}".format(sub))
+                s3_utils.s3_get_data(buck, remo, tindir, public=not creds)
+        else:
+            s3_utils.s3_get_data(buck, remo, inDir, public=not creds)
 
-        print("input directory contents: {}".format(os.listdir(inDir)))
+    print("input directory contents: {}".format(os.listdir(inDir)))
 
         ##### for debugging, remove soon
         # TODO: argument for this won't always work
@@ -598,33 +585,31 @@ def main():
         #             print("OutDir {} does not exist yet".format(outDir))
         ######
         # run ndmg.
-        session_level(
-            inDir,
-            outDir,
-            subj,
-            vox_size,
-            skipeddy,
-            skipreg,
-            clean,
-            stc,
-            atlas_select,
-            mod_type,
-            track_type,
-            mod_func,
-            reg_style,
-            sesh,
-            task,
-            run,
-            modality,
-            buck=buck,
-            remo=remo,
-            push=push,
-            creds=creds,
-            debug=debug,
-            modif=modif,
-        )
-    else:
-        print("Specified level not valid")
+    session_level(
+        inDir,
+        outDir,
+        subj,
+        vox_size,
+        skipeddy,
+        skipreg,
+        clean,
+        stc,
+        atlas_select,
+        mod_type,
+        track_type,
+        mod_func,
+        reg_style,
+        sesh,
+        task,
+        run,
+        modality,
+        buck=buck,
+        remo=remo,
+        push=push,
+        creds=creds,
+        debug=debug,
+        modif=modif,
+    )
 
 
 if __name__ == "__main__":
