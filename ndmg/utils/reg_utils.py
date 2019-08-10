@@ -114,39 +114,6 @@ def probmap2mask(prob_map, mask_path, t, erode=0):
     return mask_path
 
 
-#def segment_t1w(t1w, basename, opts=""):
-#    """
-#    A function to use FSL's FAST to segment an anatomical
-#    image into GM, WM, and CSF prob maps.
-#
-#    **Positional Arguments:**
-#
-#        t1w:
-#            - an anatomical T1w image.
-#        basename:
-#            - the basename for outputs. Often it will be
-#              most convenient for this to be the dataset,
-#              followed by the subject, followed by the step of
-#              processing. Note that this anticipates a path as well;
-#              ie, /path/to/dataset_sub_nuis, with no extension.
-#        opts:
-#            - additional options that can optionally be passed to
-#              fast. Desirable options might be -P, which will use
-#              prior probability maps if the input T1w MRI is in
-#              standard space.
-#    """
-#    print("Segmenting Anatomical Image into WM, GM, and CSF...")
-#    # run FAST, with options -t for the image type and -n to
-#    # segment into CSF (pve_0), GM (pve_1), WM (pve_2)
-#    cmd = "fast -t 1 {} -n 3 -o {} {}".format(opts, basename, t1w)
-#    mgu.execute_cmd(cmd, verb=True)
-#    out = {}  # the outputs
-#    out["wm_prob"] = "{}_{}".format(basename, "pve_2.nii.gz")
-#    out["gm_prob"] = "{}_{}".format(basename, "pve_1.nii.gz")
-#    out["csf_prob"] = "{}_{}".format(basename, "pve_0.nii.gz")
-#    return out
-
-
 def extract_brain(inp, out, opts=""):
     """
     A function to extract the brain from an image using FSL's BET.
