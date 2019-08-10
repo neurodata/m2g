@@ -14,8 +14,6 @@ setup(
         "ndmg.graph",
         "ndmg.stats",
         "ndmg.utils",
-        "ndmg.timeseries",
-        "ndmg.nuis",
         "ndmg.scripts",
     ],
     include_package_data=True,
@@ -23,7 +21,6 @@ setup(
     entry_points={
         "console_scripts": [
             "ndmg_dwi_pipeline=ndmg.scripts.ndmg_dwi_pipeline:main",
-            "ndmg_func_pipeline=ndmg.scripts.ndmg_func_pipeline:main",
             "ndmg_bids=ndmg.scripts.ndmg_bids:main",
             "ndmg_cloud=ndmg.scripts.ndmg_cloud:main",
         ]

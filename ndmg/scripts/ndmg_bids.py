@@ -122,24 +122,6 @@ def get_atlas(atlas_dir, modality, vox_size):
         ]
         labels = [op.join(atlas_dir, "label/Human/", l) for l in labels]
         fils = labels + [atlas, atlas_mask]
-    # if modality == "func":
-    #     atlas = op.join(atlas_dir, "atlas/MNI152NLin6_res-" + dims + "_T1w.nii.gz")
-    #     atlas_brain = op.join(
-    #         atlas_dir, "atlas/" + "MNI152NLin6_res-" + dims + "_T1w_brain.nii.gz"
-    #     )
-    #     atlas_mask = op.join(
-    #         atlas_dir, "mask/MNI152NLin6_res-" + dims + "_T1w_brainmask.nii.gz"
-    #     )
-    #     lv_mask = op.join(
-    #         atlas_dir,
-    #         "mask/HarvardOxford_variant-"
-    #         + "lateral-ventricles-thr25"
-    #         + "_res-' + dims + '_brainmask.nii.gz",
-    #     )
-
-    #     labels = [i for i in glob.glob(atlas_dir + "/label/*.nii.gz") if dims in i]
-    #     labels = [op.join(atlas_dir, "label", l) for l in labels]
-    #     fils = labels + [atlas, atlas_mask, atlas_brain, lv_mask]
 
     if modality == "dwi":
         atlas_brain = None
@@ -338,8 +320,9 @@ def main():
     )
     parser.add_argument(
         "--modality",
-        help="Modality of MRI scans that \
-                        are being evaluated.",
+        help="Modality of MRI scans that",
+            "are being evaluated. Functional modality
+            "analysis still under development.",
         choices=["dwi", "func"],
         default="dwi",
     )
