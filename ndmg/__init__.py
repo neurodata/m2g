@@ -18,4 +18,4 @@ from .timeseries import timeseries as timeseries
 from .scripts import ndmg_dwi_pipeline as ndmg_dwi_pipeline
 from .scripts import ndmg_func_pipeline as ndmg_func_pipeline
 
-VERSION = "0.1.3"
+VERSION = "0.2.0"

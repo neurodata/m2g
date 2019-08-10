@@ -415,7 +415,7 @@ def ndmg_dwi_worker(
 
         # -------- Tensor Fitting and Fiber Tractography ---------------- #
         start_time = time.time()
-        seeds = mgt.build_seed_list(reg.wm_gm_int_in_dwi, np.eye(4), dens=20)
+        seeds = mgt.build_seed_list(reg.wm_gm_int_in_dwi, np.eye(4), dens=25)
         print("Using " + str(len(seeds)) + " seeds...")
 
         # Compute direction model and track fiber streamlines
