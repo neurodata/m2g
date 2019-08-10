@@ -320,9 +320,9 @@ def main():
     )
     parser.add_argument(
         "--modality",
-        help="Modality of MRI scans that",
-            "are being evaluated. Functional modality
-            "analysis still under development.",
+        help="Modality of MRI scans that"
+            " are being evaluated. Functional modality"
+            " analysis still under development.",
         choices=["dwi", "func"],
         default="dwi",
     )
