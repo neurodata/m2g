@@ -35,8 +35,8 @@ The **ndmg** pipeline has been developed as a one-click solution for human conne
 ## System Requirements
 
 The **ndmg** pipeline:
- - was developed and tested primarily on Mac OSX, Ubuntu (12, 14, 16), and CentOS (5, 6);
- - was developed in Python 2.7 and updated to work on Python 3.6;
+ - was developed and tested primarily on Mac OSX, Ubuntu (12, 14, 16, 18), and CentOS (5, 6);
+ - made to work on Python 3.6;
  - is wrapped in a [Docker container](https://hub.docker.com/r/bids/ndmg/);
  - has install instructions via a [Dockerfile](https://github.com/BIDS-Apps/ndmg/blob/master/Dockerfile#L6);
  - requires no non-standard hardware to run;
@@ -46,21 +46,12 @@ The **ndmg** pipeline:
 While **ndmg** is quite robust to Python package versions (with only few exceptions, mentioned in the [installation guide](#installation-guide)), an *example* of possible versions (taken from the **ndmg** Docker Image with version `v0.0.50`) is shown below. Note: this list excludes many libraries which are standard with a Python distribution, and a complete list with all packages and versions can be produced by running `pip freeze` within the Docker container mentioned above.
 
 ```
-awscli==1.11.128 , boto3==1.4.5 , botocore==1.5.91 , colorama==0.3.7 , configparser>=3.7.4, dipy==0.16.0 ,
-matplotlib==1.5.1 , networkx==2.1 , nibabel==2.1.0 , nilearn==0.3.1 , numpy==1.8.2 , Pillow==2.3.0 , plotly==1.12.9,
-pybids==0.6.4 , s3transfer==0.1.10 , setuptools>=40.0 scikit-image==0.13.0 , scikit-learn==0.18.2 , scipy==0.13.3 .
+awscli==1.16.210 , boto3==1.9.200 , botocore==1.12.200 , colorama==0.3.9 , configparser>=3.7.4 , Cython==0.29.13 , dipy==0.16.0 ,
+duecredit==0.7.0 , fury==0.3.0 , graspy==0.0.3 , ipython==7.7.0 , matplotlib==3.1.1 , networkx==1.9 , nibabel==2.5.0 , 
+nilearn==0.5.2 , numpy==1.17.0 , pandas==0.25.0, Pillow==6.1.0 , plotly==1.12.9, pybids==0.6.4 , python-dateutil==2.8.0 , 
+PyVTK==0.5.18 , requests==2.22.0 , s3transfer==0.2.1 , setuptools>=40.0 scikit-image==0.13.0 , scikit-learn==0.21.3 , 
+scipy==1.3.0 , sklearn==8.0 , vtk==8.1.2
 ```
-^ Notes:
-- pandas and awscli in dockerfile twice
-
-no longer using:
-botocore, colorama, ?
-
-Undefined versions for:
-awscli, boto3, matplotlib,scikit-image
-
-New:
-pandas, sklearn, cython, vtk, pyvtk, fury, requests, ipython, duecredit, graspy
 
 ## Installation Guide
 
