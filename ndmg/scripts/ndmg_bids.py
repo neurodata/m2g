@@ -519,6 +519,10 @@ def main():
     reg_style = result.sp
     modif = result.modif
 
+    # Raise NotImplementedError if functional analysis is
+    if modality=='func':
+        raise NotImplementedError('Functional analysis pipeline not yet implemented.')
+
     # Check to see if user has provided direction to an existing s3 bucket they wish to use
     try:
         creds = bool(s3_utils.get_credentials())
