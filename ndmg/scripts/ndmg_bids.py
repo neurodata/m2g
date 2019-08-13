@@ -66,15 +66,13 @@ else:
     """
 
 
-def get_atlas(atlas_dir, modality, vox_size):
+def get_atlas(atlas_dir, vox_size):
     """Given the desired location of atlases and the type of processing, ensure we have all the atlases and parcellations.
     
     Parameters
     ----------
     atlas_dir : str
         Path to directory containing atlases.
-    modality : str
-        Whether you are analyzing dwi or func.
     vox_size : str
         t1w input image voxel dimensions, either 2mm or 1mm
     
@@ -99,33 +97,31 @@ def get_atlas(atlas_dir, modality, vox_size):
             "Voxel dimensions of input t1w image not currently supported by ndmg."
         )
 
-    if modality == "dwi":
-        # grab atlases if they don't exist
-        if not op.exists(atlas_dir):
-            # TODO : re-implement this pythonically with shutil and requests in python3.
-            print("atlas directory not found. Cloning ...")
-            clone = "https://github.com/neurodata/neuroparc.git"
-            os.system("git lfs clone {} {}".format(clone, atlas_dir))
+    # grab atlases if they don't exist
+    if not op.exists(atlas_dir):
+        # TODO : re-implement this pythonically with shutil and requests in python3.
+        print("atlas directory not found. Cloning ...")
+        clone = "https://github.com/neurodata/neuroparc.git"
+        os.system("git lfs clone {} {}".format(clone, atlas_dir))
 
-        atlas = op.join(
-            atlas_dir,
-            "atlases/reference_brains/MNI152NLin6_res-" + dims + "_T1w.nii.gz",
-        )
-        atlas_mask = op.join(
-            atlas_dir,
-            "atlases/mask/MNI152NLin6_res-" + dims + "_T1w_descr-brainmask.nii.gz",
-        )
-        labels = [
-            i
-            for i in glob.glob(atlas_dir + "/atlases/label/Human/*.nii.gz")
-            if dims in i
-        ]
-        labels = [op.join(atlas_dir, "label/Human/", l) for l in labels]
-        fils = labels + [atlas, atlas_mask]
+    atlas = op.join(
+        atlas_dir,
+        "atlases/reference_brains/MNI152NLin6_res-" + dims + "_T1w.nii.gz",
+    )
+    atlas_mask = op.join(
+        atlas_dir,
+        "atlases/mask/MNI152NLin6_res-" + dims + "_T1w_descr-brainmask.nii.gz",
+    )
+    labels = [
+        i
+        for i in glob.glob(atlas_dir + "/atlases/label/Human/*.nii.gz")
+        if dims in i
+    ]
+    labels = [op.join(atlas_dir, "label/Human/", l) for l in labels]
+    fils = labels + [atlas, atlas_mask]
 
-    if modality == "dwi":
-        atlas_brain = None
-        lv_mask = None
+    atlas_brain = None
+    lv_mask = None
 
     assert all(map(os.path.exists, labels)), "Some parcellations do not exist."
     assert all(
@@ -142,7 +138,6 @@ def session_level(
     skipeddy,
     skipreg,
     clean,
-    stc,
     atlas_select,
     mod_type,
     track_type,
@@ -150,9 +145,7 @@ def session_level(
     seeds,
     reg_style,
     sesh=None,
-    task=None,
     run=None,
-    modality="dwi",
     buck=None,
     remo=None,
     push=False,
@@ -178,8 +171,6 @@ def session_level(
         Whether to skip registration if it has already been run. False means don't.
     clean : bool
         Whether or not to delete intermediates
-    stc : str
-        A file for slice timing correction. Options are a TR sequence file (where each line is the shift in TRs), up (ie, bottom to top), down (ie, top to bottom), or interleaved
     atlas_select : str
         The atlas being analyzed in QC (if you only want one)
     mod_type : str
@@ -196,8 +187,6 @@ def session_level(
         task label. Default is None
     run : str, optional
         run label. Default is None
-    modality : str, optional
-        Data type being analyzed. Default is "dwi"
     buck : str, optional
         The name of an S3 bucket which holds BIDS organized data. You musht have build your bucket with credentials to the S3 bucket you wish to access. Default is None
     remo : str, optional
@@ -212,54 +201,37 @@ def session_level(
         Name of the folder on s3 to push to. If empty, push to a folder with ndmg's version number. Default is ""
     """
 
-    labels, atlas, atlas_mask, atlas_brain, lv_mask = get_atlas(
-        atlas_dir, modality, vox_size
-    )
+    labels, atlas, atlas_mask, atlas_brain, lv_mask = get_atlas(atlas_dir, vox_size)
 
     if atlas_select:
         labels = [i for i in labels if atlas_select in i]
-    # mgu.execute_cmd("mkdir -p {} {}/tmp".format(outDir, outDir))
 
-    result = sweep_directory(inDir, subjs, sesh, task, run, modality)
+    result = sweep_directory(inDir, subjs, sesh, run)
 
-    if modality == "dwi":
-        # TODO : os.remove doesn't work on directories.
-        # if not debug:
-        #     print("Cleaning output directory tree ...")
-        #     files = glob.glob(outDir + "/*")
-        #     for f in files:
-        #         os.remove(f)
-        dwis, bvals, bvecs, anats = result
-        assert len(anats) == len(dwis)
-        assert len(bvecs) == len(dwis)
-        assert len(bvals) == len(dwis)
-        args = [
-            [
-                dw,
-                bval,
-                bvec,
-                anat,
-                atlas,
-                atlas_mask,
-                labels,
-                "%s%s%s%s%s"
-                % (
-                    outDir,
-                    "/sub",
-                    bval.split("sub")[1].split("/")[0],
-                    "/ses",
-                    bval.split("ses")[1].split("/")[0],
-                ),
-            ]
-            for (dw, bval, bvec, anat) in zip(dwis, bvals, bvecs, anats)
+    dwis, bvals, bvecs, anats = result
+    assert len(anats) == len(dwis)
+    assert len(bvecs) == len(dwis)
+    assert len(bvals) == len(dwis)
+    args = [
+        [
+            dw,
+            bval,
+            bvec,
+            anat,
+            atlas,
+            atlas_mask,
+            labels,
+            "%s%s%s%s%s"
+            % (
+                outDir,
+                "/sub",
+                bval.split("sub")[1].split("/")[0],
+                "/ses",
+                bval.split("ses")[1].split("/")[0],
+            ),
         ]
-    else:
-        funcs, anats = result
-        assert len(anats) == len(funcs)
-        args = [
-            [func, anat, atlas, atlas_brain, atlas_mask, lv_mask, labels, outDir]
-            for (func, anat) in zip(funcs, anats)
-        ]
+        for (dw, bval, bvec, anat) in zip(dwis, bvals, bvecs, anats)
+    ]
 
     # optional args stored in kwargs
     # use worker wrapper to call function f with args arg
@@ -291,12 +263,6 @@ def session_level(
         modif=modif,
     )
     rmflds = []
-    if modality == "func" and not debug:
-        rmflds += [
-            os.path.join(outDir, "func", modal)
-            for modal in ["clean", "preproc", "registered"]
-        ]
-        rmflds += [os.path.join(outDir, "anat")]
     if len(rmflds) > 0:
         cmd = "rm -rf {}".format(" ".join(rmflds))
         mgu.execute_cmd(cmd)
@@ -307,8 +273,7 @@ def main():
     """Starting point of the ndmg pipeline, assuming that you are using a BIDS organized dataset
     """
     parser = ArgumentParser(
-        description="This is an end-to-end connectome \
-                            estimation pipeline from M3r Images."
+        description="This is an end-to-end connectome estimation pipeline from M3r Images."
     )
     parser.add_argument(
         "bids_dir",
@@ -318,15 +283,9 @@ def main():
     parser.add_argument(
         "output_dir",
         help="The directory where the output "
-        "files should be stored.",
-    )
-    parser.add_argument(
-        "--modality",
-        help="Modality of MRI scans that"
-            " are being evaluated. Functional modality"
-            " analysis still under development.",
-        choices=["dwi", "func"],
-        default="dwi",
+        "files should be stored. If you are running group "
+        "level analysis this folder should be prepopulated "
+        "with the results of the participant level analysis.",
     )
     parser.add_argument(
         "--participant_label",
@@ -348,16 +307,6 @@ def main():
         "parameter is not provided all sessions should be "
         "analyzed. Multiple sessions can be specified "
         "with a space separated list.",
-        nargs="+",
-    )
-    parser.add_argument(
-        "--task_label",
-        help="The label(s) of the task "
-        "that should be analyzed. The label corresponds to "
-        "task-<task_label> from the BIDS spec (so it does not "
-        'include "task-"). If this parameter is not provided '
-        "all tasks should be analyzed. Multiple tasks can be "
-        "specified with a space separated list.",
         nargs="+",
     )
     parser.add_argument(
@@ -403,24 +352,6 @@ def main():
         default=None,
     )
     parser.add_argument(
-        "--minimal",
-        action="store_true",
-        help="Determines " "whether to show a minimal or full set of plots.",
-        default=False,
-    )
-    parser.add_argument(
-        "--hemispheres",
-        action="store_true",
-        help="Whether " "or not to break degrees into hemispheres or not",
-        default=False,
-    )
-    parser.add_argument(
-        "--log",
-        action="store_true",
-        help="Determines " "axis scale for plotting.",
-        default=False,
-    )
-    parser.add_argument(
         "--debug",
         action="store_true",
         help="If False, remove any old files in the output directory.",
@@ -451,16 +382,6 @@ def main():
         action="store_true",
         default=False,
         help="Whether or not to delete intemediates",
-    )
-    parser.add_argument(
-        "--stc",
-        action="store",
-        help="A file for slice "
-        "timing correction. Options are a TR sequence file "
-        "(where each line is the shift in TRs), "
-        "up (ie, bottom to top), down (ie, top to bottom), "
-        "or interleaved.",
-        default=None,
     )
     parser.add_argument(
         "--mod",
@@ -504,33 +425,22 @@ def main():
     outDir = result.output_dir
     subj = result.participant_label
     sesh = result.session_label
-    task = result.task_label
     run = result.run_label
     buck = result.bucket
     remo = result.remote_path
     push = result.push_data
-    stc = result.stc
     debug = result.debug
-    modality = result.modality
     seeds = result.seeds
     skipeddy = result.sked
     skipreg = result.skreg
     clean = result.clean
     vox_size = result.vox
-    minimal = result.minimal
-    log = result.log
     atlas_select = result.atlas
-    dataset = result.dataset
-    hemi = result.hemispheres
     mod_type = result.mod
     track_type = result.tt
     mod_func = result.mf
     reg_style = result.sp
     modif = result.modif
-
-    # Raise NotImplementedError if functional analysis is
-    if modality=='func':
-        raise NotImplementedError('Functional analysis pipeline not yet implemented.')
 
     # Check to see if user has provided direction to an existing s3 bucket they wish to use
     try:
@@ -564,51 +474,29 @@ def main():
 
     print("input directory contents: {}".format(os.listdir(inDir)))
 
-        ##### for debugging, remove soon
-        # TODO: argument for this won't always work
-        #         for path, dirs, files in os.walk(tindir):
-        #             print(path)
-        #             for f in files:
-        #                 print(f)
-
-        #         # TODO: argument for this won't always work
-        #         if op.isdir(outDir):
-        #             for path, dirs, files in os.walk(outDir):
-        #                 print(path)
-        #                 for f in files:
-        #                     print(f)
-        #         else:
-        #             print("OutDir {} does not exist yet".format(outDir))
-        ######
-        # run ndmg.
-        session_level(
-            inDir,
-            outDir,
-            subj,
-            vox_size,
-            skipeddy,
-            skipreg,
-            clean,
-            stc,
-            atlas_select,
-            mod_type,
-            track_type,
-            mod_func,
-            seeds,
-            reg_style,
-            sesh,
-            task,
-            run,
-            modality,
-            buck=buck,
-            remo=remo,
-            push=push,
-            creds=creds,
-            debug=debug,
-            modif=modif,
-        )
-    else:
-        print("Specified level not valid")
+    session_level(
+        inDir,
+        outDir,
+        subj,
+        vox_size,
+        skipeddy,
+        skipreg,
+        clean,
+        atlas_select,
+        mod_type,
+        track_type,
+        mod_func,
+        seeds,
+        reg_style,
+        sesh,
+        run,
+        buck=buck,
+        remo=remo,
+        push=push,
+        creds=creds,
+        debug=debug,
+        modif=modif,
+    )
 
 
 if __name__ == "__main__":
