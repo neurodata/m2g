@@ -122,24 +122,6 @@ def get_atlas(atlas_dir, modality, vox_size):
         ]
         labels = [op.join(atlas_dir, "label/Human/", l) for l in labels]
         fils = labels + [atlas, atlas_mask]
-    # if modality == "func":
-    #     atlas = op.join(atlas_dir, "atlas/MNI152NLin6_res-" + dims + "_T1w.nii.gz")
-    #     atlas_brain = op.join(
-    #         atlas_dir, "atlas/" + "MNI152NLin6_res-" + dims + "_T1w_brain.nii.gz"
-    #     )
-    #     atlas_mask = op.join(
-    #         atlas_dir, "mask/MNI152NLin6_res-" + dims + "_T1w_brainmask.nii.gz"
-    #     )
-    #     lv_mask = op.join(
-    #         atlas_dir,
-    #         "mask/HarvardOxford_variant-"
-    #         + "lateral-ventricles-thr25"
-    #         + "_res-' + dims + '_brainmask.nii.gz",
-    #     )
-
-    #     labels = [i for i in glob.glob(atlas_dir + "/label/*.nii.gz") if dims in i]
-    #     labels = [op.join(atlas_dir, "label", l) for l in labels]
-    #     fils = labels + [atlas, atlas_mask, atlas_brain, lv_mask]
 
     if modality == "dwi":
         atlas_brain = None
@@ -336,23 +318,13 @@ def main():
     parser.add_argument(
         "output_dir",
         help="The directory where the output "
-        "files should be stored. If you are running group "
-        "level analysis this folder should be prepopulated "
-        "with the results of the participant level analysis.",
-    )
-    parser.add_argument(
-        "analysis_level",
-        help="Level of the analysis that "
-        "will be performed. Multiple participant level "
-        "analyses can be run independently (in parallel) "
-        "using the same output_dir.",
-        choices=["participant", "group"],
-        default="participant",
+        "files should be stored.",
     )
     parser.add_argument(
         "--modality",
-        help="Modality of MRI scans that \
-                        are being evaluated.",
+        help="Modality of MRI scans that"
+            " are being evaluated. Functional modality"
+            " analysis still under development.",
         choices=["dwi", "func"],
         default="dwi",
     )
@@ -537,7 +509,6 @@ def main():
     buck = result.bucket
     remo = result.remote_path
     push = result.push_data
-    level = result.analysis_level
     stc = result.stc
     debug = result.debug
     modality = result.modality
@@ -557,6 +528,10 @@ def main():
     reg_style = result.sp
     modif = result.modif
 
+    # Raise NotImplementedError if functional analysis is
+    if modality=='func':
+        raise NotImplementedError('Functional analysis pipeline not yet implemented.')
+
     # Check to see if user has provided direction to an existing s3 bucket they wish to use
     try:
         creds = bool(s3_utils.get_credentials())
@@ -568,27 +543,26 @@ def main():
     # TODO : `Flat is better than nested`. Make the logic for this cleaner.
     # this block of logic essentially just gets data we need from s3.
     # it's super gross.
-    if level == "participant":
-        if buck is not None and remo is not None:
-            if subj is not None:
-                if len(sesh) == 1:
-                    sesh = sesh[0]
-                for sub in subj:
-                    if sesh is not None:
-                        remo = op.join(
-                            remo, "sub-{}".format(sub), "ses-{}".format(sesh)
-                        )
-                        tindir = op.join(
-                            inDir, "sub-{}".format(sub), "ses-{}".format(sesh)
-                        )
-                    else:
-                        remo = op.join(remo, "sub-{}".format(sub))
-                        tindir = op.join(inDir, "sub-{}".format(sub))
-                    s3_utils.s3_get_data(buck, remo, tindir, public=not creds)
-            else:
-                s3_utils.s3_get_data(buck, remo, inDir, public=not creds)
+    if buck is not None and remo is not None:
+        if subj is not None:
+            if len(sesh) == 1:
+                sesh = sesh[0]
+            for sub in subj:
+                if sesh is not None:
+                    remo = op.join(
+                        remo, "sub-{}".format(sub), "ses-{}".format(sesh)
+                    )
+                    tindir = op.join(
+                        inDir, "sub-{}".format(sub), "ses-{}".format(sesh)
+                    )
+                else:
+                    remo = op.join(remo, "sub-{}".format(sub))
+                    tindir = op.join(inDir, "sub-{}".format(sub))
+                s3_utils.s3_get_data(buck, remo, tindir, public=not creds)
+        else:
+            s3_utils.s3_get_data(buck, remo, inDir, public=not creds)
 
-        print("input directory contents: {}".format(os.listdir(inDir)))
+    print("input directory contents: {}".format(os.listdir(inDir)))
 
         ##### for debugging, remove soon
         # TODO: argument for this won't always work
