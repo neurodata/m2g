@@ -27,6 +27,7 @@ import glob
 import os.path as op
 import warnings
 from argparse import ArgumentParser
+import subprocess
 
 from ndmg.utils import s3_utils
 from ndmg.utils.bids_utils import *
@@ -39,6 +40,30 @@ if sys.version_info[0] < 3:
         "WARNING : Using python 2. This Python version is no longer maintained. Use at your own risk."
     )
 
+
+def check_dependencies():
+    """
+    Check for the existence of FSL and AFNI.
+    """
+    try:
+        print(f"Your fsl directory is located here: {os.environ['FSLDIR']}")
+    except KeyError:
+        raise AssertionError(
+            "You do not have FSL installed! See installation instructions here: https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FslInstallation"
+        )
+
+    # AFNI
+    try:
+        print(
+            f"Your AFNI directory is located here: {subprocess.check_output('which afni', shell=True, universal_newlines=True)}"
+        )
+    except subprocess.CalledProcessError:
+        raise AssertionError(
+            "You do not have AFNI installed! See installation instructions here: https://afni.nimh.nih.gov/pub/dist/doc/htmldoc/background_install/main_toc.html"
+        )
+
+
+check_dependencies()
 print("Beginning ndmg ...")
 
 if os.path.isdir("/ndmg_atlases"):
@@ -105,17 +130,14 @@ def get_atlas(atlas_dir, vox_size):
         os.system("git lfs clone {} {}".format(clone, atlas_dir))
 
     atlas = op.join(
-        atlas_dir,
-        "atlases/reference_brains/MNI152NLin6_res-" + dims + "_T1w.nii.gz",
+        atlas_dir, "atlases/reference_brains/MNI152NLin6_res-" + dims + "_T1w.nii.gz"
     )
     atlas_mask = op.join(
         atlas_dir,
         "atlases/mask/MNI152NLin6_res-" + dims + "_T1w_descr-brainmask.nii.gz",
     )
     labels = [
-        i
-        for i in glob.glob(atlas_dir + "/atlases/label/Human/*.nii.gz")
-        if dims in i
+        i for i in glob.glob(atlas_dir + "/atlases/label/Human/*.nii.gz") if dims in i
     ]
     labels = [op.join(atlas_dir, "label/Human/", l) for l in labels]
     fils = labels + [atlas, atlas_mask]
@@ -459,12 +481,8 @@ def main():
                 sesh = sesh[0]
             for sub in subj:
                 if sesh is not None:
-                    remo = op.join(
-                        remo, "sub-{}".format(sub), "ses-{}".format(sesh)
-                    )
-                    tindir = op.join(
-                        inDir, "sub-{}".format(sub), "ses-{}".format(sesh)
-                    )
+                    remo = op.join(remo, "sub-{}".format(sub), "ses-{}".format(sesh))
+                    tindir = op.join(inDir, "sub-{}".format(sub), "ses-{}".format(sesh))
                 else:
                     remo = op.join(remo, "sub-{}".format(sub))
                     tindir = op.join(inDir, "sub-{}".format(sub))
