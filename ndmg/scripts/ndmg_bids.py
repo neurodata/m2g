@@ -30,39 +30,9 @@ from argparse import ArgumentParser
 import subprocess
 
 from ndmg.utils import s3_utils
+from ndmg.utils.gen_utils import check_dependencies
 from ndmg.utils.bids_utils import *
 from ndmg.scripts.ndmg_dwi_pipeline import ndmg_dwi_worker
-
-print("Python location : {}".format(sys.executable))
-print("Python version : {}".format(sys.version))
-if sys.version_info[0] < 3:
-    warnings.warn(
-        "WARNING : Using python 2. This Python version is no longer maintained. Use at your own risk."
-    )
-
-
-def check_dependencies():
-    """
-    Check for the existence of FSL and AFNI.
-    Stop the pipeline immediately if these dependencies are not installed.
-    """
-    try:
-        print(f"Your fsl directory is located here: {os.environ['FSLDIR']}")
-    except KeyError:
-        raise AssertionError(
-            "You do not have FSL installed! See installation instructions here: https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FslInstallation"
-        )
-
-    # AFNI
-    try:
-        print(
-            f"Your AFNI directory is located here: {subprocess.check_output('which afni', shell=True, universal_newlines=True)}"
-        )
-    except subprocess.CalledProcessError:
-        raise AssertionError(
-            "You do not have AFNI installed! See installation instructions here: https://afni.nimh.nih.gov/pub/dist/doc/htmldoc/background_install/main_toc.html"
-        )
-
 
 check_dependencies()
 print("Beginning ndmg ...")
