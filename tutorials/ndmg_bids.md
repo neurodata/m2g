@@ -16,7 +16,7 @@ if not op.isdir(data_dir):
 
 # Run ndmg with docker from the command-line
 ```{bash}
-input_dir = $HOME/.ndmg/HNU1t
+export input_dir=$HOME/.ndmg/HNU1t
 mkdir $HOME/.ndmg/output
 
 # Option A (Docker executable approach):
