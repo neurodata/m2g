@@ -20,9 +20,12 @@ addons:
     packages:
       - docker-ce
 
-matrix:
-  - env: SP="native,mni,native_dsn"
-  - env: MOD="det,prob"
+env:
+  matrix:
+    - SP=native MOD=det
+    - SP=mni MOD=det
+    - SP=native_dsn MOD=det
+    - MOD=prob SP=native
 
 before_install:
   # make local input and output directories to attach to container
