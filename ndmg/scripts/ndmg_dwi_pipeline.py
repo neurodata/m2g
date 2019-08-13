@@ -57,6 +57,7 @@ def ndmg_dwi_worker(
     mod_type,
     track_type,
     mod_func,
+    seeds,
     reg_style,
     clean,
     skipeddy=False,
@@ -96,6 +97,8 @@ def ndmg_dwi_worker(
         Tracking approach: eudx or local. Default is eudx.
     mod_func : str
         Diffusion model: csd, csa, or tensor. Default is tensor.
+    seeds : int
+        Density of seeding for native-space tractography.
     reg_style : str
         Space for tractography. Default is native.
     clean : bool
@@ -136,6 +139,7 @@ def ndmg_dwi_worker(
     print("mod_type = {}".format(mod_type))
     print("track_type = {}".format(track_type))
     print("mod_func = {}".format(mod_func))
+    print("seeds = {}".format(seeds))
     print("reg_style = {}".format(reg_style))
     print("clean = {}".format(clean))
     print("skip eddy = {}".format(skipeddy))
@@ -156,6 +160,7 @@ def ndmg_dwi_worker(
             mod_type,
             track_type,
             mod_func,
+            seeds,
             reg_style,
         ]
     ), "Missing a default argument."
@@ -415,7 +420,7 @@ def ndmg_dwi_worker(
 
         # -------- Tensor Fitting and Fiber Tractography ---------------- #
         start_time = time.time()
-        seeds = mgt.build_seed_list(reg.wm_gm_int_in_dwi, np.eye(4), dens=20)
+        seeds = mgt.build_seed_list(reg.wm_gm_int_in_dwi, np.eye(4), dens=int(seeds))
         print("Using " + str(len(seeds)) + " seeds...")
 
         # Compute direction model and track fiber streamlines
@@ -721,6 +726,7 @@ def main():
         result.tt,
         result.mf,
         result.sp,
+        result.seeds,
         result.clean,
         result.skipeddy,
         result.skipreg,

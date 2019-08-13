@@ -20,15 +20,15 @@ input_dir = $HOME/.ndmg/HNU1t
 mkdir $HOME/.ndmg/output
 
 # Option A (Docker executable approach):
-docker run -ti --rm --privileged -e DISPLAY=$DISPLAY -v $HOME/.ndmg/HNU1t:/input -v $HOME/.ndmg/output:/outputs ndmg_dev:latest --participant_label 0025427 --session_label 1 --modality dwi --atlas desikan --mod det --tt local --mf csd --sp native /input /output participant
+docker run -ti --rm --privileged -e DISPLAY=$DISPLAY -v $HOME/.ndmg/HNU1t:/input -v $HOME/.ndmg/output:/outputs ndmg_dev:latest --participant_label 0025427 --session_label 1 --modality dwi --atlas desikan --mod det --tt local --mf csd --sp native --seeds 20 /input /output participant
 
-ndmg_bids --bucket ndmg-data --remote_path HNU1t --participant_label 0025427 --session_label 1 --modality dwi --atlas desikan --mod det --tt local --mf csd --sp native /input /output participant
+ndmg_bids --bucket ndmg-data --remote_path HNU1t --participant_label 0025427 --session_label 1 --modality dwi --atlas desikan --mod det --tt local --mf csd --sp native --seeds 20 /input /output participant
 
 # Option B (Inside Docker container):
 docker run -ti --rm --privileged --entrypoint /bin/bash -e DISPLAY=$DISPLAY -v $HOME/.ndmg/HNU1t:/input -v $HOME/.ndmg/output:/output ndmg_dev:latest
 
-ndmg_bids --participant_label 0025427 --session_label 1 --modality dwi --atlas desikan --mod det --tt local --mf csd --sp native /input /output participant
+ndmg_bids --participant_label 0025427 --session_label 1 --modality dwi --atlas desikan --mod det --tt local --mf csd --sp native --seeds 20 /input /output participant
 
 # Option C (Docker via NeuroData AWS -- credentials required):
-ndmg_bids --bucket ndmg-data --remote_path HNU1t --participant_label 0025427 --session_label 1 --modality dwi --atlas desikan --mod det --tt local --mf csd --sp native /input /output participant
+ndmg_bids --bucket ndmg-data --remote_path HNU1t --participant_label 0025427 --session_label 1 --modality dwi --atlas desikan --mod det --tt local --mf csd --sp native --seeds 20 /input /output participant
 ```

@@ -147,6 +147,7 @@ def session_level(
     mod_type,
     track_type,
     mod_func,
+    seeds,
     reg_style,
     sesh=None,
     task=None,
@@ -277,6 +278,7 @@ def session_level(
         mod_type,
         track_type,
         mod_func,
+        seeds,
         reg_style,
         clean,
         skipeddy,
@@ -485,6 +487,12 @@ def main():
         default="native",
     )
     parser.add_argument(
+        "--seeds",
+        action="store",
+        help="Seeding density for tractography. Default is 20.",
+        default=20,
+    )
+    parser.add_argument(
         "--modif",
         action="store",
         help="Name of folder on s3 to push to. If empty, push to a folder with ndmg's version number.",
@@ -504,6 +512,7 @@ def main():
     stc = result.stc
     debug = result.debug
     modality = result.modality
+    seeds = result.seeds
     skipeddy = result.sked
     skipreg = result.skreg
     clean = result.clean
@@ -572,31 +581,34 @@ def main():
         #             print("OutDir {} does not exist yet".format(outDir))
         ######
         # run ndmg.
-    session_level(
-        inDir,
-        outDir,
-        subj,
-        vox_size,
-        skipeddy,
-        skipreg,
-        clean,
-        stc,
-        atlas_select,
-        mod_type,
-        track_type,
-        mod_func,
-        reg_style,
-        sesh,
-        task,
-        run,
-        modality,
-        buck=buck,
-        remo=remo,
-        push=push,
-        creds=creds,
-        debug=debug,
-        modif=modif,
-    )
+        session_level(
+            inDir,
+            outDir,
+            subj,
+            vox_size,
+            skipeddy,
+            skipreg,
+            clean,
+            stc,
+            atlas_select,
+            mod_type,
+            track_type,
+            mod_func,
+            seeds,
+            reg_style,
+            sesh,
+            task,
+            run,
+            modality,
+            buck=buck,
+            remo=remo,
+            push=push,
+            creds=creds,
+            debug=debug,
+            modif=modif,
+        )
+    else:
+        print("Specified level not valid")
 
 
 if __name__ == "__main__":

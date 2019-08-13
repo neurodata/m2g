@@ -16,4 +16,4 @@ from .track.gen_track import run_track as track
 # from .preproc.preproc import preproc as preproc
 from .scripts import ndmg_dwi_pipeline as ndmg_dwi_pipeline
 
-VERSION = "0.1.3"
+VERSION = "0.2.0"

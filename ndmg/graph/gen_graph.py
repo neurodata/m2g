@@ -222,9 +222,8 @@ class graph_tools(object):
             lab_arr = self.rois[i, j, k]
             endlabels = []
             for lab in np.unique(lab_arr):
-                if lab > 0:
-                    if np.sum(lab_arr == lab) >= overlap_thr:
-                        endlabels.append(node_dict[lab])
+                if (lab > 0) and (np.sum(lab_arr == lab) >= overlap_thr):
+                    endlabels.append(node_dict[lab])
 
             edges = combinations(endlabels, 2)
             for edge in edges:
