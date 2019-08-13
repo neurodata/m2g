@@ -26,6 +26,7 @@ warnings.simplefilter("ignore")
 from dipy.io import read_bvals_bvecs
 from dipy.core.gradients import gradient_table
 from subprocess import Popen, PIPE
+import subprocess
 import numpy as np
 import nibabel as nib
 import os
