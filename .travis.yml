@@ -21,9 +21,8 @@ addons:
       - docker-ce
 
 matrix:
-  include:
-    - env: SP="native,mni,native_dsn"
-    - env: MOD="det,prob"
+  - env: SP="native,mni,native_dsn"
+  - env: MOD="det,prob"
 
 before_install:
   # make local input and output directories to attach to container
