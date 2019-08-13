@@ -44,6 +44,7 @@ if sys.version_info[0] < 3:
 def check_dependencies():
     """
     Check for the existence of FSL and AFNI.
+    Stop the pipeline immediately if these dependencies are not installed.
     """
     try:
         print(f"Your fsl directory is located here: {os.environ['FSLDIR']}")
