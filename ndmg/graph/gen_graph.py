@@ -243,23 +243,6 @@ class graph_tools(object):
 
         return g
 
-    def cor_graph(self, timeseries):
-        """
-        Takes timeseries and produces a correlation matrix
-
-        **Positional Arguments:**
-            timeseries:
-                -the timeseries file to extract correlation for
-                dimensions are [numrois]x[numtimesteps]
-        """
-        ts = timeseries[0]
-        rois = timeseries[1]
-        print("Estimating absolute correlation matrix for {} ROIs...".format(len(rois)))
-        self.g = np.abs(np.corrcoef(ts))  # calculate abs pearson correlation
-        self.g = np.nan_to_num(self.g).astype(object)
-        self.n_ids = rois
-        return self.g
-
     def get_graph(self):
         """
         Returns the graph object created
