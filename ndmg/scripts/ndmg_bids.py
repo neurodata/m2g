@@ -27,18 +27,14 @@ import glob
 import os.path as op
 import warnings
 from argparse import ArgumentParser
+import subprocess
 
 from ndmg.utils import s3_utils
+from ndmg.utils.gen_utils import check_dependencies
 from ndmg.utils.bids_utils import *
 from ndmg.scripts.ndmg_dwi_pipeline import ndmg_dwi_worker
 
-print("Python location : {}".format(sys.executable))
-print("Python version : {}".format(sys.version))
-if sys.version_info[0] < 3:
-    warnings.warn(
-        "WARNING : Using python 2. This Python version is no longer maintained. Use at your own risk."
-    )
-
+check_dependencies()
 print("Beginning ndmg ...")
 
 if os.path.isdir("/ndmg_atlases"):
@@ -105,17 +101,14 @@ def get_atlas(atlas_dir, vox_size):
         os.system("git lfs clone {} {}".format(clone, atlas_dir))
 
     atlas = op.join(
-        atlas_dir,
-        "atlases/reference_brains/MNI152NLin6_res-" + dims + "_T1w.nii.gz",
+        atlas_dir, "atlases/reference_brains/MNI152NLin6_res-" + dims + "_T1w.nii.gz"
     )
     atlas_mask = op.join(
         atlas_dir,
         "atlases/mask/MNI152NLin6_res-" + dims + "_T1w_descr-brainmask.nii.gz",
     )
     labels = [
-        i
-        for i in glob.glob(atlas_dir + "/atlases/label/Human/*.nii.gz")
-        if dims in i
+        i for i in glob.glob(atlas_dir + "/atlases/label/Human/*.nii.gz") if dims in i
     ]
     labels = [op.join(atlas_dir, "label/Human/", l) for l in labels]
     fils = labels + [atlas, atlas_mask]
@@ -459,12 +452,8 @@ def main():
                 sesh = sesh[0]
             for sub in subj:
                 if sesh is not None:
-                    remo = op.join(
-                        remo, "sub-{}".format(sub), "ses-{}".format(sesh)
-                    )
-                    tindir = op.join(
-                        inDir, "sub-{}".format(sub), "ses-{}".format(sesh)
-                    )
+                    remo = op.join(remo, "sub-{}".format(sub), "ses-{}".format(sesh))
+                    tindir = op.join(inDir, "sub-{}".format(sub), "ses-{}".format(sesh))
                 else:
                     remo = op.join(remo, "sub-{}".format(sub))
                     tindir = op.join(inDir, "sub-{}".format(sub))
