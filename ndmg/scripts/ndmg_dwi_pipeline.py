@@ -551,7 +551,7 @@ def ndmg_dwi_worker(
             labels_im_file_mni = reg.atlas2t1w2dwi_align(labels_im_file, dsn=True)
             labels_im = nib.load(labels_im_file_mni)
             g1 = mgg.graph_tools(
-                attr=len(np.unique(labels_im.get_data().astype("int"))) - 1,
+                attr=len(np.unique(np.around(labels_im.get_data()).astype("int16"))) - 1,
                 rois=labels_im_file_mni,
                 tracks=streamlines_mni,
                 affine=np.eye(4),
@@ -569,7 +569,7 @@ def ndmg_dwi_worker(
             labels_im_file_dwi = reg.atlas2t1w2dwi_align(labels_im_file, dsn=False)
             labels_im = nib.load(labels_im_file_dwi)
             g1 = mgg.graph_tools(
-                attr=len(np.unique(labels_im.get_data().astype("int"))) - 1,
+                attr=len(np.unique(np.around(labels_im.get_data()).astype("int16"))) - 1,
                 rois=labels_im_file_dwi,
                 tracks=streamlines,
                 affine=np.eye(4),
@@ -584,7 +584,7 @@ def ndmg_dwi_worker(
             )
             labels_im = nib.load(labels_im_file)
             g1 = mgg.graph_tools(
-                attr=len(np.unique(labels_im.get_data().astype("int"))) - 1,
+                attr=len(np.unique(np.around(labels_im.get_data()).astype("int16"))) - 1,
                 rois=labels_im_file,
                 tracks=streamlines,
                 affine=np.eye(4),

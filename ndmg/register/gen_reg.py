@@ -657,7 +657,7 @@ class dmri_reg(object):
             self.atlas_img = nib.load(self.dwi_aligned_atlas)
         else:
             self.atlas_img = nib.load(self.aligned_atlas_t1mni)
-        self.atlas_data = self.atlas_img.get_data().astype("int")
+        self.atlas_data = np.around(self.atlas_img.get_data()).astype("int16")
         node_num = len(np.unique(self.atlas_data))
         self.atlas_data[self.atlas_data > node_num] = 0
 
