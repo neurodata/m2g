@@ -14,8 +14,6 @@ setup(
         "ndmg.graph",
         "ndmg.stats",
         "ndmg.utils",
-        "ndmg.timeseries",
-        "ndmg.nuis",
         "ndmg.scripts",
     ],
     include_package_data=True,
@@ -23,17 +21,16 @@ setup(
     entry_points={
         "console_scripts": [
             "ndmg_dwi_pipeline=ndmg.scripts.ndmg_dwi_pipeline:main",
-            "ndmg_func_pipeline=ndmg.scripts.ndmg_func_pipeline:main",
             "ndmg_bids=ndmg.scripts.ndmg_bids:main",
             "ndmg_cloud=ndmg.scripts.ndmg_cloud:main",
         ]
     },
     description="Neuro Data MRI to Graphs Pipeline",
     author="Derek Pisner, Greg Kiar, Eric Bridgeford, Alex Loftus, and Will Gray Roncal",
-    author_email="gkiar@jhu.edu, wgr@jhu.edu, ebridge2@jhu.edu, dpisner@utexas.edu, aloftus2@jhu.edu",
+    author_email="dpisner@utexas.edu, aloftus2@jhu.edu, gkiar@jhu.edu, wgr@jhu.edu, ebridge2@jhu.edu",
     url="https://github.com/neurodata/ndmg",
     download_url="https://github.com/neurodata/ndmg/tarball/"
-    + VERSION,  # I don't think we need this (this download url is a 404)
+    + VERSION,
     keywords=["connectome", "mri", "pipeline"],
     classifiers=["Programming Language :: Python :: 3.6"],
     install_requires=[
@@ -56,7 +53,7 @@ setup(
         "pybids==0.6.4",
         "setuptools>=40.0",
         "scikit-image",
-        "networkx==1.9",
+        "networkx",
         "configparser>=3.7.4",
         "pytest",
     ],

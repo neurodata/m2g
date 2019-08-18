@@ -27,18 +27,14 @@ import glob
 import os.path as op
 import warnings
 from argparse import ArgumentParser
+import subprocess
 
 from ndmg.utils import s3_utils
+from ndmg.utils.gen_utils import check_dependencies
 from ndmg.utils.bids_utils import *
 from ndmg.scripts.ndmg_dwi_pipeline import ndmg_dwi_worker
 
-print("Python location : {}".format(sys.executable))
-print("Python version : {}".format(sys.version))
-if sys.version_info[0] < 3:
-    warnings.warn(
-        "WARNING : Using python 2. This Python version is no longer maintained. Use at your own risk."
-    )
-
+check_dependencies()
 print("Beginning ndmg ...")
 
 if os.path.isdir("/ndmg_atlases"):
@@ -66,15 +62,13 @@ else:
     """
 
 
-def get_atlas(atlas_dir, modality, vox_size):
+def get_atlas(atlas_dir, vox_size):
     """Given the desired location of atlases and the type of processing, ensure we have all the atlases and parcellations.
     
     Parameters
     ----------
     atlas_dir : str
         Path to directory containing atlases.
-    modality : str
-        Whether you are analyzing dwi or func.
     vox_size : str
         t1w input image voxel dimensions, either 2mm or 1mm
     
@@ -99,51 +93,28 @@ def get_atlas(atlas_dir, modality, vox_size):
             "Voxel dimensions of input t1w image not currently supported by ndmg."
         )
 
-    if modality == "dwi":
-        # grab atlases if they don't exist
-        if not op.exists(atlas_dir):
-            # TODO : re-implement this pythonically with shutil and requests in python3.
-            print("atlas directory not found. Cloning ...")
-            clone = "https://github.com/neurodata/neuroparc.git"
-            os.system("git lfs clone {} {}".format(clone, atlas_dir))
+    # grab atlases if they don't exist
+    if not op.exists(atlas_dir):
+        # TODO : re-implement this pythonically with shutil and requests in python3.
+        print("atlas directory not found. Cloning ...")
+        clone = "https://github.com/neurodata/neuroparc.git"
+        os.system("git lfs clone {} {}".format(clone, atlas_dir))
 
-        atlas = op.join(
-            atlas_dir,
-            "atlases/reference_brains/MNI152NLin6_res-" + dims + "_T1w.nii.gz",
-        )
-        atlas_mask = op.join(
-            atlas_dir,
-            "atlases/mask/MNI152NLin6_res-" + dims + "_T1w_descr-brainmask.nii.gz",
-        )
-        labels = [
-            i
-            for i in glob.glob(atlas_dir + "/atlases/label/Human/*.nii.gz")
-            if dims in i
-        ]
-        labels = [op.join(atlas_dir, "label/Human/", l) for l in labels]
-        fils = labels + [atlas, atlas_mask]
-    # if modality == "func":
-    #     atlas = op.join(atlas_dir, "atlas/MNI152NLin6_res-" + dims + "_T1w.nii.gz")
-    #     atlas_brain = op.join(
-    #         atlas_dir, "atlas/" + "MNI152NLin6_res-" + dims + "_T1w_brain.nii.gz"
-    #     )
-    #     atlas_mask = op.join(
-    #         atlas_dir, "mask/MNI152NLin6_res-" + dims + "_T1w_brainmask.nii.gz"
-    #     )
-    #     lv_mask = op.join(
-    #         atlas_dir,
-    #         "mask/HarvardOxford_variant-"
-    #         + "lateral-ventricles-thr25"
-    #         + "_res-' + dims + '_brainmask.nii.gz",
-    #     )
+    atlas = op.join(
+        atlas_dir, "atlases/reference_brains/MNI152NLin6_res-" + dims + "_T1w.nii.gz"
+    )
+    atlas_mask = op.join(
+        atlas_dir,
+        "atlases/mask/MNI152NLin6_res-" + dims + "_T1w_descr-brainmask.nii.gz",
+    )
+    labels = [
+        i for i in glob.glob(atlas_dir + "/atlases/label/Human/*.nii.gz") if dims in i
+    ]
+    labels = [op.join(atlas_dir, "label/Human/", l) for l in labels]
+    fils = labels + [atlas, atlas_mask]
 
-    #     labels = [i for i in glob.glob(atlas_dir + "/label/*.nii.gz") if dims in i]
-    #     labels = [op.join(atlas_dir, "label", l) for l in labels]
-    #     fils = labels + [atlas, atlas_mask, atlas_brain, lv_mask]
-
-    if modality == "dwi":
-        atlas_brain = None
-        lv_mask = None
+    atlas_brain = None
+    lv_mask = None
 
     assert all(map(os.path.exists, labels)), "Some parcellations do not exist."
     assert all(
@@ -160,16 +131,14 @@ def session_level(
     skipeddy,
     skipreg,
     clean,
-    stc,
     atlas_select,
     mod_type,
     track_type,
     mod_func,
+    seeds,
     reg_style,
     sesh=None,
-    task=None,
     run=None,
-    modality="dwi",
     buck=None,
     remo=None,
     push=False,
@@ -195,8 +164,6 @@ def session_level(
         Whether to skip registration if it has already been run. False means don't.
     clean : bool
         Whether or not to delete intermediates
-    stc : str
-        A file for slice timing correction. Options are a TR sequence file (where each line is the shift in TRs), up (ie, bottom to top), down (ie, top to bottom), or interleaved
     atlas_select : str
         The atlas being analyzed in QC (if you only want one)
     mod_type : str
@@ -213,8 +180,6 @@ def session_level(
         task label. Default is None
     run : str, optional
         run label. Default is None
-    modality : str, optional
-        Data type being analyzed. Default is "dwi"
     buck : str, optional
         The name of an S3 bucket which holds BIDS organized data. You musht have build your bucket with credentials to the S3 bucket you wish to access. Default is None
     remo : str, optional
@@ -229,54 +194,37 @@ def session_level(
         Name of the folder on s3 to push to. If empty, push to a folder with ndmg's version number. Default is ""
     """
 
-    labels, atlas, atlas_mask, atlas_brain, lv_mask = get_atlas(
-        atlas_dir, modality, vox_size
-    )
+    labels, atlas, atlas_mask, atlas_brain, lv_mask = get_atlas(atlas_dir, vox_size)
 
     if atlas_select:
         labels = [i for i in labels if atlas_select in i]
-    # mgu.execute_cmd("mkdir -p {} {}/tmp".format(outDir, outDir))
 
-    result = sweep_directory(inDir, subjs, sesh, task, run, modality)
+    result = sweep_directory(inDir, subjs, sesh, run)
 
-    if modality == "dwi":
-        # TODO : os.remove doesn't work on directories.
-        # if not debug:
-        #     print("Cleaning output directory tree ...")
-        #     files = glob.glob(outDir + "/*")
-        #     for f in files:
-        #         os.remove(f)
-        dwis, bvals, bvecs, anats = result
-        assert len(anats) == len(dwis)
-        assert len(bvecs) == len(dwis)
-        assert len(bvals) == len(dwis)
-        args = [
-            [
-                dw,
-                bval,
-                bvec,
-                anat,
-                atlas,
-                atlas_mask,
-                labels,
-                "%s%s%s%s%s"
-                % (
-                    outDir,
-                    "/sub",
-                    bval.split("sub")[1].split("/")[0],
-                    "/ses",
-                    bval.split("ses")[1].split("/")[0],
-                ),
-            ]
-            for (dw, bval, bvec, anat) in zip(dwis, bvals, bvecs, anats)
+    dwis, bvals, bvecs, anats = result
+    assert len(anats) == len(dwis)
+    assert len(bvecs) == len(dwis)
+    assert len(bvals) == len(dwis)
+    args = [
+        [
+            dw,
+            bval,
+            bvec,
+            anat,
+            atlas,
+            atlas_mask,
+            labels,
+            "%s%s%s%s%s"
+            % (
+                outDir,
+                "/sub",
+                bval.split("sub")[1].split("/")[0],
+                "/ses",
+                bval.split("ses")[1].split("/")[0],
+            ),
         ]
-    else:
-        funcs, anats = result
-        assert len(anats) == len(funcs)
-        args = [
-            [func, anat, atlas, atlas_brain, atlas_mask, lv_mask, labels, outDir]
-            for (func, anat) in zip(funcs, anats)
-        ]
+        for (dw, bval, bvec, anat) in zip(dwis, bvals, bvecs, anats)
+    ]
 
     # optional args stored in kwargs
     # use worker wrapper to call function f with args arg
@@ -295,6 +243,7 @@ def session_level(
         mod_type,
         track_type,
         mod_func,
+        seeds,
         reg_style,
         clean,
         skipeddy,
@@ -307,12 +256,6 @@ def session_level(
         modif=modif,
     )
     rmflds = []
-    if modality == "func" and not debug:
-        rmflds += [
-            os.path.join(outDir, "func", modal)
-            for modal in ["clean", "preproc", "registered"]
-        ]
-        rmflds += [os.path.join(outDir, "anat")]
     if len(rmflds) > 0:
         cmd = "rm -rf {}".format(" ".join(rmflds))
         mgu.execute_cmd(cmd)
@@ -323,8 +266,7 @@ def main():
     """Starting point of the ndmg pipeline, assuming that you are using a BIDS organized dataset
     """
     parser = ArgumentParser(
-        description="This is an end-to-end connectome \
-                            estimation pipeline from M3r Images."
+        description="This is an end-to-end connectome estimation pipeline from M3r Images."
     )
     parser.add_argument(
         "bids_dir",
@@ -337,22 +279,6 @@ def main():
         "files should be stored. If you are running group "
         "level analysis this folder should be prepopulated "
         "with the results of the participant level analysis.",
-    )
-    parser.add_argument(
-        "analysis_level",
-        help="Level of the analysis that "
-        "will be performed. Multiple participant level "
-        "analyses can be run independently (in parallel) "
-        "using the same output_dir.",
-        choices=["participant", "group"],
-        default="participant",
-    )
-    parser.add_argument(
-        "--modality",
-        help="Modality of MRI scans that \
-                        are being evaluated.",
-        choices=["dwi", "func"],
-        default="dwi",
     )
     parser.add_argument(
         "--participant_label",
@@ -374,16 +300,6 @@ def main():
         "parameter is not provided all sessions should be "
         "analyzed. Multiple sessions can be specified "
         "with a space separated list.",
-        nargs="+",
-    )
-    parser.add_argument(
-        "--task_label",
-        help="The label(s) of the task "
-        "that should be analyzed. The label corresponds to "
-        "task-<task_label> from the BIDS spec (so it does not "
-        'include "task-"). If this parameter is not provided '
-        "all tasks should be analyzed. Multiple tasks can be "
-        "specified with a space separated list.",
         nargs="+",
     )
     parser.add_argument(
@@ -429,24 +345,6 @@ def main():
         default=None,
     )
     parser.add_argument(
-        "--minimal",
-        action="store_true",
-        help="Determines " "whether to show a minimal or full set of plots.",
-        default=False,
-    )
-    parser.add_argument(
-        "--hemispheres",
-        action="store_true",
-        help="Whether " "or not to break degrees into hemispheres or not",
-        default=False,
-    )
-    parser.add_argument(
-        "--log",
-        action="store_true",
-        help="Determines " "axis scale for plotting.",
-        default=False,
-    )
-    parser.add_argument(
         "--debug",
         action="store_true",
         help="If False, remove any old files in the output directory.",
@@ -479,16 +377,6 @@ def main():
         help="Whether or not to delete intemediates",
     )
     parser.add_argument(
-        "--stc",
-        action="store",
-        help="A file for slice "
-        "timing correction. Options are a TR sequence file "
-        "(where each line is the shift in TRs), "
-        "up (ie, bottom to top), down (ie, top to bottom), "
-        "or interleaved.",
-        default=None,
-    )
-    parser.add_argument(
         "--mod",
         action="store",
         help="Determinstic (det) or probabilistic (prob) tracking. Default is det.",
@@ -513,6 +401,12 @@ def main():
         default="native",
     )
     parser.add_argument(
+        "--seeds",
+        action="store",
+        help="Seeding density for tractography. Default is 20.",
+        default=20,
+    )
+    parser.add_argument(
         "--modif",
         action="store",
         help="Name of folder on s3 to push to. If empty, push to a folder with ndmg's version number.",
@@ -524,24 +418,17 @@ def main():
     outDir = result.output_dir
     subj = result.participant_label
     sesh = result.session_label
-    task = result.task_label
     run = result.run_label
     buck = result.bucket
     remo = result.remote_path
     push = result.push_data
-    level = result.analysis_level
-    stc = result.stc
     debug = result.debug
-    modality = result.modality
+    seeds = result.seeds
     skipeddy = result.sked
     skipreg = result.skreg
     clean = result.clean
     vox_size = result.vox
-    minimal = result.minimal
-    log = result.log
     atlas_select = result.atlas
-    dataset = result.dataset
-    hemi = result.hemispheres
     mod_type = result.mod
     track_type = result.tt
     mod_func = result.mf
@@ -559,72 +446,46 @@ def main():
     # TODO : `Flat is better than nested`. Make the logic for this cleaner.
     # this block of logic essentially just gets data we need from s3.
     # it's super gross.
-    if level == "participant":
-        if buck is not None and remo is not None:
-            if subj is not None:
-                if len(sesh) == 1:
-                    sesh = sesh[0]
-                for sub in subj:
-                    if sesh is not None:
-                        remo = op.join(
-                            remo, "sub-{}".format(sub), "ses-{}".format(sesh)
-                        )
-                        tindir = op.join(
-                            inDir, "sub-{}".format(sub), "ses-{}".format(sesh)
-                        )
-                    else:
-                        remo = op.join(remo, "sub-{}".format(sub))
-                        tindir = op.join(inDir, "sub-{}".format(sub))
-                    s3_utils.s3_get_data(buck, remo, tindir, public=not creds)
-            else:
-                s3_utils.s3_get_data(buck, remo, inDir, public=not creds)
+    if buck is not None and remo is not None:
+        if subj is not None:
+            if len(sesh) == 1:
+                sesh = sesh[0]
+            for sub in subj:
+                if sesh is not None:
+                    remo = op.join(remo, "sub-{}".format(sub), "ses-{}".format(sesh))
+                    tindir = op.join(inDir, "sub-{}".format(sub), "ses-{}".format(sesh))
+                else:
+                    remo = op.join(remo, "sub-{}".format(sub))
+                    tindir = op.join(inDir, "sub-{}".format(sub))
+                s3_utils.s3_get_data(buck, remo, tindir, public=not creds)
+        else:
+            s3_utils.s3_get_data(buck, remo, inDir, public=not creds)
 
-        print("input directory contents: {}".format(os.listdir(inDir)))
+    print("input directory contents: {}".format(os.listdir(inDir)))
 
-        ##### for debugging, remove soon
-        # TODO: argument for this won't always work
-        #         for path, dirs, files in os.walk(tindir):
-        #             print(path)
-        #             for f in files:
-        #                 print(f)
-
-        #         # TODO: argument for this won't always work
-        #         if op.isdir(outDir):
-        #             for path, dirs, files in os.walk(outDir):
-        #                 print(path)
-        #                 for f in files:
-        #                     print(f)
-        #         else:
-        #             print("OutDir {} does not exist yet".format(outDir))
-        ######
-        # run ndmg.
-        session_level(
-            inDir,
-            outDir,
-            subj,
-            vox_size,
-            skipeddy,
-            skipreg,
-            clean,
-            stc,
-            atlas_select,
-            mod_type,
-            track_type,
-            mod_func,
-            reg_style,
-            sesh,
-            task,
-            run,
-            modality,
-            buck=buck,
-            remo=remo,
-            push=push,
-            creds=creds,
-            debug=debug,
-            modif=modif,
-        )
-    else:
-        print("Specified level not valid")
+    session_level(
+        inDir,
+        outDir,
+        subj,
+        vox_size,
+        skipeddy,
+        skipreg,
+        clean,
+        atlas_select,
+        mod_type,
+        track_type,
+        mod_func,
+        seeds,
+        reg_style,
+        sesh,
+        run,
+        buck=buck,
+        remo=remo,
+        push=push,
+        creds=creds,
+        debug=debug,
+        modif=modif,
+    )
 
 
 if __name__ == "__main__":

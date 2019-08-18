@@ -64,10 +64,10 @@ RUN \
     pip3.6 install numpy
 
 RUN \
-    pip3.6 install nibabel scipy python-dateutil pandas boto3 awscli matplotlib nilearn sklearn pandas cython vtk pyvtk fury awscli requests ipython duecredit graspy scikit-image
+    pip3.6 install nibabel scipy python-dateutil pandas boto3 awscli matplotlib nilearn sklearn pandas cython vtk pyvtk fury awscli requests ipython duecredit graspy scikit-image networkx
 
 RUN \
-    pip3.6 install dipy==0.16.0 plotly==1.12.9 pybids==0.6.4 setuptools>=40.0 networkx==1.9 configparser>=3.7.4
+    pip3.6 install dipy==0.16.0 plotly==1.12.9 pybids==0.6.4 setuptools>=40.0 configparser>=3.7.4
 
 WORKDIR /
 
@@ -77,9 +77,6 @@ RUN mkdir /data && \
 RUN mkdir /outputs && \
     chmod -R 777 /outputs
 
-RUN git clone -b staging $NDMG_URL /ndmg && \
-    cd /ndmg && \
-    pip3.6 install .
 
 RUN mkdir /ndmg_atlases
 
@@ -95,13 +92,18 @@ RUN \
 
 RUN chmod -R 777 /ndmg_atlases
 
+# Grab ndmg from staging.
+RUN git clone -b staging $NDMG_URL /ndmg && \
+    cd /ndmg && \
+    pip3.6 install .
+RUN chmod -R 777 /usr/local/bin/ndmg_bids
+
 ENV MPLCONFIGDIR /tmp/matplotlib
 ENV PYTHONWARNINGS ignore
 
 # copy over the entrypoint script
 #ADD ./.vimrc .vimrc
 RUN ldconfig
-RUN chmod -R 777 /usr/local/bin/ndmg_bids
 
 # and add it as an entrypoint
 ENTRYPOINT ["ndmg_bids"]
