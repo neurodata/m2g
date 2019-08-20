@@ -80,11 +80,11 @@ Finally, you can install **ndmg** either from `pip` or Github as shown below. In
 
 **ndmg** is available through Dockerhub, and the most recent docker image can be pulled using:
   
-    docker pull neurodata/ndmg
+    docker pull neurodata/ndmg_dev
     
 The image can then be used to create a container and run directly with the following command (and any additional options you may require for Docker, such as volume mounting):
 
-    docker run -ti --entrypoint /bin/bash bids/ndmg
+    docker run -ti --entrypoint /bin/bash neurodata/ndmg_dev
 
 **ndmg** containers can also be made from Github. Download the most recent version of ndmg from github and in the ndmg directory created there should be a file called Dockerfile. Create a Docker image using the command:
 
@@ -199,9 +199,9 @@ The **ndmg** pipeline can be used to generate connectomes as a command-line util
 Note that more options are available which can be helpful if running on the Amazon cloud, which can be found and documented by running `ndmg_bids -h`.
 If running with the Docker container shown above, the `entrypoint` is already set to `ndmg_bids`, so the pipeline can be run directly from the host-system command line as follows:
 
-    docker run -ti -v /path/to/local/data:/data ndmg:uniquelabel /data/ /data/outputs
+    docker run -ti -v /path/to/local/data:/data neurodata/ndmg_dev /data/ /data/outputs
 
-This will run **ndmg** on the local data and save the output files to the directory /path/to/local/data/outputs
+This will run **ndmg** on the local data and save the output files to the directory /path/to/local/data/outputs. Note that if you have created the docker image from github, replace ```neurodata/ndmg_dev``` with ```ndmg:uniquelabel```
 
 ## Working with S3 Datasets
 **ndmg** has the ability to work on datasets stored on [Amazon's Simple Storage Service](https://aws.amazon.com/s3/), assuming they are in BIDS format. Doing so requires you to set your set your AWS credentials and read the related s3 bucket documentation by running `ndmg_bids -h`.
