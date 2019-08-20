@@ -54,7 +54,7 @@ def filter_graph_files(file_list, **kwargs):
             yield (filename)
 
 
-def get_files(output_directory, suffix="ssv", atlas="desikan"):
+def get_files(output_directory, suffix="csv", atlas="desikan"):
     output = []
     for dirname, _, files in os.walk(output_directory):
         file_ends = list(filter_graph_files(files, suffix=suffix, atlas=atlas))

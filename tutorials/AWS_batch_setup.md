@@ -22,7 +22,51 @@ Steps 4 and 5 above occur in parallel -- meaning, if you have a dataset with 200
 
 For arbitrarily large datasets, full runs generally take a little over an hour, at roughly \$.05/scan.
 
-## Initial Setup : Batch Console
+## Batch Setup : Console
+
+This section shows you how to set up a batch environment such that you can easily run ndmg in parallel. For more in-depth documentation, see the [AWS official documentation](https://docs.aws.amazon.com/batch/index.html).
+
+### Compute Environment
+
+Your compute environment defines the compute resources AWS will use for its instances.
+
+For ndmg, we recommend exclusively using `r5.large` instance types.
+
+#### Initial Setup
+
+**TODO : check if default roles can access s3 <br>**
+Here, you define who can access the environment. We recommend using the default IAM roles.
+
+1. Use Managed
+2. Define a compute environment name
+3. Define a service role. The default IAM is best.
+4. Define an instance role. The default IAM (ecsInstanceRole) is best.
+5. If you want to connect to your environments, you'll need a key-pair. This is optional; if you want to set this up, see the [official documentation](https://docs.aws.amazon.com/batch/latest/userguide/get-set-up-for-aws-batch.html#create-a-key-pair).
+
+![initial compute](https://i.imgur.com/vEmEpuf.png)
+
+#### Compute Resources
+
+This section lets you define what resources your environment will use. You don't need to use any launch templates here; essentially the only thing necessary is to set the instance type to `r5.large`, and to raise the maximum vCPUs (in case you're running large datasets)
+
+1. Set Allowed Instance types to `r5.large`
+2. Set minimum vCPUs to 0
+
+![Compute Resources](https://i.imgur.com/QZh4IlG.png)
+
+You can leave the rest of the options set as default in compute environments.
+
+### Job Queue
+
+Now, attach the compute environment to the job queue.
+
+1. Click "create queue" in "Job Queues"
+2. Give a queue name
+3. Give a priority (e.g., `1`)
+4. Attach the compute environment you just created to the job queue
+5. Click "Create Job Queue"
+
+![queue](https://i.imgur.com/wJk8Og0.png)
 
 TODO
 
