@@ -392,7 +392,7 @@ def main():
         "--mf",
         action="store",
         help="Diffusion model: csd or csa. Default is csd.",
-        default="csd",
+        default="csa",
     )
     parser.add_argument(
         "--sp",
