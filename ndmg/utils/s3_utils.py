@@ -7,6 +7,7 @@ import boto3
 
 
 def get_credentials():
+    # add option to pass profile name
     try:
         config = ConfigParser()
         config.read(os.getenv("HOME") + "/.aws/credentials")
@@ -37,7 +38,10 @@ def s3_client(service="s3"):
         client with proper credentials.
     """
 
-    ACCESS, SECRET = get_credentials()
+    try:
+        ACCESS, SECRET = get_credentials()
+    except AttributeError:
+        return boto3.client(service)
     return boto3.client(service, aws_access_key_id=ACCESS, aws_secret_access_key=SECRET)
 
 
