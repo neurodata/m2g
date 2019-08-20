@@ -78,7 +78,11 @@ Finally, you can install **ndmg** either from `pip` or Github as shown below. In
 
 ## Docker
 
-**ndmg** is available through Dockerhub, and can be run directly with the following container (and any additional options you may require for Docker, such as volume mounting):
+**ndmg** is available through Dockerhub, and the most recent docker image can be pulled using:
+  
+    docker pull neurodata/ndmg
+    
+The image can then be used to create a container and run directly with the following command (and any additional options you may require for Docker, such as volume mounting):
 
     docker run -ti --entrypoint /bin/bash bids/ndmg
 
