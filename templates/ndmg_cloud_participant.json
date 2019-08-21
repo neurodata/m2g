@@ -13,8 +13,6 @@
             "--participant_label",
             "<SUBJ>",
             "--push_data",
-            "--modality",
-            "dwi",
             "--atlas",
             "desikan",
             "--mod",
@@ -27,7 +25,6 @@
             "native",
             "/input",
             "/output",
-            "participant"
         ],
         "environment": [
             {
