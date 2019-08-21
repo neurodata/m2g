@@ -24,7 +24,7 @@
             "--sp",
             "native",
             "/input",
-            "/output",
+            "/output"
         ],
         "environment": [
             {
