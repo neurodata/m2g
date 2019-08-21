@@ -86,7 +86,7 @@ The image can then be used to create a container and run directly with the follo
 
     docker run -ti --entrypoint /bin/bash neurodata/ndmg_dev
 
-**ndmg** containers can also be made from Github. Download the most recent version of ndmg from github and in the ndmg directory created there should be a file called Dockerfile. Create a Docker image using the command:
+**ndmg** docker containers can also be made from Github. Download the most recent version of ndmg from github and in the ndmg directory created there should be a file called Dockerfile. Create a Docker image using the command:
 
     docker build --rm -f "path/to/docker/file" -t ndmg:uniquelabel ndmg
 
@@ -204,7 +204,7 @@ If running with the Docker container shown above, the `entrypoint` is already se
 This will run **ndmg** on the local data and save the output files to the directory /path/to/local/data/outputs. Note that if you have created the docker image from github, replace ```neurodata/ndmg_dev``` with ```ndmg:uniquelabel```
 
 ## Working with S3 Datasets
-**ndmg** has the ability to work on datasets stored on [Amazon's Simple Storage Service](https://aws.amazon.com/s3/), assuming they are in BIDS format. Doing so requires you to set your set your AWS credentials and read the related s3 bucket documentation by running `ndmg_bids -h`.
+**ndmg** has the ability to work on datasets stored on [Amazon's Simple Storage Service](https://aws.amazon.com/s3/), assuming they are in BIDS format. Doing so requires you to set your AWS credentials and read the related s3 bucket documentation by running `ndmg_bids -h`.
 
 ## Example Datasets
 
