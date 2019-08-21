@@ -89,3 +89,4 @@ TODO
 - CloudWatch
 - EC2 console
 - SSH
+- ECR
