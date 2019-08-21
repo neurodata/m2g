@@ -68,17 +68,17 @@ Now, attach the compute environment to the job queue.
 
 ![queue](https://i.imgur.com/wJk8Og0.png)
 
-TODO
+### Job Definition
 
-- link to batch documentation
-- IAM role
-- compute environment
-- other thing 1
-- other thing 2
-  - define particular ec2 instances
-  - memory
-  - vCPU's
-  - key-pair
+The job definition is where you specify the container, the job role, the vCPUs, and the memory.
+
+1. For "container image", you can use `neurodata/ndmg_dev:latest`.
+2. For vCPUs, use 2.
+3. Because we want to use one r5.large EC2 instance per scan, use `15200` for the memory.
+
+You can leave the other parameters empty.
+
+![def1](https://i.imgur.com/n1l2lPo.png)
 
 ## Running the Pipeline
 
