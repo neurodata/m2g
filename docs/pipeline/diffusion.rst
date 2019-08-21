@@ -4,7 +4,7 @@ Diffusion Pipeline
 
 .. contents:: Table of Contents
 
-Here we take a deep-dive into each of the modules of the `NDMG-d` pipeline. We will explain algorithm and parameter choices that were implemented at each step and the justification for why they were used over alternatives.
+Here we take a deep-dive into the modules of the `NDMG-d` pipeline. We will explain algorithm and parameter choices that were implemented at each step and the justification for why they were used over alternatives.
 
 
 Output Summary Table
