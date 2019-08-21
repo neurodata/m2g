@@ -17,34 +17,37 @@
   
 
   
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
 
-  
-  
     
 
   
-
   <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Functional Pipeline" href="functional.html" />
     <link rel="prev" title="Function Reference" href="../tutorials/funcref.html" /> 
-
-  
-  <script src="../_static/js/modernizr.min.js"></script>
-
 </head>
 
 <body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
@@ -91,7 +94,38 @@
 </li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="../tutorials/funcref.html">Function Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/funcref.html">Function Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/funcref.html#module-scripts.ndmg_bids">ndmg_bids</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/funcref.html#module-scripts.ndmg_dwi_pipeline">ndmg_dwi_pipeline</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/funcref.html#module-scripts.multigraph_pipeline">multigraph_pipeline</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/funcref.html#module-scripts.ndmg_cloud">ndmg_cloud</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/funcref.html#module-scripts.ndmg_setup">ndmg_setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/funcref.html#module-graph.gen_graph">gen_graph</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/funcref.html#module-preproc.preproc_anat">preproc_anat</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/funcref.html#preproc-bvec">preproc_bvec</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/funcref.html#module-register.gen_reg">gen_reg</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/funcref.html#module-stats.plotly_helper">plotly_helper</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/funcref.html#module-stats.qa_adjacency">qa_adjacency</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/funcref.html#id1">plotly_helper</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/funcref.html#id2">plotly_helper</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/funcref.html#id3">plotly_helper</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/funcref.html#module-stats.qa_mri">qa_mri</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/funcref.html#qa-reg">qa_reg</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/funcref.html#module-stats.qa_tensor">qa_tensor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/funcref.html#gen-track">gen_track</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/funcref.html#module-utils.bids_utils">bids_utils</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/funcref.html#id6">bids_utils</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/funcref.html#module-utils.gen_utils">gen_utils</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/funcref.html#module-utils.loadGraphs">loadGraphs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/funcref.html#mri-autoingest">mri_autoingest</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/funcref.html#module-utils.nifti_to_binary">nifti_to_binary</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/funcref.html#nifti-to-png">nifti_to_png</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/funcref.html#module-utils.reg_utils">reg_utils</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/funcref.html#module-utils.s3_utils">s3_utils</a><ul class="simple">
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 <p class="caption"><span class="caption-text">Pipeline Overview</span></p>
 <ul class="current">
@@ -185,7 +219,7 @@
 </li>
 </ul>
 </div>
-<p>Here we take a deep-dive into each of the modules of the <cite>NDMG-d</cite> pipeline. We will explain algorithm and parameter choices that were implemented at each step and the justification for why they were used over alternatives.</p>
+<p>Here we take a deep-dive into the modules of the <cite>NDMG-d</cite> pipeline. We will explain algorithm and parameter choices that were implemented at each step and the justification for why they were used over alternatives.</p>
 <div class="section" id="output-summary-table">
 <h2><a class="toc-backref" href="#id7">Output Summary Table</a><a class="headerlink" href="#output-summary-table" title="Permalink to this headline">¶</a></h2>
 <table border="1" class="colwidths-given docutils" id="id1">
@@ -280,7 +314,7 @@
         <a href="functional.html" class="btn btn-neutral float-right" title="Functional Pipeline" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="../tutorials/funcref.html" class="btn btn-neutral" title="Function Reference" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="../tutorials/funcref.html" class="btn btn-neutral float-left" title="Function Reference" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -306,26 +340,16 @@
   
 
 
-  
-
-    
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
-        <script type="text/javascript" src="../_static/jquery.js"></script>
-        <script type="text/javascript" src="../_static/underscore.js"></script>
-        <script type="text/javascript" src="../_static/doctools.js"></script>
-        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    
-
-  
-
-  <script type="text/javascript" src="../_static/js/theme.js"></script>
-
   <script type="text/javascript">
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
+
+  
+  
+    
+   
 
 </body>
 </html>
