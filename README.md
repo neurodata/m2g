@@ -12,7 +12,7 @@
 
 ![](./docs/nutmeg.png)
 
-NeuroData's MR Graphs package, **ndmg** (pronounced "***nutmeg***"), is a turn-key pipeline which combines structural, diffusion, and functional\* MRI data to estimate multi-resolution connectomes reliably and scalably.
+NeuroData's MR Graphs package, **ndmg** (pronounced "***nutmeg***"), is a turn-key pipeline which uses structural and diffusion MRI data to estimate multi-resolution connectomes reliably and scalably.
 
 ## Contents
 
@@ -20,8 +20,10 @@ NeuroData's MR Graphs package, **ndmg** (pronounced "***nutmeg***"), is a turn-k
 - [System Requirements](#system-requirements)
 - [Installation Guide](#installation-guide)
 - [Docker](#docker)
-- [Demo](#demo)
+- [Tutorial](#tutorial)
+- [Outputs](#outputs)
 - [Usage](#usage)
+- [Working with S3 Datasets](#Working-with-S3-Datasets)
 - [Example Datasets](#example-datasets)
 - [Documentation](#documentation)
 - [License](#license)
@@ -35,20 +37,23 @@ The **ndmg** pipeline has been developed as a one-click solution for human conne
 ## System Requirements
 
 The **ndmg** pipeline:
- - was developed and tested primarily on Mac OSX, Ubuntu (12, 14, 16), and CentOS (5, 6);
- - was developed in Python 2.7;
+ - was developed and tested primarily on Mac OSX, Ubuntu (12, 14, 16, 18), and CentOS (5, 6);
+ - made to work on Python 3.6;
  - is wrapped in a [Docker container](https://hub.docker.com/r/bids/ndmg/);
  - has install instructions via a [Dockerfile](https://github.com/BIDS-Apps/ndmg/blob/master/Dockerfile#L6);
  - requires no non-standard hardware to run;
  - has key features built upon FSL, Dipy, Nibabel, Nilearn, Networkx, Numpy, Scipy, Scikit-Learn, and others;
  - takes approximately 1-core, 8-GB of RAM, and 1 hour to run for most datasets.
 
-While **ndmg** is quite robust to Python package versions (with only few exceptions, mentioned in the [installation guide](#installation-guide)), an *example* of possible versions (taken from the **ndmg** Docker Image with version `v0.0.50`) is shown below. Note: this list excludes many libraries which are standard with a Python distribution, and a complete list with all packages and versions can be produced by running `pip freeze` within the Docker container mentioned above.
+While **ndmg** is quite robust to Python package versions (with only few exceptions, mentioned in the [installation guide](#installation-guide)), an *example* of possible versions (taken from the **ndmg** Docker Image with version `v0.2.0`) is shown below. Note: this list excludes many libraries which are standard with a Python distribution, and a complete list with all packages and versions can be produced by running `pip freeze` within the Docker container mentioned above.
 
 ```
-awscli==1.11.128 , boto3==1.4.5 , botocore==1.5.91 , colorama==0.3.7 , dipy==0.12.0 , matplotlib==1.5.1 ,
-networkx==1.11 , nibabel==2.1.0 , nilearn==0.3.1 , numpy==1.8.2 , Pillow==2.3.0 , plotly==1.12.9 ,
-s3transfer==0.1.10 , scikit-image==0.13.0 , scikit-learn==0.18.2 , scipy==0.13.3 .
+awscli==1.16.210 , boto3==1.9.200 , botocore==1.12.200 , colorama==0.3.9 , configparser>=3.7.4 ,
+Cython==0.29.13 , dipy==0.16.0 , duecredit==0.7.0 , fury==0.3.0 , graspy==0.0.3 , ipython==7.7.0 ,
+matplotlib==3.1.1 , networkx==2.3 , nibabel==2.5.0 , nilearn==0.5.2 , numpy==1.17.0 , pandas==0.25.0,
+Pillow==6.1.0 , plotly==1.12.9, pybids==0.6.4 , python-dateutil==2.8.0 , PyVTK==0.5.18 ,
+requests==2.22.0 , s3transfer==0.2.1 , setuptools>=40.0 scikit-image==0.13.0 , scikit-learn==0.21.3 ,
+scipy==1.3.0 , sklearn==8.0 , vtk==8.1.2
 ```
 
 ## Installation Guide
@@ -67,16 +72,9 @@ Finally, you can install **ndmg** either from `pip` or Github as shown below. In
 
 ### Install from Github
 
-    git clone https://github.com/neurodata/ndmg
+    git clone https://github.com/neurodata/ndmg.git
     cd ndmg
-    python setup.py install
-    
-Currently, functional processing lives only in a development branch, so if you wish to have functional processing as well you can intervene between the 2nd and 3rd lines above, and install the package as follows:
-
-    git clone https://github.com/neurodata/ndmg
-    cd ndmg
-    git checkout ndmg
-    python setup.py install
+    python install .
 
 ## Docker
 
@@ -84,121 +82,125 @@ Currently, functional processing lives only in a development branch, so if you w
 
     docker run -ti --entrypoint /bin/bash bids/ndmg
 
-## Demo
+**ndmg** containers can also be made from Github. Download the most recent version of ndmg from github and in the ndmg directory created there should be a file called Dockerfile. Create a Docker image using the command:
 
-You can run our entire end-to-end pipeline in approximately 3 minutes on downsampled data with the following command:
+    docker build --rm -f "path/to/docker/file" -t ndmg:uniquelabel ndmg
 
-    ndmg_demo_dwi
+Where "uniquelabel" can be whatever you wish to call this Docker image (for example, ndmg:neurodata). Additional information about building Docker images can be found [here](https://docs.docker.com/engine/reference/commandline/image_build/).
+Creating the Docker image should take several minutes if this is the first time you have used this docker file.
+In order to create a docker container from the docker image and access it, use the following command to both create and enter the container:
 
-The connectome produced may not have neurological significance, as the data has been significantly downsampled, but this test should ensure that all of the pieces of the code and driver script execute properly. The expected output from the demo is shown below. Files will be downloaded and output data generated in `/tmp/small_demo/` and `/tmp/small_demo/outputs/`, respectively. If the graph properties summarized at the end of the execution below match those observed with your installation, the demo ran successfully.
+    docker run -it --entrypoint /bin/bash ndmg:uniquelabel
 
-    Getting test data...
-    Archive:  /tmp/ndmg_demo.zip
-       creating: ndmg_demo/
-      inflating: ndmg_demo/MNI152NLin6_res-4x4x4_T1w.nii.gz
-      inflating: ndmg_demo/MNI152NLin6_res-4x4x4_T1w_brain.nii.gz
-       creating: ndmg_demo/sub-0025864/
-       creating: ndmg_demo/sub-0025864/ses-1/
-       creating: ndmg_demo/sub-0025864/ses-1/func/
-      inflating: ndmg_demo/sub-0025864/ses-1/func/sub-0025864_ses-1_bold.nii.gz
-       creating: ndmg_demo/sub-0025864/ses-1/dwi/
-      inflating: ndmg_demo/sub-0025864/ses-1/dwi/sub-0025864_ses-1_dwi.bvec
-      inflating: ndmg_demo/sub-0025864/ses-1/dwi/sub-0025864_ses-1_dwi.bval
-      inflating: ndmg_demo/sub-0025864/ses-1/dwi/sub-0025864_ses-1_dwi.nii.gz
-       creating: ndmg_demo/sub-0025864/ses-1/anat/
-      inflating: ndmg_demo/sub-0025864/ses-1/anat/sub-0025864_ses-1_T1w.nii.gz
-      inflating: ndmg_demo/desikan-res-4x4x4.nii.gz
-      inflating: ndmg_demo/HarvardOxford_variant-thr25_res-4x4x4_lvmask.nii.gz
-      inflating: ndmg_demo/MNI152NLin6_res-4x4x4_T1w_brainmask.nii.gz
-    Creating output directory: /tmp/ndmg_demo/outputs
-    Creating output temp directory: /tmp/ndmg_demo/outputs/tmp
-    This pipeline will produce the following derivatives...
-    DWI volume registered to atlas: /tmp/ndmg_demo/outputs/reg/dwi/sub-0025864_ses-1_dwi_aligned.nii.gz
-    Diffusion tensors in atlas space: /tmp/ndmg_demo/outputs/tensors/sub-0025864_ses-1_dwi_tensors.npz
-    Fiber streamlines in atlas space: /tmp/ndmg_demo/outputs/fibers/sub-0025864_ses-1_dwi_fibers.npz
-    Graphs of streamlines downsampled to given labels: /tmp/ndmg_demo/outputs/graphs/desikan-res-4x4x4/sub-0025864_ses-1_dwi_desikan-res-4x4x4.gpickle
-    Generating gradient table...
-    B-values shape (15,)
-             min 0.000000
-             max 1000.000000
-    B-vectors shape (15, 3)
-             min -0.978756
-             max 0.941755
-    None
-    Aligning volumes...
-    Executing: eddy_correct /tmp/ndmg_demo/outputs/tmp/sub-0025864_ses-1_dwi_t1.nii.gz /tmp/ndmg_demo/outputs/tmp/sub-0025864_ses-1_dwi_t1_t2.nii.gz 0
-    Executing: epi_reg --epi=/tmp/ndmg_demo/outputs/tmp/sub-0025864_ses-1_dwi_t1_t2.nii.gz --t1=/tmp/ndmg_demo/sub-0025864/ses-1/anat/sub-0025864_ses-1_T1w.nii.gz --t1brain=/tmp/ndmg_demo/outputs/tmp/sub-0025864_ses-1_T1w_ss.nii.gz --out=/tmp/ndmg_demo/outputs/tmp/sub-0025864_ses-1_dwi_t1_ta.nii.gz
-    Executing: flirt -in /tmp/ndmg_demo/sub-0025864/ses-1/anat/sub-0025864_ses-1_T1w.nii.gz -ref /tmp/ndmg_demo/MNI152NLin6_res-4x4x4_T1w.nii.gz -omat /tmp/ndmg_demo/outputs/tmp/sub-0025864_ses-1_T1w_MNI152NLin6_res-4x4x4_T1w_xfm.mat -dof 12 -bins 256 -cost mutualinfo -searchrx -180 180 -searchry -180 180 -searchrz -180 180
-    Executing: flirt -in /tmp/ndmg_demo/outputs/tmp/sub-0025864_ses-1_dwi_t1_ta.nii.gz -ref /tmp/ndmg_demo/MNI152NLin6_res-4x4x4_T1w.nii.gz -out /tmp/ndmg_demo/outputs/tmp/sub-0025864_ses-1_dwi_t1_ta2.nii.gz -init /tmp/ndmg_demo/outputs/tmp/sub-0025864_ses-1_T1w_MNI152NLin6_res-4x4x4_T1w_xfm.mat -interp trilinear -applyxfm
-    Beginning tractography...
-    Generating graph for desikan-res-4x4x4 parcellation...
-    {'source': 'http://m2g.io', 'ecount': 0, 'vcount': 70, 'date': 'Fri Jan 19 00:15:32 2018', 'region': 'brain', 'sensor': 'dwi', 'name': "Generated by NeuroData's MRI Graphs (ndmg)"}
-    # of Streamlines: 5772
-    0
-    288
-    576
-    864
-    1152
-    1440
-    1728
-    2016
-    2304
-    2592
-    2880
-    3168
-    3456
-    3744
-    4032
-    4320
-    4608
-    4896
-    5184
-    5472
-    5760
-    
-     Graph Summary:
-    Name: Generated by NeuroData's MRI Graphs (ndmg)
-    Type: Graph
-    Number of nodes: 70
-    Number of edges: 887
-    Average degree:  25.3429
-    Execution took: 0:02:56.343901
-    Complete!
-    
-    Parcellation: desikan-res-4x4x4
-    Computing: NNZ
-    Sample Mean: 887.00
-    Computing: Degree Sequence
-    Subject Means: 25.34
-    Computing: Edge Weight Sequence
-    Subject Means: 68.99
-    Computing: Clustering Coefficient Sequence
-    Subject Means: 0.75
-    Computing: Max Local Statistic Sequence
-    Subject Means: 24948.83
-    Computing: Eigen Value Sequence
-    Subject Maxes: 1.32
-    Computing: Betweenness Centrality Sequence
-    Subject Means: 0.01
-    Computing: Mean Connectome
-    This is the format of your plot grid:
-    [ (1,1) x1,y1 ]  [ (1,2) x2,y2 ]  [ (1,3) x3,y3 ]  [ (1,4) x4,y4 ]
-    [ (2,1) x5,y5 ]  [ (2,2) x6,y6 ]  [ (2,3) x7,y7 ]  [ (2,4) x8,y8 ]
+## Tutorial
+Tutorials on what is happening inside of the **ndmg** pipeline can be found in [ndmg/tutorials](https://github.com/neurodata/ndmg/tree/staging/tutorials)
 
-    Path to qc fig: /tmp/ndmg_demo/outputs/qa/graphs/desikan-res-4x4x4/desikan-res-4x4x4_plot.html
+## Outputs
+The output files generated by the **ndmg** pipeline are organized as:
+```
+File labels that may appear on output files, these denote additional actions ndmg may have done:
+RAS = File was originally in RAS orientation, so no reorientation was necessary
+reor_RAS = File has been reoriented into RAS+ orientation
+nores = File originally had the desired voxel size specified by the user (default 2mmx2mmx2mm), resulting in no reslicing
+res = The file has been resliced to the desired voxel size specified by the user
 
+/output
+     /anat
+          /preproc
+               Files created during the preprocessing of the anatomical data
+                   t1w_aligned_mni.nii.gz = preprocessed t1w_brain anatomical image in mni space
+                   t1w_brain.nii.gz = t1w anatomical image with only the brain
+                   t1w_seg_mixeltype.nii.gz = mixeltype image of t1w image (denotes where there are more than one tissue type in each voxel)
+                   t1w_seg_pve_0.nii.gz = probability map of Cerebrospinal fluid for original t1w image
+                   t1w_seg_pve_1.nii.gz = probability map of grey matter for original t1w image
+                   t1w_seg_pve_2.nii.gz = probability map of white matter for original t1w image
+                   t1w_seg_pveseg.nii.gz = t1w image mapping wm, gm, ventricle, and csf areas
+                   t1w_wm_thr.nii.gz = binary white matter mask for resliced t1w image
+                   
+          /registered
+               Files created during the registration process
+                   t1w_corpuscallosum.nii.gz = atlas corpus callosum mask in t1w space
+                   t1w_corpuscallosum_dwi.nii.gz = atlas corpus callosum in dwi space
+                   t1w_csf_mask_dwi.nii.gz = t1w csf mask in dwi space
+                   t1w_gm_in_dwi.nii.gz = t1w grey matter probability map in dwi space
+                   t1w_in_dwi.nii.gz = t1w in dwi space
+                   t1w_wm_gm_int_in_dwi.nii.gz = t1w white matter-grey matter interfact in dwi space
+                   t1w_wm_gm_int_in_dwi_bin.nii.gz = binary mask of t12_2m_gm_int_in_dwi.nii.gz
+                   t1w_wm_in_dwi.nii.gz = atlas white matter probability map in dwi space
+               
+     /dwi
+          /fiber
+               Streamline track file(s)
+          /preproc
+               Files created during the preprocessing of the dwi data
+                    #_B0.nii.gz = B0 image (there can be multiple B0 images per dwi file, # is the numerical location of each B0 image)
+                    bval.bval = original b-values for dwi image
+                    bvec.bvec = original b-vectors for dwi image
+                    bvecs_reor.bvecs = bvec_scaled.bvec data reoriented to RAS+ orientation
+                    bvec_scaled.bvec = b-vectors normalized to be of unit length, only non-zero b-values are changed
+                    eddy_corrected_data.nii.gz = eddy corrected dwi image
+                    eddy_corrected_data.ecclog = eddy correction log output
+                    eddy_corrected_data_reor_RAS.nii.gz = eddy corrected dwi image reoriented to RAS orientation
+                    eddy_corrected_data_reor_RAS_res.nii.gz = eddy corrected image reoriented to RAS orientation and resliced to desired voxel resolution
+                    nodif_B0.nii.gz = mean of all B0 images
+                    nodif_B0_bet.nii.gz = nodif_B0 image with all non-brain matter removed
+                    nodif_B0_bet_mask.nii.gz = mask of nodif_B0_bet.nii.gz brain
+                    tensor_fa.nii.gz = tensor image fractional anisotropy map
+          /roi-connectomes
+               Location of connectome(s) created by the pipeline, with a directory given to each atlas you use for your analysis
+          /tensor
+               Contains the rgb tensor file(s) for the dwi data if tractography is being done in MNI space
+     /qa
+          /adjacency
+          /fibers
+          /graphs
+          /graphs_plotting
+               Png file of an adjacency matrix made from the connectome
+          /mri
+          /reg
+          /tensor
+     /tmp
+          /reg_a
+               Intermediate files created during the processing of the anatomical data
+                    mni2t1w_warp.nii.gz = nonlinear warp coefficients/fields for mni to t1w space
+                    t1w_csf_mask_dwi_bin.nii.gz = binary mask of t1w_csf_mask_dwi.nii.gz
+                    t1w_gm_in_dwi_bin.nii.gz = binary mask of t12_gm_in_dwi.nii.gz
+                    t1w_vent_csf_in_dwi.nii.gz = t1w ventricle+csf mask in dwi space
+                    t1w_vent_mask_dwi.nii.gz = atlas ventricle mask in dwi space
+                    t1w_wm_edge.nii.gz = mask of the outer border of the resliced t1w white matter
+                    t1w_wm_in_dwi_bin.nii.gz = binary mask of t12_wm_in_dwi.nii.gz
+                    vent_mask_mni.nii.gz = altas ventricle mask in mni space using roi_2_mni_mat
+                    vent_mask_t1w.nii.gz = atlas ventricle mask in t1w space
+                    warp_t12mni.nii.gz = nonlinear warp coefficients/fields for t1w to mni space
+               
+          /reg_m
+               Intermediate files created during the processing of the diffusion data
+                    dwi2t1w_bbr_xfm.mat = affine transform matrix of t1w_wm_edge.nii.gz to t1w space
+                    dwi2t1w_xfm.mat = inverse transform matrix of t1w2dwi_xfm.mat
+                    roi_2_mni.mat = affine transform matrix of selected atlas to mni space
+                    t1w2dwi_bbr_xfm.mat = inverse transform matrix of dwi2t1w_bbr_xfm.mat
+                    t1w2dwi_xfm.mat = affine transform matrix of t1w_brain.nii.gz to nodif_B0.nii.gz space
+                    t1wtissue2dwi_xfm.mat = affine transform matrix of t1w_brain.nii.gz to nodif_B0.nii.gz, using t1w2dwi_bbr_xfm.mat or t1w2dwi_xfm.mat as a starting point
+                    xfm_mni2t1w_init.mat = inverse transform matrix of xfm_t1w2mni_init.mat
+                    xfm_t1w2mni_init.mat = affine transform matrix of preprocessed t1w_brain to mni space
+```
+Other files may end up in the output folders, depending on what settings or atlases you choose to use. Using MNI space for tractography or setting ```--clean``` to ```True``` will result in fewer files.
 
 ## Usage
 
 The **ndmg** pipeline can be used to generate connectomes as a command-line utility on [BIDS datasets](http://bids.neuroimaging.io) with the following:
 
-    ndmg_bids /input/bids/dataset /output/directory participant
+    ndmg_bids /input/bids/dataset /output/directory
 
-Note that more options are available which can be helpful if running on the Amazon cloud, which can be found and documented by running `ndmg_bids -h`. If you do not have a BIDS organized dataset, you an use a slightly more complicated interface which is made available and is documented with `ndmg_pipeline -h`.
-
+Note that more options are available which can be helpful if running on the Amazon cloud, which can be found and documented by running `ndmg_bids -h`.
 If running with the Docker container shown above, the `entrypoint` is already set to `ndmg_bids`, so the pipeline can be run directly from the host-system command line as follows:
 
-    docker run -ti -v /path/to/local/data:/data bids/ndmg /data/ /data/outputs participant
+    docker run -ti -v /path/to/local/data:/data ndmg:uniquelabel /data/ /data/outputs
+
+This will run **ndmg** on the local data and save the output files to the directory /path/to/local/data/outputs
+
+## Working with S3 Datasets
+**ndmg** has the ability to work on datasets stored on [Amazon's Simple Storage Service](https://aws.amazon.com/s3/), assuming they are in BIDS format. Doing so requires you to set your set your AWS credentials and read the related s3 bucket documentation by running `ndmg_bids -h`.
 
 ## Example Datasets
 
@@ -206,7 +208,7 @@ Derivatives have been produced on a variety of datasets, all of which are made a
 
 ## Documentation
 
-Check out some [resources](http://m2g.io) on our website, or our [function reference](http://docs.neurodata.io/ndmg/) for more information about **ndmg**.
+Check out some [resources](http://m2g.io) on our website, or our [function reference](https://ndmg.neurodata.io/) for more information about **ndmg**.
 
 ## License
 
