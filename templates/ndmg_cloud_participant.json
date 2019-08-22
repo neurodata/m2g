@@ -1,47 +1,44 @@
 {
-    "jobName": "<JOBNAME>",
-    "jobQueue": "ndmg-queue",
-    "dependsOn": [],
-    "jobDefinition": "ndmg",
-    "parameters": {},
-    "containerOverrides": {
-        "command": [
-            "--bucket",
-            "<BUCKET>",
-            "--remote_path",
-            "<PATH>",
-            "--participant_label",
-            "<SUBJ>",
-            "--push_data",
-            "--modality",
-            "dwi",
-            "--atlas",
-            "desikan",
-            "--mod",
-            "det",
-            "--tt",
-            "local",
-            "--mf",
-            "csd",
-            "--sp",
-            "native",
-            "/input",
-            "/output",
-            "participant"
-        ],
-        "environment": [
-            {
-                "name": "AWS_ACCESS_KEY_ID",
-                "value": "<KEYID>"
-            },
-            {
-                "name": "AWS_SECRET_ACCESS_KEY",
-                "value": "<SECRET>"
-            },
-            {
-                "name": "AWS_DEFAULT_REGION",
-                "value": "us-east-1"
-            }
-        ]
-    }
+  "jobName": "<JOBNAME>",
+  "jobQueue": "ndmg-queue",
+  "dependsOn": [],
+  "jobDefinition": "ndmg",
+  "parameters": {},
+  "containerOverrides": {
+    "command": [
+      "--bucket",
+      "<BUCKET>",
+      "--remote_path",
+      "<PATH>",
+      "--participant_label",
+      "<SUBJ>",
+      "--push_data",
+      "--atlas",
+      "desikan",
+      "--mod",
+      "det",
+      "--tt",
+      "local",
+      "--mf",
+      "csd",
+      "--sp",
+      "native",
+      "/input",
+      "/output"
+    ],
+    "environment": [
+      {
+        "name": "AWS_ACCESS_KEY_ID",
+        "value": "<KEYID>"
+      },
+      {
+        "name": "AWS_SECRET_ACCESS_KEY",
+        "value": "<SECRET>"
+      },
+      {
+        "name": "AWS_DEFAULT_REGION",
+        "value": "us-east-1"
+      }
+    ]
+  }
 }

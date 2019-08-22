@@ -1,5 +1,5 @@
-*********************
+******************
 Functional Pipeline
-*********************
+******************
 
-Coming soon!
+Functional MRI analysis coming soon!
