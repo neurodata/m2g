@@ -82,11 +82,31 @@ You can leave the other parameters empty.
 
 ## Running the Pipeline
 
+Given that you've set up your batch environment properly, and your IAM credentials are set up properly, submitting jobs to batch is relatively simple:
+
+        ndmg_cloud participant --bucket <bucket> --bidsdir <path on bucket> --jobdir <local/jobdir> --modif <name-of-s3-directory-output>
+
+An example using one of our s3 buckets can be seen below. Note that your dataset must be BIDs-formatted.:
+
+        ndmg_cloud participant --bucket ndmg-data --sp native --bidsdir HNU1 --jobdir ~/.ndmg/jobs/HNU1-08-21-native --modif ndmg-08-21-native --dataset HNU1
+
+Note that the above example won't work for people without access to our bucket.
+
+Behind the scenes, what happens here is:
+
+1. `ndmg` parses through your s3 bucket, and gets the locations of all subjects and sessions
+2. A unique `json` file is created for each scan, containing the ndmg run parameters for that scan.
+3. Every `json` file is submitted sequentially to `AWS-Batch`, and a job begins that runs that scan.
+4. Once the scan is done, the output data is pushed to the output location on `s3` specified by `--modif`.
+
 ## Monitoring Runs
 
-TODO
+You can see all of your runs in the `Batch` Dashboard.
 
-- CloudWatch
-- EC2 console
-- SSH
-- ECR
+![batch-runs](https://i.imgur.com/b9GbKdT.png)
+
+You can monitor the outputs of a given run by clicking on it and clicking `View logs for the most recent attempt in the CloudWatch console`.
+
+![cloudwatch](https://i.imgur.com/K4djTW1.png)
+
+When all of your runs finish, the outputs will on `s3`, and you can use your favorite way to pull your graphs to your local machine!
