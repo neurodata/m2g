@@ -366,38 +366,37 @@ def main():
         "--vox",
         action="store",
         default="2mm",
-        help="Voxel size to use for template registrations \
-                        (e.g. default is '2mm')",
+        help="Voxel size : 2mm, 1mm. Voxel size to use for template registrations.gi",
     )
     parser.add_argument(
         "-c",
         "--clean",
         action="store_true",
         default=False,
-        help="Whether or not to delete intemediates",
+        help="Whether or not to delete intermediates",
     )
     parser.add_argument(
         "--mod",
         action="store",
-        help="Determinstic (det) or probabilistic (prob) tracking. Default is det.",
+        help="Determinstic (det), probabilistic (prob) tracking. Default is det.",
         default="det",
     )
     parser.add_argument(
         "--tt",
         action="store",
-        help="Tracking approach: local or particle. Default is local.",
+        help="Tracking approach: local, particle. Default is local.",
         default="local",
     )
     parser.add_argument(
         "--mf",
         action="store",
-        help="Diffusion model: csd or csa. Default is csd.",
+        help="Diffusion model: csd, csa. Default is csa.",
         default="csa",
     )
     parser.add_argument(
         "--sp",
         action="store",
-        help="Space for tractography. Default is native.",
+        help="Space for tractography: mni, native_dsn, native. Default is native.",
         default="native",
     )
     parser.add_argument(
