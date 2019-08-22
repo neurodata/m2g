@@ -34,6 +34,7 @@ from argparse import ArgumentParser
 import warnings
 import shutil
 import time
+from pathlib import Path
 
 import boto3
 
@@ -211,8 +212,8 @@ def create_json(
     if bg:
         cmd.append("--big")
     if modif:
-        cmd.insert(19, u"--modif")
-        cmd.insert(20, modif)
+        cmd.insert(cmd.index("--push_data") + 1, u"--modif")
+        cmd.insert(cmd.index("--push_data") + 2, modif)
 
     # edit participant-specific values ()
     # loop over every session of every participant
@@ -458,7 +459,7 @@ def main():
         print("Beginning batch submission process...")
         if not os.path.exists(jobdir):
             print("job directory not found. Creating...")
-            os.mkdir(jobdir)
+            Path(jobdir).mkdir(parents=True)
         batch_submit(
             bucket,
             path,
