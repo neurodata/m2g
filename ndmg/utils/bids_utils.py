@@ -51,8 +51,10 @@ class name_resource:
         """
         self.__subi__ = os.path.basename(modf).split(".")[0]
         self.__anati__ = os.path.basename(t1wf).split(".")[0]
-        self.__sub__ = re.search(r"(sub-)(?!.*sub-).*?(?=[_])", modf).group()
-        self.__suball__ = "sub-{}".format(self.__sub__)
+        self.__sub__ = re.search(r"(sub-)(?!.*sub-).*?(?=[_])", modf)
+        if self.__sub__:
+            self.__sub__=self.__sub__.group()
+            self.__suball__ = "sub-{}".format(self.__sub__)
         self.__ses__ = re.search(r"(ses-)(?!.*ses-).*?(?=[_])", modf)
         if self.__ses__:
             self.__ses__ = self.__ses__.group()
