@@ -51,6 +51,7 @@ class name_resource:
         """
         self.__subi__ = os.path.basename(modf).split(".")[0]
         self.__anati__ = os.path.basename(t1wf).split(".")[0]
+        self.__suball__ = ""
         self.__sub__ = re.search(r"(sub-)(?!.*sub-).*?(?=[_])", modf)
         if self.__sub__:
             self.__sub__=self.__sub__.group()
