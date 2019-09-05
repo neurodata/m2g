@@ -57,6 +57,7 @@ def ndmg_dwi_worker(
     mod_type,
     track_type,
     mod_func,
+    seeds,
     reg_style,
     clean,
     skipeddy=False,
@@ -96,6 +97,8 @@ def ndmg_dwi_worker(
         Tracking approach: eudx or local. Default is eudx.
     mod_func : str
         Diffusion model: csd, csa, or tensor. Default is tensor.
+    seeds : int
+        Density of seeding for native-space tractography.
     reg_style : str
         Space for tractography. Default is native.
     clean : bool
@@ -136,11 +139,12 @@ def ndmg_dwi_worker(
     print("mod_type = {}".format(mod_type))
     print("track_type = {}".format(track_type))
     print("mod_func = {}".format(mod_func))
+    print("seeds = {}".format(seeds))
     print("reg_style = {}".format(reg_style))
     print("clean = {}".format(clean))
     print("skip eddy = {}".format(skipeddy))
     print("skip registration = {}".format(skipreg))
-    fmt = "_adj.ssv"
+    fmt = "_adj.csv"
 
     assert all(
         [
@@ -156,6 +160,7 @@ def ndmg_dwi_worker(
             mod_type,
             track_type,
             mod_func,
+            seeds,
             reg_style,
         ]
     ), "Missing a default argument."
@@ -176,7 +181,7 @@ def ndmg_dwi_worker(
         "reg_anat": "anat/registered",
         "fiber": "dwi/fiber",
         "tensor": "dwi/tensor",
-        "conn": "dwi/roi-connectomes"
+        "conn": "dwi/roi-connectomes",
     }
 
     label_dirs = ["conn"]  # create label level granularity
@@ -415,7 +420,7 @@ def ndmg_dwi_worker(
 
         # -------- Tensor Fitting and Fiber Tractography ---------------- #
         start_time = time.time()
-        seeds = mgt.build_seed_list(reg.wm_gm_int_in_dwi, np.eye(4), dens=20)
+        seeds = mgt.build_seed_list(reg.wm_gm_int_in_dwi, np.eye(4), dens=int(seeds))
         print("Using " + str(len(seeds)) + " seeds...")
 
         # Compute direction model and track fiber streamlines
@@ -480,7 +485,9 @@ def ndmg_dwi_worker(
     elif reg_style == "mni":
         # Check dimensions
         start_time = time.time()
-        t1w = mgu.match_target_vox_res(t1w, vox_size, namer, sens="t1w") #this is the second time this t1w data has been sent to this function (REMOVE?)
+        t1w = mgu.match_target_vox_res(
+            t1w, vox_size, namer, sens="t1w"
+        )  # this is the second time this t1w data has been sent to this function (REMOVE?)
         print(
             "%s%s%s"
             % ("Reslicing runtime: ", str(np.round(time.time() - start_time, 1)), "s")
@@ -546,7 +553,8 @@ def ndmg_dwi_worker(
             labels_im_file_mni = reg.atlas2t1w2dwi_align(labels_im_file, dsn=True)
             labels_im = nib.load(labels_im_file_mni)
             g1 = mgg.graph_tools(
-                attr=len(np.unique(labels_im.get_data().astype("int"))) - 1,
+                attr=len(np.unique(np.around(labels_im.get_data()).astype("int16")))
+                - 1,
                 rois=labels_im_file_mni,
                 tracks=streamlines_mni,
                 affine=np.eye(4),
@@ -564,7 +572,8 @@ def ndmg_dwi_worker(
             labels_im_file_dwi = reg.atlas2t1w2dwi_align(labels_im_file, dsn=False)
             labels_im = nib.load(labels_im_file_dwi)
             g1 = mgg.graph_tools(
-                attr=len(np.unique(labels_im.get_data().astype("int"))) - 1,
+                attr=len(np.unique(np.around(labels_im.get_data()).astype("int16")))
+                - 1,
                 rois=labels_im_file_dwi,
                 tracks=streamlines,
                 affine=np.eye(4),
@@ -579,7 +588,8 @@ def ndmg_dwi_worker(
             )
             labels_im = nib.load(labels_im_file)
             g1 = mgg.graph_tools(
-                attr=len(np.unique(labels_im.get_data().astype("int"))) - 1,
+                attr=len(np.unique(np.around(labels_im.get_data()).astype("int16")))
+                - 1,
                 rois=labels_im_file,
                 tracks=streamlines,
                 affine=np.eye(4),
@@ -721,6 +731,7 @@ def main():
         result.tt,
         result.mf,
         result.sp,
+        result.seeds,
         result.clean,
         result.skipeddy,
         result.skipreg,

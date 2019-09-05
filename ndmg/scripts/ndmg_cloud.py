@@ -34,6 +34,7 @@ from argparse import ArgumentParser
 import warnings
 import shutil
 import time
+from pathlib import Path
 
 import boto3
 
@@ -56,6 +57,7 @@ def batch_submit(
     bg=False,
     modif="",
     reg_style="",
+    mod_type="",
 ):
     """
     Searches through an S3 bucket, gets all subject-ids, creates json files
@@ -160,6 +162,7 @@ def create_json(
     bg=False,
     modif="",
     reg_style="",
+    mod_type="",
 ):
     """
     Takes parameters to make jsons
@@ -204,11 +207,13 @@ def create_json(
     # edit defaults if necessary
     if reg_style:
         cmd[cmd.index("--sp") + 1] = reg_style
+    if mod_type:
+        cmd[cmd.index("--mod") + 1] = reg_style
     if bg:
         cmd.append("--big")
     if modif:
-        cmd.insert(19, u"--modif")
-        cmd.insert(20, modif)
+        cmd.insert(cmd.index("--push_data") + 1, u"--modif")
+        cmd.insert(cmd.index("--push_data") + 2, modif)
 
     # edit participant-specific values ()
     # loop over every session of every participant
@@ -412,6 +417,12 @@ def main():
         help="Space for tractography. Default is native.",
         default="native",
     )
+    parser.add_argument(
+        "--mod",
+        action="store",
+        help="Determinstic (det) or probabilistic (prob) tracking. Default is det.",
+        default="det",
+    )
 
     result = parser.parse_args()
 
@@ -427,6 +438,7 @@ def main():
     bg = result.big != "False"
     modif = result.modif
     reg_style = result.sp
+    mod_type = result.mod
 
     if jobdir is None:
         jobdir = "./"
@@ -447,7 +459,7 @@ def main():
         print("Beginning batch submission process...")
         if not os.path.exists(jobdir):
             print("job directory not found. Creating...")
-            os.mkdir(jobdir)
+            Path(jobdir).mkdir(parents=True)
         batch_submit(
             bucket,
             path,
@@ -460,6 +472,7 @@ def main():
             bg,
             modif=modif,
             reg_style=reg_style,
+            mod_type=mod_type,
         )
 
     sys.exit(0)

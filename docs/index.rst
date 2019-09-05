@@ -14,9 +14,10 @@ The ndmg pipeline has been developed as a one-click solution for human connectom
 
 .. toctree::
    :caption: Tutorials
+   :maxdepth: 3
    
    tutorials/install
-   tutorials/funcref.rst
+   tutorials/funcref
 
 .. toctree::
    :caption: Pipeline Overview

@@ -26,6 +26,7 @@ warnings.simplefilter("ignore")
 from dipy.io import read_bvals_bvecs
 from dipy.core.gradients import gradient_table
 from subprocess import Popen, PIPE
+import subprocess
 import numpy as np
 import nibabel as nib
 import os
@@ -33,6 +34,46 @@ import os.path as op
 import sys
 from nilearn.image import mean_img
 from scipy.sparse import lil_matrix
+
+
+def check_dependencies():
+    """
+    Check for the existence of FSL and AFNI.
+    Stop the pipeline immediately if these dependencies are not installed.
+
+    Raises
+    ------
+    AssertionError
+        Raised if FSL is not installed.
+    AssertionError
+        Raised if AFNI is not installed.
+    """
+
+    # Check for python version
+    print("Python location : {}".format(sys.executable))
+    print("Python version : {}".format(sys.version))
+    if sys.version_info[0] < 3:
+        warnings.warn(
+            "WARNING : Using python 2. This Python version is no longer maintained. Use at your own risk."
+        )
+
+    # Check FSL installation
+    try:
+        print(f"Your fsl directory is located here: {os.environ['FSLDIR']}")
+    except KeyError:
+        raise AssertionError(
+            "You do not have FSL installed! See installation instructions here: https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FslInstallation"
+        )
+
+    # Check AFNI installation
+    try:
+        print(
+            f"Your AFNI directory is located here: {subprocess.check_output('which afni', shell=True, universal_newlines=True)}"
+        )
+    except subprocess.CalledProcessError:
+        raise AssertionError(
+            "You do not have AFNI installed! See installation instructions here: https://afni.nimh.nih.gov/pub/dist/doc/htmldoc/background_install/main_toc.html"
+        )
 
 
 def show_template_bundles(final_streamlines, template_path, fname):
@@ -167,7 +208,7 @@ def make_gtab_and_bmask(fbval, fbvec, dwi_file, outdir):
     str
         location of b0 brain mask file
     """
-    
+
     # Use B0's from the DWI to create a more stable DWI image for registration
     nodif_B0 = "{}/nodif_B0.nii.gz".format(outdir)
     nodif_B0_bet = "{}/nodif_B0_bet.nii.gz".format(outdir)
@@ -303,7 +344,7 @@ def reorient_img(img, namer):
     -------
     str
         Path to reoriented image
-    """    
+    """
     from ndmg.utils.reg_utils import normalize_xform
 
     # Load image, orient as RAS

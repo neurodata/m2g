@@ -80,30 +80,13 @@ def direct_streamline_norm(streams, fa_path, namer):
     [streamlines, _] = load_trk(streams)
 
     # Warp streamlines
-    # Create an isocentered affine
-    target_isocenter = np.diag(np.array([-vox_size, vox_size, vox_size, 1]))
-
-    # Take the off-origin affine capturing the extent contrast between fa image and the template
     adjusted_affine = affine_map.affine.copy()
-
-    # Now we flip the sign in the x and y planes so that we get the mirror image of the forward deformation field.
-    adjusted_affine[0][3] = -adjusted_affine[0][3]
-
-    # Scale z by the voxel size
-    adjusted_affine[2][3] = adjusted_affine[2][3] / vox_size
-
-    # Scale y by the square of the voxel size since we've already scaled along the z-plane.
-    adjusted_affine[1][3] = adjusted_affine[1][3] / vox_size ** vox_size
-
-    # Apply the deformation and correct for the extents
-    mni_streamlines = deform_streamlines(
-        streamlines,
-        deform_field=mapping.get_forward_field(),
-        stream_to_current_grid=target_isocenter,
-        current_grid_to_world=adjusted_affine,
-        stream_to_ref_grid=target_isocenter,
-        ref_grid_to_world=np.eye(4),
-    )
+    adjusted_affine[1][3] = -adjusted_affine[1][3]/vox_size**2
+    mni_streamlines = deform_streamlines(streamlines, deform_field=mapping.get_forward_field()[-1:],
+                                         stream_to_current_grid=template_img.affine,
+                                         current_grid_to_world=adjusted_affine,
+                                         stream_to_ref_grid=template_img.affine,
+                                         ref_grid_to_world=np.eye(4))
 
     # Save streamlines
     hdr = fa_img.header
@@ -674,7 +657,7 @@ class dmri_reg(object):
             self.atlas_img = nib.load(self.dwi_aligned_atlas)
         else:
             self.atlas_img = nib.load(self.aligned_atlas_t1mni)
-        self.atlas_data = self.atlas_img.get_data().astype("int")
+        self.atlas_data = np.around(self.atlas_img.get_data()).astype("int16")
         node_num = len(np.unique(self.atlas_data))
         self.atlas_data[self.atlas_data > node_num] = 0
 
