@@ -229,36 +229,43 @@ def session_level(
     # optional args stored in kwargs
     # use worker wrapper to call function f with args arg
     # and keyword args kwargs
-    print(args)
-    ndmg_dwi_worker(
-        args[0][0],
-        args[0][1],
-        args[0][2],
-        args[0][3],
-        atlas,
-        atlas_mask,
-        labels,
-        outDir,
-        vox_size,
-        mod_type,
-        track_type,
-        mod_func,
-        seeds,
-        reg_style,
-        clean,
-        skipeddy,
-        skipreg,
-        buck=buck,
-        remo=remo,
-        push=push,
-        creds=creds,
-        debug=debug,
-        modif=modif,
-    )
-    rmflds = []
-    if len(rmflds) > 0:
-        cmd = "rm -rf {}".format(" ".join(rmflds))
-        mgu.execute_cmd(cmd)
+    out_Dir = outDir
+    for x in range(len(args)):
+        print(args)
+
+        if len(args) > 1:
+            bid_len = len(dwis[x].split("/"))
+            outDir = out_Dir+"/"+dwis[x].split("/")[bid_len-4]+dwis[x].split("/")[bid_len-3]
+
+        ndmg_dwi_worker(
+            args[x][0],
+            args[x][1],
+            args[x][2],
+            args[x][3],
+            atlas,
+            atlas_mask,
+            labels,
+            outDir,
+            vox_size,
+            mod_type,
+            track_type,
+            mod_func,
+            seeds,
+            reg_style,
+            clean,
+            skipeddy,
+            skipreg,
+            buck=buck,
+            remo=remo,
+            push=push,
+            creds=creds,
+            debug=debug,
+            modif=modif,
+        )
+        rmflds = []
+        if len(rmflds) > 0:
+            cmd = "rm -rf {}".format(" ".join(rmflds))
+            mgu.execute_cmd(cmd)
     sys.exit(0)  # terminated
 
 
