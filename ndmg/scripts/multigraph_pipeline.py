@@ -33,9 +33,18 @@ import numpy as np
 
 
 def multigraphs(fibers, labels, outdir):
+    """Creates a brain graph from fiber streamlines
+    
+    Parameters
+    ----------
+    fibers : [type]
+        [description]
+    labels : [type]
+        [description]
+    outdir : str
+        Output directory path
     """
-    Creates a brain graph from fiber streamlines
-    """
+
     startTime = datetime.now()
     fiber_name = mgu.get_filename(fibers)
     base = fiber_name.split("_fibers", 1)[0]

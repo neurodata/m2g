@@ -153,24 +153,34 @@ def get_braindata(brain_file):
 
 
 def get_filename(label):
-    """
-    Given a fully qualified path gets just the file name, without extension
+    """Given a fully qualified path, return just the file name, without extension
+    
+    Parameters
+    ----------
+    label : str
+        Path to file you want isolated
+    
+    Returns
+    -------
+    str
+        File name
     """
     return op.splitext(op.splitext(op.basename(label))[0])[0]
 
 
 def get_slice(mri, volid, sli):
+    """Takes a volume index and constructs a new nifti image from the specified volume
+    
+    Parameters
+    ----------
+    mri : str
+        Path to the 4d mri volume you wish to extract a slice from
+    volid : int
+        The index of the volume desired
+    sli : str
+        Path for the resulting file containing the desired slice
     """
-    Takes a volume index and constructs a new nifti image from
-    the specified volume.
-    **Positional Arguments:**
-        mri:
-            - the path to a 4d mri volume to extract a slice from.
-        volid:
-            - the index of the volume desired.
-        sli:
-            - the path to the destination for the slice.
-    """
+    
     mri_im = nib.load(mri)
     data = mri_im.get_data()
     # get the slice at the desired volume
@@ -191,11 +201,11 @@ def make_gtab_and_bmask(fbval, fbvec, dwi_file, outdir):
     Parameters
     ----------
     fbval : str
-        b-value file
+        Path to b-value file
     fbvec : str
-        b-vector file
+        Path to b-vector file
     dwi_file : str
-        dwi file being analyzed
+        Path to dwi file being analyzed
     outdir : str
         output directory
     
@@ -450,13 +460,22 @@ def match_target_vox_res(img_file, vox_size, namer, sens):
 
 
 def load_timeseries(timeseries_file, ts="roi"):
+    """Loads timeseries data. Exists to standardize formatting in case changes are made
+    with how timeseries are saved in future versions.
+    
+    Parameters
+    ----------
+    timeseries_file : str
+        Path to the file you wish to load timeseries data from
+    ts : str, optional
+        Timeseries type, either 'roi' or 'voxel, by default "roi"
+    
+    Returns
+    -------
+    [type]
+        [description]
     """
-    A function to load timeseries data. Exists to standardize
-    formatting in case changes are made with how timeseries are
-    saved in future versions.
-     **Positional Arguments**
-         timeseries_file: the file to load timeseries data from.
-    """
+    
     if (ts == "roi") or (ts == "voxel"):
         timeseries = np.load(timeseries_file)["roi"]
         return timeseries

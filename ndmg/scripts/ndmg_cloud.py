@@ -59,11 +59,37 @@ def batch_submit(
     reg_style="",
     mod_type="",
 ):
+    """Searches through an S3 bucket, gets all subject-ids, creates json files for each,
+    submits batch jobs, and returns list of job ids to query status upon later
+    
+    Parameters
+    ----------
+    bucket : str
+        The S3 bucket with the input dataset formatted according to the BIDS standard.
+    path : str
+        The directory where the dataset lives on the S3 bucket should be stored
+    jobdir : str
+        Directory of batch jobs to generate/check up on
+    credentials : [type], optional
+        AWS formatted csv of credentials, by default None
+    state : str, optional
+        [description], by default "participant"
+    debug : bool, optional
+        [description], by default False
+    dataset : [type], optional
+        [description], by default None
+    log : bool, optional
+        [description], by default False
+    bg : bool, optional
+        [description], by default False
+    modif : str, optional
+        [description], by default ""
+    reg_style : str, optional
+        [description], by default ""
+    mod_type : str, optional
+        [description], by default ""
     """
-    Searches through an S3 bucket, gets all subject-ids, creates json files
-    for each, submits batch jobs, and returns list of job ids to query status
-    upon later.
-    """
+    
     print(("Getting list from s3://{}/{}/...".format(bucket, path)))
     threads = crawl_bucket(bucket, path, jobdir)
 
@@ -257,9 +283,21 @@ def create_json(
 
 
 def submit_jobs(jobs, jobdir):
+    """Give list of jobs to submit, submits them to AWS Batch
+    
+    Parameters
+    ----------
+    jobs : [type]
+        [description]
+    jobdir : [type]
+        [description]
+    
+    Returns
+    -------
+    [type]
+        [description]
     """
-    Give list of jobs to submit, submits them to AWS Batch
-    """
+    
     batch = s3_client(service="batch")
     cmd_template = "--cli-input-json file://{}"
     # cmd_template = batch.submit_jobs
