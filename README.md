@@ -42,7 +42,7 @@ The **ndmg** pipeline:
  - is wrapped in a [Docker container](https://hub.docker.com/r/bids/ndmg/);
  - has install instructions via a [Dockerfile](https://github.com/BIDS-Apps/ndmg/blob/master/Dockerfile#L6);
  - requires no non-standard hardware to run;
- - has key features built upon FSL, Dipy, Nibabel, Nilearn, Networkx, Numpy, Scipy, Scikit-Learn, and others;
+ - has key features built upon FSL, AFNI, Dipy, Nibabel, Nilearn, Networkx, Numpy, Scipy, Scikit-Learn, and others;
  - takes approximately 1-core, 8-GB of RAM, and 1 hour to run for most datasets.
 
 ## Installation Guide
