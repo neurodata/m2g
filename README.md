@@ -96,7 +96,7 @@ Once you have the pipeline up and running, you can run it with:
     
 We recommend specifying an atlas and lowering the default seed density on test runs:
 
-    ndmg_bids --seeds 2 --atlas desikan <input_directory> <output_directory>
+    ndmg_bids --seeds 1 --atlas desikan <input_directory> <output_directory>
 
 For more detailed instructions, tutorials on the **ndmg** pipeline can be found in [ndmg/tutorials](https://github.com/neurodata/ndmg/tree/staging/tutorials)
 
