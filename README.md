@@ -42,7 +42,7 @@ The **ndmg** pipeline:
  - is wrapped in a [Docker container](https://hub.docker.com/r/bids/ndmg/);
  - has install instructions via a [Dockerfile](https://github.com/BIDS-Apps/ndmg/blob/master/Dockerfile#L6);
  - requires no non-standard hardware to run;
- - has key features built upon FSL, Dipy, Nibabel, Nilearn, Networkx, Numpy, Scipy, Scikit-Learn, and others;
+ - has key features built upon FSL, AFNI, Dipy, Nibabel, Nilearn, Networkx, Numpy, Scipy, Scikit-Learn, and others;
  - takes approximately 1-core, 8-GB of RAM, and 1 hour to run for most datasets.
 
 ## Installation Guide
@@ -82,7 +82,7 @@ The image can then be used to create a container and run directly with the follo
     cd ndmg
     docker build -t <imagename:uniquelabel> .
 
-Where "uniquelabel" can be whatever you wish to call this Docker image (for example, ndmg:neurodata). Additional information about building Docker images can be found [here](https://docs.docker.com/engine/reference/commandline/image_build/).
+Where "uniquelabel" can be whatever you wish to call this Docker image (for example, ndmg:latest). Additional information about building Docker images can be found [here](https://docs.docker.com/engine/reference/commandline/image_build/).
 Creating the Docker image should take several minutes if this is the first time you have used this docker file.
 In order to create a docker container from the docker image and access it, use the following command to both create and enter the container:
 
@@ -193,14 +193,18 @@ If running with the Docker container shown above, the `entrypoint` is already se
 
     docker run -ti -v /path/to/local/data:/data neurodata/ndmg_dev /data/ /data/outputs
 
-This will run **ndmg** on the local data and save the output files to the directory /path/to/local/data/outputs. Note that if you have created the docker image from github, replace ```neurodata/ndmg_dev``` with ```ndmg:uniquelabel```
+This will run **ndmg** on the local data and save the output files to the directory /path/to/local/data/outputs. Note that if you have created the docker image from github, replace ```neurodata/ndmg_dev``` with ```imagename:uniquelabel```.
+
+Also note that currently, running `ndmg` on a single bids-formatted dataset directory only runs a single scan. To run the entire dataset, we recommend parallelizing on a high-performance cluster or using `ndmg`'s s3 integration.
 
 ## Working with S3 Datasets
-**ndmg** has the ability to work on datasets stored on [Amazon's Simple Storage Service](https://aws.amazon.com/s3/), assuming they are in BIDS format. Doing so requires you to set your AWS credentials and read the related s3 bucket documentation by running `ndmg_bids -h`.
+**ndmg** has the ability to work on datasets stored on [Amazon's Simple Storage Service](https://aws.amazon.com/s3/), assuming they are in BIDS format. Doing so requires you to set your AWS credentials and read the related s3 bucket documentation. You can find a guide [here](https://github.com/neurodata/ndmg/blob/deploy/tutorials/Batch.ipynb).
 
 ## Example Datasets
 
 Derivatives have been produced on a variety of datasets, all of which are made available on [our website](http://m2g.io). Each of these datsets is available for access and download from their respective sources. Alternatively, example datasets on the [BIDS website](http://bids.neuroimaging.io) which contain diffusion data can be used and have been tested; `ds114`, for example.
+
+For some downsampled test data, see [neuroparc](https://github.com/neurodata/neuroparc/tree/master/data/)
 
 ## Documentation
 
