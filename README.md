@@ -94,7 +94,7 @@ Once you have the pipeline up and running, you can run it with:
     
     ndmg_bids <input_directory> <output_directory>
     
-We recommend specifying an atlas and lowering the default speed density on test runs:
+We recommend specifying an atlas and lowering the default seed density on test runs:
 
     ndmg_bids --seeds 2 --atlas desikan <input_directory> <output_directory>
 
