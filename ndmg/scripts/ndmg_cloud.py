@@ -73,9 +73,9 @@ def batch_submit(
     credentials : [type], optional
         AWS formatted csv of credentials, by default None
     state : str, optional
-        [description], by default "participant"
+        determines the function to be performed by this function ("participant", "status", "kill"), by default "participant"
     debug : bool, optional
-        [description], by default False
+        flag whether to save temp files along the path of processing, by default False
     dataset : [type], optional
         [description], by default None
     log : bool, optional

@@ -7,6 +7,18 @@ import boto3
 
 
 def get_credentials():
+    """Searches for and returns AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY
+    
+    Returns
+    -------
+    tuple
+        Two strings inside of a tuple, (Access_key, Secret_access_key)
+    
+    Raises
+    ------
+    AttributeError
+        No AWS credentials are found
+    """
     # add option to pass profile name
     try:
         config = ConfigParser()
@@ -93,10 +105,27 @@ def get_matching_s3_objects(bucket, prefix="", suffix=""):
 
 
 def s3_get_data(bucket, remote, local, public=False, force=False):
+    """Given and s3 directory, copies files/subdirectories in that directory to local
+    
+    Parameters
+    ----------
+    bucket : str
+        [description]
+    remote : [type]
+        [description]
+    local : [type]
+        [description]
+    public : bool, optional
+        [description], by default False
+    force : bool, optional
+        [description], by default False
+    
+    Returns
+    -------
+    [type]
+        [description]
     """
-    given an s3 directory,
-    copies in that directory to local.
-    """
+    
 
     # TODO : use boto3 for this
     if os.path.exists(local) and not force:
@@ -131,6 +160,23 @@ def s3_get_data(bucket, remote, local, public=False, force=False):
 
 
 def s3_push_data(bucket, remote, outDir, modifier, creds=True, debug=True):
+    """Pushes data to a specified S3 bucket
+    
+    Parameters
+    ----------
+    bucket : str
+        [description]
+    remote : [type]
+        [description]
+    outDir : [type]
+        [description]
+    modifier : [type]
+        [description]
+    creds : bool, optional
+        [description], by default True
+    debug : bool, optional
+        [description], by default True
+    """
     # TODO : use boto3 for this instead
     cmd = (
         'aws s3 cp --exclude "tmp/*" {} s3://{}/{}/{}/{}/ --recursive --acl public-read'
