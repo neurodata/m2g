@@ -36,19 +36,21 @@ from ndmg.stats.plotly_helper import *
 
 class group_func(object):
     def __init__(self, basedir, outdir, atlas=None, dataset=None):
+        """A class for group level quality control
+        
+        Parameters
+        ----------
+        basedir : str
+            the name of the directory containing the ndmg-formatted functional outputs, should have a qa/ folder contained within it. A
+            '/connectomes' will be appended on it when the connectomes are retrived
+        outdir : str
+            path for the directory to place all group level quality control.
+        atlas : [type], optional
+            [description], by default None
+        dataset : str, optional
+            an optional parameter for the name of the dataset to be present in the quality control output filenames, by default None
         """
-        A class for group level quality control.
-
-        **Positional Arguments:**
-            - basedir:
-                - the ndmg-formatted functional outputs.
-                  should have a qa/ folder contained within it.
-            - outdir:
-                - the directory to place all group level quality control.
-            - dataset:
-                - an optional parameter for the name of the dataset
-                  to be present in the quality control output filenames.
-        """
+        
         print(atlas)
         self.ndmgdir = basedir
         self.qadir = "{}/qa".format(self.ndmgdir)

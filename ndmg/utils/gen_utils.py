@@ -106,10 +106,24 @@ def show_template_bundles(final_streamlines, template_path, fname):
 
 
 def execute_cmd(cmd, verb=False):
-    """
-    Given a bash command, it is executed and the response piped back to the
+    """Given a bash command, it is executed and the response piped back to the
     calling script
+    
+    Parameters
+    ----------
+    cmd : str
+        command you want to execute
+    verb : bool, optional
+        whether to print the command that is being executed, by default False
+    
+    Returns
+    -------
+    stdout
+        outputs from p.communicate
+    stderr
+        error from p.communicate
     """
+    
     if verb:
         print("Executing: {}".format(cmd))
 
@@ -126,15 +140,26 @@ def name_tmps(basedir, basename, extension):
 
 
 def get_braindata(brain_file):
-    """
-    Opens a brain data series for a mask, mri image, or atlas.
+    """Opens a brain data series for a mask, mri image, or atlas.
     Returns a numpy.ndarray representation of a brain.
-    **Positional Arguements**
-        brain_file:
-            - an object to open the data for a brain.
-            Can be a string (path to a brain file),
-            nibabel.nifti1.nifti1image, or a numpy.ndarray
+    
+    Parameters
+    ----------
+    brain_file : object
+        an object to open the data for a brain. Can be a string (path to a brain file),
+        nibabel.nifti1.nifti1image, or a numpy.ndarray
+    
+    Returns
+    -------
+    array
+        array of image data
+    
+    Raises
+    ------
+    TypeError
+        Brain file is not an accepted format
     """
+
     if type(brain_file) is np.ndarray:  # if brain passed as matrix
         braindata = brain_file
     else:
@@ -492,20 +517,22 @@ def name_tmps(basedir, basename, extension):
 
 
 def parcel_overlap(parcellation1, parcellation2, outpath):
-    """
-    A function to compute the percent composition of each parcel in
+    """A function to compute the percent composition of each parcel in
     parcellation 1 with the parcels in parcellation 2. Rows are indices
     in parcellation 1; cols are parcels in parcellation 2. Values are the
     percent of voxels in parcel (parcellation 1) that fall into parcel
     (parcellation 2). Implied is that each row sums to 1.
-    **Positional Arguments:**
-        parcellation1:
-            - the path to the first parcellation.
-        parcellation2:
-            - the path to the second parcellation.
-        outpath:
-            - the path to produce the output.
+    
+    Parameters
+    ----------
+    parcellation1 : str
+        the path to the first parcellation.
+    parcellation2 : str
+        the path to the second parcellation.
+    outpath : str
+        the path to produce the output.
     """
+    
     p1_dat = nib.load(parcellation1).get_data()
     p2_dat = nib.load(parcellation2).get_data()
     p1regs = np.unique(p1_dat)

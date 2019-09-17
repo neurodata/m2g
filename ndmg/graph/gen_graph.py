@@ -311,6 +311,13 @@ class graph_tools(object):
         pass
 
     def save_graph_png(self, graphname):
+        """Saves adjacency graph, made using graspy's heatmap function, as a png. This will be saved in the qa/graphs_plotting/ directory
+        
+        Parameters
+        ----------
+        graphname : str
+            name of the generated graph (do not include '.png')
+        """
         import matplotlib
 
         matplotlib.use("agg")

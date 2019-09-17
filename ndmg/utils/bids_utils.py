@@ -37,7 +37,7 @@ class name_resource:
     Parameters
     ----------
     modf : str
-        Path to subject MRI (dwi or func) data to be analyzed
+        Path to subject MRI (dwi) data to be analyzed
     t1wf : str
         Path to subject t1w anatomical data
     tempf : str
@@ -85,10 +85,10 @@ class name_resource:
         ----------
         paths : dict
             a dictonary of keys to suffix directories desired
-        labels : [type]
-            [description]
-        label_dirs : [type]
-            [description]
+        labels : list
+            list of paths of all the atlas label nifti files being used
+        label_dirs : list
+            list containing the keys from 'paths' you wish to add label level granularity to (create a directory for each value in 'labels')
         """
         
         self.dirs = {}
@@ -125,9 +125,9 @@ class name_resource:
         paths : dict
             a dictionary of keys to suffix directories
         labels : list
-            path to desired atlas labeling file
+            list of paths of all the atlas label nifti files being used (each will get their own directory)
         label_dirs : list
-            label directories
+            list containing the keys from 'paths' you wish to add label level granularity to (create a directory for each value in 'labels')
         """
 
         namer.dirs = {}
@@ -263,7 +263,7 @@ def flatten(current, result=[]):
     current : dict
         path to directory you want to flatten
     result : list, optional
-        Default is []
+        Used to store directory information between itterations of flatten, Default is []
     
     Returns
     -------

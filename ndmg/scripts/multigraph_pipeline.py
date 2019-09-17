@@ -37,12 +37,12 @@ def multigraphs(fibers, labels, outdir):
     
     Parameters
     ----------
-    fibers : [type]
-        [description]
-    labels : [type]
-        [description]
+    fibers : str
+        Path of fiber streamline file to be used
+    labels : list
+        Paths to nifti labels of regions of interest in atlas space
     outdir : str
-        Output directory path
+        Output directory path for brain graph
     """
 
     startTime = datetime.now()
@@ -88,6 +88,8 @@ def multigraphs(fibers, labels, outdir):
 
 
 def main():
+    """Creates a brain graph from fiber streamlines
+    """
     parser = ArgumentParser(
         description="This is an end-to-end connectome \
                             estimation pipeline from sMRI and DTI images"
