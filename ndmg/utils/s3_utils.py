@@ -110,20 +110,16 @@ def s3_get_data(bucket, remote, local, public=False, force=False):
     Parameters
     ----------
     bucket : str
-        [description]
-    remote : [type]
-        [description]
-    local : [type]
-        [description]
+        s3 bucket you are accessing data from
+    remote : str
+        The path to the data on your S3 bucket. The data will be
+        downloaded to the provided bids_dir on your machine.
+    local : str
+        Local input directory where you want the files coppied to
     public : bool, optional
-        [description], by default False
+        Whether or not the data you are accessing is public, if False s3 credentials are used, by default False
     force : bool, optional
-        [description], by default False
-    
-    Returns
-    -------
-    [type]
-        [description]
+        Whether to overwrite the local directory containing the s3 files if it already exists, by default False
     """
     
 
@@ -165,17 +161,18 @@ def s3_push_data(bucket, remote, outDir, modifier, creds=True, debug=True):
     Parameters
     ----------
     bucket : str
-        [description]
-    remote : [type]
-        [description]
-    outDir : [type]
-        [description]
-    modifier : [type]
-        [description]
+        s3 bucket you are pushing files to
+    remote : str
+        The path to the directory on your S3 bucket containing the data used in the pipeline, the string in 'modifier' will be put after the
+        first directory specified in the path as its own directory (/remote[0]/modifier/remote[1]/...)
+    outDir : str
+        Path of local directory being pushed to the s3 bucket
+    modifier : str
+        Name of the folder on s3 to push to. If empty, push to a folder with ndmg's version number. Default is ""
     creds : bool, optional
-        [description], by default True
+        Whether s3 credentials are being provided, may fail to push big files if False, by default True
     debug : bool, optional
-        [description], by default True
+        Whether to not to push intermediate files created by the pipeline, by default True
     """
     # TODO : use boto3 for this instead
     cmd = (
