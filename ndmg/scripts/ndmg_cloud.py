@@ -67,7 +67,7 @@ def batch_submit(
     bucket : str
         The S3 bucket with the input dataset formatted according to the BIDS standard.
     path : str
-        The directory where the dataset lives on the S3 bucket should be stored
+        The directory where the dataset is stored on the S3 bucket
     jobdir : str
         Directory of batch jobs to generate/check up on
     credentials : [type], optional
@@ -76,18 +76,18 @@ def batch_submit(
         determines the function to be performed by this function ("participant", "status", "kill"), by default "participant"
     debug : bool, optional
         flag whether to save temp files along the path of processing, by default False
-    dataset : [type], optional
-        [description], by default None
+    dataset : str, optional
+        Name given to the output directory containing analyzed data set "ndmg-<version>-<dataset>", by default None
     log : bool, optional
-        [description], by default False
+        flag to indicate log ploting in group analysis, by default False
     bg : bool, optional
-        [description], by default False
+        whether or not to produce voxelwise big graph, by default False
     modif : str, optional
-        [description], by default ""
+        Name of folder on s3 to push to. If empty, push to a folder with ndmg's version number, by default ""
     reg_style : str, optional
-        [description], by default ""
+        Space for tractography, by default ""
     mod_type : str, optional
-        [description], by default ""
+        Determinstic (det) or probabilistic (prob) tracking, by default ""
     """
     
     print(("Getting list from s3://{}/{}/...".format(bucket, path)))
@@ -112,9 +112,23 @@ def batch_submit(
 
 
 def crawl_bucket(bucket, path, jobdir):
+    """Gets subject list for a given s3 bucket and path
+    
+    Parameters
+    ----------
+    bucket : str
+        s3 bucket
+    path : str
+        The directory where the dataset is stored on the S3 bucket
+    jobdir : str
+        Directory of batch jobs to generate/check up on
+    
+    Returns
+    -------
+    OrderedDict
+        dictionary containing all subjects and sessions from the path location
     """
-    Gets subject list for a given S3 bucket and path
-    """
+    
     # if jobdir has seshs info file in it, use that instead
     sesh_path = "{}/seshs.json".format(jobdir)
     if os.path.isfile(sesh_path):
@@ -190,8 +204,37 @@ def create_json(
     reg_style="",
     mod_type="",
 ):
-    """
-    Takes parameters to make jsons
+    """Creates the json files for the 
+    
+    Parameters
+    ----------
+    bucket : str
+        The S3 bucket with the input dataset formatted according to the BIDS standard.
+    path : str
+        The directory where the dataset is stored on the S3 bucket
+    threads : OrderedDict
+        [description]
+    jobdir : str
+        Directory of batch jobs to generate/check up on
+    credentials : [type], optional
+        AWS formatted csv of credentials, by default None
+    debug : bool, optional
+        flag whether to save temp files along the path of processing, by default False
+    dataset : [type], optional
+        Name given to the output directory containing analyzed data set "ndmg-<version>-<dataset>", by default None
+    bg : bool, optional
+        whether or not to produce voxelwise big graph, by default False
+    modif : str, optional
+        Name of folder on s3 to push to. If empty, push to a folder with ndmg's version number, by default ""
+    reg_style : str, optional
+        Space for tractography, by default ""
+    mod_type : str, optional
+        Determinstic (det) or probabilistic (prob) tracking, by default ""
+    
+    Returns
+    -------
+    list
+        [description]
     """
     jobsjson = "{}/jobs.json".format(jobdir)
     if os.path.isfile(jobsjson):
@@ -287,15 +330,15 @@ def submit_jobs(jobs, jobdir):
     
     Parameters
     ----------
-    jobs : [type]
-        [description]
-    jobdir : [type]
-        [description]
+    jobs : list
+        Name of the json files for all jobs to submit
+    jobdir : str
+        Directory of batch jobs to generate/check up on
     
     Returns
     -------
-    [type]
-        [description]
+    int
+        0
     """
     
     batch = s3_client(service="batch")
@@ -327,9 +370,21 @@ def submit_jobs(jobs, jobdir):
 
 
 def get_status(jobdir, jobid=None):
+    """Given a list of jobs, returns status of each
+    
+    Parameters
+    ----------
+    jobdir : str
+        Directory of batch jobs to generate/check up on
+    jobid : NoneType, optional
+        Are the json files organized BIDS style?, by default None
+    
+    Returns
+    -------
+    [type]
+        [description]
     """
-    Given list of jobs, returns status of each.
-    """
+    
     cmd_template = "aws batch describe-jobs --jobs {}"
 
     if jobid is None:
@@ -354,9 +409,16 @@ def get_status(jobdir, jobid=None):
 
 
 def kill_jobs(jobdir, reason='"Killing job"'):
+    """Given a list of jobs, kills them all
+    
+    Parameters
+    ----------
+    jobdir : str
+        Directory of batch jobs to generate/check up on
+    reason : str, optional
+        Task you want to perform on the jobs, by default '"Killing job"'
     """
-    Given a list of jobs, kills them all.
-    """
+    
     cmd_template1 = "aws batch cancel-job --job-id {} --reason {}"
     cmd_template2 = "aws batch terminate-job --job-id {} --reason {}"
 
@@ -435,7 +497,9 @@ def main():
         help="flag to store " "temp files along the path of processing.",
         default=False,
     )
-    parser.add_argument("--dataset", action="store", help="Dataset name")
+    parser.add_argument("--dataset",
+        action="store",
+        help="Dataset name")
     parser.add_argument(
         "-b",
         "--big",

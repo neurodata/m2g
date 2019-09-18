@@ -115,7 +115,7 @@ def s3_get_data(bucket, remote, local, public=False, force=False):
         The path to the data on your S3 bucket. The data will be
         downloaded to the provided bids_dir on your machine.
     local : str
-        Local input directory where you want the files coppied to
+        Local input directory where you want the files copied to
     public : bool, optional
         Whether or not the data you are accessing is public, if False s3 credentials are used, by default False
     force : bool, optional

@@ -240,7 +240,7 @@ def t1w_skullstrip(t1w, out):
         path for the output skull-stripped image file
     """
     
-    cmd = "3dSkullStrip -prefix {} -input {} -shrink_fac_bot_lim 0.6 -ld 50".format(out, t1w)
+    cmd = "3dSkullStrip -prefix {} -input {}".format(out, t1w)
     mgu.execute_cmd(cmd, verb=True)
     pass
 

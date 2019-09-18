@@ -235,8 +235,7 @@ def session_level(
 
         if len(args) > 1:
             bid_len = len(dwis[x].split("/"))
-            outDir = out_Dir+"/"+dwis[x].split("/")[bid_len-4]+dwis[x].split("/")[bid_len-3]
-
+            outDir = out_Dir+"/ndmg-batch/"+dwis[x].split("/")[bid_len-4]+"/"+dwis[x].split("/")[bid_len-3]
         ndmg_dwi_worker(
             args[x][0],
             args[x][1],
@@ -454,16 +453,18 @@ def main():
     # it's super gross.
     if buck is not None and remo is not None:
         if subj is not None:
-            if len(sesh) == 1:
-                sesh = sesh[0]
+            #if len(sesh) == 1:
+            #    sesh = sesh[0]
             for sub in subj:
                 if sesh is not None:
-                    remo = op.join(remo, "sub-{}".format(sub), "ses-{}".format(sesh))
-                    tindir = op.join(inDir, "sub-{}".format(sub), "ses-{}".format(sesh))
+                    for ses in sesh:
+                        rem = op.join(remo, "sub-{}".format(sub), "ses-{}".format(ses))
+                        tindir = op.join(inDir, "sub-{}".format(sub), "ses-{}".format(ses))
+                        s3_utils.s3_get_data(buck, rem, tindir, public=not creds)
                 else:
-                    remo = op.join(remo, "sub-{}".format(sub))
+                    rem = op.join(remo, "sub-{}".format(sub))
                     tindir = op.join(inDir, "sub-{}".format(sub))
-                s3_utils.s3_get_data(buck, remo, tindir, public=not creds)
+                    s3_utils.s3_get_data(buck, rem, tindir, public=not creds)
         else:
             s3_utils.s3_get_data(buck, remo, inDir, public=not creds)
 
