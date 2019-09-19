@@ -45,8 +45,8 @@ class group_func(object):
             '/connectomes' will be appended on it when the connectomes are retrived
         outdir : str
             path for the directory to place all group level quality control.
-        atlas : [type], optional
-            [description], by default None
+        atlas : str, optional
+            [NOT USED], by default None
         dataset : str, optional
             an optional parameter for the name of the dataset to be present in the quality control output filenames, by default None
         """

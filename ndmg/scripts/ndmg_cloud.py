@@ -204,7 +204,7 @@ def create_json(
     reg_style="",
     mod_type="",
 ):
-    """Creates the json files for the 
+    """Creates the json files for each of the jobs
     
     Parameters
     ----------
@@ -213,7 +213,7 @@ def create_json(
     path : str
         The directory where the dataset is stored on the S3 bucket
     threads : OrderedDict
-        [description]
+        dictionary containing all subjects and sessions from the path location
     jobdir : str
         Directory of batch jobs to generate/check up on
     credentials : [type], optional
@@ -234,7 +234,7 @@ def create_json(
     Returns
     -------
     list
-        [description]
+        list of job jsons
     """
     jobsjson = "{}/jobs.json".format(jobdir)
     if os.path.isfile(jobsjson):
@@ -381,8 +381,8 @@ def get_status(jobdir, jobid=None):
     
     Returns
     -------
-    [type]
-        [description]
+    list
+        a list of statuses for each of the jobs currently running
     """
     
     cmd_template = "aws batch describe-jobs --jobs {}"
