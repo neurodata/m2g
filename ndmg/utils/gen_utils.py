@@ -145,7 +145,7 @@ def get_braindata(brain_file):
     
     Parameters
     ----------
-    brain_file : object
+    brain_file : str, nibabel.nifti1.nifti1image, numpy.ndarray
         an object to open the data for a brain. Can be a string (path to a brain file),
         nibabel.nifti1.nifti1image, or a numpy.ndarray
     
