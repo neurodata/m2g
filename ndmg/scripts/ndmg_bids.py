@@ -229,18 +229,17 @@ def session_level(
     # optional args stored in kwargs
     # use worker wrapper to call function f with args arg
     # and keyword args kwargs
-    out_Dir = outDir
-    for x in range(len(args)):
-        print(args)
+    for arg in args:
+        print(arg)
 
         if len(args) > 1:
-            bid_len = len(dwis[x].split("/"))
-            outDir = out_Dir+"/ndmg-batch/"+dwis[x].split("/")[bid_len-4]+"/"+dwis[x].split("/")[bid_len-3]
+            outDir = arg[7]
+
         ndmg_dwi_worker(
-            args[x][0],
-            args[x][1],
-            args[x][2],
-            args[x][3],
+            arg[0],
+            arg[1],
+            arg[2],
+            arg[3],
             atlas,
             atlas_mask,
             labels,
