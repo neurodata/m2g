@@ -232,9 +232,6 @@ def session_level(
     for arg in args:
         print(arg)
 
-        if len(args) > 1:
-            outDir = arg[7]
-
         ndmg_dwi_worker(
             arg[0],
             arg[1],
@@ -243,7 +240,7 @@ def session_level(
             atlas,
             atlas_mask,
             labels,
-            outDir,
+            arg[7],
             vox_size,
             mod_type,
             track_type,
