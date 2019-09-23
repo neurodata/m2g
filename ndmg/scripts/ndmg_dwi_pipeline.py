@@ -418,6 +418,7 @@ def ndmg_dwi_worker(
                 )
             )
         
+        #Check that the atlas hasn't lost any of the rois
         if reg_style == "native":
             labels_im_file_dwi_list = []
             for idx, label in enumerate(labels):
@@ -440,7 +441,7 @@ def ndmg_dwi_worker(
                     raise KeyError('The atlas has lost an roi due to alignment')
 
                 labels_im_file_dwi_list.append(labels_im_file_dwi)
-        elif reg_style == "native-dsn":
+        elif reg_style == "native_dsn":
             labels_im_file_mni_list = []
             for idx, label in enumerate(labels):
                 labels_im_file = mgu.reorient_img(labels[idx], namer)
@@ -462,7 +463,6 @@ def ndmg_dwi_worker(
                     raise KeyError('The atlas has lost an roi due to alignment')
 
                 labels_im_file_mni_list.append(labels_im_file_mni)
-            pass
 
 
         # -------- Tensor Fitting and Fiber Tractography ---------------- #
