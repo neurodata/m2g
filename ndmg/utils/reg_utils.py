@@ -29,19 +29,28 @@ import os.path as op
 
 
 def erode_mask(mask, v=0):
+    """A function to erode a mask by a specified number of voxels. Here, we define
+    erosion as the process of checking whether all the voxels within a number of voxels
+    for a mask have valuess.
+    
+    Parameters
+    ----------
+    mask : array
+        a numpy array of a mask to be eroded
+    v : int, optional
+        the number of voxels to erode by, by default 0
+    
+    Returns
+    -------
+    numpy array
+        eroded mask
+    
+    Raises
+    ------
+    ValueError
+        The mask you provided for erosion has an invalid shape (must be x.shape=y.shape=z.shape)
     """
-    A function to erode a mask by a specified number of
-    voxels. Here, we define erosion as the process of checking
-    whether all the voxels within a number of voxels for a
-    mask have values.
-
-    **Positional Arguments:**
-
-        mask:
-            - a numpy array of a mask to be eroded.
-        v:
-            - the number of voxels to erode by.
-    """
+    
     print("Eroding Mask...")
     for i in range(0, v):
         # masked_vox is a tuple 0f [x]. [y]. [z] cooords
@@ -71,16 +80,18 @@ def erode_mask(mask, v=0):
 
 
 def align_slices(dwi, corrected_dwi, idx):
+    """Performs eddy-correction (or self-alignment) of a stack of 3D images
+    
+    Parameters
+    ----------
+    dwi : str
+        path for the DTI image to be eddy-corrected
+    corrected_dwi : str
+        path for the corrected and aligned DTI volume in a nifti file
+    idx : str
+        Index of the first B0 volume in the stack
     """
-    Performs eddy-correction (or self-alignment) of a stack of 3D images
-    **Positional Arguments:**
-            dwi:
-                - 4D (DTI) image volume as a nifti file
-            corrected_dwi:
-                - Corrected and aligned DTI volume in a nifti file
-            idx:
-                - Index of the first B0 volume in the stack
-    """
+    
     cmd = "eddy_correct {} {} {}".format(dwi, corrected_dwi, idx)
     status = mgu.execute_cmd(cmd, verb=True)
 
@@ -114,60 +125,23 @@ def probmap2mask(prob_map, mask_path, t, erode=0):
     return mask_path
 
 
-def extract_brain(inp, out, opts=""):
-    """
-    A function to extract the brain from an image using FSL's BET.
-    **Positional Arguments:**
-        inp:
-            - the input image.
-        out:
-            - the output brain extracted image.
-    """
-    print("extracting brain")
-    cmd = "bet {} {} {}".format(inp, out, opts)
-    os.system(cmd)
-
 
 def apply_mask(inp, mask, out):
+    """A function to generate a brain-only mask for an input image using 3dcalc
+    
+    Parameters
+    ----------
+    inp : str
+        path for the input image. If 4d, the mask should be 4d. If 3d, the mask should be 3d.
+    mask : str
+        path to the mask to apply to the data. Should be nonzero in mask region.
+    out : str
+        the path for the output skull-extracted image.
     """
-    A function to generate a brain-only mask for an input image.
-
-    **Positional Arguments:**
-
-        - inp:
-            - the input image. If 4d, the mask should be 4d. If 3d, the
-              mask should be 3d.
-        - mask:
-            - the mask to apply to the data. Should be nonzero in mask region.
-        - out:
-            - the path to the skull-extracted image.
-    """
+    
     cmd = "3dcalc -a {} -b {} -expr 'a*step(b)' -prefix {}"
     cmd = cmd.format(inp, mask, out)
     mgu.execute_cmd(cmd, verb=True)
-    pass
-
-
-def extract_epi_brain(epi, out, tmpdir):
-    """
-    A function to extract the brain from an input 4d EPI image
-    using AFNI's brain extraction utilities.
-
-    **Positional Arguments:**
-
-        - epi:
-            - the path to a 4D epi image.
-        - out:
-            - the path to the EPI brain.
-        - tmpdir:
-            - the directory to place temporary files.
-    """
-    epi_name = mgu.get_filename(epi)
-    epi_mask = "{}/{}_mask.nii.gz".format(tmpdir, epi_name)
-    # 3d automask to extract the mask itself from the 4d data
-    extract_mask(epi, epi_mask)
-    # 3d calc to apply the mask to the 4d image
-    apply_mask(epi, epi_mask, out)
     pass
 
 
@@ -190,19 +164,19 @@ def extract_mask(inp, out):
 
 
 def extract_t1w_brain(t1w, out, tmpdir):
-    """
-    A function to extract the brain from an input T1w image
+    """A function to extract the brain from an input T1w image
     using AFNI's brain extraction utilities.
-
-    **Positional Arguments:**
-
-        - t1w:
-            - the input T1w image.
-        - out:
-            - the output T1w brain.
-        - tmpdir:
-            - the temporary directory to store images.
+    
+    Parameters
+    ----------
+    t1w : str
+        path for the input T1w image
+    out : str
+        path for the output brain image
+    tmpdir : str
+        Path for the temporary directory to store images
     """
+    
     t1w_name = mgu.get_filename(t1w)
     # the t1w image with the skull removed.
     skull_t1w = "{}/{}_noskull.nii.gz".format(tmpdir, t1w_name)
@@ -261,9 +235,9 @@ def t1w_skullstrip(t1w, out):
     Parameters
     ----------
     t1w : str
-        the input t1w image file
+        path for the input t1w image file
     out : str
-        the output skull-stripped image file
+        path for the output skull-stripped image file
     """
     
     cmd = "3dSkullStrip -prefix {} -input {}".format(out, t1w)
@@ -272,13 +246,16 @@ def t1w_skullstrip(t1w, out):
 
 
 def extract_brain(inp, out, opts="-B"):
-    """
-    A function to extract the brain from an image using FSL's BET.
-    **Positional Arguments:**
-        inp:
-            - the input image.
-        out:
-            - the output brain extracted image.
+    """A function to extract the brain from an image using FSL's BET
+    
+    Parameters
+    ----------
+    inp : str
+        Path to image that you want the brain extracted from
+    out : str
+        Path to save output (the extracted brain file)
+    opts : str, optional
+        , by default "-B"
     """
     cmd = "bet {} {} {}".format(inp, out, opts)
     os.system(cmd)

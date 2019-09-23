@@ -446,27 +446,33 @@ class run_track(object):
 
 
 def eudx_basic(dwi_file, gtab, stop_val=0.1):
+    """Tracking with basic tensors and basic eudx - experimental
+    We now force seeding at every voxel in the provided mask for
+    simplicity.  Future functionality will extend these options.
+    
+    Parameters
+    ----------
+    dwi_file : str
+        File (registered) to use for tensor/fiber tracking
+    gtab : GradientTable
+        dipy formatted bval/bvec structure
+    stop_val : float, optional
+        Value to cutoff fiber track, by default 0.1
+    
+    Returns
+    -------
+    TensorFit
+        TensorFit file of input dwi/gtab
+    EuDx
+        streamlines
+    str
+        Path to created mask file
+    """
     import os
     from dipy.reconst.dti import TensorModel, quantize_evecs
     from dipy.tracking.eudx import EuDX
     from dipy.data import get_sphere
     from dipy.segment.mask import median_otsu
-
-    """
-    Tracking with basic tensors and basic eudx - experimental
-    We now force seeding at every voxel in the provided mask for
-    simplicity.  Future functionality will extend these options.
-    **Positional Arguments:**
-            dwi_file:
-                - File (registered) to use for tensor/fiber tracking
-            mask:
-                - Brain mask to keep tensors inside the brain
-            gtab:
-                - dipy formatted bval/bvec Structure
-    **Optional Arguments:**
-            stop_val:
-                - Value to cutoff fiber track
-    """
 
     img = nib.load(dwi_file)
     data = img.get_data()
