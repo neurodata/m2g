@@ -5,7 +5,7 @@ warnings.simplefilter("ignore")
 
 # so we don't have to type ndg.graph.graph(), etc., to get the classes
 # from .graph import graph, biggraph
-from .register.gen_reg import dmri_reg as register
+from .register.gen_reg import DmriReg as register
 #from .register.gen_reg import epi_register as epi_register
 
 # from .stats.qa_mri import qa_mri as qa_mri

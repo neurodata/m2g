@@ -115,7 +115,7 @@ def direct_streamline_norm(streams, fa_path, namer):
     return mni_streamlines, streams_mni
 
 
-class dmri_reg(object):
+class DmriReg(object):
     """Class containing relevant paths and class methods for analysing tractography
     
     Parameters

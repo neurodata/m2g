@@ -358,7 +358,7 @@ def ndmg_dwi_worker(
 
         print("Running tractography in native space...")
         # Instantiate registration
-        reg = mgr.dmri_reg(namer, nodif_B0, nodif_B0_mask, t1w, vox_size, simple=False)
+        reg = mgr.DmriReg(namer, nodif_B0, nodif_B0_mask, t1w, vox_size, simple=False)
 
         # Perform anatomical segmentation
         start_time = time.time()
