@@ -30,12 +30,12 @@ import nibabel as nib
 from dipy.tracking.streamline import Streamlines
 from subprocess import Popen
 import ndmg
-from ndmg import preproc as mgp
+from ndmg import preproc
 from ndmg.utils import gen_utils
 from ndmg.utils import s3_utils
 from ndmg.register import gen_reg
 from ndmg.track import gen_track
-from ndmg.graph import gen_graph as gen_graph
+from ndmg.graph import gen_graph
 from ndmg.utils.bids_utils import name_resource
 from ndmg.stats.qa_tensor import *
 from ndmg.stats.qa_fibers import *
@@ -281,7 +281,7 @@ def ndmg_dwi_worker(
 
     # Rescale bvecs
     print("Rescaling b-vectors...")
-    mgp.rescale_bvec(fbvec, bvec_scaled)
+    preproc.rescale_bvec(fbvec, bvec_scaled)
 
     # Check orientation (dwi_prep)
     start_time = time.time()
