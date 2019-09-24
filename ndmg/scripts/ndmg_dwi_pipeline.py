@@ -31,7 +31,7 @@ from dipy.tracking.streamline import Streamlines
 from subprocess import Popen
 import ndmg
 from ndmg import preproc as mgp
-from ndmg.utils import gen_utils as mgu
+from ndmg.utils import gen_utils
 from ndmg.utils import s3_utils
 from ndmg.register import gen_reg as mgr
 from ndmg.track import gen_track as mgt
@@ -285,7 +285,7 @@ def ndmg_dwi_worker(
 
     # Check orientation (dwi_prep)
     start_time = time.time()
-    [dwi_prep, bvecs] = mgu.reorient_dwi(dwi_prep, bvec_scaled, namer)
+    [dwi_prep, bvecs] = gen_utils.reorient_dwi(dwi_prep, bvec_scaled, namer)
     print(
         "%s%s%s"
         % ("Reorienting runtime: ", str(np.round(time.time() - start_time, 1)), "s")
@@ -293,7 +293,7 @@ def ndmg_dwi_worker(
 
     # Check dimensions
     start_time = time.time()
-    dwi_prep = mgu.match_target_vox_res(dwi_prep, vox_size, namer, sens="dwi")
+    dwi_prep = gen_utils.match_target_vox_res(dwi_prep, vox_size, namer, sens="dwi")
     print(
         "%s%s%s"
         % ("Reslicing runtime: ", str(np.round(time.time() - start_time, 1)), "s")
@@ -305,7 +305,7 @@ def ndmg_dwi_worker(
     print("fbvec: ", fbvec)
     print("dwi_prep: ", dwi_prep)
     print("namer.dirs: ", namer.dirs["output"]["prep_dwi"])
-    [gtab, nodif_B0, nodif_B0_mask] = mgu.make_gtab_and_bmask(
+    [gtab, nodif_B0, nodif_B0_mask] = gen_utils.make_gtab_and_bmask(
         fbval, fbvec, dwi_prep, namer.dirs["output"]["prep_dwi"]
     )
 
@@ -347,8 +347,8 @@ def ndmg_dwi_worker(
 
     # Check orientation (t1w)
     start_time = time.time()
-    t1w = mgu.reorient_img(t1w, namer)
-    t1w = mgu.match_target_vox_res(t1w, vox_size, namer, sens="t1w")
+    t1w = gen_utils.reorient_img(t1w, namer)
+    t1w = gen_utils.match_target_vox_res(t1w, vox_size, namer, sens="t1w")
     print(
         "%s%s%s"
         % ("Reorienting runtime: ", str(np.round(time.time() - start_time, 1)), "s")
@@ -367,14 +367,7 @@ def ndmg_dwi_worker(
             pass
         else:
             reg.gen_tissue()
-            print(
-                "%s%s%s"
-                % (
-                    "gen_tissue runtime: ",
-                    str(np.round(time.time() - start_time, 1)),
-                    "s",
-                )
-            )
+            print(f"gen_tissue runtime: {str(np.round(time.time() - start_time, 1))}s")
 
         # Align t1w to dwi
         start_time = time.time()
@@ -485,7 +478,7 @@ def ndmg_dwi_worker(
     elif reg_style == "mni":
         # Check dimensions
         start_time = time.time()
-        t1w = mgu.match_target_vox_res(
+        t1w = gen_utils.match_target_vox_res(
             t1w, vox_size, namer, sens="t1w"
         )  # this is the second time this t1w data has been sent to this function (REMOVE?)
         print(
@@ -546,8 +539,8 @@ def ndmg_dwi_worker(
         if reg_style == "native_dsn":
             # align atlas to t1w to dwi
             print("%s%s" % ("Applying native-space alignment to ", labels[idx]))
-            labels_im_file = mgu.reorient_img(labels[idx], namer)
-            labels_im_file = mgu.match_target_vox_res(
+            labels_im_file = gen_utils.reorient_img(labels[idx], namer)
+            labels_im_file = gen_utils.match_target_vox_res(
                 labels_im_file, vox_size, namer, sens="t1w"
             )
             labels_im_file_mni = reg.atlas2t1w2dwi_align(labels_im_file, dsn=True)
@@ -565,8 +558,8 @@ def ndmg_dwi_worker(
         elif reg_style == "native":
             # align atlas to t1w to dwi
             print("%s%s" % ("Applying native-space alignment to ", labels[idx]))
-            labels_im_file = mgu.reorient_img(labels[idx], namer)
-            labels_im_file = mgu.match_target_vox_res(
+            labels_im_file = gen_utils.reorient_img(labels[idx], namer)
+            labels_im_file = gen_utils.match_target_vox_res(
                 labels_im_file, vox_size, namer, sens="t1w"
             )
             labels_im_file_dwi = reg.atlas2t1w2dwi_align(labels_im_file, dsn=False)
@@ -582,8 +575,8 @@ def ndmg_dwi_worker(
             )
             g1.g = g1.make_graph()
         elif reg_style == "mni":
-            labels_im_file = mgu.reorient_img(labels[idx], namer)
-            labels_im_file = mgu.match_target_vox_res(
+            labels_im_file = gen_utils.reorient_img(labels[idx], namer)
+            labels_im_file = gen_utils.match_target_vox_res(
                 labels_im_file, vox_size, namer, sens="t1w"
             )
             labels_im = nib.load(labels_im_file)
@@ -715,7 +708,7 @@ def main():
     # Create output directory
     print("Creating output directory: {}".format(result.outdir))
     print("Creating output temp directory: {}/tmp".format(result.outdir))
-    mgu.utils.execute_cmd("mkdir -p {} {}/tmp".format(result.outdir, result.outdir))
+    gen_utils.utils.execute_cmd("mkdir -p {} {}/tmp".format(result.outdir, result.outdir))
 
     ndmg_dwi_worker(
         result.dwi,
