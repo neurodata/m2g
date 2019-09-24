@@ -20,7 +20,7 @@
 import warnings
 
 warnings.simplefilter("ignore")
-from ndmg.utils import gen_utils as mgu
+from ndmg.utils import gen_utils
 import nibabel as nib
 import numpy as np
 import nilearn.image as nl
@@ -93,7 +93,7 @@ def align_slices(dwi, corrected_dwi, idx):
     """
     
     cmd = "eddy_correct {} {} {}".format(dwi, corrected_dwi, idx)
-    status = mgu.execute_cmd(cmd, verb=True)
+    status = gen_utils.execute_cmd(cmd, verb=True)
 
 
 def probmap2mask(prob_map, mask_path, t, erode=0):
@@ -141,7 +141,7 @@ def apply_mask(inp, mask, out):
     
     cmd = "3dcalc -a {} -b {} -expr 'a*step(b)' -prefix {}"
     cmd = cmd.format(inp, mask, out)
-    mgu.execute_cmd(cmd, verb=True)
+    gen_utils.execute_cmd(cmd, verb=True)
     pass
 
 
@@ -159,7 +159,7 @@ def extract_mask(inp, out):
             - the path to the extracted mask.
     """
     cmd = "3dAutomask -dilate 2 -prefix {} {}".format(out, inp)
-    mgu.execute_cmd(cmd, verb=True)
+    gen_utils.execute_cmd(cmd, verb=True)
     pass
 
 
@@ -177,7 +177,7 @@ def extract_t1w_brain(t1w, out, tmpdir):
         Path for the temporary directory to store images
     """
     
-    t1w_name = mgu.get_filename(t1w)
+    t1w_name = gen_utils.get_filename(t1w)
     # the t1w image with the skull removed.
     skull_t1w = "{}/{}_noskull.nii.gz".format(tmpdir, t1w_name)
     # 3dskullstrip to extract the brain-only t1w
@@ -201,7 +201,7 @@ def normalize_t1w(inp, out):
             - the output intensity-normalized image.
     """
     cmd = "3dUnifize -prefix {} -input {}".format(out, inp)
-    mgu.execute_cmd(cmd, verb=True)
+    gen_utils.execute_cmd(cmd, verb=True)
     pass
 
 
@@ -223,7 +223,7 @@ def resample_fsl(base, res, goal_res, interp="spline"):
     # resample using an isometric transform in fsl
     cmd = "flirt -in {} -ref {} -out {} -applyisoxfm {} -interp {}"
     cmd = cmd.format(base, base, res, goal_res, interp)
-    mgu.execute_cmd(cmd, verb=True)
+    gen_utils.execute_cmd(cmd, verb=True)
     pass
 
 
@@ -241,7 +241,7 @@ def t1w_skullstrip(t1w, out):
     """
     
     cmd = "3dSkullStrip -prefix {} -input {}".format(out, t1w)
-    mgu.execute_cmd(cmd, verb=True)
+    gen_utils.execute_cmd(cmd, verb=True)
     pass
 
 
