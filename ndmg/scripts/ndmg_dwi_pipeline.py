@@ -33,9 +33,9 @@ import ndmg
 from ndmg import preproc as mgp
 from ndmg.utils import gen_utils
 from ndmg.utils import s3_utils
-from ndmg.register import gen_reg as mgr
-from ndmg.track import gen_track as mgt
-from ndmg.graph import gen_graph as mgg
+from ndmg.register import gen_reg
+from ndmg.track import gen_track
+from ndmg.graph import gen_graph as gen_graph
 from ndmg.utils.bids_utils import name_resource
 from ndmg.stats.qa_tensor import *
 from ndmg.stats.qa_fibers import *
@@ -358,7 +358,7 @@ def ndmg_dwi_worker(
 
         print("Running tractography in native space...")
         # Instantiate registration
-        reg = mgr.DmriReg(namer, nodif_B0, nodif_B0_mask, t1w, vox_size, simple=False)
+        reg = gen_reg.DmriReg(namer, nodif_B0, nodif_B0_mask, t1w, vox_size, simple=False)
 
         # Perform anatomical segmentation
         start_time = time.time()
@@ -413,12 +413,12 @@ def ndmg_dwi_worker(
 
         # -------- Tensor Fitting and Fiber Tractography ---------------- #
         start_time = time.time()
-        seeds = mgt.build_seed_list(reg.wm_gm_int_in_dwi, np.eye(4), dens=int(seeds))
+        seeds = gen_track.build_seed_list(reg.wm_gm_int_in_dwi, np.eye(4), dens=int(seeds))
         print("Using " + str(len(seeds)) + " seeds...")
 
         # Compute direction model and track fiber streamlines
         print("Beginning tractography...")
-        trct = mgt.run_track(
+        trct = gen_track.run_track(
             dwi_prep,
             nodif_B0_mask,
             reg.gm_in_dwi,
@@ -464,11 +464,11 @@ def ndmg_dwi_worker(
 
     if reg_style == "native_dsn":
 
-        fa_path = mgt.tens_mod_fa_est(gtab, dwi_prep, nodif_B0_mask)
+        fa_path = gen_track.tens_mod_fa_est(gtab, dwi_prep, nodif_B0_mask)
 
         # Normalize streamlines
         print("Running DSN...")
-        [streamlines_mni, streams_mni] = mgr.direct_streamline_norm(
+        [streamlines_mni, streams_mni] = gen_reg.direct_streamline_norm(
             streams, fa_path, namer
         )
 
@@ -492,7 +492,7 @@ def ndmg_dwi_worker(
 
         # Align DWI volumes to Atlas
         print("Aligning volumes...")
-        reg = mgr.dmri_reg_old(dwi_prep, gtab, t1w, mask, aligned_dwi, namer, clean)
+        reg = gen_reg.dmri_reg_old(dwi_prep, gtab, t1w, mask, aligned_dwi, namer, clean)
         print(
             "Registering DWI image at {} to atlas; aligned dwi at {}...".format(
                 dwi_prep, aligned_dwi
@@ -505,7 +505,7 @@ def ndmg_dwi_worker(
         # Compute tensors and track fiber streamlines
         print("aligned_dwi: {}".format(aligned_dwi))
         print("gtab: {}".format(gtab))
-        [tens, streamlines, align_dwi_mask] = mgt.eudx_basic(
+        [tens, streamlines, align_dwi_mask] = gen_track.eudx_basic(
             aligned_dwi, gtab, stop_val=0.2
         )
         tensors = "{}/tensors.nii.gz".format(namer.dirs["output"]["tensor"])
@@ -545,7 +545,7 @@ def ndmg_dwi_worker(
             )
             labels_im_file_mni = reg.atlas2t1w2dwi_align(labels_im_file, dsn=True)
             labels_im = nib.load(labels_im_file_mni)
-            g1 = mgg.graph_tools(
+            g1 = gen_graph.graph_tools(
                 attr=len(np.unique(np.around(labels_im.get_data()).astype("int16")))
                 - 1,
                 rois=labels_im_file_mni,
@@ -564,7 +564,7 @@ def ndmg_dwi_worker(
             )
             labels_im_file_dwi = reg.atlas2t1w2dwi_align(labels_im_file, dsn=False)
             labels_im = nib.load(labels_im_file_dwi)
-            g1 = mgg.graph_tools(
+            g1 = gen_graph.graph_tools(
                 attr=len(np.unique(np.around(labels_im.get_data()).astype("int16")))
                 - 1,
                 rois=labels_im_file_dwi,
@@ -580,7 +580,7 @@ def ndmg_dwi_worker(
                 labels_im_file, vox_size, namer, sens="t1w"
             )
             labels_im = nib.load(labels_im_file)
-            g1 = mgg.graph_tools(
+            g1 = gen_graph.graph_tools(
                 attr=len(np.unique(np.around(labels_im.get_data()).astype("int16")))
                 - 1,
                 rois=labels_im_file,
