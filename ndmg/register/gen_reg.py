@@ -352,8 +352,9 @@ class DmriReg(object):
             + " "
             + self.wm_edge
         )
-        os.system(cmd)
+        print("Extracting white matter edge ...")
         print(cmd)
+        os.system(cmd)
 
         return
 
