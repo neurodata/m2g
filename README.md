@@ -51,7 +51,7 @@ The **ndmg** pipeline:
 
     pip install ndmg
  
-The only known packages which require a specific version are `dipy` and `networkx`, due to backwards-compatability breaking changes.
+The only known package which requires a specific version is `dipy` (0.16.0), due to backwards-compatability breaking changes.
 
 Finally, you can install **ndmg** either from `pip` or Github as shown below. Installation shouldn't take more than a few minutes, but depends on your internet connection.
 
