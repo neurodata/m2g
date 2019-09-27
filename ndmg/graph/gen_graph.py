@@ -177,11 +177,11 @@ class graph_tools(object):
         Parameters
         ----------
         error_margin : int, optional
-            [description], by default 2
+            Number of mm around roi's to use (i.e. if 2, then any voxel within 2 mm of roi is considered part of roi), by default 2
         overlap_thr : int, optional
-            [description], by default 1
+            The amount of overlap between an roi and streamline to be considered a connection, by default 1
         voxel_size : int, optional
-            [description], by default 2
+            Voxel size for roi/streamlines, by default 2
         
         Returns
         -------
@@ -311,6 +311,13 @@ class graph_tools(object):
         pass
 
     def save_graph_png(self, graphname):
+        """Saves adjacency graph, made using graspy's heatmap function, as a png. This will be saved in the qa/graphs_plotting/ directory
+        
+        Parameters
+        ----------
+        graphname : str
+            name of the generated graph (do not include '.png')
+        """
         import matplotlib
 
         matplotlib.use("agg")
