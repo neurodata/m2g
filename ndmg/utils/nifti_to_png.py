@@ -22,9 +22,9 @@ import warnings
 
 warnings.simplefilter("ignore")
 from argparse import ArgumentParser
-from scipy.misc import imsave
 import nibabel as nb
 import os
+import imageio
 
 
 def convert(indir, outdir, verbose=False):
@@ -64,7 +64,7 @@ def convert(indir, outdir, verbose=False):
                 for slices in range(dat.shape[2]):
                     if verbose:
                         print("Saving slice:", slices)
-                    imsave(
+                    imageio.imsave(
                         dirname + "/%04d.png" % slices,
                         dat[:, :, slices, count].astype("float32").T,
                     )
