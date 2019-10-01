@@ -53,12 +53,13 @@ before_install:
   - docker ps
 
 install:
+  # useful log checks for packages whose versions have given us trouble
+  - docker exec -w /ndmg travis pip show dipy networkx
+
   # get travis branch installed
   - docker exec -w /ndmg travis pip install pytest
   - docker exec -w /ndmg travis pip install .
 
-  # useful log checks for packages whose versions have given us trouble
-  - docker exec -w /ndmg travis pip show dipy networkx
 
 script:
   # Run ndmg in docker, run pytest in docker.
