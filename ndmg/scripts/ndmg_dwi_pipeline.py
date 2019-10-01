@@ -142,8 +142,8 @@ def ndmg_dwi_worker(
     print("seeds = {}".format(seeds))
     print("reg_style = {}".format(reg_style))
     print("clean = {}".format(clean))
-    print("skip eddy = {}".format(skipeddy))
-    print("skip registration = {}".format(skipreg))
+    print("skipeddy = {}".format(skipeddy))
+    print("skipreg = {}".format(skipreg))
     fmt = "_adj.csv"
 
     assert all(

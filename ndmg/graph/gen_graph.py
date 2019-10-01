@@ -192,7 +192,7 @@ class graph_tools(object):
 
         # Instantiate empty networkX graph object & dictionary
         # Create voxel-affine mapping
-        lin_T, offset = _mapping_to_voxel(np.eye(4))
+        lin_T, offset = _mapping_to_voxel(np.eye(4))  # TODO : voxel_size was removed in dipy 1.0.0, make sure that didn't break anything when voxel size is not 2mm
         mx = len(np.unique(self.rois.astype(np.int64))) - 1
         self.g = nx.Graph(ecount=0, vcount=mx)
         edge_dict = defaultdict(int)
