@@ -31,9 +31,10 @@ import nibabel as nib
 # tracking
 from dipy.tracking.streamline import Streamlines
 from dipy.tracking import utils
-from dipy.tracking.stopping_criterion import BinaryStoppingCriterion, ActStoppingCriteriion, CmcStoppingCriterion
-from dipy.tracking.local_tracking import LocalTracking, ParticleFilteringTracking
-from dipy.tracking.eudx import EuDX  # TODO : dipy 1.0.0
+from dipy.tracking.stopping_criterion import BinaryStoppingCriterion, ActStoppingCriterion, CmcStoppingCriterion
+from dipy.tracking.local_tracking import LocalTracking, ParticleFilteringTracking 
+
+# from dipy.tracking.eudx import EuDX  # TODO : dipy 1.0.0
 
 # reconst
 from dipy.reconst.dti import fractional_anisotropy, TensorModel, quantize_evecs
@@ -42,6 +43,7 @@ from dipy.reconst.csdeconv import (
     ConstrainedSphericalDeconvModel,
     recursive_response,
 )
+from dipy.reconst.peak_direction_getter import EuDXDirectionGetter
 
 # others
 from dipy.data import get_sphere
@@ -495,7 +497,7 @@ def eudx_basic(dwi_file, gtab, stop_val=0.1):
     ten = model.fit(data, mask_data)
     sphere = get_sphere("symmetric724")
     ind = quantize_evecs(ten.evecs, sphere.vertices)
-    streamlines = EuDX(
+    streamlines = EuDXDirectionGetter(
         a=ten.fa, ind=ind, seeds=seedIdx, odf_vertices=sphere.vertices, a_low=stop_val
     )  # TODO : dipy 1.0.0 The EuDX tracking function has been removed. EuDX tractography can be performed using dipy.tracking.local_tracking using dipy.reconst.peak_direction_getter.EuDXDirectionGetter.
     return ten, streamlines, mask_out_file

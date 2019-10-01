@@ -21,6 +21,8 @@
 # Originally created by Greg Kiar on 2016-07-25.
 # edited by Eric Bridgeford to incorporate fMRI, multi-threading, and
 # skipeddy-graph generation.
+import dipy
+print(f"dipy version : {dipy.__version__}")  # TODO : debugging line, remove
 
 import sys
 import glob

@@ -20,20 +20,25 @@
 # Email: wgr@jhu.edu
 # Edited by Eric Bridgeford.
 
+# system imports
 import warnings
-
 warnings.simplefilter("ignore")
-from dipy.io import read_bvals_bvecs
-from dipy.core.gradients import gradient_table
-from subprocess import Popen, PIPE
-import subprocess
-import numpy as np
-import nibabel as nib
 import os
 import os.path as op
 import sys
+from subprocess import Popen, PIPE
+import subprocess
+
+# package imports
+import numpy as np
+import nibabel as nib
 from nilearn.image import mean_img
 from scipy.sparse import lil_matrix
+
+# dipy imports
+import dipy
+from dipy.io import read_bvals_bvecs
+from dipy.core.gradients import gradient_table
 
 
 def check_dependencies():
@@ -50,8 +55,9 @@ def check_dependencies():
     """
 
     # Check for python version
-    print("Python location : {}".format(sys.executable))
-    print("Python version : {}".format(sys.version))
+    print(f"Python location : {sys.executable}")
+    print(f"Python version : {sys.version}")
+    print(f"DiPy version : {dipy.__version__}")
     if sys.version_info[0] < 3:
         warnings.warn(
             "WARNING : Using python 2. This Python version is no longer maintained. Use at your own risk."
