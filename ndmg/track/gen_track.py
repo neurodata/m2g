@@ -31,14 +31,9 @@ import nibabel as nib
 # tracking
 from dipy.tracking.streamline import Streamlines
 from dipy.tracking import utils
-from dipy.tracking.local import (
-    ActTissueClassifier,
-    CmcTissueClassifier,
-    BinaryTissueClassifier,
-    ParticleFilteringTracking,
-    LocalTracking
-) 
-from dipy.tracking.eudx import EuDX
+from dipy.tracking.stopping_criterion import BinaryStoppingCriterion, ActStoppingCriteriion, CmcStoppingCriterion
+from dipy.tracking.local_tracking import LocalTracking, ParticleFilteringTracking
+from dipy.tracking.eudx import EuDX  # TODO : dipy 1.0.0
 
 # reconst
 from dipy.reconst.dti import fractional_anisotropy, TensorModel, quantize_evecs
@@ -235,7 +230,7 @@ class run_track(object):
         
         Returns
         -------
-        ActTissueClassifier, CmcTissueClassifier, or BinaryTissueCLassifier
+        ActStoppingCriterion, CmcStoppingCriterion, or BinaryStoppingCriterion
             The resulting tissue classifier object, depending on which method you use (currently only does act)
         """
 
@@ -265,18 +260,18 @@ class run_track(object):
             self.include_map = self.wm_mask_data
             self.include_map[self.background > 0] = 0
             self.exclude_map = self.vent_csf_in_dwi_data
-            self.tiss_classifier = ActTissueClassifier(
+            self.tiss_classifier = ActStoppingCriterion(
                 self.include_map, self.exclude_map
             )
         elif tiss_class == "bin":
-            self.tiss_classifier = BinaryTissueClassifier(self.wm_in_dwi_data)
-            # self.tiss_classifier = BinaryTissueClassifier(self.mask)
+            self.tiss_classifier = BinaryStoppingCriterion(self.wm_in_dwi_data)
+            # self.tiss_classifier = BinaryStoppingCriterion(self.mask)
         elif tiss_class == "cmc":
             self.vent_csf_in_dwi = nib.load(self.vent_csf_in_dwi)
             self.vent_csf_in_dwi_data = self.vent_csf_in_dwi.get_data()
             voxel_size = np.average(self.wm_mask.get_header()["pixdim"][1:4])
             step_size = 0.2
-            self.tiss_classifier = CmcTissueClassifier.from_pve(
+            self.tiss_classifier = CmcStoppingCriterion.from_pve(
                 self.wm_mask_data,
                 self.gm_mask_data,
                 self.vent_csf_in_dwi_data,
@@ -502,5 +497,5 @@ def eudx_basic(dwi_file, gtab, stop_val=0.1):
     ind = quantize_evecs(ten.evecs, sphere.vertices)
     streamlines = EuDX(
         a=ten.fa, ind=ind, seeds=seedIdx, odf_vertices=sphere.vertices, a_low=stop_val
-    )
+    )  # TODO : dipy 1.0.0 The EuDX tracking function has been removed. EuDX tractography can be performed using dipy.tracking.local_tracking using dipy.reconst.peak_direction_getter.EuDXDirectionGetter.
     return ten, streamlines, mask_out_file
