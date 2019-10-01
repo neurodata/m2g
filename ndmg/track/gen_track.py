@@ -19,13 +19,37 @@
 # Email: dpisner@utexas.edu
 
 
-import warnings
+import warnings; warnings.simplefilter("ignore")
+import os
 
-warnings.simplefilter("ignore")
 import numpy as np
 import nibabel as nib
 from dipy.tracking.streamline import Streamlines
-
+from dipy.tracking import utils
+from dipy.reconst.dti import TensorModel
+from dipy.reconst.dti import fractional_anisotropy
+from dipy.tracking.local import (
+    ActTissueClassifier,
+    CmcTissueClassifier,
+    BinaryTissueClassifier,
+)  # TODO: these classes no longer exist in dipy 1.0.
+from dipy.reconst.dti import TensorModel, quantize_evecs
+from dipy.data import get_sphere
+from dipy.reconst.shm import CsaOdfModel
+from dipy.reconst.csdeconv import (
+    ConstrainedSphericalDeconvModel,
+    recursive_response,
+)
+from dipy.tracking.local import LocalTracking
+from dipy.data import get_sphere
+from dipy.direction import peaks_from_model, ProbabilisticDirectionGetter
+from dipy.reconst.dti import TensorModel, quantize_evecs
+from dipy.tracking.eudx import EuDX
+from dipy.data import get_sphere
+from dipy.segment.mask import median_otsu
+from dipy.tracking.local import ParticleFilteringTracking
+from dipy.data import get_sphere
+from dipy.direction import peaks_from_model, ProbabilisticDirectionGetter
 
 def build_seed_list(mask_img_file, stream_affine, dens):
     """uses dipy tractography utilities in order to create a seed list for tractography
@@ -44,7 +68,6 @@ def build_seed_list(mask_img_file, stream_affine, dens):
     ndarray
         locations for the seeds
     """
-    from dipy.tracking import utils
 
     mask_img = nib.load(mask_img_file)
     mask_img_data = mask_img.get_data().astype("bool")
@@ -74,9 +97,6 @@ def tens_mod_fa_est(gtab, dwi_file, B0_mask):
     str
         Path to tensor_fa image file
     """
-    import os
-    from dipy.reconst.dti import TensorModel
-    from dipy.reconst.dti import fractional_anisotropy
 
     data = nib.load(dwi_file).get_fdata()
 
@@ -216,11 +236,6 @@ class run_track(object):
         ActTissueClassifier, CmcTissueClassifier, or BinaryTissueCLassifier
             The resulting tissue classifier object, depending on which method you use (currently only does act)
         """
-        from dipy.tracking.local import (
-            ActTissueClassifier,
-            CmcTissueClassifier,
-            BinaryTissueClassifier,
-        )  # TODO: these classes no longer exist in dipy 1.0.
 
         if self.track_type == "local":
             tiss_class = "bin"
@@ -271,8 +286,6 @@ class run_track(object):
         return self.tiss_classifier
 
     def tens_mod_est(self):
-        from dipy.reconst.dti import TensorModel, quantize_evecs
-        from dipy.data import get_sphere
 
         print("Fitting tensor model...")
         self.model = TensorModel(self.gtab)
@@ -284,17 +297,12 @@ class run_track(object):
         return self.ten
 
     def odf_mod_est(self):
-        from dipy.reconst.shm import CsaOdfModel
 
         print("Fitting CSA ODF model...")
         self.mod = CsaOdfModel(self.gtab, sh_order=6)
         return self.mod
 
     def csd_mod_est(self):
-        from dipy.reconst.csdeconv import (
-            ConstrainedSphericalDeconvModel,
-            recursive_response,
-        )
 
         print("Fitting CSD model...")
         try:
@@ -319,9 +327,6 @@ class run_track(object):
         return self.mod
 
     def local_tracking(self):
-        from dipy.tracking.local import LocalTracking
-        from dipy.data import get_sphere
-        from dipy.direction import peaks_from_model, ProbabilisticDirectionGetter
 
         self.sphere = get_sphere("repulsion724")
         if self.mod_type == "det":
@@ -376,9 +381,6 @@ class run_track(object):
         return self.streamlines
 
     def particle_tracking(self):
-        from dipy.tracking.local import ParticleFilteringTracking
-        from dipy.data import get_sphere
-        from dipy.direction import peaks_from_model, ProbabilisticDirectionGetter
 
         self.sphere = get_sphere("repulsion724")
         if self.mod_type == "det":
@@ -468,11 +470,6 @@ def eudx_basic(dwi_file, gtab, stop_val=0.1):
     str
         Path to created mask file
     """
-    import os
-    from dipy.reconst.dti import TensorModel, quantize_evecs
-    from dipy.tracking.eudx import EuDX
-    from dipy.data import get_sphere
-    from dipy.segment.mask import median_otsu
 
     img = nib.load(dwi_file)
     data = img.get_data()
