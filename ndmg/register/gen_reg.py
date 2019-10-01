@@ -86,7 +86,7 @@ def direct_streamline_norm(streams, fa_path, namer):
                                          stream_to_current_grid=template_img.affine,
                                          current_grid_to_world=adjusted_affine,
                                          stream_to_ref_grid=template_img.affine,
-                                         ref_grid_to_world=np.eye(4))
+                                         ref_grid_to_world=np.eye(4))  # TODO : dipy 1.0.0
 
     # Save streamlines
     hdr = fa_img.header

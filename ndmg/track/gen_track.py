@@ -19,37 +19,39 @@
 # Email: dpisner@utexas.edu
 
 
+# system imports
 import warnings; warnings.simplefilter("ignore")
 import os
 
+# external package imports
 import numpy as np
 import nibabel as nib
+
+# dipy imports
+# tracking
 from dipy.tracking.streamline import Streamlines
 from dipy.tracking import utils
-from dipy.reconst.dti import TensorModel
-from dipy.reconst.dti import fractional_anisotropy
 from dipy.tracking.local import (
     ActTissueClassifier,
     CmcTissueClassifier,
     BinaryTissueClassifier,
-)  # TODO: these classes no longer exist in dipy 1.0.
-from dipy.reconst.dti import TensorModel, quantize_evecs
-from dipy.data import get_sphere
+    ParticleFilteringTracking,
+    LocalTracking
+) 
+from dipy.tracking.eudx import EuDX
+
+# reconst
+from dipy.reconst.dti import fractional_anisotropy, TensorModel, quantize_evecs
 from dipy.reconst.shm import CsaOdfModel
 from dipy.reconst.csdeconv import (
     ConstrainedSphericalDeconvModel,
     recursive_response,
 )
-from dipy.tracking.local import LocalTracking
+
+# others
 from dipy.data import get_sphere
 from dipy.direction import peaks_from_model, ProbabilisticDirectionGetter
-from dipy.reconst.dti import TensorModel, quantize_evecs
-from dipy.tracking.eudx import EuDX
-from dipy.data import get_sphere
 from dipy.segment.mask import median_otsu
-from dipy.tracking.local import ParticleFilteringTracking
-from dipy.data import get_sphere
-from dipy.direction import peaks_from_model, ProbabilisticDirectionGetter
 
 def build_seed_list(mask_img_file, stream_affine, dens):
     """uses dipy tractography utilities in order to create a seed list for tractography
@@ -76,7 +78,7 @@ def build_seed_list(mask_img_file, stream_affine, dens):
         seeds_count=int(dens),
         seed_count_per_voxel=True,
         affine=stream_affine,
-    )
+    )  # TODO : dipy 1.0.0
     return seeds
 
 
@@ -475,7 +477,7 @@ def eudx_basic(dwi_file, gtab, stop_val=0.1):
     data = img.get_data()
 
     data_sqz = np.squeeze(data)
-    b0_mask, mask_data = median_otsu(data_sqz, 2, 1)
+    b0_mask, mask_data = median_otsu(data_sqz, 2, 1)  # TODO : dipy 1.0.0
     mask_img = nib.Nifti1Image(mask_data.astype(np.float32), img.affine)
     mask_out_file = os.path.dirname(dwi_file) + "/dwi_bin_mask.nii.gz"
     nib.save(mask_img, mask_out_file)
