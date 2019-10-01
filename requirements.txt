@@ -14,4 +14,4 @@ configparser>=3.7.4
 fury
 pytest
 pathlib2
-graspy>=0.0.2
+graspy

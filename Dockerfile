@@ -64,10 +64,10 @@ RUN \
     pip3.6 install numpy
 
 RUN \
-    pip3.6 install nibabel scipy python-dateutil pandas boto3 awscli matplotlib nilearn sklearn pandas cython vtk pyvtk fury awscli requests ipython duecredit graspy scikit-image networkx
+    pip3.6 install nibabel scipy python-dateutil pandas boto3 awscli matplotlib nilearn sklearn pandas cython vtk pyvtk fury awscli requests ipython duecredit graspy scikit-image networkx dipy
 
 RUN \
-    pip3.6 install dipy==0.16.0 plotly==1.12.9 pybids==0.6.4 setuptools>=40.0 configparser>=3.7.4
+    pip3.6 install plotly==1.12.9 pybids==0.6.4 setuptools>=40.0 configparser>=3.7.4
 
 WORKDIR /
 
