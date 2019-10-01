@@ -497,7 +497,7 @@ def ndmg_dwi_worker(
             "Registering DWI image at {} to atlas; aligned dwi at {}...".format(
                 dwi_prep, aligned_dwi
             )
-        )  # alex  # TODO: make sure dwi_prep is what is being registered
+        )
         reg.dwi2atlas()
 
         # -------- Tensor Fitting and Fiber Tractography ---------------- #

@@ -43,7 +43,7 @@ from dipy.reconst.csdeconv import (
     ConstrainedSphericalDeconvModel,
     recursive_response,
 )
-from dipy.reconst.peak_direction_getter import EuDXDirectionGetter
+from dipy.reconst.peak_direction_getter import EuDXDirectionGetter  # TODO : update the EuDX code to use this
 
 # others
 from dipy.data import get_sphere
@@ -72,10 +72,10 @@ def build_seed_list(mask_img_file, stream_affine, dens):
     mask_img_data = mask_img.get_data().astype("bool")
     seeds = utils.random_seeds_from_mask(
         mask_img_data,
+        affine=stream_affine,
         seeds_count=int(dens),
         seed_count_per_voxel=True,
-        affine=stream_affine,
-    )  # TODO : dipy 1.0.0
+    ) 
     return seeds
 
 
@@ -474,7 +474,7 @@ def eudx_basic(dwi_file, gtab, stop_val=0.1):
     data = img.get_data()
 
     data_sqz = np.squeeze(data)
-    b0_mask, mask_data = median_otsu(data_sqz, 2, 1)  # TODO : dipy 1.0.0
+    b0_mask, mask_data = median_otsu(data_sqz, 2, 1) 
     mask_img = nib.Nifti1Image(mask_data.astype(np.float32), img.affine)
     mask_out_file = os.path.dirname(dwi_file) + "/dwi_bin_mask.nii.gz"
     nib.save(mask_img, mask_out_file)
@@ -499,5 +499,5 @@ def eudx_basic(dwi_file, gtab, stop_val=0.1):
     ind = quantize_evecs(ten.evecs, sphere.vertices)
     streamlines = EuDXDirectionGetter(
         a=ten.fa, ind=ind, seeds=seedIdx, odf_vertices=sphere.vertices, a_low=stop_val
-    )  # TODO : dipy 1.0.0 The EuDX tracking function has been removed. EuDX tractography can be performed using dipy.tracking.local_tracking using dipy.reconst.peak_direction_getter.EuDXDirectionGetter.
+    )  # TODO : dipy 1.0.0 The EuDX tracking function has been removed. EuDX tractography can be performed dipy.tracking.local_tracking using dipy.reconst.peak_direction_getter.EuDXDirectionGetter.
     return ten, streamlines, mask_out_file
