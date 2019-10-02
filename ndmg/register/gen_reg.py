@@ -932,7 +932,6 @@ class dmri_reg_old(object):
         )  # t1w = in, t1w_brain = out
         reg_utils.t1w_skullstrip(self.t1w, self.t1w_brain)
 
-        print("calling align_epi")
         print(self.t1w)
         print(self.t1w_brain)
         print(self.temp_aligned)

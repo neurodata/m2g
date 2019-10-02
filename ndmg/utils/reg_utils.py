@@ -93,6 +93,7 @@ def align_slices(dwi, corrected_dwi, idx):
     """
     
     cmd = "eddy_correct {} {} {}".format(dwi, corrected_dwi, idx)
+    print(f"calling eddy_correct : {cmd}")
     status = gen_utils.execute_cmd(cmd, verb=True)
 
 
@@ -141,6 +142,7 @@ def apply_mask(inp, mask, out):
     
     cmd = "3dcalc -a {} -b {} -expr 'a*step(b)' -prefix {}"
     cmd = cmd.format(inp, mask, out)
+    print(f"applying mask : {cmd}")
     gen_utils.execute_cmd(cmd, verb=True)
     pass
 
@@ -159,6 +161,7 @@ def extract_mask(inp, out):
             - the path to the extracted mask.
     """
     cmd = "3dAutomask -dilate 2 -prefix {} {}".format(out, inp)
+    print(f"Extracting mask : {cmd}")
     gen_utils.execute_cmd(cmd, verb=True)
     pass
 
@@ -201,6 +204,7 @@ def normalize_t1w(inp, out):
             - the output intensity-normalized image.
     """
     cmd = "3dUnifize -prefix {} -input {}".format(out, inp)
+    print(f"Normalizing t1w intensity values : {cmd}")
     gen_utils.execute_cmd(cmd, verb=True)
     pass
 
@@ -223,6 +227,7 @@ def resample_fsl(base, res, goal_res, interp="spline"):
     # resample using an isometric transform in fsl
     cmd = "flirt -in {} -ref {} -out {} -applyisoxfm {} -interp {}"
     cmd = cmd.format(base, base, res, goal_res, interp)
+    print(f"Calling flirt : {cmd}")
     gen_utils.execute_cmd(cmd, verb=True)
     pass
 
@@ -241,7 +246,11 @@ def t1w_skullstrip(t1w, out):
     """
     
     cmd = "3dSkullStrip -prefix {} -input {}".format(out, t1w)
-    gen_utils.execute_cmd(cmd, verb=True)
+    if not op.exists(out):
+        print(f"Calling 3dSkullStrip : {cmd}")
+        gen_utils.execute_cmd(cmd, verb=True)
+    else:
+        print(f"Skull-stripped brain found : {out}. \nSkipping skull-stripping.")
     pass
 
 
@@ -258,6 +267,7 @@ def extract_brain(inp, out, opts="-B"):
         , by default "-B"
     """
     cmd = "bet {} {} {}".format(inp, out, opts)
+    print(f"Calling bet : {cmd}")
     os.system(cmd)
     pass
 
@@ -294,7 +304,7 @@ def segment_t1w(t1w, basename, opts=""):
     # run FAST, with options -t for the image type and -n to
     # segment into CSF (pve_0), WM (pve_1), GM (pve_2)
     cmd = "fast -t 1 {} -n 3 -o {} {}".format(opts, basename, t1w)
-    print("Executing fast: {}".format(cmd))
+    print(f"Executing fast: {cmd}")
     os.system(cmd)
     out = {}  # the outputs
     out["wm_prob"] = "{}_{}".format(basename, "pve_2.nii.gz")
@@ -371,7 +381,7 @@ def align(
         cmd += " -wmseg {}".format(wmseg)
     if init is not None:
         cmd += " -init {}".format(init)
-    print(cmd)
+    print(f"Calling flirt : {cmd}")
     os.system(cmd)
 
 
@@ -381,6 +391,7 @@ def align_epi(epi, t1, brain, out):
     """
     cmd = "epi_reg --epi={} --t1={} --t1brain={} --out={}"
     cmd = cmd.format(epi, t1, brain, out)
+    print(f"Calling epi_reg: {cmd}")
     os.system(cmd)
 
 
@@ -415,7 +426,7 @@ def align_nonlinear(inp, ref, xfm, out, warp, ref_mask=None, in_mask=None, confi
         cmd += " --inmask={} --applyinmask=1".format(in_mask)
     if config is not None:
         cmd += " --config={}".format(config)
-    print(cmd)
+    print(f"Calling fnirt : {cmd}")
     os.system(cmd)
 
 
@@ -440,7 +451,7 @@ def applyxfm(ref, inp, xfm, aligned, interp="trilinear", dof=6):
     
     cmd = "flirt -in {} -ref {} -out {} -init {} -interp {} -dof {} -applyxfm"
     cmd = cmd.format(inp, ref, aligned, xfm, interp, dof)
-    print(cmd)
+    print(f"Calling flirt : {cmd}")
     os.system(cmd)
 
 
@@ -479,7 +490,7 @@ def apply_warp(ref, inp, out, warp, xfm=None, mask=None, interp=None, sup=False)
         cmd += " --interp=" + interp
     if sup is True:
         cmd += " --super --superlevel=a"
-    print(cmd)
+    print(f"Calling applywarp : {cmd}")
     os.system(cmd)
 
 
@@ -498,7 +509,7 @@ def inverse_warp(ref, out, warp):
     """
     
     cmd = "invwarp --warp=" + warp + " --out=" + out + " --ref=" + ref
-    print(cmd)
+    print(f"Calling invwarp : {cmd}")
     os.system(cmd)
 
 
@@ -542,7 +553,7 @@ def combine_xfms(xfm1, xfm2, xfmout):
         path for the ouput transformation
     """
     cmd = "convert_xfm -omat {} -concat {} {}".format(xfmout, xfm1, xfm2)
-    print(cmd)
+    print(f"Calling convert_xfm : {cmd}")
     os.system(cmd)
 
 
@@ -557,6 +568,7 @@ def reslice_to_xmm(infile, vox_sz=2):
         "mm.nii.gz",
     )
     cmd = cmd.format(infile, infile, out_file, vox_sz)
+    print(f"Calling flirt : {cmd}")
     os.system(cmd)
     return out_file
 
