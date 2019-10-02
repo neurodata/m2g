@@ -77,7 +77,7 @@ def direct_streamline_norm(streams, fa_path, namer):
     [mapping, affine_map] = regutils.wm_syn(
         template_path, fa_path, namer.dirs["tmp"]["base"]
     )
-    [streamlines, _] = load_trk(streams)
+    [streamlines, _] = load_trk(streams, reference='same')
 
     # Warp streamlines
     adjusted_affine = affine_map.affine.copy()
