@@ -20,14 +20,12 @@
 import warnings
 
 warnings.simplefilter("ignore")
+from ndmg.utils import gen_utils
 import nibabel as nib
 import numpy as np
 import nilearn.image as nl
 import os
 import os.path as op
-
-from ndmg.utils.gen_utils import check_exists
-from ndmg.utils import gen_utils
 
 
 def erode_mask(mask, v=0):
@@ -81,7 +79,6 @@ def erode_mask(mask, v=0):
     return mask
 
 
-@check_exists(0)  # TODO : should corrected_dwi also exist before this function is called?
 def align_slices(dwi, corrected_dwi, idx):
     """Performs eddy-correction (or self-alignment) of a stack of 3D images
     
@@ -98,7 +95,7 @@ def align_slices(dwi, corrected_dwi, idx):
     cmd = "eddy_correct {} {} {}".format(dwi, corrected_dwi, idx)
     status = gen_utils.execute_cmd(cmd, verb=True)
 
-@check_exists(0)
+
 def probmap2mask(prob_map, mask_path, t, erode=0):
     """
     A function to extract a mask from a probability map.
@@ -129,7 +126,6 @@ def probmap2mask(prob_map, mask_path, t, erode=0):
 
 
 
-@check_exists(0, 1)
 def apply_mask(inp, mask, out):
     """A function to generate a brain-only mask for an input image using 3dcalc
     
@@ -148,7 +144,7 @@ def apply_mask(inp, mask, out):
     gen_utils.execute_cmd(cmd, verb=True)
     pass
 
-@check_exists(0)
+
 def extract_mask(inp, out):
     """
     A function that extracts a mask from images using AFNI's
@@ -230,7 +226,7 @@ def resample_fsl(base, res, goal_res, interp="spline"):
     gen_utils.execute_cmd(cmd, verb=True)
     pass
 
-@check_exists(0)
+
 def t1w_skullstrip(t1w, out):
     """Skull-strips the t1w image using AFNIs 3dSkullStrip algorithm, which is a modification of FSLs BET specialized to t1w images.
     Offers robust skull-stripping with no hyperparameters
@@ -248,7 +244,7 @@ def t1w_skullstrip(t1w, out):
     gen_utils.execute_cmd(cmd, verb=True)
     pass
 
-@check_exists(0)
+
 def extract_brain(inp, out, opts="-B"):
     """A function to extract the brain from an image using FSL's BET
     
@@ -272,7 +268,7 @@ def get_filename(label):
     """
     return op.splitext(op.splitext(op.basename(label))[0])[0]
 
-@check_exists(0)
+
 def segment_t1w(t1w, basename, opts=""):
     """Uses FSLs FAST to segment an anatomical image into GM, WM, and CSF probability maps.
     
@@ -306,7 +302,7 @@ def segment_t1w(t1w, basename, opts=""):
     out["csf_prob"] = "{}_{}".format(basename, "pve_0.nii.gz")
     return out
 
-@check_exists(0, 1)
+
 def align(
     inp,
     ref,
@@ -378,7 +374,7 @@ def align(
     print(cmd)
     os.system(cmd)
 
-@check_exists(0, 1, 2)
+
 def align_epi(epi, t1, brain, out):
     """
     Algins EPI images to T1w image
@@ -387,7 +383,7 @@ def align_epi(epi, t1, brain, out):
     cmd = cmd.format(epi, t1, brain, out)
     os.system(cmd)
 
-@check_exists(0, 1, 2)
+
 def align_nonlinear(inp, ref, xfm, out, warp, ref_mask=None, in_mask=None, config=None):
     """Aligns two images using nonlinear methods and stores the transform between them using fnirt
     
@@ -422,14 +418,14 @@ def align_nonlinear(inp, ref, xfm, out, warp, ref_mask=None, in_mask=None, confi
     print(cmd)
     os.system(cmd)
 
-@check_exists(0, 1, 2)
+
 def applyxfm(ref, inp, xfm, aligned, interp="trilinear", dof=6):
     """Aligns two images with a given transform using FSLs flirt command
     
     Parameters
     ----------
     ref : str
-        path of reference image to be aligned to as a nifti image file
+        path of reference image to be aligned too as a nifti image file
     inp : str
         path of input image to be aligned as a nifti image file
     xfm : str
@@ -447,7 +443,7 @@ def applyxfm(ref, inp, xfm, aligned, interp="trilinear", dof=6):
     print(cmd)
     os.system(cmd)
 
-@check_exists(0, 1)
+
 def apply_warp(ref, inp, out, warp, xfm=None, mask=None, interp=None, sup=False):
     """Applies a warp from the structural to reference space in a single step using information about
     the structural -> ref mapping as well as the functional to structural mapping.
@@ -487,7 +483,6 @@ def apply_warp(ref, inp, out, warp, xfm=None, mask=None, interp=None, sup=False)
     os.system(cmd)
 
 
-@check_exists(0)
 def inverse_warp(ref, out, warp):
     """Takes a non-linear mapping and finds the inverse. Takes the file conaining warp-coefficients/fields specified in the
     variable warp (t1w -> mni) and creates its inverse (mni -> t1w) which is saved in the location determined by the variable out
@@ -507,7 +502,6 @@ def inverse_warp(ref, out, warp):
     os.system(cmd)
 
 
-@check_exists(0, 2)
 def resample(base, ingested, template):
     """
     Resamples the image such that images which have already been aligned
@@ -535,7 +529,6 @@ def resample(base, ingested, template):
     nib.save(target_im, ingested)
 
 
-@check_exists(0, 1)
 def combine_xfms(xfm1, xfm2, xfmout):
     """A function to combine two transformatios and output the resulting transformation
     
@@ -553,7 +546,6 @@ def combine_xfms(xfm1, xfm2, xfmout):
     os.system(cmd)
 
 
-@check_exists(0)
 def reslice_to_xmm(infile, vox_sz=2):
     cmd = "flirt -in {} -ref {} -out {} -nosearch -applyisoxfm {}"
     out_file = "%s%s%s%s%s%s" % (
@@ -569,7 +561,6 @@ def reslice_to_xmm(infile, vox_sz=2):
     return out_file
 
 
-@check_exists(0, 1)
 def wm_syn(template_path, fa_path, working_dir):
     """A function to perform ANTS SyN registration using dipy functions
     
