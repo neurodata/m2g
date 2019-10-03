@@ -35,11 +35,46 @@ import nibabel as nib
 from nilearn.image import mean_img
 from scipy.sparse import lil_matrix
 
+<<<<<<< Updated upstream
 # dipy imports
 import dipy
 from dipy.io import read_bvals_bvecs
 from dipy.core.gradients import gradient_table
 
+=======
+def check_exists(*dargs):
+    """
+    Decorator. For every integer index passed to check_exists, 
+    checks if the argument passed to that index in the function decorated contains a filepath that exists.
+    
+    Parameters
+    ----------
+    dargs : ints
+        Where to check the function being decorated for files.
+        
+    Raises
+    ------
+    ValueError
+        Raised if the file at that location doesn't exist.
+    
+    Returns
+    -------
+    func
+        dictionary of output files
+    """
+    def outer(f):
+        def inner(*args, **kwargs):
+            
+            for darg in dargs:
+                p = args[darg]
+                if not os.path.exists(p):
+                    raise ValueError(f"{p} does not exist.\nThis is an input to the function {f.__name__}.")
+                print(f"{p} exists.")
+                    
+            return f(*args, **kwargs)
+        return inner
+    return outer
+>>>>>>> Stashed changes
 
 def check_dependencies():
     """
