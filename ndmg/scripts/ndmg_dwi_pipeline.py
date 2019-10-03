@@ -415,8 +415,8 @@ def ndmg_dwi_worker(
         if reg_style == "native":
             labels_im_file_dwi_list = []
             for idx, label in enumerate(labels):
-                labels_im_file = mgu.reorient_img(labels[idx], namer)
-                labels_im_file = mgu.match_target_vox_res(
+                labels_im_file = gen_utils.reorient_img(labels[idx], namer)
+                labels_im_file = gen_utils.match_target_vox_res(
                     labels_im_file, vox_size, namer, sens="t1w"
                 )
                 orig_lab = nib.load(labels_im_file)
@@ -424,7 +424,7 @@ def ndmg_dwi_worker(
                 n_ids = orig_lab[orig_lab>0]
                 num = len(np.unique(n_ids))
 
-                labels_im_file_dwi = reg.atlas2t1w2dwi_align(labels_im_file, dsn=False)
+                labels_im_file_dwi = gen_reg.atlas2t1w2dwi_align(labels_im_file, dsn=False)
                 labels_im = nib.load(labels_im_file_dwi)
                 align_lab = labels_im.get_data().astype("int")
                 n_ids_2 = align_lab[align_lab>0]
@@ -437,8 +437,8 @@ def ndmg_dwi_worker(
         elif reg_style == "native_dsn":
             labels_im_file_mni_list = []
             for idx, label in enumerate(labels):
-                labels_im_file = mgu.reorient_img(labels[idx], namer)
-                labels_im_file = mgu.match_target_vox_res(
+                labels_im_file = gen_utils.reorient_img(labels[idx], namer)
+                labels_im_file = gen_utils.match_target_vox_res(
                     labels_im_file, vox_size, namer, sens="t1w"
                 )
                 orig_lab = nib.load(labels_im_file)
@@ -446,7 +446,7 @@ def ndmg_dwi_worker(
                 n_ids = orig_lab[orig_lab>0]
                 num = len(np.unique(n_ids))
 
-                labels_im_file_mni = reg.atlas2t1w2dwi_align(labels_im_file, dsn=True)
+                labels_im_file_mni = gen_reg.atlas2t1w2dwi_align(labels_im_file, dsn=True)
                 labels_im = nib.load(labels_im_file_mni)
                 align_lab = labels_im.get_data().astype("int")
                 n_ids_2 = align_lab[align_lab>0]
