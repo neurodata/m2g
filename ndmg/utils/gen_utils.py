@@ -35,13 +35,11 @@ import nibabel as nib
 from nilearn.image import mean_img
 from scipy.sparse import lil_matrix
 
-<<<<<<< Updated upstream
 # dipy imports
 import dipy
 from dipy.io import read_bvals_bvecs
 from dipy.core.gradients import gradient_table
 
-=======
 def check_exists(*dargs):
     """
     Decorator. For every integer index passed to check_exists, 
@@ -74,7 +72,6 @@ def check_exists(*dargs):
             return f(*args, **kwargs)
         return inner
     return outer
->>>>>>> Stashed changes
 
 def check_dependencies():
     """
