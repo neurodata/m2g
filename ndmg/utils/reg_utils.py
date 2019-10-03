@@ -398,7 +398,7 @@ def align_epi(epi, t1, brain, out):
     print(f"Calling epi_reg: {cmd}")
     os.system(cmd)
 
-@check_exists(0, 1, 2)
+@check_exists(0, 1)
 def align_nonlinear(inp, ref, xfm, out, warp, ref_mask=None, in_mask=None, config=None):
     """Aligns two images using nonlinear methods and stores the transform between them using fnirt
     
@@ -433,7 +433,7 @@ def align_nonlinear(inp, ref, xfm, out, warp, ref_mask=None, in_mask=None, confi
     print(f"Calling fnirt : {cmd}")
     os.system(cmd)
 
-@check_exists(0, 1, 2)
+@check_exists(0, 1)
 def applyxfm(ref, inp, xfm, aligned, interp="trilinear", dof=6):
     """Aligns two images with a given transform using FSLs flirt command
     
