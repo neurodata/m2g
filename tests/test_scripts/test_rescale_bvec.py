@@ -10,6 +10,81 @@ import numpy as np
 import pytest
 import os
 
+def test_make_gtab_and_bmask(tmp_path): 
+	"""
+	Parameters
+    ----------
+    fbval : str
+        b-value file
+    fbvec : str
+        b-vector file
+    dwi_file : str
+        dwi file being analyzed
+    outdir : str
+        output directory
+    
+    Returns
+    -------
+    GradientTable
+        gradient table created from bval and bvec files
+    str
+        location of averaged b0 image file
+    str
+        location of b0 brain mask file
+	"""
+	d = tmp_path/"sub"
+	d.mkdir()
+	temp_grad_out = d/ "test1.bvec"
+	temp_b0avg_out = d/ "test2.bvec"
+	temp_b0mask_out = d/ "test3.bvec"
+
+	#define correct input data path
+	fbval = '/test_data/inputs/bval.bval'
+	fbvec = '/test_data/inputs/bvecs.bvec'
+	dwi_prep = '/test_data/inputs/eddy_corrected_data_reor_RAS_res.nii.gz'
+
+	#create temp user directory to store function outputs
+	outdir = d/
+
+	#define correct output data path 
+	# stored as a numpy array 
+	gtab_grad_path = '/Users/wilsontang/Desktop/ndmg/tests/test_data/outputs/gtab/gtab_grad'
+	gtab_bvals_path = '/Users/wilsontang/Desktop/ndmg/tests/test_data/outputs/gtab/gtab_bvals'
+	gtab_bvecs_path = '/Users/wilsontang/Desktop/ndmg/tests/test_data/outputs/gtab/gtab_bvecs'
+	gtab_b0s_mask_path = '/Users/wilsontang/Desktop/ndmg/tests/test_data/outputs/gtab/gtab_b0s_mask'
+	gtab_b0_threshold_path = '/Users/wilsontang/Desktop/ndmg/tests/test_data/outputs/gtab/gtab_b0_threshold'
+
+	nodif_B0_path = '/Users/wilsontang/Desktop/ndmg/tests/test_data/outputs/nodif_B0.nii.gz'
+	nodif_B0_mask_path = '/Users/wilsontang/Desktop/ndmg/tests/test_data/outputs/nodif_B0_bet_mask.nii.gz'
+
+	#load data
+
+	#each property of gtab object 
+	#unable to directly save unique dipy Gradient Table Class
+	gtab_grad_control = np.loadtxt()
+	gtab_bvals_control = np.loadtxt()
+	gtab_bvecs_control = np.loadtxt()
+	gtab_b0s_mask_control = np.loadtxt()
+	gtab_b0_threshold_control = np.loadtxt()
+
+
+	nodif_B0_control = nib.load(nodif_B0_path)
+	nodif_B0_mask_control = nib.load(nodif_B0_mask_control)
+
+	#call function
+	[gtab, nodif_B0, nodif_B0_mask] = mgu.make_gtab_and_bmask(fbval, fbvec, dwi_prep, outdir)
+
+	#test gtab properties
+	assert np.allclose (gtab.gradients, gtab_grad_control)
+	assert np.allclose (gtab.bvals, gtab_bvals_control)
+	assert np.allclose (gtab.bvecs, gtab_bvecs_control)
+	assert np.allclose (gtab.b0s_mask, gtab_b0s_mask_control)
+	assert gtab.b0_threshold ==  gtab_b0_threshold_control[0]
+
+	#test b0
+	assert np.allclose (nodif_B0,nodif_B0_control )
+	assert np.allclose (nodif_B0_mask, nodif_B0_mask_control)
+
 #requires most up to date pytest for tmp_path to work
 def test_rescale_bvac(tmp_path):
 	#create temp file dir
