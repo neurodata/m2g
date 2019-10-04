@@ -7,6 +7,18 @@ import boto3
 
 
 def get_credentials():
+    """Searches for and returns AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY
+    
+    Returns
+    -------
+    tuple
+        Two strings inside of a tuple, (Access_key, Secret_access_key)
+    
+    Raises
+    ------
+    AttributeError
+        No AWS credentials are found
+    """
     # add option to pass profile name
     try:
         config = ConfigParser()
@@ -93,10 +105,23 @@ def get_matching_s3_objects(bucket, prefix="", suffix=""):
 
 
 def s3_get_data(bucket, remote, local, public=False, force=False):
+    """Given and s3 directory, copies files/subdirectories in that directory to local
+    
+    Parameters
+    ----------
+    bucket : str
+        s3 bucket you are accessing data from
+    remote : str
+        The path to the data on your S3 bucket. The data will be
+        downloaded to the provided bids_dir on your machine.
+    local : str
+        Local input directory where you want the files copied to
+    public : bool, optional
+        Whether or not the data you are accessing is public, if False s3 credentials are used, by default False
+    force : bool, optional
+        Whether to overwrite the local directory containing the s3 files if it already exists, by default False
     """
-    given an s3 directory,
-    copies in that directory to local.
-    """
+    
 
     # TODO : use boto3 for this
     if os.path.exists(local) and not force:
@@ -131,6 +156,24 @@ def s3_get_data(bucket, remote, local, public=False, force=False):
 
 
 def s3_push_data(bucket, remote, outDir, modifier, creds=True, debug=True):
+    """Pushes data to a specified S3 bucket
+    
+    Parameters
+    ----------
+    bucket : str
+        s3 bucket you are pushing files to
+    remote : str
+        The path to the directory on your S3 bucket containing the data used in the pipeline, the string in 'modifier' will be put after the
+        first directory specified in the path as its own directory (/remote[0]/modifier/remote[1]/...)
+    outDir : str
+        Path of local directory being pushed to the s3 bucket
+    modifier : str
+        Name of the folder on s3 to push to. If empty, push to a folder with ndmg's version number. Default is ""
+    creds : bool, optional
+        Whether s3 credentials are being provided, may fail to push big files if False, by default True
+    debug : bool, optional
+        Whether to not to push intermediate files created by the pipeline, by default True
+    """
     # TODO : use boto3 for this instead
     cmd = (
         'aws s3 cp --exclude "tmp/*" {} s3://{}/{}/{}/{}/ --recursive --acl public-read'
