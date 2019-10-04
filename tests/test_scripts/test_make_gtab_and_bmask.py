@@ -1,6 +1,9 @@
 import ndmg
 from ndmg import preproc as mgp
-from ndmg.utils import gen_utils as mgu
+# from ndmg.utils import gen_utils as mgu
+
+import non_fsl_make_gtab_and_bmask as mgu
+
 from ndmg.register import gen_reg as mgr
 from ndmg.track import gen_track as mgt
 from ndmg.graph import gen_graph as mgg
@@ -10,6 +13,7 @@ import nibabel as nib
 import numpy as np 
 import pytest
 import os
+
 
 def test_make_gtab_and_bmask(tmp_path): 
 	"""
