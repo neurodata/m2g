@@ -415,13 +415,13 @@ def main():
     )
     parser.add_argument(
         "--skull",
-        action="store"
+        action="store",
         help="Special actions to take when skullstripping t1w image based on default skullstrip ('none') failure:"
-        "Excess tissue below brain: below"
-        "Chunks of cerebelum missing: above"
-        "Frontal clipping near eyes: eyes"
-        "Excess clipping in general: general",
-        default="none",
+        "Excess tissue below brain: 1"
+        "Chunks of cerebelum missing: 2"
+        "Frontal clipping near eyes: 3"
+        "Excess clipping in general: 4",
+        default=0,
     )
     result = parser.parse_args()
 
