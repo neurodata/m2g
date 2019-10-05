@@ -163,7 +163,7 @@ def extract_mask(inp, out):
     pass
 
 
-def extract_t1w_brain(t1w, out, tmpdir):
+def extract_t1w_brain(t1w, out, tmpdir, skull = 0):
     """A function to extract the brain from an input T1w image
     using AFNI's brain extraction utilities.
     
@@ -175,13 +175,15 @@ def extract_t1w_brain(t1w, out, tmpdir):
         path for the output brain image
     tmpdir : str
         Path for the temporary directory to store images
+    skull : int, optional
+        skullstrip parameter pre-set. Default is 0.
     """
     
     t1w_name = gen_utils.get_filename(t1w)
     # the t1w image with the skull removed.
     skull_t1w = "{}/{}_noskull.nii.gz".format(tmpdir, t1w_name)
     # 3dskullstrip to extract the brain-only t1w
-    t1w_skullstrip(t1w, skull_t1w)
+    t1w_skullstrip(t1w, skull_t1w, skull)
     # 3dcalc to apply the mask over the 4d image
     apply_mask(t1w, skull_t1w, out)
     pass
@@ -227,7 +229,7 @@ def resample_fsl(base, res, goal_res, interp="spline"):
     pass
 
 
-def t1w_skullstrip(t1w, out):
+def t1w_skullstrip(t1w, out, skull = 0):
     """Skull-strips the t1w image using AFNIs 3dSkullStrip algorithm, which is a modification of FSLs BET specialized to t1w images.
     Offers robust skull-stripping with no hyperparameters
     Note: renormalizes the intensities, call extract_t1w_brain instead if you want the original intensity values
@@ -238,9 +240,19 @@ def t1w_skullstrip(t1w, out):
         path for the input t1w image file
     out : str
         path for the output skull-stripped image file
+    skull : int, optional
+        skullstrip parameter pre-set. Default is 0.
     """
-    
-    cmd = "3dSkullStrip -prefix {} -input {} -ld 50".format(out, t1w)
+    if skull == 1:
+        cmd = "3dSkullStrip -prefix {} -input {} -shrink_fac_bot_lim 0.6 -ld 50".format(out, t1w)
+    elif skull == 2:
+        cmd = "3dSkullStrip -prefix {} -input {} -shrink_fac_bot_lim 0.3 -ld 50".format(out, t1w)
+    elif skull == 3:
+        cmd = "3dSkullStrip -prefix {} -input {} -no_avoid eyes -ld 50".format(out, t1w)
+    elif skull == 4:
+        cmd = "3dSkullStrip -prefix {} -input {} -push_to_edge -ld 50".format(out, t1w)
+    else:
+        cmd = "3dSkullStrip -prefix {} -input {} -ld 50".format(out, t1w)
     gen_utils.execute_cmd(cmd, verb=True)
     pass
 

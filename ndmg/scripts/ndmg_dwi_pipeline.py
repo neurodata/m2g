@@ -68,6 +68,7 @@ def ndmg_dwi_worker(
     creds=None,
     debug=False,
     modif="",
+    skull=0,
 ):
     """Creates a brain graph from MRI data
     
@@ -119,6 +120,8 @@ def ndmg_dwi_worker(
         If False, remove any old filed in the output directory. Default is False
     modif : str, optional
         Name of the folder on s3 to push to. If empty, push to a folder with ndmg's version number. Default is ""
+    skull : int, optional
+        skullstrip parameter pre-set. Default is 0.
     
     Raises
     ------
@@ -144,6 +147,7 @@ def ndmg_dwi_worker(
     print("clean = {}".format(clean))
     print("skip eddy = {}".format(skipeddy))
     print("skip registration = {}".format(skipreg))
+    print("Skull strip parameter = {}".format(skull))
     fmt = "_adj.csv"
 
     assert all(
@@ -358,7 +362,7 @@ def ndmg_dwi_worker(
 
         print("Running tractography in native space...")
         # Instantiate registration
-        reg = gen_reg.DmriReg(namer, nodif_B0, nodif_B0_mask, t1w, vox_size, simple=False)
+        reg = gen_reg.DmriReg(namer, nodif_B0, nodif_B0_mask, t1w, vox_size, simple=False, skull)
 
         # Perform anatomical segmentation
         start_time = time.time()
@@ -446,7 +450,7 @@ def ndmg_dwi_worker(
                 n_ids = orig_lab[orig_lab>0]
                 num = len(np.unique(n_ids))
 
-                labels_im_file_mni = gen_reg.DmriReg.atlas2t1w2dwi_align(labels_im_file, dsn=True)
+                labels_im_file_mni = reg.atlas2t1w2dwi_align(labels_im_file, dsn=True)
                 labels_im = nib.load(labels_im_file_mni)
                 align_lab = labels_im.get_data().astype("int")
                 n_ids_2 = align_lab[align_lab>0]
@@ -539,7 +543,7 @@ def ndmg_dwi_worker(
 
         # Align DWI volumes to Atlas
         print("Aligning volumes...")
-        reg = gen_reg.dmri_reg_old(dwi_prep, gtab, t1w, mask, aligned_dwi, namer, clean)
+        reg = gen_reg.dmri_reg_old(dwi_prep, gtab, t1w, mask, aligned_dwi, namer, clean, skull)
         print(
             "Registering DWI image at {} to atlas; aligned dwi at {}...".format(
                 dwi_prep, aligned_dwi
@@ -587,7 +591,7 @@ def ndmg_dwi_worker(
             # align atlas to t1w to dwi
             print("%s%s" % ("Applying native-space alignment to ", labels[idx]))
             labels_im = nib.load(labels_im_file_mni_list[idx])
-            g1 = mgg.graph_tools(
+            g1 = gen_graph.graph_tools(
                 attr=len(np.unique(np.around(labels_im.get_data()).astype("int16")))
                 - 1,
                 rois=labels_im_file_mni_list[idx],
@@ -601,7 +605,7 @@ def ndmg_dwi_worker(
             # align atlas to t1w to dwi
             print("%s%s" % ("Applying native-space alignment to ", labels[idx]))
             labels_im = nib.load(labels_im_file_dwi_list[idx])
-            g1 = mgg.graph_tools(
+            g1 = gen_graph.graph_tools(
                 attr=len(np.unique(np.around(labels_im.get_data()).astype("int16")))
                 - 1,
                 rois=labels_im_file_dwi_list[idx],

@@ -145,6 +145,7 @@ def session_level(
     creds=None,
     debug=False,
     modif="",
+    skull=0,
 ):
     """Crawls the given BIDS organized directory for data pertaining to the given subject and session, and passes necessary files to ndmg_dwi_pipeline for processing.
     
@@ -192,6 +193,8 @@ def session_level(
         If False, remove any old filed in the output directory. Default is False
     modif : str, optional
         Name of the folder on s3 to push to. If empty, push to a folder with ndmg's version number. Default is ""
+    skull : int, optional
+        Additional skullstrip analysis parameter set for unique t1w images. Default is 0.
     """
 
     labels, atlas, atlas_mask, atlas_brain, lv_mask = get_atlas(atlas_dir, vox_size)
@@ -256,6 +259,7 @@ def session_level(
             creds=creds,
             debug=debug,
             modif=modif,
+            skull=skull,
         )
         rmflds = []
         if len(rmflds) > 0:
@@ -499,6 +503,7 @@ def main():
         creds=creds,
         debug=debug,
         modif=modif,
+        skull=skull,
     )
 
 
