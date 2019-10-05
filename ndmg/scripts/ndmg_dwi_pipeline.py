@@ -424,7 +424,7 @@ def ndmg_dwi_worker(
                 n_ids = orig_lab[orig_lab>0]
                 num = len(np.unique(n_ids))
 
-                labels_im_file_dwi = gen_reg.atlas2t1w2dwi_align(labels_im_file, dsn=False)
+                labels_im_file_dwi = gen_reg.DmriReg.atlas2t1w2dwi_align(labels_im_file, dsn=False)
                 labels_im = nib.load(labels_im_file_dwi)
                 align_lab = labels_im.get_data().astype("int")
                 n_ids_2 = align_lab[align_lab>0]
@@ -446,7 +446,7 @@ def ndmg_dwi_worker(
                 n_ids = orig_lab[orig_lab>0]
                 num = len(np.unique(n_ids))
 
-                labels_im_file_mni = gen_reg.atlas2t1w2dwi_align(labels_im_file, dsn=True)
+                labels_im_file_mni = gen_reg.DmriReg.atlas2t1w2dwi_align(labels_im_file, dsn=True)
                 labels_im = nib.load(labels_im_file_mni)
                 align_lab = labels_im.get_data().astype("int")
                 n_ids_2 = align_lab[align_lab>0]
