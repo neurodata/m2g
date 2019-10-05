@@ -413,6 +413,16 @@ def main():
         help="Name of folder on s3 to push to. If empty, push to a folder with ndmg's version number.",
         default="",
     )
+    parser.add_argument(
+        "--skull",
+        action="store"
+        help="Special actions to take when skullstripping t1w image based on default skullstrip ('none') failure:"
+        "Excess tissue below brain: below"
+        "Chunks of cerebelum missing: above"
+        "Frontal clipping near eyes: eyes"
+        "Excess clipping in general: general",
+        default="none",
+    )
     result = parser.parse_args()
 
     inDir = result.bids_dir
@@ -435,6 +445,7 @@ def main():
     mod_func = result.mf
     reg_style = result.sp
     modif = result.modif
+    skull = result.skull
 
     # Check to see if user has provided direction to an existing s3 bucket they wish to use
     try:

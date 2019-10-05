@@ -424,7 +424,7 @@ def ndmg_dwi_worker(
                 n_ids = orig_lab[orig_lab>0]
                 num = len(np.unique(n_ids))
 
-                labels_im_file_dwi = gen_reg.DmriReg.atlas2t1w2dwi_align(labels_im_file, dsn=False)
+                labels_im_file_dwi = reg.atlas2t1w2dwi_align(labels_im_file, dsn=False)
                 labels_im = nib.load(labels_im_file_dwi)
                 align_lab = labels_im.get_data().astype("int")
                 n_ids_2 = align_lab[align_lab>0]
@@ -586,11 +586,6 @@ def ndmg_dwi_worker(
         if reg_style == "native_dsn":
             # align atlas to t1w to dwi
             print("%s%s" % ("Applying native-space alignment to ", labels[idx]))
-            #labels_im_file = mgu.reorient_img(labels[idx], namer)
-            #labels_im_file = mgu.match_target_vox_res(
-            #    labels_im_file, vox_size, namer, sens="t1w"
-            #)
-            #labels_im_file_mni = reg.atlas2t1w2dwi_align(labels_im_file, dsn=True)
             labels_im = nib.load(labels_im_file_mni_list[idx])
             g1 = mgg.graph_tools(
                 attr=len(np.unique(np.around(labels_im.get_data()).astype("int16")))
@@ -605,11 +600,6 @@ def ndmg_dwi_worker(
         elif reg_style == "native":
             # align atlas to t1w to dwi
             print("%s%s" % ("Applying native-space alignment to ", labels[idx]))
-            #labels_im_file = mgu.reorient_img(labels[idx], namer)
-            #labels_im_file = mgu.match_target_vox_res(
-            #    labels_im_file, vox_size, namer, sens="t1w"
-            #)
-            #labels_im_file_dwi = reg.atlas2t1w2dwi_align(labels_im_file, dsn=False)
             labels_im = nib.load(labels_im_file_dwi_list[idx])
             g1 = mgg.graph_tools(
                 attr=len(np.unique(np.around(labels_im.get_data()).astype("int16")))
