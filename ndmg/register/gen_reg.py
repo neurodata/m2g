@@ -357,7 +357,7 @@ class DmriReg(object):
         os.system(cmd)
 
         return
-
+t1w2dwi_align()
     def t1w2dwi_align(self):
         """Alignment from t1w to mni, making t1w_mni, and t1w_mni to dwi. A function to perform self alignment. Uses a local optimisation cost function to get the
         two images close, and then uses bbr to obtain a good alignment of brain boundaries. Assumes input dwi is already preprocessed and brain extracted.
