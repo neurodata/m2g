@@ -132,15 +132,15 @@ class DmriReg(object):
         voxel resolution ('2mm' or '1mm')
     skull : int, optional
         skullstrip parameter pre-set. Default is 0
-    simple : bool
-        Whether you want to attempt non-linear registration when transforming between mni, t1w, and dwi space.
+    simple : bool, optional
+        Whether you want to attempt non-linear registration when transforming between mni, t1w, and dwi space. Default is False
     
     Raises
     ------
     ValueError
         FSL atlas for ventricle reference not found
     """
-    def __init__(self, namer, nodif_B0, nodif_B0_mask, t1w_in, vox_size, skull, simple):
+    def __init__(self, namer, nodif_B0, nodif_B0_mask, t1w_in, vox_size, skull=0, simple=False):
         import os.path as op
 
         if os.path.isdir("/ndmg_atlases"):
