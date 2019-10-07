@@ -252,7 +252,7 @@ def t1w_skullstrip(t1w, out, skull = 0):
     elif skull == 4:
         cmd = "3dSkullStrip -prefix {} -input {} -push_to_edge -ld 50".format(out, t1w)
     else:
-        cmd = "3dSkullStrip -prefix {} -input {} -ld 50".format(out, t1w)
+        cmd = "3dSkullStrip -prefix {} -input {} -ld 30".format(out, t1w)
     gen_utils.execute_cmd(cmd, verb=True)
     pass
 
