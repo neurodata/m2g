@@ -18,8 +18,8 @@
 # Email: ebridge2@jhu.edu
 
 import warnings
-
 warnings.simplefilter("ignore")
+
 import nibabel as nib
 import numpy as np
 import nilearn.image as nl
@@ -28,7 +28,6 @@ import os.path as op
 
 from ndmg.utils.gen_utils import check_exists
 from ndmg.utils import gen_utils
-
 
 def erode_mask(mask, v=0):
     """A function to erode a mask by a specified number of voxels. Here, we define
@@ -97,6 +96,7 @@ def align_slices(dwi, corrected_dwi, idx):
     
     cmd = "eddy_correct {} {} {}".format(dwi, corrected_dwi, idx)
     status = gen_utils.execute_cmd(cmd, verb=True)
+
 
 @check_exists(0)
 def probmap2mask(prob_map, mask_path, t, erode=0):

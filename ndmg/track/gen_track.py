@@ -469,7 +469,6 @@ def eudx_basic(dwi_file, gtab, stop_val=0.1):
     str
         Path to created mask file
     """
-
     img = nib.load(dwi_file)
     data = img.get_data()
 
