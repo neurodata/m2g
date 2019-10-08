@@ -63,12 +63,12 @@ def check_exists(*dargs):
     def outer(f):
         def inner(*args, **kwargs):
             
-            print(f"Calling {f.__name__}.")
             for darg in dargs:
                 p = args[darg]
                 if not os.path.exists(p):
                     raise ValueError(f"{p} does not exist.\nThis is an input to the function {f.__name__}.")
                 print(f"{p} exists.")
+            print(f"Prerequisite files for {f.__name__} all exist. Calling {f.__name__}.")
             print("\n")
                     
             return f(*args, **kwargs)
