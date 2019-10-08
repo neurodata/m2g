@@ -398,7 +398,8 @@ def main():
     parser.add_argument(
         "--sp",
         action="store",
-        help="Space for tractography: mni, native_dsn, native. Default is native.",
+        # help="Space for tractography: mni, native_dsn, native. Default is native.",
+        help="Space for tractography: native, native_dsn. Default is native.",
         default="native",
     )
     parser.add_argument(
