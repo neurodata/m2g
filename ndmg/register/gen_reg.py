@@ -130,8 +130,8 @@ class DmriReg(object):
         path to t1w file
     vox_size : str
         voxel resolution ('2mm' or '1mm')
-    skull : int, optional
-        skullstrip parameter pre-set. Default is 0
+    skull : str, optional
+        skullstrip parameter pre-set. Default is "none"
     simple : bool
         Whether you want to attempt non-linear registration when transforming between mni, t1w, and dwi space.
     
@@ -859,7 +859,7 @@ class DmriReg(object):
 
 
 class dmri_reg_old(object):
-    def __init__(self, dwi, gtab, t1w, atlas, aligned_dwi, namer, clean=False, skull=0):
+    def __init__(self, dwi, gtab, t1w, atlas, aligned_dwi, namer, clean=False, skull='none'):
         """Aligns two images and stores the transform between them
         
         Parameters
@@ -878,8 +878,8 @@ class dmri_reg_old(object):
             variable containing directory tree information for pipeline outputs
         clean : bool, optional
             Whether to delete intermediate files created by the pipeline, by default False
-        skull : int, optional
-            skullstrip parameter pre-set. Default is 0.
+        skull : str, optional
+            skullstrip parameter pre-set. Default is "none".
         """
         
         self.dwi = dwi

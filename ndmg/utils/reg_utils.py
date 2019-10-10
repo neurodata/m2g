@@ -163,7 +163,7 @@ def extract_mask(inp, out):
     pass
 
 
-def extract_t1w_brain(t1w, out, tmpdir, skull = 0):
+def extract_t1w_brain(t1w, out, tmpdir, skull = 'none'):
     """A function to extract the brain from an input T1w image
     using AFNI's brain extraction utilities.
     
@@ -175,8 +175,8 @@ def extract_t1w_brain(t1w, out, tmpdir, skull = 0):
         path for the output brain image
     tmpdir : str
         Path for the temporary directory to store images
-    skull : int, optional
-        skullstrip parameter pre-set. Default is 0.
+    skull : str, optional
+        skullstrip parameter pre-set. Default is "none".
     """
     
     t1w_name = gen_utils.get_filename(t1w)
@@ -229,7 +229,69 @@ def resample_fsl(base, res, goal_res, interp="spline"):
     pass
 
 
-def t1w_skullstrip(t1w, out, skull = 0):
+def skullstrip_check(dmrireg, labels, namer, vox_size, reg_style):
+    """Peforms the alignemnt of atlas to dwi space and checks if the alignment results in roi loss
+
+    Parameters
+    ----------
+    dmrireg : object
+        object created in the pipeline containing relevant paths and class methods for analysing tractography
+    labels : str, list
+        the path to the t1w image to be segmented
+    namer : str
+        the basename for outputs. Often it will be most convenient for this to be the dataset, followed by the subject,
+        followed by the step of processing. Note that this anticipates a path as well;
+        ie, /path/to/dataset_sub_nuis, with no extension.
+    vox_size : str
+        additional options that can optionally be passed to fast. Desirable options might be -P, which will use
+        prior probability maps if the input T1w MRI is in standard space, by default ""
+    reg_style : str
+        Tractography space, must be either native or native_dsn
+
+    Returns
+    -------
+    list
+        List containing the paths to the aligned label files
+    
+    Raises
+    ------
+    KeyError
+        The atlas has lost an roi due to alignment
+    """
+    if reg_style == "native":
+        dsn = False
+    elif reg_style == "native_dsn":
+        dsn = True
+    else:
+        raise ValueError('Unsupported tractography space, must be native or native_dsn')
+
+    labels_im_file_list = []
+    for idx, label in enumerate(labels):
+        labels_im_file = gen_utils.reorient_img(labels[idx], namer)
+        labels_im_file = gen_utils.match_target_vox_res(
+            labels_im_file, vox_size, namer, sens="t1w"
+        )
+        orig_lab = nib.load(labels_im_file)
+        orig_lab = orig_lab.get_data().astype("int")
+        n_ids = orig_lab[orig_lab>0]
+        num = len(np.unique(n_ids))
+
+
+        labels_im_file_dwi = dmrireg.atlas2t1w2dwi_align(labels_im_file, dsn)
+        labels_im = nib.load(labels_im_file_dwi)
+        align_lab = labels_im.get_data().astype("int")
+        n_ids_2 = align_lab[align_lab>0]
+        num2 = len(np.unique(n_ids_2))
+
+        if num != num2:
+            raise KeyError('The atlas has lost an roi due to alignment')
+
+        labels_im_file_list.append(labels_im_file_dwi)
+    return labels_im_file_list
+
+
+
+def t1w_skullstrip(t1w, out, skull = 'none'):
     """Skull-strips the t1w image using AFNIs 3dSkullStrip algorithm, which is a modification of FSLs BET specialized to t1w images.
     Offers robust skull-stripping with no hyperparameters
     Note: renormalizes the intensities, call extract_t1w_brain instead if you want the original intensity values
@@ -240,19 +302,19 @@ def t1w_skullstrip(t1w, out, skull = 0):
         path for the input t1w image file
     out : str
         path for the output skull-stripped image file
-    skull : int, optional
-        skullstrip parameter pre-set. Default is 0.
+    skull : str, optional
+        skullstrip parameter pre-set. Default is "none".
     """
-    if skull == 1:
-        cmd = "3dSkullStrip -prefix {} -input {} -shrink_fac_bot_lim 0.6 -ld 50".format(out, t1w)
-    elif skull == 2:
-        cmd = "3dSkullStrip -prefix {} -input {} -shrink_fac_bot_lim 0.3 -ld 50".format(out, t1w)
-    elif skull == 3:
-        cmd = "3dSkullStrip -prefix {} -input {} -no_avoid eyes -ld 50".format(out, t1w)
-    elif skull == 4:
-        cmd = "3dSkullStrip -prefix {} -input {} -push_to_edge -ld 50".format(out, t1w)
+    if skull == 'below':
+        cmd = "3dSkullStrip -prefix {} -input {} -shrink_fac_bot_lim 0.6 -ld 45".format(out, t1w)
+    elif skull == 'cerebelum':
+        cmd = "3dSkullStrip -prefix {} -input {} -shrink_fac_bot_lim 0.3 -ld 45".format(out, t1w)
+    elif skull == 'eye':
+        cmd = "3dSkullStrip -prefix {} -input {} -no_avoid_eyes -ld 45".format(out, t1w)
+    elif skull == 'general':
+        cmd = "3dSkullStrip -prefix {} -input {} -push_to_edge -ld 45".format(out, t1w)
     else:
-        cmd = "3dSkullStrip -prefix {} -input {} -ld 50".format(out, t1w)
+        cmd = "3dSkullStrip -prefix {} -input {} -ld 30".format(out, t1w)
     gen_utils.execute_cmd(cmd, verb=True)
     pass
 
