@@ -67,3 +67,10 @@ script:
   - docker exec -w /ndmg travis ndmg_bids --sp $SP --mod $MOD --participant_label 0025864 --session_label 1 --atlas desikan --seeds 1 /input /output
   - kill %1
   - docker exec -w /ndmg travis pytest -v --disable-warnings
+
+before deploy:
+  - rand=$(date +'%m_%d_%Y'_$RANDOM)
+  - echo $rand
+  - pn=$(echo /output/qa/graphs_plotting/*)
+  - for i in $pn; do mv -v /output/qa/graphs_plotting/$i /output/qa/graphs_plotting/$rand_$i
+
