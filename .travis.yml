@@ -21,20 +21,19 @@ addons:
       - docker-ce
 
 env:
-#  global:
-#    - ARTIFACTS_KEY=asdfasdfafd
-#    - ARTIFACTS_SECRET=asdfhasdfa
-#    - ARTIFACTS_BUCKET=ndmg
+  global:
+    - secure: "RKBtSjs0cgUYZXbowIuE2iJKTYrNbM6FbBZLCc3VXpbMoaDArtlHVuB3QWyzrbXFBVZhASXlST26VTb/1I5+FrMY+OLV4ei2kHIxM/rG0q8ymycpuxcV7I8cq2p952tSMwdPgVkW9Dy4N0k/me88cNRPIB71LJLmsRYlqVvXxmH9i17hRT50LzzfJDw0QpwN9Z+mvI3Pp/IgInlbBEnm2iMluYvbC6akuoP+WBh8pAMCGMm5/oZ0tCMvd+L/msXjM1BFApUaO+/bTRqDjsZeKy+VKoZ4AHc7A2oHqZrI6NfmnUxA0UwZcfDMXTzCwmaVZwzjjEu6Ykq4TnC8U4oeiz4B2802kFfwyHSSUcMKPnZKONzkCCqi1nZWsdJPOy5lK+QpMd1t+kZiHe4UdutVMb8H4Yaqiy0gqU90vujvgxp9ly++FRYIbR5NJPVw6MZaNmm6DYgjyqSn4Ke93McMFHFpkIjpsHFx5rOFdrZXDzg8aDQKKE4YdNWH4y+qGEKgwKkNxl/0pa5r0wBRmrxeSDZMPHpRnBL62Ch4YB30chWz5WWYEM+n0gl2ExGSpbUePAzjQEesl9kcbEdTnN1N4zOviW4PqJVrLP7WAvOKO1Xs83td7SeVniDTRwPUBjEUzPLfXxS0oh6hzFshYhV0FQTVu+xGSFx1pdrn+RUAGRs="
+    - secure: "N81+mfPpeor7AxHbuoRBZi6eqNoWTGnb+u5TtV4PxxWG5/+ipbCsUvb2wUk3ZYdfeWh611DDksTZ/HrUTpXG/pccZZ/Pl6A4CPf050yZ7OXa1gF9x1rhMRd5hwadmJTiGBKqEMxpojO45PhPz/IzUurItOM6VUGHKEHSieyoP1ml+8a0z0f/MTcV8UVYBSo7cWgXfmWOcBrAv9GevbN/t2UEbXqccutVG6GpcVf/ZDwPo1ezNtyiDq8ChVOR6liO0m8SlygMUMUGwlJ0OvtYfanJ2WcH0z3bQpGnkTnawz3/Cz+W/55MkJ19iYYLPFjN6tqxDCtC9KmtrRzixueZSS9b5NdRg6vo3ry2XuBamYHgLKpxZoEUrD3Xs3NaFQwxn19cFo8O/FmEgX4HmNxRgiwemCN9CYOGdwHCFX3B/xnXo6qX6iTK6++P+w/tl3mEQHrutEjXZSLrjh56hYk/1FovcS3mx5WSMjoEOK3pdrbd1Mp0rjXZPIo0zKfz3Z2xtBg7vTmMp/Bryd/REns/hrZDynTD/e7GloXpNe477PM04lbzHc2tv4KnGiw9hwJsuKw8jx067bMOrKV1Xrb5cKK8uAfaO8CXL8zDNNlv4WLbptnuxf32UBa6FcP6rB6/mnj2ndg6oVMPbMAA3av7bKgM5JJ8TfHAKNnPGFzsbw8="
   matrix:
-#    - SP=native MOD=det
+    - SP=native MOD=det
     - SP=mni MOD=det
-#    - SP=native_dsn MOD=det
-#    - MOD=prob SP=native
+    - SP=native_dsn MOD=det
+    - SP=native MOD=prob
 
 before_install:
   # make local input and output directories to attach to container
   - cd ..
-  - mkdir -m 777 input output deploy
+  - mkdir -m 777 input output
 
   # grab data from neuroparc
   - git lfs clone https://github.com/neurodata/neuroparc.git
@@ -53,8 +52,9 @@ before_install:
   - docker pull neurodata/ndmg_travis:latest
   - docker images
   - cd ndmg
-  - docker run -t -d --name travis -v $(pwd):/ndmg -v $(readlink -f ../input):/input -v $(readlink -f ../output):/output --entrypoint /bin/bash neurodata/ndmg_travis:latest
+  - docker run -t -d --name travis -e AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY -v $(pwd):/ndmg -v $(readlink -f ../input):/input -v $(readlink -f ../output):/output --entrypoint /bin/bash neurodata/ndmg_travis:latest
   - docker ps
+  - export -f travis_fold
 
 install:
   # get travis branch installed
@@ -67,29 +67,12 @@ install:
 script:
   # Run ndmg in docker, run pytest in docker.
   # top command is to prevent travis from breaking at eddy_correct
+  - travis_fold start "script.fold"
   - while sleep 9m; do echo "=====[ $SECONDS seconds still running ]====="; done &
   - docker exec -w /ndmg travis ndmg_bids --sp $SP --mod $MOD --participant_label 0025864 --session_label 1 --atlas desikan --seeds 1 /input /output
   - kill %1
   - docker exec -w /ndmg travis pytest -v --disable-warnings
-  - rand=$(date +'%m_%d_%Y'_$RANDOM_$SP_$MOD)
-  - echo $rand
-  - pn=$(docker exec travis ls /output/sub-0025864/ses-1/qa/graphs_plotting/)
-  - docker cp travis:/output/sub-0025864/ses-1/qa/graphs_plotting/ /home/travis/build/neurodata/deploy
-  - ls /home/travis/build/neurodata/deploy
-#  - docker exec travis for i in $pn; do mv -v /output/sub-0025864/ses-1/qa/graphs_plotting/$i /output/sub-0025864/ses-1/qa/graphs_plotting/$rand_$i; done
-
-#deploy:
-#  provider: s3
-#  access_key_id: "YOUR_KEY"
-#  secret_access_key: "YOUR_SECRET"
-#  bucket: YOUR_BUCKET
-#  local_dir: wheelhouse
-#  upload_dir: wheels
-#  skip_cleanup: true
-
-#addons:
-#  artifacts:
-#    paths:
-#      - /home/travis/build/neurodata/deploy/graphs_plotting/$pn
-#    target_paths:
-#      - /path/to/where/youwant/thefiles?
+  - rand=$(date +'%m-%d-%Y'-$SP-$MOD-${TRAVIS_COMMIT:0:8})
+  - docker exec travis aws s3 sync /output/sub-0025864/ses-1/qa/graphs_plotting s3://ndmg-data/Travis-Output/$TRAVIS_BRANCH/$rand
+  - docker exec travis aws s3 sync /output/sub-0025864/ses-1/dwi/roi-connectomes/desikan_space-MNI152NLin6_res-2x2x2 s3://ndmg-data/Travis-Output/$TRAVIS_BRANCH/$rand
+  - travis_fold stop "script.fold"
