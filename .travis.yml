@@ -21,6 +21,10 @@ addons:
       - docker-ce
 
 env:
+#  global:
+#    - ARTIFACTS_KEY=asdfasdfafd
+#    - ARTIFACTS_SECRET=asdfhasdfa
+#    - ARTIFACTS_BUCKET=ndmg
   matrix:
     - SP=native MOD=det
     - SP=mni MOD=det
@@ -68,9 +72,24 @@ script:
   - kill %1
   - docker exec -w /ndmg travis pytest -v --disable-warnings
 
-before deploy:
-  - rand=$(date +'%m_%d_%Y'_$RANDOM)
+after script:
+  - rand=$(date +'%m_%d_%Y'_$SP_$MOD)
   - echo $rand
   - pn=$(echo /output/qa/graphs_plotting/*)
   - for i in $pn; do mv -v /output/qa/graphs_plotting/$i /output/qa/graphs_plotting/$rand_$i
 
+#deploy:
+#  provider: s3
+#  access_key_id: "YOUR_KEY"
+#  secret_access_key: "YOUR_SECRET"
+#  bucket: YOUR_BUCKET
+#  local_dir: wheelhouse
+#  upload_dir: wheels
+#  skip_cleanup: true
+
+#addons:
+#  artifacts:
+#    paths:
+#      - /output/qa/graphs_plotting/*
+#    target_paths:
+#      - /path/to/where/youwant/thefiles?
