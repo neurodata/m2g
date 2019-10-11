@@ -26,10 +26,10 @@ env:
 #    - ARTIFACTS_SECRET=asdfhasdfa
 #    - ARTIFACTS_BUCKET=ndmg
   matrix:
-    - SP=native MOD=det
+#    - SP=native MOD=det
     - SP=mni MOD=det
-    - SP=native_dsn MOD=det
-    - MOD=prob SP=native
+#    - SP=native_dsn MOD=det
+#    - MOD=prob SP=native
 
 before_install:
   # make local input and output directories to attach to container
