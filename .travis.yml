@@ -73,8 +73,8 @@ script:
   - docker exec -w /ndmg travis pytest -v --disable-warnings
   - rand=$(date +'%m_%d_%Y'_$RANDOM_$SP_$MOD)
   - echo $rand
-  - pn=$(docker exec echo /output/qa/graphs_plotting/*)
-  - docker exec for i in $pn; do mv -v /output/qa/graphs_plotting/$i /output/qa/graphs_plotting/$rand_$i
+  - pn=$(docker exec travis ls /output/qa/graphs_plotting/)
+  - docker exec travis for i in $pn; do mv -v /output/qa/graphs_plotting/$i /output/qa/graphs_plotting/$rand_$i
 
 #deploy:
 #  provider: s3
