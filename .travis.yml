@@ -34,7 +34,7 @@ env:
 before_install:
   # make local input and output directories to attach to container
   - cd ..
-  - mkdir -m 777 input output
+  - mkdir -m 777 input output deploy
 
   # grab data from neuroparc
   - git lfs clone https://github.com/neurodata/neuroparc.git
@@ -74,8 +74,8 @@ script:
   - rand=$(date +'%m_%d_%Y'_$RANDOM_$SP_$MOD)
   - echo $rand
   - pn=$(docker exec travis ls /output/sub-0025864/ses-1/qa/graphs_plotting/)
-  - docker cp travis:/output/sub-0025864/ses-1/qa/graphs_plotting/ /deploy
-  - ls /deploy/graphs_plotting
+  - docker cp travis:/output/sub-0025864/ses-1/qa/graphs_plotting/ /home/travis/build/neurodata/deploy
+  - ls /home/travis/build/neurodata/deploy
 #  - docker exec travis for i in $pn; do mv -v /output/sub-0025864/ses-1/qa/graphs_plotting/$i /output/sub-0025864/ses-1/qa/graphs_plotting/$rand_$i; done
 
 #deploy:
@@ -90,6 +90,6 @@ script:
 #addons:
 #  artifacts:
 #    paths:
-#      - /output/qa/graphs_plotting/*
+#      - /home/travis/build/neurodata/deploy/graphs_plotting/$pn
 #    target_paths:
 #      - /path/to/where/youwant/thefiles?
