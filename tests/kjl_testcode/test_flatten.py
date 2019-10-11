@@ -11,7 +11,23 @@ import ndmg
 
 
 def test_flatten():
-    current = {'name':'liming', 'age':'20'}
+    current = {'adjacency': '/mnt/d/Downloads/ne...adjacency',
+               'base': '/mnt/d/Downloads/ne...utputs/qa',
+               'fibers': '/mnt/d/Downloads/ne...qa/fibers',
+               'graphs': '/mnt/d/Downloads/ne...qa/graphs',
+               'graphs_plotting': '/mnt/d/Downloads/ne..._plotting',
+               'mri': '/mnt/d/Downloads/ne...ts/qa/mri',
+               'reg': '/mnt/d/Downloads/ne...ts/qa/reg',
+               'tensor': '/mnt/d/Downloads/ne...qa/tensor'}
     value = ndmg.utils.bids_utils.flatten(current, [])
-    assert value == ['liming', '20']
+    print(value)
+    assert value ==     ['/mnt/d/Downloads/ne...adjacency',
+                         '/mnt/d/Downloads/ne...utputs/qa',
+                         '/mnt/d/Downloads/ne...qa/fibers',
+                         '/mnt/d/Downloads/ne...qa/graphs',
+                         '/mnt/d/Downloads/ne..._plotting',
+                         '/mnt/d/Downloads/ne...ts/qa/mri',
+                         '/mnt/d/Downloads/ne...ts/qa/reg',
+                         '/mnt/d/Downloads/ne...qa/tensor']
 
+test_flatten()
