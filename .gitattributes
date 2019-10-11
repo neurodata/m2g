@@ -4,3 +4,4 @@ tests/BNU1/sub-0025864/ses-1/anat/sub-0025864_ses-1_T1w.nii filter=lfs diff=lfs 
 tests/ndmg_outputs/ filter=lfs diff=lfs merge=lfs -text
 tests/ndmg_outputs/dwi/fiber/streamlines.trk filter=lfs diff=lfs merge=lfs -text
 tests/ndmg_outputs/dwi/preproc/eddy_corrected_data_reor_RAS_res.nii.gz filter=lfs diff=lfs merge=lfs -text
+tests/kjl_testcode/test_align_nonlinear.py filter=lfs diff=lfs merge=lfs -text
