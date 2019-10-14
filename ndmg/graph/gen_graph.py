@@ -292,20 +292,9 @@ class graph_tools(object):
         elif fmt == "npy":
             np.save(graphname, nx.to_numpy_matrix(self.g))
         elif fmt == "igraph":
-            if self.modal == "dwi":
-                nx.write_weighted_edgelist(
-                    self.g, graphname, delimiter=" ", encoding="utf-8"
-                )
-            elif self.modal == "func":
-                np.savetxt(
-                    graphname,
-                    self.g,
-                    comments="",
-                    delimiter=",",
-                    header=",".join([str(n) for n in self.n_ids]),
-                )
-            else:
-                raise ValueError("Unsupported Modality.")
+            nx.write_weighted_edgelist(
+                self.g, graphname, delimiter=" ", encoding="utf-8"
+            )
         else:
             raise ValueError("Only edgelist, gpickle, graphml, txt, and npy are currently supported")
         pass

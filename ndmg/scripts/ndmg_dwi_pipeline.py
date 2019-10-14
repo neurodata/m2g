@@ -356,7 +356,8 @@ def ndmg_dwi_worker(
 
     if reg_style == "native" or reg_style == "native_dsn":
 
-        print("Running tractography in native space...")
+        print("Running registration in native space...")
+
         # Instantiate registration
         reg = gen_reg.DmriReg(namer, nodif_B0, nodif_B0_mask, t1w, vox_size, simple=False)
 
@@ -417,7 +418,7 @@ def ndmg_dwi_worker(
         print("Using " + str(len(seeds)) + " seeds...")
 
         # Compute direction model and track fiber streamlines
-        print("Beginning tractography...")
+        print("Beginning tractography in native space...")
         trct = gen_track.run_track(
             dwi_prep,
             nodif_B0_mask,

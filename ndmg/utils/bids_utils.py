@@ -263,7 +263,7 @@ def flatten(current, result=[]):
     current : dict
         path to directory you want to flatten
     result : list, optional
-        Used to store directory information between itterations of flatten, Default is []
+        Used to store directory information between iterations of flatten, Default is []
     
     Returns
     -------
@@ -312,8 +312,6 @@ def sweep_directory(bdir, subj=None, sesh=None, task=None, run=None, modality="d
         dwis = []
         bvals = []
         bvecs = []
-    elif modality == "func":
-        funcs = []
     anats = []
     layout = BIDSLayout(bdir)  # initialize BIDs tree on bdir
     # get all files matching the specific modality we are using

@@ -534,7 +534,7 @@ def resample(base, ingested, template):
 
 @check_exists(0, 1)
 def combine_xfms(xfm1, xfm2, xfmout):
-    """A function to combine two transformatios and output the resulting transformation
+    """A function to combine two transformations and output the resulting transformation
     
     Parameters
     ----------
