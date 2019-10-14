@@ -284,7 +284,7 @@ def skullstrip_check(dmrireg, labels, namer, vox_size, reg_style):
         num2 = len(np.unique(n_ids_2))
 
         if num != num2:
-            raise KeyError('The atlas has lost an roi due to alignment')
+            raise KeyError('The atlas has lost an roi due to alignment! Try rerunning ndmg with the appropriate --skull flag.')
 
         labels_im_file_list.append(labels_im_file_dwi)
     return labels_im_file_list
