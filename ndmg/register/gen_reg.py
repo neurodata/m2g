@@ -130,15 +130,17 @@ class DmriReg(object):
         path to t1w file
     vox_size : str
         voxel resolution ('2mm' or '1mm')
-    simple : bool
-        Whether you want to attempt non-linear registration when transforming between mni, t1w, and dwi space
+    skull : str, optional
+        skullstrip parameter pre-set. Default is "none"
+    simple : bool, optional
+        Whether you want to attempt non-linear registration when transforming between mni, t1w, and dwi space. Default is False
     
     Raises
     ------
     ValueError
         FSL atlas for ventricle reference not found
     """
-    def __init__(self, namer, nodif_B0, nodif_B0_mask, t1w_in, vox_size, simple):
+    def __init__(self, namer, nodif_B0, nodif_B0_mask, t1w_in, vox_size, skull='none', simple=False):
         import os.path as op
 
         if os.path.isdir("/ndmg_atlases"):
@@ -165,6 +167,7 @@ class DmriReg(object):
         self.t1w_name = "t1w"
         self.dwi_name = "dwi"
         self.namer = namer
+        self.skull = skull
         self.t12mni_xfm_init = "{}/xfm_t1w2mni_init.mat".format(
             self.namer.dirs["tmp"]["reg_m"]
         )
@@ -317,7 +320,7 @@ class DmriReg(object):
         """
         # BET needed for this, as afni 3dautomask only works on 4d volumes
         print("Extracting brain from raw T1w image...")
-        reg_utils.t1w_skullstrip(self.t1w, self.t1w_brain)
+        reg_utils.t1w_skullstrip(self.t1w, self.t1w_brain, self.skull)
 
         # Segment the t1w brain into probability maps
         self.maps = reg_utils.segment_t1w(self.t1w_brain, self.map_path)
@@ -856,7 +859,7 @@ class DmriReg(object):
 
 
 class dmri_reg_old(object):
-    def __init__(self, dwi, gtab, t1w, atlas, aligned_dwi, namer, clean=False):
+    def __init__(self, dwi, gtab, t1w, atlas, aligned_dwi, namer, clean=False, skull='none'):
         """Aligns two images and stores the transform between them
         
         Parameters
@@ -875,6 +878,8 @@ class dmri_reg_old(object):
             variable containing directory tree information for pipeline outputs
         clean : bool, optional
             Whether to delete intermediate files created by the pipeline, by default False
+        skull : str, optional
+            skullstrip parameter pre-set. Default is "none".
         """
         
         self.dwi = dwi
@@ -883,6 +888,7 @@ class dmri_reg_old(object):
         self.gtab = gtab
         self.aligned_dwi = aligned_dwi
         self.namer = namer
+        self.skull = skull
 
         # Creates names for all intermediate files used
         self.dwi_name = gen_utils.get_filename(dwi)
@@ -930,7 +936,7 @@ class dmri_reg_old(object):
         print(
             "calling t1w_skullstrip on {}, {}".format(self.t1w, self.t1w_brain)
         )  # t1w = in, t1w_brain = out
-        reg_utils.t1w_skullstrip(self.t1w, self.t1w_brain)
+        reg_utils.t1w_skullstrip(self.t1w, self.t1w_brain, self.skull)
 
         print("calling align_epi")
         print(self.t1w)
