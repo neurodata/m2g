@@ -23,7 +23,6 @@ addons:
 env:
   matrix:
     - SP=native MOD=det
-    # - SP=mni MOD=det
     - SP=native_dsn MOD=det
     - MOD=prob SP=native
 
