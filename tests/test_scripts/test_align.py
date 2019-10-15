@@ -19,7 +19,7 @@ def test_align(tmp_path):
     # set input/ouput data paths
     align_in_path = r"../test_data/inputs/align/sub-0025864_ses-1_T1w.nii.gz"
     ref_in_path = r"../test_data/inputs/align/MNI152_T1_2mm_brain.nii.gz"
-    omat_out_cntrl_path = r"../test_data/outputs/align/omat.mat"
+    outnii_out_cntrl_path = r"../test_data/outputs/align/outnii.nii.gz"
     
     # call function
     inp = align_in_path
@@ -29,13 +29,13 @@ def test_align(tmp_path):
     mgr.align(inp, ref, xfm, out)
     
     # load function outputs
-    omat_out_temp = np.loadtxt(str(xfm))
+    outnii_out_temp = nib.load(str(out)).get_fdata()
     
     # load output data
-    omat_out_cntrl = np.loadtxt(str(omat_out_cntrl_path))
+    outnii_out_cntrl = nib.load(str(outnii_out_cntrl_path)).get_fdata()
     
     # assert
-    assert np.allclose(omat_out_temp, omat_out_cntrl) 
+    assert np.allclose(outnii_out_temp, outnii_out_cntrl) 
 
 
     
