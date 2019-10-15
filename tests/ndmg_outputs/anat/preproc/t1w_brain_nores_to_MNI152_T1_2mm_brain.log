@@ -5,9 +5,9 @@
 # 	name of file containing affine transform
 --aff=../ndmg_outputs/tmp/reg_m/xfm_t1w2mni_init.mat
 # 	name of output file with field coefficients
---cout=/tmp/pytest-of-jialinkang/pytest-33/test_align_nonlinear0/sub/outcoefficients.nii.gz
+--cout=/tmp/pytest-of-jialinkang/pytest-45/test_align_nonlinear0/sub/outcoefficients.nii.gz
 # 	name of output image
---iout=/tmp/pytest-of-jialinkang/pytest-33/test_align_nonlinear0/sub/outimage.nii.gz
+--iout=/tmp/pytest-of-jialinkang/pytest-45/test_align_nonlinear0/sub/outimage.nii.gz
 # If =1, use implicit masking based on value in --ref image. Default =1
 --imprefm=1
 # If =1, use implicit masking based on value in --in image, Default =1
