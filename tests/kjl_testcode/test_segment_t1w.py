@@ -1,10 +1,12 @@
 from ndmg.utils.reg_utils import segment_t1w
+import pytest
+
 
 t1w = '../ndmg_outputs/anat/preproc/t1w_brain.nii.gz'
 basename = '../ndmg_outputs/anat/preproc/t1w_seg'
 
 
-def test_segment_t1w():
+def test_segment_t1w(tmp_path):
     result = segment_t1w(t1w, basename, opts='')
     assert result == {'csf_prob': '../ndmg_outputs/anat/preproc/t1w_seg_pve_0.nii.gz',
                       'gm_prob': '../ndmg_outputs/anat/preproc/t1w_seg_pve_1.nii.gz',

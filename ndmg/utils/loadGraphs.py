@@ -32,15 +32,22 @@ import csv
 
 
 def loadGraphs(filenames, modality="dwi", verb=False):
-    """
-    Given a list of files, returns a dictionary of graphs
-    Required parameters:
-        filenames:
-            - List of filenames for graphs
-    Optional parameters:
-        verb:
-            - Toggles verbose output statements
-    """
+    """Given a list of files, returns a dictionary of graphs
+    
+    Parameters
+    ----------
+    filenames : list
+        List of filenames for graphs
+    modality : str, optional
+        image type of files being loaded, by default "dwi"
+    verb : bool, optional
+        Toggles verbose output statements, by default False
+    
+    Returns
+    -------
+    dict
+        dictonary of graphs specified in 'filenames'
+    """    
     #  Initializes empty dictionary
     if type(filenames) is not list:
         filenames = [filenames]
@@ -63,6 +70,27 @@ def loadGraphs(filenames, modality="dwi", verb=False):
 
 
 def loadGraph(filename, modality="dwi", verb=False):
+    """Given a graph file, returns a NetworkX graph
+    
+    Parameters
+    ----------
+    filename : str
+        Path to graph file to be read by networkx.read_weighted_edgelist
+    modality : str, optional
+        image type of file being loaded, by default "dwi"
+    verb : bool, optional
+        Toggles verbose output statements, by default False
+    
+    Returns
+    -------
+    graph
+        NetworkX graph
+    
+    Raises
+    ------
+    ValueError
+        Unsupported modality
+    """
     if modality == "dwi":
         graph = nx.read_weighted_edgelist(filename, delimiter=",")
     elif modality == "func":

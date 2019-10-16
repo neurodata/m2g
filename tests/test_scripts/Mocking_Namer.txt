@@ -1,0 +1,40 @@
+
+#we have to import this mock library
+from unittest.mock import Mock, MagicMock	
+
+#Create a magic black box mock object
+namer = MagicMock()
+
+#define your function with a tmp path:
+def test_namer(tmp_path): 
+	#This makes a temporary directory to store data, so we don't need to actually store these outputs after the unit test
+	d = tmp_path/"sub"
+	d.mkdir()
+
+	#set namer.dirs attribute to point to temp directory 
+	namer.dirs = {'property1': {'property2': d }}
+
+	#Now any function call that calls 
+	namer.dirs[ 'property1' ][ 'property2' ] will grab the temporary directory as a place to store the outputs.
+	
+	#if there are other namer properties that take a different form, you can figure out a way to simply set the namer.dirs to an object that can recognize that path. (a further nested dictionary, a list, a np.array, and etc...)
+
+	#pass this namer mock into any function that takes in a namer object
+	[output1_path, output2_path] = ndmg_function(input1,input2, namer)
+
+	#You can proceed to load these outputs (as ndmg functions typically returns paths not data)
+
+	#Loading a nifti image as a np.array
+	output1_data = nib.load().get_fdata()
+
+	#Loading text array as a np.array
+	output2_data = np.loadtxt(output2_path)
+
+	#Then test with standard asserts ... 
+	assert np.allclose(output1_data, output2_control_data)
+	assert np.allclose(output2_data, output2_control_data)
+
+	#see test_reorient_dwi.py and test_reorient_image.py as short and simple examples of this being used!
+
+
+

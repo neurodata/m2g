@@ -229,36 +229,38 @@ def session_level(
     # optional args stored in kwargs
     # use worker wrapper to call function f with args arg
     # and keyword args kwargs
-    print(args)
-    ndmg_dwi_worker(
-        args[0][0],
-        args[0][1],
-        args[0][2],
-        args[0][3],
-        atlas,
-        atlas_mask,
-        labels,
-        outDir,
-        vox_size,
-        mod_type,
-        track_type,
-        mod_func,
-        seeds,
-        reg_style,
-        clean,
-        skipeddy,
-        skipreg,
-        buck=buck,
-        remo=remo,
-        push=push,
-        creds=creds,
-        debug=debug,
-        modif=modif,
-    )
-    rmflds = []
-    if len(rmflds) > 0:
-        cmd = "rm -rf {}".format(" ".join(rmflds))
-        mgu.execute_cmd(cmd)
+    for arg in args:
+        print(arg)
+
+        ndmg_dwi_worker(
+            arg[0],
+            arg[1],
+            arg[2],
+            arg[3],
+            atlas,
+            atlas_mask,
+            labels,
+            arg[7],
+            vox_size,
+            mod_type,
+            track_type,
+            mod_func,
+            seeds,
+            reg_style,
+            clean,
+            skipeddy,
+            skipreg,
+            buck=buck,
+            remo=remo,
+            push=push,
+            creds=creds,
+            debug=debug,
+            modif=modif,
+        )
+        rmflds = []
+        if len(rmflds) > 0:
+            cmd = "rm -rf {}".format(" ".join(rmflds))
+            mgu.execute_cmd(cmd)
     sys.exit(0)  # terminated
 
 
@@ -447,16 +449,18 @@ def main():
     # it's super gross.
     if buck is not None and remo is not None:
         if subj is not None:
-            if len(sesh) == 1:
-                sesh = sesh[0]
+            #if len(sesh) == 1:
+            #    sesh = sesh[0]
             for sub in subj:
                 if sesh is not None:
-                    remo = op.join(remo, "sub-{}".format(sub), "ses-{}".format(sesh))
-                    tindir = op.join(inDir, "sub-{}".format(sub), "ses-{}".format(sesh))
+                    for ses in sesh:
+                        rem = op.join(remo, "sub-{}".format(sub), "ses-{}".format(ses))
+                        tindir = op.join(inDir, "sub-{}".format(sub), "ses-{}".format(ses))
+                        s3_utils.s3_get_data(buck, rem, tindir, public=not creds)
                 else:
-                    remo = op.join(remo, "sub-{}".format(sub))
+                    rem = op.join(remo, "sub-{}".format(sub))
                     tindir = op.join(inDir, "sub-{}".format(sub))
-                s3_utils.s3_get_data(buck, remo, tindir, public=not creds)
+                    s3_utils.s3_get_data(buck, rem, tindir, public=not creds)
         else:
             s3_utils.s3_get_data(buck, remo, inDir, public=not creds)
 
