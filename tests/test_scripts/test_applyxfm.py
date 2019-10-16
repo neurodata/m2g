@@ -2,17 +2,17 @@
 """This function is used in the line949 of function dwi2atlas in gen_reg.py"""
 """The function dwi2atlas is used in line 508 of ndmg_dwi_pipeline.py"""
 
+import ndmg
+from ndmg.utils import reg_utils as rgu
 import nibabel as nib
-import skimage.io as io
 import numpy as np
-import os
-from ndmg.utils.reg_utils import applyxfm
+
 
 def test_applyxfm(tmp_path):
-    #set up a temporary path to restore the out
+    #set up a temporary path to restore the aligned
     d=tmp_path/"sub"  
     d.mkdir()
-    temp_aligned = d / "test_aligned.nii.gz"
+    aligned_out_temp_path = d / "test_aligned.nii.gz"
 
     #ref='/usr/local/fsl/data/standard/MNI152_T1_2mm_brain.nii.gz'
     #inp='/Users/zhenhu/.ndmg/ndmg_atlases/atlases/mask/HarvardOxford-thr25_space-MNI152NLin6_variant-lateral-ventricles_res-2x2x2_descr-brainmask.nii.gz'
@@ -20,18 +20,20 @@ def test_applyxfm(tmp_path):
     #aligned='/Users/zhenhu/Documents/Neuro_Data_Design/Downloads/ndmg_outputs/tmp/reg_a/vent_mask_mni.nii.gz'
 
     # the test input
-    ref='../test_data/inputs/MNI152_T1_2mm_brain.nii.gz'
-    inp='./test_data/inputs/HarvardOxford-thr25_space-MNI152NLin6_variant-lateral-ventricles_res-2x2x2_descr-brainmask.nii.gz'
-    xfm='./test_data/inputs/roi_2_mni.mat'
-    aligned='../test_data/outputs/vent_mask_mni.nii.gz' #the real out
+    ref_in_path='../test_data/inputs/applyxfm/MNI152_T1_2mm_brain.nii.gz'
+    inp_in_path='./test_data/inputs/applyxfm/HarvardOxford-thr25_space-MNI152NLin6_variant-lateral-ventricles_res-2x2x2_descr-brainmask.nii.gz'
+    xfm_in_path='./test_data/inputs/applyxfm/roi_2_mni.mat'
 
-    applyxfm(ref, inp, xfm, str(temp_aligned), interp="trilinear", dof=6) #calculating the test out
+    aligned_out_cntrl_path='../test_data/outputs/applyxfm/vent_mask_mni.nii.gz' #the real out
 
-    #load in the real out image
-    img1=nib.load(str(aligned))
-    Matrix_real_out=img1.get_fdata()
-    #load in the test out image
-    img2=nib.load(str(temp_aligned))
-    Matrix_test_out=img2.get_fdata()
-    #compare
-    assert Matrix_real_out.all()==Matrix_test_out.all()
+    #load input data
+    aligned_out_cntrl=nib.load(str(aligned_out_cntrl_path)).get_fdata()
+
+    #call function
+    rgu.applyxfm(str(ref_in_path),str(inp_in_path),str(xfm_in_path),str(aligned_out_temp_path)) 
+    
+    #load function outputs
+    aligned_out_temp=nib.load(str(aligned_out_temp_path)).get_fdata()
+    
+    #assert
+    assert np.allclose(aligned_out_cntrl,aligned_out_temp)
