@@ -66,8 +66,12 @@ def check_exists(*dargs):
             
             for darg in dargs:
                 p = args[darg]
-                if not os.path.exists(p):
-                    raise ValueError(f"{p} does not exist.\nThis is an input to the function {f.__name__}.")
+                try:
+                    if not os.path.exists(p):
+                        raise ValueError(f"{p} does not exist.\nThis is an input to the function {f.__name__}.")
+                except TypeError:
+                    print(f"{darg} is not a file, it is {type(darg)}. \nFix decorator on this function.")
+
                 print(f"{p} exists.")
             print(f"Prerequisite files for {f.__name__} all exist. Calling {f.__name__}.")
             print("\n")
