@@ -92,8 +92,8 @@ RUN \
 
 RUN chmod -R 777 /ndmg_atlases
 
-# Grab ndmg from staging.
-RUN git clone -b staging $NDMG_URL /ndmg && \
+# Grab ndmg from deploy.
+RUN git clone -b deploy $NDMG_URL /ndmg && \
     cd /ndmg && \
     pip3.6 install .
 RUN chmod -R 777 /usr/local/bin/ndmg_bids
