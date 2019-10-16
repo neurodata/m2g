@@ -37,7 +37,7 @@ class name_resource:
     Parameters
     ----------
     modf : str
-        Path to subject MRI (dwi or func) data to be analyzed
+        Path to subject MRI (dwi) data to be analyzed
     t1wf : str
         Path to subject t1w anatomical data
     tempf : str
@@ -77,14 +77,20 @@ class name_resource:
         self.__outdir__ = self._get_outdir()
         return
 
+    #method not used in normal dwi pipeline
     def add_dirs(self, paths, labels, label_dirs):
+        """Creates temp and permanent directories for the desired suffixes
+        
+        Parameters
+        ----------
+        paths : dict
+            a dictonary of keys to suffix directories desired
+        labels : list
+            list of paths of all the atlas label nifti files being used
+        label_dirs : list
+            list containing the keys from 'paths' you wish to add label level granularity to (create a directory for each value in 'labels')
         """
-        creates tmp and permanent directories for the desired suffixes.
-
-        **Positional Arguments:
-            - paths:
-                - a dictionary of keys to suffix directories desired.
-        """
+        
         self.dirs = {}
         if not isinstance(labels, list):
             labels = [labels]
@@ -119,9 +125,9 @@ class name_resource:
         paths : dict
             a dictionary of keys to suffix directories
         labels : list
-            path to desired atlas labeling file
+            list of paths of all the atlas label nifti files being used (each will get their own directory)
         label_dirs : list
-            label directories
+            list containing the keys from 'paths' you wish to add label level granularity to (create a directory for each value in 'labels')
         """
 
         namer.dirs = {}
@@ -189,19 +195,29 @@ class name_resource:
         
         return self.__outdir__
 
-    def get_template_info(self):
-        """
-        returns the formatted spatial information associated with a template.-
-        """
-        return "space-{}_{}".format(self.__space__, self.__res__)
-
     def get_template_space(self):
+        """Returns the formatted spatial information associated with a template
+        
+        Returns
+        -------
+        str
+            string containing the MNI atlas and voxel resolution
+        """
         return "space-{}_{}".format(self.__space__, self.__res__)
 
     def get_label(self, label):
-        """
-        return the formatted label information for the parcellation.
-        """
+        """Return the formatted label information for the parcellation (i.e. the name of the file without the path)
+        
+        Parameters
+        ----------
+        label : str
+            Path to parcellation file that you want the isolated name of
+        
+        Returns
+        -------
+        str
+            the isolated file name
+        """        
         return mgu.get_filename(label)
         # return "label-{}".format(re.split(r'[._]',
         #                         os.path.basename(label))[0])
@@ -247,7 +263,7 @@ def flatten(current, result=[]):
     current : dict
         path to directory you want to flatten
     result : list, optional
-        Default is []
+        Used to store directory information between itterations of flatten, Default is []
     
     Returns
     -------

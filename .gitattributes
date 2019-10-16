@@ -1,2 +1,5 @@
 ndmg/register/FSL_HCP1065_FA_2mm.nii.gz filter=lfs diff=lfs merge=lfs -text
+
 *.gz filter=lfs diff=lfs merge=lfs -text
+
+tests/ndmg_outputs/dwi/preproc/eddy_corrected_data_reor_RAS_res.nii.gz filter=lfs diff=lfs merge=lfs -text
