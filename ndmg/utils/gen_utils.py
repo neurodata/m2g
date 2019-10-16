@@ -44,6 +44,7 @@ def check_exists(*dargs):
     """
     Decorator. For every integer index passed to check_exists, 
     checks if the argument passed to that index in the function decorated contains a filepath that exists.
+    Also standardizes print statements across functions.
     
     Parameters
     ----------
