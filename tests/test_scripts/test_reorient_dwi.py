@@ -23,29 +23,26 @@ def test_reorient_dwi(tmp_path):
 	# define correct input data path
 	# /mnt/labbook/output/untracked/dwi/preproc/eddy_corrected_data.nii.gz
 	# eddy corrected dwi file
-	dwi_prep_in = '../test_data/inputs/reorient_dwi/eddy_corrected_data.nii.gz'
-	bvec_scaled_in = '../test_data/inputs/reorient_dwi/bvec_scaled.bvec'
-
+	dwi_prep_in_path = '../test_data/inputs/reorient_dwi/eddy_corrected_data.nii.gz'
+	bvec_scaled_in_path = '../test_data/inputs/reorient_dwi/bvec_scaled.bvec'
 
 	# define correct output data path 
-	# dwi_prep_out_control_path = 
-
-	dwi_prep_out_control_path = '../test_data/outputs/reorient_dwi/eddy_corrected_data_reor_RAS.nii.gz'
-	bvec_reor_out_control_path = '../test_data/outputs/reorient_dwi/bvecs_reor.bvec' 
+	dwi_prep_out_cntrl_path = '../test_data/outputs/reorient_dwi/eddy_corrected_data_reor_RAS.nii.gz'
+	bvec_reor_out_cntrl_path = '../test_data/outputs/reorient_dwi/bvecs_reor.bvec' 
 
 	#load correct outputs
-	dwi_prep_out_control  = nib.load(dwi_prep_out_control_path).get_fdata()
-	bvec_reor_out_control = np.loadtxt(bvec_reor_out_control_path)
+	dwi_prep_out_cntrl  = nib.load(dwi_prep_out_cntrl_path).get_fdata()
+	bvec_reor_out_cntrl = np.loadtxt(bvec_reor_out_cntrl_path)
 
 	#call function and save in temp folder
-	[temp_dwi_prep_out, temp_bvec_out] = mgu.reorient_dwi(dwi_prep_in, bvec_scaled_in, namer)
+	[dwi_prep_out_temp_path, bvec_out_temp_path] = mgu.reorient_dwi(dwi_prep_in_path, bvec_scaled_in_path, namer)
 
 	#load outputs
-	dwi_prep_out = nib.load(temp_dwi_prep_out).get_fdata()
-	bvec_out = np.loadtxt(temp_bvec_out)
+	dwi_prep_out_temp = nib.load(dwi_prep_out_temp_path).get_fdata()
+	bvec_out_temp = np.loadtxt(bvec_out_temp_path)
 
 	#test dwi_prep and bvec
-	assert np.allclose (bvec_out, bvec_reor_out_control)
-	assert np.allclose (dwi_prep_out, dwi_prep_out_control)
+	assert np.allclose (bvec_out_temp, bvec_reor_out_cntrl)
+	assert np.allclose (dwi_prep_out_temp, dwi_prep_out_cntrl)
 
 #requires most up to date pytest for tmp_path to work
