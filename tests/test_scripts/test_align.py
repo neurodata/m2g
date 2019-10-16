@@ -13,8 +13,8 @@ import pytest
 def test_align(tmp_path):
     d = tmp_path / "sub"
     d.mkdir()
-    temp_out1 = d / "omat.data"
-    temp_out2 = d / "outnii.nii.gz"
+    omat_out_temp_path = d / "omat.data"
+    outnii_out_temp_path = d / "outnii.nii.gz"
     
     # set input/ouput data paths
     align_in_path = r"../test_data/inputs/align/sub-0025864_ses-1_T1w.nii.gz"
@@ -24,8 +24,8 @@ def test_align(tmp_path):
     # call function
     inp = align_in_path
     ref = ref_in_path
-    xfm = temp_out1
-    out = temp_out2
+    xfm = omat_out_temp_path
+    out = outnii_out_temp_path
     mgr.align(inp, ref, xfm, out)
     
     # load function outputs
