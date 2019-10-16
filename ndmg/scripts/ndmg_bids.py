@@ -145,6 +145,7 @@ def session_level(
     creds=None,
     debug=False,
     modif="",
+    skull='none',
 ):
     """Crawls the given BIDS organized directory for data pertaining to the given subject and session, and passes necessary files to ndmg_dwi_pipeline for processing.
     
@@ -192,6 +193,8 @@ def session_level(
         If False, remove any old filed in the output directory. Default is False
     modif : str, optional
         Name of the folder on s3 to push to. If empty, push to a folder with ndmg's version number. Default is ""
+    skull : str, optional
+        Additional skullstrip analysis parameter set for unique t1w images. Default is "none".
     """
 
     labels, atlas, atlas_mask, atlas_brain, lv_mask = get_atlas(atlas_dir, vox_size)
@@ -256,6 +259,7 @@ def session_level(
             creds=creds,
             debug=debug,
             modif=modif,
+            skull=skull,
         )
         rmflds = []
         if len(rmflds) > 0:
@@ -414,6 +418,16 @@ def main():
         help="Name of folder on s3 to push to. If empty, push to a folder with ndmg's version number.",
         default="",
     )
+    parser.add_argument(
+        "--skull",
+        action="store",
+        help="Special actions to take when skullstripping t1w image based on default skullstrip ('none') failure:"
+        "Excess tissue below brain: below"
+        "Chunks of cerebelum missing: cerebelum"
+        "Frontal clipping near eyes: eye"
+        "Excess clipping in general: general",
+        default='none',
+    )
     result = parser.parse_args()
 
     inDir = result.bids_dir
@@ -436,6 +450,7 @@ def main():
     mod_func = result.mf
     reg_style = result.sp
     modif = result.modif
+    skull = result.skull
 
     # Check to see if user has provided direction to an existing s3 bucket they wish to use
     try:
@@ -489,6 +504,7 @@ def main():
         creds=creds,
         debug=debug,
         modif=modif,
+        skull=skull,
     )
 
 
