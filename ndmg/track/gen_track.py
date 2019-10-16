@@ -331,7 +331,7 @@ class run_track(object):
         if self.mod_type == "det":
             print("Obtaining peaks from model...")
             self.mod_peaks = peaks_from_model(
-                self.mod,  # AttributeError: 'run_track' object has no attribute 'mod' -- should this be mod_func?
+                self.mod,
                 self.data,
                 self.sphere,
                 relative_peak_threshold=0.5,
