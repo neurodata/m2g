@@ -101,7 +101,7 @@ def make_gtab_and_bmask(fbval, fbvec, dwi_file, outdir):
     mean_B0 = mgu.mean_img(B0s_bbr_imgs)
     nib.save(mean_B0, nodif_B0)
 
-    # Get mean B0 brain mask
+# Get mean B0 brain mask
     # cmd = "bet " + nodif_B0 + " " + nodif_B0_bet + " -m -f 0.2"
     # os.system(cmd)
 
