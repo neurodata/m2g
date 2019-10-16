@@ -19,9 +19,9 @@ def test_inverse_warp(tmp_path):
     #warp='/Users/zhenhu/Documents/Neuro_Data_Design/Downloads/ndmg_outputs/tmp/reg_a/warp_t12mni.nii.gz'
 
     #set input/output data paths
-    OUT_out_cntrl_path='../test_data/outputs/inverse_warp/mni2t1w_warp.nii.gz' #the real out
-    ref_in_path='../test_data/inputs/inverse_warp/t1w_brain_nores.nii.gz' # the test input
-    warp_in_path='../test_data/inputs/inverse_warp/warp_t12mni.nii.gz'    #the test input
+    OUT_out_cntrl_path='../test_data/outputs/mni2t1w_warp.nii.gz' #the real out
+    ref_in_path='../test_data/inputs/t1w_brain_nores.nii.gz' # the test input
+    warp_in_path='../test_data/inputs/warp_t12mni.nii.gz'    #the test input
 
     #load input data
     OUT_out_cntrl=nib.load(str(OUT_out_cntrl_path)).get_fdata()
