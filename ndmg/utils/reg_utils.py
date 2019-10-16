@@ -234,7 +234,6 @@ def resample_fsl(base, res, goal_res, interp="spline"):
     pass
 
 
-@check_exists(0)
 def skullstrip_check(dmrireg, labels, namer, vox_size, reg_style):
     """Peforms the alignemnt of atlas to dwi space and checks if the alignment results in roi loss
 
