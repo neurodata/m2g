@@ -77,16 +77,16 @@ def direct_streamline_norm(streams, fa_path, namer):
     [mapping, affine_map] = regutils.wm_syn(
         template_path, fa_path, namer.dirs["tmp"]["base"]
     )
-    [streamlines, _] = load_trk(streams)
+    streamlines  = load_trk(streams, reference='same')
 
     # Warp streamlines
     adjusted_affine = affine_map.affine.copy()
     adjusted_affine[1][3] = -adjusted_affine[1][3]/vox_size**2
-    mni_streamlines = deform_streamlines(streamlines, deform_field=mapping.get_forward_field()[-1:],
-                                         stream_to_current_grid=template_img.affine,
-                                         current_grid_to_world=adjusted_affine,
-                                         stream_to_ref_grid=template_img.affine,
-                                         ref_grid_to_world=np.eye(4))
+    mni_streamlines = deform_streamlines(streamlines.streamlines, deform_field=mapping.get_forward_field()[-1:],
+                                            stream_to_current_grid=template_img.affine,
+                                            current_grid_to_world=adjusted_affine,
+                                            stream_to_ref_grid=template_img.affine,
+                                            ref_grid_to_world=np.eye(4))
 
     # Save streamlines
     hdr = fa_img.header
@@ -938,7 +938,6 @@ class dmri_reg_old(object):
         )  # t1w = in, t1w_brain = out
         reg_utils.t1w_skullstrip(self.t1w, self.t1w_brain, self.skull)
 
-        print("calling align_epi")
         print(self.t1w)
         print(self.t1w_brain)
         print(self.temp_aligned)

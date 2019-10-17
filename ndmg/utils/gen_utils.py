@@ -20,21 +20,65 @@
 # Email: wgr@jhu.edu
 # Edited by Eric Bridgeford.
 
+# system imports
 import warnings
-
 warnings.simplefilter("ignore")
-from dipy.io import read_bvals_bvecs
-from dipy.core.gradients import gradient_table
-from subprocess import Popen, PIPE
-import subprocess
-import numpy as np
-import nibabel as nib
 import os
 import os.path as op
 import sys
+from subprocess import Popen, PIPE
+import subprocess
+
+# package imports
+import numpy as np
+import nibabel as nib
 from nilearn.image import mean_img
 from scipy.sparse import lil_matrix
 
+# dipy imports
+import dipy
+from dipy.io import read_bvals_bvecs
+from dipy.core.gradients import gradient_table
+
+def check_exists(*dargs):
+    """
+    Decorator. For every integer index passed to check_exists, 
+    checks if the argument passed to that index in the function decorated contains a filepath that exists.
+    Also standardizes print statements across functions.
+    
+    Parameters
+    ----------
+    dargs : ints
+        Where to check the function being decorated for files.
+        
+    Raises
+    ------
+    ValueError
+        Raised if the file at that location doesn't exist.
+    
+    Returns
+    -------
+    func
+        dictionary of output files
+    """
+    def outer(f):
+        def inner(*args, **kwargs):
+            
+            for darg in dargs:
+                p = args[darg]
+                try:
+                    if not os.path.exists(p):
+                        raise ValueError(f"{p} does not exist.\nThis is an input to the function {f.__name__}.")
+                except TypeError:
+                    print(f"{darg} is not a file, it is {type(darg)}. \nFix decorator on this function.")
+
+                print(f"{p} exists.")
+            print(f"Prerequisite files for {f.__name__} all exist. Calling {f.__name__}.")
+            print("\n")
+                    
+            return f(*args, **kwargs)
+        return inner
+    return outer
 
 def check_dependencies():
     """
@@ -50,8 +94,9 @@ def check_dependencies():
     """
 
     # Check for python version
-    print("Python location : {}".format(sys.executable))
-    print("Python version : {}".format(sys.version))
+    print(f"Python location : {sys.executable}")
+    print(f"Python version : {sys.version}")
+    print(f"DiPy version : {dipy.__version__}")
     if sys.version_info[0] < 3:
         warnings.warn(
             "WARNING : Using python 2. This Python version is no longer maintained. Use at your own risk."
