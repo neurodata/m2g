@@ -1,17 +1,17 @@
 # Guidelines for Unit Test Structure and Naming:
 
 Imports: Use the following imports and shorthand (only as required):
-	import ndmg
-	from ndmg import preproc as mgp
-	from ndmg.utils import gen_utils as mgu
-	from ndmg.register import gen_reg as mgr
-	from ndmg.track import gen_track as mgt
-	from ndmg.graph import gen_graph as mgg
-	from ndmg.utils.bids_utils import name_resource
-	from unittest.mock import Mock, MagicMock	
-	import nibabel as nib
-	import numpy as np 
-	import pytest
+	`import ndmg` 
+	`from ndmg import preproc as mgp` 
+	`from ndmg.utils import gen_utils as mgu` 
+	`from ndmg.register import gen_reg as mgr` 
+	`from ndmg.track import gen_track as mgt` 
+	`from ndmg.graph import gen_graph as mgg` 
+	`from ndmg.utils.bids_utils import name_resource` 
+	`from unittest.mock import Mock, MagicMock` 
+	`import nibabel as nib` 
+	`import numpy as np ` 
+	`import pytest` 
 
 Storing and Loading Data:
 1. All stored data paths should belong in '../test_data/(inputs or outputs)/folder_test_name/' + 'filename' (e.g: '../test_data/inputs/reorient_dwi/eddy_corrected_data.nii.gz', '../test_data/outputs/reorient_dwi/eddy_corrected_data.nii.gz') 
