@@ -67,7 +67,7 @@ install:
 script:
   # Run ndmg in docker, run pytest in docker.
   # top command is to prevent travis from breaking at eddy_correct
-  - travis_fold start "script.fold"
+  - travis_fold:start:script_fold
   - while sleep 9m; do echo "=====[ $SECONDS seconds still running ]====="; done &
   - docker exec -w /ndmg travis ndmg_bids --sp $SP --mod $MOD --participant_label 0025864 --session_label 1 --atlas desikan --seeds 1 /input /output
   - kill %1
@@ -75,4 +75,4 @@ script:
   - rand=$(date +'%m-%d-%Y'-$SP-$MOD-${TRAVIS_COMMIT:0:8})
   - docker exec travis aws s3 sync /output/sub-0025864/ses-1/qa/graphs_plotting s3://ndmg-data/Travis-Output/$TRAVIS_BRANCH/$rand
   - docker exec travis aws s3 sync /output/sub-0025864/ses-1/dwi/roi-connectomes/desikan_space-MNI152NLin6_res-2x2x2 s3://ndmg-data/Travis-Output/$TRAVIS_BRANCH/$rand
-  - travis_fold stop "script.fold"
+  - travis_fold:stop:script_fold
