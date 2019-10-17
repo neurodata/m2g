@@ -1,4 +1,4 @@
-#Guidelines for Unit Test Structure and Naming:
+# Guidelines for Unit Test Structure and Naming:
 
 Imports: Use the following imports and shorthand (only as required):
 	import ndmg
@@ -40,13 +40,13 @@ Asserts:
 
 General Structure: 
 
-#Import Libraries
+# Import Libraries
 ...
 import nibabel as nib 
 import numpy as np
 ...
 
-#Mocks (if required)
+# Mocks (if required)
 
 def test_example(tmp_path):
 	#create temp directory
