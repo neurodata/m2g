@@ -21,8 +21,8 @@ def test_applyxfm(tmp_path):
 
     # the test input
     ref_in_path='../test_data/inputs/applyxfm/MNI152_T1_2mm_brain.nii.gz'
-    inp_in_path='./test_data/inputs/applyxfm/HarvardOxford-thr25_space-MNI152NLin6_variant-lateral-ventricles_res-2x2x2_descr-brainmask.nii.gz'
-    xfm_in_path='./test_data/inputs/applyxfm/roi_2_mni.mat'
+    inp_in_path='../test_data/inputs/applyxfm/HarvardOxford-thr25_space-MNI152NLin6_variant-lateral-ventricles_res-2x2x2_descr-brainmask.nii.gz'
+    xfm_in_path='../test_data/inputs/applyxfm/roi_2_mni.mat'
 
     aligned_out_cntrl_path='../test_data/outputs/applyxfm/vent_mask_mni.nii.gz' #the real out
 
