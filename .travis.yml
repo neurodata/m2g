@@ -54,7 +54,6 @@ before_install:
   - cd ndmg
   - docker run -t -d --name travis -e AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY -v $(pwd):/ndmg -v $(readlink -f ../input):/input -v $(readlink -f ../output):/output --entrypoint /bin/bash neurodata/ndmg_travis:latest
   - docker ps
-  - export -f travis_fold
 
 install:
   # get travis branch installed
@@ -72,9 +71,9 @@ script:
   - kill %1
   - docker exec -w /ndmg travis pytest -v --disable-warnings
   - rand=$(date +'%m-%d-%Y'-$SP-$MOD-${TRAVIS_COMMIT:0:7})
-  - heat=$(ls /output/sub-0025864/ses-1/qa/graphs_plotting)
-  - csv=$(ls /output/sub-0025864/ses-1/dwi/roi-connectomes/desikan_space-MNI152NLin6_res-2x2x2)
+  - heat=$(docker exec travis ls /output/sub-0025864/ses-1/qa/graphs_plotting)
+  - csv=$(docker exec travis ls /output/sub-0025864/ses-1/dwi/roi-connectomes/desikan_space-MNI152NLin6_res-2x2x2)
   - docker exec travis aws s3 sync /output/sub-0025864/ses-1/qa/graphs_plotting s3://ndmg-data/Travis-Output/$TRAVIS_BRANCH/$rand
   - docker exec travis aws s3 sync /output/sub-0025864/ses-1/dwi/roi-connectomes/desikan_space-MNI152NLin6_res-2x2x2 s3://ndmg-data/Travis-Output/$TRAVIS_BRANCH/$rand
-  - echo -en "\n\n\n\nHEATMAP_LOCATION = s3://ndmg-data/Travis-Output/$TRAVIS_BRANCH/$rand/$heat\nCSV_LOCATION = s3://ndmg-data/Travis-Output/$TRAVIS_BRANCH/$rand/$csv\n\n\n\n"
-  - echo -en "\n\n\n\nHEATMAP_LOCATION = s3.console.aws.amazon.com/s3/object/ndmg-data/Travis-Output/$TRAVIS_BRANCH/$rand/$heat?region=us-east-1&tab=overview\nCSV_LOCATION = s3.console.aws.amazon.com/s3/object/ndmg-data/Travis-Output/$TRAVIS_BRANCH/$rand/$csv?region=us-east-1&tab=overview\n\n\n\n"
+  - echo -en "\n\n\n\nHEATMAP_LOCATION = s3://ndmg-data/Travis-Output/$TRAVIS_BRANCH/$rand/$heat\nCSV_LOCATION = s3://ndmg-data/Travis-Output/$TRAVIS_BRANCH/$rand/$csv\n\n\n\n\n"
+  - echo -en "\n\n\n\nHEATMAP_LOCATION = s3.console.aws.amazon.com/s3/object/ndmg-data/Travis-Output/$TRAVIS_BRANCH/$rand/$heat?region=us-east-1&tab=overview\nCSV_LOCATION = s3.console.aws.amazon.com/s3/object/ndmg-data/Travis-Output/$TRAVIS_BRANCH/$rand/$csv?region=us-east-1&tab=overview\n\n\n\n\n"
