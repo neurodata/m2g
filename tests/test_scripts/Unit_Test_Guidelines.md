@@ -1,6 +1,7 @@
 # Guidelines for Unit Test Structure and Naming:
 
-Imports: Use the following imports and shorthand (only as required):  
+## Imports:  
+Use the following imports and shorthand (only as required):  
 	`import ndmg`  
 	`from ndmg import preproc as mgp`  
 	`from ndmg.utils import gen_utils as mgu`  
