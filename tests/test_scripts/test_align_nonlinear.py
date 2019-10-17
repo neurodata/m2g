@@ -13,8 +13,8 @@ import pytest
 def test_align_nonlinear(tmp_path):
     d = tmp_path / "sub"
     d.mkdir()
-    temp_out1 = d / "outimage.nii.gz"
-    temp_out2 = d / "outcoefficients.nii.gz"
+    outimg_out_temp_path = d / "outimage.nii.gz"
+    outcoe_out_temp_path = d / "outcoefficients.nii.gz"
 
     # set input data
     alignnonlinear_in_path = r"../test_data/inputs/alignnonlinear/t1w_brain_nores.nii.gz"
@@ -26,8 +26,8 @@ def test_align_nonlinear(tmp_path):
     inp = alignnonlinear_in_path
     ref = ref_in_path
     xfm = xfm_in_path
-    out = temp_out1
-    warp = temp_out2
+    out = outimg_out_temp_path
+    warp = outcoe_out_temp_path
     mgr.align_nonlinear(inp, ref, xfm, out, warp)
 
     # load function data
