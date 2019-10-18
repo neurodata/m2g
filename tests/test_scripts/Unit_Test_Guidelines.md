@@ -39,15 +39,15 @@ Asserts:
 2. Compare nifti images by loading with nibabel and comparing as np.array (see above)
 
 
-General Structure: 
+# General Structure: 
 
-# Import Libraries
+## Import Libraries
 ...
 import nibabel as nib 
 import numpy as np
 ...
 
-# Mocks (if required)
+## Mocks (if required)
 
 def test_example(tmp_path):
 	#create temp directory
