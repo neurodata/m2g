@@ -26,7 +26,6 @@ env:
     - secure: "N81+mfPpeor7AxHbuoRBZi6eqNoWTGnb+u5TtV4PxxWG5/+ipbCsUvb2wUk3ZYdfeWh611DDksTZ/HrUTpXG/pccZZ/Pl6A4CPf050yZ7OXa1gF9x1rhMRd5hwadmJTiGBKqEMxpojO45PhPz/IzUurItOM6VUGHKEHSieyoP1ml+8a0z0f/MTcV8UVYBSo7cWgXfmWOcBrAv9GevbN/t2UEbXqccutVG6GpcVf/ZDwPo1ezNtyiDq8ChVOR6liO0m8SlygMUMUGwlJ0OvtYfanJ2WcH0z3bQpGnkTnawz3/Cz+W/55MkJ19iYYLPFjN6tqxDCtC9KmtrRzixueZSS9b5NdRg6vo3ry2XuBamYHgLKpxZoEUrD3Xs3NaFQwxn19cFo8O/FmEgX4HmNxRgiwemCN9CYOGdwHCFX3B/xnXo6qX6iTK6++P+w/tl3mEQHrutEjXZSLrjh56hYk/1FovcS3mx5WSMjoEOK3pdrbd1Mp0rjXZPIo0zKfz3Z2xtBg7vTmMp/Bryd/REns/hrZDynTD/e7GloXpNe477PM04lbzHc2tv4KnGiw9hwJsuKw8jx067bMOrKV1Xrb5cKK8uAfaO8CXL8zDNNlv4WLbptnuxf32UBa6FcP6rB6/mnj2ndg6oVMPbMAA3av7bKgM5JJ8TfHAKNnPGFzsbw8="
   matrix:
     - SP=native MOD=det
-    - SP=mni MOD=det
     - SP=native_dsn MOD=det
     - SP=native MOD=prob
 
@@ -56,12 +55,13 @@ before_install:
   - docker ps
 
 install:
+  # useful log checks for packages whose versions have given us trouble
+  - docker exec -w /ndmg travis pip show dipy networkx
+
   # get travis branch installed
   - docker exec -w /ndmg travis pip install pytest
   - docker exec -w /ndmg travis pip install .
 
-  # useful log checks for packages whose versions have given us trouble
-  - docker exec -w /ndmg travis pip show dipy networkx
 
 script:
   # Run ndmg in docker, run pytest in docker.

@@ -192,7 +192,7 @@ class graph_tools(object):
 
         # Instantiate empty networkX graph object & dictionary
         # Create voxel-affine mapping
-        lin_T, offset = _mapping_to_voxel(np.eye(4), voxel_size)
+        lin_T, offset = _mapping_to_voxel(np.eye(4))  # TODO : voxel_size was removed in dipy 1.0.0, make sure that didn't break anything when voxel size is not 2mm
         mx = len(np.unique(self.rois.astype(np.int64))) - 1
         self.g = nx.Graph(ecount=0, vcount=mx)
         edge_dict = defaultdict(int)
@@ -292,20 +292,9 @@ class graph_tools(object):
         elif fmt == "npy":
             np.save(graphname, nx.to_numpy_matrix(self.g))
         elif fmt == "igraph":
-            if self.modal == "dwi":
-                nx.write_weighted_edgelist(
-                    self.g, graphname, delimiter=" ", encoding="utf-8"
-                )
-            elif self.modal == "func":
-                np.savetxt(
-                    graphname,
-                    self.g,
-                    comments="",
-                    delimiter=",",
-                    header=",".join([str(n) for n in self.n_ids]),
-                )
-            else:
-                raise ValueError("Unsupported Modality.")
+            nx.write_weighted_edgelist(
+                self.g, graphname, delimiter=" ", encoding="utf-8"
+            )
         else:
             raise ValueError("Only edgelist, gpickle, graphml, txt, and npy are currently supported")
         pass

@@ -63,11 +63,12 @@ ENV PATH=/opt/afni:$PATH
 RUN \
     pip3.6 install numpy
 
+RUN echo "hello world"
 RUN \
-    pip3.6 install nibabel scipy python-dateutil pandas boto3 awscli matplotlib nilearn sklearn pandas cython vtk pyvtk fury awscli requests ipython duecredit graspy scikit-image networkx
+    pip3.6 install nibabel scipy python-dateutil pandas boto3 awscli matplotlib nilearn sklearn pandas cython vtk pyvtk fury awscli requests ipython duecredit graspy scikit-image networkx dipy
 
 RUN \
-    pip3.6 install dipy==0.16.0 plotly==1.12.9 pybids==0.6.4 setuptools>=40.0 configparser>=3.7.4
+    pip3.6 install plotly==1.12.9 pybids==0.6.4 setuptools>=40.0 configparser>=3.7.4
 
 WORKDIR /
 
@@ -93,7 +94,7 @@ RUN \
 RUN chmod -R 777 /ndmg_atlases
 
 # Grab ndmg from deploy.
-RUN git clone -b deploy $NDMG_URL /ndmg && \
+RUN git clone -b dipy-newversion $NDMG_URL /ndmg && \
     cd /ndmg && \
     pip3.6 install .
 RUN chmod -R 777 /usr/local/bin/ndmg_bids
