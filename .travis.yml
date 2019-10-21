@@ -34,11 +34,6 @@ before_install:
   - cd ..
   - mkdir -m 777 input output
 
-  # grab data from neuroparc
-  - git lfs clone https://github.com/neurodata/neuroparc.git
-  - mv neuroparc/data/* input
-  - rm -rf neuroparc
-
   # useful log checks
   - readlink -f input
   - ls
@@ -51,7 +46,7 @@ before_install:
   - docker pull neurodata/ndmg_travis:latest
   - docker images
   - cd ndmg
-  - docker run -t -d --name travis -e AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY -v $(pwd):/ndmg -v $(readlink -f ../input):/input -v $(readlink -f ../output):/output --entrypoint /bin/bash neurodata/ndmg_travis:latest
+  - docker run -t -d --name travis -e AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY -v $(pwd):/ndmg -v $(readlink -f ../output):/output --entrypoint /bin/bash neurodata/ndmg_travis:latest
   - docker ps
 
 install:
