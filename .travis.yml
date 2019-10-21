@@ -46,7 +46,7 @@ before_install:
   - docker version
 
   # grab ndmg's travis docker image, run it with local branch attached as a volume
-  - docker pull neurodata/ndmg_travis:latest
+  - docker pull NeuroDataDesign/ndmg_travis:latest
   - docker images
   - cd ndmg
   - docker run -t -d --name travis -v $(pwd):/ndmg -v $(readlink -f ../input):/input -v $(readlink -f ../output):/output --entrypoint /bin/bash neurodata/ndmg_travis:latest
