@@ -243,7 +243,7 @@ def get_filename(label):
     str
         File name
     """
-    return op.splitext(op.splitext(op.basename(label))[0])[0]
+    return os.path.basename(label).split('.')[0]
 
 
 def get_slice(mri, volid, sli):

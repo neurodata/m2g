@@ -352,13 +352,6 @@ def extract_brain(inp, out, opts="-B"):
     pass
 
 
-def get_filename(label):
-    """
-    Given a fully qualified path gets just the file name, without extension
-    """
-    return op.splitext(op.splitext(op.basename(label))[0])[0]
-
-
 @check_exists(0)
 def segment_t1w(t1w, basename, opts=""):
     """Uses FSLs FAST to segment an anatomical image into GM, WM, and CSF probability maps.
