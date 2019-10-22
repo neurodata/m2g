@@ -243,7 +243,7 @@ def get_filename(label):
     str
         File name
     """
-    return os.path.basename(label).split('.')[0]
+    return os.path.basename(label).split(".")[0]
 
 
 def get_slice(mri, volid, sli):
@@ -535,34 +535,6 @@ def match_target_vox_res(img_file, vox_size, namer, sens):
         img_file = img_file_nores
 
     return img_file
-
-
-def load_timeseries(timeseries_file, ts="roi"):
-    """Loads timeseries data. Exists to standardize formatting in case changes are made
-    with how timeseries are saved in future versions.
-    
-    Parameters
-    ----------
-    timeseries_file : str
-        Path to the file you wish to load timeseries data from
-    ts : str, optional
-        Timeseries type, either 'roi' or 'voxel, by default "roi"
-    
-    Returns
-    -------
-    [type]
-        [description]
-    """
-
-    if (ts == "roi") or (ts == "voxel"):
-        timeseries = np.load(timeseries_file)["roi"]
-        return timeseries
-    else:
-        print(
-            "You have not selected a valid timeseries type."
-            + "options are ts='roi' or ts='voxel'."
-        )
-    pass
 
 
 def parcel_overlap(parcellation1, parcellation2, outpath):
