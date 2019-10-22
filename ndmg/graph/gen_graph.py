@@ -209,23 +209,6 @@ class graph_tools(object):
 
         return g
 
-    def get_graph(self):
-        """
-        Returns the graph object created
-        """
-        try:
-            return self.g
-        except AttributeError:
-            print("Error: the graph has not yet been defined.")
-            pass
-
-    def as_matrix(self):
-        """
-        Returns the graph as a matrix.
-        """
-        g = self.get_graph()
-        return nx.to_numpy_matrix(g, nodelist=np.sort(g.nodes()).tolist())
-
     def save_graph(self, graphname, fmt="igraph"):
         """Saves the graph to disk
         
