@@ -1,8 +1,17 @@
+"""
+ndmg.utils.s3_utils
+~~~~~~~~~~~~~~~~~~~
+
+Contains utility functions for working on the cloud with AWS.
+"""
+
+# standard library imports
 import subprocess
 from configparser import ConfigParser
 import os
 import sys
 
+# package imports
 import boto3
 
 

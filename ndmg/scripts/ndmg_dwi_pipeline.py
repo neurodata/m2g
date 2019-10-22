@@ -1,47 +1,36 @@
 #!/usr/bin/env python
-# Copyright 2019 NeuroData (http://neurodata.io)
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
 
-# ndmg_dwi_worker.py
-# Repackaged for native space tractography by Derek Pisner in 2019
-# Email: dpisner@utexas.edu
+"""
+ndmg.scripts.ndmg_dwi_pipeline
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Contains the primary, top-level pipeline.
+For a full description, see here: https://neurodata.io/talks/ndmg.pdf
+"""
 
 
+# standard library imports
 import shutil
 import time
-import warnings
+from datetime import datetime
 
-warnings.simplefilter("ignore")
-
-# from ndmg.stats.qa_mri import qa_mri
+# package imports
 import nibabel as nib
 from dipy.tracking.streamline import Streamlines
 from subprocess import Popen
+
+# ndmg imports
 import ndmg
 from ndmg import preproc
 from ndmg.utils import gen_utils
 from ndmg.utils import reg_utils
 from ndmg.utils import s3_utils
+from ndmg.utils.bids_utils import name_resource
 from ndmg.register import gen_reg
 from ndmg.track import gen_track
 from ndmg.graph import gen_graph
-from ndmg.utils.bids_utils import name_resource
-from ndmg.stats.qa_tensor import *
-from ndmg.stats.qa_fibers import *
-from datetime import datetime
 
+# TODO : not sure why this is here, potentially remove
 os.environ["MPLCONFIGDIR"] = "/tmp/"
 
 
@@ -615,7 +604,7 @@ def ndmg_dwi_worker(
     # TODO : putting this block of code here for now because it wouldn't run in `ndmg_bids`. Figure out how to put it somewhere else.
     if push and buck and remo is not None:
         if not modif:
-            modif = "ndmg_{}".format(ndmg.VERSION.replace(".", "-"))
+            modif = "ndmg_{}".format(ndmg.__version__.replace(".", "-"))
         s3_utils.s3_push_data(buck, remo, outdir, modif, creds, debug=debug)
         print("Pushing Complete!")
         if not debug:

@@ -1,37 +1,25 @@
 #!/usr/bin/env python
 
-# Copyright 2016 NeuroData (http://neurodata.io)
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
+"""
+ndmg.graph.gen_graph
+~~~~~~~~~~
 
-# graph.py
-# Repackaged by Derek Pisner on 2019-02-19
-# Originally created by Greg Kiar on 2016-01-27.
-# Email: dpisner@utexas.edu
+Contains the primary functionality for connectome estimation after tractography has completed.
+Used in the final stage of the pipeline.
+"""
 
 
-import warnings
+# standard library imports
+import os
+import time
+from itertools import combinations
+from collections import defaultdict
 
-warnings.simplefilter("ignore")
+# package imports
 import numpy as np
 import networkx as nx
 import nibabel as nib
-import time
-import os
 from dipy.tracking._utils import _mapping_to_voxel, _to_voxel_coordinates
-from itertools import combinations
-from collections import defaultdict
 
 
 class graph_tools(object):

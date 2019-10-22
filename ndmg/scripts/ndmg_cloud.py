@@ -1,26 +1,14 @@
 #!/usr/bin/env python
 
-# Copyright 2016 NeuroData (http://neurodata.io)
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
+"""
+ndmg.scripts.ndmg_cloud
+~~~~~~~~~~~~~~~~~~~~~~~
 
-# ndmg_cloud.py
-# Created by Greg Kiar on 2017-02-02.
-# Edited a ton by Alex Loftus
-# Email: gkiar@jhu.edu, aloftus2@jhu.edu
+Contains functionality for running ndmg in batch on AWS.
+For a tutorial on setting this up, see here : https://github.com/neurodata/ndmg/blob/deploy/tutorials/Batch.ipynb
+"""
 
-#%%
+# standard library imports
 import subprocess
 import ast
 import csv
@@ -36,11 +24,14 @@ import shutil
 import time
 from pathlib import Path
 
+# package imports
 import boto3
 
+# ndmg imports
 import ndmg
-import ndmg.utils as mgu
-from ndmg.utils.s3_utils import get_credentials, get_matching_s3_objects, s3_client
+from ndmg.utils.cloud_utils import get_credentials
+from ndmg.utils.cloud_utils import get_matching_s3_objects
+from ndmg.utils.cloud_utils import s3_client
 
 participant_templ = "https://raw.githubusercontent.com/neurodata/ndmg/staging/templates/ndmg_cloud_participant.json"
 

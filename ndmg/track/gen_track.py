@@ -1,28 +1,14 @@
 #!/usr/bin/env python
 
-# Copyright 2016 NeuroData (http://neurodata.io)
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
-# track.py
-# Created by derek Pisner on 02/17/2019.
-# Email: dpisner@utexas.edu
+"""
+ndmg.track.gen_track
+~~~~~~~~~~~~~~~~~~~~
 
+Contains ndmg's fiber reconstruction and tractography functionality.
+Theory described here: https://neurodata.io/talks/ndmg.pdf#page=21
+"""
 
 # system imports
-import warnings
-
-warnings.simplefilter("ignore")
 import os
 
 # external package imports
@@ -30,27 +16,21 @@ import numpy as np
 import nibabel as nib
 
 # dipy imports
-# tracking
 from dipy.tracking.streamline import Streamlines
 from dipy.tracking import utils
-from dipy.tracking.stopping_criterion import (
-    BinaryStoppingCriterion,
-    ActStoppingCriterion,
-    CmcStoppingCriterion,
-)
-from dipy.tracking.local_tracking import LocalTracking, ParticleFilteringTracking
+from dipy.tracking import stopping_criterion
+from dipy.tracking import local_tracking
+from stopping_criterion import BinaryStoppingCriterion
+from stopping_criterion import ActStoppingCriterion
+from stopping_criterion import CmcStoppingCriterion,
+from local_tracking import LocalTracking
+from local_tracking import ParticleFilteringTracking
 
-# from dipy.tracking.eudx import EuDX  # TODO : dipy 1.0.0
-
-# reconst
 from dipy.reconst.dti import fractional_anisotropy, TensorModel, quantize_evecs
 from dipy.reconst.shm import CsaOdfModel
 from dipy.reconst.csdeconv import ConstrainedSphericalDeconvModel, recursive_response
-from dipy.reconst.peak_direction_getter import (
-    EuDXDirectionGetter,
-)  # TODO : update the EuDX code to use this
+from dipy.reconst.peak_direction_getter import EuDXDirectionGetter
 
-# others
 from dipy.data import get_sphere
 from dipy.direction import peaks_from_model, ProbabilisticDirectionGetter
 from dipy.segment.mask import median_otsu

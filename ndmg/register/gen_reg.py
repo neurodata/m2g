@@ -1,32 +1,26 @@
-#!/usr/bin/env python -W ignore::DeprecationWarning
+#!/usr/bin/env python
 
-# Copyright 2019 NeuroData (http://neurodata.io)
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
-# register.py
-# Repackaged for native space registrations by Derek Pisner on 2019-01-16
-# Email: dpisner@utexas.edu.
-# epi_register created by Eric Bridgeford.
+"""
+ndmg.register.gen_reg
+~~~~~~~~~~~~~~~~~~~~~
 
+Contains ndmg's registration classes, organized as full registration workflows.
+Used for the majority of the registration described here: https://neurodata.io/talks/ndmg.pdf#page=20
+"""
 
-import warnings
-
-warnings.simplefilter("ignore")
+# standard library imports
 import os
+
+# package imports
 import nibabel as nib
 import numpy as np
-from nilearn.image import load_img, math_img
+from nilearn.image import load_img
+from nilearn.image import math_img
+from dipy.tracking.streamline import deform_streamlines
+from dipy.io.streamline import load_trk
+from dipy.tracking import utils
+
+# ndmg imports
 from ndmg.utils import gen_utils
 from ndmg.utils import reg_utils
 
@@ -50,18 +44,14 @@ def direct_streamline_norm(streams, fa_path, namer):
     str
         Path to tractogram streamline file: streamlines_dsn.trk
     """
-    import os.path as op
-    from dipy.tracking.streamline import deform_streamlines
-    from dipy.io.streamline import load_trk
-    from ndmg.utils import reg_utils as regutils
-    from dipy.tracking import utils
 
+    # TODO : put this atlas stuff into a function
     if os.path.isdir("/ndmg_atlases"):
         # in docker
         atlas_dir = "/ndmg_atlases"
     else:
         # local
-        atlas_dir = op.expanduser("~") + "/.ndmg/ndmg_atlases"
+        atlas_dir = os.path.expanduser("~") + "/.ndmg/ndmg_atlases"
 
     template_path = atlas_dir + "/atlases/reference_brains/FSL_HCP1065_FA_2mm.nii.gz"
 
@@ -74,7 +64,7 @@ def direct_streamline_norm(streams, fa_path, namer):
     template_data = template_img.get_data()
 
     # SyN FA->Template
-    [mapping, affine_map] = regutils.wm_syn(
+    [mapping, affine_map] = reg_utils.wm_syn(
         template_path, fa_path, namer.dirs["tmp"]["base"]
     )
     streamlines = load_trk(streams, reference="same")
@@ -154,14 +144,13 @@ class DmriReg(object):
         skull="none",
         simple=False,
     ):
-        import os.path as op
 
         if os.path.isdir("/ndmg_atlases"):
             # in docker
             atlas_dir = "/ndmg_atlases"
         else:
             # local
-            atlas_dir = op.expanduser("~") + "/.ndmg/ndmg_atlases"
+            atlas_dir = os.path.expanduser("~") + "/.ndmg/ndmg_atlases"
         try:
             FSLDIR = os.environ["FSLDIR"]
         except KeyError:

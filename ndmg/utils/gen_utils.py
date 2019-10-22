@@ -1,29 +1,13 @@
 # !/usr/bin/env python
 
-# Copyright 2016 NeuroData (http://neurodata.io)
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
+"""
+ndmg.utils.gen_utils
+~~~~~~~~~~~~~~~~~~~~
 
-# gen_utils.py
-# Created by Will Gray Roncal on 2016-01-28.
-# Email: wgr@jhu.edu
-# Edited by Eric Bridgeford.
+Contains general utility functions.
+"""
 
 # system imports
-import warnings
-
-warnings.simplefilter("ignore")
 import os
 import os.path as op
 import sys
@@ -35,11 +19,16 @@ import numpy as np
 import nibabel as nib
 from nilearn.image import mean_img
 from scipy.sparse import lil_matrix
+from fury import actor
+from fury import window
 
-# dipy imports
 import dipy
 from dipy.io import read_bvals_bvecs
 from dipy.core.gradients import gradient_table
+from dipy.align.reslice import reslice
+
+# ndmg imports
+from ndmg.utils import reg_utils
 
 
 def check_exists(*dargs):
@@ -145,8 +134,6 @@ def show_template_bundles(final_streamlines, template_path, fname):
     fname : str
         Path of the output file (saved as )
     """
-    import nibabel as nib
-    from fury import actor, window
 
     renderer = window.Renderer()
     template_img_data = nib.load(template_path).get_data().astype("bool")
@@ -368,7 +355,6 @@ def reorient_dwi(dwi_prep, bvecs, namer):
     str
         Path to b-vector file, potentially reoriented if dwi data was
     """
-    from ndmg.utils.reg_utils import normalize_xform
 
     fname = dwi_prep
     bvec_fname = bvecs
@@ -377,7 +363,7 @@ def reorient_dwi(dwi_prep, bvecs, namer):
     input_img = nib.load(fname)
     input_axcodes = nib.aff2axcodes(input_img.affine)
     reoriented = nib.as_closest_canonical(input_img)
-    normalized = normalize_xform(reoriented)
+    normalized = reg_utils.normalize_xform(reoriented)
     # Is the input image oriented how we want?
     new_axcodes = ("R", "A", "S")
     if normalized is not input_img:
@@ -433,12 +419,11 @@ def reorient_img(img, namer):
     str
         Path to reoriented image
     """
-    from ndmg.utils.reg_utils import normalize_xform
 
     # Load image, orient as RAS
     orig_img = nib.load(img)
     reoriented = nib.as_closest_canonical(orig_img)
-    normalized = normalize_xform(reoriented)
+    normalized = reg_utils.normalize_xform(reoriented)
 
     # Image may be reoriented
     if normalized is not orig_img:
@@ -481,7 +466,6 @@ def match_target_vox_res(img_file, vox_size, namer, sens):
     str
         location of potentially resliced image
     """
-    from dipy.align.reslice import reslice
 
     # Check dimensions
     img = nib.load(img_file)

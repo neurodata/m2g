@@ -1,5 +1,10 @@
-import warnings
+"""
+ndmg.scripts
+~~~~~~~~~~~~
 
-warnings.simplefilter("ignore")
-# Prevent typing multilevel imports
-from . import *
+Contains top-level, self-contained scripts.
+
+ndmg_bids : top-level pipeline entrypoint
+ndmg_dwi_pipeline : the pipeline itself
+ndmg_cloud : for performing batch processing on AWS
+"""

@@ -1,39 +1,31 @@
 #!/usr/bin/env python
 
-# Copyright 2016 NeuroData (http://neurodata.io)
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
+"""
+ndmg.scripts.ndmg_bids
+~~~~~~~~~~~~~~~~~~~~~~
 
-# ndmg_bids.py
-# Repackaged and maintained by Derek Pisner and Eric Bridgeford 2019
-# Email: dpisner@utexas.edu
-# Originally created by Greg Kiar on 2016-07-25.
-# edited by Eric Bridgeford to incorporate fMRI, multi-threading, and
-# skipeddy-graph generation.
+The top level ndmg entrypoint module.
+In this module, ndmg:
+1. Pulls input data from s3 if we need it.
+2. Parses all input data.
+3. for each set of input data, runs ndmg_dwi_pipeline.ndmg_dwi_worker (the actual pipeline)
+"""
 
+
+# standard library imports
 import sys
 import glob
 import os.path as op
-import warnings
 from argparse import ArgumentParser
 import subprocess
 
+# ndmg imports
 from ndmg.utils import s3_utils
 from ndmg.utils.gen_utils import check_dependencies
-from ndmg.utils.bids_utils import *
+from ndmg.utils.bids_utils import sweep_directory
 from ndmg.scripts.ndmg_dwi_pipeline import ndmg_dwi_worker
 
+# TODO : move the stuff below to `main`
 check_dependencies()
 print("Beginning ndmg ...")
 
