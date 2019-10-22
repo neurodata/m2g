@@ -117,7 +117,7 @@
 #     }
 #     label_dirs = ["conn"]  # create label level granularity
 #     print("Adding directory tree...")
-#     namer.add_dirs_dwi(paths, labels, label_dirs)
+#     namer.add_dirs(paths, labels, label_dirs)
 
 #     dwi_prep = "{}/eddy_corrected_data.nii.gz".format(namer.dirs["output"]["prep_dwi"])
 #     shutil.copyfile(

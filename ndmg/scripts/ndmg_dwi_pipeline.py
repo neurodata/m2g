@@ -192,7 +192,7 @@ def ndmg_dwi_worker(
     label_dirs = ["conn"]  # create label level granularity
 
     print("Adding directory tree...")
-    namer.add_dirs_dwi(paths, labels, label_dirs)
+    namer.add_dirs(paths, labels, label_dirs)
 
     # Create derivative output file names
     streams = namer.name_derivative(namer.dirs["output"]["fiber"], "streamlines.trk")
