@@ -14,7 +14,7 @@ import numpy as np
 
 def rescale_bvec(bvec, bvec_new):
     """Normalizes b-vectors to be of unit length for the non-zero b-values. If the b-value is 0, the vector is untouched
-    
+
     Parameters
     ----------
     bvec : str

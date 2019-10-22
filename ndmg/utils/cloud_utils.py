@@ -17,12 +17,12 @@ import boto3
 
 def get_credentials():
     """Searches for and returns AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY
-    
+
     Returns
     -------
     tuple
         Two strings inside of a tuple, (Access_key, Secret_access_key)
-    
+
     Raises
     ------
     AttributeError
@@ -52,7 +52,7 @@ def s3_client(service="s3"):
     ----------
     service : str
         Type of service.
-    
+
     Returns
     -------
     boto3.client
@@ -69,7 +69,7 @@ def s3_client(service="s3"):
 def get_matching_s3_objects(bucket, prefix="", suffix=""):
     """
     Generate objects in an S3 bucket.
-    
+
     Parameters
     ----------
     bucket : str
@@ -115,7 +115,7 @@ def get_matching_s3_objects(bucket, prefix="", suffix=""):
 
 def s3_get_data(bucket, remote, local, public=False, force=False):
     """Given and s3 directory, copies files/subdirectories in that directory to local
-    
+
     Parameters
     ----------
     bucket : str
@@ -165,7 +165,7 @@ def s3_get_data(bucket, remote, local, public=False, force=False):
 
 def s3_push_data(bucket, remote, outDir, modifier, creds=True, debug=True):
     """Pushes data to a specified S3 bucket
-    
+
     Parameters
     ----------
     bucket : str

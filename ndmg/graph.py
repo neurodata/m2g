@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 """
-ndmg.graph.gen_graph
+ndmg.graph
 ~~~~~~~~~~
 
 Contains the primary functionality for connectome estimation after tractography has completed.
@@ -24,7 +24,7 @@ from dipy.tracking._utils import _mapping_to_voxel, _to_voxel_coordinates
 
 class GraphTools:
     """Initializes the graph with nodes corresponding to the number of ROIS
-    
+
     Parameters
     ----------
     rois : str
@@ -42,7 +42,7 @@ class GraphTools:
         will be interpretted as node attributes. If it is any other dimensional, it will be ignored, by default None
     sens : str, optional
         type of MRI scan being analyzed (can be 'dwi' or 'func'), by default "dwi"
-        
+
     Raises
     ------
     ValueError
@@ -123,7 +123,7 @@ class GraphTools:
 
     def make_graph(self, error_margin=2, overlap_thr=1, voxel_size=2):
         """Takes streamlines and produces a graph using Numpy functions
-        
+
         Parameters
         ----------
         error_margin : int, optional
@@ -132,7 +132,7 @@ class GraphTools:
             The amount of overlap between an roi and streamline to be considered a connection, by default 1
         voxel_size : int, optional
             Voxel size for roi/streamlines, by default 2
-        
+
         Returns
         -------
         Graph
@@ -199,14 +199,14 @@ class GraphTools:
 
     def save_graph(self, graphname, fmt="igraph"):
         """Saves the graph to disk
-        
+
         Parameters
         ----------
         graphname : str
             Filename for the graph
         fmt : str, optional
             Format you want the graph saved as [edgelist, gpickle, graphml, txt, npy, igraph], by default "igraph"
-        
+
         Raises
         ------
         ValueError
@@ -240,7 +240,7 @@ class GraphTools:
 
     def save_graph_png(self, graphname):
         """Saves adjacency graph, made using graspy's heatmap function, as a png. This will be saved in the qa/graphs_plotting/ directory
-        
+
         Parameters
         ----------
         graphname : str

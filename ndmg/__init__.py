@@ -10,8 +10,8 @@ __version__ = "0.3.0"
 
 
 # to call `ndmg.graph`, etc
-__all__ = ["scripts", "stats", "utils"]  # subpackages
-__all__.extend(["graph", "preproc", "register", "track"])  # modules
+__all__ = ["graph", "preproc", "register", "track"]  # modules
+__all__.extend(["scripts", "stats", "utils"])  # subpackages
 
 # import everything listed in __all__
 from . import *

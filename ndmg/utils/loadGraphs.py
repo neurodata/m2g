@@ -21,7 +21,7 @@ import csv
 
 def loadGraphs(filenames, modality="dwi", verb=False):
     """Given a list of files, returns a dictionary of graphs
-    
+
     Parameters
     ----------
     filenames : list
@@ -30,7 +30,7 @@ def loadGraphs(filenames, modality="dwi", verb=False):
         image type of files being loaded, by default "dwi"
     verb : bool, optional
         Toggles verbose output statements, by default False
-    
+
     Returns
     -------
     dict
@@ -59,7 +59,7 @@ def loadGraphs(filenames, modality="dwi", verb=False):
 
 def loadGraph(filename, modality="dwi", verb=False):
     """Given a graph file, returns a NetworkX graph
-    
+
     Parameters
     ----------
     filename : str
@@ -68,12 +68,12 @@ def loadGraph(filename, modality="dwi", verb=False):
         image type of file being loaded, by default "dwi"
     verb : bool, optional
         Toggles verbose output statements, by default False
-    
+
     Returns
     -------
     graph
         NetworkX graph
-    
+
     Raises
     ------
     ValueError

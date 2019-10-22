@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 """
-ndmg.track.gen_track
+ndmg.track
 ~~~~~~~~~~~~~~~~~~~~
 
 Contains ndmg's fiber reconstruction and tractography functionality.
@@ -18,13 +18,11 @@ import nibabel as nib
 # dipy imports
 from dipy.tracking.streamline import Streamlines
 from dipy.tracking import utils
-from dipy.tracking import stopping_criterion
-from dipy.tracking import local_tracking
-from stopping_criterion import BinaryStoppingCriterion
-from stopping_criterion import ActStoppingCriterion
-from stopping_criterion import CmcStoppingCriterion,
-from local_tracking import LocalTracking
-from local_tracking import ParticleFilteringTracking
+from dipy.tracking.local_tracking import LocalTracking
+from dipy.tracking.local_tracking import ParticleFilteringTracking
+from dipy.tracking.stopping_criterion import BinaryStoppingCriterion
+from dipy.tracking.stopping_criterion import ActStoppingCriterion
+from dipy.tracking.stopping_criterion import CmcStoppingCriterion
 
 from dipy.reconst.dti import fractional_anisotropy, TensorModel, quantize_evecs
 from dipy.reconst.shm import CsaOdfModel
@@ -38,7 +36,7 @@ from dipy.segment.mask import median_otsu
 
 def build_seed_list(mask_img_file, stream_affine, dens):
     """uses dipy tractography utilities in order to create a seed list for tractography
-    
+
     Parameters
     ----------
     mask_img_file : str
@@ -47,7 +45,7 @@ def build_seed_list(mask_img_file, stream_affine, dens):
         4x4 array with 1s diagonally and 0s everywhere else
     dens : int
         seed density
-    
+
     Returns
     -------
     ndarray
@@ -67,7 +65,7 @@ def build_seed_list(mask_img_file, stream_affine, dens):
 
 def tens_mod_fa_est(gtab, dwi_file, B0_mask):
     """Estimate a tensor FA image to use for registrations using dipy functions
-    
+
     Parameters
     ----------
     gtab : GradientTable
@@ -76,7 +74,7 @@ def tens_mod_fa_est(gtab, dwi_file, B0_mask):
         Path to eddy-corrected and RAS reoriented dwi image
     B0_mask : str
         Path to nodif B0 mask (averaged b0 mask)
-    
+
     Returns
     -------
     str
@@ -116,7 +114,7 @@ class RunTrack:
         stream_affine,
     ):
         """A class for deterministic tractography in native space
-        
+
         Parameters
         ----------
         dwi_in : str
@@ -170,12 +168,12 @@ class RunTrack:
 
     def run(self):
         """Creates the tracktography tracks using dipy commands and the specified tracking type and approach
-        
+
         Returns
         -------
         ArraySequence
             contains the tractography track raw data for further analysis
-        
+
         Raises
         ------
         ValueError
@@ -215,7 +213,7 @@ class RunTrack:
     def prep_tracking(self):
         """Uses nibabel and dipy functions in order to load the grey matter, white matter, and csf masks
         and use a tissue classifier (act, cmc, or binary) on the include/exclude maps to make a tissueclassifier object
-        
+
         Returns
         -------
         ActStoppingCriterion, CmcStoppingCriterion, or BinaryStoppingCriterion
@@ -436,7 +434,7 @@ def eudx_basic(dwi_file, gtab, stop_val=0.1):
     """Tracking with basic tensors and basic eudx - experimental
     We now force seeding at every voxel in the provided mask for
     simplicity.  Future functionality will extend these options.
-    
+
     Parameters
     ----------
     dwi_file : str
@@ -445,7 +443,7 @@ def eudx_basic(dwi_file, gtab, stop_val=0.1):
         dipy formatted bval/bvec structure
     stop_val : float, optional
         Value to cutoff fiber track, by default 0.1
-    
+
     Returns
     -------
     TensorFit

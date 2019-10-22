@@ -52,7 +52,7 @@ def batch_submit(
 ):
     """Searches through an S3 bucket, gets all subject-ids, creates json files for each,
     submits batch jobs, and returns list of job ids to query status upon later
-    
+
     Parameters
     ----------
     bucket : str
@@ -104,7 +104,7 @@ def batch_submit(
 
 def crawl_bucket(bucket, path, jobdir):
     """Gets subject list for a given s3 bucket and path
-    
+
     Parameters
     ----------
     bucket : str
@@ -113,7 +113,7 @@ def crawl_bucket(bucket, path, jobdir):
         The directory where the dataset is stored on the S3 bucket
     jobdir : str
         Directory of batch jobs to generate/check up on
-    
+
     Returns
     -------
     OrderedDict
@@ -196,7 +196,7 @@ def create_json(
     mod_type="",
 ):
     """Creates the json files for each of the jobs
-    
+
     Parameters
     ----------
     bucket : str
@@ -221,7 +221,7 @@ def create_json(
         Space for tractography, by default ""
     mod_type : str, optional
         Determinstic (det) or probabilistic (prob) tracking, by default ""
-    
+
     Returns
     -------
     list
@@ -318,14 +318,14 @@ def create_json(
 
 def submit_jobs(jobs, jobdir):
     """Give list of jobs to submit, submits them to AWS Batch
-    
+
     Parameters
     ----------
     jobs : list
         Name of the json files for all jobs to submit
     jobdir : str
         Directory of batch jobs to generate/check up on
-    
+
     Returns
     -------
     int
@@ -362,7 +362,7 @@ def submit_jobs(jobs, jobdir):
 
 def kill_jobs(jobdir, reason='"Killing job"'):
     """Given a list of jobs, kills them all
-    
+
     Parameters
     ----------
     jobdir : str

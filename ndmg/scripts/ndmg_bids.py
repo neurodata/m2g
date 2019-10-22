@@ -15,14 +15,14 @@ In this module, ndmg:
 # standard library imports
 import sys
 import glob
-import os.path as op
+import os
 from argparse import ArgumentParser
 import subprocess
 
 # ndmg imports
 from ndmg.utils import cloud_utils
 from ndmg.utils.gen_utils import check_dependencies
-from ndmg.utils.bids_utils import sweep_directory
+from ndmg.utils.gen_utils import sweep_directory
 from ndmg.scripts.ndmg_dwi_pipeline import ndmg_dwi_worker
 
 # TODO : move the stuff below to `main`
@@ -34,7 +34,7 @@ if os.path.isdir("/ndmg_atlases"):
     atlas_dir = "/ndmg_atlases"
 else:
     # local
-    atlas_dir = op.expanduser("~") + "/.ndmg/ndmg_atlases"
+    atlas_dir = os.path.expanduser("~") + "/.ndmg/ndmg_atlases"
 
     # Data structure:
     # sub-<subject id>/
@@ -56,19 +56,19 @@ else:
 
 def get_atlas(atlas_dir, vox_size):
     """Given the desired location of atlases and the type of processing, ensure we have all the atlases and parcellations.
-    
+
     Parameters
     ----------
     atlas_dir : str
         Path to directory containing atlases.
     vox_size : str
         t1w input image voxel dimensions, either 2mm or 1mm
-    
+
     Returns
     -------
     tuple
         filepaths corresponding to the human parcellations, the atlas, and the atlas's mask. atals_brain and lv_mask is None if not fmri.
-    
+
     Raises
     ------
     ValueError
@@ -86,23 +86,23 @@ def get_atlas(atlas_dir, vox_size):
         )
 
     # grab atlases if they don't exist
-    if not op.exists(atlas_dir):
+    if not os.path.exists(atlas_dir):
         # TODO : re-implement this pythonically with shutil and requests in python3.
         print("atlas directory not found. Cloning ...")
         clone = "https://github.com/neurodata/neuroparc.git"
         os.system("git lfs clone {} {}".format(clone, atlas_dir))
 
-    atlas = op.join(
+    atlas = os.path.join(
         atlas_dir, "atlases/reference_brains/MNI152NLin6_res-" + dims + "_T1w.nii.gz"
     )
-    atlas_mask = op.join(
+    atlas_mask = os.path.join(
         atlas_dir,
         "atlases/mask/MNI152NLin6_res-" + dims + "_T1w_descr-brainmask.nii.gz",
     )
     labels = [
         i for i in glob.glob(atlas_dir + "/atlases/label/Human/*.nii.gz") if dims in i
     ]
-    labels = [op.join(atlas_dir, "label/Human/", l) for l in labels]
+    labels = [os.path.join(atlas_dir, "label/Human/", l) for l in labels]
     fils = labels + [atlas, atlas_mask]
 
     atlas_brain = None
@@ -140,7 +140,7 @@ def session_level(
     skull="none",
 ):
     """Crawls the given BIDS organized directory for data pertaining to the given subject and session, and passes necessary files to ndmg_dwi_pipeline for processing.
-    
+
     Parameters
     ----------
     inDir : str
@@ -462,14 +462,16 @@ def main():
             for sub in subj:
                 if sesh is not None:
                     for ses in sesh:
-                        rem = op.join(remo, "sub-{}".format(sub), "ses-{}".format(ses))
-                        tindir = op.join(
+                        rem = os.path.join(
+                            remo, "sub-{}".format(sub), "ses-{}".format(ses)
+                        )
+                        tindir = os.path.join(
                             inDir, "sub-{}".format(sub), "ses-{}".format(ses)
                         )
                         cloud_utils.s3_get_data(buck, rem, tindir, public=not creds)
                 else:
-                    rem = op.join(remo, "sub-{}".format(sub))
-                    tindir = op.join(inDir, "sub-{}".format(sub))
+                    rem = os.path.join(remo, "sub-{}".format(sub))
+                    tindir = os.path.join(inDir, "sub-{}".format(sub))
                     cloud_utils.s3_get_data(buck, rem, tindir, public=not creds)
         else:
             cloud_utils.s3_get_data(buck, remo, inDir, public=not creds)

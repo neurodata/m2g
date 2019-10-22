@@ -14,27 +14,27 @@ import numpy as np
 import nilearn.image as nl
 
 # ndmg imports
-from ndmg.utils.gen_utils import check_exists
 from ndmg.utils import gen_utils
+from ndmg.utils.gen_utils import check_exists
 
 
 def erode_mask(mask, v=0):
     """A function to erode a mask by a specified number of voxels. Here, we define
     erosion as the process of checking whether all the voxels within a number of voxels
     for a mask have valuess.
-    
+
     Parameters
     ----------
     mask : array
         a numpy array of a mask to be eroded
     v : int, optional
         the number of voxels to erode by, by default 0
-    
+
     Returns
     -------
     numpy array
         eroded mask
-    
+
     Raises
     ------
     ValueError
@@ -69,12 +69,10 @@ def erode_mask(mask, v=0):
     return mask
 
 
-@check_exists(
-    0
-)  # TODO : should corrected_dwi also exist before this function is called?
+@check_exists(0)
 def align_slices(dwi, corrected_dwi, idx):
     """Performs eddy-correction (or self-alignment) of a stack of 3D images
-    
+
     Parameters
     ----------
     dwi : str
@@ -122,7 +120,7 @@ def probmap2mask(prob_map, mask_path, t, erode=0):
 @check_exists(0, 1)
 def apply_mask(inp, mask, out):
     """A function to generate a brain-only mask for an input image using 3dcalc
-    
+
     Parameters
     ----------
     inp : str
@@ -142,7 +140,7 @@ def apply_mask(inp, mask, out):
 def extract_t1w_brain(t1w, out, tmpdir, skull="none"):
     """A function to extract the brain from an input T1w image
     using AFNI's brain extraction utilities.
-    
+
     Parameters
     ----------
     t1w : str
@@ -230,7 +228,7 @@ def skullstrip_check(dmrireg, labels, namer, vox_size, reg_style):
     -------
     list
         List containing the paths to the aligned label files
-    
+
     Raises
     ------
     KeyError
@@ -274,7 +272,7 @@ def t1w_skullstrip(t1w, out, skull="none"):
     """Skull-strips the t1w image using AFNIs 3dSkullStrip algorithm, which is a modification of FSLs BET specialized to t1w images.
     Offers robust skull-stripping with no hyperparameters
     Note: renormalizes the intensities, call extract_t1w_brain instead if you want the original intensity values
-    
+
     Parameters
     ----------
     t1w : str
@@ -302,11 +300,10 @@ def t1w_skullstrip(t1w, out, skull="none"):
     pass
 
 
-
 @check_exists(0)
 def segment_t1w(t1w, basename, opts=""):
     """Uses FSLs FAST to segment an anatomical image into GM, WM, and CSF probability maps.
-    
+
     Parameters
     ----------
     t1w : str
@@ -318,7 +315,7 @@ def segment_t1w(t1w, basename, opts=""):
     opts : str, optional
         additional options that can optionally be passed to fast. Desirable options might be -P, which will use
         prior probability maps if the input T1w MRI is in standard space, by default ""
-    
+
     Returns
     -------
     dict
@@ -353,7 +350,7 @@ def align(
     finesearch=None,
 ):
     """Aligns two images using FSLs flirt function and stores the transform between them
-    
+
     Parameters
     ----------
     inp : str
@@ -421,7 +418,7 @@ def align_epi(epi, t1, brain, out):
 @check_exists(0, 1)
 def align_nonlinear(inp, ref, xfm, out, warp, ref_mask=None, in_mask=None, config=None):
     """Aligns two images using nonlinear methods and stores the transform between them using fnirt
-    
+
     Parameters
     ----------
     inp : str
@@ -456,7 +453,7 @@ def align_nonlinear(inp, ref, xfm, out, warp, ref_mask=None, in_mask=None, confi
 @check_exists(0, 1)
 def applyxfm(ref, inp, xfm, aligned, interp="trilinear", dof=6):
     """Aligns two images with a given transform using FSLs flirt command
-    
+
     Parameters
     ----------
     ref : str
@@ -482,7 +479,7 @@ def applyxfm(ref, inp, xfm, aligned, interp="trilinear", dof=6):
 def apply_warp(ref, inp, out, warp, xfm=None, mask=None, interp=None, sup=False):
     """Applies a warp from the structural to reference space in a single step using information about
     the structural -> ref mapping as well as the functional to structural mapping.
-    
+
     Parameters
     ----------
     ref : str
@@ -521,7 +518,7 @@ def apply_warp(ref, inp, out, warp, xfm=None, mask=None, interp=None, sup=False)
 def inverse_warp(ref, out, warp):
     """Takes a non-linear mapping and finds the inverse. Takes the file conaining warp-coefficients/fields specified in the
     variable warp (t1w -> mni) and creates its inverse (mni -> t1w) which is saved in the location determined by the variable out
-    
+
     Parameters
     ----------
     ref : str
@@ -567,7 +564,7 @@ def resample(base, ingested, template):
 @check_exists(0, 1)
 def combine_xfms(xfm1, xfm2, xfmout):
     """A function to combine two transformations and output the resulting transformation
-    
+
     Parameters
     ----------
     xfm1 : str
@@ -584,7 +581,7 @@ def combine_xfms(xfm1, xfm2, xfmout):
 @check_exists(0, 1)
 def wm_syn(template_path, fa_path, working_dir):
     """A function to perform ANTS SyN registration using dipy functions
-    
+
     Parameters
     ----------
     template_path  : str
@@ -593,7 +590,7 @@ def wm_syn(template_path, fa_path, working_dir):
         File path to the FA moving image (image to be fitted to reference)
     working_dir : str
         Path to the working directory to perform SyN and save outputs.
-    
+
     Returns
     -------
     DiffeomorphicMap
@@ -717,51 +714,3 @@ def wm_syn(template_path, fa_path, working_dir):
     )
 
     return mapping, affine_map
-
-
-def normalize_xform(img):
-    """ Set identical, valid qform and sform matrices in an image
-    Selects the best available affine (sform > qform > shape-based), and
-    coerces it to be qform-compatible (no shears).
-    The resulting image represents this same affine as both qform and sform,
-    and is marked as NIFTI_XFORM_ALIGNED_ANAT, indicating that it is valid,
-    not aligned to template, and not necessarily preserving the original
-    coordinates.
-    If header would be unchanged, returns input image.
-    
-    Parameters
-    ----------
-    img : Nifti1Image
-        Input image to be normalized
-    
-    Returns
-    -------
-    Nifti1Image
-        normalized image
-    """
-
-    # Let nibabel convert from affine to quaternions, and recover xform
-    tmp_header = img.header.copy()
-    tmp_header.set_qform(img.affine)
-    xform = tmp_header.get_qform()
-    xform_code = 2
-
-    # Check desired codes
-    qform, qform_code = img.get_qform(coded=True)
-    sform, sform_code = img.get_sform(coded=True)
-    if all(
-        (
-            qform is not None and np.allclose(qform, xform),
-            sform is not None and np.allclose(sform, xform),
-            int(qform_code) == xform_code,
-            int(sform_code) == xform_code,
-        )
-    ):
-        return img
-
-    new_img = img.__class__(img.get_data(), xform, img.header)
-    # Unconditionally set sform/qform
-    new_img.set_sform(xform, xform_code)
-    new_img.set_qform(xform, xform_code)
-
-    return new_img

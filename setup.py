@@ -6,22 +6,13 @@ from ndmg import __version__
 
 setup(
     name="ndmg",
-    packages=[
-        "ndmg",
-        "ndmg.preproc",
-        "ndmg.register",
-        "ndmg.track",
-        "ndmg.graph",
-        "ndmg.stats",
-        "ndmg.utils",
-        "ndmg.scripts",
-    ],
+    packages=["ndmg", "ndmg.stats", "ndmg.utils", "ndmg.scripts"],
     include_package_data=True,
     version=__version__,
     entry_points={
         "console_scripts": [
+            "ndmg=ndmg.scripts.ndmg_bids:main",
             "ndmg_dwi_pipeline=ndmg.scripts.ndmg_dwi_pipeline:main",
-            "ndmg_bids=ndmg.scripts.ndmg_bids:main",
             "ndmg_cloud=ndmg.scripts.ndmg_cloud:main",
         ]
     },
