@@ -34,45 +34,6 @@ from itertools import combinations
 from collections import defaultdict
 
 
-def get_sphere(coords, r, vox_dims, dims):
-    """
-    Return all points within r mm of coords. Generates a cube and then discards all points outside sphere.
-
-    Parameters
-    ----------
-    coords : list
-        List of (x, y, z) tuples corresponding to a coordinate atlas used or
-        which represent the center-of-mass of each parcellation node.
-    r : int
-        Radius for sphere.
-    vox_dims : array/tuple
-        1D vector (x, y, z) of mm voxel resolution for sphere.
-    dims : array/tuple
-        1D vector (x, y, z) of image dimensions for sphere.
-
-    Returns
-    -------
-    neighbors : list
-        A list of indices, within the dimensions of the image, that fall within a spherical neighborhood defined by
-        the specified error radius of the list of the input coordinates.
-
-    References
-    ----------
-    .. Adapted from NeuroSynth
-    """
-    r = float(r)
-    xx, yy, zz = [
-        slice(-r / vox_dims[i], r / vox_dims[i] + 0.01, 1) for i in range(len(coords))
-    ]
-    cube = np.vstack([row.ravel() for row in np.mgrid[xx, yy, zz]])
-    sphere = cube[:, np.sum(np.dot(np.diag(vox_dims), cube) ** 2, 0) ** 0.5 <= r]
-    sphere = np.round(sphere.T + coords)
-    neighbors = sphere[
-        (np.min(sphere, 1) >= 0) & (np.max(np.subtract(sphere, dims), 1) <= -1), :
-    ].astype(int)
-    return neighbors
-
-
 class graph_tools(object):
     """Initializes the graph with nodes corresponding to the number of ROIS
     
