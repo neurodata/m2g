@@ -145,6 +145,7 @@ def session_level(
     creds=None,
     debug=False,
     modif="",
+    skull="none",
 ):
     """Crawls the given BIDS organized directory for data pertaining to the given subject and session, and passes necessary files to ndmg_dwi_pipeline for processing.
     
@@ -192,6 +193,8 @@ def session_level(
         If False, remove any old filed in the output directory. Default is False
     modif : str, optional
         Name of the folder on s3 to push to. If empty, push to a folder with ndmg's version number. Default is ""
+    skull : str, optional
+        Additional skullstrip analysis parameter set for unique t1w images. Default is "none".
     """
 
     labels, atlas, atlas_mask, atlas_brain, lv_mask = get_atlas(atlas_dir, vox_size)
@@ -229,36 +232,39 @@ def session_level(
     # optional args stored in kwargs
     # use worker wrapper to call function f with args arg
     # and keyword args kwargs
-    print(args)
-    ndmg_dwi_worker(
-        args[0][0],
-        args[0][1],
-        args[0][2],
-        args[0][3],
-        atlas,
-        atlas_mask,
-        labels,
-        outDir,
-        vox_size,
-        mod_type,
-        track_type,
-        mod_func,
-        seeds,
-        reg_style,
-        clean,
-        skipeddy,
-        skipreg,
-        buck=buck,
-        remo=remo,
-        push=push,
-        creds=creds,
-        debug=debug,
-        modif=modif,
-    )
-    rmflds = []
-    if len(rmflds) > 0:
-        cmd = "rm -rf {}".format(" ".join(rmflds))
-        mgu.execute_cmd(cmd)
+    for arg in args:
+        print(arg)
+
+        ndmg_dwi_worker(
+            arg[0],
+            arg[1],
+            arg[2],
+            arg[3],
+            atlas,
+            atlas_mask,
+            labels,
+            arg[7],
+            vox_size,
+            mod_type,
+            track_type,
+            mod_func,
+            seeds,
+            reg_style,
+            clean,
+            skipeddy,
+            skipreg,
+            buck=buck,
+            remo=remo,
+            push=push,
+            creds=creds,
+            debug=debug,
+            modif=modif,
+            skull=skull,
+        )
+        rmflds = []
+        if len(rmflds) > 0:
+            cmd = "rm -rf {}".format(" ".join(rmflds))
+            mgu.execute_cmd(cmd)
     sys.exit(0)  # terminated
 
 
@@ -396,7 +402,8 @@ def main():
     parser.add_argument(
         "--sp",
         action="store",
-        help="Space for tractography: mni, native_dsn, native. Default is native.",
+        # help="Space for tractography: mni, native_dsn, native. Default is native.",
+        help="Space for tractography: native, native_dsn. Default is native.",
         default="native",
     )
     parser.add_argument(
@@ -410,6 +417,16 @@ def main():
         action="store",
         help="Name of folder on s3 to push to. If empty, push to a folder with ndmg's version number.",
         default="",
+    )
+    parser.add_argument(
+        "--skull",
+        action="store",
+        help="Special actions to take when skullstripping t1w image based on default skullstrip ('none') failure:"
+        "Excess tissue below brain: below"
+        "Chunks of cerebelum missing: cerebelum"
+        "Frontal clipping near eyes: eye"
+        "Excess clipping in general: general",
+        default="none",
     )
     result = parser.parse_args()
 
@@ -433,6 +450,7 @@ def main():
     mod_func = result.mf
     reg_style = result.sp
     modif = result.modif
+    skull = result.skull
 
     # Check to see if user has provided direction to an existing s3 bucket they wish to use
     try:
@@ -447,16 +465,20 @@ def main():
     # it's super gross.
     if buck is not None and remo is not None:
         if subj is not None:
-            if len(sesh) == 1:
-                sesh = sesh[0]
+            # if len(sesh) == 1:
+            #    sesh = sesh[0]
             for sub in subj:
                 if sesh is not None:
-                    remo = op.join(remo, "sub-{}".format(sub), "ses-{}".format(sesh))
-                    tindir = op.join(inDir, "sub-{}".format(sub), "ses-{}".format(sesh))
+                    for ses in sesh:
+                        rem = op.join(remo, "sub-{}".format(sub), "ses-{}".format(ses))
+                        tindir = op.join(
+                            inDir, "sub-{}".format(sub), "ses-{}".format(ses)
+                        )
+                        s3_utils.s3_get_data(buck, rem, tindir, public=not creds)
                 else:
-                    remo = op.join(remo, "sub-{}".format(sub))
+                    rem = op.join(remo, "sub-{}".format(sub))
                     tindir = op.join(inDir, "sub-{}".format(sub))
-                s3_utils.s3_get_data(buck, remo, tindir, public=not creds)
+                    s3_utils.s3_get_data(buck, rem, tindir, public=not creds)
         else:
             s3_utils.s3_get_data(buck, remo, inDir, public=not creds)
 
@@ -484,6 +506,7 @@ def main():
         creds=creds,
         debug=debug,
         modif=modif,
+        skull=skull,
     )
 
 

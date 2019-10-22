@@ -548,8 +548,8 @@ or compatible format.</li>
 </dd></dl>
 
 <dl class="class">
-<dt id="register.gen_reg.dmri_reg">
-<em class="property">class </em><code class="descclassname">register.gen_reg.</code><code class="descname">dmri_reg</code><span class="sig-paren">(</span><em>namer</em>, <em>nodif_B0</em>, <em>nodif_B0_mask</em>, <em>t1w_in</em>, <em>vox_size</em>, <em>simple</em><span class="sig-paren">)</span><a class="headerlink" href="#register.gen_reg.dmri_reg" title="Permalink to this definition">¶</a></dt>
+<dt id="register.gen_reg.DmriReg">
+<em class="property">class </em><code class="descclassname">register.gen_reg.</code><code class="descname">DmriReg</code><span class="sig-paren">(</span><em>namer</em>, <em>nodif_B0</em>, <em>nodif_B0_mask</em>, <em>t1w_in</em>, <em>vox_size</em>, <em>simple</em><span class="sig-paren">)</span><a class="headerlink" href="#register.gen_reg.DmriReg" title="Permalink to this definition">¶</a></dt>
 <dd><p>Class containing relevant paths and class methods for analysing tractography</p>
 <dl class="docutils">
 <dt>namer <span class="classifier-delimiter">:</span> <span class="classifier">name_resource</span></dt>
@@ -570,8 +570,8 @@ or compatible format.</li>
 <dd>FSL atlas for ventricle reference not found</dd>
 </dl>
 <dl class="method">
-<dt id="register.gen_reg.dmri_reg.atlas2t1w2dwi_align">
-<code class="descname">atlas2t1w2dwi_align</code><span class="sig-paren">(</span><em>atlas</em>, <em>dsn=True</em><span class="sig-paren">)</span><a class="headerlink" href="#register.gen_reg.dmri_reg.atlas2t1w2dwi_align" title="Permalink to this definition">¶</a></dt>
+<dt id="register.gen_reg.DmriReg.atlas2t1w2dwi_align">
+<code class="descname">atlas2t1w2dwi_align</code><span class="sig-paren">(</span><em>atlas</em>, <em>dsn=True</em><span class="sig-paren">)</span><a class="headerlink" href="#register.gen_reg.DmriReg.atlas2t1w2dwi_align" title="Permalink to this definition">¶</a></dt>
 <dd><p>alignment from atlas to t1w to dwi. A function to perform atlas alignmet. Tries nonlinear registration first, and if that fails, does a liner
 registration instead.
 Note: for this to work, must first have called t1w2dwi_align.</p>
@@ -588,23 +588,23 @@ Note: for this to work, must first have called t1w2dwi_align.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="register.gen_reg.dmri_reg.gen_tissue">
-<code class="descname">gen_tissue</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#register.gen_reg.dmri_reg.gen_tissue" title="Permalink to this definition">¶</a></dt>
+<dt id="register.gen_reg.DmriReg.gen_tissue">
+<code class="descname">gen_tissue</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#register.gen_reg.DmriReg.gen_tissue" title="Permalink to this definition">¶</a></dt>
 <dd><p>Extracts the brain from the raw t1w image (as indicated by self.t1w), uses it to create WM, GM, and CSF masks,
 reslices all 4 files to the target voxel resolution and extracts the white matter edge. Each mask is saved to 
 location indicated by self.map_path</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="register.gen_reg.dmri_reg.t1w2dwi_align">
-<code class="descname">t1w2dwi_align</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#register.gen_reg.dmri_reg.t1w2dwi_align" title="Permalink to this definition">¶</a></dt>
+<dt id="register.gen_reg.DmriReg.t1w2dwi_align">
+<code class="descname">t1w2dwi_align</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#register.gen_reg.DmriReg.t1w2dwi_align" title="Permalink to this definition">¶</a></dt>
 <dd><p>Alignment from t1w to mni, making t1w_mni, and t1w_mni to dwi. A function to perform self alignment. Uses a local optimisation cost function to get the
 two images close, and then uses bbr to obtain a good alignment of brain boundaries. Assumes input dwi is already preprocessed and brain extracted.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="register.gen_reg.dmri_reg.tissue2dwi_align">
-<code class="descname">tissue2dwi_align</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#register.gen_reg.dmri_reg.tissue2dwi_align" title="Permalink to this definition">¶</a></dt>
+<dt id="register.gen_reg.DmriReg.tissue2dwi_align">
+<code class="descname">tissue2dwi_align</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#register.gen_reg.DmriReg.tissue2dwi_align" title="Permalink to this definition">¶</a></dt>
 <dd><p>alignment of ventricle and CC ROI’s from MNI space –&gt; dwi and CC and CSF from T1w space –&gt; dwi
 A function to generate and perform dwi space alignment of avoidance/waypoint masks for tractography.
 First creates ventricle and CC ROI. Then creates transforms from stock MNI template to dwi space.

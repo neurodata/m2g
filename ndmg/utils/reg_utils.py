@@ -20,28 +20,40 @@
 import warnings
 
 warnings.simplefilter("ignore")
-from ndmg.utils import gen_utils as mgu
+
 import nibabel as nib
 import numpy as np
 import nilearn.image as nl
 import os
 import os.path as op
 
+from ndmg.utils.gen_utils import check_exists
+from ndmg.utils import gen_utils
+
 
 def erode_mask(mask, v=0):
+    """A function to erode a mask by a specified number of voxels. Here, we define
+    erosion as the process of checking whether all the voxels within a number of voxels
+    for a mask have valuess.
+    
+    Parameters
+    ----------
+    mask : array
+        a numpy array of a mask to be eroded
+    v : int, optional
+        the number of voxels to erode by, by default 0
+    
+    Returns
+    -------
+    numpy array
+        eroded mask
+    
+    Raises
+    ------
+    ValueError
+        The mask you provided for erosion has an invalid shape (must be x.shape=y.shape=z.shape)
     """
-    A function to erode a mask by a specified number of
-    voxels. Here, we define erosion as the process of checking
-    whether all the voxels within a number of voxels for a
-    mask have values.
 
-    **Positional Arguments:**
-
-        mask:
-            - a numpy array of a mask to be eroded.
-        v:
-            - the number of voxels to erode by.
-    """
     print("Eroding Mask...")
     for i in range(0, v):
         # masked_vox is a tuple 0f [x]. [y]. [z] cooords
@@ -70,21 +82,27 @@ def erode_mask(mask, v=0):
     return mask
 
 
+@check_exists(
+    0
+)  # TODO : should corrected_dwi also exist before this function is called?
 def align_slices(dwi, corrected_dwi, idx):
+    """Performs eddy-correction (or self-alignment) of a stack of 3D images
+    
+    Parameters
+    ----------
+    dwi : str
+        path for the DTI image to be eddy-corrected
+    corrected_dwi : str
+        path for the corrected and aligned DTI volume in a nifti file
+    idx : str
+        Index of the first B0 volume in the stack
     """
-    Performs eddy-correction (or self-alignment) of a stack of 3D images
-    **Positional Arguments:**
-            dwi:
-                - 4D (DTI) image volume as a nifti file
-            corrected_dwi:
-                - Corrected and aligned DTI volume in a nifti file
-            idx:
-                - Index of the first B0 volume in the stack
-    """
+
     cmd = "eddy_correct {} {} {}".format(dwi, corrected_dwi, idx)
-    status = mgu.execute_cmd(cmd, verb=True)
+    status = gen_utils.execute_cmd(cmd, verb=True)
 
 
+@check_exists(0)
 def probmap2mask(prob_map, mask_path, t, erode=0):
     """
     A function to extract a mask from a probability map.
@@ -114,63 +132,27 @@ def probmap2mask(prob_map, mask_path, t, erode=0):
     return mask_path
 
 
-def extract_brain(inp, out, opts=""):
-    """
-    A function to extract the brain from an image using FSL's BET.
-    **Positional Arguments:**
-        inp:
-            - the input image.
-        out:
-            - the output brain extracted image.
-    """
-    print("extracting brain")
-    cmd = "bet {} {} {}".format(inp, out, opts)
-    os.system(cmd)
-
-
+@check_exists(0, 1)
 def apply_mask(inp, mask, out):
+    """A function to generate a brain-only mask for an input image using 3dcalc
+    
+    Parameters
+    ----------
+    inp : str
+        path for the input image. If 4d, the mask should be 4d. If 3d, the mask should be 3d.
+    mask : str
+        path to the mask to apply to the data. Should be nonzero in mask region.
+    out : str
+        the path for the output skull-extracted image.
     """
-    A function to generate a brain-only mask for an input image.
 
-    **Positional Arguments:**
-
-        - inp:
-            - the input image. If 4d, the mask should be 4d. If 3d, the
-              mask should be 3d.
-        - mask:
-            - the mask to apply to the data. Should be nonzero in mask region.
-        - out:
-            - the path to the skull-extracted image.
-    """
     cmd = "3dcalc -a {} -b {} -expr 'a*step(b)' -prefix {}"
     cmd = cmd.format(inp, mask, out)
-    mgu.execute_cmd(cmd, verb=True)
+    gen_utils.execute_cmd(cmd, verb=True)
     pass
 
 
-def extract_epi_brain(epi, out, tmpdir):
-    """
-    A function to extract the brain from an input 4d EPI image
-    using AFNI's brain extraction utilities.
-
-    **Positional Arguments:**
-
-        - epi:
-            - the path to a 4D epi image.
-        - out:
-            - the path to the EPI brain.
-        - tmpdir:
-            - the directory to place temporary files.
-    """
-    epi_name = mgu.get_filename(epi)
-    epi_mask = "{}/{}_mask.nii.gz".format(tmpdir, epi_name)
-    # 3d automask to extract the mask itself from the 4d data
-    extract_mask(epi, epi_mask)
-    # 3d calc to apply the mask to the 4d image
-    apply_mask(epi, epi_mask, out)
-    pass
-
-
+@check_exists(0)
 def extract_mask(inp, out):
     """
     A function that extracts a mask from images using AFNI's
@@ -185,34 +167,37 @@ def extract_mask(inp, out):
             - the path to the extracted mask.
     """
     cmd = "3dAutomask -dilate 2 -prefix {} {}".format(out, inp)
-    mgu.execute_cmd(cmd, verb=True)
+    gen_utils.execute_cmd(cmd, verb=True)
     pass
 
 
-def extract_t1w_brain(t1w, out, tmpdir):
-    """
-    A function to extract the brain from an input T1w image
+def extract_t1w_brain(t1w, out, tmpdir, skull="none"):
+    """A function to extract the brain from an input T1w image
     using AFNI's brain extraction utilities.
-
-    **Positional Arguments:**
-
-        - t1w:
-            - the input T1w image.
-        - out:
-            - the output T1w brain.
-        - tmpdir:
-            - the temporary directory to store images.
+    
+    Parameters
+    ----------
+    t1w : str
+        path for the input T1w image
+    out : str
+        path for the output brain image
+    tmpdir : str
+        Path for the temporary directory to store images
+    skull : str, optional
+        skullstrip parameter pre-set. Default is "none".
     """
-    t1w_name = mgu.get_filename(t1w)
+
+    t1w_name = gen_utils.get_filename(t1w)
     # the t1w image with the skull removed.
     skull_t1w = "{}/{}_noskull.nii.gz".format(tmpdir, t1w_name)
     # 3dskullstrip to extract the brain-only t1w
-    t1w_skullstrip(t1w, skull_t1w)
+    t1w_skullstrip(t1w, skull_t1w, skull)
     # 3dcalc to apply the mask over the 4d image
     apply_mask(t1w, skull_t1w, out)
     pass
 
 
+@check_exists(0)
 def normalize_t1w(inp, out):
     """
     A function that normalizes intensity values for anatomical
@@ -227,10 +212,11 @@ def normalize_t1w(inp, out):
             - the output intensity-normalized image.
     """
     cmd = "3dUnifize -prefix {} -input {}".format(out, inp)
-    mgu.execute_cmd(cmd, verb=True)
+    gen_utils.execute_cmd(cmd, verb=True)
     pass
 
 
+@check_exists(0)
 def resample_fsl(base, res, goal_res, interp="spline"):
     """
     A function to resample a base image in fsl to that of a template.
@@ -249,11 +235,74 @@ def resample_fsl(base, res, goal_res, interp="spline"):
     # resample using an isometric transform in fsl
     cmd = "flirt -in {} -ref {} -out {} -applyisoxfm {} -interp {}"
     cmd = cmd.format(base, base, res, goal_res, interp)
-    mgu.execute_cmd(cmd, verb=True)
+    gen_utils.execute_cmd(cmd, verb=True)
     pass
 
 
-def t1w_skullstrip(t1w, out):
+def skullstrip_check(dmrireg, labels, namer, vox_size, reg_style):
+    """Peforms the alignemnt of atlas to dwi space and checks if the alignment results in roi loss
+
+    Parameters
+    ----------
+    dmrireg : object
+        object created in the pipeline containing relevant paths and class methods for analysing tractography
+    labels : str, list
+        the path to the t1w image to be segmented
+    namer : str
+        the basename for outputs. Often it will be most convenient for this to be the dataset, followed by the subject,
+        followed by the step of processing. Note that this anticipates a path as well;
+        ie, /path/to/dataset_sub_nuis, with no extension.
+    vox_size : str
+        additional options that can optionally be passed to fast. Desirable options might be -P, which will use
+        prior probability maps if the input T1w MRI is in standard space, by default ""
+    reg_style : str
+        Tractography space, must be either native or native_dsn
+
+    Returns
+    -------
+    list
+        List containing the paths to the aligned label files
+    
+    Raises
+    ------
+    KeyError
+        The atlas has lost an roi due to alignment
+    """
+    if reg_style == "native":
+        dsn = False
+    elif reg_style == "native_dsn":
+        dsn = True
+    else:
+        raise ValueError("Unsupported tractography space, must be native or native_dsn")
+
+    labels_im_file_list = []
+    for idx, label in enumerate(labels):
+        labels_im_file = gen_utils.reorient_img(labels[idx], namer)
+        labels_im_file = gen_utils.match_target_vox_res(
+            labels_im_file, vox_size, namer, sens="t1w"
+        )
+        orig_lab = nib.load(labels_im_file)
+        orig_lab = orig_lab.get_data().astype("int")
+        n_ids = orig_lab[orig_lab > 0]
+        num = len(np.unique(n_ids))
+
+        labels_im_file_dwi = dmrireg.atlas2t1w2dwi_align(labels_im_file, dsn)
+        labels_im = nib.load(labels_im_file_dwi)
+        align_lab = labels_im.get_data().astype("int")
+        n_ids_2 = align_lab[align_lab > 0]
+        num2 = len(np.unique(n_ids_2))
+
+        if num != num2:
+            raise KeyError(
+                "The atlas has lost an roi due to alignment! Try rerunning ndmg with the appropriate --skull flag."
+            )
+
+        labels_im_file_list.append(labels_im_file_dwi)
+    return labels_im_file_list
+
+
+@check_exists(0)
+def t1w_skullstrip(t1w, out, skull="none"):
     """Skull-strips the t1w image using AFNIs 3dSkullStrip algorithm, which is a modification of FSLs BET specialized to t1w images.
     Offers robust skull-stripping with no hyperparameters
     Note: renormalizes the intensities, call extract_t1w_brain instead if you want the original intensity values
@@ -261,24 +310,42 @@ def t1w_skullstrip(t1w, out):
     Parameters
     ----------
     t1w : str
-        the input t1w image file
+        path for the input t1w image file
     out : str
-        the output skull-stripped image file
+        path for the output skull-stripped image file
+    skull : str, optional
+        skullstrip parameter pre-set. Default is "none".
     """
-    
-    cmd = "3dSkullStrip -prefix {} -input {}".format(out, t1w)
-    mgu.execute_cmd(cmd, verb=True)
+    if skull == "below":
+        cmd = "3dSkullStrip -prefix {} -input {} -shrink_fac_bot_lim 0.6 -ld 45".format(
+            out, t1w
+        )
+    elif skull == "cerebelum":
+        cmd = "3dSkullStrip -prefix {} -input {} -shrink_fac_bot_lim 0.3 -ld 45".format(
+            out, t1w
+        )
+    elif skull == "eye":
+        cmd = "3dSkullStrip -prefix {} -input {} -no_avoid_eyes -ld 45".format(out, t1w)
+    elif skull == "general":
+        cmd = "3dSkullStrip -prefix {} -input {} -push_to_edge -ld 45".format(out, t1w)
+    else:
+        cmd = "3dSkullStrip -prefix {} -input {} -ld 30".format(out, t1w)
+    gen_utils.execute_cmd(cmd, verb=True)
     pass
 
 
+@check_exists(0)
 def extract_brain(inp, out, opts="-B"):
-    """
-    A function to extract the brain from an image using FSL's BET.
-    **Positional Arguments:**
-        inp:
-            - the input image.
-        out:
-            - the output brain extracted image.
+    """A function to extract the brain from an image using FSL's BET
+    
+    Parameters
+    ----------
+    inp : str
+        Path to image that you want the brain extracted from
+    out : str
+        Path to save output (the extracted brain file)
+    opts : str, optional
+        , by default "-B"
     """
     cmd = "bet {} {} {}".format(inp, out, opts)
     os.system(cmd)
@@ -292,6 +359,7 @@ def get_filename(label):
     return op.splitext(op.splitext(op.basename(label))[0])[0]
 
 
+@check_exists(0)
 def segment_t1w(t1w, basename, opts=""):
     """Uses FSLs FAST to segment an anatomical image into GM, WM, and CSF probability maps.
     
@@ -312,12 +380,10 @@ def segment_t1w(t1w, basename, opts=""):
     dict
         dictionary of output files
     """
-    
-    print("Segmenting Anatomical Image into WM, GM, and CSF with FSL's FAST:")
+
     # run FAST, with options -t for the image type and -n to
     # segment into CSF (pve_0), WM (pve_1), GM (pve_2)
     cmd = "fast -t 1 {} -n 3 -o {} {}".format(opts, basename, t1w)
-    print("Executing fast: {}".format(cmd))
     os.system(cmd)
     out = {}  # the outputs
     out["wm_prob"] = "{}_{}".format(basename, "pve_2.nii.gz")
@@ -326,6 +392,7 @@ def segment_t1w(t1w, basename, opts=""):
     return out
 
 
+@check_exists(0, 1)
 def align(
     inp,
     ref,
@@ -372,7 +439,7 @@ def align(
     finesearch : int, optional
         angle in degrees, by default None
     """
-    
+
     cmd = "flirt -in {} -ref {}".format(inp, ref)
     if xfm is not None:
         cmd += " -omat {}".format(xfm)
@@ -394,10 +461,10 @@ def align(
         cmd += " -wmseg {}".format(wmseg)
     if init is not None:
         cmd += " -init {}".format(init)
-    print(cmd)
     os.system(cmd)
 
 
+@check_exists(0, 1, 2)
 def align_epi(epi, t1, brain, out):
     """
     Algins EPI images to T1w image
@@ -407,6 +474,7 @@ def align_epi(epi, t1, brain, out):
     os.system(cmd)
 
 
+@check_exists(0, 1)
 def align_nonlinear(inp, ref, xfm, out, warp, ref_mask=None, in_mask=None, config=None):
     """Aligns two images using nonlinear methods and stores the transform between them using fnirt
     
@@ -438,17 +506,17 @@ def align_nonlinear(inp, ref, xfm, out, warp, ref_mask=None, in_mask=None, confi
         cmd += " --inmask={} --applyinmask=1".format(in_mask)
     if config is not None:
         cmd += " --config={}".format(config)
-    print(cmd)
     os.system(cmd)
 
 
+@check_exists(0, 1)
 def applyxfm(ref, inp, xfm, aligned, interp="trilinear", dof=6):
     """Aligns two images with a given transform using FSLs flirt command
     
     Parameters
     ----------
     ref : str
-        path of reference image to be aligned too as a nifti image file
+        path of reference image to be aligned to as a nifti image file
     inp : str
         path of input image to be aligned as a nifti image file
     xfm : str
@@ -460,13 +528,13 @@ def applyxfm(ref, inp, xfm, aligned, interp="trilinear", dof=6):
     dof : int, optional
         degrees of freedom for the alignment, by default 6
     """
-    
+
     cmd = "flirt -in {} -ref {} -out {} -init {} -interp {} -dof {} -applyxfm"
     cmd = cmd.format(inp, ref, aligned, xfm, interp, dof)
-    print(cmd)
     os.system(cmd)
 
 
+@check_exists(0, 1)
 def apply_warp(ref, inp, out, warp, xfm=None, mask=None, interp=None, sup=False):
     """Applies a warp from the structural to reference space in a single step using information about
     the structural -> ref mapping as well as the functional to structural mapping.
@@ -490,7 +558,7 @@ def apply_warp(ref, inp, out, warp, xfm=None, mask=None, interp=None, sup=False)
     sup : bool, optional
         whether to perform automatic intermediary supersampling, by default False
     """
-    
+
     cmd = (
         "applywarp --ref=" + ref + " --in=" + inp + " --out=" + out + " --warp=" + warp
     )
@@ -502,10 +570,10 @@ def apply_warp(ref, inp, out, warp, xfm=None, mask=None, interp=None, sup=False)
         cmd += " --interp=" + interp
     if sup is True:
         cmd += " --super --superlevel=a"
-    print(cmd)
     os.system(cmd)
 
 
+@check_exists(0)
 def inverse_warp(ref, out, warp):
     """Takes a non-linear mapping and finds the inverse. Takes the file conaining warp-coefficients/fields specified in the
     variable warp (t1w -> mni) and creates its inverse (mni -> t1w) which is saved in the location determined by the variable out
@@ -519,12 +587,12 @@ def inverse_warp(ref, out, warp):
     warp : str
         path to the warp/shiftmap transform volume wanting to be inverted
     """
-    
+
     cmd = "invwarp --warp=" + warp + " --out=" + out + " --ref=" + ref
-    print(cmd)
     os.system(cmd)
 
 
+@check_exists(0, 2)
 def resample(base, ingested, template):
     """
     Resamples the image such that images which have already been aligned
@@ -552,8 +620,9 @@ def resample(base, ingested, template):
     nib.save(target_im, ingested)
 
 
+@check_exists(0, 1)
 def combine_xfms(xfm1, xfm2, xfmout):
-    """A function to combine two transformatios and output the resulting transformation
+    """A function to combine two transformations and output the resulting transformation
     
     Parameters
     ----------
@@ -565,10 +634,10 @@ def combine_xfms(xfm1, xfm2, xfmout):
         path for the ouput transformation
     """
     cmd = "convert_xfm -omat {} -concat {} {}".format(xfmout, xfm1, xfm2)
-    print(cmd)
     os.system(cmd)
 
 
+@check_exists(0)
 def reslice_to_xmm(infile, vox_sz=2):
     cmd = "flirt -in {} -ref {} -out {} -nosearch -applyisoxfm {}"
     out_file = "%s%s%s%s%s%s" % (
@@ -584,6 +653,7 @@ def reslice_to_xmm(infile, vox_sz=2):
     return out_file
 
 
+@check_exists(0, 1)
 def wm_syn(template_path, fa_path, working_dir):
     """A function to perform ANTS SyN registration using dipy functions
     
@@ -603,9 +673,17 @@ def wm_syn(template_path, fa_path, working_dir):
     AffineMap
         An object used to transform the moving (FA) image towards the static image (template)
     """
-    
-    from dipy.align.imaffine import MutualInformationMetric, AffineRegistration, transform_origins
-    from dipy.align.transforms import TranslationTransform3D, RigidTransform3D, AffineTransform3D
+
+    from dipy.align.imaffine import (
+        MutualInformationMetric,
+        AffineRegistration,
+        transform_origins,
+    )
+    from dipy.align.transforms import (
+        TranslationTransform3D,
+        RigidTransform3D,
+        AffineTransform3D,
+    )
     from dipy.align.imaffine import (
         MutualInformationMetric,
         AffineRegistration,
@@ -733,7 +811,7 @@ def normalize_xform(img):
     Nifti1Image
         normalized image
     """
-    
+
     # Let nibabel convert from affine to quaternions, and recover xform
     tmp_header = img.header.copy()
     tmp_header.set_qform(img.affine)
