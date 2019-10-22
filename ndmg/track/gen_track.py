@@ -99,7 +99,7 @@ def tens_mod_fa_est(gtab, dwi_file, B0_mask):
     return fa_path
 
 
-class run_track(object):
+class RunTrack:
     def __init__(
         self,
         dwi_in,

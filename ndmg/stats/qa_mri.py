@@ -36,7 +36,7 @@ import matplotlib.pyplot as plt
 import csv
 
 
-class qa_mri(object):
+class QaMRI:
     def __init__(self, name, modality):
         self.namer = name
         self.modality = modality

@@ -295,7 +295,7 @@ def create_json(
             # make the json file for this iteration,
             # and add the path to its json file to `jobs`.
             job_json = deepcopy(template)
-            ver = ndmg.VERSION.replace(".", "-")
+            ver = ndmg.__version__.replace(".", "-")
             if dataset:
                 name = "ndmg_{}_{}_sub-{}".format(ver, dataset, subj)
             else:

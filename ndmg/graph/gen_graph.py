@@ -33,8 +33,8 @@ class GraphTools:
         Streamlines for analysis
     affine : ndarray
         a 2-D array with ones on the diagonal and zeros elsewhere (DOESN'T APPEAR TO BE Used)
-    namer : name_resource
-        Name_resource object containing relevant path for the pipeline
+    namer : NameResource
+        NameResource object containing relevant path for the pipeline
     connectome_path : str
         Path for the output connectome file (.ssv file)
     attr : [type], optional

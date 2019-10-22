@@ -20,7 +20,7 @@ from argparse import ArgumentParser
 import subprocess
 
 # ndmg imports
-from ndmg.utils import s3_utils
+from ndmg.utils import cloud_utils
 from ndmg.utils.gen_utils import check_dependencies
 from ndmg.utils.bids_utils import sweep_directory
 from ndmg.scripts.ndmg_dwi_pipeline import ndmg_dwi_worker
@@ -446,7 +446,7 @@ def main():
 
     # Check to see if user has provided direction to an existing s3 bucket they wish to use
     try:
-        creds = bool(s3_utils.get_credentials())
+        creds = bool(cloud_utils.get_credentials())
     except:
         creds = bool(
             os.getenv("AWS_ACCESS_KEY_ID", 0) and os.getenv("AWS_SECRET_ACCESS_KEY", 0)
@@ -466,13 +466,13 @@ def main():
                         tindir = op.join(
                             inDir, "sub-{}".format(sub), "ses-{}".format(ses)
                         )
-                        s3_utils.s3_get_data(buck, rem, tindir, public=not creds)
+                        cloud_utils.s3_get_data(buck, rem, tindir, public=not creds)
                 else:
                     rem = op.join(remo, "sub-{}".format(sub))
                     tindir = op.join(inDir, "sub-{}".format(sub))
-                    s3_utils.s3_get_data(buck, rem, tindir, public=not creds)
+                    cloud_utils.s3_get_data(buck, rem, tindir, public=not creds)
         else:
-            s3_utils.s3_get_data(buck, remo, inDir, public=not creds)
+            cloud_utils.s3_get_data(buck, remo, inDir, public=not creds)
 
     print("input directory contents: {}".format(os.listdir(inDir)))
 
