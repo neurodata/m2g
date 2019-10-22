@@ -89,7 +89,7 @@ def batch_submit(
     mod_type : str, optional
         Determinstic (det) or probabilistic (prob) tracking, by default ""
     """
-    
+
     print(("Getting list from s3://{}/{}/...".format(bucket, path)))
     threads = crawl_bucket(bucket, path, jobdir)
 
@@ -128,7 +128,7 @@ def crawl_bucket(bucket, path, jobdir):
     OrderedDict
         dictionary containing all subjects and sessions from the path location
     """
-    
+
     # if jobdir has seshs info file in it, use that instead
     sesh_path = "{}/seshs.json".format(jobdir)
     if os.path.isfile(sesh_path):
@@ -340,7 +340,7 @@ def submit_jobs(jobs, jobdir):
     int
         0
     """
-    
+
     batch = s3_client(service="batch")
     cmd_template = "--cli-input-json file://{}"
     # cmd_template = batch.submit_jobs
@@ -384,7 +384,7 @@ def get_status(jobdir, jobid=None):
     list
         a list of statuses for each of the jobs currently running
     """
-    
+
     cmd_template = "aws batch describe-jobs --jobs {}"
 
     if jobid is None:
@@ -418,7 +418,7 @@ def kill_jobs(jobdir, reason='"Killing job"'):
     reason : str, optional
         Task you want to perform on the jobs, by default '"Killing job"'
     """
-    
+
     cmd_template1 = "aws batch cancel-job --job-id {} --reason {}"
     cmd_template2 = "aws batch terminate-job --job-id {} --reason {}"
 
@@ -497,9 +497,7 @@ def main():
         help="flag to store " "temp files along the path of processing.",
         default=False,
     )
-    parser.add_argument("--dataset",
-        action="store",
-        help="Dataset name")
+    parser.add_argument("--dataset", action="store", help="Dataset name")
     parser.add_argument(
         "-b",
         "--big",

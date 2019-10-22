@@ -50,7 +50,7 @@ class group_func(object):
         dataset : str, optional
             an optional parameter for the name of the dataset to be present in the quality control output filenames, by default None
         """
-        
+
         print(atlas)
         self.ndmgdir = basedir
         self.qadir = "{}/qa".format(self.ndmgdir)

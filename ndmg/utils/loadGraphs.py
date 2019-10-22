@@ -47,7 +47,7 @@ def loadGraphs(filenames, modality="dwi", verb=False):
     -------
     dict
         dictonary of graphs specified in 'filenames'
-    """    
+    """
     #  Initializes empty dictionary
     if type(filenames) is not list:
         filenames = [filenames]
