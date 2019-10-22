@@ -37,7 +37,7 @@ def rescale_bvec(bvec, bvec_new):
     bvec_new : str
         Path to the new (normalized) b-vectors file. Must have extension '.bvec'
     """
-    
+
     bv1 = np.array(np.loadtxt(bvec))
     # Enforce proper dimensions
     bv1 = bv1.T if bv1.shape[0] == 3 else bv1

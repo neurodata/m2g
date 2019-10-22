@@ -22,6 +22,7 @@
 
 # system imports
 import warnings
+
 warnings.simplefilter("ignore")
 import os
 import os.path as op
@@ -39,6 +40,7 @@ from scipy.sparse import lil_matrix
 import dipy
 from dipy.io import read_bvals_bvecs
 from dipy.core.gradients import gradient_table
+
 
 def check_exists(*dargs):
     """
@@ -61,24 +63,34 @@ def check_exists(*dargs):
     func
         dictionary of output files
     """
+
     def outer(f):
         def inner(*args, **kwargs):
-            
+
             for darg in dargs:
                 p = args[darg]
                 try:
                     if not os.path.exists(p):
-                        raise ValueError(f"{p} does not exist.\nThis is an input to the function {f.__name__}.")
+                        raise ValueError(
+                            f"{p} does not exist.\nThis is an input to the function {f.__name__}."
+                        )
                 except TypeError:
-                    print(f"{darg} is not a file, it is {type(darg)}. \nFix decorator on this function.")
+                    print(
+                        f"{darg} is not a file, it is {type(darg)}. \nFix decorator on this function."
+                    )
 
                 print(f"{p} exists.")
-            print(f"Prerequisite files for {f.__name__} all exist. Calling {f.__name__}.")
+            print(
+                f"Prerequisite files for {f.__name__} all exist. Calling {f.__name__}."
+            )
             print("\n")
-                    
+
             return f(*args, **kwargs)
+
         return inner
+
     return outer
+
 
 def check_dependencies():
     """
@@ -168,7 +180,7 @@ def execute_cmd(cmd, verb=False):
     stderr
         error from p.communicate
     """
-    
+
     if verb:
         print("Executing: {}".format(cmd))
 
@@ -178,10 +190,6 @@ def execute_cmd(cmd, verb=False):
     if code:
         sys.exit("Error {}: {}".format(code, err))
     return out, err
-
-
-def name_tmps(basedir, basename, extension):
-    return "{}/tmp/{}{}".format(basedir, basename, extension)
 
 
 def get_braindata(brain_file):
@@ -250,7 +258,7 @@ def get_slice(mri, volid, sli):
     sli : str
         Path for the resulting file containing the desired slice
     """
-    
+
     mri_im = nib.load(mri)
     data = mri_im.get_data()
     # get the slice at the desired volume
@@ -545,7 +553,7 @@ def load_timeseries(timeseries_file, ts="roi"):
     [type]
         [description]
     """
-    
+
     if (ts == "roi") or (ts == "voxel"):
         timeseries = np.load(timeseries_file)["roi"]
         return timeseries
@@ -555,10 +563,6 @@ def load_timeseries(timeseries_file, ts="roi"):
             + "options are ts='roi' or ts='voxel'."
         )
     pass
-
-
-def name_tmps(basedir, basename, extension):
-    return "{}/tmp/{}{}".format(basedir, basename, extension)
 
 
 def parcel_overlap(parcellation1, parcellation2, outpath):
@@ -577,7 +581,7 @@ def parcel_overlap(parcellation1, parcellation2, outpath):
     outpath : str
         the path to produce the output.
     """
-    
+
     p1_dat = nib.load(parcellation1).get_data()
     p2_dat = nib.load(parcellation2).get_data()
     p1regs = np.unique(p1_dat)

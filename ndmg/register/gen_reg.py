@@ -77,16 +77,19 @@ def direct_streamline_norm(streams, fa_path, namer):
     [mapping, affine_map] = regutils.wm_syn(
         template_path, fa_path, namer.dirs["tmp"]["base"]
     )
-    streamlines  = load_trk(streams, reference='same')
+    streamlines = load_trk(streams, reference="same")
 
     # Warp streamlines
     adjusted_affine = affine_map.affine.copy()
-    adjusted_affine[1][3] = -adjusted_affine[1][3]/vox_size**2
-    mni_streamlines = deform_streamlines(streamlines.streamlines, deform_field=mapping.get_forward_field()[-1:],
-                                            stream_to_current_grid=template_img.affine,
-                                            current_grid_to_world=adjusted_affine,
-                                            stream_to_ref_grid=template_img.affine,
-                                            ref_grid_to_world=np.eye(4))
+    adjusted_affine[1][3] = -adjusted_affine[1][3] / vox_size ** 2
+    mni_streamlines = deform_streamlines(
+        streamlines.streamlines,
+        deform_field=mapping.get_forward_field()[-1:],
+        stream_to_current_grid=template_img.affine,
+        current_grid_to_world=adjusted_affine,
+        stream_to_ref_grid=template_img.affine,
+        ref_grid_to_world=np.eye(4),
+    )
 
     # Save streamlines
     hdr = fa_img.header
@@ -140,7 +143,17 @@ class DmriReg(object):
     ValueError
         FSL atlas for ventricle reference not found
     """
-    def __init__(self, namer, nodif_B0, nodif_B0_mask, t1w_in, vox_size, skull='none', simple=False):
+
+    def __init__(
+        self,
+        namer,
+        nodif_B0,
+        nodif_B0_mask,
+        t1w_in,
+        vox_size,
+        skull="none",
+        simple=False,
+    ):
         import os.path as op
 
         if os.path.isdir("/ndmg_atlases"):
@@ -365,7 +378,7 @@ class DmriReg(object):
         """Alignment from t1w to mni, making t1w_mni, and t1w_mni to dwi. A function to perform self alignment. Uses a local optimisation cost function to get the
         two images close, and then uses bbr to obtain a good alignment of brain boundaries. Assumes input dwi is already preprocessed and brain extracted.
         """
-        
+
         # Create linear transform/ initializer T1w-->MNI
         reg_utils.align(
             self.t1w_brain,
@@ -395,7 +408,9 @@ class DmriReg(object):
                 )
 
                 # Get warp from MNI -> T1
-                reg_utils.inverse_warp(self.t1w_brain, self.mni2t1w_warp, self.warp_t1w2mni)
+                reg_utils.inverse_warp(
+                    self.t1w_brain, self.mni2t1w_warp, self.warp_t1w2mni
+                )
 
                 # Get mat from MNI -> T1
                 cmd = (
@@ -520,7 +535,7 @@ class DmriReg(object):
         str
             path to aligned atlas file
         """
-        
+
         self.atlas = atlas
         self.atlas_name = self.atlas.split("/")[-1].split(".")[0]
         self.aligned_atlas_t1mni = "{}/{}_aligned_atlas_t1w_mni.nii.gz".format(
@@ -694,7 +709,7 @@ class DmriReg(object):
         ------
         ValueError
             Raised if FSL atlas for ventricle reference not found
-        """        
+        """
 
         # Create MNI-space ventricle mask
         print("Creating MNI-space ventricle ROI...")
@@ -859,7 +874,9 @@ class DmriReg(object):
 
 
 class dmri_reg_old(object):
-    def __init__(self, dwi, gtab, t1w, atlas, aligned_dwi, namer, clean=False, skull='none'):
+    def __init__(
+        self, dwi, gtab, t1w, atlas, aligned_dwi, namer, clean=False, skull="none"
+    ):
         """Aligns two images and stores the transform between them
         
         Parameters
@@ -881,7 +898,7 @@ class dmri_reg_old(object):
         skull : str, optional
             skullstrip parameter pre-set. Default is "none".
         """
-        
+
         self.dwi = dwi
         self.t1w = t1w
         self.atlas = atlas
@@ -944,7 +961,11 @@ class dmri_reg_old(object):
         reg_utils.align_epi(self.dwi, self.t1w, self.t1w_brain, self.temp_aligned)
 
         # Applies linear registration from T1 to template
-        print("calling reg_utils.align on {}, {}, {}".format(self.t1w, self.atlas, self.xfm))
+        print(
+            "calling reg_utils.align on {}, {}, {}".format(
+                self.t1w, self.atlas, self.xfm
+            )
+        )
         reg_utils.align(self.t1w, self.atlas, self.xfm)
 
         # Applies combined transform to dwi image volume

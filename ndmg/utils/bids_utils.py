@@ -54,7 +54,7 @@ class name_resource:
         self.__suball__ = ""
         self.__sub__ = re.search(r"(sub-)(?!.*sub-).*?(?=[_])", modf)
         if self.__sub__:
-            self.__sub__=self.__sub__.group()
+            self.__sub__ = self.__sub__.group()
             self.__suball__ = "sub-{}".format(self.__sub__)
         self.__ses__ = re.search(r"(ses-)(?!.*ses-).*?(?=[_])", modf)
         if self.__ses__:
@@ -77,7 +77,7 @@ class name_resource:
         self.__outdir__ = self._get_outdir()
         return
 
-    #method not used in normal dwi pipeline
+    # method not used in normal dwi pipeline
     def add_dirs(self, paths, labels, label_dirs):
         """Creates temp and permanent directories for the desired suffixes
         
@@ -90,7 +90,7 @@ class name_resource:
         label_dirs : list
             list containing the keys from 'paths' you wish to add label level granularity to (create a directory for each value in 'labels')
         """
-        
+
         self.dirs = {}
         if not isinstance(labels, list):
             labels = [labels]
@@ -177,7 +177,7 @@ class name_resource:
         list
             path to output directory
         """
-        
+
         olist = [self.__basepath__]
         # olist.append(self.__sub__)
         # if self.__ses__:
@@ -192,7 +192,7 @@ class name_resource:
         str
             output directory
         """
-        
+
         return self.__outdir__
 
     def get_template_space(self):
@@ -217,7 +217,7 @@ class name_resource:
         -------
         str
             the isolated file name
-        """        
+        """
         return mgu.get_filename(label)
         # return "label-{}".format(re.split(r'[._]',
         #                         os.path.basename(label))[0])
@@ -237,7 +237,7 @@ class name_resource:
         str
             Derivative output file path
         """
-        
+
         return os.path.join(*[folder, derivative])
 
     def get_mod_source(self):
@@ -307,7 +307,6 @@ def sweep_directory(bdir, subj=None, sesh=None, task=None, run=None, modality="d
         Raised if incorrect mobility passed
     """
 
-    
     if modality == "dwi":
         dwis = []
         bvals = []
@@ -421,8 +420,7 @@ def as_list(x):
     list
         a list containing x
     """
-    
-    
+
     if not isinstance(x, list):
         return [x]
     else:
@@ -446,7 +444,6 @@ def merge_dicts(x, y):
         combined dictionary with {x content,y content}
     """
 
-    
     z = x.copy()
     z.update(y)
     return z

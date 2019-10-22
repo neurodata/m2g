@@ -69,7 +69,7 @@ def ndmg_dwi_worker(
     creds=None,
     debug=False,
     modif="",
-    skull='none',
+    skull="none",
 ):
     """Creates a brain graph from MRI data
     
@@ -364,7 +364,9 @@ def ndmg_dwi_worker(
         print("Running registration in native space...")
 
         # Instantiate registration
-        reg = gen_reg.DmriReg(namer, nodif_B0, nodif_B0_mask, t1w, vox_size, skull, simple=False)
+        reg = gen_reg.DmriReg(
+            namer, nodif_B0, nodif_B0_mask, t1w, vox_size, skull, simple=False
+        )
 
         # Perform anatomical segmentation
         start_time = time.time()
@@ -416,17 +418,22 @@ def ndmg_dwi_worker(
                     "s",
                 )
             )
-        
-        #Check that the atlas hasn't lost any of the rois
-        if reg_style == 'native_dsn':
-            labels_im_file_mni_list = reg_utils.skullstrip_check(reg, labels, namer, vox_size, reg_style)
-        elif reg_style == 'native':
-            labels_im_file_dwi_list = reg_utils.skullstrip_check(reg, labels, namer, vox_size, reg_style)
 
+        # Check that the atlas hasn't lost any of the rois
+        if reg_style == "native_dsn":
+            labels_im_file_mni_list = reg_utils.skullstrip_check(
+                reg, labels, namer, vox_size, reg_style
+            )
+        elif reg_style == "native":
+            labels_im_file_dwi_list = reg_utils.skullstrip_check(
+                reg, labels, namer, vox_size, reg_style
+            )
 
         # -------- Tensor Fitting and Fiber Tractography ---------------- #
         start_time = time.time()
-        seeds = gen_track.build_seed_list(reg.wm_gm_int_in_dwi, np.eye(4), dens=int(seeds))
+        seeds = gen_track.build_seed_list(
+            reg.wm_gm_int_in_dwi, np.eye(4), dens=int(seeds)
+        )
         print("Using " + str(len(seeds)) + " seeds...")
 
         # Compute direction model and track fiber streamlines
@@ -709,7 +716,9 @@ def main():
     # Create output directory
     print("Creating output directory: {}".format(result.outdir))
     print("Creating output temp directory: {}/tmp".format(result.outdir))
-    gen_utils.utils.execute_cmd("mkdir -p {} {}/tmp".format(result.outdir, result.outdir))
+    gen_utils.utils.execute_cmd(
+        "mkdir -p {} {}/tmp".format(result.outdir, result.outdir)
+    )
 
     ndmg_dwi_worker(
         result.dwi,

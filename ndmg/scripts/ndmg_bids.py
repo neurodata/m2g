@@ -145,7 +145,7 @@ def session_level(
     creds=None,
     debug=False,
     modif="",
-    skull='none',
+    skull="none",
 ):
     """Crawls the given BIDS organized directory for data pertaining to the given subject and session, and passes necessary files to ndmg_dwi_pipeline for processing.
     
@@ -426,7 +426,7 @@ def main():
         "Chunks of cerebelum missing: cerebelum"
         "Frontal clipping near eyes: eye"
         "Excess clipping in general: general",
-        default='none',
+        default="none",
     )
     result = parser.parse_args()
 
@@ -465,13 +465,15 @@ def main():
     # it's super gross.
     if buck is not None and remo is not None:
         if subj is not None:
-            #if len(sesh) == 1:
+            # if len(sesh) == 1:
             #    sesh = sesh[0]
             for sub in subj:
                 if sesh is not None:
                     for ses in sesh:
                         rem = op.join(remo, "sub-{}".format(sub), "ses-{}".format(ses))
-                        tindir = op.join(inDir, "sub-{}".format(sub), "ses-{}".format(ses))
+                        tindir = op.join(
+                            inDir, "sub-{}".format(sub), "ses-{}".format(ses)
+                        )
                         s3_utils.s3_get_data(buck, rem, tindir, public=not creds)
                 else:
                     rem = op.join(remo, "sub-{}".format(sub))

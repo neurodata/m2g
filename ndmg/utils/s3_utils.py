@@ -121,7 +121,6 @@ def s3_get_data(bucket, remote, local, public=False, force=False):
     force : bool, optional
         Whether to overwrite the local directory containing the s3 files if it already exists, by default False
     """
-    
 
     # TODO : use boto3 for this
     if os.path.exists(local) and not force:

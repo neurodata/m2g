@@ -20,7 +20,9 @@
 
 
 # system imports
-import warnings; warnings.simplefilter("ignore")
+import warnings
+
+warnings.simplefilter("ignore")
 import os
 
 # external package imports
@@ -31,24 +33,28 @@ import nibabel as nib
 # tracking
 from dipy.tracking.streamline import Streamlines
 from dipy.tracking import utils
-from dipy.tracking.stopping_criterion import BinaryStoppingCriterion, ActStoppingCriterion, CmcStoppingCriterion
-from dipy.tracking.local_tracking import LocalTracking, ParticleFilteringTracking 
+from dipy.tracking.stopping_criterion import (
+    BinaryStoppingCriterion,
+    ActStoppingCriterion,
+    CmcStoppingCriterion,
+)
+from dipy.tracking.local_tracking import LocalTracking, ParticleFilteringTracking
 
 # from dipy.tracking.eudx import EuDX  # TODO : dipy 1.0.0
 
 # reconst
 from dipy.reconst.dti import fractional_anisotropy, TensorModel, quantize_evecs
 from dipy.reconst.shm import CsaOdfModel
-from dipy.reconst.csdeconv import (
-    ConstrainedSphericalDeconvModel,
-    recursive_response,
-)
-from dipy.reconst.peak_direction_getter import EuDXDirectionGetter  # TODO : update the EuDX code to use this
+from dipy.reconst.csdeconv import ConstrainedSphericalDeconvModel, recursive_response
+from dipy.reconst.peak_direction_getter import (
+    EuDXDirectionGetter,
+)  # TODO : update the EuDX code to use this
 
 # others
 from dipy.data import get_sphere
 from dipy.direction import peaks_from_model, ProbabilisticDirectionGetter
 from dipy.segment.mask import median_otsu
+
 
 def build_seed_list(mask_img_file, stream_affine, dens):
     """uses dipy tractography utilities in order to create a seed list for tractography
@@ -75,7 +81,7 @@ def build_seed_list(mask_img_file, stream_affine, dens):
         affine=stream_affine,
         seeds_count=int(dens),
         seed_count_per_voxel=True,
-    ) 
+    )
     return seeds
 
 
@@ -168,7 +174,7 @@ class run_track(object):
         stream_affine : ndarray
             4x4 2D array with 1s diagonaly and 0s everywhere else
         """
-        
+
         self.dwi = dwi_in
         self.nodif_B0_mask = nodif_B0_mask
         self.gm_in_dwi = gm_in_dwi
@@ -473,7 +479,7 @@ def eudx_basic(dwi_file, gtab, stop_val=0.1):
     data = img.get_data()
 
     data_sqz = np.squeeze(data)
-    b0_mask, mask_data = median_otsu(data_sqz, 2, 1) 
+    b0_mask, mask_data = median_otsu(data_sqz, 2, 1)
     mask_img = nib.Nifti1Image(mask_data.astype(np.float32), img.affine)
     mask_out_file = os.path.dirname(dwi_file) + "/dwi_bin_mask.nii.gz"
     nib.save(mask_img, mask_out_file)
