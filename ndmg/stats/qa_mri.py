@@ -26,7 +26,7 @@ import re
 import os.path
 import matplotlib
 import numpy as np
-from ndmg.utils import gen_utils as mgu
+from ndmg.utils import gen_utils
 
 # from ndmg.stats.func_qa_utils import plot_timeseries, plot_signals, \
 #    registration_score, plot_connectome
@@ -89,7 +89,7 @@ class qa_mri(object):
                 - the id of the subject.
         """
         print("Performing QA for Functional Preprocessing...")
-        func_name = mgu.get_filename(prep.preproc_func)
+        func_name = gen_utils.get_filename(prep.preproc_func)
 
         raw_im = nb.load(prep.func)
         raw_dat = raw_im.get_data()
@@ -239,7 +239,7 @@ class qa_mri(object):
             self.namer.dirs["qa"]["reg_a"], reg.sreg_strat, self.self_reg_sc * 1000
         )
         cmd = "mkdir -p {} {}".format(sreg_m_final, sreg_a_final)
-        mgu.execute_cmd(cmd)
+        gen_utils.execute_cmd(cmd)
         sreg_fig.savefig(
             "{}/{}_bold_t1w_overlap.png".format(
                 sreg_m_final, self.namer.get_mod_source()
@@ -300,7 +300,7 @@ class qa_mri(object):
             self.namer.dirs["qa"]["reg_a"], reg.treg_strat, self.temp_reg_sc * 1000
         )
         cmd = "mkdir -p {} {}".format(treg_m_final, treg_a_final)
-        mgu.execute_cmd(cmd)
+        gen_utils.execute_cmd(cmd)
         mri_name = self.aligned_mri_name()
         treg_fig.savefig("{}/{}_epi2temp_overlap.png".format(treg_m_final, mri_name))
         plt.close(treg_fig)
@@ -382,7 +382,7 @@ class qa_mri(object):
         fftdir = "{}/{}".format(qcfdir, "filtering")
 
         cmd = "mkdir -p {} {} {}".format(maskdir, glmdir, fftdir)
-        mgu.execute_cmd(cmd)
+        gen_utils.execute_cmd(cmd)
 
         anat_name = self.aligned_anat_name()
         t1w_dat = nb.load(nuisobj.smri).get_data()
@@ -455,7 +455,7 @@ class qa_mri(object):
         # Frequency Filtering
         if nuisobj.fft_reg is not None:
             cmd = "mkdir -p {}".format(fftdir)
-            mgu.execute_cmd(cmd)
+            gen_utils.execute_cmd(cmd)
             # start by just plotting the average fft of gm voxels and
             # compare with average fft after frequency filtering
             fig_fft_pow = plot_signals(
@@ -505,7 +505,7 @@ class qa_mri(object):
         qcdir = self.namer.dirs["qa"]["conn"][label_name]
         print("Performing QA for ROI Analysis...")
         cmd = "mkdir -p {}".format(qcdir)
-        mgu.execute_cmd(cmd)
+        gen_utils.execute_cmd(cmd)
 
         # overlap between the temp-aligned t1w and the labelled parcellation
         reg_mri_pngs(anat, label, qcdir, minthr=10, maxthr=95)
