@@ -117,7 +117,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#module-stats.qa_tensor">qa_tensor</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-utils.reg_utils">reg_utils</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-preproc.rescale_bvec">rescale_bvec</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-utils.s3_utils">s3_utils</a><ul class="simple">
+<li class="toctree-l2"><a class="reference internal" href="#module-utils.cloud_utils">cloud_utils</a><ul class="simple">
 </ul>
 </li>
 </ul>
@@ -227,7 +227,7 @@
 <li><a class="reference internal" href="#module-stats.qa_tensor" id="id23">qa_tensor</a></li>
 <li><a class="reference internal" href="#module-utils.reg_utils" id="id24">reg_utils</a></li>
 <li><a class="reference internal" href="#module-preproc.rescale_bvec" id="id25">rescale_bvec</a></li>
-<li><a class="reference internal" href="#module-utils.s3_utils" id="id26">s3_utils</a></li>
+<li><a class="reference internal" href="#module-utils.cloud_utils" id="id26">cloud_utils</a></li>
 </ul>
 </li>
 </ul>
@@ -1922,11 +1922,11 @@ Note: renormalizes the intensities, call extract_t1w_brain instead if you want t
 </dd></dl>
 
 </div>
-<div class="section" id="module-utils.s3_utils">
-<span id="s3-utils"></span><h2><a class="toc-backref" href="#id26">s3_utils</a><a class="headerlink" href="#module-utils.s3_utils" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-utils.cloud_utils">
+<span id="s3-utils"></span><h2><a class="toc-backref" href="#id26">cloud_utils</a><a class="headerlink" href="#module-utils.cloud_utils" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
-<dt id="utils.s3_utils.get_matching_s3_objects">
-<code class="descclassname">utils.s3_utils.</code><code class="descname">get_matching_s3_objects</code><span class="sig-paren">(</span><em>bucket</em>, <em>prefix=''</em>, <em>suffix=''</em><span class="sig-paren">)</span><a class="headerlink" href="#utils.s3_utils.get_matching_s3_objects" title="Permalink to this definition">¶</a></dt>
+<dt id="utils.cloud_utils.get_matching_s3_objects">
+<code class="descclassname">utils.cloud_utils.</code><code class="descname">get_matching_s3_objects</code><span class="sig-paren">(</span><em>bucket</em>, <em>prefix=''</em>, <em>suffix=''</em><span class="sig-paren">)</span><a class="headerlink" href="#utils.cloud_utils.get_matching_s3_objects" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generate objects in an S3 bucket.</p>
 <dl class="docutils">
 <dt>bucket <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
@@ -1939,8 +1939,8 @@ Note: renormalizes the intensities, call extract_t1w_brain instead if you want t
 </dd></dl>
 
 <dl class="function">
-<dt id="utils.s3_utils.s3_client">
-<code class="descclassname">utils.s3_utils.</code><code class="descname">s3_client</code><span class="sig-paren">(</span><em>service='s3'</em><span class="sig-paren">)</span><a class="headerlink" href="#utils.s3_utils.s3_client" title="Permalink to this definition">¶</a></dt>
+<dt id="utils.cloud_utils.s3_client">
+<code class="descclassname">utils.cloud_utils.</code><code class="descname">s3_client</code><span class="sig-paren">(</span><em>service='s3'</em><span class="sig-paren">)</span><a class="headerlink" href="#utils.cloud_utils.s3_client" title="Permalink to this definition">¶</a></dt>
 <dd><p>create an s3 client.</p>
 <dl class="docutils">
 <dt>service <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
@@ -1953,8 +1953,8 @@ Note: renormalizes the intensities, call extract_t1w_brain instead if you want t
 </dd></dl>
 
 <dl class="function">
-<dt id="utils.s3_utils.s3_get_data">
-<code class="descclassname">utils.s3_utils.</code><code class="descname">s3_get_data</code><span class="sig-paren">(</span><em>bucket</em>, <em>remote</em>, <em>local</em>, <em>public=False</em>, <em>force=False</em><span class="sig-paren">)</span><a class="headerlink" href="#utils.s3_utils.s3_get_data" title="Permalink to this definition">¶</a></dt>
+<dt id="utils.cloud_utils.s3_get_data">
+<code class="descclassname">utils.cloud_utils.</code><code class="descname">s3_get_data</code><span class="sig-paren">(</span><em>bucket</em>, <em>remote</em>, <em>local</em>, <em>public=False</em>, <em>force=False</em><span class="sig-paren">)</span><a class="headerlink" href="#utils.cloud_utils.s3_get_data" title="Permalink to this definition">¶</a></dt>
 <dd><p>given an s3 directory,
 copies in that directory to local.</p>
 </dd></dl>

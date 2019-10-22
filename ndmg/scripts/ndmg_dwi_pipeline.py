@@ -24,7 +24,7 @@ import ndmg
 from ndmg import preproc
 from ndmg.utils import gen_utils
 from ndmg.utils import reg_utils
-from ndmg.utils import s3_utils
+from ndmg.utils import cloud_utils
 from ndmg.utils.bids_utils import NameResource
 from ndmg.register import gen_reg
 from ndmg.track import gen_track
@@ -605,7 +605,7 @@ def ndmg_dwi_worker(
     if push and buck and remo is not None:
         if not modif:
             modif = "ndmg_{}".format(ndmg.__version__.replace(".", "-"))
-        s3_utils.s3_push_data(buck, remo, outdir, modif, creds, debug=debug)
+        cloud_utils.s3_push_data(buck, remo, outdir, modif, creds, debug=debug)
         print("Pushing Complete!")
         if not debug:
             print("Listing contents of output directory ...")
