@@ -144,6 +144,10 @@ class DmriReg(object):
         skull="none",
         simple=False,
     ):
+<<<<<<< HEAD
+=======
+        import os.path as op
+>>>>>>> staging
 
         if os.path.isdir("/ndmg_atlases"):
             # in docker
@@ -862,7 +866,11 @@ class DmriReg(object):
         return
 
 
+<<<<<<< HEAD
 class DmriRegOld:
+=======
+class dmri_reg_old(object):
+>>>>>>> staging
     def __init__(
         self, dwi, gtab, t1w, atlas, aligned_dwi, namer, clean=False, skull="none"
     ):

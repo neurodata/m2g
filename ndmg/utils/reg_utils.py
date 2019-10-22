@@ -1,6 +1,31 @@
+<<<<<<< HEAD
 """
 ndmg.utils.reg_utils
 ~~~~~~~~~~~~~~~~~~~~
+=======
+# Copyright 2017 NeuroData (http://neurodata.io)
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+# reg_utils.py
+# Created by Eric Bridgeford on 2017-06-21.
+# Email: ebridge2@jhu.edu
+
+import warnings
+
+warnings.simplefilter("ignore")
+>>>>>>> staging
 
 Contains small-scale registration utilities.
 """
@@ -138,6 +163,28 @@ def apply_mask(inp, mask, out):
     gen_utils.execute_cmd(cmd, verb=True)
     pass
 
+<<<<<<< HEAD
+=======
+
+@check_exists(0)
+def extract_mask(inp, out):
+    """
+    A function that extracts a mask from images using AFNI's
+    3dAutomask algorithm.
+
+    **Positional Arguments:**
+
+        - inp:
+            the input image. Can be a skull-stripped T1w (from 3dSkullStrip)
+            or a 4d EPI image.
+        - out:
+            - the path to the extracted mask.
+    """
+    cmd = "3dAutomask -dilate 2 -prefix {} {}".format(out, inp)
+    gen_utils.execute_cmd(cmd, verb=True)
+    pass
+
+>>>>>>> staging
 
 def extract_t1w_brain(t1w, out, tmpdir, skull="none"):
     """A function to extract the brain from an input T1w image
@@ -300,6 +347,34 @@ def t1w_skullstrip(t1w, out, skull="none"):
         cmd = "3dSkullStrip -prefix {} -input {} -ld 30".format(out, t1w)
     gen_utils.execute_cmd(cmd, verb=True)
     pass
+
+<<<<<<< HEAD
+=======
+
+@check_exists(0)
+def extract_brain(inp, out, opts="-B"):
+    """A function to extract the brain from an image using FSL's BET
+    
+    Parameters
+    ----------
+    inp : str
+        Path to image that you want the brain extracted from
+    out : str
+        Path to save output (the extracted brain file)
+    opts : str, optional
+        , by default "-B"
+    """
+    cmd = "bet {} {} {}".format(inp, out, opts)
+    os.system(cmd)
+    pass
+
+
+def get_filename(label):
+    """
+    Given a fully qualified path gets just the file name, without extension
+    """
+    return op.splitext(op.splitext(op.basename(label))[0])[0]
+>>>>>>> staging
 
 
 @check_exists(0)

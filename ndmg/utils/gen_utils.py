@@ -8,6 +8,12 @@ Contains general utility functions.
 """
 
 # system imports
+<<<<<<< HEAD
+=======
+import warnings
+
+warnings.simplefilter("ignore")
+>>>>>>> staging
 import os
 import os.path as op
 import sys
@@ -29,6 +35,7 @@ from dipy.align.reslice import reslice
 
 # ndmg imports
 from ndmg.utils import reg_utils
+
 
 
 def check_exists(*dargs):
@@ -521,6 +528,37 @@ def match_target_vox_res(img_file, vox_size, namer, sens):
     return img_file
 
 
+<<<<<<< HEAD
+=======
+def load_timeseries(timeseries_file, ts="roi"):
+    """Loads timeseries data. Exists to standardize formatting in case changes are made
+    with how timeseries are saved in future versions.
+    
+    Parameters
+    ----------
+    timeseries_file : str
+        Path to the file you wish to load timeseries data from
+    ts : str, optional
+        Timeseries type, either 'roi' or 'voxel, by default "roi"
+    
+    Returns
+    -------
+    [type]
+        [description]
+    """
+
+    if (ts == "roi") or (ts == "voxel"):
+        timeseries = np.load(timeseries_file)["roi"]
+        return timeseries
+    else:
+        print(
+            "You have not selected a valid timeseries type."
+            + "options are ts='roi' or ts='voxel'."
+        )
+    pass
+
+
+>>>>>>> staging
 def parcel_overlap(parcellation1, parcellation2, outpath):
     """A function to compute the percent composition of each parcel in
     parcellation 1 with the parcels in parcellation 2. Rows are indices

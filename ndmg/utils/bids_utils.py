@@ -70,7 +70,49 @@ class NameResource:
         self.__outdir__ = self._get_outdir()
         return
 
+<<<<<<< HEAD
     def add_dirs(namer, paths, labels, label_dirs):
+=======
+    # method not used in normal dwi pipeline
+    def add_dirs(self, paths, labels, label_dirs):
+        """Creates temp and permanent directories for the desired suffixes
+        
+        Parameters
+        ----------
+        paths : dict
+            a dictonary of keys to suffix directories desired
+        labels : list
+            list of paths of all the atlas label nifti files being used
+        label_dirs : list
+            list containing the keys from 'paths' you wish to add label level granularity to (create a directory for each value in 'labels')
+        """
+
+        self.dirs = {}
+        if not isinstance(labels, list):
+            labels = [labels]
+        dirtypes = ["output", "tmp", "qa"]
+        for dirt in dirtypes:
+            olist = [self.get_outdir()]
+            self.dirs[dirt] = {}
+            if dirt in ["tmp", "qa"]:
+                olist = olist + [dirt] + self.get_sub_info()
+            self.dirs[dirt]["base"] = os.path.join(*olist)
+            for kwd, path in paths.items():
+                newdir = os.path.join(*[self.dirs[dirt]["base"], path])
+                if kwd in label_dirs:  # levels with label granularity
+                    self.dirs[dirt][kwd] = {}
+                    for label in labels:
+                        labname = self.get_label(label)
+                        self.dirs[dirt][kwd][labname] = os.path.join(newdir, labname)
+                else:
+                    self.dirs[dirt][kwd] = newdir
+        newdirs = flatten(self.dirs, [])
+        cmd = "mkdir -p {}".format(" ".join(newdirs))
+        mgu.execute_cmd(cmd)  # make the directories
+        return
+
+    def add_dirs_dwi(namer, paths, labels, label_dirs):
+>>>>>>> staging
         """Creates tmp and permanent directories for the desired suffixes
         
         Parameters
@@ -147,6 +189,11 @@ class NameResource:
         str
             output directory
         """
+<<<<<<< HEAD
+=======
+
+        return self.__outdir__
+>>>>>>> staging
 
         return self.__outdir__
 
@@ -163,7 +210,11 @@ class NameResource:
         str
             the isolated file name
         """
+<<<<<<< HEAD
         return gen_utils.get_filename(label)
+=======
+        return mgu.get_filename(label)
+>>>>>>> staging
         # return "label-{}".format(re.split(r'[._]',
         #                         os.path.basename(label))[0])
 

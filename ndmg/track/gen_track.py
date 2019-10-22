@@ -9,6 +9,12 @@ Theory described here: https://neurodata.io/talks/ndmg.pdf#page=21
 """
 
 # system imports
+<<<<<<< HEAD
+=======
+import warnings
+
+warnings.simplefilter("ignore")
+>>>>>>> staging
 import os
 
 # external package imports
@@ -18,6 +24,7 @@ import nibabel as nib
 # dipy imports
 from dipy.tracking.streamline import Streamlines
 from dipy.tracking import utils
+<<<<<<< HEAD
 from dipy.tracking import stopping_criterion
 from dipy.tracking import local_tracking
 from stopping_criterion import BinaryStoppingCriterion
@@ -25,11 +32,25 @@ from stopping_criterion import ActStoppingCriterion
 from stopping_criterion import CmcStoppingCriterion,
 from local_tracking import LocalTracking
 from local_tracking import ParticleFilteringTracking
+=======
+from dipy.tracking.stopping_criterion import (
+    BinaryStoppingCriterion,
+    ActStoppingCriterion,
+    CmcStoppingCriterion,
+)
+from dipy.tracking.local_tracking import LocalTracking, ParticleFilteringTracking
+>>>>>>> staging
 
 from dipy.reconst.dti import fractional_anisotropy, TensorModel, quantize_evecs
 from dipy.reconst.shm import CsaOdfModel
 from dipy.reconst.csdeconv import ConstrainedSphericalDeconvModel, recursive_response
+<<<<<<< HEAD
 from dipy.reconst.peak_direction_getter import EuDXDirectionGetter
+=======
+from dipy.reconst.peak_direction_getter import (
+    EuDXDirectionGetter,
+)  # TODO : update the EuDX code to use this
+>>>>>>> staging
 
 from dipy.data import get_sphere
 from dipy.direction import peaks_from_model, ProbabilisticDirectionGetter
