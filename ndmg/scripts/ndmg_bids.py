@@ -466,11 +466,7 @@ def main():
                         tindir = op.join(
                             inDir, "sub-{}".format(sub), "ses-{}".format(ses)
                         )
-<<<<<<< HEAD
                         cloud_utils.s3_get_data(buck, rem, tindir, public=not creds)
-=======
-                        s3_utils.s3_get_data(buck, rem, tindir, public=not creds)
->>>>>>> staging
                 else:
                     rem = op.join(remo, "sub-{}".format(sub))
                     tindir = op.join(inDir, "sub-{}".format(sub))
