@@ -25,7 +25,7 @@ from ndmg import preproc
 from ndmg.utils import gen_utils
 from ndmg.utils import reg_utils
 from ndmg.utils import s3_utils
-from ndmg.utils.bids_utils import name_resource
+from ndmg.utils.bids_utils import NameResource
 from ndmg.register import gen_reg
 from ndmg.track import gen_track
 from ndmg.graph import gen_graph
@@ -161,7 +161,7 @@ def ndmg_dwi_worker(
 
     startTime = datetime.now()
 
-    namer = name_resource(dwi, t1w, atlas, outdir)
+    namer = NameResource(dwi, t1w, atlas, outdir)
 
     # TODO : do this with shutil instead of an os command
     print("Output directory: " + outdir)
@@ -427,7 +427,7 @@ def ndmg_dwi_worker(
 
         # Compute direction model and track fiber streamlines
         print("Beginning tractography in native space...")
-        trct = gen_track.run_track(
+        trct = gen_track.RunTrack(
             dwi_prep,
             nodif_B0_mask,
             reg.gm_in_dwi,
@@ -502,7 +502,7 @@ def ndmg_dwi_worker(
 
     #     # Align DWI volumes to Atlas
     #     print("Aligning volumes...")
-    #     reg = gen_reg.dmri_reg_old(dwi_prep, gtab, t1w, mask, aligned_dwi, namer, clean)
+    #     reg = gen_reg.DmriRegOld(dwi_prep, gtab, t1w, mask, aligned_dwi, namer, clean)
     #     print(
     #         "Registering DWI image at {} to atlas; aligned dwi at {}...".format(
     #             dwi_prep, aligned_dwi
@@ -550,7 +550,7 @@ def ndmg_dwi_worker(
             # align atlas to t1w to dwi
             print("%s%s" % ("Applying native-space alignment to ", labels[idx]))
             labels_im = nib.load(labels_im_file_mni_list[idx])
-            g1 = gen_graph.graph_tools(
+            g1 = gen_graph.GraphTools(
                 attr=len(np.unique(np.around(labels_im.get_data()).astype("int16")))
                 - 1,
                 rois=labels_im_file_mni_list[idx],
@@ -564,7 +564,7 @@ def ndmg_dwi_worker(
             # align atlas to t1w to dwi
             print("%s%s" % ("Applying native-space alignment to ", labels[idx]))
             labels_im = nib.load(labels_im_file_dwi_list[idx])
-            g1 = gen_graph.graph_tools(
+            g1 = gen_graph.GraphTools(
                 attr=len(np.unique(np.around(labels_im.get_data()).astype("int16")))
                 - 1,
                 rois=labels_im_file_dwi_list[idx],

@@ -345,8 +345,8 @@ def reorient_dwi(dwi_prep, bvecs, namer):
         Path to eddy corrected dwi file
     bvecs : str
         Path to the resaled b-vector file
-    namer : name_resource
-        name_resource variable containing relevant directory tree information
+    namer : NameResource
+        NameResource variable containing relevant directory tree information
     
     Returns
     -------
@@ -411,8 +411,8 @@ def reorient_img(img, namer):
     ----------
     img : str
         Path to image being reoriented
-    namer : name_resource
-        name_resource object containing all revlevent pathing information for the pipeline
+    namer : NameResource
+        NameResource object containing all revlevent pathing information for the pipeline
     
     Returns
     -------
@@ -456,8 +456,8 @@ def match_target_vox_res(img_file, vox_size, namer, sens):
         path to file to be resliced
     vox_size : str
         target voxel resolution ('2mm' or '1mm')
-    namer : name_resource
-        name_resource variable containing relevant directory tree information
+    namer : NameResource
+        NameResource variable containing relevant directory tree information
     sens : str
         type of data being analyzed ('dwi' or 'func')
     

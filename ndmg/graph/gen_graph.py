@@ -22,7 +22,7 @@ import nibabel as nib
 from dipy.tracking._utils import _mapping_to_voxel, _to_voxel_coordinates
 
 
-class graph_tools(object):
+class GraphTools:
     """Initializes the graph with nodes corresponding to the number of ROIS
     
     Parameters

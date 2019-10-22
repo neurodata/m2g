@@ -34,7 +34,7 @@ def direct_streamline_norm(streams, fa_path, namer):
         Path to streamlines.trk file to be transformed
     fa_path : str
         Path to subject's FA tensor image
-    namer : name_resource
+    namer : NameResource
         variable containing all relevant pathing information
     
     Returns
@@ -113,8 +113,8 @@ class DmriReg(object):
     
     Parameters
     ----------
-    namer : name_resource
-        name_resource variable containing relevant directory tree information
+    namer : NameResource
+        NameResource variable containing relevant directory tree information
     nodif_B0 : str
         path to mean b0 image
     nodif_B0_mask : str
@@ -862,7 +862,7 @@ class DmriReg(object):
         return
 
 
-class dmri_reg_old(object):
+class DmriRegOld:
     def __init__(
         self, dwi, gtab, t1w, atlas, aligned_dwi, namer, clean=False, skull="none"
     ):
@@ -880,7 +880,7 @@ class dmri_reg_old(object):
             path to roi atlas file
         aligned_dwi : str
             path for the output aligned dwi image
-        namer : name_resource
+        namer : NameResource
             variable containing directory tree information for pipeline outputs
         clean : bool, optional
             Whether to delete intermediate files created by the pipeline, by default False

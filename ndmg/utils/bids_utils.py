@@ -23,7 +23,7 @@ import boto3
 from ndmg.utils import gen_utils
 
 
-class name_resource:
+class NameResource:
     """
     A class for naming derivatives under the BIDs spec.
 
@@ -75,8 +75,8 @@ class name_resource:
         
         Parameters
         ----------
-        namer : name_resource
-            varibale of the name_resource class created by name_resource() containing path and settings information for the desired run. It includes: subject, anatomical scan, session, run number, task, resolution, output directory 
+        namer : NameResource
+            varibale of the NameResource class created by NameResource() containing path and settings information for the desired run. It includes: subject, anatomical scan, session, run number, task, resolution, output directory 
         paths : dict
             a dictionary of keys to suffix directories
         labels : list

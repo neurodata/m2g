@@ -7,7 +7,7 @@
 # from pathlib2 import Path
 # from ndmg.scripts import ndmg_dwi_pipeline
 # from itertools import product
-# from ndmg.utils.bids_utils import name_resource
+# from ndmg.utils.bids_utils import NameResource
 
 # # atlases = ['desikan', 'CPAC200', 'DKT', 'HarvardOxfordcort', 'HarvardOxfordsub', 'JHU', 'Schaefer2018-200', 'Talairach', 'aal', 'brodmann', 'glasser', 'yeo-7-liberal', 'yeo-17-liberal']
 # # mod_types = ['det', 'prob']
@@ -102,7 +102,7 @@
 #     ]
 
 #     # Create directory tree
-#     namer = name_resource(dwi, t1w, atlas, outdir)
+#     namer = NameResource(dwi, t1w, atlas, outdir)
 
 #     print("Output directory: " + outdir)
 #     if not os.path.isdir(outdir):
