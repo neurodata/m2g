@@ -316,24 +316,6 @@ def t1w_skullstrip(t1w, out, skull="none"):
 
 
 @check_exists(0)
-def extract_brain(inp, out, opts="-B"):
-    """A function to extract the brain from an image using FSL's BET
-    
-    Parameters
-    ----------
-    inp : str
-        Path to image that you want the brain extracted from
-    out : str
-        Path to save output (the extracted brain file)
-    opts : str, optional
-        , by default "-B"
-    """
-    cmd = "bet {} {} {}".format(inp, out, opts)
-    os.system(cmd)
-    pass
-
-
-@check_exists(0)
 def segment_t1w(t1w, basename, opts=""):
     """Uses FSLs FAST to segment an anatomical image into GM, WM, and CSF probability maps.
     
