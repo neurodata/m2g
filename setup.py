@@ -29,8 +29,7 @@ setup(
     author="Derek Pisner, Greg Kiar, Eric Bridgeford, Alex Loftus, and Will Gray Roncal",
     author_email="dpisner@utexas.edu, aloftus2@jhu.edu, gkiar@jhu.edu, wgr@jhu.edu, ebridge2@jhu.edu",
     url="https://github.com/neurodata/ndmg",
-    download_url="https://github.com/neurodata/ndmg/tarball/"
-    + VERSION,
+    download_url="https://github.com/neurodata/ndmg/tarball/" + VERSION,
     keywords=["connectome", "mri", "pipeline"],
     classifiers=["Programming Language :: Python :: 3.6"],
     install_requires=[
