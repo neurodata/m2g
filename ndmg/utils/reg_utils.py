@@ -152,25 +152,6 @@ def apply_mask(inp, mask, out):
     pass
 
 
-@check_exists(0)
-def extract_mask(inp, out):
-    """
-    A function that extracts a mask from images using AFNI's
-    3dAutomask algorithm.
-
-    **Positional Arguments:**
-
-        - inp:
-            the input image. Can be a skull-stripped T1w (from 3dSkullStrip)
-            or a 4d EPI image.
-        - out:
-            - the path to the extracted mask.
-    """
-    cmd = "3dAutomask -dilate 2 -prefix {} {}".format(out, inp)
-    gen_utils.execute_cmd(cmd, verb=True)
-    pass
-
-
 def extract_t1w_brain(t1w, out, tmpdir, skull="none"):
     """A function to extract the brain from an input T1w image
     using AFNI's brain extraction utilities.
