@@ -21,21 +21,18 @@ addons:
       - docker-ce
 
 env:
+  global:
+    - secure: "RKBtSjs0cgUYZXbowIuE2iJKTYrNbM6FbBZLCc3VXpbMoaDArtlHVuB3QWyzrbXFBVZhASXlST26VTb/1I5+FrMY+OLV4ei2kHIxM/rG0q8ymycpuxcV7I8cq2p952tSMwdPgVkW9Dy4N0k/me88cNRPIB71LJLmsRYlqVvXxmH9i17hRT50LzzfJDw0QpwN9Z+mvI3Pp/IgInlbBEnm2iMluYvbC6akuoP+WBh8pAMCGMm5/oZ0tCMvd+L/msXjM1BFApUaO+/bTRqDjsZeKy+VKoZ4AHc7A2oHqZrI6NfmnUxA0UwZcfDMXTzCwmaVZwzjjEu6Ykq4TnC8U4oeiz4B2802kFfwyHSSUcMKPnZKONzkCCqi1nZWsdJPOy5lK+QpMd1t+kZiHe4UdutVMb8H4Yaqiy0gqU90vujvgxp9ly++FRYIbR5NJPVw6MZaNmm6DYgjyqSn4Ke93McMFHFpkIjpsHFx5rOFdrZXDzg8aDQKKE4YdNWH4y+qGEKgwKkNxl/0pa5r0wBRmrxeSDZMPHpRnBL62Ch4YB30chWz5WWYEM+n0gl2ExGSpbUePAzjQEesl9kcbEdTnN1N4zOviW4PqJVrLP7WAvOKO1Xs83td7SeVniDTRwPUBjEUzPLfXxS0oh6hzFshYhV0FQTVu+xGSFx1pdrn+RUAGRs="
+    - secure: "N81+mfPpeor7AxHbuoRBZi6eqNoWTGnb+u5TtV4PxxWG5/+ipbCsUvb2wUk3ZYdfeWh611DDksTZ/HrUTpXG/pccZZ/Pl6A4CPf050yZ7OXa1gF9x1rhMRd5hwadmJTiGBKqEMxpojO45PhPz/IzUurItOM6VUGHKEHSieyoP1ml+8a0z0f/MTcV8UVYBSo7cWgXfmWOcBrAv9GevbN/t2UEbXqccutVG6GpcVf/ZDwPo1ezNtyiDq8ChVOR6liO0m8SlygMUMUGwlJ0OvtYfanJ2WcH0z3bQpGnkTnawz3/Cz+W/55MkJ19iYYLPFjN6tqxDCtC9KmtrRzixueZSS9b5NdRg6vo3ry2XuBamYHgLKpxZoEUrD3Xs3NaFQwxn19cFo8O/FmEgX4HmNxRgiwemCN9CYOGdwHCFX3B/xnXo6qX6iTK6++P+w/tl3mEQHrutEjXZSLrjh56hYk/1FovcS3mx5WSMjoEOK3pdrbd1Mp0rjXZPIo0zKfz3Z2xtBg7vTmMp/Bryd/REns/hrZDynTD/e7GloXpNe477PM04lbzHc2tv4KnGiw9hwJsuKw8jx067bMOrKV1Xrb5cKK8uAfaO8CXL8zDNNlv4WLbptnuxf32UBa6FcP6rB6/mnj2ndg6oVMPbMAA3av7bKgM5JJ8TfHAKNnPGFzsbw8="
   matrix:
     - SP=native MOD=det
-    - SP=mni MOD=det
     - SP=native_dsn MOD=det
-    - MOD=prob SP=native
+    - SP=native MOD=prob
 
 before_install:
   # make local input and output directories to attach to container
   - cd ..
   - mkdir -m 777 input output
-
-  # grab data from neuroparc
-  - git lfs clone https://github.com/neurodata/neuroparc.git
-  - mv neuroparc/data/* input
-  - rm -rf neuroparc
 
   # useful log checks
   - readlink -f input
@@ -49,16 +46,17 @@ before_install:
   - docker pull neurodata/ndmg_travis:latest
   - docker images
   - cd ndmg
-  - docker run -t -d --name travis -v $(pwd):/ndmg -v $(readlink -f ../input):/input -v $(readlink -f ../output):/output --entrypoint /bin/bash neurodata/ndmg_travis:latest
+  - docker run -t -d --name travis -e AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY -v $(pwd):/ndmg -v $(readlink -f ../output):/output --entrypoint /bin/bash neurodata/ndmg_travis:latest
   - docker ps
 
 install:
+  # useful log checks for packages whose versions have given us trouble
+  - docker exec -w /ndmg travis pip show dipy networkx
+
   # get travis branch installed
   - docker exec -w /ndmg travis pip install pytest
   - docker exec -w /ndmg travis pip install .
 
-  # useful log checks for packages whose versions have given us trouble
-  - docker exec -w /ndmg travis pip show dipy networkx
 
 script:
   # Run ndmg in docker, run pytest in docker.
@@ -67,3 +65,13 @@ script:
   - docker exec -w /ndmg travis ndmg_bids --sp $SP --mod $MOD --participant_label 0025864 --session_label 1 --atlas desikan --seeds 1 /input /output
   - kill %1
   - docker exec -w /ndmg travis pytest -v --disable-warnings
+  # generate an identifier for this travis branch run using date_SP_MOD_commit_ID
+  - rand=$(date +'%m-%d-%Y'-$SP-$MOD-${TRAVIS_COMMIT:0:7})
+  # get name of heatmap and connectome files
+  - heat=$(docker exec travis ls /output/sub-0025864/ses-1/qa/graphs_plotting)
+  - csv=$(docker exec travis ls /output/sub-0025864/ses-1/dwi/roi-connectomes/desikan_space-MNI152NLin6_res-2x2x2)
+  # run a command inside of docker to push heatmap and connectome to the ndmg-data s3 bucket
+  - docker exec travis aws s3 sync /output/sub-0025864/ses-1/qa/graphs_plotting s3://ndmg-data/Travis-Output/$TRAVIS_BRANCH/$rand
+  - docker exec travis aws s3 sync /output/sub-0025864/ses-1/dwi/roi-connectomes/desikan_space-MNI152NLin6_res-2x2x2 s3://ndmg-data/Travis-Output/$TRAVIS_BRANCH/$rand
+  # print the url location for the two files on the s3 bucket
+  - echo -en "\n\n\n\n\n\nHEATMAP_LOCATION = s3.console.aws.amazon.com/s3/object/ndmg-data/Travis-Output/$TRAVIS_BRANCH/$rand/$heat?region=us-east-1&tab=overview\n\nCSV_LOCATION = s3.console.aws.amazon.com/s3/object/ndmg-data/Travis-Output/$TRAVIS_BRANCH/$rand/$csv?region=us-east-1&tab=overview\n\n\n\n\n\n"
