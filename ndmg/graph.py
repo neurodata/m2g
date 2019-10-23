@@ -20,6 +20,12 @@ import numpy as np
 import networkx as nx
 import nibabel as nib
 from dipy.tracking._utils import _mapping_to_voxel, _to_voxel_coordinates
+import matplotlib
+
+matplotlib.use("agg")
+from matplotlib import pyplot as plt
+from graspy.utils import ptr
+from graspy.plot import heatmap
 
 
 class GraphTools:
@@ -246,12 +252,6 @@ class GraphTools:
         graphname : str
             name of the generated graph (do not include '.png')
         """
-        import matplotlib
-
-        matplotlib.use("agg")
-        from matplotlib import pyplot as plt
-        from graspy.utils import ptr
-        from graspy.plot import heatmap
 
         conn_matrix = np.array(nx.to_numpy_matrix(self.g))
         conn_matrix = ptr.pass_to_ranks(conn_matrix)

@@ -13,6 +13,16 @@ import nibabel as nib
 import numpy as np
 import nilearn.image as nl
 
+from dipy.align.imaffine import MutualInformationMetric
+from dipy.align.imaffine import AffineRegistration
+from dipy.align.imaffine import transform_origins
+from dipy.align.transforms import TranslationTransform3D
+from dipy.align.transforms import RigidTransform3D
+from dipy.align.transforms import AffineTransform3D
+from dipy.align.imwarp import SymmetricDiffeomorphicRegistration
+from dipy.align.metrics import CCMetric
+from dipy.viz import regtools
+
 # ndmg imports
 from ndmg.utils import gen_utils
 from ndmg.utils.gen_utils import check_exists
@@ -598,30 +608,6 @@ def wm_syn(template_path, fa_path, working_dir):
     AffineMap
         An object used to transform the moving (FA) image towards the static image (template)
     """
-
-    from dipy.align.imaffine import (
-        MutualInformationMetric,
-        AffineRegistration,
-        transform_origins,
-    )
-    from dipy.align.transforms import (
-        TranslationTransform3D,
-        RigidTransform3D,
-        AffineTransform3D,
-    )
-    from dipy.align.imaffine import (
-        MutualInformationMetric,
-        AffineRegistration,
-        transform_origins,
-    )
-    from dipy.align.transforms import (
-        TranslationTransform3D,
-        RigidTransform3D,
-        AffineTransform3D,
-    )
-    from dipy.align.imwarp import SymmetricDiffeomorphicRegistration
-    from dipy.align.metrics import CCMetric
-    from dipy.viz import regtools
 
     fa_img = nib.load(fa_path)
     template_img = nib.load(template_path)
