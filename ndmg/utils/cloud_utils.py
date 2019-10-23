@@ -1,6 +1,6 @@
 """
 ndmg.utils.cloud_utils
-~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~
 
 Contains utility functions for working on the cloud with AWS.
 """
