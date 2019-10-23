@@ -17,8 +17,10 @@ import os
 
 # package imports
 import nibabel as nib
-from dipy.tracking.streamline import Streamlines
+import numpy as np
 from subprocess import Popen
+from dipy.tracking.streamline import Streamlines
+from dipy.io import read_bvals_bvecs
 
 # ndmg imports
 from ndmg import preproc
@@ -248,8 +250,6 @@ def ndmg_dwi_worker(
     shutil.copyfile(bvals, fbval)
 
     # Correct any corrupted bvecs/bvals
-    from dipy.io import read_bvals_bvecs
-
     bvals, bvecs = read_bvals_bvecs(fbval, fbvec)
     bvecs[np.where(np.any(abs(bvecs) >= 10, axis=1) == True)] = [1, 0, 0]
     bvecs[np.where(bvals == 0)] = 0

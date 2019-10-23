@@ -707,6 +707,7 @@ def make_gtab_and_bmask(fbval, fbvec, dwi_file, outdir):
     os.system(cmd)
     return gtab, nodif_B0, nodif_B0_mask
 
+
 def normalize_xform(img):
     """ Set identical, valid qform and sform matrices in an image
     Selects the best available affine (sform > qform > shape-based), and
@@ -753,6 +754,7 @@ def normalize_xform(img):
     new_img.set_qform(xform, xform_code)
 
     return new_img
+
 
 def reorient_dwi(dwi_prep, bvecs, namer):
     """Orients dwi data to the proper orientation (RAS+) using nibabel
@@ -984,4 +986,6 @@ def parcel_overlap(parcellation1, parcellation2, outpath):
             datstr = ["%.4f" % x for x in overlapdat[idx,].toarray()[0,]]
             f.write(str(p1reg) + "," + ",".join(datstr) + "\n")
         f.close()
+
+
 #     return
