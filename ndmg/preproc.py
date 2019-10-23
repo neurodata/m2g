@@ -1,35 +1,20 @@
 #!/usr/bin/env python
 
-# Copyright 2014 Open Connectome Project (http://openconnecto.me)
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
+"""
+ndmg.preproc.rescale_bvec
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
-# ndmg/preproc/rescale_bvec.py
-# Created by Greg Kiar on 2016-02-12.
-# Email: gkiar@jhu.edu
+Contains functionality for normalizing b-vectors.
+TODO : depracate or change name. Add other preprocessing functions created from ndmg_dwi_pipeline.
+"""
 
-
-import warnings
-
-warnings.simplefilter("ignore")
+# package imports
 import numpy as np
-import os.path as op
 
 
 def rescale_bvec(bvec, bvec_new):
     """Normalizes b-vectors to be of unit length for the non-zero b-values. If the b-value is 0, the vector is untouched
-    
+
     Parameters
     ----------
     bvec : str

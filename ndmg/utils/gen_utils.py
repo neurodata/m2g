@@ -1,63 +1,423 @@
 # !/usr/bin/env python
 
-# Copyright 2016 NeuroData (http://neurodata.io)
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
+"""
+ndmg.utils.gen_utils
+~~~~~~~~~~~~~~~~~~~~
 
-# gen_utils.py
-# Created by Will Gray Roncal on 2016-01-28.
-# Email: wgr@jhu.edu
-# Edited by Eric Bridgeford.
+Contains general utility functions.
+"""
 
 # system imports
-import warnings
-
-warnings.simplefilter("ignore")
 import os
-import os.path as op
 import sys
+import re
 from subprocess import Popen, PIPE
 import subprocess
+import functools
+from itertools import product
 
 # package imports
+from bids import BIDSLayout
 import numpy as np
 import nibabel as nib
 from nilearn.image import mean_img
 from scipy.sparse import lil_matrix
+from fury import actor
+from fury import window
 
-# dipy imports
 import dipy
 from dipy.io import read_bvals_bvecs
 from dipy.core.gradients import gradient_table
+from dipy.align.reslice import reslice
+
+
+class NameResource:
+    """
+    A class for naming derivatives under the BIDs spec.
+
+    Parameters
+    ----------
+    modf : str
+        Path to subject MRI (dwi) data to be analyzed
+    t1wf : str
+        Path to subject t1w anatomical data
+    tempf : str
+        Path to atlas file(s) to be used during analysis
+    opath : str
+        Path to output directory
+    """
+
+    def __init__(self, modf, t1wf, tempf, opath):
+        """__init__ containing relevant BIDS specified paths for relevant data
+        """
+        self.__subi__ = os.path.basename(modf).split(".")[0]
+        self.__anati__ = os.path.basename(t1wf).split(".")[0]
+        self.__suball__ = ""
+        self.__sub__ = re.search(r"(sub-)(?!.*sub-).*?(?=[_])", modf)
+        if self.__sub__:
+            self.__sub__ = self.__sub__.group()
+            self.__suball__ = "sub-{}".format(self.__sub__)
+        self.__ses__ = re.search(r"(ses-)(?!.*ses-).*?(?=[_])", modf)
+        if self.__ses__:
+            self.__ses__ = self.__ses__.group()
+            self.__suball__ = self.__suball__ + "_ses-{}".format(self.__ses__)
+        self.__run__ = re.search(r"(run-)(?!.*run-).*?(?=[_])", modf)
+        if self.__run__:
+            self.__run__ = self.__run__.group()
+            self.__suball__ = self.__suball__ + "_run-{}".format(self.__run__)
+        self.__task__ = re.search(r"(task-)(?!.*task-).*?(?=[_])", modf)
+        if self.__task__:
+            self.__task__ = self.__task__.group()
+            self.__suball__ = self.__suball__ + "_run-{}".format(self.__task__)
+        self.__temp__ = os.path.basename(tempf).split(".")[0]
+        self.__space__ = re.split(r"[._]", self.__temp__)[0]
+        self.__res__ = re.search(r"(res-)(?!.*res-).*?(?=[_])", tempf)
+        if self.__res__:
+            self.__res__ = self.__res__.group()
+        self.__basepath__ = opath
+        self.__outdir__ = self._get_outdir()
+        return
+
+    def add_dirs(namer, paths, labels, label_dirs):
+        """Creates tmp and permanent directories for the desired suffixes
+
+        Parameters
+        ----------
+        namer : NameResource
+            varibale of the NameResource class created by NameResource() containing path and settings information for the desired run. It includes: subject, anatomical scan, session, run number, task, resolution, output directory
+        paths : dict
+            a dictionary of keys to suffix directories
+        labels : list
+            list of paths of all the atlas label nifti files being used (each will get their own directory)
+        label_dirs : list
+            list containing the keys from 'paths' you wish to add label level granularity to (create a directory for each value in 'labels')
+        """
+
+        namer.dirs = {}
+        if not isinstance(labels, list):
+            labels = [labels]
+        dirtypes = ["output"]
+        for dirt in dirtypes:
+            olist = [namer.get_outdir()]
+            namer.dirs[dirt] = {}
+            if dirt in ["tmp"]:
+                olist = olist + [dirt]
+            namer.dirs[dirt]["base"] = os.path.join(*olist)
+            for kwd, path in paths.items():
+                newdir = os.path.join(*[namer.dirs[dirt]["base"], path])
+                if kwd in label_dirs:  # levels with label granularity
+                    namer.dirs[dirt][kwd] = {}
+                    for label in labels:
+                        labname = namer.get_label(label)
+                        namer.dirs[dirt][kwd][labname] = os.path.join(newdir, labname)
+                else:
+                    namer.dirs[dirt][kwd] = newdir
+        namer.dirs["tmp"] = {}
+        namer.dirs["tmp"]["base"] = namer.get_outdir() + "/tmp"
+        namer.dirs["tmp"]["reg_a"] = namer.dirs["tmp"]["base"] + "/reg_a"
+        namer.dirs["tmp"]["reg_m"] = namer.dirs["tmp"]["base"] + "/reg_m"
+        namer.dirs["qa"] = {}
+        namer.dirs["qa"]["base"] = namer.get_outdir() + "/qa"
+        namer.dirs["qa"]["adjacency"] = namer.dirs["qa"]["base"] + "/adjacency"
+        namer.dirs["qa"]["fibers"] = namer.dirs["qa"]["base"] + "/fibers"
+        namer.dirs["qa"]["graphs"] = namer.dirs["qa"]["base"] + "/graphs"
+        namer.dirs["qa"]["graphs_plotting"] = (
+            namer.dirs["qa"]["base"] + "/graphs_plotting"
+        )
+        namer.dirs["qa"]["mri"] = namer.dirs["qa"]["base"] + "/mri"
+        namer.dirs["qa"]["reg"] = namer.dirs["qa"]["base"] + "/reg"
+        namer.dirs["qa"]["tensor"] = namer.dirs["qa"]["base"] + "/tensor"
+        newdirs = flatten(namer.dirs, [])
+        cmd = "mkdir -p {}".format(" ".join(newdirs))
+        execute_cmd(cmd)  # make the directories
+        return
+
+    def _get_outdir(self):
+        """Called by constructor to initialize the output directory
+
+        Returns
+        -------
+        list
+            path to output directory
+        """
+
+        olist = [self.__basepath__]
+        # olist.append(self.__sub__)
+        # if self.__ses__:
+        #    olist.append(self.__ses__)
+        return os.path.join(*olist)
+
+    def get_outdir(self):
+        """Returns the base output directory for a particular subject and appropriate granularity.
+
+        Returns
+        -------
+        str
+            output directory
+        """
+
+        return self.__outdir__
+
+    def get_label(self, label):
+        """Return the formatted label information for the parcellation (i.e. the name of the file without the path)
+
+        Parameters
+        ----------
+        label : str
+            Path to parcellation file that you want the isolated name of
+
+        Returns
+        -------
+        str
+            the isolated file name
+        """
+        return get_filename(label)
+        # return "label-{}".format(re.split(r'[._]',
+        #                         os.path.basename(label))[0])
+
+    def name_derivative(self, folder, derivative):
+        """Creates derivative output file paths using os.path.join
+
+        Parameters
+        ----------
+        folder : str
+            Path of directory that you want the derivative file name appended too
+        derivative : str
+            The name of the file to be produced
+
+        Returns
+        -------
+        str
+            Derivative output file path
+        """
+
+        return os.path.join(*[folder, derivative])
+
+    def get_mod_source(self):
+        return self.__subi__
+
+    def get_anat_source(self):
+        return self.__anati__
+
+    def get_sub_info(self):
+        olist = []
+        if self.__sub__:
+            olist.append(self.__sub__)
+        if self.__ses__:
+            olist.append(self.__ses__)
+        return olist
+
+
+def flatten(current, result=[]):
+    """Flatten a folder heirarchy
+
+    Parameters
+    ----------
+    current : dict
+        path to directory you want to flatten
+    result : list, optional
+        Used to store directory information between iterations of flatten, Default is []
+
+    Returns
+    -------
+    list
+        All new directories created by flattening the current directory
+    """
+    if isinstance(current, dict):
+        for key in current:
+            flatten(current[key], result)
+    else:
+        result.append(current)
+    return result
+
+
+def sweep_directory(bdir, subj=None, sesh=None, task=None, run=None, modality="dwi"):
+    """Given a BIDs formatted directory, crawls the BIDs dir and prepares the necessary inputs for the NDMG pipeline. Uses regexes to check matches for BIDs compliance.
+
+    Parameters
+    ----------
+    bdir : str
+        input directory
+    subj : list, optional
+        subject label. Default = None
+    sesh : list, optional
+        session label. Default = None
+    task : list, optional
+        task label. Default = None
+    run : list, optional
+        run label. Default = None
+    modality : str, optional
+        Data type being analyzed. Default = "dwi"
+
+    Returns
+    -------
+    tuple
+        contining location of dwi, bval, bvec, and anat
+
+    Raises
+    ------
+    ValueError
+        Raised if incorrect mobility passed
+    """
+
+    if modality == "dwi":
+        dwis = []
+        bvals = []
+        bvecs = []
+    anats = []
+    layout = BIDSLayout(bdir)  # initialize BIDs tree on bdir
+    # get all files matching the specific modality we are using
+    if subj is None:
+        subjs = layout.get_subjects()  # list of all the subjects
+    else:
+        subjs = as_list(subj)  # make it a list so we can iterate
+    for sub in subjs:
+        if not sesh:
+            seshs = layout.get_sessions(subject=sub)
+            seshs += [None]  # in case there are non-session level inputs
+        else:
+            seshs = as_list(sesh)  # make a list so we can iterate
+
+        if not task:
+            tasks = layout.get_tasks(subject=sub)
+            tasks += [None]
+        else:
+            tasks = as_list(task)
+
+        if not run:
+            runs = layout.get_runs(subject=sub)
+            runs += [None]
+        else:
+            runs = as_list(run)
+
+        print(sub)
+        print(("%s%s" % ("Subject:", sub)))
+        print(("%s%s" % ("Sessions:", seshs)))
+        print(("%s%s" % ("Tasks:", tasks)))
+        print(("%s%s" % ("Runs:", runs)))
+        print("\n\n")
+        # all the combinations of sessions and tasks that are possible
+        for (ses, tas, ru) in product(seshs, tasks, runs):
+            # the attributes for our modality img
+            mod_attributes = [sub, ses, tas, ru]
+            # the keys for our modality img
+            mod_keys = ["subject", "session", "task", "run"]
+            # our query we will use for each modality img
+            mod_query = {"modality": modality}
+            if modality == "dwi":
+                type_img = "dwi"  # use the dwi image
+            elif modality == "func":
+                type_img = "bold"  # use the bold image
+            mod_query["type"] = type_img
+
+            for attr, key in zip(mod_attributes, mod_keys):
+                if attr:
+                    mod_query[key] = attr
+
+            anat_attributes = [sub, ses]  # the attributes for our anat img
+            anat_keys = ["subject", "session"]  # the keys for our modality img
+            # our query for the anatomical image
+            anat_query = {"modality": "anat", "type": "T1w", "extensions": "nii.gz|nii"}
+            for attr, key in zip(anat_attributes, anat_keys):
+                if attr:
+                    anat_query[key] = attr
+            # make a query to fine the desired files from the BIDSLayout
+            anat = layout.get(**anat_query)
+            if modality == "dwi":
+                dwi = layout.get(**merge_dicts(mod_query, {"extensions": "nii.gz|nii"}))
+                bval = layout.get(**merge_dicts(mod_query, {"extensions": "bval"}))
+                bvec = layout.get(**merge_dicts(mod_query, {"extensions": "bvec"}))
+                if anat and dwi and bval and bvec:
+                    for (dw, bva, bve) in zip(dwi, bval, bvec):
+                        if dw.filename not in dwis:
+                            # if all the required files exist, append by the first
+                            # match (0 index)
+                            anats.append(anat[0].filename)
+                            dwis.append(dw.filename)
+                            bvals.append(bva.filename)
+                            bvecs.append(bve.filename)
+            elif modality == "func":
+                func = layout.get(
+                    **merge_dicts(mod_query, {"extensions": "nii.gz|nii"})
+                )
+                if func and anat:
+                    for fun in func:
+                        if fun.filename not in funcs:
+                            funcs.append(fun.filename)
+                            anats.append(anat[0].filename)
+    if modality == "dwi":
+        if not len(dwis) or not len(bvals) or not len(bvecs) or not len(anats):
+            print("No dMRI files found in BIDs spec. Skipping...")
+        return (dwis, bvals, bvecs, anats)
+    elif modality == "func":
+        if not len(funcs) or not len(anats):
+            print("No fMRI files found in BIDs spec. Skipping...")
+        return (funcs, anats)
+    else:
+        raise ValueError(
+            "Incorrect modality passed.\
+                         Choices are 'func' and 'dwi'."
+        )
+
+
+def as_list(x):
+    """A function to convert an item to a list if it is not, or pass it through otherwise
+
+    Parameters
+    ----------
+    x : any object
+        anything that can be entered into a list that you want to be converted into a list
+
+    Returns
+    -------
+    list
+        a list containing x
+    """
+
+    if not isinstance(x, list):
+        return [x]
+    else:
+        return x
+
+
+def merge_dicts(x, y):
+    """A function to merge two dictionaries, making it easier for us to make modality specific queries
+    for dwi images (since they have variable extensions due to having an nii.gz, bval, and bvec file)
+
+    Parameters
+    ----------
+    x : dict
+        dictionary you want merged with y
+    y : dict
+        dictionary you want merged with x
+
+    Returns
+    -------
+    dict
+        combined dictionary with {x content,y content}
+    """
+
+    z = x.copy()
+    z.update(y)
+    return z
 
 
 def check_exists(*dargs):
     """
-    Decorator. For every integer index passed to check_exists, 
+    Decorator. For every integer index passed to check_exists,
     checks if the argument passed to that index in the function decorated contains a filepath that exists.
     Also standardizes print statements across functions.
-    
+
     Parameters
     ----------
     dargs : ints
         Where to check the function being decorated for files.
-        
+
     Raises
     ------
     ValueError
         Raised if the file at that location doesn't exist.
-    
+
     Returns
     -------
     func
@@ -65,6 +425,7 @@ def check_exists(*dargs):
     """
 
     def outer(f):
+        @functools.wraps(f)
         def inner(*args, **kwargs):
 
             for darg in dargs:
@@ -135,7 +496,7 @@ def check_dependencies():
 
 def show_template_bundles(final_streamlines, template_path, fname):
     """Displayes the template bundles
-    
+
     Parameters
     ----------
     final_streamlines : list
@@ -145,8 +506,6 @@ def show_template_bundles(final_streamlines, template_path, fname):
     fname : str
         Path of the output file (saved as )
     """
-    import nibabel as nib
-    from fury import actor, window
 
     renderer = window.Renderer()
     template_img_data = nib.load(template_path).get_data().astype("bool")
@@ -165,14 +524,14 @@ def show_template_bundles(final_streamlines, template_path, fname):
 def execute_cmd(cmd, verb=False):
     """Given a bash command, it is executed and the response piped back to the
     calling script
-    
+
     Parameters
     ----------
     cmd : str
         command you want to execute
     verb : bool, optional
         whether to print the command that is being executed, by default False
-    
+
     Returns
     -------
     stdout
@@ -195,18 +554,18 @@ def execute_cmd(cmd, verb=False):
 def get_braindata(brain_file):
     """Opens a brain data series for a mask, mri image, or atlas.
     Returns a numpy.ndarray representation of a brain.
-    
+
     Parameters
     ----------
     brain_file : str, nibabel.nifti1.nifti1image, numpy.ndarray
         an object to open the data for a brain. Can be a string (path to a brain file),
         nibabel.nifti1.nifti1image, or a numpy.ndarray
-    
+
     Returns
     -------
     array
         array of image data
-    
+
     Raises
     ------
     TypeError
@@ -232,23 +591,23 @@ def get_braindata(brain_file):
 
 def get_filename(label):
     """Given a fully qualified path, return just the file name, without extension
-    
+
     Parameters
     ----------
     label : str
         Path to file you want isolated
-    
+
     Returns
     -------
     str
         File name
     """
-    return op.splitext(op.splitext(op.basename(label))[0])[0]
+    return os.path.basename(label).split(".")[0]
 
 
 def get_slice(mri, volid, sli):
     """Takes a volume index and constructs a new nifti image from the specified volume
-    
+
     Parameters
     ----------
     mri : str
@@ -275,7 +634,7 @@ def get_slice(mri, volid, sli):
 
 def make_gtab_and_bmask(fbval, fbvec, dwi_file, outdir):
     """Takes bval and bvec files and produces a structure in dipy format while also using FSL commands
-    
+
     Parameters
     ----------
     fbval : str
@@ -286,7 +645,7 @@ def make_gtab_and_bmask(fbval, fbvec, dwi_file, outdir):
         Path to dwi file being analyzed
     outdir : str
         output directory
-    
+
     Returns
     -------
     GradientTable
@@ -349,18 +708,66 @@ def make_gtab_and_bmask(fbval, fbvec, dwi_file, outdir):
     return gtab, nodif_B0, nodif_B0_mask
 
 
+def normalize_xform(img):
+    """ Set identical, valid qform and sform matrices in an image
+    Selects the best available affine (sform > qform > shape-based), and
+    coerces it to be qform-compatible (no shears).
+    The resulting image represents this same affine as both qform and sform,
+    and is marked as NIFTI_XFORM_ALIGNED_ANAT, indicating that it is valid,
+    not aligned to template, and not necessarily preserving the original
+    coordinates.
+    If header would be unchanged, returns input image.
+
+    Parameters
+    ----------
+    img : Nifti1Image
+        Input image to be normalized
+
+    Returns
+    -------
+    Nifti1Image
+        normalized image
+    """
+
+    # Let nibabel convert from affine to quaternions, and recover xform
+    tmp_header = img.header.copy()
+    tmp_header.set_qform(img.affine)
+    xform = tmp_header.get_qform()
+    xform_code = 2
+
+    # Check desired codes
+    qform, qform_code = img.get_qform(coded=True)
+    sform, sform_code = img.get_sform(coded=True)
+    if all(
+        (
+            qform is not None and np.allclose(qform, xform),
+            sform is not None and np.allclose(sform, xform),
+            int(qform_code) == xform_code,
+            int(sform_code) == xform_code,
+        )
+    ):
+        return img
+
+    new_img = img.__class__(img.get_data(), xform, img.header)
+    # Unconditionally set sform/qform
+    new_img.set_sform(xform, xform_code)
+    new_img.set_qform(xform, xform_code)
+
+    return new_img
+
+
 def reorient_dwi(dwi_prep, bvecs, namer):
     """Orients dwi data to the proper orientation (RAS+) using nibabel
-    
+
     Parameters
     ----------
     dwi_prep : str
         Path to eddy corrected dwi file
     bvecs : str
         Path to the resaled b-vector file
-    namer : name_resource
-        name_resource variable containing relevant directory tree information
-    
+    namer : NameResource
+        NameResource variable containing relevant directory tree information
+
     Returns
     -------
     str
@@ -368,7 +775,6 @@ def reorient_dwi(dwi_prep, bvecs, namer):
     str
         Path to b-vector file, potentially reoriented if dwi data was
     """
-    from ndmg.utils.reg_utils import normalize_xform
 
     fname = dwi_prep
     bvec_fname = bvecs
@@ -420,20 +826,19 @@ def reorient_dwi(dwi_prep, bvecs, namer):
 
 def reorient_img(img, namer):
     """Reorients input image to RAS+
-    
+
     Parameters
     ----------
     img : str
         Path to image being reoriented
-    namer : name_resource
-        name_resource object containing all revlevent pathing information for the pipeline
-    
+    namer : NameResource
+        NameResource object containing all revlevent pathing information for the pipeline
+
     Returns
     -------
     str
         Path to reoriented image
     """
-    from ndmg.utils.reg_utils import normalize_xform
 
     # Load image, orient as RAS
     orig_img = nib.load(img)
@@ -464,24 +869,23 @@ def reorient_img(img, namer):
 
 def match_target_vox_res(img_file, vox_size, namer, sens):
     """Reslices input MRI file if it does not match the targeted voxel resolution. Can take dwi or t1w scans.
-    
+
     Parameters
     ----------
     img_file : str
         path to file to be resliced
     vox_size : str
         target voxel resolution ('2mm' or '1mm')
-    namer : name_resource
-        name_resource variable containing relevant directory tree information
+    namer : NameResource
+        NameResource variable containing relevant directory tree information
     sens : str
         type of data being analyzed ('dwi' or 'func')
-    
+
     Returns
     -------
     str
         location of potentially resliced image
     """
-    from dipy.align.reslice import reslice
 
     # Check dimensions
     img = nib.load(img_file)
@@ -537,41 +941,13 @@ def match_target_vox_res(img_file, vox_size, namer, sens):
     return img_file
 
 
-def load_timeseries(timeseries_file, ts="roi"):
-    """Loads timeseries data. Exists to standardize formatting in case changes are made
-    with how timeseries are saved in future versions.
-    
-    Parameters
-    ----------
-    timeseries_file : str
-        Path to the file you wish to load timeseries data from
-    ts : str, optional
-        Timeseries type, either 'roi' or 'voxel, by default "roi"
-    
-    Returns
-    -------
-    [type]
-        [description]
-    """
-
-    if (ts == "roi") or (ts == "voxel"):
-        timeseries = np.load(timeseries_file)["roi"]
-        return timeseries
-    else:
-        print(
-            "You have not selected a valid timeseries type."
-            + "options are ts='roi' or ts='voxel'."
-        )
-    pass
-
-
 def parcel_overlap(parcellation1, parcellation2, outpath):
     """A function to compute the percent composition of each parcel in
     parcellation 1 with the parcels in parcellation 2. Rows are indices
     in parcellation 1; cols are parcels in parcellation 2. Values are the
     percent of voxels in parcel (parcellation 1) that fall into parcel
     (parcellation 2). Implied is that each row sums to 1.
-    
+
     Parameters
     ----------
     parcellation1 : str
@@ -602,7 +978,7 @@ def parcel_overlap(parcellation1, parcellation2, outpath):
                 pover = np.logical_and(p1seq, p2_dat == p2reg).sum() / float(N)
                 overlapdat[p1idx, p2idx] = pover
 
-    outf = op.join(outpath, "{}_{}.csv".format(p1n, p2n))
+    outf = os.path.join(outpath, "{}_{}.csv".format(p1n, p2n))
     with open(outf, "w") as f:
         p2str = ["%s" % x for x in p2regs]
         f.write("p1reg," + ",".join(p2str) + "\n")
@@ -610,4 +986,6 @@ def parcel_overlap(parcellation1, parcellation2, outpath):
             datstr = ["%.4f" % x for x in overlapdat[idx,].toarray()[0,]]
             f.write(str(p1reg) + "," + ",".join(datstr) + "\n")
         f.close()
-    return
+
+
+#     return

@@ -1,28 +1,14 @@
 #!/usr/bin/env python
 
-# Copyright 2016 NeuroData (http://neurodata.io)
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
-# track.py
-# Created by derek Pisner on 02/17/2019.
-# Email: dpisner@utexas.edu
+"""
+ndmg.track
+~~~~~~~~~~~~~~~~~~~~
 
+Contains ndmg's fiber reconstruction and tractography functionality.
+Theory described here: https://neurodata.io/talks/ndmg.pdf#page=21
+"""
 
 # system imports
-import warnings
-
-warnings.simplefilter("ignore")
 import os
 
 # external package imports
@@ -30,27 +16,19 @@ import numpy as np
 import nibabel as nib
 
 # dipy imports
-# tracking
 from dipy.tracking.streamline import Streamlines
 from dipy.tracking import utils
-from dipy.tracking.stopping_criterion import (
-    BinaryStoppingCriterion,
-    ActStoppingCriterion,
-    CmcStoppingCriterion,
-)
-from dipy.tracking.local_tracking import LocalTracking, ParticleFilteringTracking
+from dipy.tracking.local_tracking import LocalTracking
+from dipy.tracking.local_tracking import ParticleFilteringTracking
+from dipy.tracking.stopping_criterion import BinaryStoppingCriterion
+from dipy.tracking.stopping_criterion import ActStoppingCriterion
+from dipy.tracking.stopping_criterion import CmcStoppingCriterion
 
-# from dipy.tracking.eudx import EuDX  # TODO : dipy 1.0.0
-
-# reconst
 from dipy.reconst.dti import fractional_anisotropy, TensorModel, quantize_evecs
 from dipy.reconst.shm import CsaOdfModel
 from dipy.reconst.csdeconv import ConstrainedSphericalDeconvModel, recursive_response
-from dipy.reconst.peak_direction_getter import (
-    EuDXDirectionGetter,
-)  # TODO : update the EuDX code to use this
+from dipy.reconst.peak_direction_getter import EuDXDirectionGetter
 
-# others
 from dipy.data import get_sphere
 from dipy.direction import peaks_from_model, ProbabilisticDirectionGetter
 from dipy.segment.mask import median_otsu
@@ -58,7 +36,7 @@ from dipy.segment.mask import median_otsu
 
 def build_seed_list(mask_img_file, stream_affine, dens):
     """uses dipy tractography utilities in order to create a seed list for tractography
-    
+
     Parameters
     ----------
     mask_img_file : str
@@ -67,7 +45,7 @@ def build_seed_list(mask_img_file, stream_affine, dens):
         4x4 array with 1s diagonally and 0s everywhere else
     dens : int
         seed density
-    
+
     Returns
     -------
     ndarray
@@ -87,7 +65,7 @@ def build_seed_list(mask_img_file, stream_affine, dens):
 
 def tens_mod_fa_est(gtab, dwi_file, B0_mask):
     """Estimate a tensor FA image to use for registrations using dipy functions
-    
+
     Parameters
     ----------
     gtab : GradientTable
@@ -96,7 +74,7 @@ def tens_mod_fa_est(gtab, dwi_file, B0_mask):
         Path to eddy-corrected and RAS reoriented dwi image
     B0_mask : str
         Path to nodif B0 mask (averaged b0 mask)
-    
+
     Returns
     -------
     str
@@ -119,7 +97,7 @@ def tens_mod_fa_est(gtab, dwi_file, B0_mask):
     return fa_path
 
 
-class run_track(object):
+class RunTrack:
     def __init__(
         self,
         dwi_in,
@@ -136,7 +114,7 @@ class run_track(object):
         stream_affine,
     ):
         """A class for deterministic tractography in native space
-        
+
         Parameters
         ----------
         dwi_in : str
@@ -190,12 +168,12 @@ class run_track(object):
 
     def run(self):
         """Creates the tracktography tracks using dipy commands and the specified tracking type and approach
-        
+
         Returns
         -------
         ArraySequence
             contains the tractography track raw data for further analysis
-        
+
         Raises
         ------
         ValueError
@@ -235,7 +213,7 @@ class run_track(object):
     def prep_tracking(self):
         """Uses nibabel and dipy functions in order to load the grey matter, white matter, and csf masks
         and use a tissue classifier (act, cmc, or binary) on the include/exclude maps to make a tissueclassifier object
-        
+
         Returns
         -------
         ActStoppingCriterion, CmcStoppingCriterion, or BinaryStoppingCriterion
@@ -456,7 +434,7 @@ def eudx_basic(dwi_file, gtab, stop_val=0.1):
     """Tracking with basic tensors and basic eudx - experimental
     We now force seeding at every voxel in the provided mask for
     simplicity.  Future functionality will extend these options.
-    
+
     Parameters
     ----------
     dwi_file : str
@@ -465,7 +443,7 @@ def eudx_basic(dwi_file, gtab, stop_val=0.1):
         dipy formatted bval/bvec structure
     stop_val : float, optional
         Value to cutoff fiber track, by default 0.1
-    
+
     Returns
     -------
     TensorFit
