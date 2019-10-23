@@ -9,13 +9,15 @@ Contains general utility functions.
 
 # system imports
 import os
-import os.path as op
 import sys
+import re
 from subprocess import Popen, PIPE
 import subprocess
 import functools
+from itertools import product
 
 # package imports
+from bids import BIDSLayout
 import numpy as np
 import nibabel as nib
 from nilearn.image import mean_img
@@ -127,7 +129,7 @@ class NameResource:
         namer.dirs["qa"]["tensor"] = namer.dirs["qa"]["base"] + "/tensor"
         newdirs = flatten(namer.dirs, [])
         cmd = "mkdir -p {}".format(" ".join(newdirs))
-        gen_utils.execute_cmd(cmd)  # make the directories
+        execute_cmd(cmd)  # make the directories
         return
 
     def _get_outdir(self):
@@ -169,7 +171,7 @@ class NameResource:
         str
             the isolated file name
         """
-        return gen_utils.get_filename(label)
+        return get_filename(label)
         # return "label-{}".format(re.split(r'[._]',
         #                         os.path.basename(label))[0])
 
@@ -974,7 +976,7 @@ def parcel_overlap(parcellation1, parcellation2, outpath):
                 pover = np.logical_and(p1seq, p2_dat == p2reg).sum() / float(N)
                 overlapdat[p1idx, p2idx] = pover
 
-    outf = op.join(outpath, "{}_{}.csv".format(p1n, p2n))
+    outf = os.path.join(outpath, "{}_{}.csv".format(p1n, p2n))
     with open(outf, "w") as f:
         p2str = ["%s" % x for x in p2regs]
         f.write("p1reg," + ",".join(p2str) + "\n")
