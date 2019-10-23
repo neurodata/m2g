@@ -13,6 +13,7 @@ import os.path as op
 import sys
 from subprocess import Popen, PIPE
 import subprocess
+import functools
 
 # package imports
 import numpy as np
@@ -422,6 +423,7 @@ def check_exists(*dargs):
     """
 
     def outer(f):
+        @functools.wraps(f)
         def inner(*args, **kwargs):
 
             for darg in dargs:
