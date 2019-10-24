@@ -2,7 +2,7 @@
 
 """
 ndmg.register
-~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~
 
 Contains ndmg's registration classes, organized as full registration workflows.
 Used for the majority of the registration described here: https://neurodata.io/talks/ndmg.pdf#page=20

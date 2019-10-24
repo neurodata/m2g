@@ -46,7 +46,7 @@ setup(
     },
     python_requires = ">=3.6",
 
-    # download these on `pip install`
+    # download dependencies on `pip install`
     install_requires=[
         "nibabel",
         "numpy",

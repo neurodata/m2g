@@ -374,10 +374,10 @@ def as_list(x):
         a list containing x
     """
 
-    if not isinstance(x, list):
-        return [x]
-    else:
+    if isinstance(x, list):
         return x
+
+    return [x]
 
 
 def merge_dicts(x, y):
@@ -589,12 +589,12 @@ def get_braindata(brain_file):
     return braindata
 
 
-def get_filename(label):
+def get_filename(path):
     """Given a fully qualified path, return just the file name, without extension
 
     Parameters
     ----------
-    label : str
+    path : str
         Path to file you want isolated
 
     Returns
@@ -602,7 +602,7 @@ def get_filename(label):
     str
         File name
     """
-    return os.path.basename(label).split(".")[0]
+    return os.path.basename(path).split(".")[0]
 
 
 def get_slice(mri, volid, sli):
@@ -986,6 +986,3 @@ def parcel_overlap(parcellation1, parcellation2, outpath):
             datstr = ["%.4f" % x for x in overlapdat[idx,].toarray()[0,]]
             f.write(str(p1reg) + "," + ",".join(datstr) + "\n")
         f.close()
-
-
-#     return
