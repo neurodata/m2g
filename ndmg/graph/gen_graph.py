@@ -32,7 +32,7 @@ import os
 from dipy.tracking._utils import _mapping_to_voxel, _to_voxel_coordinates
 from itertools import combinations
 from collections import defaultdict
-from ndmg.gen_utils import timer
+from ndmg.utils.gen_utils import timer
 
 
 def get_sphere(coords, r, vox_dims, dims):
