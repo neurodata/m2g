@@ -69,10 +69,10 @@ RUN \
 WORKDIR /
 
 RUN mkdir /input && \
-    chmod -R 777 /data
+    chmod -R 777 /input
 
 RUN mkdir /output && \
-    chmod -R 777 /outputs
+    chmod -R 777 /output
 
 # grab atlases from neuroparc
 RUN mkdir /ndmg_atlases
