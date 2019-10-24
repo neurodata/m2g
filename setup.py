@@ -84,15 +84,3 @@ kwargs.update(
 
 # run setup
 setup(**kwargs)
-
-# setup(
-#         name="ndmg",
-#         # version=__version__,
-#         description="Neuro Data MRI to Graphs Pipeline",
-#         author="Derek Pisner, Alex Loftus, Greg Kiar, Eric Bridgeford, and Will Gray Roncal",
-#         author_email="dpisner@utexas.edu, aloftus2@jhu.edu, gkiar@jhu.edu, wgr@jhu.edu, ebridge2@jhu.edu",
-#         url="https://github.com/neurodata/ndmg",
-#         download_url="https://github.com/neurodata/ndmg/tarball/" + __version__,
-#         keywords=["connectome", "mri", "pipeline"],
-#         classifiers=["Programming Language :: Python :: 3.6"],
-# )
