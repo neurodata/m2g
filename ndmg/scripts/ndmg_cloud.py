@@ -33,6 +33,7 @@ from ndmg.utils.cloud_utils import get_credentials
 from ndmg.utils.cloud_utils import get_matching_s3_objects
 from ndmg.utils.cloud_utils import s3_client
 
+# TODO : grab this locally, using pkg_resources
 participant_templ = "https://raw.githubusercontent.com/neurodata/ndmg/staging/templates/ndmg_cloud_participant.json"
 
 
@@ -120,7 +121,7 @@ def crawl_bucket(bucket, path, jobdir):
         dictionary containing all subjects and sessions from the path location
     """
 
-    # if jobdir has seshs info file in it, use that instead
+    # if jobdir has seshs json cached, use that instead
     sesh_path = "{}/seshs.json".format(jobdir)
     if os.path.isfile(sesh_path):
         print("seshs.json found -- loading bucket info from there")
@@ -129,40 +130,26 @@ def crawl_bucket(bucket, path, jobdir):
         print("Information obtained from s3.")
         return seshs
 
+    # set up bucket crawl
     subj_pattern = r"(?<=sub-)(\w*)(?=/ses)"
     sesh_pattern = r"(?<=ses-)(\d*)"
     all_subfiles = get_matching_s3_objects(bucket, path + "/sub-")
     subjs = list(set(re.findall(subj_pattern, obj)[0] for obj in all_subfiles))
-    # cmd = "aws s3 ls s3://{}/{}/".format(bucket, path)
-    # try:
-    #     ACCESS, SECRET = get_credentials()
-    #     os.environ["AWS_ACCESS_KEY_ID"] = ACCESS
-    #     os.environ["AWS_SECRET_ACCESS_KEY"] = SECRET
-    # except:
-    #     cmd += " --no-sign-request"
-    # out = subprocess.check_output(cmd, shell=True)
-    # pattern = r"(?<=sub-)(\w*)(?=/ses)"
-    # subjs = re.findall(pattern, out.decode("utf-8"))
-    # cmd = "aws s3 ls s3://{}/{}/sub-{}/"
-    # if not ACCESS:
-    #     cmd += " --no-sign-request"
     seshs = OrderedDict()
-    # TODO : use boto3 for this.
+
+    # populate seshs
     for subj in subjs:
         prefix = path + "/sub-{}/".format(subj)
         all_seshfiles = get_matching_s3_objects(bucket, prefix)
         sesh = list(set([re.findall(sesh_pattern, obj)[0] for obj in all_seshfiles]))
-
-        # cmd = cmd.format(bucket, path, subj)
-        # out = subprocess.check_output(cmd, shell=True)  # TODO: get this information outside of a loop
-        # sesh = re.findall("ses-(.+)/", out.decode("utf-8"))
         if sesh != []:
             seshs[subj] = sesh
             print("{} added to seshs.".format(subj))
         else:
             seshs[subj] = None
             print("{} not added (no sessions).".format(subj))
-        # seshs[subj] = sesh if sesh != [] else [None]
+
+    # print session IDs and create json cache
     print(
         (
             "Session IDs: "
@@ -334,18 +321,12 @@ def submit_jobs(jobs, jobdir):
 
     batch = s3_client(service="batch")
     cmd_template = "--cli-input-json file://{}"
-    # cmd_template = batch.submit_jobs
 
     for job in jobs:
-        # use this to start wherever
-        # if jobs.index(job) >= jobs.index('/jobs/jobs/ndmg_0-1-2_SWU4_sub-0025768_ses-1.json'):
         with open(job, "r") as f:
             kwargs = json.load(f)
         print(("... Submitting job {}...".format(job)))
         submission = batch.submit_job(**kwargs)
-        # out = subprocess.check_output(cmd, shell=True)
-        # time.sleep(0.1)  # jobs sometimes hang, seeing if this helps
-        # submission = ast.literal_eval(out.decode("utf-8"))
         print(
             (
                 "Job Name: {}, Job ID: {}".format(
@@ -392,19 +373,6 @@ def kill_jobs(jobdir, reason='"Killing job"'):
     for jid in jids:
         print("Terminating job {}".format(jid))
         batch.terminate_job(jobId=jid, reason=reason)
-        # status = get_status(jobdir, jid)
-        # if status in ["SUCCEEDED", "FAILED"]:
-        #     print(("... No action needed for {}...".format(name)))
-        # elif status in ["SUBMITTED", "PENDING", "RUNNABLE"]:
-        #     cmd = cmd_template1.format(jid, reason)
-        #     print(("... Cancelling job {}...".format(name)))
-        #     out = subprocess.check_output(cmd, shell=True)
-        # elif status in ["STARTING", "RUNNING"]:
-        #     cmd = cmd_template2.format(jid, reason)
-        #     print(("... Terminating job {}...".format(name)))
-        #     out = subprocess.check_output(cmd, shell=True)
-        # else:
-        #     print("... Unknown status??")
 
 
 #%%

@@ -1,14 +1,26 @@
 #!/usr/bin/env python
 
-from setuptools import setup, Extension
+from setuptools import setup, find_packages
 from ndmg import __version__
 
 
 setup(
+
+    # metadata
     name="ndmg",
-    packages=["ndmg", "ndmg.stats", "ndmg.utils", "ndmg.scripts"],
-    include_package_data=True,
     version=__version__,
+    description="Neuro Data MRI to Graphs Pipeline",
+    author="Derek Pisner, Alex Loftus, Greg Kiar, Eric Bridgeford, and Will Gray Roncal",
+    author_email="dpisner@utexas.edu, aloftus2@jhu.edu, gkiar@jhu.edu, wgr@jhu.edu, ebridge2@jhu.edu",
+    url="https://github.com/neurodata/ndmg",
+    download_url="https://github.com/neurodata/ndmg/tarball/" + __version__,
+    keywords=["connectome", "mri", "pipeline"],
+    classifiers=["Programming Language :: Python :: 3.6"],
+
+    # utility
+    packages=find_packages()
+    package_data={'templates': ["*.json"] } 
+    include_package_data=False,  # only include the ndmg_cloud template jsons
     entry_points={
         "console_scripts": [
             "ndmg_bids=ndmg.scripts.ndmg_bids:main",  # for backwards compatibility
@@ -17,13 +29,8 @@ setup(
             "ndmg_cloud=ndmg.scripts.ndmg_cloud:main",
         ]
     },
-    description="Neuro Data MRI to Graphs Pipeline",
-    author="Derek Pisner, Alex Loftus, Greg Kiar, Eric Bridgeford, and Will Gray Roncal",
-    author_email="dpisner@utexas.edu, aloftus2@jhu.edu, gkiar@jhu.edu, wgr@jhu.edu, ebridge2@jhu.edu",
-    url="https://github.com/neurodata/ndmg",
-    download_url="https://github.com/neurodata/ndmg/tarball/" + __version__,
-    keywords=["connectome", "mri", "pipeline"],
-    classifiers=["Programming Language :: Python :: 3.6"],
+
+    # download these on `pip install`
     install_requires=[
         "numpy",
         "nibabel",

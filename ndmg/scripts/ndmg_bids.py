@@ -25,34 +25,6 @@ from ndmg.utils.gen_utils import check_dependencies
 from ndmg.utils.gen_utils import sweep_directory
 from ndmg.scripts.ndmg_dwi_pipeline import ndmg_dwi_worker
 
-# TODO : move the stuff below to `main`
-check_dependencies()
-print("Beginning ndmg ...")
-
-if os.path.isdir("/ndmg_atlases"):
-    # in docker
-    atlas_dir = "/ndmg_atlases"
-else:
-    # local
-    atlas_dir = os.path.expanduser("~") + "/.ndmg/ndmg_atlases"
-
-    # Data structure:
-    # sub-<subject id>/
-    #   ses-<session id>/
-    #     anat/
-    #       sub-<subject id>_ses-<session id>_T1w.nii.gz
-    #     dwi/
-    #       sub-<subject id>_ses-<session id>_dwi.nii.gz
-    #   *   sub-<subject id>_ses-<session id>_dwi.bval
-    #   *   sub-<subject id>_ses-<session id>_dwi.bvec
-    #
-    # *these files can be anywhere up stream of the dwi data, and are inherited.
-
-    """
-    Given the desired location for atlases and the type of processing, ensure
-    we have all the atlases and parcellations.
-    """
-
 
 def get_atlas(atlas_dir, vox_size):
     """Given the desired location of atlases and the type of processing, ensure we have all the atlases and parcellations.
@@ -443,6 +415,15 @@ def main():
     reg_style = result.sp
     modif = result.modif
     skull = result.skull
+
+    # initial setup and checks
+    check_dependencies()
+    print("Beginning ndmg ...")
+
+    if os.path.isdir("/ndmg_atlases"):
+        atlas_dir = "/ndmg_atlases"  # in docker
+    else:
+        atlas_dir = os.path.expanduser("~") + "/.ndmg/ndmg_atlases"  # local
 
     # Check to see if user has provided direction to an existing s3 bucket they wish to use
     try:
