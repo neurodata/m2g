@@ -32,6 +32,7 @@ import os
 from dipy.tracking._utils import _mapping_to_voxel, _to_voxel_coordinates
 from itertools import combinations
 from collections import defaultdict
+from ndmg.gen_utils import timer
 
 
 def get_sphere(coords, r, vox_dims, dims):
@@ -119,6 +120,7 @@ class graph_tools(object):
         self.connectome_path = os.path.dirname(connectome_path)
         pass
 
+    @timer
     def make_graph_old(self):
         """
         Takes streamlines and produces a graph
@@ -172,6 +174,7 @@ class graph_tools(object):
         self.g.add_weighted_edges_from(edge_list)
         return self.g, self.edge_dict
 
+    @timer
     def make_graph(self, error_margin=2, overlap_thr=1, voxel_size=2):
         """Takes streamlines and produces a graph using Numpy functions
         

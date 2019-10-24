@@ -29,6 +29,7 @@ import os.path as op
 import sys
 from subprocess import Popen, PIPE
 import subprocess
+import time
 
 # package imports
 import numpy as np
@@ -91,6 +92,16 @@ def check_exists(*dargs):
 
     return outer
 
+def timer(f):
+    """Print the runtime of the decorated function"""
+    def wrapper_timer(*args, **kwargs):
+        start_time = time.perf_counter()    # 1
+        f(*args, **kwargs)
+        end_time = time.perf_counter()      # 2
+        run_time = end_time - start_time    # 3
+        print(f"Function {f.__name__!r} finished in {run_time:.4f} secs")
+        return f(*args, **kwargs)
+    return wrapper_timer
 
 def check_dependencies():
     """
@@ -161,7 +172,7 @@ def show_template_bundles(final_streamlines, template_path, fname):
     window.record(renderer, n_frames=1, out_path=fname, size=(900, 900))
     return
 
-
+@timer
 def execute_cmd(cmd, verb=False):
     """Given a bash command, it is executed and the response piped back to the
     calling script
@@ -272,7 +283,7 @@ def get_slice(mri, volid, sli):
     # and saved to a new file
     nib.save(out, sli)
 
-
+@timer
 def make_gtab_and_bmask(fbval, fbvec, dwi_file, outdir):
     """Takes bval and bvec files and produces a structure in dipy format while also using FSL commands
     
@@ -348,7 +359,7 @@ def make_gtab_and_bmask(fbval, fbvec, dwi_file, outdir):
     os.system(cmd)
     return gtab, nodif_B0, nodif_B0_mask
 
-
+@timer
 def reorient_dwi(dwi_prep, bvecs, namer):
     """Orients dwi data to the proper orientation (RAS+) using nibabel
     
@@ -417,7 +428,7 @@ def reorient_dwi(dwi_prep, bvecs, namer):
 
     return out_fname, out_bvec_fname
 
-
+@timer
 def reorient_img(img, namer):
     """Reorients input image to RAS+
     
@@ -461,7 +472,7 @@ def reorient_img(img, namer):
 
     return out_name
 
-
+@timer
 def match_target_vox_res(img_file, vox_size, namer, sens):
     """Reslices input MRI file if it does not match the targeted voxel resolution. Can take dwi or t1w scans.
     

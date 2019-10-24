@@ -289,20 +289,10 @@ def ndmg_dwi_worker(
     preproc.rescale_bvec(fbvec, bvec_scaled)
 
     # Check orientation (dwi_prep)
-    start_time = time.time()
     [dwi_prep, bvecs] = gen_utils.reorient_dwi(dwi_prep, bvec_scaled, namer)
-    print(
-        "%s%s%s"
-        % ("Reorienting runtime: ", str(np.round(time.time() - start_time, 1)), "s")
-    )
 
     # Check dimensions
-    start_time = time.time()
     dwi_prep = gen_utils.match_target_vox_res(dwi_prep, vox_size, namer, sens="dwi")
-    print(
-        "%s%s%s"
-        % ("Reslicing runtime: ", str(np.round(time.time() - start_time, 1)), "s")
-    )
 
     # Build gradient table
     print("fbval: ", fbval)
@@ -317,10 +307,6 @@ def ndmg_dwi_worker(
     # Get B0 header and affine
     dwi_prep_img = nib.load(dwi_prep)
     hdr = dwi_prep_img.header
-    print(
-        "%s%s%s"
-        % ("Preprocessing runtime: ", str(np.round(time.time() - start_time, 1)), "s")
-    )
 
     # -------- Registration Steps ----------------------------------- #
     if (skipreg is False) and len(os.listdir(namer.dirs["output"]["prep_anat"])) != 0:
@@ -354,10 +340,6 @@ def ndmg_dwi_worker(
     start_time = time.time()
     t1w = gen_utils.reorient_img(t1w, namer)
     t1w = gen_utils.match_target_vox_res(t1w, vox_size, namer, sens="t1w")
-    print(
-        "%s%s%s"
-        % ("Reorienting runtime: ", str(np.round(time.time() - start_time, 1)), "s")
-    )
 
     if reg_style == "native" or reg_style == "native_dsn":
 
@@ -369,16 +351,13 @@ def ndmg_dwi_worker(
         )
 
         # Perform anatomical segmentation
-        start_time = time.time()
         if (skipreg is True) and os.path.isfile(reg.wm_edge):
             print("Found existing gentissue run!")
             pass
         else:
             reg.gen_tissue()
-            print(f"gen_tissue runtime: {str(np.round(time.time() - start_time, 1))}s")
-
+        
         # Align t1w to dwi
-        start_time = time.time()
         if (
             (skipreg is True)
             and os.path.isfile(reg.t1w2dwi)
@@ -389,17 +368,8 @@ def ndmg_dwi_worker(
             pass
         else:
             reg.t1w2dwi_align()
-            print(
-                "%s%s%s"
-                % (
-                    "t1w2dwi_align runtime: ",
-                    str(np.round(time.time() - start_time, 1)),
-                    "s",
-                )
-            )
 
         # Align tissue classifiers
-        start_time = time.time()
         if (
             (skipreg is True)
             and os.path.isfile(reg.wm_gm_int_in_dwi)
@@ -410,16 +380,8 @@ def ndmg_dwi_worker(
             pass
         else:
             reg.tissue2dwi_align()
-            print(
-                "%s%s%s"
-                % (
-                    "tissue2dwi_align runtime: ",
-                    str(np.round(time.time() - start_time, 1)),
-                    "s",
-                )
-            )
 
-        # Check that the atlas hasn't lost any of the rois
+        # Align atlas to dwi-space and check that the atlas hasn't lost any of the rois
         if reg_style == "native_dsn":
             labels_im_file_mni_list = reg_utils.skullstrip_check(
                 reg, labels, namer, vox_size, reg_style
@@ -476,7 +438,7 @@ def ndmg_dwi_worker(
         print(
             "%s%s%s"
             % (
-                "Tractography runtime: ",
+                "POTNETIALLY REMOVE!!!Tractography runtime: ",
                 str(np.round(time.time() - start_time, 1)),
                 "s",
             )

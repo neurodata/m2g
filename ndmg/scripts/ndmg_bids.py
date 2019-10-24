@@ -30,7 +30,7 @@ from argparse import ArgumentParser
 import subprocess
 
 from ndmg.utils import s3_utils
-from ndmg.utils.gen_utils import check_dependencies
+from ndmg.utils.gen_utils import check_dependencies, timer
 from ndmg.utils.bids_utils import *
 from ndmg.scripts.ndmg_dwi_pipeline import ndmg_dwi_worker
 
@@ -60,7 +60,6 @@ else:
     Given the desired location for atlases and the type of processing, ensure
     we have all the atlases and parcellations.
     """
-
 
 def get_atlas(atlas_dir, vox_size):
     """Given the desired location of atlases and the type of processing, ensure we have all the atlases and parcellations.

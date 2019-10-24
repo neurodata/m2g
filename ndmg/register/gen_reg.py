@@ -30,7 +30,7 @@ from nilearn.image import load_img, math_img
 from ndmg.utils import gen_utils
 from ndmg.utils import reg_utils
 
-
+@gen_utils.timer
 def direct_streamline_norm(streams, fa_path, namer):
     """Applys the Symmetric Diffeomorphic Registration (SyN) Algorithm onto the streamlines to the atlas space defined by .../atlases/reference_brains/FSL_HCP1065_FA_2mm.nii.gz
     
@@ -326,6 +326,7 @@ class DmriReg(object):
             self.namer.dirs["output"]["reg_anat"], self.t1w_name
         )
 
+    @gen_utils.timer
     def gen_tissue(self):
         """Extracts the brain from the raw t1w image (as indicated by self.t1w), uses it to create WM, GM, and CSF masks,
         reslices all 4 files to the target voxel resolution and extracts the white matter edge. Each mask is saved to 
@@ -374,6 +375,7 @@ class DmriReg(object):
 
         return
 
+    @gen_utils.timer
     def t1w2dwi_align(self):
         """Alignment from t1w to mni, making t1w_mni, and t1w_mni to dwi. A function to perform self alignment. Uses a local optimisation cost function to get the
         two images close, and then uses bbr to obtain a good alignment of brain boundaries. Assumes input dwi is already preprocessed and brain extracted.
@@ -699,6 +701,7 @@ class DmriReg(object):
             )
             return self.aligned_atlas_t1mni
 
+    @gen_utils.timer
     def tissue2dwi_align(self):
         """alignment of ventricle and CC ROI's from MNI space --> dwi and CC and CSF from T1w space --> dwi
         A function to generate and perform dwi space alignment of avoidance/waypoint masks for tractography.

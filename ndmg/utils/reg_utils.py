@@ -27,7 +27,7 @@ import nilearn.image as nl
 import os
 import os.path as op
 
-from ndmg.utils.gen_utils import check_exists
+from ndmg.utils.gen_utils import check_exists, timer
 from ndmg.utils import gen_utils
 
 
@@ -473,7 +473,7 @@ def align_epi(epi, t1, brain, out):
     cmd = cmd.format(epi, t1, brain, out)
     os.system(cmd)
 
-
+@timer
 @check_exists(0, 1)
 def align_nonlinear(inp, ref, xfm, out, warp, ref_mask=None, in_mask=None, config=None):
     """Aligns two images using nonlinear methods and stores the transform between them using fnirt

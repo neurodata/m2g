@@ -54,6 +54,7 @@ from dipy.reconst.peak_direction_getter import (
 from dipy.data import get_sphere
 from dipy.direction import peaks_from_model, ProbabilisticDirectionGetter
 from dipy.segment.mask import median_otsu
+from ndmg.utils.gen_utils import timer
 
 
 def build_seed_list(mask_img_file, stream_affine, dens):
@@ -188,6 +189,7 @@ class run_track(object):
         self.mod_func = mod_func
         self.stream_affine = stream_affine
 
+    @timer
     def run(self):
         """Creates the tracktography tracks using dipy commands and the specified tracking type and approach
         
