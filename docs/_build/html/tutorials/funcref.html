@@ -117,7 +117,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#module-stats.qa_tensor">qa_tensor</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-utils.reg_utils">reg_utils</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-preproc.rescale_bvec">rescale_bvec</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-utils.s3_utils">s3_utils</a><ul class="simple">
+<li class="toctree-l2"><a class="reference internal" href="#module-utils.cloud_utils">cloud_utils</a><ul class="simple">
 </ul>
 </li>
 </ul>
@@ -227,7 +227,7 @@
 <li><a class="reference internal" href="#module-stats.qa_tensor" id="id23">qa_tensor</a></li>
 <li><a class="reference internal" href="#module-utils.reg_utils" id="id24">reg_utils</a></li>
 <li><a class="reference internal" href="#module-preproc.rescale_bvec" id="id25">rescale_bvec</a></li>
-<li><a class="reference internal" href="#module-utils.s3_utils" id="id26">s3_utils</a></li>
+<li><a class="reference internal" href="#module-utils.cloud_utils" id="id26">cloud_utils</a></li>
 </ul>
 </li>
 </ul>
@@ -282,8 +282,8 @@ for dwi images (since they have variable extensions due to having an nii.gz, bva
 </dd></dl>
 
 <dl class="class">
-<dt id="utils.bids_utils.name_resource">
-<em class="property">class </em><code class="descclassname">utils.bids_utils.</code><code class="descname">name_resource</code><span class="sig-paren">(</span><em>modf</em>, <em>t1wf</em>, <em>tempf</em>, <em>opath</em><span class="sig-paren">)</span><a class="headerlink" href="#utils.bids_utils.name_resource" title="Permalink to this definition">¶</a></dt>
+<dt id="utils.bids_utils.NameResource">
+<em class="property">class </em><code class="descclassname">utils.bids_utils.</code><code class="descname">NameResource</code><span class="sig-paren">(</span><em>modf</em>, <em>t1wf</em>, <em>tempf</em>, <em>opath</em><span class="sig-paren">)</span><a class="headerlink" href="#utils.bids_utils.NameResource" title="Permalink to this definition">¶</a></dt>
 <dd><p>A class for naming derivatives under the BIDs spec.</p>
 <dl class="docutils">
 <dt>modf <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
@@ -296,8 +296,8 @@ for dwi images (since they have variable extensions due to having an nii.gz, bva
 <dd>Path to output directory</dd>
 </dl>
 <dl class="method">
-<dt id="utils.bids_utils.name_resource.add_dirs">
-<code class="descname">add_dirs</code><span class="sig-paren">(</span><em>paths</em>, <em>labels</em>, <em>label_dirs</em><span class="sig-paren">)</span><a class="headerlink" href="#utils.bids_utils.name_resource.add_dirs" title="Permalink to this definition">¶</a></dt>
+<dt id="utils.bids_utils.NameResource.add_dirs">
+<code class="descname">add_dirs</code><span class="sig-paren">(</span><em>paths</em>, <em>labels</em>, <em>label_dirs</em><span class="sig-paren">)</span><a class="headerlink" href="#utils.bids_utils.NameResource.add_dirs" title="Permalink to this definition">¶</a></dt>
 <dd><p>creates tmp and permanent directories for the desired suffixes.</p>
 <dl class="docutils">
 <dt><a href="#id1"><span class="problematic" id="id2">**</span></a>Positional Arguments:</dt>
@@ -316,12 +316,12 @@ for dwi images (since they have variable extensions due to having an nii.gz, bva
 </dd></dl>
 
 <dl class="method">
-<dt id="utils.bids_utils.name_resource.add_dirs_dwi">
-<code class="descname">add_dirs_dwi</code><span class="sig-paren">(</span><em>paths</em>, <em>labels</em>, <em>label_dirs</em><span class="sig-paren">)</span><a class="headerlink" href="#utils.bids_utils.name_resource.add_dirs_dwi" title="Permalink to this definition">¶</a></dt>
+<dt id="utils.bids_utils.NameResource.add_dirs_dwi">
+<code class="descname">add_dirs_dwi</code><span class="sig-paren">(</span><em>paths</em>, <em>labels</em>, <em>label_dirs</em><span class="sig-paren">)</span><a class="headerlink" href="#utils.bids_utils.NameResource.add_dirs_dwi" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates tmp and permanent directories for the desired suffixes</p>
 <dl class="docutils">
-<dt>namer <span class="classifier-delimiter">:</span> <span class="classifier">name_resource</span></dt>
-<dd>varibale of the name_resource class created by name_resource() containing path and settings information for the desired run. It includes: subject, anatomical scan, session, run number, task, resolution, output directory</dd>
+<dt>namer <span class="classifier-delimiter">:</span> <span class="classifier">NameResource</span></dt>
+<dd>varibale of the NameResource class created by NameResource() containing path and settings information for the desired run. It includes: subject, anatomical scan, session, run number, task, resolution, output directory</dd>
 <dt>paths <span class="classifier-delimiter">:</span> <span class="classifier">dict</span></dt>
 <dd>a dictionary of keys to suffix directories</dd>
 <dt>labels <span class="classifier-delimiter">:</span> <span class="classifier">list</span></dt>
@@ -332,14 +332,14 @@ for dwi images (since they have variable extensions due to having an nii.gz, bva
 </dd></dl>
 
 <dl class="method">
-<dt id="utils.bids_utils.name_resource.get_label">
-<code class="descname">get_label</code><span class="sig-paren">(</span><em>label</em><span class="sig-paren">)</span><a class="headerlink" href="#utils.bids_utils.name_resource.get_label" title="Permalink to this definition">¶</a></dt>
+<dt id="utils.bids_utils.NameResource.get_label">
+<code class="descname">get_label</code><span class="sig-paren">(</span><em>label</em><span class="sig-paren">)</span><a class="headerlink" href="#utils.bids_utils.NameResource.get_label" title="Permalink to this definition">¶</a></dt>
 <dd><p>return the formatted label information for the parcellation.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="utils.bids_utils.name_resource.get_outdir">
-<code class="descname">get_outdir</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#utils.bids_utils.name_resource.get_outdir" title="Permalink to this definition">¶</a></dt>
+<dt id="utils.bids_utils.NameResource.get_outdir">
+<code class="descname">get_outdir</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#utils.bids_utils.NameResource.get_outdir" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the base output directory for a particular subject and appropriate granularity.</p>
 <dl class="docutils">
 <dt>str</dt>
@@ -348,14 +348,14 @@ for dwi images (since they have variable extensions due to having an nii.gz, bva
 </dd></dl>
 
 <dl class="method">
-<dt id="utils.bids_utils.name_resource.get_template_info">
-<code class="descname">get_template_info</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#utils.bids_utils.name_resource.get_template_info" title="Permalink to this definition">¶</a></dt>
+<dt id="utils.bids_utils.NameResource.get_template_info">
+<code class="descname">get_template_info</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#utils.bids_utils.NameResource.get_template_info" title="Permalink to this definition">¶</a></dt>
 <dd><p>returns the formatted spatial information associated with a template.-</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="utils.bids_utils.name_resource.name_derivative">
-<code class="descname">name_derivative</code><span class="sig-paren">(</span><em>folder</em>, <em>derivative</em><span class="sig-paren">)</span><a class="headerlink" href="#utils.bids_utils.name_resource.name_derivative" title="Permalink to this definition">¶</a></dt>
+<dt id="utils.bids_utils.NameResource.name_derivative">
+<code class="descname">name_derivative</code><span class="sig-paren">(</span><em>folder</em>, <em>derivative</em><span class="sig-paren">)</span><a class="headerlink" href="#utils.bids_utils.NameResource.name_derivative" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates derivative output file paths using os.path.join</p>
 <dl class="docutils">
 <dt>folder <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
@@ -435,7 +435,7 @@ the specified error radius of the list of the input coordinates.</dd>
 <dd>Streamlines for analysis</dd>
 <dt>affine <span class="classifier-delimiter">:</span> <span class="classifier">ndarray</span></dt>
 <dd>a 2-D array with ones on the diagonal and zeros elsewhere (DOESN’T APPEAR TO BE Used)</dd>
-<dt>namer <span class="classifier-delimiter">:</span> <span class="classifier">name_resource</span></dt>
+<dt>namer <span class="classifier-delimiter">:</span> <span class="classifier">NameResource</span></dt>
 <dd>Name_resource object containing relevant path for the pipeline</dd>
 <dt>connectome_path <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
 <dd>Path for the output connectome file (.ssv file)</dd>
@@ -536,7 +536,7 @@ or compatible format.</li>
 <dd>Path to streamlines.trk file to be transformed</dd>
 <dt>fa_path <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
 <dd>Path to subject’s FA tensor image</dd>
-<dt>namer <span class="classifier-delimiter">:</span> <span class="classifier">name_resource</span></dt>
+<dt>namer <span class="classifier-delimiter">:</span> <span class="classifier">NameResource</span></dt>
 <dd>variable containing all relevant pathing information</dd>
 </dl>
 <dl class="docutils">
@@ -548,12 +548,12 @@ or compatible format.</li>
 </dd></dl>
 
 <dl class="class">
-<dt id="register.gen_reg.dmri_reg">
-<em class="property">class </em><code class="descclassname">register.gen_reg.</code><code class="descname">dmri_reg</code><span class="sig-paren">(</span><em>namer</em>, <em>nodif_B0</em>, <em>nodif_B0_mask</em>, <em>t1w_in</em>, <em>vox_size</em>, <em>simple</em><span class="sig-paren">)</span><a class="headerlink" href="#register.gen_reg.dmri_reg" title="Permalink to this definition">¶</a></dt>
+<dt id="register.gen_reg.DmriReg">
+<em class="property">class </em><code class="descclassname">register.gen_reg.</code><code class="descname">DmriReg</code><span class="sig-paren">(</span><em>namer</em>, <em>nodif_B0</em>, <em>nodif_B0_mask</em>, <em>t1w_in</em>, <em>vox_size</em>, <em>simple</em><span class="sig-paren">)</span><a class="headerlink" href="#register.gen_reg.DmriReg" title="Permalink to this definition">¶</a></dt>
 <dd><p>Class containing relevant paths and class methods for analysing tractography</p>
 <dl class="docutils">
-<dt>namer <span class="classifier-delimiter">:</span> <span class="classifier">name_resource</span></dt>
-<dd>name_resource variable containing relevant directory tree information</dd>
+<dt>namer <span class="classifier-delimiter">:</span> <span class="classifier">NameResource</span></dt>
+<dd>NameResource variable containing relevant directory tree information</dd>
 <dt>nodif_B0 <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
 <dd>path to mean b0 image</dd>
 <dt>nodif_B0_mask <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
@@ -570,8 +570,8 @@ or compatible format.</li>
 <dd>FSL atlas for ventricle reference not found</dd>
 </dl>
 <dl class="method">
-<dt id="register.gen_reg.dmri_reg.atlas2t1w2dwi_align">
-<code class="descname">atlas2t1w2dwi_align</code><span class="sig-paren">(</span><em>atlas</em>, <em>dsn=True</em><span class="sig-paren">)</span><a class="headerlink" href="#register.gen_reg.dmri_reg.atlas2t1w2dwi_align" title="Permalink to this definition">¶</a></dt>
+<dt id="register.gen_reg.DmriReg.atlas2t1w2dwi_align">
+<code class="descname">atlas2t1w2dwi_align</code><span class="sig-paren">(</span><em>atlas</em>, <em>dsn=True</em><span class="sig-paren">)</span><a class="headerlink" href="#register.gen_reg.DmriReg.atlas2t1w2dwi_align" title="Permalink to this definition">¶</a></dt>
 <dd><p>alignment from atlas to t1w to dwi. A function to perform atlas alignmet. Tries nonlinear registration first, and if that fails, does a liner
 registration instead.
 Note: for this to work, must first have called t1w2dwi_align.</p>
@@ -588,23 +588,23 @@ Note: for this to work, must first have called t1w2dwi_align.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="register.gen_reg.dmri_reg.gen_tissue">
-<code class="descname">gen_tissue</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#register.gen_reg.dmri_reg.gen_tissue" title="Permalink to this definition">¶</a></dt>
+<dt id="register.gen_reg.DmriReg.gen_tissue">
+<code class="descname">gen_tissue</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#register.gen_reg.DmriReg.gen_tissue" title="Permalink to this definition">¶</a></dt>
 <dd><p>Extracts the brain from the raw t1w image (as indicated by self.t1w), uses it to create WM, GM, and CSF masks,
 reslices all 4 files to the target voxel resolution and extracts the white matter edge. Each mask is saved to 
 location indicated by self.map_path</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="register.gen_reg.dmri_reg.t1w2dwi_align">
-<code class="descname">t1w2dwi_align</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#register.gen_reg.dmri_reg.t1w2dwi_align" title="Permalink to this definition">¶</a></dt>
+<dt id="register.gen_reg.DmriReg.t1w2dwi_align">
+<code class="descname">t1w2dwi_align</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#register.gen_reg.DmriReg.t1w2dwi_align" title="Permalink to this definition">¶</a></dt>
 <dd><p>Alignment from t1w to mni, making t1w_mni, and t1w_mni to dwi. A function to perform self alignment. Uses a local optimisation cost function to get the
 two images close, and then uses bbr to obtain a good alignment of brain boundaries. Assumes input dwi is already preprocessed and brain extracted.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="register.gen_reg.dmri_reg.tissue2dwi_align">
-<code class="descname">tissue2dwi_align</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#register.gen_reg.dmri_reg.tissue2dwi_align" title="Permalink to this definition">¶</a></dt>
+<dt id="register.gen_reg.DmriReg.tissue2dwi_align">
+<code class="descname">tissue2dwi_align</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#register.gen_reg.DmriReg.tissue2dwi_align" title="Permalink to this definition">¶</a></dt>
 <dd><p>alignment of ventricle and CC ROI’s from MNI space –&gt; dwi and CC and CSF from T1w space –&gt; dwi
 A function to generate and perform dwi space alignment of avoidance/waypoint masks for tractography.
 First creates ventricle and CC ROI. Then creates transforms from stock MNI template to dwi space.
@@ -742,8 +742,8 @@ saved in future versions.</p>
 <dd>path to file to be resliced</dd>
 <dt>vox_size <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
 <dd>target voxel resolution (‘2mm’ or ‘1mm’)</dd>
-<dt>namer <span class="classifier-delimiter">:</span> <span class="classifier">name_resource</span></dt>
-<dd>name_resource variable containing relevant directory tree information</dd>
+<dt>namer <span class="classifier-delimiter">:</span> <span class="classifier">NameResource</span></dt>
+<dd>NameResource variable containing relevant directory tree information</dd>
 <dt>sens <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
 <dd>type of data being analyzed (‘dwi’ or ‘func’)</dd>
 </dl>
@@ -792,8 +792,8 @@ percent of voxels in parcel (parcellation 1) that fall into parcel
 <dd>Path to eddy corrected dwi file</dd>
 <dt>bvecs <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
 <dd>Path to the resaled b-vector file</dd>
-<dt>namer <span class="classifier-delimiter">:</span> <span class="classifier">name_resource</span></dt>
-<dd>name_resource variable containing relevant directory tree information</dd>
+<dt>namer <span class="classifier-delimiter">:</span> <span class="classifier">NameResource</span></dt>
+<dd>NameResource variable containing relevant directory tree information</dd>
 </dl>
 <dl class="docutils">
 <dt>str</dt>
@@ -810,8 +810,8 @@ percent of voxels in parcel (parcellation 1) that fall into parcel
 <dl class="docutils">
 <dt>img <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
 <dd>Path to image being reoriented</dd>
-<dt>namer <span class="classifier-delimiter">:</span> <span class="classifier">name_resource</span></dt>
-<dd>name_resource object containing all revlevent pathing information for the pipeline</dd>
+<dt>namer <span class="classifier-delimiter">:</span> <span class="classifier">NameResource</span></dt>
+<dd>NameResource object containing all revlevent pathing information for the pipeline</dd>
 </dl>
 <dl class="docutils">
 <dt>str</dt>
@@ -1922,11 +1922,11 @@ Note: renormalizes the intensities, call extract_t1w_brain instead if you want t
 </dd></dl>
 
 </div>
-<div class="section" id="module-utils.s3_utils">
-<span id="s3-utils"></span><h2><a class="toc-backref" href="#id26">s3_utils</a><a class="headerlink" href="#module-utils.s3_utils" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-utils.cloud_utils">
+<span id="s3-utils"></span><h2><a class="toc-backref" href="#id26">cloud_utils</a><a class="headerlink" href="#module-utils.cloud_utils" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
-<dt id="utils.s3_utils.get_matching_s3_objects">
-<code class="descclassname">utils.s3_utils.</code><code class="descname">get_matching_s3_objects</code><span class="sig-paren">(</span><em>bucket</em>, <em>prefix=''</em>, <em>suffix=''</em><span class="sig-paren">)</span><a class="headerlink" href="#utils.s3_utils.get_matching_s3_objects" title="Permalink to this definition">¶</a></dt>
+<dt id="utils.cloud_utils.get_matching_s3_objects">
+<code class="descclassname">utils.cloud_utils.</code><code class="descname">get_matching_s3_objects</code><span class="sig-paren">(</span><em>bucket</em>, <em>prefix=''</em>, <em>suffix=''</em><span class="sig-paren">)</span><a class="headerlink" href="#utils.cloud_utils.get_matching_s3_objects" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generate objects in an S3 bucket.</p>
 <dl class="docutils">
 <dt>bucket <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
@@ -1939,8 +1939,8 @@ Note: renormalizes the intensities, call extract_t1w_brain instead if you want t
 </dd></dl>
 
 <dl class="function">
-<dt id="utils.s3_utils.s3_client">
-<code class="descclassname">utils.s3_utils.</code><code class="descname">s3_client</code><span class="sig-paren">(</span><em>service='s3'</em><span class="sig-paren">)</span><a class="headerlink" href="#utils.s3_utils.s3_client" title="Permalink to this definition">¶</a></dt>
+<dt id="utils.cloud_utils.s3_client">
+<code class="descclassname">utils.cloud_utils.</code><code class="descname">s3_client</code><span class="sig-paren">(</span><em>service='s3'</em><span class="sig-paren">)</span><a class="headerlink" href="#utils.cloud_utils.s3_client" title="Permalink to this definition">¶</a></dt>
 <dd><p>create an s3 client.</p>
 <dl class="docutils">
 <dt>service <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
@@ -1953,8 +1953,8 @@ Note: renormalizes the intensities, call extract_t1w_brain instead if you want t
 </dd></dl>
 
 <dl class="function">
-<dt id="utils.s3_utils.s3_get_data">
-<code class="descclassname">utils.s3_utils.</code><code class="descname">s3_get_data</code><span class="sig-paren">(</span><em>bucket</em>, <em>remote</em>, <em>local</em>, <em>public=False</em>, <em>force=False</em><span class="sig-paren">)</span><a class="headerlink" href="#utils.s3_utils.s3_get_data" title="Permalink to this definition">¶</a></dt>
+<dt id="utils.cloud_utils.s3_get_data">
+<code class="descclassname">utils.cloud_utils.</code><code class="descname">s3_get_data</code><span class="sig-paren">(</span><em>bucket</em>, <em>remote</em>, <em>local</em>, <em>public=False</em>, <em>force=False</em><span class="sig-paren">)</span><a class="headerlink" href="#utils.cloud_utils.s3_get_data" title="Permalink to this definition">¶</a></dt>
 <dd><p>given an s3 directory,
 copies in that directory to local.</p>
 </dd></dl>

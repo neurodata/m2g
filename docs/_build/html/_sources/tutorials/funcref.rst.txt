@@ -115,9 +115,9 @@ rescale_bvec
 .. automodule:: preproc.rescale_bvec
      :members:
 
-s3_utils
+cloud_utils
 ======================
-.. automodule:: utils.s3_utils
+.. automodule:: utils.cloud_utils
      :members:
 
 .. toctree::
