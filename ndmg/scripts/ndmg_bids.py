@@ -439,7 +439,7 @@ def main():
     # initial setup and checks
     print("Beginning ndmg ...")
     check_dependencies()
-    check_input_data()
+    check_input_data(inDir)
 
     # Check to see if user has provided direction to an existing s3 bucket they wish to use
     try:

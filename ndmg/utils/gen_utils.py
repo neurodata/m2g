@@ -17,8 +17,7 @@ import functools
 from itertools import product
 
 # package imports
-from bids import BIDSLayout
-from bids import BIDSValidator
+import bids
 import numpy as np
 import nibabel as nib
 from nilearn.image import mean_img
@@ -266,7 +265,7 @@ def sweep_directory(bdir, subj=None, sesh=None, task=None, run=None, modality="d
         bvals = []
         bvecs = []
     anats = []
-    layout = BIDSLayout(bdir)  # initialize BIDs tree on bdir
+    layout = bids.BIDSLayout(bdir)  # initialize BIDs tree on bdir
     # get all files matching the specific modality we are using
     if subj is None:
         subjs = layout.get_subjects()  # list of all the subjects
@@ -477,7 +476,25 @@ def is_bids(input_dir):
         p = "'dataset_description.json' is missing from project root. Every valid BIDS dataset must have this file."
         if str(e) != p:
             raise ValueError(e)
-        return True
+        create_datadescript(input_dir)
+        return is_bids(input_dir)
+
+
+def create_datadescript(input_dir):
+    """
+    Creates a simple `data_description.json` file in the root of the input directory. Necessary for proper BIDs formatting.
+    
+    Parameters
+    ----------
+    input_dir : str
+        BIDs-formatted input director.
+    """
+    print(f"Creating a simple dataset_description.json in {input_dir}... ")
+    name = Path(input_dir).stem
+    vers = bids.__version__
+    out = dict(Name=name, BIDSVersion=vers)
+    with open(input_dir + "/dataset_description.json", "w") as f:
+        json.dump(out, f)
 
 
 def check_dependencies():
