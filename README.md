@@ -83,15 +83,15 @@ In order to create a docker container from the docker image and access it, use t
 
 Once you have the pipeline up and running, you can run it with:
     
-    ndmg_bids <input_directory> <output_directory>
+    ndmg <input_directory> <output_directory>
     
 We recommend specifying an atlas and lowering the default seed density on test runs:
 
-    ndmg_bids --seeds 1 --atlas desikan <input_directory> <output_directory>
+    ndmg --seeds 1 --atlas desikan <input_directory> <output_directory>
     
 You can set a particular scan and session as well (recommended for batch scripts):
 
-    ndmg_bids --seeds 1 --atlas desikan --participant_label <label> --session_label <label> <input_directory> <output_directory>
+    ndmg --seeds 1 --atlas desikan --participant_label <label> --session_label <label> <input_directory> <output_directory>
 
 For more detailed instructions, tutorials on the **ndmg** pipeline can be found in [ndmg/tutorials](https://github.com/neurodata/ndmg/tree/staging/tutorials)
 
@@ -192,10 +192,10 @@ Other files may end up in the output folders, depending on what settings or atla
 
 The **ndmg** pipeline can be used to generate connectomes as a command-line utility on [BIDS datasets](http://bids.neuroimaging.io) with the following:
 
-    ndmg_bids /input/bids/dataset /output/directory
+    ndmg /input/bids/dataset /output/directory
 
-Note that more options are available which can be helpful if running on the Amazon cloud, which can be found and documented by running `ndmg_bids -h`.
-If running with the Docker container shown above, the `entrypoint` is already set to `ndmg_bids`, so the pipeline can be run directly from the host-system command line as follows:
+Note that more options are available which can be helpful if running on the Amazon cloud, which can be found and documented by running `ndmg -h`.
+If running with the Docker container shown above, the `entrypoint` is already set to `ndmg`, so the pipeline can be run directly from the host-system command line as follows:
 
     docker run -ti -v /path/to/local/data:/data neurodata/ndmg_dev /data/ /data/outputs
 

@@ -21,7 +21,7 @@ import warnings
 
 warnings.simplefilter("ignore")
 import pickle
-from ndmg.stats.qa_mri import qa_mri as mqa
+from ndmg.stats.qa_mri import QaMRI
 import numpy as np
 import ndmg.utils as mgu
 import os
@@ -34,7 +34,7 @@ import networkx as nx
 from ndmg.stats.plotly_helper import *
 
 
-class group_func(object):
+class GroupFunc:
     def __init__(self, basedir, outdir, atlas=None, dataset=None):
         """A class for group level quality control
         
@@ -50,7 +50,7 @@ class group_func(object):
         dataset : str, optional
             an optional parameter for the name of the dataset to be present in the quality control output filenames, by default None
         """
-        
+
         print(atlas)
         self.ndmgdir = basedir
         self.qadir = "{}/qa".format(self.ndmgdir)
@@ -104,7 +104,7 @@ class group_func(object):
         qa_objects = []
         for qa_file in self.qa_files:
             # load the qa objects as qa_mri objects
-            qa_objects.append(mqa.load(qa_file))
+            qa_objects.append(QaMRI.load(qa_file))
         return qa_objects
 
     def group_level_analysis(self):

@@ -1,26 +1,14 @@
 #!/usr/bin/env python
 
-# Copyright 2016 NeuroData (http://neurodata.io)
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
+"""
+ndmg.scripts.ndmg_cloud
+~~~~~~~~~~~~~~~~~~~~~~~
 
-# ndmg_cloud.py
-# Created by Greg Kiar on 2017-02-02.
-# Edited a ton by Alex Loftus
-# Email: gkiar@jhu.edu, aloftus2@jhu.edu
+Contains functionality for running ndmg in batch on AWS.
+For a tutorial on setting this up, see here : https://github.com/neurodata/ndmg/blob/deploy/tutorials/Batch.ipynb
+"""
 
-#%%
+# standard library imports
 import subprocess
 import ast
 import csv
@@ -36,11 +24,14 @@ import shutil
 import time
 from pathlib import Path
 
+# package imports
 import boto3
 
+# ndmg imports
 import ndmg
-import ndmg.utils as mgu
-from ndmg.utils.s3_utils import get_credentials, get_matching_s3_objects, s3_client
+from ndmg.utils.cloud_utils import get_credentials
+from ndmg.utils.cloud_utils import get_matching_s3_objects
+from ndmg.utils.cloud_utils import s3_client
 
 participant_templ = "https://raw.githubusercontent.com/neurodata/ndmg/staging/templates/ndmg_cloud_participant.json"
 
@@ -61,7 +52,7 @@ def batch_submit(
 ):
     """Searches through an S3 bucket, gets all subject-ids, creates json files for each,
     submits batch jobs, and returns list of job ids to query status upon later
-    
+
     Parameters
     ----------
     bucket : str
@@ -89,7 +80,7 @@ def batch_submit(
     mod_type : str, optional
         Determinstic (det) or probabilistic (prob) tracking, by default ""
     """
-    
+
     print(("Getting list from s3://{}/{}/...".format(bucket, path)))
     threads = crawl_bucket(bucket, path, jobdir)
 
@@ -113,7 +104,7 @@ def batch_submit(
 
 def crawl_bucket(bucket, path, jobdir):
     """Gets subject list for a given s3 bucket and path
-    
+
     Parameters
     ----------
     bucket : str
@@ -122,13 +113,13 @@ def crawl_bucket(bucket, path, jobdir):
         The directory where the dataset is stored on the S3 bucket
     jobdir : str
         Directory of batch jobs to generate/check up on
-    
+
     Returns
     -------
     OrderedDict
         dictionary containing all subjects and sessions from the path location
     """
-    
+
     # if jobdir has seshs info file in it, use that instead
     sesh_path = "{}/seshs.json".format(jobdir)
     if os.path.isfile(sesh_path):
@@ -205,7 +196,7 @@ def create_json(
     mod_type="",
 ):
     """Creates the json files for each of the jobs
-    
+
     Parameters
     ----------
     bucket : str
@@ -230,7 +221,7 @@ def create_json(
         Space for tractography, by default ""
     mod_type : str, optional
         Determinstic (det) or probabilistic (prob) tracking, by default ""
-    
+
     Returns
     -------
     list
@@ -304,7 +295,7 @@ def create_json(
             # make the json file for this iteration,
             # and add the path to its json file to `jobs`.
             job_json = deepcopy(template)
-            ver = ndmg.VERSION.replace(".", "-")
+            ver = ndmg.__version__.replace(".", "-")
             if dataset:
                 name = "ndmg_{}_{}_sub-{}".format(ver, dataset, subj)
             else:
@@ -327,20 +318,20 @@ def create_json(
 
 def submit_jobs(jobs, jobdir):
     """Give list of jobs to submit, submits them to AWS Batch
-    
+
     Parameters
     ----------
     jobs : list
         Name of the json files for all jobs to submit
     jobdir : str
         Directory of batch jobs to generate/check up on
-    
+
     Returns
     -------
     int
         0
     """
-    
+
     batch = s3_client(service="batch")
     cmd_template = "--cli-input-json file://{}"
     # cmd_template = batch.submit_jobs
@@ -369,48 +360,9 @@ def submit_jobs(jobs, jobdir):
     return 0
 
 
-def get_status(jobdir, jobid=None):
-    """Given a list of jobs, returns status of each
-    
-    Parameters
-    ----------
-    jobdir : str
-        Directory of batch jobs to generate/check up on
-    jobid : NoneType, optional
-        Are the json files organized BIDS style?, by default None
-    
-    Returns
-    -------
-    list
-        a list of statuses for each of the jobs currently running
-    """
-    
-    cmd_template = "aws batch describe-jobs --jobs {}"
-
-    if jobid is None:
-        print(("Describing jobs in {}/ids/...".format(jobdir)))
-        jobs = os.listdir(jobdir + "/ids/")
-        for job in jobs:
-            with open("{}/ids/{}".format(jobdir, job), "r") as inf:
-                submission = json.load(inf)
-            cmd = cmd_template.format(submission["jobId"])
-            print(("... Checking job {}...".format(submission["jobName"])))
-            out = subprocess.check_output(cmd, shell=True)
-            status = re.findall('"status": "([A-Za-z]+)",', out.decode("utf-8"))[0]
-            print(("... ... Status: {}".format(status)))
-        return 0
-    else:
-        print(("Describing job id {}...".format(jobid)))
-        cmd = cmd_template.format(jobid)
-        out = subprocess.check_output(cmd, shell=True)
-        status = re.findall('"status": "([A-Za-z]+)",', out.decode("utf-8"))[0]
-        print(("... Status: {}".format(status)))
-        return status
-
-
 def kill_jobs(jobdir, reason='"Killing job"'):
     """Given a list of jobs, kills them all
-    
+
     Parameters
     ----------
     jobdir : str
@@ -418,7 +370,7 @@ def kill_jobs(jobdir, reason='"Killing job"'):
     reason : str, optional
         Task you want to perform on the jobs, by default '"Killing job"'
     """
-    
+
     cmd_template1 = "aws batch cancel-job --job-id {} --reason {}"
     cmd_template2 = "aws batch terminate-job --job-id {} --reason {}"
 
@@ -497,9 +449,7 @@ def main():
         help="flag to store " "temp files along the path of processing.",
         default=False,
     )
-    parser.add_argument("--dataset",
-        action="store",
-        help="Dataset name")
+    parser.add_argument("--dataset", action="store", help="Dataset name")
     parser.add_argument(
         "-b",
         "--big",
