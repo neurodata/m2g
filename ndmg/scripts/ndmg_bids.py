@@ -1,39 +1,31 @@
 #!/usr/bin/env python
 
-# Copyright 2016 NeuroData (http://neurodata.io)
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
+"""
+ndmg.scripts.ndmg_bids
+~~~~~~~~~~~~~~~~~~~~~~
 
-# ndmg_bids.py
-# Repackaged and maintained by Derek Pisner and Eric Bridgeford 2019
-# Email: dpisner@utexas.edu
-# Originally created by Greg Kiar on 2016-07-25.
-# edited by Eric Bridgeford to incorporate fMRI, multi-threading, and
-# skipeddy-graph generation.
+The top level ndmg entrypoint module.
+In this module, ndmg:
+1. Pulls input data from s3 if we need it.
+2. Parses all input data.
+3. for each set of input data, runs ndmg_dwi_pipeline.ndmg_dwi_worker (the actual pipeline)
+"""
 
+
+# standard library imports
 import sys
 import glob
-import os.path as op
-import warnings
+import os
 from argparse import ArgumentParser
 import subprocess
 
-from ndmg.utils import s3_utils
+# ndmg imports
+from ndmg.utils import cloud_utils
 from ndmg.utils.gen_utils import check_dependencies
-from ndmg.utils.bids_utils import *
+from ndmg.utils.gen_utils import sweep_directory
 from ndmg.scripts.ndmg_dwi_pipeline import ndmg_dwi_worker
 
+# TODO : move the stuff below to `main`
 check_dependencies()
 print("Beginning ndmg ...")
 
@@ -42,7 +34,7 @@ if os.path.isdir("/ndmg_atlases"):
     atlas_dir = "/ndmg_atlases"
 else:
     # local
-    atlas_dir = op.expanduser("~") + "/.ndmg/ndmg_atlases"
+    atlas_dir = os.path.expanduser("~") + "/.ndmg/ndmg_atlases"
 
     # Data structure:
     # sub-<subject id>/
@@ -64,19 +56,19 @@ else:
 
 def get_atlas(atlas_dir, vox_size):
     """Given the desired location of atlases and the type of processing, ensure we have all the atlases and parcellations.
-    
+
     Parameters
     ----------
     atlas_dir : str
         Path to directory containing atlases.
     vox_size : str
         t1w input image voxel dimensions, either 2mm or 1mm
-    
+
     Returns
     -------
     tuple
         filepaths corresponding to the human parcellations, the atlas, and the atlas's mask. atals_brain and lv_mask is None if not fmri.
-    
+
     Raises
     ------
     ValueError
@@ -94,23 +86,23 @@ def get_atlas(atlas_dir, vox_size):
         )
 
     # grab atlases if they don't exist
-    if not op.exists(atlas_dir):
+    if not os.path.exists(atlas_dir):
         # TODO : re-implement this pythonically with shutil and requests in python3.
         print("atlas directory not found. Cloning ...")
         clone = "https://github.com/neurodata/neuroparc.git"
         os.system("git lfs clone {} {}".format(clone, atlas_dir))
 
-    atlas = op.join(
+    atlas = os.path.join(
         atlas_dir, "atlases/reference_brains/MNI152NLin6_res-" + dims + "_T1w.nii.gz"
     )
-    atlas_mask = op.join(
+    atlas_mask = os.path.join(
         atlas_dir,
         "atlases/mask/MNI152NLin6_res-" + dims + "_T1w_descr-brainmask.nii.gz",
     )
     labels = [
         i for i in glob.glob(atlas_dir + "/atlases/label/Human/*.nii.gz") if dims in i
     ]
-    labels = [op.join(atlas_dir, "label/Human/", l) for l in labels]
+    labels = [os.path.join(atlas_dir, "label/Human/", l) for l in labels]
     fils = labels + [atlas, atlas_mask]
 
     atlas_brain = None
@@ -145,9 +137,10 @@ def session_level(
     creds=None,
     debug=False,
     modif="",
+    skull="none",
 ):
     """Crawls the given BIDS organized directory for data pertaining to the given subject and session, and passes necessary files to ndmg_dwi_pipeline for processing.
-    
+
     Parameters
     ----------
     inDir : str
@@ -192,6 +185,8 @@ def session_level(
         If False, remove any old filed in the output directory. Default is False
     modif : str, optional
         Name of the folder on s3 to push to. If empty, push to a folder with ndmg's version number. Default is ""
+    skull : str, optional
+        Additional skullstrip analysis parameter set for unique t1w images. Default is "none".
     """
 
     labels, atlas, atlas_mask, atlas_brain, lv_mask = get_atlas(atlas_dir, vox_size)
@@ -256,6 +251,7 @@ def session_level(
             creds=creds,
             debug=debug,
             modif=modif,
+            skull=skull,
         )
         rmflds = []
         if len(rmflds) > 0:
@@ -398,7 +394,8 @@ def main():
     parser.add_argument(
         "--sp",
         action="store",
-        help="Space for tractography: mni, native_dsn, native. Default is native.",
+        # help="Space for tractography: mni, native_dsn, native. Default is native.",
+        help="Space for tractography: native, native_dsn. Default is native.",
         default="native",
     )
     parser.add_argument(
@@ -412,6 +409,16 @@ def main():
         action="store",
         help="Name of folder on s3 to push to. If empty, push to a folder with ndmg's version number.",
         default="",
+    )
+    parser.add_argument(
+        "--skull",
+        action="store",
+        help="Special actions to take when skullstripping t1w image based on default skullstrip ('none') failure:"
+        "Excess tissue below brain: below"
+        "Chunks of cerebelum missing: cerebelum"
+        "Frontal clipping near eyes: eye"
+        "Excess clipping in general: general",
+        default="none",
     )
     result = parser.parse_args()
 
@@ -435,10 +442,11 @@ def main():
     mod_func = result.mf
     reg_style = result.sp
     modif = result.modif
+    skull = result.skull
 
     # Check to see if user has provided direction to an existing s3 bucket they wish to use
     try:
-        creds = bool(s3_utils.get_credentials())
+        creds = bool(cloud_utils.get_credentials())
     except:
         creds = bool(
             os.getenv("AWS_ACCESS_KEY_ID", 0) and os.getenv("AWS_SECRET_ACCESS_KEY", 0)
@@ -449,20 +457,24 @@ def main():
     # it's super gross.
     if buck is not None and remo is not None:
         if subj is not None:
-            #if len(sesh) == 1:
+            # if len(sesh) == 1:
             #    sesh = sesh[0]
             for sub in subj:
                 if sesh is not None:
                     for ses in sesh:
-                        rem = op.join(remo, "sub-{}".format(sub), "ses-{}".format(ses))
-                        tindir = op.join(inDir, "sub-{}".format(sub), "ses-{}".format(ses))
-                        s3_utils.s3_get_data(buck, rem, tindir, public=not creds)
+                        rem = os.path.join(
+                            remo, "sub-{}".format(sub), "ses-{}".format(ses)
+                        )
+                        tindir = os.path.join(
+                            inDir, "sub-{}".format(sub), "ses-{}".format(ses)
+                        )
+                        cloud_utils.s3_get_data(buck, rem, tindir, public=not creds)
                 else:
-                    rem = op.join(remo, "sub-{}".format(sub))
-                    tindir = op.join(inDir, "sub-{}".format(sub))
-                    s3_utils.s3_get_data(buck, rem, tindir, public=not creds)
+                    rem = os.path.join(remo, "sub-{}".format(sub))
+                    tindir = os.path.join(inDir, "sub-{}".format(sub))
+                    cloud_utils.s3_get_data(buck, rem, tindir, public=not creds)
         else:
-            s3_utils.s3_get_data(buck, remo, inDir, public=not creds)
+            cloud_utils.s3_get_data(buck, remo, inDir, public=not creds)
 
     print("input directory contents: {}".format(os.listdir(inDir)))
 
@@ -488,6 +500,7 @@ def main():
         creds=creds,
         debug=debug,
         modif=modif,
+        skull=skull,
     )
 
 
