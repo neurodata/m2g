@@ -1,10 +1,12 @@
 import ndmg
-from ndmg import preproc as mgp
-from ndmg.utils import gen_utils as mgu
-from ndmg.register import gen_reg as mgr
-from ndmg.track import gen_track as mgt
-from ndmg.graph import gen_graph as mgg
-from ndmg.utils.bids_utils import name_resource
+from ndmg import preproc
+from ndmg import register
+from ndmg import track
+from ndmg import graph
+from ndmg.utils import gen_utils
+from ndmg.utils import reg_utils
+from ndmg.utils import cloud_utils
+
 from unittest.mock import Mock, MagicMock	
 import nibabel as nib
 import numpy as np 
