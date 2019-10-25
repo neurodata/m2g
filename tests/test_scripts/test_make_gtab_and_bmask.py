@@ -1,14 +1,14 @@
 import ndmg
-from ndmg import preproc as mgp
-
-from ndmg.utils import gen_utils as mgu
 #use if want to test non_fsl version
 #import non_fsl_make_gtab_and_bmask as mgu
+from ndmg import preproc
+from ndmg import register
+from ndmg import track
+from ndmg import graph
+from ndmg.utils import gen_utils
+from ndmg.utils import reg_utils
+from ndmg.utils import cloud_utils
 
-from ndmg.register import gen_reg as mgr
-from ndmg.track import gen_track as mgt
-from ndmg.graph import gen_graph as mgg
-from ndmg.utils.bids_utils import name_resource
 from unittest.mock import Mock
 import nibabel as nib
 import numpy as np 
@@ -54,7 +54,7 @@ def test_make_gtab_and_bmask(tmp_path):
 	nodif_B0_mask_out_cntrl = nib.load(nodif_B0_mask_out_cntrl_path).get_fdata()
 
 	#call function
-	[gtab, nodif_B0_out_temp_path, nodif_B0_mask_out_temp_path] = mgu.make_gtab_and_bmask(fbval_in_path, fbvec_in_path, dwi_prep_in_path, outdir)
+	[gtab, nodif_B0_out_temp_path, nodif_B0_mask_out_temp_path] = gen_utils.make_gtab_and_bmask(fbval_in_path, fbvec_in_path, dwi_prep_in_path, outdir)
 
 	#call out nodif_B0 and nodif_B0_mask as np.arrays
 	nodif_B0_out_temp = nib.load(nodif_B0_out_temp_path).get_fdata()

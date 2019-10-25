@@ -1,10 +1,11 @@
 import ndmg
-from ndmg import preproc as mgp
-from ndmg.utils import gen_utils as mgu
-from ndmg.register import gen_reg as mgr
-from ndmg.track import gen_track as mgt
-from ndmg.graph import gen_graph as mgg
-from ndmg.utils.bids_utils import name_resource
+from ndmg import preproc
+from ndmg import register
+from ndmg import track
+from ndmg import graph
+from ndmg.utils import gen_utils
+from ndmg.utils import reg_utils
+from ndmg.utils import cloud_utils
 from unittest.mock import Mock, MagicMock	
 import nibabel as nib
 import numpy as np 
@@ -33,7 +34,7 @@ def test_reorient_image(tmp_path):
 	t1w_out_cntrl = nib.load(t1w_out_cntrl_path).get_fdata()
 
 	#call function and save in temp folder
-	t1w_out_temp_path = mgu.reorient_img(img_in_path, namer)
+	t1w_out_temp_path = gen_utils.reorient_img(img_in_path, namer)
 
 	#load outputs
 	t1w_out_temp = nib.load(t1w_out_temp_path).get_fdata()

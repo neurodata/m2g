@@ -1,10 +1,12 @@
 import ndmg
-from ndmg import preproc as mgp
-from ndmg.utils import gen_utils as mgu
-from ndmg.register import gen_reg as mgr
-from ndmg.track import gen_track as mgt
-from ndmg.graph import gen_graph as mgg
-from ndmg.utils.bids_utils import name_resource
+from ndmg import preproc
+from ndmg import register
+from ndmg import track
+from ndmg import graph
+from ndmg.utils import gen_utils
+from ndmg.utils import reg_utils
+from ndmg.utils import cloud_utils
+
 from unittest.mock import Mock, MagicMock	
 import nibabel as nib
 import numpy as np 
@@ -35,7 +37,7 @@ def test_reorient_dwi(tmp_path):
 	bvec_reor_out_cntrl = np.loadtxt(bvec_reor_out_cntrl_path)
 
 	#call function and save in temp folder
-	[dwi_prep_out_temp_path, bvec_out_temp_path] = mgu.reorient_dwi(dwi_prep_in_path, bvec_scaled_in_path, namer)
+	[dwi_prep_out_temp_path, bvec_out_temp_path] = gen_utils.reorient_dwi(dwi_prep_in_path, bvec_scaled_in_path, namer)
 
 	#load outputs
 	dwi_prep_out_temp = nib.load(dwi_prep_out_temp_path).get_fdata()
