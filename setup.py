@@ -73,7 +73,7 @@ kwargs.update(
             "fury",
             "requests",
             "plotly",
-            "pybids",
+            "pybids>=0.9.0",
             "scikit-image",
             "networkx",
             "configparser>=3.7.4",

@@ -21,8 +21,9 @@ import subprocess
 
 # ndmg imports
 from ndmg.utils import cloud_utils
-from ndmg.utils.gen_utils import check_dependencies
 from ndmg.utils.gen_utils import sweep_directory
+from ndmg.utils.gen_utils import check_dependencies
+from ndmg.utils.gen_utils import check_input_data
 from ndmg.scripts.ndmg_dwi_pipeline import ndmg_dwi_worker
 
 
@@ -85,6 +86,21 @@ def get_atlas(atlas_dir, vox_size):
         map(os.path.exists, [atlas, atlas_mask])
     ), "atlas or atlas_mask, does not exist. You may not have git-lfs -- if not, install it."
     return (labels, atlas, atlas_mask, atlas_brain, lv_mask)
+
+
+def get_atlas_dir():
+    """
+    Gets the location of ndmg's atlases.
+    
+    Returns
+    -------
+    str
+        atlas directory location.
+    """
+    if os.path.isdir("/ndmg_atlases"):
+        return "/ndmg_atlases"  # in docker
+    else:
+        return os.path.expanduser("~") + "/.ndmg/ndmg_atlases"  # local
 
 
 def session_level(
@@ -161,11 +177,16 @@ def session_level(
         Additional skullstrip analysis parameter set for unique t1w images. Default is "none".
     """
 
+    # get atlas directory
+    atlas_dir = get_atlas_dir()
+
+    # parse atlas directory
     labels, atlas, atlas_mask, atlas_brain, lv_mask = get_atlas(atlas_dir, vox_size)
 
     if atlas_select:
         labels = [i for i in labels if atlas_select in i]
 
+    # parse input directory
     result = sweep_directory(inDir, subjs, sesh, run)
 
     dwis, bvals, bvecs, anats = result
@@ -197,8 +218,6 @@ def session_level(
     # use worker wrapper to call function f with args arg
     # and keyword args kwargs
     for arg in args:
-        print(arg)
-
         ndmg_dwi_worker(
             arg[0],
             arg[1],
@@ -225,10 +244,10 @@ def session_level(
             modif=modif,
             skull=skull,
         )
-        rmflds = []
-        if len(rmflds) > 0:
-            cmd = "rm -rf {}".format(" ".join(rmflds))
-            mgu.execute_cmd(cmd)
+    rmflds = []
+    if len(rmflds) > 0:
+        cmd = "rm -rf {}".format(" ".join(rmflds))
+        mgu.execute_cmd(cmd)
     sys.exit(0)  # terminated
 
 
@@ -392,8 +411,9 @@ def main():
         "Excess clipping in general: general",
         default="none",
     )
-    result = parser.parse_args()
 
+    # parse cli arguments
+    result = parser.parse_args()
     inDir = result.bids_dir
     outDir = result.output_dir
     subj = result.participant_label
@@ -417,13 +437,9 @@ def main():
     skull = result.skull
 
     # initial setup and checks
-    check_dependencies()
     print("Beginning ndmg ...")
-
-    if os.path.isdir("/ndmg_atlases"):
-        atlas_dir = "/ndmg_atlases"  # in docker
-    else:
-        atlas_dir = os.path.expanduser("~") + "/.ndmg/ndmg_atlases"  # local
+    check_dependencies()
+    check_input_data()
 
     # Check to see if user has provided direction to an existing s3 bucket they wish to use
     try:
@@ -459,6 +475,7 @@ def main():
 
     print("input directory contents: {}".format(os.listdir(inDir)))
 
+    # run session-level ndmg
     session_level(
         inDir,
         outDir,

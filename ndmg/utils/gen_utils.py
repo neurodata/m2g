@@ -18,6 +18,7 @@ from itertools import product
 
 # package imports
 from bids import BIDSLayout
+from bids import BIDSValidator
 import numpy as np
 import nibabel as nib
 from nilearn.image import mean_img
@@ -451,6 +452,32 @@ def check_exists(*dargs):
         return inner
 
     return outer
+
+
+def is_bids(input_dir):
+    # TODO : change pybids dependency
+    """
+    Make sure that the input data is BIDs-formatted.
+    If it's BIDs-formatted, except for a `dataset_description.json` file, return True.
+    
+    Returns
+    -------
+    bool
+        True if the input directory is BIDs-formatted
+    
+    Raises
+    ------
+    ValueError
+        Occurs if the input directory is not formatted properly.
+    """
+    try:
+        l = bids.BIDSLayout(input_dir)
+        return l.validate
+    except ValueError as e:
+        p = "'dataset_description.json' is missing from project root. Every valid BIDS dataset must have this file."
+        if str(e) != p:
+            raise ValueError(e)
+        return True
 
 
 def check_dependencies():
