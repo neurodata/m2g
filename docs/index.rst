@@ -30,10 +30,4 @@ The ndmg pipeline has been developed as a one-click solution for human connectom
    :caption: Function Reference
    :maxdepth: 1
 
-.. toctree::
-   :maxdepth: 1
-   :caption: Useful Links
-
-   ndmg @ GitHub <http://www.github.com/neurodata/ndmg/>
-   ndmg @ PyPI <https://pypi.org/project/ndmg/>
-   Issue Tracker <https://github.com/neurodata/ndmg/issues>
+.. funcref

@@ -116,7 +116,7 @@
 <li class="toctree-l2"><a class="reference internal" href="tutorials/funcref.html#module-stats.qa_tensor">qa_tensor</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tutorials/funcref.html#module-utils.reg_utils">reg_utils</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tutorials/funcref.html#module-preproc.rescale_bvec">rescale_bvec</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tutorials/funcref.html#module-utils.cloud_utils">cloud_utils</a><ul class="simple">
+<li class="toctree-l2"><a class="reference internal" href="tutorials/funcref.html#module-utils.s3_utils">s3_utils</a><ul class="simple">
 </ul>
 </li>
 </ul>
@@ -224,9 +224,9 @@
 <h2 id="A">A</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="tutorials/funcref.html#utils.bids_utils.NameResource.add_dirs">add_dirs() (utils.bids_utils.NameResource method)</a>
+      <li><a href="tutorials/funcref.html#utils.bids_utils.name_resource.add_dirs">add_dirs() (utils.bids_utils.name_resource method)</a>
 </li>
-      <li><a href="tutorials/funcref.html#utils.bids_utils.NameResource.add_dirs_dwi">add_dirs_dwi() (utils.bids_utils.NameResource method)</a>
+      <li><a href="tutorials/funcref.html#utils.bids_utils.name_resource.add_dirs_dwi">add_dirs_dwi() (utils.bids_utils.name_resource method)</a>
 </li>
       <li><a href="tutorials/funcref.html#utils.reg_utils.align">align() (in module utils.reg_utils)</a>
 </li>
@@ -248,7 +248,7 @@
 </li>
       <li><a href="tutorials/funcref.html#graph.gen_graph.graph_tools.as_matrix">as_matrix() (graph.gen_graph.graph_tools method)</a>
 </li>
-      <li><a href="tutorials/funcref.html#register.gen_reg.DmriReg.atlas2t1w2dwi_align">atlas2t1w2dwi_align() (register.gen_reg.DmriReg method)</a>
+      <li><a href="tutorials/funcref.html#register.gen_reg.dmri_reg.atlas2t1w2dwi_align">atlas2t1w2dwi_align() (register.gen_reg.dmri_reg method)</a>
 </li>
       <li><a href="tutorials/funcref.html#scripts.ndmg_bids.atlas_dir">atlas_dir (in module scripts.ndmg_bids)</a>
 </li>
@@ -294,7 +294,7 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="tutorials/funcref.html#register.gen_reg.direct_streamline_norm">direct_streamline_norm() (in module register.gen_reg)</a>
 </li>
-      <li><a href="tutorials/funcref.html#register.gen_reg.DmriReg">DmriReg (class in register.gen_reg)</a>
+      <li><a href="tutorials/funcref.html#register.gen_reg.dmri_reg">dmri_reg (class in register.gen_reg)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -334,7 +334,7 @@
 <h2 id="G">G</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="tutorials/funcref.html#register.gen_reg.DmriReg.gen_tissue">gen_tissue() (register.gen_reg.DmriReg method)</a>
+      <li><a href="tutorials/funcref.html#register.gen_reg.dmri_reg.gen_tissue">gen_tissue() (register.gen_reg.dmri_reg method)</a>
 </li>
       <li><a href="tutorials/funcref.html#scripts.ndmg_bids.get_atlas">get_atlas() (in module scripts.ndmg_bids)</a>
 </li>
@@ -348,13 +348,13 @@
       </ul></li>
       <li><a href="tutorials/funcref.html#graph.gen_graph.graph_tools.get_graph">get_graph() (graph.gen_graph.graph_tools method)</a>
 </li>
-      <li><a href="tutorials/funcref.html#utils.bids_utils.NameResource.get_label">get_label() (utils.bids_utils.NameResource method)</a>
+      <li><a href="tutorials/funcref.html#utils.bids_utils.name_resource.get_label">get_label() (utils.bids_utils.name_resource method)</a>
 </li>
-      <li><a href="tutorials/funcref.html#utils.cloud_utils.get_matching_s3_objects">get_matching_s3_objects() (in module utils.cloud_utils)</a>
+      <li><a href="tutorials/funcref.html#utils.s3_utils.get_matching_s3_objects">get_matching_s3_objects() (in module utils.s3_utils)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="tutorials/funcref.html#utils.bids_utils.NameResource.get_outdir">get_outdir() (utils.bids_utils.NameResource method)</a>
+      <li><a href="tutorials/funcref.html#utils.bids_utils.name_resource.get_outdir">get_outdir() (utils.bids_utils.name_resource method)</a>
 </li>
       <li><a href="tutorials/funcref.html#utils.gen_utils.get_slice">get_slice() (in module utils.gen_utils)</a>
 </li>
@@ -362,7 +362,7 @@
 </li>
       <li><a href="tutorials/funcref.html#scripts.ndmg_cloud.get_status">get_status() (in module scripts.ndmg_cloud)</a>
 </li>
-      <li><a href="tutorials/funcref.html#utils.bids_utils.NameResource.get_template_info">get_template_info() (utils.bids_utils.NameResource method)</a>
+      <li><a href="tutorials/funcref.html#utils.bids_utils.name_resource.get_template_info">get_template_info() (utils.bids_utils.name_resource method)</a>
 </li>
       <li><a href="tutorials/funcref.html#module-graph.gen_graph">graph.gen_graph (module)</a>
 </li>
@@ -434,9 +434,9 @@
 <h2 id="N">N</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="tutorials/funcref.html#utils.bids_utils.NameResource.name_derivative">name_derivative() (utils.bids_utils.NameResource method)</a>
+      <li><a href="tutorials/funcref.html#utils.bids_utils.name_resource.name_derivative">name_derivative() (utils.bids_utils.name_resource method)</a>
 </li>
-      <li><a href="tutorials/funcref.html#utils.bids_utils.NameResource">NameResource (class in utils.bids_utils)</a>
+      <li><a href="tutorials/funcref.html#utils.bids_utils.name_resource">name_resource (class in utils.bids_utils)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
@@ -492,9 +492,9 @@
 <h2 id="S">S</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="tutorials/funcref.html#utils.cloud_utils.s3_client">s3_client() (in module utils.cloud_utils)</a>
+      <li><a href="tutorials/funcref.html#utils.s3_utils.s3_client">s3_client() (in module utils.s3_utils)</a>
 </li>
-      <li><a href="tutorials/funcref.html#utils.cloud_utils.s3_get_data">s3_get_data() (in module utils.cloud_utils)</a>
+      <li><a href="tutorials/funcref.html#utils.s3_utils.s3_get_data">s3_get_data() (in module utils.s3_utils)</a>
 </li>
       <li><a href="tutorials/funcref.html#graph.gen_graph.graph_tools.save_graph">save_graph() (graph.gen_graph.graph_tools method)</a>
 </li>
@@ -540,7 +540,7 @@
 <h2 id="T">T</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="tutorials/funcref.html#register.gen_reg.DmriReg.t1w2dwi_align">t1w2dwi_align() (register.gen_reg.DmriReg method)</a>
+      <li><a href="tutorials/funcref.html#register.gen_reg.dmri_reg.t1w2dwi_align">t1w2dwi_align() (register.gen_reg.dmri_reg method)</a>
 </li>
       <li><a href="tutorials/funcref.html#utils.reg_utils.t1w_skullstrip">t1w_skullstrip() (in module utils.reg_utils)</a>
 </li>
@@ -550,7 +550,7 @@
 </li>
       <li><a href="tutorials/funcref.html#stats.qa_fibers.threshold_fibers">threshold_fibers() (in module stats.qa_fibers)</a>
 </li>
-      <li><a href="tutorials/funcref.html#register.gen_reg.DmriReg.tissue2dwi_align">tissue2dwi_align() (register.gen_reg.DmriReg method)</a>
+      <li><a href="tutorials/funcref.html#register.gen_reg.dmri_reg.tissue2dwi_align">tissue2dwi_align() (register.gen_reg.dmri_reg method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -570,7 +570,7 @@
 </li>
       <li><a href="tutorials/funcref.html#module-utils.reg_utils">utils.reg_utils (module)</a>
 </li>
-      <li><a href="tutorials/funcref.html#module-utils.cloud_utils">utils.cloud_utils (module)</a>
+      <li><a href="tutorials/funcref.html#module-utils.s3_utils">utils.s3_utils (module)</a>
 </li>
   </ul></td>
 </tr></table>

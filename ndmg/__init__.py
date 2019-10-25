@@ -1,17 +1,19 @@
-"""
-ndmg
-~~~~
+import warnings
 
-an end-to-end connectome estimation pipeline
-"""
+warnings.simplefilter("ignore")
+# from . import *
 
-# naming convention for __version__ : major.minor.bugs
-__version__ = "0.3.0"
+# so we don't have to type ndg.graph.graph(), etc., to get the classes
+# from .graph import graph, biggraph
+from .register.gen_reg import dmri_reg as register
+from .register.gen_reg import epi_register as epi_register
 
+# from .stats.qa_mri import qa_mri as qa_mri
+# from .stats.group_func import group_func as group_func
+from .track.gen_track import run_track as track
 
-# to call `ndmg.graph`, etc
-__all__ = ["graph", "preproc", "register", "track"]  # modules
-__all__.extend(["scripts", "stats", "utils"])  # subpackages
+# from .stats import *
+# from .preproc.preproc import preproc as preproc
+from .scripts import ndmg_dwi_pipeline as ndmg_dwi_pipeline
 
-# import everything listed in __all__
-from . import *
+VERSION = "0.2.0"
