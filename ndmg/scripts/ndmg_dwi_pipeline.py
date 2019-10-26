@@ -1,47 +1,37 @@
 #!/usr/bin/env python
-# Copyright 2019 NeuroData (http://neurodata.io)
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
 
-# ndmg_dwi_worker.py
-# Repackaged for native space tractography by Derek Pisner in 2019
-# Email: dpisner@utexas.edu
+"""
+ndmg.scripts.ndmg_dwi_pipeline
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Contains the primary, top-level pipeline.
+For a full description, see here: https://neurodata.io/talks/ndmg.pdf
+"""
 
 
+# standard library imports
 import shutil
 import time
-import warnings
+from datetime import datetime
+import os
 
-warnings.simplefilter("ignore")
-
-# from ndmg.stats.qa_mri import qa_mri
+# package imports
 import nibabel as nib
-from dipy.tracking.streamline import Streamlines
+import numpy as np
 from subprocess import Popen
-import ndmg
+from dipy.tracking.streamline import Streamlines
+from dipy.io import read_bvals_bvecs
+
+# ndmg imports
 from ndmg import preproc
+from ndmg import register
+from ndmg import track
+from ndmg import graph
 from ndmg.utils import gen_utils
 from ndmg.utils import reg_utils
-from ndmg.utils import s3_utils
-from ndmg.register import gen_reg
-from ndmg.track import gen_track
-from ndmg.graph import gen_graph
-from ndmg.utils.bids_utils import name_resource
-from ndmg.stats.qa_tensor import *
-from ndmg.stats.qa_fibers import *
-from datetime import datetime
+from ndmg.utils import cloud_utils
 
+# TODO : not sure why this is here, potentially remove
 os.environ["MPLCONFIGDIR"] = "/tmp/"
 
 
@@ -72,7 +62,7 @@ def ndmg_dwi_worker(
     skull="none",
 ):
     """Creates a brain graph from MRI data
-    
+
     Parameters
     ----------
     dwi : str
@@ -123,7 +113,7 @@ def ndmg_dwi_worker(
         Name of the folder on s3 to push to. If empty, push to a folder with ndmg's version number. Default is ""
     skull : str, optional
         skullstrip parameter pre-set. Default is "none".
-    
+
     Raises
     ------
     ValueError
@@ -172,7 +162,7 @@ def ndmg_dwi_worker(
 
     startTime = datetime.now()
 
-    namer = name_resource(dwi, t1w, atlas, outdir)
+    namer = gen_utils.NameResource(dwi, t1w, atlas, outdir)
 
     # TODO : do this with shutil instead of an os command
     print("Output directory: " + outdir)
@@ -192,7 +182,7 @@ def ndmg_dwi_worker(
     label_dirs = ["conn"]  # create label level granularity
 
     print("Adding directory tree...")
-    namer.add_dirs_dwi(paths, labels, label_dirs)
+    namer.add_dirs(paths, labels, label_dirs)
 
     # Create derivative output file names
     streams = namer.name_derivative(namer.dirs["output"]["fiber"], "streamlines.trk")
@@ -258,8 +248,6 @@ def ndmg_dwi_worker(
     shutil.copyfile(bvals, fbval)
 
     # Correct any corrupted bvecs/bvals
-    from dipy.io import read_bvals_bvecs
-
     bvals, bvecs = read_bvals_bvecs(fbval, fbvec)
     bvecs[np.where(np.any(abs(bvecs) >= 10, axis=1) == True)] = [1, 0, 0]
     bvecs[np.where(bvals == 0)] = 0
@@ -344,7 +332,7 @@ def ndmg_dwi_worker(
         print("Running registration in native space...")
 
         # Instantiate registration
-        reg = gen_reg.DmriReg(
+        reg = register.DmriReg(
             namer, nodif_B0, nodif_B0_mask, t1w, vox_size, skull, simple=False
         )
 
@@ -391,14 +379,12 @@ def ndmg_dwi_worker(
 
         # -------- Tensor Fitting and Fiber Tractography ---------------- #
         start_time = time.time()
-        seeds = gen_track.build_seed_list(
-            reg.wm_gm_int_in_dwi, np.eye(4), dens=int(seeds)
-        )
+        seeds = track.build_seed_list(reg.wm_gm_int_in_dwi, np.eye(4), dens=int(seeds))
         print("Using " + str(len(seeds)) + " seeds...")
 
         # Compute direction model and track fiber streamlines
         print("Beginning tractography in native space...")
-        trct = gen_track.run_track(
+        trct = track.RunTrack(
             dwi_prep,
             nodif_B0_mask,
             reg.gm_in_dwi,
@@ -444,18 +430,18 @@ def ndmg_dwi_worker(
 
     if reg_style == "native_dsn":
 
-        fa_path = gen_track.tens_mod_fa_est(gtab, dwi_prep, nodif_B0_mask)
+        fa_path = track.tens_mod_fa_est(gtab, dwi_prep, nodif_B0_mask)
 
         # Normalize streamlines
         print("Running DSN...")
-        [streamlines_mni, streams_mni] = gen_reg.direct_streamline_norm(
+        [streamlines_mni, streams_mni] = register.direct_streamline_norm(
             streams, fa_path, namer
         )
 
         # Save streamlines to disk
         print("Saving DSN-registered streamlines: " + streams_mni)
 
-    # TODO : mni space currently broken. Fix EuDX in gen_track.py.
+    # TODO : mni space currently broken. Fix EuDX in track.py.
     # elif reg_style == "mni":
     #     # Check dimensions
     #     start_time = time.time()
@@ -473,7 +459,7 @@ def ndmg_dwi_worker(
 
     #     # Align DWI volumes to Atlas
     #     print("Aligning volumes...")
-    #     reg = gen_reg.dmri_reg_old(dwi_prep, gtab, t1w, mask, aligned_dwi, namer, clean)
+    #     reg = register.DmriRegOld(dwi_prep, gtab, t1w, mask, aligned_dwi, namer, clean)
     #     print(
     #         "Registering DWI image at {} to atlas; aligned dwi at {}...".format(
     #             dwi_prep, aligned_dwi
@@ -486,7 +472,7 @@ def ndmg_dwi_worker(
     #     # Compute tensors and track fiber streamlines
     #     print("aligned_dwi: {}".format(aligned_dwi))
     #     print("gtab: {}".format(gtab))
-    #     [tens, streamlines, align_dwi_mask] = gen_track.eudx_basic(
+    #     [tens, streamlines, align_dwi_mask] = track.eudx_basic(
     #         aligned_dwi, gtab, stop_val=0.2
     #     )
     #     tensors = "{}/tensors.nii.gz".format(namer.dirs["output"]["tensor"])
@@ -521,7 +507,7 @@ def ndmg_dwi_worker(
             # align atlas to t1w to dwi
             print("%s%s" % ("Applying native-space alignment to ", labels[idx]))
             labels_im = nib.load(labels_im_file_mni_list[idx])
-            g1 = gen_graph.graph_tools(
+            g1 = graph.GraphTools(
                 attr=len(np.unique(np.around(labels_im.get_data()).astype("int16")))
                 - 1,
                 rois=labels_im_file_mni_list[idx],
@@ -535,7 +521,7 @@ def ndmg_dwi_worker(
             # align atlas to t1w to dwi
             print("%s%s" % ("Applying native-space alignment to ", labels[idx]))
             labels_im = nib.load(labels_im_file_dwi_list[idx])
-            g1 = gen_graph.graph_tools(
+            g1 = graph.GraphTools(
                 attr=len(np.unique(np.around(labels_im.get_data()).astype("int16")))
                 - 1,
                 rois=labels_im_file_dwi_list[idx],
@@ -546,14 +532,14 @@ def ndmg_dwi_worker(
             )
             g1.g = g1.make_graph()
 
-        # TODO : mni-space currently broken. Fix in gen_track.
+        # TODO : mni-space currently broken. Fix in track.
         # elif reg_style == "mni":
         #     labels_im_file = gen_utils.reorient_img(labels[idx], namer)
         #     labels_im_file = gen_utils.match_target_vox_res(
         #         labels_im_file, vox_size, namer, sens="t1w"
         #     )
         #     labels_im = nib.load(labels_im_file)
-        #     g1 = gen_graph.graph_tools(
+        #     g1 = graph.graph_tools(
         #         attr=len(np.unique(np.around(labels_im.get_data()).astype("int16")))
         #         - 1,
         #         rois=labels_im_file,
@@ -572,11 +558,21 @@ def ndmg_dwi_worker(
     print(f'Total execution time: {exe_time}')
     print("NDMG Complete.")
 
+    if reg_style == "native" or reg_style == "native_dsn":
+        print("WARNING :: you are using native-space registration to generate connectomes. Without post-hoc normalization, multiple connectomes generated with NDMG cannot be compared directly.")
+
     # TODO : putting this block of code here for now because it wouldn't run in `ndmg_bids`. Figure out how to put it somewhere else.
     if push and buck and remo is not None:
         if not modif:
+<<<<<<< HEAD
             modif = f'ndmg_{ndmg.VERSION.replace(".", "-")}'
         s3_utils.s3_push_data(buck, remo, outdir, modif, creds, debug=debug)
+=======
+            modif = "ndmg_{}".format(
+                __version__.replace(".", "-")
+            )  # TODO : make sure __version__ is in the namespace
+        cloud_utils.s3_push_data(buck, remo, outdir, modif, creds, debug=debug)
+>>>>>>> origin/staging
         print("Pushing Complete!")
         if not debug:
             print("Listing contents of output directory ...")

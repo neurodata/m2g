@@ -1,48 +1,42 @@
-#!/usr/bin/env python -W ignore::DeprecationWarning
+#!/usr/bin/env python
 
-# Copyright 2019 NeuroData (http://neurodata.io)
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
-# register.py
-# Repackaged for native space registrations by Derek Pisner on 2019-01-16
-# Email: dpisner@utexas.edu.
-# epi_register created by Eric Bridgeford.
+"""
+ndmg.register
+~~~~~~~~~~~~~~~~~~~~~
 
+Contains ndmg's registration classes, organized as full registration workflows.
+Used for the majority of the registration described here: https://neurodata.io/talks/ndmg.pdf#page=20
+"""
 
-import warnings
-
-warnings.simplefilter("ignore")
+# standard library imports
 import os
+
+# package imports
 import nibabel as nib
 import numpy as np
-from nilearn.image import load_img, math_img
+from nilearn.image import load_img
+from nilearn.image import math_img
+from dipy.tracking.streamline import deform_streamlines
+from dipy.io.streamline import load_trk
+from dipy.tracking import utils
+
+# ndmg imports
 from ndmg.utils import gen_utils
 from ndmg.utils import reg_utils
 
 @gen_utils.timer
 def direct_streamline_norm(streams, fa_path, namer):
     """Applys the Symmetric Diffeomorphic Registration (SyN) Algorithm onto the streamlines to the atlas space defined by .../atlases/reference_brains/FSL_HCP1065_FA_2mm.nii.gz
-    
+
     Parameters
     ----------
     streams : str
         Path to streamlines.trk file to be transformed
     fa_path : str
         Path to subject's FA tensor image
-    namer : name_resource
+    namer : NameResource
         variable containing all relevant pathing information
-    
+
     Returns
     -------
     ArraySequence
@@ -50,18 +44,14 @@ def direct_streamline_norm(streams, fa_path, namer):
     str
         Path to tractogram streamline file: streamlines_dsn.trk
     """
-    import os.path as op
-    from dipy.tracking.streamline import deform_streamlines
-    from dipy.io.streamline import load_trk
-    from ndmg.utils import reg_utils as regutils
-    from dipy.tracking import utils
 
+    # TODO : put this atlas stuff into a function
     if os.path.isdir("/ndmg_atlases"):
         # in docker
         atlas_dir = "/ndmg_atlases"
     else:
         # local
-        atlas_dir = op.expanduser("~") + "/.ndmg/ndmg_atlases"
+        atlas_dir = os.path.expanduser("~") + "/.ndmg/ndmg_atlases"
 
     template_path = atlas_dir + "/atlases/reference_brains/FSL_HCP1065_FA_2mm.nii.gz"
 
@@ -74,7 +64,7 @@ def direct_streamline_norm(streams, fa_path, namer):
     template_data = template_img.get_data()
 
     # SyN FA->Template
-    [mapping, affine_map] = regutils.wm_syn(
+    [mapping, affine_map] = reg_utils.wm_syn(
         template_path, fa_path, namer.dirs["tmp"]["base"]
     )
     streamlines = load_trk(streams, reference="same")
@@ -120,11 +110,11 @@ def direct_streamline_norm(streams, fa_path, namer):
 
 class DmriReg(object):
     """Class containing relevant paths and class methods for analysing tractography
-    
+
     Parameters
     ----------
-    namer : name_resource
-        name_resource variable containing relevant directory tree information
+    namer : NameResource
+        NameResource variable containing relevant directory tree information
     nodif_B0 : str
         path to mean b0 image
     nodif_B0_mask : str
@@ -137,7 +127,7 @@ class DmriReg(object):
         skullstrip parameter pre-set. Default is "none"
     simple : bool, optional
         Whether you want to attempt non-linear registration when transforming between mni, t1w, and dwi space. Default is False
-    
+
     Raises
     ------
     ValueError
@@ -154,14 +144,13 @@ class DmriReg(object):
         skull="none",
         simple=False,
     ):
-        import os.path as op
 
         if os.path.isdir("/ndmg_atlases"):
             # in docker
             atlas_dir = "/ndmg_atlases"
         else:
             # local
-            atlas_dir = op.expanduser("~") + "/.ndmg/ndmg_atlases"
+            atlas_dir = os.path.expanduser("~") + "/.ndmg/ndmg_atlases"
         try:
             FSLDIR = os.environ["FSLDIR"]
         except KeyError:
@@ -233,7 +222,7 @@ class DmriReg(object):
     @gen_utils.timer
     def gen_tissue(self):
         """Extracts the brain from the raw t1w image (as indicated by self.t1w), uses it to create WM, GM, and CSF masks,
-        reslices all 4 files to the target voxel resolution and extracts the white matter edge. Each mask is saved to 
+        reslices all 4 files to the target voxel resolution and extracts the white matter edge. Each mask is saved to
         location indicated by self.map_path
         """
         # BET needed for this, as afni 3dautomask only works on 4d volumes
@@ -410,14 +399,14 @@ class DmriReg(object):
         """alignment from atlas to t1w to dwi. A function to perform atlas alignmet. Tries nonlinear registration first, and if that fails, does a liner
         registration instead.
         Note: for this to work, must first have called t1w2dwi_align.
-        
+
         Parameters
         ----------
         atlas : str
             path to atlas file you want to use
         dsn : bool, optional
             is your space for tractography native-dsn, by default True
-        
+
         Returns
         -------
         str
@@ -587,7 +576,7 @@ class DmriReg(object):
         A function to generate and perform dwi space alignment of avoidance/waypoint masks for tractography.
         First creates ventricle and CC ROI. Then creates transforms from stock MNI template to dwi space.
         NOTE: for this to work, must first have called both t1w2dwi_align and atlas2t1w2dwi_align.
-        
+
         Raises
         ------
         ValueError
@@ -717,12 +706,12 @@ class DmriReg(object):
 
 
 
-class dmri_reg_old(object):
+class DmriRegOld:
     def __init__(
         self, dwi, gtab, t1w, atlas, aligned_dwi, namer, clean=False, skull="none"
     ):
         """Aligns two images and stores the transform between them
-        
+
         Parameters
         ----------
         dwi : str
@@ -730,12 +719,12 @@ class dmri_reg_old(object):
         gtab : str
             path to file containing gradient driections and strength
         t1w : str
-            path to reference image to be aligned to 
+            path to reference image to be aligned to
         atlas : str
             path to roi atlas file
         aligned_dwi : str
             path for the output aligned dwi image
-        namer : name_resource
+        namer : NameResource
             variable containing directory tree information for pipeline outputs
         clean : bool, optional
             Whether to delete intermediate files created by the pipeline, by default False
@@ -764,7 +753,7 @@ class dmri_reg_old(object):
 
     def dwi2atlas(self, clean=False):
         """Aligns the dwi image into atlas space
-        
+
         Parameters
         ----------
         clean : bool, optional

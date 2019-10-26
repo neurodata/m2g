@@ -1,82 +1,42 @@
 #!/usr/bin/env python
 
-# Copyright 2016 NeuroData (http://neurodata.io)
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
+"""
+ndmg.graph
+~~~~~~~~~~
 
-# graph.py
-# Repackaged by Derek Pisner on 2019-02-19
-# Originally created by Greg Kiar on 2016-01-27.
-# Email: dpisner@utexas.edu
+Contains the primary functionality for connectome estimation after tractography has completed.
+Used in the final stage of the pipeline.
+"""
 
 
-import warnings
+# standard library imports
+import os
+import time
+from itertools import combinations
+from collections import defaultdict
 
-warnings.simplefilter("ignore")
+# package imports
 import numpy as np
 import networkx as nx
 import nibabel as nib
-import time
-import os
 from dipy.tracking._utils import _mapping_to_voxel, _to_voxel_coordinates
+<<<<<<< HEAD:ndmg/graph/gen_graph.py
 from itertools import combinations
 from collections import defaultdict
 from ndmg.utils.gen_utils import timer
+=======
+import matplotlib
+>>>>>>> origin/staging:ndmg/graph.py
+
+matplotlib.use("agg")
+from matplotlib import pyplot as plt
+from graspy.utils import ptr
+from graspy.plot import heatmap
 
 
-def get_sphere(coords, r, vox_dims, dims):
-    """
-    Return all points within r mm of coords. Generates a cube and then discards all points outside sphere.
-
-    Parameters
-    ----------
-    coords : list
-        List of (x, y, z) tuples corresponding to a coordinate atlas used or
-        which represent the center-of-mass of each parcellation node.
-    r : int
-        Radius for sphere.
-    vox_dims : array/tuple
-        1D vector (x, y, z) of mm voxel resolution for sphere.
-    dims : array/tuple
-        1D vector (x, y, z) of image dimensions for sphere.
-
-    Returns
-    -------
-    neighbors : list
-        A list of indices, within the dimensions of the image, that fall within a spherical neighborhood defined by
-        the specified error radius of the list of the input coordinates.
-
-    References
-    ----------
-    .. Adapted from NeuroSynth
-    """
-    r = float(r)
-    xx, yy, zz = [
-        slice(-r / vox_dims[i], r / vox_dims[i] + 0.01, 1) for i in range(len(coords))
-    ]
-    cube = np.vstack([row.ravel() for row in np.mgrid[xx, yy, zz]])
-    sphere = cube[:, np.sum(np.dot(np.diag(vox_dims), cube) ** 2, 0) ** 0.5 <= r]
-    sphere = np.round(sphere.T + coords)
-    neighbors = sphere[
-        (np.min(sphere, 1) >= 0) & (np.max(np.subtract(sphere, dims), 1) <= -1), :
-    ].astype(int)
-    return neighbors
-
-
-class graph_tools(object):
+class GraphTools:
     """Initializes the graph with nodes corresponding to the number of ROIS
-    
+
     Parameters
     ----------
     rois : str
@@ -85,8 +45,8 @@ class graph_tools(object):
         Streamlines for analysis
     affine : ndarray
         a 2-D array with ones on the diagonal and zeros elsewhere (DOESN'T APPEAR TO BE Used)
-    namer : name_resource
-        Name_resource object containing relevant path for the pipeline
+    namer : NameResource
+        NameResource object containing relevant path for the pipeline
     connectome_path : str
         Path for the output connectome file (.ssv file)
     attr : [type], optional
@@ -94,7 +54,7 @@ class graph_tools(object):
         will be interpretted as node attributes. If it is any other dimensional, it will be ignored, by default None
     sens : str, optional
         type of MRI scan being analyzed (can be 'dwi' or 'func'), by default "dwi"
-        
+
     Raises
     ------
     ValueError
@@ -177,7 +137,7 @@ class graph_tools(object):
     @timer
     def make_graph(self, error_margin=2, overlap_thr=1, voxel_size=2):
         """Takes streamlines and produces a graph using Numpy functions
-        
+
         Parameters
         ----------
         error_margin : int, optional
@@ -186,7 +146,7 @@ class graph_tools(object):
             The amount of overlap between an roi and streamline to be considered a connection, by default 1
         voxel_size : int, optional
             Voxel size for roi/streamlines, by default 2
-        
+
         Returns
         -------
         Graph
@@ -251,33 +211,16 @@ class graph_tools(object):
 
         return g
 
-    def get_graph(self):
-        """
-        Returns the graph object created
-        """
-        try:
-            return self.g
-        except AttributeError:
-            print("Error: the graph has not yet been defined.")
-            pass
-
-    def as_matrix(self):
-        """
-        Returns the graph as a matrix.
-        """
-        g = self.get_graph()
-        return nx.to_numpy_matrix(g, nodelist=np.sort(g.nodes()).tolist())
-
     def save_graph(self, graphname, fmt="igraph"):
         """Saves the graph to disk
-        
+
         Parameters
         ----------
         graphname : str
             Filename for the graph
         fmt : str, optional
             Format you want the graph saved as [edgelist, gpickle, graphml, txt, npy, igraph], by default "igraph"
-        
+
         Raises
         ------
         ValueError
@@ -311,18 +254,12 @@ class graph_tools(object):
 
     def save_graph_png(self, graphname):
         """Saves adjacency graph, made using graspy's heatmap function, as a png. This will be saved in the qa/graphs_plotting/ directory
-        
+
         Parameters
         ----------
         graphname : str
             name of the generated graph (do not include '.png')
         """
-        import matplotlib
-
-        matplotlib.use("agg")
-        from matplotlib import pyplot as plt
-        from graspy.utils import ptr
-        from graspy.plot import heatmap
 
         conn_matrix = np.array(nx.to_numpy_matrix(self.g))
         conn_matrix = ptr.pass_to_ranks(conn_matrix)

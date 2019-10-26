@@ -61,24 +61,20 @@ ENV PATH=/opt/afni:$PATH
 #--------NDMG SETUP-----------------------------------------------------------#
 # setup of python dependencies for ndmg itself, as well as file dependencies
 RUN \
-    pip3.6 install numpy
-
-RUN echo "hello world"
-RUN \
-    pip3.6 install nibabel scipy python-dateutil pandas boto3 awscli matplotlib nilearn sklearn pandas cython vtk pyvtk fury awscli requests ipython duecredit graspy scikit-image networkx dipy
+    pip3.6 install numpy nibabel scipy python-dateutil pandas boto3 awscli matplotlib nilearn sklearn pandas cython vtk pyvtk fury awscli requests ipython duecredit graspy scikit-image networkx dipy
 
 RUN \
     pip3.6 install plotly==1.12.9 pybids==0.6.4 setuptools>=40.0 configparser>=3.7.4
 
 WORKDIR /
 
-RUN mkdir /data && \
-    chmod -R 777 /data
+RUN mkdir /input && \
+    chmod -R 777 /input
 
-RUN mkdir /outputs && \
-    chmod -R 777 /outputs
+RUN mkdir /output && \
+    chmod -R 777 /output
 
-
+# grab atlases from neuroparc
 RUN mkdir /ndmg_atlases
 
 RUN \
@@ -107,4 +103,4 @@ ENV PYTHONWARNINGS ignore
 RUN ldconfig
 
 # and add it as an entrypoint
-ENTRYPOINT ["ndmg_bids"]
+ENTRYPOINT ["ndmg"]
