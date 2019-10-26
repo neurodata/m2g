@@ -131,24 +131,24 @@ def ndmg_dwi_worker(
     ValueError
         Raised if bval/bvecs are potentially corrupted
     """
-    print("dwi = {}".format(dwi))
-    print("bvals = {}".format(bvals))
-    print("bvecs = {}".format(bvecs))
-    print("t1w = {}".format(t1w))
-    print("atlas = {}".format(atlas))
-    print("mask = {}".format(mask))
-    print("labels = {}".format(labels))
-    print("outdir = {}".format(outdir))
-    print("vox_size = {}".format(vox_size))
-    print("mod_type = {}".format(mod_type))
-    print("track_type = {}".format(track_type))
-    print("mod_func = {}".format(mod_func))
-    print("seeds = {}".format(seeds))
-    print("reg_style = {}".format(reg_style))
-    print("clean = {}".format(clean))
-    print("skipeddy = {}".format(skipeddy))
-    print("skipreg = {}".format(skipreg))
-    print("skull = {}".format(skull))
+    print(f'dwi = {dwi}')
+    print(f'bvals = {bvals}')
+    print(f'bvecs = {bvecs}')
+    print(f't1w = {t1w}')
+    print(f'atlas = {atlas}')
+    print(f'mask = {mask}')
+    print(f'labels = {labels}')
+    print(f'outdir = {outdir}')
+    print(f'vox_size = {vox_size}')
+    print(f'mod_type = {mod_type}')
+    print(f'track_type = {track_type}')
+    print(f'mod_func = {mod_func}')
+    print(f'seeds = {seeds}')
+    print(f'reg_style = {reg_style}')
+    print(f'clean = {clean}')
+    print(f'skipeddy = {skipeddy}')
+    print(f'skipreg = {skipreg}')
+    print(f'skull = {skull}')
     fmt = "_adj.csv"
 
     assert all(
@@ -177,7 +177,7 @@ def ndmg_dwi_worker(
     # TODO : do this with shutil instead of an os command
     print("Output directory: " + outdir)
     if not os.path.isdir(outdir):
-        cmd = "mkdir -p {}".format(outdir)
+        cmd = f'mkdir -p {outdir}'
         os.system(cmd)
 
     paths = {
@@ -203,9 +203,7 @@ def ndmg_dwi_worker(
     connectomes = [
         namer.name_derivative(
             namer.dirs["output"]["conn"][namer.get_label(lab)],
-            "{}_{}_measure-spatial-ds{}".format(
-                namer.get_mod_source(), namer.get_label(lab), fmt
-            ),
+            f'{namer.get_mod_source()}_{namer.get_label(lab)}_measure-spatial-ds{fmt}'
         )
         for lab in labels
     ]
@@ -218,7 +216,7 @@ def ndmg_dwi_worker(
     # -------- Preprocessing Steps --------------------------------- #
 
     # Perform eddy correction
-    dwi_prep = "{}/eddy_corrected_data.nii.gz".format(namer.dirs["output"]["prep_dwi"])
+    dwi_prep = f'{namer.dirs["output"]["prep_dwi"]}/eddy_corrected_data.nii.gz'
 
     if len(os.listdir(namer.dirs["output"]["prep_dwi"])) != 0:
         if skipeddy is False:
@@ -227,7 +225,7 @@ def ndmg_dwi_worker(
                 shutil.rmtree(namer.dirs["output"]["prep_dwi"])
                 os.mkdir(namer.dirs["output"]["prep_dwi"])
             except Exception as e:
-                print("Exception when trying to delete existing data: {}".format(e))
+                print(f'Exception when trying to delete existing data: {e}')
                 pass
             print("Performing eddy correction...")
             cmd = "eddy_correct " + dwi + " " + dwi_prep + " 0"
@@ -253,9 +251,9 @@ def ndmg_dwi_worker(
         print(st)
 
     # Instantiate bvec/bval naming variations and copy to derivative director
-    bvec_scaled = "{}/bvec_scaled.bvec".format(namer.dirs["output"]["prep_dwi"])
-    fbval = "{}/bval.bval".format(namer.dirs["output"]["prep_dwi"])
-    fbvec = "{}/bvec.bvec".format(namer.dirs["output"]["prep_dwi"])
+    bvec_scaled = f'{namer.dirs["output"]["prep_dwi"]}/bvec_scaled.bvec'
+    fbval = f'{namer.dirs["output"]["prep_dwi"]}/bval.bval'
+    fbvec = f'{namer.dirs["output"]["prep_dwi"]}/bvec.bvec'
     shutil.copyfile(bvecs, fbvec)
     shutil.copyfile(bvals, fbval)
 
@@ -518,7 +516,7 @@ def ndmg_dwi_worker(
     # ------- Connectome Estimation --------------------------------- #
     # Generate graphs from streamlines for each parcellation
     for idx, label in enumerate(labels):
-        print("Generating graph for {} parcellation...".format(label))
+        print(f'Generating graph for {label} parcellation...')
         if reg_style == "native_dsn":
             # align atlas to t1w to dwi
             print("%s%s" % ("Applying native-space alignment to ", labels[idx]))
@@ -571,13 +569,13 @@ def ndmg_dwi_worker(
 
     exe_time = datetime.now() - startTime
 
-    print("Total execution time: {}".format(exe_time))
+    print(f'Total execution time: {exe_time}')
     print("NDMG Complete.")
 
     # TODO : putting this block of code here for now because it wouldn't run in `ndmg_bids`. Figure out how to put it somewhere else.
     if push and buck and remo is not None:
         if not modif:
-            modif = "ndmg_{}".format(ndmg.VERSION.replace(".", "-"))
+            modif = f'ndmg_{ndmg.VERSION.replace(".", "-")}'
         s3_utils.s3_push_data(buck, remo, outdir, modif, creds, debug=debug)
         print("Pushing Complete!")
         if not debug:
@@ -585,11 +583,7 @@ def ndmg_dwi_worker(
             print(os.listdir(outdir))
             print("clearing contents of output directory ...")
             shutil.rmtree(outdir)
-            print(
-                "Clearing complete. Output directory exists: {}".format(
-                    os.path.exists(outdir)
-                )
-            )
+            print(f'Clearing complete. Output directory exists: {os.path.exists(outdir)}')
 
 
 def main():
@@ -676,11 +670,9 @@ def main():
     result = parser.parse_args()
 
     # Create output directory
-    print("Creating output directory: {}".format(result.outdir))
-    print("Creating output temp directory: {}/tmp".format(result.outdir))
-    gen_utils.utils.execute_cmd(
-        "mkdir -p {} {}/tmp".format(result.outdir, result.outdir)
-    )
+    print(f'Creating output directory: {result.outdir}')
+    print(f'Creating output temp directory: {result.outdir}/tmp')
+    gen_utils.utils.execute_cmd(f'mkdir -p {result.outdir} {result.outdir}/tmp')
 
     ndmg_dwi_worker(
         result.dwi,

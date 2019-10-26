@@ -53,9 +53,9 @@ class group_func(object):
 
         print(atlas)
         self.ndmgdir = basedir
-        self.qadir = "{}/qa".format(self.ndmgdir)
+        self.qadir = f'{self.ndmgdir}/qa'
         self.outdir = outdir
-        self.conn_dir = "{}/connectomes".format(self.ndmgdir)
+        self.conn_dir = f'{self.ndmgdir}/connectomes'
         self.dataset = dataset
         self.atlas = atlas
         (self.qa_files, self.subs) = self.get_qa_files()
@@ -73,7 +73,7 @@ class group_func(object):
         qa_files = []
         subs = []
         for sub in os.listdir(self.qadir):
-            sub_qa = "{}/{}/{}_stats.pkl".format(self.qadir, sub, sub)
+            sub_qa = f'{self.qadir}/{sub}/{sub}_stats.pkl'
             # if the files exists, add it to our qa_files
             if os.path.isfile(sub_qa):
                 qa_files.append(sub_qa)
@@ -89,9 +89,9 @@ class group_func(object):
         for label in os.listdir(self.conn_dir):
             print(label)
             this_label = []
-            label_dir = "{}/{}".format(self.conn_dir, label)
+            label_dir = f'{self.conn_dir}/{label}'
             for connectome in os.listdir(label_dir):
-                conn_path = "{}/{}".format(label_dir, connectome)
+                conn_path = f'{label_dir}/{connectome}
                 if os.path.isfile(conn_path):
                     this_label.append(conn_path)
             connectomes[label] = this_label
@@ -119,8 +119,8 @@ class group_func(object):
         """
         A function that performs group level registration quality control.
         """
-        regdir = "{}/{}".format(self.outdir, "reg")
-        cmd = "mkdir -p {}".format(regdir)
+        regdir = f'{self.outdir}/{"reg"}'
+        cmd = f'mkdir -p {regdir}'
         mgu.execute_cmd(cmd)
 
         self_reg_sc = []
@@ -152,8 +152,8 @@ class group_func(object):
         fname_multi = "registration_qa.html"
         # if a dataset name is provided, add it to the name
         if self.dataset is not None:
-            fname_multi = "{}_{}".format(self.dataset, fname_multi)
-        fname_multi = "{}/{}".format(regdir, fname_multi)
+            fname_multi = f'{self.dataset}_{fname_multi}'
+        fname_multi = f'{regdir}/{fname_multi}'
         multi = traces_to_panels(traces, names=names, ylabs=ylab, xlabs=xlab)
         pyo.plot(multi, validate=False, filename=fname_multi)
         pass
@@ -162,8 +162,8 @@ class group_func(object):
         """
         A function that performs group level motion corrective quality control.
         """
-        mcdir = "{}/{}".format(self.outdir, "mc")
-        cmd = "mkdir -p {}".format(mcdir)
+        mcdir = f'{self.outdir}/{"mc"}'
+        cmd = f'mkdir -p {mcdir}'
         mgu.execute_cmd(cmd)
 
         trans_abs = np.zeros((len(self.qa_objects)))
@@ -201,9 +201,8 @@ class group_func(object):
 
         # if a dataset name is provided, add it to the name
         if self.dataset is not None:
-            fname_multi = "{}_{}".format(self.dataset, fname_multi)
-        fname_multi = "{}/{}".format(mcdir, fname_multi)
-
+            fname_multi = f'{self.dataset}_{fname_multi}'
+        fname_multi = f'{mcdir}/{fname_multi}'
         multi = traces_to_panels(traces, names=names, ylabs=ylab, xlabs=xlab)
         pyo.plot(multi, validate=False, filename=fname_multi)
         pass
