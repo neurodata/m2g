@@ -292,10 +292,10 @@ def sweep_directory(bdir, subj=None, sesh=None, task=None, run=None, modality="d
             runs = as_list(run)
 
         print(sub)
-        print(("%s%s" % ("Subject:", sub)))
-        print(("%s%s" % ("Sessions:", seshs)))
-        print(("%s%s" % ("Tasks:", tasks)))
-        print(("%s%s" % ("Runs:", runs)))
+        print(f'Subject: {sub}')
+        print(f'Sessions: {seshs}')
+        print(f'Tasks: {tasks}')
+        print(f'Runs: {runs}')
         print("\n\n")
         # all the combinations of sessions and tasks that are possible
         for (ses, tas, ru) in product(seshs, tasks, runs):
@@ -789,7 +789,7 @@ def reorient_dwi(dwi_prep, bvecs, namer):
 
     fname = dwi_prep
     bvec_fname = bvecs
-    out_bvec_fname = "%s%s" % (namer.dirs["output"]["prep_dwi"], "/bvecs_reor.bvec")
+    out_bvec_fname = f'{namer.dirs["output"]["prep_dwi"]}/bvecs_reor.bvec'
 
     input_img = nib.load(fname)
     input_axcodes = nib.aff2axcodes(input_img.affine)
@@ -852,19 +852,13 @@ def reorient_img(img, namer):
 
     # Image may be reoriented
     if normalized is not orig_img:
-        print("%s%s%s" % ("Reorienting ", img, " to RAS+..."))
-        out_name = "%s%s%s%s" % (
-            namer.dirs["output"]["prep_anat"],
-            "/",
-            img.split("/")[-1].split(".nii.gz")[0],
-            "_reor_RAS.nii.gz",
+        print(f'Reorienting {img} to RAS+...')
+        out_name =(f'{namer.dirs["output"]["prep_anat"]}/'
+            f'{img.split("/")[-1].split(".nii.gz")[0]}_reor_RAS.nii.gz'
         )
     else:
-        out_name = "%s%s%s%s" % (
-            namer.dirs["output"]["prep_anat"],
-            "/",
-            img.split("/")[-1].split(".nii.gz")[0],
-            "_RAS.nii.gz",
+        out_name = (f'{namer.dirs["output"]["prep_anat"]}/'
+            f'{img.split("/")[-1].split(".nii.gz")[0]}_RAS.nii.gz'
         )
 
     normalized.to_filename(out_name)
@@ -906,18 +900,12 @@ def match_target_vox_res(img_file, vox_size, namer, sens):
     if (abs(zooms[0]), abs(zooms[1]), abs(zooms[2])) != new_zooms:
         print("Reslicing image " + img_file + " to " + vox_size + "...")
         if sens == "dwi":
-            img_file_res = "%s%s%s%s" % (
-                namer.dirs["output"]["prep_dwi"],
-                "/",
-                os.path.basename(img_file).split(".nii.gz")[0],
-                "_res.nii.gz",
+            img_file_res = (f'{namer.dirs["output"]["prep_dwi"]}/'
+                f'{os.path.basename(img_file).split(".nii.gz")[0]}_res.nii.gz'
             )
         elif sens == "t1w":
-            img_file_res = "%s%s%s%s" % (
-                namer.dirs["output"]["prep_anat"],
-                "/",
-                os.path.basename(img_file).split(".nii.gz")[0],
-                "_res.nii.gz",
+            img_file_res = (f'{namer.dirs["output"]["prep_anat"]}/'
+                f'{os.path.basename(img_file).split(".nii.gz")[0]}_res.nii.gz'
             )
 
         data2, affine2 = reslice(data, affine, zooms, new_zooms)
@@ -927,18 +915,12 @@ def match_target_vox_res(img_file, vox_size, namer, sens):
     else:
         print("Reslicing image " + img_file + " to " + vox_size + "...")
         if sens == "dwi":
-            img_file_nores = "%s%s%s%s" % (
-                namer.dirs["output"]["prep_dwi"],
-                "/",
-                os.path.basename(img_file).split(".nii.gz")[0],
-                "_nores.nii.gz",
+            img_file_nores = (f'{namer.dirs["output"]["prep_dwi"]}/'
+                f'{os.path.basename(img_file).split(".nii.gz")[0]}_nores.nii.gz'
             )
         elif sens == "t1w":
-            img_file_nores = "%s%s%s%s" % (
-                namer.dirs["output"]["prep_anat"],
-                "/",
-                os.path.basename(img_file).split(".nii.gz")[0],
-                "_nores.nii.gz",
+            img_file_nores =  (f'{namer.dirs["output"]["prep_anat"]}/'
+                f'{os.path.basename(img_file).split(".nii.gz")[0]}_nores.nii.gz'
             )
         nib.save(img, img_file_nores)
         img_file = img_file_nores

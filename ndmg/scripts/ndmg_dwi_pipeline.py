@@ -505,7 +505,7 @@ def ndmg_dwi_worker(
         print(f'Generating graph for {label} parcellation...')
         if reg_style == "native_dsn":
             # align atlas to t1w to dwi
-            print("%s%s" % ("Applying native-space alignment to ", labels[idx]))
+            print(f'Applying native-space alignment to {labels[idx]}')
             labels_im = nib.load(labels_im_file_mni_list[idx])
             g1 = graph.GraphTools(
                 attr=len(np.unique(np.around(labels_im.get_data()).astype("int16")))
@@ -519,7 +519,7 @@ def ndmg_dwi_worker(
             g1.g = g1.make_graph()
         elif reg_style == "native":
             # align atlas to t1w to dwi
-            print("%s%s" % ("Applying native-space alignment to ", labels[idx]))
+            print(f'Applying native-space alignment to {labels[idx]}')
             labels_im = nib.load(labels_im_file_dwi_list[idx])
             g1 = graph.GraphTools(
                 attr=len(np.unique(np.around(labels_im.get_data()).astype("int16")))

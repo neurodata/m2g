@@ -148,17 +148,15 @@ def s3_get_data(bucket, remote, local, public=False, force=False):
                 "Error: could not locate bucket. Available buckets: " + ", ".join(bkts)
             )
 
-        cmd = "aws s3 cp --exclude 'ndmg_*' --recursive s3://{}/{}/ {};\nwait".format(
-            bucket, remote, local
-        )
+        cmd = f'aws s3 cp --exclude "ndmg_*" --recursive s3://{bucket}/{remote}/ {local};\nwait'
     if public:
         cmd += " --no-sign-request --region=us-east-1;\nwait"
 
-    print("Calling {} to get data from S3 ...".format(cmd))
-    out = subprocess.check_output("mkdir -p {}".format(local), shell=True)
+    print(f'Calling {cmd} to get data from S3 ...')
+    out = subprocess.check_output(f'mkdir -p {local}', shell=True)
     out = subprocess.check_output(cmd, shell=True)
     out = subprocess.check_output(
-        'echo "\n\n\n\n\n\n\nDATA ARRIVED\n\n\n\n\n\n" {}'.format(local), shell=True
+        f'echo "\n\n\n\n\n\n\nDATA ARRIVED\n\n\n\n\n\n" {local}', shell=True
     )
     print(out)
 
@@ -183,15 +181,14 @@ def s3_push_data(bucket, remote, outDir, modifier, creds=True, debug=True):
         Whether to not to push intermediate files created by the pipeline, by default True
     """
     # TODO : use boto3 for this instead
-    cmd = (
-        'aws s3 cp --exclude "tmp/*" {} s3://{}/{}/{}/{}/ --recursive --acl public-read'
-    )
     dataset = remote.split("/")[0]
     rest_of_path_list = remote.split("/")[1:]
     rest_of_path = os.path.join(*rest_of_path_list)
-    cmd = cmd.format(outDir, bucket, dataset, modifier, rest_of_path)
+    cmd = (
+        f'aws s3 cp --exclude "tmp/*" {outDir} s3://{bucket}/{dataset}/{modifier}/{rest_of_path}/ --recursive --acl public-read'
+    )
     if not creds:
         print("Note: no credentials provided, may fail to push big files.")
         cmd += " --no-sign-request"
-    print("Pushing results to S3: {}".format(cmd))
+    print(f'Pushing results to S3: {cmd}')
     subprocess.check_output(cmd, shell=True)

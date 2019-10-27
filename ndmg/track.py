@@ -93,7 +93,7 @@ def tens_mod_fa_est(gtab, dwi_file, B0_mask):
     FA = fractional_anisotropy(mod.evals)
     FA[np.isnan(FA)] = 0
     fa_img = nib.Nifti1Image(FA.astype(np.float32), nodif_B0_affine)
-    fa_path = "%s%s" % (os.path.dirname(B0_mask), "/tensor_fa.nii.gz")
+    fa_path = f'{os.path.dirname(B0_mask)}/tensor_fa.nii.gz'
     nib.save(fa_img, fa_path)
     return fa_path
 
@@ -474,7 +474,7 @@ def eudx_basic(dwi_file, gtab, stop_val=0.1):
     print(f'data shape: {data.shape}')
     print(f'data type: {type(data)}')
     # print('mask data: {}'.format(mask_data))
-    print(f'mask data shape: {mask_data.shape)}')
+    print(f'mask data shape: {mask_data.shape}')
     print(f'mask data type: {type(mask_data)}')
 
     print(f'data location: {dwi_file}')
