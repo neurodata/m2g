@@ -98,9 +98,7 @@ class QaMRI:
         # is significant, will show a poorly defined border
         # since the brain will be moving in time
         rawfig = plot_brain(raw_dat.mean(axis=3), minthr=10)
-        rawfig.savefig(
-            "{}/{}_raw.png".format(self.namer.dirs["qa"]["prep_m"], func_name)
-        )
+        rawfig.savefig(f'{self.namer.dirs["qa"]["prep_m"]}/{func_name}_raw.png')
 
         prep_im = nb.load(prep.preproc_func)
         prep_dat = prep_im.get_data()
@@ -110,9 +108,7 @@ class QaMRI:
         # due to motion correction
         prepfig = plot_brain(prep_dat.mean(axis=3), minthr=10)
         nvols = prep_dat.shape[3]
-        prepfig.savefig(
-            "{}/{}_preproc.png".format(self.namer.dirs["qa"]["prep_m"], func_name)
-        )
+        prepfig.savefig(f'{self.namer.dirs["qa"]["prep_m"]}/{func_name}_preproc.png')
 
         # get the functional preprocessing motion parameters
         mc_params = np.genfromtxt(prep.mc_params)
@@ -169,12 +165,10 @@ class QaMRI:
             # iterate over the parameters while iterating over the legend
             # labels for each param
             params = [param for param in param_type]
-            labels = [" {} displacement".format(leg) for leg in legs]
+            labels = [f' {leg} displacement' for leg in legs]
             fig = plot_signals(params, labels, title=title, xlabel=xlab, ylabel=ylab)
 
-            fname_reg = "{}/{}_{}_parameters.png".format(
-                self.namer.dirs["qa"]["prep_m"], func_name, name
-            )
+            fname_reg = f'{self.namer.dirs["qa"]["prep_m"]}/{func_name}_{name}_parameters.png'
             fig.savefig(fname_reg, format="png")
             plt.close(fig)
 
@@ -208,9 +202,7 @@ class QaMRI:
         figs["preproc_brain"] = plot_overlays(prep.anat, prep.anat_preproc_brain)
         # save iterator
         for plotname, fig in figs.items():
-            fname = "{}/{}_{}.png".format(
-                self.namer.dirs["qa"]["prep_a"], prep.anat_name, plotname
-            )
+            fname = f'{self.namer.dirs["qa"]["prep_a"]}/{ prep.anat_name}_{plotname}.png'
             fig.tight_layout()
             fig.savefig(fname)
             plt.close(fig)
@@ -238,21 +230,16 @@ class QaMRI:
         sreg_a_final = "{}/space-T1w/{}_jaccard_{:.0f}".format(
             self.namer.dirs["qa"]["reg_a"], reg.sreg_strat, self.self_reg_sc * 1000
         )
-        cmd = "mkdir -p {} {}".format(sreg_m_final, sreg_a_final)
+        cmd = f'mkdir -p {sreg_m_final} {sreg_a_final}'
         gen_utils.execute_cmd(cmd)
-        sreg_fig.savefig(
-            "{}/{}_bold_t1w_overlap.png".format(
-                sreg_m_final, self.namer.get_mod_source()
-            )
-        )
+        sreg_fig.savefig(f'{sreg_m_final}/{self.namer.get_mod_source()}_bold_t1w_overlap.png')
+
         # produce plot of the white-matter mask used during bbr
         if mreg.wm_mask is not None:
             mask_dat = nb.load(reg.wm_mask).get_data()
             t1w_dat = nb.load(reg.t1w_brain).get_data()
             m_mask = plot_overlays(t1w_dat, mask_dat, minthr=0, maxthr=100)
-            fname_mask = "{}/{}_{}.png".format(
-                sreg_a_final, self.namer.get_anat_source(), "wmm"
-            )
+            fname_mask = f'{sreg_a_final}/{self.namer.get_anat_source()}_{"wmm"}.png'
             m_mask.savefig(fname_mask, format="png")
             plt.close(m_mask)
 
@@ -263,17 +250,13 @@ class QaMRI:
         """
         A util to return aligned func name.
         """
-        return "{}_{}".format(
-            self.namer.get_mod_source(), self.namer.get_template_info()
-        )
+        return f'{self.namer.get_mod_source()}_{self.namer.get_template_info()}'
 
     def aligned_anat_name(self):
         """
         A util to return aligned func name.
         """
-        return "{}_{}".format(
-            self.namer.get_anat_source(), self.namer.get_template_info()
-        )
+        return f'{self.namer.get_anat_source()}_{self.namer.get_template_info()}'
 
     def temp_reg_qa(self, reg):
         """
@@ -299,10 +282,10 @@ class QaMRI:
         treg_a_final = "{}/template/{}_jaccard_{:.0f}".format(
             self.namer.dirs["qa"]["reg_a"], reg.treg_strat, self.temp_reg_sc * 1000
         )
-        cmd = "mkdir -p {} {}".format(treg_m_final, treg_a_final)
+        cmd = f'mkdir -p {treg_m_final} {treg_a_final}'
         gen_utils.execute_cmd(cmd)
         mri_name = self.aligned_mri_name()
-        treg_fig.savefig("{}/{}_epi2temp_overlap.png".format(treg_m_final, mri_name))
+        treg_fig.savefig(f'{treg_m_final}/{mri_name}_epi2temp_overlap.png')
         plt.close(treg_fig)
         t1w_name = self.aligned_anat_name()
         # overlap between the template-aligned t1w and the atlas brain
@@ -310,7 +293,7 @@ class QaMRI:
         t1w2temp_fig = plot_overlays(
             reg.taligned_t1w, freg.atlas_brain, edge=True, minthr=0, maxthr=100
         )
-        t1w2temp_fig.savefig("{}/{}_t1w2temp.png".format(treg_a_final, t1w_name))
+        t1w2temp_fig.savefig(f'{treg_a_final}/{t1w_name}_t1w2temp.png')
         plt.close(t1w2temp_fig)
         # produce cnr, snr, and mean plots for temporal voxelwise statistics
         self.voxel_qa(reg.epi_aligned_skull, reg.atlas_mask, treg_m_final)
@@ -360,7 +343,7 @@ class QaMRI:
         plots["snr"] = plot_brain(snr_ts, minthr=10)
         plots["cnr"] = plot_brain(cnr_ts, minthr=10)
         for plotname, plot in plots.items():
-            fname = "{}/{}_{}.png".format(qadir, func_name, plotname)
+            fname = f'{qadir}/{func_name}_{plotname}.png'
             plot.savefig(fname, format="png")
             plt.close(plot)
         pass
@@ -377,11 +360,11 @@ class QaMRI:
         print("Performing QA for Nuisance...")
         qcadir = self.namer.dirs["qa"]["nuis_a"]
         qcfdir = self.namer.dirs["qa"]["nuis_f"]
-        maskdir = "{}/{}".format(qcadir, "masks")
-        glmdir = "{}/{}".format(qcfdir, "glm_correction")
-        fftdir = "{}/{}".format(qcfdir, "filtering")
+        maskdir = f'{qcadir}/{"masks"}'
+        glmdir = f'{qcfdir}/{"glm_correction"}'
+        fftdir = f'{qcfdir}/{"filtering"}'
 
-        cmd = "mkdir -p {} {} {}".format(maskdir, glmdir, fftdir)
+        cmd = f'mkdir -p {maskdir} {glmdir} {fftdir}'
         gen_utils.execute_cmd(cmd)
 
         anat_name = self.aligned_anat_name()
@@ -397,7 +380,7 @@ class QaMRI:
                 # produce overlay figure between the t1w image that has
                 # segmentation performed on it and the respective mask
                 f_mask = plot_overlays(t1w_dat, mask_dat, minthr=0, maxthr=100)
-                fname_mask = "{}/{}_{}.png".format(maskdir, anat_name, maskname)
+                fname_mask = f'{maskdir}/{anat_name}_{maskname}.png'
                 f_mask.savefig(fname_mask, format="png")
                 plt.close(f_mask)
 
@@ -426,7 +409,7 @@ class QaMRI:
                 # store each regressor as a element of our list
                 regs = [reg[:, i] for i in range(0, nreg)]
                 # store labels in case they are plotted
-                labels = ["{} reg {}".format(name, i) for i in range(0, nreg)]
+                labels = [f'{name} reg {i}' for i in range(0, nreg)]
                 # plot each regressor as a line
                 fig = plot_signals(
                     regs,
@@ -436,7 +419,7 @@ class QaMRI:
                     ylabel="Intensity",
                     lab_incl=lab,
                 )
-                fname_reg = "{}/{}_{}_regressors.png".format(glmdir, func_name, name)
+                fname_reg = f'{glmdir}/{func_name}_{name}_regressors.png'
                 fig.savefig(fname_reg, format="png")
                 plt.close(fig)
         # signal before compared with the signal removed and
@@ -448,13 +431,13 @@ class QaMRI:
             xlabel="Timepoint",
             ylabel="Intensity",
         )
-        fname_glm_sig = "{}/{}_glm_signal_cmp.png".format(glmdir, func_name)
+        fname_glm_sig = f'{glmdir}/{func_name}_glm_signal_cmp.png'
         fig_glm_sig.savefig(fname_glm_sig, format="png")
         plt.close(fig_glm_sig)
 
         # Frequency Filtering
         if nuisobj.fft_reg is not None:
-            cmd = "mkdir -p {}".format(fftdir)
+            cmd = f'mkdir -p {fftdir}'
             gen_utils.execute_cmd(cmd)
             # start by just plotting the average fft of gm voxels and
             # compare with average fft after frequency filtering
@@ -466,7 +449,7 @@ class QaMRI:
                 ylabel="Power",
                 xax=nuisobj.freq_ra,
             )
-            fname_fft_pow = "{}/{}_fft_power.png".format(fftdir, func_name)
+            fname_fft_pow = f'{fftdir}/{func_name}_fft_power.png'
             fig_fft_pow.savefig(fname_fft_pow, format="png")
             plt.close(fig_fft_pow)
             # plot the signal vs the regressed signal vs signal after
@@ -477,7 +460,7 @@ class QaMRI:
                 xlabel="Timepoint",
                 ylabel="Intensity",
             )
-            fname_fft_sig = "{}/{}_fft_signal_cmp.png".format(fftdir, func_name)
+            fname_fft_sig = f'{fftdir}/{func_name}_fft_signal_cmp.png'
             fig_fft_sig.savefig(fname_fft_sig, format="png")
             plt.close(fig_fft_sig)
         pass
@@ -504,7 +487,7 @@ class QaMRI:
         label_name = self.namer.get_label(label)
         qcdir = self.namer.dirs["qa"]["conn"][label_name]
         print("Performing QA for ROI Analysis...")
-        cmd = "mkdir -p {}".format(qcdir)
+        cmd = f'mkdir -p {qcdir}'
         gen_utils.execute_cmd(cmd)
 
         # overlap between the temp-aligned t1w and the labelled parcellation
@@ -512,12 +495,8 @@ class QaMRI:
         # overlap between the temp-aligned fmri and the labelled parcellation
         reg_mri_pngs(func, label, qcdir, minthr=10, maxthr=95)
         # plot the timeseries for each ROI and the connectivity matrix
-        fname_ts = "{}/{}_{}_timeseries.html".format(
-            qcdir, self.aligned_mri_name(), label_name
-        )
-        fname_con = "{}/{}_{}_measure-correlation.html".format(
-            qcdir, self.aligned_mri_name(), label_name
-        )
+        fname_ts = f'{qcdir}/{self.aligned_mri_name()}_{label_name}_timeseries.html'
+        fname_con = f'{qcdir}/{self.aligned_mri_name()}_{label_name}_measure-correlation.html'
         if self.modality == "func":
             plot_timeseries(timeseries, fname_ts, self.aligned_mri_name(), label_name)
         plot_connectome(connectome, fname_con, self.aligned_mri_name(), label_name)
@@ -543,4 +522,4 @@ class QaMRI:
         # plot the voxelwise signal with respect to the atlas to
         # get an idea of how well the fmri is masked
         reg_mri_pngs(voxel_func, atlas_mask, qcdir, loc=0, minthr=10, maxthr=95)
-        pass
+

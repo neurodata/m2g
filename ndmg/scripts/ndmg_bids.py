@@ -19,16 +19,10 @@ import os
 from argparse import ArgumentParser
 import subprocess
 
-<<<<<<< HEAD
-from ndmg.utils import s3_utils
-from ndmg.utils.gen_utils import check_dependencies, timer
-from ndmg.utils.bids_utils import *
-=======
 # ndmg imports
 from ndmg.utils import cloud_utils
-from ndmg.utils.gen_utils import check_dependencies
+from ndmg.utils.gen_utils import check_dependencies, timer
 from ndmg.utils.gen_utils import sweep_directory
->>>>>>> origin/staging
 from ndmg.scripts.ndmg_dwi_pipeline import ndmg_dwi_worker
 
 # TODO : move the stuff below to `main`
@@ -253,7 +247,7 @@ def session_level(
         )
         rmflds = []
         if len(rmflds) > 0:
-            cmd = "rm -rf {}".format(" ".join(rmflds))
+            cmd = f'rm -rf {" ".join(rmflds)}'
             mgu.execute_cmd(cmd)
     sys.exit(0)  # terminated
 
@@ -460,21 +454,17 @@ def main():
             for sub in subj:
                 if sesh is not None:
                     for ses in sesh:
-                        rem = os.path.join(
-                            remo, "sub-{}".format(sub), "ses-{}".format(ses)
-                        )
-                        tindir = os.path.join(
-                            inDir, "sub-{}".format(sub), "ses-{}".format(ses)
-                        )
+                        rem = os.path.join(remo, f'sub-{sub}', f'ses-{ses}')
+                        tindir = os.path.join(inDir, f'sub-{sub}', f'ses-{ses}')
                         cloud_utils.s3_get_data(buck, rem, tindir, public=not creds)
                 else:
-                    rem = os.path.join(remo, "sub-{}".format(sub))
-                    tindir = os.path.join(inDir, "sub-{}".format(sub))
+                    rem = os.path.join(remo, f'sub-{sub}')
+                    tindir = os.path.join(inDir, f'sub-{sub}')
                     cloud_utils.s3_get_data(buck, rem, tindir, public=not creds)
         else:
             cloud_utils.s3_get_data(buck, remo, inDir, public=not creds)
 
-    print("input directory contents: {}".format(os.listdir(inDir)))
+    print(f'input directory contents: {os.listdir(inDir)}')
 
     session_level(
         inDir,

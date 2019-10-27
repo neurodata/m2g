@@ -564,15 +564,9 @@ def ndmg_dwi_worker(
     # TODO : putting this block of code here for now because it wouldn't run in `ndmg_bids`. Figure out how to put it somewhere else.
     if push and buck and remo is not None:
         if not modif:
-<<<<<<< HEAD
-            modif = f'ndmg_{ndmg.VERSION.replace(".", "-")}'
-        s3_utils.s3_push_data(buck, remo, outdir, modif, creds, debug=debug)
-=======
-            modif = "ndmg_{}".format(
-                __version__.replace(".", "-")
-            )  # TODO : make sure __version__ is in the namespace
+            modif = f'ndmg_{__version__.replace(".", "-")}'
+            # TODO : make sure __version__ is in the namespace
         cloud_utils.s3_push_data(buck, remo, outdir, modif, creds, debug=debug)
->>>>>>> origin/staging
         print("Pushing Complete!")
         if not debug:
             print("Listing contents of output directory ...")

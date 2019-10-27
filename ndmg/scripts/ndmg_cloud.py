@@ -241,7 +241,7 @@ def create_json(
     seshs = threads
 
     # make template
-    if not os.path.isfile(f'{jobdir}/{template.split("/")[-1]}')
+    if not os.path.isfile(f'{jobdir}/{template.split("/")[-1]}'):
         cmd = f'wget --quiet -P {jobdir} {template}'
         subprocess.check_output(cmd, shell=True)
 
@@ -354,48 +354,6 @@ def submit_jobs(jobs, jobdir):
     return 0
 
 
-<<<<<<< HEAD
-def get_status(jobdir, jobid=None):
-    """Given a list of jobs, returns status of each
-    
-    Parameters
-    ----------
-    jobdir : str
-        Directory of batch jobs to generate/check up on
-    jobid : NoneType, optional
-        Are the json files organized BIDS style?, by default None
-    
-    Returns
-    -------
-    list
-        a list of statuses for each of the jobs currently running
-    """
-
-    cmd_template = "aws batch describe-jobs --jobs {}"
-
-    if jobid is None:
-        print(f'Describing jobs in {jobdir}/ids/...')
-        jobs = os.listdir(jobdir + "/ids/")
-        for job in jobs:
-            with open(f'{jobdir}/ids/{job}', "r") as inf:
-                submission = json.load(inf)
-            cmd = cmd_template.format(submission["jobId"])
-            print(f'... Checking job {submission["jobName"]}...')
-            out = subprocess.check_output(cmd, shell=True)
-            status = re.findall('"status": "([A-Za-z]+)",', out.decode("utf-8"))[0]
-            print(f'... ... Status: {status}')
-        return 0
-    else:
-        print(f'Describing job id {jobid}...')
-        cmd = cmd_template.format(jobid)
-        out = subprocess.check_output(cmd, shell=True)
-        status = re.findall('"status": "([A-Za-z]+)",', out.decode("utf-8"))[0]
-        print(f'... Status: {status}')
-        return status
-
-
-=======
->>>>>>> origin/staging
 def kill_jobs(jobdir, reason='"Killing job"'):
     """Given a list of jobs, kills them all
 

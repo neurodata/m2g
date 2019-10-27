@@ -57,19 +57,19 @@ class NameResource:
         self.__sub__ = re.search(r"(sub-)(?!.*sub-).*?(?=[_])", modf)
         if self.__sub__:
             self.__sub__ = self.__sub__.group()
-            self.__suball__ = "sub-{}".format(self.__sub__)
+            self.__suball__ = f'sub-{self.__sub__}'
         self.__ses__ = re.search(r"(ses-)(?!.*ses-).*?(?=[_])", modf)
         if self.__ses__:
             self.__ses__ = self.__ses__.group()
-            self.__suball__ = self.__suball__ + "_ses-{}".format(self.__ses__)
+            self.__suball__ = self.__suball__ + f'_ses-{self.__ses__}'
         self.__run__ = re.search(r"(run-)(?!.*run-).*?(?=[_])", modf)
         if self.__run__:
             self.__run__ = self.__run__.group()
-            self.__suball__ = self.__suball__ + "_run-{}".format(self.__run__)
+            self.__suball__ = self.__suball__ + f'_run-{self.__run__}'
         self.__task__ = re.search(r"(task-)(?!.*task-).*?(?=[_])", modf)
         if self.__task__:
             self.__task__ = self.__task__.group()
-            self.__suball__ = self.__suball__ + "_run-{}".format(self.__task__)
+            self.__suball__ = self.__suball__ + f'_run-{self.__task__}'
         self.__temp__ = os.path.basename(tempf).split(".")[0]
         self.__space__ = re.split(r"[._]", self.__temp__)[0]
         self.__res__ = re.search(r"(res-)(?!.*res-).*?(?=[_])", tempf)
@@ -129,7 +129,7 @@ class NameResource:
         namer.dirs["qa"]["reg"] = namer.dirs["qa"]["base"] + "/reg"
         namer.dirs["qa"]["tensor"] = namer.dirs["qa"]["base"] + "/tensor"
         newdirs = flatten(namer.dirs, [])
-        cmd = "mkdir -p {}".format(" ".join(newdirs))
+        cmd = f'mkdir -p {" ".join(newdirs)}'
         execute_cmd(cmd)  # make the directories
         return
 
@@ -552,13 +552,13 @@ def execute_cmd(cmd, verb=False):
     """
 
     if verb:
-        print("Executing: {}".format(cmd))
+        print(f'Executing: {cmd}')
 
     p = Popen(cmd, stdout=PIPE, stderr=PIPE, shell=True)
     out, err = p.communicate()
     code = p.returncode
     if code:
-        sys.exit("Error {}: {}".format(code, err))
+        sys.exit(f'Error {code}: {err}')
     return out, err
 
 
@@ -592,9 +592,9 @@ def get_braindata(brain_file):
             brain = brain_file
         else:
             raise TypeError(
-                "Brain file is type: {}".format(type(brain_file))
-                + "; accepted types are numpy.ndarray, "
-                "string, and nibabel.nifti1.Nifti1Image."
+                f'Brain file is type: {type(brain_file)}'
+                f'; accepted types are numpy.ndarray, '
+                f'string, and nibabel.nifti1.Nifti1Image.'
             )
         braindata = brain.get_data()
     return braindata
@@ -668,9 +668,9 @@ def make_gtab_and_bmask(fbval, fbvec, dwi_file, outdir):
     """
 
     # Use B0's from the DWI to create a more stable DWI image for registration
-    nodif_B0 = "{}/nodif_B0.nii.gz".format(outdir)
-    nodif_B0_bet = "{}/nodif_B0_bet.nii.gz".format(outdir)
-    nodif_B0_mask = "{}/nodif_B0_bet_mask.nii.gz".format(outdir)
+    nodif_B0 = f'{outdir}/nodif_B0.nii.gz'
+    nodif_B0_bet = f'{outdir}/nodif_B0_bet.nii.gz'
+    nodif_B0_mask = f'{outdir}/nodif_B0_bet_mask.nii.gz'
 
     # loading bvecs/bvals
     print(fbval)
@@ -685,7 +685,7 @@ def make_gtab_and_bmask(fbval, fbvec, dwi_file, outdir):
 
     # Get B0 indices
     B0s = np.where(gtab.bvals == gtab.b0_threshold)[0]
-    print("%s%s" % ("B0's found at: ", B0s))
+    print(f'B0s found at: {B0s}')
 
     # Show info
     print(gtab.info)
@@ -696,8 +696,8 @@ def make_gtab_and_bmask(fbval, fbvec, dwi_file, outdir):
     B0s_bbr = []
     for B0 in B0s:
         print(B0)
-        B0_bbr = "{}/{}_B0.nii.gz".format(outdir, str(B0))
-        cmd = "fslroi " + dwi_file + " " + B0_bbr + " " + str(B0) + " 1"
+        B0_bbr = f'{outdir}/{str(B0)}_B0.nii.gz'
+        cmd = f'fslroi {dwi_file} {B0_bbr} {str(B0)} 1'
         cmds.append(cmd)
         B0s_bbr.append(B0_bbr)
 
@@ -714,7 +714,7 @@ def make_gtab_and_bmask(fbval, fbvec, dwi_file, outdir):
     nib.save(mean_B0, nodif_B0)
 
     # Get mean B0 brain mask
-    cmd = "bet " + nodif_B0 + " " + nodif_B0_bet + " -m -f 0.2"
+    cmd = f'bet {nodif_B0} {nodif_B0_bet} -m -f 0.2'
     os.system(cmd)
     return gtab, nodif_B0, nodif_B0_mask
 
@@ -798,13 +798,10 @@ def reorient_dwi(dwi_prep, bvecs, namer):
     # Is the input image oriented how we want?
     new_axcodes = ("R", "A", "S")
     if normalized is not input_img:
-        out_fname = "%s%s%s%s" % (
-            namer.dirs["output"]["prep_dwi"],
-            "/",
-            dwi_prep.split("/")[-1].split(".nii.gz")[0],
-            "_reor_RAS.nii.gz",
+        out_fname = (f'{namer.dirs["output"]["prep_dwi"]}/'
+            f'{dwi_prep.split("/")[-1].split(".nii.gz")[0]}_reor_RAS.nii.gz'
         )
-        print("%s%s%s" % ("Reorienting ", dwi_prep, " to RAS+..."))
+        print(f'Reorienting {dwi_prep} to RAS+...')
 
         # Flip the bvecs
         input_orientation = nib.orientations.axcodes2ornt(input_axcodes)
@@ -822,11 +819,8 @@ def reorient_dwi(dwi_prep, bvecs, namer):
             output_array[this_axnum] = bvec_array[int(axnum)] * float(flip)
         np.savetxt(out_bvec_fname, output_array, fmt="%.8f ")
     else:
-        out_fname = "%s%s%s%s" % (
-            namer.dirs["output"]["prep_dwi"],
-            "/",
-            dwi_prep.split("/")[-1].split(".nii.gz")[0],
-            "_RAS.nii.gz",
+        out_fname =(f'{namer.dirs["output"]["prep_dwi"]}/'
+            f'{dwi_prep.split("/")[-1].split(".nii.gz")[0]}_RAS.nii.gz'
         )
         out_bvec_fname = bvec_fname
 
@@ -989,9 +983,9 @@ def parcel_overlap(parcellation1, parcellation2, outpath):
                 pover = np.logical_and(p1seq, p2_dat == p2reg).sum() / float(N)
                 overlapdat[p1idx, p2idx] = pover
 
-    outf = os.path.join(outpath, "{}_{}.csv".format(p1n, p2n))
+    outf = os.path.join(outpath, f'{pln}_{p2n}.csv')
     with open(outf, "w") as f:
-        p2str = ["%s" % x for x in p2regs]
+        p2str = [f'{x}' for x in p2regs]
         f.write("p1reg," + ",".join(p2str) + "\n")
         for idx, p1reg in enumerate(p1regs):
             datstr = ["%.4f" % x for x in overlapdat[idx,].toarray()[0,]]
