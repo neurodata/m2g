@@ -237,7 +237,6 @@ class DirectorySweeper:
         self.bdir = bdir
         self.subjs = subjs
         self.seshs = seshs
-        self.run = run
         self.df = self.layout.to_df()
         self.trim()
 

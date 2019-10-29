@@ -184,7 +184,7 @@ def session_level(
         labels = [i for i in labels if atlas_select in i]
 
     # parse input directory
-    sweeper = DirectorySweeper(inDir, subj=subjs, sesh=sesh)
+    sweeper = DirectorySweeper(inDir, subjs=subjs, seshs=sesh)
     dwis = sweeper.get_dwis()
     bvals = sweeper.get_bvals()
     bvecs = sweeper.get_bvecs()
@@ -194,6 +194,8 @@ def session_level(
     assert len(anats) == len(dwis)
     assert len(bvecs) == len(dwis)
     assert len(bvals) == len(dwis)
+
+    # TODO : clean below
     args = [
         [
             dw,
