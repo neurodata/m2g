@@ -243,17 +243,11 @@ class DirectorySweeper:
         self.trim()
 
     @staticmethod
-    def as_list(inp):
-        if not isinstance(inp, list):
-            inp = [inp]
-        return inp
-
-    @staticmethod
     def all_strings(iterable):
         return [str(x) for x in iterable]
 
     def clean(self, iterable):
-        iterable = self.as_list(iterable)
+        iterable = as_list(iterable)
         iterable = self.all_strings(iterable)
         return iterable
 
