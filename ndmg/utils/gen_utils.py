@@ -235,6 +235,21 @@ def flatten(current, result=[]):
 
 class DirectorySweeper:
     # TODO : find data with run_label in it and test on that
+    """
+    Class for parsing through a BIDs-formatted directory tree.
+    
+    Parameters
+    ----------
+    bdir : str
+        BIDs-formatted directory containing dwi data.
+    subjs : list or str, optional
+        The subjects to run ndmg on. 
+        If None, parse through the whole directory.
+    seshs : list or str, optional
+        The sessions to run ndmg with.
+        If None, use every possible session.
+    """
+
     def __init__(self, bdir, subjs=None, seshs=None):
         self.layout = bids.BIDSLayout(bdir)
         self.bdir = bdir
@@ -248,11 +263,27 @@ class DirectorySweeper:
         return [str(x) for x in iterable]
 
     def clean(self, iterable):
+        """
+        Take either the subjects or the sessions, ensure that that are lists, and ensure that the elements in them are strings.
+        
+        Parameters
+        ----------
+        iterable : list
+            subjects or sessions list.
+        
+        Returns
+        -------
+        list
+            Cleaned subjects or sessions list
+        """
         iterable = as_list(iterable)
         iterable = self.all_strings(iterable)
         return iterable
 
     def trim(self):
+        """
+        Trim the internal pandas dataframe such that it only has the subjects and sessions we want.
+        """
         if self.subjs is not None:
             subjs = self.clean(self.subjs)
             self.df = self.df[self.df.subject.isin(subjs)]
@@ -262,6 +293,21 @@ class DirectorySweeper:
             self.df = self.df[self.df.session.isin(seshs)]
 
     def get(self, datatype=None, extension=None):
+        """
+        Method to retrieve lists from our pandas dataframe of BIDs data.
+        
+        Parameters
+        ----------
+        datatype : str
+            dwi or anat.
+        extension : str
+            nii.gz, bval, or bvec.
+        
+        Returns
+        -------
+        list
+            All dwis, bvals, bvecs, or anats, in order.
+        """
         df = self.df[(self.df.datatype == datatype) & (self.df.extension == extension)]
         return list(df.path)
 
