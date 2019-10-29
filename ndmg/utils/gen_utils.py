@@ -15,6 +15,7 @@ from subprocess import Popen, PIPE
 import subprocess
 import functools
 from itertools import product
+from pathlib import Path
 
 # package imports
 import bids
@@ -232,6 +233,7 @@ def flatten(current, result=[]):
 
 
 class DirectorySweeper:
+    # TODO : find data with run_label in it and test on that
     def __init__(self, bdir, subjs=None, seshs=None):
         self.layout = bids.BIDSLayout(bdir)
         self.bdir = bdir
