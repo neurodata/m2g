@@ -21,7 +21,7 @@ import subprocess
 
 # ndmg imports
 from ndmg.utils import cloud_utils
-from ndmg.utils.gen_utils import sweep_directory
+from ndmg.utils.gen_utils import DirectorySweeper
 from ndmg.utils.gen_utils import check_dependencies
 from ndmg.utils.gen_utils import is_bids
 from ndmg.scripts.ndmg_dwi_pipeline import ndmg_dwi_worker
@@ -118,7 +118,6 @@ def session_level(
     seeds,
     reg_style,
     sesh=None,
-    run=None,
     buck=None,
     remo=None,
     push=False,
@@ -159,8 +158,6 @@ def session_level(
         The label of the session that should be analyzed. If not provided all sessions are analyzed. Multiple sessions can be specified with a space separated list. Default is None
     task : str, optional
         task label. Default is None
-    run : str, optional
-        run label. Default is None
     buck : str, optional
         The name of an S3 bucket which holds BIDS organized data. You musht have build your bucket with credentials to the S3 bucket you wish to access. Default is None
     remo : str, optional
@@ -187,9 +184,13 @@ def session_level(
         labels = [i for i in labels if atlas_select in i]
 
     # parse input directory
-    result = sweep_directory(inDir, subjs, sesh, run)
+    sweeper = DirectorySweeper(inDir, subj=subjs, sesh=sesh)
+    dwis = sweeper.get_dwis()
+    bvals = sweeper.get_bvals()
+    bvecs = sweeper.get_bvecs()
+    anats = sweeper.get_anats()
 
-    dwis, bvals, bvecs, anats = result
+    # dwis, bvals, bvecs, anats = result
     assert len(anats) == len(dwis)
     assert len(bvecs) == len(dwis)
     assert len(bvals) == len(dwis)
@@ -284,16 +285,6 @@ def main():
         "parameter is not provided all sessions should be "
         "analyzed. Multiple sessions can be specified "
         "with a space separated list.",
-        nargs="+",
-    )
-    parser.add_argument(
-        "--run_label",
-        help="The label(s) of the run "
-        "that should be analyzed. The label corresponds to "
-        "run-<run_label> from the BIDS spec (so it does not "
-        'include "task-"). If this parameter is not provided '
-        "all runs should be analyzed. Multiple runs can be "
-        "specified with a space separated list.",
         nargs="+",
     )
     parser.add_argument(
@@ -413,7 +404,6 @@ def main():
     outDir = result.output_dir
     subj = result.participant_label
     sesh = result.session_label
-    run = result.run_label
     buck = result.bucket
     remo = result.remote_path
     push = result.push_data
@@ -491,7 +481,6 @@ def main():
         seeds,
         reg_style,
         sesh,
-        run,
         buck=buck,
         remo=remo,
         push=push,

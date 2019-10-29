@@ -230,6 +230,7 @@ def flatten(current, result=[]):
         result.append(current)
     return result
 
+
 class DirectorySweeper:
     def __init__(self, bdir, subjs=None, seshs=None):
         self.layout = bids.BIDSLayout(bdir)
@@ -239,46 +240,47 @@ class DirectorySweeper:
         self.run = run
         self.df = self.layout.to_df()
         self.trim()
-    
+
     @staticmethod
     def as_list(inp):
         if not isinstance(inp, list):
             inp = [inp]
         return inp
-    
+
     @staticmethod
     def all_strings(iterable):
         return [str(x) for x in iterable]
-    
+
     def clean(self, iterable):
         iterable = self.as_list(iterable)
         iterable = self.all_strings(iterable)
         return iterable
-    
+
     def trim(self):
         if self.subjs is not None:
             subjs = self.clean(self.subjs)
             self.df = self.df[self.df.subject.isin(subjs)]
-            
+
         if self.seshs is not None:
             seshs = self.clean(self.seshs)
             self.df = self.df[self.df.session.isin(seshs)]
-    
+
     def get(self, datatype=None, extension=None):
         df = self.df[(self.df.datatype == datatype) & (self.df.extension == extension)]
         return list(df.path)
-    
+
     def get_dwis(self):
-        return self.get(datatype='dwi', extension='nii.gz')
-    
+        return self.get(datatype="dwi", extension="nii.gz")
+
     def get_bvals(self):
-        return self.get(datatype='dwi', extension='bval')
-    
+        return self.get(datatype="dwi", extension="bval")
+
     def get_bvecs(self):
-        return self.get(datatype='dwi', extension='bvec')
-    
+        return self.get(datatype="dwi", extension="bvec")
+
     def get_anats(self):
-        return self.get(datatype='anat', extension='nii.gz')
+        return self.get(datatype="anat", extension="nii.gz")
+
 
 def sweep_directory(bdir, subj=None, sesh=None, task=None, run=None, modality="dwi"):
     """Given a BIDs formatted directory, crawls the BIDs dir and prepares the necessary inputs for the NDMG pipeline. Uses regexes to check matches for BIDs compliance.
