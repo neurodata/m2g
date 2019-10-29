@@ -23,7 +23,7 @@ import subprocess
 from ndmg.utils import cloud_utils
 from ndmg.utils.gen_utils import sweep_directory
 from ndmg.utils.gen_utils import check_dependencies
-from ndmg.utils.gen_utils import check_input_data
+from ndmg.utils.gen_utils import is_bids
 from ndmg.scripts.ndmg_dwi_pipeline import ndmg_dwi_worker
 
 
@@ -436,10 +436,13 @@ def main():
     modif = result.modif
     skull = result.skull
 
-    # initial setup and checks
+    # make sure we have AFNI and FSL
     print("Beginning ndmg ...")
     check_dependencies()
-    check_input_data(inDir)
+
+    # make sure input directory is BIDs-formatted
+    in_bids  = is_bids(inDir)
+    assert f
 
     # Check to see if user has provided direction to an existing s3 bucket they wish to use
     try:
