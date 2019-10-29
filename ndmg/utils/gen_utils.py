@@ -260,10 +260,9 @@ def sweep_directory(bdir, subj=None, sesh=None, task=None, run=None, modality="d
         Raised if incorrect mobility passed
     """
 
-    if modality == "dwi":
-        dwis = []
-        bvals = []
-        bvecs = []
+    dwis = []
+    bvals = []
+    bvecs = []
     anats = []
     layout = bids.BIDSLayout(bdir)  # initialize BIDs tree on bdir
     # get all files matching the specific modality we are using
@@ -290,11 +289,10 @@ def sweep_directory(bdir, subj=None, sesh=None, task=None, run=None, modality="d
         else:
             runs = as_list(run)
 
-        print(sub)
-        print(("%s%s" % ("Subject:", sub)))
-        print(("%s%s" % ("Sessions:", seshs)))
-        print(("%s%s" % ("Tasks:", tasks)))
-        print(("%s%s" % ("Runs:", runs)))
+        print(f"Subject: {sub}")
+        print(f"Sessions: {seshs}")
+        print(f"Tasks: {tasks}")
+        print(f"Runs: {runs}")
         print("\n\n")
         # all the combinations of sessions and tasks that are possible
         for (ses, tas, ru) in product(seshs, tasks, runs):
@@ -304,11 +302,8 @@ def sweep_directory(bdir, subj=None, sesh=None, task=None, run=None, modality="d
             mod_keys = ["subject", "session", "task", "run"]
             # our query we will use for each modality img
             mod_query = {"modality": modality}
-            if modality == "dwi":
-                type_img = "dwi"  # use the dwi image
-            elif modality == "func":
-                type_img = "bold"  # use the bold image
-            mod_query["type"] = type_img
+            type_img = "dwi"  # use the dwi image
+            mod_query["suffix"] = type_img
 
             for attr, key in zip(mod_attributes, mod_keys):
                 if attr:
@@ -317,47 +312,31 @@ def sweep_directory(bdir, subj=None, sesh=None, task=None, run=None, modality="d
             anat_attributes = [sub, ses]  # the attributes for our anat img
             anat_keys = ["subject", "session"]  # the keys for our modality img
             # our query for the anatomical image
-            anat_query = {"modality": "anat", "type": "T1w", "extensions": "nii.gz|nii"}
+            anat_query = {
+                "modality": "anat",
+                "suffix": "T1w",
+                "extensions": "nii.gz|nii",
+            }
             for attr, key in zip(anat_attributes, anat_keys):
                 if attr:
                     anat_query[key] = attr
             # make a query to fine the desired files from the BIDSLayout
             anat = layout.get(**anat_query)
-            if modality == "dwi":
-                dwi = layout.get(**merge_dicts(mod_query, {"extensions": "nii.gz|nii"}))
-                bval = layout.get(**merge_dicts(mod_query, {"extensions": "bval"}))
-                bvec = layout.get(**merge_dicts(mod_query, {"extensions": "bvec"}))
-                if anat and dwi and bval and bvec:
-                    for (dw, bva, bve) in zip(dwi, bval, bvec):
-                        if dw.filename not in dwis:
-                            # if all the required files exist, append by the first
-                            # match (0 index)
-                            anats.append(anat[0].filename)
-                            dwis.append(dw.filename)
-                            bvals.append(bva.filename)
-                            bvecs.append(bve.filename)
-            elif modality == "func":
-                func = layout.get(
-                    **merge_dicts(mod_query, {"extensions": "nii.gz|nii"})
-                )
-                if func and anat:
-                    for fun in func:
-                        if fun.filename not in funcs:
-                            funcs.append(fun.filename)
-                            anats.append(anat[0].filename)
-    if modality == "dwi":
-        if not len(dwis) or not len(bvals) or not len(bvecs) or not len(anats):
-            print("No dMRI files found in BIDs spec. Skipping...")
-        return (dwis, bvals, bvecs, anats)
-    elif modality == "func":
-        if not len(funcs) or not len(anats):
-            print("No fMRI files found in BIDs spec. Skipping...")
-        return (funcs, anats)
-    else:
-        raise ValueError(
-            "Incorrect modality passed.\
-                         Choices are 'func' and 'dwi'."
-        )
+            dwi = layout.get(**merge_dicts(mod_query, {"extensions": "nii.gz|nii"}))
+            bval = layout.get(**merge_dicts(mod_query, {"extensions": "bval"}))
+            bvec = layout.get(**merge_dicts(mod_query, {"extensions": "bvec"}))
+            if anat and dwi and bval and bvec:
+                for (dw, bva, bve) in zip(dwi, bval, bvec):
+                    if dw.filename not in dwis:
+                        # if all the required files exist, append by the first
+                        # match (0 index)
+                        anats.append(anat[0].filename)
+                        dwis.append(dw.filename)
+                        bvals.append(bva.filename)
+                        bvecs.append(bve.filename)
+    if not len(dwis) or not len(bvals) or not len(bvecs) or not len(anats):
+        print("No dMRI files found in BIDs spec. Skipping...")
+    return (dwis, bvals, bvecs, anats)
 
 
 def as_list(x):

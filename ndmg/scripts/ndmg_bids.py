@@ -244,11 +244,6 @@ def session_level(
             modif=modif,
             skull=skull,
         )
-    rmflds = []
-    if len(rmflds) > 0:
-        cmd = "rm -rf {}".format(" ".join(rmflds))
-        mgu.execute_cmd(cmd)
-    sys.exit(0)  # terminated
 
 
 def main():
@@ -441,8 +436,10 @@ def main():
     check_dependencies()
 
     # make sure input directory is BIDs-formatted
-    in_bids  = is_bids(inDir)
-    assert f
+    is_bids_ = is_bids(inDir)
+    assert is_bids_
+
+    # check on input data
 
     # Check to see if user has provided direction to an existing s3 bucket they wish to use
     try:
