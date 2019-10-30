@@ -264,7 +264,8 @@ class DirectorySweeper:
 
     def clean(self, iterable):
         """
-        Take either the subjects or the sessions, ensure that that are lists, and ensure that the elements in them are strings.
+        Take either the subjects or the sessions, ensure that they are lists, 
+        and ensure that the elements in them are strings.
         
         Parameters
         ----------
@@ -293,6 +294,10 @@ class DirectorySweeper:
             self.df = self.df[self.df.session.isin(seshs)]
 
     def get(self, datatype=None, extension=None):
+        # TODO : is there a way to generalize this more using `df.query`,
+        # so that we're not limited to datatype and extension?
+
+        # TODO : probably reorganize this such that we return a list of dictionaries of ndmg arguments rather than separate lists of filepaths
         """
         Method to retrieve lists from our pandas dataframe of BIDs data.
         
@@ -322,114 +327,6 @@ class DirectorySweeper:
 
     def get_anats(self):
         return self.get(datatype="anat", extension="nii.gz")
-
-
-# def sweep_directory(bdir, subj=None, sesh=None, task=None, run=None, modality="dwi"):
-#     """Given a BIDs formatted directory, crawls the BIDs dir and prepares the necessary inputs for the NDMG pipeline. Uses regexes to check matches for BIDs compliance.
-
-#     Parameters
-#     ----------
-#     bdir : str
-#         input directory
-#     subj : list, optional
-#         subject label. Default = None
-#     sesh : list, optional
-#         session label. Default = None
-#     task : list, optional
-#         task label. Default = None
-#     run : list, optional
-#         run label. Default = None
-#     modality : str, optional
-#         Data type being analyzed. Default = "dwi"
-
-#     Returns
-#     -------
-#     tuple
-#         contining location of dwi, bval, bvec, and anat
-
-#     Raises
-#     ------
-#     ValueError
-#         Raised if incorrect mobility passed
-#     """
-
-#     dwis = []
-#     bvals = []
-#     bvecs = []
-#     anats = []
-#     layout = bids.BIDSLayout(bdir)  # initialize BIDs tree on bdir
-#     # get all files matching the specific modality we are using
-#     if subj is None:
-#         subjs = layout.get_subjects()  # list of all the subjects
-#     else:
-#         subjs = as_list(subj)  # make it a list so we can iterate
-#     for sub in subjs:
-#         if not sesh:
-#             seshs = layout.get_sessions(subject=sub)
-#             seshs += [None]  # in case there are non-session level inputs
-#         else:
-#             seshs = as_list(sesh)  # make a list so we can iterate
-
-#         if not task:
-#             tasks = layout.get_tasks(subject=sub)
-#             tasks += [None]
-#         else:
-#             tasks = as_list(task)
-
-#         if not run:
-#             runs = layout.get_runs(subject=sub)
-#             runs += [None]
-#         else:
-#             runs = as_list(run)
-
-#         print(f"Subject: {sub}")
-#         print(f"Sessions: {seshs}")
-#         print(f"Tasks: {tasks}")
-#         print(f"Runs: {runs}")
-#         print("\n\n")
-#         # all the combinations of sessions and tasks that are possible
-#         for (ses, tas, ru) in product(seshs, tasks, runs):
-#             # the attributes for our modality img
-#             mod_attributes = [sub, ses, tas, ru]
-#             # the keys for our modality img
-#             mod_keys = ["subject", "session", "task", "run"]
-#             # our query we will use for each modality img
-#             mod_query = {"modality": modality}
-#             type_img = "dwi"  # use the dwi image
-#             mod_query["suffix"] = type_img
-
-#             for attr, key in zip(mod_attributes, mod_keys):
-#                 if attr:
-#                     mod_query[key] = attr
-
-#             anat_attributes = [sub, ses]  # the attributes for our anat img
-#             anat_keys = ["subject", "session"]  # the keys for our modality img
-#             # our query for the anatomical image
-#             anat_query = {
-#                 "modality": "anat",
-#                 "suffix": "T1w",
-#                 "extensions": "nii.gz|nii",
-#             }
-#             for attr, key in zip(anat_attributes, anat_keys):
-#                 if attr:
-#                     anat_query[key] = attr
-#             # make a query to fine the desired files from the BIDSLayout
-#             anat = layout.get(**anat_query)
-#             dwi = layout.get(**merge_dicts(mod_query, {"extensions": "nii.gz|nii"}))
-#             bval = layout.get(**merge_dicts(mod_query, {"extensions": "bval"}))
-#             bvec = layout.get(**merge_dicts(mod_query, {"extensions": "bvec"}))
-#             if anat and dwi and bval and bvec:
-#                 for (dw, bva, bve) in zip(dwi, bval, bvec):
-#                     if dw.filename not in dwis:
-#                         # if all the required files exist, append by the first
-#                         # match (0 index)
-#                         anats.append(anat[0].filename)
-#                         dwis.append(dw.filename)
-#                         bvals.append(bva.filename)
-#                         bvecs.append(bve.filename)
-#     if not len(dwis) or not len(bvals) or not len(bvecs) or not len(anats):
-#         print("No dMRI files found in BIDs spec. Skipping...")
-#     return (dwis, bvals, bvecs, anats)
 
 
 def as_list(x):
