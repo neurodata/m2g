@@ -250,11 +250,11 @@ class DirectorySweeper:
         If None, use every possible session.
     """
 
-    def __init__(self, bdir, subjs=None, seshs=None):
+    def __init__(self, bdir, subjects=None, sessions=None):
         self.layout = bids.BIDSLayout(bdir)
         self.bdir = bdir
-        self.subjs = subjs
-        self.seshs = seshs
+        self.subjects = subjects
+        self.sessions = sessions
         self.df = self.layout.to_df()
         self.trim()
 
@@ -285,48 +285,69 @@ class DirectorySweeper:
         """
         Trim the internal pandas dataframe such that it only has the subjects and sessions we want.
         """
-        if self.subjs is not None:
-            subjs = self.clean(self.subjs)
-            self.df = self.df[self.df.subject.isin(subjs)]
 
-        if self.seshs is not None:
-            seshs = self.clean(self.seshs)
-            self.df = self.df[self.df.session.isin(seshs)]
+        # remove description json file
+        self.df = self.df[self.df.suffix != "description"]
 
-    def get(self, datatype=None, extension=None):
-        # TODO : is there a way to generalize this more using `df.query`,
-        # so that we're not limited to datatype and extension?
+        # trim subjects
+        if self.subjects is not None:
+            subjs = self.clean(self.subjects)
+            self.df = self.df[self.df.subject.isin(subjects)]
+        else:
+            self.subjects = list(self.df.subject)
 
-        # TODO : probably reorganize this such that we return a list of dictionaries of ndmg arguments rather than separate lists of filepaths
+        # trim sessions
+        if self.sessions is not None:
+            seshs = self.clean(self.sessions)
+            self.df = self.df[self.df.session.isin(sessions)]
+        else:
+            self.subjects = list(self.df.session)
+
+    def get_scan(self, subject, session):
         """
-        Method to retrieve lists from our pandas dataframe of BIDs data.
+        Method to retrieve all information necessary for a single ndmg run.
         
         Parameters
         ----------
-        datatype : str
-            dwi or anat.
-        extension : str
-            nii.gz, bval, or bvec.
+        subject : str
+            Subject number
+        session : str
+            Session number
+        
+        Returns
+        -------
+        dict
+            All files from a single session.
+        """
+        df = self.df[(self.df.subject == subject) & (self.df.session == session)]
+
+        dwi = df[(df.datatype == "dwi") & (df.extension == "nii.gz")].path.iloc[0]
+        bval = df[(df.datatype == "dwi") & (df.extension == "bval")].path.iloc[0]
+        bvec = df[(df.datatype == "dwi") & (df.extension == "bvec")].path.iloc[0]
+        anat = df[df.datatype == "anat"].path.iloc[0]
+
+        return {"dwi": dwi, "bvals": bval, "bvecs": bvec, "anat": anat}
+
+    def get_scans(self):
+        """
+        Parse an entire BIDSLayout for scan parameters.
         
         Returns
         -------
         list
-            All dwis, bvals, bvecs, or anats, in order.
+            List of dictionaries. 
+            Each element corresponds to the arguments for a particular ndmg run.
         """
-        df = self.df[(self.df.datatype == datatype) & (self.df.extension == extension)]
-        return list(df.path)
 
-    def get_dwis(self):
-        return self.get(datatype="dwi", extension="nii.gz")
+        scans = []
 
-    def get_bvals(self):
-        return self.get(datatype="dwi", extension="bval")
+        subjects = self.df.subject
+        sessions = self.df.session
 
-    def get_bvecs(self):
-        return self.get(datatype="dwi", extension="bvec")
+        for subject, session in zip(subjects, sessions):
+            scans.append(self.get_scan(subject, session))
 
-    def get_anats(self):
-        return self.get(datatype="anat", extension="nii.gz")
+        return scans
 
 
 def as_list(x):
@@ -920,7 +941,7 @@ def match_target_vox_res(img_file, vox_size, namer, sens):
                 os.path.basename(img_file).split(".nii.gz")[0],
                 "_res.nii.gz",
             )
-        elif sens == "t1w":
+        elif sens == "anat":
             img_file_res = "%s%s%s%s" % (
                 namer.dirs["output"]["prep_anat"],
                 "/",

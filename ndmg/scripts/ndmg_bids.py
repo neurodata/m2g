@@ -72,20 +72,16 @@ def get_atlas(atlas_dir, vox_size):
         atlas_dir,
         "atlases/mask/MNI152NLin6_res-" + dims + "_T1w_descr-brainmask.nii.gz",
     )
-    labels = [
+    parcellations = [
         i for i in glob.glob(atlas_dir + "/atlases/label/Human/*.nii.gz") if dims in i
     ]
-    labels = [os.path.join(atlas_dir, "label/Human/", l) for l in labels]
-    fils = labels + [atlas, atlas_mask]
+    parcellations = [os.path.join(atlas_dir, "label/Human/", l) for l in parcellations]
 
-    atlas_brain = None
-    lv_mask = None
-
-    assert all(map(os.path.exists, labels)), "Some parcellations do not exist."
+    assert all(map(os.path.exists, parcellations)), "Some parcellations do not exist."
     assert all(
         map(os.path.exists, [atlas, atlas_mask])
     ), "atlas or atlas_mask, does not exist. You may not have git-lfs -- if not, install it."
-    return (labels, atlas, atlas_mask, atlas_brain, lv_mask)
+    return parcellations, atlas, atlas_mask
 
 
 def get_atlas_dir():
@@ -99,39 +95,19 @@ def get_atlas_dir():
     """
     if os.path.isdir("/ndmg_atlases"):
         return "/ndmg_atlases"  # in docker
-    else:
-        return os.path.expanduser("~") + "/.ndmg/ndmg_atlases"  # local
+
+    return os.path.expanduser("~") + "/.ndmg/ndmg_atlases"  # local
 
 
 def session_level(
-    inDir,
-    outDir,
-    subjs,
-    vox_size,
-    skipeddy,
-    skipreg,
-    clean,
-    atlas_select,
-    mod_type,
-    track_type,
-    mod_func,
-    seeds,
-    reg_style,
-    sesh=None,
-    buck=None,
-    remo=None,
-    push=False,
-    creds=None,
-    debug=False,
-    modif="",
-    skull="none",
+    inDir, parcellation_selection, subjects=None, sessions=None, **kwargs
 ):
     """Crawls the given BIDS organized directory for data pertaining to the given subject and session, and passes necessary files to ndmg_dwi_pipeline for processing.
 
     Parameters
     ----------
     inDir : str
-        Path to BIDS input directory
+        Path to BIDS input direceory
     outDir : str
         Path to output directory
     subjs : list
@@ -174,79 +150,26 @@ def session_level(
         Additional skullstrip analysis parameter set for unique t1w images. Default is "none".
     """
 
+    # parse input directory
+    sweeper = DirectorySweeper(inDir, subjects=subjects, sessions=sessions)
+    scans = sweeper.get_scans()
+
     # get atlas directory
     atlas_dir = get_atlas_dir()
-
-    # parse atlas directory
-    labels, atlas, atlas_mask, atlas_brain, lv_mask = get_atlas(atlas_dir, vox_size)
-
-    if atlas_select:
-        labels = [i for i in labels if atlas_select in i]
-
-    # parse input directory
-    sweeper = DirectorySweeper(inDir, subjs=subjs, seshs=sesh)
-    dwis = sweeper.get_dwis()
-    bvals = sweeper.get_bvals()
-    bvecs = sweeper.get_bvecs()
-    anats = sweeper.get_anats()
-
-    # dwis, bvals, bvecs, anats = result
-    assert len(anats) == len(dwis)
-    assert len(bvecs) == len(dwis)
-    assert len(bvals) == len(dwis)
-
-    # TODO : clean below
-    args = [
-        [
-            dw,
-            bval,
-            bvec,
-            anat,
-            atlas,
-            atlas_mask,
-            labels,
-            "%s%s%s%s%s"
-            % (
-                outDir,
-                "/sub",
-                bval.split("sub")[1].split("/")[0],
-                "/ses",
-                bval.split("ses")[1].split("/")[0],
-            ),
+    parcellations, atlas, mask, = get_atlas(atlas_dir, kwargs["vox_size"])
+    if parcellation_selection:  # filter parcellations
+        parcellations = [
+            parcel for parcel in parcellations if parcellation_selection in parcel
         ]
-        for (dw, bval, bvec, anat) in zip(dwis, bvals, bvecs, anats)
-    ]
 
-    # optional args stored in kwargs
-    # use worker wrapper to call function f with args arg
-    # and keyword args kwargs
-    for arg in args:
-        ndmg_dwi_worker(
-            arg[0],
-            arg[1],
-            arg[2],
-            arg[3],
-            atlas,
-            atlas_mask,
-            labels,
-            arg[7],
-            vox_size,
-            mod_type,
-            track_type,
-            mod_func,
-            seeds,
-            reg_style,
-            clean,
-            skipeddy,
-            skipreg,
-            buck=buck,
-            remo=remo,
-            push=push,
-            creds=creds,
-            debug=debug,
-            modif=modif,
-            skull=skull,
-        )
+    # stick atlases into the kwargs
+    atlas_stuff = {"atlas": atlas, "mask": mask, "parcellations": parcellations}
+    kwargs.update(atlas_stuff)
+
+    # run ndmg on the entire BIDs directory.
+    for scan in scans:
+        scan.update(kwargs)
+        ndmg_dwi_worker(**scan)
 
 
 def main():
@@ -316,9 +239,9 @@ def main():
         help="The name of " "the dataset you are perfoming QC on.",
     )
     parser.add_argument(
-        "--atlas",
+        "--parcellation",
         action="store",
-        help="The atlas " "being analyzed in QC (if you only want one).",
+        help="The parcellation(s) being analyzed. Multiple parcellations can be provided with a space separated list.",
         default=None,
     )
     parser.add_argument(
@@ -373,7 +296,6 @@ def main():
     parser.add_argument(
         "--sp",
         action="store",
-        # help="Space for tractography: mni, native_dsn, native. Default is native.",
         help="Space for tractography: native, native_dsn. Default is native.",
         default="native",
     )
@@ -403,25 +325,29 @@ def main():
     # parse cli arguments
     result = parser.parse_args()
     inDir = result.bids_dir
-    outDir = result.output_dir
-    subj = result.participant_label
-    sesh = result.session_label
-    buck = result.bucket
-    remo = result.remote_path
-    push = result.push_data
-    debug = result.debug
-    seeds = result.seeds
-    skipeddy = result.sked
-    skipreg = result.skreg
-    clean = result.clean
-    vox_size = result.vox
-    atlas_select = result.atlas
-    mod_type = result.mod
-    track_type = result.tt
-    mod_func = result.mf
-    reg_style = result.sp
-    modif = result.modif
-    skull = result.skull
+    subject = result.participant_label
+    session = result.session_label
+    parcellation_selection = result.parcellation
+
+    # all arguments to be used universally
+    kwargs = {
+        "outdir": result.output_dir,
+        "vox_size": result.vox,
+        "mod_type": result.mod,
+        "track_type": result.tt,
+        "mod_func": result.mf,
+        "seeds": result.seeds,
+        "reg_style": result.sp,
+        "clean": result.clean,
+        "skipeddy": result.sked,
+        "skipreg": result.skreg,
+        "buck": result.bucket,
+        "remo": result.remote_path,
+        "push": result.push_data,
+        "debug": result.debug,
+        "modif": result.modif,
+        "skull": result.skull,
+    }
 
     # make sure we have AFNI and FSL
     print("Beginning ndmg ...")
@@ -441,56 +367,40 @@ def main():
             os.getenv("AWS_ACCESS_KEY_ID", 0) and os.getenv("AWS_SECRET_ACCESS_KEY", 0)
         )
 
+    kwargs.update({"creds": creds})
+
     # TODO : `Flat is better than nested`. Make the logic for this cleaner.
     # this block of logic essentially just gets data we need from s3.
     # it's super gross.
-    if buck is not None and remo is not None:
-        if subj is not None:
+    if kwargs["buck"] is not None and kwargs["remo"] is not None:
+        if subject is not None:
             # if len(sesh) == 1:
             #    sesh = sesh[0]
-            for sub in subj:
-                if sesh is not None:
-                    for ses in sesh:
+            for sub in subject:
+                if session is not None:
+                    for ses in session:
                         rem = os.path.join(
-                            remo, "sub-{}".format(sub), "ses-{}".format(ses)
+                            kwargs["remo"], "sub-{}".format(sub), "ses-{}".format(ses)
                         )
                         tindir = os.path.join(
                             inDir, "sub-{}".format(sub), "ses-{}".format(ses)
                         )
-                        cloud_utils.s3_get_data(buck, rem, tindir, public=not creds)
+                        cloud_utils.s3_get_data(
+                            kwargs["buck"], rem, tindir, public=not creds
+                        )
                 else:
-                    rem = os.path.join(remo, "sub-{}".format(sub))
+                    rem = os.path.join(kwargs["remo"], "sub-{}".format(sub))
                     tindir = os.path.join(inDir, "sub-{}".format(sub))
-                    cloud_utils.s3_get_data(buck, rem, tindir, public=not creds)
+                    cloud_utils.s3_get_data(
+                        kwargs["buck"], rem, tindir, public=not creds
+                    )
         else:
-            cloud_utils.s3_get_data(buck, remo, inDir, public=not creds)
+            cloud_utils.s3_get_data(buck, kwargs["remo"], inDir, public=not creds)
 
     print("input directory contents: {}".format(os.listdir(inDir)))
 
     # run session-level ndmg
-    session_level(
-        inDir,
-        outDir,
-        subj,
-        vox_size,
-        skipeddy,
-        skipreg,
-        clean,
-        atlas_select,
-        mod_type,
-        track_type,
-        mod_func,
-        seeds,
-        reg_style,
-        sesh,
-        buck=buck,
-        remo=remo,
-        push=push,
-        creds=creds,
-        debug=debug,
-        modif=modif,
-        skull=skull,
-    )
+    session_level(inDir, parcellation_selection, subject, session, **kwargs)
 
 
 if __name__ == "__main__":
