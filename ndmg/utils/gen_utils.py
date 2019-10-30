@@ -326,7 +326,7 @@ class DirectorySweeper:
         bvec = df[(df.datatype == "dwi") & (df.extension == "bvec")].path.iloc[0]
         anat = df[df.datatype == "anat"].path.iloc[0]
 
-        return {"dwi": dwi, "bvals": bval, "bvecs": bvec, "anat": anat}
+        return {"dwi": dwi, "bvals": bval, "bvecs": bvec, "t1w": anat}
 
     def get_scans(self):
         """
@@ -941,7 +941,7 @@ def match_target_vox_res(img_file, vox_size, namer, sens):
                 os.path.basename(img_file).split(".nii.gz")[0],
                 "_res.nii.gz",
             )
-        elif sens == "anat":
+        elif sens == "t1w":
             img_file_res = "%s%s%s%s" % (
                 namer.dirs["output"]["prep_anat"],
                 "/",

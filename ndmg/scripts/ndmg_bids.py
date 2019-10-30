@@ -99,9 +99,7 @@ def get_atlas_dir():
     return os.path.expanduser("~") + "/.ndmg/ndmg_atlases"  # local
 
 
-def session_level(
-    inDir, parcellation_selection, subjects=None, sessions=None, **kwargs
-):
+def session_level(inDir, parcellation, subjects=None, sessions=None, **kwargs):
     """Crawls the given BIDS organized directory for data pertaining to the given subject and session, and passes necessary files to ndmg_dwi_pipeline for processing.
 
     Parameters
@@ -150,23 +148,20 @@ def session_level(
         Additional skullstrip analysis parameter set for unique t1w images. Default is "none".
     """
 
+    # get atlas stuff, then stick it into the kwargs
+    atlas_dir = get_atlas_dir()
+    parcellations, atlas, mask, = get_atlas(atlas_dir, kwargs["vox_size"])
+    if parcellation is not None:  # filter parcellations
+        parcellations = [file_ for file_ in parcellations if parcellation in file_]
+    atlas_stuff = {"atlas": atlas, "mask": mask, "labels": parcellations}
+    kwargs.update(atlas_stuff)
+
     # parse input directory
     sweeper = DirectorySweeper(inDir, subjects=subjects, sessions=sessions)
     scans = sweeper.get_scans()
 
-    # get atlas directory
-    atlas_dir = get_atlas_dir()
-    parcellations, atlas, mask, = get_atlas(atlas_dir, kwargs["vox_size"])
-    if parcellation_selection:  # filter parcellations
-        parcellations = [
-            parcel for parcel in parcellations if parcellation_selection in parcel
-        ]
-
-    # stick atlases into the kwargs
-    atlas_stuff = {"atlas": atlas, "mask": mask, "parcellations": parcellations}
-    kwargs.update(atlas_stuff)
-
     # run ndmg on the entire BIDs directory.
+    # TODO: make sure this works on all scans
     for scan in scans:
         scan.update(kwargs)
         ndmg_dwi_worker(**scan)
@@ -350,7 +345,7 @@ def main():
     }
 
     # make sure we have AFNI and FSL
-    print("Beginning ndmg ...")
+    print("\nBeginning ndmg ...")
     check_dependencies()
 
     # make sure input directory is BIDs-formatted
