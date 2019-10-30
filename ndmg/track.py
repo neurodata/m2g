@@ -270,6 +270,7 @@ class RunTrack:
             pass
         return self.tiss_classifier
 
+    @timer
     def tens_mod_est(self):
 
         print("Fitting tensor model...")
@@ -281,12 +282,14 @@ class RunTrack:
         self.ind = quantize_evecs(self.ten.evecs, self.sphere.vertices)
         return self.ten
 
+    @timer
     def odf_mod_est(self):
 
         print("Fitting CSA ODF model...")
         self.mod = CsaOdfModel(self.gtab, sh_order=6)
         return self.mod
 
+    @timer
     def csd_mod_est(self):
 
         print("Fitting CSD model...")
@@ -311,6 +314,7 @@ class RunTrack:
             self.mod = ConstrainedSphericalDeconvModel(self.gtab, self.response)
         return self.mod
 
+    @timer
     def local_tracking(self):
 
         self.sphere = get_sphere("repulsion724")
@@ -365,6 +369,7 @@ class RunTrack:
         self.streamlines = Streamlines(self.streamline_generator)
         return self.streamlines
 
+    @timer
     def particle_tracking(self):
 
         self.sphere = get_sphere("repulsion724")

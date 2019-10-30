@@ -455,6 +455,7 @@ def check_exists(*dargs):
 
 def timer(f):
     """Print the runtime of the decorated function"""
+    @functools.wraps(f)
     def wrapper_timer(*args, **kwargs):
         start_time = time.perf_counter()    # 1
         a = f(*args, **kwargs)
@@ -766,7 +767,6 @@ def normalize_xform(img):
 
     return new_img
 
-@timer
 def reorient_dwi(dwi_prep, bvecs, namer):
     """Orients dwi data to the proper orientation (RAS+) using nibabel
 
@@ -828,7 +828,6 @@ def reorient_dwi(dwi_prep, bvecs, namer):
 
     return out_fname, out_bvec_fname
 
-@timer
 def reorient_img(img, namer):
     """Reorients input image to RAS+
 

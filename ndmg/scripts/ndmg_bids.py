@@ -255,6 +255,10 @@ def session_level(
 def main():
     """Starting point of the ndmg pipeline, assuming that you are using a BIDS organized dataset
     """
+    if sys.platform.startswith('w') or sys.platform.startswith('c') or sys.platform.startswith('a'):
+        input('\n\nWARNING: You appear to be running ndmg on an operating system that is not macOS or Linux.'
+        '\nndmg has not been tested on this operating system and may not work. Press enter to continue.\n\n')
+
     parser = ArgumentParser(
         description="This is an end-to-end connectome estimation pipeline from M3r Images."
     )

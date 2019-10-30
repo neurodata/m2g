@@ -213,7 +213,7 @@ class DmriReg(object):
         self.wm_gm_int_in_dwi = f'{namer.dirs["output"]["reg_anat"]}/{self.t1w_name}_wm_gm_int_in_dwi.nii.gz'
         self.wm_gm_int_in_dwi_bin = f'{namer.dirs["output"]["reg_anat"]}/{self.t1w_name}_wm_gm_int_in_dwi_bin.nii.gz'
         self.input_mni_sched = f'{FSLDIR}/etc/flirtsch/T1_2_MNI152_2mm.cnf'
-        self.mni_atlas = f'{FSLDIR}/data/atlases/HarvardOxford/HarvardOxford-sub-prob-{vox_size}.nii.gz'
+        self.mni_atlas = f'{atlas_dir}/atlases/label/Human/HarvardOxfordsub-maxprob-thr25_space-MNI152NLin6_label_all_res-{vox_size}.nii.gz'
         self.mni_vent_loc = f'{atlas_dir}/atlases/mask/HarvardOxford-thr25_space-MNI152NLin6_variant-lateral-ventricles_res-{vox_dims}_descr-brainmask.nii.gz'
         self.corpuscallosum = f'{atlas_dir}/atlases/mask/CorpusCallosum_res_{vox_size}.nii.gz'
         self.corpuscallosum_mask_t1w = f'{self.namer.dirs["output"]["reg_anat"]}/{self.t1w_name}_corpuscallosum.nii.gz'

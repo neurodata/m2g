@@ -422,7 +422,7 @@ def ndmg_dwi_worker(
         print(
             "%s%s%s"
             % (
-                "POTNETIALLY REMOVE!!!Tractography runtime: ",
+                "Tractography runtime: ",
                 str(np.round(time.time() - start_time, 1)),
                 "s",
             )

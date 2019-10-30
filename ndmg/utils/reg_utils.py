@@ -275,6 +275,7 @@ def skullstrip_check(dmrireg, labels, namer, vox_size, reg_style):
     return labels_im_file_list
 
 
+@timer
 @check_exists(0)
 def t1w_skullstrip(t1w, out, skull="none"):
     """Skull-strips the t1w image using AFNIs 3dSkullStrip algorithm, which is a modification of FSLs BET specialized to t1w images.
