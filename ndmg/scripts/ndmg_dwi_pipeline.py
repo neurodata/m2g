@@ -187,9 +187,8 @@ def ndmg_dwi_worker(
     # Create derivative output file names
     streams = namer.name_derivative(namer.dirs["output"]["fiber"], "streamlines.trk")
 
-    # Again, connectomes are different
-    if not isinstance(labels, list):
-        labels = [labels]
+    # generate list of connectomes
+    labels = gen_utils.as_list(labels)
     connectomes = [
         namer.name_derivative(
             namer.dirs["output"]["conn"][namer.get_label(lab)],
@@ -200,10 +199,8 @@ def ndmg_dwi_worker(
         for lab in labels
     ]
 
-    print("Welcome to ndmg!")
-    print("Your connectomes will be located here:")
-    for connectome in connectomes:
-        print(connectome, "\n")
+    warm_welcome = welcome_message(connectomes)
+    print(warm_welcome)
 
     if vox_size != "1mm" and vox_size != "2mm":
         raise ValueError("Voxel size not supported. Use 2mm or 1mm")
@@ -624,6 +621,20 @@ def ndmg_dwi_worker(
                     os.path.exists(outdir)
                 )
             )
+
+
+def welcome_message(connectomes):
+
+    line = "\n~~~~~~~~~~~~~~~~\n"
+    line += "Welcome to ndmg!\n"
+    line += "Your connectomes will be located here:\n\n"
+
+    for connectome in connectomes:
+        line += connectome + "\n"
+
+    line += "\n~~~~~~~~~~~~~~~~"
+
+    return line
 
 
 def main():
