@@ -200,7 +200,10 @@ def ndmg_dwi_worker(
         for lab in labels
     ]
 
-    print("Connectomes downsampled to given labels: " + ", ".join(connectomes))
+    print("Welcome to ndmg!")
+    print("Your connectomes will be located here:")
+    for connectome in connectomes:
+        print(connectome, "\n")
 
     if vox_size != "1mm" and vox_size != "2mm":
         raise ValueError("Voxel size not supported. Use 2mm or 1mm")
@@ -599,7 +602,9 @@ def ndmg_dwi_worker(
     print("NDMG Complete.")
 
     if reg_style == "native" or reg_style == "native_dsn":
-        print("WARNING :: you are using native-space registration to generate connectomes. Without post-hoc normalization, multiple connectomes generated with NDMG cannot be compared directly.")
+        print(
+            "WARNING :: you are using native-space registration to generate connectomes. Without post-hoc normalization, multiple connectomes generated with NDMG cannot be compared directly."
+        )
 
     # TODO : putting this block of code here for now because it wouldn't run in `ndmg_bids`. Figure out how to put it somewhere else.
     if push and buck and remo is not None:

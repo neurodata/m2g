@@ -14,10 +14,12 @@ import re
 from subprocess import Popen, PIPE
 import subprocess
 import functools
+import json
 from itertools import product
+from pathlib import Path
 
 # package imports
-from bids import BIDSLayout
+import bids
 import numpy as np
 import nibabel as nib
 from nilearn.image import mean_img
@@ -231,133 +233,100 @@ def flatten(current, result=[]):
     return result
 
 
-def sweep_directory(bdir, subj=None, sesh=None, task=None, run=None, modality="dwi"):
-    """Given a BIDs formatted directory, crawls the BIDs dir and prepares the necessary inputs for the NDMG pipeline. Uses regexes to check matches for BIDs compliance.
-
+class DirectorySweeper:
+    # TODO : find data with run_label in it and test on that
+    """
+    Class for parsing through a BIDs-formatted directory tree.
+    
     Parameters
     ----------
     bdir : str
-        input directory
-    subj : list, optional
-        subject label. Default = None
-    sesh : list, optional
-        session label. Default = None
-    task : list, optional
-        task label. Default = None
-    run : list, optional
-        run label. Default = None
-    modality : str, optional
-        Data type being analyzed. Default = "dwi"
-
-    Returns
-    -------
-    tuple
-        contining location of dwi, bval, bvec, and anat
-
-    Raises
-    ------
-    ValueError
-        Raised if incorrect mobility passed
+        BIDs-formatted directory containing dwi data.
+    subjs : list or str, optional
+        The subjects to run ndmg on. 
+        If None, parse through the whole directory.
+    seshs : list or str, optional
+        The sessions to run ndmg with.
+        If None, use every possible session.
     """
 
-    if modality == "dwi":
-        dwis = []
-        bvals = []
-        bvecs = []
-    anats = []
-    layout = BIDSLayout(bdir)  # initialize BIDs tree on bdir
-    # get all files matching the specific modality we are using
-    if subj is None:
-        subjs = layout.get_subjects()  # list of all the subjects
-    else:
-        subjs = as_list(subj)  # make it a list so we can iterate
-    for sub in subjs:
-        if not sesh:
-            seshs = layout.get_sessions(subject=sub)
-            seshs += [None]  # in case there are non-session level inputs
-        else:
-            seshs = as_list(sesh)  # make a list so we can iterate
+    def __init__(self, bdir, subjs=None, seshs=None):
+        self.layout = bids.BIDSLayout(bdir)
+        self.bdir = bdir
+        self.subjs = subjs
+        self.seshs = seshs
+        self.df = self.layout.to_df()
+        self.trim()
 
-        if not task:
-            tasks = layout.get_tasks(subject=sub)
-            tasks += [None]
-        else:
-            tasks = as_list(task)
+    @staticmethod
+    def all_strings(iterable):
+        return [str(x) for x in iterable]
 
-        if not run:
-            runs = layout.get_runs(subject=sub)
-            runs += [None]
-        else:
-            runs = as_list(run)
+    def clean(self, iterable):
+        """
+        Take either the subjects or the sessions, ensure that they are lists, 
+        and ensure that the elements in them are strings.
+        
+        Parameters
+        ----------
+        iterable : list
+            subjects or sessions list.
+        
+        Returns
+        -------
+        list
+            Cleaned subjects or sessions list
+        """
+        iterable = as_list(iterable)
+        iterable = self.all_strings(iterable)
+        return iterable
 
-        print(sub)
-        print(("%s%s" % ("Subject:", sub)))
-        print(("%s%s" % ("Sessions:", seshs)))
-        print(("%s%s" % ("Tasks:", tasks)))
-        print(("%s%s" % ("Runs:", runs)))
-        print("\n\n")
-        # all the combinations of sessions and tasks that are possible
-        for (ses, tas, ru) in product(seshs, tasks, runs):
-            # the attributes for our modality img
-            mod_attributes = [sub, ses, tas, ru]
-            # the keys for our modality img
-            mod_keys = ["subject", "session", "task", "run"]
-            # our query we will use for each modality img
-            mod_query = {"modality": modality}
-            if modality == "dwi":
-                type_img = "dwi"  # use the dwi image
-            elif modality == "func":
-                type_img = "bold"  # use the bold image
-            mod_query["type"] = type_img
+    def trim(self):
+        """
+        Trim the internal pandas dataframe such that it only has the subjects and sessions we want.
+        """
+        if self.subjs is not None:
+            subjs = self.clean(self.subjs)
+            self.df = self.df[self.df.subject.isin(subjs)]
 
-            for attr, key in zip(mod_attributes, mod_keys):
-                if attr:
-                    mod_query[key] = attr
+        if self.seshs is not None:
+            seshs = self.clean(self.seshs)
+            self.df = self.df[self.df.session.isin(seshs)]
 
-            anat_attributes = [sub, ses]  # the attributes for our anat img
-            anat_keys = ["subject", "session"]  # the keys for our modality img
-            # our query for the anatomical image
-            anat_query = {"modality": "anat", "type": "T1w", "extensions": "nii.gz|nii"}
-            for attr, key in zip(anat_attributes, anat_keys):
-                if attr:
-                    anat_query[key] = attr
-            # make a query to fine the desired files from the BIDSLayout
-            anat = layout.get(**anat_query)
-            if modality == "dwi":
-                dwi = layout.get(**merge_dicts(mod_query, {"extensions": "nii.gz|nii"}))
-                bval = layout.get(**merge_dicts(mod_query, {"extensions": "bval"}))
-                bvec = layout.get(**merge_dicts(mod_query, {"extensions": "bvec"}))
-                if anat and dwi and bval and bvec:
-                    for (dw, bva, bve) in zip(dwi, bval, bvec):
-                        if dw.filename not in dwis:
-                            # if all the required files exist, append by the first
-                            # match (0 index)
-                            anats.append(anat[0].filename)
-                            dwis.append(dw.filename)
-                            bvals.append(bva.filename)
-                            bvecs.append(bve.filename)
-            elif modality == "func":
-                func = layout.get(
-                    **merge_dicts(mod_query, {"extensions": "nii.gz|nii"})
-                )
-                if func and anat:
-                    for fun in func:
-                        if fun.filename not in funcs:
-                            funcs.append(fun.filename)
-                            anats.append(anat[0].filename)
-    if modality == "dwi":
-        if not len(dwis) or not len(bvals) or not len(bvecs) or not len(anats):
-            print("No dMRI files found in BIDs spec. Skipping...")
-        return (dwis, bvals, bvecs, anats)
-    elif modality == "func":
-        if not len(funcs) or not len(anats):
-            print("No fMRI files found in BIDs spec. Skipping...")
-        return (funcs, anats)
-    else:
-        raise ValueError(
-            "Incorrect modality passed.\
-                         Choices are 'func' and 'dwi'."
-        )
+    def get(self, datatype=None, extension=None):
+        # TODO : is there a way to generalize this more using `df.query`,
+        # so that we're not limited to datatype and extension?
+
+        # TODO : probably reorganize this such that we return a list of dictionaries of ndmg arguments rather than separate lists of filepaths
+        """
+        Method to retrieve lists from our pandas dataframe of BIDs data.
+        
+        Parameters
+        ----------
+        datatype : str
+            dwi or anat.
+        extension : str
+            nii.gz, bval, or bvec.
+        
+        Returns
+        -------
+        list
+            All dwis, bvals, bvecs, or anats, in order.
+        """
+        df = self.df[(self.df.datatype == datatype) & (self.df.extension == extension)]
+        return list(df.path)
+
+    def get_dwis(self):
+        return self.get(datatype="dwi", extension="nii.gz")
+
+    def get_bvals(self):
+        return self.get(datatype="dwi", extension="bval")
+
+    def get_bvecs(self):
+        return self.get(datatype="dwi", extension="bvec")
+
+    def get_anats(self):
+        return self.get(datatype="anat", extension="nii.gz")
 
 
 def as_list(x):
@@ -374,10 +343,10 @@ def as_list(x):
         a list containing x
     """
 
-    if not isinstance(x, list):
-        return [x]
-    else:
+    if isinstance(x, list):
         return x
+
+    return [x]
 
 
 def merge_dicts(x, y):
@@ -451,6 +420,50 @@ def check_exists(*dargs):
         return inner
 
     return outer
+
+
+def is_bids(input_dir):
+    # TODO : change pybids dependency
+    """
+    Make sure that the input data is BIDs-formatted.
+    If it's BIDs-formatted, except for a `dataset_description.json` file, return True.
+    
+    Returns
+    -------
+    bool
+        True if the input directory is BIDs-formatted
+    
+    Raises
+    ------
+    ValueError
+        Occurs if the input directory is not formatted properly.
+    """
+    try:
+        l = bids.BIDSLayout(input_dir)
+        return l.validate
+    except ValueError as e:
+        p = "'dataset_description.json' is missing from project root. Every valid BIDS dataset must have this file."
+        if str(e) != p:
+            raise ValueError(e)
+        create_datadescript(input_dir)
+        return is_bids(input_dir)
+
+
+def create_datadescript(input_dir):
+    """
+    Creates a simple `data_description.json` file in the root of the input directory. Necessary for proper BIDs formatting.
+    
+    Parameters
+    ----------
+    input_dir : str
+        BIDs-formatted input director.
+    """
+    print(f"Creating a simple dataset_description.json in {input_dir}... ")
+    name = Path(input_dir).stem
+    vers = bids.__version__
+    out = dict(Name=name, BIDSVersion=vers)
+    with open(input_dir + "/dataset_description.json", "w") as f:
+        json.dump(out, f)
 
 
 def check_dependencies():
@@ -589,12 +602,12 @@ def get_braindata(brain_file):
     return braindata
 
 
-def get_filename(label):
+def get_filename(path):
     """Given a fully qualified path, return just the file name, without extension
 
     Parameters
     ----------
-    label : str
+    path : str
         Path to file you want isolated
 
     Returns
@@ -602,7 +615,7 @@ def get_filename(label):
     str
         File name
     """
-    return os.path.basename(label).split(".")[0]
+    return os.path.basename(path).split(".")[0]
 
 
 def get_slice(mri, volid, sli):
@@ -986,6 +999,3 @@ def parcel_overlap(parcellation1, parcellation2, outpath):
             datstr = ["%.4f" % x for x in overlapdat[idx,].toarray()[0,]]
             f.write(str(p1reg) + "," + ",".join(datstr) + "\n")
         f.close()
-
-
-#     return

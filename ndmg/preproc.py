@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
 """
-ndmg.preproc.rescale_bvec
-~~~~~~~~~~~~~~~~~~~~~~~~~
+ndmg.preproc
+~~~~~~~~~~~~
 
 Contains functionality for normalizing b-vectors.
 TODO : depracate or change name. Add other preprocessing functions created from ndmg_dwi_pipeline.
