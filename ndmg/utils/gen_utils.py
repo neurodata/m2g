@@ -79,7 +79,6 @@ class NameResource:
             self.__res__ = self.__res__.group()
         self.__basepath__ = opath
         self.__outdir__ = self._get_outdir()
-        return
 
     def add_dirs(namer, paths, labels, label_dirs):
         """Creates tmp and permanent directories for the desired suffixes
@@ -133,7 +132,6 @@ class NameResource:
         newdirs = flatten(namer.dirs, [])
         cmd = f'mkdir -p {" ".join(newdirs)}'
         execute_cmd(cmd)  # make the directories
-        return
 
     def _get_outdir(self):
         """Called by constructor to initialize the output directory
@@ -543,7 +541,6 @@ def show_template_bundles(final_streamlines, template_path, fname):
     )
     renderer.add(lines_actor)
     window.record(renderer, n_frames=1, out_path=fname, size=(900, 900))
-    return
 
 
 def execute_cmd(cmd, verb=False):
