@@ -99,74 +99,6 @@ def get_atlas_dir():
     return os.path.expanduser("~") + "/.ndmg/ndmg_atlases"  # local
 
 
-def session_level(inDir, parcellation, subjects=None, sessions=None, **kwargs):
-    """Crawls the given BIDS organized directory for data pertaining to the given subject and session, and passes necessary files to ndmg_dwi_pipeline for processing.
-
-    Parameters
-    ----------
-    inDir : str
-        Path to BIDS input direceory
-    outDir : str
-        Path to output directory
-    subjs : list
-        subject label
-    vox_size : str
-        Voxel size to use for template registrations.
-    skipeddy : bool
-        Whether to skip eddy correction if it has already been run. False means don't.
-    skipreg : bool
-        Whether to skip registration if it has already been run. False means don't.
-    clean : bool
-        Whether or not to delete intermediates
-    atlas_select : str
-        The atlas being analyzed in QC (if you only want one)
-    mod_type : str
-        Determinstic (det) or probabilistic (prob) tracking
-    track_type : str
-        Tracking approach: eudx or local. Default is eudx
-    mod_func : str
-        Which diffusion model you want to use, csd or csa
-    reg_style : str
-        Space for tractography.
-    sesh : str, optional
-        The label of the session that should be analyzed. If not provided all sessions are analyzed. Multiple sessions can be specified with a space separated list. Default is None
-    task : str, optional
-        task label. Default is None
-    buck : str, optional
-        The name of an S3 bucket which holds BIDS organized data. You musht have build your bucket with credentials to the S3 bucket you wish to access. Default is None
-    remo : str, optional
-        The path to the data on your S3 bucket. The data will be downloaded to the provided bids_dir on your machine. Default is None.
-    push : bool, optional
-        Flag to push derivatives back to S3. Default is False
-    creds : bool, optional
-        Determine if you have S3 credentials. Default is None
-    debug : bool, optional
-        If False, remove any old filed in the output directory. Default is False
-    modif : str, optional
-        Name of the folder on s3 to push to. If empty, push to a folder with ndmg's version number. Default is ""
-    skull : str, optional
-        Additional skullstrip analysis parameter set for unique t1w images. Default is "none".
-    """
-
-    # get atlas stuff, then stick it into the kwargs
-    atlas_dir = get_atlas_dir()
-    parcellations, atlas, mask, = get_atlas(atlas_dir, kwargs["vox_size"])
-    if parcellation is not None:  # filter parcellations
-        parcellations = [file_ for file_ in parcellations if parcellation in file_]
-    atlas_stuff = {"atlas": atlas, "mask": mask, "labels": parcellations}
-    kwargs.update(atlas_stuff)
-
-    # parse input directory
-    sweeper = DirectorySweeper(inDir, subjects=subjects, sessions=sessions)
-    scans = sweeper.get_scans()
-
-    # run ndmg on the entire BIDs directory.
-    # TODO: make sure this works on all scans
-    for scan in scans:
-        scan.update(kwargs)
-        ndmg_dwi_worker(**scan)
-
-
 def main():
     """Starting point of the ndmg pipeline, assuming that you are using a BIDS organized dataset
     """
@@ -317,12 +249,15 @@ def main():
         default="none",
     )
 
+    # and ... begin!
+    print("\nBeginning ndmg ...")
+
     # parse cli arguments
     result = parser.parse_args()
     inDir = result.bids_dir
-    subject = result.participant_label
-    session = result.session_label
-    parcellation_selection = result.parcellation
+    subjects = result.participant_label
+    sessions = result.session_label
+    parcellation_name = result.parcellation
 
     # all arguments to be used universally
     kwargs = {
@@ -345,7 +280,6 @@ def main():
     }
 
     # make sure we have AFNI and FSL
-    print("\nBeginning ndmg ...")
     check_dependencies()
 
     # make sure input directory is BIDs-formatted
@@ -394,8 +328,23 @@ def main():
 
     print("input directory contents: {}".format(os.listdir(inDir)))
 
-    # run session-level ndmg
-    session_level(inDir, parcellation_selection, subject, session, **kwargs)
+    # get atlas stuff, then stick it into the kwargs
+    atlas_dir = get_atlas_dir()
+    parcellations, atlas, mask, = get_atlas(atlas_dir, kwargs["vox_size"])
+    if parcellation_name is not None:  # filter parcellations
+        parcellations = [file_ for file_ in parcellations if parcellation_name in file_]
+    atlas_stuff = {"atlas": atlas, "mask": mask, "labels": parcellations}
+    kwargs.update(atlas_stuff)
+
+    # parse input directory
+    sweeper = DirectorySweeper(inDir, subjects=subjects, sessions=sessions)
+    scans = sweeper.get_scans()
+
+    # run ndmg on the entire BIDs directory.
+    # TODO: make sure this works on all scans
+    for scan in scans:
+        scan.update(kwargs)
+        ndmg_dwi_worker(**scan)
 
 
 if __name__ == "__main__":

@@ -632,7 +632,7 @@ def welcome_message(connectomes):
     for connectome in connectomes:
         line += connectome + "\n"
 
-    line += "\n~~~~~~~~~~~~~~~~"
+    line += "~~~~~~~~~~~~~~~~\n"
 
     return line
 
