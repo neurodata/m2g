@@ -242,10 +242,10 @@ class DirectorySweeper:
     ----------
     bdir : str
         BIDs-formatted directory containing dwi data.
-    subjs : list or str, optional
+    subjects : list or str, optional
         The subjects to run ndmg on. 
         If None, parse through the whole directory.
-    seshs : list or str, optional
+    sessions : list or str, optional
         The sessions to run ndmg with.
         If None, use every possible session.
     """
@@ -291,14 +291,14 @@ class DirectorySweeper:
 
         # trim subjects
         if self.subjects is not None:
-            subjs = self.clean(self.subjects)
+            subjects = self.clean(self.subjects)
             self.df = self.df[self.df.subject.isin(subjects)]
         else:
             self.subjects = list(self.df.subject)
 
         # trim sessions
         if self.sessions is not None:
-            seshs = self.clean(self.sessions)
+            sessions = self.clean(self.sessions)
             self.df = self.df[self.df.session.isin(sessions)]
         else:
             self.subjects = list(self.df.session)
@@ -321,6 +321,7 @@ class DirectorySweeper:
         """
         df = self.df[(self.df.subject == subject) & (self.df.session == session)]
 
+        # TODO : there might be a cleaner way to index these in pandas.
         dwi = df[(df.datatype == "dwi") & (df.extension == "nii.gz")].path.iloc[0]
         bval = df[(df.datatype == "dwi") & (df.extension == "bval")].path.iloc[0]
         bvec = df[(df.datatype == "dwi") & (df.extension == "bvec")].path.iloc[0]
