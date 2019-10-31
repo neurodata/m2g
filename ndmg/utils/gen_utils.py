@@ -359,11 +359,11 @@ class DirectorySweeper:
         sessions = self.sessions
 
         # get all possible subject/session combos,
+        # then discard the ones that don't exist
         for subject, session in product(subjects, sessions):
             try:
                 scan = self.get_scan(subject, session)
                 scans.append(scan)
-            # then discard the ones that don't exist
             except IndexError:
                 continue
 
