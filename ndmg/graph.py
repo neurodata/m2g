@@ -75,7 +75,6 @@ class GraphTools:
         self.affine = affine
         self.namer = namer
         self.connectome_path = os.path.dirname(connectome_path)
-        pass
 
     @timer
     def make_graph_old(self):
@@ -247,7 +246,6 @@ class GraphTools:
             raise ValueError(
                 "Only edgelist, gpickle, graphml, txt, and npy are currently supported"
             )
-        pass
 
     def save_graph_png(self, graphname):
         """Saves adjacency graph, made using graspy's heatmap function, as a png. This will be saved in the qa/graphs_plotting/ directory

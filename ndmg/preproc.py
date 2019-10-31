@@ -45,4 +45,3 @@ def rescale_bvec(bvec, bvec_new):
         pass
     else:
         pass
-    pass

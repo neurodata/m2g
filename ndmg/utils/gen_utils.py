@@ -462,7 +462,7 @@ def timer(f):
         end_time = time.perf_counter()      # 2
         run_time = end_time - start_time    # 3
         print(f"Function {f.__name__!r} finished in {run_time:.4f} secs")
-        return a #f(*args, **kwargs)
+        return a
     return wrapper_timer
 
 def check_dependencies():
