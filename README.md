@@ -87,6 +87,8 @@ Creating the Docker image should take several minutes if this is the first time 
 In order to create a docker container from the docker image and access it, use the following command to both create and enter the container:
 
     docker run -it --entrypoint /bin/bash ndmg:uniquelabel
+    
+Note that `ndmg` has particularly high RAM requirements, and docker containers are given low memory by default. We recommend changing the default preferences to give docker access to at least 6 GB of RAM.
 
 ## Tutorial
 
