@@ -21,37 +21,11 @@ import subprocess
 
 # ndmg imports
 from ndmg.utils import cloud_utils
-from ndmg.utils.gen_utils import check_dependencies, timer
-from ndmg.utils.gen_utils import sweep_directory
+from ndmg.utils.gen_utils import DirectorySweeper
+from ndmg.utils.gen_utils import check_dependencies
+from ndmg.utils.gen_utils import is_bids
 from ndmg.scripts.ndmg_dwi_pipeline import ndmg_dwi_worker
 
-# TODO : move the stuff below to `main`
-check_dependencies()
-print("Beginning ndmg ...")
-
-if os.path.isdir("/ndmg_atlases"):
-    # in docker
-    atlas_dir = "/ndmg_atlases"
-else:
-    # local
-    atlas_dir = os.path.expanduser("~") + "/.ndmg/ndmg_atlases"
-
-    # Data structure:
-    # sub-<subject id>/
-    #   ses-<session id>/
-    #     anat/
-    #       sub-<subject id>_ses-<session id>_T1w.nii.gz
-    #     dwi/
-    #       sub-<subject id>_ses-<session id>_dwi.nii.gz
-    #   *   sub-<subject id>_ses-<session id>_dwi.bval
-    #   *   sub-<subject id>_ses-<session id>_dwi.bvec
-    #
-    # *these files can be anywhere up stream of the dwi data, and are inherited.
-
-    """
-    Given the desired location for atlases and the type of processing, ensure
-    we have all the atlases and parcellations.
-    """
 
 def get_atlas(atlas_dir, vox_size):
     """Given the desired location of atlases and the type of processing, ensure we have all the atlases and parcellations.
@@ -114,6 +88,21 @@ def get_atlas(atlas_dir, vox_size):
     return (labels, atlas, atlas_mask, atlas_brain, lv_mask)
 
 
+def get_atlas_dir():
+    """
+    Gets the location of ndmg's atlases.
+    
+    Returns
+    -------
+    str
+        atlas directory location.
+    """
+    if os.path.isdir("/ndmg_atlases"):
+        return "/ndmg_atlases"  # in docker
+    else:
+        return os.path.expanduser("~") + "/.ndmg/ndmg_atlases"  # local
+
+
 def session_level(
     inDir,
     outDir,
@@ -129,7 +118,6 @@ def session_level(
     seeds,
     reg_style,
     sesh=None,
-    run=None,
     buck=None,
     remo=None,
     push=False,
@@ -170,8 +158,6 @@ def session_level(
         The label of the session that should be analyzed. If not provided all sessions are analyzed. Multiple sessions can be specified with a space separated list. Default is None
     task : str, optional
         task label. Default is None
-    run : str, optional
-        run label. Default is None
     buck : str, optional
         The name of an S3 bucket which holds BIDS organized data. You musht have build your bucket with credentials to the S3 bucket you wish to access. Default is None
     remo : str, optional
@@ -188,17 +174,28 @@ def session_level(
         Additional skullstrip analysis parameter set for unique t1w images. Default is "none".
     """
 
+    # get atlas directory
+    atlas_dir = get_atlas_dir()
+
+    # parse atlas directory
     labels, atlas, atlas_mask, atlas_brain, lv_mask = get_atlas(atlas_dir, vox_size)
 
     if atlas_select:
         labels = [i for i in labels if atlas_select in i]
 
-    result = sweep_directory(inDir, subjs, sesh, run)
+    # parse input directory
+    sweeper = DirectorySweeper(inDir, subjs=subjs, seshs=sesh)
+    dwis = sweeper.get_dwis()
+    bvals = sweeper.get_bvals()
+    bvecs = sweeper.get_bvecs()
+    anats = sweeper.get_anats()
 
-    dwis, bvals, bvecs, anats = result
+    # dwis, bvals, bvecs, anats = result
     assert len(anats) == len(dwis)
     assert len(bvecs) == len(dwis)
     assert len(bvals) == len(dwis)
+
+    # TODO : clean below
     args = [
         [
             dw,
@@ -217,8 +214,6 @@ def session_level(
     # use worker wrapper to call function f with args arg
     # and keyword args kwargs
     for arg in args:
-        print(arg)
-
         ndmg_dwi_worker(
             arg[0],
             arg[1],
@@ -245,11 +240,6 @@ def session_level(
             modif=modif,
             skull=skull,
         )
-        rmflds = []
-        if len(rmflds) > 0:
-            cmd = f'rm -rf {" ".join(rmflds)}'
-            mgu.execute_cmd(cmd)
-    sys.exit(0)  # terminated
 
 
 def main():
@@ -294,16 +284,6 @@ def main():
         "parameter is not provided all sessions should be "
         "analyzed. Multiple sessions can be specified "
         "with a space separated list.",
-        nargs="+",
-    )
-    parser.add_argument(
-        "--run_label",
-        help="The label(s) of the run "
-        "that should be analyzed. The label corresponds to "
-        "run-<run_label> from the BIDS spec (so it does not "
-        'include "task-"). If this parameter is not provided '
-        "all runs should be analyzed. Multiple runs can be "
-        "specified with a space separated list.",
         nargs="+",
     )
     parser.add_argument(
@@ -416,13 +396,13 @@ def main():
         "Excess clipping in general: general",
         default="none",
     )
-    result = parser.parse_args()
 
+    # parse cli arguments
+    result = parser.parse_args()
     inDir = result.bids_dir
     outDir = result.output_dir
     subj = result.participant_label
     sesh = result.session_label
-    run = result.run_label
     buck = result.bucket
     remo = result.remote_path
     push = result.push_data
@@ -439,6 +419,16 @@ def main():
     reg_style = result.sp
     modif = result.modif
     skull = result.skull
+
+    # make sure we have AFNI and FSL
+    print("Beginning ndmg ...")
+    check_dependencies()
+
+    # make sure input directory is BIDs-formatted
+    is_bids_ = is_bids(inDir)
+    assert is_bids_
+
+    # check on input data
 
     # Check to see if user has provided direction to an existing s3 bucket they wish to use
     try:
@@ -470,6 +460,7 @@ def main():
 
     print(f'input directory contents: {os.listdir(inDir)}')
 
+    # run session-level ndmg
     session_level(
         inDir,
         outDir,
@@ -485,7 +476,6 @@ def main():
         seeds,
         reg_style,
         sesh,
-        run,
         buck=buck,
         remo=remo,
         push=push,

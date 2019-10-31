@@ -2,7 +2,7 @@
 
 """
 ndmg.register
-~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~
 
 Contains ndmg's registration classes, organized as full registration workflows.
 Used for the majority of the registration described here: https://neurodata.io/talks/ndmg.pdf#page=20
@@ -108,7 +108,7 @@ def direct_streamline_norm(streams, fa_path, namer):
     return mni_streamlines, streams_mni
 
 
-class DmriReg(object):
+class DmriReg:
     """Class containing relevant paths and class methods for analysing tractography
 
     Parameters

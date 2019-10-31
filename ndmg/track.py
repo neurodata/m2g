@@ -2,7 +2,7 @@
 
 """
 ndmg.track
-~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~
 
 Contains ndmg's fiber reconstruction and tractography functionality.
 Theory described here: https://neurodata.io/talks/ndmg.pdf#page=21
