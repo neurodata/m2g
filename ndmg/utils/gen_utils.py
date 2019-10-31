@@ -250,19 +250,43 @@ class DirectorySweeper:
         If None, use every possible session.
     """
 
-    def __init__(self, bdir, subjects=None, sessions=None):
+    def __init__(self, bdir, subject=None, session=None):
         self.layout = bids.BIDSLayout(bdir)
         self.bdir = bdir
-        self.subjects = subjects
-        self.sessions = sessions
-        self.df = self.layout.to_df()
+        self.df = self.layout.to_df(filters={"absolute_paths": True})
+        self.df = self.df[self.df.suffix != "description"]
+        self.subjects = subject
+        self.sessions = session
+        
+        # clean subjects / sessions
+        self.update()
+        
+        # trim dataframe
         self.trim()
+
+    def __repr__(self):
+        return self.layout
 
     @staticmethod
     def all_strings(iterable):
         return [str(x) for x in iterable]
-
-    def clean(self, iterable):
+    
+    
+    def update(self):
+        
+        subjects = self.subjects
+        sessions = self.sessions
+        
+        if subjects is None:
+            subjects = list(self.df.subject.unique())
+        if sessions is None:
+            sessions = list(self.df.session.unique())
+            
+        self.subjects = self.clean(subjects)
+        self.sessions = self.clean(sessions)
+        
+    
+    def clean(self, sub_or_ses):
         """
         Take either the subjects or the sessions, ensure that they are lists, 
         and ensure that the elements in them are strings.
@@ -277,7 +301,7 @@ class DirectorySweeper:
         list
             Cleaned subjects or sessions list
         """
-        iterable = as_list(iterable)
+        iterable = as_list(sub_or_ses)
         iterable = self.all_strings(iterable)
         return iterable
 
@@ -286,22 +310,11 @@ class DirectorySweeper:
         Trim the internal pandas dataframe such that it only has the subjects and sessions we want.
         """
 
-        # remove description json file
-        self.df = self.df[self.df.suffix != "description"]
+        # trim df to subjects
+        self.df = self.df[self.df.subject.isin(self.subjects)]
 
-        # trim subjects
-        if self.subjects is not None:
-            subjects = self.clean(self.subjects)
-            self.df = self.df[self.df.subject.isin(subjects)]
-        else:
-            self.subjects = list(self.df.subject)
-
-        # trim sessions
-        if self.sessions is not None:
-            sessions = self.clean(self.sessions)
-            self.df = self.df[self.df.session.isin(sessions)]
-        else:
-            self.subjects = list(self.df.session)
+        # trim df to sessions
+        self.df = self.df[self.df.session.isin(self.sessions)]
 
     def get_scan(self, subject, session):
         """
@@ -342,11 +355,17 @@ class DirectorySweeper:
 
         scans = []
 
-        subjects = self.df.subject
-        sessions = self.df.session
+        subjects = self.subjects
+        sessions = self.sessions
 
-        for subject, session in zip(subjects, sessions):
-            scans.append(self.get_scan(subject, session))
+        # get all possible subject/session combos,
+        for subject, session in product(subjects, sessions):
+            try:
+                scan = self.get_scan(subject, session)
+                scans.append(scan)
+            # then discard the ones that don't exist
+            except IndexError:
+                continue
 
         return scans
 

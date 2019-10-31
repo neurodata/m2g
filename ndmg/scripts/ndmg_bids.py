@@ -99,6 +99,17 @@ def get_atlas_dir():
     return os.path.expanduser("~") + "/.ndmg/ndmg_atlases"  # local
 
 
+def failure_message(i, scan):
+    line = f"Scan {i} failed."
+    line += f"Scan {i} file locations:\n"
+    line += f"\t{scan['t1w']}\n"
+    line += f"\t{scan['dwi']}\n"
+    line += f"\t{scan['bvals']}\n"
+    line += f"\t{scan['bvecs']}\n"
+    line += f"Trying next scan.\n"
+    return line
+
+
 def main():
     """Starting point of the ndmg pipeline, assuming that you are using a BIDS organized dataset
     """
@@ -259,7 +270,7 @@ def main():
     sessions = result.session_label
     parcellation_name = result.parcellation
 
-    # all arguments to be used universally
+    # arguments to be passed in every ndmg run
     kwargs = {
         "outdir": result.output_dir,
         "vox_size": result.vox,
@@ -279,6 +290,7 @@ def main():
         "skull": result.skull,
     }
 
+    # ---------------- Pre-run checks ---------------- #
     # make sure we have AFNI and FSL
     check_dependencies()
 
@@ -288,6 +300,7 @@ def main():
 
     # check on input data
 
+    # ---------------- Grab arguments --------------- #
     # Check to see if user has provided direction to an existing s3 bucket they wish to use
     try:
         creds = bool(cloud_utils.get_credentials())
@@ -340,11 +353,17 @@ def main():
     sweeper = DirectorySweeper(inDir, subjects=subjects, sessions=sessions)
     scans = sweeper.get_scans()
 
+    # ---------------- Run Pipeline --------------- #
     # run ndmg on the entire BIDs directory.
     # TODO: make sure this works on all scans
-    for scan in scans:
+    for i, scan in enumerate(scans):
         scan.update(kwargs)
-        ndmg_dwi_worker(**scan)
+        try:
+            ndmg_dwi_worker(**scan)
+        except:
+            failure = failure_message(i, scan)
+            print(failure)
+            continue
 
 
 if __name__ == "__main__":
