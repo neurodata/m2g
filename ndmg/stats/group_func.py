@@ -62,7 +62,6 @@ class GroupFunc:
         self.connectomes = self.get_connectomes()
         self.qa_objects = self.load_qa()
         self.group_level_analysis()
-        pass
 
     def get_qa_files(self):
         """
@@ -156,7 +155,6 @@ class GroupFunc:
         fname_multi = f'{regdir}/{fname_multi}'
         multi = traces_to_panels(traces, names=names, ylabs=ylab, xlabs=xlab)
         pyo.plot(multi, validate=False, filename=fname_multi)
-        pass
 
     def group_motion(self):
         """
@@ -205,4 +203,3 @@ class GroupFunc:
         fname_multi = f'{mcdir}/{fname_multi}'
         multi = traces_to_panels(traces, names=names, ylabs=ylab, xlabs=xlab)
         pyo.plot(multi, validate=False, filename=fname_multi)
-        pass

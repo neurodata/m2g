@@ -342,7 +342,6 @@ def ndmg_dwi_worker(
         # Perform anatomical segmentation
         if (skipreg is True) and os.path.isfile(reg.wm_edge):
             print("Found existing gentissue run!")
-            pass
         else:
             reg.gen_tissue()
         
@@ -354,7 +353,6 @@ def ndmg_dwi_worker(
             and os.path.isfile(reg.t1_aligned_mni)
         ):
             print("Found existing t1w2dwi run!")
-            pass
         else:
             reg.t1w2dwi_align()
 
@@ -366,7 +364,6 @@ def ndmg_dwi_worker(
             and os.path.isfile(reg.corpuscallosum_dwi)
         ):
             print("Found existing tissue2dwi run!")
-            pass
         else:
             reg.tissue2dwi_align()
 

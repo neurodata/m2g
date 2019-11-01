@@ -131,9 +131,8 @@ def s3_get_data(bucket, remote, local, public=False, force=False):
         Whether to overwrite the local directory containing the s3 files if it already exists, by default False
     """
 
-    # TODO : use boto3 for this
     if os.path.exists(local) and not force:
-        print("Local directory already exists. Not pulling s3 data.")
+        print(f'Local directory: {local} already exists. Not pulling s3 data. Delete contents to re-download data.')
         return  # TODO: make sure this doesn't append None a bunch of times to a list in a loop on this function
     if not public:
         # get client with credentials if they exist
@@ -141,24 +140,27 @@ def s3_get_data(bucket, remote, local, public=False, force=False):
             client = s3_client(service="s3")
         except:
             client = boto3.client("s3")
+    else:
+        client = boto3.client("s3")
+    
+    bkts = [bk["Name"] for bk in client.list_buckets()["Buckets"]]
+    if bucket not in bkts:
+        sys.exit(
+            "Error: could not locate bucket. Available buckets: " + ", ".join(bkts)
+        )
 
-        bkts = [bk["Name"] for bk in client.list_buckets()["Buckets"]]
-        if bucket not in bkts:
-            sys.exit(
-                "Error: could not locate bucket. Available buckets: " + ", ".join(bkts)
-            )
+    s3 = boto3.resource('s3')
+    buck = s3.Bucket(bucket)
+    for obj in buck.objects.filter(Prefix=f'{remote}'):
+        bdir,data = os.path.split(obj.key)
+        if not os.path.exists(f'{local}/{bdir.split("/")[-1]}'):
+            os.makedirs(f'{local}/{bdir.split("/")[-1]}')
+        print(f'Downloading {bdir}/{data} from {bucket} s3 bucket...')   
+        client.download_file(bucket,f'{bdir}/{data}', f'{local}/{bdir.split("/")[-1]}/{data}')
+        if os.path.exists(f'{local}/{bdir.split("/")[-1]}/{data}'):
+            print('Success!')
 
-        cmd = f'aws s3 cp --exclude "ndmg_*" --recursive s3://{bucket}/{remote}/ {local};\nwait'
-    if public:
-        cmd += " --no-sign-request --region=us-east-1;\nwait"
 
-    print(f'Calling {cmd} to get data from S3 ...')
-    out = subprocess.check_output(f'mkdir -p {local}', shell=True)
-    out = subprocess.check_output(cmd, shell=True)
-    out = subprocess.check_output(
-        f'echo "\n\n\n\n\n\n\nDATA ARRIVED\n\n\n\n\n\n" {local}', shell=True
-    )
-    print(out)
 
 
 def s3_push_data(bucket, remote, outDir, modifier, creds=True, debug=True):

@@ -143,7 +143,6 @@ def apply_mask(inp, mask, out):
 
     cmd = f'3dcalc -a {inp} -b {mask} -expr "a*step(b)" -prefix {out}'
     gen_utils.execute_cmd(cmd, verb=True)
-    pass
 
 
 def extract_t1w_brain(t1w, out, tmpdir, skull="none"):
@@ -169,7 +168,6 @@ def extract_t1w_brain(t1w, out, tmpdir, skull="none"):
     t1w_skullstrip(t1w, skull_t1w, skull)
     # 3dcalc to apply the mask over the 4d image
     apply_mask(t1w, skull_t1w, out)
-    pass
 
 
 @check_exists(0)
@@ -188,7 +186,6 @@ def normalize_t1w(inp, out):
     """
     cmd = f'3dUnifize -prefix {out} -input {inp}'
     gen_utils.execute_cmd(cmd, verb=True)
-    pass
 
 
 @check_exists(0)
@@ -210,7 +207,6 @@ def resample_fsl(base, res, goal_res, interp="spline"):
     # resample using an isometric transform in fsl
     cmd = f'flirt -in {base} -ref {base} -out {res} -applyisoxfm {goal_res} -interp {interp}'
     gen_utils.execute_cmd(cmd, verb=True)
-    pass
 
 
 def skullstrip_check(dmrireg, labels, namer, vox_size, reg_style):
@@ -302,7 +298,6 @@ def t1w_skullstrip(t1w, out, skull="none"):
     else:
         cmd = f'3dSkullStrip -prefix {out} -input {t1w} -ld 30'
     gen_utils.execute_cmd(cmd, verb=True)
-    pass
 
 
 @check_exists(0)

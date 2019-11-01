@@ -73,7 +73,6 @@ class QaMRI:
             wr = csv.writer(file, delimiter=":")
             for key, value in list(self.__dict__.items()):
                 wr.writerow([key, value])
-        pass
 
     def func_preproc_qa(self, prep):
         """
@@ -180,7 +179,6 @@ class QaMRI:
         prep.num_fd_gt_200um = np.sum(fd_pars > 0.2)
         # number of framewise displacements greater than .5 mm
         prep.num_fd_gt_500um = np.sum(fd_pars > 0.5)
-        pass
 
     def anat_preproc_qa(self, prep):
         """
@@ -206,7 +204,6 @@ class QaMRI:
             fig.tight_layout()
             fig.savefig(fname)
             plt.close(fig)
-        pass
 
     def self_reg_qa(self, reg):
         """
@@ -244,7 +241,7 @@ class QaMRI:
             plt.close(m_mask)
 
         plt.close(sreg_fig)
-        pass
+
 
     def aligned_mri_name(self):
         """
@@ -297,7 +294,6 @@ class QaMRI:
         plt.close(t1w2temp_fig)
         # produce cnr, snr, and mean plots for temporal voxelwise statistics
         self.voxel_qa(reg.epi_aligned_skull, reg.atlas_mask, treg_m_final)
-        pass
 
     def voxel_qa(self, func, mask, qadir):
         """
@@ -346,7 +342,6 @@ class QaMRI:
             fname = f'{qadir}/{func_name}_{plotname}.png'
             plot.savefig(fname, format="png")
             plt.close(plot)
-        pass
 
     def nuisance_qa(self, nuisobj):
         """
@@ -463,7 +458,6 @@ class QaMRI:
             fname_fft_sig = f'{fftdir}/{func_name}_fft_signal_cmp.png'
             fig_fft_sig.savefig(fname_fft_sig, format="png")
             plt.close(fig_fft_sig)
-        pass
 
     def roi_graph_qa(self, timeseries, connectome, func, anat, label):
         """
@@ -500,7 +494,6 @@ class QaMRI:
         if self.modality == "func":
             plot_timeseries(timeseries, fname_ts, self.aligned_mri_name(), label_name)
         plot_connectome(connectome, fname_con, self.aligned_mri_name(), label_name)
-        pass
 
     def voxel_ts_qa(self, timeseries, voxel_func, atlas_mask):
         """

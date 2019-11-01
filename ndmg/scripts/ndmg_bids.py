@@ -424,9 +424,6 @@ def main():
     print("Beginning ndmg ...")
     check_dependencies()
 
-    # make sure input directory is BIDs-formatted
-    is_bids_ = is_bids(inDir)
-    assert is_bids_
 
     # check on input data
 
@@ -459,6 +456,10 @@ def main():
             cloud_utils.s3_get_data(buck, remo, inDir, public=not creds)
 
     print(f'input directory contents: {os.listdir(inDir)}')
+
+    # make sure input directory is BIDs-formatted
+    is_bids_ = is_bids(inDir)
+    assert is_bids_
 
     # run session-level ndmg
     session_level(

@@ -114,12 +114,9 @@ class GraphTools:
                     loc = self.rois[point[0], point[1], point[2]]
                 except IndexError:
                     loc = ""
-                    pass
 
                 if loc:
                     p.add(loc)
-                else:
-                    pass
 
             edges = combinations(p, 2)
             for edge in edges:
@@ -273,4 +270,3 @@ class GraphTools:
         """
         print("\nGraph Summary:")
         print(nx.info(self.g))
-        pass

@@ -330,9 +330,7 @@ def submit_jobs(jobs, jobdir):
         submission = batch.submit_job(**kwargs)
         print(
             (
-                "Job Name: {}, Job ID: {}".format(
-                    submission["jobName"], submission["jobId"]
-                )
+                f'Job Name: {submission["jobName"]}, Job ID: {submission["jobId"]}'
             )
         )
         sub_file = os.path.join(jobdir, "ids", submission["jobName"] + ".json")
