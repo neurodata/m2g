@@ -350,7 +350,7 @@ def main():
     kwargs.update(atlas_stuff)
 
     # parse input directory
-    sweeper = DirectorySweeper(inDir, subjects=subjects, sessions=sessions)
+    sweeper = DirectorySweeper(inDir, subject=subjects, session=sessions)
     scans = sweeper.get_scans()
 
     # ---------------- Run Pipeline --------------- #

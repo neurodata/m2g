@@ -257,17 +257,16 @@ class DirectorySweeper:
         self.df = self.df[self.df.suffix != "description"]  # no metadata file
         self.subjects = subject
         self.sessions = session
-        
+
         # clean subjects / sessions
         self.update()
-        
+
         # trim dataframe
         self.trim()
 
     def __repr__(self):
         return self.layout
-    
-    
+
     def update(self):
         """
         If subjects or sessions aren't passed to the object, 
@@ -275,19 +274,18 @@ class DirectorySweeper:
         
         Ensure that `self.subjects` and `self.subjects` are List(str).
         """
-        
+
         subjects = self.subjects
         sessions = self.sessions
-        
+
         if subjects is None:
             subjects = list(self.df.subject.unique())
         if sessions is None:
             sessions = list(self.df.session.unique())
-            
+
         self.subjects = self.clean(subjects)
         self.sessions = self.clean(sessions)
-        
-    
+
     def clean(self, sub_or_ses):
         """
         Take either the subjects or the sessions, ensure that they are lists, 
@@ -342,7 +340,9 @@ class DirectorySweeper:
         bvec = df[(df.datatype == "dwi") & (df.extension == "bvec")].path.iloc[0]
         anat = df[df.datatype == "anat"].path.iloc[0]
 
-        return {"dwi": dwi, "bvals": bval, "bvecs": bvec, "t1w": anat}
+        scan = {"dwi": dwi, "bvals": bval, "bvecs": bvec, "t1w": anat}
+        assert all(isinstance(val, str) for val in scan.values())
+        return scan
 
     def get_scans(self):
         """
@@ -366,8 +366,8 @@ class DirectorySweeper:
 
         if not scans:
             raise ValueError("There were no scans matching the specifications given.")
-            
-        return scanss
+
+        return scans
 
 
 def all_strings(iterable_):
