@@ -233,6 +233,10 @@ def flatten(current, result=[]):
     return result
 
 
+from collections import namedtuple
+import warnings
+
+
 class DirectorySweeper:
     # TODO : find data with run_label in it and test on that
     """
@@ -250,13 +254,13 @@ class DirectorySweeper:
         If None, use every possible session.
     """
 
-    def __init__(self, bdir, subject=None, session=None):
+    def __init__(self, bdir, subjects=None, sessions=None):
         self.layout = bids.BIDSLayout(bdir)
         self.bdir = bdir
         self.df = self.layout.to_df(filters={"absolute_paths": True})
         self.df = self.df[self.df.suffix != "description"]  # no metadata file
-        self.subjects = subject
-        self.sessions = session
+        self.subjects = subjects
+        self.sessions = sessions
 
         # clean subjects / sessions
         self.update()
@@ -316,7 +320,7 @@ class DirectorySweeper:
         # trim df to sessions
         self.df = self.df[self.df.session.isin(self.sessions)]
 
-    def get_scan(self, subject, session):
+    def get_files(self, subject, session):
         """
         Method to retrieve all information necessary for a single ndmg run.
         
@@ -329,9 +333,10 @@ class DirectorySweeper:
         
         Returns
         -------
-        dict
-            All files from a single session.
+        namedtuple
+            All files from a single session, as well as the corresponding subject and session.
         """
+
         df = self.df[(self.df.subject == subject) & (self.df.session == session)]
 
         # TODO : there might be a cleaner way to index these in pandas.
@@ -340,34 +345,39 @@ class DirectorySweeper:
         bvec = df[(df.datatype == "dwi") & (df.extension == "bvec")].path.iloc[0]
         anat = df[df.datatype == "anat"].path.iloc[0]
 
-        scan = {"dwi": dwi, "bvals": bval, "bvecs": bvec, "t1w": anat}
-        assert all(isinstance(val, str) for val in scan.values())
-        return scan
+        files = {"dwi": dwi, "bvals": bval, "bvecs": bvec, "t1w": anat}
+        return files
 
-    def get_scans(self):
+    def get_dir_info(self):
         """
-        Parse an entire BIDSLayout for filenames.
+        Parse an entire BIDSLayout for scan parameters.
         
         Returns
         -------
         list
-            List of dictionaries. 
-            Each element corresponds to the arguments for a particular ndmg run.
+            List of SubSesFiles namedtuples. 
+            SubSesFile.files is a dictionary of files.
+            SubSesFile.subject is the subject string.
+            SubSesFile.session is the session string.
         """
 
-        scans = []
+        info = []
+        SubSesFiles = namedtuple("SubSesFiles", ["subject", "session", "files"])
 
         # get all possible subject/session combos,
         groups = self.df.groupby(["subject", "session"])
         for pair, df in groups:
             subject, session = pair
-            scan = self.get_scan(subject, session)
-            scans.append(scan)
+            files = self.get_files(subject, session)
+            scan = SubSesFiles(subject, session, files)
+            info.append(scan)
 
-        if not scans:
-            raise ValueError("There were no scans matching the specifications given.")
+            if not scan.files:
+                raise warnings.warn(
+                    f"There were no files for subject {subject}, session {session}."
+                )
 
-        return scans
+        return info
 
 
 def all_strings(iterable_):

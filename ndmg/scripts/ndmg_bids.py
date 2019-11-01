@@ -266,13 +266,13 @@ def main():
     # parse cli arguments
     result = parser.parse_args()
     inDir = result.bids_dir
+    outDir = result.output_dir
     subjects = result.participant_label
     sessions = result.session_label
     parcellation_name = result.parcellation
 
     # arguments to be passed in every ndmg run
     kwargs = {
-        "outdir": result.output_dir,
         "vox_size": result.vox,
         "mod_type": result.mod,
         "track_type": result.tt,
@@ -315,12 +315,12 @@ def main():
     # this block of logic essentially just gets data we need from s3.
     # it's super gross.
     if kwargs["buck"] is not None and kwargs["remo"] is not None:
-        if subject is not None:
+        if subjects is not None:
             # if len(sesh) == 1:
             #    sesh = sesh[0]
-            for sub in subject:
-                if session is not None:
-                    for ses in session:
+            for sub in subjects:
+                if sessions is not None:
+                    for ses in sessions:
                         rem = os.path.join(
                             kwargs["remo"], "sub-{}".format(sub), "ses-{}".format(ses)
                         )
@@ -350,16 +350,19 @@ def main():
     kwargs.update(atlas_stuff)
 
     # parse input directory
-    sweeper = DirectorySweeper(inDir, subject=subjects, session=sessions)
-    scans = sweeper.get_scans()
+    sweeper = DirectorySweeper(inDir, subjects=subjects, sessions=sessions)
+    info = sweeper.get_dir_info()
 
     # ---------------- Run Pipeline --------------- #
     # run ndmg on the entire BIDs directory.
     # TODO: make sure this works on all scans
-    for i, scan in enumerate(scans):
-        scan.update(kwargs)
+    for i, SubSesFile in enumerate(info):
+        subject, session, files = SubSesFile
+        kwargs["outdir"] = f"{outDir}/sub-{subject}/ses-{session}"
+        files.update(kwargs)
+
         try:
-            ndmg_dwi_worker(**scan)
+            ndmg_dwi_worker(**files)
         except:
             failure = failure_message(i, scan)
             print(failure)
