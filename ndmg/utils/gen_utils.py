@@ -254,7 +254,7 @@ class DirectorySweeper:
         self.layout = bids.BIDSLayout(bdir)
         self.bdir = bdir
         self.df = self.layout.to_df(filters={"absolute_paths": True})
-        self.df = self.df[self.df.suffix != "description"]
+        self.df = self.df[self.df.suffix != "description"]  # no metadata file
         self.subjects = subject
         self.sessions = session
         
@@ -266,13 +266,15 @@ class DirectorySweeper:
 
     def __repr__(self):
         return self.layout
-
-    @staticmethod
-    def all_strings(iterable):
-        return [str(x) for x in iterable]
     
     
     def update(self):
+        """
+        If subjects or sessions aren't passed to the object, 
+        update object state to use all possible subjects and subjects.
+        
+        Ensure that `self.subjects` and `self.subjects` are List(str).
+        """
         
         subjects = self.subjects
         sessions = self.sessions
@@ -293,7 +295,7 @@ class DirectorySweeper:
         
         Parameters
         ----------
-        iterable : list
+        sub_or_ses : list
             subjects or sessions list.
         
         Returns
@@ -301,9 +303,9 @@ class DirectorySweeper:
         list
             Cleaned subjects or sessions list
         """
-        iterable = as_list(sub_or_ses)
-        iterable = self.all_strings(iterable)
-        return iterable
+        sub_or_ses = as_list(sub_or_ses)
+        sub_or_ses = all_strings(sub_or_ses)
+        return sub_or_ses
 
     def trim(self):
         """
@@ -355,19 +357,21 @@ class DirectorySweeper:
 
         scans = []
 
-        subjects = self.subjects
-        sessions = self.sessions
-
         # get all possible subject/session combos,
-        # then discard the ones that don't exist
-        for subject, session in product(subjects, sessions):
-            try:
-                scan = self.get_scan(subject, session)
-                scans.append(scan)
-            except IndexError:
-                continue
+        groups = self.df.groupby(["subject", "session"])
+        for pair, df in groups:
+            subject, session = pair
+            scan = self.get_scan(subject, session)
+            scans.append(scan)
 
-        return scans
+        if not scans:
+            raise ValueError("There were no scans matching the specifications given.")
+            
+        return scanss
+
+
+def all_strings(iterable_):
+    return [str(x) for x in iterable_]
 
 
 def as_list(x):
