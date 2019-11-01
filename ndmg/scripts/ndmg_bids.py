@@ -6,9 +6,9 @@ ndmg.scripts.ndmg_bids
 
 The top level ndmg entrypoint module.
 In this module, ndmg:
-1. Pulls input data from s3 if we need it.
-2. Parses all input data.
-3. for each set of input data, runs ndmg_dwi_pipeline.ndmg_dwi_worker (the actual pipeline)
+1. Pulls data into the input directory from s3 if we need it.
+2. Parses the input directory.
+3. for each subject/session pair, runs ndmg_dwi_pipeline.ndmg_dwi_worker (the actual pipeline)
 """
 
 

@@ -346,7 +346,7 @@ class DirectorySweeper:
 
     def get_scans(self):
         """
-        Parse an entire BIDSLayout for scan parameters.
+        Parse an entire BIDSLayout for filenames.
         
         Returns
         -------
