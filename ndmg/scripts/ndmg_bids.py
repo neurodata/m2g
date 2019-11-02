@@ -99,13 +99,9 @@ def get_atlas_dir():
     return os.path.expanduser("~") + "/.ndmg/ndmg_atlases"  # local
 
 
-def failure_message(i, scan):
-    line = f"Scan {i} failed."
-    line += f"Scan {i} file locations:\n"
-    line += f"\t{scan['t1w']}\n"
-    line += f"\t{scan['dwi']}\n"
-    line += f"\t{scan['bvals']}\n"
-    line += f"\t{scan['bvecs']}\n"
+def failure_message(subject, session, error):
+    line = f"Subject {subject}, session {session} failed."
+    line += f"Errror message: {error}"
     line += f"Trying next scan.\n"
     return line
 
@@ -363,8 +359,8 @@ def main():
 
         try:
             ndmg_dwi_worker(**files)
-        except:
-            failure = failure_message(i, scan)
+        except Exception as e:
+            failure = failure_message(subject, session, errorr)
             print(failure)
             continue
 
