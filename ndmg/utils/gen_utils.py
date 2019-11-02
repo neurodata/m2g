@@ -322,7 +322,7 @@ class DirectorySweeper:
 
     def get_files(self, subject, session):
         """
-        Method to retrieve all information necessary for a single ndmg run.
+        Retrieve all session-level subject files necessary for a single ndmg run.
         
         Parameters
         ----------
@@ -333,8 +333,8 @@ class DirectorySweeper:
         
         Returns
         -------
-        namedtuple
-            All files from a single session, as well as the corresponding subject and session.
+        dict
+            Dictionary of all files from a single session.
         """
 
         df = self.df[(self.df.subject == subject) & (self.df.session == session)]
@@ -364,7 +364,7 @@ class DirectorySweeper:
         info = []
         SubSesFiles = namedtuple("SubSesFiles", ["subject", "session", "files"])
 
-        # get all possible subject/session combos,
+        # append subject, session, and files for each session to info
         groups = self.df.groupby(["subject", "session"])
         for pair, df in groups:
             subject, session = pair
@@ -373,7 +373,7 @@ class DirectorySweeper:
             info.append(scan)
 
             if not scan.files:
-                raise warnings.warn(
+                warnings.warn(
                     f"There were no files for subject {subject}, session {session}."
                 )
 
