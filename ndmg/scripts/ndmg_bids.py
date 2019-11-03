@@ -299,7 +299,8 @@ def main():
         action="store",
         help="The path to "
         "the data on your S3 bucket. The data will be "
-        "downloaded to the provided bids_dir on your machine.",
+        "downloaded to the provided bids_dir on your machine."
+        "Do not start or end with /",
     )
     parser.add_argument(
         "--push_data",
@@ -383,7 +384,9 @@ def main():
     parser.add_argument(
         "--modif",
         action="store",
-        help="Name of folder on s3 to push to. If empty, push to a folder with ndmg's version number.",
+        help="Name of folder on s3 to push to, if the folder does not exist, it will be created."
+        "If empty, push to a folder with ndmg's version number."
+        "Do not start or end with /",
         default="",
     )
     parser.add_argument(
@@ -425,8 +428,6 @@ def main():
     check_dependencies()
 
 
-    # check on input data
-
     # Check to see if user has provided direction to an existing s3 bucket they wish to use
     try:
         creds = bool(cloud_utils.get_credentials())
@@ -446,17 +447,17 @@ def main():
                 if sesh is not None:
                     for ses in sesh:
                         rem = os.path.join(remo, f'sub-{sub}', f'ses-{ses}')
-                        tindir = os.path.join(inDir, f'sub-{sub}', f'ses-{ses}')
-                        cloud_utils.s3_get_data(buck, rem, tindir, public=not creds)
+                        cloud_utils.s3_get_data(buck, rem, inDir, info=f'sub-{sub}/ses-{ses}', public=not creds)
                 else:
                     rem = os.path.join(remo, f'sub-{sub}')
-                    tindir = os.path.join(inDir, f'sub-{sub}')
-                    cloud_utils.s3_get_data(buck, rem, tindir, public=not creds)
+                    cloud_utils.s3_get_data(buck, rem, inDir, info=f'sub-{sub}', public=not creds)
         else:
-            cloud_utils.s3_get_data(buck, remo, inDir, public=not creds)
+            cloud_utils.s3_get_data(buck, f'{remo}/sub-', inDir, public=not creds)
 
     print(f'input directory contents: {os.listdir(inDir)}')
 
+
+    # check on input data
     # make sure input directory is BIDs-formatted
     is_bids_ = is_bids(inDir)
     assert is_bids_

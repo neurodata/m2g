@@ -113,7 +113,7 @@ def get_matching_s3_objects(bucket, prefix="", suffix=""):
             break
 
 
-def s3_get_data(bucket, remote, local, public=False, force=False):
+def s3_get_data(bucket, remote, local, info='', public=False, force=False):
     """Given and s3 directory, copies files/subdirectories in that directory to local
 
     Parameters
@@ -123,17 +123,23 @@ def s3_get_data(bucket, remote, local, public=False, force=False):
     remote : str
         The path to the data on your S3 bucket. The data will be
         downloaded to the provided bids_dir on your machine.
-    local : str
-        Local input directory where you want the files copied to
+    local : list
+        Local input directory where you want the files copied to and subject/session info [input, sub-#/ses-#]
+    info : str, optional
+        Relevant subject and session information in the form of sub-#/ses-#
     public : bool, optional
         Whether or not the data you are accessing is public, if False s3 credentials are used, by default False
     force : bool, optional
         Whether to overwrite the local directory containing the s3 files if it already exists, by default False
     """
 
-    if os.path.exists(local) and not force:
-        print(f'Local directory: {local} already exists. Not pulling s3 data. Delete contents to re-download data.')
-        return  # TODO: make sure this doesn't append None a bunch of times to a list in a loop on this function
+    if os.path.exists(os.path.join(local,info)) and not force:
+        if os.listdir(os.path.join(local,info)):
+            print(f'Local directory: {os.path.join(local,info)} already exists. Not pulling s3 data. Delete contents to re-download data.')
+            return  # TODO: make sure this doesn't append None a bunch of times to a list in a loop on this function
+        else:
+            pass
+    
     if not public:
         # get client with credentials if they exist
         try:
@@ -143,21 +149,26 @@ def s3_get_data(bucket, remote, local, public=False, force=False):
     else:
         client = boto3.client("s3")
     
+    # check that bucket exists
     bkts = [bk["Name"] for bk in client.list_buckets()["Buckets"]]
     if bucket not in bkts:
         sys.exit(
             "Error: could not locate bucket. Available buckets: " + ", ".join(bkts)
         )
 
+    # go through all folders inside of remote directory and download relevant files
     s3 = boto3.resource('s3')
     buck = s3.Bucket(bucket)
     for obj in buck.objects.filter(Prefix=f'{remote}'):
         bdir,data = os.path.split(obj.key)
-        if not os.path.exists(f'{local}/{bdir.split("/")[-1]}'):
-            os.makedirs(f'{local}/{bdir.split("/")[-1]}')
-        print(f'Downloading {bdir}/{data} from {bucket} s3 bucket...')   
-        client.download_file(bucket,f'{bdir}/{data}', f'{local}/{bdir.split("/")[-1]}/{data}')
-        if os.path.exists(f'{local}/{bdir.split("/")[-1]}/{data}'):
+        print(os.path.join(local,*bdir.split('/')[-3:]))
+        # Make directory for data if it doesn't exist
+        if not os.path.exists(os.path.join(local,*bdir.split('/')[-3:])):
+            os.makedirs(os.path.join(local,*bdir.split('/')[-3:]))
+        print(f'Downloading {bdir}/{data} from {bucket} s3 bucket...')
+        # Download file 
+        client.download_file(bucket,f'{bdir}/{data}',f'{os.path.join(local,*bdir.split("/")[-3:])}/{data}')
+        if os.path.exists(f'{os.path.join(local,*bdir.split("/")[-3:])}/{data}'):
             print('Success!')
 
 
@@ -182,15 +193,30 @@ def s3_push_data(bucket, remote, outDir, modifier, creds=True, debug=True):
     debug : bool, optional
         Whether to not to push intermediate files created by the pipeline, by default True
     """
-    # TODO : use boto3 for this instead
-    dataset = remote.split("/")[0]
-    rest_of_path_list = remote.split("/")[1:]
-    rest_of_path = os.path.join(*rest_of_path_list)
-    cmd = (
-        f'aws s3 cp --exclude "tmp/*" {outDir} s3://{bucket}/{dataset}/{modifier}/{rest_of_path}/ --recursive --acl public-read'
-    )
-    if not creds:
-        print("Note: no credentials provided, may fail to push big files.")
-        cmd += " --no-sign-request"
-    print(f'Pushing results to S3: {cmd}')
-    subprocess.check_output(cmd, shell=True)
+
+    if creds:
+        # get client with credentials if they exist
+        try:
+            client = s3_client(service="s3")
+        except:
+            client = boto3.client("s3")
+    else:
+        client = boto3.client("s3")
+    
+    # check that bucket exists
+    bkts = [bk["Name"] for bk in client.list_buckets()["Buckets"]]
+    if bucket not in bkts:
+        sys.exit(
+            "Error: could not locate bucket. Available buckets: " + ", ".join(bkts)
+        )
+
+    # List all files and upload
+    for r, d, f in os.walk(outDir):
+        for file in f:
+            if not 'tmp/' in r: # exclude things in the tmp/ folder
+                print(f'Uploading: {os.path.join(r, file)}')
+                d = r.replace(os.path.join('/',*outDir.split('/')[:-2]),'') #remove everything before /sub-*
+                client.upload_file(
+                    os.path.join(r, file), bucket, f'{remote}/{modifier}{os.path.join(d,file)}',
+                    ExtraArgs={'ACL':'public-read'}
+                    )
