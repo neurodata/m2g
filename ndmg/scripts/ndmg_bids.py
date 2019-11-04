@@ -360,7 +360,7 @@ def main():
         try:
             ndmg_dwi_worker(**files)
         except Exception as e:
-            failure = failure_message(subject, session, errorr)
+            failure = failure_message(subject, session, error)
             print(failure)
             continue
 
