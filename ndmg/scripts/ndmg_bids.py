@@ -18,6 +18,7 @@ import glob
 import os
 from argparse import ArgumentParser
 import subprocess
+import warnings
 
 # ndmg imports
 from ndmg.utils import cloud_utils
@@ -359,9 +360,9 @@ def main():
 
         try:
             ndmg_dwi_worker(**files)
-        except Exception as e:
+        except Exception as error:
             failure = failure_message(subject, session, error)
-            print(failure)
+            warnings.warn(failure)
             continue
 
 
