@@ -18,6 +18,7 @@ import glob
 import os
 from argparse import ArgumentParser
 import subprocess
+import warnings
 
 # ndmg imports
 from ndmg.utils import cloud_utils
@@ -347,21 +348,21 @@ def main():
 
     # parse input directory
     sweeper = DirectorySweeper(inDir, subjects=subjects, sessions=sessions)
-    info = sweeper.get_dir_info()
+    scans = sweeper.get_dir_info()
 
     # ---------------- Run Pipeline --------------- #
     # run ndmg on the entire BIDs directory.
     # TODO: make sure this works on all scans
-    for i, SubSesFile in enumerate(info):
+    for SubSesFile in scans:
         subject, session, files = SubSesFile
         kwargs["outdir"] = f"{outDir}/sub-{subject}/ses-{session}"
         files.update(kwargs)
 
         try:
             ndmg_dwi_worker(**files)
-        except Exception as e:
-            failure = failure_message(subject, session, errorr)
-            print(failure)
+        except Exception as error:
+            failure = failure_message(subject, session, error)
+            warnings.warn(failure)
             continue
 
 
