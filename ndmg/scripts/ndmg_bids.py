@@ -101,73 +101,52 @@ def get_atlas_dir():
 
 
 def failure_message(subject, session, error):
-    line = f"Subject {subject}, session {session} failed."
-    line += f"Errror message: {error}"
-    line += f"Trying next scan.\n"
+    line = f"""Subject {subject}, session {session} failed. \n
+    Error message: {error}.\n
+    Trying next scan.\n"""
     return line
 
 
 def main():
     """Starting point of the ndmg pipeline, assuming that you are using a BIDS organized dataset
     """
-    compatible = sys.platform == "darwin" or sys.platform == "linux"
-    if not compatible:
-        input(
-            "\n\nWARNING: You appear to be running ndmg on an operating system that is not macOS or Linux."
-            "\nndmg has not been tested on this operating system and may not work. Press enter to continue.\n\n"
-        )
 
     parser = ArgumentParser(
         description="This is an end-to-end connectome estimation pipeline from M3r Images."
     )
     parser.add_argument(
         "bids_dir",
-        help="The directory with the input dataset"
-        " formatted according to the BIDS standard.",
+        help="""The directory with the input dataset"
+        formatted according to the BIDS standard.""",
     )
     parser.add_argument(
         "output_dir",
-        help="The directory where the output "
-        "files should be stored. If you are running group "
-        "level analysis this folder should be prepopulated "
-        "with the results of the participant level analysis.",
+        help="""The directory where the output
+        files should be stored. If you are running group
+        level analysis this folder should be prepopulated
+        with the results of the participant level analysis.""",
     )
     parser.add_argument(
         "--participant_label",
-        help="The label(s) of the "
-        "participant(s) that should be analyzed. The label "
-        "corresponds to sub-<participant_label> from the BIDS "
-        'spec (so it does not include "sub-"). If this '
-        "parameter is not provided all subjects should be "
-        "analyzed. Multiple participants can be specified "
-        "with a space separated list.",
+        help="""The label(s) of the
+        participant(s) that should be analyzed. The label
+        corresponds to sub-<participant_label> from the BIDS
+        spec (so it does not include "sub-"). If this
+        parameter is not provided all subjects should be
+        analyzed. Multiple participants can be specified
+        with a space separated list.""",
         nargs="+",
     )
     parser.add_argument(
         "--session_label",
-        help="The label(s) of the "
-        "session that should be analyzed. The label "
-        "corresponds to ses-<participant_label> from the BIDS "
-        'spec (so it does not include "ses-"). If this '
-        "parameter is not provided all sessions should be "
-        "analyzed. Multiple sessions can be specified "
-        "with a space separated list.",
+        help="""The label(s) of the
+        session that should be analyzed. The label
+        corresponds to ses-<participant_label> from the BIDS
+        spec (so it does not include "ses-"). If this
+        parameter is not provided all sessions should be
+        analyzed. Multiple sessions can be specified
+        with a space separated list.""",
         nargs="+",
-    )
-    parser.add_argument(
-        "--bucket",
-        action="store",
-        help="The name of "
-        "an S3 bucket which holds BIDS organized data. You "
-        "must have built your bucket with credentials to the "
-        "S3 bucket you wish to access.",
-    )
-    parser.add_argument(
-        "--remote_path",
-        action="store",
-        help="The path to "
-        "the data on your S3 bucket, not including the bucket name."
-        "The data will be downloaded to the provided bids_dir on your machine.",
     )
     parser.add_argument(
         "--push_data",
@@ -239,11 +218,11 @@ def main():
     parser.add_argument(
         "--skull",
         action="store",
-        help="Special actions to take when skullstripping t1w image based on default skullstrip ('none') failure:"
-        "Excess tissue below brain: below"
-        "Chunks of cerebelum missing: cerebelum"
-        "Frontal clipping near eyes: eye"
-        "Excess clipping in general: general",
+        help="""Special actions to take when skullstripping t1w image based on default skullstrip ('none') failure:
+        Excess tissue below brain: below
+        Chunks of cerebelum missing: cerebelum
+        Frontal clipping near eyes: eye
+        Excess clipping in general: general,""",
         default="none",
     )
 
@@ -252,7 +231,8 @@ def main():
 
     # parse cli arguments
     result = parser.parse_args()
-    inDir = result.bids_dir
+    inDir = result.input_dir
+    s3 = inDir.startswith("s3://")
     outDir = result.output_dir
     subjects = result.participant_label
     sessions = result.session_label
@@ -276,6 +256,14 @@ def main():
     }
 
     # ---------------- Pre-run checks ---------------- #
+    # check operating system compatibility
+    compatible = sys.platform == "darwin" or sys.platform == "linux"
+    if not compatible:
+        input(
+            "\n\nWARNING: You appear to be running ndmg on an operating system that is not macOS or Linux."
+            "\nndmg has not been tested on this operating system and may not work. Press enter to continue.\n\n"
+        )
+
     # make sure we have AFNI and FSL
     check_dependencies()
 
@@ -295,7 +283,7 @@ def main():
     # TODO : `Flat is better than nested`. Make the logic for this cleaner.
     # this block of logic essentially just gets data we need from s3.
     # it's super gross.
-    if kwargs["buck"] is not None and kwargs["remo"] is not None:
+    if s3:
         if subjects is not None:
             for sub in subjects:
                 if sessions is not None:
@@ -320,7 +308,7 @@ def main():
     is_bids_ = is_bids(inDir)
     assert is_bids_
 
-    # get atlas stuff, then stick it into the kwargs
+    # get parcellations, atlas, and mask, then stick it into kwargs
     atlas_dir = get_atlas_dir()
     parcellations, atlas, mask, = get_atlas(atlas_dir, kwargs["vox_size"])
     if parcellation_name is not None:  # filter parcellations

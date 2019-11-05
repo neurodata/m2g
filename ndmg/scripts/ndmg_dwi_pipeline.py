@@ -565,9 +565,10 @@ def ndmg_dwi_worker(
 
 def welcome_message(connectomes):
 
-    line = "\n~~~~~~~~~~~~~~~~\n"
-    line += "Welcome to ndmg!\n"
-    line += "Your connectomes will be located here:\n\n"
+    line = """\n~~~~~~~~~~~~~~~~\n 
+    Welcome to ndmg!\n 
+    Your connectomes will be located here:
+    \n\n"""
 
     for connectome in connectomes:
         line += connectome + "\n"
