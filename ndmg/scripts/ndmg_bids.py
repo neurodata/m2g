@@ -169,11 +169,6 @@ def main():
         default=False,
     )
     parser.add_argument(
-        "--dataset",
-        action="store",
-        help="The name of " "the dataset you are perfoming QC on.",
-    )
-    parser.add_argument(
         "--parcellation",
         action="store",
         help="The parcellation(s) being analyzed. Multiple parcellations can be provided with a space separated list.",
@@ -216,7 +211,7 @@ def main():
         default="csa",
     )
     parser.add_argument(
-        "--sp",
+        "--space",
         action="store",
         help="Space for tractography: native, native_dsn. Default is native.",
         default="native",
@@ -262,7 +257,7 @@ def main():
         "track_type": result.track_type,
         "mod_func": result.diffusion_model,
         "seeds": result.seeds,
-        "reg_style": result.sp,
+        "reg_style": result.space,
         "skipeddy": result.sked,
         "skipreg": result.skreg,
         "buck": result.bucket,
