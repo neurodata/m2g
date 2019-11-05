@@ -63,7 +63,7 @@ def get_atlas(atlas_dir, vox_size):
         # TODO : re-implement this pythonically with shutil and requests in python3.
         print("atlas directory not found. Cloning ...")
         clone = "https://github.com/neurodata/neuroparc.git"
-        os.system("git lfs clone {} {}".format(clone, atlas_dir))
+        os.system(f'git lfs clone {clone} {atlas_dir}')
 
     atlas = os.path.join(
         atlas_dir, "atlases/reference_brains/MNI152NLin6_res-" + dims + "_T1w.nii.gz"
@@ -205,14 +205,7 @@ def session_level(
             atlas,
             atlas_mask,
             labels,
-            "%s%s%s%s%s"
-            % (
-                outDir,
-                "/sub",
-                bval.split("sub")[1].split("/")[0],
-                "/ses",
-                bval.split("ses")[1].split("/")[0],
-            ),
+            f'{outDir}/sub{bval.split("sub")[1].split("/")[0]}/ses{bval.split("ses")[1].split("/")[0]}'
         ]
         for (dw, bval, bvec, anat) in zip(dwis, bvals, bvecs, anats)
     ]
@@ -252,6 +245,11 @@ def session_level(
 def main():
     """Starting point of the ndmg pipeline, assuming that you are using a BIDS organized dataset
     """
+    compatible = sys.platform == 'darwin' or sys.platform == 'linux'
+    if not compatible:
+        input('\n\nWARNING: You appear to be running ndmg on an operating system that is not macOS or Linux.'
+        '\nndmg has not been tested on this operating system and may not work. Press enter to continue.\n\n')
+
     parser = ArgumentParser(
         description="This is an end-to-end connectome estimation pipeline from M3r Images."
     )
@@ -301,8 +299,8 @@ def main():
         "--remote_path",
         action="store",
         help="The path to "
-        "the data on your S3 bucket. The data will be "
-        "downloaded to the provided bids_dir on your machine.",
+        "the data on your S3 bucket, not including the bucket name."
+        "The data will be downloaded to the provided bids_dir on your machine."
     )
     parser.add_argument(
         "--push_data",
@@ -386,7 +384,8 @@ def main():
     parser.add_argument(
         "--modif",
         action="store",
-        help="Name of folder on s3 to push to. If empty, push to a folder with ndmg's version number.",
+        help="Name of folder on s3 to push to, if the folder does not exist, it will be created."
+        "If empty, push to a folder with ndmg's version number.",
         default="",
     )
     parser.add_argument(
@@ -423,15 +422,16 @@ def main():
     modif = result.modif
     skull = result.skull
 
+    # remove slashes from edges of remo and modif
+    if remo:
+        remo.strip('/')
+    if modif:
+        modif.strip('/')
+    
     # make sure we have AFNI and FSL
     print("Beginning ndmg ...")
     check_dependencies()
 
-    # make sure input directory is BIDs-formatted
-    is_bids_ = is_bids(inDir)
-    assert is_bids_
-
-    # check on input data
 
     # Check to see if user has provided direction to an existing s3 bucket they wish to use
     try:
@@ -440,6 +440,8 @@ def main():
         creds = bool(
             os.getenv("AWS_ACCESS_KEY_ID", 0) and os.getenv("AWS_SECRET_ACCESS_KEY", 0)
         )
+    if (not creds) and push:
+        raise AttributeError("No AWS credentials found. Pushing will most likely fail.")
 
     # TODO : `Flat is better than nested`. Make the logic for this cleaner.
     # this block of logic essentially just gets data we need from s3.
@@ -451,21 +453,19 @@ def main():
             for sub in subj:
                 if sesh is not None:
                     for ses in sesh:
-                        rem = os.path.join(
-                            remo, "sub-{}".format(sub), "ses-{}".format(ses)
-                        )
-                        tindir = os.path.join(
-                            inDir, "sub-{}".format(sub), "ses-{}".format(ses)
-                        )
-                        cloud_utils.s3_get_data(buck, rem, tindir, public=not creds)
+                        cloud_utils.s3_get_data(buck, remo, inDir, info=f'sub-{sub}/ses-{ses}')
                 else:
-                    rem = os.path.join(remo, "sub-{}".format(sub))
-                    tindir = os.path.join(inDir, "sub-{}".format(sub))
-                    cloud_utils.s3_get_data(buck, rem, tindir, public=not creds)
+                    cloud_utils.s3_get_data(buck, remo, inDir, info=f'sub-{sub}')
         else:
-            cloud_utils.s3_get_data(buck, remo, inDir, public=not creds)
+            cloud_utils.s3_get_data(buck, remo, inDir, info='sub-')
 
-    print("input directory contents: {}".format(os.listdir(inDir)))
+    print(f'input directory contents: {os.listdir(inDir)}')
+
+
+    # check on input data
+    # make sure input directory is BIDs-formatted
+    is_bids_ = is_bids(inDir)
+    assert is_bids_
 
     # run session-level ndmg
     session_level(

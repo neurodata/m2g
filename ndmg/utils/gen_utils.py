@@ -13,6 +13,7 @@ import sys
 import re
 from subprocess import Popen, PIPE
 import subprocess
+import time
 import functools
 import json
 from itertools import product
@@ -58,19 +59,19 @@ class NameResource:
         self.__sub__ = re.search(r"(sub-)(?!.*sub-).*?(?=[_])", modf)
         if self.__sub__:
             self.__sub__ = self.__sub__.group()
-            self.__suball__ = "sub-{}".format(self.__sub__)
+            self.__suball__ = f'sub-{self.__sub__}'
         self.__ses__ = re.search(r"(ses-)(?!.*ses-).*?(?=[_])", modf)
         if self.__ses__:
             self.__ses__ = self.__ses__.group()
-            self.__suball__ = self.__suball__ + "_ses-{}".format(self.__ses__)
+            self.__suball__ = self.__suball__ + f'_ses-{self.__ses__}'
         self.__run__ = re.search(r"(run-)(?!.*run-).*?(?=[_])", modf)
         if self.__run__:
             self.__run__ = self.__run__.group()
-            self.__suball__ = self.__suball__ + "_run-{}".format(self.__run__)
+            self.__suball__ = self.__suball__ + f'_run-{self.__run__}'
         self.__task__ = re.search(r"(task-)(?!.*task-).*?(?=[_])", modf)
         if self.__task__:
             self.__task__ = self.__task__.group()
-            self.__suball__ = self.__suball__ + "_run-{}".format(self.__task__)
+            self.__suball__ = self.__suball__ + f'_run-{self.__task__}'
         self.__temp__ = os.path.basename(tempf).split(".")[0]
         self.__space__ = re.split(r"[._]", self.__temp__)[0]
         self.__res__ = re.search(r"(res-)(?!.*res-).*?(?=[_])", tempf)
@@ -78,7 +79,6 @@ class NameResource:
             self.__res__ = self.__res__.group()
         self.__basepath__ = opath
         self.__outdir__ = self._get_outdir()
-        return
 
     def add_dirs(namer, paths, labels, label_dirs):
         """Creates tmp and permanent directories for the desired suffixes
@@ -130,9 +130,8 @@ class NameResource:
         namer.dirs["qa"]["reg"] = namer.dirs["qa"]["base"] + "/reg"
         namer.dirs["qa"]["tensor"] = namer.dirs["qa"]["base"] + "/tensor"
         newdirs = flatten(namer.dirs, [])
-        cmd = "mkdir -p {}".format(" ".join(newdirs))
+        cmd = f'mkdir -p {" ".join(newdirs)}'
         execute_cmd(cmd)  # make the directories
-        return
 
     def _get_outdir(self):
         """Called by constructor to initialize the output directory
@@ -421,6 +420,17 @@ def check_exists(*dargs):
 
     return outer
 
+def timer(f):
+    """Print the runtime of the decorated function"""
+    @functools.wraps(f)
+    def wrapper_timer(*args, **kwargs):
+        start_time = time.perf_counter()
+        func = f(*args, **kwargs)
+        end_time = time.perf_counter()
+        run_time = end_time - start_time
+        print(f"Function {f.__name__!r} finished in {run_time:.4f} secs")
+        return func
+    return wrapper_timer
 
 def is_bids(input_dir):
     # TODO : change pybids dependency
@@ -531,7 +541,6 @@ def show_template_bundles(final_streamlines, template_path, fname):
     )
     renderer.add(lines_actor)
     window.record(renderer, n_frames=1, out_path=fname, size=(900, 900))
-    return
 
 
 def execute_cmd(cmd, verb=False):
@@ -554,13 +563,13 @@ def execute_cmd(cmd, verb=False):
     """
 
     if verb:
-        print("Executing: {}".format(cmd))
+        print(f'Executing: {cmd}')
 
     p = Popen(cmd, stdout=PIPE, stderr=PIPE, shell=True)
     out, err = p.communicate()
     code = p.returncode
     if code:
-        sys.exit("Error {}: {}".format(code, err))
+        sys.exit(f'Error {code}: {err}')
     return out, err
 
 
@@ -594,9 +603,9 @@ def get_braindata(brain_file):
             brain = brain_file
         else:
             raise TypeError(
-                "Brain file is type: {}".format(type(brain_file))
-                + "; accepted types are numpy.ndarray, "
-                "string, and nibabel.nifti1.Nifti1Image."
+                f'Brain file is type: {type(brain_file)}'
+                f'; accepted types are numpy.ndarray, '
+                f'string, and nibabel.nifti1.Nifti1Image.'
             )
         braindata = brain.get_data()
     return braindata
@@ -644,7 +653,7 @@ def get_slice(mri, volid, sli):
     # and saved to a new file
     nib.save(out, sli)
 
-
+@timer
 def make_gtab_and_bmask(fbval, fbvec, dwi_file, outdir):
     """Takes bval and bvec files and produces a structure in dipy format while also using FSL commands
 
@@ -670,9 +679,9 @@ def make_gtab_and_bmask(fbval, fbvec, dwi_file, outdir):
     """
 
     # Use B0's from the DWI to create a more stable DWI image for registration
-    nodif_B0 = "{}/nodif_B0.nii.gz".format(outdir)
-    nodif_B0_bet = "{}/nodif_B0_bet.nii.gz".format(outdir)
-    nodif_B0_mask = "{}/nodif_B0_bet_mask.nii.gz".format(outdir)
+    nodif_B0 = f'{outdir}/nodif_B0.nii.gz'
+    nodif_B0_bet = f'{outdir}/nodif_B0_bet.nii.gz'
+    nodif_B0_mask = f'{outdir}/nodif_B0_bet_mask.nii.gz'
 
     # loading bvecs/bvals
     print(fbval)
@@ -687,7 +696,7 @@ def make_gtab_and_bmask(fbval, fbvec, dwi_file, outdir):
 
     # Get B0 indices
     B0s = np.where(gtab.bvals == gtab.b0_threshold)[0]
-    print("%s%s" % ("B0's found at: ", B0s))
+    print(f'B0s found at: {B0s}')
 
     # Show info
     print(gtab.info)
@@ -698,8 +707,8 @@ def make_gtab_and_bmask(fbval, fbvec, dwi_file, outdir):
     B0s_bbr = []
     for B0 in B0s:
         print(B0)
-        B0_bbr = "{}/{}_B0.nii.gz".format(outdir, str(B0))
-        cmd = "fslroi " + dwi_file + " " + B0_bbr + " " + str(B0) + " 1"
+        B0_bbr = f'{outdir}/{str(B0)}_B0.nii.gz'
+        cmd = f'fslroi {dwi_file} {B0_bbr} {str(B0)} 1'
         cmds.append(cmd)
         B0s_bbr.append(B0_bbr)
 
@@ -716,7 +725,7 @@ def make_gtab_and_bmask(fbval, fbvec, dwi_file, outdir):
     nib.save(mean_B0, nodif_B0)
 
     # Get mean B0 brain mask
-    cmd = "bet " + nodif_B0 + " " + nodif_B0_bet + " -m -f 0.2"
+    cmd = f'bet {nodif_B0} {nodif_B0_bet} -m -f 0.2'
     os.system(cmd)
     return gtab, nodif_B0, nodif_B0_mask
 
@@ -768,7 +777,6 @@ def normalize_xform(img):
 
     return new_img
 
-
 def reorient_dwi(dwi_prep, bvecs, namer):
     """Orients dwi data to the proper orientation (RAS+) using nibabel
 
@@ -791,7 +799,7 @@ def reorient_dwi(dwi_prep, bvecs, namer):
 
     fname = dwi_prep
     bvec_fname = bvecs
-    out_bvec_fname = "%s%s" % (namer.dirs["output"]["prep_dwi"], "/bvecs_reor.bvec")
+    out_bvec_fname = f'{namer.dirs["output"]["prep_dwi"]}/bvecs_reor.bvec'
 
     input_img = nib.load(fname)
     input_axcodes = nib.aff2axcodes(input_img.affine)
@@ -800,13 +808,10 @@ def reorient_dwi(dwi_prep, bvecs, namer):
     # Is the input image oriented how we want?
     new_axcodes = ("R", "A", "S")
     if normalized is not input_img:
-        out_fname = "%s%s%s%s" % (
-            namer.dirs["output"]["prep_dwi"],
-            "/",
-            dwi_prep.split("/")[-1].split(".nii.gz")[0],
-            "_reor_RAS.nii.gz",
+        out_fname = (f'{namer.dirs["output"]["prep_dwi"]}/'
+            f'{dwi_prep.split("/")[-1].split(".nii.gz")[0]}_reor_RAS.nii.gz'
         )
-        print("%s%s%s" % ("Reorienting ", dwi_prep, " to RAS+..."))
+        print(f'Reorienting {dwi_prep} to RAS+...')
 
         # Flip the bvecs
         input_orientation = nib.orientations.axcodes2ornt(input_axcodes)
@@ -824,18 +829,14 @@ def reorient_dwi(dwi_prep, bvecs, namer):
             output_array[this_axnum] = bvec_array[int(axnum)] * float(flip)
         np.savetxt(out_bvec_fname, output_array, fmt="%.8f ")
     else:
-        out_fname = "%s%s%s%s" % (
-            namer.dirs["output"]["prep_dwi"],
-            "/",
-            dwi_prep.split("/")[-1].split(".nii.gz")[0],
-            "_RAS.nii.gz",
+        out_fname =(f'{namer.dirs["output"]["prep_dwi"]}/'
+            f'{dwi_prep.split("/")[-1].split(".nii.gz")[0]}_RAS.nii.gz'
         )
         out_bvec_fname = bvec_fname
 
     normalized.to_filename(out_fname)
 
     return out_fname, out_bvec_fname
-
 
 def reorient_img(img, namer):
     """Reorients input image to RAS+
@@ -860,19 +861,13 @@ def reorient_img(img, namer):
 
     # Image may be reoriented
     if normalized is not orig_img:
-        print("%s%s%s" % ("Reorienting ", img, " to RAS+..."))
-        out_name = "%s%s%s%s" % (
-            namer.dirs["output"]["prep_anat"],
-            "/",
-            img.split("/")[-1].split(".nii.gz")[0],
-            "_reor_RAS.nii.gz",
+        print(f'Reorienting {img} to RAS+...')
+        out_name =(f'{namer.dirs["output"]["prep_anat"]}/'
+            f'{img.split("/")[-1].split(".nii.gz")[0]}_reor_RAS.nii.gz'
         )
     else:
-        out_name = "%s%s%s%s" % (
-            namer.dirs["output"]["prep_anat"],
-            "/",
-            img.split("/")[-1].split(".nii.gz")[0],
-            "_RAS.nii.gz",
+        out_name = (f'{namer.dirs["output"]["prep_anat"]}/'
+            f'{img.split("/")[-1].split(".nii.gz")[0]}_RAS.nii.gz'
         )
 
     normalized.to_filename(out_name)
@@ -914,18 +909,12 @@ def match_target_vox_res(img_file, vox_size, namer, sens):
     if (abs(zooms[0]), abs(zooms[1]), abs(zooms[2])) != new_zooms:
         print("Reslicing image " + img_file + " to " + vox_size + "...")
         if sens == "dwi":
-            img_file_res = "%s%s%s%s" % (
-                namer.dirs["output"]["prep_dwi"],
-                "/",
-                os.path.basename(img_file).split(".nii.gz")[0],
-                "_res.nii.gz",
+            img_file_res = (f'{namer.dirs["output"]["prep_dwi"]}/'
+                f'{os.path.basename(img_file).split(".nii.gz")[0]}_res.nii.gz'
             )
         elif sens == "t1w":
-            img_file_res = "%s%s%s%s" % (
-                namer.dirs["output"]["prep_anat"],
-                "/",
-                os.path.basename(img_file).split(".nii.gz")[0],
-                "_res.nii.gz",
+            img_file_res = (f'{namer.dirs["output"]["prep_anat"]}/'
+                f'{os.path.basename(img_file).split(".nii.gz")[0]}_res.nii.gz'
             )
 
         data2, affine2 = reslice(data, affine, zooms, new_zooms)
@@ -935,18 +924,12 @@ def match_target_vox_res(img_file, vox_size, namer, sens):
     else:
         print("Reslicing image " + img_file + " to " + vox_size + "...")
         if sens == "dwi":
-            img_file_nores = "%s%s%s%s" % (
-                namer.dirs["output"]["prep_dwi"],
-                "/",
-                os.path.basename(img_file).split(".nii.gz")[0],
-                "_nores.nii.gz",
+            img_file_nores = (f'{namer.dirs["output"]["prep_dwi"]}/'
+                f'{os.path.basename(img_file).split(".nii.gz")[0]}_nores.nii.gz'
             )
         elif sens == "t1w":
-            img_file_nores = "%s%s%s%s" % (
-                namer.dirs["output"]["prep_anat"],
-                "/",
-                os.path.basename(img_file).split(".nii.gz")[0],
-                "_nores.nii.gz",
+            img_file_nores =  (f'{namer.dirs["output"]["prep_anat"]}/'
+                f'{os.path.basename(img_file).split(".nii.gz")[0]}_nores.nii.gz'
             )
         nib.save(img, img_file_nores)
         img_file = img_file_nores
@@ -991,9 +974,9 @@ def parcel_overlap(parcellation1, parcellation2, outpath):
                 pover = np.logical_and(p1seq, p2_dat == p2reg).sum() / float(N)
                 overlapdat[p1idx, p2idx] = pover
 
-    outf = os.path.join(outpath, "{}_{}.csv".format(p1n, p2n))
+    outf = os.path.join(outpath, f'{pln}_{p2n}.csv')
     with open(outf, "w") as f:
-        p2str = ["%s" % x for x in p2regs]
+        p2str = [f'{x}' for x in p2regs]
         f.write("p1reg," + ",".join(p2str) + "\n")
         for idx, p1reg in enumerate(p1regs):
             datstr = ["%.4f" % x for x in overlapdat[idx,].toarray()[0,]]

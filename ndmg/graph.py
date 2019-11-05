@@ -20,6 +20,9 @@ import numpy as np
 import networkx as nx
 import nibabel as nib
 from dipy.tracking._utils import _mapping_to_voxel, _to_voxel_coordinates
+from itertools import combinations
+from collections import defaultdict
+from ndmg.utils.gen_utils import timer
 import matplotlib
 
 matplotlib.use("agg")
@@ -72,8 +75,8 @@ class GraphTools:
         self.affine = affine
         self.namer = namer
         self.connectome_path = os.path.dirname(connectome_path)
-        pass
 
+    @timer
     def make_graph_old(self):
         """
         Takes streamlines and produces a graph
@@ -111,12 +114,9 @@ class GraphTools:
                     loc = self.rois[point[0], point[1], point[2]]
                 except IndexError:
                     loc = ""
-                    pass
 
                 if loc:
                     p.add(loc)
-                else:
-                    pass
 
             edges = combinations(p, 2)
             for edge in edges:
@@ -127,6 +127,7 @@ class GraphTools:
         self.g.add_weighted_edges_from(edge_list)
         return self.g, self.edge_dict
 
+    @timer
     def make_graph(self, error_margin=2, overlap_thr=1, voxel_size=2):
         """Takes streamlines and produces a graph using Numpy functions
 
@@ -242,7 +243,6 @@ class GraphTools:
             raise ValueError(
                 "Only edgelist, gpickle, graphml, txt, and npy are currently supported"
             )
-        pass
 
     def save_graph_png(self, graphname):
         """Saves adjacency graph, made using graspy's heatmap function, as a png. This will be saved in the qa/graphs_plotting/ directory
@@ -270,4 +270,3 @@ class GraphTools:
         """
         print("\nGraph Summary:")
         print(nx.info(self.g))
-        pass
