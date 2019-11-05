@@ -32,6 +32,7 @@ from dipy.reconst.peak_direction_getter import EuDXDirectionGetter
 from dipy.data import get_sphere
 from dipy.direction import peaks_from_model, ProbabilisticDirectionGetter
 from dipy.segment.mask import median_otsu
+from ndmg.utils.gen_utils import timer
 
 
 def build_seed_list(mask_img_file, stream_affine, dens):
@@ -92,7 +93,7 @@ def tens_mod_fa_est(gtab, dwi_file, B0_mask):
     FA = fractional_anisotropy(mod.evals)
     FA[np.isnan(FA)] = 0
     fa_img = nib.Nifti1Image(FA.astype(np.float32), nodif_B0_affine)
-    fa_path = "%s%s" % (os.path.dirname(B0_mask), "/tensor_fa.nii.gz")
+    fa_path = f'{os.path.dirname(B0_mask)}/tensor_fa.nii.gz'
     nib.save(fa_img, fa_path)
     return fa_path
 
@@ -166,6 +167,7 @@ class RunTrack:
         self.mod_func = mod_func
         self.stream_affine = stream_affine
 
+    @timer
     def run(self):
         """Creates the tracktography tracks using dipy commands and the specified tracking type and approach
 
@@ -268,6 +270,7 @@ class RunTrack:
             pass
         return self.tiss_classifier
 
+    @timer
     def tens_mod_est(self):
 
         print("Fitting tensor model...")
@@ -279,12 +282,14 @@ class RunTrack:
         self.ind = quantize_evecs(self.ten.evecs, self.sphere.vertices)
         return self.ten
 
+    @timer
     def odf_mod_est(self):
 
         print("Fitting CSA ODF model...")
         self.mod = CsaOdfModel(self.gtab, sh_order=6)
         return self.mod
 
+    @timer
     def csd_mod_est(self):
 
         print("Fitting CSD model...")
@@ -309,6 +314,7 @@ class RunTrack:
             self.mod = ConstrainedSphericalDeconvModel(self.gtab, self.response)
         return self.mod
 
+    @timer
     def local_tracking(self):
 
         self.sphere = get_sphere("repulsion724")
@@ -363,6 +369,7 @@ class RunTrack:
         self.streamlines = Streamlines(self.streamline_generator)
         return self.streamlines
 
+    @timer
     def particle_tracking(self):
 
         self.sphere = get_sphere("repulsion724")
@@ -469,14 +476,14 @@ def eudx_basic(dwi_file, gtab, stop_val=0.1):
     model = TensorModel(gtab)
 
     # print('data: {}'.format(data))
-    print("data shape: {}".format(data.shape))
-    print("data type: {}".format(type(data)))
+    print(f'data shape: {data.shape}')
+    print(f'data type: {type(data)}')
     # print('mask data: {}'.format(mask_data))
-    print("mask data shape: {}".format(mask_data.shape))
-    print("mask data type: {}".format(type(mask_data)))
+    print(f'mask data shape: {mask_data.shape}')
+    print(f'mask data type: {type(mask_data)}')
 
-    print("data location: {}".format(dwi_file))
-    print("mask location: {}".format(mask_out_file))
+    print(f'data location: {dwi_file}')
+    print(f'mask location: {mask_out_file}')
     ten = model.fit(data, mask_data)
     sphere = get_sphere("symmetric724")
     ind = quantize_evecs(ten.evecs, sphere.vertices)

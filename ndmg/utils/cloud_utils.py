@@ -113,7 +113,7 @@ def get_matching_s3_objects(bucket, prefix="", suffix=""):
             break
 
 
-def s3_get_data(bucket, remote, local, public=False, force=False):
+def s3_get_data(bucket, remote, local, info='', force=False):
     """Given and s3 directory, copies files/subdirectories in that directory to local
 
     Parameters
@@ -123,44 +123,52 @@ def s3_get_data(bucket, remote, local, public=False, force=False):
     remote : str
         The path to the data on your S3 bucket. The data will be
         downloaded to the provided bids_dir on your machine.
-    local : str
-        Local input directory where you want the files copied to
-    public : bool, optional
-        Whether or not the data you are accessing is public, if False s3 credentials are used, by default False
+    local : list
+        Local input directory where you want the files copied to and subject/session info [input, sub-#/ses-#]
+    info : str, optional
+        Relevant subject and session information in the form of sub-#/ses-#
     force : bool, optional
         Whether to overwrite the local directory containing the s3 files if it already exists, by default False
     """
 
-    # TODO : use boto3 for this
-    if os.path.exists(local) and not force:
-        print("Local directory already exists. Not pulling s3 data.")
-        return  # TODO: make sure this doesn't append None a bunch of times to a list in a loop on this function
-    if not public:
-        # get client with credentials if they exist
-        try:
-            client = s3_client(service="s3")
-        except:
-            client = boto3.client("s3")
-
-        bkts = [bk["Name"] for bk in client.list_buckets()["Buckets"]]
-        if bucket not in bkts:
-            sys.exit(
-                "Error: could not locate bucket. Available buckets: " + ", ".join(bkts)
-            )
-
-        cmd = "aws s3 cp --exclude 'ndmg_*' --recursive s3://{}/{}/ {};\nwait".format(
-            bucket, remote, local
+    if info=='sub-':
+        print('Subject not specified, comparing input folder to remote directory...')
+    else:
+        if os.path.exists(os.path.join(local,info)) and not force:
+            if os.listdir(os.path.join(local,info)):
+                print(f'Local directory: {os.path.join(local,info)} already exists. Not pulling s3 data. Delete contents to re-download data.')
+                return  # TODO: make sure this doesn't append None a bunch of times to a list in a loop on this function
+    
+    # get client with credentials if they exist
+    client = s3_client(service="s3")
+    
+    # check that bucket exists
+    bkts = [bk["Name"] for bk in client.list_buckets()["Buckets"]]
+    if bucket not in bkts:
+        sys.exit(
+            "Error: could not locate bucket. Available buckets: " + ", ".join(bkts)
         )
-    if public:
-        cmd += " --no-sign-request --region=us-east-1;\nwait"
 
-    print("Calling {} to get data from S3 ...".format(cmd))
-    out = subprocess.check_output("mkdir -p {}".format(local), shell=True)
-    out = subprocess.check_output(cmd, shell=True)
-    out = subprocess.check_output(
-        'echo "\n\n\n\n\n\n\nDATA ARRIVED\n\n\n\n\n\n" {}'.format(local), shell=True
-    )
-    print(out)
+    bpath=get_matching_s3_objects(bucket, f'{remote}/{info}')
+    
+    # go through all folders inside of remote directory and download relevant files
+    for obj in bpath:
+        bdir,data = os.path.split(obj)
+        localpath = os.path.join(local,bdir.replace(f'{remote}/',''))
+        # Make directory for data if it doesn't exist
+        if not os.path.exists(localpath):
+            os.makedirs(localpath)
+        if not os.path.exists(f'{localpath}/{data}'):
+            print(f'Downloading {bdir}/{data} from {bucket} s3 bucket...')
+            # Download file 
+            client.download_file(bucket,f'{bdir}/{data}',f'{localpath}/{data}')
+            if os.path.exists(f'{localpath}/{data}'):
+                print('Success!')
+            else:
+                print('Error: File not downloaded')
+        else:
+            print(f'File {data} already exists at {localpath}/{data}')
+
 
 
 def s3_push_data(bucket, remote, outDir, modifier, creds=True):
@@ -180,16 +188,24 @@ def s3_push_data(bucket, remote, outDir, modifier, creds=True):
     creds : bool, optional
         Whether s3 credentials are being provided, may fail to push big files if False, by default True
     """
-    # TODO : use boto3 for this instead
-    cmd = (
-        'aws s3 cp --exclude "tmp/*" {} s3://{}/{}/{}/{}/ --recursive --acl public-read'
-    )
-    dataset = remote.split("/")[0]
-    rest_of_path_list = remote.split("/")[1:]
-    rest_of_path = os.path.join(*rest_of_path_list)
-    cmd = cmd.format(outDir, bucket, dataset, modifier, rest_of_path)
-    if not creds:
-        print("Note: no credentials provided, may fail to push big files.")
-        cmd += " --no-sign-request"
-    print("Pushing results to S3: {}".format(cmd))
-    subprocess.check_output(cmd, shell=True)
+
+    # get client with credentials if they exist
+    client = s3_client(service="s3")
+    
+    # check that bucket exists
+    bkts = [bk["Name"] for bk in client.list_buckets()["Buckets"]]
+    if bucket not in bkts:
+        sys.exit(
+            "Error: could not locate bucket. Available buckets: " + ", ".join(bkts)
+        )
+
+    # List all files and upload
+    for root, _, files in os.walk(outDir):
+        for file_ in files:
+            if not 'tmp/' in root: # exclude things in the tmp/ folder
+                print(f'Uploading: {os.path.join(root, file_)}')
+                spath = root.replace(os.path.join('/',*outDir.split('/')[:-2]),'') #remove everything before /sub-*
+                client.upload_file(
+                    os.path.join(root, file_), bucket, f'{remote}/{modifier}{os.path.join(spath,file_)}',
+                    ExtraArgs={'ACL':'public-read'}
+                    )
