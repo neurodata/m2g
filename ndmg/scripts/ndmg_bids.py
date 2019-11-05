@@ -406,7 +406,7 @@ def main():
     subj = result.participant_label
     sesh = result.session_label
     buck = result.bucket
-    remo = result.remote_path.strip('/')
+    remo = result.remote_path
     push = result.push_data
     debug = result.debug
     seeds = result.seeds
@@ -419,9 +419,15 @@ def main():
     track_type = result.tt
     mod_func = result.mf
     reg_style = result.sp
-    modif = result.modif.strip('/')
+    modif = result.modif
     skull = result.skull
 
+    # remove slashes from edges of remo and modif
+    if remo:
+        remo.strip('/')
+    if modif:
+        modif.strip('/')
+    
     # make sure we have AFNI and FSL
     print("Beginning ndmg ...")
     check_dependencies()
