@@ -354,11 +354,11 @@ def main():
     # run ndmg on the entire BIDs directory.
     # TODO: make sure this works on all scans
     for SubSesFile in scans:
-        subject, session, files = SubSesFile
-        kwargs["outdir"] = f"{outDir}/sub-{subject}/ses-{session}"
-        files.update(kwargs)
-
         try:
+            subject, session, files = SubSesFile
+            current_outdir = f"{outDir}/sub-{subject}/ses-{session}"
+            kwargs["outdir"] = current_outdir
+            files.update(kwargs)
             ndmg_dwi_worker(**files)
         except Exception as error:
             failure = failure_message(subject, session, error)

@@ -373,8 +373,10 @@ class DirectorySweeper:
             info.append(scan)
 
             if not scan.files:
-                warnings.warn(f"There were no files for 
-                    subject {subject}, session {session}.")
+                warnings.warn(
+                    f"There were no files for \
+                    subject {subject}, session {session}."
+                )
 
         return info
 
@@ -455,15 +457,21 @@ def check_exists(*dargs):
                 p = args[darg]
                 try:
                     if not os.path.exists(p):
-                        raise ValueError(f"{p} does not exist.\n \
-                            This is an input to the function {f.__name__}.")
+                        raise ValueError(
+                            f"{p} does not exist.\n \
+                            This is an input to the function {f.__name__}."
+                        )
                 except TypeError:
-                    print(f"{darg} is not a file, it is {type(darg)}.\n \
-                        Fix decorator on this function.")
+                    print(
+                        f"{darg} is not a file, it is {type(darg)}.\n \
+                        Fix decorator on this function."
+                    )
 
                 print(f"{p} exists.")
-            print(f"Prerequisite files for {f.__name__} all exist. \
-            Calling {f.__name__}.\n")
+            print(
+                f"Prerequisite files for {f.__name__} all exist. \
+            Calling {f.__name__}.\n"
+            )
 
             return f(*args, **kwargs)
 
