@@ -202,12 +202,12 @@ def s3_push_data(bucket, remote, outDir, modifier, creds=True, debug=True):
         )
 
     # List all files and upload
-    for root, _, objs in os.walk(outDir):
-        for obj in objs:
-            if not 'tmp/' in r: # exclude things in the tmp/ folder
-                print(f'Uploading: {os.path.join(root, file)}')
+    for root, _, files in os.walk(outDir):
+        for file_ in files:
+            if not 'tmp/' in root: # exclude things in the tmp/ folder
+                print(f'Uploading: {os.path.join(root, file_)}')
                 spath = root.replace(os.path.join('/',*outDir.split('/')[:-2]),'') #remove everything before /sub-*
                 client.upload_file(
-                    os.path.join(root, obj), bucket, f'{remote}/{modifier}{os.path.join(spath,obj)}',
+                    os.path.join(root, file_), bucket, f'{remote}/{modifier}{os.path.join(spath,file_)}',
                     ExtraArgs={'ACL':'public-read'}
                     )

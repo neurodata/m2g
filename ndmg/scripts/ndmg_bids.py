@@ -440,7 +440,7 @@ def main():
         creds = bool(
             os.getenv("AWS_ACCESS_KEY_ID", 0) and os.getenv("AWS_SECRET_ACCESS_KEY", 0)
         )
-    if not creds and push:
+    if (not creds) and push:
         raise AttributeError("No AWS credentials found. Pushing will most likely fail.")
 
     # TODO : `Flat is better than nested`. Make the logic for this cleaner.
