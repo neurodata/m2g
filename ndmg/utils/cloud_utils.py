@@ -163,7 +163,7 @@ def s3_get_data(bucket, remote, local, public=False, force=False):
     print(out)
 
 
-def s3_push_data(bucket, remote, outDir, modifier, creds=True, debug=True):
+def s3_push_data(bucket, remote, outDir, modifier, creds=True):
     """Pushes data to a specified S3 bucket
 
     Parameters
@@ -179,8 +179,6 @@ def s3_push_data(bucket, remote, outDir, modifier, creds=True, debug=True):
         Name of the folder on s3 to push to. If empty, push to a folder with ndmg's version number. Default is ""
     creds : bool, optional
         Whether s3 credentials are being provided, may fail to push big files if False, by default True
-    debug : bool, optional
-        Whether to not to push intermediate files created by the pipeline, by default True
     """
     # TODO : use boto3 for this instead
     cmd = (

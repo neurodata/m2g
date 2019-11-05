@@ -180,12 +180,6 @@ def main():
         default=None,
     )
     parser.add_argument(
-        "--debug",
-        action="store_true",
-        help="If False, remove any old files in the output directory.",
-        default=False,
-    )
-    parser.add_argument(
         "--sked",
         action="store_true",
         help="Whether to skip eddy correction if it has already been run.",
@@ -198,32 +192,25 @@ def main():
         help="whether or not to skip registration",
     )
     parser.add_argument(
-        "--vox",
+        "--voxelsize",
         action="store",
         default="2mm",
         help="Voxel size : 2mm, 1mm. Voxel size to use for template registrations.gi",
     )
     parser.add_argument(
-        "-c",
-        "--clean",
-        action="store_true",
-        default=False,
-        help="Whether or not to delete intermediates",
-    )
-    parser.add_argument(
         "--mod",
         action="store",
-        help="Determinstic (det), probabilistic (prob) tracking. Default is det.",
+        help="Deterministic (det) or probabilistic (prob) tracking. Default is det.",
         default="det",
     )
     parser.add_argument(
-        "--tt",
+        "--track_type",
         action="store",
         help="Tracking approach: local, particle. Default is local.",
         default="local",
     )
     parser.add_argument(
-        "--mf",
+        "--diffusion_model",
         action="store",
         help="Diffusion model: csd, csa. Default is csa.",
         default="csa",
@@ -270,19 +257,17 @@ def main():
 
     # arguments to be passed in every ndmg run
     kwargs = {
-        "vox_size": result.vox,
+        "vox_size": result.voxelsize,
         "mod_type": result.mod,
-        "track_type": result.tt,
-        "mod_func": result.mf,
+        "track_type": result.track_type,
+        "mod_func": result.diffusion_model,
         "seeds": result.seeds,
         "reg_style": result.sp,
-        "clean": result.clean,
         "skipeddy": result.sked,
         "skipreg": result.skreg,
         "buck": result.bucket,
         "remo": result.remote_path,
         "push": result.push_data,
-        "debug": result.debug,
         "modif": result.modif,
         "skull": result.skull,
     }
@@ -356,8 +341,7 @@ def main():
     for SubSesFile in scans:
         try:
             subject, session, files = SubSesFile
-            current_outdir = f"{outDir}/sub-{subject}/ses-{session}"
-            kwargs["outdir"] = current_outdir
+            kwargs["outdir"] = f"{outDir}/sub-{subject}/ses-{session}"
             files.update(kwargs)
             ndmg_dwi_worker(**files)
         except Exception as error:

@@ -50,14 +50,12 @@ def ndmg_dwi_worker(
     mod_func,
     seeds,
     reg_style,
-    clean,
     skipeddy=False,
     skipreg=False,
     buck=None,
     remo=None,
     push=False,
     creds=None,
-    debug=False,
     modif="",
     skull="none",
 ):
@@ -93,8 +91,6 @@ def ndmg_dwi_worker(
         Density of seeding for native-space tractography.
     reg_style : str
         Space for tractography. Default is native.
-    clean : bool
-        Whether or not to delete intermediates. Default is False.
     skipeddy : bool
         Whether or not to skip the eddy correction if it has already been run. Default is False.
     skipreg : bool
@@ -107,8 +103,6 @@ def ndmg_dwi_worker(
         Flag to push derivatives back to S3. Default is False
     creds : bool, optional
         Determine if you have S3 credentials. Default is True
-    debug : bool, optional
-        If False, remove any old filed in the output directory. Default is False
     modif : str, optional
         Name of the folder on s3 to push to. If empty, push to a folder with ndmg's version number. Default is ""
     skull : str, optional
@@ -135,7 +129,6 @@ def ndmg_dwi_worker(
     print("mod_func = {}".format(mod_func))
     print("seeds = {}".format(seeds))
     print("reg_style = {}".format(reg_style))
-    print("clean = {}".format(clean))
     print("skipeddy = {}".format(skipeddy))
     print("skipreg = {}".format(skipreg))
     print("skull = {}".format(skull))
@@ -499,7 +492,7 @@ def ndmg_dwi_worker(
 
     #     # Align DWI volumes to Atlas
     #     print("Aligning volumes...")
-    #     reg = register.DmriRegOld(dwi_prep, gtab, t1w, mask, aligned_dwi, namer, clean)
+    #     reg = register.DmriRegOld(dwi_prep, gtab, t1w, mask, aligned_dwi, namer, clean=False)
     #     print(
     #         "Registering DWI image at {} to atlas; aligned dwi at {}...".format(
     #             dwi_prep, aligned_dwi
@@ -600,27 +593,16 @@ def ndmg_dwi_worker(
 
     if reg_style == "native" or reg_style == "native_dsn":
         print(
-            "NOTE :: you are using native-space registration to generate connectomes. Without post-hoc normalization, multiple connectomes generated with NDMG cannot be compared directly."
+            "NOTE :: you are using native-space registration to generate connectomes. \
+             Without post-hoc normalization, multiple connectomes generated with NDMG \
+             cannot be compared directly."
         )
 
-    # TODO : putting this block of code here for now because it wouldn't run in `ndmg_bids`. Figure out how to put it somewhere else.
     if push and buck and remo is not None:
         if not modif:
-            modif = "ndmg_{}".format(
-                __version__.replace(".", "-")
-            )  # TODO : make sure __version__ is in the namespace
-        cloud_utils.s3_push_data(buck, remo, outdir, modif, creds, debug=debug)
+            modif = "ndmg_{}".format(__version__.replace(".", "-"))
+        cloud_utils.s3_push_data(buck, remo, outdir, modif, creds)
         print("Pushing Complete!")
-        if not debug:
-            print("Listing contents of output directory ...")
-            print(os.listdir(outdir))
-            print("clearing contents of output directory ...")
-            shutil.rmtree(outdir)
-            print(
-                "Clearing complete. Output directory exists: {}".format(
-                    os.path.exists(outdir)
-                )
-            )
 
 
 def welcome_message(connectomes):
@@ -698,13 +680,6 @@ def main():
         default="native",
     )
     parser.add_argument(
-        "-c",
-        "--clean",
-        action="store_true",
-        default=False,
-        help="Whether or not to delete intemediates",
-    )
-    parser.add_argument(
         "-sked",
         "--sked",
         action="store_true",
@@ -742,7 +717,6 @@ def main():
         result.mf,
         result.sp,
         result.seeds,
-        result.clean,
         result.skipeddy,
         result.skipreg,
     )
