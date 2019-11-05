@@ -245,7 +245,8 @@ def session_level(
 def main():
     """Starting point of the ndmg pipeline, assuming that you are using a BIDS organized dataset
     """
-    if sys.platform.startswith('w') or sys.platform.startswith('c') or sys.platform.startswith('a'):
+    compatible = sys.platform == 'darwin' or sys.platform == 'linux'
+    if not compatible:
         input('\n\nWARNING: You appear to be running ndmg on an operating system that is not macOS or Linux.'
         '\nndmg has not been tested on this operating system and may not work. Press enter to continue.\n\n')
 
@@ -298,9 +299,8 @@ def main():
         "--remote_path",
         action="store",
         help="The path to "
-        "the data on your S3 bucket. The data will be "
-        "downloaded to the provided bids_dir on your machine."
-        "Do not start or end with /",
+        "the data on your S3 bucket, not including the bucket name."
+        "The data will be downloaded to the provided bids_dir on your machine."
     )
     parser.add_argument(
         "--push_data",
@@ -385,8 +385,7 @@ def main():
         "--modif",
         action="store",
         help="Name of folder on s3 to push to, if the folder does not exist, it will be created."
-        "If empty, push to a folder with ndmg's version number."
-        "Do not start or end with /",
+        "If empty, push to a folder with ndmg's version number.",
         default="",
     )
     parser.add_argument(
@@ -407,7 +406,7 @@ def main():
     subj = result.participant_label
     sesh = result.session_label
     buck = result.bucket
-    remo = result.remote_path
+    remo = result.remote_path.strip('/')
     push = result.push_data
     debug = result.debug
     seeds = result.seeds
@@ -420,7 +419,7 @@ def main():
     track_type = result.tt
     mod_func = result.mf
     reg_style = result.sp
-    modif = result.modif
+    modif = result.modif.strip('/')
     skull = result.skull
 
     # make sure we have AFNI and FSL
@@ -435,6 +434,8 @@ def main():
         creds = bool(
             os.getenv("AWS_ACCESS_KEY_ID", 0) and os.getenv("AWS_SECRET_ACCESS_KEY", 0)
         )
+    if not creds and push:
+        raise AttributeError("No AWS credentials found. Pushing will most likely fail.")
 
     # TODO : `Flat is better than nested`. Make the logic for this cleaner.
     # this block of logic essentially just gets data we need from s3.
@@ -446,13 +447,11 @@ def main():
             for sub in subj:
                 if sesh is not None:
                     for ses in sesh:
-                        rem = os.path.join(remo, f'sub-{sub}', f'ses-{ses}')
-                        cloud_utils.s3_get_data(buck, rem, inDir, info=f'sub-{sub}/ses-{ses}', public=not creds)
+                        cloud_utils.s3_get_data(buck, remo, inDir, info=f'sub-{sub}/ses-{ses}')
                 else:
-                    rem = os.path.join(remo, f'sub-{sub}')
-                    cloud_utils.s3_get_data(buck, rem, inDir, info=f'sub-{sub}', public=not creds)
+                    cloud_utils.s3_get_data(buck, remo, inDir, info=f'sub-{sub}')
         else:
-            cloud_utils.s3_get_data(buck, f'{remo}/sub-', inDir, public=not creds)
+            cloud_utils.s3_get_data(buck, remo, inDir, info='sub-')
 
     print(f'input directory contents: {os.listdir(inDir)}')
 
