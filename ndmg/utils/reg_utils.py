@@ -25,7 +25,7 @@ from dipy.viz import regtools
 
 # ndmg imports
 from ndmg.utils import gen_utils
-from ndmg.utils.gen_utils import check_exists
+from ndmg.utils.gen_utils import check_exists, timer
 
 
 def erode_mask(mask, v=0):
@@ -93,7 +93,7 @@ def align_slices(dwi, corrected_dwi, idx):
         Index of the first B0 volume in the stack
     """
 
-    cmd = "eddy_correct {} {} {}".format(dwi, corrected_dwi, idx)
+    cmd = f'eddy_correct {dwi} {corrected_dwi} {idx}'
     status = gen_utils.execute_cmd(cmd, verb=True)
 
 
@@ -115,7 +115,7 @@ def probmap2mask(prob_map, mask_path, t, erode=0):
         erode=0:
             - the number of voxels to erode by. Defaults to 0.
     """
-    print("Extracting Mask from probability map {}...".format(prob_map))
+    print(f'Extracting Mask from probability map {prob_map}...')
     prob = nib.load(prob_map)
     prob_dat = prob.get_data()
     mask = (prob_dat > t).astype(int)
@@ -141,10 +141,8 @@ def apply_mask(inp, mask, out):
         the path for the output skull-extracted image.
     """
 
-    cmd = "3dcalc -a {} -b {} -expr 'a*step(b)' -prefix {}"
-    cmd = cmd.format(inp, mask, out)
+    cmd = f'3dcalc -a {inp} -b {mask} -expr "a*step(b)" -prefix {out}'
     gen_utils.execute_cmd(cmd, verb=True)
-    pass
 
 
 def extract_t1w_brain(t1w, out, tmpdir, skull="none"):
@@ -165,12 +163,11 @@ def extract_t1w_brain(t1w, out, tmpdir, skull="none"):
 
     t1w_name = gen_utils.get_filename(t1w)
     # the t1w image with the skull removed.
-    skull_t1w = "{}/{}_noskull.nii.gz".format(tmpdir, t1w_name)
+    skull_t1w = f'{tmpdir}/{t1w_name}_noskull.nii.gz'
     # 3dskullstrip to extract the brain-only t1w
     t1w_skullstrip(t1w, skull_t1w, skull)
     # 3dcalc to apply the mask over the 4d image
     apply_mask(t1w, skull_t1w, out)
-    pass
 
 
 @check_exists(0)
@@ -187,9 +184,8 @@ def normalize_t1w(inp, out):
         - out:
             - the output intensity-normalized image.
     """
-    cmd = "3dUnifize -prefix {} -input {}".format(out, inp)
+    cmd = f'3dUnifize -prefix {out} -input {inp}'
     gen_utils.execute_cmd(cmd, verb=True)
-    pass
 
 
 @check_exists(0)
@@ -209,10 +205,8 @@ def resample_fsl(base, res, goal_res, interp="spline"):
             - the interpolation strategy to use.
     """
     # resample using an isometric transform in fsl
-    cmd = "flirt -in {} -ref {} -out {} -applyisoxfm {} -interp {}"
-    cmd = cmd.format(base, base, res, goal_res, interp)
+    cmd = f'flirt -in {base} -ref {base} -out {res} -applyisoxfm {goal_res} -interp {interp}'
     gen_utils.execute_cmd(cmd, verb=True)
-    pass
 
 
 def skullstrip_check(dmrireg, labels, namer, vox_size, reg_style):
@@ -277,6 +271,7 @@ def skullstrip_check(dmrireg, labels, namer, vox_size, reg_style):
     return labels_im_file_list
 
 
+@timer
 @check_exists(0)
 def t1w_skullstrip(t1w, out, skull="none"):
     """Skull-strips the t1w image using AFNIs 3dSkullStrip algorithm, which is a modification of FSLs BET specialized to t1w images.
@@ -293,21 +288,16 @@ def t1w_skullstrip(t1w, out, skull="none"):
         skullstrip parameter pre-set. Default is "none".
     """
     if skull == "below":
-        cmd = "3dSkullStrip -prefix {} -input {} -shrink_fac_bot_lim 0.6 -ld 45".format(
-            out, t1w
-        )
+        cmd = f'3dSkullStrip -prefix {out} -input {t1w} -shrink_fac_bot_lim 0.6 -ld 45'
     elif skull == "cerebelum":
-        cmd = "3dSkullStrip -prefix {} -input {} -shrink_fac_bot_lim 0.3 -ld 45".format(
-            out, t1w
-        )
+        cmd = f'3dSkullStrip -prefix {out} -input {t1w} -shrink_fac_bot_lim 0.3 -ld 45'
     elif skull == "eye":
-        cmd = "3dSkullStrip -prefix {} -input {} -no_avoid_eyes -ld 45".format(out, t1w)
+        cmd = f'3dSkullStrip -prefix {out} -input {t1w} -no_avoid_eyes -ld 45'
     elif skull == "general":
-        cmd = "3dSkullStrip -prefix {} -input {} -push_to_edge -ld 45".format(out, t1w)
+        cmd = f'3dSkullStrip -prefix {out} -input {t1w} -push_to_edge -ld 45'
     else:
-        cmd = "3dSkullStrip -prefix {} -input {} -ld 30".format(out, t1w)
+        cmd = f'3dSkullStrip -prefix {out} -input {t1w} -ld 30'
     gen_utils.execute_cmd(cmd, verb=True)
-    pass
 
 
 @check_exists(0)
@@ -334,12 +324,12 @@ def segment_t1w(t1w, basename, opts=""):
 
     # run FAST, with options -t for the image type and -n to
     # segment into CSF (pve_0), WM (pve_1), GM (pve_2)
-    cmd = "fast -t 1 {} -n 3 -o {} {}".format(opts, basename, t1w)
+    cmd = f'fast -t 1 {opts} -n 3 -o {basename} {t1w}'
     os.system(cmd)
     out = {}  # the outputs
-    out["wm_prob"] = "{}_{}".format(basename, "pve_2.nii.gz")
-    out["gm_prob"] = "{}_{}".format(basename, "pve_1.nii.gz")
-    out["csf_prob"] = "{}_{}".format(basename, "pve_0.nii.gz")
+    out["wm_prob"] = f'{basename}_pve_2.nii.gz'
+    out["gm_prob"] = f'{basename}_pve_1.nii.gz'
+    out["csf_prob"] = f'{basename}_pve_0.nii.gz'
     return out
 
 
@@ -391,27 +381,27 @@ def align(
         angle in degrees, by default None
     """
 
-    cmd = "flirt -in {} -ref {}".format(inp, ref)
+    cmd = f'flirt -in {inp} -ref {ref}'
     if xfm is not None:
-        cmd += " -omat {}".format(xfm)
+        cmd += f' -omat {xfm}'
     if out is not None:
-        cmd += " -out {}".format(out)
+        cmd += f' -out {out}'
     if dof is not None:
-        cmd += " -dof {}".format(dof)
+        cmd += f' -dof {dof}'
     if bins is not None:
-        cmd += " -bins {}".format(bins)
+        cmd += f' -bins {bins}'
     if interp is not None:
-        cmd += " -interp {}".format(interp)
+        cmd += f' -interp {interp}'
     if cost is not None:
-        cmd += " -cost {}".format(cost)
+        cmd += f' -cost {cost}'
     if searchrad is not None:
         cmd += " -searchrx -180 180 -searchry -180 180 " + "-searchrz -180 180"
     if sch is not None:
-        cmd += " -schedule {}".format(sch)
+        cmd += f' -schedule {sch}'
     if wmseg is not None:
-        cmd += " -wmseg {}".format(wmseg)
+        cmd += f' -wmseg {wmseg}'
     if init is not None:
-        cmd += " -init {}".format(init)
+        cmd += f' -init {init}'
     os.system(cmd)
 
 
@@ -420,11 +410,10 @@ def align_epi(epi, t1, brain, out):
     """
     Algins EPI images to T1w image
     """
-    cmd = "epi_reg --epi={} --t1={} --t1brain={} --out={}"
-    cmd = cmd.format(epi, t1, brain, out)
+    cmd = f'epi_reg --epi={epi} --t1={t1} --t1brain={brain} --out={out}'
     os.system(cmd)
 
-
+@timer
 @check_exists(0, 1)
 def align_nonlinear(inp, ref, xfm, out, warp, ref_mask=None, in_mask=None, config=None):
     """Aligns two images using nonlinear methods and stores the transform between them using fnirt
@@ -449,14 +438,13 @@ def align_nonlinear(inp, ref, xfm, out, warp, ref_mask=None, in_mask=None, confi
         path to the config file specifying command line arguments, by default None
     """
 
-    cmd = "fnirt --in={} --ref={} --aff={} --iout={} --cout={} --warpres=8,8,8"
-    cmd = cmd.format(inp, ref, xfm, out, warp, config)
+    cmd = f'fnirt --in={inp} --ref={ref} --aff={xfm} --iout={out} --cout={warp} --warpres=8,8,8'
     if ref_mask is not None:
-        cmd += " --refmask={} --applyrefmask=1".format(ref_mask)
+        cmd += f' --refmask={ref_mask} --applyrefmask=1'
     if in_mask is not None:
-        cmd += " --inmask={} --applyinmask=1".format(in_mask)
+        cmd += f' --inmask={in_mask} --applyinmask=1'
     if config is not None:
-        cmd += " --config={}".format(config)
+        cmd += f' --config={config}'
     os.system(cmd)
 
 
@@ -480,8 +468,7 @@ def applyxfm(ref, inp, xfm, aligned, interp="trilinear", dof=6):
         degrees of freedom for the alignment, by default 6
     """
 
-    cmd = "flirt -in {} -ref {} -out {} -init {} -interp {} -dof {} -applyxfm"
-    cmd = cmd.format(inp, ref, aligned, xfm, interp, dof)
+    cmd = f'flirt -in {inp} -ref {ref} -out {aligned} -init {xfm} -interp {interp} -dof {dof} -applyxfm'
     os.system(cmd)
 
 
@@ -584,7 +571,7 @@ def combine_xfms(xfm1, xfm2, xfmout):
     xfmout : str
         path for the ouput transformation
     """
-    cmd = "convert_xfm -omat {} -concat {} {}".format(xfmout, xfm1, xfm2)
+    cmd = f'convert_xfm -omat {xfmout} -concat {xfm1} {xfm2}'
     os.system(cmd)
 
 
@@ -678,7 +665,7 @@ def wm_syn(template_path, fa_path, working_dir):
         0,
         "Static",
         "Moving",
-        "%s%s" % (working_dir, "/transformed_sagittal.png"),
+        f'{working_dir}/transformed_sagittal.png'
     )
     regtools.overlay_slices(
         static,
@@ -687,7 +674,7 @@ def wm_syn(template_path, fa_path, working_dir):
         1,
         "Static",
         "Moving",
-        "%s%s" % (working_dir, "/transformed_coronal.png"),
+        f'{working_dir}/transformed_coronal.png'
     )
     regtools.overlay_slices(
         static,
@@ -696,7 +683,7 @@ def wm_syn(template_path, fa_path, working_dir):
         2,
         "Static",
         "Moving",
-        "%s%s" % (working_dir, "/transformed_axial.png"),
+        f'{working_dir}/transformed_axial.png'
     )
 
     return mapping, affine_map
