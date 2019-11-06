@@ -17,6 +17,7 @@ import functools
 import json
 from itertools import product
 from pathlib import Path
+from collections import namedtuple
 
 # package imports
 import bids
@@ -231,10 +232,6 @@ def flatten(current, result=[]):
     else:
         result.append(current)
     return result
-
-
-from collections import namedtuple
-import warnings
 
 
 class DirectorySweeper:
