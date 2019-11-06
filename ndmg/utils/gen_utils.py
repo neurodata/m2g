@@ -373,9 +373,9 @@ class DirectorySweeper:
             info.append(scan)
 
             if not scan.files:
-                warnings.warn(
-                    f"There were no files for \
-                    subject {subject}, session {session}."
+                print(
+                    f"""There were no files for
+                    subject {subject}, session {session}."""
                 )
 
         return info
