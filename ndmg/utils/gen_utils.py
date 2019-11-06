@@ -366,7 +366,7 @@ class DirectorySweeper:
 
         # append subject, session, and files for each relevant session to info
         groups = self.df.groupby(["subject", "session"])
-        for pair, df in groups:
+        for pair, _ in groups:
             subject, session = pair
             files = self.get_files(subject, session)
             scan = SubSesFiles(subject, session, files)
