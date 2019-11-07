@@ -6,9 +6,55 @@ import pytest
 import ndmg
 from ndmg.utils.cloud_utils import s3_get_data
 from pathlib import Path
+from ndmg.utils.gen_utils import create_datadescript, DirectorySweeper
+import tempfile
 
 KEYWORDS = ["sub", "ses"]
 
+
+
+#/input/sub-{sub}/ses-{ses}/
+#                           anat/sub-{sub}_ses-{ses}_T1w.nii.gz
+#                           dwi/sub-{sub}_ses-{ses}_dwi.(bval,bvec,nii.gz)
+@pytest.fixture
+def input_dir_tree(tmp_path):
+    data = {'002547':2, '002548':1, '002449':3}
+    for sub, session in data.items():
+        for ses in range(1,session+1):
+            info = f'sub-{sub}/ses-{ses}'
+            anat = os.path.join(tmp_path, info, 'anat')
+            dwi = os.path.join(tmp_path, info, 'dwi')
+            # make directories and files
+            os.makedirs(anat)
+            os.makedirs(dwi)
+            tmpfilepath = os.path.join(anat, f"sub-{sub}_ses-{ses}_T1w.nii.gz")
+            with open(tmpfilepath, "x") as f:
+                f.write("placeholder text")
+            tmpfilepath = os.path.join(dwi, f"sub-{sub}_ses-{ses}_dwi.bval")
+            with open(tmpfilepath, "x") as f:
+                f.write("placeholder text")
+            tmpfilepath = os.path.join(dwi, f"sub-{sub}_ses-{ses}_dwi.bvec")
+            with open(tmpfilepath, "x") as f:
+                f.write("placeholder text")
+            tmpfilepath = os.path.join(dwi, f"sub-{sub}_ses-{ses}_dwi.nii.gz")
+            with open(tmpfilepath, "x") as f:
+                f.write("placeholder text")
+
+    # Create json file of input data
+    create_datadescript(os.path.join(tmp_path))
+
+    return tmp_path
+
+
+@pytest.fixture
+def dirsweep(input_dir_tree):
+    sweeper = DirectorySweeper(str(input_dir_tree))
+    return sweeper
+
+def test_DirectorySweeper(dirsweep):
+    sweeper=dirsweep
+    scans = sweeper.get_dir_info()
+    assert os.path.exists(scans[0].files['bvals'])
 
 def is_graph(filename, atlas="", suffix=""):
     """
