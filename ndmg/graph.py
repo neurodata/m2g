@@ -244,6 +244,11 @@ class GraphTools:
                 "Only edgelist, gpickle, graphml, txt, and npy are currently supported"
             )
 
+        if not os.path.isfile(graphname):
+            raise FileNotFoundError(f"File {graphname} not created.")
+
+        print(f"Graph saved. Output location here: {graphname}")
+
     def save_graph_png(self, graphname):
         """Saves adjacency graph, made using graspy's heatmap function, as a png. This will be saved in the qa/graphs_plotting/ directory
 

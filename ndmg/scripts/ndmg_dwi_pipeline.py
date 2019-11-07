@@ -187,9 +187,8 @@ def ndmg_dwi_worker(
     # Create derivative output file names
     streams = namer.name_derivative(namer.dirs["output"]["fiber"], "streamlines.trk")
 
-    # Again, connectomes are different
-    if not isinstance(labels, list):
-        labels = [labels]
+    # generate list of connectomes
+    labels = gen_utils.as_list(labels)
     connectomes = [
         namer.name_derivative(
             namer.dirs["output"]["conn"][namer.get_label(lab)],
@@ -198,10 +197,8 @@ def ndmg_dwi_worker(
         for lab in labels
     ]
 
-    print("Welcome to ndmg!")
-    print("Your connectomes will be located here:")
-    for connectome in connectomes:
-        print(connectome, "\n")
+    warm_welcome = welcome_message(connectomes)
+    print(warm_welcome)
 
     if vox_size != "1mm" and vox_size != "2mm":
         raise ValueError("Voxel size not supported. Use 2mm or 1mm")
@@ -560,7 +557,7 @@ def ndmg_dwi_worker(
 
     if reg_style == "native" or reg_style == "native_dsn":
         print(
-            "WARNING :: you are using native-space registration to generate connectomes. Without post-hoc normalization, multiple connectomes generated with NDMG cannot be compared directly."
+            "NOTE :: you are using native-space registration to generate connectomes. Without post-hoc normalization, multiple connectomes generated with NDMG cannot be compared directly."
         )
 
     # TODO : putting this block of code here for now because it wouldn't run in `ndmg_bids`. Figure out how to put it somewhere else.
@@ -576,6 +573,20 @@ def ndmg_dwi_worker(
             print("clearing contents of output directory ...")
             shutil.rmtree(outdir)
             print(f'Clearing complete. Output directory exists: {os.path.exists(outdir)}')
+
+
+def welcome_message(connectomes):
+
+    line = "\n~~~~~~~~~~~~~~~~\n"
+    line += "Welcome to ndmg!\n"
+    line += "Your connectomes will be located here:\n\n"
+
+    for connectome in connectomes:
+        line += connectome + "\n"
+
+    line += "~~~~~~~~~~~~~~~~\n"
+
+    return line
 
 
 def main():

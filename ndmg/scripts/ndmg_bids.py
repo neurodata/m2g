@@ -6,9 +6,9 @@ ndmg.scripts.ndmg_bids
 
 The top level ndmg entrypoint module.
 In this module, ndmg:
-1. Pulls input data from s3 if we need it.
-2. Parses all input data.
-3. for each set of input data, runs ndmg_dwi_pipeline.ndmg_dwi_worker (the actual pipeline)
+1. Pulls data into the input directory from s3 if we need it.
+2. Parses the input directory.
+3. for each subject/session pair, runs ndmg_dwi_pipeline.ndmg_dwi_worker (the actual pipeline)
 """
 
 
@@ -18,6 +18,7 @@ import glob
 import os
 from argparse import ArgumentParser
 import subprocess
+import warnings
 
 # ndmg imports
 from ndmg.utils import cloud_utils
@@ -72,20 +73,16 @@ def get_atlas(atlas_dir, vox_size):
         atlas_dir,
         "atlases/mask/MNI152NLin6_res-" + dims + "_T1w_descr-brainmask.nii.gz",
     )
-    labels = [
+    parcellations = [
         i for i in glob.glob(atlas_dir + "/atlases/label/Human/*.nii.gz") if dims in i
     ]
-    labels = [os.path.join(atlas_dir, "label/Human/", l) for l in labels]
-    fils = labels + [atlas, atlas_mask]
+    parcellations = [os.path.join(atlas_dir, "label/Human/", l) for l in parcellations]
 
-    atlas_brain = None
-    lv_mask = None
-
-    assert all(map(os.path.exists, labels)), "Some parcellations do not exist."
+    assert all(map(os.path.exists, parcellations)), "Some parcellations do not exist."
     assert all(
         map(os.path.exists, [atlas, atlas_mask])
     ), "atlas or atlas_mask, does not exist. You may not have git-lfs -- if not, install it."
-    return (labels, atlas, atlas_mask, atlas_brain, lv_mask)
+    return parcellations, atlas, atlas_mask
 
 
 def get_atlas_dir():
@@ -99,147 +96,15 @@ def get_atlas_dir():
     """
     if os.path.isdir("/ndmg_atlases"):
         return "/ndmg_atlases"  # in docker
-    else:
-        return os.path.expanduser("~") + "/.ndmg/ndmg_atlases"  # local
+
+    return os.path.expanduser("~") + "/.ndmg/ndmg_atlases"  # local
 
 
-def session_level(
-    inDir,
-    outDir,
-    subjs,
-    vox_size,
-    skipeddy,
-    skipreg,
-    clean,
-    atlas_select,
-    mod_type,
-    track_type,
-    mod_func,
-    seeds,
-    reg_style,
-    sesh=None,
-    buck=None,
-    remo=None,
-    push=False,
-    creds=None,
-    debug=False,
-    modif="",
-    skull="none",
-):
-    """Crawls the given BIDS organized directory for data pertaining to the given subject and session, and passes necessary files to ndmg_dwi_pipeline for processing.
-
-    Parameters
-    ----------
-    inDir : str
-        Path to BIDS input directory
-    outDir : str
-        Path to output directory
-    subjs : list
-        subject label
-    vox_size : str
-        Voxel size to use for template registrations.
-    skipeddy : bool
-        Whether to skip eddy correction if it has already been run. False means don't.
-    skipreg : bool
-        Whether to skip registration if it has already been run. False means don't.
-    clean : bool
-        Whether or not to delete intermediates
-    atlas_select : str
-        The atlas being analyzed in QC (if you only want one)
-    mod_type : str
-        Determinstic (det) or probabilistic (prob) tracking
-    track_type : str
-        Tracking approach: eudx or local. Default is eudx
-    mod_func : str
-        Which diffusion model you want to use, csd or csa
-    reg_style : str
-        Space for tractography.
-    sesh : str, optional
-        The label of the session that should be analyzed. If not provided all sessions are analyzed. Multiple sessions can be specified with a space separated list. Default is None
-    task : str, optional
-        task label. Default is None
-    buck : str, optional
-        The name of an S3 bucket which holds BIDS organized data. You musht have build your bucket with credentials to the S3 bucket you wish to access. Default is None
-    remo : str, optional
-        The path to the data on your S3 bucket. The data will be downloaded to the provided bids_dir on your machine. Default is None.
-    push : bool, optional
-        Flag to push derivatives back to S3. Default is False
-    creds : bool, optional
-        Determine if you have S3 credentials. Default is None
-    debug : bool, optional
-        If False, remove any old filed in the output directory. Default is False
-    modif : str, optional
-        Name of the folder on s3 to push to. If empty, push to a folder with ndmg's version number. Default is ""
-    skull : str, optional
-        Additional skullstrip analysis parameter set for unique t1w images. Default is "none".
-    """
-
-    # get atlas directory
-    atlas_dir = get_atlas_dir()
-
-    # parse atlas directory
-    labels, atlas, atlas_mask, atlas_brain, lv_mask = get_atlas(atlas_dir, vox_size)
-
-    if atlas_select:
-        labels = [i for i in labels if atlas_select in i]
-
-    # parse input directory
-    sweeper = DirectorySweeper(inDir, subjs=subjs, seshs=sesh)
-    dwis = sweeper.get_dwis()
-    bvals = sweeper.get_bvals()
-    bvecs = sweeper.get_bvecs()
-    anats = sweeper.get_anats()
-
-    # dwis, bvals, bvecs, anats = result
-    assert len(anats) == len(dwis)
-    assert len(bvecs) == len(dwis)
-    assert len(bvals) == len(dwis)
-
-    # TODO : clean below
-    args = [
-        [
-            dw,
-            bval,
-            bvec,
-            anat,
-            atlas,
-            atlas_mask,
-            labels,
-            f'{outDir}/sub{bval.split("sub")[1].split("/")[0]}/ses{bval.split("ses")[1].split("/")[0]}'
-        ]
-        for (dw, bval, bvec, anat) in zip(dwis, bvals, bvecs, anats)
-    ]
-
-    # optional args stored in kwargs
-    # use worker wrapper to call function f with args arg
-    # and keyword args kwargs
-    for arg in args:
-        ndmg_dwi_worker(
-            arg[0],
-            arg[1],
-            arg[2],
-            arg[3],
-            atlas,
-            atlas_mask,
-            labels,
-            arg[7],
-            vox_size,
-            mod_type,
-            track_type,
-            mod_func,
-            seeds,
-            reg_style,
-            clean,
-            skipeddy,
-            skipreg,
-            buck=buck,
-            remo=remo,
-            push=push,
-            creds=creds,
-            debug=debug,
-            modif=modif,
-            skull=skull,
-        )
+def failure_message(subject, session, error):
+    line = f"Subject {subject}, session {session} failed."
+    line += f"Errror message: {error}"
+    line += f"Trying next scan.\n"
+    return line
 
 
 def main():
@@ -314,9 +179,9 @@ def main():
         help="The name of " "the dataset you are perfoming QC on.",
     )
     parser.add_argument(
-        "--atlas",
+        "--parcellation",
         action="store",
-        help="The atlas " "being analyzed in QC (if you only want one).",
+        help="The parcellation(s) being analyzed. Multiple parcellations can be provided with a space separated list.",
         default=None,
     )
     parser.add_argument(
@@ -371,7 +236,6 @@ def main():
     parser.add_argument(
         "--sp",
         action="store",
-        # help="Space for tractography: mni, native_dsn, native. Default is native.",
         help="Space for tractography: native, native_dsn. Default is native.",
         default="native",
     )
@@ -399,40 +263,48 @@ def main():
         default="none",
     )
 
+    # and ... begin!
+    print("\nBeginning ndmg ...")
+
     # parse cli arguments
     result = parser.parse_args()
     inDir = result.bids_dir
     outDir = result.output_dir
-    subj = result.participant_label
-    sesh = result.session_label
-    buck = result.bucket
-    remo = result.remote_path
-    push = result.push_data
-    debug = result.debug
-    seeds = result.seeds
-    skipeddy = result.sked
-    skipreg = result.skreg
-    clean = result.clean
-    vox_size = result.vox
-    atlas_select = result.atlas
-    mod_type = result.mod
-    track_type = result.tt
-    mod_func = result.mf
-    reg_style = result.sp
-    modif = result.modif
-    skull = result.skull
+    subjects = result.participant_label
+    sessions = result.session_label
+    parcellation_name = result.parcellation
 
+    # arguments to be passed in every ndmg run
+    kwargs = {
+        "vox_size": result.vox,
+        "mod_type": result.mod,
+        "track_type": result.tt,
+        "mod_func": result.mf,
+        "seeds": result.seeds,
+        "reg_style": result.sp,
+        "clean": result.clean,
+        "skipeddy": result.sked,
+        "skipreg": result.skreg,
+        "buck": result.bucket,
+        "remo": result.remote_path,
+        "push": result.push_data,
+        "debug": result.debug,
+        "modif": result.modif,
+        "skull": result.skull,
+    }
+
+    # ---------------- Pre-run checks ---------------- #
     # remove slashes from edges of remo and modif
-    if remo:
-        remo.strip('/')
-    if modif:
-        modif.strip('/')
-    
+    if kwargs["remo"]:
+        kwargs["remo"].strip('/')
+    if kwargs["modif"]:
+        kwargs["modif"].strip('/')
+   
     # make sure we have AFNI and FSL
-    print("Beginning ndmg ...")
     check_dependencies()
 
 
+    # ---------------- Grab arguments --------------- #
     # Check to see if user has provided direction to an existing s3 bucket they wish to use
     try:
         creds = bool(cloud_utils.get_credentials())
@@ -443,21 +315,20 @@ def main():
     if (not creds) and push:
         raise AttributeError("No AWS credentials found. Pushing will most likely fail.")
 
+    kwargs.update({"creds": creds})
+
+    # Get S3 input data if needed
     # TODO : `Flat is better than nested`. Make the logic for this cleaner.
-    # this block of logic essentially just gets data we need from s3.
-    # it's super gross.
-    if buck is not None and remo is not None:
-        if subj is not None:
-            # if len(sesh) == 1:
-            #    sesh = sesh[0]
-            for sub in subj:
-                if sesh is not None:
-                    for ses in sesh:
-                        cloud_utils.s3_get_data(buck, remo, inDir, info=f'sub-{sub}/ses-{ses}')
+    if kwargs["buck"] is not None and kwargs["remo"] is not None:
+        if subjects is not None:
+            for subject in subjects:
+                if sessions is not None:
+                    for session in sessions:
+                        cloud_utils.s3_get_data(kwargs["buck"], kwargs["remo"], inDir, info=f'sub-{subject}/ses-{session}')
                 else:
-                    cloud_utils.s3_get_data(buck, remo, inDir, info=f'sub-{sub}')
+                    cloud_utils.s3_get_data(kwargs["buck"], kwargs["remo"], inDir, info=f'sub-{subject}')
         else:
-            cloud_utils.s3_get_data(buck, remo, inDir, info='sub-')
+            cloud_utils.s3_get_data(kwargs["buck"], kwargs["remo"], inDir, info='sub-')
 
     print(f'input directory contents: {os.listdir(inDir)}')
 
@@ -467,30 +338,32 @@ def main():
     is_bids_ = is_bids(inDir)
     assert is_bids_
 
-    # run session-level ndmg
-    session_level(
-        inDir,
-        outDir,
-        subj,
-        vox_size,
-        skipeddy,
-        skipreg,
-        clean,
-        atlas_select,
-        mod_type,
-        track_type,
-        mod_func,
-        seeds,
-        reg_style,
-        sesh,
-        buck=buck,
-        remo=remo,
-        push=push,
-        creds=creds,
-        debug=debug,
-        modif=modif,
-        skull=skull,
-    )
+    # get atlas stuff, then stick it into the kwargs
+    atlas_dir = get_atlas_dir()
+    parcellations, atlas, mask, = get_atlas(atlas_dir, kwargs["vox_size"])
+    if parcellation_name is not None:  # filter parcellations
+        parcellations = [file_ for file_ in parcellations if parcellation_name in file_]
+    atlas_stuff = {"atlas": atlas, "mask": mask, "labels": parcellations}
+    kwargs.update(atlas_stuff)
+
+    # parse input directory
+    sweeper = DirectorySweeper(inDir, subjects=subjects, sessions=sessions)
+    scans = sweeper.get_dir_info()
+
+    # ---------------- Run Pipeline --------------- #
+    # run ndmg on the entire BIDs directory.
+    # TODO: make sure this works on all scans
+    for SubSesFile in scans:
+        try:
+            subject, session, files = SubSesFile
+            current_outdir = f"{outDir}/sub-{subject}/ses-{session}"
+            kwargs["outdir"] = current_outdir
+            files.update(kwargs)
+            ndmg_dwi_worker(**files)
+        except Exception as error:
+            failure = failure_message(subject, session, error)
+            print(failure)
+            continue
 
 
 if __name__ == "__main__":
