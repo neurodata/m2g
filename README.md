@@ -46,24 +46,18 @@ The **ndmg** pipeline:
 
 ## Installation Guide
 
-**ndmg** relies on [FSL](http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FslInstallation), [AFNI](https://afni.nimh.nih.gov/), [Dipy](http://nipy.org/dipy/), [networkx](https://networkx.github.io/), and [nibabel](http://nipy.org/nibabel/), [numpy](http://www.numpy.org/) [scipy](http://www.scipy.org/), [scikit-learn](http://scikit-learn.org/stable/), [scikit-image](http://scikit-image.org/), [nilearn](http://nilearn.github.io/). You should install FSL and AFNI through the instructions on their website, then install other Python dependencies with the following:
-
-    pip install ndmg
-
-The only known package which requires a specific version is `dipy` (0.16.0), due to backwards-compatability breaking changes.
-
-Finally, you can install **ndmg** either from `pip` or Github as shown below. Installation shouldn't take more than a few minutes, but depends on your internet connection.
-
-### Install from pip
-
-    pip install ndmg
-
-### Install from Github
+**ndmg** relies on [FSL](http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FslInstallation), [AFNI](https://afni.nimh.nih.gov/), [Dipy](http://nipy.org/dipy/), [networkx](https://networkx.github.io/), and [nibabel](http://nipy.org/nibabel/), [numpy](http://www.numpy.org/) [scipy](http://www.scipy.org/), [scikit-learn](http://scikit-learn.org/stable/), [scikit-image](http://scikit-image.org/), [nilearn](http://nilearn.github.io/). You should install FSL and AFNI through the instructions on their website, then install other Python dependencies as well as the package itself with the following:
 
     git clone https://github.com/neurodata/ndmg.git
     cd ndmg
     pip install -r requirements.txt
     pip install .
+
+Finally, you can install **ndmg** from `pip` as shown below. Installation shouldn't take more than a few minutes, but depends on your internet connection. Note that to install the most up-to-date version of the pipeline, we currently recommend installing from github.
+
+### Install from pip
+
+    pip install ndmg
 
 ## Docker
 
