@@ -18,6 +18,7 @@ import functools
 import json
 from itertools import product
 from pathlib import Path
+from collections import namedtuple
 
 # package imports
 import bids
@@ -232,10 +233,6 @@ def flatten(current, result=[]):
     return result
 
 
-from collections import namedtuple
-import warnings
-
-
 class DirectorySweeper:
     # TODO : find data with run_label in it and test on that
     """
@@ -254,81 +251,60 @@ class DirectorySweeper:
     """
 
     def __init__(self, bdir, subjects=None, sessions=None):
-        self.layout = bids.BIDSLayout(bdir)
         self.bdir = bdir
-        self.df = self.layout.to_df(filters={"absolute_paths": True})
-        self.df = self.df[self.df.suffix != "description"]  # no metadata file
-        self.subjects = subjects
-        self.sessions = sessions
+        self.layout = bids.BIDSLayout(bdir)
+        if subjects is None:
+            subjects = self.layout.get_subjects()
+        if sessions is None:
+            sessions = self.layout.get_sessions()
 
-        # clean subjects / sessions
-        self.update()
-
-        # trim dataframe
-        self.trim()
+        # get list of subject / session pairs
+        self.pairs = self.get_pairs(subjects=subjects, sessions=sessions)
 
     def __repr__(self):
         return self.layout
 
-    def update(self):
+    def get_pairs(self, subjects, sessions):
         """
-        If subjects or sessions aren't passed to the object, 
-        update object state to use all possible subjects and subjects.
-        
-        Ensure that `self.subjects` and `self.subjects` are List(str).
-        """
-
-        subjects = self.subjects
-        sessions = self.sessions
-
-        if subjects is None:
-            subjects = list(self.df.subject.unique())
-        if sessions is None:
-            sessions = list(self.df.session.unique())
-
-        self.subjects = self.clean(subjects)
-        self.sessions = self.clean(sessions)
-
-    def clean(self, sub_or_ses):
-        """
-        Take either the subjects or the sessions, ensure that they are lists, 
-        and ensure that the elements in them are strings.
+        Return subject/session pairs.
         
         Parameters
         ----------
-        sub_or_ses : list
-            subjects or sessions list.
+        subjects : str or list
+            Subjects to retrieve.
+        sessions : str or list
+            Sessions to retrieve.
         
         Returns
         -------
         list
-            Cleaned subjects or sessions list
+            List of subject, session pairs.
+            Formatted like: [(subject, session), (subject, session), ...].
         """
-        sub_or_ses = as_list(sub_or_ses)
-        sub_or_ses = all_strings(sub_or_ses)
-        return sub_or_ses
+        pairs = []
+        args = dict(
+            suffix="dwi",
+            extensions=["nii", "nii.gz"],
+            subject=subjects,
+            session=sessions,
+        )
 
-    def trim(self):
-        """
-        Trim the internal pandas dataframe such that it only has the subjects and sessions we want.
-        """
-
-        # trim df to subjects
-        self.df = self.df[self.df.subject.isin(self.subjects)]
-
-        # trim df to sessions
-        self.df = self.df[self.df.session.isin(self.sessions)]
+        for entity in self.layout.get(**args):
+            subject = entity.entities["subject"]
+            session = entity.entities["session"]
+            pairs.append((subject, session))
+        return pairs
 
     def get_files(self, subject, session):
         """
-        Retrieve all session-level subject files necessary for a single ndmg run.
+        Retrieve all relevant files from a dataframe.
         
         Parameters
         ----------
         subject : str
-            Subject number
+            Subject to get files for.
         session : str
-            Session number
+            Session to get files for.
         
         Returns
         -------
@@ -336,13 +312,9 @@ class DirectorySweeper:
             Dictionary of all files from a single session.
         """
 
-        df = self.df[(self.df.subject == subject) & (self.df.session == session)]
-
-        # TODO : there might be a cleaner way to index these in pandas.
-        dwi = df[(df.datatype == "dwi") & (df.extension == "nii.gz")].path.iloc[0]
-        bval = df[(df.datatype == "dwi") & (df.extension == "bval")].path.iloc[0]
-        bvec = df[(df.datatype == "dwi") & (df.extension == "bvec")].path.iloc[0]
-        anat = df[df.datatype == "anat"].path.iloc[0]
+        anat, bval, bvec, dwi = self.layout.get(
+            return_type="filename", session=session, subject=subject
+        )
 
         files = {"dwi": dwi, "bvals": bval, "bvecs": bvec, "t1w": anat}
         return files
@@ -360,24 +332,24 @@ class DirectorySweeper:
             SubSesFile.session is the session string.
         """
 
-        info = []
+        scans = []
         SubSesFiles = namedtuple("SubSesFiles", ["subject", "session", "files"])
 
-        # append subject, session, and files for each relevant session to info
-        groups = self.df.groupby(["subject", "session"])
-        for pair, df in groups:
-            subject, session = pair
+        # append subject, session, and files for each relevant session to scans
+        for subject, session in self.pairs:
             files = self.get_files(subject, session)
             scan = SubSesFiles(subject, session, files)
-            info.append(scan)
+            scans.append(scan)
 
             if not scan.files:
-                warnings.warn(f""""
+                print(
+                    f""""
                     There were no files for
                     subject {subject}, session {session}.
-                    """)
+                    """
+                )
 
-        return info
+        return scans
 
 
 def all_strings(iterable_):

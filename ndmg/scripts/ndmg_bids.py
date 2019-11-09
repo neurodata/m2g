@@ -101,9 +101,11 @@ def get_atlas_dir():
 
 
 def failure_message(subject, session, error):
-    line = f"""Subject {subject}, session {session} failed. \n
-    Error message: {error}.\n
-    Trying next scan.\n"""
+    line = f"""
+    Subject {subject}, session {session} failed.
+        Error message: {error}.
+    Trying next scan.
+    """
     return line
 
 
@@ -115,7 +117,7 @@ def main():
         description="This is an end-to-end connectome estimation pipeline from M3r Images."
     )
     parser.add_argument(
-        "bids_dir",
+        "input_dir",
         help="""The directory with the input dataset"
         formatted according to the BIDS standard.""",
     )
@@ -232,7 +234,6 @@ def main():
     # parse cli arguments
     result = parser.parse_args()
     inDir = result.input_dir
-    s3 = inDir.startswith("s3://")
     outDir = result.output_dir
     subjects = result.participant_label
     sessions = result.session_label
@@ -264,6 +265,12 @@ def main():
             "\nndmg has not been tested on this operating system and may not work. Press enter to continue.\n\n"
         )
 
+    # remove slashes from edges of remo and modif
+    if kwargs["remo"]:
+        kwargs["remo"].strip("/")
+    if kwargs["modif"]:
+        kwargs["modif"].strip("/")
+
     # make sure we have AFNI and FSL
     check_dependencies()
 
@@ -280,26 +287,27 @@ def main():
 
     kwargs.update({"creds": creds})
 
+    # Get S3 input data if needed
     # TODO : `Flat is better than nested`. Make the logic for this cleaner.
-    # this block of logic essentially just gets data we need from s3.
-    # it's super gross.
-    if s3:
+    if kwargs["buck"] is not None and kwargs["remo"] is not None:
         if subjects is not None:
-            for sub in subjects:
+            for subject in subjects:
                 if sessions is not None:
-                    for ses in sessions:
+                    for session in sessions:
                         cloud_utils.s3_get_data(
                             kwargs["buck"],
                             kwargs["remo"],
                             inDir,
-                            info=f"sub-{sub}/ses-{ses}",
+                            info=f"sub-{subject}/ses-{session}",
                         )
                 else:
                     cloud_utils.s3_get_data(
-                        kwargs["buck"], kwargs["remo"], inDir, info=f"sub-{sub}"
+                        kwargs["buck"], kwargs["remo"], inDir, info=f"sub-{subject}"
                     )
         else:
             cloud_utils.s3_get_data(kwargs["buck"], kwargs["remo"], inDir, info="sub-")
+
+    print(f"input directory contents: {os.listdir(inDir)}")
 
     print(f"input directory contents: {os.listdir(inDir)}")
 
@@ -331,7 +339,7 @@ def main():
             ndmg_dwi_worker(**files)
         except Exception as error:
             failure = failure_message(subject, session, error)
-            warnings.warn(failure)
+            print(failure)
             continue
 
 
