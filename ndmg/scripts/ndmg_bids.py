@@ -19,6 +19,8 @@ import os
 from argparse import ArgumentParser
 import subprocess
 import warnings
+import logging
+import traceback
 
 # ndmg imports
 from ndmg.utils import cloud_utils
@@ -100,10 +102,15 @@ def get_atlas_dir():
     return os.path.expanduser("~") + "/.ndmg/ndmg_atlases"  # local
 
 
-def failure_message(subject, session, error):
+def failure_message(subject, session, tb):
+    logger = logging.getLogger(__name__)
+    error = ""
+    tbexc = traceback.TracebackException(type(tb), tb, tb.__traceback__)
+    for line in tbexc.format(chain=True):
+        error += line
     line = f"""
-    Subject {subject}, session {session} failed.
-        Error message: {error}.
+    Subject {subject}, session {session} failed. Error message:
+    \n\n{error}
     Trying next scan.
     """
     return line
@@ -153,7 +160,7 @@ def main():
     parser.add_argument(
         "--push_data",
         action="store_true",
-        help="flag to " "push derivatives back up to S3.",
+        help="flag to push derivatives back up to S3.",
         default=False,
     )
     parser.add_argument(
@@ -187,7 +194,7 @@ def main():
         default="det",
     )
     parser.add_argument(
-        "--track_type",
+        "--filtering_type",
         action="store",
         help="Tracking approach: local, particle. Default is local.",
         default="local",
@@ -231,7 +238,7 @@ def main():
     # and ... begin!
     print("\nBeginning ndmg ...")
 
-    # parse cli arguments
+    # ---------------- Parse CLI arguments ---------------- #
     result = parser.parse_args()
     inDir = result.input_dir
     outDir = result.output_dir
@@ -240,21 +247,57 @@ def main():
     parcellation_name = result.parcellation
 
     # arguments to be passed in every ndmg run
+    # TODO : change value naming convention to match key naming convention
     kwargs = {
         "vox_size": result.voxelsize,
         "mod_type": result.mod,
-        "track_type": result.track_type,
+        "track_type": result.filtering_type,
         "mod_func": result.diffusion_model,
         "seeds": result.seeds,
         "reg_style": result.space,
         "skipeddy": result.sked,
         "skipreg": result.skreg,
-        "buck": result.bucket,
-        "remo": result.remote_path,
+        # "buck": result.bucket,
+        # "remo": result.remote_path,
         "push": result.push_data,
         "modif": result.modif,
         "skull": result.skull,
     }
+
+    # ---------------- S3 stuff ---------------- #
+    # grab s3 stuff
+    s3 = inDir.startswith("s3://")
+    if s3:
+        buck, remo = cloud_utils.parse_path(inDir)
+        home = os.path.expanduser("~")
+        inDir = home + "/.ndmg/input"
+        if kwargs["modif"]:
+            kwargs["modif"].strip("/")
+        creds = bool(cloud_utils.get_credentials())
+        if (not creds) and kwargs["push"]:
+            raise AttributeError(
+                """No AWS credentials found. 
+                Pushing will most likely fail."""
+            )
+
+        kwargs.update({"creds": creds})
+
+        # Get S3 input data if needed
+        # TODO : `Flat is better than nested`. Make the logic for this cleaner
+
+        if subjects is None:
+            cloud_utils.s3_get_data(buck, remo, inDir, info="sub-")
+        else:
+            for subject in subjects:
+                if session is None:
+                    cloud_utils.s3_get_data(buck, remo, inDir, info=f"sub-{subject}")
+                else:
+                    for session in sessions:
+                        cloud_utils.s3_get_data(
+                            buck, remo, inDir, info=f"sub-{subject}/ses-{session}"
+                        )
+    print(f"input directory location: {inDir}")
+    print(f"input directory contents: {os.listdir(inDir)}")
 
     # ---------------- Pre-run checks ---------------- #
     # check operating system compatibility
@@ -265,57 +308,14 @@ def main():
             "\nndmg has not been tested on this operating system and may not work. Press enter to continue.\n\n"
         )
 
-    # remove slashes from edges of remo and modif
-    if kwargs["remo"]:
-        kwargs["remo"].strip("/")
-    if kwargs["modif"]:
-        kwargs["modif"].strip("/")
-
     # make sure we have AFNI and FSL
     check_dependencies()
-
-    # ---------------- Grab arguments --------------- #
-    # Check to see if user has provided direction to an existing s3 bucket they wish to use
-    try:
-        creds = bool(cloud_utils.get_credentials())
-    except:
-        creds = bool(
-            os.getenv("AWS_ACCESS_KEY_ID", 0) and os.getenv("AWS_SECRET_ACCESS_KEY", 0)
-        )
-    if (not creds) and push:
-        raise AttributeError("No AWS credentials found. Pushing will most likely fail.")
-
-    kwargs.update({"creds": creds})
-
-    # Get S3 input data if needed
-    # TODO : `Flat is better than nested`. Make the logic for this cleaner.
-    if kwargs["buck"] is not None and kwargs["remo"] is not None:
-        if subjects is not None:
-            for subject in subjects:
-                if sessions is not None:
-                    for session in sessions:
-                        cloud_utils.s3_get_data(
-                            kwargs["buck"],
-                            kwargs["remo"],
-                            inDir,
-                            info=f"sub-{subject}/ses-{session}",
-                        )
-                else:
-                    cloud_utils.s3_get_data(
-                        kwargs["buck"], kwargs["remo"], inDir, info=f"sub-{subject}"
-                    )
-        else:
-            cloud_utils.s3_get_data(kwargs["buck"], kwargs["remo"], inDir, info="sub-")
-
-    print(f"input directory contents: {os.listdir(inDir)}")
-
-    print(f"input directory contents: {os.listdir(inDir)}")
-
     # check on input data
     # make sure input directory is BIDs-formatted
     is_bids_ = is_bids(inDir)
     assert is_bids_
 
+    # ---------------- Grab parcellations, atlases, mask --------------- #
     # get parcellations, atlas, and mask, then stick it into kwargs
     atlas_dir = get_atlas_dir()
     parcellations, atlas, mask, = get_atlas(atlas_dir, kwargs["vox_size"])
