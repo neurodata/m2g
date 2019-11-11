@@ -103,7 +103,6 @@ def get_atlas_dir():
 
 
 def failure_message(subject, session, tb):
-    logger = logging.getLogger(__name__)
     error = ""
     tbexc = traceback.TracebackException(type(tb), tb, tb.__traceback__)
     for line in tbexc.format(chain=True):

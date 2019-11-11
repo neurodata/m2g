@@ -129,7 +129,6 @@ def ndmg_dwi_worker(
     print(f"mod_func = {mod_func}")
     print(f"seeds = {seeds}")
     print(f"reg_style = {reg_style}")
-    print(f"clean = {clean}")
     print(f"skipeddy = {skipeddy}")
     print(f"skipreg = {skipreg}")
     print(f"skull = {skull}")
