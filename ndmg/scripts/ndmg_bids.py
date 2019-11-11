@@ -273,9 +273,10 @@ def main():
         if kwargs["modif"]:
             kwargs["modif"].strip("/")
         creds = bool(cloud_utils.get_credentials())
+        # TODO : Should we really prevent the pipeline from running in this case? What if user is pushing to a public bucket?
         if (not creds) and kwargs["push"]:
             raise AttributeError(
-                """No AWS credentials found. 
+                """No AWS credentials found, but "--push" flag called. 
                 Pushing will most likely fail."""
             )
 
@@ -283,20 +284,22 @@ def main():
 
         # Get S3 input data if needed
         # TODO : `Flat is better than nested`. Make the logic for this cleaner
-
         if subjects is None:
-            cloud_utils.s3_get_data(buck, remo, inDir, info="sub-")
+            info = "sub-"
+            cloud_utils.s3_get_data(buck, remo, inDir, info=info)
         else:
             for subject in subjects:
                 if session is None:
-                    cloud_utils.s3_get_data(buck, remo, inDir, info=f"sub-{subject}")
+                    info = f"sub-{subject}"
+                    cloud_utils.s3_get_data(buck, remo, inDir, info=info)
                 else:
                     for session in sessions:
-                        cloud_utils.s3_get_data(
-                            buck, remo, inDir, info=f"sub-{subject}/ses-{session}"
-                        )
-    print(f"input directory location: {inDir}")
-    print(f"input directory contents: {os.listdir(inDir)}")
+                        info = f"sub-{subject}/ses-{session}"
+                        cloud_utils.s3_get_data(buck, remo, inDir, info=info)
+    print(
+        f"""input directory location: {inDir}. 
+    Input directory contents: {os.listdir(inDir)}."""
+    )
 
     # ---------------- Pre-run checks ---------------- #
     # check operating system compatibility
