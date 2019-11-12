@@ -27,6 +27,7 @@ from ndmg.utils import cloud_utils
 from ndmg.utils.gen_utils import DirectorySweeper
 from ndmg.utils.gen_utils import check_dependencies
 from ndmg.utils.gen_utils import is_bids
+from ndmg.utils.gen_utils import as_directory
 from ndmg.scripts.ndmg_dwi_pipeline import ndmg_dwi_worker
 
 
@@ -103,8 +104,28 @@ def get_atlas_dir():
 
 
 def failure_message(subject, session, tb):
+    """
+    Return a failure message.
+    Called if a ndmg run fails.
+
+    Parameters
+    ----------
+    subject : str
+        Subject number.
+    session : str
+        Session number.
+    tb : Error
+        Error object containing the traceback text.
+
+    Returns
+    -------
+    str
+        Traceback with subject/session info
+        to print to standard output.
+    """
     error = ""
     tbexc = traceback.TracebackException(type(tb), tb, tb.__traceback__)
+    # I have no idea what chain does, I found this on stackoverflow
     for line in tbexc.format(chain=True):
         error += line
     line = f"""
@@ -125,7 +146,8 @@ def main():
     parser.add_argument(
         "input_dir",
         help="""The directory with the input dataset"
-        formatted according to the BIDS standard.""",
+        formatted according to the BIDS standard.
+        To use data from s3, just pass `s3://<bucket>/<dataset>` as the input directory.""",
     )
     parser.add_argument(
         "output_dir",
@@ -269,7 +291,7 @@ def main():
     if s3:
         buck, remo = cloud_utils.parse_path(inDir)
         home = os.path.expanduser("~")
-        inDir = home + "/.ndmg/input"
+        inDir = as_directory(home + "/.ndmg/input", remove=True)
         if kwargs["modif"]:
             kwargs["modif"].strip("/")
         creds = bool(cloud_utils.get_credentials())
@@ -284,21 +306,22 @@ def main():
 
         # Get S3 input data if needed
         # TODO : `Flat is better than nested`. Make the logic for this cleaner
-        if subjects is None:
-            info = "sub-"
-            cloud_utils.s3_get_data(buck, remo, inDir, info=info)
-        else:
+        if subjects is not None:
             for subject in subjects:
-                if session is None:
-                    info = f"sub-{subject}"
-                    cloud_utils.s3_get_data(buck, remo, inDir, info=info)
-                else:
+                if sessions is not None:
                     for session in sessions:
                         info = f"sub-{subject}/ses-{session}"
                         cloud_utils.s3_get_data(buck, remo, inDir, info=info)
+                else:
+                    info = f"sub-{subject}"
+                    cloud_utils.s3_get_data(buck, remo, inDir, info=info)
+        else:
+            info = "sub-"
+            cloud_utils.s3_get_data(buck, remo, inDir, info=info)
+
     print(
         f"""input directory location: {inDir}. 
-    Input directory contents: {os.listdir(inDir)}."""
+        Input directory contents: {os.listdir(inDir)}."""
     )
 
     # ---------------- Pre-run checks ---------------- #

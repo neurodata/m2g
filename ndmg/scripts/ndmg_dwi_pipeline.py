@@ -547,12 +547,11 @@ def ndmg_dwi_worker(
 
     print(f"Total execution time: {exe_time}")
     print("NDMG Complete.")
+    print("~~~~~~~~~~~~~~\n\n")
 
     if reg_style == "native" or reg_style == "native_dsn":
         print(
-            "NOTE :: you are using native-space registration to generate connectomes. \
-             Without post-hoc normalization, multiple connectomes generated with NDMG \
-             cannot be compared directly."
+            "NOTE :: you are using native-space registration to generate connectomes.\n Without post-hoc normalization, multiple connectomes generated with NDMG cannot be compared directly."
         )
 
     if push and buck and remo is not None:

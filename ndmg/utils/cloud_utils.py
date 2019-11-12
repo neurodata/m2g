@@ -169,7 +169,7 @@ def s3_get_data(bucket, remote, local, info="", force=False):
     # check that bucket exists
     bkts = [bk["Name"] for bk in client.list_buckets()["Buckets"]]
     if bucket not in bkts:
-        sys.exit(
+        raise ValueError(
             "Error: could not locate bucket. Available buckets: " + ", ".join(bkts)
         )
 
