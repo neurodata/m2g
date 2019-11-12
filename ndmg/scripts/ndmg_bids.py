@@ -319,11 +319,6 @@ def main():
             info = "sub-"
             cloud_utils.s3_get_data(buck, remo, inDir, info=info)
 
-    print(
-        f"""input directory location: {inDir}. 
-        Input directory contents: {os.listdir(inDir)}."""
-    )
-
     # ---------------- Pre-run checks ---------------- #
     # check operating system compatibility
     compatible = sys.platform == "darwin" or sys.platform == "linux"
@@ -340,6 +335,12 @@ def main():
     is_bids_ = is_bids(inDir)
     assert is_bids_
 
+    print(
+        f"""
+        input directory location: {inDir}. 
+        Input directory contents: {os.listdir(inDir)}.
+        """
+    )
     # ---------------- Grab parcellations, atlases, mask --------------- #
     # get parcellations, atlas, and mask, then stick it into kwargs
     atlas_dir = get_atlas_dir()
