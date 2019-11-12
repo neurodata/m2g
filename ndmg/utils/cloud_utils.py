@@ -84,7 +84,7 @@ def parse_path(s3_datapath):
     bucket_path = str(s3_datapath).split("//")[1]
     parts = bucket_path.split("/")
     bucket = parts[0].strip("/")
-    prefix = "/".join(parts[1:4])
+    prefix = "/".join(parts[1:])
     return bucket, prefix
 
 
