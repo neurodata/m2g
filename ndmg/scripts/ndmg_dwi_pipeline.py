@@ -244,6 +244,7 @@ def ndmg_dwi_worker(
     bvals, bvecs = read_bvals_bvecs(fbval, fbvec)
     bvecs[np.where(np.any(abs(bvecs) >= 10, axis=1) == True)] = [1, 0, 0]
     bvecs[np.where(bvals == 0)] = 0
+    # TODO : clean the heck out of the below lines
     if (
         len(
             bvecs[
@@ -320,103 +321,97 @@ def ndmg_dwi_worker(
     t1w = gen_utils.reorient_img(t1w, namer)
     t1w = gen_utils.match_target_vox_res(t1w, vox_size, namer, sens="t1w")
 
-    if reg_style == "native" or reg_style == "native_dsn":
+    print("Running registration in native space...")
 
-        print("Running registration in native space...")
+    # Instantiate registration
+    reg = register.DmriReg(
+        namer, nodif_B0, nodif_B0_mask, t1w, vox_size, skull, simple=False
+    )
 
-        # Instantiate registration
-        reg = register.DmriReg(
-            namer, nodif_B0, nodif_B0_mask, t1w, vox_size, skull, simple=False
+    # Perform anatomical segmentation
+    if (skipreg is True) and os.path.isfile(reg.wm_edge):
+        print("Found existing gentissue run!")
+    else:
+        reg.gen_tissue()
+
+    # Align t1w to dwi
+    if (
+        (skipreg is True)
+        and os.path.isfile(reg.t1w2dwi)
+        and os.path.isfile(reg.mni2t1w_warp)
+        and os.path.isfile(reg.t1_aligned_mni)
+    ):
+        print("Found existing t1w2dwi run!")
+    else:
+        reg.t1w2dwi_align()
+
+    # Align tissue classifiers
+    if (
+        (skipreg is True)
+        and os.path.isfile(reg.wm_gm_int_in_dwi)
+        and os.path.isfile(reg.vent_csf_in_dwi)
+        and os.path.isfile(reg.corpuscallosum_dwi)
+    ):
+        print("Found existing tissue2dwi run!")
+    else:
+        reg.tissue2dwi_align()
+
+    # Align atlas to dwi-space and check that the atlas hasn't lost any of the rois
+    if reg_style == "native_dsn":
+        labels_im_file_mni_list = reg_utils.skullstrip_check(
+            reg, labels, namer, vox_size, reg_style
+        )
+    elif reg_style == "native":
+        labels_im_file_dwi_list = reg_utils.skullstrip_check(
+            reg, labels, namer, vox_size, reg_style
         )
 
-        # Perform anatomical segmentation
-        if (skipreg is True) and os.path.isfile(reg.wm_edge):
-            print("Found existing gentissue run!")
-        else:
-            reg.gen_tissue()
+    # -------- Tensor Fitting and Fiber Tractography ---------------- #
+    start_time = time.time()
+    seeds = track.build_seed_list(reg.wm_gm_int_in_dwi, np.eye(4), dens=int(seeds))
+    print("Using " + str(len(seeds)) + " seeds...")
 
-        # Align t1w to dwi
-        if (
-            (skipreg is True)
-            and os.path.isfile(reg.t1w2dwi)
-            and os.path.isfile(reg.mni2t1w_warp)
-            and os.path.isfile(reg.t1_aligned_mni)
-        ):
-            print("Found existing t1w2dwi run!")
-        else:
-            reg.t1w2dwi_align()
+    # Compute direction model and track fiber streamlines
+    print("Beginning tractography in native space...")
+    trct = track.RunTrack(
+        dwi_prep,
+        nodif_B0_mask,
+        reg.gm_in_dwi,
+        reg.vent_csf_in_dwi,
+        reg.csf_mask_dwi,
+        reg.wm_in_dwi,
+        gtab,
+        mod_type,
+        track_type,
+        mod_func,
+        seeds,
+        np.eye(4),
+    )
+    streamlines = trct.run()
+    streamlines = Streamlines([sl for sl in streamlines if len(sl) > 60])
+    print("Streamlines complete")
 
-        # Align tissue classifiers
-        if (
-            (skipreg is True)
-            and os.path.isfile(reg.wm_gm_int_in_dwi)
-            and os.path.isfile(reg.vent_csf_in_dwi)
-            and os.path.isfile(reg.corpuscallosum_dwi)
-        ):
-            print("Found existing tissue2dwi run!")
-        else:
-            reg.tissue2dwi_align()
-
-        # Align atlas to dwi-space and check that the atlas hasn't lost any of the rois
-        if reg_style == "native_dsn":
-            labels_im_file_mni_list = reg_utils.skullstrip_check(
-                reg, labels, namer, vox_size, reg_style
-            )
-        elif reg_style == "native":
-            labels_im_file_dwi_list = reg_utils.skullstrip_check(
-                reg, labels, namer, vox_size, reg_style
-            )
-
-        # -------- Tensor Fitting and Fiber Tractography ---------------- #
-        start_time = time.time()
-        seeds = track.build_seed_list(reg.wm_gm_int_in_dwi, np.eye(4), dens=int(seeds))
-        print("Using " + str(len(seeds)) + " seeds...")
-
-        # Compute direction model and track fiber streamlines
-        print("Beginning tractography in native space...")
-        trct = track.RunTrack(
-            dwi_prep,
-            nodif_B0_mask,
-            reg.gm_in_dwi,
-            reg.vent_csf_in_dwi,
-            reg.csf_mask_dwi,
-            reg.wm_in_dwi,
-            gtab,
-            mod_type,
-            track_type,
-            mod_func,
-            seeds,
-            np.eye(4),
-        )
-        streamlines = trct.run()
-        streamlines = Streamlines([sl for sl in streamlines if len(sl) > 60])
-        print("Streamlines complete")
-
-        trk_affine = np.eye(4)
-        trk_hdr = nib.streamlines.trk.TrkFile.create_empty_header()
-        trk_hdr["hdr_size"] = 1000
-        trk_hdr["dimensions"] = hdr["dim"][1:4].astype("float32")
-        trk_hdr["voxel_sizes"] = hdr["pixdim"][1:4]
-        trk_hdr["voxel_to_rasmm"] = trk_affine
-        trk_hdr["voxel_order"] = "RAS"
-        trk_hdr["pad2"] = "RAS"
-        trk_hdr["image_orientation_patient"] = np.array(
-            [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-        ).astype("float32")
-        trk_hdr["endianness"] = "<"
-        trk_hdr["_offset_data"] = 1000
-        trk_hdr["nb_streamlines"] = streamlines.total_nb_rows
-        tractogram = nib.streamlines.Tractogram(streamlines, affine_to_rasmm=trk_affine)
-        trkfile = nib.streamlines.trk.TrkFile(tractogram, header=trk_hdr)
-        nib.streamlines.save(trkfile, streams)
-        print(
-            "%s%s%s"
-            % (
-                "Tractography runtime: ",
-                str(np.round(time.time() - start_time, 1)),
-                "s",
-            )
-        )
+    trk_affine = np.eye(4)
+    trk_hdr = nib.streamlines.trk.TrkFile.create_empty_header()
+    trk_hdr["hdr_size"] = 1000
+    trk_hdr["dimensions"] = hdr["dim"][1:4].astype("float32")
+    trk_hdr["voxel_sizes"] = hdr["pixdim"][1:4]
+    trk_hdr["voxel_to_rasmm"] = trk_affine
+    trk_hdr["voxel_order"] = "RAS"
+    trk_hdr["pad2"] = "RAS"
+    trk_hdr["image_orientation_patient"] = np.array(
+        [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+    ).astype("float32")
+    trk_hdr["endianness"] = "<"
+    trk_hdr["_offset_data"] = 1000
+    trk_hdr["nb_streamlines"] = streamlines.total_nb_rows
+    tractogram = nib.streamlines.Tractogram(streamlines, affine_to_rasmm=trk_affine)
+    trkfile = nib.streamlines.trk.TrkFile(tractogram, header=trk_hdr)
+    nib.streamlines.save(trkfile, streams)
+    print(
+        "%s%s%s"
+        % ("Tractography runtime: ", str(np.round(time.time() - start_time, 1)), "s")
+    )
 
     if reg_style == "native_dsn":
 
@@ -430,64 +425,6 @@ def ndmg_dwi_worker(
 
         # Save streamlines to disk
         print("Saving DSN-registered streamlines: " + streams_mni)
-
-    # TODO : mni space currently broken. Fix EuDX in track.py.
-    # elif reg_style == "mni":
-    #     # Check dimensions
-    #     start_time = time.time()
-    #     t1w = gen_utils.match_target_vox_res(
-    #         t1w, vox_size, namer, sens="t1w"
-    #     )  # this is the second time this t1w data has been sent to this function (REMOVE?)
-    #     print(
-    #         "%s%s%s"
-    #         % ("Reslicing runtime: ", str(np.round(time.time() - start_time, 1)), "s")
-    #     )
-    #     print("Running tractography in MNI-space...")
-    #     aligned_dwi = "{}/dwi_mni_aligned.nii.gz".format(
-    #         namer.dirs["output"]["prep_dwi"]
-    #     )
-
-    #     # Align DWI volumes to Atlas
-    #     print("Aligning volumes...")
-    #     reg = register.DmriRegOld(dwi_prep, gtab, t1w, mask, aligned_dwi, namer, clean=False)
-    #     print(
-    #         "Registering DWI image at {} to atlas; aligned dwi at {}...".format(
-    #             dwi_prep, aligned_dwi
-    #         )
-    #     )
-    #     reg.dwi2atlas()
-
-    #     # -------- Tensor Fitting and Fiber Tractography ---------------- #
-    #     print("Beginning tractography...")
-    #     # Compute tensors and track fiber streamlines
-    #     print("aligned_dwi: {}".format(aligned_dwi))
-    #     print("gtab: {}".format(gtab))
-    #     [tens, streamlines, align_dwi_mask] = track.eudx_basic(
-    #         aligned_dwi, gtab, stop_val=0.2
-    #     )
-    #     tensors = "{}/tensors.nii.gz".format(namer.dirs["output"]["tensor"])
-    #     tensor2fa(
-    #         tens,
-    #         tensors,
-    #         aligned_dwi,
-    #         namer.dirs["output"]["tensor"],
-    #         namer.dirs["qa"]["tensor"],
-    #     )
-
-    #     # Save streamlines to disk
-    #     print("Saving streamlines: " + streams)
-    #     print("streamlines: {}".format(streamlines))
-    #     print("streams: {}".format(streams))
-    #     tractogram_list = [i for i in streamlines]
-    #     trk_affine = np.eye(4)
-    #     tractogram = nib.streamlines.Tractogram(
-    #         tractogram_list, affine_to_rasmm=trk_affine
-    #     )
-    #     nib.streamlines.save(tractogram, streams)
-    #     streamlines = Streamlines(
-    #         streamlines
-    #     )  # alex  # to try to make the streamlines variable be the same thing as the native space one
-    #     print("atlas location: {}".format(atlas))
 
     # ------- Connectome Estimation --------------------------------- #
     # Generate graphs from streamlines for each parcellation
@@ -522,23 +459,6 @@ def ndmg_dwi_worker(
             )
             g1.g = g1.make_graph()
 
-        # TODO : mni-space currently broken. Fix in track.
-        # elif reg_style == "mni":
-        #     labels_im_file = gen_utils.reorient_img(labels[idx], namer)
-        #     labels_im_file = gen_utils.match_target_vox_res(
-        #         labels_im_file, vox_size, namer, sens="t1w"
-        #     )
-        #     labels_im = nib.load(labels_im_file)
-        #     g1 = graph.graph_tools(
-        #         attr=len(np.unique(np.around(labels_im.get_data()).astype("int16")))
-        #         - 1,
-        #         rois=labels_im_file,
-        #         tracks=streamlines,
-        #         affine=np.eye(4),
-        #         namer=namer,
-        #         connectome_path=connectomes[idx],
-        #     )
-        #     g1.make_graph_old()
         g1.summary()
         g1.save_graph_png(connectomes[idx])
         g1.save_graph(connectomes[idx])
@@ -547,12 +467,10 @@ def ndmg_dwi_worker(
 
     print(f"Total execution time: {exe_time}")
     print("NDMG Complete.")
+    print(
+        "NOTE :: you are using native-space registration to generate connectomes.\n Without post-hoc normalization, multiple connectomes generated with NDMG cannot be compared directly."
+    )
     print("~~~~~~~~~~~~~~\n\n")
-
-    if reg_style == "native" or reg_style == "native_dsn":
-        print(
-            "NOTE :: you are using native-space registration to generate connectomes.\n Without post-hoc normalization, multiple connectomes generated with NDMG cannot be compared directly."
-        )
 
     if push and buck and remo is not None:
         if not modif:
