@@ -418,13 +418,6 @@ def main():
     )
     parser.add_argument("--dataset", action="store", help="Dataset name")
     parser.add_argument(
-        "-b",
-        "--big",
-        action="store",
-        default="False",
-        help="whether or not to produce voxelwise big graph",
-    )
-    parser.add_argument(
         "--modif",
         action="store",
         help="Name of folder on s3 to push to. If empty, push to a folder with ndmg's version number.",

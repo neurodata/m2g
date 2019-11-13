@@ -50,14 +50,12 @@ def ndmg_dwi_worker(
     mod_func,
     seeds,
     reg_style,
-    clean,
     skipeddy=False,
     skipreg=False,
     buck=None,
     remo=None,
     push=False,
     creds=None,
-    debug=False,
     modif="",
     skull="none",
 ):
@@ -93,8 +91,6 @@ def ndmg_dwi_worker(
         Density of seeding for native-space tractography.
     reg_style : str
         Space for tractography. Default is native.
-    clean : bool
-        Whether or not to delete intermediates. Default is False.
     skipeddy : bool
         Whether or not to skip the eddy correction if it has already been run. Default is False.
     skipreg : bool
@@ -107,8 +103,6 @@ def ndmg_dwi_worker(
         Flag to push derivatives back to S3. Default is False
     creds : bool, optional
         Determine if you have S3 credentials. Default is True
-    debug : bool, optional
-        If False, remove any old filed in the output directory. Default is False
     modif : str, optional
         Name of the folder on s3 to push to. If empty, push to a folder with ndmg's version number. Default is ""
     skull : str, optional
@@ -121,24 +115,23 @@ def ndmg_dwi_worker(
     ValueError
         Raised if bval/bvecs are potentially corrupted
     """
-    print(f'dwi = {dwi}')
-    print(f'bvals = {bvals}')
-    print(f'bvecs = {bvecs}')
-    print(f't1w = {t1w}')
-    print(f'atlas = {atlas}')
-    print(f'mask = {mask}')
-    print(f'labels = {labels}')
-    print(f'outdir = {outdir}')
-    print(f'vox_size = {vox_size}')
-    print(f'mod_type = {mod_type}')
-    print(f'track_type = {track_type}')
-    print(f'mod_func = {mod_func}')
-    print(f'seeds = {seeds}')
-    print(f'reg_style = {reg_style}')
-    print(f'clean = {clean}')
-    print(f'skipeddy = {skipeddy}')
-    print(f'skipreg = {skipreg}')
-    print(f'skull = {skull}')
+    print(f"dwi = {dwi}")
+    print(f"bvals = {bvals}")
+    print(f"bvecs = {bvecs}")
+    print(f"t1w = {t1w}")
+    print(f"atlas = {atlas}")
+    print(f"mask = {mask}")
+    print(f"labels = {labels}")
+    print(f"outdir = {outdir}")
+    print(f"vox_size = {vox_size}")
+    print(f"mod_type = {mod_type}")
+    print(f"track_type = {track_type}")
+    print(f"mod_func = {mod_func}")
+    print(f"seeds = {seeds}")
+    print(f"reg_style = {reg_style}")
+    print(f"skipeddy = {skipeddy}")
+    print(f"skipreg = {skipreg}")
+    print(f"skull = {skull}")
     fmt = "_adj.csv"
 
     assert all(
@@ -167,7 +160,7 @@ def ndmg_dwi_worker(
     # TODO : do this with shutil instead of an os command
     print("Output directory: " + outdir)
     if not os.path.isdir(outdir):
-        cmd = f'mkdir -p {outdir}'
+        cmd = f"mkdir -p {outdir}"
         os.system(cmd)
 
     paths = {
@@ -192,7 +185,7 @@ def ndmg_dwi_worker(
     connectomes = [
         namer.name_derivative(
             namer.dirs["output"]["conn"][namer.get_label(lab)],
-            f'{namer.get_mod_source()}_{namer.get_label(lab)}_measure-spatial-ds{fmt}'
+            f"{namer.get_mod_source()}_{namer.get_label(lab)}_measure-spatial-ds{fmt}",
         )
         for lab in labels
     ]
@@ -215,7 +208,7 @@ def ndmg_dwi_worker(
                 shutil.rmtree(namer.dirs["output"]["prep_dwi"])
                 os.mkdir(namer.dirs["output"]["prep_dwi"])
             except Exception as e:
-                print(f'Exception when trying to delete existing data: {e}')
+                print(f"Exception when trying to delete existing data: {e}")
                 pass
             print("Performing eddy correction...")
             cmd = "eddy_correct " + dwi + " " + dwi_prep + " 0"
@@ -341,7 +334,7 @@ def ndmg_dwi_worker(
             print("Found existing gentissue run!")
         else:
             reg.gen_tissue()
-        
+
         # Align t1w to dwi
         if (
             (skipreg is True)
@@ -456,7 +449,7 @@ def ndmg_dwi_worker(
 
     #     # Align DWI volumes to Atlas
     #     print("Aligning volumes...")
-    #     reg = register.DmriRegOld(dwi_prep, gtab, t1w, mask, aligned_dwi, namer, clean)
+    #     reg = register.DmriRegOld(dwi_prep, gtab, t1w, mask, aligned_dwi, namer, clean=False)
     #     print(
     #         "Registering DWI image at {} to atlas; aligned dwi at {}...".format(
     #             dwi_prep, aligned_dwi
@@ -499,10 +492,10 @@ def ndmg_dwi_worker(
     # ------- Connectome Estimation --------------------------------- #
     # Generate graphs from streamlines for each parcellation
     for idx, label in enumerate(labels):
-        print(f'Generating graph for {label} parcellation...')
+        print(f"Generating graph for {label} parcellation...")
         if reg_style == "native_dsn":
             # align atlas to t1w to dwi
-            print(f'Applying native-space alignment to {labels[idx]}')
+            print(f"Applying native-space alignment to {labels[idx]}")
             labels_im = nib.load(labels_im_file_mni_list[idx])
             g1 = graph.GraphTools(
                 attr=len(np.unique(np.around(labels_im.get_data()).astype("int16")))
@@ -516,7 +509,7 @@ def ndmg_dwi_worker(
             g1.g = g1.make_graph()
         elif reg_style == "native":
             # align atlas to t1w to dwi
-            print(f'Applying native-space alignment to {labels[idx]}')
+            print(f"Applying native-space alignment to {labels[idx]}")
             labels_im = nib.load(labels_im_file_dwi_list[idx])
             g1 = graph.GraphTools(
                 attr=len(np.unique(np.around(labels_im.get_data()).astype("int16")))
@@ -552,34 +545,28 @@ def ndmg_dwi_worker(
 
     exe_time = datetime.now() - startTime
 
-    print(f'Total execution time: {exe_time}')
+    print(f"Total execution time: {exe_time}")
     print("NDMG Complete.")
+    print("~~~~~~~~~~~~~~\n\n")
 
     if reg_style == "native" or reg_style == "native_dsn":
         print(
-            "NOTE :: you are using native-space registration to generate connectomes. Without post-hoc normalization, multiple connectomes generated with NDMG cannot be compared directly."
+            "NOTE :: you are using native-space registration to generate connectomes.\n Without post-hoc normalization, multiple connectomes generated with NDMG cannot be compared directly."
         )
 
-    # TODO : putting this block of code here for now because it wouldn't run in `ndmg_bids`. Figure out how to put it somewhere else.
     if push and buck and remo is not None:
         if not modif:
-            modif = f'ndmg_{__version__.replace(".", "-")}'
-            # TODO : make sure __version__ is in the namespace
-        cloud_utils.s3_push_data(buck, remo, outdir, modif, creds, debug=debug)
+            modif = "ndmg_{}".format(__version__.replace(".", "-"))
+        cloud_utils.s3_push_data(buck, remo, outdir, modif, creds)
         print("Pushing Complete!")
-        if not debug:
-            print("Listing contents of output directory ...")
-            print(os.listdir(outdir))
-            print("clearing contents of output directory ...")
-            shutil.rmtree(outdir)
-            print(f'Clearing complete. Output directory exists: {os.path.exists(outdir)}')
 
 
 def welcome_message(connectomes):
 
-    line = "\n~~~~~~~~~~~~~~~~\n"
-    line += "Welcome to ndmg!\n"
-    line += "Your connectomes will be located here:\n\n"
+    line = """\n~~~~~~~~~~~~~~~~\n 
+    Welcome to ndmg!\n 
+    Your connectomes will be located here:
+    \n\n"""
 
     for connectome in connectomes:
         line += connectome + "\n"
@@ -650,13 +637,6 @@ def main():
         default="native",
     )
     parser.add_argument(
-        "-c",
-        "--clean",
-        action="store_true",
-        default=False,
-        help="Whether or not to delete intemediates",
-    )
-    parser.add_argument(
         "-sked",
         "--sked",
         action="store_true",
@@ -673,9 +653,9 @@ def main():
     result = parser.parse_args()
 
     # Create output directory
-    print(f'Creating output directory: {result.outdir}')
-    print(f'Creating output temp directory: {result.outdir}/tmp')
-    gen_utils.utils.execute_cmd(f'mkdir -p {result.outdir} {result.outdir}/tmp')
+    print(f"Creating output directory: {result.outdir}")
+    print(f"Creating output temp directory: {result.outdir}/tmp")
+    gen_utils.utils.execute_cmd(f"mkdir -p {result.outdir} {result.outdir}/tmp")
 
     ndmg_dwi_worker(
         result.dwi,
@@ -692,7 +672,6 @@ def main():
         result.mf,
         result.sp,
         result.seeds,
-        result.clean,
         result.skipeddy,
         result.skipreg,
     )

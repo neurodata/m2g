@@ -9,6 +9,7 @@ Contains general utility functions.
 
 # system imports
 import os
+import shutil
 import sys
 import re
 from subprocess import Popen, PIPE
@@ -341,11 +342,46 @@ class DirectorySweeper:
             scan = SubSesFiles(subject, session, files)
             scans.append(scan)
 
+            if not scan.files:
+                print(
+                    f""""
+                    There were no files for
+                    subject {subject}, session {session}.
+                    """
+                )
+
         return scans
 
 
 def all_strings(iterable_):
+    """
+    Ensure all elements in `iterable_` are strings.
+    """
     return [str(x) for x in iterable_]
+
+
+def as_directory(dir_, remove=False):
+    """
+    Convenience function to make a directory while returning it.
+    
+    Parameters
+    ----------
+    dir_ : str, Path
+        File location to directory.
+    remove : bool, optional
+        Whether to remove a previously existing directory, by default False
+    
+    Returns
+    -------
+    str
+        Directory string.
+    """
+    p = Path(dir_).absolute()
+    if remove:
+        print(f"Previous directory found at {dir_}. Removing.")
+        shutil.rmtree(p, ignore_errors=True)
+    p.mkdir(parents=True, exist_ok=True)
+    return str(p)
 
 
 def as_list(x):
@@ -415,27 +451,19 @@ def check_exists(*dargs):
     def outer(f):
         @functools.wraps(f)
         def inner(*args, **kwargs):
-
             for darg in dargs:
                 p = args[darg]
                 try:
                     if not os.path.exists(p):
                         raise ValueError(
-                            f"{p} does not exist.\n \
-                            This is an input to the function {f.__name__}."
+                            f"{p} does not exist.\n This is an input to the function {f.__name__}."
                         )
                 except TypeError:
-                    print(
-                        f"{darg} is not a file, it is {type(darg)}.\n \
-                        Fix decorator on this function."
-                    )
-
+                    print(f"{darg} is not a file, it is {type(darg)}.")
+                    print("Fix decorator on this function.")
                 print(f"{p} exists.")
-            print(
-                f"Prerequisite files for {f.__name__} all exist. \
-            Calling {f.__name__}.\n"
-            )
-
+            print(f"Prerequisite files for {f.__name__} all exist.")
+            print(f"Calling {f.__name__}.\n")
             return f(*args, **kwargs)
 
         return inner
