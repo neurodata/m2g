@@ -1,9 +1,16 @@
-
-
 # ndmg
+
+![Downloads shield](https://img.shields.io/pypi/dm/ndmg.svg)
+[![](https://img.shields.io/pypi/v/ndmg.svg)](https://pypi.python.org/pypi/ndmg)
+![](https://travis-ci.org/neurodata/ndmg.svg?branch=master)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1161284.svg)](https://doi.org/10.5281/zenodo.1161284)
+[![Code Climate](https://codeclimate.com/github/neurodata/ndmg/badges/gpa.svg)](https://codeclimate.com/github/neurodata/ndmg)
+[![DockerHub](https://img.shields.io/docker/pulls/bids/ndmg.svg)](https://hub.docker.com/r/bids/ndmg)
+[![OpenNeuro](http://bids.neuroimaging.io/openneuro_badge.svg)](https://openneuro.org)
+
 ![](./docs/nutmeg.png)
 
-NeuroData's MR Graphs package, **ndmg** (pronounced "***nutmeg***"), is a turn-key pipeline which uses structural and diffusion MRI data to estimate multi-resolution connectomes reliably and scalably.
+NeuroData's MR Graphs package, **ndmg** (pronounced "**_nutmeg_**"), is a turn-key pipeline which uses structural and diffusion MRI data to estimate multi-resolution connectomes reliably and scalably.
 
 ## Contents
 
@@ -28,41 +35,44 @@ The **ndmg** pipeline has been developed as a one-click solution for human conne
 ## System Requirements
 
 The **ndmg** pipeline:
- - was developed and tested primarily on Mac OSX, Ubuntu (12, 14, 16, 18), and CentOS (5, 6);
- - made to work on Python 3.6;
- - is wrapped in a [Docker container](https://hub.docker.com/r/bids/ndmg/);
- - has install instructions via a [Dockerfile](https://github.com/BIDS-Apps/ndmg/blob/master/Dockerfile#L6);
- - requires no non-standard hardware to run;
- - has key features built upon FSL, AFNI, Dipy, Nibabel, Nilearn, Networkx, Numpy, Scipy, Scikit-Learn, and others;
- - takes approximately 1-core, 8-GB of RAM, and 1 hour to run for most datasets.
+
+- was developed and tested primarily on Mac OSX, Ubuntu (12, 14, 16, 18), and CentOS (5, 6);
+- made to work on Python 3.6;
+- is wrapped in a [Docker container](https://hub.docker.com/r/bids/ndmg/);
+- has install instructions via a [Dockerfile](https://github.com/BIDS-Apps/ndmg/blob/master/Dockerfile#L6);
+- requires no non-standard hardware to run;
+- has key features built upon FSL, AFNI, Dipy, Nibabel, Nilearn, Networkx, Numpy, Scipy, Scikit-Learn, and others;
+- takes approximately 1-core, 8-GB of RAM, and 1 hour to run for most datasets.
 
 ## Installation Guide
 
-**ndmg** relies on [FSL](http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FslInstallation), [AFNI](https://afni.nimh.nih.gov/), [Dipy](http://nipy.org/dipy/), [networkx](https://networkx.github.io/), and [nibabel](http://nipy.org/nibabel/), [numpy](http://www.numpy.org/) [scipy](http://www.scipy.org/), [scikit-learn](http://scikit-learn.org/stable/), [scikit-image](http://scikit-image.org/), [nilearn](http://nilearn.github.io/). You should install FSL and AFNI through the instructions on their website, then install other Python dependencies with the following:
-
-    pip install ndmg
- 
-The only known package which requires a specific version is `dipy` (0.16.0), due to backwards-compatability breaking changes.
-
-Finally, you can install **ndmg** either from `pip` or Github as shown below. Installation shouldn't take more than a few minutes, but depends on your internet connection.
-
-### Install from pip
-
-    pip install ndmg
-
-### Install from Github
+**ndmg** relies on [FSL](http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FslInstallation), [AFNI](https://afni.nimh.nih.gov/), [Dipy](http://nipy.org/dipy/), [networkx](https://networkx.github.io/), and [nibabel](http://nipy.org/nibabel/), [numpy](http://www.numpy.org/) [scipy](http://www.scipy.org/), [scikit-learn](http://scikit-learn.org/stable/), [scikit-image](http://scikit-image.org/), [nilearn](http://nilearn.github.io/). You should install FSL and AFNI through the instructions on their website, then install other Python dependencies as well as the package itself with the following:
 
     git clone https://github.com/neurodata/ndmg.git
     cd ndmg
     pip install -r requirements.txt
     pip install .
 
+For the most up-to-date version of ndmg, you can use the staging branch. This version is updated regularly, but may be less stable:
+
+    git clone https://github.com/neurodata/ndmg.git
+    cd ndmg
+    git checkout staging
+    pip install -r requirements.txt
+    pip install .
+
+You can also install **ndmg** from `pip` as shown below. Installation shouldn't take more than a few minutes, but depends on your internet connection. Note that to install the most up-to-date version of the pipeline, we currently recommend installing from github.
+
+### Install from pip
+
+    pip install ndmg
+
 ## Docker
 
 **ndmg** is available through Dockerhub, and the most recent docker image can be pulled using:
-  
+
     docker pull neurodata/ndmg_dev:latest
-    
+
 The image can then be used to create a container and run directly with the following command (and any additional options you may require for Docker, such as volume mounting):
 
     docker run -ti --entrypoint /bin/bash neurodata/ndmg_dev:latest
@@ -82,21 +92,23 @@ In order to create a docker container from the docker image and access it, use t
 ## Tutorial
 
 Once you have the pipeline up and running, you can run it with:
-    
-    ndmg_bids <input_directory> <output_directory>
-    
+  
+ ndmg <input_directory> <output_directory>
+  
 We recommend specifying an atlas and lowering the default seed density on test runs:
 
-    ndmg_bids --seeds 1 --atlas desikan <input_directory> <output_directory>
-    
+    ndmg --seeds 1 --parcellation desikan <input_directory> <output_directory>
+
 You can set a particular scan and session as well (recommended for batch scripts):
 
-    ndmg_bids --seeds 1 --atlas desikan --participant_label <label> --session_label <label> <input_directory> <output_directory>
+    ndmg --seeds 1 --parcellation desikan --participant_label <label> --session_label <label> <input_directory> <output_directory>
 
 For more detailed instructions, tutorials on the **ndmg** pipeline can be found in [ndmg/tutorials](https://github.com/neurodata/ndmg/tree/staging/tutorials)
 
 ## Outputs
-The output files generated by the **ndmg** pipeline are organized as:
+
+The organization of the output files generated by the ndmg pipeline are shown below. If you only care about the connectome edgelists (**ndmg**'s fundamental output), you can find them in `/output/dwi/roi-connectomes`.
+
 ```
 File labels that may appear on output files, these denote additional actions ndmg may have done:
 RAS = File was originally in RAS orientation, so no reorientation was necessary
@@ -116,7 +128,7 @@ res = The file has been resliced to the desired voxel size specified by the user
                    t1w_seg_pve_2.nii.gz = probability map of white matter for original t1w image
                    t1w_seg_pveseg.nii.gz = t1w image mapping wm, gm, ventricle, and csf areas
                    t1w_wm_thr.nii.gz = binary white matter mask for resliced t1w image
-                   
+
           /registered
                Files created during the registration process
                    t1w_corpuscallosum.nii.gz = atlas corpus callosum mask in t1w space
@@ -127,7 +139,7 @@ res = The file has been resliced to the desired voxel size specified by the user
                    t1w_wm_gm_int_in_dwi.nii.gz = t1w white matter-grey matter interfact in dwi space
                    t1w_wm_gm_int_in_dwi_bin.nii.gz = binary mask of t12_2m_gm_int_in_dwi.nii.gz
                    t1w_wm_in_dwi.nii.gz = atlas white matter probability map in dwi space
-               
+
      /dwi
           /fiber
                Streamline track file(s)
@@ -172,7 +184,7 @@ res = The file has been resliced to the desired voxel size specified by the user
                     vent_mask_mni.nii.gz = altas ventricle mask in mni space using roi_2_mni_mat
                     vent_mask_t1w.nii.gz = atlas ventricle mask in t1w space
                     warp_t12mni.nii.gz = nonlinear warp coefficients/fields for t1w to mni space
-               
+
           /reg_m
                Intermediate files created during the processing of the diffusion data
                     dwi2t1w_bbr_xfm.mat = affine transform matrix of t1w_wm_edge.nii.gz to t1w space
@@ -184,24 +196,26 @@ res = The file has been resliced to the desired voxel size specified by the user
                     xfm_mni2t1w_init.mat = inverse transform matrix of xfm_t1w2mni_init.mat
                     xfm_t1w2mni_init.mat = affine transform matrix of preprocessed t1w_brain to mni space
 ```
-Other files may end up in the output folders, depending on what settings or atlases you choose to use. Using MNI space for tractography or setting ```--clean``` to ```True``` will result in fewer files.
+
+Other files may end up in the output folders, depending on what settings or atlases you choose to use. Using MNI space for tractography or setting `--clean` to `True` will result in fewer files.
 
 ## Usage
 
 The **ndmg** pipeline can be used to generate connectomes as a command-line utility on [BIDS datasets](http://bids.neuroimaging.io) with the following:
 
-    ndmg_bids /input/bids/dataset /output/directory
+    ndmg /input/bids/dataset /output/directory
 
-Note that more options are available which can be helpful if running on the Amazon cloud, which can be found and documented by running `ndmg_bids -h`.
-If running with the Docker container shown above, the `entrypoint` is already set to `ndmg_bids`, so the pipeline can be run directly from the host-system command line as follows:
+Note that more options are available which can be helpful if running on the Amazon cloud, which can be found and documented by running `ndmg -h`.
+If running with the Docker container shown above, the `entrypoint` is already set to `ndmg`, so the pipeline can be run directly from the host-system command line as follows:
 
     docker run -ti -v /path/to/local/data:/data neurodata/ndmg_dev /data/ /data/outputs
 
-This will run **ndmg** on the local data and save the output files to the directory /path/to/local/data/outputs. Note that if you have created the docker image from github, replace ```neurodata/ndmg_dev``` with ```imagename:uniquelabel```.
+This will run **ndmg** on the local data and save the output files to the directory /path/to/local/data/outputs. Note that if you have created the docker image from github, replace `neurodata/ndmg_dev` with `imagename:uniquelabel`.
 
 Also note that currently, running `ndmg` on a single bids-formatted dataset directory only runs a single scan. To run the entire dataset, we recommend parallelizing on a high-performance cluster or using `ndmg`'s s3 integration.
 
 ## Working with S3 Datasets
+
 **ndmg** has the ability to work on datasets stored on [Amazon's Simple Storage Service](https://aws.amazon.com/s3/), assuming they are in BIDS format. Doing so requires you to set your AWS credentials and read the related s3 bucket documentation. You can find a guide [here](https://github.com/neurodata/ndmg/blob/deploy/tutorials/Batch.ipynb).
 
 ## Example Datasets
