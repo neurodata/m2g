@@ -745,4 +745,3 @@ class DmriReg:
             f"-sub {self.vent_csf_in_dwi} -mas {self.nodif_B0_mask} -bin {self.wm_gm_int_in_dwi}"
         )
         os.system(cmd)
-
