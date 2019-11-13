@@ -1,46 +1,37 @@
 #!/usr/bin/env python
-# Copyright 2019 NeuroData (http://neurodata.io)
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
 
-# ndmg_dwi_worker.py
-# Repackaged for native space tractography by Derek Pisner in 2019
-# Email: dpisner@utexas.edu
+"""
+ndmg.scripts.ndmg_dwi_pipeline
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Contains the primary, top-level pipeline.
+For a full description, see here: https://neurodata.io/talks/ndmg.pdf
+"""
 
 
+# standard library imports
 import shutil
 import time
-import warnings
-
-warnings.simplefilter("ignore")
-
-# from ndmg.stats.qa_mri import qa_mri
-import nibabel as nib
-from dipy.tracking.streamline import Streamlines
-from subprocess import Popen
-import ndmg
-from ndmg import preproc as mgp
-from ndmg.utils import gen_utils as mgu
-from ndmg.utils import s3_utils
-from ndmg.register import gen_reg as mgr
-from ndmg.track import gen_track as mgt
-from ndmg.graph import gen_graph as mgg
-from ndmg.utils.bids_utils import name_resource
-from ndmg.stats.qa_tensor import *
-from ndmg.stats.qa_fibers import *
 from datetime import datetime
+import os
 
+# package imports
+import nibabel as nib
+import numpy as np
+from subprocess import Popen
+from dipy.tracking.streamline import Streamlines
+from dipy.io import read_bvals_bvecs
+
+# ndmg imports
+from ndmg import preproc
+from ndmg import register
+from ndmg import track
+from ndmg import graph
+from ndmg.utils import gen_utils
+from ndmg.utils import reg_utils
+from ndmg.utils import cloud_utils
+
+# TODO : not sure why this is here, potentially remove
 os.environ["MPLCONFIGDIR"] = "/tmp/"
 
 
@@ -59,18 +50,17 @@ def ndmg_dwi_worker(
     mod_func,
     seeds,
     reg_style,
-    clean,
     skipeddy=False,
     skipreg=False,
     buck=None,
     remo=None,
     push=False,
     creds=None,
-    debug=False,
     modif="",
+    skull="none",
 ):
     """Creates a brain graph from MRI data
-    
+
     Parameters
     ----------
     dwi : str
@@ -101,8 +91,6 @@ def ndmg_dwi_worker(
         Density of seeding for native-space tractography.
     reg_style : str
         Space for tractography. Default is native.
-    clean : bool
-        Whether or not to delete intermediates. Default is False.
     skipeddy : bool
         Whether or not to skip the eddy correction if it has already been run. Default is False.
     skipreg : bool
@@ -115,11 +103,11 @@ def ndmg_dwi_worker(
         Flag to push derivatives back to S3. Default is False
     creds : bool, optional
         Determine if you have S3 credentials. Default is True
-    debug : bool, optional
-        If False, remove any old filed in the output directory. Default is False
     modif : str, optional
         Name of the folder on s3 to push to. If empty, push to a folder with ndmg's version number. Default is ""
-    
+    skull : str, optional
+        skullstrip parameter pre-set. Default is "none".
+
     Raises
     ------
     ValueError
@@ -127,23 +115,23 @@ def ndmg_dwi_worker(
     ValueError
         Raised if bval/bvecs are potentially corrupted
     """
-    print("dwi = {}".format(dwi))
-    print("bvals = {}".format(bvals))
-    print("bvecs = {}".format(bvecs))
-    print("t1w = {}".format(t1w))
-    print("atlas = {}".format(atlas))
-    print("mask = {}".format(mask))
-    print("labels = {}".format(labels))
-    print("outdir = {}".format(outdir))
-    print("vox_size = {}".format(vox_size))
-    print("mod_type = {}".format(mod_type))
-    print("track_type = {}".format(track_type))
-    print("mod_func = {}".format(mod_func))
-    print("seeds = {}".format(seeds))
-    print("reg_style = {}".format(reg_style))
-    print("clean = {}".format(clean))
-    print("skip eddy = {}".format(skipeddy))
-    print("skip registration = {}".format(skipreg))
+    print(f"dwi = {dwi}")
+    print(f"bvals = {bvals}")
+    print(f"bvecs = {bvecs}")
+    print(f"t1w = {t1w}")
+    print(f"atlas = {atlas}")
+    print(f"mask = {mask}")
+    print(f"labels = {labels}")
+    print(f"outdir = {outdir}")
+    print(f"vox_size = {vox_size}")
+    print(f"mod_type = {mod_type}")
+    print(f"track_type = {track_type}")
+    print(f"mod_func = {mod_func}")
+    print(f"seeds = {seeds}")
+    print(f"reg_style = {reg_style}")
+    print(f"skipeddy = {skipeddy}")
+    print(f"skipreg = {skipreg}")
+    print(f"skull = {skull}")
     fmt = "_adj.csv"
 
     assert all(
@@ -167,12 +155,12 @@ def ndmg_dwi_worker(
 
     startTime = datetime.now()
 
-    namer = name_resource(dwi, t1w, atlas, outdir)
+    namer = gen_utils.NameResource(dwi, t1w, atlas, outdir)
 
     # TODO : do this with shutil instead of an os command
     print("Output directory: " + outdir)
     if not os.path.isdir(outdir):
-        cmd = "mkdir -p {}".format(outdir)
+        cmd = f"mkdir -p {outdir}"
         os.system(cmd)
 
     paths = {
@@ -187,25 +175,23 @@ def ndmg_dwi_worker(
     label_dirs = ["conn"]  # create label level granularity
 
     print("Adding directory tree...")
-    namer.add_dirs_dwi(paths, labels, label_dirs)
+    namer.add_dirs(paths, labels, label_dirs)
 
     # Create derivative output file names
     streams = namer.name_derivative(namer.dirs["output"]["fiber"], "streamlines.trk")
 
-    # Again, connectomes are different
-    if not isinstance(labels, list):
-        labels = [labels]
+    # generate list of connectomes
+    labels = gen_utils.as_list(labels)
     connectomes = [
         namer.name_derivative(
             namer.dirs["output"]["conn"][namer.get_label(lab)],
-            "{}_{}_measure-spatial-ds{}".format(
-                namer.get_mod_source(), namer.get_label(lab), fmt
-            ),
+            f"{namer.get_mod_source()}_{namer.get_label(lab)}_measure-spatial-ds{fmt}",
         )
         for lab in labels
     ]
 
-    print("Connectomes downsampled to given labels: " + ", ".join(connectomes))
+    warm_welcome = welcome_message(connectomes)
+    print(warm_welcome)
 
     if vox_size != "1mm" and vox_size != "2mm":
         raise ValueError("Voxel size not supported. Use 2mm or 1mm")
@@ -213,7 +199,7 @@ def ndmg_dwi_worker(
     # -------- Preprocessing Steps --------------------------------- #
 
     # Perform eddy correction
-    dwi_prep = "{}/eddy_corrected_data.nii.gz".format(namer.dirs["output"]["prep_dwi"])
+    dwi_prep = f'{namer.dirs["output"]["prep_dwi"]}/eddy_corrected_data.nii.gz'
 
     if len(os.listdir(namer.dirs["output"]["prep_dwi"])) != 0:
         if skipeddy is False:
@@ -222,7 +208,7 @@ def ndmg_dwi_worker(
                 shutil.rmtree(namer.dirs["output"]["prep_dwi"])
                 os.mkdir(namer.dirs["output"]["prep_dwi"])
             except Exception as e:
-                print("Exception when trying to delete existing data: {}".format(e))
+                print(f"Exception when trying to delete existing data: {e}")
                 pass
             print("Performing eddy correction...")
             cmd = "eddy_correct " + dwi + " " + dwi_prep + " 0"
@@ -248,15 +234,13 @@ def ndmg_dwi_worker(
         print(st)
 
     # Instantiate bvec/bval naming variations and copy to derivative director
-    bvec_scaled = "{}/bvec_scaled.bvec".format(namer.dirs["output"]["prep_dwi"])
-    fbval = "{}/bval.bval".format(namer.dirs["output"]["prep_dwi"])
-    fbvec = "{}/bvec.bvec".format(namer.dirs["output"]["prep_dwi"])
+    bvec_scaled = f'{namer.dirs["output"]["prep_dwi"]}/bvec_scaled.bvec'
+    fbval = f'{namer.dirs["output"]["prep_dwi"]}/bval.bval'
+    fbvec = f'{namer.dirs["output"]["prep_dwi"]}/bvec.bvec'
     shutil.copyfile(bvecs, fbvec)
     shutil.copyfile(bvals, fbval)
 
     # Correct any corrupted bvecs/bvals
-    from dipy.io import read_bvals_bvecs
-
     bvals, bvecs = read_bvals_bvecs(fbval, fbvec)
     bvecs[np.where(np.any(abs(bvecs) >= 10, axis=1) == True)] = [1, 0, 0]
     bvecs[np.where(bvals == 0)] = 0
@@ -281,23 +265,13 @@ def ndmg_dwi_worker(
 
     # Rescale bvecs
     print("Rescaling b-vectors...")
-    mgp.rescale_bvec(fbvec, bvec_scaled)
+    preproc.rescale_bvec(fbvec, bvec_scaled)
 
     # Check orientation (dwi_prep)
-    start_time = time.time()
-    [dwi_prep, bvecs] = mgu.reorient_dwi(dwi_prep, bvec_scaled, namer)
-    print(
-        "%s%s%s"
-        % ("Reorienting runtime: ", str(np.round(time.time() - start_time, 1)), "s")
-    )
+    [dwi_prep, bvecs] = gen_utils.reorient_dwi(dwi_prep, bvec_scaled, namer)
 
     # Check dimensions
-    start_time = time.time()
-    dwi_prep = mgu.match_target_vox_res(dwi_prep, vox_size, namer, sens="dwi")
-    print(
-        "%s%s%s"
-        % ("Reslicing runtime: ", str(np.round(time.time() - start_time, 1)), "s")
-    )
+    dwi_prep = gen_utils.match_target_vox_res(dwi_prep, vox_size, namer, sens="dwi")
 
     # Build gradient table
     print("fbval: ", fbval)
@@ -305,17 +279,13 @@ def ndmg_dwi_worker(
     print("fbvec: ", fbvec)
     print("dwi_prep: ", dwi_prep)
     print("namer.dirs: ", namer.dirs["output"]["prep_dwi"])
-    [gtab, nodif_B0, nodif_B0_mask] = mgu.make_gtab_and_bmask(
+    [gtab, nodif_B0, nodif_B0_mask] = gen_utils.make_gtab_and_bmask(
         fbval, fbvec, dwi_prep, namer.dirs["output"]["prep_dwi"]
     )
 
     # Get B0 header and affine
     dwi_prep_img = nib.load(dwi_prep)
     hdr = dwi_prep_img.header
-    print(
-        "%s%s%s"
-        % ("Preprocessing runtime: ", str(np.round(time.time() - start_time, 1)), "s")
-    )
 
     # -------- Registration Steps ----------------------------------- #
     if (skipreg is False) and len(os.listdir(namer.dirs["output"]["prep_anat"])) != 0:
@@ -347,37 +317,25 @@ def ndmg_dwi_worker(
 
     # Check orientation (t1w)
     start_time = time.time()
-    t1w = mgu.reorient_img(t1w, namer)
-    t1w = mgu.match_target_vox_res(t1w, vox_size, namer, sens="t1w")
-    print(
-        "%s%s%s"
-        % ("Reorienting runtime: ", str(np.round(time.time() - start_time, 1)), "s")
-    )
+    t1w = gen_utils.reorient_img(t1w, namer)
+    t1w = gen_utils.match_target_vox_res(t1w, vox_size, namer, sens="t1w")
 
     if reg_style == "native" or reg_style == "native_dsn":
 
-        print("Running tractography in native space...")
+        print("Running registration in native space...")
+
         # Instantiate registration
-        reg = mgr.dmri_reg(namer, nodif_B0, nodif_B0_mask, t1w, vox_size, simple=False)
+        reg = register.DmriReg(
+            namer, nodif_B0, nodif_B0_mask, t1w, vox_size, skull, simple=False
+        )
 
         # Perform anatomical segmentation
-        start_time = time.time()
         if (skipreg is True) and os.path.isfile(reg.wm_edge):
             print("Found existing gentissue run!")
-            pass
         else:
             reg.gen_tissue()
-            print(
-                "%s%s%s"
-                % (
-                    "gen_tissue runtime: ",
-                    str(np.round(time.time() - start_time, 1)),
-                    "s",
-                )
-            )
 
         # Align t1w to dwi
-        start_time = time.time()
         if (
             (skipreg is True)
             and os.path.isfile(reg.t1w2dwi)
@@ -385,20 +343,10 @@ def ndmg_dwi_worker(
             and os.path.isfile(reg.t1_aligned_mni)
         ):
             print("Found existing t1w2dwi run!")
-            pass
         else:
             reg.t1w2dwi_align()
-            print(
-                "%s%s%s"
-                % (
-                    "t1w2dwi_align runtime: ",
-                    str(np.round(time.time() - start_time, 1)),
-                    "s",
-                )
-            )
 
         # Align tissue classifiers
-        start_time = time.time()
         if (
             (skipreg is True)
             and os.path.isfile(reg.wm_gm_int_in_dwi)
@@ -406,26 +354,27 @@ def ndmg_dwi_worker(
             and os.path.isfile(reg.corpuscallosum_dwi)
         ):
             print("Found existing tissue2dwi run!")
-            pass
         else:
             reg.tissue2dwi_align()
-            print(
-                "%s%s%s"
-                % (
-                    "tissue2dwi_align runtime: ",
-                    str(np.round(time.time() - start_time, 1)),
-                    "s",
-                )
+
+        # Align atlas to dwi-space and check that the atlas hasn't lost any of the rois
+        if reg_style == "native_dsn":
+            labels_im_file_mni_list = reg_utils.skullstrip_check(
+                reg, labels, namer, vox_size, reg_style
+            )
+        elif reg_style == "native":
+            labels_im_file_dwi_list = reg_utils.skullstrip_check(
+                reg, labels, namer, vox_size, reg_style
             )
 
         # -------- Tensor Fitting and Fiber Tractography ---------------- #
         start_time = time.time()
-        seeds = mgt.build_seed_list(reg.wm_gm_int_in_dwi, np.eye(4), dens=int(seeds))
+        seeds = track.build_seed_list(reg.wm_gm_int_in_dwi, np.eye(4), dens=int(seeds))
         print("Using " + str(len(seeds)) + " seeds...")
 
         # Compute direction model and track fiber streamlines
-        print("Beginning tractography...")
-        trct = mgt.run_track(
+        print("Beginning tractography in native space...")
+        trct = track.RunTrack(
             dwi_prep,
             nodif_B0_mask,
             reg.gm_in_dwi,
@@ -471,91 +420,87 @@ def ndmg_dwi_worker(
 
     if reg_style == "native_dsn":
 
-        fa_path = mgt.tens_mod_fa_est(gtab, dwi_prep, nodif_B0_mask)
+        fa_path = track.tens_mod_fa_est(gtab, dwi_prep, nodif_B0_mask)
 
         # Normalize streamlines
         print("Running DSN...")
-        [streamlines_mni, streams_mni] = mgr.direct_streamline_norm(
+        [streamlines_mni, streams_mni] = register.direct_streamline_norm(
             streams, fa_path, namer
         )
 
         # Save streamlines to disk
         print("Saving DSN-registered streamlines: " + streams_mni)
 
-    elif reg_style == "mni":
-        # Check dimensions
-        start_time = time.time()
-        t1w = mgu.match_target_vox_res(
-            t1w, vox_size, namer, sens="t1w"
-        )  # this is the second time this t1w data has been sent to this function (REMOVE?)
-        print(
-            "%s%s%s"
-            % ("Reslicing runtime: ", str(np.round(time.time() - start_time, 1)), "s")
-        )
-        print("Running tractography in MNI-space...")
-        aligned_dwi = "{}/dwi_mni_aligned.nii.gz".format(
-            namer.dirs["output"]["prep_dwi"]
-        )
+    # TODO : mni space currently broken. Fix EuDX in track.py.
+    # elif reg_style == "mni":
+    #     # Check dimensions
+    #     start_time = time.time()
+    #     t1w = gen_utils.match_target_vox_res(
+    #         t1w, vox_size, namer, sens="t1w"
+    #     )  # this is the second time this t1w data has been sent to this function (REMOVE?)
+    #     print(
+    #         "%s%s%s"
+    #         % ("Reslicing runtime: ", str(np.round(time.time() - start_time, 1)), "s")
+    #     )
+    #     print("Running tractography in MNI-space...")
+    #     aligned_dwi = "{}/dwi_mni_aligned.nii.gz".format(
+    #         namer.dirs["output"]["prep_dwi"]
+    #     )
 
-        # Align DWI volumes to Atlas
-        print("Aligning volumes...")
-        reg = mgr.dmri_reg_old(dwi_prep, gtab, t1w, mask, aligned_dwi, namer, clean)
-        print(
-            "Registering DWI image at {} to atlas; aligned dwi at {}...".format(
-                dwi_prep, aligned_dwi
-            )
-        )  # alex  # TODO: make sure dwi_prep is what is being registered
-        reg.dwi2atlas()
+    #     # Align DWI volumes to Atlas
+    #     print("Aligning volumes...")
+    #     reg = register.DmriRegOld(dwi_prep, gtab, t1w, mask, aligned_dwi, namer, clean=False)
+    #     print(
+    #         "Registering DWI image at {} to atlas; aligned dwi at {}...".format(
+    #             dwi_prep, aligned_dwi
+    #         )
+    #     )
+    #     reg.dwi2atlas()
 
-        # -------- Tensor Fitting and Fiber Tractography ---------------- #
-        print("Beginning tractography...")
-        # Compute tensors and track fiber streamlines
-        print("aligned_dwi: {}".format(aligned_dwi))
-        print("gtab: {}".format(gtab))
-        [tens, streamlines, align_dwi_mask] = mgt.eudx_basic(
-            aligned_dwi, gtab, stop_val=0.2
-        )
-        tensors = "{}/tensors.nii.gz".format(namer.dirs["output"]["tensor"])
-        tensor2fa(
-            tens,
-            tensors,
-            aligned_dwi,
-            namer.dirs["output"]["tensor"],
-            namer.dirs["qa"]["tensor"],
-        )
+    #     # -------- Tensor Fitting and Fiber Tractography ---------------- #
+    #     print("Beginning tractography...")
+    #     # Compute tensors and track fiber streamlines
+    #     print("aligned_dwi: {}".format(aligned_dwi))
+    #     print("gtab: {}".format(gtab))
+    #     [tens, streamlines, align_dwi_mask] = track.eudx_basic(
+    #         aligned_dwi, gtab, stop_val=0.2
+    #     )
+    #     tensors = "{}/tensors.nii.gz".format(namer.dirs["output"]["tensor"])
+    #     tensor2fa(
+    #         tens,
+    #         tensors,
+    #         aligned_dwi,
+    #         namer.dirs["output"]["tensor"],
+    #         namer.dirs["qa"]["tensor"],
+    #     )
 
-        # Save streamlines to disk
-        print("Saving streamlines: " + streams)
-        print("streamlines: {}".format(streamlines))
-        print("streams: {}".format(streams))
-        tractogram_list = [i for i in streamlines]
-        trk_affine = np.eye(4)
-        tractogram = nib.streamlines.Tractogram(
-            tractogram_list, affine_to_rasmm=trk_affine
-        )
-        nib.streamlines.save(tractogram, streams)
-        streamlines = Streamlines(
-            streamlines
-        )  # alex  # to try to make the streamlines variable be the same thing as the native space one
-        print("atlas location: {}".format(atlas))
+    #     # Save streamlines to disk
+    #     print("Saving streamlines: " + streams)
+    #     print("streamlines: {}".format(streamlines))
+    #     print("streams: {}".format(streams))
+    #     tractogram_list = [i for i in streamlines]
+    #     trk_affine = np.eye(4)
+    #     tractogram = nib.streamlines.Tractogram(
+    #         tractogram_list, affine_to_rasmm=trk_affine
+    #     )
+    #     nib.streamlines.save(tractogram, streams)
+    #     streamlines = Streamlines(
+    #         streamlines
+    #     )  # alex  # to try to make the streamlines variable be the same thing as the native space one
+    #     print("atlas location: {}".format(atlas))
 
     # ------- Connectome Estimation --------------------------------- #
     # Generate graphs from streamlines for each parcellation
     for idx, label in enumerate(labels):
-        print("Generating graph for {} parcellation...".format(label))
+        print(f"Generating graph for {label} parcellation...")
         if reg_style == "native_dsn":
             # align atlas to t1w to dwi
-            print("%s%s" % ("Applying native-space alignment to ", labels[idx]))
-            labels_im_file = mgu.reorient_img(labels[idx], namer)
-            labels_im_file = mgu.match_target_vox_res(
-                labels_im_file, vox_size, namer, sens="t1w"
-            )
-            labels_im_file_mni = reg.atlas2t1w2dwi_align(labels_im_file, dsn=True)
-            labels_im = nib.load(labels_im_file_mni)
-            g1 = mgg.graph_tools(
+            print(f"Applying native-space alignment to {labels[idx]}")
+            labels_im = nib.load(labels_im_file_mni_list[idx])
+            g1 = graph.GraphTools(
                 attr=len(np.unique(np.around(labels_im.get_data()).astype("int16")))
                 - 1,
-                rois=labels_im_file_mni,
+                rois=labels_im_file_mni_list[idx],
                 tracks=streamlines_mni,
                 affine=np.eye(4),
                 namer=namer,
@@ -564,69 +509,71 @@ def ndmg_dwi_worker(
             g1.g = g1.make_graph()
         elif reg_style == "native":
             # align atlas to t1w to dwi
-            print("%s%s" % ("Applying native-space alignment to ", labels[idx]))
-            labels_im_file = mgu.reorient_img(labels[idx], namer)
-            labels_im_file = mgu.match_target_vox_res(
-                labels_im_file, vox_size, namer, sens="t1w"
-            )
-            labels_im_file_dwi = reg.atlas2t1w2dwi_align(labels_im_file, dsn=False)
-            labels_im = nib.load(labels_im_file_dwi)
-            g1 = mgg.graph_tools(
+            print(f"Applying native-space alignment to {labels[idx]}")
+            labels_im = nib.load(labels_im_file_dwi_list[idx])
+            g1 = graph.GraphTools(
                 attr=len(np.unique(np.around(labels_im.get_data()).astype("int16")))
                 - 1,
-                rois=labels_im_file_dwi,
+                rois=labels_im_file_dwi_list[idx],
                 tracks=streamlines,
                 affine=np.eye(4),
                 namer=namer,
                 connectome_path=connectomes[idx],
             )
             g1.g = g1.make_graph()
-        elif reg_style == "mni":
-            labels_im_file = mgu.reorient_img(labels[idx], namer)
-            labels_im_file = mgu.match_target_vox_res(
-                labels_im_file, vox_size, namer, sens="t1w"
-            )
-            labels_im = nib.load(labels_im_file)
-            g1 = mgg.graph_tools(
-                attr=len(np.unique(np.around(labels_im.get_data()).astype("int16")))
-                - 1,
-                rois=labels_im_file,
-                tracks=streamlines,
-                affine=np.eye(4),
-                namer=namer,
-                connectome_path=connectomes[idx],
-            )
-            g1.make_graph_old()
+
+        # TODO : mni-space currently broken. Fix in track.
+        # elif reg_style == "mni":
+        #     labels_im_file = gen_utils.reorient_img(labels[idx], namer)
+        #     labels_im_file = gen_utils.match_target_vox_res(
+        #         labels_im_file, vox_size, namer, sens="t1w"
+        #     )
+        #     labels_im = nib.load(labels_im_file)
+        #     g1 = graph.graph_tools(
+        #         attr=len(np.unique(np.around(labels_im.get_data()).astype("int16")))
+        #         - 1,
+        #         rois=labels_im_file,
+        #         tracks=streamlines,
+        #         affine=np.eye(4),
+        #         namer=namer,
+        #         connectome_path=connectomes[idx],
+        #     )
+        #     g1.make_graph_old()
         g1.summary()
         g1.save_graph_png(connectomes[idx])
         g1.save_graph(connectomes[idx])
 
     exe_time = datetime.now() - startTime
 
-    print("Total execution time: {}".format(exe_time))
+    print(f"Total execution time: {exe_time}")
     print("NDMG Complete.")
+    print("~~~~~~~~~~~~~~\n\n")
 
-    # TODO : putting this block of code here for now because it wouldn't run in `ndmg_bids`. Figure out how to put it somewhere else.
+    if reg_style == "native" or reg_style == "native_dsn":
+        print(
+            "NOTE :: you are using native-space registration to generate connectomes.\n Without post-hoc normalization, multiple connectomes generated with NDMG cannot be compared directly."
+        )
+
     if push and buck and remo is not None:
         if not modif:
-            modif = "ndmg_{}".format(ndmg.VERSION.replace(".", "-"))
-        s3_utils.s3_push_data(buck, remo, outdir, modif, creds, debug=debug)
+            modif = "ndmg_{}".format(__version__.replace(".", "-"))
+        cloud_utils.s3_push_data(buck, remo, outdir, modif, creds)
         print("Pushing Complete!")
-        if not debug:
-            print("Listing contents of output directory ...")
-            print(os.listdir(outdir))
-            print("clearing contents of output directory ...")
-            shutil.rmtree(outdir)
-            print(
-                "Clearing complete. Output directory exists: {}".format(
-                    os.path.exists(outdir)
-                )
-            )
-            # # Log docker info in EC2 containers, assuming we're using AWS Batch
-            # f = subprocess.check_output('docker info', shell=True)
-            # info_we_care_about = f[f.find(
-            #     'Data Space Used'):f.find('Metadata Space Used')]
-            # print("docker info on space: {}".format(info_we_care_about))
+
+
+def welcome_message(connectomes):
+
+    line = """\n~~~~~~~~~~~~~~~~\n 
+    Welcome to ndmg!\n 
+    Your connectomes will be located here:
+    \n\n"""
+
+    for connectome in connectomes:
+        line += connectome + "\n"
+
+    line += "~~~~~~~~~~~~~~~~\n"
+
+    return line
 
 
 def main():
@@ -690,13 +637,6 @@ def main():
         default="native",
     )
     parser.add_argument(
-        "-c",
-        "--clean",
-        action="store_true",
-        default=False,
-        help="Whether or not to delete intemediates",
-    )
-    parser.add_argument(
         "-sked",
         "--sked",
         action="store_true",
@@ -713,9 +653,9 @@ def main():
     result = parser.parse_args()
 
     # Create output directory
-    print("Creating output directory: {}".format(result.outdir))
-    print("Creating output temp directory: {}/tmp".format(result.outdir))
-    mgu.utils.execute_cmd("mkdir -p {} {}/tmp".format(result.outdir, result.outdir))
+    print(f"Creating output directory: {result.outdir}")
+    print(f"Creating output temp directory: {result.outdir}/tmp")
+    gen_utils.utils.execute_cmd(f"mkdir -p {result.outdir} {result.outdir}/tmp")
 
     ndmg_dwi_worker(
         result.dwi,
@@ -732,7 +672,6 @@ def main():
         result.mf,
         result.sp,
         result.seeds,
-        result.clean,
         result.skipeddy,
         result.skipreg,
     )

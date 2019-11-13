@@ -55,7 +55,7 @@ def loadGraphs(filenames, modality="dwi", verb=False):
             gstruct[fname] = loadGraph(files, modality=modality)
             vlist |= set(gstruct[fname].nodes())
         except:
-            print("{} is not in proper format. Skipping...".format(fname))
+            print(f'{fname} is not in proper format. Skipping...')
     for k, v in list(gstruct.items()):
         vtx_to_add = list(np.setdiff1d(list(vlist), list(v.nodes())))
         [gstruct[k].add_node(vtx) for vtx in vtx_to_add]
