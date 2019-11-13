@@ -760,16 +760,24 @@ def make_gtab_and_bmask(fbval, fbvec, dwi_file, outdir):
     print("Extracting B0's...")
     cmds = []
     B0s_bbr = []
+
+    #load target image dwi_file
+    dwi_file_loaded = nib.load(dwi_file)
+
+    #Convert to numpy
+    dwi_file_loaded_np = dwi_file_loaded.get_fdata()
+
     for B0 in B0s:
         print(B0)
-        B0_bbr = f"{outdir}/{str(B0)}_B0.nii.gz"
-        cmd = f"fslroi {dwi_file} {B0_bbr} {str(B0)} 1"
-        cmds.append(cmd)
+        B0_bbr = "{}/{}_B0.nii.gz".format(outdir, str(B0))
+        #save the B0th dimension, a 1 dimensional ROI at B0, the voxel corresponding to the B0th
+        B0_dwi = dwi_file_loaded_np[:,:,:,B0]
+        #convert back to nifti image using the affine of original image
+        B0_nifti = nib.Nifti1Image(B0_dwi, dwi_file_loaded.affine)
+        #save in path
+        nib.save(B0_nifti, B0_bbr)
+        #save for mean image later
         B0s_bbr.append(B0_bbr)
-
-    for cmd in cmds:
-        print(cmd)
-        os.system(cmd)
 
     # Get mean B0
     B0s_bbr_imgs = []
