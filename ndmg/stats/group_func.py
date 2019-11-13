@@ -21,7 +21,7 @@ import warnings
 
 warnings.simplefilter("ignore")
 import pickle
-from ndmg.stats.qa_mri import qa_mri as mqa
+from ndmg.stats.qa_mri import QaMRI
 import numpy as np
 import ndmg.utils as mgu
 import os
@@ -34,21 +34,23 @@ import networkx as nx
 from ndmg.stats.plotly_helper import *
 
 
-class group_func(object):
+class GroupFunc:
     def __init__(self, basedir, outdir, atlas=None, dataset=None):
+        """A class for group level quality control
+        
+        Parameters
+        ----------
+        basedir : str
+            the name of the directory containing the ndmg-formatted functional outputs, should have a qa/ folder contained within it. A
+            '/connectomes' will be appended on it when the connectomes are retrived
+        outdir : str
+            path for the directory to place all group level quality control.
+        atlas : str, optional
+            [NOT USED], by default None
+        dataset : str, optional
+            an optional parameter for the name of the dataset to be present in the quality control output filenames, by default None
         """
-        A class for group level quality control.
 
-        **Positional Arguments:**
-            - basedir:
-                - the ndmg-formatted functional outputs.
-                  should have a qa/ folder contained within it.
-            - outdir:
-                - the directory to place all group level quality control.
-            - dataset:
-                - an optional parameter for the name of the dataset
-                  to be present in the quality control output filenames.
-        """
         print(atlas)
         self.ndmgdir = basedir
         self.qadir = f'{self.ndmgdir}/qa'
@@ -101,7 +103,7 @@ class group_func(object):
         qa_objects = []
         for qa_file in self.qa_files:
             # load the qa objects as qa_mri objects
-            qa_objects.append(mqa.load(qa_file))
+            qa_objects.append(QaMRI.load(qa_file))
         return qa_objects
 
     def group_level_analysis(self):

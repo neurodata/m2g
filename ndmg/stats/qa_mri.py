@@ -515,3 +515,4 @@ class QaMRI:
         # plot the voxelwise signal with respect to the atlas to
         # get an idea of how well the fmri is masked
         reg_mri_pngs(voxel_func, atlas_mask, qcdir, loc=0, minthr=10, maxthr=95)
+
