@@ -40,27 +40,53 @@ def input_dir_tree(tmp_path):
             with open(tmpfilepath, "x") as f:
                 f.write("placeholder text")
 
+    #Empty Directory
+    os.makedirs(os.path.join(tmp_path,'sub-002'))
+    # Create non-BIDS files
+    tmpfilepath = os.path.join(anat, f"dummy.txt")
+    with open(tmpfilepath, "x") as f:
+        f.write("placeholder text")
+    tmpfilepath = os.path.join(dwi, f"sub-55.nii.gz")
+    with open(tmpfilepath, "x") as f:
+        f.write("placeholder text")
+
     # Create json file of input data
     create_datadescript(os.path.join(tmp_path))
 
     return tmp_path
 
 
-@pytest.fixture
-def dirsweep(input_dir_tree):
-    sweeper = DirectorySweeper(str(input_dir_tree))
-    return sweeper
-
-def test_DirectorySweeper(dirsweep, input_dir_tree):
-    sweeper=dirsweep
+def test_DirectorySweeper(input_dir_tree):
+    data = {'002547':2, '002548':1, '002449':3}
+    for sub, session in data.items():
+        for ses in range(1,session+1):
+            sweeper=DirectorySweeper(str(input_dir_tree),sub,ses)
+            scans = sweeper.get_dir_info()
+            # Check that all files exist
+            for SubSesFiles in scans:
+                _, _, files = SubSesFiles
+                for type_, file_ in files.items():
+                    assert os.path.exists(file_)
+    
+    #Check with no sub/ses specified
+    sweeper=DirectorySweeper(str(input_dir_tree))
     scans = sweeper.get_dir_info()
-    # Check that all files exist
-    for SubSesFile in scans:
-        subject, session, files = SubSesFile
+    for SubSesFiles in scans:
+        _, _, files = SubSesFiles
         for type_, file_ in files.items():
             assert os.path.exists(file_)
-    # TODO: Check that ancelary file isn't recorded
-    # TODO: Check different sub/ses combos
+    
+    #Abnormal data
+    data = {'002547':3, '002548':-1, '002449':0.2}
+    for sub, session in data.items():
+        sweeper=DirectorySweeper(str(input_dir_tree),sub,session)
+        scans=sweeper.get_dir_info()
+        pairs = sweeper.get_pairs(sub,session)
+        assert pairs==[]
+    
+    # Check that ancelary file isn't recorded
+    assert (f'{str(input_dir_tree)}/sub-002448/ses-3/anat/dummy.txt' in sweeper.get_files('002449','3').values())==False
+    assert (f'{str(input_dir_tree)}/sub-002448/ses-3/dwi/sub-55.nii.gz' in sweeper.get_files('002449','3').values())==False
 
 def is_graph(filename, atlas="", suffix=""):
     """
