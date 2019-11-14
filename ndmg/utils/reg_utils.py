@@ -94,7 +94,7 @@ def align_slices(dwi, corrected_dwi, idx):
     """
 
     cmd = f"eddy_correct {dwi} {corrected_dwi} {idx}"
-    status = gen_utils.execute_cmd(cmd, verb=True)
+    gen_utils.execute_cmd(cmd, verb=True)
 
 
 @check_exists(0)

@@ -470,7 +470,7 @@ def ndmg_dwi_worker(
 
     if push and buck and remo is not None:
         if not modif:
-            modif = "ndmg_{}".format(__version__.replace(".", "-"))
+            modif = "ndmg_{}".format(ndmg.__version__.replace(".", "-"))
         cloud_utils.s3_push_data(buck, remo, outdir, modif, creds)
         print("Pushing Complete!")
 

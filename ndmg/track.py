@@ -27,11 +27,9 @@ from dipy.tracking.stopping_criterion import CmcStoppingCriterion
 from dipy.reconst.dti import fractional_anisotropy, TensorModel, quantize_evecs
 from dipy.reconst.shm import CsaOdfModel
 from dipy.reconst.csdeconv import ConstrainedSphericalDeconvModel, recursive_response
-from dipy.reconst.peak_direction_getter import EuDXDirectionGetter
 
 from dipy.data import get_sphere
 from dipy.direction import peaks_from_model, ProbabilisticDirectionGetter
-from dipy.segment.mask import median_otsu
 from ndmg.utils.gen_utils import timer
 
 

@@ -15,3 +15,5 @@ __all__.extend(["scripts", "stats", "utils"])  # subpackages
 
 # import everything listed in __all__
 from . import *
+
+print("test")
