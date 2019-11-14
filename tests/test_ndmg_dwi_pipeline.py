@@ -51,10 +51,16 @@ def dirsweep(input_dir_tree):
     sweeper = DirectorySweeper(str(input_dir_tree))
     return sweeper
 
-def test_DirectorySweeper(dirsweep):
+def test_DirectorySweeper(dirsweep, input_dir_tree):
     sweeper=dirsweep
     scans = sweeper.get_dir_info()
-    assert os.path.exists(scans[0].files['bvals'])
+    # Check that all files exist
+    for SubSesFile in scans:
+        subject, session, files = SubSesFile
+        for type_, file_ in files.items():
+            assert os.path.exists(file_)
+    # TODO: Check that ancelary file isn't recorded
+    # TODO: Check different sub/ses combos
 
 def is_graph(filename, atlas="", suffix=""):
     """
