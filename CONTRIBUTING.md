@@ -3,26 +3,48 @@
 This document is a working draft.  Edits and comments welcome.
 
 ## Driving Principles
+bids, pythonic
 
 1. Any code from NeuroData (eg, written based on work here, and therefore funded by our funders, rather than for fun), live in a neurodata controlled org, rather than a personal repo (much like if you worked at google or a startup).
 2. Everything is always a PR, never a direct commit to master
 3. People using the code should always use master, if you have some branch that you think is better than master for some reason, then it is your responsibility to make a PR to master, rather than encouraging other people to use some untested branch. that is, unless you want them to be testing for you, which is a different thing.
 
-## Branch System
-
+## Branches
+### deploy: 
+The most stable branch, it is updated approximately once per month and only with sugnifican testing and changes that pass the Improvement Criteria
+### staging: 
+The most up-to-date branch, it is where feature branches are added to and is what gets merged into deploy. This version of the pipeline has not been as thoroughly tested as deploy, meaning there may be issues/less accurate results.
 
 ## Contributing through GitHub
+We appreciate all contributions to ndmg,
+but those accepted fastest will follow a workflow similar to the following:
 
+1. **Comment on an existing issue or open a new issue referencing your addition.**<br />
+  This allows other members of the ndmg development team to confirm that you aren't
+  overlapping with work that's currently underway and that everyone is on the same page
+  with the goal of the work you're going to carry out.
+  
+2. **Fork the ndmg repository to your profile.**
 
-## [Feature branches](https://www.atlassian.com/git/tutorials/comparing-workflows/feature-branch-workflow)
-* Create a branch for each feature addition
-* Each PR should ideally encapsulate a single feature.  This allows reviews to be well contained
-* Don’t let branches get stale (merge in changes from master frequently)
-* Squash and merge each PR
-* Keep the commit history clean and concise. Commit messages should be in [imperative mood](https://chris.beams.io/posts/git-commit/).
+3. **Make the changes you've discussed, following the ndmg Code Format**
+  Keep the changes focused: Changing one feature or addressing one bug per pull request.
+  Keep the commit history clean and concise. Commit messages should be in [imperative mood](https://chris.beams.io/posts/git-commit/).
+  It is highly recommended that you test your changes thoroughly before submitting a pull request.
+
+4. **Submit a Pull Request to staging.**
+   A member of the development team will review your changes to confirm
+   that they can be merged into the main code base
+
+5. **Have your PR reviewed by the development team, and update your changes accordingly in your branch.**
+   The reviewers will take special care in assisting you to address their comments, as well as dealing with conflicts
+   and other tricky situations that could emerge from distributed development. While your PR may be accepted to staging, it will have to meet the improvement criteria before being added to deploy.
 
 ## Improvement Criteria
-
+In order for a change to be made to the ndmg deploy branch, it must meet the following criteria:
+1. Result in a discriminability value equal to/greater than the current deploy metrics:
+   * BNU1=
+2. Maintain or reduce the amount of non-python3 dependencies of the pipeline
+3. 
 
 ## Code formatting
 * [Black](https://github.com/ambv/black) for Python
@@ -38,7 +60,6 @@ This document is a working draft.  Edits and comments welcome.
 
 ## Issues
 * An Issue should consist of a manageable task with a concrete DOD; larger tasks should be split into multiple issues, with milestones, epics, and or tags.
-* Create an issue template.  Can use [these](https://github.com/neurodata/rerf/tree/staging/.github/ISSUE_TEMPLATE) as a guide.
 
 ## Testing
 * Python: [Pytest](https://doc.pytest.org/)
