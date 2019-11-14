@@ -239,7 +239,7 @@ def main():
         default=20,
     )
     parser.add_argument(
-        "--modif",
+        "--push_location",
         action="store",
         help="Name of folder on s3 to push to, if the folder does not exist, it will be created."
         "If empty, push to a folder with ndmg's version number.",
@@ -281,7 +281,7 @@ def main():
         # "buck": result.bucket,
         # "remo": result.remote_path,
         "push": result.push_data,
-        "modif": result.modif,
+        "modif": result.push_location,
         "skull": result.skull,
     }
 

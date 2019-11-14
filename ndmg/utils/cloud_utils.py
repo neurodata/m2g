@@ -236,4 +236,3 @@ def s3_push_data(bucket, remote, outDir, modifier, creds=True):
                     f"{remote}/{modifier}{os.path.join(spath,file_)}",
                     ExtraArgs={"ACL": "public-read"},
                 )
-
