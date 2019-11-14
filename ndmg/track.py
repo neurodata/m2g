@@ -214,11 +214,10 @@ class RunTrack:
     @staticmethod
     def make_hdr(streamlines):
         trk_hdr = nib.streamlines.trk.TrkFile.create_empty_header()
-        trk_affine = np.eye(4)
         trk_hdr["hdr_size"] = 1000
         trk_hdr["dimensions"] = hdr["dim"][1:4].astype("float32")
         trk_hdr["voxel_sizes"] = hdr["pixdim"][1:4]
-        trk_hdr["voxel_to_rasmm"] = trk_affine
+        trk_hdr["voxel_to_rasmm"] = np.eye(4)
         trk_hdr["voxel_order"] = "RAS"
         trk_hdr["pad2"] = "RAS"
         trk_hdr["image_orientation_patient"] = np.array(

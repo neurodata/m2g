@@ -14,6 +14,7 @@ import shutil
 import time
 from datetime import datetime
 import os
+from pathlib import Path
 
 # package imports
 import nibabel as nib
@@ -44,12 +45,12 @@ def ndmg_dwi_worker(
     mask,
     labels,
     outdir,
-    vox_size,
-    mod_type,
-    track_type,
-    mod_func,
-    seeds,
-    reg_style,
+    vox_size="2mm",
+    mod_type="det",
+    track_type="local",
+    mod_func="csa",
+    seeds=20,
+    reg_style="native",
     skipeddy=False,
     skipreg=False,
     buck=None,
@@ -134,35 +135,12 @@ def ndmg_dwi_worker(
     print(f"skull = {skull}")
     fmt = "_adj.csv"
 
-    assert all(
-        [
-            dwi,
-            bvals,
-            bvecs,
-            t1w,
-            atlas,
-            mask,
-            labels,
-            outdir,
-            vox_size,
-            mod_type,
-            track_type,
-            mod_func,
-            seeds,
-            reg_style,
-        ]
-    ), "Missing a default argument."
 
+    # initial setup
     startTime = datetime.now()
-
     namer = gen_utils.NameResource(dwi, t1w, atlas, outdir)
-
-    # TODO : do this with shutil instead of an os command
     print("Output directory: " + outdir)
-    if not os.path.isdir(outdir):
-        cmd = f"mkdir -p {outdir}"
-        os.system(cmd)
-
+    Path(outdir).mkdir(parents=True, exist_ok=True
     paths = {
         "prep_dwi": "dwi/preproc",
         "prep_anat": "anat/preproc",
@@ -172,28 +150,25 @@ def ndmg_dwi_worker(
         "conn": "dwi/roi-connectomes",
     }
 
-    label_dirs = ["conn"]  # create label level granularity
-
     print("Adding directory tree...")
-    namer.add_dirs(paths, labels, label_dirs)
+    namer.add_dirs(paths, labels, ["conn"])
 
     # Create derivative output file names
     streams = namer.name_derivative(namer.dirs["output"]["fiber"], "streamlines.trk")
 
-    # generate list of connectomes
+    # generate list of connectome file locations
     labels = gen_utils.as_list(labels)
-    connectomes = [
-        namer.name_derivative(
-            namer.dirs["output"]["conn"][namer.get_label(lab)],
-            f"{namer.get_mod_source()}_{namer.get_label(lab)}_measure-spatial-ds{fmt}",
-        )
-        for lab in labels
-    ]
+    connectomes = []
+    for label in labels:
+        filename = namer.get_label(label)
+        folder = namer.dirs["output"]["conn"][filename]
+        derivative = f"{namer.__subi__}_{filename}_measure-spatial-ds{fmt}"
+        connectomes.append(namer.name_derivative(folder, derivative))
 
     warm_welcome = welcome_message(connectomes)
     print(warm_welcome)
 
-    if vox_size != "1mm" and vox_size != "2mm":
+    if vox_size not in ["1mm", "2mm"]:
         raise ValueError("Voxel size not supported. Use 2mm or 1mm")
 
     # -------- Preprocessing Steps --------------------------------- #
@@ -387,8 +362,10 @@ def ndmg_dwi_worker(
         np.eye(4),
     )
     streamlines = trct.run()
-    trk_hdr = trct.make_hdr(streamlines)
-    tractogram = nib.streamlines.Tractogram(streamlines, affine_to_rasmm=trk_affine)
+    trk_hdr = trct.make_hdr(streamlines, hdr)
+    tractogram = nib.streamlines.Tractogram(
+        streamlines, affine_to_rasmm=trk_hdr["voxel_to_rasmm"]
+    )
     trkfile = nib.streamlines.trk.TrkFile(tractogram, header=trk_hdr)
     nib.streamlines.save(trkfile, streams)
     print("Streamlines complete")
