@@ -387,38 +387,20 @@ def ndmg_dwi_worker(
         np.eye(4),
     )
     streamlines = trct.run()
-    streamlines = Streamlines([sl for sl in streamlines if len(sl) > 60])
-    print("Streamlines complete")
-
-    trk_affine = np.eye(4)
-    trk_hdr = nib.streamlines.trk.TrkFile.create_empty_header()
-    trk_hdr["hdr_size"] = 1000
-    trk_hdr["dimensions"] = hdr["dim"][1:4].astype("float32")
-    trk_hdr["voxel_sizes"] = hdr["pixdim"][1:4]
-    trk_hdr["voxel_to_rasmm"] = trk_affine
-    trk_hdr["voxel_order"] = "RAS"
-    trk_hdr["pad2"] = "RAS"
-    trk_hdr["image_orientation_patient"] = np.array(
-        [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-    ).astype("float32")
-    trk_hdr["endianness"] = "<"
-    trk_hdr["_offset_data"] = 1000
-    trk_hdr["nb_streamlines"] = streamlines.total_nb_rows
+    trk_hdr = trct.make_hdr(streamlines)
     tractogram = nib.streamlines.Tractogram(streamlines, affine_to_rasmm=trk_affine)
     trkfile = nib.streamlines.trk.TrkFile(tractogram, header=trk_hdr)
     nib.streamlines.save(trkfile, streams)
+    print("Streamlines complete")
     print(f"Tractography runtime: {np.round(time.time() - start_time, 1)}")
 
     if reg_style == "native_dsn":
-
         fa_path = track.tens_mod_fa_est(gtab, dwi_prep, nodif_B0_mask)
-
         # Normalize streamlines
         print("Running DSN...")
         [streamlines_mni, streams_mni] = register.direct_streamline_norm(
             streams, fa_path, namer
         )
-
         # Save streamlines to disk
         print("Saving DSN-registered streamlines: " + streams_mni)
 
@@ -426,35 +408,26 @@ def ndmg_dwi_worker(
     # Generate graphs from streamlines for each parcellation
     for idx, label in enumerate(labels):
         print(f"Generating graph for {label} parcellation...")
-        if reg_style == "native_dsn":
-            # align atlas to t1w to dwi
-            print(f"Applying native-space alignment to {labels[idx]}")
-            labels_im = nib.load(labels_im_file_mni_list[idx])
-            g1 = graph.GraphTools(
-                attr=len(np.unique(np.around(labels_im.get_data()).astype("int16")))
-                - 1,
-                rois=labels_im_file_mni_list[idx],
-                tracks=streamlines_mni,
-                affine=np.eye(4),
-                namer=namer,
-                connectome_path=connectomes[idx],
-            )
-            g1.g = g1.make_graph()
-        elif reg_style == "native":
-            # align atlas to t1w to dwi
-            print(f"Applying native-space alignment to {labels[idx]}")
+        print(f"Applying native-space alignment to {labels[idx]}")
+        if reg_style == "native":
             labels_im = nib.load(labels_im_file_dwi_list[idx])
-            g1 = graph.GraphTools(
-                attr=len(np.unique(np.around(labels_im.get_data()).astype("int16")))
-                - 1,
-                rois=labels_im_file_dwi_list[idx],
-                tracks=streamlines,
-                affine=np.eye(4),
-                namer=namer,
-                connectome_path=connectomes[idx],
-            )
-            g1.g = g1.make_graph()
+            rois = labels_im_file_dwi_list[idx]
+            tracks = streamlines
+        elif reg_style == "native_dsn":
+            labels_im = nib.load(labels_im_file_mni_list[idx])
+            rois = labels_im_file_mni_list[idx]
+            tracks = streamlines_mni
 
+        attr = len(np.unique(np.around(labels_im.get_data()).astype("int16"))) - 1
+        g1 = graph.GraphTools(
+            attr=attr,
+            rois=rois,
+            tracks=streamlines_mni,
+            affine=np.eye(4),
+            namer=namer,
+            connectome_path=connectomes[idx],
+        )
+        g1.g = g1.make_graph()
         g1.summary()
         g1.save_graph_png(connectomes[idx])
         g1.save_graph(connectomes[idx])
