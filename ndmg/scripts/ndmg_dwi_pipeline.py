@@ -244,7 +244,6 @@ def ndmg_dwi_worker(
     bvals, bvecs = read_bvals_bvecs(fbval, fbvec)
     bvecs[np.where(np.any(abs(bvecs) >= 10, axis=1) == True)] = [1, 0, 0]
     bvecs[np.where(bvals == 0)] = 0
-    # TODO : clean the heck out of the below lines
     if (
         len(
             bvecs[
@@ -408,10 +407,7 @@ def ndmg_dwi_worker(
     tractogram = nib.streamlines.Tractogram(streamlines, affine_to_rasmm=trk_affine)
     trkfile = nib.streamlines.trk.TrkFile(tractogram, header=trk_hdr)
     nib.streamlines.save(trkfile, streams)
-    print(
-        "%s%s%s"
-        % ("Tractography runtime: ", str(np.round(time.time() - start_time, 1)), "s")
-    )
+    print(f"Tractography runtime: {np.round(time.time() - start_time, 1)}")
 
     if reg_style == "native_dsn":
 
@@ -467,10 +463,10 @@ def ndmg_dwi_worker(
 
     print(f"Total execution time: {exe_time}")
     print("NDMG Complete.")
+    print("~~~~~~~~~~~~~~\n\n")
     print(
         "NOTE :: you are using native-space registration to generate connectomes.\n Without post-hoc normalization, multiple connectomes generated with NDMG cannot be compared directly."
     )
-    print("~~~~~~~~~~~~~~\n\n")
 
     if push and buck and remo is not None:
         if not modif:
