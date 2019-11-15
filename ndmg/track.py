@@ -212,7 +212,7 @@ class RunTrack:
         return tracks
 
     @staticmethod
-    def make_hdr(streamlines):
+    def make_hdr(streamlines, hdr):
         trk_hdr = nib.streamlines.trk.TrkFile.create_empty_header()
         trk_hdr["hdr_size"] = 1000
         trk_hdr["dimensions"] = hdr["dim"][1:4].astype("float32")

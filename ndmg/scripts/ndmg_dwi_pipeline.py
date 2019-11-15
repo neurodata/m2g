@@ -116,31 +116,19 @@ def ndmg_dwi_worker(
     ValueError
         Raised if bval/bvecs are potentially corrupted
     """
-    print(f"dwi = {dwi}")
-    print(f"bvals = {bvals}")
-    print(f"bvecs = {bvecs}")
-    print(f"t1w = {t1w}")
-    print(f"atlas = {atlas}")
-    print(f"mask = {mask}")
-    print(f"labels = {labels}")
-    print(f"outdir = {outdir}")
-    print(f"vox_size = {vox_size}")
-    print(f"mod_type = {mod_type}")
-    print(f"track_type = {track_type}")
-    print(f"mod_func = {mod_func}")
-    print(f"seeds = {seeds}")
-    print(f"reg_style = {reg_style}")
-    print(f"skipeddy = {skipeddy}")
-    print(f"skipreg = {skipreg}")
-    print(f"skull = {skull}")
-    fmt = "_adj.csv"
 
+    # print starting arguments for clarity in log
+    args = locals().copy()
+    for arg, value in args.items():
+        print(f"{arg} = {value}")
+
+    fmt = "_adj.csv"
 
     # initial setup
     startTime = datetime.now()
     namer = gen_utils.NameResource(dwi, t1w, atlas, outdir)
     print("Output directory: " + outdir)
-    Path(outdir).mkdir(parents=True, exist_ok=True
+    Path(outdir).mkdir(parents=True, exist_ok=True)
     paths = {
         "prep_dwi": "dwi/preproc",
         "prep_anat": "anat/preproc",
