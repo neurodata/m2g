@@ -20,6 +20,7 @@ from argparse import ArgumentParser
 import traceback
 
 # ndmg imports
+from ndmg import __version__
 from ndmg.utils import cloud_utils
 from ndmg.utils.gen_utils import DirectorySweeper
 from ndmg.utils.gen_utils import check_dependencies
@@ -263,6 +264,7 @@ def main():
     subjects = result.participant_label
     sessions = result.session_label
     parcellation_name = result.parcellation
+    push = result.push_data
 
     # arguments to be passed in every ndmg run
     # TODO : change value naming convention to match key naming convention
@@ -275,10 +277,6 @@ def main():
         "reg_style": result.space,
         "skipeddy": result.sked,
         "skipreg": result.skreg,
-        # "buck": result.bucket,
-        # "remo": result.remote_path,
-        "push": result.push_data,
-        "modif": result.push_location,
         "skull": result.skull,
     }
 
@@ -286,6 +284,7 @@ def main():
     # grab s3 stuff
     s3 = inDir.startswith("s3://")
     if s3:
+        push_location = result.push_location
         buck, remo = cloud_utils.parse_path(inDir)
         home = os.path.expanduser("~")
         inDir = as_directory(home + "/.ndmg/input", remove=True)
@@ -360,6 +359,12 @@ def main():
             kwargs["outdir"] = f"{outDir}/sub-{subject}/ses-{session}"
             files.update(kwargs)
             ndmg_dwi_worker(**files)
+            if s3 and push:
+                if not push_location:
+                    push_location = f"ndmg_{__version__.replace(".", "-"}"
+                print(f"Pushing to s3 at {push_location}.")
+                cloud_utils.s3_push_data(buck, remo, outDir, push_location, creds)
+
         except Exception as error:
             failure = failure_message(subject, session, error)
             print(failure)
