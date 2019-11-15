@@ -293,6 +293,8 @@ class DirectorySweeper:
             subject = entity.entities["subject"]
             session = entity.entities["session"]
             pairs.append((subject, session))
+        if len(pairs)==0:
+            raise ValueError("No pairs found for this subject/session")
         return pairs
 
     def get_files(self, subject, session):

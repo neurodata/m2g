@@ -44,14 +44,14 @@ def input_dir_tree(tmp_path):
     # Create json file of input data
     create_datadescript(os.path.join(tmp_path))
 
-    return tmp_path
+    return tmp_path, data
 
 
 def test_DirectorySweeper(input_dir_tree):
-    data = {"002547": [1,2], "002548": [1], "002449": [1,2,3]}
+    input_dir, data = input_dir_tree
     for sub, session in data.items():
         for ses in session:
-            sweeper = DirectorySweeper(str(input_dir_tree), sub, ses)
+            sweeper = DirectorySweeper(str(input_dir), sub, ses)
             scans = sweeper.get_dir_info()
             # Check that all files exist
             for SubSesFiles in scans:
@@ -60,7 +60,7 @@ def test_DirectorySweeper(input_dir_tree):
                     assert os.path.exists(file_)
 
     # Check with no sub/ses specified
-    sweeper = DirectorySweeper(str(input_dir_tree))
+    sweeper = DirectorySweeper(str(input_dir))
     scans = sweeper.get_dir_info()
     for SubSesFiles in scans:
         _, _, files = SubSesFiles
@@ -68,12 +68,12 @@ def test_DirectorySweeper(input_dir_tree):
             assert os.path.exists(file_)
 
     # Abnormal data
-    data = {"002547": 3, "002548": -1, "002449": 0.2}
-    for sub, session in data.items():
-        sweeper = DirectorySweeper(str(input_dir_tree), sub, session)
+    bad_data = {"002547": 3, "002548": -1, "002449": 0.2}
+    for sub, session in bad_data.items():
+        sweeper = DirectorySweeper(str(input_dir), sub, session)
         scans = sweeper.get_dir_info()
-        pairs = sweeper.get_pairs(sub, session)
-        assert pairs == []
+        with pytest.raises(ValueError):
+            pairs = sweeper.get_pairs(sub, session)
 
     # Check that ancelary file isn't recorded
     assert (
