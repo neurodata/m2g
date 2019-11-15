@@ -180,8 +180,6 @@ def ndmg_dwi_worker(
             sts = Popen(cmd, shell=True).wait()
             print(sts)
             ts = time.time()
-            st = datetime.fromtimestamp(ts).strftime("%Y-%m-%d %H:%M:%S")
-            print(st)
         else:
             if not os.path.isfile(dwi_prep):
                 raise ValueError(
@@ -194,10 +192,8 @@ def ndmg_dwi_worker(
         sts = Popen(cmd, shell=True).wait()
         print(sts)
         ts = time.time()
-        st = datetime.fromtimestamp(ts).strftime("%Y-%m-%d %H:%M:%S")
-        print(st)
 
-    # Instantiate bvec/bval naming variations and copy to derivative director
+    # Instantiate bvec/bval naming variations and copy to derivative directory
     bvec_scaled = f'{namer.dirs["output"]["prep_dwi"]}/bvec_scaled.bvec'
     fbval = f'{namer.dirs["output"]["prep_dwi"]}/bval.bval'
     fbvec = f'{namer.dirs["output"]["prep_dwi"]}/bvec.bvec'
@@ -208,18 +204,8 @@ def ndmg_dwi_worker(
     bvals, bvecs = read_bvals_bvecs(fbval, fbvec)
     bvecs[np.where(np.any(abs(bvecs) >= 10, axis=1) == True)] = [1, 0, 0]
     bvecs[np.where(bvals == 0)] = 0
-    if (
-        len(
-            bvecs[
-                np.where(
-                    np.logical_and(
-                        bvals > 50, np.all(abs(bvecs) == np.array([0, 0, 0]), axis=1)
-                    )
-                )
-            ]
-        )
-        > 0
-    ):
+    bvecs_0_loc = np.all(abs(bvecs) == np.array([0, 0, 0]), axis=1)
+    if len(bvecs[np.where(np.logical_and(bvals > 50, bvecs_0_loc))]) > 0:
         raise ValueError(
             "WARNING: Encountered potentially corrupted bval/bvecs. Check to ensure volumes with a "
             "diffusion weighting are not being treated as B0's along the bvecs"
@@ -232,7 +218,7 @@ def ndmg_dwi_worker(
     preproc.rescale_bvec(fbvec, bvec_scaled)
 
     # Check orientation (dwi_prep)
-    [dwi_prep, bvecs] = gen_utils.reorient_dwi(dwi_prep, bvec_scaled, namer)
+    dwi_prep, bvecs = gen_utils.reorient_dwi(dwi_prep, bvec_scaled, namer)
 
     # Check dimensions
     dwi_prep = gen_utils.match_target_vox_res(dwi_prep, vox_size, namer, sens="dwi")
@@ -243,7 +229,7 @@ def ndmg_dwi_worker(
     print("fbvec: ", fbvec)
     print("dwi_prep: ", dwi_prep)
     print("namer.dirs: ", namer.dirs["output"]["prep_dwi"])
-    [gtab, nodif_B0, nodif_B0_mask] = gen_utils.make_gtab_and_bmask(
+    gtab, nodif_B0, nodif_B0_mask = gen_utils.make_gtab_and_bmask(
         fbval, fbvec, dwi_prep, namer.dirs["output"]["prep_dwi"]
     )
 
@@ -320,15 +306,9 @@ def ndmg_dwi_worker(
         reg.tissue2dwi_align()
 
     # Align atlas to dwi-space and check that the atlas hasn't lost any of the rois
-    if reg_style == "native_dsn":
-        labels_im_file_mni_list = reg_utils.skullstrip_check(
-            reg, labels, namer, vox_size, reg_style
-        )
-    elif reg_style == "native":
-        labels_im_file_dwi_list = reg_utils.skullstrip_check(
-            reg, labels, namer, vox_size, reg_style
-        )
-
+    labels_im_file_mni_list = reg_utils.skullstrip_check(
+        reg, labels, namer, vox_size, reg_style
+    )
     # -------- Tensor Fitting and Fiber Tractography ---------------- #
     start_time = time.time()
     seeds = track.build_seed_list(reg.wm_gm_int_in_dwi, np.eye(4), dens=int(seeds))
@@ -376,14 +356,11 @@ def ndmg_dwi_worker(
         print(f"Generating graph for {label} parcellation...")
         print(f"Applying native-space alignment to {labels[idx]}")
         if reg_style == "native":
-            labels_im = nib.load(labels_im_file_dwi_list[idx])
-            rois = labels_im_file_dwi_list[idx]
             tracks = streamlines
         elif reg_style == "native_dsn":
-            labels_im = nib.load(labels_im_file_mni_list[idx])
-            rois = labels_im_file_mni_list[idx]
             tracks = streamlines_mni
-
+        rois = labels_im_file_mni_list[idx]
+        labels_im = nib.load(labels_im_file_mni_list[idx])
         attr = len(np.unique(np.around(labels_im.get_data()).astype("int16"))) - 1
         g1 = graph.GraphTools(
             attr=attr,
