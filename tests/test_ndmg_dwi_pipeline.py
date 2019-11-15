@@ -12,10 +12,6 @@ import tempfile
 KEYWORDS = ["sub", "ses"]
 
 
-
-#/input/sub-{sub}/ses-{ses}/
-#                           anat/sub-{sub}_ses-{ses}_T1w.nii.gz
-#                           dwi/sub-{sub}_ses-{ses}_dwi.(bval,bvec,nii.gz)
 @pytest.fixture
 def input_dir_tree(tmp_path):
     data = {'002547':2, '002548':1, '002449':3}
