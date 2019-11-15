@@ -117,6 +117,7 @@ def ndmg_dwi_worker(
         Raised if bval/bvecs are potentially corrupted
     """
 
+    # -------- Initial Setup ------------------ #
     # print starting arguments for clarity in log
     args = locals().copy()
     for arg, value in args.items():
@@ -124,7 +125,7 @@ def ndmg_dwi_worker(
 
     fmt = "_adj.csv"
 
-    # initial setup
+    # make output directory
     startTime = datetime.now()
     namer = gen_utils.NameResource(dwi, t1w, atlas, outdir)
     print("Output directory: " + outdir)
@@ -387,7 +388,7 @@ def ndmg_dwi_worker(
         g1 = graph.GraphTools(
             attr=attr,
             rois=rois,
-            tracks=streamlines_mni,
+            tracks=tracks,
             affine=np.eye(4),
             namer=namer,
             connectome_path=connectomes[idx],
