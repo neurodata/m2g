@@ -23,6 +23,7 @@ from dipy.tracking import utils
 # ndmg imports
 from ndmg.utils import gen_utils
 from ndmg.utils import reg_utils
+from ndmg.stats import qa_registration
 
 @gen_utils.timer
 def direct_streamline_norm(streams, fa_path, namer):
@@ -321,6 +322,7 @@ class DmriReg:
                 out=self.t1_aligned_mni,
                 sch=None,
             )
+        qa_registration.qa_registration(self.t1_aligned_mni, self.input_mni, self.namer.dirs['qa']['reg'])
 
         # Align T1w-->DWI
         reg_utils.align(
