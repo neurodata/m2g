@@ -10,8 +10,6 @@ For a tutorial on setting this up, see here : https://github.com/neurodata/ndmg/
 
 # standard library imports
 import subprocess
-import ast
-import csv
 import re
 import os
 import sys
@@ -19,13 +17,7 @@ import json
 from copy import deepcopy
 from collections import OrderedDict
 from argparse import ArgumentParser
-import warnings
-import shutil
-import time
 from pathlib import Path
-
-# package imports
-import boto3
 
 # ndmg imports
 import ndmg
@@ -100,7 +92,7 @@ def batch_submit(
     )
 
     print("Submitting jobs to the queue...")
-    ids = submit_jobs(jobs, jobdir)
+    submit_jobs(jobs, jobdir)
 
 
 def crawl_bucket(bucket, path, jobdir):
@@ -320,7 +312,6 @@ def submit_jobs(jobs, jobdir):
     """
 
     batch = s3_client(service="batch")
-    cmd_template = "--cli-input-json file://{}"
 
     for job in jobs:
         with open(job, "r") as f:
@@ -345,9 +336,6 @@ def kill_jobs(jobdir, reason='"Killing job"'):
     reason : str, optional
         Task you want to perform on the jobs, by default '"Killing job"'
     """
-
-    cmd_template1 = "aws batch cancel-job --job-id {} --reason {}"
-    cmd_template2 = "aws batch terminate-job --job-id {} --reason {}"
 
     print(f"Cancelling/Terminating jobs in {jobdir}/ids/...")
     jobs = os.listdir(jobdir + "/ids/")
@@ -455,11 +443,7 @@ def main():
             "Requires either path to bucket and data, or the status flag"
             " and job IDs to query.\n  Try:\n    ndmg_cloud --help"
         )
-
-    if state == "status":
-        print("Checking job status...")
-        get_status(jobdir)
-    elif state == "kill":
+    if state == "kill":
         print("Killing jobs...")
         kill_jobs(jobdir)
     elif state == "participant":

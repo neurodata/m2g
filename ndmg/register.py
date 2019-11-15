@@ -10,6 +10,7 @@ Used for the majority of the registration described here: https://neurodata.io/t
 
 # standard library imports
 import os
+from argparse import ArgumentParser
 
 # package imports
 import nibabel as nib
@@ -56,13 +57,10 @@ def direct_streamline_norm(streams, fa_path, namer):
 
     template_path = atlas_dir + "/atlases/reference_brains/FSL_HCP1065_FA_2mm.nii.gz"
 
-    streams_warp_png = namer.dirs["tmp"]["base"] + "/warp_qc.png"
-
     # Run SyN and normalize streamlines
     fa_img = nib.load(fa_path)
     vox_size = fa_img.get_header().get_zooms()[0]
     template_img = nib.load(template_path)
-    template_data = template_img.get_data()
 
     # SyN FA->Template
     [mapping, affine_map] = reg_utils.wm_syn(
@@ -102,10 +100,6 @@ def direct_streamline_norm(streams, fa_path, namer):
     trkfile = nib.streamlines.trk.TrkFile(tractogram, header=trk_hdr)
     streams_mni = streams.split(".trk")[0] + "_dsn.trk"
     nib.streamlines.save(trkfile, streams_mni)
-
-    # DSN QC plotting
-    # gen_utils.show_template_bundles(mni_streamlines, template_path, streams_warp_png)
-
     return mni_streamlines, streams_mni
 
 

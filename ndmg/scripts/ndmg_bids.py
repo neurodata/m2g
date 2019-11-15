@@ -17,9 +17,6 @@ import sys
 import glob
 import os
 from argparse import ArgumentParser
-import subprocess
-import warnings
-import logging
 import traceback
 
 # ndmg imports

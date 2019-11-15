@@ -17,7 +17,6 @@ import subprocess
 import time
 import functools
 import json
-from itertools import product
 from pathlib import Path
 from collections import namedtuple
 
@@ -548,7 +547,7 @@ def check_dependencies():
     print(f"Python version : {sys.version}")
     print(f"DiPy version : {dipy.__version__}")
     if sys.version_info[0] < 3:
-        warnings.warn(
+        print(
             "WARNING : Using python 2. This Python version is no longer maintained. Use at your own risk."
         )
 
@@ -1039,7 +1038,7 @@ def parcel_overlap(parcellation1, parcellation2, outpath):
                 pover = np.logical_and(p1seq, p2_dat == p2reg).sum() / float(N)
                 overlapdat[p1idx, p2idx] = pover
 
-    outf = os.path.join(outpath, f"{pln}_{p2n}.csv")
+    outf = os.path.join(outpath, f"{p1n}_{p2n}.csv")
     with open(outf, "w") as f:
         p2str = [f"{x}" for x in p2regs]
         f.write("p1reg," + ",".join(p2str) + "\n")
