@@ -17,14 +17,14 @@ import sys
 import glob
 import os
 from argparse import ArgumentParser
-import subprocess
-import warnings
+import traceback
 
 # ndmg imports
 from ndmg.utils import cloud_utils
 from ndmg.utils.gen_utils import DirectorySweeper
 from ndmg.utils.gen_utils import check_dependencies
 from ndmg.utils.gen_utils import is_bids
+from ndmg.utils.gen_utils import as_directory
 from ndmg.scripts.ndmg_dwi_pipeline import ndmg_dwi_worker
 
 
@@ -64,7 +64,7 @@ def get_atlas(atlas_dir, vox_size):
         # TODO : re-implement this pythonically with shutil and requests in python3.
         print("atlas directory not found. Cloning ...")
         clone = "https://github.com/neurodata/neuroparc.git"
-        os.system(f'git lfs clone {clone} {atlas_dir}')
+        os.system(f"git lfs clone {clone} {atlas_dir}")
 
     atlas = os.path.join(
         atlas_dir, "atlases/reference_brains/MNI152NLin6_res-" + dims + "_T1w.nii.gz"
@@ -100,95 +100,92 @@ def get_atlas_dir():
     return os.path.expanduser("~") + "/.ndmg/ndmg_atlases"  # local
 
 
-def failure_message(subject, session, error):
-    line = f"Subject {subject}, session {session} failed."
-    line += f"Errror message: {error}"
-    line += f"Trying next scan.\n"
+def failure_message(subject, session, tb):
+    """
+    Return a failure message.
+    Called if a ndmg run fails.
+
+    Parameters
+    ----------
+    subject : str
+        Subject number.
+    session : str
+        Session number.
+    tb : Error
+        Error object containing the traceback text.
+
+    Returns
+    -------
+    str
+        Traceback with subject/session info
+        to print to standard output.
+    """
+    error = ""
+    tbexc = traceback.TracebackException(type(tb), tb, tb.__traceback__)
+    # I have no idea what chain does, I found this on stackoverflow
+    for line in tbexc.format(chain=True):
+        error += line
+    line = f"""
+    Subject {subject}, session {session} failed. Error message:
+    \n\n{error}
+    Trying next scan.
+    """
     return line
 
 
 def main():
     """Starting point of the ndmg pipeline, assuming that you are using a BIDS organized dataset
     """
-    compatible = sys.platform == 'darwin' or sys.platform == 'linux'
-    if not compatible:
-        input('\n\nWARNING: You appear to be running ndmg on an operating system that is not macOS or Linux.'
-        '\nndmg has not been tested on this operating system and may not work. Press enter to continue.\n\n')
 
     parser = ArgumentParser(
         description="This is an end-to-end connectome estimation pipeline from M3r Images."
     )
     parser.add_argument(
-        "bids_dir",
-        help="The directory with the input dataset"
-        " formatted according to the BIDS standard.",
+        "input_dir",
+        help="""The directory with the input dataset"
+        formatted according to the BIDS standard.
+        To use data from s3, just pass `s3://<bucket>/<dataset>` as the input directory.""",
     )
     parser.add_argument(
         "output_dir",
-        help="The directory where the output "
-        "files should be stored. If you are running group "
-        "level analysis this folder should be prepopulated "
-        "with the results of the participant level analysis.",
+        help="""The directory where the output
+        files should be stored. If you are running group
+        level analysis this folder should be prepopulated
+        with the results of the participant level analysis.""",
     )
     parser.add_argument(
         "--participant_label",
-        help="The label(s) of the "
-        "participant(s) that should be analyzed. The label "
-        "corresponds to sub-<participant_label> from the BIDS "
-        'spec (so it does not include "sub-"). If this '
-        "parameter is not provided all subjects should be "
-        "analyzed. Multiple participants can be specified "
-        "with a space separated list.",
+        help="""The label(s) of the
+        participant(s) that should be analyzed. The label
+        corresponds to sub-<participant_label> from the BIDS
+        spec (so it does not include "sub-"). If this
+        parameter is not provided all subjects should be
+        analyzed. Multiple participants can be specified
+        with a space separated list.""",
         nargs="+",
     )
     parser.add_argument(
         "--session_label",
-        help="The label(s) of the "
-        "session that should be analyzed. The label "
-        "corresponds to ses-<participant_label> from the BIDS "
-        'spec (so it does not include "ses-"). If this '
-        "parameter is not provided all sessions should be "
-        "analyzed. Multiple sessions can be specified "
-        "with a space separated list.",
+        help="""The label(s) of the
+        session that should be analyzed. The label
+        corresponds to ses-<participant_label> from the BIDS
+        spec (so it does not include "ses-"). If this
+        parameter is not provided all sessions should be
+        analyzed. Multiple sessions can be specified
+        with a space separated list.""",
         nargs="+",
-    )
-    parser.add_argument(
-        "--bucket",
-        action="store",
-        help="The name of "
-        "an S3 bucket which holds BIDS organized data. You "
-        "must have built your bucket with credentials to the "
-        "S3 bucket you wish to access.",
-    )
-    parser.add_argument(
-        "--remote_path",
-        action="store",
-        help="The path to "
-        "the data on your S3 bucket, not including the bucket name."
-        "The data will be downloaded to the provided bids_dir on your machine."
     )
     parser.add_argument(
         "--push_data",
         action="store_true",
-        help="flag to " "push derivatives back up to S3.",
+        help="flag to push derivatives back up to S3.",
         default=False,
-    )
-    parser.add_argument(
-        "--dataset",
-        action="store",
-        help="The name of " "the dataset you are perfoming QC on.",
     )
     parser.add_argument(
         "--parcellation",
         action="store",
         help="The parcellation(s) being analyzed. Multiple parcellations can be provided with a space separated list.",
         default=None,
-    )
-    parser.add_argument(
-        "--debug",
-        action="store_true",
-        help="If False, remove any old files in the output directory.",
-        default=False,
     )
     parser.add_argument(
         "--sked",
@@ -203,38 +200,31 @@ def main():
         help="whether or not to skip registration",
     )
     parser.add_argument(
-        "--vox",
+        "--voxelsize",
         action="store",
         default="2mm",
         help="Voxel size : 2mm, 1mm. Voxel size to use for template registrations.gi",
     )
     parser.add_argument(
-        "-c",
-        "--clean",
-        action="store_true",
-        default=False,
-        help="Whether or not to delete intermediates",
-    )
-    parser.add_argument(
         "--mod",
         action="store",
-        help="Determinstic (det), probabilistic (prob) tracking. Default is det.",
+        help="Deterministic (det) or probabilistic (prob) tracking. Default is det.",
         default="det",
     )
     parser.add_argument(
-        "--tt",
+        "--filtering_type",
         action="store",
         help="Tracking approach: local, particle. Default is local.",
         default="local",
     )
     parser.add_argument(
-        "--mf",
+        "--diffusion_model",
         action="store",
         help="Diffusion model: csd, csa. Default is csa.",
         default="csa",
     )
     parser.add_argument(
-        "--sp",
+        "--space",
         action="store",
         help="Space for tractography: native, native_dsn. Default is native.",
         default="native",
@@ -246,7 +236,7 @@ def main():
         default=20,
     )
     parser.add_argument(
-        "--modif",
+        "--push_location",
         action="store",
         help="Name of folder on s3 to push to, if the folder does not exist, it will be created."
         "If empty, push to a folder with ndmg's version number.",
@@ -255,90 +245,101 @@ def main():
     parser.add_argument(
         "--skull",
         action="store",
-        help="Special actions to take when skullstripping t1w image based on default skullstrip ('none') failure:"
-        "Excess tissue below brain: below"
-        "Chunks of cerebelum missing: cerebelum"
-        "Frontal clipping near eyes: eye"
-        "Excess clipping in general: general",
+        help="""Special actions to take when skullstripping t1w image based on default skullstrip ('none') failure:
+        Excess tissue below brain: below
+        Chunks of cerebelum missing: cerebelum
+        Frontal clipping near eyes: eye
+        Excess clipping in general: general,""",
         default="none",
     )
 
     # and ... begin!
     print("\nBeginning ndmg ...")
 
-    # parse cli arguments
+    # ---------------- Parse CLI arguments ---------------- #
     result = parser.parse_args()
-    inDir = result.bids_dir
+    inDir = result.input_dir
     outDir = result.output_dir
     subjects = result.participant_label
     sessions = result.session_label
     parcellation_name = result.parcellation
 
     # arguments to be passed in every ndmg run
+    # TODO : change value naming convention to match key naming convention
     kwargs = {
-        "vox_size": result.vox,
+        "vox_size": result.voxelsize,
         "mod_type": result.mod,
-        "track_type": result.tt,
-        "mod_func": result.mf,
+        "track_type": result.filtering_type,
+        "mod_func": result.diffusion_model,
         "seeds": result.seeds,
-        "reg_style": result.sp,
-        "clean": result.clean,
+        "reg_style": result.space,
         "skipeddy": result.sked,
         "skipreg": result.skreg,
-        "buck": result.bucket,
-        "remo": result.remote_path,
+        # "buck": result.bucket,
+        # "remo": result.remote_path,
         "push": result.push_data,
-        "debug": result.debug,
-        "modif": result.modif,
+        "modif": result.push_location,
         "skull": result.skull,
     }
 
-    # ---------------- Pre-run checks ---------------- #
-    # remove slashes from edges of remo and modif
-    if kwargs["remo"]:
-        kwargs["remo"].strip('/')
-    if kwargs["modif"]:
-        kwargs["modif"].strip('/')
-   
-    # make sure we have AFNI and FSL
-    check_dependencies()
-
-
-    # ---------------- Grab arguments --------------- #
-    # Check to see if user has provided direction to an existing s3 bucket they wish to use
-    try:
+    # ---------------- S3 stuff ---------------- #
+    # grab s3 stuff
+    s3 = inDir.startswith("s3://")
+    if s3:
+        buck, remo = cloud_utils.parse_path(inDir)
+        home = os.path.expanduser("~")
+        inDir = as_directory(home + "/.ndmg/input", remove=True)
+        if kwargs["modif"]:
+            kwargs["modif"].strip("/")
         creds = bool(cloud_utils.get_credentials())
-    except:
-        creds = bool(
-            os.getenv("AWS_ACCESS_KEY_ID", 0) and os.getenv("AWS_SECRET_ACCESS_KEY", 0)
-        )
-    if (not creds) and push:
-        raise AttributeError("No AWS credentials found. Pushing will most likely fail.")
+        # TODO : Should we really prevent the pipeline from running in this case? What if user is pushing to a public bucket?
+        if (not creds) and kwargs["push"]:
+            raise AttributeError(
+                """No AWS credentials found, but "--push" flag called. 
+                Pushing will most likely fail."""
+            )
 
-    kwargs.update({"creds": creds})
+        kwargs.update({"creds": creds})
 
-    # Get S3 input data if needed
-    # TODO : `Flat is better than nested`. Make the logic for this cleaner.
-    if kwargs["buck"] is not None and kwargs["remo"] is not None:
+        # Get S3 input data if needed
+        # TODO : `Flat is better than nested`. Make the logic for this cleaner
         if subjects is not None:
             for subject in subjects:
                 if sessions is not None:
                     for session in sessions:
-                        cloud_utils.s3_get_data(kwargs["buck"], kwargs["remo"], inDir, info=f'sub-{subject}/ses-{session}')
+                        info = f"sub-{subject}/ses-{session}"
+                        cloud_utils.s3_get_data(buck, remo, inDir, info=info)
                 else:
-                    cloud_utils.s3_get_data(kwargs["buck"], kwargs["remo"], inDir, info=f'sub-{subject}')
+                    info = f"sub-{subject}"
+                    cloud_utils.s3_get_data(buck, remo, inDir, info=info)
         else:
-            cloud_utils.s3_get_data(kwargs["buck"], kwargs["remo"], inDir, info='sub-')
+            info = "sub-"
+            cloud_utils.s3_get_data(buck, remo, inDir, info=info)
 
-    print(f'input directory contents: {os.listdir(inDir)}')
+    # ---------------- Pre-run checks ---------------- #
+    # check operating system compatibility
+    compatible = sys.platform == "darwin" or sys.platform == "linux"
+    if not compatible:
+        input(
+            "\n\nWARNING: You appear to be running ndmg on an operating system that is not macOS or Linux."
+            "\nndmg has not been tested on this operating system and may not work. Press enter to continue.\n\n"
+        )
 
-
+    # make sure we have AFNI and FSL
+    check_dependencies()
     # check on input data
     # make sure input directory is BIDs-formatted
     is_bids_ = is_bids(inDir)
     assert is_bids_
 
-    # get atlas stuff, then stick it into the kwargs
+    print(
+        f"""
+        input directory location: {inDir}. 
+        Input directory contents: {os.listdir(inDir)}.
+        """
+    )
+    # ---------------- Grab parcellations, atlases, mask --------------- #
+    # get parcellations, atlas, and mask, then stick it into kwargs
     atlas_dir = get_atlas_dir()
     parcellations, atlas, mask, = get_atlas(atlas_dir, kwargs["vox_size"])
     if parcellation_name is not None:  # filter parcellations
@@ -356,8 +357,7 @@ def main():
     for SubSesFile in scans:
         try:
             subject, session, files = SubSesFile
-            current_outdir = f"{outDir}/sub-{subject}/ses-{session}"
-            kwargs["outdir"] = current_outdir
+            kwargs["outdir"] = f"{outDir}/sub-{subject}/ses-{session}"
             files.update(kwargs)
             ndmg_dwi_worker(**files)
         except Exception as error:

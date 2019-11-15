@@ -6,7 +6,6 @@ Contains utility functions for working on the cloud with AWS.
 """
 
 # standard library imports
-import subprocess
 from configparser import ConfigParser
 import os
 import sys
@@ -66,6 +65,28 @@ def s3_client(service="s3"):
     return boto3.client(service, aws_access_key_id=ACCESS, aws_secret_access_key=SECRET)
 
 
+def parse_path(s3_datapath):
+    """
+    Return bucket and prefix from full s3 path.
+    
+    Parameters
+    ----------
+    s3_datapath : str
+        path to a bucket. 
+        Should be of the form s3://bucket/prefix/.
+    
+    Returns
+    -------
+    tuple
+        bucket and prefix.
+    """
+    bucket_path = str(s3_datapath).split("//")[1]
+    parts = bucket_path.split("/")
+    bucket = parts[0].strip("/")
+    prefix = "/".join(parts[1:])
+    return bucket, prefix
+
+
 def get_matching_s3_objects(bucket, prefix="", suffix=""):
     """
     Generate objects in an S3 bucket.
@@ -113,7 +134,7 @@ def get_matching_s3_objects(bucket, prefix="", suffix=""):
             break
 
 
-def s3_get_data(bucket, remote, local, info='', force=False):
+def s3_get_data(bucket, remote, local, info="", force=False):
     """Given and s3 directory, copies files/subdirectories in that directory to local
 
     Parameters
@@ -131,47 +152,48 @@ def s3_get_data(bucket, remote, local, info='', force=False):
         Whether to overwrite the local directory containing the s3 files if it already exists, by default False
     """
 
-    if info=='sub-':
-        print('Subject not specified, comparing input folder to remote directory...')
+    if info == "sub-":
+        print("Subject not specified, comparing input folder to remote directory...")
     else:
-        if os.path.exists(os.path.join(local,info)) and not force:
-            if os.listdir(os.path.join(local,info)):
-                print(f'Local directory: {os.path.join(local,info)} already exists. Not pulling s3 data. Delete contents to re-download data.')
+        if os.path.exists(os.path.join(local, info)) and not force:
+            if os.listdir(os.path.join(local, info)):
+                print(
+                    f"Local directory: {os.path.join(local,info)} already exists. Not pulling s3 data. Delete contents to re-download data."
+                )
                 return  # TODO: make sure this doesn't append None a bunch of times to a list in a loop on this function
-    
+
     # get client with credentials if they exist
     client = s3_client(service="s3")
-    
+
     # check that bucket exists
     bkts = [bk["Name"] for bk in client.list_buckets()["Buckets"]]
     if bucket not in bkts:
-        sys.exit(
+        raise ValueError(
             "Error: could not locate bucket. Available buckets: " + ", ".join(bkts)
         )
 
-    bpath=get_matching_s3_objects(bucket, f'{remote}/{info}')
-    
+    bpath = get_matching_s3_objects(bucket, f"{remote}/{info}")
+
     # go through all folders inside of remote directory and download relevant files
     for obj in bpath:
-        bdir,data = os.path.split(obj)
-        localpath = os.path.join(local,bdir.replace(f'{remote}/',''))
+        bdir, data = os.path.split(obj)
+        localpath = os.path.join(local, bdir.replace(f"{remote}/", ""))
         # Make directory for data if it doesn't exist
         if not os.path.exists(localpath):
             os.makedirs(localpath)
-        if not os.path.exists(f'{localpath}/{data}'):
-            print(f'Downloading {bdir}/{data} from {bucket} s3 bucket...')
-            # Download file 
-            client.download_file(bucket,f'{bdir}/{data}',f'{localpath}/{data}')
-            if os.path.exists(f'{localpath}/{data}'):
-                print('Success!')
+        if not os.path.exists(f"{localpath}/{data}"):
+            print(f"Downloading {bdir}/{data} from {bucket} s3 bucket...")
+            # Download file
+            client.download_file(bucket, f"{bdir}/{data}", f"{localpath}/{data}")
+            if os.path.exists(f"{localpath}/{data}"):
+                print("Success!")
             else:
-                print('Error: File not downloaded')
+                print("Error: File not downloaded")
         else:
-            print(f'File {data} already exists at {localpath}/{data}')
+            print(f"File {data} already exists at {localpath}/{data}")
 
 
-
-def s3_push_data(bucket, remote, outDir, modifier, creds=True, debug=True):
+def s3_push_data(bucket, remote, outDir, modifier, creds=True):
     """Pushes data to a specified S3 bucket
 
     Parameters
@@ -187,13 +209,11 @@ def s3_push_data(bucket, remote, outDir, modifier, creds=True, debug=True):
         Name of the folder on s3 to push to. If empty, push to a folder with ndmg's version number. Default is ""
     creds : bool, optional
         Whether s3 credentials are being provided, may fail to push big files if False, by default True
-    debug : bool, optional
-        Whether to not to push intermediate files created by the pipeline, by default True
     """
 
     # get client with credentials if they exist
     client = s3_client(service="s3")
-    
+
     # check that bucket exists
     bkts = [bk["Name"] for bk in client.list_buckets()["Buckets"]]
     if bucket not in bkts:
@@ -204,10 +224,14 @@ def s3_push_data(bucket, remote, outDir, modifier, creds=True, debug=True):
     # List all files and upload
     for root, _, files in os.walk(outDir):
         for file_ in files:
-            if not 'tmp/' in root: # exclude things in the tmp/ folder
-                print(f'Uploading: {os.path.join(root, file_)}')
-                spath = root.replace(os.path.join('/',*outDir.split('/')[:-2]),'') #remove everything before /sub-*
+            if not "tmp/" in root:  # exclude things in the tmp/ folder
+                print(f"Uploading: {os.path.join(root, file_)}")
+                spath = root.replace(
+                    os.path.join("/", *outDir.split("/")[:-2]), ""
+                )  # remove everything before /sub-*
                 client.upload_file(
-                    os.path.join(root, file_), bucket, f'{remote}/{modifier}{os.path.join(spath,file_)}',
-                    ExtraArgs={'ACL':'public-read'}
-                    )
+                    os.path.join(root, file_),
+                    bucket,
+                    f"{remote}/{modifier}{os.path.join(spath,file_)}",
+                    ExtraArgs={"ACL": "public-read"},
+                )

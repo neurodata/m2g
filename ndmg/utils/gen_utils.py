@@ -9,6 +9,7 @@ Contains general utility functions.
 
 # system imports
 import os
+import shutil
 import sys
 import re
 from subprocess import Popen, PIPE
@@ -16,7 +17,6 @@ import subprocess
 import time
 import functools
 import json
-from itertools import product
 from pathlib import Path
 from collections import namedtuple
 
@@ -341,11 +341,46 @@ class DirectorySweeper:
             scan = SubSesFiles(subject, session, files)
             scans.append(scan)
 
+            if not scan.files:
+                print(
+                    f""""
+                    There were no files for
+                    subject {subject}, session {session}.
+                    """
+                )
+
         return scans
 
 
 def all_strings(iterable_):
+    """
+    Ensure all elements in `iterable_` are strings.
+    """
     return [str(x) for x in iterable_]
+
+
+def as_directory(dir_, remove=False):
+    """
+    Convenience function to make a directory while returning it.
+    
+    Parameters
+    ----------
+    dir_ : str, Path
+        File location to directory.
+    remove : bool, optional
+        Whether to remove a previously existing directory, by default False
+    
+    Returns
+    -------
+    str
+        Directory string.
+    """
+    p = Path(dir_).absolute()
+    if remove:
+        print(f"Previous directory found at {dir_}. Removing.")
+        shutil.rmtree(p, ignore_errors=True)
+    p.mkdir(parents=True, exist_ok=True)
+    return str(p)
 
 
 def as_list(x):
@@ -415,27 +450,19 @@ def check_exists(*dargs):
     def outer(f):
         @functools.wraps(f)
         def inner(*args, **kwargs):
-
             for darg in dargs:
                 p = args[darg]
                 try:
                     if not os.path.exists(p):
                         raise ValueError(
-                            f"{p} does not exist.\n \
-                            This is an input to the function {f.__name__}."
+                            f"{p} does not exist.\n This is an input to the function {f.__name__}."
                         )
                 except TypeError:
-                    print(
-                        f"{darg} is not a file, it is {type(darg)}.\n \
-                        Fix decorator on this function."
-                    )
-
+                    print(f"{darg} is not a file, it is {type(darg)}.")
+                    print("Fix decorator on this function.")
                 print(f"{p} exists.")
-            print(
-                f"Prerequisite files for {f.__name__} all exist. \
-            Calling {f.__name__}.\n"
-            )
-
+            print(f"Prerequisite files for {f.__name__} all exist.")
+            print(f"Calling {f.__name__}.\n")
             return f(*args, **kwargs)
 
         return inner
@@ -520,7 +547,7 @@ def check_dependencies():
     print(f"Python version : {sys.version}")
     print(f"DiPy version : {dipy.__version__}")
     if sys.version_info[0] < 3:
-        warnings.warn(
+        print(
             "WARNING : Using python 2. This Python version is no longer maintained. Use at your own risk."
         )
 
@@ -1011,7 +1038,7 @@ def parcel_overlap(parcellation1, parcellation2, outpath):
                 pover = np.logical_and(p1seq, p2_dat == p2reg).sum() / float(N)
                 overlapdat[p1idx, p2idx] = pover
 
-    outf = os.path.join(outpath, f"{pln}_{p2n}.csv")
+    outf = os.path.join(outpath, f"{p1n}_{p2n}.csv")
     with open(outf, "w") as f:
         p2str = [f"{x}" for x in p2regs]
         f.write("p1reg," + ",".join(p2str) + "\n")

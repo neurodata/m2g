@@ -10,8 +10,6 @@ For a tutorial on setting this up, see here : https://github.com/neurodata/ndmg/
 
 # standard library imports
 import subprocess
-import ast
-import csv
 import re
 import os
 import sys
@@ -19,13 +17,7 @@ import json
 from copy import deepcopy
 from collections import OrderedDict
 from argparse import ArgumentParser
-import warnings
-import shutil
-import time
 from pathlib import Path
-
-# package imports
-import boto3
 
 # ndmg imports
 import ndmg
@@ -82,7 +74,7 @@ def batch_submit(
         Determinstic (det) or probabilistic (prob) tracking, by default ""
     """
 
-    print(f'Getting list from s3://{bucket}/{path}/...')
+    print(f"Getting list from s3://{bucket}/{path}/...")
     threads = crawl_bucket(bucket, path, jobdir)
 
     print("Generating job for each subject...")
@@ -100,7 +92,7 @@ def batch_submit(
     )
 
     print("Submitting jobs to the queue...")
-    ids = submit_jobs(jobs, jobdir)
+    submit_jobs(jobs, jobdir)
 
 
 def crawl_bucket(bucket, path, jobdir):
@@ -122,7 +114,7 @@ def crawl_bucket(bucket, path, jobdir):
     """
 
     # if jobdir has seshs info file in it, use that instead
-    sesh_path = f'{jobdir}/seshs.json'
+    sesh_path = f"{jobdir}/seshs.json"
     if os.path.isfile(sesh_path):
         print("seshs.json found -- loading bucket info from there")
         with open(sesh_path, "r") as f:
@@ -139,16 +131,15 @@ def crawl_bucket(bucket, path, jobdir):
 
     # populate seshs
     for subj in subjs:
-        prefix = f'{path}/sub-{subj}/'
+        prefix = f"{path}/sub-{subj}/"
         all_seshfiles = get_matching_s3_objects(bucket, prefix)
         sesh = list(set([re.findall(sesh_pattern, obj)[0] for obj in all_seshfiles]))
         if sesh != []:
             seshs[subj] = sesh
-            print(f'{subj} added to seshs.')
+            print(f"{subj} added to seshs.")
         else:
             seshs[subj] = None
-            print(f'{subj} not added (no sessions).')
-
+            print(f"{subj} not added (no sessions).")
 
     # print session IDs and create json cache
     print(
@@ -165,7 +156,7 @@ def crawl_bucket(bucket, path, jobdir):
     )
     with open(sesh_path, "w") as f:
         json.dump(seshs, f)
-    print(f'{sesh_path} created.')
+    print(f"{sesh_path} created.")
     print("Information obtained from s3.")
     return seshs
 
@@ -215,22 +206,22 @@ def create_json(
     list
         list of job jsons
     """
-    jobsjson = f'{jobdir}/jobs.json'
+    jobsjson = f"{jobdir}/jobs.json"
     if os.path.isfile(jobsjson):
         with open(jobsjson, "r") as f:
             jobs = json.load(f)
         return jobs
 
     # set up infrastructure
-    out = subprocess.check_output(f'mkdir -p {jobdir}', shell=True)
-    out = subprocess.check_output(f'mkdir -p {jobdir}/jobs/', shell=True)
-    out = subprocess.check_output(f'mkdir -p {jobdir}/ids/', shell=True)
+    out = subprocess.check_output(f"mkdir -p {jobdir}", shell=True)
+    out = subprocess.check_output(f"mkdir -p {jobdir}/jobs/", shell=True)
+    out = subprocess.check_output(f"mkdir -p {jobdir}/ids/", shell=True)
     template = participant_templ
     seshs = threads
 
     # make template
     if not os.path.isfile(f'{jobdir}/{template.split("/")[-1]}'):
-        cmd = f'wget --quiet -P {jobdir} {template}'
+        cmd = f"wget --quiet -P {jobdir} {template}"
         subprocess.check_output(cmd, shell=True)
 
     with open(f'{jobdir}/{template.split("/")[-1]}', "r") as inf:
@@ -260,23 +251,23 @@ def create_json(
     if bg:
         cmd.append("--big")
     if modif:
-        cmd.insert(cmd.index("--push_data") + 1, u"--modif")
+        cmd.insert(cmd.index("--push_data") + 1, "--modif")
         cmd.insert(cmd.index("--push_data") + 2, modif)
 
     # edit participant-specific values ()
     # loop over every session of every participant
     for subj in seshs.keys():
-        print(f'... Generating job for sub-{subj}')
+        print(f"... Generating job for sub-{subj}")
         # and for each subject number in each participant number,
         for sesh in seshs[subj]:
             # add format-specific commands,
             job_cmd = deepcopy(cmd)
             job_cmd[job_cmd.index("<SUBJ>")] = subj
             if sesh is not None:
-                job_cmd.insert(7, u"--session_label")
-                job_cmd.insert(8, u"{}".format(sesh))
+                job_cmd.insert(7, "--session_label")
+                job_cmd.insert(8, "{}".format(sesh))
             if debug:
-                job_cmd += [u"--debug"]
+                job_cmd += ["--debug"]
 
             # then, grab the template,
             # add additional parameters,
@@ -285,11 +276,11 @@ def create_json(
             job_json = deepcopy(template)
             ver = ndmg.__version__.replace(".", "-")
             if dataset:
-                name = f'ndmg_{ver}_{dataset}_sub-{subj}'
+                name = f"ndmg_{ver}_{dataset}_sub-{subj}"
             else:
-                name = f'ndmg_{ver}_sub-{subj}'
+                name = f"ndmg_{ver}_sub-{subj}"
             if sesh is not None:
-                name = f'{name}_ses-{sesh}'
+                name = f"{name}_ses-{sesh}"
             print(job_cmd)
             job_json["jobName"] = name
             job_json["containerOverrides"]["command"] = job_cmd
@@ -321,18 +312,13 @@ def submit_jobs(jobs, jobdir):
     """
 
     batch = s3_client(service="batch")
-    cmd_template = "--cli-input-json file://{}"
 
     for job in jobs:
         with open(job, "r") as f:
             kwargs = json.load(f)
-        print(f'... Submitting job {job}...')
+        print(f"... Submitting job {job}...")
         submission = batch.submit_job(**kwargs)
-        print(
-            (
-                f'Job Name: {submission["jobName"]}, Job ID: {submission["jobId"]}'
-            )
-        )
+        print((f'Job Name: {submission["jobName"]}, Job ID: {submission["jobId"]}'))
         sub_file = os.path.join(jobdir, "ids", submission["jobName"] + ".json")
         with open(sub_file, "w") as outfile:
             json.dump(submission, outfile)
@@ -351,10 +337,7 @@ def kill_jobs(jobdir, reason='"Killing job"'):
         Task you want to perform on the jobs, by default '"Killing job"'
     """
 
-    cmd_template1 = "aws batch cancel-job --job-id {} --reason {}"
-    cmd_template2 = "aws batch terminate-job --job-id {} --reason {}"
-
-    print(f'Cancelling/Terminating jobs in {jobdir}/ids/...')
+    print(f"Cancelling/Terminating jobs in {jobdir}/ids/...")
     jobs = os.listdir(jobdir + "/ids/")
     batch = s3_client(service="batch")
     jids = []
@@ -362,7 +345,7 @@ def kill_jobs(jobdir, reason='"Killing job"'):
 
     # grab info about all the jobs
     for job in jobs:
-        with open(f'{jobdir}/ids/{job}', "r") as inf:
+        with open(f"{jobdir}/ids/{job}", "r") as inf:
             submission = json.load(inf)
         jid = submission["jobId"]
         name = submission["jobName"]
@@ -370,7 +353,7 @@ def kill_jobs(jobdir, reason='"Killing job"'):
         names.append(name)
 
     for jid in jids:
-        print(f'Terminating job {jid}')
+        print(f"Terminating job {jid}")
         batch.terminate_job(jobId=jid, reason=reason)
 
 
@@ -418,13 +401,6 @@ def main():
     )
     parser.add_argument("--dataset", action="store", help="Dataset name")
     parser.add_argument(
-        "-b",
-        "--big",
-        action="store",
-        default="False",
-        help="whether or not to produce voxelwise big graph",
-    )
-    parser.add_argument(
         "--modif",
         action="store",
         help="Name of folder on s3 to push to. If empty, push to a folder with ndmg's version number.",
@@ -467,11 +443,7 @@ def main():
             "Requires either path to bucket and data, or the status flag"
             " and job IDs to query.\n  Try:\n    ndmg_cloud --help"
         )
-
-    if state == "status":
-        print("Checking job status...")
-        get_status(jobdir)
-    elif state == "kill":
+    if state == "kill":
         print("Killing jobs...")
         kill_jobs(jobdir)
     elif state == "participant":

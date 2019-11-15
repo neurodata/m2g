@@ -53,7 +53,15 @@ The **ndmg** pipeline:
     pip install -r requirements.txt
     pip install .
 
-Finally, you can install **ndmg** from `pip` as shown below. Installation shouldn't take more than a few minutes, but depends on your internet connection. Note that to install the most up-to-date version of the pipeline, we currently recommend installing from github.
+For the most up-to-date version of ndmg, you can use the staging branch. This version is updated regularly, but may be less stable:
+
+    git clone https://github.com/neurodata/ndmg.git
+    cd ndmg
+    git checkout staging
+    pip install -r requirements.txt
+    pip install .
+
+You can also install **ndmg** from `pip` as shown below. Installation shouldn't take more than a few minutes, but depends on your internet connection. Note that to install the most up-to-date version of the pipeline, we currently recommend installing from github.
 
 ### Install from pip
 
