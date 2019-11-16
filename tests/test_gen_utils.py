@@ -70,10 +70,8 @@ def test_DirectorySweeper(input_dir_tree):
     # Abnormal data
     bad_data = {"002547": 3, "002548": -1, "002449": 0.2}
     for sub, session in bad_data.items():
-        sweeper = DirectorySweeper(str(input_dir), sub, session)
-        scans = sweeper.get_dir_info()
         with pytest.raises(ValueError):
-            pairs = sweeper.get_pairs(sub, session)
+            sweeper = DirectorySweeper(str(input_dir), sub, session)
 
     # Check that ancelary file isn't recorded
     assert (
