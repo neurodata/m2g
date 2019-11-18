@@ -53,11 +53,6 @@ def ndmg_dwi_worker(
     reg_style="native",
     skipeddy=False,
     skipreg=False,
-    buck=None,
-    remo=None,
-    push=False,
-    creds=None,
-    modif="",
     skull="none",
 ):
     """Creates a brain graph from MRI data
@@ -96,16 +91,6 @@ def ndmg_dwi_worker(
         Whether or not to skip the eddy correction if it has already been run. Default is False.
     skipreg : bool
         Whether or not to skip registration. Default is False.
-    buck : str, optional
-        The name of an S3 bucket which holds BIDS organized data. You musht have build your bucket with credentials to the S3 bucket you wish to access. Default is None
-    remo : str, optional
-        The path to the data on your S3 bucket. The data will be downloaded to the provided bids_dir on your machine. Default is None.
-    push : bool, optional
-        Flag to push derivatives back to S3. Default is False
-    creds : bool, optional
-        Determine if you have S3 credentials. Default is True
-    modif : str, optional
-        Name of the folder on s3 to push to. If empty, push to a folder with ndmg's version number. Default is ""
     skull : str, optional
         skullstrip parameter pre-set. Default is "none".
 
@@ -383,12 +368,6 @@ def ndmg_dwi_worker(
     print(
         "NOTE :: you are using native-space registration to generate connectomes.\n Without post-hoc normalization, multiple connectomes generated with NDMG cannot be compared directly."
     )
-
-    if push and buck and remo is not None:
-        if not modif:
-            modif = "ndmg_{}".format(ndmg.__version__.replace(".", "-"))
-        cloud_utils.s3_push_data(buck, remo, outdir, modif, creds)
-        print("Pushing Complete!")
 
 
 def welcome_message(connectomes):

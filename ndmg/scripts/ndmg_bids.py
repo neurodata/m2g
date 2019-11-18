@@ -291,7 +291,6 @@ def main():
         if kwargs["modif"]:
             kwargs["modif"].strip("/")
         creds = bool(cloud_utils.get_credentials())
-        # TODO : Should we really prevent the pipeline from running in this case? What if user is pushing to a public bucket?
         if (not creds) and kwargs["push"]:
             raise AttributeError(
                 """No AWS credentials found, but "--push" flag called. 
@@ -352,16 +351,17 @@ def main():
 
     # ---------------- Run Pipeline --------------- #
     # run ndmg on the entire BIDs directory.
-    # TODO: make sure this works on all scans
     for SubSesFile in scans:
         try:
             subject, session, files = SubSesFile
             kwargs["outdir"] = f"{outDir}/sub-{subject}/ses-{session}"
             files.update(kwargs)
             ndmg_dwi_worker(**files)
+            # TODO : this code is probably broken
             if s3 and push:
                 if not push_location:
-                    push_location = f"ndmg_{__version__.replace(".", "-"}"
+                    version = __version__.replace(".", "-")
+                    push_location = f"ndmg_{version}"
                 print(f"Pushing to s3 at {push_location}.")
                 cloud_utils.s3_push_data(buck, remo, outDir, push_location, creds)
 
