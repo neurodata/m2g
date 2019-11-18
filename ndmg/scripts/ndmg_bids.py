@@ -281,15 +281,11 @@ def main():
         buck, remo = cloud_utils.parse_path(input_dir)
         home = os.path.expanduser("~")
         input_dir = as_directory(home + "/.ndmg/input", remove=True)
-        if kwargs["modif"]:
-            kwargs["modif"].strip("/")
-        if (not creds) and kwargs["push"]:
+        if (not creds) and push_location:
             raise AttributeError(
-                """No AWS credentials found, but "--push" flag called. 
+                """No AWS credentials found, but "--push_location" flag called. 
                 Pushing will most likely fail."""
             )
-
-        kwargs.update({"creds": creds})
 
         # Get S3 input data if needed
         # TODO : `Flat is better than nested`. Make the logic for this cleaner
@@ -353,15 +349,18 @@ def main():
                 print(f"Pushing to s3 at {push_location}.")
                 push_buck, push_remo = cloud_utils.parse_path(push_location)
                 cloud_utils.s3_push_data(
-                    push_buck, push_remo, output_dir, subject, session, creds
+                    push_buck,
+                    push_remo,
+                    output_dir,
+                    subject=subject,
+                    session=session,
+                    creds=creds,
                 )
 
         except Exception as error:
             failure = failure_message(subject, session, error)
             print(failure)
             continue
-
-    print("done")
 
 
 if __name__ == "__main__":
