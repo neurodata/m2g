@@ -25,20 +25,17 @@ from ndmg.utils.cloud_utils import get_credentials
 from ndmg.utils.cloud_utils import get_matching_s3_objects
 from ndmg.utils.cloud_utils import s3_client
 
-# TODO : grab this locally, using pkg_resources
-participant_templ = "https://raw.githubusercontent.com/neurodata/ndmg/staging/templates/ndmg_cloud_participant.json"
 
 
 def batch_submit(
     bucket,
     path,
     jobdir,
+    mod_func="csa",
+    track_type="local",
     credentials=None,
     state="participant",
-    debug=False,
     dataset=None,
-    log=False,
-    bg=False,
     modif="",
     reg_style="",
     mod_type="",
@@ -58,14 +55,8 @@ def batch_submit(
         AWS formatted csv of credentials, by default None
     state : str, optional
         determines the function to be performed by this function ("participant", "status", "kill"), by default "participant"
-    debug : bool, optional
-        flag whether to save temp files along the path of processing, by default False
     dataset : str, optional
         Name given to the output directory containing analyzed data set "ndmg-<version>-<dataset>", by default None
-    log : bool, optional
-        flag to indicate log ploting in group analysis, by default False
-    bg : bool, optional
-        whether or not to produce voxelwise big graph, by default False
     modif : str, optional
         Name of folder on s3 to push to. If empty, push to a folder with ndmg's version number, by default ""
     reg_style : str, optional
@@ -83,12 +74,13 @@ def batch_submit(
         path,
         threads,
         jobdir,
-        credentials,
-        debug,
-        dataset,
-        bg,
+        mod_func=mod_func,
+        credentials=credentials,
+        dataset=dataset,
+        track_type=track_type,
         modif=modif,
         reg_style=reg_style,
+        mod_type=mod_type,
     )
 
     print("Submitting jobs to the queue...")
@@ -166,10 +158,10 @@ def create_json(
     path,
     threads,
     jobdir,
+    mod_func="csa",
+    track_type="local",
     credentials=None,
-    debug=False,
     dataset=None,
-    bg=False,
     modif="",
     reg_style="",
     mod_type="",
@@ -188,12 +180,8 @@ def create_json(
         Directory of batch jobs to generate/check up on
     credentials : [type], optional
         AWS formatted csv of credentials, by default None
-    debug : bool, optional
-        flag whether to save temp files along the path of processing, by default False
     dataset : [type], optional
         Name given to the output directory containing analyzed data set "ndmg-<version>-<dataset>", by default None
-    bg : bool, optional
-        whether or not to produce voxelwise big graph, by default False
     modif : str, optional
         Name of folder on s3 to push to. If empty, push to a folder with ndmg's version number, by default ""
     reg_style : str, optional
@@ -216,15 +204,15 @@ def create_json(
     out = subprocess.check_output(f"mkdir -p {jobdir}", shell=True)
     out = subprocess.check_output(f"mkdir -p {jobdir}/jobs/", shell=True)
     out = subprocess.check_output(f"mkdir -p {jobdir}/ids/", shell=True)
-    template = participant_templ
+    #template = participant_templ
     seshs = threads
 
     # make template
-    if not os.path.isfile(f'{jobdir}/{template.split("/")[-1]}'):
-        cmd = f"wget --quiet -P {jobdir} {template}"
-        subprocess.check_output(cmd, shell=True)
+    #if not os.path.isfile(f'{jobdir}/{template.split("/")[-1]}'):
+    #    cmd = f"wget --quiet -P {jobdir} {template}"
+    #    subprocess.check_output(cmd, shell=True)
 
-    with open(f'{jobdir}/{template.split("/")[-1]}', "r") as inf:
+    with open(f'/ndmg/templates/ndmg_cloud_participant.json', "r") as inf:
         template = json.load(inf)
 
     cmd = template["containerOverrides"]["command"]
@@ -240,19 +228,20 @@ def create_json(
 
     # edit non-defaults
     jobs = []
-    cmd[cmd.index("<BUCKET>")] = bucket
-    cmd[cmd.index("<PATH>")] = path
+    cmd[cmd.index("<INPUT>")]=f's3://{bucket}/{path}'
+    #cmd[cmd.index("<BUCKET>")] = bucket
+    #cmd[cmd.index("<PATH>")] = path
+
+    cmd[cmd.index("<FILTER>")]=track_type
+    cmd[cmd.index("<DIFF>")]=mod_func
 
     # edit defaults if necessary
     if reg_style:
-        cmd[cmd.index("--sp") + 1] = reg_style
+        cmd[cmd.index("<SPACE>")] = reg_style
     if mod_type:
-        cmd[cmd.index("--mod") + 1] = reg_style
-    if bg:
-        cmd.append("--big")
+        cmd[cmd.index("<MOD>")] = mod_type
     if modif:
-        cmd.insert(cmd.index("--push_data") + 1, "--modif")
-        cmd.insert(cmd.index("--push_data") + 2, modif)
+        cmd[cmd.index("<PUSH>")] = f's3://{bucket}/{path}/{modif}'
 
     # edit participant-specific values ()
     # loop over every session of every participant
@@ -264,10 +253,7 @@ def create_json(
             job_cmd = deepcopy(cmd)
             job_cmd[job_cmd.index("<SUBJ>")] = subj
             if sesh is not None:
-                job_cmd.insert(7, "--session_label")
-                job_cmd.insert(8, "{}".format(sesh))
-            if debug:
-                job_cmd += ["--debug"]
+                job_cmd[job_cmd.index("<SESH>")] = sesh
 
             # then, grab the template,
             # add additional parameters,
@@ -387,18 +373,6 @@ def main():
     parser.add_argument(
         "--credentials", action="store", help="AWS formatted" " csv of credentials."
     )
-    parser.add_argument(
-        "--log",
-        action="store_true",
-        help="flag to indicate" " log plotting in group analysis.",
-        default=False,
-    )
-    parser.add_argument(
-        "--debug",
-        action="store_true",
-        help="flag to store " "temp files along the path of processing.",
-        default=False,
-    )
     parser.add_argument("--dataset", action="store", help="Dataset name")
     parser.add_argument(
         "--modif",
@@ -407,7 +381,7 @@ def main():
         default="",
     )
     parser.add_argument(
-        "--sp",
+        "--space",
         action="store",
         help="Space for tractography. Default is native.",
         default="native",
@@ -418,22 +392,33 @@ def main():
         help="Determinstic (det) or probabilistic (prob) tracking. Default is det.",
         default="det",
     )
+    parser.add_argument(
+        "--diffusion_model",
+        action="store",
+        help="Diffusion model: csd, csa. Default is csa.",
+        default="csa",
+    )
+    parser.add_argument(
+        "--filtering_type",
+        action="store",
+        help="Tracking approach: local, particle. Default is local.",
+        default="local",
+    )
 
     result = parser.parse_args()
 
     bucket = result.bucket
     path = result.bidsdir
     path = path.strip("/") if path is not None else path
-    debug = result.debug
     state = result.state
     creds = result.credentials
     jobdir = result.jobdir
     dset = result.dataset
-    log = result.log
-    bg = result.big != "False"
     modif = result.modif
-    reg_style = result.sp
+    reg_style = result.space
     mod_type = result.mod
+    track_type = result.filtering_type
+    mod_func = result.diffusion_model
 
     if jobdir is None:
         jobdir = "./"
@@ -455,12 +440,11 @@ def main():
             bucket,
             path,
             jobdir,
-            creds,
-            state,
-            debug,
-            dset,
-            log,
-            bg,
+            credentials=creds,
+            state=state,
+            dataset=dset,
+            mod_func=mod_func,
+            track_type=track_type,
             modif=modif,
             reg_style=reg_style,
             mod_type=mod_type,
