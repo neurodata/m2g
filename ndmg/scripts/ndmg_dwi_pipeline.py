@@ -291,7 +291,7 @@ def ndmg_dwi_worker(
         reg.tissue2dwi_align()
 
     # Align atlas to dwi-space and check that the atlas hasn't lost any of the rois
-    labels_im_file_mni_list = reg_utils.skullstrip_check(
+    labels_im_file_list = reg_utils.skullstrip_check(
         reg, labels, namer, vox_size, reg_style
     )
     # -------- Tensor Fitting and Fiber Tractography ---------------- #
@@ -344,8 +344,8 @@ def ndmg_dwi_worker(
             tracks = streamlines
         elif reg_style == "native_dsn":
             tracks = streamlines_mni
-        rois = labels_im_file_mni_list[idx]
-        labels_im = nib.load(labels_im_file_mni_list[idx])
+        rois = labels_im_file_list[idx]
+        labels_im = nib.load(labels_im_file_list[idx])
         attr = len(np.unique(np.around(labels_im.get_data()).astype("int16"))) - 1
         g1 = graph.GraphTools(
             attr=attr,
