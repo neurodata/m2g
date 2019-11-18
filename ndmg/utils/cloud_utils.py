@@ -193,7 +193,7 @@ def s3_get_data(bucket, remote, local, info="", force=False):
             print(f"File {data} already exists at {localpath}/{data}")
 
 
-def s3_push_data(bucket, remote, outDir, modifier, creds=True):
+def s3_push_data(bucket, remote, outDir, subject, session, creds=True):
     """Pushes data to a specified S3 bucket
 
     Parameters
@@ -225,13 +225,12 @@ def s3_push_data(bucket, remote, outDir, modifier, creds=True):
     for root, _, files in os.walk(outDir):
         for file_ in files:
             if not "tmp/" in root:  # exclude things in the tmp/ folder
-                print(f"Uploading: {os.path.join(root, file_)}")
-                spath = root.replace(
-                    os.path.join("/", *outDir.split("/")[:-2]), ""
-                )  # remove everything before /sub-*
-                client.upload_file(
-                    os.path.join(root, file_),
-                    bucket,
-                    f"{remote}/{modifier}{os.path.join(spath,file_)}",
-                    ExtraArgs={"ACL": "public-read"},
-                )
+                if f"sub-{subject}/ses-{session}" in root:
+                    print(f"Uploading: {os.path.join(root, file_)}")
+                    spath = root[root.find("sub") :]  # remove everything before /sub-*
+                    client.upload_file(
+                        os.path.join(root, file_),
+                        bucket,
+                        f"{remote}/{os.path.join(spath,file_)}",
+                        ExtraArgs={"ACL": "public-read"},
+                    )

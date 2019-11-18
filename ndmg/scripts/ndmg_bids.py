@@ -20,7 +20,6 @@ from argparse import ArgumentParser
 import traceback
 
 # ndmg imports
-from ndmg import __version__
 from ndmg.utils import cloud_utils
 from ndmg.utils.gen_utils import DirectorySweeper
 from ndmg.utils.gen_utils import check_dependencies
@@ -177,12 +176,6 @@ def main():
         nargs="+",
     )
     parser.add_argument(
-        "--push_data",
-        action="store_true",
-        help="flag to push derivatives back up to S3.",
-        default=False,
-    )
-    parser.add_argument(
         "--parcellation",
         action="store",
         help="The parcellation(s) being analyzed. Multiple parcellations can be provided with a space separated list.",
@@ -259,12 +252,12 @@ def main():
 
     # ---------------- Parse CLI arguments ---------------- #
     result = parser.parse_args()
-    inDir = result.input_dir
-    outDir = result.output_dir
+    input_dir = result.input_dir
+    output_dir = result.output_dir
     subjects = result.participant_label
     sessions = result.session_label
     parcellation_name = result.parcellation
-    push = result.push_data
+    push_location = result.push_location
 
     # arguments to be passed in every ndmg run
     # TODO : change value naming convention to match key naming convention
@@ -282,15 +275,14 @@ def main():
 
     # ---------------- S3 stuff ---------------- #
     # grab s3 stuff
-    s3 = inDir.startswith("s3://")
+    s3 = input_dir.startswith("s3://")
+    creds = bool(cloud_utils.get_credentials())
     if s3:
-        push_location = result.push_location
-        buck, remo = cloud_utils.parse_path(inDir)
+        buck, remo = cloud_utils.parse_path(input_dir)
         home = os.path.expanduser("~")
-        inDir = as_directory(home + "/.ndmg/input", remove=True)
+        input_dir = as_directory(home + "/.ndmg/input", remove=True)
         if kwargs["modif"]:
             kwargs["modif"].strip("/")
-        creds = bool(cloud_utils.get_credentials())
         if (not creds) and kwargs["push"]:
             raise AttributeError(
                 """No AWS credentials found, but "--push" flag called. 
@@ -306,13 +298,13 @@ def main():
                 if sessions is not None:
                     for session in sessions:
                         info = f"sub-{subject}/ses-{session}"
-                        cloud_utils.s3_get_data(buck, remo, inDir, info=info)
+                        cloud_utils.s3_get_data(buck, remo, input_dir, info=info)
                 else:
                     info = f"sub-{subject}"
-                    cloud_utils.s3_get_data(buck, remo, inDir, info=info)
+                    cloud_utils.s3_get_data(buck, remo, input_dir, info=info)
         else:
             info = "sub-"
-            cloud_utils.s3_get_data(buck, remo, inDir, info=info)
+            cloud_utils.s3_get_data(buck, remo, input_dir, info=info)
 
     # ---------------- Pre-run checks ---------------- #
     # check operating system compatibility
@@ -327,13 +319,13 @@ def main():
     check_dependencies()
     # check on input data
     # make sure input directory is BIDs-formatted
-    is_bids_ = is_bids(inDir)
+    is_bids_ = is_bids(input_dir)
     assert is_bids_
 
     print(
         f"""
-        input directory location: {inDir}. 
-        Input directory contents: {os.listdir(inDir)}.
+        input directory location: {input_dir}. 
+        Input directory contents: {os.listdir(input_dir)}.
         """
     )
     # ---------------- Grab parcellations, atlases, mask --------------- #
@@ -346,7 +338,7 @@ def main():
     kwargs.update(atlas_stuff)
 
     # parse input directory
-    sweeper = DirectorySweeper(inDir, subjects=subjects, sessions=sessions)
+    sweeper = DirectorySweeper(input_dir, subjects=subjects, sessions=sessions)
     scans = sweeper.get_dir_info()
 
     # ---------------- Run Pipeline --------------- #
@@ -354,21 +346,22 @@ def main():
     for SubSesFile in scans:
         try:
             subject, session, files = SubSesFile
-            kwargs["outdir"] = f"{outDir}/sub-{subject}/ses-{session}"
+            kwargs["outdir"] = f"{output_dir}/sub-{subject}/ses-{session}"
             files.update(kwargs)
             ndmg_dwi_worker(**files)
-            # TODO : this code is probably broken
-            if s3 and push:
-                if not push_location:
-                    version = __version__.replace(".", "-")
-                    push_location = f"ndmg_{version}"
+            if push_location:
                 print(f"Pushing to s3 at {push_location}.")
-                cloud_utils.s3_push_data(buck, remo, outDir, push_location, creds)
+                push_buck, push_remo = cloud_utils.parse_path(push_location)
+                cloud_utils.s3_push_data(
+                    push_buck, push_remo, output_dir, subject, session, creds
+                )
 
         except Exception as error:
             failure = failure_message(subject, session, error)
             print(failure)
             continue
+
+    print("done")
 
 
 if __name__ == "__main__":
