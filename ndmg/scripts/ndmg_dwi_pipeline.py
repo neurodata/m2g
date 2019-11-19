@@ -14,6 +14,7 @@ import shutil
 import time
 from datetime import datetime
 import os
+from pathlib import Path
 
 # package imports
 import nibabel as nib
@@ -44,19 +45,14 @@ def ndmg_dwi_worker(
     mask,
     labels,
     outdir,
-    vox_size,
-    mod_type,
-    track_type,
-    mod_func,
-    seeds,
-    reg_style,
+    vox_size="2mm",
+    mod_type="det",
+    track_type="local",
+    mod_func="csa",
+    seeds=20,
+    reg_style="native",
     skipeddy=False,
     skipreg=False,
-    buck=None,
-    remo=None,
-    push=False,
-    creds=None,
-    modif="",
     skull="none",
 ):
     """Creates a brain graph from MRI data
@@ -95,16 +91,6 @@ def ndmg_dwi_worker(
         Whether or not to skip the eddy correction if it has already been run. Default is False.
     skipreg : bool
         Whether or not to skip registration. Default is False.
-    buck : str, optional
-        The name of an S3 bucket which holds BIDS organized data. You musht have build your bucket with credentials to the S3 bucket you wish to access. Default is None
-    remo : str, optional
-        The path to the data on your S3 bucket. The data will be downloaded to the provided bids_dir on your machine. Default is None.
-    push : bool, optional
-        Flag to push derivatives back to S3. Default is False
-    creds : bool, optional
-        Determine if you have S3 credentials. Default is True
-    modif : str, optional
-        Name of the folder on s3 to push to. If empty, push to a folder with ndmg's version number. Default is ""
     skull : str, optional
         skullstrip parameter pre-set. Default is "none".
 
@@ -115,54 +101,20 @@ def ndmg_dwi_worker(
     ValueError
         Raised if bval/bvecs are potentially corrupted
     """
-    print(f"dwi = {dwi}")
-    print(f"bvals = {bvals}")
-    print(f"bvecs = {bvecs}")
-    print(f"t1w = {t1w}")
-    print(f"atlas = {atlas}")
-    print(f"mask = {mask}")
-    print(f"labels = {labels}")
-    print(f"outdir = {outdir}")
-    print(f"vox_size = {vox_size}")
-    print(f"mod_type = {mod_type}")
-    print(f"track_type = {track_type}")
-    print(f"mod_func = {mod_func}")
-    print(f"seeds = {seeds}")
-    print(f"reg_style = {reg_style}")
-    print(f"skipeddy = {skipeddy}")
-    print(f"skipreg = {skipreg}")
-    print(f"skull = {skull}")
+
+    # -------- Initial Setup ------------------ #
+    # print starting arguments for clarity in log
+    args = locals().copy()
+    for arg, value in args.items():
+        print(f"{arg} = {value}")
+
     fmt = "_adj.csv"
 
-    assert all(
-        [
-            dwi,
-            bvals,
-            bvecs,
-            t1w,
-            atlas,
-            mask,
-            labels,
-            outdir,
-            vox_size,
-            mod_type,
-            track_type,
-            mod_func,
-            seeds,
-            reg_style,
-        ]
-    ), "Missing a default argument."
-
+    # make output directory
     startTime = datetime.now()
-
     namer = gen_utils.NameResource(dwi, t1w, atlas, outdir)
-
-    # TODO : do this with shutil instead of an os command
     print("Output directory: " + outdir)
-    if not os.path.isdir(outdir):
-        cmd = f"mkdir -p {outdir}"
-        os.system(cmd)
-
+    Path(outdir).mkdir(parents=True, exist_ok=True)
     paths = {
         "prep_dwi": "dwi/preproc",
         "prep_anat": "anat/preproc",
@@ -172,28 +124,25 @@ def ndmg_dwi_worker(
         "conn": "dwi/roi-connectomes",
     }
 
-    label_dirs = ["conn"]  # create label level granularity
-
     print("Adding directory tree...")
-    namer.add_dirs(paths, labels, label_dirs)
+    namer.add_dirs(paths, labels, ["conn"])
 
     # Create derivative output file names
     streams = namer.name_derivative(namer.dirs["output"]["fiber"], "streamlines.trk")
 
-    # generate list of connectomes
+    # generate list of connectome file locations
     labels = gen_utils.as_list(labels)
-    connectomes = [
-        namer.name_derivative(
-            namer.dirs["output"]["conn"][namer.get_label(lab)],
-            f"{namer.get_mod_source()}_{namer.get_label(lab)}_measure-spatial-ds{fmt}",
-        )
-        for lab in labels
-    ]
+    connectomes = []
+    for label in labels:
+        filename = namer.get_label(label)
+        folder = namer.dirs["output"]["conn"][filename]
+        derivative = f"{namer.__subi__}_{filename}_measure-spatial-ds{fmt}"
+        connectomes.append(namer.name_derivative(folder, derivative))
 
     warm_welcome = welcome_message(connectomes)
     print(warm_welcome)
 
-    if vox_size != "1mm" and vox_size != "2mm":
+    if vox_size not in ["1mm", "2mm"]:
         raise ValueError("Voxel size not supported. Use 2mm or 1mm")
 
     # -------- Preprocessing Steps --------------------------------- #
@@ -216,8 +165,6 @@ def ndmg_dwi_worker(
             sts = Popen(cmd, shell=True).wait()
             print(sts)
             ts = time.time()
-            st = datetime.fromtimestamp(ts).strftime("%Y-%m-%d %H:%M:%S")
-            print(st)
         else:
             if not os.path.isfile(dwi_prep):
                 raise ValueError(
@@ -230,10 +177,8 @@ def ndmg_dwi_worker(
         sts = Popen(cmd, shell=True).wait()
         print(sts)
         ts = time.time()
-        st = datetime.fromtimestamp(ts).strftime("%Y-%m-%d %H:%M:%S")
-        print(st)
 
-    # Instantiate bvec/bval naming variations and copy to derivative director
+    # Instantiate bvec/bval naming variations and copy to derivative directory
     bvec_scaled = f'{namer.dirs["output"]["prep_dwi"]}/bvec_scaled.bvec'
     fbval = f'{namer.dirs["output"]["prep_dwi"]}/bval.bval'
     fbvec = f'{namer.dirs["output"]["prep_dwi"]}/bvec.bvec'
@@ -244,18 +189,8 @@ def ndmg_dwi_worker(
     bvals, bvecs = read_bvals_bvecs(fbval, fbvec)
     bvecs[np.where(np.any(abs(bvecs) >= 10, axis=1) == True)] = [1, 0, 0]
     bvecs[np.where(bvals == 0)] = 0
-    if (
-        len(
-            bvecs[
-                np.where(
-                    np.logical_and(
-                        bvals > 50, np.all(abs(bvecs) == np.array([0, 0, 0]), axis=1)
-                    )
-                )
-            ]
-        )
-        > 0
-    ):
+    bvecs_0_loc = np.all(abs(bvecs) == np.array([0, 0, 0]), axis=1)
+    if len(bvecs[np.where(np.logical_and(bvals > 50, bvecs_0_loc))]) > 0:
         raise ValueError(
             "WARNING: Encountered potentially corrupted bval/bvecs. Check to ensure volumes with a "
             "diffusion weighting are not being treated as B0's along the bvecs"
@@ -268,7 +203,7 @@ def ndmg_dwi_worker(
     preproc.rescale_bvec(fbvec, bvec_scaled)
 
     # Check orientation (dwi_prep)
-    [dwi_prep, bvecs] = gen_utils.reorient_dwi(dwi_prep, bvec_scaled, namer)
+    dwi_prep, bvecs = gen_utils.reorient_dwi(dwi_prep, bvec_scaled, namer)
 
     # Check dimensions
     dwi_prep = gen_utils.match_target_vox_res(dwi_prep, vox_size, namer, sens="dwi")
@@ -279,7 +214,7 @@ def ndmg_dwi_worker(
     print("fbvec: ", fbvec)
     print("dwi_prep: ", dwi_prep)
     print("namer.dirs: ", namer.dirs["output"]["prep_dwi"])
-    [gtab, nodif_B0, nodif_B0_mask] = gen_utils.make_gtab_and_bmask(
+    gtab, nodif_B0, nodif_B0_mask = gen_utils.make_gtab_and_bmask(
         fbval, fbvec, dwi_prep, namer.dirs["output"]["prep_dwi"]
     )
 
@@ -356,15 +291,9 @@ def ndmg_dwi_worker(
         reg.tissue2dwi_align()
 
     # Align atlas to dwi-space and check that the atlas hasn't lost any of the rois
-    if reg_style == "native_dsn":
-        labels_im_file_mni_list = reg_utils.skullstrip_check(
-            reg, labels, namer, vox_size, reg_style
-        )
-    elif reg_style == "native":
-        labels_im_file_dwi_list = reg_utils.skullstrip_check(
-            reg, labels, namer, vox_size, reg_style
-        )
-
+    labels_im_file_list = reg_utils.skullstrip_check(
+        reg, labels, namer, vox_size, reg_style
+    )
     # -------- Tensor Fitting and Fiber Tractography ---------------- #
     start_time = time.time()
     seeds = track.build_seed_list(reg.wm_gm_int_in_dwi, np.eye(4), dens=int(seeds))
@@ -387,38 +316,22 @@ def ndmg_dwi_worker(
         np.eye(4),
     )
     streamlines = trct.run()
-    streamlines = Streamlines([sl for sl in streamlines if len(sl) > 60])
-    print("Streamlines complete")
-
-    trk_affine = np.eye(4)
-    trk_hdr = nib.streamlines.trk.TrkFile.create_empty_header()
-    trk_hdr["hdr_size"] = 1000
-    trk_hdr["dimensions"] = hdr["dim"][1:4].astype("float32")
-    trk_hdr["voxel_sizes"] = hdr["pixdim"][1:4]
-    trk_hdr["voxel_to_rasmm"] = trk_affine
-    trk_hdr["voxel_order"] = "RAS"
-    trk_hdr["pad2"] = "RAS"
-    trk_hdr["image_orientation_patient"] = np.array(
-        [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-    ).astype("float32")
-    trk_hdr["endianness"] = "<"
-    trk_hdr["_offset_data"] = 1000
-    trk_hdr["nb_streamlines"] = streamlines.total_nb_rows
-    tractogram = nib.streamlines.Tractogram(streamlines, affine_to_rasmm=trk_affine)
+    trk_hdr = trct.make_hdr(streamlines, hdr)
+    tractogram = nib.streamlines.Tractogram(
+        streamlines, affine_to_rasmm=trk_hdr["voxel_to_rasmm"]
+    )
     trkfile = nib.streamlines.trk.TrkFile(tractogram, header=trk_hdr)
     nib.streamlines.save(trkfile, streams)
+    print("Streamlines complete")
     print(f"Tractography runtime: {np.round(time.time() - start_time, 1)}")
 
     if reg_style == "native_dsn":
-
         fa_path = track.tens_mod_fa_est(gtab, dwi_prep, nodif_B0_mask)
-
         # Normalize streamlines
         print("Running DSN...")
         [streamlines_mni, streams_mni] = register.direct_streamline_norm(
             streams, fa_path, namer
         )
-
         # Save streamlines to disk
         print("Saving DSN-registered streamlines: " + streams_mni)
 
@@ -426,35 +339,23 @@ def ndmg_dwi_worker(
     # Generate graphs from streamlines for each parcellation
     for idx, label in enumerate(labels):
         print(f"Generating graph for {label} parcellation...")
-        if reg_style == "native_dsn":
-            # align atlas to t1w to dwi
-            print(f"Applying native-space alignment to {labels[idx]}")
-            labels_im = nib.load(labels_im_file_mni_list[idx])
-            g1 = graph.GraphTools(
-                attr=len(np.unique(np.around(labels_im.get_data()).astype("int16")))
-                - 1,
-                rois=labels_im_file_mni_list[idx],
-                tracks=streamlines_mni,
-                affine=np.eye(4),
-                namer=namer,
-                connectome_path=connectomes[idx],
-            )
-            g1.g = g1.make_graph()
-        elif reg_style == "native":
-            # align atlas to t1w to dwi
-            print(f"Applying native-space alignment to {labels[idx]}")
-            labels_im = nib.load(labels_im_file_dwi_list[idx])
-            g1 = graph.GraphTools(
-                attr=len(np.unique(np.around(labels_im.get_data()).astype("int16")))
-                - 1,
-                rois=labels_im_file_dwi_list[idx],
-                tracks=streamlines,
-                affine=np.eye(4),
-                namer=namer,
-                connectome_path=connectomes[idx],
-            )
-            g1.g = g1.make_graph()
-
+        print(f"Applying native-space alignment to {labels[idx]}")
+        if reg_style == "native":
+            tracks = streamlines
+        elif reg_style == "native_dsn":
+            tracks = streamlines_mni
+        rois = labels_im_file_list[idx]
+        labels_im = nib.load(labels_im_file_list[idx])
+        attr = len(np.unique(np.around(labels_im.get_data()).astype("int16"))) - 1
+        g1 = graph.GraphTools(
+            attr=attr,
+            rois=rois,
+            tracks=tracks,
+            affine=np.eye(4),
+            namer=namer,
+            connectome_path=connectomes[idx],
+        )
+        g1.g = g1.make_graph()
         g1.summary()
         g1.save_graph_png(connectomes[idx])
         g1.save_graph(connectomes[idx])
@@ -467,12 +368,6 @@ def ndmg_dwi_worker(
     print(
         "NOTE :: you are using native-space registration to generate connectomes.\n Without post-hoc normalization, multiple connectomes generated with NDMG cannot be compared directly."
     )
-
-    if push and buck and remo is not None:
-        if not modif:
-            modif = "ndmg_{}".format(ndmg.__version__.replace(".", "-"))
-        cloud_utils.s3_push_data(buck, remo, outdir, modif, creds)
-        print("Pushing Complete!")
 
 
 def welcome_message(connectomes):
