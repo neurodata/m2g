@@ -25,7 +25,7 @@ from dipy.viz import regtools
 
 # ndmg imports
 from ndmg.utils import gen_utils
-from ndmg.utils.gen_utils import check_exists, timer
+from ndmg.utils.gen_utils import print_arguments, timer
 
 
 def erode_mask(mask, v=0):
@@ -79,7 +79,7 @@ def erode_mask(mask, v=0):
     return mask
 
 
-@check_exists(0)
+@print_arguments(inputs=[0], outputs=[1])
 def align_slices(dwi, corrected_dwi, idx):
     """Performs eddy-correction (or self-alignment) of a stack of 3D images
 
@@ -97,7 +97,7 @@ def align_slices(dwi, corrected_dwi, idx):
     gen_utils.execute_cmd(cmd, verb=True)
 
 
-@check_exists(0)
+@print_arguments(inputs=[0], outputs=[1])
 def probmap2mask(prob_map, mask_path, t, erode=0):
     """
     A function to extract a mask from a probability map.
@@ -127,7 +127,7 @@ def probmap2mask(prob_map, mask_path, t, erode=0):
     return mask_path
 
 
-@check_exists(0, 1)
+@print_arguments(inputs=[0, 1], outputs=[2])
 def apply_mask(inp, mask, out):
     """A function to generate a brain-only mask for an input image using 3dcalc
 
@@ -145,6 +145,7 @@ def apply_mask(inp, mask, out):
     gen_utils.execute_cmd(cmd, verb=True)
 
 
+@print_arguments(inputs=[1], outputs=[2])
 def extract_t1w_brain(t1w, out, tmpdir, skull="none"):
     """A function to extract the brain from an input T1w image
     using AFNI's brain extraction utilities.
@@ -170,7 +171,7 @@ def extract_t1w_brain(t1w, out, tmpdir, skull="none"):
     apply_mask(t1w, skull_t1w, out)
 
 
-@check_exists(0)
+@print_arguments(inputs=[1], outputs=[0])
 def normalize_t1w(inp, out):
     """
     A function that normalizes intensity values for anatomical
@@ -188,7 +189,7 @@ def normalize_t1w(inp, out):
     gen_utils.execute_cmd(cmd, verb=True)
 
 
-@check_exists(0)
+@print_arguments(inputs=[0], outputs=[1])
 def resample_fsl(base, res, goal_res, interp="spline"):
     """
     A function to resample a base image in fsl to that of a template.
@@ -210,7 +211,7 @@ def resample_fsl(base, res, goal_res, interp="spline"):
 
 
 def skullstrip_check(dmrireg, labels, namer, vox_size, reg_style):
-    """Peforms the alignemnt of atlas to dwi space and checks if the alignment results in roi loss
+    """Peforms the alignment of atlas to dwi space and checks if the alignment results in roi loss
 
     Parameters
     ----------
@@ -272,7 +273,7 @@ def skullstrip_check(dmrireg, labels, namer, vox_size, reg_style):
 
 
 @timer
-@check_exists(0)
+@print_arguments(inputs=[0], outputs=[1])
 def t1w_skullstrip(t1w, out, skull="none"):
     """Skull-strips the t1w image using AFNIs 3dSkullStrip algorithm, which is a modification of FSLs BET specialized to t1w images.
     Offers robust skull-stripping with no hyperparameters
@@ -300,7 +301,7 @@ def t1w_skullstrip(t1w, out, skull="none"):
     gen_utils.execute_cmd(cmd, verb=True)
 
 
-@check_exists(0)
+@print_arguments(inputs=[0], outputs=[1])
 def segment_t1w(t1w, basename, opts=""):
     """Uses FSLs FAST to segment an anatomical image into GM, WM, and CSF probability maps.
 
@@ -333,7 +334,7 @@ def segment_t1w(t1w, basename, opts=""):
     return out
 
 
-@check_exists(0, 1)
+@print_arguments(inputs=[0, 1], outputs=[3])
 def align(
     inp,
     ref,
@@ -405,7 +406,7 @@ def align(
     os.system(cmd)
 
 
-@check_exists(0, 1, 2)
+@print_arguments(inputs=[0, 1, 2], outputs=[3])
 def align_epi(epi, t1, brain, out):
     """
     Algins EPI images to T1w image
@@ -415,7 +416,7 @@ def align_epi(epi, t1, brain, out):
 
 
 @timer
-@check_exists(0, 1)
+@print_arguments(inputs=[0, 1], outputs=[3])
 def align_nonlinear(inp, ref, xfm, out, warp, ref_mask=None, in_mask=None, config=None):
     """Aligns two images using nonlinear methods and stores the transform between them using fnirt
 
@@ -449,7 +450,7 @@ def align_nonlinear(inp, ref, xfm, out, warp, ref_mask=None, in_mask=None, confi
     os.system(cmd)
 
 
-@check_exists(0, 1)
+@print_arguments(inputs=[0, 1, 2], outputs=[3])
 def applyxfm(ref, inp, xfm, aligned, interp="trilinear", dof=6):
     """Aligns two images with a given transform using FSLs flirt command
 
@@ -473,7 +474,7 @@ def applyxfm(ref, inp, xfm, aligned, interp="trilinear", dof=6):
     os.system(cmd)
 
 
-@check_exists(0, 1)
+@print_arguments(inputs=[0, 1], outputs=[2, 3])
 def apply_warp(ref, inp, out, warp, xfm=None, mask=None, interp=None, sup=False):
     """Applies a warp from the structural to reference space in a single step using information about
     the structural -> ref mapping as well as the functional to structural mapping.
@@ -512,7 +513,7 @@ def apply_warp(ref, inp, out, warp, xfm=None, mask=None, interp=None, sup=False)
     os.system(cmd)
 
 
-@check_exists(0)
+@print_arguments(inputs=[0, 2], outputs=[1])
 def inverse_warp(ref, out, warp):
     """Takes a non-linear mapping and finds the inverse. Takes the file conaining warp-coefficients/fields specified in the
     variable warp (t1w -> mni) and creates its inverse (mni -> t1w) which is saved in the location determined by the variable out
@@ -531,7 +532,7 @@ def inverse_warp(ref, out, warp):
     os.system(cmd)
 
 
-@check_exists(0, 2)
+@print_arguments(inputs=[0, 2], outputs=[1])
 def resample(base, ingested, template):
     """
     Resamples the image such that images which have already been aligned
@@ -559,7 +560,7 @@ def resample(base, ingested, template):
     nib.save(target_im, ingested)
 
 
-@check_exists(0, 1)
+@print_arguments(inputs=[0, 1], outputs=[2])
 def combine_xfms(xfm1, xfm2, xfmout):
     """A function to combine two transformations and output the resulting transformation
 
@@ -576,7 +577,7 @@ def combine_xfms(xfm1, xfm2, xfmout):
     os.system(cmd)
 
 
-@check_exists(0, 1)
+@print_arguments(inputs=[0, 1], outputs=[2])
 def wm_syn(template_path, fa_path, working_dir):
     """A function to perform ANTS SyN registration using dipy functions
 

@@ -113,7 +113,6 @@ def ndmg_dwi_worker(
     # make output directory
     startTime = datetime.now()
     namer = gen_utils.NameResource(dwi, t1w, atlas, outdir)
-    print("Output directory: " + outdir)
     Path(outdir).mkdir(parents=True, exist_ok=True)
     paths = {
         "prep_dwi": "dwi/preproc",
