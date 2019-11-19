@@ -282,8 +282,7 @@ def main():
     check_dependencies()
     # check on input data
     # make sure input directory is BIDs-formatted
-    is_bids_ = is_bids(input_dir)
-    assert is_bids_
+    assert is_bids(input_dir)
 
     print(
         f"""
