@@ -456,8 +456,9 @@ def print_arguments(inputs=[], outputs=[]):
             print("\n")
             all_args = list(args) + list(kwargs.values())
 
-            for input_ in inputs:
+            if inputs:
                 print(f"Checking inputs for {f.__name__} ...")
+            for input_ in inputs:
                 p = all_args[input_]
                 if not os.path.exists(p):
                     raise FileNotFoundError(f"Input {p} does not exist.")
@@ -465,7 +466,7 @@ def print_arguments(inputs=[], outputs=[]):
 
             for output_ in outputs:
                 p = all_args[output_]
-                print(f"{f.__name__} will output {p}.")
+                print(f"Output {p} found.")
 
             print(f"Calling {f.__name__}.")
             function_out = f(*args, **kwargs)

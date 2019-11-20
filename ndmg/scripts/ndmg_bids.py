@@ -322,8 +322,6 @@ def main():
                 creds=creds,
             )
 
-    print("done")
-
 
 if __name__ == "__main__":
     main()
