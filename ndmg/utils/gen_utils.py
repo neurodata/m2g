@@ -429,9 +429,7 @@ def merge_dicts(x, y):
 
 def print_arguments(inputs=[], outputs=[]):
     """
-    Decorator. For every integer index passed, if outputs is False,
-    checks if the argument passed to that index in the function decorated contains a filepath that exists.
-    Either way, it then standardizes print statements across functions by printing arguments to stdout.
+    Decorator. Standardizes print statements across functions by printing arguments to stdout. Checks input files for existence.
 
     Parameters
     ----------
