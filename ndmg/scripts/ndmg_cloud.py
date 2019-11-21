@@ -37,8 +37,9 @@ def batch_submit(
     state="participant",
     dataset=None,
     modif="",
-    reg_style="",
-    mod_type="",
+    reg_style="native",
+    voxel_size="2mm",
+    mod_type="det",
 ):
     """Searches through an S3 bucket, gets all subject-ids, creates json files for each,
     submits batch jobs, and returns list of job ids to query status upon later
@@ -60,9 +61,9 @@ def batch_submit(
     modif : str, optional
         Name of folder on s3 to push to. If empty, push to a folder with ndmg's version number, by default ""
     reg_style : str, optional
-        Space for tractography, by default ""
+        Space for tractography, by default "native"
     mod_type : str, optional
-        Determinstic (det) or probabilistic (prob) tracking, by default ""
+        Determinstic (det) or probabilistic (prob) tracking, by default "det"
     """
 
     print(f"Getting list from s3://{bucket}/{path}/...")
@@ -80,6 +81,7 @@ def batch_submit(
         track_type=track_type,
         modif=modif,
         reg_style=reg_style,
+        voxel_size=voxel_size,
         mod_type=mod_type,
     )
 
@@ -163,8 +165,9 @@ def create_json(
     credentials=None,
     dataset=None,
     modif="",
-    reg_style="",
-    mod_type="",
+    reg_style="native",
+    voxel_size="2mm",
+    mod_type="det",
 ):
     """Creates the json files for each of the jobs
 
@@ -181,13 +184,13 @@ def create_json(
     credentials : [type], optional
         AWS formatted csv of credentials, by default None
     dataset : [type], optional
-        Name given to the output directory containing analyzed data set "ndmg-<version>-<dataset>", by default None
+        Name added to the generated json job files "ndmg_<version>_<dataset>_sub-<sub>_ses-<ses>", by default None
     modif : str, optional
         Name of folder on s3 to push to. If empty, push to a folder with ndmg's version number, by default ""
     reg_style : str, optional
         Space for tractography, by default ""
     mod_type : str, optional
-        Determinstic (det) or probabilistic (prob) tracking, by default ""
+        Determinstic (det) or probabilistic (prob) tracking, by default "det"
 
     Returns
     -------
@@ -204,15 +207,12 @@ def create_json(
     out = subprocess.check_output(f"mkdir -p {jobdir}", shell=True)
     out = subprocess.check_output(f"mkdir -p {jobdir}/jobs/", shell=True)
     out = subprocess.check_output(f"mkdir -p {jobdir}/ids/", shell=True)
-    #template = participant_templ
     seshs = threads
 
-    # make template
-    #if not os.path.isfile(f'{jobdir}/{template.split("/")[-1]}'):
-    #    cmd = f"wget --quiet -P {jobdir} {template}"
-    #    subprocess.check_output(cmd, shell=True)
+    templ = os.path.dirname(__file__)
+    tpath=templ[: templ.find("/ndmg/scripts")]
 
-    with open(f'/ndmg/templates/ndmg_cloud_participant.json', "r") as inf:
+    with open(f'{tpath}/templates/ndmg_cloud_participant.json', "r") as inf:
         template = json.load(inf)
 
     cmd = template["containerOverrides"]["command"]
@@ -229,19 +229,12 @@ def create_json(
     # edit non-defaults
     jobs = []
     cmd[cmd.index("<INPUT>")]=f's3://{bucket}/{path}'
-    #cmd[cmd.index("<BUCKET>")] = bucket
-    #cmd[cmd.index("<PATH>")] = path
-
+    cmd[cmd.index("<PUSH>")] = f's3://{bucket}/{path}/{modif}'
+    cmd[cmd.index("<VOX>")] = voxel_size
+    cmd[cmd.index("<MOD>")] = mod_type
     cmd[cmd.index("<FILTER>")]=track_type
     cmd[cmd.index("<DIFF>")]=mod_func
-
-    # edit defaults if necessary
-    if reg_style:
-        cmd[cmd.index("<SPACE>")] = reg_style
-    if mod_type:
-        cmd[cmd.index("<MOD>")] = mod_type
-    if modif:
-        cmd[cmd.index("<PUSH>")] = f's3://{bucket}/{path}/{modif}'
+    cmd[cmd.index("<SPACE>")] = reg_style
 
     # edit participant-specific values ()
     # loop over every session of every participant
@@ -348,36 +341,39 @@ def main():
     parser = ArgumentParser(
         description="This is a pipeline for running BIDs-formatted diffusion MRI datasets through AWS S3 to produce connectomes."
     )
-
     parser.add_argument(
-        "state",
+        "--state",
         choices=["participant", "status", "kill"],
         default="participant",
-        help="determines the function to be performed by " "this function.",
+        help="determines the function to be performed by ndmg_cloud.",
     )
     parser.add_argument(
         "--bucket",
-        help="The S3 bucket with the input dataset"
-        " formatted according to the BIDS standard.",
+        help="""The S3 bucket with the input dataset
+         formatted according to the BIDS standard.""",
     )
     parser.add_argument(
         "--bidsdir",
-        help="The directory where the dataset"
-        " lives on the S3 bucket should be stored. If you"
-        " level analysis this folder should be prepopulated"
-        " with the results of the participant level analysis.",
+        help="""The path of the directory where the dataset
+        lives on the S3 bucket.""",
     )
     parser.add_argument(
-        "--jobdir", action="store", help="Dir of batch jobs to" " generate/check up on."
+        "--jobdir",
+        action="store",
+        help="""Local directory where the generated batch jobs will be
+        saved/run through in case of batch termination or check-up."""
     )
     parser.add_argument(
-        "--credentials", action="store", help="AWS formatted" " csv of credentials."
+        "--credentials",
+        action="store",
+        help="csv formatted AWS credentials."
     )
-    parser.add_argument("--dataset", action="store", help="Dataset name")
+    #parser.add_argument("--dataset", action="store", help="Dataset name")
     parser.add_argument(
         "--modif",
         action="store",
-        help="Name of folder on s3 to push to. If empty, push to a folder with ndmg's version number.",
+        help="""Name of folder on s3 to push to. Data will be saved at '<bucket>/<bidsdir>/<modif>' on the s3 bucket
+        If empty, push to a folder with ndmg's version number.""",
         default="",
     )
     parser.add_argument(
@@ -385,6 +381,12 @@ def main():
         action="store",
         help="Space for tractography. Default is native.",
         default="native",
+    )
+    parser.add_argument(
+        "--voxelsize",
+        action="store",
+        default="2mm",
+        help="Voxel size : 2mm, 1mm. Voxel size to use for template registrations.",
     )
     parser.add_argument(
         "--mod",
@@ -410,12 +412,13 @@ def main():
     bucket = result.bucket
     path = result.bidsdir
     path = path.strip("/") if path is not None else path
+    dset = path.split("/")[-1] if path is not None else None
     state = result.state
     creds = result.credentials
     jobdir = result.jobdir
-    dset = result.dataset
     modif = result.modif
     reg_style = result.space
+    vox = result.voxelsize
     mod_type = result.mod
     track_type = result.filtering_type
     mod_func = result.diffusion_model
@@ -447,6 +450,7 @@ def main():
             track_type=track_type,
             modif=modif,
             reg_style=reg_style,
+            voxel_size=vox,
             mod_type=mod_type,
         )
 
