@@ -269,15 +269,7 @@ def main():
             info = "sub-"
             cloud_utils.s3_get_data(buck, remo, input_dir, info=info)
 
-    pd = kwargs["push"].startswith("s3://")
-    if pd:
-        buck, remo = cloud_utils.parse_path(kwargs["push"])
-        kwargs["buck"] = buck
-        remo.strip("/")
-        kwargs["modif"] = remo.split("/")[-1]
-        kwargs["remo"] = remo.replace(f'/{kwargs["modif"]}',"")
-    kwargs["push"]=True
-
+    
 
     # ---------------- Pre-run checks ---------------- #
     # check operating system compatibility
