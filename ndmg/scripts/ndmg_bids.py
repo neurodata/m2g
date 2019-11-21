@@ -100,39 +100,6 @@ def get_atlas_dir():
     return os.path.expanduser("~") + "/.ndmg/ndmg_atlases"  # local
 
 
-def failure_message(subject, session, tb):
-    """
-    Return a failure message.
-    Called if a ndmg run fails.
-
-    Parameters
-    ----------
-    subject : str
-        Subject number.
-    session : str
-        Session number.
-    tb : Error
-        Error object containing the traceback text.
-
-    Returns
-    -------
-    str
-        Traceback with subject/session info
-        to print to standard output.
-    """
-    error = ""
-    tbexc = traceback.TracebackException(type(tb), tb, tb.__traceback__)
-    # I have no idea what chain does, I found this on stackoverflow
-    for line in tbexc.format(chain=True):
-        error += line
-    line = f"""
-    Subject {subject}, session {session} failed. Error message:
-    \n\n{error}
-    Trying next scan.
-    """
-    return line
-
-
 def main():
     """Starting point of the ndmg pipeline, assuming that you are using a BIDS organized dataset
     """
@@ -175,12 +142,6 @@ def main():
         with a space separated list.""",
         nargs="+",
     )
-    #parser.add_argument(
-    #    "--push_data",
-    #    action="store_true",
-    #    help="flag to push derivatives back up to S3.",
-    #    default=False,
-    #)
     parser.add_argument(
         "--push_location",
         action="store",
@@ -258,15 +219,16 @@ def main():
 
     # ---------------- Parse CLI arguments ---------------- #
     result = parser.parse_args()
-    inDir = result.input_dir
-    outDir = result.output_dir
+    input_dir = result.input_dir
+    output_dir = result.output_dir
     subjects = result.participant_label
     sessions = result.session_label
     parcellation_name = result.parcellation
+    push_location = result.push_location
 
     # arguments to be passed in every ndmg run
     # TODO : change value naming convention to match key naming convention
-    kwargs = {
+    constant_kwargs = {
         "vox_size": result.voxelsize,
         "mod_type": result.mod,
         "track_type": result.filtering_type,
@@ -275,31 +237,22 @@ def main():
         "reg_style": result.space,
         "skipeddy": result.sked,
         "skipreg": result.skreg,
-        # "buck": result.bucket,
-        # "remo": result.remote_path,
-        # "push": result.push_data,
-        "push": result.push_location, #modif
         "skull": result.skull,
     }
 
     # ---------------- S3 stuff ---------------- #
     # grab s3 stuff
-    s3 = inDir.startswith("s3://")
+    s3 = input_dir.startswith("s3://")
+    creds = bool(cloud_utils.get_credentials())
     if s3:
-        buck, remo = cloud_utils.parse_path(inDir)
+        buck, remo = cloud_utils.parse_path(input_dir)
         home = os.path.expanduser("~")
-        inDir = as_directory(home + "/.ndmg/input", remove=True)
-        #if kwargs["modif"]:
-        #    kwargs["modif"].strip("/")
-        creds = bool(cloud_utils.get_credentials())
-        # TODO : Should we really prevent the pipeline from running in this case? What if user is pushing to a public bucket?
-        if (not creds) and kwargs["push"]:
+        input_dir = as_directory(home + "/.ndmg/input", remove=True)
+        if (not creds) and push_location:
             raise AttributeError(
                 """No AWS credentials found, but "--push_location" flag called. 
                 Pushing will most likely fail."""
             )
-
-        kwargs.update({"creds": creds})
 
         # Get S3 input data if needed
         # TODO : `Flat is better than nested`. Make the logic for this cleaner
@@ -308,13 +261,13 @@ def main():
                 if sessions is not None:
                     for session in sessions:
                         info = f"sub-{subject}/ses-{session}"
-                        cloud_utils.s3_get_data(buck, remo, inDir, info=info)
+                        cloud_utils.s3_get_data(buck, remo, input_dir, info=info)
                 else:
                     info = f"sub-{subject}"
-                    cloud_utils.s3_get_data(buck, remo, inDir, info=info)
+                    cloud_utils.s3_get_data(buck, remo, input_dir, info=info)
         else:
             info = "sub-"
-            cloud_utils.s3_get_data(buck, remo, inDir, info=info)
+            cloud_utils.s3_get_data(buck, remo, input_dir, info=info)
 
     pd = kwargs["push"].startswith("s3://")
     if pd:
@@ -339,41 +292,45 @@ def main():
     check_dependencies()
     # check on input data
     # make sure input directory is BIDs-formatted
-    is_bids_ = is_bids(inDir)
-    assert is_bids_
+    assert is_bids(input_dir)
 
     print(
         f"""
-        input directory location: {inDir}. 
-        Input directory contents: {os.listdir(inDir)}.
+        input directory location: {input_dir}. 
+        Input directory contents: {os.listdir(input_dir)}.
         """
     )
     # ---------------- Grab parcellations, atlases, mask --------------- #
-    # get parcellations, atlas, and mask, then stick it into kwargs
+    # get parcellations, atlas, and mask, then stick it into constant_kwargs
     atlas_dir = get_atlas_dir()
-    parcellations, atlas, mask, = get_atlas(atlas_dir, kwargs["vox_size"])
+    parcellations, atlas, mask, = get_atlas(atlas_dir, constant_kwargs["vox_size"])
     if parcellation_name is not None:  # filter parcellations
         parcellations = [file_ for file_ in parcellations if parcellation_name in file_]
     atlas_stuff = {"atlas": atlas, "mask": mask, "labels": parcellations}
-    kwargs.update(atlas_stuff)
+    constant_kwargs.update(atlas_stuff)
 
     # parse input directory
-    sweeper = DirectorySweeper(inDir, subjects=subjects, sessions=sessions)
+    sweeper = DirectorySweeper(input_dir, subjects=subjects, sessions=sessions)
     scans = sweeper.get_dir_info()
 
     # ---------------- Run Pipeline --------------- #
     # run ndmg on the entire BIDs directory.
-    # TODO: make sure this works on all scans
     for SubSesFile in scans:
-        try:
-            subject, session, files = SubSesFile
-            kwargs["outdir"] = f"{outDir}/sub-{subject}/ses-{session}"
-            files.update(kwargs)
-            ndmg_dwi_worker(**files)
-        except Exception as error:
-            failure = failure_message(subject, session, error)
-            print(failure)
-            continue
+        subject, session, kwargs = SubSesFile
+        kwargs["outdir"] = f"{output_dir}/sub-{subject}/ses-{session}"
+        kwargs.update(constant_kwargs)
+        ndmg_dwi_worker(**kwargs)
+        if push_location:
+            print(f"Pushing to s3 at {push_location}.")
+            push_buck, push_remo = cloud_utils.parse_path(push_location)
+            cloud_utils.s3_push_data(
+                push_buck,
+                push_remo,
+                output_dir,
+                subject=subject,
+                session=session,
+                creds=creds,
+            )
 
 
 if __name__ == "__main__":

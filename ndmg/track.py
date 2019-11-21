@@ -208,7 +208,26 @@ class RunTrack:
             raise ValueError(
                 "Error: Either no seeds supplied, or no valid seeds found in white-matter interface"
             )
+        tracks = Streamlines([track for track in tracks if len(track) > 60])
         return tracks
+
+    @staticmethod
+    def make_hdr(streamlines, hdr):
+        trk_hdr = nib.streamlines.trk.TrkFile.create_empty_header()
+        trk_hdr["hdr_size"] = 1000
+        trk_hdr["dimensions"] = hdr["dim"][1:4].astype("float32")
+        trk_hdr["voxel_sizes"] = hdr["pixdim"][1:4]
+        trk_hdr["voxel_to_rasmm"] = np.eye(4)
+        trk_hdr["voxel_order"] = "RAS"
+        trk_hdr["pad2"] = "RAS"
+        trk_hdr["image_orientation_patient"] = np.array(
+            [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+        ).astype("float32")
+        trk_hdr["endianness"] = "<"
+        trk_hdr["_offset_data"] = 1000
+        trk_hdr["nb_streamlines"] = streamlines.total_nb_rows
+
+        return trk_hdr
 
     def prep_tracking(self):
         """Uses nibabel and dipy functions in order to load the grey matter, white matter, and csf masks
