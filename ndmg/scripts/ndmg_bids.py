@@ -100,39 +100,6 @@ def get_atlas_dir():
     return os.path.expanduser("~") + "/.ndmg/ndmg_atlases"  # local
 
 
-def failure_message(subject, session, tb):
-    """
-    Return a failure message.
-    Called if a ndmg run fails.
-
-    Parameters
-    ----------
-    subject : str
-        Subject number.
-    session : str
-        Session number.
-    tb : Error
-        Error object containing the traceback text.
-
-    Returns
-    -------
-    str
-        Traceback with subject/session info
-        to print to standard output.
-    """
-    error = ""
-    tbexc = traceback.TracebackException(type(tb), tb, tb.__traceback__)
-    # I have no idea what chain does, I found this on stackoverflow
-    for line in tbexc.format(chain=True):
-        error += line
-    line = f"""
-    Subject {subject}, session {session} failed. Error message:
-    \n\n{error}
-    Trying next scan.
-    """
-    return line
-
-
 def main():
     """Starting point of the ndmg pipeline, assuming that you are using a BIDS organized dataset
     """
@@ -142,16 +109,14 @@ def main():
     )
     parser.add_argument(
         "input_dir",
-        help="""The directory with the input dataset"
+        help="""The directory with the input dataset
         formatted according to the BIDS standard.
         To use data from s3, just pass `s3://<bucket>/<dataset>` as the input directory.""",
     )
     parser.add_argument(
         "output_dir",
-        help="""The directory where the output
-        files should be stored. If you are running group
-        level analysis this folder should be prepopulated
-        with the results of the participant level analysis.""",
+        help="""The local directory where the output
+        files should be stored.""",
     )
     parser.add_argument(
         "--participant_label",
@@ -176,6 +141,13 @@ def main():
         nargs="+",
     )
     parser.add_argument(
+        "--push_location",
+        action="store",
+        help="Name of folder on s3 to push output data to, if the folder does not exist, it will be created."
+        "Format the location as `s3://<bucket>/<path>`",
+        default=None,
+    )
+    parser.add_argument(
         "--parcellation",
         action="store",
         help="The parcellation(s) being analyzed. Multiple parcellations can be provided with a space separated list.",
@@ -197,7 +169,7 @@ def main():
         "--voxelsize",
         action="store",
         default="2mm",
-        help="Voxel size : 2mm, 1mm. Voxel size to use for template registrations.gi",
+        help="Voxel size : 2mm, 1mm. Voxel size to use for template registrations.",
     )
     parser.add_argument(
         "--mod",
@@ -230,13 +202,6 @@ def main():
         default=20,
     )
     parser.add_argument(
-        "--push_location",
-        action="store",
-        help="Name of folder on s3 to push to, if the folder does not exist, it will be created."
-        "If empty, push to a folder with ndmg's version number.",
-        default="",
-    )
-    parser.add_argument(
         "--skull",
         action="store",
         help="""Special actions to take when skullstripping t1w image based on default skullstrip ('none') failure:
@@ -261,7 +226,7 @@ def main():
 
     # arguments to be passed in every ndmg run
     # TODO : change value naming convention to match key naming convention
-    kwargs = {
+    constant_kwargs = {
         "vox_size": result.voxelsize,
         "mod_type": result.mod,
         "track_type": result.filtering_type,
@@ -302,6 +267,8 @@ def main():
             info = "sub-"
             cloud_utils.s3_get_data(buck, remo, input_dir, info=info)
 
+    
+
     # ---------------- Pre-run checks ---------------- #
     # check operating system compatibility
     compatible = sys.platform == "darwin" or sys.platform == "linux"
@@ -315,8 +282,7 @@ def main():
     check_dependencies()
     # check on input data
     # make sure input directory is BIDs-formatted
-    is_bids_ = is_bids(input_dir)
-    assert is_bids_
+    assert is_bids(input_dir)
 
     print(
         f"""
@@ -325,13 +291,13 @@ def main():
         """
     )
     # ---------------- Grab parcellations, atlases, mask --------------- #
-    # get parcellations, atlas, and mask, then stick it into kwargs
+    # get parcellations, atlas, and mask, then stick it into constant_kwargs
     atlas_dir = get_atlas_dir()
-    parcellations, atlas, mask, = get_atlas(atlas_dir, kwargs["vox_size"])
+    parcellations, atlas, mask, = get_atlas(atlas_dir, constant_kwargs["vox_size"])
     if parcellation_name is not None:  # filter parcellations
         parcellations = [file_ for file_ in parcellations if parcellation_name in file_]
     atlas_stuff = {"atlas": atlas, "mask": mask, "labels": parcellations}
-    kwargs.update(atlas_stuff)
+    constant_kwargs.update(atlas_stuff)
 
     # parse input directory
     sweeper = DirectorySweeper(input_dir, subjects=subjects, sessions=sessions)
@@ -340,27 +306,21 @@ def main():
     # ---------------- Run Pipeline --------------- #
     # run ndmg on the entire BIDs directory.
     for SubSesFile in scans:
-        try:
-            subject, session, files = SubSesFile
-            kwargs["outdir"] = f"{output_dir}/sub-{subject}/ses-{session}"
-            files.update(kwargs)
-            ndmg_dwi_worker(**files)
-            if push_location:
-                print(f"Pushing to s3 at {push_location}.")
-                push_buck, push_remo = cloud_utils.parse_path(push_location)
-                cloud_utils.s3_push_data(
-                    push_buck,
-                    push_remo,
-                    output_dir,
-                    subject=subject,
-                    session=session,
-                    creds=creds,
-                )
-
-        except Exception as error:
-            failure = failure_message(subject, session, error)
-            print(failure)
-            continue
+        subject, session, kwargs = SubSesFile
+        kwargs["outdir"] = f"{output_dir}/sub-{subject}/ses-{session}"
+        kwargs.update(constant_kwargs)
+        ndmg_dwi_worker(**kwargs)
+        if push_location:
+            print(f"Pushing to s3 at {push_location}.")
+            push_buck, push_remo = cloud_utils.parse_path(push_location)
+            cloud_utils.s3_push_data(
+                push_buck,
+                push_remo,
+                output_dir,
+                subject=subject,
+                session=session,
+                creds=creds,
+            )
 
 
 if __name__ == "__main__":
