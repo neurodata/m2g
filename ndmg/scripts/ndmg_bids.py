@@ -109,16 +109,14 @@ def main():
     )
     parser.add_argument(
         "input_dir",
-        help="""The directory with the input dataset"
+        help="""The directory with the input dataset
         formatted according to the BIDS standard.
         To use data from s3, just pass `s3://<bucket>/<dataset>` as the input directory.""",
     )
     parser.add_argument(
         "output_dir",
         help="""The local directory where the output
-        files should be stored. If you are running group
-        level analysis this folder should be prepopulated
-        with the results of the participant level analysis.""",
+        files should be stored.""",
     )
     parser.add_argument(
         "--participant_label",
