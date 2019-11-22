@@ -34,10 +34,9 @@ from argparse import ArgumentParser
 from scipy import ndimage
 from matplotlib.colors import LinearSegmentedColormap
 import matplotlib as mpl
-mpl.use("TkAgg")  # very important above pyplot import
+mpl.use("Agg")  # very important above pyplot import
 from nilearn.plotting.edge_detect import _edge_map as edge_map
 import matplotlib.pyplot as plt
-import pandas as pd
 
 
 def reg_mri_pngs(
@@ -234,8 +233,6 @@ def plot_overlays(atlas, b0, cmaps=None, minthr=2, maxthr=95, edge=False):
             if idx == 3:
                 plt.plot(0,0,"-",c="pink",label='registered')
                 plt.plot(0,0,"-",c="green",label='reference')
-                #box = ax.get_position()
-                #ax.set_position([box.x0, box.y0, box.width, box.height*0.8])
                 plt.legend(loc='best',fontsize=12,bbox_to_anchor=(1.5,1.5))
             
     #Set title for the whole picture
