@@ -64,7 +64,7 @@ def reg_mri_pngs(
     fname = os.path.split(mri)[1].split(".")[0] + ".png"
     fig.savefig(outdir + "/" + fname, format="png")
     
-    #plt.close()
+    plt.close()
 
 def opaque_colorscale(basemap, reference, vmin=None, vmax=None, alpha=1):
     """
