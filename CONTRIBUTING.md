@@ -42,11 +42,11 @@ but those accepted fastest will follow a workflow similar to the following:
 ## Improvement Criteria
 In order for a change to be made to the ndmg deploy branch, it must meet the following criteria:
 1. Result in a discriminability value equal to/greater than the current deploy metrics:
-   * BNU1 = 0.927759, 1 failures
-   * HNU1 = 0.9693128, 2 failures
-   * NKI1 = 0.9362745, 5 failures
-   * NKI24 = 0.9379084, 5 failures
-   * SWU4 = 0.785687, 69 failures
+   * BNU1 = 0.927, 1 failures        BNU1_staging = 0.923, 1 failures (113 success)
+   * HNU1 = 0.969, 2 failures       HNU1_staging = 0.966, 2 failures (298 success)
+   * NKI1 = 0.936, 5 failures       NKI1_staging = 0.924, 4 failures (36 success)
+   * NKI24 = 0.937, 5 failures      NKI24_staging = 0.928, 4 failures (36 success)
+   * SWU4 = 0.785, 69 failures       SWU4_staging = 0.790, 68 failures (382 success)
    * Settings: `local`, `native`, `csa`, `det`
 2. Maintain or reduce the amount of non-python3 dependencies of the pipeline
 3. 
