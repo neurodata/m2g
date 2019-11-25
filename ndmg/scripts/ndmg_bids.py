@@ -109,16 +109,14 @@ def main():
     )
     parser.add_argument(
         "input_dir",
-        help="""The directory with the input dataset"
+        help="""The directory with the input dataset
         formatted according to the BIDS standard.
         To use data from s3, just pass `s3://<bucket>/<dataset>` as the input directory.""",
     )
     parser.add_argument(
         "output_dir",
-        help="""The directory where the output
-        files should be stored. If you are running group
-        level analysis this folder should be prepopulated
-        with the results of the participant level analysis.""",
+        help="""The local directory where the output
+        files should be stored.""",
     )
     parser.add_argument(
         "--participant_label",
@@ -143,6 +141,13 @@ def main():
         nargs="+",
     )
     parser.add_argument(
+        "--push_location",
+        action="store",
+        help="Name of folder on s3 to push output data to, if the folder does not exist, it will be created."
+        "Format the location as `s3://<bucket>/<path>`",
+        default=None,
+    )
+    parser.add_argument(
         "--parcellation",
         action="store",
         help="The parcellation(s) being analyzed. Multiple parcellations can be provided with a space separated list.",
@@ -164,7 +169,7 @@ def main():
         "--voxelsize",
         action="store",
         default="2mm",
-        help="Voxel size : 2mm, 1mm. Voxel size to use for template registrations.gi",
+        help="Voxel size : 2mm, 1mm. Voxel size to use for template registrations.",
     )
     parser.add_argument(
         "--mod",
@@ -195,13 +200,6 @@ def main():
         action="store",
         help="Seeding density for tractography. Default is 20.",
         default=20,
-    )
-    parser.add_argument(
-        "--push_location",
-        action="store",
-        help="Name of folder on s3 to push to, if the folder does not exist, it will be created."
-        "If empty, push to a folder with ndmg's version number.",
-        default="",
     )
     parser.add_argument(
         "--skull",
