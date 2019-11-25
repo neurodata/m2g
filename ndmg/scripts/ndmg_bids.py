@@ -267,8 +267,6 @@ def main():
             info = "sub-"
             cloud_utils.s3_get_data(buck, remo, input_dir, info=info)
 
-    
-
     # ---------------- Pre-run checks ---------------- #
     # check operating system compatibility
     compatible = sys.platform == "darwin" or sys.platform == "linux"

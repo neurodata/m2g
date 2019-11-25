@@ -26,7 +26,6 @@ from ndmg.utils.cloud_utils import get_matching_s3_objects
 from ndmg.utils.cloud_utils import s3_client
 
 
-
 def batch_submit(
     bucket,
     path,
@@ -210,9 +209,9 @@ def create_json(
     seshs = threads
 
     templ = os.path.dirname(__file__)
-    tpath=templ[: templ.find("/ndmg/scripts")]
+    tpath = templ[: templ.find("/ndmg/scripts")]
 
-    with open(f'{tpath}/templates/ndmg_cloud_participant.json', "r") as inf:
+    with open(f"{tpath}/templates/ndmg_cloud_participant.json", "r") as inf:
         template = json.load(inf)
 
     cmd = template["containerOverrides"]["command"]
@@ -228,12 +227,12 @@ def create_json(
 
     # edit non-defaults
     jobs = []
-    cmd[cmd.index("<INPUT>")]=f's3://{bucket}/{path}'
-    cmd[cmd.index("<PUSH>")] = f's3://{bucket}/{path}/{modif}'
+    cmd[cmd.index("<INPUT>")] = f"s3://{bucket}/{path}"
+    cmd[cmd.index("<PUSH>")] = f"s3://{bucket}/{path}/{modif}"
     cmd[cmd.index("<VOX>")] = voxel_size
     cmd[cmd.index("<MOD>")] = mod_type
-    cmd[cmd.index("<FILTER>")]=track_type
-    cmd[cmd.index("<DIFF>")]=mod_func
+    cmd[cmd.index("<FILTER>")] = track_type
+    cmd[cmd.index("<DIFF>")] = mod_func
     cmd[cmd.index("<SPACE>")] = reg_style
 
     # edit participant-specific values ()
@@ -361,14 +360,12 @@ def main():
         "--jobdir",
         action="store",
         help="""Local directory where the generated batch jobs will be
-        saved/run through in case of batch termination or check-up."""
+        saved/run through in case of batch termination or check-up.""",
     )
     parser.add_argument(
-        "--credentials",
-        action="store",
-        help="csv formatted AWS credentials."
+        "--credentials", action="store", help="csv formatted AWS credentials."
     )
-    #parser.add_argument("--dataset", action="store", help="Dataset name")
+    # parser.add_argument("--dataset", action="store", help="Dataset name")
     parser.add_argument(
         "--modif",
         action="store",
