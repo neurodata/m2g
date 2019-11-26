@@ -154,13 +154,13 @@ def main():
         default=None,
     )
     parser.add_argument(
-        "--sked",
+        "--skipeddy",
         action="store_true",
         help="Whether to skip eddy correction if it has already been run.",
         default=False,
     )
     parser.add_argument(
-        "--skreg",
+        "--skipreg",
         action="store_true",
         default=False,
         help="whether or not to skip registration",
@@ -233,8 +233,8 @@ def main():
         "mod_func": result.diffusion_model,
         "seeds": result.seeds,
         "reg_style": result.space,
-        "skipeddy": result.sked,
-        "skipreg": result.skreg,
+        "skipeddy": result.skipeddy,
+        "skipreg": result.skipreg,
         "skull": result.skull,
     }
 

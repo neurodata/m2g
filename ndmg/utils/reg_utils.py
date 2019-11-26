@@ -80,24 +80,6 @@ def erode_mask(mask, v=0):
 
 
 @print_arguments(inputs=[0], outputs=[1])
-def align_slices(dwi, corrected_dwi, idx):
-    """Performs eddy-correction (or self-alignment) of a stack of 3D images
-
-    Parameters
-    ----------
-    dwi : str
-        path for the DTI image to be eddy-corrected
-    corrected_dwi : str
-        path for the corrected and aligned DTI volume in a nifti file
-    idx : str
-        Index of the first B0 volume in the stack
-    """
-
-    cmd = f"eddy_correct {dwi} {corrected_dwi} {idx}"
-    gen_utils.execute_cmd(cmd, verb=True)
-
-
-@print_arguments(inputs=[0], outputs=[1])
 def probmap2mask(prob_map, mask_path, t, erode=0):
     """
     A function to extract a mask from a probability map.
