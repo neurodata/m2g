@@ -620,7 +620,7 @@ class DmriReg:
         subprocess.run(cmd, shell=True, check=True)
 
         cmd = f"fslmaths {self.corpuscallosum} -bin {self.corpuscallosum}"
-        subprocess.run(shell=True, check=True)
+        subprocess.run(cmd, shell=True, check=True)
 
         cmd = f"fslmaths {self.corpuscallosum} -sub {self.mni_vent_loc} -bin {self.corpuscallosum}"
         subprocess.run(cmd, shell=True, check=True)
