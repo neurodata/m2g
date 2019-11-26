@@ -209,7 +209,7 @@ def main():
         Chunks of cerebelum missing: cerebelum
         Frontal clipping near eyes: eye
         Excess clipping in general: general,""",
-        default="none",
+        default=None,
     )
 
     # and ... begin!

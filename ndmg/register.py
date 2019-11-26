@@ -11,6 +11,7 @@ Used for the majority of the registration described here: https://neurodata.io/t
 # standard library imports
 import os
 from argparse import ArgumentParser
+import subprocess
 
 # package imports
 import nibabel as nib
@@ -130,14 +131,7 @@ class DmriReg:
     """
 
     def __init__(
-        self,
-        namer,
-        nodif_B0,
-        nodif_B0_mask,
-        t1w_in,
-        vox_size,
-        skull="none",
-        simple=False,
+        self, namer, nodif_B0, nodif_B0_mask, t1w_in, vox_size, skull=None, simple=False
     ):
 
         if os.path.isdir("/ndmg_atlases"):

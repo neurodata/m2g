@@ -7,6 +7,7 @@ Contains small-scale registration utilities.
 
 # standard library imports
 import os
+import subprocess
 
 # package imports
 import nibabel as nib
@@ -256,7 +257,7 @@ def skullstrip_check(dmrireg, labels, namer, vox_size, reg_style):
 
 @timer
 @print_arguments(inputs=[0], outputs=[1])
-def t1w_skullstrip(t1w, out, skull="none"):
+def t1w_skullstrip(t1w, out, skull=None):
     """Skull-strips the t1w image using AFNIs 3dSkullStrip algorithm, which is a modification of FSLs BET specialized to t1w images.
     Offers robust skull-stripping with no hyperparameters
     Note: renormalizes the intensities, call extract_t1w_brain instead if you want the original intensity values

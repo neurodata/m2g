@@ -53,7 +53,7 @@ def ndmg_dwi_worker(
     reg_style="native",
     skipeddy=False,
     skipreg=False,
-    skull="none",
+    skull=None,
 ):
     """Creates a brain graph from MRI data
 
@@ -72,7 +72,7 @@ def ndmg_dwi_worker(
     mask : str
         Location of T1w brain mask file, make sure the proper voxel size is used
     labels : list
-        Location of file containing the labels for the atlas file(s)
+        Filepaths to the parcellations we're using.
     outdir : str
         The directory where the output files should be stored. Prepopulate this folder with results of participants level analysis if running gorup analysis.
     vox_size : str
@@ -125,8 +125,6 @@ def ndmg_dwi_worker(
 
     print("Adding directory tree...")
     namer.add_dirs(paths, labels, ["conn"])
-
-    # Create derivative output file names
 
     # generate list of connectome file locations
     labels = gen_utils.as_list(labels)
