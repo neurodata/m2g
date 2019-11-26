@@ -10,6 +10,8 @@ TODO : depracate or change name. Add other preprocessing functions created from 
 
 # package imports
 import numpy as np
+import subprocess
+from subprocess import PIPE
 
 # ndmg imports
 from ndmg.utils import gen_utils
@@ -23,15 +25,14 @@ def eddy_correct(dwi, corrected_dwi, idx):
     Parameters
     ----------
     dwi : str
-        path for the DTI image to be eddy-corrected
+        Path for the DTI image to be eddy-corrected
     corrected_dwi : str
-        path for the corrected and aligned DTI volume in a nifti file
+        Path for the corrected and aligned DTI volume in a nifti file
     idx : str
         Index of the first B0 volume in the stack
     """
 
-    cmd = f"eddy_correct {dwi} {corrected_dwi} {idx}"
-    gen_utils.execute_cmd(cmd, verb=True)
+    subprocess.run(["eddy_correct", dwi, corrected_dwi, str(idx)], check=True)
 
 
 def rescale_bvec(bvec, bvec_new):

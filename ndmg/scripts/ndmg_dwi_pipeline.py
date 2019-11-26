@@ -154,11 +154,10 @@ def ndmg_dwi_worker(
         # do it anyway if dwi_prep doesnt exist
         if not os.path.isfile(dwi_prep):
             print("Cannot skip preprocessing if it has not already been run!")
-            preproc_dir = gen_utils.as_directory(preproc_dir, remove=True)
-            preproc.eddy_correct(dwi, dwi_prep, 0)
+            skipeddy = False
 
     # if we're not skipping eddy correct, perform it
-    elif not skipeddy:
+    if not skipeddy:
         preproc_dir = gen_utils.as_directory(preproc_dir, remove=True)
         preproc.eddy_correct(dwi, dwi_prep, 0)
 
@@ -449,7 +448,8 @@ def main():
     # Create output directory
     print(f"Creating output directory: {result.outdir}")
     print(f"Creating output temp directory: {result.outdir}/tmp")
-    gen_utils.utils.execute_cmd(f"mkdir -p {result.outdir} {result.outdir}/tmp")
+    outdir_tmp = Path(result.outdir) / "tmp"
+    outdir_tmp.mkdir(parents=True, exist_ok=True)
 
     ndmg_dwi_worker(
         result.dwi,
