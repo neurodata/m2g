@@ -746,7 +746,7 @@ def make_gtab_and_bmask(fbval, fbvec, dwi_file, outdir):
 
     for cmd in cmds:
         print(cmd)
-        os.system(cmd)
+        subprocess.run(cmd, shell=True, check=True)
 
     # Get mean B0
     B0s_bbr_imgs = []
@@ -758,7 +758,7 @@ def make_gtab_and_bmask(fbval, fbvec, dwi_file, outdir):
 
     # Get mean B0 brain mask
     cmd = f"bet {nodif_B0} {nodif_B0_bet} -m -f 0.2"
-    os.system(cmd)
+    subprocess.run(cmd, shell=True, check=True)
     return gtab, nodif_B0, nodif_B0_mask
 
 

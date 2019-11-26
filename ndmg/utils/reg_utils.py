@@ -308,7 +308,7 @@ def segment_t1w(t1w, basename, opts=""):
     # run FAST, with options -t for the image type and -n to
     # segment into CSF (pve_0), WM (pve_1), GM (pve_2)
     cmd = f"fast -t 1 {opts} -n 3 -o {basename} {t1w}"
-    os.system(cmd)
+    subprocess.run(cmd, check=True, shell=True)
     out = {}  # the outputs
     out["wm_prob"] = f"{basename}_pve_2.nii.gz"
     out["gm_prob"] = f"{basename}_pve_1.nii.gz"
@@ -385,7 +385,7 @@ def align(
         cmd += f" -wmseg {wmseg}"
     if init is not None:
         cmd += f" -init {init}"
-    os.system(cmd)
+    subprocess.run(cmd, check=True, shell=True)
 
 
 @print_arguments(inputs=[0, 1, 2], outputs=[3])
@@ -394,7 +394,7 @@ def align_epi(epi, t1, brain, out):
     Algins EPI images to T1w image
     """
     cmd = f"epi_reg --epi={epi} --t1={t1} --t1brain={brain} --out={out}"
-    os.system(cmd)
+    subprocess.run(cmd, check=True, shell=True)
 
 
 @timer
@@ -429,7 +429,7 @@ def align_nonlinear(inp, ref, xfm, out, warp, ref_mask=None, in_mask=None, confi
         cmd += f" --inmask={in_mask} --applyinmask=1"
     if config is not None:
         cmd += f" --config={config}"
-    os.system(cmd)
+    subprocess.run(cmd, check=True, shell=True)
 
 
 @print_arguments(inputs=[0, 1, 2], outputs=[3])
@@ -453,7 +453,7 @@ def applyxfm(ref, inp, xfm, aligned, interp="trilinear", dof=6):
     """
 
     cmd = f"flirt -in {inp} -ref {ref} -out {aligned} -init {xfm} -interp {interp} -dof {dof} -applyxfm"
-    os.system(cmd)
+    subprocess.run(check=True, shell=True)
 
 
 @print_arguments(inputs=[0, 1], outputs=[2, 3])
@@ -492,7 +492,7 @@ def apply_warp(ref, inp, out, warp, xfm=None, mask=None, interp=None, sup=False)
         cmd += " --interp=" + interp
     if sup is True:
         cmd += " --super --superlevel=a"
-    os.system(cmd)
+    subprocess.run(check=True, shell=True)
 
 
 @print_arguments(inputs=[0, 2], outputs=[1])
@@ -511,7 +511,7 @@ def inverse_warp(ref, out, warp):
     """
 
     cmd = "invwarp --warp=" + warp + " --out=" + out + " --ref=" + ref
-    os.system(cmd)
+    subprocess.run(cmd, check=True, shell=True)
 
 
 @print_arguments(inputs=[0, 2], outputs=[1])
@@ -556,7 +556,7 @@ def combine_xfms(xfm1, xfm2, xfmout):
         path for the ouput transformation
     """
     cmd = f"convert_xfm -omat {xfmout} -concat {xfm1} {xfm2}"
-    os.system(cmd)
+    subprocess.run(cmd, check=True, shell=True)
 
 
 @print_arguments(inputs=[0, 1], outputs=[2])
