@@ -603,36 +603,6 @@ def show_template_bundles(final_streamlines, template_path, fname):
     window.record(renderer, n_frames=1, out_path=fname, size=(900, 900))
 
 
-def execute_cmd(cmd, verb=False):
-    """Given a bash command, it is executed and the response piped back to the
-    calling script
-
-    Parameters
-    ----------
-    cmd : str
-        command you want to execute
-    verb : bool, optional
-        whether to print the command that is being executed, by default False
-
-    Returns
-    -------
-    stdout
-        outputs from p.communicate
-    stderr
-        error from p.communicate
-    """
-
-    if verb:
-        print(f"Executing: {cmd}")
-
-    p = Popen(cmd, stdout=PIPE, stderr=PIPE, shell=True)
-    out, err = p.communicate()
-    code = p.returncode
-    if code:
-        sys.exit(f"Error {code}: {err}")
-    return out, err
-
-
 def get_braindata(brain_file):
     """Opens a brain data series for a mask, mri image, or atlas.
     Returns a numpy.ndarray representation of a brain.

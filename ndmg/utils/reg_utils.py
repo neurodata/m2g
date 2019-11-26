@@ -124,7 +124,7 @@ def apply_mask(inp, mask, out):
     """
 
     cmd = f'3dcalc -a {inp} -b {mask} -expr "a*step(b)" -prefix {out}'
-    gen_utils.execute_cmd(cmd, verb=True)
+    subprocess.run(cmd, shell=True, check=True)
 
 
 @print_arguments(inputs=[1], outputs=[2])
@@ -168,7 +168,7 @@ def normalize_t1w(inp, out):
             - the output intensity-normalized image.
     """
     cmd = f"3dUnifize -prefix {out} -input {inp}"
-    gen_utils.execute_cmd(cmd, verb=True)
+    subprocess.run(cmd, check=True, shell=True)
 
 
 @print_arguments(inputs=[0], outputs=[1])
@@ -189,7 +189,7 @@ def resample_fsl(base, res, goal_res, interp="spline"):
     """
     # resample using an isometric transform in fsl
     cmd = f"flirt -in {base} -ref {base} -out {res} -applyisoxfm {goal_res} -interp {interp}"
-    gen_utils.execute_cmd(cmd, verb=True)
+    subprocess.run(cmd, check=True, shell=True)
 
 
 def skullstrip_check(dmrireg, labels, namer, vox_size, reg_style):
@@ -280,7 +280,7 @@ def t1w_skullstrip(t1w, out, skull="none"):
         cmd = f"3dSkullStrip -prefix {out} -input {t1w} -push_to_edge -ld 45"
     else:
         cmd = f"3dSkullStrip -prefix {out} -input {t1w} -ld 30"
-    gen_utils.execute_cmd(cmd, verb=True)
+    subprocess.run(cmd, check=True, shell=True)
 
 
 @print_arguments(inputs=[0], outputs=[1])
