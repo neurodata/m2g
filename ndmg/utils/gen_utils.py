@@ -131,8 +131,8 @@ class NameResource:
         namer.dirs["qa"]["reg"] = namer.dirs["qa"]["base"] + "/reg"
         namer.dirs["qa"]["tensor"] = namer.dirs["qa"]["base"] + "/tensor"
         newdirs = flatten(namer.dirs, [])
-        cmd = f'mkdir -p {" ".join(newdirs)}'
-        execute_cmd(cmd)  # make the directories
+        for dir_ in newdirs:
+            Path(dir_).mkdir(parents=True, exist_ok=True)
 
     def _get_outdir(self):
         """Called by constructor to initialize the output directory
