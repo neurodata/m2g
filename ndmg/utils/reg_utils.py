@@ -454,7 +454,7 @@ def applyxfm(ref, inp, xfm, aligned, interp="trilinear", dof=6):
     """
 
     cmd = f"flirt -in {inp} -ref {ref} -out {aligned} -init {xfm} -interp {interp} -dof {dof} -applyxfm"
-    subprocess.run(check=True, shell=True)
+    subprocess.run(cmd, check=True, shell=True)
 
 
 @print_arguments(inputs=[0, 1], outputs=[2, 3])
