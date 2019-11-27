@@ -493,7 +493,7 @@ def apply_warp(ref, inp, out, warp, xfm=None, mask=None, interp=None, sup=False)
         cmd += " --interp=" + interp
     if sup is True:
         cmd += " --super --superlevel=a"
-    subprocess.run(check=True, shell=True)
+    subprocess.run(cmd, check=True, shell=True)
 
 
 @print_arguments(inputs=[0, 2], outputs=[1])
