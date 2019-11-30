@@ -46,6 +46,10 @@ def opaque_colorscale(basemap, reference, vmin=None, vmax=None, alpha=1):
 def plot_overlays(atlas, b0, inimg, cmaps=None, minthr=2, maxthr=95, edge=False):
     plt.rcParams.update({"axes.labelsize": "x-large", "axes.titlesize": "x-large"})
     foverlay = plt.figure()
+    plt.title("QA for dipy's TissueClassify\n\n\n")
+    plt.xticks([])
+    plt.yticks([])
+    plt.axis('off')
 
     if atlas.shape != b0.shape:
         raise ValueError("Brains are not the same shape.")
@@ -183,8 +187,4 @@ def reg_mri_pngs(
     outdir.dirs['qa']['preproc'] = outdir.dirs['qa']['base'] + '/preproc/'
 
     fig.savefig(outdir.dirs['qa']['preproc']+'fastOverlay.png', format="png")
-    # name and save the file
-    # fname = os.path.split(mri)[1].split(".")[0] + ".png"
-    # fig.savefig(outdir + "/" + fname, format="png")
-    #plt.close()
 

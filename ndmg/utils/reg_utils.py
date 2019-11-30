@@ -26,6 +26,8 @@ from dipy.viz import regtools
 # ndmg imports
 from ndmg.utils import gen_utils
 from ndmg.utils.gen_utils import check_exists, timer
+from dipy.segment.tissue import TissueClassifierHMRF
+
 
 
 def erode_mask(mask, v=0):
@@ -302,7 +304,7 @@ def t1w_skullstrip(t1w, out, skull="none"):
 
 @check_exists(0)
 def segment_t1w(t1w, basename, opts=""):
-    """Uses FSLs FAST to segment an anatomical image into GM, WM, and CSF probability maps.
+    """Uses dipy's TissueClassifierHMRF to segment an anatomical image into GM, WM, and CSF probability maps.
 
     Parameters
     ----------
@@ -322,11 +324,27 @@ def segment_t1w(t1w, basename, opts=""):
         dictionary of output files
     """
 
-    # run FAST, with options -t for the image type and -n to
     # segment into CSF (pve_0), WM (pve_1), GM (pve_2)
-    cmd = f'fast -t 1 {opts} -n 3 -o {basename} {t1w}'
-    os.system(cmd)
+    print("Segmenting Anatomical Image into WM, GM, and CSF with dipy's TissueClassifierHMRF:")
+    t1 = nib.load(t1w)
+    t1_array = t1.get_data()
+    t1_header = t1.header
+    t1_affine = t1.affine
+    nclass = 3
+    beta = 0.1
+    hmrf = TissueClassifierHMRF()
+    initial_segmentation, final_segmentation, PVE = hmrf.classify(t1_array, nclass, beta)
+    CSF_array = PVE[ :, :, :, 0]
+    gm_array = PVE[:, :, :, 1]
+    wm_array = PVE[:, :, :, 2]
+    CSF_nii = nib.nifti1.Nifti1Image(CSF_array, t1_affine, t1_header)
+    gm_nii = nib.nifti1.Nifti1Image(gm_array, t1_affine, t1_header)
+    wm_nii = nib.nifti1.Nifti1Image(wm_array, t1_affine, t1_header)
+    nib.save(CSF_nii, "{}_{}".format(basename, "pve_0.nii.gz"))
+    nib.save(gm_nii, "{}_{}".format(basename, "pve_1.nii.gz"))
+    nib.save(wm_nii, "{}_{}".format(basename, "pve_2.nii.gz"))
     out = {}  # the outputs
+
     out["wm_prob"] = f'{basename}_pve_2.nii.gz'
     out["gm_prob"] = f'{basename}_pve_1.nii.gz'
     out["csf_prob"] = f'{basename}_pve_0.nii.gz'
