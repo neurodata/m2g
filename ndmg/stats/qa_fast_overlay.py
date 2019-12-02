@@ -46,6 +46,10 @@ def opaque_colorscale(basemap, reference, vmin=None, vmax=None, alpha=1):
 def plot_overlays(atlas, b0, inimg, cmaps=None, minthr=2, maxthr=95, edge=False):
     plt.rcParams.update({"axes.labelsize": "x-large", "axes.titlesize": "x-large"})
     foverlay = plt.figure()
+    plt.title("QA for FAST\n\n\n")
+    plt.xticks([])
+    plt.yticks([])
+    plt.axis('off')
 
     if atlas.shape != b0.shape:
         raise ValueError("Brains are not the same shape.")
@@ -119,7 +123,7 @@ def plot_overlays(atlas, b0, inimg, cmaps=None, minthr=2, maxthr=95, edge=False)
             ax.spines['left'].set_visible(False)
             ax.imshow(atl, interpolation="none", cmap=cmaps[0], alpha=0.65)
             ax.imshow(inim, interpolation="none", cmap=cmaps[1], alpha=0.65)
-            ax.imshow(image, interpolation="none", cmap=cmaps[2], alpha=0.58)
+            ax.imshow(image, interpolation="none", cmap=cmaps[2], alpha=0.6)
             ax.imshow(
                 opaque_colorscale(
                     cmaps[0], atl, alpha=0.65, vmin=min_val, vmax=max_val
@@ -132,7 +136,7 @@ def plot_overlays(atlas, b0, inimg, cmaps=None, minthr=2, maxthr=95, edge=False)
             )
             ax.imshow(
                 opaque_colorscale(
-                    cmaps[2], image, alpha=0.58, vmin=min_val, vmax=max_val
+                    cmaps[2], image, alpha=0.6, vmin=min_val, vmax=max_val
                 )
             )
             if idx == 3:
