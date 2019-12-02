@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # This travis build simply tests to see if the ndmg pipeline runs to completion.
 # Note that this does not mean the ndmg pipeline is *correct* -- just that it ran to completion!
 # TODO : run ndmg with `pytest`, rather than travis.
@@ -74,3 +75,81 @@ script:
   - docker exec travis aws s3 sync /output/sub-0025864/ses-1/dwi/roi-connectomes/desikan_space-MNI152NLin6_res-2x2x2 s3://ndmg-data/Travis-Output/$TRAVIS_BRANCH/$rand
   # print the url location for the two files on the s3 bucket
   - echo -en "\n\n\n\n\n\nHEATMAP_LOCATION = s3.console.aws.amazon.com/s3/object/ndmg-data/Travis-Output/$TRAVIS_BRANCH/$rand/$heat?region=us-east-1&tab=overview\n\nCSV_LOCATION = s3.console.aws.amazon.com/s3/object/ndmg-data/Travis-Output/$TRAVIS_BRANCH/$rand/$csv?region=us-east-1&tab=overview\n\n\n\n\n\n"
+=======
+# This travis build simply tests to see if the ndmg pipeline runs to completion.
+# Note that this does not mean the ndmg pipeline is *correct* -- just that it ran to completion!
+# TODO : run ndmg with `pytest`, rather than travis.
+# TODO : travis breaks if you make edits directly from github, because the branch name is wrong.
+
+# dist: xenial
+# virtualenv:
+#   system_site_packages: true
+
+language: python
+
+python:
+  - "3.6"
+
+services:
+  - docker
+
+addons:
+  apt:
+    packages:
+      - docker-ce
+
+env:
+  global:
+    - secure: "YYKxTQT3uuAS9Fihse/Ws2nl0Md70Bso/Mqo/hloIgPlhcchvwE0XhosTKVmKGe3fB3OqQQwxlTMehwc7gIu1CZ/qtbj1UulJbOe5hUEc+tnnY+YyHSWUpP2YnTDMaVcVZsQLRjT/I1svkFsjBHlJ86t24vDFdd50ZQZRrnAfCZbkxL8kR7z8YkWnLghnRosw63g3Y76yw7/Cbkg1d8Ezp3xiyDBB1ZVPUy+PXi/phFwNIH2DKuvTBlXPydjMgzhfscWrOUxfErW1LYEbB8JMcuuMc8UzoEt7Pewy+62Yv5q1Oz/Vxjl5bdczh/gGHnkVpSV2YKuphY7WYhaHXZgtrebyT7RhlhyfV0tnsxAVudfpcfS+LoPnJZxohjgtwao0JGzf5mSxxeY77vx++vM/xswd+0aCm4Qq3+nQjBnpktLBQsEIBCmvmIJdTZd+F8ZvmDQ5iK0P7o2sGqVxi9+UAJSNcop4ZqUa++Wf3U8ytb0uJ4TsKu8qstSgH6YPZrSg30hL9E5kPsxZwB5hXcqcrCltpx12ChjQohVKIk7sQhqeSrmM1PEZex1Pfd0yUDm5OuLOOV7znZuzfUbrDy5Aku4Ak3VTQclA6Hbj7gXu2gt4fk2jiTiCLT3JcJlBxK64a6JDlvw4lugnK/zzXI1dwI1ZB2PluJLBomwUbYDpic="
+    - secure: "QQa6udNBezNrYXagBy43Ky8mNR62088qggRgiS1jSKXit9K1Uab4c++g9HZKMTd63jYSsZMmDqTCzyd/uFxjcsgYlHd8VYOw5gX0vl6i12+vXkS4CgtGTfbyK9i4x0NlZR3ZD0AoU6epFoyEJuU9T9aDQJ6CvwcA4mGvbrTbKwR7pbWhUJE+5vSNDnd3OpR+lHJ16Mahejfo+yU5iO5M9rLV7Pkc4KPq9z8FloesgnIK+C1SIPpXPwT+o2jV1d8nh6zDSbfs0MkDk+nExKywxHSgGDX7gTPk3c1Et/P1U/dcSEwq/tyO6ciMrjqN4fvDoYSYojdm5WLjRo6tcKjsz4oGpo5dwWVBOkYXzWQHHeg1XY14P2aMXPjzP2AeHOT+yShIm29Is1Tk62uU8dV27YFLMx8q9PgMEGV2/L3xuQ20rFVMYxVYRpJ+iZc++nbjzMmvNIAY4KQ34TRdLOna8CUF+q18SnLeLYU1eeDtYVbChk8bItW+z5vw3h89ttuZrti1WTnfj5cRZG+a2Il69RhDvo1NSp0IGZds3aOqBOyRC9cGcFqw9MVPWOWWosbialtIYiD90DvseicsTSL6BjxQfRUqJl683TkfShimJ4hi+H84UtInw/Okt7CJ8ExXDdpUfp3y0LI/2iH92bIDJYKnlUBALiAUrAK+swpvTo8="
+  matrix:
+    - SP=native MOD=det
+    - SP=native_dsn MOD=det
+    - SP=native MOD=prob
+
+before_install:
+  # make local input and output directories to attach to container
+  - cd ..
+  - mkdir -m 777 input output
+
+  # useful log checks
+  - readlink -f input
+  - ls
+  - pwd
+  - uname -a
+  - df -h
+  - docker version
+
+  # grab ndmg's travis docker image, run it with local branch attached as a volume
+  - docker pull neurodata/ndmg_travis:latest
+  - docker images
+  - cd ndmg
+  - docker run -t -d --name travis -e AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY -v $(pwd):/ndmg -v $(readlink -f ../output):/output --entrypoint /bin/bash neurodata/ndmg_travis:latest
+  - docker ps
+
+install:
+  # useful log checks for packages whose versions have given us trouble
+  - docker exec -w /ndmg travis pip show dipy networkx
+
+  # get travis branch installed
+  - docker exec -w /ndmg travis pip install pytest
+  - docker exec -w /ndmg travis pip install .
+
+script:
+  # Run ndmg in docker, run pytest in docker.
+  # top command is to prevent travis from breaking at eddy_correct
+  - while sleep 9m; do echo "=====[ $SECONDS seconds still running ]====="; done &
+  - docker exec -w /ndmg travis ndmg --sp $SP --mod $MOD --participant_label 0025864 --session_label 1 --parcellation desikan --seeds 1 /input /output
+  - kill %1
+  - docker exec -w /ndmg travis pytest -v --disable-warnings
+  # generate an identifier for this travis branch run using date_SP_MOD_commit_ID
+  - rand=$(date +'%m-%d-%Y'-$SP-$MOD-${TRAVIS_COMMIT:0:7})
+  # get name of heatmap and connectome files
+  - heat=$(docker exec travis ls /output/sub-0025864/ses-1/qa/graphs_plotting)
+  - csv=$(docker exec travis ls /output/sub-0025864/ses-1/dwi/roi-connectomes/desikan_space-MNI152NLin6_res-2x2x2)
+  # run a command inside of docker to push heatmap and connectome to the ndmg-data s3 bucket
+  - docker exec travis aws s3 sync /output/sub-0025864/ses-1/qa/graphs_plotting s3://ndmg-data/Travis-Output/$TRAVIS_BRANCH/$rand
+  - docker exec travis aws s3 sync /output/sub-0025864/ses-1/dwi/roi-connectomes/desikan_space-MNI152NLin6_res-2x2x2 s3://ndmg-data/Travis-Output/$TRAVIS_BRANCH/$rand
+  # print the url location for the two files on the s3 bucket
+  - echo -en "\n\n\n\n\n\nHEATMAP_LOCATION = s3.console.aws.amazon.com/s3/object/ndmg-data/Travis-Output/$TRAVIS_BRANCH/$rand/$heat?region=us-east-1&tab=overview\n\nCSV_LOCATION = s3.console.aws.amazon.com/s3/object/ndmg-data/Travis-Output/$TRAVIS_BRANCH/$rand/$csv?region=us-east-1&tab=overview\n\n\n\n\n\n"
+>>>>>>> 5f8cfc2abef8846b1edde092d54b894ae4c29a35
