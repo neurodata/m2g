@@ -24,6 +24,7 @@ from dipy.tracking import utils
 from ndmg.utils import gen_utils
 from ndmg.utils import reg_utils
 from ndmg.stats.qa_skullstrip import gen_overlay_pngs
+
 @gen_utils.timer
 def direct_streamline_norm(streams, fa_path, namer):
     """Applys the Symmetric Diffeomorphic Registration (SyN) Algorithm onto the streamlines to the atlas space defined by .../atlases/reference_brains/FSL_HCP1065_FA_2mm.nii.gz
@@ -228,6 +229,7 @@ class DmriReg:
         # BET needed for this, as afni 3dautomask only works on 4d volumes
         print("Extracting brain from raw T1w image...")
         reg_utils.t1w_skullstrip(self.t1w, self.t1w_brain, self.skull)
+        
         #  QA part of skull strip
         last_folder = self.namer.dirs["qa"]["base"]
         QA_skullstrip_path = last_folder + '/skull_strip'
