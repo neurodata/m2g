@@ -3,7 +3,7 @@ LABEL author="Derek Pisner"
 LABEL maintainer="dpisner@utexas.edu"
 
 #--------Environment Variables-----------------------------------------------#
-ENV NDMG_URL https://github.com/neurodata/ndmg.git
+ENV NDMG_URL https://github.com/NeuroDataDesign/ndmg.git
 ENV NDMG_ATLASES https://github.com/neurodata/neuroparc.git
 ENV AFNI_URL https://files.osf.io/v1/resources/fvuh8/providers/osfstorage/5a0dd9a7b83f69027512a12b
 ENV LIBXP_URL http://mirrors.kernel.org/debian/pool/main/libx/libxp/libxp6_1.0.2-2_amd64.deb
@@ -90,7 +90,7 @@ RUN \
 RUN chmod -R 777 /ndmg_atlases
 
 # Grab ndmg from deploy.
-RUN git clone -b staging $NDMG_URL /ndmg && \
+RUN git clone -b neurodata_staging_clean $NDMG_URL /ndmg && \
     cd /ndmg && \
     pip3.6 install .
 RUN chmod -R 777 /usr/local/bin/ndmg_bids
@@ -104,3 +104,4 @@ RUN ldconfig
 
 # and add it as an entrypoint
 ENTRYPOINT ["ndmg"]
+
