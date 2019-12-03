@@ -11,7 +11,6 @@ TODO : depracate or change name. Add other preprocessing functions created from 
 # package imports
 import numpy as np
 import subprocess
-from subprocess import PIPE
 
 # ndmg imports
 from ndmg.utils import gen_utils

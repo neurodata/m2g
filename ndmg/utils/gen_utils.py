@@ -12,7 +12,6 @@ import os
 import shutil
 import sys
 import re
-from subprocess import Popen, PIPE
 import subprocess
 import time
 import functools

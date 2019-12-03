@@ -18,6 +18,7 @@ import glob
 import os
 from argparse import ArgumentParser
 import traceback
+import subprocess
 
 # ndmg imports
 from ndmg.utils import cloud_utils
