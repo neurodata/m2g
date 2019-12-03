@@ -7,7 +7,7 @@ bids, pythonic
 
 1. Any code from NeuroData (eg, written based on work here, and therefore funded by our funders, rather than for fun), live in a neurodata controlled org, rather than a personal repo (much like if you worked at google or a startup).
 2. Everything is always a PR, never a direct commit to master
-3. People using the code should always use master, if you have some branch that you think is better than master for some reason, then it is your responsibility to make a PR to master, rather than encouraging other people to use some untested branch. that is, unless you want them to be testing for you, which is a different thing.
+3. People using the code should always use deploy, if you have some branch that you think is better than deploy for some reason, then it is your responsibility to make a PR to deploy, rather than encouraging other people to use some untested branch. that is, unless you want them to be testing for you, which is a different thing.
 
 ## Branches
 ### deploy: 
