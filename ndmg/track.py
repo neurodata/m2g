@@ -27,11 +27,9 @@ from dipy.tracking.stopping_criterion import CmcStoppingCriterion
 from dipy.reconst.dti import fractional_anisotropy, TensorModel, quantize_evecs
 from dipy.reconst.shm import CsaOdfModel
 from dipy.reconst.csdeconv import ConstrainedSphericalDeconvModel, recursive_response
-from dipy.reconst.peak_direction_getter import EuDXDirectionGetter
 
 from dipy.data import get_sphere
 from dipy.direction import peaks_from_model, ProbabilisticDirectionGetter
-from dipy.segment.mask import median_otsu
 from ndmg.utils.gen_utils import timer
 
 
@@ -93,7 +91,7 @@ def tens_mod_fa_est(gtab, dwi_file, B0_mask):
     FA = fractional_anisotropy(mod.evals)
     FA[np.isnan(FA)] = 0
     fa_img = nib.Nifti1Image(FA.astype(np.float32), nodif_B0_affine)
-    fa_path = f'{os.path.dirname(B0_mask)}/tensor_fa.nii.gz'
+    fa_path = f"{os.path.dirname(B0_mask)}/tensor_fa.nii.gz"
     nib.save(fa_img, fa_path)
     return fa_path
 
@@ -210,7 +208,26 @@ class RunTrack:
             raise ValueError(
                 "Error: Either no seeds supplied, or no valid seeds found in white-matter interface"
             )
+        tracks = Streamlines([track for track in tracks if len(track) > 60])
         return tracks
+
+    @staticmethod
+    def make_hdr(streamlines, hdr):
+        trk_hdr = nib.streamlines.trk.TrkFile.create_empty_header()
+        trk_hdr["hdr_size"] = 1000
+        trk_hdr["dimensions"] = hdr["dim"][1:4].astype("float32")
+        trk_hdr["voxel_sizes"] = hdr["pixdim"][1:4]
+        trk_hdr["voxel_to_rasmm"] = np.eye(4)
+        trk_hdr["voxel_order"] = "RAS"
+        trk_hdr["pad2"] = "RAS"
+        trk_hdr["image_orientation_patient"] = np.array(
+            [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+        ).astype("float32")
+        trk_hdr["endianness"] = "<"
+        trk_hdr["_offset_data"] = 1000
+        trk_hdr["nb_streamlines"] = streamlines.total_nb_rows
+
+        return trk_hdr
 
     def prep_tracking(self):
         """Uses nibabel and dipy functions in order to load the grey matter, white matter, and csf masks
@@ -435,59 +452,3 @@ class RunTrack:
         print("Reconstructing tractogram streamlines...")
         self.streamlines = Streamlines(self.streamline_generator)
         return self.streamlines
-
-
-def eudx_basic(dwi_file, gtab, stop_val=0.1):
-    """Tracking with basic tensors and basic eudx - experimental
-    We now force seeding at every voxel in the provided mask for
-    simplicity.  Future functionality will extend these options.
-
-    Parameters
-    ----------
-    dwi_file : str
-        File (registered) to use for tensor/fiber tracking
-    gtab : GradientTable
-        dipy formatted bval/bvec structure
-    stop_val : float, optional
-        Value to cutoff fiber track, by default 0.1
-
-    Returns
-    -------
-    TensorFit
-        TensorFit file of input dwi/gtab
-    EuDx
-        streamlines
-    str
-        Path to created mask file
-    """
-    img = nib.load(dwi_file)
-    data = img.get_data()
-
-    data_sqz = np.squeeze(data)
-    b0_mask, mask_data = median_otsu(data_sqz, 2, 1)
-    mask_img = nib.Nifti1Image(mask_data.astype(np.float32), img.affine)
-    mask_out_file = os.path.dirname(dwi_file) + "/dwi_bin_mask.nii.gz"
-    nib.save(mask_img, mask_out_file)
-
-    # use all points in mask
-    seedIdx = np.where(mask_data > 0)  # seed everywhere not equal to zero
-    seedIdx = np.transpose(seedIdx)
-
-    model = TensorModel(gtab)
-
-    # print('data: {}'.format(data))
-    print(f'data shape: {data.shape}')
-    print(f'data type: {type(data)}')
-    # print('mask data: {}'.format(mask_data))
-    print(f'mask data shape: {mask_data.shape}')
-    print(f'mask data type: {type(mask_data)}')
-
-    print(f'data location: {dwi_file}')
-    print(f'mask location: {mask_out_file}')
-    ten = model.fit(data, mask_data)
-    sphere = get_sphere("symmetric724")
-    ind = quantize_evecs(ten.evecs, sphere.vertices)
-    streamlines = EuDXDirectionGetter(
-        a=ten.fa, ind=ind, seeds=seedIdx, odf_vertices=sphere.vertices, a_low=stop_val
-    )  # TODO : dipy 1.0.0 The EuDX tracking function has been removed. EuDX tractography can be performed dipy.tracking.local_tracking using dipy.reconst.peak_direction_getter.EuDXDirectionGetter.
-    return ten, streamlines, mask_out_file

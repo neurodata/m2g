@@ -6,6 +6,7 @@ import pytest
 import ndmg
 from ndmg.utils.cloud_utils import s3_get_data
 from pathlib import Path
+from ndmg.utils.gen_utils import create_datadescript, DirectorySweeper
 
 KEYWORDS = ["sub", "ses"]
 

@@ -36,7 +36,7 @@ def rescale_bvec(bvec, bvec_new):
     try:
         assert "bvec" in bvec_new
         np.savetxt(bvec_new, bv2)
-    
+
     except AssertionError:
         print(
             "Error: your new b-vector file must have extension .bvec to"
