@@ -30,18 +30,21 @@ but those accepted fastest will follow a workflow similar to the following:
   Keep the changes focused: Changing one feature or addressing one bug per pull request.
   Keep the commit history clean and concise. Commit messages should be in [imperative mood](https://chris.beams.io/posts/git-commit/).
   It is highly recommended that you test your changes thoroughly before submitting a pull request.
+  
+4. **Make sure your branch is up-to-date**
+  If you need to resolve merge conflicts, do so and make sure your branch still runs. Don't ever revert code that you didn't   write to a previous state.
 
-4. **Submit a Pull Request to staging.**
+5. **Submit a Pull Request to staging.**
    A member of the development team will review your changes to confirm
    that they can be merged into the main code base
 
-5. **Have your PR reviewed by the development team, and update your changes accordingly in your branch.**
+6. **Have your PR reviewed by the development team, and update your changes accordingly in your branch.**
    The reviewers will take special care in assisting you to address their comments, as well as dealing with conflicts
    and other tricky situations that could emerge from distributed development. While your PR may be accepted to staging, it will have to meet the improvement criteria before being added to deploy.
 
 ## Improvement Criteria
 In order for a change to be made to the ndmg deploy branch, it must meet the following criteria:
-1. Result in a discriminability value equal to/greater than the current deploy metrics (within noise):
+1. Result in a discriminability value equal to/greater than the current deploy metrics (within noise) on these 5 datasets:
    * BNU1 = 0.927, 1 failures        BNU1_staging = 0.923, 1 failures (113 success)
    * HNU1 = 0.969, 2 failures       HNU1_staging = 0.966, 2 failures (298 success)
    * NKI1 = 0.936, 5 failures       NKI1_staging = 0.924, 4 failures (36 success)
