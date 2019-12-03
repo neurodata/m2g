@@ -11,7 +11,7 @@ bids, pythonic
 
 ## Branches
 ### deploy: 
-The most stable branch, it is updated approximately once per month and only with sugnifican testing and changes that pass the Improvement Criteria
+The most stable branch, it is updated approximately once per month and only with significant testing and changes that pass the Improvement Criteria
 ### staging: 
 The most up-to-date branch, it is where feature branches are added to and is what gets merged into deploy. This version of the pipeline has not been as thoroughly tested as deploy, meaning there may be issues/less accurate results.
 
