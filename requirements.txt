@@ -15,4 +15,5 @@ fury
 pytest
 pathlib2
 graspy
+pythotk
 tkinter
