@@ -41,7 +41,7 @@ but those accepted fastest will follow a workflow similar to the following:
 
 ## Improvement Criteria
 In order for a change to be made to the ndmg deploy branch, it must meet the following criteria:
-1. Result in a discriminability value equal to/greater than the current deploy metrics:
+1. Result in a discriminability value equal to/greater than the current deploy metrics (within noise):
    * BNU1 = 0.927, 1 failures        BNU1_staging = 0.923, 1 failures (113 success)
    * HNU1 = 0.969, 2 failures       HNU1_staging = 0.966, 2 failures (298 success)
    * NKI1 = 0.936, 5 failures       NKI1_staging = 0.924, 4 failures (36 success)
