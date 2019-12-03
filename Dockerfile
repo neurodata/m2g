@@ -90,7 +90,7 @@ RUN \
 RUN chmod -R 777 /ndmg_atlases
 
 # Grab ndmg from deploy.
-RUN git clone -b neurodata_staging_clean $NDMG_URL /ndmg && \
+RUN git clone -b new_qa_fast_pr $NDMG_URL /ndmg && \
     cd /ndmg && \
     pip3.6 install .
 RUN chmod -R 777 /usr/local/bin/ndmg_bids
