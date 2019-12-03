@@ -20,8 +20,6 @@ import numpy as np
 import networkx as nx
 import nibabel as nib
 from dipy.tracking._utils import _mapping_to_voxel, _to_voxel_coordinates
-from itertools import combinations
-from collections import defaultdict
 from ndmg.utils.gen_utils import timer
 import matplotlib
 
