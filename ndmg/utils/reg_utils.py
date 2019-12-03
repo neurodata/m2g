@@ -94,8 +94,8 @@ def align_slices(dwi, corrected_dwi, idx):
         Index of the first B0 volume in the stack
     """
 
-    cmd = f'eddy_correct {dwi} {corrected_dwi} {idx}'
-    status = gen_utils.execute_cmd(cmd, verb=True)
+    cmd = f"eddy_correct {dwi} {corrected_dwi} {idx}"
+    gen_utils.execute_cmd(cmd, verb=True)
 
 
 @check_exists(0)
@@ -116,7 +116,7 @@ def probmap2mask(prob_map, mask_path, t, erode=0):
         erode=0:
             - the number of voxels to erode by. Defaults to 0.
     """
-    print(f'Extracting Mask from probability map {prob_map}...')
+    print(f"Extracting Mask from probability map {prob_map}...")
     prob = nib.load(prob_map)
     prob_dat = prob.get_data()
     mask = (prob_dat > t).astype(int)
@@ -164,7 +164,7 @@ def extract_t1w_brain(t1w, out, tmpdir, skull="none"):
 
     t1w_name = gen_utils.get_filename(t1w)
     # the t1w image with the skull removed.
-    skull_t1w = f'{tmpdir}/{t1w_name}_noskull.nii.gz'
+    skull_t1w = f"{tmpdir}/{t1w_name}_noskull.nii.gz"
     # 3dskullstrip to extract the brain-only t1w
     t1w_skullstrip(t1w, skull_t1w, skull)
     # 3dcalc to apply the mask over the 4d image
@@ -185,7 +185,7 @@ def normalize_t1w(inp, out):
         - out:
             - the output intensity-normalized image.
     """
-    cmd = f'3dUnifize -prefix {out} -input {inp}'
+    cmd = f"3dUnifize -prefix {out} -input {inp}"
     gen_utils.execute_cmd(cmd, verb=True)
 
 
@@ -206,7 +206,7 @@ def resample_fsl(base, res, goal_res, interp="spline"):
             - the interpolation strategy to use.
     """
     # resample using an isometric transform in fsl
-    cmd = f'flirt -in {base} -ref {base} -out {res} -applyisoxfm {goal_res} -interp {interp}'
+    cmd = f"flirt -in {base} -ref {base} -out {res} -applyisoxfm {goal_res} -interp {interp}"
     gen_utils.execute_cmd(cmd, verb=True)
 
 
@@ -289,15 +289,15 @@ def t1w_skullstrip(t1w, out, skull="none"):
         skullstrip parameter pre-set. Default is "none".
     """
     if skull == "below":
-        cmd = f'3dSkullStrip -prefix {out} -input {t1w} -shrink_fac_bot_lim 0.6 -ld 45'
+        cmd = f"3dSkullStrip -prefix {out} -input {t1w} -shrink_fac_bot_lim 0.6 -ld 45"
     elif skull == "cerebelum":
-        cmd = f'3dSkullStrip -prefix {out} -input {t1w} -shrink_fac_bot_lim 0.3 -ld 45'
+        cmd = f"3dSkullStrip -prefix {out} -input {t1w} -shrink_fac_bot_lim 0.3 -ld 45"
     elif skull == "eye":
-        cmd = f'3dSkullStrip -prefix {out} -input {t1w} -no_avoid_eyes -ld 45'
+        cmd = f"3dSkullStrip -prefix {out} -input {t1w} -no_avoid_eyes -ld 45"
     elif skull == "general":
-        cmd = f'3dSkullStrip -prefix {out} -input {t1w} -push_to_edge -ld 45'
+        cmd = f"3dSkullStrip -prefix {out} -input {t1w} -push_to_edge -ld 45"
     else:
-        cmd = f'3dSkullStrip -prefix {out} -input {t1w} -ld 30'
+        cmd = f"3dSkullStrip -prefix {out} -input {t1w} -ld 30"
     gen_utils.execute_cmd(cmd, verb=True)
 
 
@@ -399,27 +399,27 @@ def align(
         angle in degrees, by default None
     """
 
-    cmd = f'flirt -in {inp} -ref {ref}'
+    cmd = f"flirt -in {inp} -ref {ref}"
     if xfm is not None:
-        cmd += f' -omat {xfm}'
+        cmd += f" -omat {xfm}"
     if out is not None:
-        cmd += f' -out {out}'
+        cmd += f" -out {out}"
     if dof is not None:
-        cmd += f' -dof {dof}'
+        cmd += f" -dof {dof}"
     if bins is not None:
-        cmd += f' -bins {bins}'
+        cmd += f" -bins {bins}"
     if interp is not None:
-        cmd += f' -interp {interp}'
+        cmd += f" -interp {interp}"
     if cost is not None:
-        cmd += f' -cost {cost}'
+        cmd += f" -cost {cost}"
     if searchrad is not None:
         cmd += " -searchrx -180 180 -searchry -180 180 " + "-searchrz -180 180"
     if sch is not None:
-        cmd += f' -schedule {sch}'
+        cmd += f" -schedule {sch}"
     if wmseg is not None:
-        cmd += f' -wmseg {wmseg}'
+        cmd += f" -wmseg {wmseg}"
     if init is not None:
-        cmd += f' -init {init}'
+        cmd += f" -init {init}"
     os.system(cmd)
 
 
@@ -428,8 +428,9 @@ def align_epi(epi, t1, brain, out):
     """
     Algins EPI images to T1w image
     """
-    cmd = f'epi_reg --epi={epi} --t1={t1} --t1brain={brain} --out={out}'
+    cmd = f"epi_reg --epi={epi} --t1={t1} --t1brain={brain} --out={out}"
     os.system(cmd)
+
 
 @timer
 @check_exists(0, 1)
@@ -456,13 +457,13 @@ def align_nonlinear(inp, ref, xfm, out, warp, ref_mask=None, in_mask=None, confi
         path to the config file specifying command line arguments, by default None
     """
 
-    cmd = f'fnirt --in={inp} --ref={ref} --aff={xfm} --iout={out} --cout={warp} --warpres=8,8,8'
+    cmd = f"fnirt --in={inp} --ref={ref} --aff={xfm} --iout={out} --cout={warp} --warpres=8,8,8"
     if ref_mask is not None:
-        cmd += f' --refmask={ref_mask} --applyrefmask=1'
+        cmd += f" --refmask={ref_mask} --applyrefmask=1"
     if in_mask is not None:
-        cmd += f' --inmask={in_mask} --applyinmask=1'
+        cmd += f" --inmask={in_mask} --applyinmask=1"
     if config is not None:
-        cmd += f' --config={config}'
+        cmd += f" --config={config}"
     os.system(cmd)
 
 
@@ -486,7 +487,7 @@ def applyxfm(ref, inp, xfm, aligned, interp="trilinear", dof=6):
         degrees of freedom for the alignment, by default 6
     """
 
-    cmd = f'flirt -in {inp} -ref {ref} -out {aligned} -init {xfm} -interp {interp} -dof {dof} -applyxfm'
+    cmd = f"flirt -in {inp} -ref {ref} -out {aligned} -init {xfm} -interp {interp} -dof {dof} -applyxfm"
     os.system(cmd)
 
 
@@ -589,7 +590,7 @@ def combine_xfms(xfm1, xfm2, xfmout):
     xfmout : str
         path for the ouput transformation
     """
-    cmd = f'convert_xfm -omat {xfmout} -concat {xfm1} {xfm2}'
+    cmd = f"convert_xfm -omat {xfmout} -concat {xfm1} {xfm2}"
     os.system(cmd)
 
 
@@ -683,7 +684,7 @@ def wm_syn(template_path, fa_path, working_dir):
         0,
         "Static",
         "Moving",
-        f'{working_dir}/transformed_sagittal.png'
+        f"{working_dir}/transformed_sagittal.png",
     )
     regtools.overlay_slices(
         static,
@@ -692,7 +693,7 @@ def wm_syn(template_path, fa_path, working_dir):
         1,
         "Static",
         "Moving",
-        f'{working_dir}/transformed_coronal.png'
+        f"{working_dir}/transformed_coronal.png",
     )
     regtools.overlay_slices(
         static,
@@ -701,7 +702,7 @@ def wm_syn(template_path, fa_path, working_dir):
         2,
         "Static",
         "Moving",
-        f'{working_dir}/transformed_axial.png'
+        f"{working_dir}/transformed_axial.png",
     )
 
     return mapping, affine_map

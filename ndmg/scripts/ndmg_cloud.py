@@ -10,8 +10,6 @@ For a tutorial on setting this up, see here : https://github.com/neurodata/ndmg/
 
 # standard library imports
 import subprocess
-import ast
-import csv
 import re
 import os
 import sys
@@ -19,13 +17,7 @@ import json
 from copy import deepcopy
 from collections import OrderedDict
 from argparse import ArgumentParser
-import warnings
-import shutil
-import time
 from pathlib import Path
-
-# package imports
-import boto3
 
 # ndmg imports
 import ndmg
@@ -33,23 +25,21 @@ from ndmg.utils.cloud_utils import get_credentials
 from ndmg.utils.cloud_utils import get_matching_s3_objects
 from ndmg.utils.cloud_utils import s3_client
 
-# TODO : grab this locally, using pkg_resources
-participant_templ = "https://raw.githubusercontent.com/neurodata/ndmg/staging/templates/ndmg_cloud_participant.json"
 
 
 def batch_submit(
     bucket,
     path,
     jobdir,
+    mod_func="csa",
+    track_type="local",
     credentials=None,
     state="participant",
-    debug=False,
     dataset=None,
-    log=False,
-    bg=False,
     modif="",
-    reg_style="",
-    mod_type="",
+    reg_style="native",
+    voxel_size="2mm",
+    mod_type="det",
 ):
     """Searches through an S3 bucket, gets all subject-ids, creates json files for each,
     submits batch jobs, and returns list of job ids to query status upon later
@@ -66,23 +56,17 @@ def batch_submit(
         AWS formatted csv of credentials, by default None
     state : str, optional
         determines the function to be performed by this function ("participant", "status", "kill"), by default "participant"
-    debug : bool, optional
-        flag whether to save temp files along the path of processing, by default False
     dataset : str, optional
         Name given to the output directory containing analyzed data set "ndmg-<version>-<dataset>", by default None
-    log : bool, optional
-        flag to indicate log ploting in group analysis, by default False
-    bg : bool, optional
-        whether or not to produce voxelwise big graph, by default False
     modif : str, optional
         Name of folder on s3 to push to. If empty, push to a folder with ndmg's version number, by default ""
     reg_style : str, optional
-        Space for tractography, by default ""
+        Space for tractography, by default "native"
     mod_type : str, optional
-        Determinstic (det) or probabilistic (prob) tracking, by default ""
+        Determinstic (det) or probabilistic (prob) tracking, by default "det"
     """
 
-    print(f'Getting list from s3://{bucket}/{path}/...')
+    print(f"Getting list from s3://{bucket}/{path}/...")
     threads = crawl_bucket(bucket, path, jobdir)
 
     print("Generating job for each subject...")
@@ -91,16 +75,18 @@ def batch_submit(
         path,
         threads,
         jobdir,
-        credentials,
-        debug,
-        dataset,
-        bg,
+        mod_func=mod_func,
+        credentials=credentials,
+        dataset=dataset,
+        track_type=track_type,
         modif=modif,
         reg_style=reg_style,
+        voxel_size=voxel_size,
+        mod_type=mod_type,
     )
 
     print("Submitting jobs to the queue...")
-    ids = submit_jobs(jobs, jobdir)
+    submit_jobs(jobs, jobdir)
 
 
 def crawl_bucket(bucket, path, jobdir):
@@ -122,7 +108,7 @@ def crawl_bucket(bucket, path, jobdir):
     """
 
     # if jobdir has seshs info file in it, use that instead
-    sesh_path = f'{jobdir}/seshs.json'
+    sesh_path = f"{jobdir}/seshs.json"
     if os.path.isfile(sesh_path):
         print("seshs.json found -- loading bucket info from there")
         with open(sesh_path, "r") as f:
@@ -139,16 +125,15 @@ def crawl_bucket(bucket, path, jobdir):
 
     # populate seshs
     for subj in subjs:
-        prefix = f'{path}/sub-{subj}/'
+        prefix = f"{path}/sub-{subj}/"
         all_seshfiles = get_matching_s3_objects(bucket, prefix)
         sesh = list(set([re.findall(sesh_pattern, obj)[0] for obj in all_seshfiles]))
         if sesh != []:
             seshs[subj] = sesh
-            print(f'{subj} added to seshs.')
+            print(f"{subj} added to seshs.")
         else:
             seshs[subj] = None
-            print(f'{subj} not added (no sessions).')
-
+            print(f"{subj} not added (no sessions).")
 
     # print session IDs and create json cache
     print(
@@ -165,7 +150,7 @@ def crawl_bucket(bucket, path, jobdir):
     )
     with open(sesh_path, "w") as f:
         json.dump(seshs, f)
-    print(f'{sesh_path} created.')
+    print(f"{sesh_path} created.")
     print("Information obtained from s3.")
     return seshs
 
@@ -175,13 +160,14 @@ def create_json(
     path,
     threads,
     jobdir,
+    mod_func="csa",
+    track_type="local",
     credentials=None,
-    debug=False,
     dataset=None,
-    bg=False,
     modif="",
-    reg_style="",
-    mod_type="",
+    reg_style="native",
+    voxel_size="2mm",
+    mod_type="det",
 ):
     """Creates the json files for each of the jobs
 
@@ -197,43 +183,36 @@ def create_json(
         Directory of batch jobs to generate/check up on
     credentials : [type], optional
         AWS formatted csv of credentials, by default None
-    debug : bool, optional
-        flag whether to save temp files along the path of processing, by default False
     dataset : [type], optional
-        Name given to the output directory containing analyzed data set "ndmg-<version>-<dataset>", by default None
-    bg : bool, optional
-        whether or not to produce voxelwise big graph, by default False
+        Name added to the generated json job files "ndmg_<version>_<dataset>_sub-<sub>_ses-<ses>", by default None
     modif : str, optional
         Name of folder on s3 to push to. If empty, push to a folder with ndmg's version number, by default ""
     reg_style : str, optional
         Space for tractography, by default ""
     mod_type : str, optional
-        Determinstic (det) or probabilistic (prob) tracking, by default ""
+        Determinstic (det) or probabilistic (prob) tracking, by default "det"
 
     Returns
     -------
     list
         list of job jsons
     """
-    jobsjson = f'{jobdir}/jobs.json'
+    jobsjson = f"{jobdir}/jobs.json"
     if os.path.isfile(jobsjson):
         with open(jobsjson, "r") as f:
             jobs = json.load(f)
         return jobs
 
     # set up infrastructure
-    out = subprocess.check_output(f'mkdir -p {jobdir}', shell=True)
-    out = subprocess.check_output(f'mkdir -p {jobdir}/jobs/', shell=True)
-    out = subprocess.check_output(f'mkdir -p {jobdir}/ids/', shell=True)
-    template = participant_templ
+    out = subprocess.check_output(f"mkdir -p {jobdir}", shell=True)
+    out = subprocess.check_output(f"mkdir -p {jobdir}/jobs/", shell=True)
+    out = subprocess.check_output(f"mkdir -p {jobdir}/ids/", shell=True)
     seshs = threads
 
-    # make template
-    if not os.path.isfile(f'{jobdir}/{template.split("/")[-1]}'):
-        cmd = f'wget --quiet -P {jobdir} {template}'
-        subprocess.check_output(cmd, shell=True)
+    templ = os.path.dirname(__file__)
+    tpath=templ[: templ.find("/ndmg/scripts")]
 
-    with open(f'{jobdir}/{template.split("/")[-1]}', "r") as inf:
+    with open(f'{tpath}/templates/ndmg_cloud_participant.json', "r") as inf:
         template = json.load(inf)
 
     cmd = template["containerOverrides"]["command"]
@@ -249,34 +228,25 @@ def create_json(
 
     # edit non-defaults
     jobs = []
-    cmd[cmd.index("<BUCKET>")] = bucket
-    cmd[cmd.index("<PATH>")] = path
-
-    # edit defaults if necessary
-    if reg_style:
-        cmd[cmd.index("--sp") + 1] = reg_style
-    if mod_type:
-        cmd[cmd.index("--mod") + 1] = reg_style
-    if bg:
-        cmd.append("--big")
-    if modif:
-        cmd.insert(cmd.index("--push_data") + 1, u"--modif")
-        cmd.insert(cmd.index("--push_data") + 2, modif)
+    cmd[cmd.index("<INPUT>")]=f's3://{bucket}/{path}'
+    cmd[cmd.index("<PUSH>")] = f's3://{bucket}/{path}/{modif}'
+    cmd[cmd.index("<VOX>")] = voxel_size
+    cmd[cmd.index("<MOD>")] = mod_type
+    cmd[cmd.index("<FILTER>")]=track_type
+    cmd[cmd.index("<DIFF>")]=mod_func
+    cmd[cmd.index("<SPACE>")] = reg_style
 
     # edit participant-specific values ()
     # loop over every session of every participant
     for subj in seshs.keys():
-        print(f'... Generating job for sub-{subj}')
+        print(f"... Generating job for sub-{subj}")
         # and for each subject number in each participant number,
         for sesh in seshs[subj]:
             # add format-specific commands,
             job_cmd = deepcopy(cmd)
             job_cmd[job_cmd.index("<SUBJ>")] = subj
             if sesh is not None:
-                job_cmd.insert(7, u"--session_label")
-                job_cmd.insert(8, u"{}".format(sesh))
-            if debug:
-                job_cmd += [u"--debug"]
+                job_cmd[job_cmd.index("<SESH>")] = sesh
 
             # then, grab the template,
             # add additional parameters,
@@ -285,11 +255,11 @@ def create_json(
             job_json = deepcopy(template)
             ver = ndmg.__version__.replace(".", "-")
             if dataset:
-                name = f'ndmg_{ver}_{dataset}_sub-{subj}'
+                name = f"ndmg_{ver}_{dataset}_sub-{subj}"
             else:
-                name = f'ndmg_{ver}_sub-{subj}'
+                name = f"ndmg_{ver}_sub-{subj}"
             if sesh is not None:
-                name = f'{name}_ses-{sesh}'
+                name = f"{name}_ses-{sesh}"
             print(job_cmd)
             job_json["jobName"] = name
             job_json["containerOverrides"]["command"] = job_cmd
@@ -321,18 +291,13 @@ def submit_jobs(jobs, jobdir):
     """
 
     batch = s3_client(service="batch")
-    cmd_template = "--cli-input-json file://{}"
 
     for job in jobs:
         with open(job, "r") as f:
             kwargs = json.load(f)
-        print(f'... Submitting job {job}...')
+        print(f"... Submitting job {job}...")
         submission = batch.submit_job(**kwargs)
-        print(
-            (
-                f'Job Name: {submission["jobName"]}, Job ID: {submission["jobId"]}'
-            )
-        )
+        print((f'Job Name: {submission["jobName"]}, Job ID: {submission["jobId"]}'))
         sub_file = os.path.join(jobdir, "ids", submission["jobName"] + ".json")
         with open(sub_file, "w") as outfile:
             json.dump(submission, outfile)
@@ -351,10 +316,7 @@ def kill_jobs(jobdir, reason='"Killing job"'):
         Task you want to perform on the jobs, by default '"Killing job"'
     """
 
-    cmd_template1 = "aws batch cancel-job --job-id {} --reason {}"
-    cmd_template2 = "aws batch terminate-job --job-id {} --reason {}"
-
-    print(f'Cancelling/Terminating jobs in {jobdir}/ids/...')
+    print(f"Cancelling/Terminating jobs in {jobdir}/ids/...")
     jobs = os.listdir(jobdir + "/ids/")
     batch = s3_client(service="batch")
     jids = []
@@ -362,7 +324,7 @@ def kill_jobs(jobdir, reason='"Killing job"'):
 
     # grab info about all the jobs
     for job in jobs:
-        with open(f'{jobdir}/ids/{job}', "r") as inf:
+        with open(f"{jobdir}/ids/{job}", "r") as inf:
             submission = json.load(inf)
         jid = submission["jobId"]
         name = submission["jobName"]
@@ -370,7 +332,7 @@ def kill_jobs(jobdir, reason='"Killing job"'):
         names.append(name)
 
     for jid in jids:
-        print(f'Terminating job {jid}')
+        print(f"Terminating job {jid}")
         batch.terminate_job(jobId=jid, reason=reason)
 
 
@@ -379,55 +341,52 @@ def main():
     parser = ArgumentParser(
         description="This is a pipeline for running BIDs-formatted diffusion MRI datasets through AWS S3 to produce connectomes."
     )
-
     parser.add_argument(
-        "state",
+        "--state",
         choices=["participant", "status", "kill"],
         default="participant",
-        help="determines the function to be performed by " "this function.",
+        help="determines the function to be performed by ndmg_cloud.",
     )
     parser.add_argument(
         "--bucket",
-        help="The S3 bucket with the input dataset"
-        " formatted according to the BIDS standard.",
+        help="""The S3 bucket with the input dataset
+         formatted according to the BIDS standard.""",
     )
     parser.add_argument(
         "--bidsdir",
-        help="The directory where the dataset"
-        " lives on the S3 bucket should be stored. If you"
-        " level analysis this folder should be prepopulated"
-        " with the results of the participant level analysis.",
+        help="""The path of the directory where the dataset
+        lives on the S3 bucket.""",
     )
     parser.add_argument(
-        "--jobdir", action="store", help="Dir of batch jobs to" " generate/check up on."
+        "--jobdir",
+        action="store",
+        help="""Local directory where the generated batch jobs will be
+        saved/run through in case of batch termination or check-up."""
     )
     parser.add_argument(
-        "--credentials", action="store", help="AWS formatted" " csv of credentials."
+        "--credentials",
+        action="store",
+        help="csv formatted AWS credentials."
     )
-    parser.add_argument(
-        "--log",
-        action="store_true",
-        help="flag to indicate" " log plotting in group analysis.",
-        default=False,
-    )
-    parser.add_argument(
-        "--debug",
-        action="store_true",
-        help="flag to store " "temp files along the path of processing.",
-        default=False,
-    )
-    parser.add_argument("--dataset", action="store", help="Dataset name")
+    #parser.add_argument("--dataset", action="store", help="Dataset name")
     parser.add_argument(
         "--modif",
         action="store",
-        help="Name of folder on s3 to push to. If empty, push to a folder with ndmg's version number.",
+        help="""Name of folder on s3 to push to. Data will be saved at '<bucket>/<bidsdir>/<modif>' on the s3 bucket
+        If empty, push to a folder with ndmg's version number.""",
         default="",
     )
     parser.add_argument(
-        "--sp",
+        "--space",
         action="store",
         help="Space for tractography. Default is native.",
         default="native",
+    )
+    parser.add_argument(
+        "--voxelsize",
+        action="store",
+        default="2mm",
+        help="Voxel size : 2mm, 1mm. Voxel size to use for template registrations.",
     )
     parser.add_argument(
         "--mod",
@@ -435,22 +394,34 @@ def main():
         help="Determinstic (det) or probabilistic (prob) tracking. Default is det.",
         default="det",
     )
+    parser.add_argument(
+        "--diffusion_model",
+        action="store",
+        help="Diffusion model: csd, csa. Default is csa.",
+        default="csa",
+    )
+    parser.add_argument(
+        "--filtering_type",
+        action="store",
+        help="Tracking approach: local, particle. Default is local.",
+        default="local",
+    )
 
     result = parser.parse_args()
 
     bucket = result.bucket
     path = result.bidsdir
     path = path.strip("/") if path is not None else path
-    debug = result.debug
+    dset = path.split("/")[-1] if path is not None else None
     state = result.state
     creds = result.credentials
     jobdir = result.jobdir
-    dset = result.dataset
-    log = result.log
-    bg = result.big != "False"
     modif = result.modif
-    reg_style = result.sp
+    reg_style = result.space
+    vox = result.voxelsize
     mod_type = result.mod
+    track_type = result.filtering_type
+    mod_func = result.diffusion_model
 
     if jobdir is None:
         jobdir = "./"
@@ -460,11 +431,7 @@ def main():
             "Requires either path to bucket and data, or the status flag"
             " and job IDs to query.\n  Try:\n    ndmg_cloud --help"
         )
-
-    if state == "status":
-        print("Checking job status...")
-        get_status(jobdir)
-    elif state == "kill":
+    if state == "kill":
         print("Killing jobs...")
         kill_jobs(jobdir)
     elif state == "participant":
@@ -476,14 +443,14 @@ def main():
             bucket,
             path,
             jobdir,
-            creds,
-            state,
-            debug,
-            dset,
-            log,
-            bg,
+            credentials=creds,
+            state=state,
+            dataset=dset,
+            mod_func=mod_func,
+            track_type=track_type,
             modif=modif,
             reg_style=reg_style,
+            voxel_size=vox,
             mod_type=mod_type,
         )
 
