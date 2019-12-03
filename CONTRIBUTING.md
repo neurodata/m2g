@@ -51,7 +51,8 @@ In order for a change to be made to the ndmg deploy branch, it must meet the fol
    * NKI24 = 0.937, 5 failures      NKI24_staging = 0.928, 4 failures (36 success)
    * SWU4 = 0.785, 69 failures       SWU4_staging = 0.790, 68 failures (382 success)
    * Settings: `local`, `native`, `csa`, `det`
-2. There should be no non-python3 dependencies in the pipeline (we only support python3)
+2. Scans run with 20 seeds at 2mm resolution should finish in less than 1.5 hours
+3. There should be no non-python3 dependencies in the pipeline (we only support python3)
 
 ## Code formatting
 * [Black](https://github.com/ambv/black) for Python
