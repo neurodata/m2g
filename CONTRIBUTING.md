@@ -1,6 +1,6 @@
 # Contributing to NDMG
 
-This document is a working draft.  Edits and comments welcome.
+This document is a working draft.  Edits and comments welcome. See the [neurodata practices](https://github.com/neurodata/practices) for best practices on writing code.
 
 ## Driving Principles
 bids, pythonic
