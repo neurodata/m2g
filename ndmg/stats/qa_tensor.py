@@ -18,6 +18,7 @@
 # qa_tensor.py
 # Created by Vikram Chandrashekhar.
 # Edited by Greg Kiar.
+# Edited by Wilson Tang
 # Email: Greg Kiar @ gkiar@jhu.edu
 
 import warnings
@@ -33,7 +34,7 @@ import nibabel as nb
 import sys
 import matplotlib
 
-from dipy.viz import window, actor,
+from dipy.viz import window, actor
 from fury.actor import orient2rgb
 
 matplotlib.use("Agg")  # very important above pyplot import
@@ -112,7 +113,7 @@ def plot_directions(peak_dirs,peak_values,x_angle,y_angle,fname,size=(300,300)):
     
     window.show(scene, size = size)
 
-def create_qa_figure(peak_dirs,peak_values,output_dir):
+def create_qa_figure(peak_dirs,peak_values,output_dir,model):
     """
     Creates a 9x9 figure of the 3-d volume and saves it
     
@@ -121,7 +122,10 @@ def create_qa_figure(peak_dirs,peak_values,output_dir):
     peak_dirs: np array of peak_dirs 
     peak_values: np array of peak_values
     output_dir: location to save qa figure
+    model: model type (CSA, CSD)
     """
+    #title
+    title = f'QA for Tractography {model} Model Peak Directions'
     
     #set shape of image
     im_shape = peak_dirs.shape[0:3]
@@ -137,7 +141,6 @@ def create_qa_figure(peak_dirs,peak_values,output_dir):
     y = [int(im_shape[1] * 0.35), int(im_shape[1] * 0.51), int(im_shape[1] * 0.65)]
     z = [int(im_shape[2] * 0.35), int(im_shape[2] * 0.51), int(im_shape[2] * 0.65)]
     coords = (x, y, z)
-    print('Plotting Slices' + str(coords))
     labs = [
         "Sagittal Slice (YZ fixed)",
         "Coronal Slice (XZ fixed)",
@@ -148,7 +151,6 @@ def create_qa_figure(peak_dirs,peak_values,output_dir):
     idx = 0
     for i, coord in enumerate(coords):
         for pos in coord:
-            print(pos)
             idx += 1
             ax = plt.subplot(3, 3, idx)
             ax.set_title(var[i] + " = " + str(pos))
@@ -163,8 +165,10 @@ def create_qa_figure(peak_dirs,peak_values,output_dir):
                 ax.set_ylabel(labs[i])
                 ax.yaxis.set_ticks([0, image.shape[0] / 2, image.shape[0] - 1])
                 ax.xaxis.set_ticks([0, image.shape[1] / 2, image.shape[1] - 1])
-
-
+            #casting to deal with clipping issue in matplotlib
+            plt.imshow((image * 255).astype(np.uint8))
+            
     fig = plt.gcf()
+    fig.suptitle(title)
     fig.set_size_inches(12.5, 10.5, forward=True)
     fig.savefig(output_dir)

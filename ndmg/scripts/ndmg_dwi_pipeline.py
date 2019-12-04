@@ -129,7 +129,7 @@ def ndmg_dwi_worker(
     # Create derivative output file names
     streams = namer.name_derivative(namer.dirs["output"]["fiber"], "streamlines.trk")
     qa_tensor = namer.name_derivative(namer.dirs["qa"]["tensor"],"Tractography_Model_Peak_Directions.png")
-
+    
     # generate list of connectome file locations
     labels = gen_utils.as_list(labels)
     connectomes = []
@@ -149,7 +149,6 @@ def ndmg_dwi_worker(
 
     # Perform eddy correction
     dwi_prep = f'{namer.dirs["output"]["prep_dwi"]}/eddy_corrected_data.nii.gz'
-
     if len(os.listdir(namer.dirs["output"]["prep_dwi"])) != 0:
         if skipeddy is False:
             try:

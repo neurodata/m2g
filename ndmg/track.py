@@ -111,7 +111,7 @@ class RunTrack:
         mod_type,
         track_type,
         mod_func,
-        qa_tensor
+        qa_tensor_out,
         seeds,
         stream_affine,
     ):
@@ -166,7 +166,7 @@ class RunTrack:
         self.gtab = gtab
         self.mod_type = mod_type
         self.track_type = track_type
-        self.qa_tensor = qa_tensor 
+        self.qa_tensor_out = qa_tensor_out 
         self.seeds = seeds
         self.mod_func = mod_func
         self.stream_affine = stream_affine
@@ -354,7 +354,7 @@ class RunTrack:
                 npeaks=5,
                 normalize_peaks=True,
             )
-            create_qa_figure(self.mod_peaks.peak_dirs, self.mod_peaks.peak_values, self.qa_tensor)
+            qa_tensor.create_qa_figure(self.mod_peaks.peak_dirs, self.mod_peaks.peak_values, self.qa_tensor_out, self.mod_func)
             self.streamline_generator = LocalTracking(
                 self.mod_peaks,
                 self.tiss_classifier,
@@ -378,7 +378,7 @@ class RunTrack:
                 npeaks=5,
                 normalize_peaks=True,
             )
-            create_qa_figure(self.mod_peaks.peak_dirs, self.mod_peaks.peak_values, self.qa_tensor)
+            qa_tensor.create_qa_figure(self.mod_peaks.peak_dirs, self.mod_peaks.peak_values, self.qa_tensor_out, self.mod_func)
             try:
                 print(
                     "Proceeding using spherical harmonic coefficient from model estimation..."
@@ -422,7 +422,7 @@ class RunTrack:
                 npeaks=5,
                 normalize_peaks=True,
             )
-            create_qa_figure(self.mod_peaks.peak_dirs, self.mod_peaks.peak_values, self.qa_tensor)
+            qa_tensor.create_qa_figure(self.mod_peaks.peak_dirs, self.mod_peaks.peak_values, self.qa_tensor_out, self.mod_func)
             self.streamline_generator = ParticleFilteringTracking(
                 self.mod_peaks,
                 self.tiss_classifier,
@@ -442,7 +442,7 @@ class RunTrack:
             print("Fitting model to data...")
             self.mod_fit = self.mod.fit(self.data, self.wm_in_dwi_data)
             print("Building direction-getter...")
-                        self.mod_peaks = peaks_from_model(
+            self.mod_peaks = peaks_from_model(
                 self.mod,
                 self.data,
                 self.sphere,
@@ -452,7 +452,7 @@ class RunTrack:
                 npeaks=5,
                 normalize_peaks=True,
             )
-            create_qa_figure(self.mod_peaks.peak_dirs, self.mod_peaks.peak_values, self.qa_tensor)
+            qa_tensor.create_qa_figure(self.mod_peaks.peak_dirs, self.mod_peaks.peak_values, self.qa_tensor_out, self.mod_func)
             try:
                 print(
                     "Proceeding using spherical harmonic coefficient from model estimation..."
