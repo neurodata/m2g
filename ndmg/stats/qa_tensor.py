@@ -33,86 +33,138 @@ import nibabel as nb
 import sys
 import matplotlib
 
+from dipy.viz import window, actor,
+from fury.actor import orient2rgb
+
 matplotlib.use("Agg")  # very important above pyplot import
 import matplotlib.pyplot as plt
 
 
-def tensor2fa(tensors, tensor_name, dti, derivdir, qcdir):
+def generate_3_d_directions(peak_dirs,peak_values):
     """
-    outdir: location of output directory.
-    fname: name of output fa map file. default is none (name created based on
-    input file)
+    Generates 3-d data required for plotting directions for the entire brain volume
+    
+    Parameters
+    -----------
+    peak_dirs: np array of peak_dirs 
+    peak_values: np array of peak_values
+    slices: dictionary of lists of slices in x,y,z plane
+    
+    Returns
+    -----------
+    centers: np array of center points
+    directions: np array of vector directions
+    directions_colors: np array of RGB colors 
+    heights: np array of vector magnitudes
     """
-    dti_data = nb.load(dti)
-    affine = dti_data.get_affine()
-    dti_data = dti_data.get_data()
+    
+    #initialize 
+    centers = []
+    directions = []
+    heights = []
+    directions_colors = []
+    
+    #iteratively create required new arrow entries per value in 3-d peak object
+    for x in range(peak_dirs.shape[0]):
+        for y in range(peak_dirs.shape[1]): 
+            for z in range(peak_dirs.shape[2]):
+                centers.append([x,y,z])
+                
+                #relies on the fact that peaks_from_models generates peak_dirs and peak_values in descending order
+                directions.append(peak_dirs[x,y,z,0,:])
+                heights.append(peak_values[x,y,z,0])
 
-    # create FA map
-    FA = fractional_anisotropy(tensors.evals)
-    FA[np.isnan(FA)] = 0
+    #convert to np arrays
+    centers = np.asarray(centers)
+    directions = np.asarray(directions)
+    heights = np.asarray(heights)
+    
+    #get rgb based on directional components
+    directions_colors = orient2rgb(directions)
+    
+    return centers,directions,directions_colors,heights
 
-    # generate the RGB FA map
-    FA = np.clip(FA, 0, 1)
-    RGB = color_fa(FA, tensors.evecs)
-
-    fname = os.path.split(tensor_name)[1].split(".")[0] + "_fa_rgb.nii.gz"
-    fa = nb.Nifti1Image(np.array(255 * RGB, "uint8"), affine)
-    nb.save(fa, os.path.join(derivdir, fname))
-
-    fa_pngs(fa, fname, qcdir)
-
-
-def fa_pngs(data, fname, outdir):
+def plot_directions(peak_dirs,peak_values,x_angle,y_angle,fname,size=(300,300)):
     """
-    data: fa map
+    Opens a 3-d fury window of the maximum peaks visualized
+    
+    To show a slice, provide a sliced volume of the peak_dirs and peak_values and adjust the x_angle and y_angle 
+    See Tractography Directional Field QA Tutorial for examples
+    
+    Parameters
+    -----------
+    peak_dirs: np array of peak_dirs 
+    peak_values: np array of peak_values
+    slices: dictionary of lists of slices in x,y,z plane
+    x_angle: angle to rotate image along x axis
+    y_angle: angle to rotate image along y axis
+    fname: str path to save
+    size: size tuple for each image
+    """    
+    centers,directions,directions_colors,heights = generate_3_d_directions(peak_dirs,peak_values)
+    
+    scene = window.Scene()
+    arrow_actor = actor.arrow(centers, directions, directions_colors, heights)
+
+    scene.add(arrow_actor)
+    scene.roll(x_angle)
+    scene.pitch(y_angle)
+    
+    window.show(scene, size = size)
+
+def create_qa_figure(peak_dirs,peak_values,output_dir):
     """
-    im = data.get_data()
-    fig = plot_rgb(im)
-    fname = os.path.split(fname)[1].split(".")[0] + ".png"
-    plt.savefig(outdir + fname, format="png")
-
-
-def plot_rgb(im):
-    plt.rcParams.update({"axes.labelsize": "x-large", "axes.titlesize": "x-large"})
-
-    if im.shape == (182, 218, 182):
-        x = [78, 90, 100]
-        y = [82, 107, 142]
-        z = [88, 103, 107]
-    else:
-        shap = im.shape
-        x = [int(shap[0] * 0.35), int(shap[0] * 0.51), int(shap[0] * 0.65)]
-        y = [int(shap[1] * 0.35), int(shap[1] * 0.51), int(shap[1] * 0.65)]
-        z = [int(shap[2] * 0.35), int(shap[2] * 0.51), int(shap[2] * 0.65)]
+    Creates a 9x9 figure of the 3-d volume and saves it
+    
+    Parameters
+    -----------
+    peak_dirs: np array of peak_dirs 
+    peak_values: np array of peak_values
+    output_dir: location to save qa figure
+    """
+    
+    #set shape of image
+    im_shape = peak_dirs.shape[0:3]
+    im_shape_rgb = im_shape + (3,)
+    
+    #generate 3-d directional data
+    centers,directions,directions_colors,heights = generate_3_d_directions(peak_dirs,peak_values)
+    
+    #reshape back into a 3-d volume with voxel encoded RGB values corresponding to directional vectors
+    im = directions_colors.reshape(im_shape_rgb)
+    
+    x = [int(im_shape[0] * 0.35), int(im_shape[0] * 0.51), int(im_shape[0] * 0.65)]
+    y = [int(im_shape[1] * 0.35), int(im_shape[1] * 0.51), int(im_shape[1] * 0.65)]
+    z = [int(im_shape[2] * 0.35), int(im_shape[2] * 0.51), int(im_shape[2] * 0.65)]
     coords = (x, y, z)
-
+    print('Plotting Slices' + str(coords))
     labs = [
         "Sagittal Slice (YZ fixed)",
         "Coronal Slice (XZ fixed)",
         "Axial Slice (XY fixed)",
     ]
     var = ["X", "Y", "Z"]
-
+    
     idx = 0
     for i, coord in enumerate(coords):
         for pos in coord:
+            print(pos)
             idx += 1
             ax = plt.subplot(3, 3, idx)
             ax.set_title(var[i] + " = " + str(pos))
             if i == 0:
-                image = ndimage.rotate(im[pos, :, :], 90)
+                image = ndimage.rotate(im[pos, :, : , :], 90)
             elif i == 1:
-                image = ndimage.rotate(im[:, pos, :], 90)
+                image = ndimage.rotate(im[:, pos, : , :], 90)
             else:
-                image = im[:, :, pos]
+                image = im[:, :, pos, :]
 
             if idx % 3 == 1:
                 ax.set_ylabel(labs[i])
                 ax.yaxis.set_ticks([0, image.shape[0] / 2, image.shape[0] - 1])
                 ax.xaxis.set_ticks([0, image.shape[1] / 2, image.shape[1] - 1])
 
-            plt.imshow(image)
 
     fig = plt.gcf()
     fig.set_size_inches(12.5, 10.5, forward=True)
-    return fig
+    fig.savefig(output_dir)

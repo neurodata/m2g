@@ -32,6 +32,8 @@ from dipy.data import get_sphere
 from dipy.direction import peaks_from_model, ProbabilisticDirectionGetter
 from ndmg.utils.gen_utils import timer
 
+from ndmg.stats import qa_tensor
+
 
 def build_seed_list(mask_img_file, stream_affine, dens):
     """uses dipy tractography utilities in order to create a seed list for tractography
@@ -109,6 +111,7 @@ class RunTrack:
         mod_type,
         track_type,
         mod_func,
+        qa_tensor
         seeds,
         stream_affine,
     ):
@@ -146,6 +149,8 @@ class RunTrack:
             Tracking approach: local or particle
         mod_func : str
             Diffusion model: csd or csa
+        qa_tensor: str
+            path to store the qa for tensor/directions of model 
         seeds : ndarray
             ndarray of seeds for tractography
         stream_affine : ndarray
@@ -161,9 +166,11 @@ class RunTrack:
         self.gtab = gtab
         self.mod_type = mod_type
         self.track_type = track_type
+        self.qa_tensor = qa_tensor 
         self.seeds = seeds
         self.mod_func = mod_func
         self.stream_affine = stream_affine
+
 
     @timer
     def run(self):
@@ -347,6 +354,7 @@ class RunTrack:
                 npeaks=5,
                 normalize_peaks=True,
             )
+            create_qa_figure(self.mod_peaks.peak_dirs, self.mod_peaks.peak_values, self.qa_tensor)
             self.streamline_generator = LocalTracking(
                 self.mod_peaks,
                 self.tiss_classifier,
@@ -360,6 +368,17 @@ class RunTrack:
             print("Fitting model to data...")
             self.mod_fit = self.mod.fit(self.data, self.wm_in_dwi_data)
             print("Building direction-getter...")
+            self.mod_peaks = peaks_from_model(
+                self.mod,
+                self.data,
+                self.sphere,
+                relative_peak_threshold=0.5,
+                min_separation_angle=25,
+                mask=self.wm_in_dwi_data,
+                npeaks=5,
+                normalize_peaks=True,
+            )
+            create_qa_figure(self.mod_peaks.peak_dirs, self.mod_peaks.peak_values, self.qa_tensor)
             try:
                 print(
                     "Proceeding using spherical harmonic coefficient from model estimation..."
@@ -403,6 +422,7 @@ class RunTrack:
                 npeaks=5,
                 normalize_peaks=True,
             )
+            create_qa_figure(self.mod_peaks.peak_dirs, self.mod_peaks.peak_values, self.qa_tensor)
             self.streamline_generator = ParticleFilteringTracking(
                 self.mod_peaks,
                 self.tiss_classifier,
@@ -422,6 +442,17 @@ class RunTrack:
             print("Fitting model to data...")
             self.mod_fit = self.mod.fit(self.data, self.wm_in_dwi_data)
             print("Building direction-getter...")
+                        self.mod_peaks = peaks_from_model(
+                self.mod,
+                self.data,
+                self.sphere,
+                relative_peak_threshold=0.5,
+                min_separation_angle=25,
+                mask=self.wm_in_dwi_data,
+                npeaks=5,
+                normalize_peaks=True,
+            )
+            create_qa_figure(self.mod_peaks.peak_dirs, self.mod_peaks.peak_values, self.qa_tensor)
             try:
                 print(
                     "Proceeding using spherical harmonic coefficient from model estimation..."

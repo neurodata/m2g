@@ -128,6 +128,7 @@ def ndmg_dwi_worker(
 
     # Create derivative output file names
     streams = namer.name_derivative(namer.dirs["output"]["fiber"], "streamlines.trk")
+    qa_tensor = namer.name_derivative(namer.dirs["qa"]["tensor"],"Tractography_Model_Peak_Directions.png")
 
     # generate list of connectome file locations
     labels = gen_utils.as_list(labels)
@@ -311,6 +312,7 @@ def ndmg_dwi_worker(
         mod_type,
         track_type,
         mod_func,
+        qa_tensor,
         seeds,
         np.eye(4),
     )
