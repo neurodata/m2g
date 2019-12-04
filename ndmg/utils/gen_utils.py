@@ -17,7 +17,7 @@ import time
 import functools
 import json
 from pathlib import Path
-from collections import namedtuple
+from collections import namedtuple, UserDict
 
 # package imports
 import bids
@@ -152,7 +152,7 @@ class DirectorySweeper:
         return scans
 
 
-class NameResource:
+class NameResource(UserDict):
     """
     A class for naming derivatives under the BIDs spec.
 
@@ -175,6 +175,9 @@ class NameResource:
         self.t1w_name = get_filename(t1w)
         self.outdir = outdir
         self.dirs = {}
+
+    def __repr__(self):
+        return str(self.dirs)
 
     @staticmethod
     def name_derivative(folder, derivative):
@@ -200,8 +203,6 @@ class NameResource:
 
         Parameters
         ----------
-        namer : NameResource
-            varibale of the NameResource class created by NameResource() containing path and settings information for the desired run. It includes: subject, anatomical scan, session, run number, task, resolution, output directory
         paths : dict
             a dictionary of keys to suffix directories
         labels : list
@@ -210,8 +211,7 @@ class NameResource:
             list containing the keys from 'paths' you wish to add label level granularity to (create a directory for each value in 'labels')
         """
 
-        if not isinstance(labels, list):
-            labels = [labels]
+        labels = as_list(labels)
         dirtypes = ["output"]
         for dirt in dirtypes:
             olist = [self.outdir]
@@ -228,6 +228,7 @@ class NameResource:
                         self.dirs[dirt][kwd][labname] = os.path.join(newdir, labname)
                 else:
                     self.dirs[dirt][kwd] = newdir
+
         self.dirs["tmp"] = {}
         self.dirs["tmp"]["base"] = self.outdir + "/tmp"
         self.dirs["tmp"]["reg_a"] = self.dirs["tmp"]["base"] + "/reg_a"
@@ -243,6 +244,7 @@ class NameResource:
         self.dirs["qa"]["mri"] = self.dirs["qa"]["base"] + "/mri"
         self.dirs["qa"]["reg"] = self.dirs["qa"]["base"] + "/reg"
         self.dirs["qa"]["tensor"] = self.dirs["qa"]["base"] + "/tensor"
+
         newdirs = flatten(self.dirs, [])
         for dir_ in newdirs:
             Path(dir_).mkdir(parents=True, exist_ok=True)
