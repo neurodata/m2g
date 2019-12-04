@@ -131,7 +131,7 @@ def ndmg_dwi_worker(
     labels = gen_utils.as_list(labels)
     connectomes = []
     for label in labels:
-        filename = namer.get_label(label)
+        filename = gen_utils.get_filename(label)
         folder = namer.dirs["output"]["conn"][filename]
         derivative = f"{namer.dwi_name}_{filename}_measure-spatial-ds{fmt}"
         connectomes.append(namer.name_derivative(folder, derivative))

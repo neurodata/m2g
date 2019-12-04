@@ -34,192 +34,6 @@ from dipy.core.gradients import gradient_table
 from dipy.align.reslice import reslice
 
 
-class NameResource:
-    """
-    A class for naming derivatives under the BIDs spec.
-
-    Parameters
-    ----------
-    dwi : str
-        Path to subject MRI (dwi) data to be analyzed
-    t1w : str
-        Path to subject t1w anatomical data
-    parcellation : str
-        Path to atlas file(s) to be used during analysis
-    outdir : str
-        Path to output directory
-    """
-
-    def __init__(self, dwi, t1w, parcellation, outdir):
-        """__init__ containing relevant BIDS specified paths for relevant data
-        """
-        self.dwi_name = get_filename(dwi)
-        self.t1w_name = get_filename(t1w)
-        self.subname = self.search(r"(sub-)(?!.*sub-).*?(?=[_])", dwi)
-        self.sesname = self.search(r"(ses-)(?!.*ses-).*?(?=[_])", dwi)
-        self.task = self.search(r"(task-)(?!.*task-).*?(?=[_])", dwi)
-        self.temp = get_filename(parcellation)
-        self.space = re.split(r"[._]", self.temp)[0]
-        self.res = self.search(r"(res-)(?!.*res-).*?(?=[_])", parcellation)
-        self.basepath = outdir
-        self.outdir = self._get_outdir()
-
-    @staticmethod
-    def search(pattern, string):
-        try:
-            return re.search(pattern, string).group()
-        except AttributeError:
-            return None
-
-    def add_dirs(namer, paths, labels, label_dirs):
-        """Creates tmp and permanent directories for the desired suffixes
-
-        Parameters
-        ----------
-        namer : NameResource
-            varibale of the NameResource class created by NameResource() containing path and settings information for the desired run. It includes: subject, anatomical scan, session, run number, task, resolution, output directory
-        paths : dict
-            a dictionary of keys to suffix directories
-        labels : list
-            list of paths of all the atlas label nifti files being used (each will get their own directory)
-        label_dirs : list
-            list containing the keys from 'paths' you wish to add label level granularity to (create a directory for each value in 'labels')
-        """
-
-        namer.dirs = {}
-        if not isinstance(labels, list):
-            labels = [labels]
-        dirtypes = ["output"]
-        for dirt in dirtypes:
-            olist = [namer.get_outdir()]
-            namer.dirs[dirt] = {}
-            if dirt in ["tmp"]:
-                olist = olist + [dirt]
-            namer.dirs[dirt]["base"] = os.path.join(*olist)
-            for kwd, path in paths.items():
-                newdir = os.path.join(*[namer.dirs[dirt]["base"], path])
-                if kwd in label_dirs:  # levels with label granularity
-                    namer.dirs[dirt][kwd] = {}
-                    for label in labels:
-                        labname = namer.get_label(label)
-                        namer.dirs[dirt][kwd][labname] = os.path.join(newdir, labname)
-                else:
-                    namer.dirs[dirt][kwd] = newdir
-        namer.dirs["tmp"] = {}
-        namer.dirs["tmp"]["base"] = namer.get_outdir() + "/tmp"
-        namer.dirs["tmp"]["reg_a"] = namer.dirs["tmp"]["base"] + "/reg_a"
-        namer.dirs["tmp"]["reg_m"] = namer.dirs["tmp"]["base"] + "/reg_m"
-        namer.dirs["qa"] = {}
-        namer.dirs["qa"]["base"] = namer.get_outdir() + "/qa"
-        namer.dirs["qa"]["adjacency"] = namer.dirs["qa"]["base"] + "/adjacency"
-        namer.dirs["qa"]["fibers"] = namer.dirs["qa"]["base"] + "/fibers"
-        namer.dirs["qa"]["graphs"] = namer.dirs["qa"]["base"] + "/graphs"
-        namer.dirs["qa"]["graphs_plotting"] = (
-            namer.dirs["qa"]["base"] + "/graphs_plotting"
-        )
-        namer.dirs["qa"]["mri"] = namer.dirs["qa"]["base"] + "/mri"
-        namer.dirs["qa"]["reg"] = namer.dirs["qa"]["base"] + "/reg"
-        namer.dirs["qa"]["tensor"] = namer.dirs["qa"]["base"] + "/tensor"
-        newdirs = flatten(namer.dirs, [])
-        for dir_ in newdirs:
-            Path(dir_).mkdir(parents=True, exist_ok=True)
-
-    def _get_outdir(self):
-        """Called by constructor to initialize the output directory
-
-        Returns
-        -------
-        list
-            path to output directory
-        """
-
-        olist = [self.basepath]
-        return os.path.join(*olist)
-
-    def get_outdir(self):
-        """Returns the base output directory for a particular subject and appropriate granularity.
-
-        Returns
-        -------
-        str
-            output directory
-        """
-
-        return self.outdir
-
-    def get_label(self, label):
-        """Return the formatted label information for the parcellation (i.e. the name of the file without the path)
-
-        Parameters
-        ----------
-        label : str
-            Path to parcellation file that you want the isolated name of
-
-        Returns
-        -------
-        str
-            the isolated file name
-        """
-        return get_filename(label)
-        # return "label-{}".format(re.split(r'[._]',
-        #                         os.path.basename(label))[0])
-
-    def name_derivative(self, folder, derivative):
-        """Creates derivative output file paths using os.path.join
-
-        Parameters
-        ----------
-        folder : str
-            Path of directory that you want the derivative file name appended too
-        derivative : str
-            The name of the file to be produced
-
-        Returns
-        -------
-        str
-            Derivative output file path
-        """
-
-        return os.path.join(*[folder, derivative])
-
-    def get_mod_source(self):
-        return self.dwi_name
-
-    def get_anat_source(self):
-        return self.t1w_name
-
-    def get_sub_info(self):
-        olist = []
-        if self.subname:
-            olist.append(self.subname)
-        if self.sesname:
-            olist.append(self.sesname)
-        return olist
-
-
-def flatten(current, result=[]):
-    """Flatten a folder heirarchy
-
-    Parameters
-    ----------
-    current : dict
-        path to directory you want to flatten
-    result : list, optional
-        Used to store directory information between iterations of flatten, Default is []
-
-    Returns
-    -------
-    list
-        All new directories created by flattening the current directory
-    """
-    if isinstance(current, dict):
-        for key in current:
-            flatten(current[key], result)
-    else:
-        result.append(current)
-    return result
-
-
 class DirectorySweeper:
     """
     Class for parsing through a BIDs-formatted directory tree.
@@ -300,10 +114,8 @@ class DirectorySweeper:
             Dictionary of all files from a single session.
         """
 
-        anat, bval, bvec, dwi = self.layout.get(
-            return_type="filename", session=session, subject=subject
-        )
-
+        kwargs = dict(return_type="filename", session=session, subject=subject)
+        anat, bval, bvec, dwi = self.layout.get(**kwargs)
         files = {"dwi": dwi, "bvals": bval, "bvecs": bvec, "t1w": anat}
         return files
 
@@ -338,6 +150,125 @@ class DirectorySweeper:
                 )
 
         return scans
+
+
+class NameResource:
+    """
+    A class for naming derivatives under the BIDs spec.
+
+    Parameters
+    ----------
+    dwi : str
+        Path to subject MRI (dwi) data to be analyzed
+    t1w : str
+        Path to subject t1w anatomical data
+    parcellation : str
+        Path to atlas file(s) to be used during analysis
+    outdir : str
+        Path to output directory
+    """
+
+    def __init__(self, dwi, t1w, parcellation, outdir):
+        """__init__ containing relevant BIDS specified paths for relevant data
+        """
+        self.dwi_name = get_filename(dwi)
+        self.t1w_name = get_filename(t1w)
+        self.outdir = outdir
+        self.dirs = {}
+
+    @staticmethod
+    def name_derivative(folder, derivative):
+        """Creates derivative output file paths using os.path.join
+
+        Parameters
+        ----------
+        folder : str
+            Path of directory that you want the derivative file name appended too
+        derivative : str
+            The name of the file to be produced
+
+        Returns
+        -------
+        str
+            Derivative output file path
+        """
+
+        return os.path.join(*[folder, derivative])
+
+    def add_dirs(self, paths, labels, label_dirs):
+        """Creates tmp and permanent directories for the desired suffixes
+
+        Parameters
+        ----------
+        namer : NameResource
+            varibale of the NameResource class created by NameResource() containing path and settings information for the desired run. It includes: subject, anatomical scan, session, run number, task, resolution, output directory
+        paths : dict
+            a dictionary of keys to suffix directories
+        labels : list
+            list of paths of all the atlas label nifti files being used (each will get their own directory)
+        label_dirs : list
+            list containing the keys from 'paths' you wish to add label level granularity to (create a directory for each value in 'labels')
+        """
+
+        if not isinstance(labels, list):
+            labels = [labels]
+        dirtypes = ["output"]
+        for dirt in dirtypes:
+            olist = [self.outdir]
+            self.dirs[dirt] = {}
+            if dirt in ["tmp"]:
+                olist = olist + [dirt]
+            self.dirs[dirt]["base"] = os.path.join(*olist)
+            for kwd, path in paths.items():
+                newdir = os.path.join(*[self.dirs[dirt]["base"], path])
+                if kwd in label_dirs:  # levels with label granularity
+                    self.dirs[dirt][kwd] = {}
+                    for label in labels:
+                        labname = get_filename(label)
+                        self.dirs[dirt][kwd][labname] = os.path.join(newdir, labname)
+                else:
+                    self.dirs[dirt][kwd] = newdir
+        self.dirs["tmp"] = {}
+        self.dirs["tmp"]["base"] = self.outdir + "/tmp"
+        self.dirs["tmp"]["reg_a"] = self.dirs["tmp"]["base"] + "/reg_a"
+        self.dirs["tmp"]["reg_m"] = self.dirs["tmp"]["base"] + "/reg_m"
+        self.dirs["qa"] = {}
+        self.dirs["qa"]["base"] = self.outdir + "/qa"
+        self.dirs["qa"]["adjacency"] = self.dirs["qa"]["base"] + "/adjacency"
+        self.dirs["qa"]["fibers"] = self.dirs["qa"]["base"] + "/fibers"
+        self.dirs["qa"]["graphs"] = self.dirs["qa"]["base"] + "/graphs"
+        self.dirs["qa"]["graphs_plotting"] = (
+            self.dirs["qa"]["base"] + "/graphs_plotting"
+        )
+        self.dirs["qa"]["mri"] = self.dirs["qa"]["base"] + "/mri"
+        self.dirs["qa"]["reg"] = self.dirs["qa"]["base"] + "/reg"
+        self.dirs["qa"]["tensor"] = self.dirs["qa"]["base"] + "/tensor"
+        newdirs = flatten(self.dirs, [])
+        for dir_ in newdirs:
+            Path(dir_).mkdir(parents=True, exist_ok=True)
+
+
+def flatten(current, result=[]):
+    """Flatten a folder heirarchy
+
+    Parameters
+    ----------
+    current : dict
+        path to directory you want to flatten
+    result : list, optional
+        Used to store directory information between iterations of flatten, Default is []
+
+    Returns
+    -------
+    list
+        All new directories created by flattening the current directory
+    """
+    if isinstance(current, dict):
+        for key in current:
+            flatten(current[key], result)
+    else:
+        result.append(current)
+    return result
 
 
 def all_strings(iterable_):

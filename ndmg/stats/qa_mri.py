@@ -483,7 +483,7 @@ class QaMRI:
             qcdir:
                 - the quality control directory to place outputs.
         """
-        label_name = self.namer.get_label(label)
+        label_name = gen_utils.get_filename(label)
         qcdir = self.namer.dirs["qa"]["conn"][label_name]
         print("Performing QA for ROI Analysis...")
         cmd = f"mkdir -p {qcdir}"
