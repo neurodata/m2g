@@ -120,7 +120,7 @@ class GroupFunc:
         """
         regdir = f'{self.outdir}/{"reg"}'
         cmd = f"mkdir -p {regdir}"
-        mgu.execute_cmd(cmd)
+        mgu.execute_cmd(cmd)  # TODO : remove
 
         self_reg_sc = []
         temp_reg_sc = []
@@ -162,7 +162,7 @@ class GroupFunc:
         """
         mcdir = f'{self.outdir}/{"mc"}'
         cmd = f"mkdir -p {mcdir}"
-        mgu.execute_cmd(cmd)
+        mgu.execute_cmd(cmd)  # TODO: remove
 
         trans_abs = np.zeros((len(self.qa_objects)))
         trans_rel = np.zeros((len(self.qa_objects)))

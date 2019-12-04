@@ -12,7 +12,6 @@ import os
 import shutil
 import sys
 import re
-from subprocess import Popen, PIPE
 import subprocess
 import time
 import functools
@@ -131,8 +130,8 @@ class NameResource:
         namer.dirs["qa"]["reg"] = namer.dirs["qa"]["base"] + "/reg"
         namer.dirs["qa"]["tensor"] = namer.dirs["qa"]["base"] + "/tensor"
         newdirs = flatten(namer.dirs, [])
-        cmd = f'mkdir -p {" ".join(newdirs)}'
-        execute_cmd(cmd)  # make the directories
+        for dir_ in newdirs:
+            Path(dir_).mkdir(parents=True, exist_ok=True)
 
     def _get_outdir(self):
         """Called by constructor to initialize the output directory
@@ -466,7 +465,7 @@ def print_arguments(inputs=[], outputs=[]):
 
             for output_ in outputs:
                 p = all_args[output_]
-                print(f"Output {p} found.")
+                print(f"Output will exist at {p}.")
 
             print(f"Calling {f.__name__}.")
             function_out = f(*args, **kwargs)
@@ -601,36 +600,6 @@ def show_template_bundles(final_streamlines, template_path, fname):
     )
     renderer.add(lines_actor)
     window.record(renderer, n_frames=1, out_path=fname, size=(900, 900))
-
-
-def execute_cmd(cmd, verb=False):
-    """Given a bash command, it is executed and the response piped back to the
-    calling script
-
-    Parameters
-    ----------
-    cmd : str
-        command you want to execute
-    verb : bool, optional
-        whether to print the command that is being executed, by default False
-
-    Returns
-    -------
-    stdout
-        outputs from p.communicate
-    stderr
-        error from p.communicate
-    """
-
-    if verb:
-        print(f"Executing: {cmd}")
-
-    p = Popen(cmd, stdout=PIPE, stderr=PIPE, shell=True)
-    out, err = p.communicate()
-    code = p.returncode
-    if code:
-        sys.exit(f"Error {code}: {err}")
-    return out, err
 
 
 def get_braindata(brain_file):
@@ -776,7 +745,7 @@ def make_gtab_and_bmask(fbval, fbvec, dwi_file, outdir):
 
     for cmd in cmds:
         print(cmd)
-        os.system(cmd)
+        subprocess.run(cmd, shell=True, check=True)
 
     # Get mean B0
     B0s_bbr_imgs = []
@@ -788,7 +757,7 @@ def make_gtab_and_bmask(fbval, fbvec, dwi_file, outdir):
 
     # Get mean B0 brain mask
     cmd = f"bet {nodif_B0} {nodif_B0_bet} -m -f 0.2"
-    os.system(cmd)
+    subprocess.run(cmd, shell=True, check=True)
     return gtab, nodif_B0, nodif_B0_mask
 
 
