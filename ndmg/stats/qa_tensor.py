@@ -40,7 +40,6 @@ from fury.actor import orient2rgb
 matplotlib.use("Agg")  # very important above pyplot import
 import matplotlib.pyplot as plt
 
-
 def generate_3_d_directions(peak_dirs,peak_values):
     """
     Generates 3-d data required for plotting directions for the entire brain volume
@@ -112,6 +111,26 @@ def plot_directions(peak_dirs,peak_values,x_angle,y_angle,fname,size=(300,300)):
     scene.pitch(y_angle)
     
     window.show(scene, size = size)
+    
+def pad_im(image,max_dim,pad_val):
+    """
+    Pads an image to be same dimensions as given max_dim
+    
+    Parameters
+    -----------
+    image: 3-d RGB np array of image slice
+    max_dim: dimension to pad up to
+    pad_val: value to pad with
+    
+    Returns
+    -----------
+    padded_image: 3-d RGB np array of image slice with padding
+    """
+    #pad only in first two dimensions not in rgb
+    pad_width = (((max_dim-image.shape[0])//2,(max_dim-image.shape[0])//2),((max_dim-image.shape[1])//2,(max_dim-image.shape[1])//2),(0,0))
+    padded_image = np.pad(image, pad_width=pad_width, mode='constant', constant_values=pad_val)
+    
+    return padded_image
 
 def create_qa_figure(peak_dirs,peak_values,output_dir,model):
     """
@@ -127,9 +146,10 @@ def create_qa_figure(peak_dirs,peak_values,output_dir,model):
     #set shape of image
     im_shape = peak_dirs.shape[0:3]
     im_shape_rgb = im_shape + (3,)
+    max_dim = max(im_shape) 
 
     #title
-    title = f'QA for Tractography {model} Model Peak Directions. Brain Volume: {im_shape}'
+    title = f'QA for Tractography {model.upper()} Model Peak Directions. Brain Volume: {im_shape}'
     
     #generate 3-d directional data
     centers,directions,directions_colors,heights = generate_3_d_directions(peak_dirs,peak_values)
@@ -140,11 +160,12 @@ def create_qa_figure(peak_dirs,peak_values,output_dir,model):
     x = [int(im_shape[0] * 0.35), int(im_shape[0] * 0.51), int(im_shape[0] * 0.65)]
     y = [int(im_shape[1] * 0.35), int(im_shape[1] * 0.51), int(im_shape[1] * 0.65)]
     z = [int(im_shape[2] * 0.35), int(im_shape[2] * 0.51), int(im_shape[2] * 0.65)]
+
     coords = (x, y, z)
     labs = [
-        "Sagittal Slice (YZ fixed)",
-        "Coronal Slice (XZ fixed)",
-        "Axial Slice (XY fixed)",
+        "Sagittal Slice",
+        "Coronal Slice",
+        "Axial Slice",
     ]
     var = ["X", "Y", "Z"]
     
@@ -160,11 +181,18 @@ def create_qa_figure(peak_dirs,peak_values,output_dir,model):
                 image = ndimage.rotate(im[:, pos, : , :], 90)
             else:
                 image = im[:, :, pos, :]
-
             if idx % 3 == 1:
                 ax.set_ylabel(labs[i])
-            #casting to deal with clipping issue in matplotlib
-            plt.imshow((image * 255).astype(np.uint8))
+            #remove axis
+            plt.xticks([])
+            plt.yticks([])
+            image = (image*255).astype(np.uint8)
+            #convert background
+            image = np.where(image<=0.01, 255, image)
+            #pad image size
+            image = pad_im(image,max_dim,255)
+            plt.imshow(image)
+
             
     fig = plt.gcf()
     fig.suptitle(title)
