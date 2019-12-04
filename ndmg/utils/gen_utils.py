@@ -40,45 +40,36 @@ class NameResource:
 
     Parameters
     ----------
-    modf : str
+    dwi : str
         Path to subject MRI (dwi) data to be analyzed
-    t1wf : str
+    t1w : str
         Path to subject t1w anatomical data
-    tempf : str
+    parcellation : str
         Path to atlas file(s) to be used during analysis
-    opath : str
+    outdir : str
         Path to output directory
     """
 
-    def __init__(self, modf, t1wf, tempf, opath):
+    def __init__(self, dwi, t1w, parcellation, outdir):
         """__init__ containing relevant BIDS specified paths for relevant data
         """
-        self.__subi__ = os.path.basename(modf).split(".")[0]
-        self.__anati__ = os.path.basename(t1wf).split(".")[0]
-        self.__suball__ = ""
-        self.__sub__ = re.search(r"(sub-)(?!.*sub-).*?(?=[_])", modf)
-        if self.__sub__:
-            self.__sub__ = self.__sub__.group()
-            self.__suball__ = f"sub-{self.__sub__}"
-        self.__ses__ = re.search(r"(ses-)(?!.*ses-).*?(?=[_])", modf)
-        if self.__ses__:
-            self.__ses__ = self.__ses__.group()
-            self.__suball__ = self.__suball__ + f"_ses-{self.__ses__}"
-        self.__run__ = re.search(r"(run-)(?!.*run-).*?(?=[_])", modf)
-        if self.__run__:
-            self.__run__ = self.__run__.group()
-            self.__suball__ = self.__suball__ + f"_run-{self.__run__}"
-        self.__task__ = re.search(r"(task-)(?!.*task-).*?(?=[_])", modf)
-        if self.__task__:
-            self.__task__ = self.__task__.group()
-            self.__suball__ = self.__suball__ + f"_run-{self.__task__}"
-        self.__temp__ = os.path.basename(tempf).split(".")[0]
-        self.__space__ = re.split(r"[._]", self.__temp__)[0]
-        self.__res__ = re.search(r"(res-)(?!.*res-).*?(?=[_])", tempf)
-        if self.__res__:
-            self.__res__ = self.__res__.group()
-        self.__basepath__ = opath
-        self.__outdir__ = self._get_outdir()
+        self.dwi_name = get_filename(dwi)
+        self.t1w_name = get_filename(t1w)
+        self.subname = self.search(r"(sub-)(?!.*sub-).*?(?=[_])", dwi)
+        self.sesname = self.search(r"(ses-)(?!.*ses-).*?(?=[_])", dwi)
+        self.task = self.search(r"(task-)(?!.*task-).*?(?=[_])", dwi)
+        self.temp = get_filename(parcellation)
+        self.space = re.split(r"[._]", self.temp)[0]
+        self.res = self.search(r"(res-)(?!.*res-).*?(?=[_])", parcellation)
+        self.basepath = outdir
+        self.outdir = self._get_outdir()
+
+    @staticmethod
+    def search(pattern, string):
+        try:
+            return re.search(pattern, string).group()
+        except AttributeError:
+            return None
 
     def add_dirs(namer, paths, labels, label_dirs):
         """Creates tmp and permanent directories for the desired suffixes
@@ -142,10 +133,7 @@ class NameResource:
             path to output directory
         """
 
-        olist = [self.__basepath__]
-        # olist.append(self.__sub__)
-        # if self.__ses__:
-        #    olist.append(self.__ses__)
+        olist = [self.basepath]
         return os.path.join(*olist)
 
     def get_outdir(self):
@@ -157,7 +145,7 @@ class NameResource:
             output directory
         """
 
-        return self.__outdir__
+        return self.outdir
 
     def get_label(self, label):
         """Return the formatted label information for the parcellation (i.e. the name of the file without the path)
@@ -195,17 +183,17 @@ class NameResource:
         return os.path.join(*[folder, derivative])
 
     def get_mod_source(self):
-        return self.__subi__
+        return self.dwi_name
 
     def get_anat_source(self):
-        return self.__anati__
+        return self.t1w_name
 
     def get_sub_info(self):
         olist = []
-        if self.__sub__:
-            olist.append(self.__sub__)
-        if self.__ses__:
-            olist.append(self.__ses__)
+        if self.subname:
+            olist.append(self.subname)
+        if self.sesname:
+            olist.append(self.sesname)
         return olist
 
 
@@ -233,7 +221,6 @@ def flatten(current, result=[]):
 
 
 class DirectorySweeper:
-    # TODO : find data with run_label in it and test on that
     """
     Class for parsing through a BIDs-formatted directory tree.
     
@@ -261,7 +248,7 @@ class DirectorySweeper:
         self.pairs = self.get_pairs(subjects=subjects, sessions=sessions)
 
     def __repr__(self):
-        return self.layout
+        return str(self.layout)
 
     def get_pairs(self, subjects, sessions):
         """
@@ -281,19 +268,19 @@ class DirectorySweeper:
             Formatted like: [(subject, session), (subject, session), ...].
         """
         pairs = []
-        args = dict(
+        kwargs = dict(
             suffix="dwi",
             extensions=["nii", "nii.gz"],
             subject=subjects,
             session=sessions,
         )
 
-        for entity in self.layout.get(**args):
+        for entity in self.layout.get(**kwargs):
             subject = entity.entities["subject"]
             session = entity.entities["session"]
             pairs.append((subject, session))
         if len(pairs) == 0:
-            raise ValueError("No pairs found for this subject/session")
+            raise ValueError(f"No pairs found for {self}")
         return pairs
 
     def get_files(self, subject, session):

@@ -108,6 +108,7 @@ def ndmg_dwi_worker(
     for arg, value in args.items():
         print(f"{arg} = {value}")
 
+    # connectome paths will end in f"{fmt}"
     fmt = "_adj.csv"
 
     # make output directory
@@ -132,7 +133,7 @@ def ndmg_dwi_worker(
     for label in labels:
         filename = namer.get_label(label)
         folder = namer.dirs["output"]["conn"][filename]
-        derivative = f"{namer.__subi__}_{filename}_measure-spatial-ds{fmt}"
+        derivative = f"{namer.dwi_name}_{filename}_measure-spatial-ds{fmt}"
         connectomes.append(namer.name_derivative(folder, derivative))
 
     warm_welcome = welcome_message(connectomes)
