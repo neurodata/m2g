@@ -273,7 +273,7 @@ class DmriReg:
         if not folder:
             os.makedirs(QA_skullstrip_path)
         print('QA_skullstrip_path  ', QA_skullstrip_path)
-        self.namer["qa"]["skull_strip"] = QA_skullstrip_path
+        self.namer.dirs["qa"]["skull_strip"] = QA_skullstrip_path
         gen_overlay_pngs(brain=self.t1w_brain, origional=self.t1w, outdir=self.namer.dirs["qa"]["skull_strip"], loc=0,
                          mean=False, minthr=2, maxthr=95, edge=False)
 
