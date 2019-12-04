@@ -22,8 +22,8 @@ addons:
 
 env:
   global:
-    - secure: "FG40Jg9hHyRi5T0Hw9Zr+fQsdMEZLUpEVOr0g0JPppA7Nvi2wEhGUdVPgr+4ni8OuXyrK0AdpCDNnMopLdjwG1pslSUtQbPOrPSatvrr9gpMJ0zzekyDYzQuzPsbSH0mxETTlFqnmn5Lxu90HOVu1ashm+icurz2zyFXP/11nsiIMQUTWX64dkppYmPDgIBmPSS+TWRI3ccP2S2Zt349xHULFYdz1SfQCmbmUQm5Oms7Ixyby7Se4mNiCTpNAkB7TXChJ3VB9QeT9IGHlPWk8FWZa36WuwyRkBrwCfwhKBOrdKHQqZ2KaJKHpKt2Mwr4IvUCuGzbi9Bfjn1uDxbPH0wiWMyRxM7HhZFgsCdyvChITkMFGhJtGmxGD8MMkliqk8DVK9332+zzM1vjm7MIxc1QpM8IdZSxL5fXSRP8+CnK+TsWf41vG8ueu16GMXqr4sCP/ReK1ZDZfprW7NUNKoQ5KCEN8ToNVOHAAaVVPr4f0B2e6XrWdzvExVEtSMOtRBJ3zZ0XkU4E++FIBMB80E7tQGyH8vds3YjLlDRh9rgw34jKOGN6SVwHsuI3BTujo5my0BF1YvcdSqP49NpJRWMo4ehYRC9/8tM2De+AzIxHaYk9NeuEStGKa0tGn/0Os6YUlUKC8XuxxQNLb1yo1ONNwWaShMsHkdfBFkpnU/o="
-    - secure: "GvzALZB0ZfKfe5sDWMF1R38Ov+SCRGG0Xj5Bm5F5p0pqfGCgX0k7iwmzOc+hOoM1XKqQHB/AOUsH53UABJkmlKLAsA6GZbtQprWD9h+kdYhTrMZ9ym4QywdIv0drF1rY7zCx6rAth0Lp9LaUu0P5KhsZNWqW/+ftmT25PvdaMuseIa/fWTWwDEiw5ZJym53we7fRrNgYU+tnlmEdSi0Ix8PmqAWDjxTlUxdg4muij0Tp4SZ4YwmHMlMDgbb8xYxEVfw8tvCYIRqtLbAq2G2s4sF68uzE0VWeI/e0+J0Xu0V5cHMM1x2Nq3+D8vNI97/ptCLo+EYtKnZGo+oxeu4EEB3Gwl8IaJ2JM/WDaq7H87/g1LNhWO5omTpNlRKdRE9p6VnMAbrUip24fCH2kui+FE5+acy7QHepBLYCLohFlK/sGOBszNzudio7AabJlP65tKSYOmAFts3yRZ20kv+tH/3uosL3u/NZGcOeKXKeFCKMRdyAJLdWjhfddLh1iv3vj+VYkDp9mUC13OH29EUIg8VozV5Yyyo3DOIvfX/vMhzWojJlhe6eXPVCI39V8KX01Qs06X83CXAYpaJhbWidyixJHwLoS7qH07o675bRR8Hq8sIT//5o6ho3BzJp1h8hqc3HjIxcKjQDIKvBGqTStoAZH+R8AHJ3l0RJf4eFKwU="
+    - secure: "HoiQQdwCbxO2Lf2L6aiP8hzJlNVmHLDli3Z+DqMEoN5ZUZWz2uM2T/Wdol/xe54zAA/YRyFK3cPt3liAWkMVtiGZ2Ndq297f7vlmSQB+h02pdFPLFuYLcAkZyKI+KW3N+SWsi3tH5XUXSIe/NLIea9kY4mpMJIKXPGgwxROd+iMpswy+bApkKaw9Y2tGlJ64OpqSaJZxTF955ftT7pFnuhyHwkswKv0r6mndox0ZXQvkOvdrTgJDsafz7HakFT3hCQz948C9QWOHxvBDKWHNV4KDZxS1DQ6EAU/OpVGoG7uTShiZmFZh1C4F3htojhr2fz0YIXLGdjaHgZVKtjn2VJuRrYmCR487zufXmCTroXSU9B297JZz1OnQhfaMJjPOVnyav/Ny3iSx6hoKsF5322tcWPZzYn4b6wdYoV4wGkn1Y33nxDBcBl142AdsACXTLzug2uCgr4LYGE9jUJnH8nC7GIX4lF7tu2xc3rhx4S8NXvqTWFS5OyJnBZ9uQWvzkQ0QcJQyusCOKfxuNEOPfsHAcBzXK/AOomxtmhMcay0zT9HY44/v/E/mnB1riQ82AGonoQ8quKbupvCNDGd7i1jzidPNjf6UrwWQRKZ96Y0P1H5eEcxqhppmvLjPtJq+/UCF1MHTuwWrMFVWrLe08SPC2pETVsCIP18bp2BIHJ0="
+    - secure: "gWj85fpWo3NFY/IbpFqF4YiaF3/KNohD4FC9xX9RCkA3M6Cpz1Tj7CSTi5pq2YsBTlfOYET8lIke+E7MPItMylyDCojkXrorFyQuPqd6DArDfaQfiwK12f3MBL0o8igNvDr0YYvNPTDbRgUSR+gzQt4I43gRQmtdRwAZpAdh5SwRzciRoxyz+l9yofVElX4vj9lnQodVjZ0oGf8ovT31z+fN6wAUegBHOFsWB3ZBQtnH/hPHq4ryM3y8N8iEk2RtAJYP8FfigaSjv/fE9YawTxC/oaMtPymYCe1DioMQLzpo0UwLIRQFNAcpLMoVIcbilU9AYEvcTQ/958cKd0Y5/zot9joTujQue7RHbadvp4OwgFJi3ov1+uNW9ZuZZnAlCs6aTe0CjPgULlvM2pPqsjnWvyzObA3qlM9ApwIjESR+O54ytU2oJYc0k+zJS35iC6Hi5fIOmlY2U+Q7I2POHVtJ39WslOBfgaDnJEc9PSspCFUmqc9s7xBCX6/TbXLP8UtGJoHnVM7rKpQVRTlkx2ChvkDjEUJIaiPw8MpCaMIL0ZO1KYQ4RrYD3FqgB+YzkMYp39iMmeI5ni16CneZD0GcKj7tn2kcgXmZHfKbPP2tLZsaRIFsVTuXQG83vR9DYpDdyqQuYgxNxncF5fUbv8/L0+s9vAb426iNdHA93vM="
   matrix:
     - SP=native MOD=det
     - SP=native_dsn MOD=det
@@ -61,6 +61,7 @@ script:
   # Run ndmg in docker, run pytest in docker.
   # top command is to prevent travis from breaking at eddy_correct
   - while sleep 9m; do echo "=====[ $SECONDS seconds still running ]====="; done &
+  - docker exec travis aws s3 sync /output s3://ndmg-data/Travis-Output/
   - docker exec -w /ndmg travis ndmg --sp $SP --mod $MOD --participant_label 0025864 --session_label 1 --parcellation desikan --seeds 1 /input /output
   - kill %1
   - docker exec -w /ndmg travis pytest -v --disable-warnings
