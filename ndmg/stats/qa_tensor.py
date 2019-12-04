@@ -124,12 +124,12 @@ def create_qa_figure(peak_dirs,peak_values,output_dir,model):
     output_dir: location to save qa figure
     model: model type (CSA, CSD)
     """
-    #title
-    title = f'QA for Tractography {model} Model Peak Directions'
-    
     #set shape of image
     im_shape = peak_dirs.shape[0:3]
     im_shape_rgb = im_shape + (3,)
+
+    #title
+    title = f'QA for Tractography {model} Model Peak Directions. Brain Volume: {im_shape}'
     
     #generate 3-d directional data
     centers,directions,directions_colors,heights = generate_3_d_directions(peak_dirs,peak_values)
@@ -163,8 +163,6 @@ def create_qa_figure(peak_dirs,peak_values,output_dir,model):
 
             if idx % 3 == 1:
                 ax.set_ylabel(labs[i])
-                ax.yaxis.set_ticks([0, image.shape[0] / 2, image.shape[0] - 1])
-                ax.xaxis.set_ticks([0, image.shape[1] / 2, image.shape[1] - 1])
             #casting to deal with clipping issue in matplotlib
             plt.imshow((image * 255).astype(np.uint8))
             

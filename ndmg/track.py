@@ -335,7 +335,7 @@ class RunTrack:
                 parallel=False,
             )
             print("CSD Reponse: " + str(self.response))
-            self.mod = ConstrainedSphericalDeconvModel(self.gtab, self.response)
+            self.mod = ConstrainedSphericalDeconvModel(self.gtab, self.response,sh_order=6)
         return self.mod
 
     @timer
