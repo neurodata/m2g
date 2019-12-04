@@ -17,7 +17,8 @@ import time
 import functools
 import json
 from pathlib import Path
-from collections import namedtuple, UserDict
+from collections import namedtuple
+from collections.abc import MutableMapping
 
 # package imports
 import bids
@@ -152,7 +153,7 @@ class DirectorySweeper:
         return scans
 
 
-class NameResource(UserDict):
+class NameResource:
     """
     A class for naming derivatives under the BIDs spec.
 
@@ -174,31 +175,28 @@ class NameResource(UserDict):
         self.dwi_name = get_filename(dwi)
         self.t1w_name = get_filename(t1w)
         self.outdir = outdir
+        self.paths = {
+            "prep_dwi": "dwi/preproc",
+            "prep_anat": "anat/preproc",
+            "reg_anat": "anat/registered",
+            "fiber": "dwi/fiber",
+            "tensor": "dwi/tensor",
+            "conn": "dwi/roi-connectomes",
+        }
+
+        # internal dictionary storing data, built with `self.add_dirs`
         self.dirs = {}
 
     def __repr__(self):
         return str(self.dirs)
 
-    @staticmethod
-    def name_derivative(folder, derivative):
-        """Creates derivative output file paths using os.path.join
+    def __setitem__(self, key, value):
+        self.dirs[key] = value
 
-        Parameters
-        ----------
-        folder : str
-            Path of directory that you want the derivative file name appended too
-        derivative : str
-            The name of the file to be produced
+    def __getitem__(self, key):
+        return self.dirs[key]
 
-        Returns
-        -------
-        str
-            Derivative output file path
-        """
-
-        return os.path.join(*[folder, derivative])
-
-    def add_dirs(self, paths, labels, label_dirs):
+    def add_dirs(self, labels, label_dirs):
         """Creates tmp and permanent directories for the desired suffixes
 
         Parameters
@@ -212,39 +210,38 @@ class NameResource(UserDict):
         """
 
         labels = as_list(labels)
-        dirtypes = ["output"]
-        for dirt in dirtypes:
-            olist = [self.outdir]
-            self.dirs[dirt] = {}
-            if dirt in ["tmp"]:
-                olist = olist + [dirt]
-            self.dirs[dirt]["base"] = os.path.join(*olist)
-            for kwd, path in paths.items():
-                newdir = os.path.join(*[self.dirs[dirt]["base"], path])
-                if kwd in label_dirs:  # levels with label granularity
-                    self.dirs[dirt][kwd] = {}
-                    for label in labels:
-                        labname = get_filename(label)
-                        self.dirs[dirt][kwd][labname] = os.path.join(newdir, labname)
-                else:
-                    self.dirs[dirt][kwd] = newdir
 
-        self.dirs["tmp"] = {}
-        self.dirs["tmp"]["base"] = self.outdir + "/tmp"
-        self.dirs["tmp"]["reg_a"] = self.dirs["tmp"]["base"] + "/reg_a"
-        self.dirs["tmp"]["reg_m"] = self.dirs["tmp"]["base"] + "/reg_m"
-        self.dirs["qa"] = {}
-        self.dirs["qa"]["base"] = self.outdir + "/qa"
-        self.dirs["qa"]["adjacency"] = self.dirs["qa"]["base"] + "/adjacency"
-        self.dirs["qa"]["fibers"] = self.dirs["qa"]["base"] + "/fibers"
-        self.dirs["qa"]["graphs"] = self.dirs["qa"]["base"] + "/graphs"
-        self.dirs["qa"]["graphs_plotting"] = (
-            self.dirs["qa"]["base"] + "/graphs_plotting"
-        )
-        self.dirs["qa"]["mri"] = self.dirs["qa"]["base"] + "/mri"
-        self.dirs["qa"]["reg"] = self.dirs["qa"]["base"] + "/reg"
-        self.dirs["qa"]["tensor"] = self.dirs["qa"]["base"] + "/tensor"
+        # add output directories
+        self["output"] = {}
+        self["output"]["base"] = self.outdir
+        for kwd, path in self.paths.items():
+            newdir = os.path.join(self["output"]["base"], path)
+            if kwd in label_dirs:  # levels with label granularity
+                self["output"][kwd] = {}
+                for label in labels:
+                    labname = get_filename(label)
+                    self["output"][kwd][labname] = os.path.join(newdir, labname)
+            else:
+                self["output"][kwd] = newdir
 
+        # add tmp directories
+        self["tmp"] = {}
+        self["tmp"]["base"] = self.outdir + "/tmp"
+        self["tmp"]["reg_a"] = self["tmp"]["base"] + "/reg_a"
+        self["tmp"]["reg_m"] = self["tmp"]["base"] + "/reg_m"
+
+        # add qa directories
+        self["qa"] = {}
+        self["qa"]["base"] = self.outdir + "/qa"
+        self["qa"]["adjacency"] = self["qa"]["base"] + "/adjacency"
+        self["qa"]["fibers"] = self["qa"]["base"] + "/fibers"
+        self["qa"]["graphs"] = self["qa"]["base"] + "/graphs"
+        self["qa"]["graphs_plotting"] = self["qa"]["base"] + "/graphs_plotting"
+        self["qa"]["mri"] = self["qa"]["base"] + "/mri"
+        self["qa"]["reg"] = self["qa"]["base"] + "/reg"
+        self["qa"]["tensor"] = self["qa"]["base"] + "/tensor"
+
+        # make newdirs
         newdirs = flatten(self.dirs, [])
         for dir_ in newdirs:
             Path(dir_).mkdir(parents=True, exist_ok=True)

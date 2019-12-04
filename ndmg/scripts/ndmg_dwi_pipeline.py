@@ -113,19 +113,12 @@ def ndmg_dwi_worker(
 
     # make output directory
     startTime = datetime.now()
-    namer = gen_utils.NameResource(dwi, t1w, atlas, outdir)
     Path(outdir).mkdir(parents=True, exist_ok=True)
-    paths = {
-        "prep_dwi": "dwi/preproc",
-        "prep_anat": "anat/preproc",
-        "reg_anat": "anat/registered",
-        "fiber": "dwi/fiber",
-        "tensor": "dwi/tensor",
-        "conn": "dwi/roi-connectomes",
-    }
 
+    # instantiate namer
+    namer = gen_utils.NameResource(dwi, t1w, atlas, outdir)
     print("Adding directory tree...")
-    namer.add_dirs(paths, labels, ["conn"])
+    namer.add_dirs(labels, ["conn"])
 
     # generate list of connectome file locations
     labels = gen_utils.as_list(labels)
@@ -134,7 +127,7 @@ def ndmg_dwi_worker(
         filename = gen_utils.get_filename(label)
         folder = namer.dirs["output"]["conn"][filename]
         derivative = f"{namer.dwi_name}_{filename}_measure-spatial-ds{fmt}"
-        connectomes.append(namer.name_derivative(folder, derivative))
+        connectomes.append(os.path.join(folder, derivative))
 
     warm_welcome = welcome_message(connectomes)
     print(warm_welcome)
@@ -303,7 +296,7 @@ def ndmg_dwi_worker(
         streamlines, affine_to_rasmm=trk_hdr["voxel_to_rasmm"]
     )
     trkfile = nib.streamlines.trk.TrkFile(tractogram, header=trk_hdr)
-    streams = namer.name_derivative(namer.dirs["output"]["fiber"], "streamlines.trk")
+    streams = os.path.join(namer.dirs["output"]["fiber"], "streamlines.trk")
     nib.streamlines.save(trkfile, streams)
     print("Streamlines complete")
     print(f"Tractography runtime: {np.round(time.time() - start_time, 1)}")
