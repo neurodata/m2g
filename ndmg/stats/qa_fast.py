@@ -11,11 +11,10 @@ from argparse import ArgumentParser
 from scipy import ndimage
 from matplotlib.colors import LinearSegmentedColormap
 import matplotlib as mpl
-mpl.use("TkAgg")  # very important above pyplot import
+# mpl.use("TkAgg")  # very important above pyplot import
 from nilearn.plotting.edge_detect import _edge_map as edge_map
 import matplotlib.pyplot as plt
 # %matplotlib inline
-import pandas as pd
 
 
 
