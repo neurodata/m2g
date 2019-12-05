@@ -50,7 +50,7 @@ def pad_im(image,max_dim,pad_val):
     -----------
     padded_image: 3-d RGB np array of image slice with padding
     """
-    pad_width = (((max_dim-image.shape[0])//2,(max_dim-image.shape[0])//2),((max_dim-image.shape[1])//2,(max_dim-image.shape[1])//2),(0,0))
+    pad_width = (((max_dim-image.shape[0])//2,(max_dim-image.shape[0])//2),((max_dim-image.shape[1])//2,(max_dim-image.shape[1])//2))
     padded_image = np.pad(image, pad_width=pad_width, mode='constant', constant_values=pad_val)
 
     return padded_image
@@ -126,6 +126,12 @@ def plot_overlays(gm, csf, wm, cmaps=None, minthr=2, maxthr=95, edge=False):
                 ax.yaxis.set_ticks([0, image.shape[0] / 2, image.shape[0] - 1])
                 ax.xaxis.set_ticks([0, image.shape[1] / 2, image.shape[1] - 1])
             
+            image = (image*255).astype(np.uint8)
+            atl = (atl*255).astype(np.uint8)
+            inim = (inim*255).astype(np.uint8)
+            image = pad_im(image, max(image.shape), 0)
+            atl = pad_im(atl, max(image.shape), 0)
+            inim = pad_im(inim, max(image.shape), 0)
             
             if edge:
                 image = edge_map(image).data
@@ -186,14 +192,6 @@ def reg_mri_pngs(
     gm_data = nb.load(gm).get_data()#csf
     csf_data = nb.load(csf).get_data()#gm
     wm_data = nb.load(wm).get_data()#wm
-    
-    gm_data = (gm_data*255).astype(np.uint8)
-    csf_data = (csf_data*255).astype(np.uint8)
-    wm_data = (wm_data*255).astype(np.uint8)
-    
-    gm_data = pad_im(gm_data, max(gm_data.shape), 0)
-    csf_data = pad_im(csf_data, max(csf_data.shape), 0)
-    wm_data = pad_im(wm_data, max(wm_data.shape), 0)
 
     cmap1 = LinearSegmentedColormap.from_list("mycmap1", ["white", "magenta"])
     cmap2 = LinearSegmentedColormap.from_list("mycmap2", ["white", "green"])
