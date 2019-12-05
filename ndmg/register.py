@@ -11,6 +11,7 @@ Used for the majority of the registration described here: https://neurodata.io/t
 # standard library imports
 import os
 from argparse import ArgumentParser
+import subprocess
 
 # package imports
 import nibabel as nib
@@ -132,14 +133,7 @@ class DmriReg:
     """
 
     def __init__(
-        self,
-        namer,
-        nodif_B0,
-        nodif_B0_mask,
-        t1w_in,
-        vox_size,
-        skull="none",
-        simple=False,
+        self, namer, nodif_B0, nodif_B0_mask, t1w_in, vox_size, skull=None, simple=False
     ):
 
         if os.path.isdir("/ndmg_atlases"):
@@ -300,7 +294,7 @@ class DmriReg:
         cmd = f"fslmaths {self.wm_mask_thr} -edge -bin -mas {self.wm_mask_thr} {self.wm_edge}"
         print("Extracting white matter edge ...")
         print(cmd)
-        os.system(cmd)
+        subprocess.run(cmd, shell=True, check=True)
 
     @gen_utils.timer
     def t1w2dwi_align(self):
@@ -344,7 +338,7 @@ class DmriReg:
                 # Get mat from MNI -> T1
                 cmd = f"convert_xfm -omat {self.mni2t1_xfm_init} -inverse {self.t12mni_xfm_init}"
                 print(cmd)
-                os.system(cmd)
+                subprocess.run(cmd, shell=True, check=True)
 
             except RuntimeError("Error: FNIRT failed!"):
                 pass
@@ -379,7 +373,7 @@ class DmriReg:
         )
         cmd = f"convert_xfm -omat {self.dwi2t1w_xfm} -inverse {self.t1w2dwi_xfm}"
         print(cmd)
-        os.system(cmd)
+        subprocess.run(cmd, shell=True, check=True)
 
         if self.simple is False:
             # Flirt bbr
@@ -401,7 +395,7 @@ class DmriReg:
                     sch="${FSLDIR}/etc/flirtsch/bbr.sch",
                 )
                 cmd = f"convert_xfm -omat {self.t1w2dwi_bbr_xfm} -inverse {self.dwi2t1w_bbr_xfm}"
-                os.system(cmd)
+                subprocess.run(cmd, shell=True, check=True)
 
                 # Apply the alignment
                 reg_utils.align(
@@ -628,13 +622,13 @@ class DmriReg:
         if not os.path.isfile(self.mni_atlas):
             raise ValueError("FSL atlas for ventricle reference not found!")
         cmd = f"fslmaths {self.mni_vent_loc} -thr 0.1 -bin {self.mni_vent_loc}"
-        os.system(cmd)
+        subprocess.run(cmd, shell=True, check=True)
 
         cmd = f"fslmaths {self.corpuscallosum} -bin {self.corpuscallosum}"
-        os.system(cmd)
+        subprocess.run(cmd, shell=True, check=True)
 
         cmd = f"fslmaths {self.corpuscallosum} -sub {self.mni_vent_loc} -bin {self.corpuscallosum}"
-        os.system(cmd)
+        subprocess.run(cmd, shell=True, check=True)
 
         # Create a transform from the atlas onto T1w. This will be used to transform the ventricles to dwi space.
         reg_utils.align(
@@ -732,16 +726,16 @@ class DmriReg:
         # Create ventricular CSF mask
         print("Creating ventricular CSF mask...")
         cmd = f"fslmaths {self.vent_mask_dwi} -kernel sphere 10 -ero -bin {self.vent_mask_dwi}"
-        os.system(cmd)
+        subprocess.run(cmd, shell=True, check=True)
         print("Creating Corpus Callosum mask...")
         cmd = f"fslmaths {self.corpuscallosum_dwi} -mas {self.wm_in_dwi_bin} -bin {self.corpuscallosum_dwi}"
-        os.system(cmd)
+        subprocess.run(cmd, shell=True, check=True)
         cmd = f"fslmaths {self.csf_mask_dwi} -add {self.vent_mask_dwi} -bin {self.vent_csf_in_dwi}"
-        os.system(cmd)
+        subprocess.run(cmd, shell=True, check=True)
 
         # Create gm-wm interface image
         cmd = (
             f"fslmaths {self.gm_in_dwi_bin} -mul {self.wm_in_dwi_bin} -add {self.corpuscallosum_dwi} "
             f"-sub {self.vent_csf_in_dwi} -mas {self.nodif_B0_mask} -bin {self.wm_gm_int_in_dwi}"
         )
-        os.system(cmd)
+        subprocess.run(cmd, shell=True, check=True)
