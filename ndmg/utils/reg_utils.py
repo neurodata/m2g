@@ -7,6 +7,7 @@ Contains small-scale registration utilities.
 
 # standard library imports
 import os
+import subprocess
 
 # package imports
 import nibabel as nib
@@ -80,24 +81,6 @@ def erode_mask(mask, v=0):
 
 
 @print_arguments(inputs=[0], outputs=[1])
-def align_slices(dwi, corrected_dwi, idx):
-    """Performs eddy-correction (or self-alignment) of a stack of 3D images
-
-    Parameters
-    ----------
-    dwi : str
-        path for the DTI image to be eddy-corrected
-    corrected_dwi : str
-        path for the corrected and aligned DTI volume in a nifti file
-    idx : str
-        Index of the first B0 volume in the stack
-    """
-
-    cmd = f"eddy_correct {dwi} {corrected_dwi} {idx}"
-    gen_utils.execute_cmd(cmd, verb=True)
-
-
-@print_arguments(inputs=[0], outputs=[1])
 def probmap2mask(prob_map, mask_path, t, erode=0):
     """
     A function to extract a mask from a probability map.
@@ -142,7 +125,7 @@ def apply_mask(inp, mask, out):
     """
 
     cmd = f'3dcalc -a {inp} -b {mask} -expr "a*step(b)" -prefix {out}'
-    gen_utils.execute_cmd(cmd, verb=True)
+    subprocess.run(cmd, shell=True, check=True)
 
 
 @print_arguments(inputs=[1], outputs=[2])
@@ -186,7 +169,7 @@ def normalize_t1w(inp, out):
             - the output intensity-normalized image.
     """
     cmd = f"3dUnifize -prefix {out} -input {inp}"
-    gen_utils.execute_cmd(cmd, verb=True)
+    subprocess.run(cmd, check=True, shell=True)
 
 
 @print_arguments(inputs=[0], outputs=[1])
@@ -207,7 +190,7 @@ def resample_fsl(base, res, goal_res, interp="spline"):
     """
     # resample using an isometric transform in fsl
     cmd = f"flirt -in {base} -ref {base} -out {res} -applyisoxfm {goal_res} -interp {interp}"
-    gen_utils.execute_cmd(cmd, verb=True)
+    subprocess.run(cmd, check=True, shell=True)
 
 
 def skullstrip_check(dmrireg, labels, namer, vox_size, reg_style):
@@ -274,7 +257,7 @@ def skullstrip_check(dmrireg, labels, namer, vox_size, reg_style):
 
 @timer
 @print_arguments(inputs=[0], outputs=[1])
-def t1w_skullstrip(t1w, out, skull="none"):
+def t1w_skullstrip(t1w, out, skull=None):
     """Skull-strips the t1w image using AFNIs 3dSkullStrip algorithm, which is a modification of FSLs BET specialized to t1w images.
     Offers robust skull-stripping with no hyperparameters
     Note: renormalizes the intensities, call extract_t1w_brain instead if you want the original intensity values
@@ -298,7 +281,7 @@ def t1w_skullstrip(t1w, out, skull="none"):
         cmd = f"3dSkullStrip -prefix {out} -input {t1w} -push_to_edge -ld 45"
     else:
         cmd = f"3dSkullStrip -prefix {out} -input {t1w} -ld 30"
-    gen_utils.execute_cmd(cmd, verb=True)
+    subprocess.run(cmd, check=True, shell=True)
 
 
 @print_arguments(inputs=[0], outputs=[1])
@@ -326,7 +309,7 @@ def segment_t1w(t1w, basename, opts=""):
     # run FAST, with options -t for the image type and -n to
     # segment into CSF (pve_0), WM (pve_1), GM (pve_2)
     cmd = f"fast -t 1 {opts} -n 3 -o {basename} {t1w}"
-    os.system(cmd)
+    subprocess.run(cmd, check=True, shell=True)
     out = {}  # the outputs
     out["wm_prob"] = f"{basename}_pve_2.nii.gz"
     out["gm_prob"] = f"{basename}_pve_1.nii.gz"
@@ -403,7 +386,7 @@ def align(
         cmd += f" -wmseg {wmseg}"
     if init is not None:
         cmd += f" -init {init}"
-    os.system(cmd)
+    subprocess.run(cmd, check=True, shell=True)
 
 
 @print_arguments(inputs=[0, 1, 2], outputs=[3])
@@ -412,7 +395,7 @@ def align_epi(epi, t1, brain, out):
     Algins EPI images to T1w image
     """
     cmd = f"epi_reg --epi={epi} --t1={t1} --t1brain={brain} --out={out}"
-    os.system(cmd)
+    subprocess.run(cmd, check=True, shell=True)
 
 
 @timer
@@ -447,7 +430,7 @@ def align_nonlinear(inp, ref, xfm, out, warp, ref_mask=None, in_mask=None, confi
         cmd += f" --inmask={in_mask} --applyinmask=1"
     if config is not None:
         cmd += f" --config={config}"
-    os.system(cmd)
+    subprocess.run(cmd, check=True, shell=True)
 
 
 @print_arguments(inputs=[0, 1, 2], outputs=[3])
@@ -471,7 +454,7 @@ def applyxfm(ref, inp, xfm, aligned, interp="trilinear", dof=6):
     """
 
     cmd = f"flirt -in {inp} -ref {ref} -out {aligned} -init {xfm} -interp {interp} -dof {dof} -applyxfm"
-    os.system(cmd)
+    subprocess.run(cmd, check=True, shell=True)
 
 
 @print_arguments(inputs=[0, 1], outputs=[2, 3])
@@ -510,7 +493,7 @@ def apply_warp(ref, inp, out, warp, xfm=None, mask=None, interp=None, sup=False)
         cmd += " --interp=" + interp
     if sup is True:
         cmd += " --super --superlevel=a"
-    os.system(cmd)
+    subprocess.run(cmd, check=True, shell=True)
 
 
 @print_arguments(inputs=[0, 2], outputs=[1])
@@ -529,7 +512,7 @@ def inverse_warp(ref, out, warp):
     """
 
     cmd = "invwarp --warp=" + warp + " --out=" + out + " --ref=" + ref
-    os.system(cmd)
+    subprocess.run(cmd, check=True, shell=True)
 
 
 @print_arguments(inputs=[0, 2], outputs=[1])
@@ -574,7 +557,7 @@ def combine_xfms(xfm1, xfm2, xfmout):
         path for the ouput transformation
     """
     cmd = f"convert_xfm -omat {xfmout} -concat {xfm1} {xfm2}"
-    os.system(cmd)
+    subprocess.run(cmd, check=True, shell=True)
 
 
 @print_arguments(inputs=[0, 1], outputs=[2])
