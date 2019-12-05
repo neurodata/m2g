@@ -7,14 +7,10 @@ import sys
 import numpy as np
 from numpy import *
 import nibabel as nb
-from argparse import ArgumentParser
 from scipy import ndimage
 from matplotlib.colors import LinearSegmentedColormap
-import matplotlib as mpl
-# mpl.use("TkAgg")  # very important above pyplot import
 from nilearn.plotting.edge_detect import _edge_map as edge_map
 import matplotlib.pyplot as plt
-# %matplotlib inline
 
 
 
@@ -41,16 +37,38 @@ def opaque_colorscale(basemap, reference, vmin=None, vmax=None, alpha=1):
     cmap[:, :, 3] = opaque_scale
     return cmap
 
+def pad_im(image,max_dim,pad_val):
 
-def plot_overlays(atlas, b0, inimg, cmaps=None, minthr=2, maxthr=95, edge=False):
+    """
+    Pads an image to be same dimensions as given max_dim
+    Parameters
+    -----------
+    image: 3-d RGB np array of image slice
+    max_dim: dimension to pad up to
+    pad_val: value to pad with
+    Returns
+    -----------
+    padded_image: 3-d RGB np array of image slice with padding
+    """
+    pad_width = (((max_dim-image.shape[0])//2,(max_dim-image.shape[0])//2),((max_dim-image.shape[1])//2,(max_dim-image.shape[1])//2),(0,0))
+    padded_image = np.pad(image, pad_width=pad_width, mode='constant', constant_values=pad_val)
+
+    return padded_image
+
+def plot_overlays(gm, csf, wm, cmaps=None, minthr=2, maxthr=95, edge=False):
+    '''
+    gm: 3d nparray of gm
+    csf: 3d nparray of csf
+    wm: 3d nparray of wm
+    '''
     plt.rcParams.update({"axes.labelsize": "x-large", "axes.titlesize": "x-large"})
     foverlay = plt.figure()
-    plt.title("QA for FAST\n\n\n")
+    plt.title(f'Qa for fast \n {gm.shape} \n\n', fontsize=20)
     plt.xticks([])
     plt.yticks([])
     plt.axis('off')
 
-    if atlas.shape != b0.shape:
+    if gm.shape != csf.shape:
         raise ValueError("Brains are not the same shape.")
     if cmaps is None:
         cmap1 = LinearSegmentedColormap.from_list("mycmap1", ["white", "magenta"])
@@ -58,12 +76,12 @@ def plot_overlays(atlas, b0, inimg, cmaps=None, minthr=2, maxthr=95, edge=False)
         cmap3 = LinearSegmentedColormap.from_list("mycmap3", ["white", "blue"])
         cmaps = [cmap1, cmap2, cmap3]
 
-    if b0.shape == (182, 218, 182):
+    if csf.shape == (182, 218, 182):
         x = [78, 90, 100]
         y = [82, 107, 142]
         z = [88, 103, 107]
     else:
-        shap = b0.shape
+        shap = csf.shape
         x = [int(shap[0] * 0.35), int(shap[0] * 0.51), int(shap[0] * 0.65)]
         y = [int(shap[1] * 0.35), int(shap[1] * 0.51), int(shap[1] * 0.65)]
         z = [int(shap[2] * 0.35), int(shap[2] * 0.51), int(shap[2] * 0.65)]
@@ -84,30 +102,30 @@ def plot_overlays(atlas, b0, inimg, cmaps=None, minthr=2, maxthr=95, edge=False)
         min_val = 0
         max_val = 1
     else:
-        min_val, max_val = get_min_max(b0, minthr, maxthr)
+        min_val, max_val = get_min_max(csf, minthr, maxthr)
     for i, coord in enumerate(coords):
         for pos in coord:
             idx += 1
             ax = foverlay.add_subplot(3, 3, idx)
             ax.set_title(var[i] + " = " + str(pos))
             if i == 0:
-                image = ndimage.rotate(b0[pos, :, :], 90)
-                atl = ndimage.rotate(atlas[pos, :, :], 90)
-                inim = ndimage.rotate(inimg[pos, :, :], 90)
+                image = ndimage.rotate(csf[pos, :, :], 90)
+                atl = ndimage.rotate(gm[pos, :, :], 90)
+                inim = ndimage.rotate(wm[pos, :, :], 90)
             elif i == 1:
-                image = ndimage.rotate(b0[:, pos, :], 90)
-                atl = ndimage.rotate(atlas[:, pos, :], 90)
-                inim = ndimage.rotate(inimg[:, pos, :], 90)
+                image = ndimage.rotate(csf[:, pos, :], 90)
+                atl = ndimage.rotate(gm[:, pos, :], 90)
+                inim = ndimage.rotate(wm[:, pos, :], 90)
             else:
-                image = b0[:, :, pos]
-                atl = atlas[:, :, pos]
-                inim = inimg[:, :, pos]
+                image = csf[:, :, pos]
+                atl = gm[:, :, pos]
+                inim = wm[:, :, pos]
 
             if idx % 3 == 1:
                 ax.set_ylabel(labs[i])
                 ax.yaxis.set_ticks([0, image.shape[0] / 2, image.shape[0] - 1])
                 ax.xaxis.set_ticks([0, image.shape[1] / 2, image.shape[1] - 1])
-                
+            
             
             if edge:
                 image = edge_map(image).data
@@ -143,8 +161,7 @@ def plot_overlays(atlas, b0, inimg, cmaps=None, minthr=2, maxthr=95, edge=False)
                 plt.plot(0, 0, "-", c='pink', label='gm')
                 plt.plot(0, 0, "-", c='blue', label='csf')
                 plt.legend(loc='upper right',fontsize=15,bbox_to_anchor=(1.5,1.5))
-#                 plt.legend(loc='best')
-
+            
     foverlay.set_size_inches(12.5, 10.5, forward=True)
     foverlay.tight_layout
     return foverlay
@@ -158,27 +175,31 @@ def get_min_max(data, minthr=2, maxthr=95):
     return (min_val.astype(float), max_val.astype(float))
 
 def reg_mri_pngs(
-    mri, atlas, inimg, outdir, loc=0, mean=False, minthr=2, maxthr=95, edge=False):
+    csf, gm, wm, outdir, loc=0, mean=False, minthr=2, maxthr=95, edge=False):
     """
+    csf: directory where csf nifity file is loaded
+    gm: directory where gm nifity file is loaded
+    wm: directory where wm nifity file is loaded
     outdir: directory where output png file is saved
     fname: name of output file WITHOUT FULL PATH. Path provided in outdir.
     """
-    atlas_data = nb.load(atlas).get_data()
-    mri_data = nb.load(mri).get_data()
-    inimg_data = nb.load(inimg).get_data()
-    if mri_data.ndim == 4:  # 4d data, so we need to reduce a dimension
-        if mean:
-            mr_data = mri_data.mean(axis=3)
-        else:
-            mr_data = mri_data[:, :, :, loc]
-    else:  # dim=3
-        mr_data = mri_data
+    gm_data = nb.load(gm).get_data()#csf
+    csf_data = nb.load(csf).get_data()#gm
+    wm_data = nb.load(wm).get_data()#wm
+    
+    gm_data = (gm_data*255).astype(np.uint8)
+    csf_data = (csf_data*255).astype(np.uint8)
+    wm_data = (wm_data*255).astype(np.uint8)
+    
+    gm_data = pad_im(gm_data, max(gm_data.shape), 0)
+    csf_data = pad_im(csf_data, max(csf_data.shape), 0)
+    wm_data = pad_im(wm_data, max(wm_data.shape), 0)
 
     cmap1 = LinearSegmentedColormap.from_list("mycmap1", ["white", "magenta"])
     cmap2 = LinearSegmentedColormap.from_list("mycmap2", ["white", "green"])
     cmap3 = LinearSegmentedColormap.from_list("mycmap3", ["white", "blue"])
 
-    fig = plot_overlays(atlas_data, mr_data, inimg_data, [cmap1, cmap2, cmap3], minthr, maxthr, edge)
+    fig = plot_overlays(gm_data, csf_data, wm_data, [cmap1, cmap2, cmap3], minthr, maxthr, edge)
 
     os.chdir(outdir.dirs['qa']['base'])
     if 'preproc' not in os.listdir():
