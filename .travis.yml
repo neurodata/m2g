@@ -70,7 +70,9 @@ script:
   - heat=$(docker exec travis ls /output/sub-0025864/ses-1/qa/graphs_plotting)
   - csv=$(docker exec travis ls /output/sub-0025864/ses-1/dwi/roi-connectomes/desikan_space-MNI152NLin6_res-2x2x2)
   # run a command inside of docker to push heatmap and connectome to the ndmg-data s3 bucket
-  - docker exec travis aws s3 sync /output/sub-0025864/ses-1/qa/graphs_plotting s3://ndmg-data/Travis-Output/$TRAVIS_BRANCH/$rand
-  - docker exec travis aws s3 sync /output/sub-0025864/ses-1/dwi/roi-connectomes/desikan_space-MNI152NLin6_res-2x2x2 s3://ndmg-data/Travis-Output/$TRAVIS_BRANCH/$rand
+  
+  
+  # - docker exec travis aws s3 sync /output/sub-0025864/ses-1/qa/graphs_plotting s3://ndmg-data/Travis-Output/$TRAVIS_BRANCH/$rand
+  # - docker exec travis aws s3 sync /output/sub-0025864/ses-1/dwi/roi-connectomes/desikan_space-MNI152NLin6_res-2x2x2 s3://ndmg-data/Travis-Output/$TRAVIS_BRANCH/$rand
   # print the url location for the two files on the s3 bucket
-  - echo -en "\n\n\n\n\n\nHEATMAP_LOCATION = s3.console.aws.amazon.com/s3/object/ndmg-data/Travis-Output/$TRAVIS_BRANCH/$rand/$heat?region=us-east-1&tab=overview\n\nCSV_LOCATION = s3.console.aws.amazon.com/s3/object/ndmg-data/Travis-Output/$TRAVIS_BRANCH/$rand/$csv?region=us-east-1&tab=overview\n\n\n\n\n\n"
+  # - echo -en "\n\n\n\n\n\nHEATMAP_LOCATION = s3.console.aws.amazon.com/s3/object/ndmg-data/Travis-Output/$TRAVIS_BRANCH/$rand/$heat?region=us-east-1&tab=overview\n\nCSV_LOCATION = s3.console.aws.amazon.com/s3/object/ndmg-data/Travis-Output/$TRAVIS_BRANCH/$rand/$csv?region=us-east-1&tab=overview\n\n\n\n\n\n"
