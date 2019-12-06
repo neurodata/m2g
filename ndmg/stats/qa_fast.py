@@ -63,7 +63,7 @@ def plot_overlays(gm, csf, wm, cmaps=None, minthr=2, maxthr=95, edge=False):
     '''
     plt.rcParams.update({"axes.labelsize": "x-large", "axes.titlesize": "x-large"})
     foverlay = plt.figure()
-    plt.title(f'Qa for fast \n {gm.shape} \n\n', fontsize=20)
+    plt.title(f'Qa for fast (brain volume:{gm.shape}) \n\n', fontsize=20)
     plt.xticks([])
     plt.yticks([])
     plt.axis('off')
