@@ -261,7 +261,7 @@ def plot_overlays(atlas, b0, cmaps=None, minthr=2, maxthr=95, edge=False):
     #Set title for the whole picture
     [a,b,c] = shap
     title = 'QA For Registration\n\nVolume:'+ str(a) +'*'+ str(b) + '*' + str(c)+'\n'
-    foverlay.suptitle('QA For Registration',fontsize=24)
+    foverlay.suptitle(title,fontsize=24)
     foverlay.set_size_inches(12.5, 10.5, forward=True)
     foverlay.tight_layout
     return foverlay
