@@ -24,6 +24,7 @@ from dipy.tracking import utils
 # ndmg imports
 from ndmg.utils import gen_utils
 from ndmg.utils import reg_utils
+from ndmg.stats import qa_reg
 
 
 @gen_utils.timer
@@ -668,26 +669,26 @@ class DmriReg:
             self.t1wtissue2dwi_xfm,
             self.vent_mask_dwi,
         )
-        qa_reg.reg_mri_pngs(self.vent_mask_t1w, self.nodif_B0, self.namer.dirs['qa']['reg'])
+        qa_reg.reg_mri_pngs(self.vent_mask_dwi, self.nodif_B0, self.namer.dirs['qa']['reg'])
         reg_utils.applyxfm(
             self.nodif_B0,
             self.corpuscallosum_mask_t1w,
             self.t1wtissue2dwi_xfm,
             self.corpuscallosum_dwi,
         )
-        qa_reg.reg_mri_pngs(self.corpuscallosum_mask_t1w, self.nodif_B0, self.namer.dirs['qa']['reg'])
+        qa_reg.reg_mri_pngs(self.corpuscallosum_dwi, self.nodif_B0, self.namer.dirs['qa']['reg'])
         reg_utils.applyxfm(
             self.nodif_B0, self.csf_mask, self.t1wtissue2dwi_xfm, self.csf_mask_dwi
         )
-        qa_reg.reg_mri_pngs(self.csf_mask, self.nodif_B0, self.namer.dirs['qa']['reg'])
+        qa_reg.reg_mri_pngs(self.csf_mask_dwi, self.nodif_B0, self.namer.dirs['qa']['reg'])
         reg_utils.applyxfm(
             self.nodif_B0, self.gm_mask, self.t1wtissue2dwi_xfm, self.gm_in_dwi
         )
-        qa_reg.reg_mri_pngs(self.gm_mask, self.nodif_B0, self.namer.dirs['qa']['reg'])
+        qa_reg.reg_mri_pngs(self.gm_in_dwi, self.nodif_B0, self.namer.dirs['qa']['reg'])
         reg_utils.applyxfm(
             self.nodif_B0, self.wm_mask, self.t1wtissue2dwi_xfm, self.wm_in_dwi
         )
-        qa_reg.reg_mri_pngs(self.wm_mask, self.nodif_B0, self.namer.dirs['qa']['reg'])
+        qa_reg.reg_mri_pngs(self.wm_in_dwi, self.nodif_B0, self.namer.dirs['qa']['reg'])
 
         # Threshold WM to binary in dwi space
         thr_img = nib.load(self.wm_in_dwi)
