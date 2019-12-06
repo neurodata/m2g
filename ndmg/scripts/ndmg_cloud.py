@@ -203,9 +203,9 @@ def create_json(
         return jobs
 
     # set up infrastructure
-    out = subprocess.check_output(f"mkdir -p {jobdir}", shell=True)
-    out = subprocess.check_output(f"mkdir -p {jobdir}/jobs/", shell=True)
-    out = subprocess.check_output(f"mkdir -p {jobdir}/ids/", shell=True)
+    out = subprocess.run(f"mkdir -p {jobdir}", shell=True, check=True)
+    out = subprocess.run(f"mkdir -p {jobdir}/jobs/", shell=True, check=True)
+    out = subprocess.run(f"mkdir -p {jobdir}/ids/", shell=True, check=True)
     seshs = threads
 
     templ = os.path.dirname(__file__)
