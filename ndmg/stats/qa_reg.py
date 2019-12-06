@@ -89,6 +89,22 @@ def opaque_colorscale(basemap, reference, vmin=None, vmax=None, alpha=1):
     cmap[:, :, 3] = opaque_scale
     return cmap
 
+def pad_im(image,max_dim,pad_val):
+    """
+    Pads an image to be same dimensions as given max_dim
+    Parameters
+    -----------
+    image: 3-d RGB np array of image slice
+    max_dim: dimension to pad up to
+    pad_val: value to pad with
+    Returns
+    -----------
+    padded_image: 3-d RGB np array of image slice with padding
+    """
+    #pad only in first two dimensions not in rgb
+    pad_width = (((max_dim-image.shape[0])//2,(max_dim-image.shape[0])//2),((max_dim-image.shape[1])//2,(max_dim-image.shape[1])//2),((max_dim-image.shape[2])//2,(max_dim-image.shape[2])//2))
+    padded_image = np.pad(image, pad_width=pad_width, mode='constant', constant_values=pad_val)
+    return padded_image
 
 def plot_brain(brain, minthr=2, maxthr=95, edge=False):
     brain = mgu.gen_utils.get_braindata(brain)
@@ -173,7 +189,14 @@ def plot_overlays(atlas, b0, cmaps=None, minthr=2, maxthr=95, edge=False):
         y = [int(shap[1] * 0.35), int(shap[1] * 0.51), int(shap[1] * 0.65)]
         z = [int(shap[2] * 0.35), int(shap[2] * 0.51), int(shap[2] * 0.65)]
     coords = (x, y, z)
-
+    
+    atlas = pad_im(atlas,max(shap[0:3]),0)
+    b0 = pad_im(b0,max(shap[0:3]),0)
+    x = [int(max(shap[0:3]) * 0.35), int(max(shap[0:3]) * 0.51), int(max(shap[0:3]) * 0.65)]
+    y = [int(max(shap[0:3]) * 0.35), int(max(shap[0:3]) * 0.51), int(max(shap[0:3]) * 0.65)]
+    z = [int(max(shap[0:3]) * 0.35), int(max(shap[0:3]) * 0.51), int(max(shap[0:3]) * 0.65)]
+    coords = (x, y, z)
+    
     labs = [
         "Sagittal Slice",
         "Coronal Slice",
@@ -236,6 +259,8 @@ def plot_overlays(atlas, b0, cmaps=None, minthr=2, maxthr=95, edge=False):
                 plt.legend(loc='best',fontsize=12,bbox_to_anchor=(1.5,1.5))
             
     #Set title for the whole picture
+    [a,b,c] = shap
+    title = 'QA For Registration\n\nVolume:'+ str(a) +'*'+ str(b) + '*' + str(c)+'\n'
     foverlay.suptitle('QA For Registration',fontsize=24)
     foverlay.set_size_inches(12.5, 10.5, forward=True)
     foverlay.tight_layout
