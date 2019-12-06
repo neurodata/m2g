@@ -260,7 +260,7 @@ class GraphTools:
         conn_matrix = ptr.pass_to_ranks(conn_matrix)
         heatmap(conn_matrix)
         plt.savefig(
-            self.namer.dirs["qa"]["graphs_plotting"]
+            self.namer["qa"]["graphs_plotting"]
             + "/"
             + graphname.split(".")[:-1][0].split("/")[-1]
             + ".png"

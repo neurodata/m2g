@@ -65,7 +65,7 @@ def direct_streamline_norm(streams, fa_path, namer):
 
     # SyN FA->Template
     [mapping, affine_map] = reg_utils.wm_syn(
-        template_path, fa_path, namer.dirs["tmp"]["base"]
+        template_path, fa_path, namer["tmp"]["base"]
     )
     streamlines = load_trk(streams, reference="same")
 
@@ -159,34 +159,34 @@ class DmriReg:
         self.dwi_name = "dwi"
         self.namer = namer
         self.skull = skull
-        self.t12mni_xfm_init = f'{self.namer.dirs["tmp"]["reg_m"]}/xfm_t1w2mni_init.mat'
-        self.mni2t1_xfm_init = f'{self.namer.dirs["tmp"]["reg_m"]}/xfm_mni2t1w_init.mat'
-        self.t12mni_xfm = f'{self.namer.dirs["tmp"]["reg_m"]}/xfm_t1w2mni.mat'
-        self.mni2t1_xfm = f'{self.namer.dirs["tmp"]["reg_m"]}/xfm_mni2t1.mat'
-        self.mni2t1w_warp = f'{self.namer.dirs["tmp"]["reg_a"]}/mni2t1w_warp.nii.gz'
-        self.warp_t1w2mni = f'{self.namer.dirs["tmp"]["reg_a"]}/warp_t12mni.nii.gz'
+        self.t12mni_xfm_init = f'{self.namer["tmp"]["reg_m"]}/xfm_t1w2mni_init.mat'
+        self.mni2t1_xfm_init = f'{self.namer["tmp"]["reg_m"]}/xfm_mni2t1w_init.mat'
+        self.t12mni_xfm = f'{self.namer["tmp"]["reg_m"]}/xfm_t1w2mni.mat'
+        self.mni2t1_xfm = f'{self.namer["tmp"]["reg_m"]}/xfm_mni2t1.mat'
+        self.mni2t1w_warp = f'{self.namer["tmp"]["reg_a"]}/mni2t1w_warp.nii.gz'
+        self.warp_t1w2mni = f'{self.namer["tmp"]["reg_a"]}/warp_t12mni.nii.gz'
         self.t1w2dwi = (
-            f'{self.namer.dirs["output"]["reg_anat"]}/{self.t1w_name}_in_dwi.nii.gz'
+            f'{self.namer["output"]["reg_anat"]}/{self.t1w_name}_in_dwi.nii.gz'
         )
-        self.t1_aligned_mni = f'{self.namer.dirs["output"]["prep_anat"]}/{self.t1w_name}_aligned_mni.nii.gz'
+        self.t1_aligned_mni = f'{self.namer["output"]["prep_anat"]}/{self.t1w_name}_aligned_mni.nii.gz'
         self.t1w_brain = (
-            f'{self.namer.dirs["output"]["prep_anat"]}/{self.t1w_name}_brain.nii.gz'
+            f'{self.namer["output"]["prep_anat"]}/{self.t1w_name}_brain.nii.gz'
         )
-        self.dwi2t1w_xfm = f'{self.namer.dirs["tmp"]["reg_m"]}/dwi2t1w_xfm.mat'
-        self.t1w2dwi_xfm = f'{self.namer.dirs["tmp"]["reg_m"]}/t1w2dwi_xfm.mat'
-        self.t1w2dwi_bbr_xfm = f'{self.namer.dirs["tmp"]["reg_m"]}/t1w2dwi_bbr_xfm.mat'
-        self.dwi2t1w_bbr_xfm = f'{self.namer.dirs["tmp"]["reg_m"]}/dwi2t1w_bbr_xfm.mat'
+        self.dwi2t1w_xfm = f'{self.namer["tmp"]["reg_m"]}/dwi2t1w_xfm.mat'
+        self.t1w2dwi_xfm = f'{self.namer["tmp"]["reg_m"]}/t1w2dwi_xfm.mat'
+        self.t1w2dwi_bbr_xfm = f'{self.namer["tmp"]["reg_m"]}/t1w2dwi_bbr_xfm.mat'
+        self.dwi2t1w_bbr_xfm = f'{self.namer["tmp"]["reg_m"]}/dwi2t1w_bbr_xfm.mat'
         self.t1wtissue2dwi_xfm = (
-            f'{self.namer.dirs["tmp"]["reg_m"]}/t1wtissue2dwi_xfm.mat'
+            f'{self.namer["tmp"]["reg_m"]}/t1wtissue2dwi_xfm.mat'
         )
         self.xfm_atlas2t1w_init = (
-            f'{self.namer.dirs["tmp"]["reg_m"]}/{self.t1w_name}_xfm_atlas2t1w_init.mat'
+            f'{self.namer["tmp"]["reg_m"]}/{self.t1w_name}_xfm_atlas2t1w_init.mat'
         )
         self.xfm_atlas2t1w = (
-            f'{self.namer.dirs["tmp"]["reg_m"]}/{self.t1w_name}_xfm_atlas2t1w.mat'
+            f'{self.namer["tmp"]["reg_m"]}/{self.t1w_name}_xfm_atlas2t1w.mat'
         )
         self.temp2dwi_xfm = (
-            f'{self.namer.dirs["tmp"]["reg_m"]}/{self.dwi_name}_xfm_temp2dwi.mat'
+            f'{self.namer["tmp"]["reg_m"]}/{self.dwi_name}_xfm_temp2dwi.mat'
         )
 
         self.input_mni = f"{FSLDIR}/data/standard/MNI152_T1_{vox_size}_brain.nii.gz"
@@ -194,61 +194,61 @@ class DmriReg:
             f"{FSLDIR}/data/standard/MNI152_T1_{vox_size}_brain_mask.nii.gz"
         )
         self.temp2dwi_xfm = (
-            f'{self.namer.dirs["tmp"]["reg_m"]}/{self.dwi_name}_xfm_temp2dwi.mat'
+            f'{self.namer["tmp"]["reg_m"]}/{self.dwi_name}_xfm_temp2dwi.mat'
         )
-        self.map_path = f'{self.namer.dirs["output"]["prep_anat"]}/{self.t1w_name}_seg'
+        self.map_path = f'{self.namer["output"]["prep_anat"]}/{self.t1w_name}_seg'
         self.wm_mask = (
-            f'{self.namer.dirs["output"]["prep_anat"]}/{self.t1w_name}_wm.nii.gz'
+            f'{self.namer["output"]["prep_anat"]}/{self.t1w_name}_wm.nii.gz'
         )
         self.wm_mask_thr = (
-            f'{self.namer.dirs["output"]["prep_anat"]}/{self.t1w_name}_wm_thr.nii.gz'
+            f'{self.namer["output"]["prep_anat"]}/{self.t1w_name}_wm_thr.nii.gz'
         )
         self.wm_edge = (
-            f'{self.namer.dirs["tmp"]["reg_a"]}/{self.t1w_name}_wm_edge.nii.gz'
+            f'{self.namer["tmp"]["reg_a"]}/{self.t1w_name}_wm_edge.nii.gz'
         )
         self.csf_mask = (
-            f'{self.namer.dirs["output"]["prep_anat"]}/{self.t1w_name}_csf.nii.gz'
+            f'{self.namer["output"]["prep_anat"]}/{self.t1w_name}_csf.nii.gz'
         )
         self.gm_mask = (
-            f'{self.namer.dirs["output"]["prep_anat"]}/{self.t1w_name}_gm.nii.gz'
+            f'{self.namer["output"]["prep_anat"]}/{self.t1w_name}_gm.nii.gz'
         )
-        self.xfm_roi2mni_init = f'{self.namer.dirs["tmp"]["reg_m"]}/roi_2_mni.mat'
-        self.lvent_out_file = f'{self.namer.dirs["tmp"]["reg_a"]}/LVentricle.nii.gz'
-        self.rvent_out_file = f'{self.namer.dirs["tmp"]["reg_a"]}/RVentricle.nii.gz'
-        self.csf_mask_dwi = f'{self.namer.dirs["output"]["reg_anat"]}/{self.t1w_name}_csf_mask_dwi.nii.gz'
+        self.xfm_roi2mni_init = f'{self.namer["tmp"]["reg_m"]}/roi_2_mni.mat'
+        self.lvent_out_file = f'{self.namer["tmp"]["reg_a"]}/LVentricle.nii.gz'
+        self.rvent_out_file = f'{self.namer["tmp"]["reg_a"]}/RVentricle.nii.gz'
+        self.csf_mask_dwi = f'{self.namer["output"]["reg_anat"]}/{self.t1w_name}_csf_mask_dwi.nii.gz'
         self.gm_in_dwi = (
-            f'{self.namer.dirs["output"]["reg_anat"]}/{self.t1w_name}_gm_in_dwi.nii.gz'
+            f'{self.namer["output"]["reg_anat"]}/{self.t1w_name}_gm_in_dwi.nii.gz'
         )
         self.wm_in_dwi = (
-            f'{self.namer.dirs["output"]["reg_anat"]}/{self.t1w_name}_wm_in_dwi.nii.gz'
+            f'{self.namer["output"]["reg_anat"]}/{self.t1w_name}_wm_in_dwi.nii.gz'
         )
         self.csf_mask_dwi_bin = (
-            f'{self.namer.dirs["tmp"]["reg_a"]}/{self.t1w_name}_csf_mask_dwi_bin.nii.gz'
+            f'{self.namer["tmp"]["reg_a"]}/{self.t1w_name}_csf_mask_dwi_bin.nii.gz'
         )
         self.gm_in_dwi_bin = (
-            f'{self.namer.dirs["tmp"]["reg_a"]}/{self.t1w_name}_gm_in_dwi_bin.nii.gz'
+            f'{self.namer["tmp"]["reg_a"]}/{self.t1w_name}_gm_in_dwi_bin.nii.gz'
         )
         self.wm_in_dwi_bin = (
-            f'{self.namer.dirs["tmp"]["reg_a"]}/{self.t1w_name}_wm_in_dwi_bin.nii.gz'
+            f'{self.namer["tmp"]["reg_a"]}/{self.t1w_name}_wm_in_dwi_bin.nii.gz'
         )
         self.vent_mask_dwi = (
-            f'{self.namer.dirs["tmp"]["reg_a"]}/{self.t1w_name}_vent_mask_dwi.nii.gz'
+            f'{self.namer["tmp"]["reg_a"]}/{self.t1w_name}_vent_mask_dwi.nii.gz'
         )
         self.vent_csf_in_dwi = (
-            f'{self.namer.dirs["tmp"]["reg_a"]}/{self.t1w_name}_vent_csf_in_dwi.nii.gz'
+            f'{self.namer["tmp"]["reg_a"]}/{self.t1w_name}_vent_csf_in_dwi.nii.gz'
         )
-        self.vent_mask_mni = f'{self.namer.dirs["tmp"]["reg_a"]}/vent_mask_mni.nii.gz'
-        self.vent_mask_t1w = f'{self.namer.dirs["tmp"]["reg_a"]}/vent_mask_t1w.nii.gz'
-        self.wm_gm_int_in_dwi = f'{namer.dirs["output"]["reg_anat"]}/{self.t1w_name}_wm_gm_int_in_dwi.nii.gz'
-        self.wm_gm_int_in_dwi_bin = f'{namer.dirs["output"]["reg_anat"]}/{self.t1w_name}_wm_gm_int_in_dwi_bin.nii.gz'
+        self.vent_mask_mni = f'{self.namer["tmp"]["reg_a"]}/vent_mask_mni.nii.gz'
+        self.vent_mask_t1w = f'{self.namer["tmp"]["reg_a"]}/vent_mask_t1w.nii.gz'
+        self.wm_gm_int_in_dwi = f'{namer["output"]["reg_anat"]}/{self.t1w_name}_wm_gm_int_in_dwi.nii.gz'
+        self.wm_gm_int_in_dwi_bin = f'{namer["output"]["reg_anat"]}/{self.t1w_name}_wm_gm_int_in_dwi_bin.nii.gz'
         self.input_mni_sched = f"{FSLDIR}/etc/flirtsch/T1_2_MNI152_2mm.cnf"
         self.mni_atlas = f"{atlas_dir}/atlases/label/Human/HarvardOxfordsub-maxprob-thr25_space-MNI152NLin6_label_all_res-{vox_dims}.nii.gz"
         self.mni_vent_loc = f"{atlas_dir}/atlases/mask/HarvardOxford-thr25_space-MNI152NLin6_variant-lateral-ventricles_res-{vox_dims}_descr-brainmask.nii.gz"
         self.corpuscallosum = (
             f"{atlas_dir}/atlases/mask/CorpusCallosum_res_{vox_size}.nii.gz"
         )
-        self.corpuscallosum_mask_t1w = f'{self.namer.dirs["output"]["reg_anat"]}/{self.t1w_name}_corpuscallosum.nii.gz'
-        self.corpuscallosum_dwi = f'{self.namer.dirs["output"]["reg_anat"]}/{self.t1w_name}_corpuscallosum_dwi.nii.gz'
+        self.corpuscallosum_mask_t1w = f'{self.namer["output"]["reg_anat"]}/{self.t1w_name}_corpuscallosum.nii.gz'
+        self.corpuscallosum_dwi = f'{self.namer["output"]["reg_anat"]}/{self.t1w_name}_corpuscallosum_dwi.nii.gz'
 
     @gen_utils.timer
     def gen_tissue(self):
@@ -444,9 +444,9 @@ class DmriReg:
 
         self.atlas = atlas
         self.atlas_name = self.atlas.split("/")[-1].split(".")[0]
-        self.aligned_atlas_t1mni = f'{self.namer.dirs["tmp"]["reg_a"]}/{self.atlas_name}_aligned_atlas_t1w_mni.nii.gz'
-        self.aligned_atlas_skull = f'{self.namer.dirs["tmp"]["reg_a"]}/{self.atlas_name}_aligned_atlas_skull.nii.gz'
-        self.dwi_aligned_atlas = f'{self.namer.dirs["output"]["reg_anat"]}/{self.atlas_name}_aligned_atlas.nii.gz'
+        self.aligned_atlas_t1mni = f'{self.namer["tmp"]["reg_a"]}/{self.atlas_name}_aligned_atlas_t1w_mni.nii.gz'
+        self.aligned_atlas_skull = f'{self.namer["tmp"]["reg_a"]}/{self.atlas_name}_aligned_atlas_skull.nii.gz'
+        self.dwi_aligned_atlas = f'{self.namer["output"]["reg_anat"]}/{self.atlas_name}_aligned_atlas.nii.gz'
         # self.dwi_aligned_atlas_mask = "{}/{}_aligned_atlas_mask.nii.gz".format(self.namer.dirs['tmp']['reg_a'], self.atlas_name)
 
         reg_utils.align(

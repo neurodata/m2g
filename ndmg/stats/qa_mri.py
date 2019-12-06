@@ -97,7 +97,7 @@ class QaMRI:
         # is significant, will show a poorly defined border
         # since the brain will be moving in time
         rawfig = plot_brain(raw_dat.mean(axis=3), minthr=10)
-        rawfig.savefig(f'{self.namer.dirs["qa"]["prep_m"]}/{func_name}_raw.png')
+        rawfig.savefig(f'{self.namer["qa"]["prep_m"]}/{func_name}_raw.png')
 
         prep_im = nb.load(prep.preproc_func)
         prep_dat = prep_im.get_data()
@@ -107,7 +107,7 @@ class QaMRI:
         # due to motion correction
         prepfig = plot_brain(prep_dat.mean(axis=3), minthr=10)
         nvols = prep_dat.shape[3]
-        prepfig.savefig(f'{self.namer.dirs["qa"]["prep_m"]}/{func_name}_preproc.png')
+        prepfig.savefig(f'{self.namer["qa"]["prep_m"]}/{func_name}_preproc.png')
 
         # get the functional preprocessing motion parameters
         mc_params = np.genfromtxt(prep.mc_params)
@@ -168,7 +168,7 @@ class QaMRI:
             fig = plot_signals(params, labels, title=title, xlabel=xlab, ylabel=ylab)
 
             fname_reg = (
-                f'{self.namer.dirs["qa"]["prep_m"]}/{func_name}_{name}_parameters.png'
+                f'{self.namer["qa"]["prep_m"]}/{func_name}_{name}_parameters.png'
             )
             fig.savefig(fname_reg, format="png")
             plt.close(fig)
@@ -203,7 +203,7 @@ class QaMRI:
         # save iterator
         for plotname, fig in figs.items():
             fname = (
-                f'{self.namer.dirs["qa"]["prep_a"]}/{ prep.anat_name}_{plotname}.png'
+                f'{self.namer["qa"]["prep_a"]}/{ prep.anat_name}_{plotname}.png'
             )
             fig.tight_layout()
             fig.savefig(fname)
@@ -226,10 +226,10 @@ class QaMRI:
         # use the jaccard score in the filepath to easily
         # identify failed subjects
         sreg_m_final = "{}/space-T1w/{}_jaccard_{:.0f}".format(
-            self.namer.dirs["qa"]["reg_m"], reg.sreg_strat, self.self_reg_sc * 1000
+            self.namer["qa"]["reg_m"], reg.sreg_strat, self.self_reg_sc * 1000
         )
         sreg_a_final = "{}/space-T1w/{}_jaccard_{:.0f}".format(
-            self.namer.dirs["qa"]["reg_a"], reg.sreg_strat, self.self_reg_sc * 1000
+            self.namer["qa"]["reg_a"], reg.sreg_strat, self.self_reg_sc * 1000
         )
         cmd = f"mkdir -p {sreg_m_final} {sreg_a_final}"
         gen_utils.execute_cmd(cmd)
@@ -279,10 +279,10 @@ class QaMRI:
         # identification of failed subjects
         self.temp_reg_sc = treg_sc
         treg_m_final = "{}/template/{}_jaccard_{:.0f}".format(
-            self.namer.dirs["qa"]["reg_m"], reg.treg_strat, self.temp_reg_sc * 1000
+            self.namer["qa"]["reg_m"], reg.treg_strat, self.temp_reg_sc * 1000
         )
         treg_a_final = "{}/template/{}_jaccard_{:.0f}".format(
-            self.namer.dirs["qa"]["reg_a"], reg.treg_strat, self.temp_reg_sc * 1000
+            self.namer["qa"]["reg_a"], reg.treg_strat, self.temp_reg_sc * 1000
         )
         cmd = f"mkdir -p {treg_m_final} {treg_a_final}"
         gen_utils.execute_cmd(cmd)
@@ -358,8 +358,8 @@ class QaMRI:
                 - the nuisance correction object.
         """
         print("Performing QA for Nuisance...")
-        qcadir = self.namer.dirs["qa"]["nuis_a"]
-        qcfdir = self.namer.dirs["qa"]["nuis_f"]
+        qcadir = self.namer["qa"]["nuis_a"]
+        qcfdir = self.namer["qa"]["nuis_f"]
         maskdir = f'{qcadir}/{"masks"}'
         glmdir = f'{qcfdir}/{"glm_correction"}'
         fftdir = f'{qcfdir}/{"filtering"}'
@@ -484,7 +484,7 @@ class QaMRI:
                 - the quality control directory to place outputs.
         """
         label_name = gen_utils.get_filename(label)
-        qcdir = self.namer.dirs["qa"]["conn"][label_name]
+        qcdir = self.namer["qa"]["conn"][label_name]
         print("Performing QA for ROI Analysis...")
         cmd = f"mkdir -p {qcdir}"
         gen_utils.execute_cmd(cmd)
@@ -518,7 +518,7 @@ class QaMRI:
                 - the directory to place qc in.
         """
         print("Performing QA for Voxel Timeseries...")
-        qcdir = self.namer.dirs["qa"]["ts_voxel"]
+        qcdir = self.namer["qa"]["ts_voxel"]
         # plot the voxelwise signal with respect to the atlas to
         # get an idea of how well the fmri is masked
         reg_mri_pngs(voxel_func, atlas_mask, qcdir, loc=0, minthr=10, maxthr=95)

@@ -43,7 +43,7 @@ def ndmg_dwi_worker(
     t1w,
     atlas,
     mask,
-    labels,
+    parcellations,
     outdir,
     vox_size="2mm",
     mod_type="det",
@@ -108,38 +108,37 @@ def ndmg_dwi_worker(
     for arg, value in args.items():
         print(f"{arg} = {value}")
 
-    # connectome paths will end in f"{fmt}"
-    fmt = "_adj.csv"
+    if vox_size not in ["1mm", "2mm"]:
+        raise ValueError("Voxel size not supported. Use 2mm or 1mm")
+
+    # time ndmg execution
+    startTime = datetime.now()
+
+    # initial variables
+    outdir = Path(outdir)
+    dwi_name = gen_utils.get_filename(dwi)
 
     # make output directory
-    startTime = datetime.now()
-    Path(outdir).mkdir(parents=True, exist_ok=True)
-
-    # instantiate namer
-    namer = gen_utils.NameResource(dwi, t1w, atlas, outdir)
     print("Adding directory tree...")
-    namer.add_dirs(labels, ["conn"])
+    gen_utils.make_initial_directories(outdir, parcellations=parcellations)
 
     # generate list of connectome file locations
-    labels = gen_utils.as_list(labels)
+    parcellations = gen_utils.as_list(parcellations)
     connectomes = []
-    for label in labels:
-        filename = gen_utils.get_filename(label)
-        folder = namer.dirs["output"]["conn"][filename]
-        derivative = f"{namer.dwi_name}_{filename}_measure-spatial-ds{fmt}"
-        connectomes.append(os.path.join(folder, derivative))
+    for parc in parcellations:
+        name = gen_utils.get_filename(parc)
+        folder = outdir / f"connectomes/{name}"
+        connectome = f"{dwi_name}_{name}_connectome.csv"
+        connectomes.append(str(folder / connectome))
 
     warm_welcome = welcome_message(connectomes)
     print(warm_welcome)
 
-    if vox_size not in ["1mm", "2mm"]:
-        raise ValueError("Voxel size not supported. Use 2mm or 1mm")
-
     # -------- Preprocessing Steps --------------------------------- #
 
     # Perform eddy correction
-    dwi_prep = f'{namer.dirs["output"]["prep_dwi"]}/eddy_corrected_data.nii.gz'
-    preproc_dir = namer.dirs["output"]["prep_dwi"]
+    dwi_prep = str(outdir / "dwi/preproc/eddy_corrected_data.nii.gz")
+    preproc_dir = str(outdir / "dwi/preproc")
 
     # check that skipping eddy correct is possible
     if skipeddy:
@@ -154,9 +153,9 @@ def ndmg_dwi_worker(
         preproc.eddy_correct(dwi, dwi_prep, 0)
 
     # Instantiate bvec/bval naming variations and copy to derivative directory
-    bvec_scaled = f'{namer.dirs["output"]["prep_dwi"]}/bvec_scaled.bvec'
-    fbval = f'{namer.dirs["output"]["prep_dwi"]}/bval.bval'
-    fbvec = f'{namer.dirs["output"]["prep_dwi"]}/bvec.bvec'
+    bvec_scaled = f'{namer["output"]["prep_dwi"]}/bvec_scaled.bvec'
+    fbval = f'{namer["output"]["prep_dwi"]}/bval.bval'
+    fbvec = f'{namer["output"]["prep_dwi"]}/bvec.bvec'
     shutil.copyfile(bvecs, fbvec)
     shutil.copyfile(bvals, fbval)
 
@@ -188,9 +187,9 @@ def ndmg_dwi_worker(
     print("bvecs: ", bvecs)
     print("fbvec: ", fbvec)
     print("dwi_prep: ", dwi_prep)
-    print("namer.dirs: ", namer.dirs["output"]["prep_dwi"])
+    print("namer.dirs: ", namer["output"]["prep_dwi"])
     gtab, nodif_B0, nodif_B0_mask = gen_utils.make_gtab_and_bmask(
-        fbval, fbvec, dwi_prep, namer.dirs["output"]["prep_dwi"]
+        fbval, fbvec, dwi_prep, namer["output"]["prep_dwi"]
     )
 
     # Get B0 header and affine
@@ -198,30 +197,30 @@ def ndmg_dwi_worker(
     hdr = dwi_prep_img.header
 
     # -------- Registration Steps ----------------------------------- #
-    if (skipreg is False) and len(os.listdir(namer.dirs["output"]["prep_anat"])) != 0:
+    if (skipreg is False) and len(os.listdir(namer["output"]["prep_anat"])) != 0:
         try:
             print("Pre-existing preprocessed t1w files found. Deleting these...")
-            shutil.rmtree(namer.dirs["output"]["prep_anat"])
-            os.mkdir(namer.dirs["output"]["prep_anat"])
+            shutil.rmtree(namer["output"]["prep_anat"])
+            os.mkdir(namer["output"]["prep_anat"])
         except:
             pass
-    if (skipreg is False) and len(os.listdir(namer.dirs["output"]["reg_anat"])) != 0:
+    if (skipreg is False) and len(os.listdir(namer["output"]["reg_anat"])) != 0:
         try:
             print("Pre-existing registered t1w files found. Deleting these...")
-            shutil.rmtree(namer.dirs["output"]["reg_anat"])
-            os.mkdir(namer.dirs["output"]["reg_anat"])
+            shutil.rmtree(namer["output"]["reg_anat"])
+            os.mkdir(namer["output"]["reg_anat"])
         except:
             pass
     if (skipreg is False) and (
-        (len(os.listdir(namer.dirs["tmp"]["reg_a"])) != 0)
-        or (len(os.listdir(namer.dirs["tmp"]["reg_m"])) != 0)
+        (len(os.listdir(namer["tmp"]["reg_a"])) != 0)
+        or (len(os.listdir(namer["tmp"]["reg_m"])) != 0)
     ):
         try:
             print("Pre-existing temporary files found. Deleting these...")
-            shutil.rmtree(namer.dirs["tmp"]["reg_a"])
-            os.mkdir(namer.dirs["tmp"]["reg_a"])
-            shutil.rmtree(namer.dirs["tmp"]["reg_m"])
-            os.mkdir(namer.dirs["tmp"]["reg_m"])
+            shutil.rmtree(namer["tmp"]["reg_a"])
+            os.mkdir(namer["tmp"]["reg_a"])
+            shutil.rmtree(namer["tmp"]["reg_m"])
+            os.mkdir(namer["tmp"]["reg_m"])
         except:
             pass
 
@@ -296,7 +295,7 @@ def ndmg_dwi_worker(
         streamlines, affine_to_rasmm=trk_hdr["voxel_to_rasmm"]
     )
     trkfile = nib.streamlines.trk.TrkFile(tractogram, header=trk_hdr)
-    streams = os.path.join(namer.dirs["output"]["fiber"], "streamlines.trk")
+    streams = os.path.join(namer["output"]["fiber"], "streamlines.trk")
     nib.streamlines.save(trkfile, streams)
     print("Streamlines complete")
     print(f"Tractography runtime: {np.round(time.time() - start_time, 1)}")

@@ -153,121 +153,155 @@ class DirectorySweeper:
         return scans
 
 
-class NameResource:
-    """
-    A class for naming derivatives under the BIDs spec.
+# class NameResource:
+#     """
+#     A class for naming derivatives under the BIDs spec.
 
+#     Parameters
+#     ----------
+#     dwi : str
+#         Path to subject MRI (dwi) data to be analyzed
+#     t1w : str
+#         Path to subject t1w anatomical data
+#     parcellation : str
+#         Path to atlas file(s) to be used during analysis
+#     outdir : str
+#         Path to output directory
+#     """
+
+#     def __init__(self, dwi, t1w, parcellation, outdir):
+#         """__init__ containing relevant BIDS specified paths for relevant data
+#         """
+#         self.dwi_name = get_filename(dwi)
+#         self.t1w_name = get_filename(t1w)
+#         self.outdir = outdir
+
+#         # internal containers storing data
+#         self._dirs = {}
+#         self.locations = set()
+
+#         # populate self._dirs
+#         self.make_default_directories()
+
+#     def __repr__(self):
+#         return str(self._dirs)
+
+#     def __setitem__(self, key, value):
+#         self._dirs[key] = value
+#         self.locations |= set(NameResource.flatten_dirs(value))
+
+#     def __getitem__(self, key):
+#         return self._dirs[key]
+
+#     def __iter__(self):
+#         return iter(self._dirs.values())
+
+#     @staticmethod
+#     def flatten_dirs(directory: dict):
+#         flat = []
+#         for val in directory.values():
+#             if isinstance(val, dict):
+#                 flat += NameResource.flatten_dirs(val)
+#             else:
+#                 flat.append(val)
+#         return flat
+
+#     def make_default_directories(self):
+
+#         # add output directories
+#         self["output"] = {}
+#         self["output"]["base"] = self.outdir
+
+#         # add tmp directories
+#         self["tmp"] = {}
+#         self["tmp"]["base"] = self.outdir + "/tmp"
+#         self["tmp"]["reg_a"] = self["tmp"]["base"] + "/reg_a"
+#         self["tmp"]["reg_m"] = self["tmp"]["base"] + "/reg_m"
+
+#         # add qa directories
+#         self["qa"] = {}
+#         self["qa"]["base"] = self.outdir + "/qa"
+#         self["qa"]["adjacency"] = self["qa"]["base"] + "/adjacency"
+#         self["qa"]["fibers"] = self["qa"]["base"] + "/fibers"
+#         self["qa"]["graphs"] = self["qa"]["base"] + "/graphs"
+#         self["qa"]["graphs_plotting"] = self["qa"]["base"] + "/graphs_plotting"
+#         self["qa"]["mri"] = self["qa"]["base"] + "/mri"
+#         self["qa"]["reg"] = self["qa"]["base"] + "/reg"
+#         self["qa"]["tensor"] = self["qa"]["base"] + "/tensor"
+
+#     def add_output_dirs(self, parcellations, parc_dirs):
+#         """Creates tmp and permanent directories for the desired suffixes
+
+#         Parameters
+#         ----------
+#         parcellations : list
+#             list of paths of all the atlas label nifti files being used (each will get their own directory)
+#         parc_dirs : list
+#             list containing the keys from 'paths' you wish to add parcellation-level granularity to (create a directory for each value in 'parcellations')
+#         """
+
+#         parcellations = as_list(parcellations)
+#         paths = {
+#             "prep_dwi": "dwi/preproc",
+#             "prep_anat": "anat/preproc",
+#             "reg_anat": "anat/registered",
+#             "fiber": "dwi/fiber",
+#             "tensor": "dwi/tensor",
+#             "conn": "dwi/roi-connectomes",
+#         }
+
+#         # add output directories, checking for parcellations
+#         for kwd, path in paths.items():
+#             newdir = os.path.join(self["output"]["base"], path)
+#             if kwd in parc_dirs:
+#                 self["output"][kwd] = {}
+#                 for parc in parcellations:
+#                     parcname = get_filename(parc)
+#                     self["output"][kwd][parcname] = os.path.join(newdir, parcname)
+#             else:
+#                 self["output"][kwd] = newdir
+
+#     def mkdirs(self):
+#         for loc in self.locations:
+#             Path(loc).mkdir(parents=True, exist_ok=True)
+
+
+def make_initial_directories(outdir: Path, parcellations=[]) -> None:
+    """
+    Make starting directory tree.
+    
     Parameters
     ----------
-    dwi : str
-        Path to subject MRI (dwi) data to be analyzed
-    t1w : str
-        Path to subject t1w anatomical data
-    parcellation : str
-        Path to atlas file(s) to be used during analysis
-    outdir : str
-        Path to output directory
+    outdir : Path
+        Output directory of the form Path(<dir>/sub-<n>/ses-<m>/)
+    parcellations : list, optional
+        Set of all parcellations we're using, by default []
     """
+    initial_dirs = [
+        outdir / "connectomes",
+        outdir / "anat/preproc",
+        outdir / "anat/registered",
+        outdir / "dwi/fiber",
+        outdir / "dwi/preproc",
+        outdir / "dwi/tensor",
+    ]
+    for parc in parcellations:
+        name = get_filename(parc)
+        p = outdir / f"dwi/roi-connectomes/{name}"
+        initial_dirs.append(p)
 
-    def __init__(self, dwi, t1w, parcellation, outdir):
-        """__init__ containing relevant BIDS specified paths for relevant data
-        """
-        self.dwi_name = get_filename(dwi)
-        self.t1w_name = get_filename(t1w)
-        self.outdir = outdir
-        self.paths = {
-            "prep_dwi": "dwi/preproc",
-            "prep_anat": "anat/preproc",
-            "reg_anat": "anat/registered",
-            "fiber": "dwi/fiber",
-            "tensor": "dwi/tensor",
-            "conn": "dwi/roi-connectomes",
-        }
-
-        # internal dictionary storing data, built with `self.add_dirs`
-        self.dirs = {}
-
-    def __repr__(self):
-        return str(self.dirs)
-
-    def __setitem__(self, key, value):
-        self.dirs[key] = value
-
-    def __getitem__(self, key):
-        return self.dirs[key]
-
-    def add_dirs(self, labels, label_dirs):
-        """Creates tmp and permanent directories for the desired suffixes
-
-        Parameters
-        ----------
-        paths : dict
-            a dictionary of keys to suffix directories
-        labels : list
-            list of paths of all the atlas label nifti files being used (each will get their own directory)
-        label_dirs : list
-            list containing the keys from 'paths' you wish to add label level granularity to (create a directory for each value in 'labels')
-        """
-
-        labels = as_list(labels)
-
-        # add output directories
-        self["output"] = {}
-        self["output"]["base"] = self.outdir
-        for kwd, path in self.paths.items():
-            newdir = os.path.join(self["output"]["base"], path)
-            if kwd in label_dirs:  # levels with label granularity
-                self["output"][kwd] = {}
-                for label in labels:
-                    labname = get_filename(label)
-                    self["output"][kwd][labname] = os.path.join(newdir, labname)
-            else:
-                self["output"][kwd] = newdir
-
-        # add tmp directories
-        self["tmp"] = {}
-        self["tmp"]["base"] = self.outdir + "/tmp"
-        self["tmp"]["reg_a"] = self["tmp"]["base"] + "/reg_a"
-        self["tmp"]["reg_m"] = self["tmp"]["base"] + "/reg_m"
-
-        # add qa directories
-        self["qa"] = {}
-        self["qa"]["base"] = self.outdir + "/qa"
-        self["qa"]["adjacency"] = self["qa"]["base"] + "/adjacency"
-        self["qa"]["fibers"] = self["qa"]["base"] + "/fibers"
-        self["qa"]["graphs"] = self["qa"]["base"] + "/graphs"
-        self["qa"]["graphs_plotting"] = self["qa"]["base"] + "/graphs_plotting"
-        self["qa"]["mri"] = self["qa"]["base"] + "/mri"
-        self["qa"]["reg"] = self["qa"]["base"] + "/reg"
-        self["qa"]["tensor"] = self["qa"]["base"] + "/tensor"
-
-        # make newdirs
-        newdirs = flatten(self.dirs, [])
-        for dir_ in newdirs:
-            Path(dir_).mkdir(parents=True, exist_ok=True)
+    for initial_path in initial_dirs:
+        initial_path.mkdir(parents=True, exist_ok=True)
 
 
-def flatten(current, result=[]):
-    """Flatten a folder heirarchy
-
-    Parameters
-    ----------
-    current : dict
-        path to directory you want to flatten
-    result : list, optional
-        Used to store directory information between iterations of flatten, Default is []
-
-    Returns
-    -------
-    list
-        All new directories created by flattening the current directory
-    """
-    if isinstance(current, dict):
-        for key in current:
-            flatten(current[key], result)
-    else:
-        result.append(current)
-    return result
+def flatten(dict_: dict):
+    flat = []
+    for val in dict_.values():
+        if isinstance(val, dict):
+            flat += flatten(val)
+        else:
+            flat.append(val)
+    return flat
 
 
 def all_strings(iterable_):
@@ -748,7 +782,7 @@ def reorient_dwi(dwi_prep, bvecs, namer):
 
     fname = dwi_prep
     bvec_fname = bvecs
-    out_bvec_fname = f'{namer.dirs["output"]["prep_dwi"]}/bvecs_reor.bvec'
+    out_bvec_fname = f'{namer["output"]["prep_dwi"]}/bvecs_reor.bvec'
 
     input_img = nib.load(fname)
     input_axcodes = nib.aff2axcodes(input_img.affine)
@@ -758,7 +792,7 @@ def reorient_dwi(dwi_prep, bvecs, namer):
     new_axcodes = ("R", "A", "S")
     if normalized is not input_img:
         out_fname = (
-            f'{namer.dirs["output"]["prep_dwi"]}/'
+            f'{namer["output"]["prep_dwi"]}/'
             f'{dwi_prep.split("/")[-1].split(".nii.gz")[0]}_reor_RAS.nii.gz'
         )
         print(f"Reorienting {dwi_prep} to RAS+...")
@@ -780,7 +814,7 @@ def reorient_dwi(dwi_prep, bvecs, namer):
         np.savetxt(out_bvec_fname, output_array, fmt="%.8f ")
     else:
         out_fname = (
-            f'{namer.dirs["output"]["prep_dwi"]}/'
+            f'{namer["output"]["prep_dwi"]}/'
             f'{dwi_prep.split("/")[-1].split(".nii.gz")[0]}_RAS.nii.gz'
         )
         out_bvec_fname = bvec_fname
@@ -815,12 +849,12 @@ def reorient_img(img, namer):
     if normalized is not orig_img:
         print(f"Reorienting {img} to RAS+...")
         out_name = (
-            f'{namer.dirs["output"]["prep_anat"]}/'
+            f'{namer["output"]["prep_anat"]}/'
             f'{img.split("/")[-1].split(".nii.gz")[0]}_reor_RAS.nii.gz'
         )
     else:
         out_name = (
-            f'{namer.dirs["output"]["prep_anat"]}/'
+            f'{namer["output"]["prep_anat"]}/'
             f'{img.split("/")[-1].split(".nii.gz")[0]}_RAS.nii.gz'
         )
 
@@ -865,12 +899,12 @@ def match_target_vox_res(img_file, vox_size, namer, sens):
         print("Reslicing image " + img_file + " to " + vox_size + "...")
         if sens == "dwi":
             img_file_res = (
-                f'{namer.dirs["output"]["prep_dwi"]}/'
+                f'{namer["output"]["prep_dwi"]}/'
                 f'{os.path.basename(img_file).split(".nii.gz")[0]}_res.nii.gz'
             )
         elif sens == "t1w":
             img_file_res = (
-                f'{namer.dirs["output"]["prep_anat"]}/'
+                f'{namer["output"]["prep_anat"]}/'
                 f'{os.path.basename(img_file).split(".nii.gz")[0]}_res.nii.gz'
             )
 
@@ -882,12 +916,12 @@ def match_target_vox_res(img_file, vox_size, namer, sens):
         print("Reslicing image " + img_file + " to " + vox_size + "...")
         if sens == "dwi":
             img_file_nores = (
-                f'{namer.dirs["output"]["prep_dwi"]}/'
+                f'{namer["output"]["prep_dwi"]}/'
                 f'{os.path.basename(img_file).split(".nii.gz")[0]}_nores.nii.gz'
             )
         elif sens == "t1w":
             img_file_nores = (
-                f'{namer.dirs["output"]["prep_anat"]}/'
+                f'{namer["output"]["prep_anat"]}/'
                 f'{os.path.basename(img_file).split(".nii.gz")[0]}_nores.nii.gz'
             )
         nib.save(img, img_file_nores)

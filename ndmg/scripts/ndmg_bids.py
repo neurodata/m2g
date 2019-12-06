@@ -295,7 +295,7 @@ def main():
     parcellations, atlas, mask, = get_atlas(atlas_dir, constant_kwargs["vox_size"])
     if parcellation_name is not None:  # filter parcellations
         parcellations = [file_ for file_ in parcellations if parcellation_name in file_]
-    atlas_stuff = {"atlas": atlas, "mask": mask, "labels": parcellations}
+    atlas_stuff = {"atlas": atlas, "mask": mask, "parcellations": parcellations}
     constant_kwargs.update(atlas_stuff)
 
     # parse input directory
