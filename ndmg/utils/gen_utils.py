@@ -164,21 +164,32 @@ def make_initial_directories(outdir: Path, parcellations=[]) -> None:
     parcellations : list, optional
         Set of all parcellations we're using, by default []
     """
-    initial_dirs = [
-        outdir / "connectomes",
-        outdir / "anat/preproc",
-        outdir / "anat/registered",
-        outdir / "dwi/fiber",
-        outdir / "dwi/preproc",
-        outdir / "dwi/tensor",
+    anat_dirs = ["anat/preproc", "anat/registered"]
+    dwi_dirs = ["dwi/fiber", "dwi/preproc", "dwi/tensor"]
+    qa_dirs = [
+        "qa/adjacency",
+        "qa/fibers",
+        "qa/graphs",
+        "qa/graphs_plotting",
+        "qa/mri",
+        "qa/reg",
+        "qa/tensor",
     ]
+    tmp_dirs = ["tmp/reg_a", "tmp/reg_m"]
+
+    # populate connectome_dir with folder for each parcellation
+    connectome_dirs = []
     for parc in parcellations:
         name = get_filename(parc)
-        p = outdir / f"dwi/roi-connectomes/{name}"
-        initial_dirs.append(p)
+        p = str(f"connectomes/{name}")
+        connectome_dirs.append(p)
 
-    for initial_path in initial_dirs:
-        initial_path.mkdir(parents=True, exist_ok=True)
+    initial_dirs = anat_dirs + dwi_dirs + qa_dirs + tmp_dirs + connectome_dirs
+
+    # create directories
+    for p in initial_dirs:
+        full_path = outdir / p
+        full_path.mkdir(parents=True, exist_ok=True)
 
 
 def flatten(dict_: dict):

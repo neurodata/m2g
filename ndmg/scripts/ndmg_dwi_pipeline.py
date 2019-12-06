@@ -120,10 +120,10 @@ def ndmg_dwi_worker(
 
     # make output directory
     print("Adding directory tree...")
+    parcellations = gen_utils.as_list(parcellations)
     gen_utils.make_initial_directories(outdir, parcellations=parcellations)
 
     # generate list of connectome file locations
-    parcellations = gen_utils.as_list(parcellations)
     connectomes = []
     for parc in parcellations:
         name = gen_utils.get_filename(parc)
