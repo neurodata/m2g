@@ -152,10 +152,10 @@ def ndmg_dwi_worker(
         preproc_dir = gen_utils.as_directory(preproc_dir, remove=True)
         preproc.eddy_correct(dwi, dwi_prep, 0)
 
-    # Instantiate bvec/bval naming variations and copy to derivative directory
-    bvec_scaled = f'{namer["output"]["prep_dwi"]}/bvec_scaled.bvec'
-    fbval = f'{namer["output"]["prep_dwi"]}/bval.bval'
-    fbvec = f'{namer["output"]["prep_dwi"]}/bvec.bvec'
+    # copy bval/bvec files to output directory
+    bvec_scaled = str(outdir / "dwi/preproc/bvec_scaled.bvec")
+    fbval = str(outdir / "dwi/preproc/bval.bval")
+    fbvec = str(outdir / "dwi/preproc/bvec.bvec")
     shutil.copyfile(bvecs, fbvec)
     shutil.copyfile(bvals, fbval)
 
