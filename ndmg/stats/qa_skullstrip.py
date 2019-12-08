@@ -42,29 +42,32 @@ import matplotlib.pyplot as plt
 
 
 def gen_overlay_pngs(
-    brain, origional, outdir, loc=0, mean=False, minthr=2, maxthr=95, edge=False
-):
+    brain, origional, outdir, loc=0, mean=False, minthr=2, maxthr=95, edge=False):
     """
     outdir: directory where output png file is saved
     fname: name of output file WITHOUT FULL PATH. Path provided in outdir.
     """
-    origional_data = nb.load(origional).get_data()
+    try:
+        origional_name = get_filename(origional)
+    except:
+        origional_name = 'compare_origional_data_and_brain'
     brain_data = nb.load(brain).get_data()
     if brain_data.ndim == 4:  # 4d data, so we need to reduce a dimension
         if mean:
-            mr_data = brain_data.mean(axis=3)
+            brain_data2 = brain_data.mean(axis=3)
         else:
-            mr_data = brain_data[:, :, :, loc]
+            brain_data2 = brain_data[:, :, :, loc]
     else:  # dim=3
-        mr_data = brain_data
+        brain_data2 = brain_data
 
     cmap1 = LinearSegmentedColormap.from_list("mycmap1", ["white", "magenta"])
     cmap2 = LinearSegmentedColormap.from_list("mycmap2", ["white", "green"])
 
-    fig = plot_overlays(origional_data, mr_data, [cmap1, cmap2], minthr, maxthr, edge)
+
+    fig = plot_overlays(brain_data2, origional, [cmap1, cmap2], minthr, maxthr, edge)
 
     # name and save the file
-    fname = os.path.split(brain)[1].split(".")[0] + ".png"
+    fname = "qa_skullstrip__" + origional_name + ".png"
     fig.savefig(outdir + "/" + fname, format="png")
     # plt.close()
 
@@ -93,74 +96,21 @@ def opaque_colorscale(basemap, reference, vmin=None, vmax=None, alpha=1):
     return cmap
 
 
-def plot_brain(brain, minthr=2, maxthr=95, edge=False):
-    brain = get_braindata(brain)
-    cmap = LinearSegmentedColormap.from_list("mycmap2", ["white", "green"])
-    plt.rcParams.update({"axes.labelsize": "x-large", "axes.titlesize": "x-large"})
-    fbr = plt.figure()
-    if brain.shape == (182, 218, 182):
-        x = [78, 90, 100]
-        y = [82, 107, 142]
-        z = [88, 103, 107]
-    else:
-        shap = brain.shape
-        x = [int(shap[0] * 0.35), int(shap[0] * 0.51), int(shap[0] * 0.65)]
-        y = [int(shap[1] * 0.35), int(shap[1] * 0.51), int(shap[1] * 0.65)]
-        z = [int(shap[2] * 0.35), int(shap[2] * 0.51), int(shap[2] * 0.65)]
-    coords = (x, y, z)
-
-    labs = [
-        "Sagittal Slice",
-        "Coronal Slice",
-        "Axial Slice",
-    ]
-    var = ["X", "Y", "Z"]
-    # create subplot for first slice
-    # and customize all labels
-    idx = 0
-    min_val, max_val = get_min_max(brain, minthr, maxthr)
-    for i, coord in enumerate(coords):
-        for pos in coord:
-            idx += 1
-            ax = fbr.add_subplot(3, 3, idx)
-            ax.set_axis_bgcolor("white")
-            ax.set_title(var[i] + " = " + str(pos))
-            if i == 0:
-                image = ndimage.rotate(brain[pos, :, :], 90)
-            elif i == 1:
-                image = ndimage.rotate(brain[:, pos, :], 90)
-            else:
-                image = brain[:, :, pos]
-
-            if idx % 3 == 1:
-                ax.set_ylabel(labs[i])
-                ax.yaxis.set_ticks([0, image.shape[0] / 2, image.shape[0] - 1])
-                ax.xaxis.set_ticks([0, image.shape[1] / 2, image.shape[1] - 1])
-
-            if edge:
-                image = edge_map(image).data
-            ax.imshow(
-                image,
-                interpolation="none",
-                cmap=cmap,
-                alpha=1,
-                vmin=min_val,
-                vmax=max_val,
-            )
-
-    fbr.set_size_inches(12.5, 10.5, forward=True)
-    fbr.tight_layout()
-    return fbr
 
 
-def plot_overlays(origional, b0, cmaps=None, minthr=2, maxthr=95, edge=False):
+def plot_overlays(b0, origional, cmaps=None, minthr=2, maxthr=95, edge=False):
     plt.rcParams.update({"axes.labelsize": "x-large", "axes.titlesize": "x-large"})
     foverlay = plt.figure()
 
     origional = get_braindata(origional)
+    ori_shape = get_braindata(b0).shape
     b0 = get_braindata(b0)
     if origional.shape != b0.shape:
         raise ValueError("Two files are not the same shape.")
+    b0 = pad_im(b0,max(ori_shape[0:3]),0)
+    origional = pad_im(origional,max(ori_shape[0:3]),0)
+
+
     if cmaps is None:
         cmap1 = LinearSegmentedColormap.from_list("mycmap1", ["white", "magenta"])
         cmap2 = LinearSegmentedColormap.from_list("mycmap2", ["white", "green"])
@@ -196,8 +146,8 @@ def plot_overlays(origional, b0, cmaps=None, minthr=2, maxthr=95, edge=False):
                 image = ndimage.rotate(b0[:, pos, :], 90)
                 atl = ndimage.rotate(origional[:, pos, :], 90)
             else:
-                image = b0[:, :, pos]
-                atl = origional[:, :, pos]
+                image = ndimage.rotate(b0[:, :, pos], 270)
+                atl = ndimage.rotate(origional[:, :, pos], 270)
 
             if idx % 3 == 1:
                 ax.set_ylabel(labs[i])
@@ -228,8 +178,11 @@ def plot_overlays(origional, b0, cmaps=None, minthr=2, maxthr=95, edge=False):
                 # box = ax.get_position()
                 # ax.set_position([box.x0, box.y0, box.width, box.height*0.8])
                 plt.legend(loc='best', fontsize=15, frameon=False, bbox_to_anchor=(1.5, 1.5))
-    # plot title
-    foverlay.suptitle('QA For skull-strip',fontsize=24)
+
+    # Set title for the whole picture
+    [a, b, c] = ori_shape
+    title = 'QA For skullstrip. Brain Volume:' + str(a) + '*' + str(b) + '*' + str(c) + '\n'
+    foverlay.suptitle(title, fontsize=24)
     foverlay.set_size_inches(12.5, 10.5, forward=True)
     return foverlay
 
@@ -286,8 +239,8 @@ def get_braindata(brain_file):
         braindata = brain_file
     else:
         if type(brain_file) is str or type(brain_file) is str:
-            brain = nib.load(str(brain_file))
-        elif type(brain_file) is nib.nifti1.Nifti1Image:
+            brain = nb.load(str(brain_file))
+        elif type(brain_file) is nb.nifti1.Nifti1Image:
             brain = brain_file
         else:
             raise TypeError(
@@ -298,3 +251,22 @@ def get_braindata(brain_file):
         braindata = brain.get_data()
     return braindata
 
+def pad_im(image,max_dim,pad_val):
+    """
+    Pads an image to be same dimensions as given max_dim
+    Parameters
+    -----------
+    image: 3-d RGB np array of image slice
+    max_dim: dimension to pad up to
+    pad_val: value to pad with
+    Returns
+    -----------
+    padded_image: 3-d RGB np array of image slice with padding
+    """
+    #pad only in first two dimensions not in rgb
+    pad_width = (((max_dim-image.shape[0])//2,(max_dim-image.shape[0])//2),((max_dim-image.shape[1])//2,(max_dim-image.shape[1])//2),((max_dim-image.shape[2])//2,(max_dim-image.shape[2])//2))
+    padded_image = np.pad(image, pad_width=pad_width, mode='constant', constant_values=pad_val)
+    return padded_image
+
+def get_filename(label):
+    return os.path.splitext(os.path.splitext(os.path.basename(label))[0])[0]
