@@ -1,4 +1,4 @@
-cdimport nibabel as nib
+import nibabel as nib
 import numpy as np
 from fury import actor, window, colormap, ui
 from dipy.tracking.streamline import Streamlines
