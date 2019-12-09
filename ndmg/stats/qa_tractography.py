@@ -2,14 +2,14 @@ import nibabel as nib
 import numpy as np
 from fury import actor, window, colormap, ui
 from dipy.tracking.streamline import Streamlines
-#import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 from PIL import Image
 from matplotlib.colors import LinearSegmentedColormap
 import os
 
-import matplotlib
-matplotlib.use("TkAgg")
-from matplotlib import pyplot as plt
+# import matplotlib
+# matplotlib.use("TkAgg")
+# from matplotlib import pyplot as plt
 
 #from xvfbwrapper import Xvfb
 
