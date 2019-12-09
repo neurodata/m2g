@@ -31,6 +31,7 @@ from ndmg import graph
 from ndmg.utils import gen_utils
 from ndmg.utils import reg_utils
 from ndmg.utils import cloud_utils
+from ndmg.stats.qa_tractography import qa_tractography
 
 # TODO : not sure why this is here, potentially remove
 os.environ["MPLCONFIGDIR"] = "/tmp/"
@@ -304,6 +305,40 @@ def ndmg_dwi_worker(
     trkfile = nib.streamlines.trk.TrkFile(tractogram, header=trk_hdr)
     streams = namer.name_derivative(namer.dirs["output"]["fiber"], "streamlines.trk")
     nib.streamlines.save(trkfile, streams)
+    # try:
+    #     print("-----------hhhhhhhhhhh------------")
+    #     qa_tractography_out = namer.dirs["qa"]["fibers"]
+    #     qa_tractography(streams,qa_tractography_out,dwi_prep)
+    # except BaseException as e:
+    #     print("----------------xxxxxxxxxxxxxxx------------")
+    #     print("QA for tractography Error Has Occured!")
+    #     print('Reason:', e)
+
+    # try:
+    #     qa_tractography_out = namer.dirs["qa"]["fibers"]
+    #     qa_tractography(streams,qa_tractography_out,dwi_prep)
+    # except NameError:
+    #     print("Variable x is not defined")
+    # except:
+    #     print("----------------xxxxxxxxxxxxxxx------------")
+    #     print("QA for tractography Error Has Occured!")
+
+    # try:
+    #     if os.environ["NDMG_URL"]:
+    #         print("Notice: QA_tractography didn't works in Docker environment")
+    # except KeyError:
+    #     qa_tractography_out = namer.dirs["qa"]["fibers"]
+    #     qa_tractography(streams,qa_tractography_out,dwi_prep)
+    # else:
+    #     pass
+
+    if "NDMG_URL" in os.environ:
+        print("Notice: QA_tractography didn't works in Docker environment")
+    else:
+        qa_tractography_out = namer.dirs["qa"]["fibers"]
+        qa_tractography(streams,qa_tractography_out,dwi_prep)
+    print("----------hhhhhhhhhhhhhhhhhh-----------")
+
     print("Streamlines complete")
     print(f"Tractography runtime: {np.round(time.time() - start_time, 1)}")
 
