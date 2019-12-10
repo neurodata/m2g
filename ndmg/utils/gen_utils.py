@@ -276,6 +276,8 @@ def merge_dicts(x, y):
 
 
 def print_arguments(inputs=[], outputs=[]):
+    # NOTE : any functions decorated with this go here first when you set a breakpoint in the debugger.
+    #        To debug the function itself, step into the line that calls the decorated function (f(*args, **kwargs)).
     """
     Decorator. Standardizes print statements across functions by printing arguments to stdout. Checks input files for existence.
 
@@ -659,7 +661,8 @@ def normalize_xform(img):
 
 
 @print_arguments(inputs=[0, 1])
-def reorient_dwi(dwi_prep, bvecs, outdir):
+def reorient_dwi(dwi_prep: Path, bvecs: str, preproc_dir: Path):
+    # TODO : normalize whether inputs are `str` or `Path`
     """Orients dwi data to the proper orientation (RAS+) using nibabel
 
     Parameters
@@ -677,7 +680,10 @@ def reorient_dwi(dwi_prep, bvecs, outdir):
         Path to b-vector file, potentially reoriented if dwi data was
     """
 
-    out_bvec_fname = str(outdir / "dwi/preproc/bvecs_reor.bvec")
+    # ensure proper types
+    preproc_dir = Path(preproc_dir)
+    dwi_prep = str(dwi_prep)
+    out_bvec_fname = str(preproc_dir / "bvecs_reor.bvec")
 
     input_img = nib.load(dwi_prep)
     input_axcodes = nib.aff2axcodes(input_img.affine)
@@ -685,7 +691,7 @@ def reorient_dwi(dwi_prep, bvecs, outdir):
     normalized = normalize_xform(reoriented)
     # Is the input image oriented how we want?
     new_axcodes = ("R", "A", "S")
-    out_beginning = str(outdir / f"dwi/preproc/{get_filename(dwi_prep)}")
+    out_beginning = str(preproc_dir / f"{get_filename(dwi_prep)}")
     if normalized is not input_img:
         out_fname = out_beginning + "_reor_RAS.nii.gz"
         print(f"Reorienting {dwi_prep} to RAS+...")
@@ -754,7 +760,7 @@ def reorient_img(img, namer):
 
 
 @print_arguments(inputs=[0])
-def match_target_vox_res(img_file, vox_size, namer, sens):
+def match_target_vox_res(img_file: str, vox_size, outdir: Path, sens):
     """Reslices input MRI file if it does not match the targeted voxel resolution. Can take dwi or t1w scans.
 
     Parameters
@@ -766,7 +772,7 @@ def match_target_vox_res(img_file, vox_size, namer, sens):
     namer : NameResource
         NameResource variable containing relevant directory tree information
     sens : str
-        type of data being analyzed ('dwi' or 'func')
+        type of data being analyzed ('dwi' or 'anat')
 
     Returns
     -------
@@ -785,35 +791,20 @@ def match_target_vox_res(img_file, vox_size, namer, sens):
     elif vox_size == "2mm":
         new_zooms = (2.0, 2.0, 2.0)
 
+    # set up paths
+    preproc_location = str(outdir / f"{sens}/preproc/{get_filename(img_file)}")
+
     if (abs(zooms[0]), abs(zooms[1]), abs(zooms[2])) != new_zooms:
         print("Reslicing image " + img_file + " to " + vox_size + "...")
-        if sens == "dwi":
-            img_file_res = (
-                f'{namer["output"]["prep_dwi"]}/'
-                f'{os.path.basename(img_file).split(".nii.gz")[0]}_res.nii.gz'
-            )
-        elif sens == "t1w":
-            img_file_res = (
-                f'{namer["output"]["prep_anat"]}/'
-                f'{os.path.basename(img_file).split(".nii.gz")[0]}_res.nii.gz'
-            )
 
+        img_file_res = preproc_location + "_res.nii.gz"
         data2, affine2 = reslice(data, affine, zooms, new_zooms)
         img2 = nib.Nifti1Image(data2, affine=affine2)
         nib.save(img2, img_file_res)
         img_file = img_file_res
     else:
         print("Reslicing image " + img_file + " to " + vox_size + "...")
-        if sens == "dwi":
-            img_file_nores = (
-                f'{namer["output"]["prep_dwi"]}/'
-                f'{os.path.basename(img_file).split(".nii.gz")[0]}_nores.nii.gz'
-            )
-        elif sens == "t1w":
-            img_file_nores = (
-                f'{namer["output"]["prep_anat"]}/'
-                f'{os.path.basename(img_file).split(".nii.gz")[0]}_nores.nii.gz'
-            )
+        img_file_nores = preproc_location + "_nores.nii.gz"
         nib.save(img, img_file_nores)
         img_file = img_file_nores
 

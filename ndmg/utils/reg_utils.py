@@ -193,7 +193,7 @@ def resample_fsl(base, res, goal_res, interp="spline"):
     subprocess.run(cmd, check=True, shell=True)
 
 
-def skullstrip_check(dmrireg, labels, namer, vox_size, reg_style):
+def skullstrip_check(dmrireg, labels, outdir, vox_size, reg_style):
     """Peforms the alignment of atlas to dwi space and checks if the alignment results in roi loss
 
     Parameters
@@ -231,9 +231,9 @@ def skullstrip_check(dmrireg, labels, namer, vox_size, reg_style):
 
     labels_im_file_list = []
     for idx, label in enumerate(labels):
-        labels_im_file = gen_utils.reorient_img(labels[idx], namer)
+        labels_im_file = gen_utils.reorient_img(labels[idx], namer)  # TODO
         labels_im_file = gen_utils.match_target_vox_res(
-            labels_im_file, vox_size, namer, sens="t1w"
+            labels_im_file, vox_size, outdir, sens="anat"
         )
         orig_lab = nib.load(labels_im_file)
         orig_lab = orig_lab.get_data().astype("int")

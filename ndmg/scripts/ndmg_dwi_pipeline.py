@@ -136,21 +136,21 @@ def ndmg_dwi_worker(
 
     # -------- Preprocessing Steps --------------------------------- #
 
-    # Perform eddy correction
-    dwi_prep = str(outdir / "dwi/preproc/eddy_corrected_data.nii.gz")
-    preproc_dir = str(outdir / "dwi/preproc")
+    # set up directories
+    preproc_dir: Path = outdir / "dwi/preproc"
+    dwi_prep: Path = preproc_dir / "eddy_corrected_data.nii.gz"
 
     # check that skipping eddy correct is possible
     if skipeddy:
         # do it anyway if dwi_prep doesnt exist
-        if not os.path.isfile(dwi_prep):
+        if not dwi_prep.is_file():
             print("Cannot skip preprocessing if it has not already been run!")
             skipeddy = False
 
     # if we're not skipping eddy correct, perform it
     if not skipeddy:
-        preproc_dir = gen_utils.as_directory(preproc_dir, remove=True)
-        preproc.eddy_correct(dwi, dwi_prep, 0)
+        preproc_dir = Path(gen_utils.as_directory(preproc_dir, remove=True))
+        preproc.eddy_correct(dwi, str(dwi_prep), 0)
 
     # copy bval/bvec files to output directory
     bvec_scaled = str(outdir / "dwi/preproc/bvec_scaled.bvec")
@@ -177,10 +177,10 @@ def ndmg_dwi_worker(
     preproc.rescale_bvec(fbvec, bvec_scaled)
 
     # Check orientation (dwi_prep)
-    dwi_prep, bvecs = gen_utils.reorient_dwi(dwi_prep, bvec_scaled, outdir)
+    dwi_prep, bvecs = gen_utils.reorient_dwi(dwi_prep, bvec_scaled, preproc_dir)
 
     # Check dimensions
-    dwi_prep = gen_utils.match_target_vox_res(dwi_prep, vox_size, namer, sens="dwi")
+    dwi_prep = gen_utils.match_target_vox_res(dwi_prep, vox_size, outdir, sens="dwi")
 
     # Build gradient table
     print("fbval: ", fbval)
@@ -226,7 +226,7 @@ def ndmg_dwi_worker(
     # Check orientation (t1w)
     start_time = time.time()
     t1w = gen_utils.reorient_img(t1w, namer)
-    t1w = gen_utils.match_target_vox_res(t1w, vox_size, namer, sens="t1w")
+    t1w = gen_utils.match_target_vox_res(t1w, vox_size, outdir, sens="anat")
 
     print("Running registration in native space...")
 
@@ -265,7 +265,7 @@ def ndmg_dwi_worker(
 
     # Align atlas to dwi-space and check that the atlas hasn't lost any of the rois
     labels_im_file_list = reg_utils.skullstrip_check(
-        reg, labels, namer, vox_size, reg_style
+        reg, labels, outdir, vox_size, reg_style
     )
     # -------- Tensor Fitting and Fiber Tractography ---------------- #
     start_time = time.time()
