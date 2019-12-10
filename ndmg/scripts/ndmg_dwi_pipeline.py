@@ -188,40 +188,36 @@ def ndmg_dwi_worker(
     print("fbvec: ", fbvec)
     print("dwi_prep: ", dwi_prep)
     gtab, nodif_B0, nodif_B0_mask = gen_utils.make_gtab_and_bmask(
-        fbval, fbvec, dwi_prep, namer["output"]["prep_dwi"]
+        fbval, fbvec, dwi_prep, str(preproc_dir)
     )
 
     # Get B0 header and affine
-    dwi_prep_img = nib.load(dwi_prep)
+    dwi_prep_img = nib.load(str(dwi_prep))
     hdr = dwi_prep_img.header
 
     # -------- Registration Steps ----------------------------------- #
-    if (skipreg is False) and len(os.listdir(namer["output"]["prep_anat"])) != 0:
-        try:
+
+    # define registration directory locations
+    reg_dirs = ["anat/preproc", "anat/registered", "tmp/reg_a", "tmp/reg_b"]
+    reg_dirs = [outdir / loc for loc in reg_locations]
+    anat_preproc_dir, anat_reg_dir, tmp_rega_dir, tmp_regb_dir = reg_dirs
+
+    # check if output directories already have output files
+    anat_preproc_has_files = bool(os.listdir(anat_preproc_dir))
+    anat_reg_has_files = bool(os.listdir(anat_reg_dir))
+    tmp_has_files = bool(os.listdir(tmp_rega_dir) or os.listdir(tmp_regb_dir))
+
+    if not skipreg:
+        if anat_preproc_has_files:
             print("Pre-existing preprocessed t1w files found. Deleting these...")
-            shutil.rmtree(namer["output"]["prep_anat"])
-            os.mkdir(namer["output"]["prep_anat"])
-        except:
-            pass
-    if (skipreg is False) and len(os.listdir(namer["output"]["reg_anat"])) != 0:
-        try:
+            gen_utils.as_directory(anat_preproc_dir, remove=True)
+        if anat_reg_has_files:
             print("Pre-existing registered t1w files found. Deleting these...")
-            shutil.rmtree(namer["output"]["reg_anat"])
-            os.mkdir(namer["output"]["reg_anat"])
-        except:
-            pass
-    if (skipreg is False) and (
-        (len(os.listdir(namer["tmp"]["reg_a"])) != 0)
-        or (len(os.listdir(namer["tmp"]["reg_m"])) != 0)
-    ):
-        try:
+            gen_utils.as_directory(anat_reg_dir, remove=True)
+        if tmp_has_files:
             print("Pre-existing temporary files found. Deleting these...")
-            shutil.rmtree(namer["tmp"]["reg_a"])
-            os.mkdir(namer["tmp"]["reg_a"])
-            shutil.rmtree(namer["tmp"]["reg_m"])
-            os.mkdir(namer["tmp"]["reg_m"])
-        except:
-            pass
+            gen_utils.as_directory(tmp_rega_dir, remove=True)
+            gen_utils.as_directory(tmp_regb_dir, remove=True)
 
     # Check orientation (t1w)
     start_time = time.time()

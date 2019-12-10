@@ -329,6 +329,8 @@ def print_arguments(inputs=[], outputs=[]):
 
 
 def timer(f):
+    # NOTE : any functions decorated with this go here first when you set a breakpoint in the debugger.
+    #        To debug the function itself, step into the line that calls the decorated function (f(*args, **kwargs)).
     """Print the runtime of the decorated function"""
 
     @functools.wraps(f)
@@ -536,7 +538,7 @@ def get_slice(mri, volid, sli):
 
 @timer
 @print_arguments(inputs=[0, 1, 2], outputs=[3])
-def make_gtab_and_bmask(fbval, fbvec, dwi_file, outdir):
+def make_gtab_and_bmask(fbval: str, fbvec: str, dwi_file: str, preproc_dir: str):
     """Takes bval and bvec files and produces a structure in dipy format while also using FSL commands
 
     Parameters
@@ -547,7 +549,7 @@ def make_gtab_and_bmask(fbval, fbvec, dwi_file, outdir):
         Path to b-vector file
     dwi_file : str
         Path to dwi file being analyzed
-    outdir : str
+    preproc_dir : str
         output directory
 
     Returns
@@ -561,9 +563,9 @@ def make_gtab_and_bmask(fbval, fbvec, dwi_file, outdir):
     """
 
     # Use B0's from the DWI to create a more stable DWI image for registration
-    nodif_B0 = f"{outdir}/nodif_B0.nii.gz"
-    nodif_B0_bet = f"{outdir}/nodif_B0_bet.nii.gz"
-    nodif_B0_mask = f"{outdir}/nodif_B0_bet_mask.nii.gz"
+    nodif_B0 = f"{preproc_dir}/nodif_B0.nii.gz"
+    nodif_B0_bet = f"{preproc_dir}/nodif_B0_bet.nii.gz"
+    nodif_B0_mask = f"{preproc_dir}/nodif_B0_bet_mask.nii.gz"
 
     # loading bvecs/bvals
     print(fbval)
@@ -589,7 +591,7 @@ def make_gtab_and_bmask(fbval, fbvec, dwi_file, outdir):
     B0s_bbr = []
     for B0 in B0s:
         print(B0)
-        B0_bbr = f"{outdir}/{str(B0)}_B0.nii.gz"
+        B0_bbr = f"{preproc_dir}/{str(B0)}_B0.nii.gz"
         cmd = f"fslroi {dwi_file} {B0_bbr} {str(B0)} 1"
         cmds.append(cmd)
         B0s_bbr.append(B0_bbr)
