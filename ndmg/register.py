@@ -157,6 +157,7 @@ class DmriReg:
         elif vox_size == "1mm":
             vox_dims = "1x1x1"
 
+        # TODO : clean up all these attributes
         self.simple = simple
         self.nodif_B0 = nodif_B0
         self.nodif_B0_mask = nodif_B0_mask
@@ -452,7 +453,7 @@ class DmriReg:
         """
 
         self.atlas = atlas
-        self.atlas_name = self.atlas.split("/")[-1].split(".")[0]
+        self.atlas_name = gen_utils.get_filename(self.atlas)
         self.aligned_atlas_t1mni = f'{self.namer["tmp"]["reg_a"]}/{self.atlas_name}_aligned_atlas_t1w_mni.nii.gz'
         self.aligned_atlas_skull = (
             f'{self.namer["tmp"]["reg_a"]}/{self.atlas_name}_aligned_atlas_skull.nii.gz'

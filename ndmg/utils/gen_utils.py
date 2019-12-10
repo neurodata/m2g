@@ -192,23 +192,6 @@ def make_initial_directories(outdir: Path, parcellations=[]) -> None:
         full_path.mkdir(parents=True, exist_ok=True)
 
 
-def flatten(dict_: dict):
-    flat = []
-    for val in dict_.values():
-        if isinstance(val, dict):
-            flat += flatten(val)
-        else:
-            flat.append(val)
-    return flat
-
-
-def all_strings(iterable_):
-    """
-    Ensure all elements in `iterable_` are strings.
-    """
-    return [str(x) for x in iterable_]
-
-
 def as_directory(dir_, remove=False):
     """
     Convenience function to make a directory while returning it.
@@ -722,15 +705,16 @@ def reorient_dwi(dwi_prep: Path, bvecs: str, preproc_dir: Path):
     return out_fname, out_bvec_fname
 
 
-def reorient_img(img, namer):
-    """Reorients input image to RAS+
+def reorient_t1w(img: str, anat_preproc_dir: Path):
+    """Reorients input image to RAS+. Essentially a wrapper on `nib.as_closest_canonical` and `normalize_xform`.
 
     Parameters
     ----------
     img : str
         Path to image being reoriented
-    namer : NameResource
-        NameResource object containing all revlevent pathing information for the pipeline
+    anat_preproc_dir : Path
+        Location of preproc directory for anatomical files.
+
 
     Returns
     -------
@@ -744,17 +728,12 @@ def reorient_img(img, namer):
     normalized = normalize_xform(reoriented)
 
     # Image may be reoriented
+    out_name = anat_preproc_dir / f"{get_filename(img)}"
     if normalized is not orig_img:
         print(f"Reorienting {img} to RAS+...")
-        out_name = (
-            f'{namer["output"]["prep_anat"]}/'
-            f'{img.split("/")[-1].split(".nii.gz")[0]}_reor_RAS.nii.gz'
-        )
+        out_name = str(out_name) + "_reor_RAS.nii.gz"
     else:
-        out_name = (
-            f'{namer["output"]["prep_anat"]}/'
-            f'{img.split("/")[-1].split(".nii.gz")[0]}_RAS.nii.gz'
-        )
+        out_name = str(out_name) + "_RAS.nii.gz"
 
     normalized.to_filename(out_name)
 

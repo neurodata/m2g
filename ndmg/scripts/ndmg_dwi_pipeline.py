@@ -199,36 +199,28 @@ def ndmg_dwi_worker(
 
     # define registration directory locations
     reg_dirs = ["anat/preproc", "anat/registered", "tmp/reg_a", "tmp/reg_b"]
-    reg_dirs = [outdir / loc for loc in reg_locations]
+    reg_dirs = [outdir / loc for loc in reg_dirs]
     anat_preproc_dir, anat_reg_dir, tmp_rega_dir, tmp_regb_dir = reg_dirs
 
     # check if output directories already have output files
-    anat_preproc_has_files = bool(os.listdir(anat_preproc_dir))
-    anat_reg_has_files = bool(os.listdir(anat_reg_dir))
-    tmp_has_files = bool(os.listdir(tmp_rega_dir) or os.listdir(tmp_regb_dir))
-
-    if not skipreg:
-        if anat_preproc_has_files:
-            print("Pre-existing preprocessed t1w files found. Deleting these...")
-            gen_utils.as_directory(anat_preproc_dir, remove=True)
-        if anat_reg_has_files:
-            print("Pre-existing registered t1w files found. Deleting these...")
-            gen_utils.as_directory(anat_reg_dir, remove=True)
-        if tmp_has_files:
-            print("Pre-existing temporary files found. Deleting these...")
-            gen_utils.as_directory(tmp_rega_dir, remove=True)
-            gen_utils.as_directory(tmp_regb_dir, remove=True)
+    if skipreg:
+        for dir_ in reg_dirs:
+            # raises FileNotFoundError if `dir_.exists()` isn't first
+            has_files = dir_.exists() and bool(os.listdir(dir_))
+            if has_files:
+                print(f"Pre-existing files found in {dir_}. Deleting ...")
+                gen_utils.as_directory(dir_, remove=True)
 
     # Check orientation (t1w)
     start_time = time.time()
-    t1w = gen_utils.reorient_img(t1w, namer)
+    t1w = gen_utils.reorient_t1w(t1w, anat_preproc_dir)
     t1w = gen_utils.match_target_vox_res(t1w, vox_size, outdir, sens="anat")
 
     print("Running registration in native space...")
 
     # Instantiate registration
     reg = register.DmriReg(
-        namer, nodif_B0, nodif_B0_mask, t1w, vox_size, skull, simple=False
+        outdir, nodif_B0, nodif_B0_mask, t1w, vox_size, skull, simple=False
     )
 
     # Perform anatomical segmentation
