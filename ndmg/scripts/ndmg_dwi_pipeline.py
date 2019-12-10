@@ -198,9 +198,9 @@ def ndmg_dwi_worker(
     # -------- Registration Steps ----------------------------------- #
 
     # define registration directory locations
-    reg_dirs = ["anat/preproc", "anat/registered", "tmp/reg_a", "tmp/reg_b"]
+    reg_dirs = ["anat/preproc", "anat/registered", "tmp/reg_a", "tmp/reg_m"]
     reg_dirs = [outdir / loc for loc in reg_dirs]
-    anat_preproc_dir, anat_reg_dir, tmp_rega_dir, tmp_regb_dir = reg_dirs
+    anat_preproc_dir, anat_reg_dir, tmp_rega_dir, tmp_regm_dir = reg_dirs
 
     # check if output directories already have output files
     if skipreg:
