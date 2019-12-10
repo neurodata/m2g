@@ -177,7 +177,7 @@ def ndmg_dwi_worker(
     preproc.rescale_bvec(fbvec, bvec_scaled)
 
     # Check orientation (dwi_prep)
-    dwi_prep, bvecs = gen_utils.reorient_dwi(dwi_prep, bvec_scaled, namer)
+    dwi_prep, bvecs = gen_utils.reorient_dwi(dwi_prep, bvec_scaled, outdir)
 
     # Check dimensions
     dwi_prep = gen_utils.match_target_vox_res(dwi_prep, vox_size, namer, sens="dwi")
@@ -187,7 +187,6 @@ def ndmg_dwi_worker(
     print("bvecs: ", bvecs)
     print("fbvec: ", fbvec)
     print("dwi_prep: ", dwi_prep)
-    print("namer.dirs: ", namer["output"]["prep_dwi"])
     gtab, nodif_B0, nodif_B0_mask = gen_utils.make_gtab_and_bmask(
         fbval, fbvec, dwi_prep, namer["output"]["prep_dwi"]
     )

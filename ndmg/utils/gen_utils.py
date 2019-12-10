@@ -658,7 +658,8 @@ def normalize_xform(img):
     return new_img
 
 
-def reorient_dwi(dwi_prep, bvecs, namer):
+@print_arguments(inputs=[0, 1])
+def reorient_dwi(dwi_prep, bvecs, outdir):
     """Orients dwi data to the proper orientation (RAS+) using nibabel
 
     Parameters
@@ -667,32 +668,26 @@ def reorient_dwi(dwi_prep, bvecs, namer):
         Path to eddy corrected dwi file
     bvecs : str
         Path to the resaled b-vector file
-    namer : NameResource
-        NameResource variable containing relevant directory tree information
 
     Returns
     -------
-    str
+    out_fname : str
         Path to potentially reoriented dwi file
-    str
+    out_bvec_fname : str
         Path to b-vector file, potentially reoriented if dwi data was
     """
 
-    fname = dwi_prep
-    bvec_fname = bvecs
-    out_bvec_fname = f'{namer["output"]["prep_dwi"]}/bvecs_reor.bvec'
+    out_bvec_fname = str(outdir / "dwi/preproc/bvecs_reor.bvec")
 
-    input_img = nib.load(fname)
+    input_img = nib.load(dwi_prep)
     input_axcodes = nib.aff2axcodes(input_img.affine)
     reoriented = nib.as_closest_canonical(input_img)
     normalized = normalize_xform(reoriented)
     # Is the input image oriented how we want?
     new_axcodes = ("R", "A", "S")
+    out_beginning = str(outdir / f"dwi/preproc/{get_filename(dwi_prep)}")
     if normalized is not input_img:
-        out_fname = (
-            f'{namer["output"]["prep_dwi"]}/'
-            f'{dwi_prep.split("/")[-1].split(".nii.gz")[0]}_reor_RAS.nii.gz'
-        )
+        out_fname = out_beginning + "_reor_RAS.nii.gz"
         print(f"Reorienting {dwi_prep} to RAS+...")
 
         # Flip the bvecs
@@ -701,7 +696,7 @@ def reorient_dwi(dwi_prep, bvecs, namer):
         transform_orientation = nib.orientations.ornt_transform(
             input_orientation, desired_orientation
         )
-        bvec_array = np.loadtxt(bvec_fname)
+        bvec_array = np.loadtxt(bvecs)
         if bvec_array.shape[0] != 3:
             bvec_array = bvec_array.T
         if not bvec_array.shape[0] == transform_orientation.shape[0]:
@@ -711,11 +706,8 @@ def reorient_dwi(dwi_prep, bvecs, namer):
             output_array[this_axnum] = bvec_array[int(axnum)] * float(flip)
         np.savetxt(out_bvec_fname, output_array, fmt="%.8f ")
     else:
-        out_fname = (
-            f'{namer["output"]["prep_dwi"]}/'
-            f'{dwi_prep.split("/")[-1].split(".nii.gz")[0]}_RAS.nii.gz'
-        )
-        out_bvec_fname = bvec_fname
+        out_fname = out_beginning + "_RAS.nii.gz"
+        out_bvec_fname = bvecs
 
     normalized.to_filename(out_fname)
 
