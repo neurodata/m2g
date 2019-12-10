@@ -78,6 +78,7 @@ def qa_tractography(stream_path,qa_img_path,brain_path):
         if i % 3 == 0:
             ax.set_ylabel(labs[j],fontsize=60,fontweight='bold')
             j = j + 1
+        im[i].close()
     fig.set_size_inches(40, 40, forward = True)
     fig.savefig(qa_img_path + 'qa_tractography.png', format='png')
 

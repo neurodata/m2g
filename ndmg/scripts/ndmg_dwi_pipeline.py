@@ -283,6 +283,7 @@ def ndmg_dwi_worker(
 
     # Compute direction model and track fiber streamlines
     print("Beginning tractography in native space...")
+    print("--------------test---------------------")
     trct = track.RunTrack(
         dwi_prep,
         nodif_B0_mask,
