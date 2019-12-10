@@ -412,6 +412,21 @@ def check_dependencies():
         )
 
 
+def execute_cmd(cmd):
+    """
+    Print the command.
+    Execute a command string on the shell (on bash).
+    Exists so that the shell prints out commands as ndmg calls them.
+    
+    Parameters
+    ----------
+    cmd : str
+        Command to be sent to the shell.
+    """
+    print(f"executing: {cmd}")
+    subprocess.run(cmd, shell=True, check=True)
+
+
 def show_template_bundles(final_streamlines, template_path, fname):
     """Displayes the template bundles
 
@@ -581,7 +596,7 @@ def make_gtab_and_bmask(fbval: str, fbvec: str, dwi_file: str, preproc_dir: str)
 
     for cmd in cmds:
         print(cmd)
-        subprocess.run(cmd, shell=True, check=True)
+        execute_cmd(cmd)
 
     # Get mean B0
     B0s_bbr_imgs = []
@@ -593,7 +608,7 @@ def make_gtab_and_bmask(fbval: str, fbvec: str, dwi_file: str, preproc_dir: str)
 
     # Get mean B0 brain mask
     cmd = f"bet {nodif_B0} {nodif_B0_bet} -m -f 0.2"
-    subprocess.run(cmd, shell=True, check=True)
+    execute_cmd(cmd)
     return gtab, nodif_B0, nodif_B0_mask
 
 

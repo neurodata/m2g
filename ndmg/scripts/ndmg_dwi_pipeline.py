@@ -137,8 +137,8 @@ def ndmg_dwi_worker(
     # -------- Preprocessing Steps --------------------------------- #
 
     # set up directories
-    preproc_dir: Path = outdir / "dwi/preproc"
-    dwi_prep: Path = preproc_dir / "eddy_corrected_data.nii.gz"
+    prep_dwi: Path = outdir / "dwi/preproc"
+    dwi_prep: Path = prep_dwi / "eddy_corrected_data.nii.gz"
 
     # check that skipping eddy correct is possible
     if skipeddy:
@@ -149,7 +149,7 @@ def ndmg_dwi_worker(
 
     # if we're not skipping eddy correct, perform it
     if not skipeddy:
-        preproc_dir = Path(gen_utils.as_directory(preproc_dir, remove=True))
+        prep_dwi = Path(gen_utils.as_directory(prep_dwi, remove=True))
         preproc.eddy_correct(dwi, str(dwi_prep), 0)
 
     # copy bval/bvec files to output directory
@@ -177,7 +177,7 @@ def ndmg_dwi_worker(
     preproc.rescale_bvec(fbvec, bvec_scaled)
 
     # Check orientation (dwi_prep)
-    dwi_prep, bvecs = gen_utils.reorient_dwi(dwi_prep, bvec_scaled, preproc_dir)
+    dwi_prep, bvecs = gen_utils.reorient_dwi(dwi_prep, bvec_scaled, prep_dwi)
 
     # Check dimensions
     dwi_prep = gen_utils.match_target_vox_res(dwi_prep, vox_size, outdir, sens="dwi")
@@ -188,7 +188,7 @@ def ndmg_dwi_worker(
     print("fbvec: ", fbvec)
     print("dwi_prep: ", dwi_prep)
     gtab, nodif_B0, nodif_B0_mask = gen_utils.make_gtab_and_bmask(
-        fbval, fbvec, dwi_prep, str(preproc_dir)
+        fbval, fbvec, dwi_prep, str(prep_dwi)
     )
 
     # Get B0 header and affine
@@ -200,7 +200,7 @@ def ndmg_dwi_worker(
     # define registration directory locations
     reg_dirs = ["anat/preproc", "anat/registered", "tmp/reg_a", "tmp/reg_m"]
     reg_dirs = [outdir / loc for loc in reg_dirs]
-    anat_preproc_dir, anat_reg_dir, tmp_rega_dir, tmp_regm_dir = reg_dirs
+    prep_anat, reg_anat, tmp_rega, tmp_regm = reg_dirs
 
     # check if output directories already have output files
     if skipreg:
@@ -213,7 +213,7 @@ def ndmg_dwi_worker(
 
     # Check orientation (t1w)
     start_time = time.time()
-    t1w = gen_utils.reorient_t1w(t1w, anat_preproc_dir)
+    t1w = gen_utils.reorient_t1w(t1w, prep_anat)
     t1w = gen_utils.match_target_vox_res(t1w, vox_size, outdir, sens="anat")
 
     print("Running registration in native space...")
@@ -224,14 +224,14 @@ def ndmg_dwi_worker(
     )
 
     # Perform anatomical segmentation
-    if (skipreg is True) and os.path.isfile(reg.wm_edge):
+    if skipreg and os.path.isfile(reg.wm_edge):
         print("Found existing gentissue run!")
     else:
         reg.gen_tissue()
 
     # Align t1w to dwi
     if (
-        (skipreg is True)
+        skipreg
         and os.path.isfile(reg.t1w2dwi)
         and os.path.isfile(reg.mni2t1w_warp)
         and os.path.isfile(reg.t1_aligned_mni)
