@@ -65,7 +65,7 @@ def get_atlas(atlas_dir, vox_size):
         # TODO : re-implement this pythonically with shutil and requests in python3.
         print("atlas directory not found. Cloning ...")
         clone = "https://github.com/neurodata/neuroparc.git"
-        gen_utils.execute_cmd(f"git lfs clone {clone} {atlas_dir}")
+        gen_utils.run(f"git lfs clone {clone} {atlas_dir}")
 
     atlas = os.path.join(
         atlas_dir, "atlases/reference_brains/MNI152NLin6_res-" + dims + "_T1w.nii.gz"

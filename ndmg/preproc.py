@@ -32,7 +32,7 @@ def eddy_correct(dwi, corrected_dwi, idx):
     """
 
     cmd = f"eddy_correct {dwi} {corrected_dwi} {str(idx)}"
-    gen_utils.execute_cmd(cmd)
+    gen_utils.run(cmd)
 
 
 def rescale_bvec(bvec, bvec_new):

@@ -232,7 +232,7 @@ class QaMRI:
             self.namer["qa"]["reg_a"], reg.sreg_strat, self.self_reg_sc * 1000
         )
         cmd = f"mkdir -p {sreg_m_final} {sreg_a_final}"
-        gen_utils.execute_cmd(cmd)
+        gen_utils.run(cmd)
         sreg_fig.savefig(
             f"{sreg_m_final}/{self.namer.get_mod_source()}_bold_t1w_overlap.png"
         )
@@ -285,7 +285,7 @@ class QaMRI:
             self.namer["qa"]["reg_a"], reg.treg_strat, self.temp_reg_sc * 1000
         )
         cmd = f"mkdir -p {treg_m_final} {treg_a_final}"
-        gen_utils.execute_cmd(cmd)
+        gen_utils.run(cmd)
         mri_name = self.aligned_mri_name()
         treg_fig.savefig(f"{treg_m_final}/{mri_name}_epi2temp_overlap.png")
         plt.close(treg_fig)
@@ -365,7 +365,7 @@ class QaMRI:
         fftdir = f'{qcfdir}/{"filtering"}'
 
         cmd = f"mkdir -p {maskdir} {glmdir} {fftdir}"
-        gen_utils.execute_cmd(cmd)
+        gen_utils.run(cmd)
 
         anat_name = self.aligned_anat_name()
         t1w_dat = nb.load(nuisobj.smri).get_data()
@@ -438,7 +438,7 @@ class QaMRI:
         # Frequency Filtering
         if nuisobj.fft_reg is not None:
             cmd = f"mkdir -p {fftdir}"
-            gen_utils.execute_cmd(cmd)
+            gen_utils.run(cmd)
             # start by just plotting the average fft of gm voxels and
             # compare with average fft after frequency filtering
             fig_fft_pow = plot_signals(
@@ -487,7 +487,7 @@ class QaMRI:
         qcdir = self.namer["qa"]["conn"][label_name]
         print("Performing QA for ROI Analysis...")
         cmd = f"mkdir -p {qcdir}"
-        gen_utils.execute_cmd(cmd)
+        gen_utils.run(cmd)
 
         # overlap between the temp-aligned t1w and the labelled parcellation
         reg_mri_pngs(anat, label, qcdir, minthr=10, maxthr=95)

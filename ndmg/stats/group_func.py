@@ -120,7 +120,7 @@ class GroupFunc:
         """
         regdir = f'{self.outdir}/{"reg"}'
         cmd = f"mkdir -p {regdir}"
-        mgu.execute_cmd(cmd)  # TODO : remove
+        mgu.run(cmd)  # TODO : remove
 
         self_reg_sc = []
         temp_reg_sc = []
