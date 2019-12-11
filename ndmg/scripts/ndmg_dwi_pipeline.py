@@ -139,6 +139,9 @@ def ndmg_dwi_worker(
     # set up directories
     prep_dwi: Path = outdir / "dwi/preproc"
     dwi_prep: Path = prep_dwi / "eddy_corrected_data.nii.gz"
+    if not (skipeddy and skipreg):
+        # remake directory if we're not skipping anything
+        outdir = gen_utils.as_directory(outdir, remove=True, return_as_path=True)
 
     # check that skipping eddy correct is possible
     if skipeddy:
@@ -149,7 +152,7 @@ def ndmg_dwi_worker(
 
     # if we're not skipping eddy correct, perform it
     if not skipeddy:
-        prep_dwi = Path(gen_utils.as_directory(prep_dwi, remove=True))
+        prep_dwi = gen_utils.as_directory(prep_dwi, remove=True, return_as_path=True)
         preproc.eddy_correct(dwi, str(dwi_prep), 0)
 
     # copy bval/bvec files to output directory
@@ -230,23 +233,22 @@ def ndmg_dwi_worker(
         reg.gen_tissue()
 
     # Align t1w to dwi
-    if (
-        skipreg
-        and os.path.isfile(reg.t1w2dwi)
-        and os.path.isfile(reg.mni2t1w_warp)
-        and os.path.isfile(reg.t1_aligned_mni)
-    ):
+    existing_files = all(
+        map(os.path.isfile, [reg.t1w2dwi, reg.mni2t1w_warp, reg.t1_aligned_mni])
+    )
+    if skipreg and existing_files:
         print("Found existing t1w2dwi run!")
     else:
         reg.t1w2dwi_align()
 
     # Align tissue classifiers
-    if (
-        (skipreg is True)
-        and os.path.isfile(reg.wm_gm_int_in_dwi)
-        and os.path.isfile(reg.vent_csf_in_dwi)
-        and os.path.isfile(reg.corpuscallosum_dwi)
-    ):
+    existing_files = all(
+        map(
+            os.path.isfile,
+            [reg.wm_gm_int_in_dwi, reg.vent_csf_in_dwi, reg.corpuscallosum_dwi],
+        )
+    )
+    if skipreg and existing_files:
         print("Found existing tissue2dwi run!")
     else:
         reg.tissue2dwi_align()

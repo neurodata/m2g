@@ -192,7 +192,7 @@ def make_initial_directories(outdir: Path, parcellations=[]) -> None:
         full_path.mkdir(parents=True, exist_ok=True)
 
 
-def as_directory(dir_, remove=False):
+def as_directory(dir_, remove=False, return_as_path=False):
     """
     Convenience function to make a directory while returning it.
     
@@ -209,10 +209,15 @@ def as_directory(dir_, remove=False):
         Directory string.
     """
     p = Path(dir_).absolute()
+
     if remove:
         print(f"Previous directory found at {dir_}. Removing.")
         shutil.rmtree(p, ignore_errors=True)
     p.mkdir(parents=True, exist_ok=True)
+
+    if return_as_path:
+        return p
+
     return str(p)
 
 
