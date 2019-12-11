@@ -80,11 +80,10 @@ def gen_overlay_pngs(
     fig = plot_overlays_skullstrip(brain_data, original, [cmap1, cmap2], minthr, maxthr, edge)
 
     # name and save the file
-    fig.savefig(f"'{outdir}' +  '/qa_skullstrip__' + '{original_name}' + '.png'", format="png")
+    fig.savefig(f"{outdir}/qa_skullstrip__{original_name}.png", format="png")
 
 
-outdir = 'adf/df'
-original_name = 'aaaaaaaaaaa'
+
 
 
 def plot_overlays_skullstrip(b0, original, cmaps=None, minthr=2, maxthr=95, edge=False):
