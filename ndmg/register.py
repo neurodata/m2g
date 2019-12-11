@@ -268,15 +268,11 @@ class DmriReg:
         reg_utils.t1w_skullstrip(self.t1w, self.t1w_brain, self.skull)
 
         #  QA part of skull strip
-        last_folder = self.namer.dirs["qa"]["base"]
-        QA_skullstrip_path = last_folder + '/skull_strip'
-        folder = os.path.exists(QA_skullstrip_path)
-        if not folder:
-            os.makedirs(QA_skullstrip_path)
-        print('QA_skullstrip_path  ', QA_skullstrip_path)
-        self.namer.dirs["qa"]["skull_strip"] = QA_skullstrip_path
-        gen_overlay_pngs(brain=self.t1w_brain, origional=self.t1w, outdir=self.namer.dirs["qa"]["skull_strip"], loc=0,
-                         mean=False, minthr=2, maxthr=95, edge=False)
+        self.namer.dirs["qa"]["skull_strip"] = f'{self.namer.dirs["qa"]["base"]}/skull_strip'
+        if not os.path.exists(self.namer.dirs["qa"]["skull_strip"]):
+            os.makedirs(self.namer.dirs["qa"]["skull_strip"])
+        print('QA_skullstrip_path  ', self.namer.dirs["qa"]["skull_strip"])
+        gen_overlay_pngs(self.t1w_brain, self.t1w, self.namer.dirs["qa"]["skull_strip"])
 
         # Segment the t1w brain into probability maps
         self.maps = reg_utils.segment_t1w(self.t1w_brain, self.map_path)

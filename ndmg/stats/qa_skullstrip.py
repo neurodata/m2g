@@ -37,78 +37,78 @@ import matplotlib as mpl
 mpl.use("Agg")  # very important above pyplot import
 from nilearn.plotting.edge_detect import _edge_map as edge_map
 import matplotlib.pyplot as plt
+from ndmg.utils.qa_utils import get_min_max, opaque_colorscale,pad_im
+from ndmg.utils.gen_utils import get_filename, get_braindata
+
 
 
 
 
 def gen_overlay_pngs(
-    brain, origional, outdir, loc=0, mean=False, minthr=2, maxthr=95, edge=False):
+    brain, original, outdir, loc=0, mean=False, minthr=2, maxthr=95, edge=False):
     """
-    outdir: directory where output png file is saved
-    fname: name of output file WITHOUT FULL PATH. Path provided in outdir.
+    generate the image combine the brain and original data
+
+    Parameters
+    ----------
+    brain:
+        is the skull striped result, only left the brain
+    original:
+        is the original nii.gz file
+    outdir:
+        directory where output png file is saved
+    loc and mean is to deal with 4d data
+    minthr, maxthr, edge are the variables about the color
     """
     try:
-        origional_name = get_filename(origional)
-    except:
-        origional_name = 'compare_origional_data_and_brain'
+        original_name = get_filename(original)
+    except ValueError:
+        original_name = 'stripped_brain_skull_comparison'
     brain_data = nb.load(brain).get_data()
     if brain_data.ndim == 4:  # 4d data, so we need to reduce a dimension
         if mean:
-            brain_data2 = brain_data.mean(axis=3)
+            brain_data = brain_data.mean(axis=3)
         else:
-            brain_data2 = brain_data[:, :, :, loc]
+            brain_data = brain_data[:, :, :, loc]
     else:  # dim=3
-        brain_data2 = brain_data
+        brain_data = brain_data
 
     cmap1 = LinearSegmentedColormap.from_list("mycmap1", ["white", "magenta"])
     cmap2 = LinearSegmentedColormap.from_list("mycmap2", ["white", "green"])
 
 
-    fig = plot_overlays(brain_data2, origional, [cmap1, cmap2], minthr, maxthr, edge)
+    fig = plot_overlays_skullstrip(brain_data, original, [cmap1, cmap2], minthr, maxthr, edge)
 
     # name and save the file
-    fname = "qa_skullstrip__" + origional_name + ".png"
-    fig.savefig(outdir + "/" + fname, format="png")
-    # plt.close()
+    fig.savefig(f"{outdir} +  '/qa_skullstrip__' + {original_name} + '.png'", format="png")
 
 
-def opaque_colorscale(basemap, reference, vmin=None, vmax=None, alpha=1):
+
+
+
+def plot_overlays_skullstrip(b0, original, cmaps=None, minthr=2, maxthr=95, edge=False):
     """
-    A function to return a colorscale, with opacities
-    dependent on reference intensities.
-    **Positional Arguments:**
-        - basemap:
-            - the colormap to use for this colorscale.
-        - reference:
-            - the reference matrix.
+    generate the image combine the brain and original data
+
+    Parameters
+    ----------
+    b0:
+        is the skull striped result, only left the brain
+    original:
+        is the original nii.gz file
+    cmaps, minthr, maxthr, edge are the variables about the color
     """
-    reference = reference
-    if vmin is not None:
-        reference[reference > vmax] = vmax
-    if vmax is not None:
-        reference[reference < vmin] = vmin
-    cmap = basemap(reference)
-    maxval = np.nanmax(reference)
-    # all values beteween 0 opacity and 1
-    opaque_scale = alpha * reference / float(maxval)
-    # remaps intensities
-    cmap[:, :, 3] = opaque_scale
-    return cmap
 
-
-
-
-def plot_overlays(b0, origional, cmaps=None, minthr=2, maxthr=95, edge=False):
     plt.rcParams.update({"axes.labelsize": "x-large", "axes.titlesize": "x-large"})
     foverlay = plt.figure()
 
-    origional = get_braindata(origional)
+    original = get_braindata(original)
     ori_shape = get_braindata(b0).shape
     b0 = get_braindata(b0)
-    if origional.shape != b0.shape:
+    if original.shape != b0.shape:
         raise ValueError("Two files are not the same shape.")
-    b0 = pad_im(b0,max(ori_shape[0:3]),0)
-    origional = pad_im(origional,max(ori_shape[0:3]),0)
+    b0 = pad_im(b0, max(ori_shape[0:3]), 0, False)
+    original = pad_im(original,max(ori_shape[0:3]),0, False)
 
 
     if cmaps is None:
@@ -141,13 +141,13 @@ def plot_overlays(b0, origional, cmaps=None, minthr=2, maxthr=95, edge=False):
             ax.set_title(var[i] + " = " + str(pos))
             if i == 0:
                 image = ndimage.rotate(b0[pos, :, :], 90)
-                atl = ndimage.rotate(origional[pos, :, :], 90)
+                atl = ndimage.rotate(original[pos, :, :], 90)
             elif i == 1:
                 image = ndimage.rotate(b0[:, pos, :], 90)
-                atl = ndimage.rotate(origional[:, pos, :], 90)
+                atl = ndimage.rotate(original[:, pos, :], 90)
             else:
-                image = ndimage.rotate(b0[:, :, pos], 270)
-                atl = ndimage.rotate(origional[:, :, pos], 270)
+                image = ndimage.rotate(b0[:, :, pos], 0)
+                atl = ndimage.rotate(original[:, :, pos], 0)
 
             if idx % 3 == 1:
                 ax.set_ylabel(labs[i])
@@ -173,7 +173,7 @@ def plot_overlays(b0, origional, cmaps=None, minthr=2, maxthr=95, edge=False):
                 )
             )
             if idx ==3:
-                plt.plot(0, 0, "-", c="purple", label='skull')
+                plt.plot(0, 0, "-", c="magenta", label='skull')
                 plt.plot(0, 0, "-", c="green", label='brain')
                 # box = ax.get_position()
                 # ax.set_position([box.x0, box.y0, box.width, box.height*0.8])
@@ -181,16 +181,14 @@ def plot_overlays(b0, origional, cmaps=None, minthr=2, maxthr=95, edge=False):
 
     # Set title for the whole picture
     [a, b, c] = ori_shape
-    title = 'QA For skullstrip. Brain Volume:' + str(a) + '*' + str(b) + '*' + str(c) + '\n'
+    title = 'QA For skullstrip. Scan Volume:' + str(a) + '*' + str(b) + '*' + str(c)
     foverlay.suptitle(title, fontsize=24)
     foverlay.set_size_inches(12.5, 10.5, forward=True)
     return foverlay
 
 def get_true_volume(nparray):
     """
-    because there is some spacing out side of brain, instead of simply choosing
-    1/4  1/2  3/4 part of all space to slide,
-    this function is first detect where is brain and then get 1/4 1/2 3/4 part of brain
+    locates 1/4,1/3,1/2 slices of brain and returns them
     """
     img_arr = nparray.astype(int)
     threshold = int(1)
@@ -209,13 +207,7 @@ def get_range(array,i):
     quarter = np.percentile(arrange, [25, 50, 75]).astype(int)
     return quarter
 
-def get_min_max(data, minthr=2, maxthr=95):
-    """
-    data: regbrain data to threshold.
-    """
-    min_val = np.percentile(data, minthr)
-    max_val = np.percentile(data, maxthr)
-    return (min_val.astype(float), max_val.astype(float))
+
 
 def get_braindata(brain_file):
     """Opens a brain data series for a mask, mri image, or atlas.
@@ -250,23 +242,3 @@ def get_braindata(brain_file):
             )
         braindata = brain.get_data()
     return braindata
-
-def pad_im(image,max_dim,pad_val):
-    """
-    Pads an image to be same dimensions as given max_dim
-    Parameters
-    -----------
-    image: 3-d RGB np array of image slice
-    max_dim: dimension to pad up to
-    pad_val: value to pad with
-    Returns
-    -----------
-    padded_image: 3-d RGB np array of image slice with padding
-    """
-    #pad only in first two dimensions not in rgb
-    pad_width = (((max_dim-image.shape[0])//2,(max_dim-image.shape[0])//2),((max_dim-image.shape[1])//2,(max_dim-image.shape[1])//2),((max_dim-image.shape[2])//2,(max_dim-image.shape[2])//2))
-    padded_image = np.pad(image, pad_width=pad_width, mode='constant', constant_values=pad_val)
-    return padded_image
-
-def get_filename(label):
-    return os.path.splitext(os.path.splitext(os.path.basename(label))[0])[0]
