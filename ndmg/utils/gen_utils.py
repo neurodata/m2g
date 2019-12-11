@@ -423,7 +423,7 @@ def run(cmd):
     cmd : str
         Command to be sent to the shell.
     """
-    print(f"executing: {cmd}")
+    print(f"Running shell command: {cmd}")
     subprocess.run(cmd, shell=True, check=True)
 
 

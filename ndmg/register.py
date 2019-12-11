@@ -256,8 +256,7 @@ class DmriReg:
         # Extract wm edge
         # TODO : this should be a function in reg_utils so that we can print it to the log
         cmd = f"fslmaths {self.wm_mask_thr} -edge -bin -mas {self.wm_mask_thr} {self.wm_edge}"
-        print("Extracting white matter edge ...")
-        print(cmd)
+        print("Extracting white matter edge...")
         gen_utils.run(cmd)
 
     @gen_utils.timer
