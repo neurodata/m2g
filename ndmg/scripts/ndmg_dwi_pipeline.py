@@ -346,20 +346,19 @@ def ndmg_dwi_worker(
 
     exe_time = datetime.now() - startTime
 
+    if "NDMG_URL" in os.environ:
+        print("Notice: QA_tractography didn't work in Docker environment")
+    else:
+        qa_tractography_out = namer.dirs["qa"]["fibers"]
+        qa_tractography(streams,qa_tractography_out,dwi_prep)
+        print("QA tractography Completed.")
+
     print(f"Total execution time: {exe_time}")
     print("NDMG Complete.")
     print("~~~~~~~~~~~~~~\n\n")
     print(
         "NOTE :: you are using native-space registration to generate connectomes.\n Without post-hoc normalization, multiple connectomes generated with NDMG cannot be compared directly."
     )
-
-    if "NDMG_URL" in os.environ:
-        print("Notice: QA_tractography didn't works in Docker environment")
-    else:
-        qa_tractography_out = namer.dirs["qa"]["fibers"]
-        qa_tractography(streams,qa_tractography_out,dwi_prep)
-        print("QA tractography Completed.")
-
 
 
 def welcome_message(connectomes):
