@@ -24,18 +24,16 @@
 import warnings
 
 warnings.simplefilter("ignore")
-from dipy.reconst.dti import fractional_anisotropy, color_fa
 from argparse import ArgumentParser
 from scipy import ndimage
-import os
-import re
 import numpy as np
 import nibabel as nb
-import sys
 import matplotlib
+import itertools
 
 from dipy.viz import window, actor
 from fury.actor import orient2rgb
+from ndmg.utils import qa_utils
 
 matplotlib.use("Agg")  # very important above pyplot import
 import matplotlib.pyplot as plt
@@ -46,16 +44,21 @@ def generate_3_d_directions(peak_dirs,peak_values):
     
     Parameters
     -----------
-    peak_dirs: np array of peak_dirs 
-    peak_values: np array of peak_values
-    slices: dictionary of lists of slices in x,y,z plane
+    peak_dirs: np array
+        peak_dirs from tractography model 
+    peak_values: np array
+        peak_values from tractography model
     
     Returns
     -----------
-    centers: np array of center points
-    directions: np array of vector directions
-    directions_colors: np array of RGB colors 
-    heights: np array of vector magnitudes
+    centers: np array
+        cartesian coordinates
+    directions: np array
+        vector directions (x,y,z) in flattened format 
+    directions_colors: np array
+        vector directions encoded as RGB colors in flattened format
+    heights: np array
+        vector magnitudes in flattened format
     """
     
     #initialize 
@@ -64,15 +67,15 @@ def generate_3_d_directions(peak_dirs,peak_values):
     heights = []
     directions_colors = []
     
-    #iteratively create required new arrow entries per value in 3-d peak object
-    for x in range(peak_dirs.shape[0]):
-        for y in range(peak_dirs.shape[1]): 
-            for z in range(peak_dirs.shape[2]):
-                centers.append([x,y,z])
+    xs = range(peak_dirs.shape[0])
+    ys = range(peak_dirs.shape[1])
+    zs = range(peak_dirs.shape[2])
+    for x, y, z in itertools.product(xs, ys, zs):
+        centers.append([x,y,z])
                 
-                #relies on the fact that peaks_from_models generates peak_dirs and peak_values in descending order
-                directions.append(peak_dirs[x,y,z,0,:])
-                heights.append(peak_values[x,y,z,0])
+        #relies on the fact that peaks_from_models generates peak_dirs and peak_values in descending order
+        directions.append(peak_dirs[x,y,z,0,:])
+        heights.append(peak_values[x,y,z,0])
 
     #convert to np arrays
     centers = np.asarray(centers)
@@ -84,7 +87,7 @@ def generate_3_d_directions(peak_dirs,peak_values):
     
     return centers,directions,directions_colors,heights
 
-def plot_directions(peak_dirs,peak_values,x_angle,y_angle,fname,size=(300,300)):
+def plot_directions(peak_dirs,peak_values,x_angle,y_angle,size=(300,300)):
     """
     Opens a 3-d fury window of the maximum peaks visualized
     
@@ -93,13 +96,17 @@ def plot_directions(peak_dirs,peak_values,x_angle,y_angle,fname,size=(300,300)):
     
     Parameters
     -----------
-    peak_dirs: np array of peak_dirs 
-    peak_values: np array of peak_values
+    peak_dirs: np array
+        peak directional vector (x,y,z)  
+    peak_values: np array
+        peak values/magnitude 
     slices: dictionary of lists of slices in x,y,z plane
-    x_angle: angle to rotate image along x axis
-    y_angle: angle to rotate image along y axis
-    fname: str path to save
-    size: size tuple for each image
+    x_angle: int
+        angle to rotate image along x axis
+    y_angle: int
+        angle to rotate image along y axis
+    size: tuple
+        size of fury window 
     """    
     centers,directions,directions_colors,heights = generate_3_d_directions(peak_dirs,peak_values)
     
@@ -111,26 +118,6 @@ def plot_directions(peak_dirs,peak_values,x_angle,y_angle,fname,size=(300,300)):
     scene.pitch(y_angle)
     
     window.show(scene, size = size)
-    
-def pad_im(image,max_dim,pad_val):
-    """
-    Pads an image to be same dimensions as given max_dim
-    
-    Parameters
-    -----------
-    image: 3-d RGB np array of image slice
-    max_dim: dimension to pad up to
-    pad_val: value to pad with
-    
-    Returns
-    -----------
-    padded_image: 3-d RGB np array of image slice with padding
-    """
-    #pad only in first two dimensions not in rgb
-    pad_width = (((max_dim-image.shape[0])//2,(max_dim-image.shape[0])//2),((max_dim-image.shape[1])//2,(max_dim-image.shape[1])//2),(0,0))
-    padded_image = np.pad(image, pad_width=pad_width, mode='constant', constant_values=pad_val)
-    
-    return padded_image
 
 def create_qa_figure(peak_dirs,peak_values,output_dir,model):
     """
@@ -138,28 +125,35 @@ def create_qa_figure(peak_dirs,peak_values,output_dir,model):
     
     Parameters
     -----------
-    peak_dirs: np array of peak_dirs 
-    peak_values: np array of peak_values
-    output_dir: location to save qa figure
-    model: model type (CSA, CSD)
+    peak_dirs: np array
+        peak_dirs 
+    peak_values: np array
+        peak_values
+    output_dir: str
+        location to save qa figure
+    model: str
+        model type (CSA, CSD)
     """
     #set shape of image
-    im_shape = peak_dirs.shape[0:3]
-    im_shape_rgb = im_shape + (3,)
+    im_shape = peak_dirs.shape[:3]
+    im_shape_rgb = (*im_shape, 3)
+
     max_dim = max(im_shape) 
 
     #title
-    title = f'QA for Tractography {model.upper()} Model Peak Directions. Brain Volume: {im_shape}'
+    title = f'QA for Tractography {model.upper()} Model Peak Directions. Scan Volume: {im_shape}'
     
     #generate 3-d directional data
     centers,directions,directions_colors,heights = generate_3_d_directions(peak_dirs,peak_values)
     
     #reshape back into a 3-d volume with voxel encoded RGB values corresponding to directional vectors
     im = directions_colors.reshape(im_shape_rgb)
+
+    slices = (0.35,0.51,0.65)
     
-    x = [int(im_shape[0] * 0.35), int(im_shape[0] * 0.51), int(im_shape[0] * 0.65)]
-    y = [int(im_shape[1] * 0.35), int(im_shape[1] * 0.51), int(im_shape[1] * 0.65)]
-    z = [int(im_shape[2] * 0.35), int(im_shape[2] * 0.51), int(im_shape[2] * 0.65)]
+    x = [int(im_shape[0] * slices[0]), int(im_shape[0] * slices[1]), int(im_shape[0] * slices[2])]
+    y = [int(im_shape[1] * slices[0]), int(im_shape[1] * slices[1]), int(im_shape[1] * slices[2])]
+    z = [int(im_shape[2] * slices[0]), int(im_shape[2] * slices[1]), int(im_shape[2] * slices[2])]
 
     coords = (x, y, z)
     labs = [
@@ -190,7 +184,7 @@ def create_qa_figure(peak_dirs,peak_values,output_dir,model):
             #convert background
             image = np.where(image<=0.01, 255, image)
             #pad image size
-            image = pad_im(image,max_dim,255)
+            image = qa_utils.pad_im(image,max_dim,255,True)
             plt.imshow(image)
 
             
