@@ -360,7 +360,6 @@ def ndmg_dwi_worker(
         "NOTE :: you are using native-space registration to generate connectomes.\n Without post-hoc normalization, multiple connectomes generated with NDMG cannot be compared directly."
     )
 
-
 def welcome_message(connectomes):
 
     line = """\n~~~~~~~~~~~~~~~~\n 
