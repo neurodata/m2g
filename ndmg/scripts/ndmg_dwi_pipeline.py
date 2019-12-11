@@ -283,7 +283,6 @@ def ndmg_dwi_worker(
 
     # Compute direction model and track fiber streamlines
     print("Beginning tractography in native space...")
-    print("--------------test---------------------")
     trct = track.RunTrack(
         dwi_prep,
         nodif_B0_mask,
@@ -306,39 +305,6 @@ def ndmg_dwi_worker(
     trkfile = nib.streamlines.trk.TrkFile(tractogram, header=trk_hdr)
     streams = namer.name_derivative(namer.dirs["output"]["fiber"], "streamlines.trk")
     nib.streamlines.save(trkfile, streams)
-    # try:
-    #     print("-----------hhhhhhhhhhh------------")
-    #     qa_tractography_out = namer.dirs["qa"]["fibers"]
-    #     qa_tractography(streams,qa_tractography_out,dwi_prep)
-    # except BaseException as e:
-    #     print("----------------xxxxxxxxxxxxxxx------------")
-    #     print("QA for tractography Error Has Occured!")
-    #     print('Reason:', e)
-
-    # try:
-    #     qa_tractography_out = namer.dirs["qa"]["fibers"]
-    #     qa_tractography(streams,qa_tractography_out,dwi_prep)
-    # except NameError:
-    #     print("Variable x is not defined")
-    # except:
-    #     print("----------------xxxxxxxxxxxxxxx------------")
-    #     print("QA for tractography Error Has Occured!")
-
-    # try:
-    #     if os.environ["NDMG_URL"]:
-    #         print("Notice: QA_tractography didn't works in Docker environment")
-    # except KeyError:
-    #     qa_tractography_out = namer.dirs["qa"]["fibers"]
-    #     qa_tractography(streams,qa_tractography_out,dwi_prep)
-    # else:
-    #     pass
-
-    if "NDMG_URL" in os.environ:
-        print("Notice: QA_tractography didn't works in Docker environment")
-    else:
-        qa_tractography_out = namer.dirs["qa"]["fibers"]
-        qa_tractography(streams,qa_tractography_out,dwi_prep)
-    print("----------hhhhhhhhhhhhhhhhhh-----------")
 
     print("Streamlines complete")
     print(f"Tractography runtime: {np.round(time.time() - start_time, 1)}")
@@ -386,6 +352,14 @@ def ndmg_dwi_worker(
     print(
         "NOTE :: you are using native-space registration to generate connectomes.\n Without post-hoc normalization, multiple connectomes generated with NDMG cannot be compared directly."
     )
+
+    if "NDMG_URL" in os.environ:
+        print("Notice: QA_tractography didn't works in Docker environment")
+    else:
+        qa_tractography_out = namer.dirs["qa"]["fibers"]
+        qa_tractography(streams,qa_tractography_out,dwi_prep)
+        print("QA tractography Completed.")
+
 
 
 def welcome_message(connectomes):
