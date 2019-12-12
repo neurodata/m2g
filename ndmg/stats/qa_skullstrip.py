@@ -35,7 +35,7 @@ from matplotlib.colors import LinearSegmentedColormap
 import matplotlib as mpl
 
 mpl.use("Agg")  # very important above pyplot import
-from nilearn.plotting.edge_detect import _edge_map as edge_map
+# from nilearn.plotting.edge_detect import _edge_map as edge_map
 import matplotlib.pyplot as plt
 from ndmg.utils.qa_utils import get_min_max, opaque_colorscale,pad_im
 from ndmg.utils.gen_utils import get_filename, get_braindata
