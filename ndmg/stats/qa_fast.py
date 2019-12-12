@@ -24,8 +24,6 @@ def qa_fast_png(csf, gm, wm, outdir):
     outdir: class
     use Class namer to get the path to save QA graph
     
-    return:
-    None
     """
     
     # load data
@@ -90,7 +88,7 @@ def qa_fast_png(csf, gm, wm, outdir):
             if idx % 3 == 1:
                 plt.ylabel(labs[i])
             
-            #  Fill pictures to make them the same size
+            #  padding pictures to make them the same size
             csf_slice = (csf_slice*255).astype(np.uint8)
             gm_slice = (gm_slice*255).astype(np.uint8)
             wm_slice = (wm_slice*255).astype(np.uint8)
@@ -111,7 +109,7 @@ def qa_fast_png(csf, gm, wm, outdir):
             ax.imshow(gm_slice, interpolation="none", cmap=cmap2, alpha=0.5)
             ax.imshow(wm_slice, interpolation="none", cmap=cmap3, alpha=0.3)
            
-            # Legend of white, gray and cerebrospinal fluid(csf)
+            # Legend of white matter(WM), gray matter(GM) and cerebrospinal fluid(csf)
             if idx == 3:
                 plt.plot(0, 0, "-", c='green', label='wm')
                 plt.plot(0, 0, "-", c='pink', label='gm')
@@ -119,4 +117,4 @@ def qa_fast_png(csf, gm, wm, outdir):
                 plt.legend(loc='upper right',fontsize=15,bbox_to_anchor=(1.5,1.5))
                 
     # save figure
-    overlay.savefig(f"{outdir.dirs['qa']['reg']}'/qa_fast.png'", format="png")
+    overlay.savefig(f"{outdir.dirs['qa']['reg']}/qa_fast.png", format="png")
