@@ -267,7 +267,7 @@ class DmriReg:
         self.gm_mask = self.maps["gm_prob"]
         self.csf_mask = self.maps["csf_prob"]
         # Generates quality analysis pictures of white matter, gray matter and cerebrospinal fluid
-        qa_fast_png(self.csf_mask, self.gm_mask, self.wm_mask, self.namer)
+        qa_fast_png(self.csf_mask, self.gm_mask, self.wm_mask, f"{self.namer.dirs['qa']['reg']}/qa_fast.png")
 
 
         self.t1w_brain = gen_utils.match_target_vox_res(

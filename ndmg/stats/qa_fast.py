@@ -3,7 +3,6 @@ import numpy as np
 import nibabel as nb
 from scipy import ndimage
 from matplotlib.colors import LinearSegmentedColormap
-from PIL import Image
 from ndmg.utils.qa_utils import pad_im
 
 
@@ -21,8 +20,8 @@ def qa_fast_png(csf, gm, wm, outdir):
     the path of gm nifity image
     wm: str
     the path of wm nifity image
-    outdir: class
-    use Class namer to get the path to save QA graph
+    outdir: str
+    the path to save QA graph
     
     """
     
@@ -114,7 +113,7 @@ def qa_fast_png(csf, gm, wm, outdir):
                 plt.plot(0, 0, "-", c='green', label='wm')
                 plt.plot(0, 0, "-", c='pink', label='gm')
                 plt.plot(0, 0, "-", c='blue', label='csf')
-                plt.legend(loc='upper right',fontsize=15,bbox_to_anchor=(1.5,1.5))
+                plt.legend(loc='upper right',fontsize=15,bbox_to_anchor=(1.5,1.2))
                 
     # save figure
-    overlay.savefig(f"{outdir.dirs['qa']['reg']}/qa_fast.png", format="png")
+    overlay.savefig(f"{outdir}", format="png")
