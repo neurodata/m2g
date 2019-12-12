@@ -17,8 +17,8 @@
 
 # qa_reg.py
 # Created by Vikram Chandrashekhar.
-# Edited by Greg Kiar and Eric Bridgeford.
-# Email: Greg Kiar @ gkiar@jhu.edu
+# Edited by Greg Kiar, Eric Bridgeford and Fang Cai.
+# Email: Greg Kiar @ gkiar@jhu.edu, Fang Cai @ fcai4@jh.edu
 
 import warnings
 
@@ -29,7 +29,8 @@ import sys
 import numpy as np
 from numpy import *
 import nibabel as nb
-import ndmg.utils as mgu
+from ndmg.utils.gen_utils import get_braindata
+from ndmg.utils.qa_utils import get_min_max, opaque_colorscale, pad_im
 from argparse import ArgumentParser
 from scipy import ndimage
 from matplotlib.colors import LinearSegmentedColormap
@@ -43,8 +44,24 @@ def reg_mri_pngs(
     mri, atlas, outdir, loc=0, mean=False, minthr=2, maxthr=95, edge=False
 ):
     """
-    outdir: directory where output png file is saved
-    fname: name of output file WITHOUT FULL PATH. Path provided in outdir.
+    A function to create and save registered brain slice figures.
+    
+    Parameter
+    ---------
+    mri: nifti file
+        the registered brain file generated in each registration step.
+    atlas: nifti file
+        the reference brain file used in each registration step.
+    outdir: str
+        directory where output png file is saved. 
+    loc: int
+    mean: bool
+    minthr: int
+    maxthr: int
+    edge: bool
+
+    fname: str
+        name of output file WITHOUT FULL PATH. Path provided in outdir. 
     """
     atlas_data = nb.load(atlas).get_data()
     mri_data = nb.load(mri).get_data()
@@ -66,49 +83,25 @@ def reg_mri_pngs(
     
     plt.close()
 
-def opaque_colorscale(basemap, reference, vmin=None, vmax=None, alpha=1):
-    """
-    A function to return a colorscale, with opacities
-    dependent on reference intensities.
-    **Positional Arguments:**
-        - basemap:
-            - the colormap to use for this colorscale.
-        - reference:
-            - the reference matrix.
-    """
-    reference = reference
-    if vmin is not None:
-        reference[reference > vmax] = vmax
-    if vmax is not None:
-        reference[reference < vmin] = vmin
-    cmap = basemap(reference)
-    maxval = np.nanmax(reference)
-    # all values beteween 0 opacity and 1
-    opaque_scale = alpha * reference / float(maxval)
-    # remaps intensities
-    cmap[:, :, 3] = opaque_scale
-    return cmap
-
-def pad_im(image,max_dim,pad_val):
-    """
-    Pads an image to be same dimensions as given max_dim
-    Parameters
-    -----------
-    image: 3-d RGB np array of image slice
-    max_dim: dimension to pad up to
-    pad_val: value to pad with
-    Returns
-    -----------
-    padded_image: 3-d RGB np array of image slice with padding
-    """
-    #pad only in first two dimensions not in rgb
-    pad_width = (((max_dim-image.shape[0])//2,(max_dim-image.shape[0])//2),((max_dim-image.shape[1])//2,(max_dim-image.shape[1])//2),((max_dim-image.shape[2])//2,(max_dim-image.shape[2])//2))
-    padded_image = np.pad(image, pad_width=pad_width, mode='constant', constant_values=pad_val)
-    return padded_image
-
 def plot_brain(brain, minthr=2, maxthr=95, edge=False):
-    brain = mgu.gen_utils.get_braindata(brain)
-    cmap = LinearSegmentedColormap.from_list("mycmap2", ["black", "green"])
+    """
+    A function to plot a brain.
+    
+    Parameter
+    ---------
+    brain: str, nifti image, numpy.ndarray
+        an object to open the data for a registered brain. Can be a string (path to a brain file),
+        nibabel.nifti1.nifti1image, or a numpy.ndarray.
+    minthr: int
+    maxthr: int
+    edge: bool
+
+    Returns
+    ---------
+    fbr: matplotlib.figure.Figure
+    """
+    brain = get_braindata(brain)
+    cmap = LinearSegmentedColormap.from_list("mycmap2", ["white", "green"])
     plt.rcParams.update({"axes.labelsize": "x-large", "axes.titlesize": "x-large"})
     fbr = plt.figure()
     if brain.shape == (182, 218, 182):
@@ -116,16 +109,16 @@ def plot_brain(brain, minthr=2, maxthr=95, edge=False):
         y = [82, 107, 142]
         z = [88, 103, 107]
     else:
-        shap = brain.shape
-        x = [int(shap[0] * 0.35), int(shap[0] * 0.51), int(shap[0] * 0.65)]
-        y = [int(shap[1] * 0.35), int(shap[1] * 0.51), int(shap[1] * 0.65)]
-        z = [int(shap[2] * 0.35), int(shap[2] * 0.51), int(shap[2] * 0.65)]
+        brain_volume = brain.shape
+        x = [int(brain_volume[0] * 0.35), int(brain_volume[0] * 0.51), int(brain_volume[0] * 0.65)]
+        y = [int(brain_volume[1] * 0.35), int(brain_volume[1] * 0.51), int(brain_volume[1] * 0.65)]
+        z = [int(brain_volume[2] * 0.35), int(brain_volume[2] * 0.51), int(brain_volume[2] * 0.65)]
     coords = (x, y, z)
 
     labs = [
-        "Sagittal Slice (YZ fixed)",
-        "Coronal Slice (XZ fixed)",
-        "Axial Slice (XY fixed)",
+        "Sagittal Slice",
+        "Coronal Slice",
+        "Axial Slice",
     ]
     var = ["X", "Y", "Z"]
     # create subplot for first slice
@@ -168,10 +161,32 @@ def plot_brain(brain, minthr=2, maxthr=95, edge=False):
 
 
 def plot_overlays(atlas, b0, cmaps=None, minthr=2, maxthr=95, edge=False):
+    """
+    A function to plot the overlay figures of registered and reference brain slices.
+    
+    Parameter
+    ---------
+    atlas: str, nifti image, numpy.ndarray
+        an object to open the data for a registered brain. Can be a string (path to a brain file),
+        nibabel.nifti1.nifti1image, or a numpy.ndarray.
+
+    b0: str, nifti image, numpy.ndarray
+        an object to open the data for a reference brain. Can be a string (path to a brain file),
+        nibabel.nifti1.nifti1image, or a numpy.ndarray.
+
+    cmap: Colormap objects based on lookup tables using linear segments.
+    minthr: int
+    maxthr: int
+    edge: bool
+
+    Returns
+    ---------
+    foverlay: matplotlib.figure.Figure
+    """
     plt.rcParams.update({"axes.labelsize": "x-large", "axes.titlesize": "x-large"})
     foverlay = plt.figure()
-    atlas = mgu.gen_utils.get_braindata(atlas)
-    b0 = mgu.gen_utils.get_braindata(b0)
+    atlas = get_braindata(atlas)
+    b0 = get_braindata(b0)
     if atlas.shape != b0.shape:
         raise ValueError("Brains are not the same shape.")
     if cmaps is None:
@@ -184,17 +199,17 @@ def plot_overlays(atlas, b0, cmaps=None, minthr=2, maxthr=95, edge=False):
         y = [82, 107, 142]
         z = [88, 103, 107]
     else:
-        shap = b0.shape
-        x = [int(shap[0] * 0.35), int(shap[0] * 0.51), int(shap[0] * 0.65)]
-        y = [int(shap[1] * 0.35), int(shap[1] * 0.51), int(shap[1] * 0.65)]
-        z = [int(shap[2] * 0.35), int(shap[2] * 0.51), int(shap[2] * 0.65)]
+        brain_volume = b0.shape
+        x = [int(brain_volume[0] * 0.35), int(brain_volume[0] * 0.51), int(brain_volume[0] * 0.65)]
+        y = [int(brain_volume[1] * 0.35), int(brain_volume[1] * 0.51), int(brain_volume[1] * 0.65)]
+        z = [int(brain_volume[2] * 0.35), int(brain_volume[2] * 0.51), int(brain_volume[2] * 0.65)]
     coords = (x, y, z)
     
-    atlas = pad_im(atlas,max(shap[0:3]),0)
-    b0 = pad_im(b0,max(shap[0:3]),0)
-    x = [int(max(shap[0:3]) * 0.35), int(max(shap[0:3]) * 0.51), int(max(shap[0:3]) * 0.65)]
-    y = [int(max(shap[0:3]) * 0.35), int(max(shap[0:3]) * 0.51), int(max(shap[0:3]) * 0.65)]
-    z = [int(max(shap[0:3]) * 0.35), int(max(shap[0:3]) * 0.51), int(max(shap[0:3]) * 0.65)]
+    atlas = pad_im(atlas, max(brain_volume[0:3]), 0, False)
+    b0 = pad_im(b0, max(brain_volume[0:3]), 0, False)
+    x = [int(max(brain_volume[0:3]) * 0.35), int(max(brain_volume[0:3]) * 0.51), int(max(brain_volume[0:3]) * 0.65)]
+    y = [int(max(brain_volume[0:3]) * 0.35), int(max(brain_volume[0:3]) * 0.51), int(max(brain_volume[0:3]) * 0.65)]
+    z = [int(max(brain_volume[0:3]) * 0.35), int(max(brain_volume[0:3]) * 0.51), int(max(brain_volume[0:3]) * 0.65)]
     coords = (x, y, z)
     
     labs = [
@@ -259,18 +274,10 @@ def plot_overlays(atlas, b0, cmaps=None, minthr=2, maxthr=95, edge=False):
                 plt.legend(loc='best',fontsize=12,bbox_to_anchor=(1.5,1.5))
             
     #Set title for the whole picture
-    [a,b,c] = shap
-    title = 'QA For Registration\n\nVolume:'+ str(a) +'*'+ str(b) + '*' + str(c)+'\n'
+    a,b,c = brain_volume
+    title = 'QA For Registration\nVolume:'+ str(a) +'*'+ str(b) + '*' + str(c)+'\n'
     foverlay.suptitle(title,fontsize=24)
     foverlay.set_size_inches(12.5, 10.5, forward=True)
-    foverlay.tight_layout
+    foverlay.tight_layout()
     return foverlay
 
-
-def get_min_max(data, minthr=2, maxthr=95):
-    """
-    data: regmri data to threshold.
-    """
-    min_val = np.percentile(data, minthr)
-    max_val = np.percentile(data, maxthr)
-    return (min_val.astype(float), max_val.astype(float))
