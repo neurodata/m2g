@@ -1,25 +1,13 @@
 #!/usr/bin/env python
 
-# Copyright 2016 NeuroData (http://neurodata.io)
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
+"""
+ndmg.stats.qa_tensor
+~~~~~~~~~~~~~~~~~~~~
 
-# qa_tensor.py
-# Created by Vikram Chandrashekhar.
-# Edited by Greg Kiar.
-# Edited by Wilson Tang
-# Email: Greg Kiar @ gkiar@jhu.edu
+Contains functions to generate intermediate qa figures for the directional field directions
+for models used during the tractrography step.
+
+"""
 
 import warnings
 
@@ -45,9 +33,9 @@ def generate_3_d_directions(peak_dirs,peak_values):
     Parameters
     -----------
     peak_dirs: np array
-        peak_dirs from tractography model 
+        peak_dirs from tractography model (x,y,z directional vectors)
     peak_values: np array
-        peak_values from tractography model
+        peak_values from tractography model (magnitude)
     
     Returns
     -----------
@@ -126,13 +114,13 @@ def create_qa_figure(peak_dirs,peak_values,output_dir,model):
     Parameters
     -----------
     peak_dirs: np array
-        peak_dirs 
+        peak directional vector (x,y,z)
     peak_values: np array
-        peak_values
+        peak values/magnitude 
     output_dir: str
         location to save qa figure
     model: str
-        model type (CSA, CSD)
+        model type used to build tractogram (CSA, CSD). only used to create figure title
     """
     #set shape of image
     im_shape = peak_dirs.shape[:3]
@@ -184,7 +172,7 @@ def create_qa_figure(peak_dirs,peak_values,output_dir,model):
             #convert background
             image = np.where(image<=0.01, 255, image)
             #pad image size
-            image = qa_utils.pad_im(image,max_dim,255,True)
+            image = qa_utils.pad_im(image,max_dim,255,rgb = True)
             plt.imshow(image)
 
             

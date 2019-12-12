@@ -1,33 +1,26 @@
 #!/usr/bin/env python
 
-# Copyright 2016 NeuroData (http://neurodata.io)
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
+"""
+ndmg.utils.qa_utils
+~~~~~~~~~~~~~~~~~~~~
 
-# qa_utils.py
-# Created by Wilson Tang
+Contains small-scale qa utilities
+
+"""
 
 import numpy as np
 
 def get_min_max(data, minthr=2, maxthr=95):
     """
+    A function to find min,max values at designated percentile thresholds
     Parameters
     -----------
     data: np array
         3-d regmri data to threshold.
     minthr: int
+        lower percentile threshold 
     maxthr: int
+        upper percentile threshold
     
     Returns
     -----------
@@ -45,7 +38,7 @@ def opaque_colorscale(basemap, reference, vmin=None, vmax=None, alpha=1):
     A function to return a colorscale, with opacities
     dependent on reference intensities.
     
-    Parameter
+    Parameters
     ---------
     basemap: matplotlib colormap
         the colormap to use for this colorscale.
@@ -55,20 +48,23 @@ def opaque_colorscale(basemap, reference, vmin=None, vmax=None, alpha=1):
     ---------
     cmap = matplotlib colormap
     """
-    reference = reference
     if vmin is not None:
         reference[reference > vmax] = vmax
     if vmax is not None:
         reference[reference < vmin] = vmin
+        
     cmap = basemap(reference)
     maxval = np.nanmax(reference)
+    
     # all values beteween 0 opacity and 1
     opaque_scale = alpha * reference / float(maxval)
+    
     # remaps intensities
     cmap[:, :, 3] = opaque_scale
+    
     return cmap
 
-def pad_im(image,max_dim,pad_val,rgb):
+def pad_im(image,max_dim,pad_val,rgb=False):
     """
     Pads an image to be same dimensions as given max_dim
     
@@ -92,9 +88,8 @@ def pad_im(image,max_dim,pad_val,rgb):
         pad_width.append(((max_dim-image.shape[i])//2,(max_dim-image.shape[i])//2))
     if rgb:
         pad_width[-1] = (0,0)
-
-    #convert to tuple
-    pad_width = tuple(pad_width)
+        
+    pad_width = tuple(pad_width)   
     padded_image = np.pad(image, pad_width=pad_width, mode='constant', constant_values=pad_val)
     
     return padded_image
