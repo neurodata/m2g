@@ -12,14 +12,14 @@ def qa_fast_png(csf, gm, wm, outdir):
     segments a 3D image of the brain into different tissue types (Grey Matter, White Matter, CSF, etc.)
     Mark different colors of white matter, gray matter, cerebrospinal fluid in a '3 by 3' picture, i.e. QA for FAST
     
-    parameters
+    Parameters*
     ---------------
     csf: str
-    the path of csf nifity image
+    the path of csf nifiti image
     gm: str
-    the path of gm nifity image
+    the path of gm nifiti image
     wm: str
-    the path of wm nifity image
+    the path of wm nifiti image
     outdir: str
     the path to save QA graph
     
@@ -53,10 +53,10 @@ def qa_fast_png(csf, gm, wm, outdir):
     
     # Set the 3D matrix cutting position in three directions
     shape = csf_data.shape
-    slice = [0.35, 0.51, 0.65]
-    x = [int(shape[0] * slice[0]), int(shape[0] * slice[1]), int(shape[0] * slice[2])]
-    y = [int(shape[1] * slice[0]), int(shape[1] * slice[1]), int(shape[1] * slice[2])]
-    z = [int(shape[2] * slice[0]), int(shape[2] * slice[1]), int(shape[2] * slice[2])]
+    index = [0.35, 0.51, 0.65]
+    x = [int(shape[0] * index[0]), int(shape[0] * index[1]), int(shape[0] * index[2])]
+    y = [int(shape[1] * index[0]), int(shape[1] * index[1]), int(shape[1] * index[2])]
+    z = [int(shape[2] * index[0]), int(shape[2] * index[1]), int(shape[2] * index[2])]
     coords = (x, y, z)
     
     # Set labels for the y-axis
