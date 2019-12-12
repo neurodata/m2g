@@ -261,7 +261,7 @@ def ndmg_dwi_worker(
 
     # Align atlas to dwi-space and check that the atlas hasn't lost any of the rois
     skullstrip_files = [reg, parcellations, prep_anat, vox_size, reg_style]
-    labels_im_file_list = reg_utils.skullstrip_check(skullstrip_files)
+    labels_im_file_list = reg_utils.skullstrip_check(*skullstrip_files)
     # -------- Tensor Fitting and Fiber Tractography ---------------- #
     start_time = time.time()
     seeds = track.build_seed_list(reg.wm_gm_int_in_dwi, np.eye(4), dens=int(seeds))
