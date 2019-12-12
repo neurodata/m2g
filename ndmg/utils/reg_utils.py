@@ -193,16 +193,16 @@ def resample_fsl(base, res, goal_res, interp="spline"):
     gen_utils.run(cmd)
 
 
-def skullstrip_check(dmrireg, labels, outdir, vox_size, reg_style):
+def skullstrip_check(dmrireg, parcellations, prep_anat, vox_size, reg_style):
     """Peforms the alignment of atlas to dwi space and checks if the alignment results in roi loss
 
     Parameters
     ----------
     dmrireg : object
         object created in the pipeline containing relevant paths and class methods for analysing tractography
-    labels : str, list
+    parcellations : str, list
         the path to the t1w image to be segmented
-    namer : str
+    outdir : str
         the basename for outputs. Often it will be most convenient for this to be the dataset, followed by the subject,
         followed by the step of processing. Note that this anticipates a path as well;
         ie, /path/to/dataset_sub_nuis, with no extension.
@@ -230,10 +230,10 @@ def skullstrip_check(dmrireg, labels, outdir, vox_size, reg_style):
         raise ValueError("Unsupported tractography space, must be native or native_dsn")
 
     labels_im_file_list = []
-    for idx, label in enumerate(labels):
-        labels_im_file = gen_utils.reorient_img(labels[idx], namer)  # TODO
+    for idx, label in enumerate(parcellations):
+        labels_im_file = gen_utils.reorient_t1w(parcellations[idx], prep_anat)
         labels_im_file = gen_utils.match_target_vox_res(
-            labels_im_file, vox_size, outdir, sens="anat"
+            labels_im_file, vox_size, prep_anat, sens="anat"
         )
         orig_lab = nib.load(labels_im_file)
         orig_lab = orig_lab.get_data().astype("int")

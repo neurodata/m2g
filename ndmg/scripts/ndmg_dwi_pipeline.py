@@ -233,30 +233,29 @@ def ndmg_dwi_worker(
         reg.gen_tissue()
 
     # Align t1w to dwi
-    existing_files = all(
-        map(os.path.isfile, [reg.t1w2dwi, reg.mni2t1w_warp, reg.t1_aligned_mni])
-    )
+    t1w2dwi_align_files = [reg.t1w2dwi, reg.mni2t1w_warp, reg.t1_aligned_mni]
+    existing_files = all(map(os.path.isfile, t1w2dwi_align_files))
     if skipreg and existing_files:
         print("Found existing t1w2dwi run!")
     else:
         reg.t1w2dwi_align()
 
     # Align tissue classifiers
-    existing_files = all(
-        map(
-            os.path.isfile,
-            [reg.wm_gm_int_in_dwi, reg.vent_csf_in_dwi, reg.corpuscallosum_dwi],
-        )
-    )
+    tissue_align_files = [
+        reg.wm_gm_int_in_dwi,
+        reg.vent_csf_in_dwi,
+        reg.corpuscallosum_dwi,
+    ]
+    existing_files = all(map(os.path.isfile, tissue_align_files))
     if skipreg and existing_files:
         print("Found existing tissue2dwi run!")
     else:
         reg.tissue2dwi_align()
 
     # Align atlas to dwi-space and check that the atlas hasn't lost any of the rois
-    labels_im_file_list = reg_utils.skullstrip_check(
-        reg, labels, outdir, vox_size, reg_style
-    )
+    # TODO : current stopping-spot
+    skullstrip_files = [reg, labels, prep_anat, vox_size, reg_style]
+    labels_im_file_list = reg_utils.skullstrip_check(skullstrip_files)
     # -------- Tensor Fitting and Fiber Tractography ---------------- #
     start_time = time.time()
     seeds = track.build_seed_list(reg.wm_gm_int_in_dwi, np.eye(4), dens=int(seeds))
