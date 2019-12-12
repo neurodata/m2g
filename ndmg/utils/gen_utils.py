@@ -725,6 +725,7 @@ def reorient_dwi(dwi_prep: Path, bvecs: str, preproc_dir: Path):
     return out_fname, out_bvec_fname
 
 
+@print_arguments(inputs=[0])
 def reorient_t1w(img: str, anat_preproc_dir: Path):
     """Reorients input image to RAS+. Essentially a wrapper on `nib.as_closest_canonical` and `normalize_xform`.
 

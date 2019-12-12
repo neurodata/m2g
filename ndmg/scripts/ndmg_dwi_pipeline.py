@@ -71,7 +71,7 @@ def ndmg_dwi_worker(
         Location of atlas file
     mask : str
         Location of T1w brain mask file, make sure the proper voxel size is used
-    labels : list
+    parcellations : list
         Filepaths to the parcellations we're using.
     outdir : str
         The directory where the output files should be stored. Prepopulate this folder with results of participants level analysis if running gorup analysis.
@@ -108,8 +108,13 @@ def ndmg_dwi_worker(
     for arg, value in args.items():
         print(f"{arg} = {value}")
 
+    # initial assertions
     if vox_size not in ["1mm", "2mm"]:
         raise ValueError("Voxel size not supported. Use 2mm or 1mm")
+
+    for file_ in [t1w, bvals, bvecs, dwi, atlas, mask, *parcellations]:
+        if not os.path.isfile(file_):
+            raise FileNotFoundError(f"Input {file_} not found. Exiting ndmg.")
 
     # time ndmg execution
     startTime = datetime.now()
