@@ -44,14 +44,19 @@ def qa_fast_png(csf, gm, wm, outdir):
     plt.axis('off')
     
     # Determine whether the input data types are consistent. If they are inconsistent, an error is reported.
-    if ((gm_data.shape != csf_data.shape) and (gm_data.shape != wm_data.shape) and (gm_data != wm_data.shape)):
-        raise ValueError("Brains are not the same shape.")
+    if gm_data.shape != csf_data.shape:
+        raise ValueError("GM and CSF are not the same shape.")
+    elif gm_data.shape != wm_data.shape:
+        raise ValueError("GM and WM are not the same shape.")
+    elif wm_data.shape != csf_data.shape:
+        raise ValueError("WM and CSF are not the same shape.")
     
     # Set the 3D matrix cutting position in three directions
     shape = csf_data.shape
-    x = [int(shape[0] * 0.35), int(shape[0] * 0.51), int(shape[0] * 0.65)]
-    y = [int(shape[1] * 0.35), int(shape[1] * 0.51), int(shape[1] * 0.65)]
-    z = [int(shape[2] * 0.35), int(shape[2] * 0.51), int(shape[2] * 0.65)]
+    slice = [0.35, 0.51, 0.65]
+    x = [int(shape[0] * slice[0]), int(shape[0] * slice[1]), int(shape[0] * slice[2])]
+    y = [int(shape[1] * slice[0]), int(shape[1] * slice[1]), int(shape[1] * slice[2])]
+    z = [int(shape[2] * slice[0]), int(shape[2] * slice[1]), int(shape[2] * slice[2])]
     coords = (x, y, z)
     
     # Set labels for the y-axis
@@ -83,7 +88,8 @@ def qa_fast_png(csf, gm, wm, outdir):
                 csf_slice = ndimage.rotate(csf_data[:, :, pos], 90)
                 gm_slice = ndimage.rotate(gm_data[:, :, pos], 90)
                 wm_slice = ndimage.rotate(wm_data[:, :, pos], 90)
-                
+
+            # set y labels    
             if idx % 3 == 1:
                 plt.ylabel(labs[i])
             
@@ -95,7 +101,7 @@ def qa_fast_png(csf, gm, wm, outdir):
             gm_slice = pad_im(gm_slice, max(shape), 0, False)
             wm_slice = pad_im(wm_slice, max(shape), 0, False)
             
-            # Hide axes
+            # hide axes
             ax.set_xticks([])
             ax.set_yticks([])
             ax.spines['top'].set_visible(False)
