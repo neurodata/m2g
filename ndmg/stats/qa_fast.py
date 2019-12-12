@@ -4,7 +4,7 @@ import nibabel as nb
 from scipy import ndimage
 from matplotlib.colors import LinearSegmentedColormap
 from PIL import Image
-from ndmg.utils.qa_utils import pad_im
+from ndmg.utils.
 
 
 def qa_fast_png(csf, gm, wm, outdir):
@@ -119,4 +119,4 @@ def qa_fast_png(csf, gm, wm, outdir):
                 plt.legend(loc='upper right',fontsize=15,bbox_to_anchor=(1.5,1.5))
                 
     # save figure
-    overlay.savefig(f"{outdir.dir['qa']['reg']'qa_fast.png'}", format="png")
+    overlay.savefig(f"{outdir.dir['qa']['reg']}'qa_fast.png'", format="png")
