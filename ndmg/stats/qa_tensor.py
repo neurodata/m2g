@@ -172,7 +172,7 @@ def create_qa_figure(peak_dirs,peak_values,output_dir,model):
             #convert background
             image = np.where(image<=0.01, 255, image)
             #pad image size
-            image = qa_utils.pad_im(image,max_dim,255,rgb = True)
+            image = qa_utils.pad_im(image,max_dim,pad_val=255,rgb = True)
             plt.imshow(image)
 
             

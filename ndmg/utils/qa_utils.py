@@ -64,7 +64,7 @@ def opaque_colorscale(basemap, reference, vmin=None, vmax=None, alpha=1):
     
     return cmap
 
-def pad_im(image,max_dim,pad_val,rgb=False):
+def pad_im(image,max_dim,pad_val=255,rgb=False):
     """
     Pads an image to be same dimensions as given max_dim
     
@@ -75,7 +75,7 @@ def pad_im(image,max_dim,pad_val,rgb=False):
     max_dim: int
         dimension to pad up to
     pad_val: int
-        value to pad with. 
+        value to pad with. default is 255 (white) background  
     rgb: boolean
         flag to indicate if RGB and last dimension should not be padded
     Returns
