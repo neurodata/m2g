@@ -37,7 +37,7 @@ import matplotlib as mpl
 mpl.use("Agg")  # very important above pyplot import
 from nilearn.plotting.edge_detect import _edge_map as edge_map
 import matplotlib.pyplot as plt
-from ndmg.utils.qa_utils import get_min_max, opaque_colorscale,pad_im
+from ndmg.utils.qa_utils import get_min_max, opaque_colorscale, pad_im
 
 
 def reg_mri_pngs(

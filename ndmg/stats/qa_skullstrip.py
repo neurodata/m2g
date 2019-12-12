@@ -28,16 +28,15 @@ import re
 import sys
 import numpy as np
 import nibabel as nb
-# import ndmg.utils as mgu
 from argparse import ArgumentParser
 from scipy import ndimage
 from matplotlib.colors import LinearSegmentedColormap
 import matplotlib as mpl
 
 mpl.use("Agg")  # very important above pyplot import
-# from nilearn.plotting.edge_detect import _edge_map as edge_map
+from nilearn.plotting.edge_detect import _edge_map as edge_map
 import matplotlib.pyplot as plt
-from ndmg.utils.qa_utils import get_min_max, opaque_colorscale,pad_im
+from ndmg.utils.qa_utils import get_min_max, opaque_colorscale, pad_im
 from ndmg.utils.gen_utils import get_filename, get_braindata
 
 
@@ -70,8 +69,7 @@ def gen_overlay_pngs(
             brain_data = brain_data.mean(axis=3)
         else:
             brain_data = brain_data[:, :, :, loc]
-    else:  # dim=3
-        brain_data = brain_data
+
 
     cmap1 = LinearSegmentedColormap.from_list("mycmap1", ["white", "magenta"])
     cmap2 = LinearSegmentedColormap.from_list("mycmap2", ["white", "green"])
@@ -86,13 +84,13 @@ def gen_overlay_pngs(
 
 
 
-def plot_overlays_skullstrip(b0, original, cmaps=None, minthr=2, maxthr=95, edge=False):
+def plot_overlays_skullstrip(brain, original, cmaps=None, minthr=2, maxthr=95, edge=False):
     """
     generate the image combine the brain and original data
 
     Parameters
     ----------
-    b0:
+    brain:
         is the skull striped result, only left the brain
     original:
         is the original nii.gz file
@@ -103,11 +101,11 @@ def plot_overlays_skullstrip(b0, original, cmaps=None, minthr=2, maxthr=95, edge
     foverlay = plt.figure()
 
     original = get_braindata(original)
-    ori_shape = get_braindata(b0).shape
-    b0 = get_braindata(b0)
-    if original.shape != b0.shape:
+    ori_shape = get_braindata(brain).shape
+    brain = get_braindata(brain)
+    if original.shape != brain.shape:
         raise ValueError("Two files are not the same shape.")
-    b0 = pad_im(b0, max(ori_shape[0:3]), 0, False)
+    brain = pad_im(brain, max(ori_shape[0:3]), 0, False)
     original = pad_im(original,max(ori_shape[0:3]),0, False)
 
 
@@ -116,7 +114,7 @@ def plot_overlays_skullstrip(b0, original, cmaps=None, minthr=2, maxthr=95, edge
         cmap2 = LinearSegmentedColormap.from_list("mycmap2", ["white", "green"])
         cmaps = [cmap1, cmap2]
 
-    x, y, z = get_true_volume(b0)
+    x, y, z = get_true_volume(brain)
     coords = (x, y, z)
 
     labs = [
@@ -132,7 +130,7 @@ def plot_overlays_skullstrip(b0, original, cmaps=None, minthr=2, maxthr=95, edge
         min_val = 0
         max_val = 1
     else:
-        min_val, max_val = get_min_max(b0, minthr, maxthr)
+        min_val, max_val = get_min_max(brain, minthr, maxthr)
 
     for i, coord in enumerate(coords):
         for pos in coord:
@@ -140,13 +138,13 @@ def plot_overlays_skullstrip(b0, original, cmaps=None, minthr=2, maxthr=95, edge
             ax = foverlay.add_subplot(3, 3, idx)
             ax.set_title(var[i] + " = " + str(pos))
             if i == 0:
-                image = ndimage.rotate(b0[pos, :, :], 90)
+                image = ndimage.rotate(brain[pos, :, :], 90)
                 atl = ndimage.rotate(original[pos, :, :], 90)
             elif i == 1:
-                image = ndimage.rotate(b0[:, pos, :], 90)
+                image = ndimage.rotate(brain[:, pos, :], 90)
                 atl = ndimage.rotate(original[:, pos, :], 90)
             else:
-                image = ndimage.rotate(b0[:, :, pos], 0)
+                image = ndimage.rotate(brain[:, :, pos], 0)
                 atl = ndimage.rotate(original[:, :, pos], 0)
 
             if idx % 3 == 1:
@@ -206,39 +204,3 @@ def get_range(array,i):
     arrange = np.arange(min_num, max_num)
     quarter = np.percentile(arrange, [25, 50, 75]).astype(int)
     return quarter
-
-
-
-def get_braindata(brain_file):
-    """Opens a brain data series for a mask, mri image, or atlas.
-    Returns a numpy.ndarray representation of a brain.
-    Parameters
-    ----------
-    brain_file : str, nibabel.nifti1.nifti1image, numpy.ndarray
-        an object to open the data for a brain. Can be a string (path to a brain file),
-        nibabel.nifti1.nifti1image, or a numpy.ndarray
-    Returns
-    -------
-    array
-        array of image data
-    Raises
-    ------
-    TypeError
-        Brain file is not an accepted format
-    """
-
-    if type(brain_file) is np.ndarray:  # if brain passed as matrix
-        braindata = brain_file
-    else:
-        if type(brain_file) is str or type(brain_file) is str:
-            brain = nb.load(str(brain_file))
-        elif type(brain_file) is nb.nifti1.Nifti1Image:
-            brain = brain_file
-        else:
-            raise TypeError(
-                "Brain file is type: {}".format(type(brain_file))
-                + "; accepted types are numpy.ndarray, "
-                "string, and nibabel.nifti1.Nifti1Image."
-            )
-        braindata = brain.get_data()
-    return braindata

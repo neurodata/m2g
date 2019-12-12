@@ -268,6 +268,7 @@ class DmriReg:
         reg_utils.t1w_skullstrip(self.t1w, self.t1w_brain, self.skull)
 
         #  QA part of skull strip
+        str(outdir / "qa/skull_strip")
         self.namer.dirs["qa"]["skull_strip"] = f'{self.namer.dirs["qa"]["base"]}/skull_strip'
         if not os.path.exists(self.namer.dirs["qa"]["skull_strip"]):
             os.makedirs(self.namer.dirs["qa"]["skull_strip"])
