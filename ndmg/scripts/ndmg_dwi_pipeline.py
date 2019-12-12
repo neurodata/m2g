@@ -112,9 +112,12 @@ def ndmg_dwi_worker(
     if vox_size not in ["1mm", "2mm"]:
         raise ValueError("Voxel size not supported. Use 2mm or 1mm")
 
+    print("Checking inputs...")
     for file_ in [t1w, bvals, bvecs, dwi, atlas, mask, *parcellations]:
         if not os.path.isfile(file_):
             raise FileNotFoundError(f"Input {file_} not found. Exiting ndmg.")
+        else:
+            print(f"Input {file_} found.")
 
     # time ndmg execution
     startTime = datetime.now()
@@ -211,12 +214,11 @@ def ndmg_dwi_worker(
     prep_anat, reg_anat, tmp_rega, tmp_regm = reg_dirs
 
     # check if output directories already have output files
-    if skipreg:
+    if not skipreg:
         for dir_ in reg_dirs:
             # raises FileNotFoundError if `dir_.exists()` isn't first
             has_files = dir_.exists() and bool(os.listdir(dir_))
             if has_files:
-                print(f"Pre-existing files found in {dir_}. Deleting ...")
                 gen_utils.as_directory(dir_, remove=True)
 
     # Check orientation (t1w)
@@ -258,8 +260,7 @@ def ndmg_dwi_worker(
         reg.tissue2dwi_align()
 
     # Align atlas to dwi-space and check that the atlas hasn't lost any of the rois
-    # TODO : current stopping-spot
-    skullstrip_files = [reg, labels, prep_anat, vox_size, reg_style]
+    skullstrip_files = [reg, parcellations, prep_anat, vox_size, reg_style]
     labels_im_file_list = reg_utils.skullstrip_check(skullstrip_files)
     # -------- Tensor Fitting and Fiber Tractography ---------------- #
     start_time = time.time()

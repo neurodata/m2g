@@ -758,6 +758,11 @@ def reorient_t1w(img: str, anat_preproc_dir: Path):
 
     normalized.to_filename(out_name)
 
+    print("TODO: REMOVE")
+    print(f"img = {img}")
+    print(f"anat_preproc_dir = {anat_preproc_dir}")
+    print(f"normalized = {type(normalized)}, {normalized}")
+    print(f"out_name = {out_name}")
     return out_name
 
 
