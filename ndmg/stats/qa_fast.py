@@ -39,7 +39,7 @@ def qa_fast_png(csf, gm, wm, outdir):
     
     overlay = plt.figure()
     overlay.set_size_inches(12.5, 10.5, forward=True)
-    plt.title(f'Qa for FAST(segments a 3D image of the brain into different tissue types)\n (scan volume:{gm_data.shape}) \n\n\n', fontsize=22)
+    plt.title(f'Qa for FAST(segments a 3D image of the brain into different tissue types)\n (scan volume:{gm_data.shape}) \n', fontsize=22)
     plt.xticks([])
     plt.yticks([])
     plt.axis('off')
