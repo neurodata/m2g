@@ -59,9 +59,6 @@ def reg_mri_pngs(
     minthr: int
     maxthr: int
     edge: bool
-
-    fname: str
-        name of output file WITHOUT FULL PATH. Path provided in outdir. 
     """
     atlas_data = nb.load(atlas).get_data()
     mri_data = nb.load(mri).get_data()
@@ -78,8 +75,7 @@ def reg_mri_pngs(
 
     fig = plot_overlays(atlas_data, mr_data, [cmap1, cmap2], minthr, maxthr, edge)
     # name and save the file
-    fname = os.path.split(mri)[1].split(".")[0] + ".png"
-    fig.savefig(outdir + "/" + fname, format="png")
+    fig.savefig(outdir + "/" + os.path.split(mri)[1].split(".")[0] + ".png", format="png")
     
     plt.close()
 
