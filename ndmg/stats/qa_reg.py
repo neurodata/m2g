@@ -27,7 +27,6 @@ import os
 import re
 import sys
 import numpy as np
-from numpy import *
 import nibabel as nb
 from ndmg.utils.gen_utils import get_braindata
 from ndmg.utils.qa_utils import get_min_max, opaque_colorscale, pad_im
