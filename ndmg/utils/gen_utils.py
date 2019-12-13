@@ -756,11 +756,16 @@ def reorient_t1w(img: str, anat_preproc_dir: Path):
     else:
         out_name = str(out_name) + "_RAS.nii.gz"
 
-    print("TODO: REMOVE")
+    print("TODO: REMOVE, FOR DEBUGGING")
     print(f"img = {img}")
+    print(f"preproc_dir exists: {os.path.isdir(anat_preproc_dir)}")
+    print(f"out_name folder exists: {os.path.isdir(Path(out_name).parent)}")
     print(f"anat_preproc_dir = {anat_preproc_dir}")
-    print(f"normalized = {type(normalized)}, {normalized}")
-    print(f"out_name = {out_name}")
+    print(f"out_name = {out_name}", "\n")
+    print(f"img location = {os.listdir(img)}"
+    print(f"anat_preproc_dir location = {os.listdir(anat_preproc_dir)}"
+    print(f"normalized = {type(normalized)}")
+
 
     normalized.to_filename(out_name)
 
