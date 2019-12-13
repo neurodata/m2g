@@ -111,8 +111,8 @@ def plot_overlays_skullstrip(brain, original, cmaps=None, minthr=2, maxthr=95, e
     brain = get_braindata(brain)
     if original.shape != brain.shape:
         raise ValueError("Two files are not the same shape.")
-    brain = pad_im(brain, max(brain_shape[0:3]), pad_val = 0, rgb = False)
-    original = pad_im(original,max(brain_shape[0:3]),pad_val = 0, rgb = False)
+    brain = pad_im(brain, max(brain_shape[0:3]), pad_val=0, rgb=False)
+    original = pad_im(original,max(brain_shape[0:3]), pad_val=0, rgb=False)
 
 
     if cmaps is None:
@@ -190,11 +190,15 @@ def plot_overlays_skullstrip(brain, original, cmaps=None, minthr=2, maxthr=95, e
     foverlay.set_size_inches(12.5, 10.5, forward=True)
     return foverlay
 
-def get_true_volume(nparray):
-    """detect the brain area from raw t1w data (numpy array format),
-    call function get_range to return 1/4 2/4 3/4 part of numpy array
+def get_true_volume(brain_volume):
+    """returns percentile dimensions to slice actual brain volume for qa_skullstrip plottitng
+
+    Parameter
+    ---------
+    brain_volume: numpy array
+        3-d brain volume
     """
-    img_arr = nparray.astype(int)
+    img_arr = brain_volume.astype(int)
     threshold = int(1)
     img_arr[img_arr <= threshold] = 0
     img_arr[img_arr > threshold] = 1
@@ -205,7 +209,14 @@ def get_true_volume(nparray):
     return x, y, z
 
 def get_range(array,i):
-    """get 1/4 2/4 3/4 part of an numpy array
+    """get percentiles of array
+
+    Parameter
+    ---------
+    array: numpy array
+        3-d brain volume
+    i: int
+        dimension of array to get percentiles
     """
     min_num = min(array[i])
     max_num = max(array[i])
