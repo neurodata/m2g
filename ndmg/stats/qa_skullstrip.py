@@ -82,14 +82,15 @@ def plot_overlays_skullstrip(brain, original, cmaps=None, minthr=2, maxthr=95, e
     brain: str, nifti image, numpy.ndarray
         an object to open the data for a skull-stripped brain. Can be a string (path to a brain file),
         nibabel.nifti1.nifti1image, or a numpy.ndarray.
-​
     original: str, nifti image, numpy.ndarray
         an object to open the data for t1w brain, with the skull included. Can be a string (path to a brain file),
         nibabel.nifti1.nifti1image, or a numpy.ndarray.
-​
-    cmap: Colormap objects based on lookup tables using linear segments.
+    cmaps: matplotlib colormap objects
+        colormap objects based on lookup tables using linear segments.
     minthr: int
+        lower percentile threshold
     maxthr: int
+        upper percentile threshold
     edge: bool
 ​
     Returns
