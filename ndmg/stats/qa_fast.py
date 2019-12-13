@@ -22,10 +22,6 @@ def qa_fast_png(csf, gm, wm, outdir):
     the path of wm nifti. image
     outdir: str
     the path to save QA graph
-    
-    Returns
-    ---------------
-    no returns
     """
     
     # load data
