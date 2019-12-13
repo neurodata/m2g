@@ -5,9 +5,9 @@ ndmg.stats.qa_skullstrip
 ~~~~~~~~~~~~~~~~~~~~~~
 The top level ndmg quality assurance for skull strip module.
 In this module, ndmg:
-1. Input original t1w file and the skull-striped brain file
+1. Input original t1w file and the skull-stripped brain file
 2. Shows the skull-stripped brain (green) overlaid on the original t1w (magenta)
-3. save the image into output directory
+3. Saves the image into output directory
 """
 
 import warnings
@@ -80,7 +80,7 @@ def plot_overlays_skullstrip(brain, original, cmaps=None, minthr=2, maxthr=95, e
     Parameter
     ---------
     brain: str, nifti image, numpy.ndarray
-        an object to open the data for a skull-striped brain. Can be a string (path to a brain file),
+        an object to open the data for a skull-stripped brain. Can be a string (path to a brain file),
         nibabel.nifti1.nifti1image, or a numpy.ndarray.
 ​
     original: str, nifti image, numpy.ndarray
