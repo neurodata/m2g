@@ -67,11 +67,6 @@ def gen_overlay_pngs(
         else:
             brain_data = brain_data[:, :, :, loc]
 
-
-    cmap1 = LinearSegmentedColormap.from_list("mycmap1", ["white", "magenta"])
-    cmap2 = LinearSegmentedColormap.from_list("mycmap2", ["white", "green"])
-
-
     fig = plot_overlays_skullstrip(brain_data, original)
 
     # name and save the file
