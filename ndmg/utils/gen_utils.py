@@ -762,10 +762,9 @@ def reorient_t1w(img: str, anat_preproc_dir: Path):
     print(f"out_name folder exists: {os.path.isdir(Path(out_name).parent)}")
     print(f"anat_preproc_dir = {anat_preproc_dir}")
     print(f"out_name = {out_name}", "\n")
-    print(f"img location = {os.listdir(img)}"
-    print(f"anat_preproc_dir location = {os.listdir(anat_preproc_dir)}"
+    print(f"img location = {os.listdir(img)}")
+    print(f"anat_preproc_dir location = {os.listdir(anat_preproc_dir)}")
     print(f"normalized = {type(normalized)}")
-
 
     normalized.to_filename(out_name)
 
@@ -782,8 +781,7 @@ def match_target_vox_res(img_file: str, vox_size, outdir: Path, sens):
         path to file to be resliced
     vox_size : str
         target voxel resolution ('2mm' or '1mm')
-    namer : NameResource
-        NameResource variable containing relevant directory tree information
+    outdir : 
     sens : str
         type of data being analyzed ('dwi' or 'anat')
 
