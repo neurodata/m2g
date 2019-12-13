@@ -12,17 +12,20 @@ def qa_fast_png(csf, gm, wm, outdir):
     segments a 3D image of the brain into different tissue types (Grey Matter, White Matter, CSF, etc.)
     Mark different colors of white matter, gray matter, cerebrospinal fluid in a '3 by 3' picture, i.e. QA for FAST
     
-    Parameters*
+    Parameters
     ---------------
     csf: str
-    the path of csf nifiti image
+    the path of csf nifti. image
     gm: str
-    the path of gm nifiti image
+    the path of gm nifti. image
     wm: str
-    the path of wm nifiti image
+    the path of wm nifti. image
     outdir: str
     the path to save QA graph
     
+    Returns
+    ---------------
+    no returns
     """
     
     # load data
