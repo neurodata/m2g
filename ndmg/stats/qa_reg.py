@@ -61,7 +61,7 @@ def reg_mri_pngs(
 
     fig = plot_overlays(atlas_data, mr_data, [cmap1, cmap2], minthr, maxthr, edge)
     # name and save the file
-    fig.savefig(outdir + "/" + os.path.split(mri)[1].split(".")[0] + ".png", format="png")
+    fig.savefig(outdir + "/" + os.path.split(mri)[1].split(".")[0] + "_2_" + os.path.split(atlas)[1].split(".")[0] + ".png", format="png")
     
     plt.close()
 
