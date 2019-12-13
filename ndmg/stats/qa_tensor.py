@@ -88,7 +88,6 @@ def plot_directions(peak_dirs,peak_values,x_angle,y_angle,size=(300,300)):
         peak directional vector (x,y,z)  
     peak_values: np array
         peak values/magnitude 
-    slices: dictionary of lists of slices in x,y,z plane
     x_angle: int
         angle to rotate image along x axis
     y_angle: int
