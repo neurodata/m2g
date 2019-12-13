@@ -15,7 +15,7 @@ import re
 import sys
 import numpy as np
 import nibabel as nb
-from ndmg.utils.gen_utils import get_braindata
+from ndmg.utils.gen_utils import get_braindata, get_filename
 from ndmg.utils.qa_utils import get_min_max, opaque_colorscale, pad_im
 from argparse import ArgumentParser
 from scipy import ndimage
@@ -27,7 +27,7 @@ import matplotlib.pyplot as plt
 
 
 def reg_mri_pngs(
-    mri, atlas, outdir, loc=0, mean=False, minthr=2, maxthr=95
+    mri, atlas, outdir, loc=0, mean=False, minthr=2, maxthr=95, edge=False
 ):
     """
     A function to create and save registered brain slice figures.
@@ -65,7 +65,7 @@ def reg_mri_pngs(
 
     fig = plot_overlays(atlas_data, mr_data, [cmap1, cmap2], minthr, maxthr, edge)
     # name and save the file
-    fig.savefig(outdir + "/" + os.path.split(mri)[1].split(".")[0] + "_2_" + os.path.split(atlas)[1].split(".")[0] + ".png", format="png")
+    fig.savefig(outdir + "/" + get_filename(mri) + "_2_" + get_filename(atlas) + ".png", format="png")
     
     plt.close()
 
