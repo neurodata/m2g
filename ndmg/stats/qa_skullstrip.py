@@ -1,24 +1,14 @@
 #!/usr/bin/env python
 
-# Copyright 2016 NeuroData (http://neurodata.io)
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
-
-
-# Created by Vikram Chandrashekhar.
-# Edited by Greg Kiar, Eric Bridgeford and Chuankai Luo.
-# Email: Greg Kiar @ gkiar@jhu.edu   cluo16@jhu.edu
+"""
+ndmg.stats.qa_skullstrip
+~~~~~~~~~~~~~~~~~~~~~~
+The top level ndmg quality assurance for skull strip module.
+In this module, ndmg:
+1. Input original t1w file and the skull-striped brain file
+2. Shows the skull-stripped brain (green) overlaid on the original t1w (magenta)
+3. save the image into output directory
+"""
 
 import warnings
 
@@ -45,24 +35,24 @@ from ndmg.utils.gen_utils import get_filename, get_braindata
 
 def gen_overlay_pngs(
     brain, original, outdir, loc=0, mean=False, minthr=2, maxthr=95, edge=False):
-    """
-    generate the image combine the brain and original data
+    """Generate a QA image for skullstrip.
+    will call the function plot_overlays_skullstrip
 
     Parameters
     ----------
-    brain:
-        is the skull striped result, only left the brain
-    original:
-        is the original nii.gz file
-    outdir:
-        directory where output png file is saved
-    loc and mean is to deal with 4d data
-    minthr, maxthr, edge are the variables about the color
+    brain: nifti file
+        Path to the skull-stripped nifti brain
+    original: nifti file
+        Path to the original t1w brain, with the skull included
+    outdir: str
+        Path to the directory where QA will be saved
+    loc: int
+    mean: bool
+    minthr: int
+    maxthr: int
+    edge: bool
     """
-    try:
-        original_name = get_filename(original)
-    except ValueError:
-        original_name = 'stripped_brain_skull_comparison'
+    original_name = get_filename(original)
     brain_data = nb.load(brain).get_data()
     if brain_data.ndim == 4:  # 4d data, so we need to reduce a dimension
         if mean:
@@ -75,7 +65,7 @@ def gen_overlay_pngs(
     cmap2 = LinearSegmentedColormap.from_list("mycmap2", ["white", "green"])
 
 
-    fig = plot_overlays_skullstrip(brain_data, original, [cmap1, cmap2], minthr, maxthr, edge)
+    fig = plot_overlays_skullstrip(brain_data, original)
 
     # name and save the file
     fig.savefig(f"{outdir}/qa_skullstrip__{original_name}.png", format="png")
@@ -85,16 +75,27 @@ def gen_overlay_pngs(
 
 
 def plot_overlays_skullstrip(brain, original, cmaps=None, minthr=2, maxthr=95, edge=False):
-    """
-    generate the image combine the brain and original data
+    """Shows the skull-stripped brain (green) overlaid on the original t1w (magenta)
 
-    Parameters
-    ----------
-    brain:
-        is the skull striped result, only left the brain
-    original:
-        is the original nii.gz file
-    cmaps, minthr, maxthr, edge are the variables about the color
+    Parameter
+    ---------
+    brain: str, nifti image, numpy.ndarray
+        an object to open the data for a skull-striped brain. Can be a string (path to a brain file),
+        nibabel.nifti1.nifti1image, or a numpy.ndarray.
+​
+    original: str, nifti image, numpy.ndarray
+        an object to open the data for t1w brain, with the skull included. Can be a string (path to a brain file),
+        nibabel.nifti1.nifti1image, or a numpy.ndarray.
+​
+    cmap: Colormap objects based on lookup tables using linear segments.
+    minthr: int
+    maxthr: int
+    edge: bool
+​
+    Returns
+    ---------
+    foverlay: matplotlib.figure.Figure
+
     """
 
     plt.rcParams.update({"axes.labelsize": "x-large", "axes.titlesize": "x-large"})
@@ -178,8 +179,8 @@ def plot_overlays_skullstrip(brain, original, cmaps=None, minthr=2, maxthr=95, e
                 plt.legend(loc='best', fontsize=15, frameon=False, bbox_to_anchor=(1.5, 1.5))
 
     # Set title for the whole picture
-    [a, b, c] = ori_shape
-    title = 'QA For skullstrip. Scan Volume:' + str(a) + '*' + str(b) + '*' + str(c)
+    a, b, c = ori_shape
+    title = 'Skullstrip QA. Scan Volume : ' + str(a) + '*' + str(b) + '*' + str(c)
     foverlay.suptitle(title, fontsize=24)
     foverlay.set_size_inches(12.5, 10.5, forward=True)
     return foverlay
