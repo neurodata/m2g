@@ -15,11 +15,11 @@ def qa_fast_png(csf, gm, wm, outdir):
     Parameters
     ---------------
     csf: str
-    the path of csf nifti. image
+    the path of csf nifti image
     gm: str
-    the path of gm nifti. image
+    the path of gm nifti image
     wm: str
-    the path of wm nifti. image
+    the path of wm nifti image
     outdir: str
     the path to save QA graph
     """
