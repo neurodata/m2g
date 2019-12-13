@@ -18,6 +18,7 @@ import glob
 import os
 from argparse import ArgumentParser
 import traceback
+import subprocess
 
 # ndmg imports
 from ndmg.utils import cloud_utils
@@ -64,7 +65,7 @@ def get_atlas(atlas_dir, vox_size):
         # TODO : re-implement this pythonically with shutil and requests in python3.
         print("atlas directory not found. Cloning ...")
         clone = "https://github.com/neurodata/neuroparc.git"
-        os.system(f"git lfs clone {clone} {atlas_dir}")
+        subprocess.run(f"git lfs clone {clone} {atlas_dir}", shell=True, check=True)
 
     atlas = os.path.join(
         atlas_dir, "atlases/reference_brains/MNI152NLin6_res-" + dims + "_T1w.nii.gz"
@@ -154,13 +155,13 @@ def main():
         default=None,
     )
     parser.add_argument(
-        "--sked",
+        "--skipeddy",
         action="store_true",
         help="Whether to skip eddy correction if it has already been run.",
         default=False,
     )
     parser.add_argument(
-        "--skreg",
+        "--skipreg",
         action="store_true",
         default=False,
         help="whether or not to skip registration",
@@ -209,7 +210,7 @@ def main():
         Chunks of cerebelum missing: cerebelum
         Frontal clipping near eyes: eye
         Excess clipping in general: general,""",
-        default="none",
+        default=None,
     )
 
     # and ... begin!
@@ -233,8 +234,8 @@ def main():
         "mod_func": result.diffusion_model,
         "seeds": result.seeds,
         "reg_style": result.space,
-        "skipeddy": result.sked,
-        "skipreg": result.skreg,
+        "skipeddy": result.skipeddy,
+        "skipreg": result.skipreg,
         "skull": result.skull,
     }
 

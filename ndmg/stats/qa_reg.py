@@ -37,7 +37,6 @@ import matplotlib as mpl
 mpl.use("Agg")  # very important above pyplot import
 from nilearn.plotting.edge_detect import _edge_map as edge_map
 import matplotlib.pyplot as plt
-from ndmg.utils.qa_utils import get_min_max, opaque_colorscale, pad_im
 
 
 def reg_mri_pngs(
@@ -68,7 +67,28 @@ def reg_mri_pngs(
     plt.close()
 
 
-
+def opaque_colorscale(basemap, reference, vmin=None, vmax=None, alpha=1):
+    """
+    A function to return a colorscale, with opacities
+    dependent on reference intensities.
+    **Positional Arguments:**
+        - basemap:
+            - the colormap to use for this colorscale.
+        - reference:
+            - the reference matrix.
+    """
+    reference = reference
+    if vmin is not None:
+        reference[reference > vmax] = vmax
+    if vmax is not None:
+        reference[reference < vmin] = vmin
+    cmap = basemap(reference)
+    maxval = np.nanmax(reference)
+    # all values beteween 0 opacity and 1
+    opaque_scale = alpha * reference / float(maxval)
+    # remaps intensities
+    cmap[:, :, 3] = opaque_scale
+    return cmap
 
 
 def plot_brain(brain, minthr=2, maxthr=95, edge=False):
@@ -204,3 +224,12 @@ def plot_overlays(atlas, b0, cmaps=None, minthr=2, maxthr=95, edge=False):
     foverlay.set_size_inches(12.5, 10.5, forward=True)
     foverlay.tight_layout()
     return foverlay
+
+
+def get_min_max(data, minthr=2, maxthr=95):
+    """
+    data: regmri data to threshold.
+    """
+    min_val = np.percentile(data, minthr)
+    max_val = np.percentile(data, maxthr)
+    return (min_val.astype(float), max_val.astype(float))

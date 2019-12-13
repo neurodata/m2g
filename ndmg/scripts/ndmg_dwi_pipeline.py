@@ -3,7 +3,6 @@
 """
 ndmg.scripts.ndmg_dwi_pipeline
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
 Contains the primary, top-level pipeline.
 For a full description, see here: https://neurodata.io/talks/ndmg.pdf
 """
@@ -53,10 +52,9 @@ def ndmg_dwi_worker(
     reg_style="native",
     skipeddy=False,
     skipreg=False,
-    skull="none",
+    skull=None,
 ):
     """Creates a brain graph from MRI data
-
     Parameters
     ----------
     dwi : str
@@ -72,7 +70,7 @@ def ndmg_dwi_worker(
     mask : str
         Location of T1w brain mask file, make sure the proper voxel size is used
     labels : list
-        Location of file containing the labels for the atlas file(s)
+        Filepaths to the parcellations we're using.
     outdir : str
         The directory where the output files should be stored. Prepopulate this folder with results of participants level analysis if running gorup analysis.
     vox_size : str
@@ -93,7 +91,6 @@ def ndmg_dwi_worker(
         Whether or not to skip registration. Default is False.
     skull : str, optional
         skullstrip parameter pre-set. Default is "none".
-
     Raises
     ------
     ValueError
@@ -126,9 +123,6 @@ def ndmg_dwi_worker(
     print("Adding directory tree...")
     namer.add_dirs(paths, labels, ["conn"])
 
-    # Create derivative output file names
-    streams = namer.name_derivative(namer.dirs["output"]["fiber"], "streamlines.trk")
-
     # generate list of connectome file locations
     labels = gen_utils.as_list(labels)
     connectomes = []
@@ -148,34 +142,19 @@ def ndmg_dwi_worker(
 
     # Perform eddy correction
     dwi_prep = f'{namer.dirs["output"]["prep_dwi"]}/eddy_corrected_data.nii.gz'
+    preproc_dir = namer.dirs["output"]["prep_dwi"]
 
-    if len(os.listdir(namer.dirs["output"]["prep_dwi"])) != 0:
-        if skipeddy is False:
-            try:
-                print("Pre-existing preprocessed dwi files found. Deleting these...")
-                shutil.rmtree(namer.dirs["output"]["prep_dwi"])
-                os.mkdir(namer.dirs["output"]["prep_dwi"])
-            except Exception as e:
-                print(f"Exception when trying to delete existing data: {e}")
-                pass
-            print("Performing eddy correction...")
-            cmd = "eddy_correct " + dwi + " " + dwi_prep + " 0"
-            print(cmd)
-            sts = Popen(cmd, shell=True).wait()
-            print(sts)
-            ts = time.time()
-        else:
-            if not os.path.isfile(dwi_prep):
-                raise ValueError(
-                    "ERROR: Cannot skip eddy correction if it has not already been run!"
-                )
-    else:
-        print("Performing eddy correction...")
-        cmd = "eddy_correct " + dwi + " " + dwi_prep + " 0"
-        print(cmd)
-        sts = Popen(cmd, shell=True).wait()
-        print(sts)
-        ts = time.time()
+    # check that skipping eddy correct is possible
+    if skipeddy:
+        # do it anyway if dwi_prep doesnt exist
+        if not os.path.isfile(dwi_prep):
+            print("Cannot skip preprocessing if it has not already been run!")
+            skipeddy = False
+
+    # if we're not skipping eddy correct, perform it
+    if not skipeddy:
+        preproc_dir = gen_utils.as_directory(preproc_dir, remove=True)
+        preproc.eddy_correct(dwi, dwi_prep, 0)
 
     # Instantiate bvec/bval naming variations and copy to derivative directory
     bvec_scaled = f'{namer.dirs["output"]["prep_dwi"]}/bvec_scaled.bvec'
@@ -298,6 +277,9 @@ def ndmg_dwi_worker(
     seeds = track.build_seed_list(reg.wm_gm_int_in_dwi, np.eye(4), dens=int(seeds))
     print("Using " + str(len(seeds)) + " seeds...")
 
+    #create location to save tensor qa
+    qa_tensor = namer.name_derivative(namer.dirs["qa"]["tensor"],"Tractography_Model_Peak_Directions.png")
+    
     # Compute direction model and track fiber streamlines
     print("Beginning tractography in native space...")
     trct = track.RunTrack(
@@ -311,6 +293,7 @@ def ndmg_dwi_worker(
         mod_type,
         track_type,
         mod_func,
+        qa_tensor,
         seeds,
         np.eye(4),
     )
@@ -320,6 +303,7 @@ def ndmg_dwi_worker(
         streamlines, affine_to_rasmm=trk_hdr["voxel_to_rasmm"]
     )
     trkfile = nib.streamlines.trk.TrkFile(tractogram, header=trk_hdr)
+    streams = namer.name_derivative(namer.dirs["output"]["fiber"], "streamlines.trk")
     nib.streamlines.save(trkfile, streams)
     print("Streamlines complete")
     print(f"Tractography runtime: {np.round(time.time() - start_time, 1)}")
@@ -328,7 +312,7 @@ def ndmg_dwi_worker(
         fa_path = track.tens_mod_fa_est(gtab, dwi_prep, nodif_B0_mask)
         # Normalize streamlines
         print("Running DSN...")
-        [streamlines_mni, streams_mni] = register.direct_streamline_norm(
+        streamlines_mni, streams_mni = register.direct_streamline_norm(
             streams, fa_path, namer
         )
         # Save streamlines to disk
@@ -463,7 +447,8 @@ def main():
     # Create output directory
     print(f"Creating output directory: {result.outdir}")
     print(f"Creating output temp directory: {result.outdir}/tmp")
-    gen_utils.utils.execute_cmd(f"mkdir -p {result.outdir} {result.outdir}/tmp")
+    outdir_tmp = Path(result.outdir) / "tmp"
+    outdir_tmp.mkdir(parents=True, exist_ok=True)
 
     ndmg_dwi_worker(
         result.dwi,

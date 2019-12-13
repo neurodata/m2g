@@ -47,10 +47,17 @@ def gen_overlay_pngs(
     outdir: str
         Path to the directory where QA will be saved
     loc: int
+        which dimension of the 4d brain data to use
     mean: bool
+        whether to calculate the mean of the 4d brain data
+        If False, the loc=0 dimension of the data (mri_data[:, :, :, loc]) is used
     minthr: int
+        lower percentile threshold
     maxthr: int
+        upper percentile threshold
     edge: bool
+        whether to use normalized luminance data
+        If None, the respective min and max of the color array is used.
     """
     original_name = get_filename(original)
     brain_data = nb.load(brain).get_data()
@@ -92,7 +99,9 @@ def plot_overlays_skullstrip(brain, original, cmaps=None, minthr=2, maxthr=95, e
     maxthr: int
         upper percentile threshold
     edge: bool
-​
+        whether to use normalized luminance data
+        If None, the respective min and max of the color array is used.
+
     Returns
     ---------
     foverlay: matplotlib.figure.Figure
