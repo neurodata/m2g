@@ -186,8 +186,8 @@ def plot_overlays_skullstrip(brain, original, cmaps=None, minthr=2, maxthr=95, e
     return foverlay
 
 def get_true_volume(nparray):
-    """
-    locates 1/4,1/3,1/2 slices of brain and returns them
+    """detect the brain area from raw t1w data (numpy array format),
+    call function get_range to return 1/4 2/4 3/4 part of numpy array
     """
     img_arr = nparray.astype(int)
     threshold = int(1)
@@ -200,6 +200,8 @@ def get_true_volume(nparray):
     return x, y, z
 
 def get_range(array,i):
+    """get 1/4 2/4 3/4 part of an numpy array
+    """
     min_num = min(array[i])
     max_num = max(array[i])
     arrange = np.arange(min_num, max_num)
