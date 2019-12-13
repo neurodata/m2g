@@ -5,7 +5,7 @@ ndmg.stats.qa_skullstrip
 ~~~~~~~~~~~~~~~~~~~~~~
 The top level ndmg quality assurance for skull strip module.
 In this module, ndmg:
-1. Input original t1w file and the skull-stripped brain file
+1. Takes an original t1w nifti file and the skull-stripped nifti file as inputs
 2. Shows the skull-stripped brain (green) overlaid on the original t1w (magenta)
 3. Saves the image into output directory
 """
@@ -102,12 +102,12 @@ def plot_overlays_skullstrip(brain, original, cmaps=None, minthr=2, maxthr=95, e
     foverlay = plt.figure()
 
     original = get_braindata(original)
-    ori_shape = get_braindata(brain).shape
+    brain_shape = get_braindata(brain).shape
     brain = get_braindata(brain)
     if original.shape != brain.shape:
         raise ValueError("Two files are not the same shape.")
-    brain = pad_im(brain, max(ori_shape[0:3]), 0, False)
-    original = pad_im(original,max(ori_shape[0:3]),0, False)
+    brain = pad_im(brain, max(brain_shape[0:3]), pad_val = 0, rgb = False)
+    original = pad_im(original,max(brain_shape[0:3]),pad_val = 0, rgb = False)
 
 
     if cmaps is None:
@@ -179,7 +179,7 @@ def plot_overlays_skullstrip(brain, original, cmaps=None, minthr=2, maxthr=95, e
                 plt.legend(loc='best', fontsize=15, frameon=False, bbox_to_anchor=(1.5, 1.5))
 
     # Set title for the whole picture
-    a, b, c = ori_shape
+    a, b, c = brain_shape
     title = 'Skullstrip QA. Scan Volume : ' + str(a) + '*' + str(b) + '*' + str(c)
     foverlay.suptitle(title, fontsize=24)
     foverlay.set_size_inches(12.5, 10.5, forward=True)
