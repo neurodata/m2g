@@ -27,7 +27,7 @@ import matplotlib.pyplot as plt
 
 
 def reg_mri_pngs(
-    mri, atlas, outdir, loc=0, mean=False, minthr=2, maxthr=95, edge=False
+    mri, atlas, outdir, loc=0, mean=False, minthr=2, maxthr=95
 ):
     """
     A function to create and save registered brain slice figures.
@@ -41,10 +41,14 @@ def reg_mri_pngs(
     outdir: str
         directory where output png file is saved. 
     loc: int
+        which dimension of the 4d brain data to use
     mean: bool
+        whether to calculate the mean of the 4d brain data
+        If False, the loc=0 dimension of the data (mri_data[:, :, :, loc]) is used
     minthr: int
+        lower percentile threshold 
     maxthr: int
-    edge: bool
+        upper percentile threshold
     """
     atlas_data = nb.load(atlas).get_data()
     mri_data = nb.load(mri).get_data()
@@ -75,9 +79,12 @@ def plot_brain(brain, minthr=2, maxthr=95, edge=False):
         an object to open the data for a registered brain. Can be a string (path to a brain file),
         nibabel.nifti1.nifti1image, or a numpy.ndarray.
     minthr: int
+        lower percentile threshold 
     maxthr: int
+        upper percentile threshold
     edge: bool
-
+        whether to use normalized luminance data
+        If None, the respective min and max of the color array is used. 
     Returns
     ---------
     fbr: matplotlib.figure.Figure
@@ -158,8 +165,12 @@ def plot_overlays(atlas, b0, cmaps=None, minthr=2, maxthr=95, edge=False):
 
     cmap: Colormap objects based on lookup tables using linear segments.
     minthr: int
+        lower percentile threshold 
     maxthr: int
+        upper percentile threshold
     edge: bool
+        whether to use normalized luminance data
+        If None, the respective min and max of the color array is used. 
 
     Returns
     ---------
