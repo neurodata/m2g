@@ -191,7 +191,7 @@ def plot_overlays_skullstrip(brain, original, cmaps=None, minthr=2, maxthr=95, e
     return foverlay
 
 def get_true_volume(brain_volume):
-    """returns percentile dimensions to slice actual brain volume for qa_skullstrip plottitng
+    """returns percentile dimensions to slice actual brain volume for qa_skullstrip plotting
 
     Parameter
     ---------
