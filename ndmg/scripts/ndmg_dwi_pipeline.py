@@ -267,13 +267,12 @@ def ndmg_dwi_worker(
     # initial path setup
     prep_track: Path = outdir / "dwi/fiber"
     start_time = time.time()
+    qa_tensor = str(outdir / "qa/tensor/Tractography_Model_Peak_Directions.png"))
 
     # build seeds
     seeds = track.build_seed_list(reg.wm_gm_int_in_dwi, np.eye(4), dens=int(seeds))
     print("Using " + str(len(seeds)) + " seeds...")
 
-    #create location to save tensor qa
-    qa_tensor = namer.name_derivative(namer.dirs["qa"]["tensor"],"Tractography_Model_Peak_Directions.png")
     
     # Compute direction model and track fiber streamlines
     print("Beginning tractography in native space...")
