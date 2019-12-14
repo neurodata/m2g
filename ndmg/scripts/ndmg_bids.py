@@ -200,7 +200,7 @@ def main():
         "--seeds",
         action="store",
         help="Seeding density for tractography. Default is 20.",
-        I
+        default=20,
     )
     parser.add_argument(
         "--skull",
