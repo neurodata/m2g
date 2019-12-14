@@ -763,7 +763,7 @@ def reorient_t1w(img: str, anat_preproc_dir: Path):
     print(f"out_name folder exists: {os.path.isdir(Path(out_name).parent)}")
     print(f"anat_preproc_dir = {anat_preproc_dir}")
     print(f"out_name = {out_name}", "\n")
-    print(f"img location = {os.listdir(img)}")
+    print(f"img location list = {os.listdir(img.parent)}")
     print(f"anat_preproc_dir location = {os.listdir(anat_preproc_dir)}")
     print(f"normalized = {type(normalized)}")
 
