@@ -147,9 +147,6 @@ def ndmg_dwi_worker(
     # set up directories
     prep_dwi: Path = outdir / "dwi/preproc"
     dwi_prep: Path = prep_dwi / "eddy_corrected_data.nii.gz"
-    if not (skipeddy and skipreg):
-        # remake directory if we're not skipping anything
-        outdir = gen_utils.as_directory(outdir, remove=True, return_as_path=True)
 
     # check that skipping eddy correct is possible
     if skipeddy:
@@ -213,14 +210,13 @@ def ndmg_dwi_worker(
     reg_dirs = [outdir / loc for loc in reg_dirs]
     prep_anat, reg_anat, tmp_rega, tmp_regm = reg_dirs
 
-    # check if output directories already have output files
     if not skipreg:
-        for dir_ in reg_dirs:
-            # raises FileNotFoundError if `dir_.exists()` isn't first
-            has_files = dir_.exists() and bool(os.listdir(dir_))
-            if has_files:
-                print(f"making directory {dir_}")
+        for dir_ in [prep_anat, reg_anat]:
+            if gen_utils.has_files(dir_):
                 gen_utils.as_directory(dir_, remove=True)
+        if gen_utils.has_files(tmp_rega) or gen_utils.has_files(tmp_regm):
+            for tmp in [tmp_regm, tmp_rega]:
+                gen_utils.as_directory(tmp, remove=True)
 
     # Check orientation (t1w)
     start_time = time.time()

@@ -192,6 +192,14 @@ def make_initial_directories(outdir: Path, parcellations=[]) -> None:
         full_path.mkdir(parents=True, exist_ok=True)
 
 
+def has_files(dirname: Path):
+    dirname = Path(dirname)
+    if dirname.exists() and dirname.is_dir():
+        if os.listdir(dirname):
+            return True
+    return False
+
+
 def as_directory(dir_, remove=False, return_as_path=False):
     """
     Convenience function to make a directory while returning it.
