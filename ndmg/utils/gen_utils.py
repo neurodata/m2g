@@ -18,7 +18,6 @@ import functools
 import json
 from pathlib import Path
 from collections import namedtuple
-from collections.abc import MutableMapping
 
 # package imports
 import bids
@@ -551,7 +550,7 @@ def get_slice(mri, volid, sli):
 
 @timer
 @print_arguments(inputs=[0, 1, 2], outputs=[3])
-def make_gtab_and_bmask(fbval: str, fbvec: str, dwi_file: str, preproc_dir: str):
+def make_gtab_and_bmask(fbval: str, fbvec: str, dwi_file: str, preproc_dir: Path):
     """Takes bval and bvec files and produces a structure in dipy format while also using FSL commands
 
     Parameters
@@ -562,8 +561,8 @@ def make_gtab_and_bmask(fbval: str, fbvec: str, dwi_file: str, preproc_dir: str)
         Path to b-vector file
     dwi_file : str
         Path to dwi file being analyzed
-    preproc_dir : str
-        output directory
+    preproc_dir : Path
+        Path to <outdir>/dwi/preproc
 
     Returns
     -------

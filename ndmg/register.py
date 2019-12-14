@@ -40,6 +40,7 @@ def direct_streamline_norm(streams, fa_path, outdir: Path):
     fa_path : str
         Path to subject's FA tensor image
     outdir : Path
+        Output directory location.
 
     Returns
     -------
@@ -49,7 +50,6 @@ def direct_streamline_norm(streams, fa_path, outdir: Path):
         Path to tractogram streamline file: streamlines_dsn.trk
     """
 
-    # TODO : put this atlas stuff into a function
     atlas_dir = ndmg_bids.get_atlas_dir()
     template_path = atlas_dir + "/atlases/reference_brains/FSL_HCP1065_FA_2mm.nii.gz"
 

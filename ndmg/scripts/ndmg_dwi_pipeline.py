@@ -200,7 +200,7 @@ def ndmg_dwi_worker(
     print("fbvec: ", fbvec)
     print("eddy_corrected_data: ", eddy_corrected_data)
     gtab, nodif_B0, nodif_B0_mask = gen_utils.make_gtab_and_bmask(
-        fbval, fbvec, eddy_corrected_data, str(prep_dwi)
+        fbval, fbvec, eddy_corrected_data, prep_dwi
     )
 
     # Get B0 header and affine
@@ -262,8 +262,8 @@ def ndmg_dwi_worker(
         reg.tissue2dwi_align()
 
     # Align atlas to dwi-space and check that the atlas hasn't lost any of the rois
-    skullstrip_files = [reg, parcellations, outdir, prep_anat, vox_size, reg_style]
-    labels_im_file_list = reg_utils.skullstrip_check(*skullstrip_files)
+    _ = [reg, parcellations, outdir, prep_anat, vox_size, reg_style]
+    labels_im_file_list = reg_utils.skullstrip_check(*_)
 
     # -------- Tensor Fitting and Fiber Tractography ---------------- #
 
