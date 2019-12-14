@@ -267,13 +267,12 @@ def ndmg_dwi_worker(
     # initial path setup
     prep_track: Path = outdir / "dwi/fiber"
     start_time = time.time()
-    qa_tensor = str(outdir / "qa/tensor/Tractography_Model_Peak_Directions.png"))
+    qa_tensor = str(outdir / "qa/tensor/Tractography_Model_Peak_Directions.png")
 
     # build seeds
     seeds = track.build_seed_list(reg.wm_gm_int_in_dwi, np.eye(4), dens=int(seeds))
     print("Using " + str(len(seeds)) + " seeds...")
 
-    
     # Compute direction model and track fiber streamlines
     print("Beginning tractography in native space...")
     # TODO: could add a --skiptrack flag here that checks if `streamlines.trk` already exists to skip to connectome estimation more quickly
