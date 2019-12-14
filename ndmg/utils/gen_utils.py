@@ -426,7 +426,9 @@ def check_dependencies():
 
 
 def run(cmd):
+    # TODO: subprocess.run can take in lists, so could do a check with `isinstance` to allow running a command as a list
     """
+    Wrapper on `subprocess.run`.
     Print the command.
     Execute a command string on the shell (on bash).
     Exists so that the shell prints out commands as ndmg calls them.
@@ -764,17 +766,6 @@ def reorient_t1w(img: str, anat_preproc_dir: Path):
     else:
         out_name = str(out_name) + "_RAS.nii.gz"
 
-    print("TODO: REMOVE, FOR DEBUGGING")
-    print(f"nibabel vers:{nib.__version__}")
-    print(f"img = {img}")
-    print(f"anat_preproc_dir exists: {os.path.isdir(anat_preproc_dir)}")
-    print(f"out_name folder exists: {os.path.isdir(Path(out_name).parent)}")
-    print(f"anat_preproc_dir = {anat_preproc_dir}")
-    print(f"out_name = {out_name}", "\n")
-    print(f"img location list = {os.listdir(Path(img).parent)}")
-    print(f"anat_preproc_dir location = {os.listdir(anat_preproc_dir)}")
-    print(f"normalized = {type(normalized)}")
-
     normalized.to_filename(out_name)
 
     return out_name
@@ -790,7 +781,7 @@ def match_target_vox_res(img_file: str, vox_size, outdir: Path, sens):
         path to file to be resliced
     vox_size : str
         target voxel resolution ('2mm' or '1mm')
-    outdir : 
+    preproc_dir : 
     sens : str
         type of data being analyzed ('dwi' or 'anat')
 
@@ -812,6 +803,7 @@ def match_target_vox_res(img_file: str, vox_size, outdir: Path, sens):
         new_zooms = (2.0, 2.0, 2.0)
 
     # set up paths
+    outdir = Path(outdir)
     preproc_location = str(outdir / f"{sens}/preproc/{get_filename(img_file)}")
 
     if (abs(zooms[0]), abs(zooms[1]), abs(zooms[2])) != new_zooms:

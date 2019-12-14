@@ -193,7 +193,7 @@ def resample_fsl(base, res, goal_res, interp="spline"):
     gen_utils.run(cmd)
 
 
-def skullstrip_check(dmrireg, parcellations, prep_anat, vox_size, reg_style):
+def skullstrip_check(dmrireg, parcellations, outdir, prep_anat, vox_size, reg_style):
     """Peforms the alignment of atlas to dwi space and checks if the alignment results in roi loss
 
     Parameters
@@ -206,6 +206,8 @@ def skullstrip_check(dmrireg, parcellations, prep_anat, vox_size, reg_style):
         the basename for outputs. Often it will be most convenient for this to be the dataset, followed by the subject,
         followed by the step of processing. Note that this anticipates a path as well;
         ie, /path/to/dataset_sub_nuis, with no extension.
+    preproc_dir : str
+        Path to anatomical preprocessing directory location.
     vox_size : str
         additional options that can optionally be passed to fast. Desirable options might be -P, which will use
         prior probability maps if the input T1w MRI is in standard space, by default ""
@@ -233,7 +235,7 @@ def skullstrip_check(dmrireg, parcellations, prep_anat, vox_size, reg_style):
     for idx, label in enumerate(parcellations):
         labels_im_file = gen_utils.reorient_t1w(parcellations[idx], prep_anat)
         labels_im_file = gen_utils.match_target_vox_res(
-            labels_im_file, vox_size, prep_anat, sens="anat"
+            labels_im_file, vox_size, outdir, sens="anat"
         )
         orig_lab = nib.load(labels_im_file)
         orig_lab = orig_lab.get_data().astype("int")
