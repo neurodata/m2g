@@ -219,6 +219,7 @@ def ndmg_dwi_worker(
             # raises FileNotFoundError if `dir_.exists()` isn't first
             has_files = dir_.exists() and bool(os.listdir(dir_))
             if has_files:
+                print(f"making directory {dir_}")
                 gen_utils.as_directory(dir_, remove=True)
 
     # Check orientation (t1w)
