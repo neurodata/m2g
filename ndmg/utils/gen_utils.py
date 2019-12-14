@@ -757,8 +757,9 @@ def reorient_t1w(img: str, anat_preproc_dir: Path):
         out_name = str(out_name) + "_RAS.nii.gz"
 
     print("TODO: REMOVE, FOR DEBUGGING")
+    print(f"nibabel vers:{nib.__version__}")
     print(f"img = {img}")
-    print(f"preproc_dir exists: {os.path.isdir(anat_preproc_dir)}")
+    print(f"anat_preproc_dir exists: {os.path.isdir(anat_preproc_dir)}")
     print(f"out_name folder exists: {os.path.isdir(Path(out_name).parent)}")
     print(f"anat_preproc_dir = {anat_preproc_dir}")
     print(f"out_name = {out_name}", "\n")
