@@ -146,19 +146,19 @@ def ndmg_dwi_worker(
 
     # set up directories
     prep_dwi: Path = outdir / "dwi/preproc"
-    dwi_prep: Path = prep_dwi / "eddy_corrected_data.nii.gz"
+    eddy_corrected_data: Path = prep_dwi / "eddy_corrected_data.nii.gz"
 
     # check that skipping eddy correct is possible
     if skipeddy:
-        # do it anyway if dwi_prep doesnt exist
-        if not dwi_prep.is_file():
+        # do it anyway if eddy_corrected_data doesnt exist
+        if not eddy_corrected_data.is_file():
             print("Cannot skip preprocessing if it has not already been run!")
             skipeddy = False
 
     # if we're not skipping eddy correct, perform it
     if not skipeddy:
         prep_dwi = gen_utils.as_directory(prep_dwi, remove=True, return_as_path=True)
-        preproc.eddy_correct(dwi, str(dwi_prep), 0)
+        preproc.eddy_correct(dwi, str(eddy_corrected_data), 0)
 
     # copy bval/bvec files to output directory
     bvec_scaled = str(outdir / "dwi/preproc/bvec_scaled.bvec")
@@ -184,24 +184,28 @@ def ndmg_dwi_worker(
     print("Rescaling b-vectors...")
     preproc.rescale_bvec(fbvec, bvec_scaled)
 
-    # Check orientation (dwi_prep)
-    dwi_prep, bvecs = gen_utils.reorient_dwi(dwi_prep, bvec_scaled, prep_dwi)
+    # Check orientation (eddy_corrected_data)
+    eddy_corrected_data, bvecs = gen_utils.reorient_dwi(
+        eddy_corrected_data, bvec_scaled, prep_dwi
+    )
 
     # Check dimensions
-    dwi_prep = gen_utils.match_target_vox_res(dwi_prep, vox_size, outdir, sens="dwi")
+    eddy_corrected_data = gen_utils.match_target_vox_res(
+        eddy_corrected_data, vox_size, outdir, sens="dwi"
+    )
 
     # Build gradient table
     print("fbval: ", fbval)
     print("bvecs: ", bvecs)
     print("fbvec: ", fbvec)
-    print("dwi_prep: ", dwi_prep)
+    print("eddy_corrected_data: ", eddy_corrected_data)
     gtab, nodif_B0, nodif_B0_mask = gen_utils.make_gtab_and_bmask(
-        fbval, fbvec, dwi_prep, str(prep_dwi)
+        fbval, fbvec, eddy_corrected_data, str(prep_dwi)
     )
 
     # Get B0 header and affine
-    dwi_prep_img = nib.load(str(dwi_prep))
-    hdr = dwi_prep_img.header
+    eddy_corrected_data_img = nib.load(str(eddy_corrected_data))
+    hdr = eddy_corrected_data_img.header
 
     # -------- Registration Steps ----------------------------------- #
 
@@ -263,14 +267,19 @@ def ndmg_dwi_worker(
 
     # -------- Tensor Fitting and Fiber Tractography ---------------- #
 
+    # initial path setup
+    prep_track: Path = outdir / "dwi/fiber"
     start_time = time.time()
+
+    # build seeds
     seeds = track.build_seed_list(reg.wm_gm_int_in_dwi, np.eye(4), dens=int(seeds))
     print("Using " + str(len(seeds)) + " seeds...")
 
     # Compute direction model and track fiber streamlines
     print("Beginning tractography in native space...")
+    # TODO: could add a --skiptrack flag here that checks if `streamlines.trk` already exists to skip to connectome estimation more quickly
     trct = track.RunTrack(
-        dwi_prep,
+        eddy_corrected_data,
         nodif_B0_mask,
         reg.gm_in_dwi,
         reg.vent_csf_in_dwi,
@@ -289,26 +298,27 @@ def ndmg_dwi_worker(
         streamlines, affine_to_rasmm=trk_hdr["voxel_to_rasmm"]
     )
     trkfile = nib.streamlines.trk.TrkFile(tractogram, header=trk_hdr)
-    streams = os.path.join(namer["output"]["fiber"], "streamlines.trk")
+    streams = os.path.join(prep_track, "streamlines.trk")
     nib.streamlines.save(trkfile, streams)
     print("Streamlines complete")
     print(f"Tractography runtime: {np.round(time.time() - start_time, 1)}")
 
     if reg_style == "native_dsn":
-        fa_path = track.tens_mod_fa_est(gtab, dwi_prep, nodif_B0_mask)
+        fa_path = track.tens_mod_fa_est(gtab, eddy_corrected_data, nodif_B0_mask)
         # Normalize streamlines
         print("Running DSN...")
         streamlines_mni, streams_mni = register.direct_streamline_norm(
-            streams, fa_path, namer
+            streams, fa_path, outdir
         )
         # Save streamlines to disk
         print("Saving DSN-registered streamlines: " + streams_mni)
 
     # ------- Connectome Estimation --------------------------------- #
     # Generate graphs from streamlines for each parcellation
-    for idx, label in enumerate(labels):
-        print(f"Generating graph for {label} parcellation...")
-        print(f"Applying native-space alignment to {labels[idx]}")
+
+    for idx, parc in enumerate(parcellations):
+        print(f"Generating graph for {parc} parcellation...")
+        print(f"Applying native-space alignment to {parcellations[idx]}")
         if reg_style == "native":
             tracks = streamlines
         elif reg_style == "native_dsn":
@@ -321,7 +331,7 @@ def ndmg_dwi_worker(
             rois=rois,
             tracks=tracks,
             affine=np.eye(4),
-            namer=namer,
+            outdir=outdir,
             connectome_path=connectomes[idx],
         )
         g1.g = g1.make_graph()
@@ -335,7 +345,7 @@ def ndmg_dwi_worker(
     print("NDMG Complete.")
     print("~~~~~~~~~~~~~~\n\n")
     print(
-        "NOTE :: you are using native-space registration to generate connectomes.\n Without post-hoc normalization, multiple connectomes generated with NDMG cannot be compared directly."
+        "NOTE :: ndmg uses native-space registration to generate connectomes.\n Without post-hoc normalization, multiple connectomes generated with ndmg cannot be compared directly."
     )
 
 
