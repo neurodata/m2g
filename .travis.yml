@@ -71,7 +71,6 @@ script:
   # get name of heatmap and connectome files
   - heat=$(docker exec travis ls /output/sub-0025864/ses-1/qa/graphs_plotting)
   - csv=$(docker exec travis ls /output/sub-0025864/ses-1/connectomes/desikan_space-MNI152NLin6_res-2x2x2)
-
   # run a command inside of docker to push heatmap and connectome to the ndmg-data s3 bucket
-  - docker exec travis aws s3 sync /output/sub-0025864/ses-1/qa/graphs_plotting s3://ndmg-data/Travis-Output/$TRAVIS_BRANCH/$rand
-  - docker exec travis aws s3 sync /output/sub-0025864/ses-1/connectomes/desikan_space-MNI152NLin6_res-2x2x2 s3://ndmg-data/Travis-Output/$TRAVIS_BRANCH/$rand
+  # - docker exec travis aws s3 sync /output/sub-0025864/ses-1/qa/graphs_plotting s3://ndmg-data/Travis-Output/$TRAVIS_BRANCH/$rand
+  # - docker exec travis aws s3 sync /output/sub-0025864/ses-1/connectomes/desikan_space-MNI152NLin6_res-2x2x2 s3://ndmg-data/Travis-Output/$TRAVIS_BRANCH/$rand
