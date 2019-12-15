@@ -24,7 +24,8 @@ from dipy.tracking import utils
 # ndmg imports
 from ndmg.utils import gen_utils
 from ndmg.utils import reg_utils
-from ndmg.stats import qa_reg, qa_fast_png
+from ndmg.stats import qa_reg
+from ndmg.stats.qa_fast import qa_fast_png
 
 
 @gen_utils.timer
