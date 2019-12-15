@@ -20,21 +20,19 @@ def combine_plot(qa_out_path,brain_path):
         Path for the reference brain scan, in order to get the scan volume.
     """
     
+    #Get the scan volume of the brain.
     brain_ref = nib.load(brain_path)
     brain_ref_shape = brain_ref.shape[0:3]
-
-#   plt.rcParams.update({"axes.labelsize":"x-large","axes.titlesize":"x-large"})
-    plots_list = ['imgage1000000.png','imgage1000001.png','imgage1000002.png',
-                 'imgage2000000.png','imgage2000001.png','imgage2000002.png',
-                 'imgage3000000.png','imgage3000001.png','imgage3000002.png']
+    
+    plots_list = ['Rotate_Z_axis_000000.png','Rotate_Z_axis_000001.png','Rotate_Z_axis_000002.png',
+                 'Rotate_Y_axis_000000.png','Rotate_Y_axis_000001.png','Rotate_Y_axis_000002.png',
+                 'Rotate_X_axis_000000.png','Rotate_X_axis_000001.png','Rotate_X_axis_000002.png']
     y_labels = ["Rotate with Z axis","Rotate with Y axis","Rotate with X axis"]
     x_labels = ["angle=0","angle=120","angle=240"]
     
-    #Temporary list to store the open image:
-    im=[] 
     #Temporary list to store the image nparray:
     im_arr=[] 
-
+    
     fig= plt.figure()
     plt.title(f'QA_tractography. Scan volume = {brain_ref_shape} \n\n', fontsize=60,fontweight='bold')
     plt.xticks([])
@@ -43,12 +41,14 @@ def combine_plot(qa_out_path,brain_path):
 
     j = 0
     for i in range(9):
-        im.append(Image.open(qa_out_path + "/"+ plots_list[i]))
-        im_arr.append(np.array(im[i])) 
+        #Load in the nine images into a nparray one by one.
+        im_arr = np.array(Image.open(qa_out_path + "/" + plots_list[i]))
         #Change the background of the image into black:
-        im_arr[i] = np.where(im_arr[i]<=0.01, 255, im_arr[i]) 
+        im_arr = np.where(im_arr<=0.01, 255, im_arr) 
         ax = fig.add_subplot(3,3,i+1)
-        ax.imshow(im_arr[i],interpolation="none",alpha=0.9)
+        ax.imshow(im_arr,interpolation="none",alpha=0.9)
+        
+        #Set the X labels and Y labels
         if i<3:
             ax.set_title(x_labels[i],fontsize=60,fontweight='bold')
         if i % 3 == 0:
@@ -57,17 +57,15 @@ def combine_plot(qa_out_path,brain_path):
         plt.xticks([])
         plt.yticks([])
             
-        im[i].close()
     fig.set_size_inches(40, 40, forward = True)
     fig.savefig(qa_out_path + "/" + 'qa_tractography.png', format='png')
 
+    #Delete the Nine images which used to generate the qa_tractography.png 
     for plot in plots_list:
-        os.chdir(qa_out_path)
-        #print(os.getcwd())
         if os.path.exists(qa_out_path + "/" + plot):
-            os.remove(plot)
+            os.remove(qa_out_path + "/" + plot)
         else:
-            print('No such file generated from streamlines window.')
+            print('No such file generated from streamlines window. Please check if the streamline.trk files is generated from the pipeline correctly or not')
 
 def qa_tractography(stream_path,qa_out_path,brain_path):
     """
@@ -84,10 +82,11 @@ def qa_tractography(stream_path,qa_out_path,brain_path):
         Path for the reference brain scan, in order to get the scan volume.
     """
     
-    streamlines_mni = str(stream_path)
+    #Use window to visualize the streamlines
     r = window.renderer()
-
-    streamlines_mni_load = nib.streamlines.load(streamlines_mni).streamlines
+    
+    #Load the streamline.trk file
+    streamlines_mni_load = nib.streamlines.load(stream_path).streamlines
     streamlines_mni_in = Streamlines(streamlines_mni_load)
     streamlines_actor = actor.line(
         streamlines_mni_in,
@@ -100,14 +99,12 @@ def qa_tractography(stream_path,qa_out_path,brain_path):
     )
     
     r.add(streamlines_actor)
-    
-    interactive = False
-    if interactive:
-        window.show(r)
+    #window.show(r)
         
     showmng = window.ShowManager(r)
-    window.record(r,cam_pos = (70.03, 64.97, 269.80), cam_view = (0,1,0),path_numbering= True,out_path = qa_out_path + '/imgage1', az_ang=120,n_frames=3,reset_camera=True,size=(600,600))
-    window.record(r,cam_pos = (70.03, 64.97, 269.80), cam_view = (1,0,0),path_numbering= True,out_path = qa_out_path + '/imgage2', az_ang=120,n_frames=3,reset_camera=True,size=(600,600))
-    window.record(r,cam_pos = (70.03, 64.97, 269.80), cam_view = (0,0,1),path_numbering= True,out_path = qa_out_path + '/imgage3', az_ang=120,n_frames=3,reset_camera=True,size=(600,600))
+    #window.record function can rotate the 3D-image, then get the snapshot of the specific angle. 
+    window.record(r,cam_pos = (70.03, 64.97, 269.80), cam_view = (0,1,0),path_numbering= True,out_path = qa_out_path + '/Rotate_Z_axis_', az_ang=120,n_frames=3,reset_camera=True,size=(600,600))
+    window.record(r,cam_pos = (70.03, 64.97, 269.80), cam_view = (1,0,0),path_numbering= True,out_path = qa_out_path + '/Rotate_Y_axis_', az_ang=120,n_frames=3,reset_camera=True,size=(600,600))
+    window.record(r,cam_pos = (70.03, 64.97, 269.80), cam_view = (0,0,1),path_numbering= True,out_path = qa_out_path + '/Rotate_X_axis_', az_ang=120,n_frames=3,reset_camera=True,size=(600,600))
     showmng.exit()
     combine_plot(qa_out_path,brain_path)
