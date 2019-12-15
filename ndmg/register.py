@@ -24,11 +24,7 @@ from dipy.tracking import utils
 # ndmg imports
 from ndmg.utils import gen_utils
 from ndmg.utils import reg_utils
-<<<<<<< HEAD
 from ndmg.stats.qa_reg import reg_mri_pngs
-from ndmg.stats.qa_fast import qa_fast_png
-=======
->>>>>>> abc7686810931594a9756ac8c50bd0f2ef69908e
 from ndmg.stats.qa_fast import qa_fast_png
 
 
