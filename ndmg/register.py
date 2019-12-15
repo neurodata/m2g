@@ -24,10 +24,9 @@ from dipy.tracking import utils
 # ndmg imports
 from ndmg.utils import gen_utils
 from ndmg.utils import reg_utils
+from ndmg.stats.qa_skullstrip import gen_overlay_pngs
 from ndmg.stats.qa_reg import reg_mri_pngs
 from ndmg.stats.qa_fast import qa_fast_png
-from ndmg.stats.qa_skullstrip import gen_overlay_pngs
-
 
 
 @gen_utils.timer
