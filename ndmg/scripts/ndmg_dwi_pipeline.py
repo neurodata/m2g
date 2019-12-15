@@ -3,7 +3,6 @@
 """
 ndmg.scripts.ndmg_dwi_pipeline
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
 Contains the primary, top-level pipeline.
 For a full description, see here: https://neurodata.io/talks/ndmg.pdf
 """
@@ -57,7 +56,6 @@ def ndmg_dwi_worker(
     skull=None,
 ):
     """Creates a brain graph from MRI data
-
     Parameters
     ----------
     dwi : str
@@ -94,7 +92,6 @@ def ndmg_dwi_worker(
         Whether or not to skip registration. Default is False.
     skull : str, optional
         skullstrip parameter pre-set. Default is "none".
-
     Raises
     ------
     ValueError
@@ -281,6 +278,9 @@ def ndmg_dwi_worker(
     seeds = track.build_seed_list(reg.wm_gm_int_in_dwi, np.eye(4), dens=int(seeds))
     print("Using " + str(len(seeds)) + " seeds...")
 
+    #create location to save tensor qa
+    qa_tensor = namer.name_derivative(namer.dirs["qa"]["tensor"],"Tractography_Model_Peak_Directions.png")
+    
     # Compute direction model and track fiber streamlines
     print("Beginning tractography in native space...")
     trct = track.RunTrack(
@@ -294,6 +294,7 @@ def ndmg_dwi_worker(
         mod_type,
         track_type,
         mod_func,
+        qa_tensor,
         seeds,
         np.eye(4),
     )
