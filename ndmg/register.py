@@ -29,6 +29,7 @@ from ndmg.stats.qa_fast import qa_fast_png
 from ndmg.stats.qa_skullstrip import gen_overlay_pngs
 
 
+
 @gen_utils.timer
 def direct_streamline_norm(streams, fa_path, namer):
     """Applys the Symmetric Diffeomorphic Registration (SyN) Algorithm onto the streamlines to the atlas space defined by .../atlases/reference_brains/FSL_HCP1065_FA_2mm.nii.gz
