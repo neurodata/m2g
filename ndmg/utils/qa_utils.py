@@ -6,7 +6,6 @@ ndmg.utils.qa_utils
 Contains small-scale qa utilities
 """
 
-
 import numpy as np
 
 def get_min_max(data, minthr=2, maxthr=95):

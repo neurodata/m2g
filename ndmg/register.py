@@ -3,7 +3,6 @@
 """
 ndmg.register
 ~~~~~~~~~~~~~
-
 Contains ndmg's registration classes, organized as full registration workflows.
 Used for the majority of the registration described here: https://neurodata.io/talks/ndmg.pdf#page=20
 """
@@ -25,16 +24,14 @@ from dipy.tracking import utils
 # ndmg imports
 from ndmg.utils import gen_utils
 from ndmg.utils import reg_utils
-from ndmg.stats.qa_skullstrip import gen_overlay_pngs
 from ndmg.stats.qa_reg import reg_mri_pngs
 from ndmg.stats.qa_fast import qa_fast_png
-
+from ndmg.stats.qa_skullstrip import gen_overlay_pngs
 
 
 @gen_utils.timer
 def direct_streamline_norm(streams, fa_path, namer):
     """Applys the Symmetric Diffeomorphic Registration (SyN) Algorithm onto the streamlines to the atlas space defined by .../atlases/reference_brains/FSL_HCP1065_FA_2mm.nii.gz
-
     Parameters
     ----------
     streams : str
@@ -43,7 +40,6 @@ def direct_streamline_norm(streams, fa_path, namer):
         Path to subject's FA tensor image
     namer : NameResource
         variable containing all relevant pathing information
-
     Returns
     -------
     ArraySequence
@@ -110,7 +106,6 @@ def direct_streamline_norm(streams, fa_path, namer):
 
 class DmriReg:
     """Class containing relevant paths and class methods for analysing tractography
-
     Parameters
     ----------
     namer : NameResource
@@ -127,7 +122,6 @@ class DmriReg:
         skullstrip parameter pre-set. Default is "none"
     simple : bool, optional
         Whether you want to attempt non-linear registration when transforming between mni, t1w, and dwi space. Default is False
-
     Raises
     ------
     ValueError
@@ -270,12 +264,15 @@ class DmriReg:
             os.makedirs(self.namer.dirs["qa"]["skull_strip"])
         print('QA_skullstrip_path  ', self.namer.dirs["qa"]["skull_strip"])
         gen_overlay_pngs(self.t1w_brain, self.t1w, self.namer.dirs["qa"]["skull_strip"])
-
+        
         # Segment the t1w brain into probability maps
         self.maps = reg_utils.segment_t1w(self.t1w_brain, self.map_path)
         self.wm_mask = self.maps["wm_prob"]
         self.gm_mask = self.maps["gm_prob"]
         self.csf_mask = self.maps["csf_prob"]
+        # Generates quality analysis pictures of white matter, gray matter and cerebrospinal fluid
+        qa_fast_png(self.csf_mask, self.gm_mask, self.wm_mask, f"{self.namer.dirs['qa']['reg']}/qa_fast.png")
+
 
         self.t1w_brain = gen_utils.match_target_vox_res(
             self.t1w_brain, self.vox_size, self.namer, sens="t1w"
@@ -363,6 +360,7 @@ class DmriReg:
                 out=self.t1_aligned_mni,
                 sch=None,
             )
+        reg_mri_pngs(self.t1_aligned_mni, self.input_mni, self.namer.dirs['qa']['reg'])
 
         # Align T1w-->DWI
         reg_utils.align(
@@ -434,19 +432,18 @@ class DmriReg:
                 searchrad=True,
                 sch=None,
             )
+        reg_mri_pngs(self.t1w2dwi, self.nodif_B0, self.namer.dirs['qa']['reg'])
 
     def atlas2t1w2dwi_align(self, atlas, dsn=True):
         """alignment from atlas to t1w to dwi. A function to perform atlas alignmet. Tries nonlinear registration first, and if that fails, does a liner
         registration instead.
         Note: for this to work, must first have called t1w2dwi_align.
-
         Parameters
         ----------
         atlas : str
             path to atlas file you want to use
         dsn : bool, optional
             is your space for tractography native-dsn, by default True
-
         Returns
         -------
         str
@@ -598,6 +595,7 @@ class DmriReg:
                 ),
                 self.dwi_aligned_atlas,
             )
+            reg_mri_pngs(self.dwi_aligned_atlas, self.nodif_B0, self.namer.dirs['qa']['reg'])
             return self.dwi_aligned_atlas
         else:
             nib.save(
@@ -608,6 +606,7 @@ class DmriReg:
                 ),
                 self.aligned_atlas_t1mni,
             )
+            reg_mri_pngs(self.aligned_atlas_t1mni, self.t1_aligned_mni, self.namer.dirs['qa']['reg'])
             return self.aligned_atlas_t1mni
 
     @gen_utils.timer
@@ -616,7 +615,6 @@ class DmriReg:
         A function to generate and perform dwi space alignment of avoidance/waypoint masks for tractography.
         First creates ventricle and CC ROI. Then creates transforms from stock MNI template to dwi space.
         NOTE: for this to work, must first have called both t1w2dwi_align and atlas2t1w2dwi_align.
-
         Raises
         ------
         ValueError
@@ -683,21 +681,26 @@ class DmriReg:
             self.t1wtissue2dwi_xfm,
             self.vent_mask_dwi,
         )
+        reg_mri_pngs(self.vent_mask_dwi, self.nodif_B0, self.namer.dirs['qa']['reg'])
         reg_utils.applyxfm(
             self.nodif_B0,
             self.corpuscallosum_mask_t1w,
             self.t1wtissue2dwi_xfm,
             self.corpuscallosum_dwi,
         )
+        reg_mri_pngs(self.corpuscallosum_dwi, self.nodif_B0, self.namer.dirs['qa']['reg'])
         reg_utils.applyxfm(
             self.nodif_B0, self.csf_mask, self.t1wtissue2dwi_xfm, self.csf_mask_dwi
         )
+        reg_mri_pngs(self.csf_mask_dwi, self.nodif_B0, self.namer.dirs['qa']['reg'])
         reg_utils.applyxfm(
             self.nodif_B0, self.gm_mask, self.t1wtissue2dwi_xfm, self.gm_in_dwi
         )
+        reg_mri_pngs(self.gm_in_dwi, self.nodif_B0, self.namer.dirs['qa']['reg'])
         reg_utils.applyxfm(
             self.nodif_B0, self.wm_mask, self.t1wtissue2dwi_xfm, self.wm_in_dwi
         )
+        reg_mri_pngs(self.wm_in_dwi, self.nodif_B0, self.namer.dirs['qa']['reg'])
 
         # Threshold WM to binary in dwi space
         thr_img = nib.load(self.wm_in_dwi)
