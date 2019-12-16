@@ -9,9 +9,9 @@ boto3
 matplotlib
 plotly==1.12.1
 duecredit
-pybids==0.6.4
+pybids
 configparser>=3.7.4
 fury
 pytest
 pathlib2
-graspy>=0.0.2
+graspy

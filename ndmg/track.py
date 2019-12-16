@@ -1,35 +1,41 @@
 #!/usr/bin/env python
 
-# Copyright 2016 NeuroData (http://neurodata.io)
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
-# track.py
-# Created by derek Pisner on 02/17/2019.
-# Email: dpisner@utexas.edu
+"""
+ndmg.track
+~~~~~~~~~~
 
+Contains ndmg's fiber reconstruction and tractography functionality.
+Theory described here: https://neurodata.io/talks/ndmg.pdf#page=21
+"""
 
-import warnings
+# system imports
+import os
 
-warnings.simplefilter("ignore")
+# external package imports
 import numpy as np
 import nibabel as nib
+
+# dipy imports
 from dipy.tracking.streamline import Streamlines
+from dipy.tracking import utils
+from dipy.tracking.local_tracking import LocalTracking
+from dipy.tracking.local_tracking import ParticleFilteringTracking
+from dipy.tracking.stopping_criterion import BinaryStoppingCriterion
+from dipy.tracking.stopping_criterion import ActStoppingCriterion
+from dipy.tracking.stopping_criterion import CmcStoppingCriterion
+
+from dipy.reconst.dti import fractional_anisotropy, TensorModel, quantize_evecs
+from dipy.reconst.shm import CsaOdfModel
+from dipy.reconst.csdeconv import ConstrainedSphericalDeconvModel, recursive_response
+
+from dipy.data import get_sphere
+from dipy.direction import peaks_from_model, ProbabilisticDirectionGetter
+from ndmg.utils.gen_utils import timer
 
 
 def build_seed_list(mask_img_file, stream_affine, dens):
     """uses dipy tractography utilities in order to create a seed list for tractography
-    
+
     Parameters
     ----------
     mask_img_file : str
@@ -38,28 +44,27 @@ def build_seed_list(mask_img_file, stream_affine, dens):
         4x4 array with 1s diagonally and 0s everywhere else
     dens : int
         seed density
-    
+
     Returns
     -------
     ndarray
         locations for the seeds
     """
-    from dipy.tracking import utils
 
     mask_img = nib.load(mask_img_file)
     mask_img_data = mask_img.get_data().astype("bool")
     seeds = utils.random_seeds_from_mask(
         mask_img_data,
+        affine=stream_affine,
         seeds_count=int(dens),
         seed_count_per_voxel=True,
-        affine=stream_affine,
     )
     return seeds
 
 
 def tens_mod_fa_est(gtab, dwi_file, B0_mask):
     """Estimate a tensor FA image to use for registrations using dipy functions
-    
+
     Parameters
     ----------
     gtab : GradientTable
@@ -68,15 +73,12 @@ def tens_mod_fa_est(gtab, dwi_file, B0_mask):
         Path to eddy-corrected and RAS reoriented dwi image
     B0_mask : str
         Path to nodif B0 mask (averaged b0 mask)
-    
+
     Returns
     -------
     str
         Path to tensor_fa image file
     """
-    import os
-    from dipy.reconst.dti import TensorModel
-    from dipy.reconst.dti import fractional_anisotropy
 
     data = nib.load(dwi_file).get_fdata()
 
@@ -89,12 +91,12 @@ def tens_mod_fa_est(gtab, dwi_file, B0_mask):
     FA = fractional_anisotropy(mod.evals)
     FA[np.isnan(FA)] = 0
     fa_img = nib.Nifti1Image(FA.astype(np.float32), nodif_B0_affine)
-    fa_path = "%s%s" % (os.path.dirname(B0_mask), "/tensor_fa.nii.gz")
+    fa_path = f"{os.path.dirname(B0_mask)}/tensor_fa.nii.gz"
     nib.save(fa_img, fa_path)
     return fa_path
 
 
-class run_track(object):
+class RunTrack:
     def __init__(
         self,
         dwi_in,
@@ -111,7 +113,7 @@ class run_track(object):
         stream_affine,
     ):
         """A class for deterministic tractography in native space
-        
+
         Parameters
         ----------
         dwi_in : str
@@ -149,7 +151,7 @@ class run_track(object):
         stream_affine : ndarray
             4x4 2D array with 1s diagonaly and 0s everywhere else
         """
-        
+
         self.dwi = dwi_in
         self.nodif_B0_mask = nodif_B0_mask
         self.gm_in_dwi = gm_in_dwi
@@ -163,14 +165,15 @@ class run_track(object):
         self.mod_func = mod_func
         self.stream_affine = stream_affine
 
+    @timer
     def run(self):
         """Creates the tracktography tracks using dipy commands and the specified tracking type and approach
-        
+
         Returns
         -------
         ArraySequence
             contains the tractography track raw data for further analysis
-        
+
         Raises
         ------
         ValueError
@@ -205,22 +208,36 @@ class run_track(object):
             raise ValueError(
                 "Error: Either no seeds supplied, or no valid seeds found in white-matter interface"
             )
+        tracks = Streamlines([track for track in tracks if len(track) > 60])
         return tracks
+
+    @staticmethod
+    def make_hdr(streamlines, hdr):
+        trk_hdr = nib.streamlines.trk.TrkFile.create_empty_header()
+        trk_hdr["hdr_size"] = 1000
+        trk_hdr["dimensions"] = hdr["dim"][1:4].astype("float32")
+        trk_hdr["voxel_sizes"] = hdr["pixdim"][1:4]
+        trk_hdr["voxel_to_rasmm"] = np.eye(4)
+        trk_hdr["voxel_order"] = "RAS"
+        trk_hdr["pad2"] = "RAS"
+        trk_hdr["image_orientation_patient"] = np.array(
+            [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+        ).astype("float32")
+        trk_hdr["endianness"] = "<"
+        trk_hdr["_offset_data"] = 1000
+        trk_hdr["nb_streamlines"] = streamlines.total_nb_rows
+
+        return trk_hdr
 
     def prep_tracking(self):
         """Uses nibabel and dipy functions in order to load the grey matter, white matter, and csf masks
         and use a tissue classifier (act, cmc, or binary) on the include/exclude maps to make a tissueclassifier object
-        
+
         Returns
         -------
-        ActTissueClassifier, CmcTissueClassifier, or BinaryTissueCLassifier
+        ActStoppingCriterion, CmcStoppingCriterion, or BinaryStoppingCriterion
             The resulting tissue classifier object, depending on which method you use (currently only does act)
         """
-        from dipy.tracking.local import (
-            ActTissueClassifier,
-            CmcTissueClassifier,
-            BinaryTissueClassifier,
-        )  # TODO: these classes no longer exist in dipy 1.0.
 
         if self.track_type == "local":
             tiss_class = "bin"
@@ -248,18 +265,18 @@ class run_track(object):
             self.include_map = self.wm_mask_data
             self.include_map[self.background > 0] = 0
             self.exclude_map = self.vent_csf_in_dwi_data
-            self.tiss_classifier = ActTissueClassifier(
+            self.tiss_classifier = ActStoppingCriterion(
                 self.include_map, self.exclude_map
             )
         elif tiss_class == "bin":
-            self.tiss_classifier = BinaryTissueClassifier(self.wm_in_dwi_data)
-            # self.tiss_classifier = BinaryTissueClassifier(self.mask)
+            self.tiss_classifier = BinaryStoppingCriterion(self.wm_in_dwi_data)
+            # self.tiss_classifier = BinaryStoppingCriterion(self.mask)
         elif tiss_class == "cmc":
             self.vent_csf_in_dwi = nib.load(self.vent_csf_in_dwi)
             self.vent_csf_in_dwi_data = self.vent_csf_in_dwi.get_data()
             voxel_size = np.average(self.wm_mask.get_header()["pixdim"][1:4])
             step_size = 0.2
-            self.tiss_classifier = CmcTissueClassifier.from_pve(
+            self.tiss_classifier = CmcStoppingCriterion.from_pve(
                 self.wm_mask_data,
                 self.gm_mask_data,
                 self.vent_csf_in_dwi_data,
@@ -270,9 +287,8 @@ class run_track(object):
             pass
         return self.tiss_classifier
 
+    @timer
     def tens_mod_est(self):
-        from dipy.reconst.dti import TensorModel, quantize_evecs
-        from dipy.data import get_sphere
 
         print("Fitting tensor model...")
         self.model = TensorModel(self.gtab)
@@ -283,18 +299,15 @@ class run_track(object):
         self.ind = quantize_evecs(self.ten.evecs, self.sphere.vertices)
         return self.ten
 
+    @timer
     def odf_mod_est(self):
-        from dipy.reconst.shm import CsaOdfModel
 
         print("Fitting CSA ODF model...")
         self.mod = CsaOdfModel(self.gtab, sh_order=6)
         return self.mod
 
+    @timer
     def csd_mod_est(self):
-        from dipy.reconst.csdeconv import (
-            ConstrainedSphericalDeconvModel,
-            recursive_response,
-        )
 
         print("Fitting CSD model...")
         try:
@@ -318,16 +331,14 @@ class run_track(object):
             self.mod = ConstrainedSphericalDeconvModel(self.gtab, self.response)
         return self.mod
 
+    @timer
     def local_tracking(self):
-        from dipy.tracking.local import LocalTracking
-        from dipy.data import get_sphere
-        from dipy.direction import peaks_from_model, ProbabilisticDirectionGetter
 
         self.sphere = get_sphere("repulsion724")
         if self.mod_type == "det":
             print("Obtaining peaks from model...")
             self.mod_peaks = peaks_from_model(
-                self.mod,  # AttributeError: 'run_track' object has no attribute 'mod' -- should this be mod_func?
+                self.mod,
                 self.data,
                 self.sphere,
                 relative_peak_threshold=0.5,
@@ -375,10 +386,8 @@ class run_track(object):
         self.streamlines = Streamlines(self.streamline_generator)
         return self.streamlines
 
+    @timer
     def particle_tracking(self):
-        from dipy.tracking.local import ParticleFilteringTracking
-        from dipy.data import get_sphere
-        from dipy.direction import peaks_from_model, ProbabilisticDirectionGetter
 
         self.sphere = get_sphere("repulsion724")
         if self.mod_type == "det":
@@ -443,59 +452,3 @@ class run_track(object):
         print("Reconstructing tractogram streamlines...")
         self.streamlines = Streamlines(self.streamline_generator)
         return self.streamlines
-
-
-def eudx_basic(dwi_file, gtab, stop_val=0.1):
-    import os
-    from dipy.reconst.dti import TensorModel, quantize_evecs
-    from dipy.tracking.eudx import EuDX
-    from dipy.data import get_sphere
-    from dipy.segment.mask import median_otsu
-
-    """
-    Tracking with basic tensors and basic eudx - experimental
-    We now force seeding at every voxel in the provided mask for
-    simplicity.  Future functionality will extend these options.
-    **Positional Arguments:**
-            dwi_file:
-                - File (registered) to use for tensor/fiber tracking
-            mask:
-                - Brain mask to keep tensors inside the brain
-            gtab:
-                - dipy formatted bval/bvec Structure
-    **Optional Arguments:**
-            stop_val:
-                - Value to cutoff fiber track
-    """
-
-    img = nib.load(dwi_file)
-    data = img.get_data()
-
-    data_sqz = np.squeeze(data)
-    b0_mask, mask_data = median_otsu(data_sqz, 2, 1)
-    mask_img = nib.Nifti1Image(mask_data.astype(np.float32), img.affine)
-    mask_out_file = os.path.dirname(dwi_file) + "/dwi_bin_mask.nii.gz"
-    nib.save(mask_img, mask_out_file)
-
-    # use all points in mask
-    seedIdx = np.where(mask_data > 0)  # seed everywhere not equal to zero
-    seedIdx = np.transpose(seedIdx)
-
-    model = TensorModel(gtab)
-
-    # print('data: {}'.format(data))
-    print("data shape: {}".format(data.shape))
-    print("data type: {}".format(type(data)))
-    # print('mask data: {}'.format(mask_data))
-    print("mask data shape: {}".format(mask_data.shape))
-    print("mask data type: {}".format(type(mask_data)))
-
-    print("data location: {}".format(dwi_file))
-    print("mask location: {}".format(mask_out_file))
-    ten = model.fit(data, mask_data)
-    sphere = get_sphere("symmetric724")
-    ind = quantize_evecs(ten.evecs, sphere.vertices)
-    streamlines = EuDX(
-        a=ten.fa, ind=ind, seeds=seedIdx, odf_vertices=sphere.vertices, a_low=stop_val
-    )
-    return ten, streamlines, mask_out_file

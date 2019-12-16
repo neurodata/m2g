@@ -171,11 +171,9 @@ def make_panel_plot(
     if dataset is not None and atlas is not None:
         if atlas == "desikan":
             atlas = atlas.capitalize()
-        tit = "{} Dataset ({} parcellation), {} Group Analysis".format(
-            dataset, atlas, modtit
-        )
+        tit = f"{dataset} Dataset ({atlas} parcellation), {modtit} Group Analysis"
     else:
-        tit = "{} Group Analysis".format(modtit)
+        tit = f"{modtit} Group Analysis"
     multi.layout["title"] = tit
     # iplot(multi, validate=False)
 
