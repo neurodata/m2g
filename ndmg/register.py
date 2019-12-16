@@ -24,6 +24,7 @@ from dipy.tracking import utils
 # ndmg imports
 from ndmg.utils import gen_utils
 from ndmg.utils import reg_utils
+from ndmg.stats.qa_skullstrip import gen_overlay_pngs
 from ndmg.stats.qa_reg import reg_mri_pngs
 from ndmg.stats.qa_fast import qa_fast_png
 
@@ -257,6 +258,13 @@ class DmriReg:
         print("Extracting brain from raw T1w image...")
         reg_utils.t1w_skullstrip(self.t1w, self.t1w_brain, self.skull)
 
+        #  QA part of skull strip
+        self.namer.dirs["qa"]["skull_strip"] = f'{self.namer.dirs["qa"]["base"]}/skull_strip'
+        if not os.path.exists(self.namer.dirs["qa"]["skull_strip"]):
+            os.makedirs(self.namer.dirs["qa"]["skull_strip"])
+        print('QA_skullstrip_path  ', self.namer.dirs["qa"]["skull_strip"])
+        gen_overlay_pngs(self.t1w_brain, self.t1w, self.namer.dirs["qa"]["skull_strip"])
+        
         # Segment the t1w brain into probability maps
         self.maps = reg_utils.segment_t1w(self.t1w_brain, self.map_path)
         self.wm_mask = self.maps["wm_prob"]
