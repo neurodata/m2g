@@ -25,6 +25,7 @@ from dipy.tracking import utils
 # ndmg imports
 from ndmg.utils import gen_utils
 from ndmg.utils import reg_utils
+from ndmg.scripts import ndmg_bids
 from ndmg.stats.qa_skullstrip import gen_overlay_pngs
 from ndmg.stats.qa_reg import reg_mri_pngs
 from ndmg.stats.qa_fast import qa_fast_png
@@ -243,7 +244,7 @@ class DmriReg:
         self.csf_mask = self.maps["csf_prob"]
 
         # Generates quality analysis pictures of white matter, gray matter and cerebrospinal fluid
-        qa_fast_png(self.csf_mask, self.gm_mask, self.wm_mask, self.qa_reg/"qa_fast.png"))
+        qa_fast_png(self.csf_mask, self.gm_mask, self.wm_mask, self.qa_reg/"qa_fast.png")
 
 
         self.t1w_brain = gen_utils.match_target_vox_res(
