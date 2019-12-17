@@ -45,7 +45,7 @@ before_install:
   # grab ndmg's travis docker image, run it with local branch attached as a volume
   - docker pull neurodata/ndmg_travis:latest
   - docker images
-  - cd ndmg
+  - cd m2g
   - docker run -t -d --name travis -e MPLCONFIGDIR=/tmp/matplotlib -e AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY -v $(pwd):/ndmg -v $(readlink -f ../output):/output --entrypoint /bin/bash neurodata/ndmg_travis:latest
   - docker ps
 
