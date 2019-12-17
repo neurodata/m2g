@@ -30,6 +30,7 @@ from ndmg import graph
 from ndmg.utils import gen_utils
 from ndmg.utils import reg_utils
 from ndmg.utils import cloud_utils
+from ndmg.stats.qa_tractography import qa_tractography
 
 # TODO : not sure why this is here, potentially remove
 os.environ["MPLCONFIGDIR"] = "/tmp/"
@@ -299,6 +300,7 @@ def ndmg_dwi_worker(
     trkfile = nib.streamlines.trk.TrkFile(tractogram, header=trk_hdr)
     streams = os.path.join(prep_track, "streamlines.trk")
     nib.streamlines.save(trkfile, streams)
+
     print("Streamlines complete")
     print(f"Tractography runtime: {np.round(time.time() - start_time, 1)}")
 
@@ -339,6 +341,13 @@ def ndmg_dwi_worker(
         g1.save_graph(connectomes[idx])
 
     exe_time = datetime.now() - startTime
+
+    if "NDMG_URL" in os.environ:
+        print("Note: tractography QA does not work in a Docker environment.")
+    else:
+        qa_tractography_out = outdir / "qa/fibers"
+        qa_tractography(streams, qa_tractography_out, dwi_prep)
+        print("QA tractography Completed.")
 
     print(f"Total execution time: {exe_time}")
     print("NDMG Complete.")

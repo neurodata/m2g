@@ -3,9 +3,7 @@
 """
 ndmg.utils.qa_utils
 ~~~~~~~~~~~~~~~~~~~~
-
 Contains small-scale qa utilities
-
 """
 
 import numpy as np
