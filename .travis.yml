@@ -74,4 +74,4 @@ script:
 
   # run a command inside of docker to push heatmap and connectome to the ndmg-data s3 bucket
   - docker exec travis aws s3 sync /output/sub-0025864/ses-1/qa/graphs_plotting s3://ndmg-data/travis-output/$travis_branch/$rand
-  - docker exec travis aws s3 sync /output/sub-0025864/ses-1/connectomes/desikan_space-mni152nlin6_res-2x2x2 s3://ndmg-data/travis-output/$travis_branch/$rand
+  - docker exec travis aws s3 sync /output/sub-0025864/ses-1/connectomes/desikan_space-mni152nlin6_res-2x2x2/sub-0025864_ses-1_dwi_desikan_space-MNI152NLin6_res-2x2x2_connectome.csv s3://ndmg-data/travis-output/$travis_branch/$rand
