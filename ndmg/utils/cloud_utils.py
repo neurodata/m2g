@@ -173,7 +173,7 @@ def s3_get_data(bucket, remote, local, info="", force=False):
         )
 
     if not info.endswith('/'):
-        info = info + '/'
+        info += '/'
     bpath = get_matching_s3_objects(bucket, f"{remote}/{info}")
 
     # go through all folders inside of remote directory and download relevant files

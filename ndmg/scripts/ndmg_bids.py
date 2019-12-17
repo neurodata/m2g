@@ -22,6 +22,7 @@ import subprocess
 
 # ndmg imports
 from ndmg.utils import cloud_utils
+from ndmg.utils import gen_utils
 from ndmg.utils.gen_utils import DirectorySweeper
 from ndmg.utils.gen_utils import check_dependencies
 from ndmg.utils.gen_utils import is_bids
