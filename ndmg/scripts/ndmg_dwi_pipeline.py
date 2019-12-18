@@ -351,7 +351,7 @@ def ndmg_dwi_worker(
 
     print(f"Total execution time: {exe_time}")
     print("NDMG Complete.")
-    print(f"Output contents: {os.listdir(output / f'connectomes')}"
+    print(f"Output contents: {os.listdir(output / f'connectomes')}")
     print("~~~~~~~~~~~~~~\n\n")
     print(
         "NOTE :: ndmg uses native-space registration to generate connectomes.\n Without post-hoc normalization, multiple connectomes generated with ndmg cannot be compared directly."
