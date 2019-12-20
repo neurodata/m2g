@@ -172,8 +172,7 @@ def s3_get_data(bucket, remote, local, info="", force=False):
             "Error: could not locate bucket. Available buckets: " + ", ".join(bkts)
         )
 
-    if not info.endswith('/'):
-        info += '/'
+    info = info.rstrip("/") + "/"
     bpath = get_matching_s3_objects(bucket, f"{remote}/{info}")
 
     # go through all folders inside of remote directory and download relevant files
