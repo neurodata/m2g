@@ -22,6 +22,7 @@ import subprocess
 
 # ndmg imports
 from ndmg.utils import cloud_utils
+from ndmg.utils import gen_utils
 from ndmg.utils.gen_utils import DirectorySweeper
 from ndmg.utils.gen_utils import check_dependencies
 from ndmg.utils.gen_utils import is_bids
@@ -65,7 +66,7 @@ def get_atlas(atlas_dir, vox_size):
         # TODO : re-implement this pythonically with shutil and requests in python3.
         print("atlas directory not found. Cloning ...")
         clone = "https://github.com/neurodata/neuroparc.git"
-        subprocess.run(f"git lfs clone {clone} {atlas_dir}", shell=True, check=True)
+        gen_utils.run(f"git lfs clone {clone} {atlas_dir}")
 
     atlas = os.path.join(
         atlas_dir, "atlases/reference_brains/MNI152NLin6_res-" + dims + "_T1w.nii.gz"
@@ -295,7 +296,7 @@ def main():
     parcellations, atlas, mask, = get_atlas(atlas_dir, constant_kwargs["vox_size"])
     if parcellation_name is not None:  # filter parcellations
         parcellations = [file_ for file_ in parcellations if parcellation_name in file_]
-    atlas_stuff = {"atlas": atlas, "mask": mask, "labels": parcellations}
+    atlas_stuff = {"atlas": atlas, "mask": mask, "parcellations": parcellations}
     constant_kwargs.update(atlas_stuff)
 
     # parse input directory

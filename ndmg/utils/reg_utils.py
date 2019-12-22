@@ -125,7 +125,7 @@ def apply_mask(inp, mask, out):
     """
 
     cmd = f'3dcalc -a {inp} -b {mask} -expr "a*step(b)" -prefix {out}'
-    subprocess.run(cmd, shell=True, check=True)
+    gen_utils.run(cmd)
 
 
 @print_arguments(inputs=[1], outputs=[2])
@@ -169,7 +169,7 @@ def normalize_t1w(inp, out):
             - the output intensity-normalized image.
     """
     cmd = f"3dUnifize -prefix {out} -input {inp}"
-    subprocess.run(cmd, check=True, shell=True)
+    gen_utils.run(cmd)
 
 
 @print_arguments(inputs=[0], outputs=[1])
@@ -190,22 +190,24 @@ def resample_fsl(base, res, goal_res, interp="spline"):
     """
     # resample using an isometric transform in fsl
     cmd = f"flirt -in {base} -ref {base} -out {res} -applyisoxfm {goal_res} -interp {interp}"
-    subprocess.run(cmd, check=True, shell=True)
+    gen_utils.run(cmd)
 
 
-def skullstrip_check(dmrireg, labels, namer, vox_size, reg_style):
+def skullstrip_check(dmrireg, parcellations, outdir, prep_anat, vox_size, reg_style):
     """Peforms the alignment of atlas to dwi space and checks if the alignment results in roi loss
 
     Parameters
     ----------
     dmrireg : object
         object created in the pipeline containing relevant paths and class methods for analysing tractography
-    labels : str, list
+    parcellations : str, list
         the path to the t1w image to be segmented
-    namer : str
+    outdir : str
         the basename for outputs. Often it will be most convenient for this to be the dataset, followed by the subject,
         followed by the step of processing. Note that this anticipates a path as well;
         ie, /path/to/dataset_sub_nuis, with no extension.
+    preproc_dir : str
+        Path to anatomical preprocessing directory location.
     vox_size : str
         additional options that can optionally be passed to fast. Desirable options might be -P, which will use
         prior probability maps if the input T1w MRI is in standard space, by default ""
@@ -230,10 +232,10 @@ def skullstrip_check(dmrireg, labels, namer, vox_size, reg_style):
         raise ValueError("Unsupported tractography space, must be native or native_dsn")
 
     labels_im_file_list = []
-    for idx, label in enumerate(labels):
-        labels_im_file = gen_utils.reorient_img(labels[idx], namer)
+    for idx, label in enumerate(parcellations):
+        labels_im_file = gen_utils.reorient_t1w(parcellations[idx], prep_anat)
         labels_im_file = gen_utils.match_target_vox_res(
-            labels_im_file, vox_size, namer, sens="t1w"
+            labels_im_file, vox_size, outdir, sens="anat"
         )
         orig_lab = nib.load(labels_im_file)
         orig_lab = orig_lab.get_data().astype("int")
@@ -281,7 +283,7 @@ def t1w_skullstrip(t1w, out, skull=None):
         cmd = f"3dSkullStrip -prefix {out} -input {t1w} -push_to_edge -ld 45"
     else:
         cmd = f"3dSkullStrip -prefix {out} -input {t1w} -ld 30"
-    subprocess.run(cmd, check=True, shell=True)
+    gen_utils.run(cmd)
 
 
 @print_arguments(inputs=[0], outputs=[1])
@@ -309,7 +311,7 @@ def segment_t1w(t1w, basename, opts=""):
     # run FAST, with options -t for the image type and -n to
     # segment into CSF (pve_0), WM (pve_1), GM (pve_2)
     cmd = f"fast -t 1 {opts} -n 3 -o {basename} {t1w}"
-    subprocess.run(cmd, check=True, shell=True)
+    gen_utils.run(cmd)
     out = {}  # the outputs
     out["wm_prob"] = f"{basename}_pve_2.nii.gz"
     out["gm_prob"] = f"{basename}_pve_1.nii.gz"
@@ -386,7 +388,7 @@ def align(
         cmd += f" -wmseg {wmseg}"
     if init is not None:
         cmd += f" -init {init}"
-    subprocess.run(cmd, check=True, shell=True)
+    gen_utils.run(cmd)
 
 
 @print_arguments(inputs=[0, 1, 2], outputs=[3])
@@ -395,7 +397,7 @@ def align_epi(epi, t1, brain, out):
     Algins EPI images to T1w image
     """
     cmd = f"epi_reg --epi={epi} --t1={t1} --t1brain={brain} --out={out}"
-    subprocess.run(cmd, check=True, shell=True)
+    gen_utils.run(cmd)
 
 
 @timer
@@ -430,7 +432,7 @@ def align_nonlinear(inp, ref, xfm, out, warp, ref_mask=None, in_mask=None, confi
         cmd += f" --inmask={in_mask} --applyinmask=1"
     if config is not None:
         cmd += f" --config={config}"
-    subprocess.run(cmd, check=True, shell=True)
+    gen_utils.run(cmd)
 
 
 @print_arguments(inputs=[0, 1, 2], outputs=[3])
@@ -454,7 +456,7 @@ def applyxfm(ref, inp, xfm, aligned, interp="trilinear", dof=6):
     """
 
     cmd = f"flirt -in {inp} -ref {ref} -out {aligned} -init {xfm} -interp {interp} -dof {dof} -applyxfm"
-    subprocess.run(cmd, check=True, shell=True)
+    gen_utils.run(cmd)
 
 
 @print_arguments(inputs=[0, 1], outputs=[2, 3])
@@ -493,7 +495,7 @@ def apply_warp(ref, inp, out, warp, xfm=None, mask=None, interp=None, sup=False)
         cmd += " --interp=" + interp
     if sup is True:
         cmd += " --super --superlevel=a"
-    subprocess.run(cmd, check=True, shell=True)
+    gen_utils.run(cmd)
 
 
 @print_arguments(inputs=[0, 2], outputs=[1])
@@ -512,7 +514,7 @@ def inverse_warp(ref, out, warp):
     """
 
     cmd = "invwarp --warp=" + warp + " --out=" + out + " --ref=" + ref
-    subprocess.run(cmd, check=True, shell=True)
+    gen_utils.run(cmd)
 
 
 @print_arguments(inputs=[0, 2], outputs=[1])
@@ -557,7 +559,7 @@ def combine_xfms(xfm1, xfm2, xfmout):
         path for the ouput transformation
     """
     cmd = f"convert_xfm -omat {xfmout} -concat {xfm1} {xfm2}"
-    subprocess.run(cmd, check=True, shell=True)
+    gen_utils.run(cmd)
 
 
 @print_arguments(inputs=[0, 1], outputs=[2])

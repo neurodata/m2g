@@ -21,6 +21,7 @@ from pathlib import Path
 
 # ndmg imports
 import ndmg
+from ndmg.utils import gen_utils
 from ndmg.utils.cloud_utils import get_credentials
 from ndmg.utils.cloud_utils import get_matching_s3_objects
 from ndmg.utils.cloud_utils import s3_client
@@ -203,9 +204,10 @@ def create_json(
         return jobs
 
     # set up infrastructure
-    out = subprocess.run(f"mkdir -p {jobdir}", shell=True, check=True)
-    out = subprocess.run(f"mkdir -p {jobdir}/jobs/", shell=True, check=True)
-    out = subprocess.run(f"mkdir -p {jobdir}/ids/", shell=True, check=True)
+    jobdir = Path(jobdir)
+    (jobdir / "jobs").mkdir(parents=True, exist_ok=True)
+    (jobdir / "ids").mkdir(parents=True, exist_ok=True)
+    jobdir = str(jobdir)
     seshs = threads
 
     templ = os.path.dirname(__file__)

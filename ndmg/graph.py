@@ -14,6 +14,7 @@ import os
 import time
 from itertools import combinations
 from collections import defaultdict
+from pathlib import Path
 
 # package imports
 import numpy as np
@@ -40,14 +41,14 @@ class GraphTools:
         Streamlines for analysis
     affine : ndarray
         a 2-D array with ones on the diagonal and zeros elsewhere (DOESN'T APPEAR TO BE Used)
-    namer : NameResource
-        NameResource object containing relevant path for the pipeline
+    outdir : Path
+        location of output directory
     connectome_path : str
-        Path for the output connectome file (.ssv file)
+        Path for the output connectome file (.csv file)
     attr : [type], optional
         Node or graph attributes. Can be a list. If 1 dimensional, will be interpretted as a graph attribute. If N dimensional
         will be interpretted as node attributes. If it is any other dimensional, it will be ignored, by default None
-    sens : str, optional
+    sens : str, optional, DEPRACATED
         type of MRI scan being analyzed (can be 'dwi' or 'func'), by default "dwi"
 
     Raises
@@ -59,7 +60,7 @@ class GraphTools:
     """
 
     def __init__(
-        self, rois, tracks, affine, namer, connectome_path, attr=None, sens="dwi"
+        self, rois, tracks, affine, outdir, connectome_path, attr=None, sens="dwi"
     ):
 
         self.edge_dict = defaultdict(int)
@@ -71,7 +72,7 @@ class GraphTools:
         self.modal = sens
         self.tracks = tracks
         self.affine = affine
-        self.namer = namer
+        self.outdir = outdir
         self.connectome_path = os.path.dirname(connectome_path)
 
     @timer
@@ -259,12 +260,8 @@ class GraphTools:
         conn_matrix = np.array(nx.to_numpy_matrix(self.g))
         conn_matrix = ptr.pass_to_ranks(conn_matrix)
         heatmap(conn_matrix)
-        plt.savefig(
-            self.namer.dirs["qa"]["graphs_plotting"]
-            + "/"
-            + graphname.split(".")[:-1][0].split("/")[-1]
-            + ".png"
-        )
+        outpath = str(self.outdir / f"qa/graphs_plotting/{Path(graphname).stem}.png")
+        plt.savefig(outpath)
         plt.close()
 
     def summary(self):
@@ -273,3 +270,4 @@ class GraphTools:
         """
         print("\nGraph Summary:")
         print(nx.info(self.g))
+

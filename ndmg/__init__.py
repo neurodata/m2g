@@ -14,4 +14,5 @@ __all__ = ["graph", "preproc", "register", "track"]  # modules
 __all__.extend(["scripts", "stats", "utils"])  # subpackages
 
 # import everything listed in __all__
+# TODO: maybe still change this
 from . import *

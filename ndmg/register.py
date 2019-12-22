@@ -11,6 +11,7 @@ Used for the majority of the registration described here: https://neurodata.io/t
 import os
 from argparse import ArgumentParser
 import subprocess
+from pathlib import Path
 
 # package imports
 import nibabel as nib
@@ -24,13 +25,14 @@ from dipy.tracking import utils
 # ndmg imports
 from ndmg.utils import gen_utils
 from ndmg.utils import reg_utils
+from ndmg.scripts import ndmg_bids
 from ndmg.stats.qa_skullstrip import gen_overlay_pngs
 from ndmg.stats.qa_reg import reg_mri_pngs
 from ndmg.stats.qa_fast import qa_fast_png
 
 
 @gen_utils.timer
-def direct_streamline_norm(streams, fa_path, namer):
+def direct_streamline_norm(streams, fa_path, outdir: Path):
     """Applys the Symmetric Diffeomorphic Registration (SyN) Algorithm onto the streamlines to the atlas space defined by .../atlases/reference_brains/FSL_HCP1065_FA_2mm.nii.gz
     Parameters
     ----------
@@ -38,8 +40,9 @@ def direct_streamline_norm(streams, fa_path, namer):
         Path to streamlines.trk file to be transformed
     fa_path : str
         Path to subject's FA tensor image
-    namer : NameResource
-        variable containing all relevant pathing information
+    outdir : Path
+        Output directory location.
+
     Returns
     -------
     ArraySequence
@@ -48,14 +51,7 @@ def direct_streamline_norm(streams, fa_path, namer):
         Path to tractogram streamline file: streamlines_dsn.trk
     """
 
-    # TODO : put this atlas stuff into a function
-    if os.path.isdir("/ndmg_atlases"):
-        # in docker
-        atlas_dir = "/ndmg_atlases"
-    else:
-        # local
-        atlas_dir = os.path.expanduser("~") + "/.ndmg/ndmg_atlases"
-
+    atlas_dir = ndmg_bids.get_atlas_dir()
     template_path = atlas_dir + "/atlases/reference_brains/FSL_HCP1065_FA_2mm.nii.gz"
 
     # Run SyN and normalize streamlines
@@ -64,9 +60,7 @@ def direct_streamline_norm(streams, fa_path, namer):
     template_img = nib.load(template_path)
 
     # SyN FA->Template
-    [mapping, affine_map] = reg_utils.wm_syn(
-        template_path, fa_path, namer.dirs["tmp"]["base"]
-    )
+    mapping, affine_map = reg_utils.wm_syn(template_path, fa_path, str(outdir / "tmp"))
     streamlines = load_trk(streams, reference="same")
 
     # Warp streamlines
@@ -108,8 +102,8 @@ class DmriReg:
     """Class containing relevant paths and class methods for analysing tractography
     Parameters
     ----------
-    namer : NameResource
-        NameResource variable containing relevant directory tree information
+    outdir : Path
+        Output directory location.
     nodif_B0 : str
         path to mean b0 image
     nodif_B0_mask : str
@@ -129,25 +123,32 @@ class DmriReg:
     """
 
     def __init__(
-        self, namer, nodif_B0, nodif_B0_mask, t1w_in, vox_size, skull=None, simple=False
+        self,
+        outdir: Path,
+        nodif_B0,
+        nodif_B0_mask,
+        t1w_in,
+        vox_size,
+        skull=None,
+        simple=False,
     ):
 
-        if os.path.isdir("/ndmg_atlases"):
-            # in docker
-            atlas_dir = "/ndmg_atlases"
-        else:
-            # local
-            atlas_dir = os.path.expanduser("~") + "/.ndmg/ndmg_atlases"
-        try:
-            FSLDIR = os.environ["FSLDIR"]
-        except KeyError:
-            print("FSLDIR environment variable not set!")
+        atlas_dir = ndmg_bids.get_atlas_dir()
+        FSLDIR = os.environ["FSLDIR"]
 
         if vox_size == "2mm":
             vox_dims = "2x2x2"
         elif vox_size == "1mm":
             vox_dims = "1x1x1"
 
+        # TODO : clean up all these attributes
+        self.outdir = outdir
+        self.reg_a = str(outdir / "tmp/reg_a")
+        self.reg_m = str(outdir / "tmp/reg_m")
+        self.reg_anat = str(outdir / "anat/registered")
+        self.prep_anat = str(outdir / "anat/preproc")
+        self.qa = str(outdir / "qa")
+        self.qa_reg = str(Path(self.qa) / "reg")
         self.simple = simple
         self.nodif_B0 = nodif_B0
         self.nodif_B0_mask = nodif_B0_mask
@@ -155,98 +156,69 @@ class DmriReg:
         self.vox_size = vox_size
         self.t1w_name = "t1w"
         self.dwi_name = "dwi"
-        self.namer = namer
         self.skull = skull
-        self.t12mni_xfm_init = f'{self.namer.dirs["tmp"]["reg_m"]}/xfm_t1w2mni_init.mat'
-        self.mni2t1_xfm_init = f'{self.namer.dirs["tmp"]["reg_m"]}/xfm_mni2t1w_init.mat'
-        self.t12mni_xfm = f'{self.namer.dirs["tmp"]["reg_m"]}/xfm_t1w2mni.mat'
-        self.mni2t1_xfm = f'{self.namer.dirs["tmp"]["reg_m"]}/xfm_mni2t1.mat'
-        self.mni2t1w_warp = f'{self.namer.dirs["tmp"]["reg_a"]}/mni2t1w_warp.nii.gz'
-        self.warp_t1w2mni = f'{self.namer.dirs["tmp"]["reg_a"]}/warp_t12mni.nii.gz'
-        self.t1w2dwi = (
-            f'{self.namer.dirs["output"]["reg_anat"]}/{self.t1w_name}_in_dwi.nii.gz'
-        )
-        self.t1_aligned_mni = f'{self.namer.dirs["output"]["prep_anat"]}/{self.t1w_name}_aligned_mni.nii.gz'
-        self.t1w_brain = (
-            f'{self.namer.dirs["output"]["prep_anat"]}/{self.t1w_name}_brain.nii.gz'
-        )
-        self.dwi2t1w_xfm = f'{self.namer.dirs["tmp"]["reg_m"]}/dwi2t1w_xfm.mat'
-        self.t1w2dwi_xfm = f'{self.namer.dirs["tmp"]["reg_m"]}/t1w2dwi_xfm.mat'
-        self.t1w2dwi_bbr_xfm = f'{self.namer.dirs["tmp"]["reg_m"]}/t1w2dwi_bbr_xfm.mat'
-        self.dwi2t1w_bbr_xfm = f'{self.namer.dirs["tmp"]["reg_m"]}/dwi2t1w_bbr_xfm.mat'
-        self.t1wtissue2dwi_xfm = (
-            f'{self.namer.dirs["tmp"]["reg_m"]}/t1wtissue2dwi_xfm.mat'
-        )
+        self.t12mni_xfm_init = f"{self.reg_m}" + "/xfm_t1w2mni_init.mat"
+        self.mni2t1_xfm_init = f"{self.reg_m}" + "/xfm_mni2t1w_init.mat"
+        self.t12mni_xfm = f"{self.reg_m}" + "/xfm_t1w2mni.mat"
+        self.mni2t1_xfm = f"{self.reg_m}" + "/xfm_mni2t1.mat"
+        self.mni2t1w_warp = f"{self.reg_a}/mni2t1w_warp.nii.gz"
+        self.warp_t1w2mni = f"{self.reg_a}/warp_t12mni.nii.gz"
+        self.t1w2dwi = f"{self.reg_anat}/{self.t1w_name}_in_dwi.nii.gz"
+        self.t1_aligned_mni = f"{self.prep_anat}/{self.t1w_name}_aligned_mni.nii.gz"
+        self.t1w_brain = f"{self.prep_anat}/{self.t1w_name}_brain.nii.gz"
+        self.dwi2t1w_xfm = f"{self.reg_m}" + "/dwi2t1w_xfm.mat"
+        self.t1w2dwi_xfm = f"{self.reg_m}" + "/t1w2dwi_xfm.mat"
+        self.t1w2dwi_bbr_xfm = f"{self.reg_m}" + "/t1w2dwi_bbr_xfm.mat"
+        self.dwi2t1w_bbr_xfm = f"{self.reg_m}" + "/dwi2t1w_bbr_xfm.mat"
+        self.t1wtissue2dwi_xfm = f"{self.reg_m}" + "/t1wtissue2dwi_xfm.mat"
         self.xfm_atlas2t1w_init = (
-            f'{self.namer.dirs["tmp"]["reg_m"]}/{self.t1w_name}_xfm_atlas2t1w_init.mat'
+            f"{self.reg_m}" + f"/{self.t1w_name}_xfm_atlas2t1w_init.mat"
         )
-        self.xfm_atlas2t1w = (
-            f'{self.namer.dirs["tmp"]["reg_m"]}/{self.t1w_name}_xfm_atlas2t1w.mat'
-        )
-        self.temp2dwi_xfm = (
-            f'{self.namer.dirs["tmp"]["reg_m"]}/{self.dwi_name}_xfm_temp2dwi.mat'
-        )
+        self.xfm_atlas2t1w = f"{self.reg_m}/{self.t1w_name}_xfm_atlas2t1w.mat"
+        self.temp2dwi_xfm = f"{self.reg_m}/{self.dwi_name}_xfm_temp2dwi.mat"
 
         self.input_mni = f"{FSLDIR}/data/standard/MNI152_T1_{vox_size}_brain.nii.gz"
         self.input_mni_mask = (
             f"{FSLDIR}/data/standard/MNI152_T1_{vox_size}_brain_mask.nii.gz"
         )
-        self.temp2dwi_xfm = (
-            f'{self.namer.dirs["tmp"]["reg_m"]}/{self.dwi_name}_xfm_temp2dwi.mat'
+        self.temp2dwi_xfm = f"{self.reg_m}/{self.dwi_name}_xfm_temp2dwi.mat"
+        self.map_path = f"{self.prep_anat}/{self.t1w_name}_seg"
+        self.wm_mask = f"{self.prep_anat}/{self.t1w_name}_wm.nii.gz"
+        self.wm_mask_thr = f"{self.prep_anat}/{self.t1w_name}_wm_thr.nii.gz"
+        self.wm_edge = f"{self.reg_a}/{self.t1w_name}_wm_edge.nii.gz"
+        self.csf_mask = f"{self.prep_anat}/{self.t1w_name}_csf.nii.gz"
+        self.gm_mask = f"{self.prep_anat}/{self.t1w_name}_gm.nii.gz"
+        self.xfm_roi2mni_init = f"{self.reg_m}/roi_2_mni.mat"
+        self.lvent_out_file = f"{self.reg_a}/LVentricle.nii.gz"
+        self.rvent_out_file = f"{self.reg_a}/RVentricle.nii.gz"
+        self.csf_mask_dwi = f"{self.reg_anat}/{self.t1w_name}_csf_mask_dwi.nii.gz"
+        self.gm_in_dwi = f"{self.reg_anat}/{self.t1w_name}_gm_in_dwi.nii.gz"
+        self.wm_in_dwi = f"{self.reg_anat}/{self.t1w_name}_wm_in_dwi.nii.gz"
+        self.csf_mask_dwi_bin = f"{self.reg_a}/{self.t1w_name}_csf_mask_dwi_bin.nii.gz"
+        self.gm_in_dwi_bin = f"{self.reg_a}/{self.t1w_name}_gm_in_dwi_bin.nii.gz"
+        self.wm_in_dwi_bin = f"{self.reg_a}/{self.t1w_name}_wm_in_dwi_bin.nii.gz"
+        self.vent_mask_dwi = f"{self.reg_a}/{self.t1w_name}_vent_mask_dwi.nii.gz"
+        self.vent_csf_in_dwi = f"{self.reg_a}/{self.t1w_name}_vent_csf_in_dwi.nii.gz"
+        self.vent_mask_mni = f"{self.reg_a}/vent_mask_mni.nii.gz"
+        self.vent_mask_t1w = f"{self.reg_a}/vent_mask_t1w.nii.gz"
+        self.wm_gm_int_in_dwi = (
+            f"{self.reg_anat}/{self.t1w_name}_wm_gm_int_in_dwi.nii.gz"
         )
-        self.map_path = f'{self.namer.dirs["output"]["prep_anat"]}/{self.t1w_name}_seg'
-        self.wm_mask = (
-            f'{self.namer.dirs["output"]["prep_anat"]}/{self.t1w_name}_wm.nii.gz'
+        self.wm_gm_int_in_dwi_bin = (
+            f"{self.reg_anat}/{self.t1w_name}_wm_gm_int_in_dwi_bin.nii.gz"
         )
-        self.wm_mask_thr = (
-            f'{self.namer.dirs["output"]["prep_anat"]}/{self.t1w_name}_wm_thr.nii.gz'
-        )
-        self.wm_edge = (
-            f'{self.namer.dirs["tmp"]["reg_a"]}/{self.t1w_name}_wm_edge.nii.gz'
-        )
-        self.csf_mask = (
-            f'{self.namer.dirs["output"]["prep_anat"]}/{self.t1w_name}_csf.nii.gz'
-        )
-        self.gm_mask = (
-            f'{self.namer.dirs["output"]["prep_anat"]}/{self.t1w_name}_gm.nii.gz'
-        )
-        self.xfm_roi2mni_init = f'{self.namer.dirs["tmp"]["reg_m"]}/roi_2_mni.mat'
-        self.lvent_out_file = f'{self.namer.dirs["tmp"]["reg_a"]}/LVentricle.nii.gz'
-        self.rvent_out_file = f'{self.namer.dirs["tmp"]["reg_a"]}/RVentricle.nii.gz'
-        self.csf_mask_dwi = f'{self.namer.dirs["output"]["reg_anat"]}/{self.t1w_name}_csf_mask_dwi.nii.gz'
-        self.gm_in_dwi = (
-            f'{self.namer.dirs["output"]["reg_anat"]}/{self.t1w_name}_gm_in_dwi.nii.gz'
-        )
-        self.wm_in_dwi = (
-            f'{self.namer.dirs["output"]["reg_anat"]}/{self.t1w_name}_wm_in_dwi.nii.gz'
-        )
-        self.csf_mask_dwi_bin = (
-            f'{self.namer.dirs["tmp"]["reg_a"]}/{self.t1w_name}_csf_mask_dwi_bin.nii.gz'
-        )
-        self.gm_in_dwi_bin = (
-            f'{self.namer.dirs["tmp"]["reg_a"]}/{self.t1w_name}_gm_in_dwi_bin.nii.gz'
-        )
-        self.wm_in_dwi_bin = (
-            f'{self.namer.dirs["tmp"]["reg_a"]}/{self.t1w_name}_wm_in_dwi_bin.nii.gz'
-        )
-        self.vent_mask_dwi = (
-            f'{self.namer.dirs["tmp"]["reg_a"]}/{self.t1w_name}_vent_mask_dwi.nii.gz'
-        )
-        self.vent_csf_in_dwi = (
-            f'{self.namer.dirs["tmp"]["reg_a"]}/{self.t1w_name}_vent_csf_in_dwi.nii.gz'
-        )
-        self.vent_mask_mni = f'{self.namer.dirs["tmp"]["reg_a"]}/vent_mask_mni.nii.gz'
-        self.vent_mask_t1w = f'{self.namer.dirs["tmp"]["reg_a"]}/vent_mask_t1w.nii.gz'
-        self.wm_gm_int_in_dwi = f'{namer.dirs["output"]["reg_anat"]}/{self.t1w_name}_wm_gm_int_in_dwi.nii.gz'
-        self.wm_gm_int_in_dwi_bin = f'{namer.dirs["output"]["reg_anat"]}/{self.t1w_name}_wm_gm_int_in_dwi_bin.nii.gz'
         self.input_mni_sched = f"{FSLDIR}/etc/flirtsch/T1_2_MNI152_2mm.cnf"
         self.mni_atlas = f"{atlas_dir}/atlases/label/Human/HarvardOxfordsub-maxprob-thr25_space-MNI152NLin6_label_all_res-{vox_dims}.nii.gz"
         self.mni_vent_loc = f"{atlas_dir}/atlases/mask/HarvardOxford-thr25_space-MNI152NLin6_variant-lateral-ventricles_res-{vox_dims}_descr-brainmask.nii.gz"
         self.corpuscallosum = (
             f"{atlas_dir}/atlases/mask/CorpusCallosum_res_{vox_size}.nii.gz"
         )
-        self.corpuscallosum_mask_t1w = f'{self.namer.dirs["output"]["reg_anat"]}/{self.t1w_name}_corpuscallosum.nii.gz'
-        self.corpuscallosum_dwi = f'{self.namer.dirs["output"]["reg_anat"]}/{self.t1w_name}_corpuscallosum_dwi.nii.gz'
+        self.corpuscallosum_mask_t1w = (
+            f"{self.reg_anat}/{self.t1w_name}_corpuscallosum.nii.gz"
+        )
+        self.corpuscallosum_dwi = (
+            f"{self.reg_anat}/{self.t1w_name}_corpuscallosum_dwi.nii.gz"
+        )
 
     @gen_utils.timer
     def gen_tissue(self):
@@ -259,32 +231,33 @@ class DmriReg:
         reg_utils.t1w_skullstrip(self.t1w, self.t1w_brain, self.skull)
 
         #  QA part of skull strip
-        self.namer.dirs["qa"]["skull_strip"] = f'{self.namer.dirs["qa"]["base"]}/skull_strip'
-        if not os.path.exists(self.namer.dirs["qa"]["skull_strip"]):
-            os.makedirs(self.namer.dirs["qa"]["skull_strip"])
-        print('QA_skullstrip_path  ', self.namer.dirs["qa"]["skull_strip"])
-        gen_overlay_pngs(self.t1w_brain, self.t1w, self.namer.dirs["qa"]["skull_strip"])
+        skullstrip_qa = Path(self.qa) / "skull_strip"
+        if not os.path.exists(skullstrip_qa):
+            skullstrip_qa.mkdir(parents=True, exist_ok=True)
+        print('QA_skullstrip_path  ', skullstrip_qa)
+        gen_overlay_pngs(self.t1w_brain, self.t1w, skullstrip_qa)
         
         # Segment the t1w brain into probability maps
         self.maps = reg_utils.segment_t1w(self.t1w_brain, self.map_path)
         self.wm_mask = self.maps["wm_prob"]
         self.gm_mask = self.maps["gm_prob"]
         self.csf_mask = self.maps["csf_prob"]
+
         # Generates quality analysis pictures of white matter, gray matter and cerebrospinal fluid
-        qa_fast_png(self.csf_mask, self.gm_mask, self.wm_mask, f"{self.namer.dirs['qa']['reg']}/qa_fast.png")
+        qa_fast_png(self.csf_mask, self.gm_mask, self.wm_mask, str(Path(self.qa_reg)/"qa_fast.png"))
 
 
         self.t1w_brain = gen_utils.match_target_vox_res(
-            self.t1w_brain, self.vox_size, self.namer, sens="t1w"
+            self.t1w_brain, self.vox_size, self.outdir, sens="anat"
         )
         self.wm_mask = gen_utils.match_target_vox_res(
-            self.wm_mask, self.vox_size, self.namer, sens="t1w"
+            self.wm_mask, self.vox_size, self.outdir, sens="anat"
         )
         self.gm_mask = gen_utils.match_target_vox_res(
-            self.gm_mask, self.vox_size, self.namer, sens="t1w"
+            self.gm_mask, self.vox_size, self.outdir, sens="anat"
         )
         self.csf_mask = gen_utils.match_target_vox_res(
-            self.csf_mask, self.vox_size, self.namer, sens="t1w"
+            self.csf_mask, self.vox_size, self.outdir, sens="anat"
         )
 
         # Threshold WM to binary in dwi space
@@ -295,9 +268,8 @@ class DmriReg:
         # Extract wm edge
         # TODO : this should be a function in reg_utils so that we can print it to the log
         cmd = f"fslmaths {self.wm_mask_thr} -edge -bin -mas {self.wm_mask_thr} {self.wm_edge}"
-        print("Extracting white matter edge ...")
-        print(cmd)
-        subprocess.run(cmd, shell=True, check=True)
+        print("Extracting white matter edge...")
+        gen_utils.run(cmd)
 
     @gen_utils.timer
     def t1w2dwi_align(self):
@@ -341,7 +313,7 @@ class DmriReg:
                 # Get mat from MNI -> T1
                 cmd = f"convert_xfm -omat {self.mni2t1_xfm_init} -inverse {self.t12mni_xfm_init}"
                 print(cmd)
-                subprocess.run(cmd, shell=True, check=True)
+                gen_utils.run(cmd)
 
             except RuntimeError("Error: FNIRT failed!"):
                 pass
@@ -360,7 +332,7 @@ class DmriReg:
                 out=self.t1_aligned_mni,
                 sch=None,
             )
-        reg_mri_pngs(self.t1_aligned_mni, self.input_mni, self.namer.dirs['qa']['reg'])
+        reg_mri_pngs(self.t1_aligned_mni, self.input_mni, self.qa_reg)
 
         # Align T1w-->DWI
         reg_utils.align(
@@ -377,7 +349,7 @@ class DmriReg:
         )
         cmd = f"convert_xfm -omat {self.dwi2t1w_xfm} -inverse {self.t1w2dwi_xfm}"
         print(cmd)
-        subprocess.run(cmd, shell=True, check=True)
+        gen_utils.run(cmd)
 
         if self.simple is False:
             # Flirt bbr
@@ -399,7 +371,7 @@ class DmriReg:
                     sch="${FSLDIR}/etc/flirtsch/bbr.sch",
                 )
                 cmd = f"convert_xfm -omat {self.t1w2dwi_bbr_xfm} -inverse {self.dwi2t1w_bbr_xfm}"
-                subprocess.run(cmd, shell=True, check=True)
+                gen_utils.run(cmd)
 
                 # Apply the alignment
                 reg_utils.align(
@@ -432,7 +404,7 @@ class DmriReg:
                 searchrad=True,
                 sch=None,
             )
-        reg_mri_pngs(self.t1w2dwi, self.nodif_B0, self.namer.dirs['qa']['reg'])
+        reg_mri_pngs(self.t1w2dwi, self.nodif_B0, self.qa_reg)
 
     def atlas2t1w2dwi_align(self, atlas, dsn=True):
         """alignment from atlas to t1w to dwi. A function to perform atlas alignmet. Tries nonlinear registration first, and if that fails, does a liner
@@ -451,11 +423,16 @@ class DmriReg:
         """
 
         self.atlas = atlas
-        self.atlas_name = self.atlas.split("/")[-1].split(".")[0]
-        self.aligned_atlas_t1mni = f'{self.namer.dirs["tmp"]["reg_a"]}/{self.atlas_name}_aligned_atlas_t1w_mni.nii.gz'
-        self.aligned_atlas_skull = f'{self.namer.dirs["tmp"]["reg_a"]}/{self.atlas_name}_aligned_atlas_skull.nii.gz'
-        self.dwi_aligned_atlas = f'{self.namer.dirs["output"]["reg_anat"]}/{self.atlas_name}_aligned_atlas.nii.gz'
-        # self.dwi_aligned_atlas_mask = "{}/{}_aligned_atlas_mask.nii.gz".format(self.namer.dirs['tmp']['reg_a'], self.atlas_name)
+        self.atlas_name = gen_utils.get_filename(self.atlas)
+        self.aligned_atlas_t1mni = (
+            f"{self.reg_a}/{self.atlas_name}_aligned_atlas_t1w_mni.nii.gz"
+        )
+        self.aligned_atlas_skull = (
+            f"{self.reg_a}/{self.atlas_name}_aligned_atlas_skull.nii.gz"
+        )
+        self.dwi_aligned_atlas = (
+            f"{self.reg_anat}/{self.atlas_name}_aligned_atlas.nii.gz"
+        )
 
         reg_utils.align(
             self.atlas,
@@ -595,7 +572,7 @@ class DmriReg:
                 ),
                 self.dwi_aligned_atlas,
             )
-            reg_mri_pngs(self.dwi_aligned_atlas, self.nodif_B0, self.namer.dirs['qa']['reg'])
+            reg_mri_pngs(self.dwi_aligned_atlas, self.nodif_B0, self.qa_reg)
             return self.dwi_aligned_atlas
         else:
             nib.save(
@@ -606,7 +583,7 @@ class DmriReg:
                 ),
                 self.aligned_atlas_t1mni,
             )
-            reg_mri_pngs(self.aligned_atlas_t1mni, self.t1_aligned_mni, self.namer.dirs['qa']['reg'])
+            reg_mri_pngs(self.aligned_atlas_t1mni, self.t1_aligned_mni, self.qa_reg)
             return self.aligned_atlas_t1mni
 
     @gen_utils.timer
@@ -626,13 +603,13 @@ class DmriReg:
         if not os.path.isfile(self.mni_atlas):
             raise ValueError("FSL atlas for ventricle reference not found!")
         cmd = f"fslmaths {self.mni_vent_loc} -thr 0.1 -bin {self.mni_vent_loc}"
-        subprocess.run(cmd, shell=True, check=True)
+        gen_utils.run(cmd)
 
         cmd = f"fslmaths {self.corpuscallosum} -bin {self.corpuscallosum}"
-        subprocess.run(cmd, shell=True, check=True)
+        gen_utils.run(cmd)
 
         cmd = f"fslmaths {self.corpuscallosum} -sub {self.mni_vent_loc} -bin {self.corpuscallosum}"
-        subprocess.run(cmd, shell=True, check=True)
+        gen_utils.run(cmd)
 
         # Create a transform from the atlas onto T1w. This will be used to transform the ventricles to dwi space.
         reg_utils.align(
@@ -681,26 +658,26 @@ class DmriReg:
             self.t1wtissue2dwi_xfm,
             self.vent_mask_dwi,
         )
-        reg_mri_pngs(self.vent_mask_dwi, self.nodif_B0, self.namer.dirs['qa']['reg'])
+        reg_mri_pngs(self.vent_mask_dwi, self.nodif_B0, self.qa_reg)
         reg_utils.applyxfm(
             self.nodif_B0,
             self.corpuscallosum_mask_t1w,
             self.t1wtissue2dwi_xfm,
             self.corpuscallosum_dwi,
         )
-        reg_mri_pngs(self.corpuscallosum_dwi, self.nodif_B0, self.namer.dirs['qa']['reg'])
+        reg_mri_pngs(self.corpuscallosum_dwi, self.nodif_B0, self.qa_reg)
         reg_utils.applyxfm(
             self.nodif_B0, self.csf_mask, self.t1wtissue2dwi_xfm, self.csf_mask_dwi
         )
-        reg_mri_pngs(self.csf_mask_dwi, self.nodif_B0, self.namer.dirs['qa']['reg'])
+        reg_mri_pngs(self.csf_mask_dwi, self.nodif_B0, self.qa_reg)
         reg_utils.applyxfm(
             self.nodif_B0, self.gm_mask, self.t1wtissue2dwi_xfm, self.gm_in_dwi
         )
-        reg_mri_pngs(self.gm_in_dwi, self.nodif_B0, self.namer.dirs['qa']['reg'])
+        reg_mri_pngs(self.gm_in_dwi, self.nodif_B0, self.qa_reg)
         reg_utils.applyxfm(
             self.nodif_B0, self.wm_mask, self.t1wtissue2dwi_xfm, self.wm_in_dwi
         )
-        reg_mri_pngs(self.wm_in_dwi, self.nodif_B0, self.namer.dirs['qa']['reg'])
+        reg_mri_pngs(self.wm_in_dwi, self.nodif_B0, self.qa_reg)
 
         # Threshold WM to binary in dwi space
         thr_img = nib.load(self.wm_in_dwi)
@@ -735,16 +712,16 @@ class DmriReg:
         # Create ventricular CSF mask
         print("Creating ventricular CSF mask...")
         cmd = f"fslmaths {self.vent_mask_dwi} -kernel sphere 10 -ero -bin {self.vent_mask_dwi}"
-        subprocess.run(cmd, shell=True, check=True)
+        gen_utils.run(cmd)
         print("Creating Corpus Callosum mask...")
         cmd = f"fslmaths {self.corpuscallosum_dwi} -mas {self.wm_in_dwi_bin} -bin {self.corpuscallosum_dwi}"
-        subprocess.run(cmd, shell=True, check=True)
+        gen_utils.run(cmd)
         cmd = f"fslmaths {self.csf_mask_dwi} -add {self.vent_mask_dwi} -bin {self.vent_csf_in_dwi}"
-        subprocess.run(cmd, shell=True, check=True)
+        gen_utils.run(cmd)
 
         # Create gm-wm interface image
         cmd = (
             f"fslmaths {self.gm_in_dwi_bin} -mul {self.wm_in_dwi_bin} -add {self.corpuscallosum_dwi} "
             f"-sub {self.vent_csf_in_dwi} -mas {self.nodif_B0_mask} -bin {self.wm_gm_int_in_dwi}"
         )
-        subprocess.run(cmd, shell=True, check=True)
+        gen_utils.run(cmd)

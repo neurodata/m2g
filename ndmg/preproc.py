@@ -31,7 +31,8 @@ def eddy_correct(dwi, corrected_dwi, idx):
         Index of the first B0 volume in the stack
     """
 
-    subprocess.run(["eddy_correct", dwi, corrected_dwi, str(idx)], check=True)
+    cmd = f"eddy_correct {dwi} {corrected_dwi} {str(idx)}"
+    gen_utils.run(cmd)
 
 
 def rescale_bvec(bvec, bvec_new):
