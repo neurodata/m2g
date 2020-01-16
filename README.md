@@ -97,7 +97,7 @@ Once you have the pipeline up and running, you can run it with:
   
  ndmg <input_directory> <output_directory>
   
-We recommend specifying an atlas and lowering the default seed density on test runs:
+We recommend specifying an atlas and lowering the default seed density on test runs (although, for real runs, we recommend using the default seeding -- lowering seeding simply decreases runtime):
 
     ndmg --seeds 1 --parcellation desikan <input_directory> <output_directory>
 
