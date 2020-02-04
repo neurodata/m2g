@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
 """
-ndmg.register
+m2g.register
 ~~~~~~~~~~~~~
-Contains ndmg's registration classes, organized as full registration workflows.
+Contains m2g's registration classes, organized as full registration workflows.
 Used for the majority of the registration described here: https://neurodata.io/talks/ndmg.pdf#page=20
 """
 
@@ -22,13 +22,13 @@ from dipy.tracking.streamline import deform_streamlines
 from dipy.io.streamline import load_trk
 from dipy.tracking import utils
 
-# ndmg imports
-from ndmg.utils import gen_utils
-from ndmg.utils import reg_utils
-from ndmg.scripts import ndmg_bids
-from ndmg.stats.qa_skullstrip import gen_overlay_pngs
-from ndmg.stats.qa_reg import reg_mri_pngs
-from ndmg.stats.qa_fast import qa_fast_png
+# m2g imports
+from m2g.utils import gen_utils
+from m2g.utils import reg_utils
+from m2g.scripts import m2g_bids
+from m2g.stats.qa_skullstrip import gen_overlay_pngs
+from m2g.stats.qa_reg import reg_mri_pngs
+from m2g.stats.qa_fast import qa_fast_png
 
 
 @gen_utils.timer
@@ -51,7 +51,7 @@ def direct_streamline_norm(streams, fa_path, outdir: Path):
         Path to tractogram streamline file: streamlines_dsn.trk
     """
 
-    atlas_dir = ndmg_bids.get_atlas_dir()
+    atlas_dir = m2g_bids.get_atlas_dir()
     template_path = atlas_dir + "/atlases/reference_brains/FSL_HCP1065_FA_2mm.nii.gz"
 
     # Run SyN and normalize streamlines
@@ -133,7 +133,7 @@ class DmriReg:
         simple=False,
     ):
 
-        atlas_dir = ndmg_bids.get_atlas_dir()
+        atlas_dir = m2g_bids.get_atlas_dir()
         FSLDIR = os.environ["FSLDIR"]
 
         if vox_size == "2mm":

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 """
-ndmg.scripts.ndmg_dwi_pipeline
+m2g.scripts.m2g_dwi_pipeline
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Contains the primary, top-level pipeline.
 For a full description, see here: https://neurodata.io/talks/ndmg.pdf
@@ -22,21 +22,21 @@ from subprocess import Popen
 from dipy.tracking.streamline import Streamlines
 from dipy.io import read_bvals_bvecs
 
-# ndmg imports
-from ndmg import preproc
-from ndmg import register
-from ndmg import track
-from ndmg import graph
-from ndmg.utils import gen_utils
-from ndmg.utils import reg_utils
-from ndmg.utils import cloud_utils
-from ndmg.stats.qa_tractography import qa_tractography
+# m2g imports
+from m2g import preproc
+from m2g import register
+from m2g import track
+from m2g import graph
+from m2g.utils import gen_utils
+from m2g.utils import reg_utils
+from m2g.utils import cloud_utils
+from m2g.stats.qa_tractography import qa_tractography
 
 # TODO : not sure why this is here, potentially remove
 os.environ["MPLCONFIGDIR"] = "/tmp/"
 
 
-def ndmg_dwi_worker(
+def m2g_dwi_worker(
     dwi,
     bvals,
     bvecs,
@@ -113,11 +113,11 @@ def ndmg_dwi_worker(
     print("Checking inputs...")
     for file_ in [t1w, bvals, bvecs, dwi, atlas, mask, *parcellations]:
         if not os.path.isfile(file_):
-            raise FileNotFoundError(f"Input {file_} not found. Exiting ndmg.")
+            raise FileNotFoundError(f"Input {file_} not found. Exiting m2g.")
         else:
             print(f"Input {file_} found.")
 
-    # time ndmg execution
+    # time m2g execution
     startTime = datetime.now()
 
     # initial variables
@@ -342,7 +342,7 @@ def ndmg_dwi_worker(
 
     exe_time = datetime.now() - startTime
 
-    if "NDMG_URL" in os.environ:
+    if "M2G_URL" in os.environ:
         print("Note: tractography QA does not work in a Docker environment.")
     else:
         qa_tractography_out = outdir / "qa/fibers"
@@ -350,18 +350,18 @@ def ndmg_dwi_worker(
         print("QA tractography Completed.")
 
     print(f"Total execution time: {exe_time}")
-    print("NDMG Complete.")
+    print("M2G Complete.")
     print(f"Output contents: {os.listdir(outdir / f'connectomes')}")
     print("~~~~~~~~~~~~~~\n\n")
     print(
-        "NOTE :: ndmg uses native-space registration to generate connectomes.\n Without post-hoc normalization, multiple connectomes generated with ndmg cannot be compared directly."
+        "NOTE :: m2g uses native-space registration to generate connectomes.\n Without post-hoc normalization, multiple connectomes generated with m2g cannot be compared directly."
     )
 
 
 def welcome_message(connectomes):
 
     line = """\n~~~~~~~~~~~~~~~~\n 
-    Welcome to ndmg!\n 
+    Welcome to m2g!\n 
     Your connectomes will be located here:
     \n\n"""
 
@@ -455,7 +455,7 @@ def main():
     outdir_tmp = Path(result.outdir) / "tmp"
     outdir_tmp.mkdir(parents=True, exist_ok=True)
 
-    ndmg_dwi_worker(
+    m2g_dwi_worker(
         result.dwi,
         result.bval,
         result.bvec,

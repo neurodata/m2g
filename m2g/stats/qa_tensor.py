@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 """
-ndmg.stats.qa_tensor
+m2g.stats.qa_tensor
 ~~~~~~~~~~~~~~~~~~~~
 
 Contains functions to generate intermediate qa figures for the directional field directions
@@ -21,7 +21,7 @@ import itertools
 
 from dipy.viz import window, actor
 from fury.actor import orient2rgb
-from ndmg.utils import qa_utils
+from m2g.utils import qa_utils
 
 matplotlib.use("Agg")  # very important above pyplot import
 import matplotlib.pyplot as plt

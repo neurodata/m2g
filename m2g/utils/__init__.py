@@ -1,5 +1,5 @@
 """
-ndmg.utils
+m2g.utils
 ~~~~~~~~~~
 
 Small utility functions, for use in larger modules.

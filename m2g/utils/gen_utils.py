@@ -1,7 +1,7 @@
 # !/usr/bin/env python
 
 """
-ndmg.utils.gen_utils
+m2g.utils.gen_utils
 ~~~~~~~~~~~~~~~~~~~~
 
 Contains general utility functions.
@@ -43,10 +43,10 @@ class DirectorySweeper:
     bdir : str
         BIDs-formatted directory containing dwi data.
     subjects : list or str, optional
-        The subjects to run ndmg on. 
+        The subjects to run m2g on. 
         If None, parse through the whole directory.
     sessions : list or str, optional
-        The sessions to run ndmg with.
+        The sessions to run m2g with.
         If None, use every possible session.
     """
 
@@ -430,7 +430,7 @@ def run(cmd):
     Wrapper on `subprocess.run`.
     Print the command.
     Execute a command string on the shell (on bash).
-    Exists so that the shell prints out commands as ndmg calls them.
+    Exists so that the shell prints out commands as m2g calls them.
     
     Parameters
     ----------

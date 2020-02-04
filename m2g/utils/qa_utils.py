@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 """
-ndmg.utils.qa_utils
+m2g.utils.qa_utils
 ~~~~~~~~~~~~~~~~~~~~
 Contains small-scale qa utilities
 """

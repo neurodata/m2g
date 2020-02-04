@@ -3,7 +3,7 @@ import numpy as np
 import nibabel as nb
 from scipy import ndimage
 from matplotlib.colors import LinearSegmentedColormap
-from ndmg.utils.qa_utils import pad_im
+from m2g.utils.qa_utils import pad_im
 
 
 def qa_fast_png(csf, gm, wm, outdir):

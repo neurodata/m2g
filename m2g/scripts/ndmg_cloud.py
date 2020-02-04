@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 
 """
-ndmg.scripts.ndmg_cloud
+m2g.scripts.m2g_cloud
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-Contains functionality for running ndmg in batch on AWS.
-For a tutorial on setting this up, see here : https://github.com/neurodata/ndmg/blob/deploy/tutorials/Batch.ipynb
+Contains functionality for running m2g in batch on AWS.
+For a tutorial on setting this up, see here : https://github.com/neurodata/m2g/blob/deploy/tutorials/Batch.ipynb
 """
 
 # standard library imports
@@ -19,12 +19,12 @@ from collections import OrderedDict
 from argparse import ArgumentParser
 from pathlib import Path
 
-# ndmg imports
-import ndmg
-from ndmg.utils import gen_utils
-from ndmg.utils.cloud_utils import get_credentials
-from ndmg.utils.cloud_utils import get_matching_s3_objects
-from ndmg.utils.cloud_utils import s3_client
+# m2g imports
+import m2g
+from m2g.utils import gen_utils
+from m2g.utils.cloud_utils import get_credentials
+from m2g.utils.cloud_utils import get_matching_s3_objects
+from m2g.utils.cloud_utils import s3_client
 
 
 def batch_submit(
@@ -57,9 +57,9 @@ def batch_submit(
     state : str, optional
         determines the function to be performed by this function ("participant", "status", "kill"), by default "participant"
     dataset : str, optional
-        Name given to the output directory containing analyzed data set "ndmg-<version>-<dataset>", by default None
+        Name given to the output directory containing analyzed data set "m2g-<version>-<dataset>", by default None
     modif : str, optional
-        Name of folder on s3 to push to. If empty, push to a folder with ndmg's version number, by default ""
+        Name of folder on s3 to push to. If empty, push to a folder with m2g's version number, by default ""
     reg_style : str, optional
         Space for tractography, by default "native"
     mod_type : str, optional
@@ -184,9 +184,9 @@ def create_json(
     credentials : [type], optional
         AWS formatted csv of credentials, by default None
     dataset : [type], optional
-        Name added to the generated json job files "ndmg_<version>_<dataset>_sub-<sub>_ses-<ses>", by default None
+        Name added to the generated json job files "m2g_<version>_<dataset>_sub-<sub>_ses-<ses>", by default None
     modif : str, optional
-        Name of folder on s3 to push to. If empty, push to a folder with ndmg's version number, by default ""
+        Name of folder on s3 to push to. If empty, push to a folder with m2g's version number, by default ""
     reg_style : str, optional
         Space for tractography, by default ""
     mod_type : str, optional
@@ -211,9 +211,9 @@ def create_json(
     seshs = threads
 
     templ = os.path.dirname(__file__)
-    tpath = templ[: templ.find("/ndmg/scripts")]
+    tpath = templ[: templ.find("/m2g/scripts")]
 
-    with open(f"{tpath}/templates/ndmg_cloud_participant.json", "r") as inf:
+    with open(f"{tpath}/templates/m2g_cloud_participant.json", "r") as inf:
         template = json.load(inf)
 
     cmd = template["containerOverrides"]["command"]
@@ -254,11 +254,11 @@ def create_json(
             # make the json file for this iteration,
             # and add the path to its json file to `jobs`.
             job_json = deepcopy(template)
-            ver = ndmg.__version__.replace(".", "-")
+            ver = m2g.__version__.replace(".", "-")
             if dataset:
-                name = f"ndmg_{ver}_{dataset}_sub-{subj}"
+                name = f"m2g_{ver}_{dataset}_sub-{subj}"
             else:
-                name = f"ndmg_{ver}_sub-{subj}"
+                name = f"m2g_{ver}_sub-{subj}"
             if sesh is not None:
                 name = f"{name}_ses-{sesh}"
             print(job_cmd)
@@ -346,7 +346,7 @@ def main():
         "--state",
         choices=["participant", "status", "kill"],
         default="participant",
-        help="determines the function to be performed by ndmg_cloud.",
+        help="determines the function to be performed by m2g_cloud.",
     )
     parser.add_argument(
         "--bucket",
@@ -372,7 +372,7 @@ def main():
         "--modif",
         action="store",
         help="""Name of folder on s3 to push to. Data will be saved at '<bucket>/<bidsdir>/<modif>' on the s3 bucket
-        If empty, push to a folder with ndmg's version number.""",
+        If empty, push to a folder with m2g's version number.""",
         default="",
     )
     parser.add_argument(
@@ -428,7 +428,7 @@ def main():
     if (bucket is None or path is None) and (state != "status" and state != "kill"):
         sys.exit(
             "Requires either path to bucket and data, or the status flag"
-            " and job IDs to query.\n  Try:\n    ndmg_cloud --help"
+            " and job IDs to query.\n  Try:\n    m2g_cloud --help"
         )
     if state == "kill":
         print("Killing jobs...")

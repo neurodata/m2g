@@ -1,20 +1,20 @@
 #!/usr/bin/env python
 
 """
-ndmg.preproc
+m2g.preproc
 ~~~~~~~~~~~~
 
 Contains functionality for normalizing b-vectors.
-TODO : depracate or change name. Add other preprocessing functions created from ndmg_dwi_pipeline.
+TODO : depracate or change name. Add other preprocessing functions created from m2g_dwi_pipeline.
 """
 
 # package imports
 import numpy as np
 import subprocess
 
-# ndmg imports
-from ndmg.utils import gen_utils
-from ndmg.utils.gen_utils import print_arguments
+# m2g imports
+from m2g.utils import gen_utils
+from m2g.utils.gen_utils import print_arguments
 
 
 @print_arguments(inputs=[0], outputs=[1])

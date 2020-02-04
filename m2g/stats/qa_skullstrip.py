@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 
 """
-ndmg.stats.qa_skullstrip
+m2g.stats.qa_skullstrip
 ~~~~~~~~~~~~~~~~~~~~~~
-The top level ndmg quality assurance for skull strip module.
-In this module, ndmg:
+The top level m2g quality assurance for skull strip module.
+In this module, m2g:
 1. Takes an original t1w nifti file and the skull-stripped nifti file as inputs
 2. Shows the skull-stripped brain (green) overlaid on the original t1w (magenta)
 3. Saves the image into output directory
@@ -26,8 +26,8 @@ import matplotlib as mpl
 mpl.use("Agg")  # very important above pyplot import
 from nilearn.plotting.edge_detect import _edge_map as edge_map
 import matplotlib.pyplot as plt
-from ndmg.utils.qa_utils import get_min_max, opaque_colorscale, pad_im
-from ndmg.utils.gen_utils import get_filename, get_braindata
+from m2g.utils.qa_utils import get_min_max, opaque_colorscale, pad_im
+from m2g.utils.gen_utils import get_filename, get_braindata
 
 
 

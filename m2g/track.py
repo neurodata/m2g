@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 
 """
-ndmg.track
+m2g.track
 ~~~~~~~~~~
 
-Contains ndmg's fiber reconstruction and tractography functionality.
+Contains m2g's fiber reconstruction and tractography functionality.
 Theory described here: https://neurodata.io/talks/ndmg.pdf#page=21
 """
 
@@ -30,9 +30,9 @@ from dipy.reconst.csdeconv import ConstrainedSphericalDeconvModel, recursive_res
 
 from dipy.data import get_sphere
 from dipy.direction import peaks_from_model, ProbabilisticDirectionGetter
-from ndmg.utils.gen_utils import timer
+from m2g.utils.gen_utils import timer
 
-from ndmg.stats import qa_tensor
+from m2g.stats import qa_tensor
 
 
 def build_seed_list(mask_img_file, stream_affine, dens):

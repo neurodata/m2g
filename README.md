@@ -1,4 +1,4 @@
-# ndmg
+# m2g
 
 ![Downloads shield](https://img.shields.io/pypi/dm/ndmg.svg)
 [![](https://img.shields.io/pypi/v/ndmg.svg)](https://pypi.python.org/pypi/ndmg)
@@ -10,7 +10,7 @@
 
 ![](./docs/nutmeg.png)
 
-NeuroData's MR Graphs package, **ndmg** (pronounced "**_nutmeg_**"), is a turn-key pipeline which uses structural and diffusion MRI data to estimate multi-resolution connectomes reliably and scalably.
+NeuroData's MR Graphs package, **m2g** (pronounced "**_nutmeg_**"), is a turn-key pipeline which uses structural and diffusion MRI data to estimate multi-resolution connectomes reliably and scalably.
 
 ## Contents
 
@@ -30,11 +30,11 @@ NeuroData's MR Graphs package, **ndmg** (pronounced "**_nutmeg_**"), is a turn-k
 
 ## Overview
 
-The **ndmg** pipeline has been developed as a one-click solution for human connectome estimation by providing robust and reliable estimates of connectivity across a wide range of datasets. The pipelines are explained and derivatives analyzed in our pre-print, available on [BiorXiv](https://www.biorxiv.org/content/early/2017/09/16/188706).
+The **m2g** pipeline has been developed as a one-click solution for human connectome estimation by providing robust and reliable estimates of connectivity across a wide range of datasets. The pipelines are explained and derivatives analyzed in our pre-print, available on [BiorXiv](https://www.biorxiv.org/content/early/2017/09/16/188706).
 
 ## System Requirements
 
-The **ndmg** pipeline:
+The **m2g** pipeline:
 
 - was developed and tested primarily on Mac OSX, Ubuntu (12, 14, 16, 18), and CentOS (5, 6);
 - made to work on Python 3.6;
@@ -46,22 +46,22 @@ The **ndmg** pipeline:
 
 ## Installation Guide
 
-**ndmg** relies on [FSL](http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FslInstallation), [AFNI](https://afni.nimh.nih.gov/), [Dipy](http://nipy.org/dipy/), [networkx](https://networkx.github.io/), and [nibabel](http://nipy.org/nibabel/), [numpy](http://www.numpy.org/) [scipy](http://www.scipy.org/), [scikit-learn](http://scikit-learn.org/stable/), [scikit-image](http://scikit-image.org/), [nilearn](http://nilearn.github.io/). You should install FSL and AFNI through the instructions on their website, then install other Python dependencies as well as the package itself with the following:
+**m2g** relies on [FSL](http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FslInstallation), [AFNI](https://afni.nimh.nih.gov/), [Dipy](http://nipy.org/dipy/), [networkx](https://networkx.github.io/), and [nibabel](http://nipy.org/nibabel/), [numpy](http://www.numpy.org/) [scipy](http://www.scipy.org/), [scikit-learn](http://scikit-learn.org/stable/), [scikit-image](http://scikit-image.org/), [nilearn](http://nilearn.github.io/). You should install FSL and AFNI through the instructions on their website, then install other Python dependencies as well as the package itself with the following:
 
-    git clone https://github.com/neurodata/ndmg.git
-    cd ndmg
+    git clone https://github.com/neurodata/m2g.git
+    cd m2g
     pip install -r requirements.txt
     pip install .
 
-For the most up-to-date version of ndmg, you can use the staging branch. This version is updated regularly, but may be less stable:
+For the most up-to-date version of m2g, you can use the staging branch. This version is updated regularly, but may be less stable:
 
-    git clone https://github.com/neurodata/ndmg.git
-    cd ndmg
+    git clone https://github.com/neurodata/m2g.git
+    cd m2g
     git checkout staging
     pip install -r requirements.txt
     pip install .
 
-You can also install **ndmg** from `pip` as shown below. Installation shouldn't take more than a few minutes, but depends on your internet connection. Note that to install the most up-to-date version of the pipeline, we currently recommend installing from github.
+You can also install **m2g** from `pip` as shown below. Installation shouldn't take more than a few minutes, but depends on your internet connection. Note that to install the most up-to-date version of the pipeline, we currently recommend installing from github.
 
 ### Install from pip
 
@@ -77,40 +77,40 @@ The image can then be used to create a container and run directly with the follo
 
     docker run -ti --entrypoint /bin/bash neurodata/ndmg_dev:latest
 
-**ndmg** docker containers can also be made from ndmg's Dockerfile.
+**m2g** docker containers can also be made from m2g's Dockerfile.
 
-    git clone https://github.com/neurodata/ndmg.git
-    cd ndmg
+    git clone https://github.com/neurodata/m2g.git
+    cd m2g
     docker build -t <imagename:uniquelabel> .
 
-Where "uniquelabel" can be whatever you wish to call this Docker image (for example, ndmg:latest). Additional information about building Docker images can be found [here](https://docs.docker.com/engine/reference/commandline/image_build/).
+Where "uniquelabel" can be whatever you wish to call this Docker image (for example, m2g:latest). Additional information about building Docker images can be found [here](https://docs.docker.com/engine/reference/commandline/image_build/).
 Creating the Docker image should take several minutes if this is the first time you have used this docker file.
 In order to create a docker container from the docker image and access it, use the following command to both create and enter the container:
 
-    docker run -it --entrypoint /bin/bash ndmg:uniquelabel
+    docker run -it --entrypoint /bin/bash m2g:uniquelabel
 
 ## Tutorial
 
 Once you have the pipeline up and running, you can run it with:
   
- ndmg <input_directory> <output_directory>
+ m2g <input_directory> <output_directory>
   
 We recommend specifying an atlas and lowering the default seed density on test runs:
 
-    ndmg --seeds 1 --parcellation desikan <input_directory> <output_directory>
+    m2g --seeds 1 --parcellation desikan <input_directory> <output_directory>
 
 You can set a particular scan and session as well (recommended for batch scripts):
 
-    ndmg --seeds 1 --parcellation desikan --participant_label <label> --session_label <label> <input_directory> <output_directory>
+    m2g --seeds 1 --parcellation desikan --participant_label <label> --session_label <label> <input_directory> <output_directory>
 
-For more detailed instructions, tutorials on the **ndmg** pipeline can be found in [ndmg/tutorials](https://github.com/neurodata/ndmg/tree/staging/tutorials)
+For more detailed instructions, tutorials on the **m2g** pipeline can be found in [m2g/tutorials](https://github.com/neurodata/m2g/tree/staging/tutorials)
 
 ## Outputs
 
-The organization of the output files generated by the ndmg pipeline are shown below. If you only care about the connectome edgelists (**ndmg**'s fundamental output), you can find them in `/output/dwi/roi-connectomes`.
+The organization of the output files generated by the m2g pipeline are shown below. If you only care about the connectome edgelists (**m2g**'s fundamental output), you can find them in `/output/dwi/roi-connectomes`.
 
 ```
-File labels that may appear on output files, these denote additional actions ndmg may have done:
+File labels that may appear on output files, these denote additional actions m2g may have done:
 RAS = File was originally in RAS orientation, so no reorientation was necessary
 reor_RAS = File has been reoriented into RAS+ orientation
 nores = File originally had the desired voxel size specified by the user (default 2mmx2mmx2mm), resulting in no reslicing
@@ -201,22 +201,22 @@ Other files may end up in the output folders, depending on what settings or atla
 
 ## Usage
 
-The **ndmg** pipeline can be used to generate connectomes as a command-line utility on [BIDS datasets](http://bids.neuroimaging.io) with the following:
+The **m2g** pipeline can be used to generate connectomes as a command-line utility on [BIDS datasets](http://bids.neuroimaging.io) with the following:
 
-    ndmg /input/bids/dataset /output/directory
+    m2g /input/bids/dataset /output/directory
 
-Note that more options are available which can be helpful if running on the Amazon cloud, which can be found and documented by running `ndmg -h`.
-If running with the Docker container shown above, the `entrypoint` is already set to `ndmg`, so the pipeline can be run directly from the host-system command line as follows:
+Note that more options are available which can be helpful if running on the Amazon cloud, which can be found and documented by running `m2g -h`.
+If running with the Docker container shown above, the `entrypoint` is already set to `m2g`, so the pipeline can be run directly from the host-system command line as follows:
 
     docker run -ti -v /path/to/local/data:/data neurodata/ndmg_dev /data/ /data/outputs
 
-This will run **ndmg** on the local data and save the output files to the directory /path/to/local/data/outputs. Note that if you have created the docker image from github, replace `neurodata/ndmg_dev` with `imagename:uniquelabel`.
+This will run **m2g** on the local data and save the output files to the directory /path/to/local/data/outputs. Note that if you have created the docker image from github, replace `neurodata/m2g_dev` with `imagename:uniquelabel`.
 
-Also note that currently, running `ndmg` on a single bids-formatted dataset directory only runs a single scan. To run the entire dataset, we recommend parallelizing on a high-performance cluster or using `ndmg`'s s3 integration.
+Also note that currently, running `m2g` on a single bids-formatted dataset directory only runs a single scan. To run the entire dataset, we recommend parallelizing on a high-performance cluster or using `m2g`'s s3 integration.
 
 ## Working with S3 Datasets
 
-**ndmg** has the ability to work on datasets stored on [Amazon's Simple Storage Service](https://aws.amazon.com/s3/), assuming they are in BIDS format. Doing so requires you to set your AWS credentials and read the related s3 bucket documentation. You can find a guide [here](https://github.com/neurodata/ndmg/blob/deploy/tutorials/Batch.ipynb).
+**m2g** has the ability to work on datasets stored on [Amazon's Simple Storage Service](https://aws.amazon.com/s3/), assuming they are in BIDS format. Doing so requires you to set your AWS credentials and read the related s3 bucket documentation. You can find a guide [here](https://github.com/neurodata/m2g/blob/deploy/tutorials/Batch.ipynb).
 
 ## Example Datasets
 
@@ -226,11 +226,11 @@ For some downsampled test data, see [neuroparc](https://github.com/neurodata/neu
 
 ## Documentation
 
-Check out some [resources](http://m2g.io) on our website, or our [function reference](https://ndmg.neurodata.io/) for more information about **ndmg**.
+Check out some [resources](http://m2g.io) on our website, or our [function reference](https://ndmg.neurodata.io/) for more information about **m2g**.
 
 ## License
 
-This project is covered under the [Apache 2.0 License](https://github.com/neurodata/ndmg/blob/ndmg/LICENSE.txt).
+This project is covered under the [Apache 2.0 License](https://github.com/neurodata/m2g/blob/m2g/LICENSE.txt).
 
 ## Manuscript Reproduction
 

@@ -1,5 +1,5 @@
 """
-ndmg.utils.reg_utils
+m2g.utils.reg_utils
 ~~~~~~~~~~~~~~~~~~~~
 
 Contains small-scale registration utilities.
@@ -24,9 +24,9 @@ from dipy.align.imwarp import SymmetricDiffeomorphicRegistration
 from dipy.align.metrics import CCMetric
 from dipy.viz import regtools
 
-# ndmg imports
-from ndmg.utils import gen_utils
-from ndmg.utils.gen_utils import print_arguments, timer
+# m2g imports
+from m2g.utils import gen_utils
+from m2g.utils.gen_utils import print_arguments, timer
 
 
 def erode_mask(mask, v=0):
@@ -250,7 +250,7 @@ def skullstrip_check(dmrireg, parcellations, outdir, prep_anat, vox_size, reg_st
 
         if num != num2:
             raise KeyError(
-                "The atlas has lost an roi due to alignment! Try rerunning ndmg with the appropriate --skull flag."
+                "The atlas has lost an roi due to alignment! Try rerunning m2g with the appropriate --skull flag."
             )
 
         labels_im_file_list.append(labels_im_file_dwi)

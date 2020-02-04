@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 
 """
-ndmg.stats.qa_reg.py
+m2g.stats.qa_reg.py
 ~~~~~~~~~~~~~~~~~~~~~~
 The qa for registration step in the pipeline.
-In this module, ndmg compares the registered and reference brain data to show the quality of each registration by plotting 9 overlay brain slices.
+In this module, m2g compares the registered and reference brain data to show the quality of each registration by plotting 9 overlay brain slices.
 """
 
 import warnings
@@ -15,8 +15,8 @@ import re
 import sys
 import numpy as np
 import nibabel as nb
-from ndmg.utils.gen_utils import get_braindata, get_filename
-from ndmg.utils.qa_utils import get_min_max, opaque_colorscale, pad_im
+from m2g.utils.gen_utils import get_braindata, get_filename
+from m2g.utils.qa_utils import get_min_max, opaque_colorscale, pad_im
 from argparse import ArgumentParser
 from scipy import ndimage
 from matplotlib.colors import LinearSegmentedColormap

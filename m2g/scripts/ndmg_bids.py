@@ -1,14 +1,14 @@
 #!/usr/bin/env python
 
 """
-ndmg.scripts.ndmg_bids
+m2g.scripts.m2g_bids
 ~~~~~~~~~~~~~~~~~~~~~~
 
-The top level ndmg entrypoint module.
-In this module, ndmg:
+The top level m2g entrypoint module.
+In this module, m2g:
 1. Pulls data into the input directory from s3 if we need it.
 2. Parses the input directory.
-3. for each subject/session pair, runs ndmg_dwi_pipeline.ndmg_dwi_worker (the actual pipeline)
+3. for each subject/session pair, runs m2g_dwi_pipeline.m2g_dwi_worker (the actual pipeline)
 """
 
 
@@ -20,14 +20,14 @@ from argparse import ArgumentParser
 import traceback
 import subprocess
 
-# ndmg imports
-from ndmg.utils import cloud_utils
-from ndmg.utils import gen_utils
-from ndmg.utils.gen_utils import DirectorySweeper
-from ndmg.utils.gen_utils import check_dependencies
-from ndmg.utils.gen_utils import is_bids
-from ndmg.utils.gen_utils import as_directory
-from ndmg.scripts.ndmg_dwi_pipeline import ndmg_dwi_worker
+# m2g imports
+from m2g.utils import cloud_utils
+from m2g.utils import gen_utils
+from m2g.utils.gen_utils import DirectorySweeper
+from m2g.utils.gen_utils import check_dependencies
+from m2g.utils.gen_utils import is_bids
+from m2g.utils.gen_utils import as_directory
+from m2g.scripts.m2g_dwi_pipeline import m2g_dwi_worker
 
 
 def get_atlas(atlas_dir, vox_size):
@@ -58,7 +58,7 @@ def get_atlas(atlas_dir, vox_size):
         dims = "1x1x1"
     else:
         raise ValueError(
-            "Voxel dimensions of input t1w image not currently supported by ndmg."
+            "Voxel dimensions of input t1w image not currently supported by m2g."
         )
 
     # grab atlases if they don't exist
@@ -89,21 +89,21 @@ def get_atlas(atlas_dir, vox_size):
 
 def get_atlas_dir():
     """
-    Gets the location of ndmg's atlases.
+    Gets the location of m2g's atlases.
     
     Returns
     -------
     str
         atlas directory location.
     """
-    if os.path.isdir("/ndmg_atlases"):
-        return "/ndmg_atlases"  # in docker
+    if os.path.isdir("/m2g_atlases"):
+        return "/m2g_atlases"  # in docker
 
-    return os.path.expanduser("~") + "/.ndmg/ndmg_atlases"  # local
+    return os.path.expanduser("~") + "/.m2g/m2g_atlases"  # local
 
 
 def main():
-    """Starting point of the ndmg pipeline, assuming that you are using a BIDS organized dataset
+    """Starting point of the m2g pipeline, assuming that you are using a BIDS organized dataset
     """
 
     parser = ArgumentParser(
@@ -215,7 +215,7 @@ def main():
     )
 
     # and ... begin!
-    print("\nBeginning ndmg ...")
+    print("\nBeginning m2g ...")
 
     # ---------------- Parse CLI arguments ---------------- #
     result = parser.parse_args()
@@ -226,7 +226,7 @@ def main():
     parcellation_name = result.parcellation
     push_location = result.push_location
 
-    # arguments to be passed in every ndmg run
+    # arguments to be passed in every m2g run
     # TODO : change value naming convention to match key naming convention
     constant_kwargs = {
         "vox_size": result.voxelsize,
@@ -247,7 +247,7 @@ def main():
     if s3:
         buck, remo = cloud_utils.parse_path(input_dir)
         home = os.path.expanduser("~")
-        input_dir = as_directory(home + "/.ndmg/input", remove=True)
+        input_dir = as_directory(home + "/.m2g/input", remove=True)
         if (not creds) and push_location:
             raise AttributeError(
                 """No AWS credentials found, but "--push_location" flag called. 
@@ -274,8 +274,8 @@ def main():
     compatible = sys.platform == "darwin" or sys.platform == "linux"
     if not compatible:
         input(
-            "\n\nWARNING: You appear to be running ndmg on an operating system that is not macOS or Linux."
-            "\nndmg has not been tested on this operating system and may not work. Press enter to continue.\n\n"
+            "\n\nWARNING: You appear to be running m2g on an operating system that is not macOS or Linux."
+            "\nm2g has not been tested on this operating system and may not work. Press enter to continue.\n\n"
         )
 
     # make sure we have AFNI and FSL
@@ -304,12 +304,12 @@ def main():
     scans = sweeper.get_dir_info()
 
     # ---------------- Run Pipeline --------------- #
-    # run ndmg on the entire BIDs directory.
+    # run m2g on the entire BIDs directory.
     for SubSesFile in scans:
         subject, session, kwargs = SubSesFile
         kwargs["outdir"] = f"{output_dir}/sub-{subject}/ses-{session}"
         kwargs.update(constant_kwargs)
-        ndmg_dwi_worker(**kwargs)
+        m2g_dwi_worker(**kwargs)
         if push_location:
             print(f"Pushing to s3 at {push_location}.")
             push_buck, push_remo = cloud_utils.parse_path(push_location)

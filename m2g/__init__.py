@@ -1,5 +1,5 @@
 """
-ndmg
+m2g
 ~~~~
 
 an end-to-end connectome estimation pipeline
@@ -9,7 +9,7 @@ an end-to-end connectome estimation pipeline
 __version__ = "0.3.0"
 
 
-# to call `ndmg.graph`, etc
+# to call `m2g.graph`, etc
 __all__ = ["graph", "preproc", "register", "track"]  # modules
 __all__.extend(["scripts", "stats", "utils"])  # subpackages
 
