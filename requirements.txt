@@ -15,4 +15,3 @@ fury
 pytest
 pathlib2
 graspy
-

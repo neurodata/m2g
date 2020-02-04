@@ -44,7 +44,13 @@ The **m2g** pipeline:
 - has key features built upon FSL, AFNI, Dipy, Nibabel, Nilearn, Networkx, Numpy, Scipy, Scikit-Learn, and others;
 - takes approximately 1-core, 8-GB of RAM, and 1 hour to run for most datasets.
 
-## Installation Guide
+- was developed and tested primarily on Mac OSX, Ubuntu (12, 14, 16, 18), and CentOS (5, 6);
+- made to work on Python 3.6;
+- is wrapped in a [Docker container](https://hub.docker.com/r/bids/ndmg/);
+- has install instructions via a [Dockerfile](https://github.com/BIDS-Apps/ndmg/blob/master/Dockerfile#L6);
+- requires no non-standard hardware to run;
+- has key features built upon FSL, AFNI, Dipy, Nibabel, Nilearn, Networkx, Numpy, Scipy, Scikit-Learn, and others;
+- takes approximately 1-core, 8-GB of RAM, and 1 hour to run for most datasets.
 
 **m2g** relies on [FSL](http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FslInstallation), [AFNI](https://afni.nimh.nih.gov/), [Dipy](http://nipy.org/dipy/), [networkx](https://networkx.github.io/), and [nibabel](http://nipy.org/nibabel/), [numpy](http://www.numpy.org/) [scipy](http://www.scipy.org/), [scikit-learn](http://scikit-learn.org/stable/), [scikit-image](http://scikit-image.org/), [nilearn](http://nilearn.github.io/). You should install FSL and AFNI through the instructions on their website, then install other Python dependencies as well as the package itself with the following:
 
@@ -62,6 +68,12 @@ For the most up-to-date version of m2g, you can use the staging branch. This ver
     pip install .
 
 You can also install **m2g** from `pip` as shown below. Installation shouldn't take more than a few minutes, but depends on your internet connection. Note that to install the most up-to-date version of the pipeline, we currently recommend installing from github.
+
+### Install from pip
+
+    pip install ndmg
+
+You can also install **ndmg** from `pip` as shown below. Installation shouldn't take more than a few minutes, but depends on your internet connection. Note that to install the most up-to-date version of the pipeline, we currently recommend installing from github.
 
 ### Install from pip
 
