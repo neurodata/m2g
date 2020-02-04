@@ -90,7 +90,7 @@ RUN \
 RUN chmod -R 777 /m2g_atlases
 
 # Grab m2g from deploy.
-RUN git clone -b staging $M2G_URL /m2g && \
+RUN git clone -b m2g-staging $M2G_URL /m2g && \
     cd /m2g && \
     pip3.6 install .
 RUN chmod -R 777 /usr/local/bin/m2g_bids

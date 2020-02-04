@@ -10,7 +10,7 @@
 
 ![](./docs/nutmeg.png)
 
-NeuroData's MR Graphs package, **m2g** (pronounced "**_nutmeg_**"), is a turn-key pipeline which uses structural and diffusion MRI data to estimate multi-resolution connectomes reliably and scalably.
+NeuroData's MR Graphs package, **m2g**, is a turn-key pipeline which uses structural and diffusion MRI data to estimate multi-resolution connectomes reliably and scalably.
 
 ## Contents
 
