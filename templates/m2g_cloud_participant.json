@@ -2,7 +2,7 @@
   "jobName": "<JOBNAME>",
   "jobQueue": "ndmg-queue",
   "dependsOn": [],
-  "jobDefinition": "ndmg",
+  "jobDefinition": "m2g",
   "parameters": {},
   "containerOverrides": {
     "command": [

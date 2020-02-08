@@ -342,11 +342,11 @@ def m2g_dwi_worker(
 
     exe_time = datetime.now() - startTime
 
-    if "NDMG_URL" in os.environ: #TODO NDMG_URL in travis image should be changed to M2G_URL
+    if "M2G_URL" in os.environ:
         print("Note: tractography QA does not work in a Docker environment.")
     else:
         qa_tractography_out = outdir / "qa/fibers"
-        qa_tractography(streams, qa_tractography_out, dwi_prep) #TODO dwi_prep is not defined here
+        qa_tractography(streams, qa_tractography_out, eddy_corrected_data)
         print("QA tractography Completed.")
 
     print(f"Total execution time: {exe_time}")
