@@ -43,10 +43,10 @@ before_install:
   - docker version
 
   # grab m2g's travis docker image, run it with local branch attached as a volume
-  - docker pull neurodata/ndmg_travis:latest
+  - docker pull neurodata/m2g_travis:latest
   - docker images
   - cd m2g
-  - docker run -t -d --name travis -e MPLCONFIGDIR=/tmp/matplotlib -e AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY -v $(pwd):/m2g -v $(readlink -f ../output):/output --entrypoint /bin/bash neurodata/ndmg_travis:latest
+  - docker run -t -d --name travis -e MPLCONFIGDIR=/tmp/matplotlib -e AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY -v $(pwd):/m2g -v $(readlink -f ../output):/output --entrypoint /bin/bash neurodata/m2g_travis:latest
   - docker ps
 
 install:
