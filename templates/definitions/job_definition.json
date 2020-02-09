@@ -3,7 +3,7 @@
     "type": "container", 
     "parameters": {}, 
     "containerProperties": {
-        "image": "neurodata/ndmg", 
+        "image": "neurodata/m2g", 
         "vcpus": 2, 
         "memory": 14000, 
         "command": [
