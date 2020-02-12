@@ -1,4 +1,4 @@
-# Contributing to NDMG
+# Contributing to M2G
 
 This document is a working draft.  Edits and comments welcome. See the [neurodata practices](https://github.com/neurodata/practices) for best practices on writing code.
 
@@ -16,17 +16,17 @@ The most stable branch, it is updated approximately once per month and only with
 The most up-to-date branch, it is where feature branches are added to and is what gets merged into deploy. This version of the pipeline has not been as thoroughly tested as deploy, meaning there may be issues/less accurate results.
 
 ## Contributing through GitHub
-We appreciate all contributions to ndmg,
+We appreciate all contributions to m2g,
 but those accepted fastest will follow a workflow similar to the following:
 
 1. **Comment on an existing issue or open a new issue referencing your addition.**<br />
-  This allows other members of the ndmg development team to confirm that you aren't
+  This allows other members of the m2g development team to confirm that you aren't
   overlapping with work that's currently underway and that everyone is on the same page
   with the goal of the work you're going to carry out.
   
-2. **Fork the ndmg repository to your profile.**
+2. **Fork the m2g repository to your profile.**
 
-3. **Make the changes you've discussed, following the ndmg Code Format**
+3. **Make the changes you've discussed, following the m2g Code Format**
   Keep the changes focused: Changing one feature or addressing one bug per pull request.
   Keep the commit history clean and concise. Commit messages should be in [imperative mood](https://chris.beams.io/posts/git-commit/).
   It is highly recommended that you test your changes thoroughly before submitting a pull request.
@@ -43,7 +43,7 @@ but those accepted fastest will follow a workflow similar to the following:
    and other tricky situations that could emerge from distributed development. While your PR may be accepted to staging, it will have to meet the improvement criteria before being added to deploy.
 
 ## Improvement Criteria
-In order for a change to be made to the ndmg deploy branch, it must meet the following criteria:
+In order for a change to be made to the m2g deploy branch, it must meet the following criteria:
 1. Result in a discriminability value equal to/greater than the current deploy metrics (within noise) on these 5 datasets:
    * BNU1 = 0.927, 1 failures        BNU1_staging = 0.923, 1 failures (113 success)
    * HNU1 = 0.969, 2 failures       HNU1_staging = 0.966, 2 failures (298 success)
