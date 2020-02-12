@@ -81,7 +81,7 @@ def m2g_dwi_worker(
     track_type : str
         Tracking approach: eudx or local. Default is eudx.
     mod_func : str
-        Diffusion model: csd, csa, or tensor. Default is tensor.
+        Diffusion model: csd, csa. Default is csa.
     seeds : int
         Density of seeding for native-space tractography.
     reg_style : str
@@ -346,7 +346,7 @@ def m2g_dwi_worker(
         print("Note: tractography QA does not work in a Docker environment.")
     else:
         qa_tractography_out = outdir / "qa/fibers"
-        qa_tractography(streams, qa_tractography_out, eddy_corrected_data)
+        qa_tractography(streams, qa_tractography_out, str(eddy_corrected_data))
         print("QA tractography Completed.")
 
     print(f"Total execution time: {exe_time}")
@@ -424,8 +424,8 @@ def main():
     parser.add_argument(
         "--mf",
         action="store",
-        help="Diffusion model: csd, csa, or tensor. Default is tensor.",
-        default="tensor",
+        help="Diffusion model: csd or csa. Default is csa.",
+        default="csa",
     )
     parser.add_argument(
         "--sp",

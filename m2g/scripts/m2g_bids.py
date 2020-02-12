@@ -188,7 +188,7 @@ def main():
     parser.add_argument(
         "--diffusion_model",
         action="store",
-        help="Diffusion model: csd, csa. Default is csa.",
+        help="Diffusion model: csd or csa. Default is csa.",
         default="csa",
     )
     parser.add_argument(
