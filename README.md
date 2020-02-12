@@ -44,13 +44,7 @@ The **m2g** pipeline:
 - has key features built upon FSL, AFNI, Dipy, Nibabel, Nilearn, Networkx, Numpy, Scipy, Scikit-Learn, and others;
 - takes approximately 1-core, 8-GB of RAM, and 1 hour to run for most datasets.
 
-- was developed and tested primarily on Mac OSX, Ubuntu (12, 14, 16, 18), and CentOS (5, 6);
-- made to work on Python 3.6;
-- is wrapped in a [Docker container](https://hub.docker.com/r/bids/ndmg/);
-- has install instructions via a [Dockerfile](https://github.com/BIDS-Apps/ndmg/blob/master/Dockerfile#L6);
-- requires no non-standard hardware to run;
-- has key features built upon FSL, AFNI, Dipy, Nibabel, Nilearn, Networkx, Numpy, Scipy, Scikit-Learn, and others;
-- takes approximately 1-core, 8-GB of RAM, and 1 hour to run for most datasets.
+## Installation Guide
 
 **m2g** relies on [FSL](http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FslInstallation), [AFNI](https://afni.nimh.nih.gov/), [Dipy](http://nipy.org/dipy/), [networkx](https://networkx.github.io/), and [nibabel](http://nipy.org/nibabel/), [numpy](http://www.numpy.org/) [scipy](http://www.scipy.org/), [scikit-learn](http://scikit-learn.org/stable/), [scikit-image](http://scikit-image.org/), [nilearn](http://nilearn.github.io/). You should install FSL and AFNI through the instructions on their website, then install other Python dependencies as well as the package itself with the following:
 
@@ -71,23 +65,17 @@ You can also install **m2g** from `pip` as shown below. Installation shouldn't t
 
 ### Install from pip
 
-    pip install ndmg
-
-You can also install **ndmg** from `pip` as shown below. Installation shouldn't take more than a few minutes, but depends on your internet connection. Note that to install the most up-to-date version of the pipeline, we currently recommend installing from github.
-
-### Install from pip
-
-    pip install ndmg
+    pip install m2g
 
 ## Docker
 
-**ndmg** is available through Dockerhub, and the most recent docker image can be pulled using:
+**m2g** is available through Dockerhub, and the most recent docker image can be pulled using:
 
-    docker pull neurodata/ndmg_dev:latest
+    docker pull neurodata/m2g:latest
 
 The image can then be used to create a container and run directly with the following command (and any additional options you may require for Docker, such as volume mounting):
 
-    docker run -ti --entrypoint /bin/bash neurodata/ndmg_dev:latest
+    docker run -ti --entrypoint /bin/bash neurodata/m2g:latest
 
 **m2g** docker containers can also be made from m2g's Dockerfile.
 
@@ -220,9 +208,9 @@ The **m2g** pipeline can be used to generate connectomes as a command-line utili
 Note that more options are available which can be helpful if running on the Amazon cloud, which can be found and documented by running `m2g -h`.
 If running with the Docker container shown above, the `entrypoint` is already set to `m2g`, so the pipeline can be run directly from the host-system command line as follows:
 
-    docker run -ti -v /path/to/local/data:/data neurodata/ndmg_dev /data/ /data/outputs
+    docker run -ti -v /path/to/local/data:/data neurodata/m2g /data/ /data/outputs
 
-This will run **m2g** on the local data and save the output files to the directory /path/to/local/data/outputs. Note that if you have created the docker image from github, replace `neurodata/m2g_dev` with `imagename:uniquelabel`.
+This will run **m2g** on the local data and save the output files to the directory /path/to/local/data/outputs. Note that if you have created the docker image from github, replace `neurodata/m2g` with `imagename:uniquelabel`.
 
 Also note that currently, running `m2g` on a single bids-formatted dataset directory only runs a single scan. To run the entire dataset, we recommend parallelizing on a high-performance cluster or using `m2g`'s s3 integration.
 
