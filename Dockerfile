@@ -23,6 +23,7 @@ RUN apt-get update && \
     add-apt-repository ppa:deadsnakes/ppa && \
     apt-get update && \
     apt-get install -y python3.6 python3.6-dev && \
+    apt-get install -y python2.7 python-pip && \
     curl https://bootstrap.pypa.io/get-pip.py | python3.6
 
 RUN pip3 install --upgrade pip
@@ -90,7 +91,7 @@ RUN \
 RUN chmod -R 777 /m2g_atlases
 
 # Grab m2g from deploy.
-RUN git clone -b deploy $M2G_URL /m2g && \
+RUN git clone -b cpac-addition $M2G_URL /m2g && \
     cd /m2g && \
     pip3.6 install .
 RUN chmod -R 777 /usr/local/bin/m2g_bids
