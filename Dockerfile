@@ -23,8 +23,9 @@ RUN apt-get update && \
     add-apt-repository ppa:deadsnakes/ppa && \
     apt-get update && \
     apt-get install -y python3.6 python3.6-dev && \
-    apt-get install -y python2.7 python-pip && \
     curl https://bootstrap.pypa.io/get-pip.py | python3.6
+
+RUN apt-get install -y python2.7 python-pip
 
 RUN pip3 install --upgrade pip
 
@@ -60,7 +61,7 @@ RUN mkdir -p /opt/afni && \
 ENV PATH=/opt/afni:$PATH
 
 ## --------CPAC INSTALLS-----------------------------------------------------#
-RUN apt-get install -y graphviz graphvix-dev
+RUN apt-get install -y graphviz graphviz-dev
 
 # Setup FSL environment
 ENV FSLDIR=/usr/share/fsl/5.0 \
@@ -86,7 +87,11 @@ RUN curl -sL http://fcon_1000.projects.nitrc.org/indi/cpac_resources.tar.gz -o /
 #--------M2G SETUP-----------------------------------------------------------#
 # setup of python dependencies for m2g itself, as well as file dependencies
 RUN \
-    pip3.6 install virtualenv numpy nibabel scipy python-dateutil pandas boto3 awscli matplotlib nilearn sklearn pandas cython vtk pyvtk fury awscli requests ipython duecredit graspy scikit-image networkx dipy pybids
+    pip3.6 install virtualenv numpy nibabel scipy python-dateutil pandas boto3 awscli
+RUN \
+    pip3.6 install matplotlib nilearn sklearn pandas cython vtk pyvtk fury
+RUN \
+    pip3.6 install awscli requests ipython duecredit graspy scikit-image networkx dipy pybids
 
 RUN \
     pip3.6 install plotly==1.12.9 setuptools>=40.0 configparser>=3.7.4
@@ -137,7 +142,7 @@ RUN cd / && \
     mv /C-PAC/CPAC/dev/docker_data/* /code && \
     mv /C-PAC/* /code && \
     rm -R /C-PAC && \
-    chmod +x /code/run.py
+    chmod +x /code/run.py && \
     cd /m2g
 
 RUN virtualenv -p /usr/bin/python2.7 venv && \
