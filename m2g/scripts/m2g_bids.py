@@ -143,6 +143,12 @@ def main():
         nargs="+",
     )
     parser.add_argument(
+        "--pipeline",
+        action="store",
+        help="Pipline to use when analyzing the input data, either func or dwi. Default is dwi.",
+        default="dwi"
+    )
+    parser.add_argument(
         "--push_location",
         action="store",
         help="Name of folder on s3 to push output data to, if the folder does not exist, it will be created."
@@ -223,6 +229,7 @@ def main():
     output_dir = result.output_dir
     subjects = result.participant_label
     sessions = result.session_label
+    pipe=result.pipeline
     parcellation_name = result.parcellation
     push_location = result.push_location
 
@@ -290,6 +297,17 @@ def main():
         Input directory contents: {os.listdir(input_dir)}.
         """
     )
+
+    # ------- Check if they have selected the functional pipeline ------ #
+
+    if pipeline = "func":
+        print("here we go!!!")
+        #Change data_config_file with new input file
+        #Change pipeline file
+
+        #Change output so that it can be sent to s3
+
+
     # ---------------- Grab parcellations, atlases, mask --------------- #
     # get parcellations, atlas, and mask, then stick it into constant_kwargs
     atlas_dir = get_atlas_dir()
