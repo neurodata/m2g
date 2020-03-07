@@ -59,10 +59,34 @@ RUN mkdir -p /opt/afni && \
     rm -rf afni.tar.gz
 ENV PATH=/opt/afni:$PATH
 
+## --------CPAC INSTALLS-----------------------------------------------------#
+RUN apt-get install -y graphviz graphvix-dev
+
+# Setup FSL environment
+ENV FSLDIR=/usr/share/fsl/5.0 \
+    FSLOUTPUTTYPE=NIFTI_GZ \
+    FSLMULTIFILEQUIT=TRUE \
+    POSSUMDIR=/usr/share/fsl/5.0 \
+    LD_LIBRARY_PATH=/usr/lib/fsl/5.0:$LD_LIBRARY_PATH \
+    FSLTCLSH=/usr/bin/tclsh \
+    FSLWISH=/usr/bin/wish \
+    PATH=/usr/lib/fsl/5.0:$PATH
+
+# install CPAC resources into FSL
+RUN curl -sL http://fcon_1000.projects.nitrc.org/indi/cpac_resources.tar.gz -o /tmp/cpac_resources.tar.gz && \
+    tar xfz /tmp/cpac_resources.tar.gz -C /tmp && \
+    cp -n /tmp/cpac_image_resources/MNI_3mm/* $FSLDIR/data/standard && \
+    cp -n /tmp/cpac_image_resources/MNI_4mm/* $FSLDIR/data/standard && \
+    cp -n /tmp/cpac_image_resources/symmetric/* $FSLDIR/data/standard && \
+    cp -n /tmp/cpac_image_resources/HarvardOxford-lateral-ventricles-thr25-2mm.nii.gz $FSLDIR/data/atlases/HarvardOxford && \
+    cp -nr /tmp/cpac_image_resources/tissuepriors/2mm $FSLDIR/data/standard/tissuepriors && \
+    cp -nr /tmp/cpac_image_resources/tissuepriors/3mm $FSLDIR/data/standard/tissueprior
+
+
 #--------M2G SETUP-----------------------------------------------------------#
 # setup of python dependencies for m2g itself, as well as file dependencies
 RUN \
-    pip3.6 install numpy nibabel scipy python-dateutil pandas boto3 awscli matplotlib nilearn sklearn pandas cython vtk pyvtk fury awscli requests ipython duecredit graspy scikit-image networkx dipy pybids
+    pip3.6 install virtualenv numpy nibabel scipy python-dateutil pandas boto3 awscli matplotlib nilearn sklearn pandas cython vtk pyvtk fury awscli requests ipython duecredit graspy scikit-image networkx dipy pybids
 
 RUN \
     pip3.6 install plotly==1.12.9 setuptools>=40.0 configparser>=3.7.4
@@ -105,3 +129,22 @@ RUN ldconfig
 
 # and add it as an entrypoint
 ENTRYPOINT ["m2g"]
+
+# Set up the functional pipeline
+RUN cd / && \
+    git clone https://github.com/FCP-INDI/C-PAC.git && \
+    mkdir /code && \
+    mv /C-PAC/CPAC/dev/docker_data/* /code && \
+    mv /C-PAC/* /code && \
+    rm -R /C-PAC && \
+    chmod +x /code/run.py
+    cd /m2g
+
+RUN virtualenv -p /usr/bin/python2.7 venv && \
+    source /venv/bin/activate && \
+    pip install --upgrade pip==9.0.1 && \
+    pip install /code/requirements.txt && \
+    pip install -e /code && \
+    pip install torch==1.2.0 --no-cache-dir && \
+    pip install torch==1.2.0 torchvision==0.4.0 -f https://download.pytorch.org/whl/torch_stable.html --no-cache-dir && \
+    pip install xvfbwrapper
