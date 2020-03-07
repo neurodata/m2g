@@ -300,7 +300,7 @@ def main():
 
     # ------- Check if they have selected the functional pipeline ------ #
 
-    if pipeline = "func":
+    if pipe == "func":
         print("here we go!!!")
         #Change data_config_file with new input file
         #Change pipeline file
