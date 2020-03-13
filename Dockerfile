@@ -139,16 +139,17 @@ ENTRYPOINT ["m2g"]
 RUN cd / && \
     git clone https://github.com/FCP-INDI/C-PAC.git && \
     mkdir /code && \
-    mv /C-PAC/CPAC/dev/docker_data/* /code && \
-    mv /C-PAC/* /code && \
+    mv /C-PAC/dev/docker_data/* /code/ && \
+    mv /C-PAC/* /code/ && \
     rm -R /C-PAC && \
     chmod +x /code/run.py && \
-    cd /m2g
+    cd /
 
 RUN virtualenv -p /usr/bin/python2.7 venv && \
-    source /venv/bin/activate && \
+    . venv/bin/activate && \
     pip install --upgrade pip==9.0.1 && \
-    pip install /code/requirements.txt && \
+    ls /code && \
+    pip install -r /code/requirements.txt && \
     pip install -e /code && \
     pip install torch==1.2.0 --no-cache-dir && \
     pip install torch==1.2.0 torchvision==0.4.0 -f https://download.pytorch.org/whl/torch_stable.html --no-cache-dir && \
