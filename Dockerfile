@@ -1,6 +1,6 @@
 FROM neurodata/fsl_1604:0.0.1
-LABEL author="Derek Pisner"
-LABEL maintainer="dpisner@utexas.edu"
+LABEL author="Ross Lawrence, Alex Loftus"
+LABEL maintainer="rlawre18@jhu.edu"
 
 #--------Environment Variables-----------------------------------------------#
 ENV M2G_URL https://github.com/neurodata/m2g.git
@@ -87,14 +87,14 @@ RUN curl -sL http://fcon_1000.projects.nitrc.org/indi/cpac_resources.tar.gz -o /
 #--------M2G SETUP-----------------------------------------------------------#
 # setup of python dependencies for m2g itself, as well as file dependencies
 RUN \
-    pip3.6 install virtualenv numpy nibabel scipy python-dateutil pandas boto3 awscli
+    pip3.6 install --no-cache-dir virtualenv numpy nibabel scipy python-dateutil pandas boto3 awscli
 RUN \
-    pip3.6 install matplotlib nilearn sklearn pandas cython vtk pyvtk fury
+    pip3.6 install --no-cache-dir matplotlib nilearn sklearn pandas cython vtk pyvtk fury
 RUN \
-    pip3.6 install awscli requests ipython duecredit graspy scikit-image networkx dipy pybids
+    pip3.6 install --no-cache-dir awscli requests ipython duecredit graspy scikit-image networkx dipy pybids
 
 RUN \
-    pip3.6 install plotly==1.12.9 setuptools>=40.0 configparser>=3.7.4
+    pip3.6 install --no-cache-dir plotly==1.12.9 setuptools>=40.0 configparser>=3.7.4
 
 WORKDIR /
 
@@ -135,6 +135,9 @@ RUN ldconfig
 # and add it as an entrypoint
 ENTRYPOINT ["m2g"]
 
+# Clear apt-get caches (try adding sudo)
+RUN apt-get clean
+
 # Set up the functional pipeline
 RUN cd / && \
     git clone https://github.com/FCP-INDI/C-PAC.git && \
@@ -145,11 +148,14 @@ RUN cd / && \
     chmod +x /code/run.py && \
     cd /
 
+# due to cpac's requirments.txt being out of order, nilearn is installed before scipy and scikit-learn (which it needs)
 RUN virtualenv -p /usr/bin/python2.7 venv && \
     . venv/bin/activate && \
     pip install --upgrade pip==9.0.1 && \
     ls /code && \
-    pip install -r /code/requirements.txt && \
+    pip install scipy==1.2.1 --no-cache-dir && \
+    pip install scikit-learn==0.19.1 --no-cache-dir && \
+    pip install -r /code/requirements.txt --no-cache-dir && \
     pip install -e /code && \
     pip install torch==1.2.0 --no-cache-dir && \
     pip install torch==1.2.0 torchvision==0.4.0 -f https://download.pytorch.org/whl/torch_stable.html --no-cache-dir && \
