@@ -28,6 +28,7 @@ from m2g.utils.gen_utils import check_dependencies
 from m2g.utils.gen_utils import is_bids
 from m2g.utils.gen_utils import as_directory
 from m2g.scripts.m2g_dwi_pipeline import m2g_dwi_worker
+from m2g.functional.m2g_func import m2g_func_worker
 
 
 def get_atlas(atlas_dir, vox_size):
@@ -302,10 +303,26 @@ def main():
 
     if pipe == "func":
         print("here we go!!!")
-        #Change data_config_file with new input file
-        #Change pipeline file
 
-        #Change output so that it can be sent to s3
+        sweeper = DirectorySweeper(input_dir, subjects=subjects, sessions=sessions, pipeline='func')
+        scans = sweeper.get_dir_info(pipeline='func')
+
+        #placeholder
+        acquisition='alt+z'
+        tr=2.0
+
+        for SubSesFile in scans:
+            subject, session, files = SubSesFile
+            
+            m2g_func_worker(input_dir, output_dir, subject, session, files['t1w'], files['func'], acquisition, tr)
+        
+        #m2g_func_worker()
+        print(
+            f"""
+            Functional Pipeline completed!
+            """
+        )
+        sys.exit(0)
 
 
     # ---------------- Grab parcellations, atlases, mask --------------- #

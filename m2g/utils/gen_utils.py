@@ -48,9 +48,11 @@ class DirectorySweeper:
     sessions : list or str, optional
         The sessions to run m2g with.
         If None, use every possible session.
+    pipeline : str, optional
+        The pipeline you are using, 'func' or 'dwi', default is 'dwi'
     """
 
-    def __init__(self, bdir, subjects=None, sessions=None):
+    def __init__(self, bdir, subjects=None, sessions=None, pipeline='dwi'):
         self.bdir = bdir
         self.layout = bids.BIDSLayout(bdir)
         if subjects is None:
@@ -59,12 +61,12 @@ class DirectorySweeper:
             sessions = self.layout.get_sessions()
 
         # get list of subject / session pairs
-        self.pairs = self.get_pairs(subjects=subjects, sessions=sessions)
+        self.pairs = self.get_pairs(subjects=subjects, sessions=sessions, pipeline=pipeline)
 
     def __repr__(self):
         return str(self.layout)
 
-    def get_pairs(self, subjects, sessions):
+    def get_pairs(self, subjects, sessions, pipeline='dwi'):
         """
         Return subject/session pairs.
         
@@ -74,6 +76,8 @@ class DirectorySweeper:
             Subjects to retrieve.
         sessions : str or list
             Sessions to retrieve.
+        pipeline : str, optional
+        The pipeline you are using, 'func' or 'dwi', default is 'dwi'
         
         Returns
         -------
@@ -82,8 +86,12 @@ class DirectorySweeper:
             Formatted like: [(subject, session), (subject, session), ...].
         """
         pairs = []
+        # Change suffix to be 'bold' because prefixes aren't a thing
+        if pipeline == 'func':
+            pipeline='bold'
+        
         kwargs = dict(
-            suffix="dwi",
+            suffix=pipeline,
             extensions=["nii", "nii.gz"],
             subject=subjects,
             session=sessions,
@@ -97,7 +105,7 @@ class DirectorySweeper:
             raise ValueError(f"No pairs found for {self}")
         return pairs
 
-    def get_files(self, subject, session):
+    def get_files(self, subject, session, pipeline='dwi'):
         """
         Retrieve all relevant files from a dataframe.
         
@@ -107,6 +115,8 @@ class DirectorySweeper:
             Subject to get files for.
         session : str
             Session to get files for.
+        pipeline : str, optional
+        The pipeline you are using, 'func' or 'dwi', default is 'dwi'
         
         Returns
         -------
@@ -114,14 +124,25 @@ class DirectorySweeper:
             Dictionary of all files from a single session.
         """
 
-        kwargs = dict(return_type="filename", session=session, subject=subject)
-        anat, bval, bvec, dwi = self.layout.get(**kwargs)
-        files = {"dwi": dwi, "bvals": bval, "bvecs": bvec, "t1w": anat}
+        if pipeline == 'func':
+            [func] = self.layout.get(return_type='filename', session=session, subject=subject, suffix='bold')
+            [anat] = self.layout.get(return_type="filename", session=session, subject=subject, suffix=['T1w','t1w'])
+            files = {"func": func, "t1w": anat}
+        else:
+            bval, bvec, dwi = self.layout.get(return_type="filename", session=session, subject=subject, suffix='dwi')
+            [anat] = self.layout.get(return_type="filename", session=session, subject=subject, suffix='T1w')
+            files = {"dwi": dwi, "bvals": bval, "bvecs": bvec, "t1w": anat}
+
         return files
 
-    def get_dir_info(self):
+    def get_dir_info(self, pipeline='dwi'):
         """
         Parse an entire BIDSLayout for scan parameters.
+
+        Parameters
+        ----------
+        pipeline : str, optional
+        The pipeline you are using, 'func' or 'dwi', default is 'dwi'
         
         Returns
         -------
@@ -137,7 +158,7 @@ class DirectorySweeper:
 
         # append subject, session, and files for each relevant session to scans
         for subject, session in self.pairs:
-            files = self.get_files(subject, session)
+            files = self.get_files(subject, session, pipeline=pipeline)
             scan = SubSesFiles(subject, session, files)
             scans.append(scan)
 
