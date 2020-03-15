@@ -1,5 +1,6 @@
 import subprocess
 import yaml
+from m2g.utils.gen_utils import run
 
 def make_dataconfig(input_dir, sub, ses, anat, func, acquisition='alt+z', tr=2.0):
     """Generates the data_config file needed by cpac
@@ -17,25 +18,23 @@ def make_dataconfig(input_dir, sub, ses, anat, func, acquisition='alt+z', tr=2.0
         None
     """
 
-    Data = {
-        '-': {
-            'subject_id': sub,
-            'unique_id': ses,
-            'anat': anat,
-            'func': {
+    Data = [{
+        'subject_id': sub,
+        'unique_id': f'ses-{ses}',
+        'anat': anat,
+        'func': {
                 'rest_run-1': {
 			        'scan': func,
 			        'scan_parameters': {
 				    	'acquisition': acquisition,
 				    	'tr': tr
-				    }
 			    }
 		    }
-	    }
-    }
+	    }    
+    }]
     
-
-    with open('/input/data_config.yaml','w',encoding='utf8') as outfile:
+    config_file = f'{input_dir}/data_config.yaml'
+    with open(config_file,'w',encoding='utf8') as outfile:
         yaml.dump(Data, outfile, default_flow_style=False)
     
     
@@ -46,27 +45,41 @@ def make_dataconfig(input_dir, sub, ses, anat, func, acquisition='alt+z', tr=2.0
     #except IOError:
     #    print("Error! Could not find config file {0}".format(config_filename))
     #    raise
+    return config_file
     
-make_dataconfig('/input/', 111, 1, 'alt+z', '2.0')
 
-def update_pipeline():
-    print('test')
+def make_script(input_dir, output_dir, data_config, pipeline_config):
+    cpac_script = '/root/.m2g/cpac_script.sh'
+    with open(cpac_script,'w+',encoding='utf8') as script:
+        script.write(f'''#! /bin/bash
+        . /venv/bin/activate
+        python /code/run.py --data_config_file {data_config} --pipeline_file {pipeline_config} {input_dir} {output_dir} participant
+        ''')
+    
+    run(f'chmod +x {cpac_script}')
 
-def make_script(input_dir, output_dir):
-    #with open('/.m2g/cpac_script.sh','w',encoding='utf8') as script:
-        #script.write(f'''
-        #    #! /bin/bash
-        #    . /venv/bin/activate
-        #    python /code/run.py --data_config_file {input_dir}/data_config.yaml --pipeline_file {} {input_dir} {output_dir} participant
-        #    ''')
-    print('whatever')
+    return cpac_script
 
-def run_cpac():
-    subprocess.call(['/.m2g/cpac_script.sh'])
 
 
 def m2g_func_worker(input_dir, output_dir, sub, ses, anat, bold, acquisition, tr):
-    make_dataconfig()
-    update_pipeline()
-    make_script()
-    run_cpac()
+    """[summary]
+    
+    Arguments:
+        input_dir {[type]} -- [description]
+        output_dir {[type]} -- [description]
+        sub {[type]} -- [description]
+        ses {[type]} -- [description]
+        anat {[type]} -- [description]
+        bold {[type]} -- [description]
+        acquisition {[type]} -- [description]
+        tr {[type]} -- [description]
+    """
+    
+    pipeline_config='/m2g/m2g/functional/m2g_pipeline.yaml'
+    
+    data_config = make_dataconfig(input_dir, sub, ses, anat, bold, acquisition, tr)
+    cpac_script = make_script(input_dir, output_dir, data_config, pipeline_config)
+    
+    # Run pipeline
+    subprocess.call([cpac_script])
