@@ -146,13 +146,23 @@ def main():
     parser.add_argument(
         "--pipeline",
         action="store",
-        help="Pipline to use when analyzing the input data, either func or dwi. Default is dwi.",
+        help="""Pipline to use when analyzing the input data, 
+        either func or dwi. If  Default is dwi.""",
         default="dwi"
     )
     parser.add_argument(
         "--acquisition",
         action="store",
-        help="acquisition type for functional data, default is 'alt+z'",
+        help="""Acquisition method for functional data:
+        altplus - Alternating in the +z direction
+        alt+z - Alternating in the +z direction
+        alt+z2 - Alternating, but beginning at slice #1
+        altminus - Alternating in the -z direction
+        alt-z - Alternating in the -z direction
+        alt-z2 - Alternating, starting at slice #nz-2 instead of #nz-1
+        seqplus - Sequential in the plus direction
+        seqminus - Sequential in the minus direction,
+        default is alt+z. For more information:https://fcp-indi.github.io/docs/user/func.html""",
         default="alt+z"
     )
     parser.add_argument(
