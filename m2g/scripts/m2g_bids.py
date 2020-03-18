@@ -150,6 +150,18 @@ def main():
         default="dwi"
     )
     parser.add_argument(
+        "--acquisition",
+        action="store",
+        help="acquisition type for functional data, default is 'alt+z'",
+        default="alt+z"
+    )
+    parser.add_argument(
+        "--tr",
+        action="store",
+        help="functional scan TR (seconds), default is 2.0",
+        default=2.0
+    )
+    parser.add_argument(
         "--push_location",
         action="store",
         help="Name of folder on s3 to push output data to, if the folder does not exist, it will be created."
@@ -231,6 +243,8 @@ def main():
     subjects = result.participant_label
     sessions = result.session_label
     pipe=result.pipeline
+    acquisition = result.acquisition    #functional pipeline settings
+    tr=result.tr
     parcellation_name = result.parcellation
     push_location = result.push_location
 
@@ -306,12 +320,8 @@ def main():
         sweeper = DirectorySweeper(input_dir, subjects=subjects, sessions=sessions, pipeline='func')
         scans = sweeper.get_dir_info(pipeline='func')
 
-        #placeholder
-        acquisition='alt+z'
-        tr=2.0
-
         #add subject and session folders to output
-        outDir = f"{output_dir}/sub-{subject}/ses-{session}"}
+        outDir = f"{output_dir}/sub-{subject}/ses-{session}"
 
         for SubSesFile in scans:
             subject, session, files = SubSesFile
