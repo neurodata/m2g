@@ -300,7 +300,6 @@ def main():
     )
 
     # ------- Check if they have selected the functional pipeline ------ #
-
     if pipe == "func":
         print("here we go!!!")
 
@@ -311,10 +310,13 @@ def main():
         acquisition='alt+z'
         tr=2.0
 
+        #add subject and session folders to output
+        outDir = f"{output_dir}/sub-{subject}/ses-{session}"}
+
         for SubSesFile in scans:
             subject, session, files = SubSesFile
             
-            m2g_func_worker(input_dir, output_dir, subject, session, files['t1w'], files['func'], acquisition, tr)
+            m2g_func_worker(input_dir, outDir, subject, session, files['t1w'], files['func'], acquisition, tr)
         
         #m2g_func_worker()
         print(
@@ -322,6 +324,19 @@ def main():
             Functional Pipeline completed!
             """
         )
+
+        if push_location:
+            print(f"Pushing to s3 at {push_location}.")
+            push_buck, push_remo = cloud_utils.parse_path(push_location)
+            cloud_utils.s3_func_push_data(
+                push_buck,
+                push_remo,
+                outDir,
+                subject=subject,
+                session=session,
+                creds=creds,
+            )
+
         sys.exit(0)
 
 

@@ -195,7 +195,51 @@ def s3_get_data(bucket, remote, local, info="", force=False):
 
 
 def s3_push_data(bucket, remote, outDir, subject=None, session=None, creds=True):
-    """Pushes data to a specified S3 bucket
+    """Pushes dwi pipeline data to a specified S3 bucket
+
+    Parameters
+    ----------
+    bucket : str
+        s3 bucket you are pushing files to
+    remote : str
+        The path to the directory on your S3 bucket containing the data used in the pipeline, the string in 'modifier' will be put after the
+        first directory specified in the path as its own directory (/remote[0]/modifier/remote[1]/...)
+    outDir : str
+        Path of local directory being pushed to the s3 bucket
+    subject : str
+        subject we're pushing with
+    session : str
+        session we're pushing with
+    creds : bool, optional
+        Whether s3 credentials are being provided, may fail to push big files if False, by default True
+    """
+
+    # get client with credentials if they exist
+    client = s3_client(service="s3")
+
+    # check that bucket exists
+    bkts = [bk["Name"] for bk in client.list_buckets()["Buckets"]]
+    if bucket not in bkts:
+        sys.exit(
+            "Error: could not locate bucket. Available buckets: " + ", ".join(bkts)
+        )
+
+    # List all files and upload
+    for root, _, files in os.walk(outDir):
+        for file_ in files:
+            if not "tmp/" in root:  # exclude things in the tmp/ folder
+                if f"sub-{subject}/ses-{session}" in root:
+                    print(f"Uploading: {os.path.join(root, file_)}")
+                    spath = root[root.find("sub-") :]  # remove everything before /sub-*
+                    client.upload_file(
+                        os.path.join(root, file_),
+                        bucket,
+                        f"{remote}/{os.path.join(spath,file_)}",
+                        ExtraArgs={"ACL": "public-read"},
+                    )
+
+def s3_func_push_data(bucket, remote, outDir, subject=None, session=None, creds=True):
+    """Pushes functional pipeline data to a specified S3 bucket
 
     Parameters
     ----------
