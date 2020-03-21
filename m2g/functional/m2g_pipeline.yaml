@@ -48,7 +48,7 @@ num_ants_threads :  4
 
 
 # Name for this pipeline configuration - useful for identification.
-pipelineName :  ndmg
+pipelineName :  m2g
 
 
 # Directory where CPAC should store temporary and intermediate files.
@@ -89,7 +89,7 @@ write_debugging_outputs :  [0]
 
 # Output directory format and structure.
 # Options: default, ndmg
-output_tree: "ndmg"
+output_tree: "default" #SHOULD BE NDMG??
 
 
 # Generate quality control pages containing preprocessing and derivative outputs.

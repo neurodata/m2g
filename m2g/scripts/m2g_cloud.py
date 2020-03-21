@@ -282,7 +282,7 @@ def create_json(
     cmd[cmd.index("<ACQ>")] = acquisition
     cmd[cmd.index("<TR>")] = tr
     cmd[cmd.index("<PUSH>")] = f"s3://{bucket}/{path}/{modif}"
-    cmd.[cmd.index("<PARCEL>")] = parcellation
+    cmd[cmd.index("<PARCEL>")] = parcellation
     cmd[cmd.index("<VOX>")] = voxel_size
     cmd[cmd.index("<MOD>")] = mod_type
     cmd[cmd.index("<FILTER>")] = filtering_type
