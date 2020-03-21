@@ -6,6 +6,12 @@
   "parameters": {},
   "containerOverrides": {
     "command": [
+      "--pipeline",
+      "<PIPE>",
+      "--acquisition",
+      "<ACQ>",
+      "--tr",
+      "<TR>",
       "--participant_label",
       "<SUBJ>",
       "--session_label",
@@ -13,7 +19,7 @@
       "--push_location",
       "<PUSH>",
       "--parcellation",
-      "desikan",
+      "<PARCEL>",
       "--voxelsize",
       "<VOX>",
       "--mod",
@@ -24,6 +30,8 @@
       "<DIFF>",
       "--space",
       "<SPACE>",
+      "--seeds",
+      "<SEED>",
       "<INPUT>",
       "/output"
     ],

@@ -330,11 +330,11 @@ def main():
         sweeper = DirectorySweeper(input_dir, subjects=subjects, sessions=sessions, pipeline='func')
         scans = sweeper.get_dir_info(pipeline='func')
 
-        #add subject and session folders to output
-        outDir = f"{output_dir}/sub-{subject}/ses-{session}"
-
+        
         for SubSesFile in scans:
             subject, session, files = SubSesFile
+            #add subject and session folders to output
+            outDir = f"{output_dir}/sub-{subject}/ses-{session}"
             
             m2g_func_worker(input_dir, outDir, subject, session, files['t1w'], files['func'], acquisition, tr)
         
