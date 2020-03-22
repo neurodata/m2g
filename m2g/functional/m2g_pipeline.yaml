@@ -89,7 +89,7 @@ write_debugging_outputs :  [0]
 
 # Output directory format and structure.
 # Options: default, ndmg
-output_tree: "default" #SHOULD BE NDMG??
+output_tree: "ndmg" #try default?
 
 
 # Generate quality control pages containing preprocessing and derivative outputs.
