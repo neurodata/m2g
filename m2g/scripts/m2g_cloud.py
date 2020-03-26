@@ -455,7 +455,7 @@ def main():
         "--tr",
         action="store",
         help="functional scan TR (seconds), default is 2.0",
-        default=2.0
+        default="2.0",
     )
     parser.add_argument(
         "--parcellation",
@@ -497,7 +497,7 @@ def main():
         "--seeds",
         action="store",
         help="Seeding density for tractography. Default is 20.",
-        default=20,
+        default="20",
     )
 
     result = parser.parse_args()
