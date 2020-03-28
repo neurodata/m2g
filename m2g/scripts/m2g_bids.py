@@ -14,6 +14,7 @@ In this module, m2g:
 
 # standard library imports
 import sys
+import shutil
 import glob
 import os
 from argparse import ArgumentParser
@@ -325,8 +326,7 @@ def main():
 
     # ------- Check if they have selected the functional pipeline ------ #
     if pipe == "func":
-        print("here we go!!!")
-
+        
         sweeper = DirectorySweeper(input_dir, subjects=subjects, sessions=sessions, pipeline='func')
         scans = sweeper.get_dir_info(pipeline='func')
 
@@ -338,24 +338,25 @@ def main():
             
             m2g_func_worker(input_dir, outDir, subject, session, files['t1w'], files['func'], acquisition, tr)
         
-        #m2g_func_worker()
-        print(
-            f"""
-            Functional Pipeline completed!
-            """
-        )
-
-        if push_location:
-            print(f"Pushing to s3 at {push_location}.")
-            push_buck, push_remo = cloud_utils.parse_path(push_location)
-            cloud_utils.s3_func_push_data(
-                push_buck,
-                push_remo,
-                outDir,
-                subject=subject,
-                session=session,
-                creds=creds,
+            #m2g_func_worker()
+            print(
+                f"""
+                Functional Pipeline completed!
+                """
             )
+
+            if push_location:
+                print(f"Pushing to s3 at {push_location}.")
+                push_buck, push_remo = cloud_utils.parse_path(push_location)
+                cloud_utils.s3_func_push_data(
+                    push_buck,
+                    push_remo,
+                    outDir,
+                    subject=subject,
+                    session=session,
+                    creds=creds,
+                )
+            shutil.rmtree(f'{output_dir}/sub-{subject}', ignore_errors=False, onerror=None)
 
         sys.exit(0)
 
