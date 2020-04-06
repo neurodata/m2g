@@ -53,10 +53,7 @@ def make_script(input_dir, output_dir, subject, session, data_config, pipeline_c
     with open(cpac_script,'w+',encoding='utf8') as script:
         script.write(f'''#! /bin/bash
         . /venv/bin/activate
-        mkdir {output_dir}/sub-{subject}
-        mkdir {output_dir}/sub-{subject}/ses-{session}
-        mkdir {output_dir}/sub-{subject}/ses-{session}/crash
-        python /code/run.py --data_config_file {data_config} --pipeline_file {pipeline_config} --mem_gb 10 --n_cpus 3 {input_dir} {output_dir} participant
+        python /code/run.py --data_config_file {data_config} --pipeline_file {pipeline_config} --mem_gb 24 {input_dir} {output_dir} participant
         ''')
     
     run(f'chmod +x {cpac_script}')

@@ -329,6 +329,10 @@ def main():
         
         sweeper = DirectorySweeper(input_dir, subjects=subjects, sessions=sessions, pipeline='func')
         scans = sweeper.get_dir_info(pipeline='func')
+        
+        home = os.path.expanduser("~")
+        if not os.path.exists(home + '/.m2g'):
+            os.makedirs(f"{home}/.m2g")
 
         
         for SubSesFile in scans:
@@ -356,7 +360,7 @@ def main():
                     session=session,
                     creds=creds,
                 )
-            shutil.rmtree(f'{output_dir}/sub-{subject}', ignore_errors=False, onerror=None)
+                shutil.rmtree(f'{output_dir}/sub-{subject}', ignore_errors=False, onerror=None)
 
         sys.exit(0)
 
