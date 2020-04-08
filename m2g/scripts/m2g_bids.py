@@ -243,6 +243,12 @@ def main():
         Excess clipping in general: general,""",
         default=None,
     )
+    parser.add_argument(
+        "--mem_gb",
+        action="store",
+        help="Memory, in GB, to allocate to functional pipeline",
+        default=60,
+    )
 
     # and ... begin!
     print("\nBeginning m2g ...")
@@ -255,7 +261,8 @@ def main():
     sessions = result.session_label
     pipe=result.pipeline
     acquisition = result.acquisition    #functional pipeline settings
-    tr=result.tr
+    mem_gb = result.mem_gb              #functional pipeline settings
+    tr=result.tr                        #functional pipeline settings
     parcellation_name = result.parcellation
     push_location = result.push_location
 
@@ -340,7 +347,7 @@ def main():
             #add subject and session folders to output
             outDir = f"{output_dir}/sub-{subject}/ses-{session}"
             
-            m2g_func_worker(input_dir, outDir, subject, session, files['t1w'], files['func'], acquisition, tr)
+            m2g_func_worker(input_dir, outDir, subject, session, files['t1w'], files['func'], acquisition, tr, mem_gb)
         
             #m2g_func_worker()
             print(

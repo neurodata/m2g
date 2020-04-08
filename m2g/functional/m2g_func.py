@@ -48,12 +48,12 @@ def make_dataconfig(input_dir, sub, ses, anat, func, acquisition='alt+z', tr=2.0
     return config_file
     
 
-def make_script(input_dir, output_dir, subject, session, data_config, pipeline_config):
+def make_script(input_dir, output_dir, subject, session, data_config, pipeline_config, mem_gb):
     cpac_script = '/root/.m2g/cpac_script.sh'
     with open(cpac_script,'w+',encoding='utf8') as script:
         script.write(f'''#! /bin/bash
         . /venv/bin/activate
-        python /code/run.py --data_config_file {data_config} --pipeline_file {pipeline_config} --mem_gb 24 {input_dir} {output_dir} participant
+        python /code/run.py --data_config_file {data_config} --pipeline_file {pipeline_config} --mem_gb {mem_gb} {input_dir} {output_dir} participant
         ''')
     
     run(f'chmod +x {cpac_script}')
@@ -62,7 +62,7 @@ def make_script(input_dir, output_dir, subject, session, data_config, pipeline_c
 
 
 
-def m2g_func_worker(input_dir, output_dir, sub, ses, anat, bold, acquisition, tr):
+def m2g_func_worker(input_dir, output_dir, sub, ses, anat, bold, acquisition, tr, mem_gb):
     """[summary]
     
     Arguments:
@@ -79,7 +79,7 @@ def m2g_func_worker(input_dir, output_dir, sub, ses, anat, bold, acquisition, tr
     pipeline_config='/m2g/m2g/functional/m2g_pipeline.yaml'
     
     data_config = make_dataconfig(input_dir, sub, ses, anat, bold, acquisition, tr)
-    cpac_script = make_script(input_dir, output_dir, sub, ses, data_config, pipeline_config)
+    cpac_script = make_script(input_dir, output_dir, sub, ses, data_config, pipeline_config,mem_gb)
     
     # Run pipeline
     subprocess.call([cpac_script], shell=True)
