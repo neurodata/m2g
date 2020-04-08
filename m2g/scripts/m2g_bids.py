@@ -247,7 +247,13 @@ def main():
         "--mem_gb",
         action="store",
         help="Memory, in GB, to allocate to functional pipeline",
-        default=60,
+        default=20,
+    )
+    parser.add_argument(
+        "--n_cpus",
+        action="store",
+        help="Memory, in GB, to allocate to functional pipeline",
+        default=1,
     )
 
     # and ... begin!
@@ -262,6 +268,7 @@ def main():
     pipe=result.pipeline
     acquisition = result.acquisition    #functional pipeline settings
     mem_gb = result.mem_gb              #functional pipeline settings
+    n_cpus = result.n_cpus
     tr=result.tr                        #functional pipeline settings
     parcellation_name = result.parcellation
     push_location = result.push_location
@@ -347,7 +354,7 @@ def main():
             #add subject and session folders to output
             outDir = f"{output_dir}/sub-{subject}/ses-{session}"
             
-            m2g_func_worker(input_dir, outDir, subject, session, files['t1w'], files['func'], acquisition, tr, mem_gb)
+            m2g_func_worker(input_dir, outDir, subject, session, files['t1w'], files['func'], acquisition, tr, mem_gb, n_cpus)
         
             #m2g_func_worker()
             print(
