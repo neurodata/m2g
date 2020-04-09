@@ -53,7 +53,7 @@ def make_script(input_dir, output_dir, subject, session, data_config, pipeline_c
     with open(cpac_script,'w+',encoding='utf8') as script:
         script.write(f'''#! /bin/bash
         . /venv/bin/activate
-        python /code/run.py --data_config_file {data_config} --pipeline_file {pipeline_config} --n_cpus {n_cpus}--mem_gb {mem_gb} {input_dir} {output_dir} participant
+        python /code/run.py --data_config_file {data_config} --pipeline_file {pipeline_config} --n_cpus {n_cpus} --mem_gb {mem_gb} {input_dir} {output_dir} participant
         ''')
     
     run(f'chmod +x {cpac_script}')
