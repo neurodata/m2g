@@ -37,14 +37,6 @@ def make_dataconfig(input_dir, sub, ses, anat, func, acquisition='alt+z', tr=2.0
     with open(config_file,'w',encoding='utf8') as outfile:
         yaml.dump(Data, outfile, default_flow_style=False)
     
-    
-    #try:
-    #    with open('/input/data_config.yaml', 'r') as f:
-    #        config_data = yaml.load(f)
-    #        return config_data
-    #except IOError:
-    #    print("Error! Could not find config file {0}".format(config_filename))
-    #    raise
     return config_file
     
 

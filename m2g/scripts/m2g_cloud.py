@@ -38,6 +38,8 @@ def batch_submit(
     pipe="dwi",
     acquisition="alt+z",
     tr="2.0",
+    mem_gb="10",
+    n_cpus="2",
     parcellation="desikan",
     voxel_size="2mm",
     mod_type="det",
@@ -102,6 +104,8 @@ def batch_submit(
         pipe=pipe,
         acquisition=acquisition,
         tr=tr,
+        mem_gb="10",
+        n_cpus="2",
         parcellation=parcellation,
         voxel_size=voxel_size,
         mod_type=mod_type,
@@ -192,6 +196,8 @@ def create_json(
     pipe="dwi",
     acquisition="alt+z",
     tr="2.0",
+    mem_gb="10",
+    n_cpus="2",
     parcellation="desikan",
     voxel_size="2mm",
     mod_type="det",
@@ -281,6 +287,8 @@ def create_json(
     cmd[cmd.index("<PIPE>")] = pipe
     cmd[cmd.index("<ACQ>")] = acquisition
     cmd[cmd.index("<TR>")] = tr
+    cmd[cmd.index("<MEM>")] = mem_gb
+    cmd[cmd.index("<CPUS>")] = n_cpus
     cmd[cmd.index("<PUSH>")] = f"s3://{bucket}/{path}/{modif}"
     cmd[cmd.index("<PARCEL>")] = parcellation
     cmd[cmd.index("<VOX>")] = voxel_size
@@ -454,8 +462,19 @@ def main():
     parser.add_argument(
         "--tr",
         action="store",
-        help="functional scan TR (seconds), default is 2.0",
+        help="functional scan TR (seconds). Not required for dwi pipeline. Default is 2.0",
         default="2.0",
+    )
+    parser.add_argument(
+        "--mem_gb",
+        action="store",
+        help="The memory (in gigabytes) that the functional pipeline has access to. Not required for dwi pipeline. Default is 10 Gb",
+        default="10",
+    )
+    parser.add_argument(
+        "--n_cpus",
+        action="store",
+        help="Number of cpus that the functional pipeline has access to. Not required for dwi pipeline. Default is 2 cpus."
     )
     parser.add_argument(
         "--parcellation",
@@ -513,6 +532,8 @@ def main():
     pipe = result.pipeline
     acquisition = result.acquisition
     tr = result.tr
+    mem_gb = result.mem_gb
+    n_cpus = result.n_cpus
     parcellation = result.parcellation
     vox = result.voxelsize
     mod_type = result.mod
@@ -548,6 +569,8 @@ def main():
             pipe=pipe,
             acquisition=acquisition,
             tr=tr,
+            mem_gb=mem_gb,
+            n_cpus=n_cpus,
             parcellation=parcellation,
             voxel_size=vox,
             mod_type=mod_type,

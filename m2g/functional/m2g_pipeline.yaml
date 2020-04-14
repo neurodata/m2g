@@ -98,7 +98,7 @@ generateQualityControlImages :  [1]
 
 # Deletes the contents of the Working Directory after running.
 # This saves disk space, but any additional preprocessing or analysis will have to be completely re-run.
-removeWorkingDir :  False #True
+removeWorkingDir :  False
 
 
 # Uses the contents of the Working Directory to regenerate all outputs and their symbolic links.
@@ -689,7 +689,7 @@ lateral_ventricles_mask :  /usr/share/fsl/5.0/data/atlases/HarvardOxford/Harvard
 Regressors :
  - aCompCor:
      summary:
-       method: PC
+       method: DetrendPC
        components: 5
      tissues:
        - WhiteMatter

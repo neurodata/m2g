@@ -374,7 +374,7 @@ def main():
                     session=session,
                     creds=creds,
                 )
-                shutil.rmtree(f'{output_dir}/sub-{subject}', ignore_errors=False, onerror=None)
+                #shutil.rmtree(f'{output_dir}/sub-{subject}', ignore_errors=False, onerror=None)
 
         sys.exit(0)
 
