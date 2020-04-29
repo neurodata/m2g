@@ -104,8 +104,8 @@ def batch_submit(
         pipe=pipe,
         acquisition=acquisition,
         tr=tr,
-        mem_gb="10",
-        n_cpus="2",
+        mem_gb=mem_gb,
+        n_cpus=n_cpus,
         parcellation=parcellation,
         voxel_size=voxel_size,
         mod_type=mod_type,
@@ -149,14 +149,14 @@ def crawl_bucket(bucket, path, jobdir):
     # set up bucket crawl
     subj_pattern = r"(?<=sub-)(\w*)(?=/ses)"
     sesh_pattern = r"(?<=ses-)(\d*)"
-    all_subfiles = get_matching_s3_objects(bucket, path + "/sub-")
+    all_subfiles = get_matching_s3_objects(bucket, path + "/sub-", '.nii.gz')
     subjs = list(set(re.findall(subj_pattern, obj)[0] for obj in all_subfiles))
     seshs = OrderedDict()
 
     # populate seshs
     for subj in subjs:
         prefix = f"{path}/sub-{subj}/"
-        all_seshfiles = get_matching_s3_objects(bucket, prefix)
+        all_seshfiles = get_matching_s3_objects(bucket, prefix, '.nii.gz')
         sesh = list(set([re.findall(sesh_pattern, obj)[0] for obj in all_seshfiles]))
         if sesh != []:
             seshs[subj] = sesh
