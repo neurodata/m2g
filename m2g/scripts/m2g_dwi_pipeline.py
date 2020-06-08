@@ -328,7 +328,7 @@ def m2g_dwi_worker(
         labels_im = nib.load(labels_im_file_list[idx])
         attr = len(np.unique(np.around(labels_im.get_data()).astype("int16"))) - 1
         g1 = graph.GraphTools(
-            attr=attr,
+            attr=parcellations[idx],
             rois=rois,
             tracks=tracks,
             affine=np.eye(4),
