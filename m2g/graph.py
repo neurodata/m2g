@@ -172,7 +172,7 @@ class GraphTools:
             if un not in self.rois:
                 lost_rois.append(un)
         
-        if len(lost_rois)==0:
+        if len(lost_rois)>0:
             with open(f'{self.connectome_path}/lost_roi.csv', mode='w') as lost_file:
                 lost_writer = csv.writer(lost_file, delimiter=',')
                 lost_writer.writerow(lost_rois)
