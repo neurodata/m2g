@@ -110,9 +110,7 @@ RUN mkdir /m2g_atlases
 RUN \
     git lfs clone https://github.com/neurodata/neuroparc -b paper-fixes && \
     mv /neuroparc/atlases /m2g_atlases && \
-    rm -rf /neuroparc && \
-
-
+    rm -rf /neuroparc
 RUN chmod -R 777 /m2g_atlases
 
 # Grab m2g from deploy.
