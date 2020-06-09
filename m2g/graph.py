@@ -12,6 +12,7 @@ Used in the final stage of the pipeline.
 # standard library imports
 import os
 import time
+import csv
 from itertools import combinations
 from collections import defaultdict
 from pathlib import Path
