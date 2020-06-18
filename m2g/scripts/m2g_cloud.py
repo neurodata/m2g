@@ -480,6 +480,7 @@ def main():
         "--parcellation",
         action="store",
         help="The parcellation(s) being analyzed. Multiple parcellations can be provided with a space separated list.",
+        nargs="+",
         default=None,
     )
     parser.add_argument(
