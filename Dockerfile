@@ -134,7 +134,7 @@ RUN apt-get clean
 
 # Set up the functional pipeline
 RUN cd / && \
-    git clone https://github.com/FCP-INDI/C-PAC.git && \
+    git clone --branch v1.6.1 --single-branch https://github.com/FCP-INDI/C-PAC.git && \
     mkdir /code && \
     mv /C-PAC/dev/docker_data/* /code/ && \
     mv /C-PAC/* /code/ && \
