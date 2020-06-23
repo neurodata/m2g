@@ -183,6 +183,7 @@ def main():
         "--parcellation",
         action="store",
         help="The parcellation(s) being analyzed. Multiple parcellations can be provided with a space separated list.",
+        nargs='+',
         default=None,
     )
     parser.add_argument(
@@ -384,7 +385,7 @@ def main():
     atlas_dir = get_atlas_dir()
     parcellations, atlas, mask, = get_atlas(atlas_dir, constant_kwargs["vox_size"])
     if parcellation_name is not None:  # filter parcellations
-        parcellations = [file_ for file_ in parcellations if parcellation_name in file_]
+        parcellations = [file_ for file_ in parcellations for parc in parcellation_name if parc in file_]
     atlas_stuff = {"atlas": atlas, "mask": mask, "parcellations": parcellations}
     constant_kwargs.update(atlas_stuff)
 

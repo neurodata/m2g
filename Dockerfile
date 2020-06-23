@@ -108,19 +108,13 @@ RUN mkdir /output && \
 RUN mkdir /m2g_atlases
 
 RUN \
-    git lfs clone $M2G_ATLASES && \
+    git lfs clone https://github.com/neurodata/neuroparc -b paper-fixes && \
     mv /neuroparc/atlases /m2g_atlases && \
-    rm -rf /neuroparc && \
-    rm -rf /m2g_atlases/label/Human/DS* && \
-    rm -rf /m2g_atlases/label/Human/pp264* && \
-    rm -rf /m2g_atlases/label/Human/princeton* && \
-    rm -rf /m2g_atlases/label/Human/slab* && \
-    rm -rf /m2g_atlases/label/Human/hemispheric
-
+    rm -rf /neuroparc
 RUN chmod -R 777 /m2g_atlases
 
 # Grab m2g from deploy.
-RUN git clone -b cpac-addition $M2G_URL /m2g && \
+RUN git clone -b Priebe-edits $M2G_URL /m2g && \
     cd /m2g && \
     pip3.6 install .
 RUN chmod -R 777 /usr/local/bin/m2g_bids
@@ -140,7 +134,7 @@ RUN apt-get clean
 
 # Set up the functional pipeline
 RUN cd / && \
-    git clone https://github.com/FCP-INDI/C-PAC.git && \
+    git clone --branch v1.6.1 --single-branch https://github.com/FCP-INDI/C-PAC.git && \
     mkdir /code && \
     mv /C-PAC/dev/docker_data/* /code/ && \
     mv /C-PAC/* /code/ && \
