@@ -25,7 +25,7 @@ RUN apt-get update && \
     apt-get install -y python3.6 python3.6-dev && \
     curl https://bootstrap.pypa.io/get-pip.py | python3.6
 
-RUN pip install --upgrade pip
+RUN pip3.6 install --upgrade pip
 
 # Get neurodebian config
 RUN curl -sSL http://neuro.debian.net/lists/stretch.us-tn.full >> /etc/apt/sources.list.d/neurodebian.sources.list && \
@@ -88,9 +88,88 @@ RUN curl -sL http://fcon_1000.projects.nitrc.org/indi/cpac_resources.tar.gz -o /
     cp -nr /tmp/cpac_image_resources/tissuepriors/3mm $FSLDIR/data/standard/tissueprior
 
 
-# install ANTs
-ENV PATH=/usr/lib/ants:$PATH
-RUN apt-get install -y ants
+RUN apt-get update
+
+# Install Ubuntu dependencies and utilities
+RUN apt-get install -y \
+      build-essential \
+      cmake \
+      git \
+      graphviz \
+      graphviz-dev \
+      gsl-bin \
+      libcanberra-gtk-module \
+      libexpat1-dev \
+      libgiftiio-dev \
+      libglib2.0-dev \
+      libglu1-mesa \
+      libglu1-mesa-dev \
+      libjpeg-progs \
+      libgl1-mesa-dri \
+      libglw1-mesa \
+      libxml2 \
+      libxml2-dev \
+      libxext-dev \
+      libxft2 \
+      libxft-dev \
+      libxi-dev \
+      libxmu-headers \
+      libxmu-dev \
+      libxpm-dev \
+      libxslt1-dev \
+      m4 \
+      make \
+      mesa-common-dev \
+      mesa-utils \
+      netpbm \
+      pkg-config \
+      rsync \
+      tcsh \
+      unzip \
+      vim \
+      xvfb \
+      xauth \
+      zlib1g-dev \
+      debhelper -t xenial-backports
+
+RUN apt-get update
+
+# Install 16.04 dependencies
+RUN apt-get install -y \
+      dh-autoreconf \
+      libgsl-dev \
+      libmotif-dev \
+      libtool \
+      libx11-dev \
+      libxext-dev \
+      x11proto-xext-dev \
+      x11proto-print-dev \
+      xutils-dev \
+      environment-modules
+#libinsighttoolkit4.10
+
+# Install libpng12
+RUN curl -sLo /tmp/libpng12.deb http://mirrors.kernel.org/ubuntu/pool/main/libp/libpng/libpng12-0_1.2.54-1ubuntu1_amd64.deb && \
+    dpkg -i /tmp/libpng12.deb && \
+    rm /tmp/libpng12.deb
+
+# Compiles libxp- this is necessary for some newer versions of Ubuntu
+# where the is no Debian package available.
+RUN git clone git://anongit.freedesktop.org/xorg/lib/libXp /tmp/libXp && \
+    cd /tmp/libXp && \
+    ./autogen.sh && \
+    ./configure && \
+    make && \
+    make install && \
+    cd - && \
+    rm -rf /tmp/libXp
+
+# Installing and setting up c3d
+RUN mkdir -p /opt/c3d && \
+    curl -sSL "http://downloads.sourceforge.net/project/c3d/c3d/1.0.0/c3d-1.0.0-Linux-x86_64.tar.gz" \
+    | tar -xzC /opt/c3d --strip-components 1
+ENV C3DPATH /opt/c3d/
+ENV PATH $C3DPATH/bin:$PATH
 
 
 # download OASIS templates for niworkflows-ants skullstripping
@@ -100,17 +179,26 @@ RUN mkdir /ants_template && \
     mv /tmp/MICCAI2012-Multi-Atlas-Challenge-Data /ants_template/oasis && \
     rm -rf /tmp/Oasis.zip /tmp/MICCAI2012-Multi-Atlas-Challenge-Data
 
+RUN apt-get -f --yes --force-yes install
+
+RUN apt-get --yes --force-yes install insighttoolkit4-python
+RUN apt-get update && apt-get -y upgrade insighttoolkit4-python
+
+# install ANTs
+#ENV PATH=/usr/lib/ants:$PATH
+#RUN apt-get install -y ants
+
 #--------M2G SETUP-----------------------------------------------------------#
 # setup of python dependencies for m2g itself, as well as file dependencies
 RUN \
-    pip install --no-cache-dir numpy nibabel scipy python-dateutil pandas boto3 awscli
+    pip3.6 install --no-cache-dir numpy nibabel scipy python-dateutil pandas boto3 awscli
 RUN \
-    pip install --no-cache-dir matplotlib nilearn sklearn pandas cython vtk pyvtk fury
+    pip3.6 install --no-cache-dir matplotlib nilearn sklearn pandas cython vtk pyvtk fury
 RUN \
-    pip install --no-cache-dir awscli requests ipython duecredit graspy scikit-image networkx dipy pybids
+    pip3.6 install --no-cache-dir yamlordereddictloader awscli requests ipython duecredit graspy scikit-image networkx dipy pybids
 
 RUN \
-    pip install --no-cache-dir plotly==1.12.9 setuptools>=40.0 configparser>=3.7.4
+    pip3.6 install --no-cache-dir plotly==1.12.9 setuptools>=40.0 configparser>=3.7.4
 
 # install ICA-AROMA
 RUN mkdir -p /opt/ICA-AROMA
@@ -137,11 +225,11 @@ RUN conda update conda -y && \
         pandas==0.23.4 \
         scipy==1.4.1 \
         traits==4.6.0 \
-        wxpython \
-        pip
+        wxpython
+#pip
 
 # install torch
-RUN pip install torch==1.2.0 torchvision==0.4.0 -f https://download.pytorch.org/whl/torch_stable.html
+RUN pip3.6 install torch==1.2.0 torchvision==0.4.0 -f https://download.pytorch.org/whl/torch_stable.html
 
 
 WORKDIR /
@@ -155,9 +243,6 @@ RUN mkdir /output && \
 
 # install PyPEER
 RUN pip install git+https://github.com/ChildMindInstitute/PyPEER.git
-
-# install cpac templates
-ADD dev/docker_data/cpac_templates.tar.gz /
 
 
 # grab atlases from neuroparc
@@ -201,9 +286,16 @@ RUN cd / && \
     rm -R /C-PAC && \
     chmod +x /code/run.py && \
     cd /
+    
+RUN mv /m2g/m2g/functional/cpac_init.py /code/__init__.py
+RUN ls /code/
+
+# install cpac templates
+RUN mv /code/cpac_templates.tar.gz / && \
+    tar xvzf /cpac_templates.tar.gz
 
 # install AFNI [PUT AFTER CPAC IS CALLED]
-COPY dev/docker_data/required_afni_pkgs.txt /opt/required_afni_pkgs.txt
+RUN mv /code/required_afni_pkgs.txt /opt/required_afni_pkgs.txt
 RUN if [ -f /usr/lib/x86_64-linux-gnu/mesa/libGL.so.1.2.0]; then \
         ln -svf /usr/lib/x86_64-linux-gnu/mesa/libGL.so.1.2.0 /usr/lib/x86_64-linux-gnu/libGL.so.1; \
     fi && \
@@ -224,27 +316,29 @@ RUN if [ -f /usr/lib/x86_64-linux-gnu/mesa/libGL.so.1.2.0]; then \
 
 
 # install python dependencies
-COPY /C-PAC/requirements.txt /opt/requirements.txt
-RUN pip install --upgrade setuptools
-RUN pip install --upgrade pip
-RUN pip install -r /opt/requirements.txt
-RUN pip install xvfbwrapper
+RUN cp /code/requirements.txt /opt/requirements.txt
+RUN pip3.6 install --upgrade setuptools
+RUN pip3.6 install --upgrade pip
+RUN pip3.6 install -r /opt/requirements.txt
+RUN pip3.6 install xvfbwrapper
 
+RUN mkdir /cpac_resources
+RUN mv /code/default_pipeline.yml /cpac_resources/default_pipeline.yml
+RUN mv /code/dev/circleci_data/pipe-test_ci.yml /cpac_resources/pipe-test_ci.yml
 
+#COPY . /code
+RUN pip3.6 install -e /code
 
-COPY dev/docker_data/default_pipeline.yml /cpac_resources/default_pipeline.yml
-COPY dev/circleci_data/pipe-test_ci.yml /cpac_resources/pipe-test_ci.yml
-
-COPY . /code
-RUN pip install -e /code
-
-COPY dev/docker_data /code/docker_data
-RUN mv /code/docker_data/* /code && rm -Rf /code/docker_data && chmod +x /code/run.py
+#COPY dev/docker_data /code/docker_data
+#RUN mv /code/docker_data/* /code && rm -Rf /code/docker_data && chmod +x /code/run.py
 
 
 # Link libraries for Singularity images
 #RUN ldconfig
 
-RUN apt-get clean && \
+
+#https://stackoverflow.com/questions/18649512/unicodedecodeerror-ascii-codec-cant-decode-byte-0xe2-in-position-13-ordinal
+RUN export LC_ALL=C.UTF-8 && \
+    apt-get clean && \
     apt-get autoremove -y && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
