@@ -31,15 +31,22 @@ def batch_submit(
     bucket,
     path,
     jobdir,
-    mod_func="csa",
-    track_type="local",
     credentials=None,
     state="participant",
     dataset=None,
     modif="",
-    reg_style="native",
+    pipe="dwi",
+    acquisition="alt+z",
+    tr="2.0",
+    mem_gb="10",
+    n_cpus="2",
+    parcellation="desikan",
     voxel_size="2mm",
     mod_type="det",
+    filtering_type="local",
+    diffusion_model="csa",
+    space="native",
+    seed=20,
 ):
     """Searches through an S3 bucket, gets all subject-ids, creates json files for each,
     submits batch jobs, and returns list of job ids to query status upon later
@@ -60,10 +67,26 @@ def batch_submit(
         Name given to the output directory containing analyzed data set "m2g-<version>-<dataset>", by default None
     modif : str, optional
         Name of folder on s3 to push to. If empty, push to a folder with m2g's version number, by default ""
-    reg_style : str, optional
-        Space for tractography, by default "native"
+    pipe : str, optional
+        Which pipeline, 'dwi' for diffusion MRI or 'func' for fMRI, default is 'dwi'
+    acquisition : str, optional
+        The acquisition method for the fMRI data being analyze (only needed for functional pipeline), default is 'alt+z'
+    tr : str, optional
+        TR (in seconds) for the fMRI data (only needed for functional pipeline), default is '2.0'
+    parcellation : str, optional
+        The parcellation(s) being analyzed. Multiple parcellations can be provided with a space separated list. Default is 'desikan'
+    voxel_size : str, optional
+        Voxel size : 2mm, 1mm. Voxel size to use for template registrations. Default is '2mm'
     mod_type : str, optional
         Determinstic (det) or probabilistic (prob) tracking, by default "det"
+    filtering_type : str, optional
+        Tracking approach: local, particle. Default is local
+    diffusion_model : str, optional
+        Diffusiont model: csd or csa. Default is csa
+    space : str, optional
+        Space for tractography, by default "native"
+    seed : int optional
+        Seed density for tractography. Default is 20
     """
 
     print(f"Getting list from s3://{bucket}/{path}/...")
@@ -75,14 +98,21 @@ def batch_submit(
         path,
         threads,
         jobdir,
-        mod_func=mod_func,
         credentials=credentials,
         dataset=dataset,
-        track_type=track_type,
         modif=modif,
-        reg_style=reg_style,
+        pipe=pipe,
+        acquisition=acquisition,
+        tr=tr,
+        mem_gb=mem_gb,
+        n_cpus=n_cpus,
+        parcellation=parcellation,
         voxel_size=voxel_size,
         mod_type=mod_type,
+        filtering_type=filtering_type,
+        diffusion_model=diffusion_model,
+        space=space,
+        seed=seed,
     )
 
     print("Submitting jobs to the queue...")
@@ -119,14 +149,14 @@ def crawl_bucket(bucket, path, jobdir):
     # set up bucket crawl
     subj_pattern = r"(?<=sub-)(\w*)(?=/ses)"
     sesh_pattern = r"(?<=ses-)(\d*)"
-    all_subfiles = get_matching_s3_objects(bucket, path + "/sub-")
+    all_subfiles = get_matching_s3_objects(bucket, path + "/sub-", '.nii.gz')
     subjs = list(set(re.findall(subj_pattern, obj)[0] for obj in all_subfiles))
     seshs = OrderedDict()
 
     # populate seshs
     for subj in subjs:
         prefix = f"{path}/sub-{subj}/"
-        all_seshfiles = get_matching_s3_objects(bucket, prefix)
+        all_seshfiles = get_matching_s3_objects(bucket, prefix, '.nii.gz')
         sesh = list(set([re.findall(sesh_pattern, obj)[0] for obj in all_seshfiles]))
         if sesh != []:
             seshs[subj] = sesh
@@ -160,14 +190,21 @@ def create_json(
     path,
     threads,
     jobdir,
-    mod_func="csa",
-    track_type="local",
     credentials=None,
     dataset=None,
     modif="",
-    reg_style="native",
+    pipe="dwi",
+    acquisition="alt+z",
+    tr="2.0",
+    mem_gb="10",
+    n_cpus="2",
+    parcellation="desikan",
     voxel_size="2mm",
     mod_type="det",
+    filtering_type="local",
+    diffusion_model="csa",
+    space="native",
+    seed=20,
 ):
     """Creates the json files for each of the jobs
 
@@ -187,10 +224,28 @@ def create_json(
         Name added to the generated json job files "m2g_<version>_<dataset>_sub-<sub>_ses-<ses>", by default None
     modif : str, optional
         Name of folder on s3 to push to. If empty, push to a folder with m2g's version number, by default ""
-    reg_style : str, optional
-        Space for tractography, by default ""
+    pipe : str, optional
+        Which pipeline, 'dwi' for diffusion MRI or 'func' for fMRI, default is 'dwi'
+    acquisition : str, optional
+        The acquisition method for the fMRI data being analyze (only needed for functional pipeline), default is 'alt+z'
+    tr : str, optional
+        TR (in seconds) for the fMRI data (only needed for functional pipeline), default is '2.0'
+    parcellation : str, optional
+        The parcellation(s) being analyzed. Multiple parcellations can be provided with a space separated list. Default is 'desikan'
+    voxel_size : str, optional
+        Voxel size : 2mm, 1mm. Voxel size to use for template registrations. Default is '2mm'
     mod_type : str, optional
         Determinstic (det) or probabilistic (prob) tracking, by default "det"
+    space : str, optional
+        Space for tractography, by default ""
+    filtering_type : str, optional
+        Tracking approach: local, particle. Default is local
+    diffusion_model : str, optional
+        Diffusiont model: csd or csa. Default is csa
+    space : str, optional
+        Space for tractography, by default "native"
+    seed : int optional
+        Seed density for tractography. Default is 20
 
     Returns
     -------
@@ -229,13 +284,20 @@ def create_json(
 
     # edit non-defaults
     jobs = []
-    cmd[cmd.index("<INPUT>")] = f"s3://{bucket}/{path}"
+    cmd[cmd.index("<PIPE>")] = pipe
+    cmd[cmd.index("<ACQ>")] = acquisition
+    cmd[cmd.index("<TR>")] = tr
+    cmd[cmd.index("<MEM>")] = mem_gb
+    cmd[cmd.index("<CPUS>")] = n_cpus
     cmd[cmd.index("<PUSH>")] = f"s3://{bucket}/{path}/{modif}"
+    cmd[cmd.index("<PARCEL>")] = parcellation
     cmd[cmd.index("<VOX>")] = voxel_size
     cmd[cmd.index("<MOD>")] = mod_type
-    cmd[cmd.index("<FILTER>")] = track_type
-    cmd[cmd.index("<DIFF>")] = mod_func
-    cmd[cmd.index("<SPACE>")] = reg_style
+    cmd[cmd.index("<FILTER>")] = filtering_type
+    cmd[cmd.index("<DIFF>")] = diffusion_model
+    cmd[cmd.index("<SPACE>")] = space
+    cmd[cmd.index("<SEED>")] = seed
+    cmd[cmd.index("<INPUT>")] = f"s3://{bucket}/{path}"
 
     # edit participant-specific values ()
     # loop over every session of every participant
@@ -365,10 +427,6 @@ def main():
         saved/run through in case of batch termination or check-up.""",
     )
     parser.add_argument(
-        "--credentials", action="store", help="csv formatted AWS credentials."
-    )
-    # parser.add_argument("--dataset", action="store", help="Dataset name")
-    parser.add_argument(
         "--modif",
         action="store",
         help="""Name of folder on s3 to push to. Data will be saved at '<bucket>/<bidsdir>/<modif>' on the s3 bucket
@@ -376,10 +434,54 @@ def main():
         default="",
     )
     parser.add_argument(
-        "--space",
+        "--credentials", action="store", help="csv formatted AWS credentials."
+    )
+    # parser.add_argument("--dataset", action="store", help="Dataset name")
+    parser.add_argument(
+        "--pipeline",
         action="store",
-        help="Space for tractography. Default is native.",
-        default="native",
+        help="""Pipline to use when analyzing the input data, 
+        either func or dwi. If  Default is dwi.""",
+        default="dwi"
+    )
+    parser.add_argument(
+        "--acquisition",
+        action="store",
+        help="""Acquisition method for functional data:
+        altplus - Alternating in the +z direction
+        alt+z - Alternating in the +z direction
+        alt+z2 - Alternating, but beginning at slice #1
+        altminus - Alternating in the -z direction
+        alt-z - Alternating in the -z direction
+        alt-z2 - Alternating, starting at slice #nz-2 instead of #nz-1
+        seqplus - Sequential in the plus direction
+        seqminus - Sequential in the minus direction,
+        default is alt+z. For more information:https://fcp-indi.github.io/docs/user/func.html""",
+        default="alt+z"
+    )
+    parser.add_argument(
+        "--tr",
+        action="store",
+        help="functional scan TR (seconds). Not required for dwi pipeline. Default is 2.0",
+        default="2.0",
+    )
+    parser.add_argument(
+        "--mem_gb",
+        action="store",
+        help="The memory (in gigabytes) that the functional pipeline has access to. Not required for dwi pipeline. Default is 10 Gb",
+        default="10",
+    )
+    parser.add_argument(
+        "--n_cpus",
+        action="store",
+        help="Number of cpus that the functional pipeline has access to. Not required for dwi pipeline. Default is 2 cpus."
+    )
+    parser.add_argument(
+        "--parcellation",
+        action="store",
+        help="The parcellation(s) being analyzed. Multiple parcellations can be provided with a space separated list.",
+        nargs="+",
+        default=None,
     )
     parser.add_argument(
         "--voxelsize",
@@ -394,33 +496,52 @@ def main():
         default="det",
     )
     parser.add_argument(
+        "--filtering_type",
+        action="store",
+        help="Tracking approach: local, particle. Default is local.",
+        default="local",
+    )
+    parser.add_argument(
         "--diffusion_model",
         action="store",
         help="Diffusion model: csd, csa. Default is csa.",
         default="csa",
     )
     parser.add_argument(
-        "--filtering_type",
+        "--space",
         action="store",
-        help="Tracking approach: local, particle. Default is local.",
-        default="local",
+        help="Space for tractography. Default is native.",
+        default="native",
+    )
+    parser.add_argument(
+        "--seeds",
+        action="store",
+        help="Seeding density for tractography. Default is 20.",
+        default="20",
     )
 
     result = parser.parse_args()
-
+    
+    state = result.state
     bucket = result.bucket
     path = result.bidsdir
     path = path.strip("/") if path is not None else path
     dset = path.split("/")[-1] if path is not None else None
-    state = result.state
-    creds = result.credentials
     jobdir = result.jobdir
     modif = result.modif
-    reg_style = result.space
+    creds = result.credentials
+    pipe = result.pipeline
+    acquisition = result.acquisition
+    tr = result.tr
+    mem_gb = result.mem_gb
+    n_cpus = result.n_cpus
+    parcellation = result.parcellation
     vox = result.voxelsize
     mod_type = result.mod
-    track_type = result.filtering_type
-    mod_func = result.diffusion_model
+    filtering_type = result.filtering_type
+    diffusion_model = result.diffusion_model
+    space = result.space
+    seed = result.seeds
 
     if jobdir is None:
         jobdir = "./"
@@ -445,12 +566,19 @@ def main():
             credentials=creds,
             state=state,
             dataset=dset,
-            mod_func=mod_func,
-            track_type=track_type,
             modif=modif,
-            reg_style=reg_style,
+            pipe=pipe,
+            acquisition=acquisition,
+            tr=tr,
+            mem_gb=mem_gb,
+            n_cpus=n_cpus,
+            parcellation=parcellation,
             voxel_size=vox,
             mod_type=mod_type,
+            filtering_type=filtering_type,
+            diffusion_model=diffusion_model,
+            space=space,
+            seed=seed,
         )
 
     sys.exit(0)

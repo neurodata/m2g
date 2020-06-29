@@ -12,6 +12,7 @@ Used in the final stage of the pipeline.
 # standard library imports
 import os
 import time
+import csv
 from itertools import combinations
 from collections import defaultdict
 from pathlib import Path
@@ -45,9 +46,8 @@ class GraphTools:
         location of output directory
     connectome_path : str
         Path for the output connectome file (.csv file)
-    attr : [type], optional
-        Node or graph attributes. Can be a list. If 1 dimensional, will be interpretted as a graph attribute. If N dimensional
-        will be interpretted as node attributes. If it is any other dimensional, it will be ignored, by default None
+    attr : int, optional
+        Path to atlas before registration. By default None
     sens : str, optional, DEPRACATED
         type of MRI scan being analyzed (can be 'dwi' or 'func'), by default "dwi"
 
@@ -74,6 +74,7 @@ class GraphTools:
         self.affine = affine
         self.outdir = outdir
         self.connectome_path = os.path.dirname(connectome_path)
+        self.attr = attr
 
     @timer
     def make_graph_old(self):
@@ -151,15 +152,35 @@ class GraphTools:
         lin_T, offset = _mapping_to_voxel(
             np.eye(4)
         )  # TODO : voxel_size was removed in dipy 1.0.0, make sure that didn't break anything when voxel size is not 2mm
-        mx = len(np.unique(self.rois.astype(np.int64))) - 1
+        #mx = len(np.unique(self.rois.astype(np.int64))) #- 1
+
+        self.attr = nib.load(self.attr)
+        self.attr = self.attr.get_data().astype("int")
+                
+        mx = len(np.unique(self.attr.astype(np.int64)))
         self.g = nx.Graph(ecount=0, vcount=mx)
         edge_dict = defaultdict(int)
+        #node_dict = dict(
+        #    zip(np.unique(self.rois).astype("int16") + 1, np.arange(mx) + 1)
+        #)
         node_dict = dict(
-            zip(np.unique(self.rois).astype("int16") + 1, np.arange(mx) + 1)
+            zip(np.unique(self.attr).astype("int16"), np.arange(mx))
         )
 
+        lost_rois=[]
+        #Track lost rois
+        for un in np.unique(self.attr.astype(np.int64)):
+            if un not in self.rois:
+                lost_rois.append(un)
+        
+        if len(lost_rois)>0:
+            with open(f'{self.connectome_path}/lost_roi.csv', mode='w') as lost_file:
+                lost_writer = csv.writer(lost_file, delimiter=',')
+                lost_writer.writerow(lost_rois)
+
+
         # Add empty vertices
-        for node in range(1, mx + 1):
+        for node in range(0,mx):#(1, mx + 1):
             self.g.add_node(node)
 
         nlines = np.shape(self.tracks)[0]

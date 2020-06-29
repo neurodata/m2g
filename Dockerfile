@@ -1,6 +1,6 @@
 FROM neurodata/fsl_1604:0.0.1
-LABEL author="Derek Pisner"
-LABEL maintainer="dpisner@utexas.edu"
+LABEL author="Ross Lawrence, Alex Loftus"
+LABEL maintainer="rlawre18@jhu.edu"
 
 #--------Environment Variables-----------------------------------------------#
 ENV M2G_URL https://github.com/neurodata/m2g.git
@@ -24,6 +24,8 @@ RUN apt-get update && \
     apt-get update && \
     apt-get install -y python3.6 python3.6-dev && \
     curl https://bootstrap.pypa.io/get-pip.py | python3.6
+
+RUN apt-get install -y python2.7 python-pip
 
 RUN pip3 install --upgrade pip
 
@@ -58,13 +60,41 @@ RUN mkdir -p /opt/afni && \
     rm -rf afni.tar.gz
 ENV PATH=/opt/afni:$PATH
 
+## --------CPAC INSTALLS-----------------------------------------------------#
+RUN apt-get install -y graphviz graphviz-dev
+
+# Setup FSL environment
+ENV FSLDIR=/usr/share/fsl/5.0 \
+    FSLOUTPUTTYPE=NIFTI_GZ \
+    FSLMULTIFILEQUIT=TRUE \
+    POSSUMDIR=/usr/share/fsl/5.0 \
+    LD_LIBRARY_PATH=/usr/lib/fsl/5.0:$LD_LIBRARY_PATH \
+    FSLTCLSH=/usr/bin/tclsh \
+    FSLWISH=/usr/bin/wish \
+    PATH=/usr/lib/fsl/5.0:$PATH
+
+# install CPAC resources into FSL
+RUN curl -sL http://fcon_1000.projects.nitrc.org/indi/cpac_resources.tar.gz -o /tmp/cpac_resources.tar.gz && \
+    tar xfz /tmp/cpac_resources.tar.gz -C /tmp && \
+    cp -n /tmp/cpac_image_resources/MNI_3mm/* $FSLDIR/data/standard && \
+    cp -n /tmp/cpac_image_resources/MNI_4mm/* $FSLDIR/data/standard && \
+    cp -n /tmp/cpac_image_resources/symmetric/* $FSLDIR/data/standard && \
+    cp -n /tmp/cpac_image_resources/HarvardOxford-lateral-ventricles-thr25-2mm.nii.gz $FSLDIR/data/atlases/HarvardOxford && \
+    cp -nr /tmp/cpac_image_resources/tissuepriors/2mm $FSLDIR/data/standard/tissuepriors && \
+    cp -nr /tmp/cpac_image_resources/tissuepriors/3mm $FSLDIR/data/standard/tissueprior
+
+
 #--------M2G SETUP-----------------------------------------------------------#
 # setup of python dependencies for m2g itself, as well as file dependencies
 RUN \
-    pip3.6 install numpy nibabel scipy python-dateutil pandas boto3 awscli matplotlib nilearn sklearn pandas cython vtk pyvtk fury awscli requests ipython duecredit graspy scikit-image networkx dipy pybids
+    pip3.6 install --no-cache-dir virtualenv numpy nibabel scipy python-dateutil pandas boto3 awscli
+RUN \
+    pip3.6 install --no-cache-dir matplotlib nilearn sklearn pandas cython vtk pyvtk fury
+RUN \
+    pip3.6 install --no-cache-dir awscli requests ipython duecredit graspy scikit-image networkx dipy pybids
 
 RUN \
-    pip3.6 install plotly==1.12.9 setuptools>=40.0 configparser>=3.7.4
+    pip3.6 install --no-cache-dir plotly==1.12.9 setuptools>=40.0 configparser>=3.7.4
 
 WORKDIR /
 
@@ -78,19 +108,13 @@ RUN mkdir /output && \
 RUN mkdir /m2g_atlases
 
 RUN \
-    git lfs clone $M2G_ATLASES && \
+    git lfs clone https://github.com/neurodata/neuroparc && \
     mv /neuroparc/atlases /m2g_atlases && \
-    rm -rf /neuroparc && \
-    rm -rf /m2g_atlases/label/Human/DS* && \
-    rm -rf /m2g_atlases/label/Human/pp264* && \
-    rm -rf /m2g_atlases/label/Human/princeton* && \
-    rm -rf /m2g_atlases/label/Human/slab* && \
-    rm -rf /m2g_atlases/label/Human/hemispheric
-
+    rm -rf /neuroparc
 RUN chmod -R 777 /m2g_atlases
 
 # Grab m2g from deploy.
-RUN git clone -b deploy $M2G_URL /m2g && \
+RUN git clone $M2G_URL /m2g && \
     cd /m2g && \
     pip3.6 install .
 RUN chmod -R 777 /usr/local/bin/m2g_bids
@@ -104,3 +128,29 @@ RUN ldconfig
 
 # and add it as an entrypoint
 ENTRYPOINT ["m2g"]
+
+# Clear apt-get caches (try adding sudo)
+RUN apt-get clean
+
+# Set up the functional pipeline
+RUN cd / && \
+    git clone --branch v1.6.1 --single-branch https://github.com/FCP-INDI/C-PAC.git && \
+    mkdir /code && \
+    mv /C-PAC/dev/docker_data/* /code/ && \
+    mv /C-PAC/* /code/ && \
+    rm -R /C-PAC && \
+    chmod +x /code/run.py && \
+    cd /
+
+# due to cpac's requirments.txt being out of order, nilearn is installed before scipy and scikit-learn (which it needs)
+RUN virtualenv -p /usr/bin/python2.7 venv && \
+    . venv/bin/activate && \
+    pip install --upgrade pip==9.0.1 && \
+    ls /code && \
+    pip install scipy==1.2.1 --no-cache-dir && \
+    pip install scikit-learn==0.19.1 --no-cache-dir && \
+    pip install -r /code/requirements.txt --no-cache-dir && \
+    pip install -e /code && \
+    pip install torch==1.2.0 --no-cache-dir && \
+    pip install torch==1.2.0 torchvision==0.4.0 -f https://download.pytorch.org/whl/torch_stable.html --no-cache-dir && \
+    pip install xvfbwrapper

@@ -14,6 +14,7 @@ In this module, m2g:
 
 # standard library imports
 import sys
+import shutil
 import glob
 import os
 from argparse import ArgumentParser
@@ -28,6 +29,7 @@ from m2g.utils.gen_utils import check_dependencies
 from m2g.utils.gen_utils import is_bids
 from m2g.utils.gen_utils import as_directory
 from m2g.scripts.m2g_dwi_pipeline import m2g_dwi_worker
+from m2g.functional.m2g_func import m2g_func_worker
 
 
 def get_atlas(atlas_dir, vox_size):
@@ -143,6 +145,34 @@ def main():
         nargs="+",
     )
     parser.add_argument(
+        "--pipeline",
+        action="store",
+        help="""Pipline to use when analyzing the input data, 
+        either func or dwi. If  Default is dwi.""",
+        default="dwi"
+    )
+    parser.add_argument(
+        "--acquisition",
+        action="store",
+        help="""Acquisition method for functional data:
+        altplus - Alternating in the +z direction
+        alt+z - Alternating in the +z direction
+        alt+z2 - Alternating, but beginning at slice #1
+        altminus - Alternating in the -z direction
+        alt-z - Alternating in the -z direction
+        alt-z2 - Alternating, starting at slice #nz-2 instead of #nz-1
+        seqplus - Sequential in the plus direction
+        seqminus - Sequential in the minus direction,
+        default is alt+z. For more information:https://fcp-indi.github.io/docs/user/func.html""",
+        default="alt+z"
+    )
+    parser.add_argument(
+        "--tr",
+        action="store",
+        help="functional scan TR (seconds), default is 2.0",
+        default=2.0
+    )
+    parser.add_argument(
         "--push_location",
         action="store",
         help="Name of folder on s3 to push output data to, if the folder does not exist, it will be created."
@@ -153,6 +183,7 @@ def main():
         "--parcellation",
         action="store",
         help="The parcellation(s) being analyzed. Multiple parcellations can be provided with a space separated list.",
+        nargs='+',
         default=None,
     )
     parser.add_argument(
@@ -213,6 +244,18 @@ def main():
         Excess clipping in general: general,""",
         default=None,
     )
+    parser.add_argument(
+        "--mem_gb",
+        action="store",
+        help="Memory, in GB, to allocate to functional pipeline",
+        default=20,
+    )
+    parser.add_argument(
+        "--n_cpus",
+        action="store",
+        help="Memory, in GB, to allocate to functional pipeline",
+        default=1,
+    )
 
     # and ... begin!
     print("\nBeginning m2g ...")
@@ -223,6 +266,11 @@ def main():
     output_dir = result.output_dir
     subjects = result.participant_label
     sessions = result.session_label
+    pipe=result.pipeline
+    acquisition = result.acquisition    #functional pipeline settings
+    mem_gb = result.mem_gb              #functional pipeline settings
+    n_cpus = result.n_cpus
+    tr=result.tr                        #functional pipeline settings
     parcellation_name = result.parcellation
     push_location = result.push_location
 
@@ -290,12 +338,54 @@ def main():
         Input directory contents: {os.listdir(input_dir)}.
         """
     )
+
+    # ------- Check if they have selected the functional pipeline ------ #
+    if pipe == "func":
+        
+        sweeper = DirectorySweeper(input_dir, subjects=subjects, sessions=sessions, pipeline='func')
+        scans = sweeper.get_dir_info(pipeline='func')
+        
+        home = os.path.expanduser("~")
+        if not os.path.exists(home + '/.m2g'):
+            os.makedirs(f"{home}/.m2g")
+
+        
+        for SubSesFile in scans:
+            subject, session, files = SubSesFile
+            #add subject and session folders to output
+            outDir = f"{output_dir}/sub-{subject}/ses-{session}"
+            
+            m2g_func_worker(input_dir, outDir, subject, session, files['t1w'], files['func'], acquisition, tr, mem_gb, n_cpus)
+        
+            #m2g_func_worker()
+            print(
+                f"""
+                Functional Pipeline completed!
+                """
+            )
+
+            if push_location:
+                print(f"Pushing to s3 at {push_location}.")
+                push_buck, push_remo = cloud_utils.parse_path(push_location)
+                cloud_utils.s3_func_push_data(
+                    push_buck,
+                    push_remo,
+                    outDir,
+                    subject=subject,
+                    session=session,
+                    creds=creds,
+                )
+                #shutil.rmtree(f'{output_dir}/sub-{subject}', ignore_errors=False, onerror=None)
+
+        sys.exit(0)
+
+
     # ---------------- Grab parcellations, atlases, mask --------------- #
     # get parcellations, atlas, and mask, then stick it into constant_kwargs
     atlas_dir = get_atlas_dir()
     parcellations, atlas, mask, = get_atlas(atlas_dir, constant_kwargs["vox_size"])
     if parcellation_name is not None:  # filter parcellations
-        parcellations = [file_ for file_ in parcellations if parcellation_name in file_]
+        parcellations = [file_ for file_ in parcellations for parc in parcellation_name if parc in file_]
     atlas_stuff = {"atlas": atlas, "mask": mask, "parcellations": parcellations}
     constant_kwargs.update(atlas_stuff)
 
