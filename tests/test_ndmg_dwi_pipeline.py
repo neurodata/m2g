@@ -1,19 +1,19 @@
-""" First pytest file for ndmg. Basic assertions that don't mean anything for now just to make sure pytest + travis works."""
+""" First pytest file for m2g. Basic assertions that don't mean anything for now just to make sure pytest + travis works."""
 
 import os
 
 import pytest
-import ndmg
-from ndmg.utils.cloud_utils import s3_get_data
+import m2g
+from m2g.utils.cloud_utils import s3_get_data
 from pathlib import Path
-from ndmg.utils.gen_utils import create_datadescript, DirectorySweeper
+from m2g.utils.gen_utils import create_datadescript, DirectorySweeper
 
 KEYWORDS = ["sub", "ses"]
 
 
 def is_graph(filename, atlas="", suffix=""):
     """
-    Check if `filename` is a ndmg graph file.
+    Check if `filename` is a m2g graph file.
 
     Parameters
     ----------
@@ -23,7 +23,7 @@ def is_graph(filename, atlas="", suffix=""):
     Returns
     -------
     bool
-        True if the file has the ndmg naming convention, else False.
+        True if the file has the m2g naming convention, else False.
     """
 
     if atlas:
@@ -42,7 +42,7 @@ def is_graph(filename, atlas="", suffix=""):
 def filter_graph_files(file_list, **kwargs):
     """
     Generator.
-    Check if each file in `file_list` is a ndmg edgelist,
+    Check if each file in `file_list` is a m2g edgelist,
     yield it if it is.
 
     Parameters

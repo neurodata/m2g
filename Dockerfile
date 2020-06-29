@@ -3,8 +3,8 @@ LABEL author="Derek Pisner"
 LABEL maintainer="dpisner@utexas.edu"
 
 #--------Environment Variables-----------------------------------------------#
-ENV NDMG_URL https://github.com/neurodata/ndmg.git
-ENV NDMG_ATLASES https://github.com/neurodata/neuroparc.git
+ENV M2G_URL https://github.com/neurodata/m2g.git
+ENV M2G_ATLASES https://github.com/neurodata/neuroparc.git
 ENV AFNI_URL https://files.osf.io/v1/resources/fvuh8/providers/osfstorage/5a0dd9a7b83f69027512a12b
 ENV LIBXP_URL http://mirrors.kernel.org/debian/pool/main/libx/libxp/libxp6_1.0.2-2_amd64.deb
 ENV LIBPNG_URL http://mirrors.kernel.org/debian/pool/main/libp/libpng/libpng12-0_1.2.49-1%2Bdeb7u2_amd64.deb
@@ -58,8 +58,8 @@ RUN mkdir -p /opt/afni && \
     rm -rf afni.tar.gz
 ENV PATH=/opt/afni:$PATH
 
-#--------NDMG SETUP-----------------------------------------------------------#
-# setup of python dependencies for ndmg itself, as well as file dependencies
+#--------M2G SETUP-----------------------------------------------------------#
+# setup of python dependencies for m2g itself, as well as file dependencies
 RUN \
     pip3.6 install numpy nibabel scipy python-dateutil pandas boto3 awscli matplotlib nilearn sklearn pandas cython vtk pyvtk fury awscli requests ipython duecredit graspy scikit-image networkx dipy pybids
 
@@ -75,25 +75,25 @@ RUN mkdir /output && \
     chmod -R 777 /output
 
 # grab atlases from neuroparc
-RUN mkdir /ndmg_atlases
+RUN mkdir /m2g_atlases
 
 RUN \
-    git lfs clone $NDMG_ATLASES && \
-    mv /neuroparc/atlases /ndmg_atlases && \
+    git lfs clone $M2G_ATLASES && \
+    mv /neuroparc/atlases /m2g_atlases && \
     rm -rf /neuroparc && \
-    rm -rf /ndmg_atlases/label/Human/DS* && \
-    rm -rf /ndmg_atlases/label/Human/pp264* && \
-    rm -rf /ndmg_atlases/label/Human/princeton* && \
-    rm -rf /ndmg_atlases/label/Human/slab* && \
-    rm -rf /ndmg_atlases/label/Human/hemispheric
+    rm -rf /m2g_atlases/label/Human/DS* && \
+    rm -rf /m2g_atlases/label/Human/pp264* && \
+    rm -rf /m2g_atlases/label/Human/princeton* && \
+    rm -rf /m2g_atlases/label/Human/slab* && \
+    rm -rf /m2g_atlases/label/Human/hemispheric
 
-RUN chmod -R 777 /ndmg_atlases
+RUN chmod -R 777 /m2g_atlases
 
-# Grab ndmg from deploy.
-RUN git clone -b staging $NDMG_URL /ndmg && \
-    cd /ndmg && \
+# Grab m2g from deploy.
+RUN git clone -b deploy $M2G_URL /m2g && \
+    cd /m2g && \
     pip3.6 install .
-RUN chmod -R 777 /usr/local/bin/ndmg_bids
+RUN chmod -R 777 /usr/local/bin/m2g_bids
 
 ENV MPLCONFIGDIR /tmp/matplotlib
 ENV PYTHONWARNINGS ignore
@@ -103,4 +103,4 @@ ENV PYTHONWARNINGS ignore
 RUN ldconfig
 
 # and add it as an entrypoint
-ENTRYPOINT ["ndmg"]
+ENTRYPOINT ["m2g"]

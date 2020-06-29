@@ -1,10 +1,10 @@
 import os
 
 import pytest
-import ndmg
-from ndmg.utils.cloud_utils import s3_get_data
+import m2g
+from m2g.utils.cloud_utils import s3_get_data
 from pathlib import Path
-from ndmg.utils.gen_utils import create_datadescript, DirectorySweeper
+from m2g.utils.gen_utils import create_datadescript, DirectorySweeper
 
 
 @pytest.fixture

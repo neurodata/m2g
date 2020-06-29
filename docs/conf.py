@@ -17,11 +17,11 @@ import sys
 
 sys.path.insert(0, os.path.abspath("."))
 sys.path.insert(0, os.path.abspath(".."))
-sys.path.insert(0, os.path.abspath("../ndmg/"))
+sys.path.insert(0, os.path.abspath("../m2g/"))
 
 # -- Project information -----------------------------------------------------
 
-project = u"ndmg"
+project = u"m2g"
 copyright = u"2018, Gregory Kiar, Eric Bridgeford"
 author = u"Gregory Kiar, Eric Bridgeford"
 
@@ -104,7 +104,7 @@ html_static_path = ["_static"]
 # -- Options for HTMLHelp output ---------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = "ndmgdoc"
+htmlhelp_basename = "m2gdoc"
 
 
 # -- Options for LaTeX output ------------------------------------------------
@@ -130,8 +130,8 @@ latex_elements = {
 latex_documents = [
     (
         master_doc,
-        "ndmg.tex",
-        u"ndmg Documentation",
+        "m2g.tex",
+        u"m2g Documentation",
         u"Gregory Kiar, Eric Bridgeford",
         "manual",
     )
@@ -142,7 +142,7 @@ latex_documents = [
 
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
-man_pages = [(master_doc, "ndmg", u"ndmg Documentation", [author], 1)]
+man_pages = [(master_doc, "m2g", u"m2g Documentation", [author], 1)]
 
 
 # -- Options for Texinfo output ----------------------------------------------
@@ -153,10 +153,10 @@ man_pages = [(master_doc, "ndmg", u"ndmg Documentation", [author], 1)]
 texinfo_documents = [
     (
         master_doc,
-        "ndmg",
-        u"ndmg Documentation",
+        "m2g",
+        u"m2g Documentation",
         author,
-        "ndmg",
+        "m2g",
         "One line description of project.",
         "Miscellaneous",
     )

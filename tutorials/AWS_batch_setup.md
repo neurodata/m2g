@@ -1,6 +1,6 @@
-# ndmg on AWS Batch
+# m2g on AWS Batch
 
-To run ndmg on entire datasets, we use AWS Batch. <br>
+To run m2g on entire datasets, we use AWS Batch. <br>
 
 ## Requirements
 
@@ -13,10 +13,10 @@ To run ndmg on entire datasets, we use AWS Batch. <br>
 Our Batch pipeline works as follows.
 
 1. Parse a BIDs-formatted dataset on s3 into a set of scans.
-2. For each scan, create a JSON file containing its subject ID, session ID, and ndmg parameters.
+2. For each scan, create a JSON file containing its subject ID, session ID, and m2g parameters.
 3. For each JSON file, send a job to AWS.
 4. AWS, upon receiving each job, creates a new EC2 instance, grabs our Docker image, and then runs a container using the arguments specified in the JSON.
-5. The container then pulls the input data for that particular scan from S3, runs ndmg using that data, and upon completion, pushes the data back to S3 in the relevant location.
+5. The container then pulls the input data for that particular scan from S3, runs m2g using that data, and upon completion, pushes the data back to S3 in the relevant location.
 
 Steps 4 and 5 above occur in parallel -- meaning, if you have a dataset with 200 scans, there will be 200 EC2 instances running at the same time.
 
@@ -24,13 +24,13 @@ For arbitrarily large datasets, full runs generally take a little over an hour, 
 
 ## Batch Setup : Console
 
-This section shows you how to set up a batch environment such that you can easily run ndmg in parallel. For more in-depth documentation, see the [AWS official documentation](https://docs.aws.amazon.com/batch/index.html).
+This section shows you how to set up a batch environment such that you can easily run m2g in parallel. For more in-depth documentation, see the [AWS official documentation](https://docs.aws.amazon.com/batch/index.html).
 
 ### Compute Environment
 
 Your compute environment defines the compute resources AWS will use for its instances.
 
-For ndmg, we recommend exclusively using `r5.large` instance types.
+For m2g, we recommend using using `r5.large` instance types for `csd` and `r5.xlarge` for `csa`.
 
 #### Initial Setup
 
@@ -72,7 +72,7 @@ Now, attach the compute environment to the job queue.
 
 The job definition is where you specify the container, the job role, the vCPUs, and the memory.
 
-1. For "container image", you can use `neurodata/ndmg_dev:latest`.
+1. For "container image", you can use `neurodata/m2g:latest`.
 2. For vCPUs, use 2.
 3. Because we want to use one r5.large EC2 instance per scan, use `15200` for the memory.
 
@@ -84,18 +84,18 @@ You can leave the other parameters empty.
 
 Given that you've set up your batch environment properly, and your IAM credentials are set up properly, submitting jobs to batch is relatively simple:
 
-        ndmg_cloud participant --bucket <bucket> --bidsdir <path on bucket> --jobdir <local/jobdir> --modif <name-of-s3-directory-output>
+        m2g_cloud participant --bucket <bucket> --bidsdir <path on bucket> --jobdir <local/jobdir> --modif <name-of-s3-directory-output>
 
 An example using one of our s3 buckets can be seen below. Note that your dataset must be BIDs-formatted.:
 
-        ndmg_cloud participant --bucket ndmg-data --sp native --bidsdir HNU1 --jobdir ~/.ndmg/jobs/HNU1-08-21-native --modif ndmg-08-21-native --dataset HNU1
+        m2g_cloud participant --bucket ndmg-data --sp native --bidsdir HNU1 --jobdir ~/.ndmg/jobs/HNU1-08-21-native --modif ndmg-08-21-native --dataset HNU1
 
 Note that the above example won't work for people without access to our bucket.
 
 Behind the scenes, what happens here is:
 
-1. `ndmg` parses through your s3 bucket, and gets the locations of all subjects and sessions
-2. A unique `json` file is created for each scan, containing the ndmg run parameters for that scan.
+1. `m2g` parses through your s3 bucket, and gets the locations of all subjects and sessions
+2. A unique `json` file is created for each scan, containing the m2g run parameters for that scan.
 3. Every `json` file is submitted sequentially to `AWS-Batch`, and a job begins that runs that scan.
 4. Once the scan is done, the output data is pushed to the output location on `s3` specified by `--modif`.
 
