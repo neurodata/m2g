@@ -108,13 +108,13 @@ RUN mkdir /output && \
 RUN mkdir /m2g_atlases
 
 RUN \
-    git lfs clone https://github.com/neurodata/neuroparc -b paper-fixes && \
+    git lfs clone https://github.com/neurodata/neuroparc && \
     mv /neuroparc/atlases /m2g_atlases && \
     rm -rf /neuroparc
 RUN chmod -R 777 /m2g_atlases
 
 # Grab m2g from deploy.
-RUN git clone -b Priebe-edits $M2G_URL /m2g && \
+RUN git clone $M2G_URL /m2g && \
     cd /m2g && \
     pip3.6 install .
 RUN chmod -R 777 /usr/local/bin/m2g_bids
