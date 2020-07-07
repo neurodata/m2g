@@ -195,7 +195,7 @@ RUN \
 RUN \
     pip3.6 install --no-cache-dir matplotlib nilearn sklearn pandas cython vtk pyvtk fury
 RUN \
-    pip3.6 install --no-cache-dir yamlordereddictloader awscli requests ipython duecredit graspy scikit-image networkx dipy pybids
+    pip3.6 install --no-cache-dir yamlordereddictloader awscli==1.15.40 requests ipython duecredit graspy scikit-image networkx dipy pybids
 
 RUN \
     pip3.6 install --no-cache-dir plotly==1.12.9 setuptools>=40.0 configparser>=3.7.4
@@ -287,7 +287,6 @@ RUN cd / && \
     chmod +x /code/run.py && \
     cd /
     
-RUN mv /m2g/m2g/functional/cpac_init.py /code/__init__.py
 RUN ls /code/
 
 # install cpac templates
