@@ -644,7 +644,7 @@ def make_gtab_and_bmask(fbval: str, fbvec: str, dwi_file: str, preproc_dir: Path
     # Get mean B0 brain mask
     cmd = f"bet {nodif_B0} {nodif_B0_bet} -m -f 0.2"
     run(cmd)
-    return gtab, nodif_B0, nodif_B0_mask
+    return gtab, nodif_B0_bet, nodif_B0_mask
 
 
 def normalize_xform(img):
