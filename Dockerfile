@@ -193,7 +193,7 @@ RUN apt-get update && apt-get -y upgrade insighttoolkit4-python
 #--------M2G SETUP-----------------------------------------------------------#
 # setup of python dependencies for m2g itself, as well as file dependencies
 RUN \
-    pip3.6 install --no-cache-dir numpy nibabel scipy python-dateutil pandas boto3 awscli
+    pip3.6 install --no-cache-dir numpy nibabel scipy python-dateutil pandas boto3 awscli virtualenv
 RUN \
     pip3.6 install --no-cache-dir matplotlib nilearn sklearn pandas cython vtk pyvtk fury
 RUN \
@@ -343,3 +343,6 @@ RUN export LC_ALL=C.UTF-8 && \
     apt-get clean && \
     apt-get autoremove -y && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+RUN virtualenv -p /usr/bin/python2.7 venv && \
+    . venv/bin/activate
