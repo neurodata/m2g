@@ -243,7 +243,7 @@ class GraphTools:
         """
 
         self.g.graph["ecount"] = nx.number_of_edges(self.g)
-        self.g = nx.convert_node_labels_to_integers(self.g, first_label=1)
+        self.g = nx.convert_node_labels_to_integers(self.g, first_label=0)
         print(self.g.graph)
         if fmt == "edgelist":
             nx.write_weighted_edgelist(self.g, graphname, encoding="utf-8")
