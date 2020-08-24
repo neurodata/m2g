@@ -253,7 +253,7 @@ def main():
     parser.add_argument(
         "--n_cpus",
         action="store",
-        help="Memory, in GB, to allocate to functional pipeline",
+        help="Number of cpus to allocate to either the functional pipeline or the diffusion connectome generation",
         default=1,
     )
 
@@ -269,7 +269,7 @@ def main():
     pipe=result.pipeline
     acquisition = result.acquisition    #functional pipeline settings
     mem_gb = result.mem_gb              #functional pipeline settings
-    n_cpus = result.n_cpus
+    n_cpus = int(result.n_cpus)
     tr=result.tr                        #functional pipeline settings
     parcellation_name = result.parcellation
     push_location = result.push_location
@@ -286,6 +286,7 @@ def main():
         "skipeddy": result.skipeddy,
         "skipreg": result.skipreg,
         "skull": result.skull,
+        "n_cpus": int(result.n_cpus),
     }
 
     # ---------------- S3 stuff ---------------- #

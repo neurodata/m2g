@@ -32,6 +32,9 @@ from m2g.utils import reg_utils
 from m2g.utils import cloud_utils
 from m2g.stats.qa_tractography import qa_tractography
 
+# multithreading
+import multiprocessing as mp
+
 # TODO : not sure why this is here, potentially remove
 os.environ["MPLCONFIGDIR"] = "/tmp/"
 
@@ -54,6 +57,7 @@ def m2g_dwi_worker(
     skipeddy=False,
     skipreg=False,
     skull=None,
+    n_cpus=1,
 ):
     """Creates a brain graph from MRI data
     Parameters
@@ -316,29 +320,41 @@ def m2g_dwi_worker(
 
     # ------- Connectome Estimation --------------------------------- #
     # Generate graphs from streamlines for each parcellation
+    global tracks
+    if reg_style == "native":
+        tracks = streamlines
+    elif reg_style == "native_dsn":
+        tracks = streamlines_mni
 
-    for idx, parc in enumerate(parcellations):
-        print(f"Generating graph for {parc} parcellation...")
-        print(f"Applying native-space alignment to {parcellations[idx]}")
-        if reg_style == "native":
-            tracks = streamlines
-        elif reg_style == "native_dsn":
-            tracks = streamlines_mni
+
+    pool = mp.Pool(n_cpus)
+    for idx,parc in enumerate(parcellations):
+        parcellation = parcellations[idx]
         rois = labels_im_file_list[idx]
-        labels_im = nib.load(labels_im_file_list[idx])
-        attr = len(np.unique(np.around(labels_im.get_data()).astype("int16"))) - 1
-        g1 = graph.GraphTools(
-            attr=parcellations[idx],
-            rois=rois,
-            tracks=tracks,
-            affine=np.eye(4),
-            outdir=outdir,
-            connectome_path=connectomes[idx],
-        )
-        g1.g = g1.make_graph()
-        g1.summary()
-        g1.save_graph_png(connectomes[idx])
-        g1.save_graph(connectomes[idx])
+        affine = np.eye(4)
+        connectome = connectomes[idx]
+        pool.apply_async(make_connectome, args=(parcellation, rois, connectome, outdir,))
+    pool.close()
+    pool.join()
+
+    #for idx, parc in enumerate(parcellations):
+    #    print(f"Generating graph for {parc} parcellation...")
+    #    print(f"Applying native-space alignment to {parcellations[idx]}")
+    #    rois = labels_im_file_list[idx]
+    #    labels_im = nib.load(labels_im_file_list[idx]) #never used?
+    #    attr = len(np.unique(np.around(labels_im.get_data()).astype("int16"))) - 1#never used?
+    #    g1 = graph.GraphTools(
+    #        attr=parcellations[idx],
+    #        rois=rois,
+    #        tracks=tracks,
+    #        affine=np.eye(4),
+    #        outdir=outdir,
+    #        connectome_path=connectomes[idx],
+    #    )
+    #    g1.g = g1.make_graph()
+    #    g1.summary()
+    #    g1.save_graph_png(connectomes[idx])
+    #    g1.save_graph(connectomes[idx])
 
     exe_time = datetime.now() - startTime
 
@@ -356,6 +372,23 @@ def m2g_dwi_worker(
     print(
         "NOTE :: m2g uses native-space registration to generate connectomes.\n Without post-hoc normalization, multiple connectomes generated with m2g cannot be compared directly."
     )
+
+
+
+def make_connectome(parcellation, rois, connectome, outdir):
+    print(f"\n\nThread: {os.getpid()} processing {parcellation}")
+    g1 = graph.GraphTools(
+        attr=parcellation,
+        rois=rois,
+        tracks=tracks,
+        affine=np.eye(4),
+        outdir=outdir,
+        connectome_path=connectome,
+        )
+    g1.g = g1.make_graph()
+    g1.summary()
+    g1.save_graph_png(connectome)
+    g1.save_graph(connectome)
 
 
 def welcome_message(connectomes):
