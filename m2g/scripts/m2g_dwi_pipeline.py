@@ -239,9 +239,9 @@ def m2g_dwi_worker(
         reg.check_gen_tissue_files()
         gen_tissue_files = [reg.t1w_brain, reg.wm_mask, reg.gm_mask, reg.csf_mask]
         existing_files = all(map(os.path.isfile, gen_tissue_files))
-        if :
+        if existing_files:
             print("Found existing gentissue run!")
-        else: # Run if not all necessary files are not found
+        else:  # Run if not all necessary files are not found
             reg.gen_tissue()
     else:
         reg.gen_tissue()
