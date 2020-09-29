@@ -149,7 +149,7 @@ def main():
         action="store",
         help="""Pipline to use when analyzing the input data, 
         either func or dwi. If  Default is dwi.""",
-        default="dwi"
+        default="dwi",
     )
     parser.add_argument(
         "--acquisition",
@@ -164,13 +164,13 @@ def main():
         seqplus - Sequential in the plus direction
         seqminus - Sequential in the minus direction,
         default is alt+z. For more information:https://fcp-indi.github.io/docs/user/func.html""",
-        default="alt+z"
+        default="alt+z",
     )
     parser.add_argument(
         "--tr",
         action="store",
         help="functional scan TR (seconds), default is 2.0",
-        default=2.0
+        default=2.0,
     )
     parser.add_argument(
         "--push_location",
@@ -183,7 +183,7 @@ def main():
         "--parcellation",
         action="store",
         help="The parcellation(s) being analyzed. Multiple parcellations can be provided with a space separated list.",
-        nargs='+',
+        nargs="+",
         default=None,
     )
     parser.add_argument(
@@ -266,11 +266,11 @@ def main():
     output_dir = result.output_dir
     subjects = result.participant_label
     sessions = result.session_label
-    pipe=result.pipeline
-    acquisition = result.acquisition    #functional pipeline settings
-    mem_gb = result.mem_gb              #functional pipeline settings
+    pipe = result.pipeline
+    acquisition = result.acquisition  # functional pipeline settings
+    mem_gb = result.mem_gb  # functional pipeline settings
     n_cpus = result.n_cpus
-    tr=result.tr                        #functional pipeline settings
+    tr = result.tr  # functional pipeline settings
     parcellation_name = result.parcellation
     push_location = result.push_location
 
@@ -341,23 +341,35 @@ def main():
 
     # ------- Check if they have selected the functional pipeline ------ #
     if pipe == "func":
-        
-        sweeper = DirectorySweeper(input_dir, subjects=subjects, sessions=sessions, pipeline='func')
-        scans = sweeper.get_dir_info(pipeline='func')
-        
+
+        sweeper = DirectorySweeper(
+            input_dir, subjects=subjects, sessions=sessions, pipeline="func"
+        )
+        scans = sweeper.get_dir_info(pipeline="func")
+
         home = os.path.expanduser("~")
-        if not os.path.exists(home + '/.m2g'):
+        if not os.path.exists(home + "/.m2g"):
             os.makedirs(f"{home}/.m2g")
 
-        
         for SubSesFile in scans:
             subject, session, files = SubSesFile
-            #add subject and session folders to output
+            # add subject and session folders to output
             outDir = f"{output_dir}/sub-{subject}/ses-{session}"
-            
-            m2g_func_worker(input_dir, outDir, subject, session, files['t1w'], files['func'], acquisition, tr, mem_gb, n_cpus)
-        
-            #m2g_func_worker()
+
+            m2g_func_worker(
+                input_dir,
+                outDir,
+                subject,
+                session,
+                files["t1w"],
+                files["func"],
+                acquisition,
+                tr,
+                mem_gb,
+                n_cpus,
+            )
+
+            # m2g_func_worker()
             print(
                 f"""
                 Functional Pipeline completed!
@@ -375,20 +387,24 @@ def main():
                     session=session,
                     creds=creds,
                 )
-                #shutil.rmtree(f'{output_dir}/sub-{subject}', ignore_errors=False, onerror=None)
+                # shutil.rmtree(f'{output_dir}/sub-{subject}', ignore_errors=False, onerror=None)
 
         sys.exit(0)
-
 
     # ---------------- Grab parcellations, atlases, mask --------------- #
     # get parcellations, atlas, and mask, then stick it into constant_kwargs
     atlas_dir = get_atlas_dir()
     parcellations, atlas, mask, = get_atlas(atlas_dir, constant_kwargs["vox_size"])
     if parcellation_name is not None:  # filter parcellations
-        parcellations = [file_ for file_ in parcellations for parc in parcellation_name if parc in file_]
+        parcellations = [
+            file_
+            for file_ in parcellations
+            for parc in parcellation_name
+            if parc in file_
+        ]
     atlas_stuff = {"atlas": atlas, "mask": mask, "parcellations": parcellations}
     constant_kwargs.update(atlas_stuff)
-
+    print(atlas_stuff)
     # parse input directory
     sweeper = DirectorySweeper(input_dir, subjects=subjects, sessions=sessions)
     scans = sweeper.get_dir_info()
