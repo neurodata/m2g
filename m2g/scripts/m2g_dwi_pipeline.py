@@ -352,9 +352,10 @@ def m2g_dwi_worker(
     if "M2G_URL" in os.environ:
         print("Note: tractography QA does not work in a Docker environment.")
     else:
-        qa_tractography_out = outdir / "qa/fibers"
-        qa_tractography(streams, str(qa_tractography_out), str(eddy_corrected_data))
-        print("QA tractography Completed.")
+        # qa_tractography_out = outdir / "qa/fibers"
+        # qa_tractography(streams, str(qa_tractography_out), str(eddy_corrected_data))
+        # print("QA tractography Completed.")
+        pass
 
     print(f"Total execution time: {exe_time}")
     print("M2G Complete.")
