@@ -279,9 +279,9 @@ class DmriReg:
         """Function for checking whether files were resliced or not.
         Only used for `skipreg` option."""
 
-        if vox_size == "1mm":
+        if self.vox_size == "1mm":
             new_zooms = (1.0, 1.0, 1.0)
-        elif vox_size == "2mm":
+        elif self.vox_size == "2mm":
             new_zooms = (2.0, 2.0, 2.0)
 
         img = nib.load(self.t1w_brain)
