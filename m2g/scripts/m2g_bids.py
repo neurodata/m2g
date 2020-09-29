@@ -402,6 +402,10 @@ def main():
             for parc in parcellation_name
             if parc in file_
         ]
+    # Check if parcellations is empty
+    if len(parcellations) == 0:
+        raise ValueError("No valid parcellations found.")
+
     atlas_stuff = {"atlas": atlas, "mask": mask, "parcellations": parcellations}
     constant_kwargs.update(atlas_stuff)
     print(atlas_stuff)
