@@ -235,8 +235,14 @@ def m2g_dwi_worker(
     )
 
     # Perform anatomical segmentation
-    if skipreg and os.path.isfile(reg.wm_edge):
-        print("Found existing gentissue run!")
+    if skipreg:
+        reg.check_gen_tissue_files()
+        gen_tissue_files = [reg.t1w_brain, reg.wm_mask, reg.gm_mask, reg.csf_mask]
+        existing_files = all(map(os.path.isfile, gen_tissue_files))
+        if :
+            print("Found existing gentissue run!")
+        else: # Run if not all necessary files are not found
+            reg.gen_tissue()
     else:
         reg.gen_tissue()
 
