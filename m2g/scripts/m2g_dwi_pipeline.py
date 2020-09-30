@@ -55,6 +55,7 @@ def m2g_dwi_worker(
     skipeddy=False,
     skipreg=False,
     skull=None,
+    n_cpus=1,
 ):
     """Creates a brain graph from MRI data
     Parameters
@@ -93,6 +94,8 @@ def m2g_dwi_worker(
         Whether or not to skip registration. Default is False.
     skull : str, optional
         skullstrip parameter pre-set. Default is "none".
+    n_cpus : int, optional
+        Number of CPUs to use for computing edges from streamlines
     Raises
     ------
     ValueError
@@ -335,7 +338,6 @@ def m2g_dwi_worker(
             tracks = streamlines_mni
         rois = labels_im_file_list[idx]
         labels_im = nib.load(labels_im_file_list[idx])
-        attr = len(np.unique(np.around(labels_im.get_data()).astype("int16"))) - 1
         g1 = graph.GraphTools(
             attr=parcellations[idx],
             rois=rois,
@@ -343,6 +345,7 @@ def m2g_dwi_worker(
             affine=np.eye(4),
             outdir=outdir,
             connectome_path=connectomes[idx],
+            n_cpus=n_cpus,
         )
         g1.g = g1.make_graph()
         g1.summary()

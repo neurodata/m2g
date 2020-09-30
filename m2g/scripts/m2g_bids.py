@@ -251,10 +251,7 @@ def main():
         default=20,
     )
     parser.add_argument(
-        "--n_cpus",
-        action="store",
-        help="Memory, in GB, to allocate to functional pipeline",
-        default=1,
+        "--n_cpus", action="store", help="CPUs to allocate to pipelines", default=1,
     )
 
     # and ... begin!
@@ -286,6 +283,7 @@ def main():
         "skipeddy": result.skipeddy,
         "skipreg": result.skipreg,
         "skull": result.skull,
+        "n_cpus": result.n_cpus,
     }
 
     # ---------------- S3 stuff ---------------- #
