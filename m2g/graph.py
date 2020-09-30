@@ -87,7 +87,7 @@ class GraphTools:
         self.outdir = outdir
         self.connectome_path = os.path.dirname(connectome_path)
         self.attr = attr
-        self.n_cpus = n_cpus
+        self.n_cpus = int(n_cpus)
 
     @timer
     def make_graph_old(self):
