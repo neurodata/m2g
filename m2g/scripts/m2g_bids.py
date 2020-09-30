@@ -406,7 +406,6 @@ def main():
 
     atlas_stuff = {"atlas": atlas, "mask": mask, "parcellations": parcellations}
     constant_kwargs.update(atlas_stuff)
-    print(atlas_stuff)
     # parse input directory
     sweeper = DirectorySweeper(input_dir, subjects=subjects, sessions=sessions)
     scans = sweeper.get_dir_info()
