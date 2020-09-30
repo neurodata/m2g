@@ -269,6 +269,7 @@ def m2g_dwi_worker(
     # Align atlas to dwi-space and check that the atlas hasn't lost any of the rois
     _ = [reg, parcellations, outdir, prep_anat, vox_size, reg_style]
     labels_im_file_list = reg_utils.skullstrip_check(*_)
+    print(labels_im_file_list)
 
     # -------- Tensor Fitting and Fiber Tractography ---------------- #
 
