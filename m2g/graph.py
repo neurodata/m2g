@@ -14,7 +14,7 @@ import os
 import time
 import csv
 from itertools import combinations
-from functools import reduce
+from functools import reduce, partial
 from collections import defaultdict
 from pathlib import Path
 
@@ -190,47 +190,14 @@ class GraphTools:
         nlines = len(self.tracks)
         print("# of Streamlines: " + str(nlines))
 
-        def worker(tracks):
-            g = nx.Graph(ecount=0, vcount=mx - 1)
-            # Add empty vertices
-            nodelist = list(range(1, mx))
-            for node in nodelist:  # (1, mx + 1):
-                g.add_node(node)
-
-            edge_dict = defaultdict(int)
-            for s in tracks:
-                # Map the streamlines coordinates to voxel coordinates and get labels for label_volume
-                # i, j, k = np.vstack(np.array([get_sphere(coord, error_margin,
-                #                                          (voxel_size, voxel_size, voxel_size),
-                #                                          self.roi_img.shape) for coord in
-                #                               _to_voxel_coordinates(s, lin_T, offset)])).T
-
-                # Map the streamlines coordinates to voxel coordinates
-                points = _to_voxel_coordinates(s, lin_T, offset)
-
-                # get labels for label_volume
-                i, j, k = points.T
-
-                lab_arr = self.rois[i, j, k]
-                endlabels = []
-                for lab in np.unique(lab_arr).astype("int16"):
-                    if (lab > 0) and (np.sum(lab_arr == lab) >= overlap_thr):
-                        endlabels.append(node_dict[lab])
-
-                endlabels = sorted(endlabels)
-
-                edges = combinations(endlabels, 2)
-
-                for edge in edges:
-                    edge_dict[edge] += 1
-
-            edge_list = [(k[0], k[1], v) for k, v in edge_dict.items()]
-            g.add_weighted_edges_from(edge_list)
-            A = nx.to_numpy_array(g, nodelist=nodelist)
-            return A
-
+        partial_func = partial(
+            self._parallel_read_tracks,
+            mx=mx,
+            node_dict=node_dict,
+            overlap_thr=overlap_thr,
+        )
         res = Parallel(n_jobs=self.n_cpus)(
-            delayed(worker)(self.tracks[start :: self.n_cpus])
+            delayed(partial_func)(self.tracks[start :: self.n_cpus])
             for start in range(self.n_cpus)
         )
         conn_matrix = reduce(np.add, res)
@@ -243,6 +210,46 @@ class GraphTools:
         g = nx.from_numpy_matrix(conn_matrix)
 
         return g
+
+    def _parallel_read_tracks(self, tracks, mx, node_dict, overlap_thr):
+        lin_T, offset = _mapping_to_voxel(np.eye(4))
+        g = nx.Graph(ecount=0, vcount=mx - 1)
+        # Add empty vertices
+        nodelist = list(range(1, mx))
+        for node in nodelist:  # (1, mx + 1):
+            g.add_node(node)
+
+        edge_dict = defaultdict(int)
+        for s in tracks:
+            # Map the streamlines coordinates to voxel coordinates and get labels for label_volume
+            # i, j, k = np.vstack(np.array([get_sphere(coord, error_margin,
+            #                                          (voxel_size, voxel_size, voxel_size),
+            #                                          self.roi_img.shape) for coord in
+            #                               _to_voxel_coordinates(s, lin_T, offset)])).T
+
+            # Map the streamlines coordinates to voxel coordinates
+            points = _to_voxel_coordinates(s, lin_T, offset)
+
+            # get labels for label_volume
+            i, j, k = points.T
+
+            lab_arr = self.rois[i, j, k]
+            endlabels = []
+            for lab in np.unique(lab_arr).astype("int16"):
+                if (lab > 0) and (np.sum(lab_arr == lab) >= overlap_thr):
+                    endlabels.append(node_dict[lab])
+
+            endlabels = sorted(endlabels)
+
+            edges = combinations(endlabels, 2)
+
+            for edge in edges:
+                edge_dict[edge] += 1
+
+        edge_list = [(k[0], k[1], v) for k, v in edge_dict.items()]
+        g.add_weighted_edges_from(edge_list)
+        A = nx.to_numpy_array(g, nodelist=nodelist)
+        return A
 
     def save_graph(self, graphname, fmt="igraph"):
         """Saves the graph to disk
