@@ -334,8 +334,7 @@ def m2g_dwi_worker(
             tracks = streamlines
         elif reg_style == "native_dsn":
             tracks = streamlines_mni
-        rois = labels_im_file_list[idx]
-        labels_im = nib.load(labels_im_file_list[idx])
+        rois = nib.load(labels_im_file_list[idx]).get_fdata().astype(int)
         g1 = graph.GraphTools(
             attr=parcellations[idx],
             rois=rois,
