@@ -229,8 +229,9 @@ class GraphTools:
             A = nx.to_numpy_array(g, nodelist=nodelist)
             return A
 
-        res = Parallel(n_jobs=n_cpus)(
-            delayed(worker)(self.tracks[start::n_cpus]) for start in range(n_cpus)
+        res = Parallel(n_jobs=self.n_cpus)(
+            delayed(worker)(self.tracks[start :: self.n_cpus])
+            for start in range(self.n_cpus)
         )
         conn_matrix = reduce(np.add, res)
 
