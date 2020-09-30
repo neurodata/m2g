@@ -140,7 +140,7 @@ class GraphTools:
         self.g.add_weighted_edges_from(edge_list)
         return self.g, self.edge_dict
 
-    @timer
+    # @timer
     def make_graph(self, error_margin=2, overlap_thr=1, voxel_size=2):
         """Takes streamlines and produces a graph using Numpy functions
 
