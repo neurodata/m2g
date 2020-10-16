@@ -14,12 +14,9 @@ In this module, m2g:
 
 # standard library imports
 import sys
-import shutil
 import glob
 import os
 from argparse import ArgumentParser
-import traceback
-import subprocess
 
 # m2g imports
 from m2g.utils import cloud_utils
@@ -104,161 +101,13 @@ def get_atlas_dir():
     return os.path.expanduser("~") + "/.m2g/m2g_atlases"  # local
 
 
-def main():
+def main(result):
     """Starting point of the m2g pipeline, assuming that you are using a BIDS organized dataset
     """
-
-    parser = ArgumentParser(
-        description="This is an end-to-end connectome estimation pipeline from M3r Images."
-    )
-    parser.add_argument(
-        "input_dir",
-        help="""The directory with the input dataset
-        formatted according to the BIDS standard.
-        To use data from s3, just pass `s3://<bucket>/<dataset>` as the input directory.""",
-    )
-    parser.add_argument(
-        "output_dir",
-        help="""The local directory where the output
-        files should be stored.""",
-    )
-    parser.add_argument(
-        "--participant_label",
-        help="""The label(s) of the
-        participant(s) that should be analyzed. The label
-        corresponds to sub-<participant_label> from the BIDS
-        spec (so it does not include "sub-"). If this
-        parameter is not provided all subjects should be
-        analyzed. Multiple participants can be specified
-        with a space separated list.""",
-        nargs="+",
-    )
-    parser.add_argument(
-        "--session_label",
-        help="""The label(s) of the
-        session that should be analyzed. The label
-        corresponds to ses-<participant_label> from the BIDS
-        spec (so it does not include "ses-"). If this
-        parameter is not provided all sessions should be
-        analyzed. Multiple sessions can be specified
-        with a space separated list.""",
-        nargs="+",
-    )
-    parser.add_argument(
-        "--pipeline",
-        action="store",
-        help="""Pipline to use when analyzing the input data, 
-        either func or dwi. If  Default is dwi.""",
-        default="dwi",
-    )
-    parser.add_argument(
-        "--acquisition",
-        action="store",
-        help="""Acquisition method for functional data:
-        altplus - Alternating in the +z direction
-        alt+z - Alternating in the +z direction
-        alt+z2 - Alternating, but beginning at slice #1
-        altminus - Alternating in the -z direction
-        alt-z - Alternating in the -z direction
-        alt-z2 - Alternating, starting at slice #nz-2 instead of #nz-1
-        seqplus - Sequential in the plus direction
-        seqminus - Sequential in the minus direction,
-        default is alt+z. For more information:https://fcp-indi.github.io/docs/user/func.html""",
-        default="alt+z",
-    )
-    parser.add_argument(
-        "--tr",
-        action="store",
-        help="functional scan TR (seconds), default is 2.0",
-        default=2.0,
-    )
-    parser.add_argument(
-        "--push_location",
-        action="store",
-        help="Name of folder on s3 to push output data to, if the folder does not exist, it will be created."
-        "Format the location as `s3://<bucket>/<path>`",
-        default=None,
-    )
-    parser.add_argument(
-        "--parcellation",
-        action="store",
-        help="The parcellation(s) being analyzed. Multiple parcellations can be provided with a space separated list.",
-        nargs="+",
-        default=None,
-    )
-    parser.add_argument(
-        "--skipeddy",
-        action="store_true",
-        help="Whether to skip eddy correction if it has already been run.",
-        default=False,
-    )
-    parser.add_argument(
-        "--skipreg",
-        action="store_true",
-        default=False,
-        help="whether or not to skip registration",
-    )
-    parser.add_argument(
-        "--voxelsize",
-        action="store",
-        default="2mm",
-        help="Voxel size : 2mm, 1mm. Voxel size to use for template registrations.",
-    )
-    parser.add_argument(
-        "--mod",
-        action="store",
-        help="Deterministic (det) or probabilistic (prob) tracking. Default is det.",
-        default="det",
-    )
-    parser.add_argument(
-        "--filtering_type",
-        action="store",
-        help="Tracking approach: local, particle. Default is local.",
-        default="local",
-    )
-    parser.add_argument(
-        "--diffusion_model",
-        action="store",
-        help="Diffusion model: csd or csa. Default is csa.",
-        default="csa",
-    )
-    parser.add_argument(
-        "--space",
-        action="store",
-        help="Space for tractography: native, native_dsn. Default is native.",
-        default="native",
-    )
-    parser.add_argument(
-        "--seeds",
-        action="store",
-        help="Seeding density for tractography. Default is 20.",
-        default=20,
-    )
-    parser.add_argument(
-        "--skull",
-        action="store",
-        help="""Special actions to take when skullstripping t1w image based on default skullstrip ('none') failure:
-        Excess tissue below brain: below
-        Chunks of cerebelum missing: cerebelum
-        Frontal clipping near eyes: eye
-        Excess clipping in general: general,""",
-        default=None,
-    )
-    parser.add_argument(
-        "--mem_gb",
-        action="store",
-        help="Memory, in GB, to allocate to functional pipeline",
-        default=20,
-    )
-    parser.add_argument(
-        "--n_cpus", action="store", help="CPUs to allocate to pipelines", default=1,
-    )
-
     # and ... begin!
     print("\nBeginning m2g ...")
 
     # ---------------- Parse CLI arguments ---------------- #
-    result = parser.parse_args()
     input_dir = result.input_dir
     output_dir = result.output_dir
     subjects = result.participant_label
@@ -431,4 +280,151 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    parser = ArgumentParser(
+        description="This is an end-to-end connectome estimation pipeline from M3r Images."
+    )
+    parser.add_argument(
+        "input_dir",
+        help="""The directory with the input dataset
+        formatted according to the BIDS standard.
+        To use data from s3, just pass `s3://<bucket>/<dataset>` as the input directory.""",
+    )
+    parser.add_argument(
+        "output_dir",
+        help="""The local directory where the output
+        files should be stored.""",
+    )
+    parser.add_argument(
+        "--participant_label",
+        help="""The label(s) of the
+        participant(s) that should be analyzed. The label
+        corresponds to sub-<participant_label> from the BIDS
+        spec (so it does not include "sub-"). If this
+        parameter is not provided all subjects should be
+        analyzed. Multiple participants can be specified
+        with a space separated list.""",
+        nargs="+",
+    )
+    parser.add_argument(
+        "--session_label",
+        help="""The label(s) of the
+        session that should be analyzed. The label
+        corresponds to ses-<participant_label> from the BIDS
+        spec (so it does not include "ses-"). If this
+        parameter is not provided all sessions should be
+        analyzed. Multiple sessions can be specified
+        with a space separated list.""",
+        nargs="+",
+    )
+    parser.add_argument(
+        "--pipeline",
+        action="store",
+        help="""Pipline to use when analyzing the input data, 
+        either func or dwi. If  Default is dwi.""",
+        default="dwi",
+    )
+    parser.add_argument(
+        "--acquisition",
+        action="store",
+        help="""Acquisition method for functional data:
+        altplus - Alternating in the +z direction
+        alt+z - Alternating in the +z direction
+        alt+z2 - Alternating, but beginning at slice #1
+        altminus - Alternating in the -z direction
+        alt-z - Alternating in the -z direction
+        alt-z2 - Alternating, starting at slice #nz-2 instead of #nz-1
+        seqplus - Sequential in the plus direction
+        seqminus - Sequential in the minus direction,
+        default is alt+z. For more information:https://fcp-indi.github.io/docs/user/func.html""",
+        default="alt+z",
+    )
+    parser.add_argument(
+        "--tr",
+        action="store",
+        help="functional scan TR (seconds), default is 2.0",
+        default=2.0,
+    )
+    parser.add_argument(
+        "--push_location",
+        action="store",
+        help="Name of folder on s3 to push output data to, if the folder does not exist, it will be created."
+        "Format the location as `s3://<bucket>/<path>`",
+        default=None,
+    )
+    parser.add_argument(
+        "--parcellation",
+        action="store",
+        help="The parcellation(s) being analyzed. Multiple parcellations can be provided with a space separated list.",
+        nargs="+",
+        default=None,
+    )
+    parser.add_argument(
+        "--skipeddy",
+        action="store_true",
+        help="Whether to skip eddy correction if it has already been run.",
+        default=False,
+    )
+    parser.add_argument(
+        "--skipreg",
+        action="store_true",
+        default=False,
+        help="whether or not to skip registration",
+    )
+    parser.add_argument(
+        "--voxelsize",
+        action="store",
+        default="2mm",
+        help="Voxel size : 2mm, 1mm. Voxel size to use for template registrations.",
+    )
+    parser.add_argument(
+        "--mod",
+        action="store",
+        help="Deterministic (det) or probabilistic (prob) tracking. Default is det.",
+        default="det",
+    )
+    parser.add_argument(
+        "--filtering_type",
+        action="store",
+        help="Tracking approach: local, particle. Default is local.",
+        default="local",
+    )
+    parser.add_argument(
+        "--diffusion_model",
+        action="store",
+        help="Diffusion model: csd or csa. Default is csa.",
+        default="csa",
+    )
+    parser.add_argument(
+        "--space",
+        action="store",
+        help="Space for tractography: native, native_dsn. Default is native.",
+        default="native",
+    )
+    parser.add_argument(
+        "--seeds",
+        action="store",
+        help="Seeding density for tractography. Default is 20.",
+        default=20,
+    )
+    parser.add_argument(
+        "--skull",
+        action="store",
+        help="""Special actions to take when skullstripping t1w image based on default skullstrip ('none') failure:
+        Excess tissue below brain: below
+        Chunks of cerebelum missing: cerebelum
+        Frontal clipping near eyes: eye
+        Excess clipping in general: general,""",
+        default=None,
+    )
+    parser.add_argument(
+        "--mem_gb",
+        action="store",
+        help="Memory, in GB, to allocate to functional pipeline",
+        default=20,
+    )
+    parser.add_argument(
+        "--n_cpus", action="store", help="CPUs to allocate to pipelines", default=1,
+    )
+    result = parser.parse_args()
+
+    main(result)
