@@ -14,6 +14,7 @@ In this module, m2g:
 
 # standard library imports
 import sys
+import shutil
 import glob
 import os
 from argparse import ArgumentParser
@@ -342,7 +343,7 @@ if __name__ == "__main__":
         "--tr",
         action="store",
         help="functional scan TR (seconds), default is 2.0",
-        default=2.0,
+        default=2.0
     )
     parser.add_argument(
         "--push_location",
@@ -423,8 +424,10 @@ if __name__ == "__main__":
         default=20,
     )
     parser.add_argument(
-        "--n_cpus", action="store", help="CPUs to allocate to pipelines", default=1,
+        "--n_cpus",
+        action="store",
+        help="Number of cpus to allocate to either the functional pipeline or the diffusion connectome generation",
+        default=1,
     )
     result = parser.parse_args()
-
     main(result)

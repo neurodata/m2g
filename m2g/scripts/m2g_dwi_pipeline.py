@@ -33,6 +33,9 @@ from m2g.utils import reg_utils
 from m2g.utils import cloud_utils
 from m2g.stats.qa_tractography import qa_tractography
 
+# multithreading
+import multiprocessing as mp
+
 # TODO : not sure why this is here, potentially remove
 os.environ["MPLCONFIGDIR"] = "/tmp/"
 
@@ -326,6 +329,13 @@ def m2g_dwi_worker(
 
     # ------- Connectome Estimation --------------------------------- #
     # Generate graphs from streamlines for each parcellation
+    global tracks
+    if reg_style == "native":
+        tracks = streamlines
+    elif reg_style == "native_dsn":
+        tracks = streamlines_mni
+
+
 
     for idx, parc in enumerate(parcellations):
         print(f"Generating graph for {parc} parcellation...")
@@ -349,6 +359,7 @@ def m2g_dwi_worker(
         g1.save_graph_png(connectomes[idx])
         g1.save_graph(connectomes[idx])
 
+
     exe_time = datetime.now() - startTime
 
     if "M2G_URL" in os.environ:
@@ -366,6 +377,7 @@ def m2g_dwi_worker(
     print(
         "NOTE :: m2g uses native-space registration to generate connectomes.\n Without post-hoc normalization, multiple connectomes generated with m2g cannot be compared directly."
     )
+
 
 
 def welcome_message(connectomes):

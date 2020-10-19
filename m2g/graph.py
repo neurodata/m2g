@@ -89,6 +89,7 @@ class GraphTools:
         self.attr = attr
         self.n_cpus = int(n_cpus)
 
+
     @timer
     def make_graph_old(self):
         """
@@ -165,6 +166,7 @@ class GraphTools:
         lin_T, offset = _mapping_to_voxel(
             np.eye(4)
         )  # TODO : voxel_size was removed in dipy 1.0.0, make sure that didn't break anything when voxel size is not 2mm
+
         # mx = len(np.unique(self.rois.astype(np.int64))) #- 1
 
         self.attr = nib.load(self.attr)
@@ -191,9 +193,9 @@ class GraphTools:
         print("# of Streamlines: " + str(nlines))
 
         def worker(tracks):
-            g = nx.Graph(ecount=0, vcount=mx - 1)
+            g = nx.Graph(ecount=0, vcount=mx)
             # Add empty vertices
-            nodelist = list(range(1, mx))
+            nodelist = list(range(0, mx))
             for node in nodelist:  # (1, mx + 1):
                 g.add_node(node)
 
@@ -261,7 +263,7 @@ class GraphTools:
         """
 
         self.g.graph["ecount"] = nx.number_of_edges(self.g)
-        self.g = nx.convert_node_labels_to_integers(self.g, first_label=1)
+        self.g = nx.convert_node_labels_to_integers(self.g, first_label=0)
         print(self.g.graph)
         if fmt == "edgelist":
             nx.write_weighted_edgelist(self.g, graphname, encoding="utf-8")
