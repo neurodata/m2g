@@ -55,17 +55,17 @@ def make_script(input_dir, output_dir, subject, session, data_config, pipeline_c
 
 
 def m2g_func_worker(input_dir, output_dir, sub, ses, anat, bold, acquisition, tr, mem_gb, n_cpus):
-    """[summary]
+    """Creates the requisite files to run CPAC, then calls CPAC and runs it in a terminal
     
     Arguments:
-        input_dir {[type]} -- [description]
-        output_dir {[type]} -- [description]
-        sub {[type]} -- [description]
-        ses {[type]} -- [description]
-        anat {[type]} -- [description]
-        bold {[type]} -- [description]
-        acquisition {[type]} -- [description]
-        tr {[type]} -- [description]
+        input_dir {str} -- Path to input directory
+        output_dir {str} -- Path to output directory
+        sub {int} -- subject number
+        ses {int} -- session number
+        anat {str} -- Path of anatomical nifti file
+        bold {str} -- Path of functional nifti file
+        acquisition {str} -- Acquisition method for funcitional scans
+        tr {str} -- TR time, in seconds
     """
     
     pipeline_config='/m2g/m2g/functional/m2g_pipeline.yaml'

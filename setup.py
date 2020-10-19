@@ -68,7 +68,7 @@ kwargs.update(
             "nilearn",
             "vtk",
             "pyvtk",
-            "fury",
+            "fury==0.5.1",
             "requests",
             "plotly",
             "pybids>=0.9.0",

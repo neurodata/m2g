@@ -48,7 +48,7 @@ num_ants_threads :  4
 
 
 # Name for this pipeline configuration - useful for identification.
-pipelineName :  ndmg
+pipelineName :  m2g
 
 
 # Directory where CPAC should store temporary and intermediate files.
@@ -311,7 +311,6 @@ ANTs_para_T1_registration: None
 # Please specify ANTs parameters,if run Functional to EPI Template Registration
 ANTs_para_EPI_registration: None
 
-
 # If a lesion mask is available for a T1w image, use it to improve the ANTs' registration
 # ANTS registration only.
 use_lesion_mask : [0]
@@ -432,6 +431,7 @@ brain_mask_erosion_mm : 30
 brain_erosion_mm: 0
 
 
+
 # Erosion proportion, if use erosion.
 # Default proportion is 0 for CSF (cerebrospinal fluid)  mask.
 # Recommend to do not use erosion in both proportion and millimeter method.
@@ -509,7 +509,6 @@ motion_correction_reference: ['mean']
 
 # Choose motion correction reference volume
 motion_correction_reference_volume :  0
-
 
 # Interpolate voxel time courses so they are sampled at the same time points.
 slice_timing_correction :  [1]
@@ -722,6 +721,7 @@ targetAngleDeg : [90]
 runROITimeseries :  [1]
 
 
+
 # Functional time-series and ROI realignment method: ['ROI_to_func'] or ['func_to_ROI']
 # 'ROI_to_func' will realign the atlas/ROI to functional space (fast)
 # 'func_to_ROI' will realign the functional time series to the atlas/ROI space
@@ -745,6 +745,7 @@ tsa_roi_paths:
     /m2g_atlases/atlases/label/Human/HarvardOxfordsub-maxprob-thr25_space-MNI152NLin6_res-2x2x2.nii.gz: Avg
     /m2g_atlases/atlases/label/Human/JHU_space-MNI152NLin6_res-2x2x2.nii.gz: Avg
     /m2g_atlases/atlases/label/Human/Princetonvisual-top_space-MNI152NLin6_res-2x2x2.nii.gz: Avg
+
 
 
 # By default, extracted time series are written as both a text file and a 1D file. Additional output formats are as a .csv spreadsheet or a Numpy array.

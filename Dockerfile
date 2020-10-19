@@ -27,6 +27,7 @@ RUN apt-get update && \
 
 RUN apt-get install -y python2.7 python-pip
 
+
 RUN pip3.6 install --upgrade pip
 
 # Get neurodebian config
@@ -63,11 +64,13 @@ ENV PATH=/opt/afni:$PATH
 ## --------CPAC INSTALLS-----------------------------------------------------#
 RUN apt-get install -y graphviz graphviz-dev
 
+
 # install FSL
 RUN apt-get install -y --no-install-recommends \
       fsl-core \
       fsl-atlases \
       fsl-mni152-templates
+
 
 # Setup FSL environment
 ENV FSLDIR=/usr/share/fsl/5.0 \
@@ -251,7 +254,9 @@ RUN pip install git+https://github.com/ChildMindInstitute/PyPEER.git
 RUN mkdir /m2g_atlases
 
 RUN \
-    git lfs clone https://github.com/neurodata/neuroparc -b paper-fixes && \
+
+    git lfs clone https://github.com/neurodata/neuroparc && \
+
     mv /neuroparc/atlases /m2g_atlases && \
     rm -rf /neuroparc
 RUN chmod -R 777 /m2g_atlases
@@ -272,6 +277,10 @@ RUN ldconfig
 # and add it as an entrypoint
 ENTRYPOINT ["m2g"]
 
+
+# Clear apt-get caches (try adding sudo)
+RUN apt-get clean
+
 # Installing and setting up c3d
 RUN mkdir -p /opt/c3d && \
     curl -sSL "http://downloads.sourceforge.net/project/c3d/c3d/1.0.0/c3d-1.0.0-Linux-x86_64.tar.gz" \
@@ -288,7 +297,7 @@ RUN cd / && \
     rm -R /C-PAC && \
     chmod +x /code/run.py && \
     cd /
-    
+
 RUN ls /code/
 
 # install cpac templates
