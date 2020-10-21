@@ -7,7 +7,6 @@ scipy>=0.13.3
 dipy
 boto3
 matplotlib
-plotly==1.12.1
 duecredit
 pybids
 configparser>=3.7.4
