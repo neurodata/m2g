@@ -14,7 +14,6 @@ In this module, m2g:
 
 # standard library imports
 import sys
-import shutil
 import glob
 import os
 from argparse import ArgumentParser
@@ -90,7 +89,7 @@ def get_atlas(atlas_dir, vox_size):
 def get_atlas_dir():
     """
     Gets the location of m2g's atlases.
-    
+
     Returns
     -------
     str
@@ -102,9 +101,11 @@ def get_atlas_dir():
     return os.path.expanduser("~") + "/.m2g/m2g_atlases"  # local
 
 
-def main(result):
+def main(result=None):
     """Starting point of the m2g pipeline, assuming that you are using a BIDS organized dataset
     """
+    if result is None:
+        result = get_args()
     # and ... begin!
     print("\nBeginning m2g ...")
 
@@ -280,7 +281,7 @@ def main(result):
             )
 
 
-if __name__ == "__main__":
+def get_args():
     parser = ArgumentParser(
         description="This is an end-to-end connectome estimation pipeline from M3r Images."
     )
@@ -343,7 +344,7 @@ if __name__ == "__main__":
         "--tr",
         action="store",
         help="functional scan TR (seconds), default is 2.0",
-        default=2.0
+        default=2.0,
     )
     parser.add_argument(
         "--push_location",
@@ -424,10 +425,13 @@ if __name__ == "__main__":
         default=20,
     )
     parser.add_argument(
-        "--n_cpus",
-        action="store",
-        help="Number of cpus to allocate to either the functional pipeline or the diffusion connectome generation",
-        default=1,
+        "--n_cpus", action="store", help="CPUs to allocate to pipelines", default=1,
     )
     result = parser.parse_args()
+
+    return result
+
+
+if __name__ == "__main__":
+    result = get_args()
     main(result)
