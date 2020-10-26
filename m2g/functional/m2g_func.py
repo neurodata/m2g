@@ -1,5 +1,6 @@
 import subprocess
 import yaml
+import os
 from m2g.utils.gen_utils import run
 import sys
 
@@ -54,7 +55,7 @@ def make_script(input_dir, output_dir, subject, session, data_config, pipeline_c
 
 
 
-def m2g_func_worker(input_dir, output_dir, sub, ses, anat, bold, acquisition, tr, mem_gb, n_cpus):
+def m2g_func_worker(input_dir, output_dir, sub, ses, anat, bold, parcellations, acquisition, tr, mem_gb, n_cpus):
     """Creates the requisite files to run CPAC, then calls CPAC and runs it in a terminal
     
     Arguments:
@@ -64,12 +65,36 @@ def m2g_func_worker(input_dir, output_dir, sub, ses, anat, bold, acquisition, tr
         ses {int} -- session number
         anat {str} -- Path of anatomical nifti file
         bold {str} -- Path of functional nifti file
+        parcellations {list} -- Parcellation(s) that will be used in the analysis
         acquisition {str} -- Acquisition method for funcitional scans
         tr {str} -- TR time, in seconds
     """
     
     pipeline_config='/m2g/m2g/functional/m2g_pipeline.yaml'
     
+
+    # If parcellations specified, create dictionary to alter yaml file
+    if parcellations:
+        os.makedirs(f'{output_dir}',exist_ok=True)
+        parcs = {}
+
+        for p in parcellations:
+            parcs[p]='Avg'
+    
+        # Read in desired parcellations
+        with open(pipeline_config,'r',encoding='utf8') as func_config:
+            config = yaml.safe_load(func_config)
+
+        # Replace 'tsa_roi_paths'
+        config['tsa_roi_paths'][0] = parcs
+
+        # Create new pipeline yaml file in a different location
+        pipeline_config=f'{output_dir}/functional_pipeline_settings.yaml'
+
+        with open(pipeline_config,'w',encoding='utf8') as outfile:
+            yaml.dump(config, outfile, default_flow_style=False)
+
+
     data_config = make_dataconfig(input_dir, sub, ses, anat, bold, acquisition, tr)
     cpac_script = make_script(input_dir, output_dir, sub, ses, data_config, pipeline_config,mem_gb, n_cpus)
     

@@ -187,9 +187,26 @@ def main(result):
         """
     )
 
+    # ---------------- Grab parcellations, atlases, mask --------------- #
+    # get parcellations, atlas, and mask, then stick it into constant_kwargs
+    atlas_dir = get_atlas_dir()
+    parcellations, atlas, mask, = get_atlas(atlas_dir, constant_kwargs["vox_size"])
+    if parcellation_name is not None:  # filter parcellations
+        parcellations = [
+            file_
+            for file_ in parcellations
+            for parc in parcellation_name
+            if parc in file_
+        ]
+    # Check if parcellations is empty
+    if len(parcellations) == 0:
+        raise ValueError("No valid parcellations found.")
+
+    atlas_stuff = {"atlas": atlas, "mask": mask, "parcellations": parcellations}
+
     # ------- Check if they have selected the functional pipeline ------ #
     if pipe == "func":
-
+        
         sweeper = DirectorySweeper(
             input_dir, subjects=subjects, sessions=sessions, pipeline="func"
         )
@@ -211,6 +228,7 @@ def main(result):
                 session,
                 files["t1w"],
                 files["func"],
+                parcellations,
                 acquisition,
                 tr,
                 mem_gb,
@@ -239,22 +257,9 @@ def main(result):
 
         sys.exit(0)
 
-    # ---------------- Grab parcellations, atlases, mask --------------- #
-    # get parcellations, atlas, and mask, then stick it into constant_kwargs
-    atlas_dir = get_atlas_dir()
-    parcellations, atlas, mask, = get_atlas(atlas_dir, constant_kwargs["vox_size"])
-    if parcellation_name is not None:  # filter parcellations
-        parcellations = [
-            file_
-            for file_ in parcellations
-            for parc in parcellation_name
-            if parc in file_
-        ]
-    # Check if parcellations is empty
-    if len(parcellations) == 0:
-        raise ValueError("No valid parcellations found.")
+    
+    # ------------ Continue DWI pipeline ------------ #
 
-    atlas_stuff = {"atlas": atlas, "mask": mask, "parcellations": parcellations}
     constant_kwargs.update(atlas_stuff)
     # parse input directory
     sweeper = DirectorySweeper(input_dir, subjects=subjects, sessions=sessions)
