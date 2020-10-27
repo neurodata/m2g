@@ -82,7 +82,7 @@ def m2g_func_worker(input_dir, output_dir, sub, ses, anat, bold, parcellations, 
             parcs[p]='Avg'
     
         # Read in desired parcellations
-        with open(pipeline_config,'r',encoding='utf8') as func_config:
+        with open(pipeline_config,'r',encoding='utf-8') as func_config:
             config = yaml.safe_load(func_config)
 
         # Replace 'tsa_roi_paths'
@@ -91,7 +91,7 @@ def m2g_func_worker(input_dir, output_dir, sub, ses, anat, bold, parcellations, 
         # Create new pipeline yaml file in a different location
         pipeline_config=f'{output_dir}/functional_pipeline_settings.yaml'
 
-        with open(pipeline_config,'w',encoding='utf8') as outfile:
+        with open(pipeline_config,'w',encoding='utf-8') as outfile:
             yaml.dump(config, outfile, default_flow_style=False)
 
 
