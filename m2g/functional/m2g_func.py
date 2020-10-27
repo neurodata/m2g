@@ -55,6 +55,7 @@ def make_script(input_dir, output_dir, subject, session, data_config, pipeline_c
 
 
 
+
 def m2g_func_worker(input_dir, output_dir, sub, ses, anat, bold, parcellations, acquisition, tr, mem_gb, n_cpus):
     """Creates the requisite files to run CPAC, then calls CPAC and runs it in a terminal
     
@@ -71,7 +72,6 @@ def m2g_func_worker(input_dir, output_dir, sub, ses, anat, bold, parcellations, 
     """
     
     pipeline_config='/m2g/m2g/functional/m2g_pipeline.yaml'
-    
 
     # If parcellations specified, create dictionary to alter yaml file
     if parcellations:
