@@ -200,8 +200,8 @@ RUN \
 RUN \
     pip3.6 install --no-cache-dir matplotlib nilearn sklearn pandas cython vtk pyvtk fury
 RUN \
-    pip3.6 install --no-cache-dir yamlordereddictloader awscli==1.15.40 requests ipython duecredit graspy scikit-image networkx dipy pybids
-
+    pip3.6 install --no-cache-dir yamlordereddictloader awscli==1.15.40 requests ipython duecredit graspy scikit-image networkx dipy pybids==0.12.0
+# TODO: Update pybids
 RUN \
     pip3.6 install --no-cache-dir plotly==1.12.9 setuptools>=40.0 configparser>=3.7.4
 
