@@ -30,6 +30,7 @@ RUN apt-get install -y python2.7 python-pip
 
 RUN pip3.6 install --upgrade pip
 
+
 # Get neurodebian config
 RUN curl -sSL http://neuro.debian.net/lists/stretch.us-tn.full >> /etc/apt/sources.list.d/neurodebian.sources.list && \
     apt-key add /root/.neurodebian.gpg && \
@@ -64,13 +65,11 @@ ENV PATH=/opt/afni:$PATH
 ## --------CPAC INSTALLS-----------------------------------------------------#
 RUN apt-get install -y graphviz graphviz-dev
 
-
 # install FSL
 RUN apt-get install -y --no-install-recommends \
       fsl-core \
       fsl-atlases \
       fsl-mni152-templates
-
 
 # Setup FSL environment
 ENV FSLDIR=/usr/share/fsl/5.0 \
@@ -91,6 +90,7 @@ RUN curl -sL http://fcon_1000.projects.nitrc.org/indi/cpac_resources.tar.gz -o /
     cp -n /tmp/cpac_image_resources/HarvardOxford-lateral-ventricles-thr25-2mm.nii.gz $FSLDIR/data/atlases/HarvardOxford && \
     cp -nr /tmp/cpac_image_resources/tissuepriors/2mm $FSLDIR/data/standard/tissuepriors && \
     cp -nr /tmp/cpac_image_resources/tissuepriors/3mm $FSLDIR/data/standard/tissueprior
+
 
 
 RUN apt-get update
@@ -200,8 +200,8 @@ RUN \
 RUN \
     pip3.6 install --no-cache-dir matplotlib nilearn sklearn pandas cython vtk pyvtk fury
 RUN \
-    pip3.6 install --no-cache-dir yamlordereddictloader awscli==1.15.40 requests ipython duecredit graspy scikit-image networkx dipy pybids
-
+    pip3.6 install --no-cache-dir yamlordereddictloader awscli==1.15.40 requests ipython duecredit graspy scikit-image networkx dipy pybids==0.12.0
+# TODO: Update pybids
 RUN \
     pip3.6 install --no-cache-dir plotly==1.12.9 setuptools>=40.0 configparser>=3.7.4
 
@@ -254,15 +254,13 @@ RUN pip install git+https://github.com/ChildMindInstitute/PyPEER.git
 RUN mkdir /m2g_atlases
 
 RUN \
-
     git lfs clone https://github.com/neurodata/neuroparc && \
-
     mv /neuroparc/atlases /m2g_atlases && \
     rm -rf /neuroparc
 RUN chmod -R 777 /m2g_atlases
 
 # Grab m2g from deploy.
-RUN git clone -b cpac-py3 $M2G_URL /m2g && \
+RUN git clone $M2G_URL /m2g && \
     cd /m2g && \
     pip3.6 install .
 RUN chmod -R 777 /usr/local/bin/m2g_bids
@@ -355,3 +353,4 @@ RUN export LC_ALL=C.UTF-8 && \
 
 RUN virtualenv -p /usr/bin/python2.7 venv && \
     . venv/bin/activate
+

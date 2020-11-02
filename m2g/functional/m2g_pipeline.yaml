@@ -1,5 +1,6 @@
 # CPAC Pipeline Configuration YAML file
 # Version 1.6.2
+
 #
 # http://fcp-indi.github.io for more info.
 #
@@ -52,11 +53,11 @@ pipelineName :  m2g
 
 
 # Directory where CPAC should store temporary and intermediate files.
-workingDirectory :  /tmp
+workingDirectory :  /output #/tmp
 
 
 # Directory where CPAC should write crash logs.
-crashLogDirectory :  /tmp
+crashLogDirectory :  /output #/tmp
 
 
 # Directory where CPAC should place processed data.
@@ -68,7 +69,7 @@ run_logging :  True
 
 
 # Directory where CPAC should place run logs.
-logDirectory :  /tmp
+logDirectory :  /output #/tmp
 
 
 # If setting the 'Output Directory' to an S3 bucket, insert the path to your AWS credentials file here.
@@ -80,16 +81,16 @@ s3Encryption :  [0]
 
 
 # Include extra versions and intermediate steps of functional preprocessing in the output directory.
-write_func_outputs :  [0]
+write_func_outputs :  [1] #0
 
 
 # Include extra outputs in the output directory that may be of interest when more information is needed.
-write_debugging_outputs :  [0]
+write_debugging_outputs :  [1] #0
 
 
 # Output directory format and structure.
 # Options: default, ndmg
-output_tree: "ndmg"
+output_tree: "default" #try default?
 
 
 # Generate quality control pages containing preprocessing and derivative outputs.
@@ -499,6 +500,7 @@ scaling_factor : 10
 runMotionStatisticsFirst : [0]
 
 
+
 # Choose motion correction method. Options: AFNI 3dvolreg, FSL mcflirt
 motion_correction : ['3dvolreg']
 
@@ -720,8 +722,6 @@ targetAngleDeg : [90]
 # Extract the average time series of one or more ROIs/seeds. Must be enabled if you wish to run Seed-based Correlation Analysis.
 runROITimeseries :  [1]
 
-
-
 # Functional time-series and ROI realignment method: ['ROI_to_func'] or ['func_to_ROI']
 # 'ROI_to_func' will realign the atlas/ROI to functional space (fast)
 # 'func_to_ROI' will realign the functional time series to the atlas/ROI space
@@ -730,7 +730,6 @@ runROITimeseries :  [1]
 #           result in small misalignments for very small ROIs - please double
 #           check your data if you see issues
 realignment : ['ROI_to_func']
-
 
 # Enter paths to region-of-interest (ROI) NIFTI files (.nii or .nii.gz) to be used for time-series extraction, and then select which types of analyses to run.
 # Available analyses: ['Avg', 'Voxel', 'SpatialReg'].
@@ -745,7 +744,6 @@ tsa_roi_paths:
     /m2g_atlases/atlases/label/Human/HarvardOxfordsub-maxprob-thr25_space-MNI152NLin6_res-2x2x2.nii.gz: Avg
     /m2g_atlases/atlases/label/Human/JHU_space-MNI152NLin6_res-2x2x2.nii.gz: Avg
     /m2g_atlases/atlases/label/Human/Princetonvisual-top_space-MNI152NLin6_res-2x2x2.nii.gz: Avg
-
 
 
 # By default, extracted time series are written as both a text file and a 1D file. Additional output formats are as a .csv spreadsheet or a Numpy array.

@@ -90,7 +90,6 @@ class GraphTools:
         self.attr = attr
         self.n_cpus = int(n_cpus)
 
-
     @timer
     def make_graph_old(self):
         """
@@ -167,8 +166,6 @@ class GraphTools:
         lin_T, offset = _mapping_to_voxel(
             np.eye(4)
         )  # TODO : voxel_size was removed in dipy 1.0.0, make sure that didn't break anything when voxel size is not 2mm
-
-        # mx = len(np.unique(self.rois.astype(np.int64))) #- 1
 
         self.attr = nib.load(self.attr)
         self.attr = self.attr.get_data().astype("int")
