@@ -26,7 +26,6 @@ env:
     - secure: "N81+mfPpeor7AxHbuoRBZi6eqNoWTGnb+u5TtV4PxxWG5/+ipbCsUvb2wUk3ZYdfeWh611DDksTZ/HrUTpXG/pccZZ/Pl6A4CPf050yZ7OXa1gF9x1rhMRd5hwadmJTiGBKqEMxpojO45PhPz/IzUurItOM6VUGHKEHSieyoP1ml+8a0z0f/MTcV8UVYBSo7cWgXfmWOcBrAv9GevbN/t2UEbXqccutVG6GpcVf/ZDwPo1ezNtyiDq8ChVOR6liO0m8SlygMUMUGwlJ0OvtYfanJ2WcH0z3bQpGnkTnawz3/Cz+W/55MkJ19iYYLPFjN6tqxDCtC9KmtrRzixueZSS9b5NdRg6vo3ry2XuBamYHgLKpxZoEUrD3Xs3NaFQwxn19cFo8O/FmEgX4HmNxRgiwemCN9CYOGdwHCFX3B/xnXo6qX6iTK6++P+w/tl3mEQHrutEjXZSLrjh56hYk/1FovcS3mx5WSMjoEOK3pdrbd1Mp0rjXZPIo0zKfz3Z2xtBg7vTmMp/Bryd/REns/hrZDynTD/e7GloXpNe477PM04lbzHc2tv4KnGiw9hwJsuKw8jx067bMOrKV1Xrb5cKK8uAfaO8CXL8zDNNlv4WLbptnuxf32UBa6FcP6rB6/mnj2ndg6oVMPbMAA3av7bKgM5JJ8TfHAKNnPGFzsbw8="
   matrix:
     - SP=native MOD=det
-    - SP=native_dsn MOD=det
     - SP=native MOD=prob
 
 before_install:
@@ -57,11 +56,16 @@ install:
   - docker exec -w /m2g travis pip install pytest
   - docker exec -w /m2g travis pip install .
 
+  # download test data
+  - docker exec -w mkdir /input
+  - docker exec -w mkdir /input/sub-0025864/
+  - docker exec aws s3 sync s3://ndmg-data/BNU1/sub-0025864/ses-1 /input/sub-0025864/
+
 script:
   # Run m2g in docker, run pytest in docker.
   # top command is to prevent travis from breaking at eddy_correct
   - while sleep 9m; do echo "=====[ $SECONDS seconds still running ]====="; done &
-  - docker exec -w /m2g travis m2g --sp $SP --mod $MOD --participant_label 0025864 --session_label 1 --parcellation desikan --seeds 1 /input /output
+  - docker exec -w /m2g travis m2g --sp $SP --mod $MOD --participant_label 0025864 --session_label 1 --parcellation Desikan_ --seeds 1 /input /output
   - kill %1
   - docker exec -w /m2g travis pytest -v --disable-warnings
 
