@@ -50,11 +50,11 @@ before_install:
 
 install:
   # useful log checks for packages whose versions have given us trouble
-  - docker exec -w /m2g travis pip show dipy networkx
+  - docker exec -w /m2g travis pip3.6 show dipy networkx
 
   # get travis branch installed
-  - docker exec -w /m2g travis pip install pytest
-  - docker exec -w /m2g travis pip install .
+  - docker exec -w /m2g travis pip3.6 install pytest
+  - docker exec -w /m2g travis pip3.6 install .
   - aws s3 sync s3://ndmg-data/BNU1/sub-0025864/ses-1 /input/sub-0025864/ses-1
 
 
