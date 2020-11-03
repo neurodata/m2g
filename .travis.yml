@@ -57,9 +57,9 @@ install:
   - docker exec -w /m2g travis pip install .
 
   # download test data
-  - docker exec -w mkdir /input
-  - docker exec -w mkdir /input/sub-0025864/
-  - docker exec aws s3 sync s3://ndmg-data/BNU1/sub-0025864/ses-1 /input/sub-0025864/
+  - docker exec -w /m2g travis mkdir /input
+  - docker exec -w /m2g travis mkdir /input/sub-0025864/
+  - docker exec -w /m2g travis aws s3 sync s3://ndmg-data/BNU1/sub-0025864/ses-1 /input/sub-0025864/
 
 script:
   # Run m2g in docker, run pytest in docker.
