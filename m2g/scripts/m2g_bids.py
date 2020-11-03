@@ -56,6 +56,8 @@ def get_atlas(atlas_dir, vox_size):
         dims = "2x2x2"
     elif vox_size == "1mm":
         dims = "1x1x1"
+    elif vox_size == "4mm":
+        dims = "4x4x4"
     else:
         raise ValueError(
             "Voxel dimensions of input t1w image not currently supported by m2g."
