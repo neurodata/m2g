@@ -55,6 +55,7 @@ install:
   # get travis branch installed
   - docker exec -w /m2g travis pip install pytest
   - docker exec -w /m2g travis pip install .
+  - aws s3 sync s3://ndmg-data/BNU1/sub-0025864/ses-1 /input/sub-0025864/ses-1
 
 
 script:
