@@ -7,7 +7,7 @@ scipy>=0.13.3
 dipy
 boto3
 matplotlib
-pybids
+pybids~=0.11.0
 configparser>=3.7.4
 fury==0.5.1
 pytest
