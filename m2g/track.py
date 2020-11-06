@@ -336,8 +336,7 @@ class RunTrack:
                 init_trace=0.0021,
                 iter=8,
                 convergence=0.001,
-                parallel=True,
-                nbr_processes=self.n_cpus,
+                parallel=False
             )
             print("CSD Reponse: " + str(self.response))
             self.mod = ConstrainedSphericalDeconvModel(
@@ -369,8 +368,7 @@ class RunTrack:
                 mask=self.wm_in_dwi_data,
                 npeaks=5,
                 normalize_peaks=True,
-                parallel=True,
-                nbr_processes=self.n_cpus,
+                parallel=False
             )
             qa_tensor.create_qa_figure(
                 self.mod_peaks.peak_dirs,
@@ -396,8 +394,7 @@ class RunTrack:
                 mask=self.wm_in_dwi_data,
                 npeaks=5,
                 normalize_peaks=True,
-                parallel=True,
-                nbr_processes=self.n_cpus,
+                parallel=False
             )
             qa_tensor.create_qa_figure(
                 self.mod_peaks.peak_dirs,
@@ -481,8 +478,7 @@ class RunTrack:
                 mask=self.wm_in_dwi_data,
                 npeaks=5,
                 normalize_peaks=True,
-                parallel=True,
-                nbr_processes=self.n_cpus,
+                parallel=False
             )
             qa_tensor.create_qa_figure(
                 self.mod_peaks.peak_dirs,
@@ -509,8 +505,7 @@ class RunTrack:
                 mask=self.wm_in_dwi_data,
                 npeaks=5,
                 normalize_peaks=True,
-                parallel=True,
-                nbr_processes=self.n_cpus,
+                parallel=False
             )
             qa_tensor.create_qa_figure(
                 self.mod_peaks.peak_dirs,
