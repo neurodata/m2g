@@ -10,6 +10,7 @@ Theory described here: https://neurodata.io/talks/ndmg.pdf#page=21
 
 # system imports
 import os
+from multiprocessing import Pool
 
 # external package imports
 import numpy as np
@@ -114,6 +115,7 @@ class RunTrack:
         qa_tensor_out,
         seeds,
         stream_affine,
+        n_cpus,
     ):
         """A class for deterministic tractography in native space
 
@@ -155,6 +157,8 @@ class RunTrack:
             ndarray of seeds for tractography
         stream_affine : ndarray
             4x4 2D array with 1s diagonaly and 0s everywhere else
+        n_cpus : int, optional
+            Number of cpus to use for computing peaks and tracks.
         """
 
         self.dwi = dwi_in
@@ -170,6 +174,7 @@ class RunTrack:
         self.seeds = seeds
         self.mod_func = mod_func
         self.stream_affine = stream_affine
+        self.n_cpus = int(n_cpus)
 
     @timer
     def run(self):
@@ -331,7 +336,8 @@ class RunTrack:
                 init_trace=0.0021,
                 iter=8,
                 convergence=0.001,
-                parallel=False,
+                parallel=True,
+                nbr_processes=self.n_cpus,
             )
             print("CSD Reponse: " + str(self.response))
             self.mod = ConstrainedSphericalDeconvModel(
@@ -341,6 +347,15 @@ class RunTrack:
 
     @timer
     def local_tracking(self):
+        # Common arguments for local tracking
+        # Seeds are added later for multiprocessing support
+        tracking_kwargs = dict(
+            stopping_criterion=self.tiss_classifier,
+            # seeds=self.seeds,
+            affine=self.stream_affine,
+            step_size=0.5,
+            return_all=True,
+        )
 
         self.sphere = get_sphere("repulsion724")
         if self.mod_type == "det":
@@ -354,6 +369,8 @@ class RunTrack:
                 mask=self.wm_in_dwi_data,
                 npeaks=5,
                 normalize_peaks=True,
+                parallel=True,
+                nbr_processes=self.n_cpus,
             )
             qa_tensor.create_qa_figure(
                 self.mod_peaks.peak_dirs,
@@ -361,14 +378,10 @@ class RunTrack:
                 self.qa_tensor_out,
                 self.mod_func,
             )
-            self.streamline_generator = LocalTracking(
-                self.mod_peaks,
-                self.tiss_classifier,
-                self.seeds,
-                self.stream_affine,
-                step_size=0.5,
-                return_all=True,
-            )
+
+            # Update kwargs dict
+            tracking_kwargs["direction_getter"] = self.mod_peaks
+
         elif self.mod_type == "prob":
             print("Preparing probabilistic tracking...")
             print("Fitting model to data...")
@@ -383,6 +396,8 @@ class RunTrack:
                 mask=self.wm_in_dwi_data,
                 npeaks=5,
                 normalize_peaks=True,
+                parallel=True,
+                nbr_processes=self.n_cpus,
             )
             qa_tensor.create_qa_figure(
                 self.mod_peaks.peak_dirs,
@@ -404,24 +419,58 @@ class RunTrack:
                 self.pdg = ProbabilisticDirectionGetter.from_pmf(
                     self.pmf, max_angle=60.0, sphere=self.sphere
                 )
-            self.streamline_generator = LocalTracking(
-                self.pdg,
-                self.tiss_classifier,
-                self.seeds,
-                self.stream_affine,
-                step_size=0.5,
-                return_all=True,
-            )
+
+            tracking_kwargs["direction_getter"] = self.pdg
+
         print("Reconstructing tractogram streamlines...")
-        self.streamlines = Streamlines(self.streamline_generator)
+
+        def worker(seeds):
+            """For sending work with split seeds"""
+
+            # Initialization of LocalTracking. The computation happens in the next step.
+            streamlines_generator = LocalTracking(
+                **tracking_kwargs, seeds=seeds
+            )
+
+            # Generate streamlines object
+            streamlines = Streamlines(streamlines_generator)
+
+            return streamlines
+
+        # Start parallel streamline generation
+        pool = Pool(self.n_cpus)
+        streams = pool.map(
+            worker, [self.seeds[i::self.n_cpus] for i in range(self.n_cpus)]
+        )
+        pool.close()
+        pool.join()
+
+        # Concatenate streamlines
+        self.streamlines = Streamlines()
+        for stream in streams:
+            self.streamlines.extend(stream)
+
         return self.streamlines
 
     @timer
     def particle_tracking(self):
+        # Common arguments for particle tracking
+        # Seeds are added later for multiprocessing support
+        tracking_kwargs = dict(
+            stopping_criterion=self.tiss_classifier,
+            affine=self.stream_affine,
+            step_size=0.5,
+            maxlen=1000,
+            pft_back_tracking_dist=2,
+            pft_front_tracking_dist=1,
+            particle_count=15,
+            return_all=True,
+        )
 
         self.sphere = get_sphere("repulsion724")
         if self.mod_type == "det":
-            maxcrossing = 1
+            tracking_kwargs["maxcrossing"] = 1
+
             print("Obtaining peaks from model...")
             self.mod_peaks = peaks_from_model(
                 self.mod,
@@ -432,6 +481,8 @@ class RunTrack:
                 mask=self.wm_in_dwi_data,
                 npeaks=5,
                 normalize_peaks=True,
+                parallel=True,
+                nbr_processes=self.n_cpus,
             )
             qa_tensor.create_qa_figure(
                 self.mod_peaks.peak_dirs,
@@ -439,21 +490,12 @@ class RunTrack:
                 self.qa_tensor_out,
                 self.mod_func,
             )
-            self.streamline_generator = ParticleFilteringTracking(
-                self.mod_peaks,
-                self.tiss_classifier,
-                self.seeds,
-                self.stream_affine,
-                max_cross=maxcrossing,
-                step_size=0.5,
-                maxlen=1000,
-                pft_back_tracking_dist=2,
-                pft_front_tracking_dist=1,
-                particle_count=15,
-                return_all=True,
-            )
+
+            tracking_kwargs["direction_getter"] = self.mod_peaks
+
         elif self.mod_type == "prob":
-            maxcrossing = 2
+            tracking_kwargs["maxcrossing"] = 2
+
             print("Preparing probabilistic tracking...")
             print("Fitting model to data...")
             self.mod_fit = self.mod.fit(self.data, self.wm_in_dwi_data)
@@ -467,6 +509,8 @@ class RunTrack:
                 mask=self.wm_in_dwi_data,
                 npeaks=5,
                 normalize_peaks=True,
+                parallel=True,
+                nbr_processes=self.n_cpus,
             )
             qa_tensor.create_qa_figure(
                 self.mod_peaks.peak_dirs,
@@ -488,19 +532,35 @@ class RunTrack:
                 self.pdg = ProbabilisticDirectionGetter.from_pmf(
                     self.pmf, max_angle=60.0, sphere=self.sphere
                 )
-            self.streamline_generator = ParticleFilteringTracking(
-                self.pdg,
-                self.tiss_classifier,
-                self.seeds,
-                self.stream_affine,
-                max_cross=maxcrossing,
-                step_size=0.5,
-                maxlen=1000,
-                pft_back_tracking_dist=2,
-                pft_front_tracking_dist=1,
-                particle_count=15,
-                return_all=True,
-            )
+
+            tracking_kwargs["direction_getter"] = self.pdg
+
         print("Reconstructing tractogram streamlines...")
-        self.streamlines = Streamlines(self.streamline_generator)
+
+        def worker(seeds):
+            """For sending work with split seeds"""
+
+            # Initialization of LocalTracking. The computation happens in the next step.
+            streamlines_generator = ParticleFilteringTracking(
+                **tracking_kwargs, seeds=seeds
+            )
+
+            # Generate streamlines object
+            streamlines = Streamlines(streamlines_generator)
+
+            return streamlines
+
+        # Start parallel streamline generation
+        pool = Pool(self.n_cpus)
+        streams = pool.map(
+            worker, [self.seeds[i::self.n_cpus] for i in range(self.n_cpus)]
+        )
+        pool.close()
+        pool.join()
+
+        # Concatenate streamlines
+        self.streamlines = Streamlines()
+        for stream in streams:
+            self.streamlines.extend(stream)
+
         return self.streamlines
