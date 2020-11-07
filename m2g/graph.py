@@ -76,8 +76,8 @@ class GraphTools:
     ):
 
         self.edge_dict = defaultdict(int)
-        self.roi_file = rois
-        self.roi_img = nib.load(self.roi_file)
+        self.rois = rois
+        # self.roi_img = nib.load(self.roi_file)
         # self.rois = self.roi_img.get_data().astype("int")
         # self.n_ids = self.rois[self.rois > 0]
         # self.N = len(self.n_ids)
