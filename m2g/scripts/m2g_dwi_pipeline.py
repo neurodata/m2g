@@ -98,8 +98,7 @@ def m2g_dwi_worker(
     skull : str, optional
         skullstrip parameter pre-set. Default is "none".
     n_cpus : int, optional
-        Number of CPUs to use for tracking and connectome generation. Default is 1.
-
+        Number of CPUs to use for computing edges from streamlines
     Raises
     ------
     ValueError
@@ -305,7 +304,6 @@ def m2g_dwi_worker(
         qa_tensor,
         seeds,
         np.eye(4),
-        n_cpus,
     )
     streamlines = trct.run()
     trk_hdr = trct.make_hdr(streamlines, hdr)
