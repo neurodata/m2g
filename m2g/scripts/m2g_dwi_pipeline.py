@@ -114,8 +114,8 @@ def m2g_dwi_worker(
         print(f"{arg} = {value}")
 
     # initial assertions
-    if vox_size not in ["1mm", "2mm"]:
-        raise ValueError("Voxel size not supported. Use 2mm or 1mm")
+    if vox_size not in ["1mm", "2mm", "4mm"]:
+        raise ValueError("Voxel size not supported. Use 4mm, 2mm, or 1mm")
 
     print("Checking inputs...")
     for file_ in [t1w, bvals, bvecs, dwi, atlas, mask, *parcellations]:

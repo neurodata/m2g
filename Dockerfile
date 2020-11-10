@@ -196,14 +196,14 @@ RUN apt-get update && apt-get -y upgrade insighttoolkit4-python
 #--------M2G SETUP-----------------------------------------------------------#
 # setup of python dependencies for m2g itself, as well as file dependencies
 RUN \
-    pip3.6 install --no-cache-dir numpy nibabel scipy python-dateutil pandas boto3 awscli virtualenv
+    pip3.6 install --no-cache-dir numpy nibabel scipy python-dateutil pandas==0.23.4 boto3 awscli virtualenv
 RUN \
-    pip3.6 install --no-cache-dir matplotlib nilearn sklearn pandas cython vtk pyvtk fury
+    pip3.6 install --no-cache-dir matplotlib nilearn sklearn cython vtk pyvtk fury
 RUN \
     pip3.6 install --no-cache-dir yamlordereddictloader awscli==1.15.40 requests ipython duecredit graspy scikit-image networkx dipy pybids==0.12.0
 # TODO: Update pybids
 RUN \
-    pip3.6 install --no-cache-dir plotly==1.12.9 setuptools>=40.0 configparser>=3.7.4
+    pip3.6 install --no-cache-dir plotly==1.12.9 setuptools>=40.0 configparser>=3.7.4 regex pyyaml==5.3
 
 # install ICA-AROMA
 RUN mkdir -p /opt/ICA-AROMA
@@ -288,7 +288,7 @@ ENV PATH $C3DPATH/bin:$PATH
 
 # Set up the functional pipeline
 RUN cd / && \
-    git clone --branch v1.6.2 --single-branch https://github.com/FCP-INDI/C-PAC.git && \
+    git clone --branch v1.7.0 --single-branch https://github.com/FCP-INDI/C-PAC.git && \
     mkdir /code && \
     mv /C-PAC/dev/docker_data/* /code/ && \
     mv /C-PAC/* /code/ && \

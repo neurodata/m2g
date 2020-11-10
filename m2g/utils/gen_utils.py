@@ -125,10 +125,12 @@ class DirectorySweeper:
         """
 
         if pipeline == 'func':
-            [func] = self.layout.get(return_type='filename', session=session, subject=subject, suffix='bold')
+            func = self.layout.get(return_type='filename', session=session, subject=subject, suffix='bold')
+            if len(func) == 1: #Account for one or multiple functional scans per anatomical image
+                [func] = func
             [anat] = self.layout.get(return_type="filename", session=session, subject=subject, suffix=['T1w','t1w'])
             files = {"func": func, "t1w": anat}
-        else:
+        else:#TODO: allow for more than one dwi scan to exist in the dwi directory for processing
             bval, bvec, dwi = self.layout.get(return_type="filename", session=session, subject=subject, suffix='dwi')
             [anat] = self.layout.get(return_type="filename", session=session, subject=subject, suffix='T1w')
             files = {"dwi": dwi, "bvals": bval, "bvecs": bvec, "t1w": anat}
@@ -156,6 +158,8 @@ class DirectorySweeper:
         scans = []
         SubSesFiles = namedtuple("SubSesFiles", ["subject", "session", "files"])
 
+        #remove duplicate subject/session pairs for either 
+        self.pairs = list(set(self.pairs))
         # append subject, session, and files for each relevant session to scans
         for subject, session in self.pairs:
             files = self.get_files(subject, session, pipeline=pipeline)
@@ -800,7 +804,7 @@ def match_target_vox_res(img_file: str, vox_size, outdir: Path, sens):
     img_file : str
         path to file to be resliced
     vox_size : str
-        target voxel resolution ('2mm' or '1mm')
+        target voxel resolution ('4mm', '2mm', or '1mm')
     preproc_dir : 
     sens : str
         type of data being analyzed ('dwi' or 'anat')
@@ -821,6 +825,8 @@ def match_target_vox_res(img_file: str, vox_size, outdir: Path, sens):
         new_zooms = (1.0, 1.0, 1.0)
     elif vox_size == "2mm":
         new_zooms = (2.0, 2.0, 2.0)
+    elif vox_size == "4mm":
+        new_zooms = (4.0, 4.0, 4.0)
 
     # set up paths
     outdir = Path(outdir)

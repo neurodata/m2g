@@ -1,6 +1,7 @@
 import subprocess
 import yaml
 import os
+import regex as re
 from m2g.utils.gen_utils import run
 import sys
 
@@ -20,23 +21,53 @@ def make_dataconfig(input_dir, sub, ses, anat, func, acquisition='alt+z', tr=2.0
         None
     """
 
-    Data = [{
-        'subject_id': sub,
-        'unique_id': f'ses-{ses}',
-        'anat': anat,
-        'func': {
-                'rest_run-1': {
-			        'scan': func,
-			        'scan_parameters': {
-				    	'acquisition': acquisition,
-				    	'tr': tr
-			    }
-		    }
-	    }    
-    }]
+    for idx, funcf in enumerate(func):
+        # Extract information from the 
+        ffile = funcf.find('/func/sub-')
+        ffile = funcf[(ffile+6) :]
+        taskname = re.compile(r'task-(\w*)_')
+        acq = re.compile(r'_acq-(\w*)_bold')
+        task = taskname.search(ffile)
+        task = task.groups()[0]
+        acq = acq.search(ffile)
+        acq = acq.groups()[0]
+
+        try:
+            float(new_tr)
+            new_tr = str(float(acq)/1000)
+            print(f'TR extracted from filename of {ffile}')
+        except:
+            print(f'No TR information found in {ffile}')
+            new_tr = tr
+
+
+        if idx == 0:
+            Data = [{
+                'subject_id': sub,
+                'unique_id': f'ses-{ses}',
+                'anat': anat,
+                'func': {
+                        #'rest_run-1': {
+                        f'{task}-{acq}': {
+                            'scan': funcf,
+                            'scan_parameters': {
+                                'acquisition': acquisition,
+                                'tr': new_tr
+                        }
+                    }
+                }    
+            }]
+        else:
+            Data[0]['func'][f'{task}-{acq}'] = {
+                'scan': funcf,
+                'scan_parameters': {
+                    'acquisition': acquisition,
+                    'tr': new_tr
+                }
+            }
     
     config_file = f'{input_dir}/data_config.yaml'
-    with open(config_file,'w',encoding='utf8') as outfile:
+    with open(config_file,'w',encoding='utf-8') as outfile:
         yaml.dump(Data, outfile, default_flow_style=False)
     
     return config_file
@@ -44,7 +75,7 @@ def make_dataconfig(input_dir, sub, ses, anat, func, acquisition='alt+z', tr=2.0
 
 def make_script(input_dir, output_dir, subject, session, data_config, pipeline_config, mem_gb, n_cpus):
     cpac_script = '/root/.m2g/cpac_script.sh'
-    with open(cpac_script,'w+',encoding='utf8') as script:
+    with open(cpac_script,'w+',encoding='utf-8') as script:
         script.write(f'''#! /bin/bash
         python3.6 /code/run.py --data_config_file {data_config} --pipeline_file {pipeline_config} --n_cpus {n_cpus} --mem_gb {mem_gb} {input_dir} {output_dir} participant
         ''')
@@ -56,7 +87,7 @@ def make_script(input_dir, output_dir, subject, session, data_config, pipeline_c
 
 
 
-def m2g_func_worker(input_dir, output_dir, sub, ses, anat, bold, parcellations, acquisition, tr, mem_gb, n_cpus):
+def m2g_func_worker(input_dir, output_dir, sub, ses, anat, bold, vox, parcellations, acquisition, tr, mem_gb, n_cpus):
     """Creates the requisite files to run CPAC, then calls CPAC and runs it in a terminal
     
     Arguments:
@@ -87,6 +118,11 @@ def m2g_func_worker(input_dir, output_dir, sub, ses, anat, bold, parcellations, 
 
         # Replace 'tsa_roi_paths'
         config['tsa_roi_paths'][0] = parcs
+
+        # Change voxel size to match user input
+        config['resolution_for_anat'] = vox
+        config['resolution_for_func_preproc'] = vox
+        config['resolution_for_func_derivative'] = vox
 
         # Create new pipeline yaml file in a different location
         pipeline_config=f'{output_dir}/functional_pipeline_settings.yaml'

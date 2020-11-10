@@ -263,6 +263,7 @@ def main():
     input_dir = result.input_dir
     output_dir = result.output_dir
     subjects = result.participant_label
+#    subjectsss = result.participant_label
     sessions = result.session_label
     pipe = result.pipeline
     acquisition = result.acquisition  # functional pipeline settings
@@ -272,6 +273,9 @@ def main():
     parcellation_name = result.parcellation
     push_location = result.push_location
 
+#    for subby in subjectsss:
+#        subjects = list({subby})
+#        input_dir = result.input_dir
     # arguments to be passed in every m2g run
     # TODO : change value naming convention to match key naming convention
     constant_kwargs = {
@@ -379,6 +383,7 @@ def main():
                 session,
                 files["t1w"],
                 files["func"],
+                constant_kwargs["vox_size"],
                 parcellations,
                 acquisition,
                 tr,
@@ -434,6 +439,9 @@ def main():
                 session=session,
                 creds=creds,
             )
+                #shutil.rmtree(f"{output_dir}/sub-{subject}")
+                #shutil.rmtree(f"/root/.m2g/input/sub-{subject}")
+            
 
 
 if __name__ == "__main__":

@@ -140,6 +140,8 @@ class DmriReg:
             vox_dims = "2x2x2"
         elif vox_size == "1mm":
             vox_dims = "1x1x1"
+        elif vox_size == "4mm":
+            vox_dims = "4x4x4"
 
         # TODO : clean up all these attributes
         self.outdir = outdir
