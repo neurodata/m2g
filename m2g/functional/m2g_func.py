@@ -33,7 +33,7 @@ def make_dataconfig(input_dir, sub, ses, anat, func, acquisition='alt+z', tr=2.0
         acq = acq.groups()[0]
 
         try:
-            float(new_tr)
+            float(acq)
             new_tr = str(float(acq)/1000)
             print(f'TR extracted from filename of {ffile}')
         except:
