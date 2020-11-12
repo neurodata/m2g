@@ -13,7 +13,7 @@ def make_dataconfig(input_dir, sub, ses, anat, func, acquisition='alt+z', tr=2.0
         sub {int} -- subject number
         ses {int} -- session number
         anat {str} -- Path of anatomical nifti file
-        func {str} -- Path of functional nifti file
+        func {list} -- Path of functional nifti file
         acquisition {str} -- acquisition method for funcitonal scan
         tr {float} -- TR (seconds) of functional scan
     
@@ -30,9 +30,8 @@ def make_dataconfig(input_dir, sub, ses, anat, func, acquisition='alt+z', tr=2.0
         task = taskname.search(ffile)
         task = task.groups()[0]
         acq = acq.search(ffile)
-        acq = acq.groups()[0]
-
         try:
+            acq = acq.groups()[0]
             float(acq)
             new_tr = str(float(acq)/1000)
             print(f'TR extracted from filename of {ffile}')
@@ -130,6 +129,9 @@ def m2g_func_worker(input_dir, output_dir, sub, ses, anat, bold, vox, parcellati
         with open(pipeline_config,'w',encoding='utf-8') as outfile:
             yaml.dump(config, outfile, default_flow_style=False)
 
+    if not isinstance(bold,list):
+        bold = (bold,)
+        print('Single functional nifti file found')
 
     data_config = make_dataconfig(input_dir, sub, ses, anat, bold, acquisition, tr)
     cpac_script = make_script(input_dir, output_dir, sub, ses, data_config, pipeline_config,mem_gb, n_cpus)
