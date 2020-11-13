@@ -66,7 +66,7 @@ kwargs.update(
             "awscli",
             "matplotlib",
             "nilearn",
-            "fury==0.5.1",
+            "fury~=0.6.0",
             "requests",
             "plotly",
             "pybids>=0.9.0",

@@ -9,7 +9,7 @@ boto3
 matplotlib
 pybids~=0.11.0
 configparser>=3.7.4
-fury==0.5.1
+fury~=0.6.0
 pytest
 pathlib2
 graspy
