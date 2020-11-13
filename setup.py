@@ -63,7 +63,6 @@ kwargs.update(
             "dipy>=1.0.0",
             "scipy",
             "boto3",
-            "awscli",
             "matplotlib",
             "nilearn",
             "fury~=0.6.0",
