@@ -136,5 +136,6 @@ def m2g_func_worker(input_dir, output_dir, sub, ses, anat, bold, vox, parcellati
     data_config = make_dataconfig(input_dir, sub, ses, anat, bold, acquisition, tr)
     cpac_script = make_script(input_dir, output_dir, sub, ses, data_config, pipeline_config,mem_gb, n_cpus)
     
-    # Run pipeline
+    # Run pipeline with resource monitor
+    subprocess.Popen(['free','-m','-c','300','-s','15'])
     subprocess.call([cpac_script], shell=True)
