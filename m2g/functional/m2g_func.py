@@ -86,7 +86,7 @@ def make_script(input_dir, output_dir, subject, session, data_config, pipeline_c
 
 
 
-def m2g_func_worker(input_dir, output_dir, sub, ses, anat, bold, vox, parcellations, acquisition, tr, mem_gb, n_cpus):
+def m2g_func_worker(input_dir, output_dir, sub, ses, anat, bold, vox, parcellations, acquisition, tr, mem_gb, n_cpus, itterations, period):
     """Creates the requisite files to run CPAC, then calls CPAC and runs it in a terminal
     
     Arguments:
@@ -137,5 +137,5 @@ def m2g_func_worker(input_dir, output_dir, sub, ses, anat, bold, vox, parcellati
     cpac_script = make_script(input_dir, output_dir, sub, ses, data_config, pipeline_config,mem_gb, n_cpus)
     
     # Run pipeline with resource monitor
-    subprocess.Popen(['free','-m','-c','300','-s','15'])
+    subprocess.Popen(['free','-m','-c',f'{itterations}','-s',f'{period}'])
     subprocess.call([cpac_script], shell=True)

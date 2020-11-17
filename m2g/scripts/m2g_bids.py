@@ -255,7 +255,22 @@ def main():
         help="Number of cpus to allocate to either the functional pipeline or the diffusion connectome generation",
         default=1,
     )
+    parser.add_argument(
+        "--itter",
+        action="store",
+        help="Number of itterations for memory check",
+        default=300,
+    )
+    parser.add_argument(
+        "--period",
+        action="store",
+        help="Number of seconds between memory check",
+        default=15,
+    )
     result = parser.parse_args()
+    itterations = result.itter
+    period = result.period
+
     # and ... begin!
     print("\nBeginning m2g ...")
 
@@ -389,6 +404,8 @@ def main():
                 tr,
                 mem_gb,
                 n_cpus,
+                itterations,
+                period,
             )
 
             # m2g_func_worker()
