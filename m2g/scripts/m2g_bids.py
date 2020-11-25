@@ -18,6 +18,8 @@ import shutil
 import glob
 import os
 from argparse import ArgumentParser
+import numpy as np
+from numpy import genfromtxt
 
 # m2g imports
 from m2g.utils import cloud_utils
@@ -415,6 +417,34 @@ def main():
                 """
             )
 
+            # Convert connectomes into edgelists
+            for root, dirs, files in os.walk(output_dir):
+                for file in files:
+                    if file.endswith('measure-correlation.csv'):
+                        atlas = root.split('/')[-2]
+                        subsesh = f"{root.split('/')[-10]}_{root.split('/')[-9]}{root.split('/')[-4]}"
+
+                        edg_dir = f"{output_dir}/functional_edgelists/{atlas}"
+                        os.makedirs(edg_dir, exist_ok=True)
+
+                        my_data = genfromtxt(f"{root}/{file}", delimiter=',', skip_header=1)
+
+                        a = sum(range(1, len(my_data)))
+                        arr = np.zeros((a,3))
+                        z=0
+                        for num in range(len(my_data)):
+                            for i in range(len(my_data[num])):
+                                if i > num:
+                                    #print(f'{num+1} {i+1} {my_data[num][i]}')
+                                    arr[z][0]= f'{num+1}'
+                                    arr[z][1]= f'{i+1}'
+                                    arr[z][2] = my_data[num][i]
+                                    z=z+1
+                
+                        np.savetxt(f"{edg_dir}/{subsesh}_measure-correlation.csv", arr,fmt='%d %d %f', delimiter=' ')
+                        print(f"{file} converted to edgelist")
+
+
             if push_location:
                 print(f"Pushing to s3 at {push_location}.")
                 push_buck, push_remo = cloud_utils.parse_path(push_location)
@@ -426,7 +456,6 @@ def main():
                     session=session,
                     creds=creds,
                 )
-                # shutil.rmtree(f'{output_dir}/sub-{subject}', ignore_errors=False, onerror=None)
 
         sys.exit(0)
 
