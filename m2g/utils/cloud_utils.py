@@ -238,7 +238,7 @@ def s3_push_data(bucket, remote, outDir, subject=None, session=None, creds=True)
                         ExtraArgs={"ACL": "public-read"},
                     )
 
-def s3_func_push_data(bucket, remote, outDir, subject=None, session=None, creds=True):
+def s3_func_push_data(bucket, remote, output_dir, subject=None, session=None, creds=True):
     """Pushes functional pipeline data to a specified S3 bucket
 
     Parameters
@@ -248,7 +248,7 @@ def s3_func_push_data(bucket, remote, outDir, subject=None, session=None, creds=
     remote : str
         The path to the directory on your S3 bucket containing the data used in the pipeline, the string in 'modifier' will be put after the
         first directory specified in the path as its own directory (/remote[0]/modifier/remote[1]/...)
-    outDir : str
+    output_dir : str
         Path of local directory being pushed to the s3 bucket
     subject : str
         subject we're pushing with
@@ -269,7 +269,7 @@ def s3_func_push_data(bucket, remote, outDir, subject=None, session=None, creds=
         )
 
     # List all files and upload
-    for root, _, files in os.walk(outDir):
+    for root, _, files in os.walk(f"{output_dir}/sub-{subject}/ses-{session}"):
         for file_ in files:
             if not "tmp/" in root:  # exclude things in the tmp/ folder
                 if f"sub-{subject}/ses-{session}" in root:
@@ -281,3 +281,14 @@ def s3_func_push_data(bucket, remote, outDir, subject=None, session=None, creds=
                         f"{remote}/{os.path.join(spath,file_)}",
                         ExtraArgs={"ACL": "public-read"},
                     )
+    for root, _, files in os.walk(f"{output_dir}/functional_edgelists"):
+        for file_ in files:
+            if f"sub-{subject}_ses-{session}" in file_:
+                print(f"Uploading: {os.path.join(root, file_)}")
+                spath = root[root.find("functional_") :]  # remove everything before /functional_edgelists-*
+                client.upload_file(
+                    os.path.join(root, file_),
+                    bucket,
+                    f"{remote}/{os.path.join(spath,file_)}",
+                    ExtraArgs={"ACL": "public-read"},
+                )

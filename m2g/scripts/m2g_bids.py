@@ -451,7 +451,7 @@ def main():
                 cloud_utils.s3_func_push_data(
                     push_buck,
                     push_remo,
-                    outDir,
+                    output_dir,
                     subject=subject,
                     session=session,
                     creds=creds,
