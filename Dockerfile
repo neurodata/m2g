@@ -260,7 +260,7 @@ RUN \
 RUN chmod -R 777 /m2g_atlases
 
 # Grab m2g from deploy.
-RUN git clone $M2G_URL /m2g && \
+RUN git clone -b cpac-py3 https://github.com/neurodata/m2g /m2g && \
     cd /m2g && \
     pip3.6 install .
 RUN chmod -R 777 /usr/local/bin/m2g_bids
@@ -354,3 +354,5 @@ RUN export LC_ALL=C.UTF-8 && \
 RUN virtualenv -p /usr/bin/python2.7 venv && \
     . venv/bin/activate
 
+ENV LANG C.UTF-8
+ENV LC_ALL C.UTF-8
