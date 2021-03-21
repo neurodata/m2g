@@ -418,7 +418,7 @@ def main():
             )
 
             # Convert connectomes into edgelists
-            for root, dirs, files in os.walk(output_dir):
+            for root, dirs, files in os.walk(outDir):
                 for file in files:
                     if file.endswith('measure-correlation.csv'):
                         atlas = root.split('/')[-2]
