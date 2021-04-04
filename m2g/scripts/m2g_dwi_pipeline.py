@@ -14,6 +14,7 @@ import time
 from datetime import datetime
 import os
 from pathlib import Path
+from argparse import ArgumentParser
 
 # package imports
 import nibabel as nib
@@ -31,6 +32,9 @@ from m2g.utils import gen_utils
 from m2g.utils import reg_utils
 from m2g.utils import cloud_utils
 from m2g.stats.qa_tractography import qa_tractography
+
+# multithreading
+import multiprocessing as mp
 
 # TODO : not sure why this is here, potentially remove
 os.environ["MPLCONFIGDIR"] = "/tmp/"
@@ -54,6 +58,7 @@ def m2g_dwi_worker(
     skipeddy=False,
     skipreg=False,
     skull=None,
+    n_cpus=1,
 ):
     """Creates a brain graph from MRI data
     Parameters
@@ -92,6 +97,8 @@ def m2g_dwi_worker(
         Whether or not to skip registration. Default is False.
     skull : str, optional
         skullstrip parameter pre-set. Default is "none".
+    n_cpus : int, optional
+        Number of CPUs to use for computing edges from streamlines
     Raises
     ------
     ValueError
@@ -107,8 +114,8 @@ def m2g_dwi_worker(
         print(f"{arg} = {value}")
 
     # initial assertions
-    if vox_size not in ["1mm", "2mm"]:
-        raise ValueError("Voxel size not supported. Use 2mm or 1mm")
+    if vox_size not in ["1mm", "2mm", "4mm"]:
+        raise ValueError("Voxel size not supported. Use 4mm, 2mm, or 1mm")
 
     print("Checking inputs...")
     for file_ in [t1w, bvals, bvecs, dwi, atlas, mask, *parcellations]:
@@ -234,8 +241,14 @@ def m2g_dwi_worker(
     )
 
     # Perform anatomical segmentation
-    if skipreg and os.path.isfile(reg.wm_edge):
-        print("Found existing gentissue run!")
+    if skipreg:
+        reg.check_gen_tissue_files()
+        gen_tissue_files = [reg.t1w_brain, reg.wm_mask, reg.gm_mask, reg.csf_mask]
+        existing_files = all(map(os.path.isfile, gen_tissue_files))
+        if existing_files:
+            print("Found existing gentissue run!")
+        else:  # Run if not all necessary files are not found
+            reg.gen_tissue()
     else:
         reg.gen_tissue()
 
@@ -304,6 +317,7 @@ def m2g_dwi_worker(
     print("Streamlines complete")
     print(f"Tractography runtime: {np.round(time.time() - start_time, 1)}")
 
+    #TODO: Get rid of native_dsn once and for all?
     if reg_style == "native_dsn":
         fa_path = track.tens_mod_fa_est(gtab, eddy_corrected_data, nodif_B0_mask)
         # Normalize streamlines
@@ -316,6 +330,13 @@ def m2g_dwi_worker(
 
     # ------- Connectome Estimation --------------------------------- #
     # Generate graphs from streamlines for each parcellation
+    global tracks
+    if reg_style == "native":
+        tracks = streamlines
+    elif reg_style == "native_dsn":
+        tracks = streamlines_mni
+
+
 
     for idx, parc in enumerate(parcellations):
         print(f"Generating graph for {parc} parcellation...")
@@ -324,30 +345,31 @@ def m2g_dwi_worker(
             tracks = streamlines
         elif reg_style == "native_dsn":
             tracks = streamlines_mni
-        rois = labels_im_file_list[idx]
-        labels_im = nib.load(labels_im_file_list[idx])
-        attr = len(np.unique(np.around(labels_im.get_data()).astype("int16"))) - 1
+        #rois = nib.load(labels_im_file_list[idx]).get_fdata().astype(int)
         g1 = graph.GraphTools(
             attr=parcellations[idx],
-            rois=rois,
+            rois=labels_im_file_list[idx],#rois,
             tracks=tracks,
             affine=np.eye(4),
             outdir=outdir,
             connectome_path=connectomes[idx],
+            n_cpus=n_cpus,
         )
         g1.g = g1.make_graph()
         g1.summary()
         g1.save_graph_png(connectomes[idx])
         g1.save_graph(connectomes[idx])
 
+
     exe_time = datetime.now() - startTime
 
     if "M2G_URL" in os.environ:
         print("Note: tractography QA does not work in a Docker environment.")
     else:
-        qa_tractography_out = outdir / "qa/fibers"
-        qa_tractography(streams, str(qa_tractography_out), str(eddy_corrected_data))
-        print("QA tractography Completed.")
+        # qa_tractography_out = outdir / "qa/fibers"
+        # qa_tractography(streams, str(qa_tractography_out), str(eddy_corrected_data))
+        # print("QA tractography Completed.")
+        pass
 
     print(f"Total execution time: {exe_time}")
     print("M2G Complete.")
@@ -356,6 +378,7 @@ def m2g_dwi_worker(
     print(
         "NOTE :: m2g uses native-space registration to generate connectomes.\n Without post-hoc normalization, multiple connectomes generated with m2g cannot be compared directly."
     )
+
 
 
 def welcome_message(connectomes):

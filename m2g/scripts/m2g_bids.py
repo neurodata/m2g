@@ -18,8 +18,8 @@ import shutil
 import glob
 import os
 from argparse import ArgumentParser
-import traceback
-import subprocess
+import numpy as np
+from numpy import genfromtxt
 
 # m2g imports
 from m2g.utils import cloud_utils
@@ -58,6 +58,8 @@ def get_atlas(atlas_dir, vox_size):
         dims = "2x2x2"
     elif vox_size == "1mm":
         dims = "1x1x1"
+    elif vox_size == "4mm":
+        dims = "4x4x4"
     else:
         raise ValueError(
             "Voxel dimensions of input t1w image not currently supported by m2g."
@@ -107,7 +109,6 @@ def get_atlas_dir():
 def main():
     """Starting point of the m2g pipeline, assuming that you are using a BIDS organized dataset
     """
-
     parser = ArgumentParser(
         description="This is an end-to-end connectome estimation pipeline from M3r Images."
     )
@@ -149,7 +150,7 @@ def main():
         action="store",
         help="""Pipline to use when analyzing the input data, 
         either func or dwi. If  Default is dwi.""",
-        default="dwi"
+        default="dwi",
     )
     parser.add_argument(
         "--acquisition",
@@ -164,7 +165,7 @@ def main():
         seqplus - Sequential in the plus direction
         seqminus - Sequential in the minus direction,
         default is alt+z. For more information:https://fcp-indi.github.io/docs/user/func.html""",
-        default="alt+z"
+        default="alt+z",
     )
     parser.add_argument(
         "--tr",
@@ -183,7 +184,7 @@ def main():
         "--parcellation",
         action="store",
         help="The parcellation(s) being analyzed. Multiple parcellations can be provided with a space separated list.",
-        nargs='+',
+        nargs="+",
         default=None,
     )
     parser.add_argument(
@@ -253,27 +254,45 @@ def main():
     parser.add_argument(
         "--n_cpus",
         action="store",
-        help="Memory, in GB, to allocate to functional pipeline",
+        help="Number of cpus to allocate to either the functional pipeline or the diffusion connectome generation",
         default=1,
     )
+    parser.add_argument(
+        "--itter",
+        action="store",
+        help="Number of itterations for memory check",
+        default=300,
+    )
+    parser.add_argument(
+        "--period",
+        action="store",
+        help="Number of seconds between memory check",
+        default=15,
+    )
+    result = parser.parse_args()
+    itterations = result.itter
+    period = result.period
 
     # and ... begin!
     print("\nBeginning m2g ...")
 
     # ---------------- Parse CLI arguments ---------------- #
-    result = parser.parse_args()
     input_dir = result.input_dir
     output_dir = result.output_dir
     subjects = result.participant_label
+#    subjectsss = result.participant_label
     sessions = result.session_label
-    pipe=result.pipeline
-    acquisition = result.acquisition    #functional pipeline settings
-    mem_gb = result.mem_gb              #functional pipeline settings
+    pipe = result.pipeline
+    acquisition = result.acquisition  # functional pipeline settings
+    mem_gb = result.mem_gb  # functional pipeline settings
     n_cpus = result.n_cpus
-    tr=result.tr                        #functional pipeline settings
+    tr = result.tr  # functional pipeline settings
     parcellation_name = result.parcellation
     push_location = result.push_location
 
+#    for subby in subjectsss:
+#        subjects = list({subby})
+#        input_dir = result.input_dir
     # arguments to be passed in every m2g run
     # TODO : change value naming convention to match key naming convention
     constant_kwargs = {
@@ -286,6 +305,7 @@ def main():
         "skipeddy": result.skipeddy,
         "skipreg": result.skipreg,
         "skull": result.skull,
+        "n_cpus": result.n_cpus,
     }
 
     # ---------------- S3 stuff ---------------- #
@@ -339,30 +359,91 @@ def main():
         """
     )
 
+    # ---------------- Grab parcellations, atlases, mask --------------- #
+    # get parcellations, atlas, and mask, then stick it into constant_kwargs
+    atlas_dir = get_atlas_dir()
+    parcellations, atlas, mask, = get_atlas(atlas_dir, constant_kwargs["vox_size"])
+    if parcellation_name is not None:  # filter parcellations
+        parcellations = [
+            file_
+            for file_ in parcellations
+            for parc in parcellation_name
+            if parc in file_
+        ]
+    # Check if parcellations is empty
+    if len(parcellations) == 0:
+        raise ValueError("No valid parcellations found.")
+
+    atlas_stuff = {"atlas": atlas, "mask": mask, "parcellations": parcellations}
+
     # ------- Check if they have selected the functional pipeline ------ #
     if pipe == "func":
         
-        sweeper = DirectorySweeper(input_dir, subjects=subjects, sessions=sessions, pipeline='func')
-        scans = sweeper.get_dir_info(pipeline='func')
-        
+        sweeper = DirectorySweeper(
+            input_dir, subjects=subjects, sessions=sessions, pipeline="func"
+        )
+        scans = sweeper.get_dir_info(pipeline="func")
+
         home = os.path.expanduser("~")
-        if not os.path.exists(home + '/.m2g'):
+        if not os.path.exists(home + "/.m2g"):
             os.makedirs(f"{home}/.m2g")
 
-        
         for SubSesFile in scans:
             subject, session, files = SubSesFile
-            #add subject and session folders to output
+            # add subject and session folders to output
             outDir = f"{output_dir}/sub-{subject}/ses-{session}"
-            
-            m2g_func_worker(input_dir, outDir, subject, session, files['t1w'], files['func'], acquisition, tr, mem_gb, n_cpus)
-        
-            #m2g_func_worker()
+
+            m2g_func_worker(
+                input_dir,
+                outDir,
+                subject,
+                session,
+                files["t1w"],
+                files["func"],
+                constant_kwargs["vox_size"],
+                parcellations,
+                acquisition,
+                tr,
+                mem_gb,
+                n_cpus,
+                itterations,
+                period,
+            )
+
+            # m2g_func_worker()
             print(
                 f"""
                 Functional Pipeline completed!
                 """
             )
+
+            # Convert connectomes into edgelists
+            for root, dirs, files in os.walk(outDir):
+                for file in files:
+                    if file.endswith('measure-correlation.csv'):
+                        atlas = root.split('/')[-2]
+                        subsesh = f"{root.split('/')[-10]}_{root.split('/')[-9]}{root.split('/')[-4]}"
+
+                        edg_dir = f"{output_dir}/functional_edgelists/{atlas}"
+                        os.makedirs(edg_dir, exist_ok=True)
+
+                        my_data = genfromtxt(f"{root}/{file}", delimiter=',', skip_header=1)
+
+                        a = sum(range(1, len(my_data)))
+                        arr = np.zeros((a,3))
+                        z=0
+                        for num in range(len(my_data)):
+                            for i in range(len(my_data[num])):
+                                if i > num:
+                                    #print(f'{num+1} {i+1} {my_data[num][i]}')
+                                    arr[z][0]= f'{num+1}'
+                                    arr[z][1]= f'{i+1}'
+                                    arr[z][2] = my_data[num][i]
+                                    z=z+1
+                
+                        np.savetxt(f"{edg_dir}/{subsesh}_measure-correlation.csv", arr,fmt='%d %d %f', delimiter=' ')
+                        print(f"{file} converted to edgelist")
+
 
             if push_location:
                 print(f"Pushing to s3 at {push_location}.")
@@ -370,25 +451,18 @@ def main():
                 cloud_utils.s3_func_push_data(
                     push_buck,
                     push_remo,
-                    outDir,
+                    output_dir,
                     subject=subject,
                     session=session,
                     creds=creds,
                 )
-                #shutil.rmtree(f'{output_dir}/sub-{subject}', ignore_errors=False, onerror=None)
 
         sys.exit(0)
 
+    
+    # ------------ Continue DWI pipeline ------------ #
 
-    # ---------------- Grab parcellations, atlases, mask --------------- #
-    # get parcellations, atlas, and mask, then stick it into constant_kwargs
-    atlas_dir = get_atlas_dir()
-    parcellations, atlas, mask, = get_atlas(atlas_dir, constant_kwargs["vox_size"])
-    if parcellation_name is not None:  # filter parcellations
-        parcellations = [file_ for file_ in parcellations for parc in parcellation_name if parc in file_]
-    atlas_stuff = {"atlas": atlas, "mask": mask, "parcellations": parcellations}
     constant_kwargs.update(atlas_stuff)
-
     # parse input directory
     sweeper = DirectorySweeper(input_dir, subjects=subjects, sessions=sessions)
     scans = sweeper.get_dir_info()
@@ -411,6 +485,9 @@ def main():
                 session=session,
                 creds=creds,
             )
+                #shutil.rmtree(f"{output_dir}/sub-{subject}")
+                #shutil.rmtree(f"/root/.m2g/input/sub-{subject}")
+            
 
 
 if __name__ == "__main__":

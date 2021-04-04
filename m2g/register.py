@@ -140,6 +140,8 @@ class DmriReg:
             vox_dims = "2x2x2"
         elif vox_size == "1mm":
             vox_dims = "1x1x1"
+        elif vox_size == "4mm":
+            vox_dims = "4x4x4"
 
         # TODO : clean up all these attributes
         self.outdir = outdir
@@ -183,11 +185,11 @@ class DmriReg:
         )
         self.temp2dwi_xfm = f"{self.reg_m}/{self.dwi_name}_xfm_temp2dwi.mat"
         self.map_path = f"{self.prep_anat}/{self.t1w_name}_seg"
-        self.wm_mask = f"{self.prep_anat}/{self.t1w_name}_wm.nii.gz"
         self.wm_mask_thr = f"{self.prep_anat}/{self.t1w_name}_wm_thr.nii.gz"
         self.wm_edge = f"{self.reg_a}/{self.t1w_name}_wm_edge.nii.gz"
-        self.csf_mask = f"{self.prep_anat}/{self.t1w_name}_csf.nii.gz"
-        self.gm_mask = f"{self.prep_anat}/{self.t1w_name}_gm.nii.gz"
+        self.wm_mask = f"{self.prep_anat}/{self.t1w_name}_seg_pve_2.nii.gz"
+        self.gm_mask = f"{self.prep_anat}/{self.t1w_name}_seg_pve_1.nii.gz"
+        self.csf_mask = f"{self.prep_anat}/{self.t1w_name}_seg_pve_0.nii.gz"
         self.xfm_roi2mni_init = f"{self.reg_m}/roi_2_mni.mat"
         self.lvent_out_file = f"{self.reg_a}/LVentricle.nii.gz"
         self.rvent_out_file = f"{self.reg_a}/RVentricle.nii.gz"
@@ -226,6 +228,9 @@ class DmriReg:
         reslices all 4 files to the target voxel resolution and extracts the white matter edge. Each mask is saved to
         location indicated by self.map_path
         """
+
+
+        #TODO: Why is the t1w skullstripped here? Shouldn't this be part of the preprocessing?
         # BET needed for this, as afni 3dautomask only works on 4d volumes
         print("Extracting brain from raw T1w image...")
         reg_utils.t1w_skullstrip(self.t1w, self.t1w_brain, self.skull)
@@ -234,9 +239,9 @@ class DmriReg:
         skullstrip_qa = Path(self.qa) / "skull_strip"
         if not os.path.exists(skullstrip_qa):
             skullstrip_qa.mkdir(parents=True, exist_ok=True)
-        print('QA_skullstrip_path  ', skullstrip_qa)
+        print("QA_skullstrip_path  ", skullstrip_qa)
         gen_overlay_pngs(self.t1w_brain, self.t1w, skullstrip_qa)
-        
+
         # Segment the t1w brain into probability maps
         self.maps = reg_utils.segment_t1w(self.t1w_brain, self.map_path)
         self.wm_mask = self.maps["wm_prob"]
@@ -244,8 +249,12 @@ class DmriReg:
         self.csf_mask = self.maps["csf_prob"]
 
         # Generates quality analysis pictures of white matter, gray matter and cerebrospinal fluid
-        qa_fast_png(self.csf_mask, self.gm_mask, self.wm_mask, str(Path(self.qa_reg)/"qa_fast.png"))
-
+        qa_fast_png(
+            self.csf_mask,
+            self.gm_mask,
+            self.wm_mask,
+            str(Path(self.qa_reg) / "qa_fast.png"),
+        )
 
         self.t1w_brain = gen_utils.match_target_vox_res(
             self.t1w_brain, self.vox_size, self.outdir, sens="anat"
@@ -270,6 +279,29 @@ class DmriReg:
         cmd = f"fslmaths {self.wm_mask_thr} -edge -bin -mas {self.wm_mask_thr} {self.wm_edge}"
         print("Extracting white matter edge...")
         gen_utils.run(cmd)
+
+    def check_gen_tissue_files(self):
+        """Function for checking whether files were resliced or not.
+        Only used for `skipreg` option."""
+
+        if self.vox_size == "1mm":
+            new_zooms = (1.0, 1.0, 1.0)
+        elif self.vox_size == "2mm":
+            new_zooms = (2.0, 2.0, 2.0)
+
+        img = nib.load(self.t1w_brain)
+        zooms = img.header.get_zooms()[:3]
+
+        if (abs(zooms[0]), abs(zooms[1]), abs(zooms[2])) != new_zooms:
+            suffix = "_res.nii.gz"
+        else:
+            suffix = "_nores.nii.gz"
+
+        # Remove .nii.gz and replace with suffix
+        self.t1w_brain = self.t1w_brain[:-7] + suffix
+        self.wm_mask = self.wm_mask[:-7] + suffix
+        self.gm_mask = self.gm_mask[:-7] + suffix
+        self.csf_mask = self.csf_mask[:-7] + suffix
 
     @gen_utils.timer
     def t1w2dwi_align(self):
@@ -311,6 +343,7 @@ class DmriReg:
                 )
 
                 # Get mat from MNI -> T1
+                #TODO: I don't think the resulting matrix is used anywhere? Double check and then remove is useless...
                 cmd = f"convert_xfm -omat {self.mni2t1_xfm_init} -inverse {self.t12mni_xfm_init}"
                 print(cmd)
                 gen_utils.run(cmd)
@@ -354,7 +387,7 @@ class DmriReg:
         if self.simple is False:
             # Flirt bbr
             try:
-                print("Running FLIRT BBR registration: T1w-->DWI ...")
+                print("Running FLIRT BBR registration: DWI-->T1W ...")
                 reg_utils.align(
                     self.nodif_B0,
                     self.t1w_brain,

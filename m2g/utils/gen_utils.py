@@ -92,7 +92,7 @@ class DirectorySweeper:
         
         kwargs = dict(
             suffix=pipeline,
-            extensions=["nii", "nii.gz"],
+            extension=["nii", "nii.gz"],
             subject=subjects,
             session=sessions,
         )
@@ -125,10 +125,12 @@ class DirectorySweeper:
         """
 
         if pipeline == 'func':
-            [func] = self.layout.get(return_type='filename', session=session, subject=subject, suffix='bold')
+            func = self.layout.get(return_type='filename', session=session, subject=subject, suffix='bold')
+            if len(func) == 1: #Account for one or multiple functional scans per anatomical image
+                [func] = func
             [anat] = self.layout.get(return_type="filename", session=session, subject=subject, suffix=['T1w','t1w'])
             files = {"func": func, "t1w": anat}
-        else:
+        else:#TODO: allow for more than one dwi scan to exist in the dwi directory for processing
             bval, bvec, dwi = self.layout.get(return_type="filename", session=session, subject=subject, suffix='dwi')
             [anat] = self.layout.get(return_type="filename", session=session, subject=subject, suffix='T1w')
             files = {"dwi": dwi, "bvals": bval, "bvecs": bvec, "t1w": anat}
@@ -156,6 +158,8 @@ class DirectorySweeper:
         scans = []
         SubSesFiles = namedtuple("SubSesFiles", ["subject", "session", "files"])
 
+        #remove duplicate subject/session pairs for either 
+        self.pairs = list(set(self.pairs))
         # append subject, session, and files for each relevant session to scans
         for subject, session in self.pairs:
             files = self.get_files(subject, session, pipeline=pipeline)
@@ -380,8 +384,8 @@ def is_bids(input_dir):
         l = bids.BIDSLayout(input_dir)
         return l.validate
     except ValueError as e:
-        p = "'dataset_description.json' is missing from project root. Every valid BIDS dataset must have this file."
-        if str(e) != p:
+        p = "dataset_description.json"
+        if p not in str(e):
             raise ValueError(e)
         create_datadescript(input_dir)
         return is_bids(input_dir)
@@ -644,7 +648,7 @@ def make_gtab_and_bmask(fbval: str, fbvec: str, dwi_file: str, preproc_dir: Path
     # Get mean B0 brain mask
     cmd = f"bet {nodif_B0} {nodif_B0_bet} -m -f 0.2"
     run(cmd)
-    return gtab, nodif_B0, nodif_B0_mask
+    return gtab, nodif_B0_bet, nodif_B0_mask
 
 
 def normalize_xform(img):
@@ -800,7 +804,7 @@ def match_target_vox_res(img_file: str, vox_size, outdir: Path, sens):
     img_file : str
         path to file to be resliced
     vox_size : str
-        target voxel resolution ('2mm' or '1mm')
+        target voxel resolution ('4mm', '2mm', or '1mm')
     preproc_dir : 
     sens : str
         type of data being analyzed ('dwi' or 'anat')
@@ -821,6 +825,8 @@ def match_target_vox_res(img_file: str, vox_size, outdir: Path, sens):
         new_zooms = (1.0, 1.0, 1.0)
     elif vox_size == "2mm":
         new_zooms = (2.0, 2.0, 2.0)
+    elif vox_size == "4mm":
+        new_zooms = (4.0, 4.0, 4.0)
 
     # set up paths
     outdir = Path(outdir)

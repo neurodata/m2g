@@ -11,7 +11,7 @@ plotly==1.12.1
 duecredit
 pybids
 configparser>=3.7.4
-fury
+fury==0.5.1
 pytest
 pathlib2
 graspy
