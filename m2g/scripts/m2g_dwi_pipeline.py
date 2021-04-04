@@ -317,6 +317,7 @@ def m2g_dwi_worker(
     print("Streamlines complete")
     print(f"Tractography runtime: {np.round(time.time() - start_time, 1)}")
 
+    #TODO: Get rid of native_dsn once and for all?
     if reg_style == "native_dsn":
         fa_path = track.tens_mod_fa_est(gtab, eddy_corrected_data, nodif_B0_mask)
         # Normalize streamlines

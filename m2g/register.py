@@ -228,6 +228,9 @@ class DmriReg:
         reslices all 4 files to the target voxel resolution and extracts the white matter edge. Each mask is saved to
         location indicated by self.map_path
         """
+
+
+        #TODO: Why is the t1w skullstripped here? Shouldn't this be part of the preprocessing?
         # BET needed for this, as afni 3dautomask only works on 4d volumes
         print("Extracting brain from raw T1w image...")
         reg_utils.t1w_skullstrip(self.t1w, self.t1w_brain, self.skull)
@@ -340,6 +343,7 @@ class DmriReg:
                 )
 
                 # Get mat from MNI -> T1
+                #TODO: I don't think the resulting matrix is used anywhere? Double check and then remove is useless...
                 cmd = f"convert_xfm -omat {self.mni2t1_xfm_init} -inverse {self.t12mni_xfm_init}"
                 print(cmd)
                 gen_utils.run(cmd)
@@ -383,7 +387,7 @@ class DmriReg:
         if self.simple is False:
             # Flirt bbr
             try:
-                print("Running FLIRT BBR registration: T1w-->DWI ...")
+                print("Running FLIRT BBR registration: DWI-->T1W ...")
                 reg_utils.align(
                     self.nodif_B0,
                     self.t1w_brain,
