@@ -1,7 +1,7 @@
 # ndmg
 
-![Downloads shield](https://img.shields.io/pypi/dm/ndmg.svg)
-[![PyPI](https://img.shields.io/pypi/v/ndmg.svg)](https://pypi.python.org/pypi/ndmg)
+![Downloads shield](https://img.shields.io/pypi/dm/m2g.svg)
+[![PyPI](https://img.shields.io/pypi/v/m2g.svg)](https://pypi.python.org/pypi/m2g)
 [![Travis CI](https://travis-ci.org/neurodata/m2g.svg?branch=deploy)](https://travis-ci.org/github/neurodata/m2g)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.595684.svg)](https://doi.org/10.5281/zenodo.595684)
 [![Code Climate](https://codeclimate.com/github/neurodata/ndmg/badges/gpa.svg)](https://codeclimate.com/github/neurodata/ndmg)
