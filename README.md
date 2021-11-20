@@ -5,7 +5,7 @@
 [![Travis CI](https://travis-ci.org/neurodata/m2g.svg?branch=deploy)](https://travis-ci.org/github/neurodata/m2g)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.595684.svg)](https://doi.org/10.5281/zenodo.595684)
 [![Code Climate](https://codeclimate.com/github/neurodata/ndmg/badges/gpa.svg)](https://codeclimate.com/github/neurodata/ndmg)
-[![DockerHub](https://img.shields.io/docker/pulls/bids/m2g.svg)](https://hub.docker.com/r/bids/m2g)
+[![DockerHub](https://img.shields.io/docker/pulls/neurodata/m2g.svg)](https://hub.docker.com/r/neurodata/m2g)
 [![OpenNeuro](http://bids.neuroimaging.io/openneuro_badge.svg)](https://openneuro.org)
 
 ![](./docs/nutmeg.png)
