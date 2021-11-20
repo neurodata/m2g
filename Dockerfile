@@ -47,8 +47,7 @@ RUN curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.d
     apt-get install -y git-lfs
 
 # #---------AFNI INSTALL--------------------------------------------------------#
-# # setup of AFNI, which provides robust modifications of many of neuroimaging
-# # algorithms
+# # setup of AFNI, which provides robust modifications of many of neuroimaging algorithms
 RUN apt-get update -qq && apt-get install -yq --no-install-recommends ed gsl-bin libglu1-mesa-dev libglib2.0-0 libglw1-mesa fsl-atlases \
     libgomp1 libjpeg62 libxm4 netpbm tcsh xfonts-base xvfb && \
     libs_path=/usr/lib/x86_64-linux-gnu && \
