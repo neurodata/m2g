@@ -424,7 +424,7 @@ def main():
                         atlas = root.split('/')[-2]
                         subsesh = f"{root.split('/')[-10]}_{root.split('/')[-9]}{root.split('/')[-4]}"
 
-                        edg_dir = f"{output_dir}/functional_edgelists/{atlas}"
+                        edg_dir = f"{outDir}/functional_edgelists/{atlas}"
                         os.makedirs(edg_dir, exist_ok=True)
 
                         my_data = genfromtxt(f"{root}/{file}", delimiter=',', skip_header=1)
@@ -445,6 +445,61 @@ def main():
                         print(f"{file} converted to edgelist")
 
 
+            #Reorganize the folder structure
+            reorg = {"anat_f":["anatomical_b","anatomical_w","anatomical_c","anatomical_r","anatomical_t",'anatomical_g',"seg_"],
+                "connectomes_f":["functional_edgelists"],
+                "func/preproc":["coordinate","frame_w","functional_b","functional_f","functional_n","functional_p","motion","slice","raw"],
+                "func/register":['mean_functional',"functional_to",'functional_in', "max_", "movement_par","power_","roi"],
+                "log_f":['log'],
+                "qa_f":['mni_normalized_','carpet','csf_gm','mean_func_','rot_plot','trans_plot','skullstrip_vis', 'snr_']
+            }
+
+            moved = set()
+            for root, dirs, files in os.walk(outDir, topdown=False):
+                if 'cpac_' and 'functional_pipeline_settings.yaml' in files:
+                    for i in files:
+                        shutil.move(os.path.join(root,i),os.path.join(outDir,i))
+                
+                if root not in moved and 'workingDirectory' not in root:
+                    for cat in reorg:
+                        for nam in reorg[cat]:
+                            if nam in root.split('/')[-1]:
+                                #Get rid of the stupid in-between subdirectory
+                                if '_scan_rest-None' in dirs:
+                                    _ = os.path.join(outDir,cat,root.split('/')[-1])
+                                    os.makedirs(_, exist_ok=True)
+                                    for fil in os.listdir(os.path.join(root, '_scan_rest-None')):
+                                        shutil.move(os.path.join(root,'_scan_rest-None',fil), _ )
+                                    moved.add(root)                                
+                                else:
+                                    _ = os.path.join(outDir,cat)
+                                    if cat != 'connectomes' and cat != 'log':
+                                        os.makedirs(_,exist_ok=True)
+                                    shutil.move(root,_)
+                                    moved.add(root)
+                                    #print(f'moved {root} to {os.path.join(outDir,cat)}')
+                                    _ = os.path.join(_,root.split('/')[-1])
+                                    
+                                for r, d, ff in os.walk(_):
+                                    nono = ['_montage_','_selector_']
+                                    for i, element in enumerate(d):
+                                        for q in nono:
+                                            if q in element:
+                                                for f in os.listdir(os.path.join(r,d[i])):
+                                                    shutil.move(os.path.join(r,d[i],f),_)
+                                                os.rmdir(os.path.join(r,d[i]))
+
+
+                        for x in os.walk(outDir):
+                            dir = x[0].split('/')[-1]
+                            for cat in reorg:
+                                if dir in reorg[cat]:
+                                    shutil.move(x[0],os.path.join(outDir,cat))
+            
+            #get rid of cpac output folder
+            shutil.rmtree(os.path.join(outDir,'output'), ignore_errors=True)
+
+
             if push_location:
                 print(f"Pushing to s3 at {push_location}.")
                 push_buck, push_remo = cloud_utils.parse_path(push_location)
@@ -456,8 +511,8 @@ def main():
                     session=session,
                     creds=creds,
                 )
-
-        sys.exit(0)
+        if pipe != 'both':
+            sys.exit(0)
 
     
     # ------------ Continue DWI pipeline ------------ #

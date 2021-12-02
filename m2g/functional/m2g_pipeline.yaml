@@ -53,15 +53,15 @@ pipelineName :  m2g
 
 
 # Directory where CPAC should store temporary and intermediate files.
-workingDirectory :  /output #/tmp
+workingDirectory :  /workingDirectory #/tmp
 
 
 # Directory where CPAC should write crash logs.
-crashLogDirectory :  /output #/tmp
+crashLogDirectory : /crashLogDirectory #/tmp
 
 
 # Directory where CPAC should place processed data.
-outputDirectory :  /output
+outputDirectory : / #/output4
 
 
 # Whether to write log details of the pipeline.
@@ -69,7 +69,7 @@ run_logging :  True
 
 
 # Directory where CPAC should place run logs.
-logDirectory :  /output #/tmp
+logDirectory :  /logDirectory #/tmp
 
 
 # If setting the 'Output Directory' to an S3 bucket, insert the path to your AWS credentials file here.
