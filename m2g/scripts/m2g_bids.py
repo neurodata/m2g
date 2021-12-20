@@ -377,7 +377,7 @@ def main():
     atlas_stuff = {"atlas": atlas, "mask": mask, "parcellations": parcellations}
 
     # ------- Check if they have selected the functional pipeline ------ #
-    if pipe == "func":
+    if pipe == "func" or "both":
         
         sweeper = DirectorySweeper(
             input_dir, subjects=subjects, sessions=sessions, pipeline="func"
@@ -470,10 +470,19 @@ def main():
                                     os.makedirs(_, exist_ok=True)
                                     for fil in os.listdir(os.path.join(root, '_scan_rest-None')):
                                         shutil.move(os.path.join(root,'_scan_rest-None',fil), _ )
-                                    moved.add(root)                                
+                                    moved.add(root)
+
+                                elif 'pipeline_m2g' in dirs:
+                                    _ = os.path.join(outDir,root.split('/')[-1])
+                                    os.makedirs(_, exist_ok=True)
+                                    for fil in os.listdir(os.path.join(root, 'pipeline_m2g')):
+                                        shutil.move(os.path.join(root,'pipeline_m2g',fil), _ )
+                                    os.rmdir(os.path.join(root,'pipeline_m2g'))
+                                    moved.add(root)
+
                                 else:
                                     _ = os.path.join(outDir,cat)
-                                    if cat != 'connectomes' and cat != 'log':
+                                    if cat != 'connectomes_f' and cat != 'log_f':
                                         os.makedirs(_,exist_ok=True)
                                     shutil.move(root,_)
                                     moved.add(root)
@@ -481,7 +490,7 @@ def main():
                                     _ = os.path.join(_,root.split('/')[-1])
                                     
                                 for r, d, ff in os.walk(_):
-                                    nono = ['_montage_','_selector_']
+                                    nono = ['_montage_','_selector_','ses-']
                                     for i, element in enumerate(d):
                                         for q in nono:
                                             if q in element:
@@ -490,14 +499,19 @@ def main():
                                                 os.rmdir(os.path.join(r,d[i]))
 
 
-                        for x in os.walk(outDir):
-                            dir = x[0].split('/')[-1]
-                            for cat in reorg:
-                                if dir in reorg[cat]:
-                                    shutil.move(x[0],os.path.join(outDir,cat))
-            
             #get rid of cpac output folder
             shutil.rmtree(os.path.join(outDir,'output'), ignore_errors=True)
+
+            for x in os.walk(outDir):
+                dir = x[0].split('/')[-1]
+                for cat in reorg:
+                    if dir in reorg[cat]:
+                        os.makedirs(os.path.join(outDir,cat), exist_ok=True)
+                        for i in os.listdir(x[0]):
+                            shutil.move(os.path.join(x[0],i),os.path.join(outDir,cat,i))
+            
+            # #get rid of cpac output folder
+            # shutil.rmtree(os.path.join(outDir,'output'), ignore_errors=True)
 
 
             if push_location:
