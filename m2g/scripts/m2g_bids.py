@@ -422,9 +422,11 @@ def main():
                 for file in files:
                     if file.endswith('measure-correlation.csv'):
                         atlas = root.split('/')[-2]
+                        atlas = atlas.split('Human..')[-1]
+                        atlas = atlas.split('.nii')[0]
                         subsesh = f"{root.split('/')[-10]}_{root.split('/')[-9]}{root.split('/')[-4]}"
 
-                        edg_dir = f"{outDir}/functional_edgelists/{atlas}"
+                        edg_dir = f"{outDir}/connectomes_f/{atlas}"
                         os.makedirs(edg_dir, exist_ok=True)
 
                         my_data = genfromtxt(f"{root}/{file}", delimiter=',', skip_header=1)
@@ -441,24 +443,31 @@ def main():
                                     arr[z][2] = my_data[num][i]
                                     z=z+1
                 
-                        np.savetxt(f"{edg_dir}/{subsesh}_measure-correlation.csv", arr,fmt='%d %d %f', delimiter=' ')
+                        np.savetxt(f"{edg_dir}/{subsesh}_func_{atlas}_connectome.csv", arr,fmt='%d %d %f', delimiter=' ')
                         print(f"{file} converted to edgelist")
 
 
             #Reorganize the folder structure
             reorg = {"anat_f":["anatomical_b","anatomical_w","anatomical_c","anatomical_r","anatomical_t",'anatomical_g',"seg_"],
-                "connectomes_f":["functional_edgelists"],
+                #"connectomes_f":["functional_edgelists"],
                 "func/preproc":["coordinate","frame_w","functional_b","functional_f","functional_n","functional_p","motion","slice","raw"],
                 "func/register":['mean_functional',"functional_to",'functional_in', "max_", "movement_par","power_","roi"],
-                "log_f":['log'],
+                #"log_f":['log'],
                 "qa_f":['mni_normalized_','carpet','csf_gm','mean_func_','rot_plot','trans_plot','skullstrip_vis', 'snr_']
             }
 
             moved = set()
             for root, dirs, files in os.walk(outDir, topdown=False):
                 if 'cpac_' and 'functional_pipeline_settings.yaml' in files:
+                    os.makedirs(os.path.join(outDir,'log_f'), exist_ok=True)
                     for i in files:
-                        shutil.move(os.path.join(root,i),os.path.join(outDir,i))
+                        shutil.move(os.path.join(root,i),os.path.join(outDir,'log_f',i))
+                    moved.add(root)
+                if ('cpac_individual_timing_m2g.csv' in files) or ('pypeline.log' in files):
+                    os.makedirs(os.path.join(outDir,'log_f'), exist_ok=True)
+                    for i in files:
+                        shutil.move(os.path.join(root,i),os.path.join(outDir,'log_f',i))
+                    moved.add(root)
                 
                 if root not in moved and 'workingDirectory' not in root:
                     for cat in reorg:
@@ -472,13 +481,13 @@ def main():
                                         shutil.move(os.path.join(root,'_scan_rest-None',fil), _ )
                                     moved.add(root)
 
-                                elif 'pipeline_m2g' in dirs:
-                                    _ = os.path.join(outDir,root.split('/')[-1])
-                                    os.makedirs(_, exist_ok=True)
-                                    for fil in os.listdir(os.path.join(root, 'pipeline_m2g')):
-                                        shutil.move(os.path.join(root,'pipeline_m2g',fil), _ )
-                                    os.rmdir(os.path.join(root,'pipeline_m2g'))
-                                    moved.add(root)
+                                # elif 'pipeline_m2g' in dirs:
+                                #     _ = os.path.join(outDir,root.split('/')[-1])
+                                #     os.makedirs(_, exist_ok=True)
+                                #     for fil in os.listdir(os.path.join(root, 'pipeline_m2g')):
+                                #         shutil.move(os.path.join(root,'pipeline_m2g',fil), _ )
+                                #     os.rmdir(os.path.join(root,'pipeline_m2g'))
+                                #     moved.add(root)
 
                                 else:
                                     _ = os.path.join(outDir,cat)
@@ -486,11 +495,10 @@ def main():
                                         os.makedirs(_,exist_ok=True)
                                     shutil.move(root,_)
                                     moved.add(root)
-                                    #print(f'moved {root} to {os.path.join(outDir,cat)}')
                                     _ = os.path.join(_,root.split('/')[-1])
                                     
                                 for r, d, ff in os.walk(_):
-                                    nono = ['_montage_','_selector_','ses-']
+                                    nono = ['_montage_','_selector_','ses-']#,'pipeline']
                                     for i, element in enumerate(d):
                                         for q in nono:
                                             if q in element:
@@ -501,14 +509,27 @@ def main():
 
             #get rid of cpac output folder
             shutil.rmtree(os.path.join(outDir,'output'), ignore_errors=True)
+            shutil.rmtree(os.path.join(outDir, 'log'), ignore_errors=True)
 
-            for x in os.walk(outDir):
-                dir = x[0].split('/')[-1]
-                for cat in reorg:
-                    if dir in reorg[cat]:
-                        os.makedirs(os.path.join(outDir,cat), exist_ok=True)
-                        for i in os.listdir(x[0]):
-                            shutil.move(os.path.join(x[0],i),os.path.join(outDir,cat,i))
+            # for x in os.walk(os.path.join(outDir,'log_f')):
+            #     dir = x[0].split('/')[-1]
+            #     for cat in reorg:
+            #         if dir in reorg[cat]:
+            #             os.makedirs(os.path.join(outDir,cat), exist_ok=True)
+            #             for i in os.listdir(x[0]):
+            #                 shutil.move(os.path.join(x[0],i),os.path.join(outDir,cat,i))
+
+
+
+            # for x in os.walk(outDir):
+            #     dir = x[0].split('/')[-1]
+            #     for cat in reorg:
+            #         if dir in reorg[cat]:
+            #             os.makedirs(os.path.join(outDir,cat), exist_ok=True)
+            #             for i in os.listdir(x[0]):
+            #                 shutil.move(os.path.join(x[0],i),os.path.join(outDir,cat,i))
+
+
             
             # #get rid of cpac output folder
             # shutil.rmtree(os.path.join(outDir,'output'), ignore_errors=True)
