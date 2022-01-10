@@ -287,7 +287,7 @@ class GraphTools:
 
         print(f"Graph saved. Output location here: {graphname}")
 
-    def save_graph_png(self, graphname):
+    def save_graph_png(self, qa_dir, graphname):
         """Saves adjacency graph, made using graspy's heatmap function, as a png. This will be saved in the qa/graphs_plotting/ directory
 
         Parameters
@@ -299,7 +299,7 @@ class GraphTools:
         conn_matrix = np.array(nx.to_numpy_matrix(self.g))
         conn_matrix = ptr.pass_to_ranks(conn_matrix)
         heatmap(conn_matrix)
-        outpath = str(self.outdir / f"qa/graphs_plotting/{Path(graphname).stem}.png")
+        outpath = str(qa_dir / f"{Path(graphname).stem}.png")
         plt.savefig(outpath)
         plt.close()
 

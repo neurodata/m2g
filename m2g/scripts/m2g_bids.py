@@ -149,7 +149,7 @@ def main():
         "--pipeline",
         action="store",
         help="""Pipline to use when analyzing the input data, 
-        either func or dwi. If  Default is dwi.""",
+        either func, dwi, or both. If  Default is dwi.""",
         default="dwi",
     )
     parser.add_argument(
@@ -257,21 +257,7 @@ def main():
         help="Number of cpus to allocate to either the functional pipeline or the diffusion connectome generation",
         default=1,
     )
-    parser.add_argument(
-        "--itter",
-        action="store",
-        help="Number of itterations for memory check",
-        default=300,
-    )
-    parser.add_argument(
-        "--period",
-        action="store",
-        help="Number of seconds between memory check",
-        default=15,
-    )
     result = parser.parse_args()
-    itterations = result.itter
-    period = result.period
 
     # and ... begin!
     print("\nBeginning m2g ...")
@@ -377,7 +363,7 @@ def main():
     atlas_stuff = {"atlas": atlas, "mask": mask, "parcellations": parcellations}
 
     # ------- Check if they have selected the functional pipeline ------ #
-    if pipe == "func":
+    if pipe == "func" or "both":
         
         sweeper = DirectorySweeper(
             input_dir, subjects=subjects, sessions=sessions, pipeline="func"
@@ -406,8 +392,6 @@ def main():
                 tr,
                 mem_gb,
                 n_cpus,
-                itterations,
-                period,
             )
 
             # m2g_func_worker()
@@ -422,9 +406,11 @@ def main():
                 for file in files:
                     if file.endswith('measure-correlation.csv'):
                         atlas = root.split('/')[-2]
+                        atlas = atlas.split('Human..')[-1]
+                        atlas = atlas.split('.nii')[0]
                         subsesh = f"{root.split('/')[-10]}_{root.split('/')[-9]}{root.split('/')[-4]}"
 
-                        edg_dir = f"{output_dir}/functional_edgelists/{atlas}"
+                        edg_dir = f"{outDir}/connectomes_f/{atlas}"
                         os.makedirs(edg_dir, exist_ok=True)
 
                         my_data = genfromtxt(f"{root}/{file}", delimiter=',', skip_header=1)
@@ -441,8 +427,65 @@ def main():
                                     arr[z][2] = my_data[num][i]
                                     z=z+1
                 
-                        np.savetxt(f"{edg_dir}/{subsesh}_measure-correlation.csv", arr,fmt='%d %d %f', delimiter=' ')
+                        np.savetxt(f"{edg_dir}/{subsesh}_func_{atlas}_connectome.csv", arr,fmt='%d %d %f', delimiter=' ')
                         print(f"{file} converted to edgelist")
+
+
+            #Reorganize the folder structure
+            reorg = {"anat_f":["anatomical_b","anatomical_w","anatomical_c","anatomical_r","anatomical_t",'anatomical_g',"seg_"],
+                #"connectomes_f":["functional_edgelists"],
+                "func/preproc":["coordinate","frame_w","functional_b","functional_f","functional_n","functional_p","motion","slice","raw"],
+                "func/register":['mean_functional',"functional_to",'functional_in', "max_", "movement_par","power_","roi"],
+                #"log_f":['log'],
+                "qa_f":['mni_normalized_','carpet','csf_gm','mean_func_','rot_plot','trans_plot','skullstrip_vis', 'snr_']
+            }
+
+            moved = set()
+            for root, dirs, files in os.walk(outDir, topdown=False):
+                if 'cpac_' and 'functional_pipeline_settings.yaml' in files:
+                    os.makedirs(os.path.join(outDir,'log_f'), exist_ok=True)
+                    for i in files:
+                        shutil.move(os.path.join(root,i),os.path.join(outDir,'log_f',i))
+                    moved.add(root)
+                if ('cpac_individual_timing_m2g.csv' in files) or ('pypeline.log' in files):
+                    os.makedirs(os.path.join(outDir,'log_f'), exist_ok=True)
+                    for i in files:
+                        shutil.move(os.path.join(root,i),os.path.join(outDir,'log_f',i))
+                    moved.add(root)
+                
+                if root not in moved and 'workingDirectory' not in root:
+                    for cat in reorg:
+                        for nam in reorg[cat]:
+                            if nam in root.split('/')[-1]:
+                                #Get rid of the stupid in-between subdirectory
+                                if '_scan_rest-None' in dirs:
+                                    _ = os.path.join(outDir,cat,root.split('/')[-1])
+                                    os.makedirs(_, exist_ok=True)
+                                    for fil in os.listdir(os.path.join(root, '_scan_rest-None')):
+                                        shutil.move(os.path.join(root,'_scan_rest-None',fil), _ )
+                                    moved.add(root)
+
+                                else:
+                                    _ = os.path.join(outDir,cat)
+                                    if cat != 'connectomes_f' and cat != 'log_f':
+                                        os.makedirs(_,exist_ok=True)
+                                    shutil.move(root,_)
+                                    moved.add(root)
+                                    _ = os.path.join(_,root.split('/')[-1])
+                                    
+                                for r, d, ff in os.walk(_):
+                                    nono = ['_montage_','_selector_','ses-']#,'pipeline']
+                                    for i, element in enumerate(d):
+                                        for q in nono:
+                                            if q in element:
+                                                for f in os.listdir(os.path.join(r,d[i])):
+                                                    shutil.move(os.path.join(r,d[i],f),_)
+                                                os.rmdir(os.path.join(r,d[i]))
+
+
+            #get rid of cpac output folder
+            shutil.rmtree(os.path.join(outDir,'output'), ignore_errors=True)
+            shutil.rmtree(os.path.join(outDir, 'log'), ignore_errors=True)
 
 
             if push_location:
@@ -456,8 +499,8 @@ def main():
                     session=session,
                     creds=creds,
                 )
-
-        sys.exit(0)
+        if pipe != 'both':
+            sys.exit(0)
 
     
     # ------------ Continue DWI pipeline ------------ #

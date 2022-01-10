@@ -177,7 +177,7 @@ class DirectorySweeper:
         return scans
 
 
-def make_initial_directories(outdir: Path, parcellations=[]) -> None:
+def make_initial_directories(outdir: Path, dwi:Path, parcellations=[]) -> None:
     """
     Make starting directory tree.
     
@@ -185,35 +185,70 @@ def make_initial_directories(outdir: Path, parcellations=[]) -> None:
     ----------
     outdir : Path
         Output directory of the form Path(<dir>/sub-<n>/ses-<m>/)
+    dwi : Path
+        Path to dwi directory/files
     parcellations : list, optional
         Set of all parcellations we're using, by default []
     """
-    anat_dirs = ["anat/preproc", "anat/registered"]
-    dwi_dirs = ["dwi/fiber", "dwi/preproc", "dwi/tensor"]
-    qa_dirs = [
-        "qa/adjacency",
-        "qa/fibers",
-        "qa/graphs",
-        "qa/graphs_plotting",
-        "qa/mri",
-        "qa/reg",
-        "qa/tensor",
-    ]
-    tmp_dirs = ["tmp/reg_a", "tmp/reg_m"]
+    # anat_dirs = ["anat/preproc", "anat/registered"]
+    # dwi_dirs = ["dwi/fiber", "dwi/preproc", "dwi/tensor"]
+    # qa_dirs = [
+    #     "qa/adjacency",
+    #     "qa/fibers",
+    #     "qa/graphs",
+    #     "qa/graphs_plotting",
+    #     "qa/mri",
+    #     "qa/reg",
+    #     "qa/tensor",
+    # ]
+    # tmp_dirs = ["tmp/reg_a", "tmp/reg_m"]
 
+    
     # populate connectome_dir with folder for each parcellation
     connectome_dirs = []
     for parc in parcellations:
         name = get_filename(parc)
-        p = str(f"connectomes/{name}")
+        p = str(f"connectomes_d/{name}")
         connectome_dirs.append(p)
 
-    initial_dirs = anat_dirs + dwi_dirs + qa_dirs + tmp_dirs + connectome_dirs
+    init_dirs = {'anat_dirs':["anat_d/preproc", "anat_d/registered"],
+    'dwi_dirs':["dwi/fiber", "dwi/preproc", "dwi/tensor"],
+    'qa_dirs':["qa_d/adjacency",
+        "qa_d/fibers",
+        "qa_d/graphs",
+        "qa_d/graphs_plotting",
+        "qa_d/mri",
+        "qa_d/reg",
+        "qa_d/tensor",],
+    'tmp_dirs':["tmp_d/reg_a", "tmp_d/reg_m"],
+    "connectome_dirs":connectome_dirs,
+    "connectomes":[]}
+
+    #initial_dirs = anat_dirs + dwi_dirs + qa_dirs + tmp_dirs + connectome_dirs
 
     # create directories
-    for p in initial_dirs:
-        full_path = outdir / p
-        full_path.mkdir(parents=True, exist_ok=True)
+    for cat in init_dirs:
+        replace=[]
+        for p in init_dirs[cat]:
+            full_path = outdir / p
+            full_path.mkdir(parents=True, exist_ok=True)
+            replace.append(full_path)
+        init_dirs[cat] = replace
+
+    init_dirs['outdir'] = outdir
+
+    # generate list of connectome file locations
+    dwi_name = get_filename(dwi)
+    connectomes = []
+    for parc in parcellations:
+        name = get_filename(parc)
+        folder = outdir / f"connectomes_d/{name}"
+        connectome = f"{dwi_name}_{name}_connectome.csv"
+        connectomes.append(str(folder / connectome))
+
+    init_dirs['connectomes'] = connectomes
+
+    return init_dirs
 
 
 def has_files(dirname: Path):

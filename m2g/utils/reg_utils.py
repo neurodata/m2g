@@ -235,7 +235,7 @@ def skullstrip_check(dmrireg, parcellations, outdir, prep_anat, vox_size, reg_st
     for idx, label in enumerate(parcellations):
         labels_im_file = gen_utils.reorient_t1w(parcellations[idx], prep_anat)
         labels_im_file = gen_utils.match_target_vox_res(
-            labels_im_file, vox_size, outdir, sens="anat"
+            labels_im_file, vox_size, outdir, sens="anat_d"
         )
         orig_lab = nib.load(labels_im_file)
         orig_lab = orig_lab.get_data().astype("int")

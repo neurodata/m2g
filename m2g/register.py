@@ -145,12 +145,14 @@ class DmriReg:
 
         # TODO : clean up all these attributes
         self.outdir = outdir
-        self.reg_a = str(outdir / "tmp/reg_a")
-        self.reg_m = str(outdir / "tmp/reg_m")
-        self.reg_anat = str(outdir / "anat/registered")
-        self.prep_anat = str(outdir / "anat/preproc")
-        self.qa = str(outdir / "qa")
+        self.reg_a = str(outdir / "tmp_d/reg_a")
+        self.reg_m = str(outdir / "tmp_d/reg_m")
+        self.reg_anat = str(outdir / "anat_d/registered")
+        self.prep_anat = str(outdir / "anat_d/preproc")
+        self.qa = str(outdir / "qa_d")
         self.qa_reg = str(Path(self.qa) / "reg")
+
+
         self.simple = simple
         self.nodif_B0 = nodif_B0
         self.nodif_B0_mask = nodif_B0_mask
@@ -257,16 +259,16 @@ class DmriReg:
         )
 
         self.t1w_brain = gen_utils.match_target_vox_res(
-            self.t1w_brain, self.vox_size, self.outdir, sens="anat"
+            self.t1w_brain, self.vox_size, self.outdir, sens="anat_d"
         )
         self.wm_mask = gen_utils.match_target_vox_res(
-            self.wm_mask, self.vox_size, self.outdir, sens="anat"
+            self.wm_mask, self.vox_size, self.outdir, sens="anat_d"
         )
         self.gm_mask = gen_utils.match_target_vox_res(
-            self.gm_mask, self.vox_size, self.outdir, sens="anat"
+            self.gm_mask, self.vox_size, self.outdir, sens="anat_d"
         )
         self.csf_mask = gen_utils.match_target_vox_res(
-            self.csf_mask, self.vox_size, self.outdir, sens="anat"
+            self.csf_mask, self.vox_size, self.outdir, sens="anat_d"
         )
 
         # Threshold WM to binary in dwi space
