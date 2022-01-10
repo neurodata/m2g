@@ -86,7 +86,7 @@ def make_script(input_dir, output_dir, subject, session, data_config, pipeline_c
 
 
 
-def m2g_func_worker(input_dir, output_dir, sub, ses, anat, bold, vox, parcellations, acquisition, tr, mem_gb, n_cpus, itterations, period):
+def m2g_func_worker(input_dir, output_dir, sub, ses, anat, bold, vox, parcellations, acquisition, tr, mem_gb, n_cpus):
     """Creates the requisite files to run CPAC, then calls CPAC and runs it in a terminal
     
     Arguments:

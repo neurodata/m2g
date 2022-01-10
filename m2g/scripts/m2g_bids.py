@@ -149,7 +149,7 @@ def main():
         "--pipeline",
         action="store",
         help="""Pipline to use when analyzing the input data, 
-        either func or dwi. If  Default is dwi.""",
+        either func, dwi, or both. If  Default is dwi.""",
         default="dwi",
     )
     parser.add_argument(
@@ -257,21 +257,7 @@ def main():
         help="Number of cpus to allocate to either the functional pipeline or the diffusion connectome generation",
         default=1,
     )
-    parser.add_argument(
-        "--itter",
-        action="store",
-        help="Number of itterations for memory check",
-        default=300,
-    )
-    parser.add_argument(
-        "--period",
-        action="store",
-        help="Number of seconds between memory check",
-        default=15,
-    )
     result = parser.parse_args()
-    itterations = result.itter
-    period = result.period
 
     # and ... begin!
     print("\nBeginning m2g ...")
@@ -406,8 +392,6 @@ def main():
                 tr,
                 mem_gb,
                 n_cpus,
-                itterations,
-                period,
             )
 
             # m2g_func_worker()
@@ -481,14 +465,6 @@ def main():
                                         shutil.move(os.path.join(root,'_scan_rest-None',fil), _ )
                                     moved.add(root)
 
-                                # elif 'pipeline_m2g' in dirs:
-                                #     _ = os.path.join(outDir,root.split('/')[-1])
-                                #     os.makedirs(_, exist_ok=True)
-                                #     for fil in os.listdir(os.path.join(root, 'pipeline_m2g')):
-                                #         shutil.move(os.path.join(root,'pipeline_m2g',fil), _ )
-                                #     os.rmdir(os.path.join(root,'pipeline_m2g'))
-                                #     moved.add(root)
-
                                 else:
                                     _ = os.path.join(outDir,cat)
                                     if cat != 'connectomes_f' and cat != 'log_f':
@@ -510,29 +486,6 @@ def main():
             #get rid of cpac output folder
             shutil.rmtree(os.path.join(outDir,'output'), ignore_errors=True)
             shutil.rmtree(os.path.join(outDir, 'log'), ignore_errors=True)
-
-            # for x in os.walk(os.path.join(outDir,'log_f')):
-            #     dir = x[0].split('/')[-1]
-            #     for cat in reorg:
-            #         if dir in reorg[cat]:
-            #             os.makedirs(os.path.join(outDir,cat), exist_ok=True)
-            #             for i in os.listdir(x[0]):
-            #                 shutil.move(os.path.join(x[0],i),os.path.join(outDir,cat,i))
-
-
-
-            # for x in os.walk(outDir):
-            #     dir = x[0].split('/')[-1]
-            #     for cat in reorg:
-            #         if dir in reorg[cat]:
-            #             os.makedirs(os.path.join(outDir,cat), exist_ok=True)
-            #             for i in os.listdir(x[0]):
-            #                 shutil.move(os.path.join(x[0],i),os.path.join(outDir,cat,i))
-
-
-            
-            # #get rid of cpac output folder
-            # shutil.rmtree(os.path.join(outDir,'output'), ignore_errors=True)
 
 
             if push_location:
