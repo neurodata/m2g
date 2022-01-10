@@ -213,9 +213,21 @@ res = The file has been resliced to the desired voxel size specified by the user
 
 /output
     /anat_f
-
+        /anatomical_brain
+        /anatomical_brain_mask
+        /anatomical_csf_mask
+        /anatomical_gm_mask
+        /anatomical_reorient
+        /anatomical_to_mni_nonlinear_xfm
+        /anatomical_to_standard
+        /anatomical_to_standard
+        /anatomical_wm_mask
+        /seg_mixeltype
+        /seg_partial_volume_files
+        /seg_partial_volume_map
+        /seg_probability_maps
     /connectomes_f
-
+        
     /func
 
     /log_f
