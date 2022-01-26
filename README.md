@@ -214,6 +214,7 @@ res = The file has been resliced to the desired voxel size specified by the user
 /output
     /anat_f
         /anatomical_brain
+            <subject>_<session>_T1w_resample_calc.nii.gz
         /anatomical_brain_mask
         /anatomical_csf_mask
         /anatomical_gm_mask
@@ -224,15 +225,61 @@ res = The file has been resliced to the desired voxel size specified by the user
         /anatomical_wm_mask
         /seg_mixeltype
         /seg_partial_volume_files
+            /segment_pve_0.nii.gz
+            /segment_pve_1.nii.gz
+            /segment_pve_2.nii.gz
         /seg_partial_volume_map
         /seg_probability_maps
     /connectomes_f
         
     /func
+        /preproc
+            /coordinate_transformation
+            /frame_wise_displacement_jenkinson
+            /frame_wise_displacement_power
+            /functional_brain_mask
+            /functional_brain_mask_to_standard
+            /functional_freq_filtered
+            /functional_nuisance_regressors
+            /functional_nuisance_residuals
+            /functional_preprocessed
+            /functional_preprocessed_mask
+            /motion_correct
+            /motion_correct_to_standard_smooth
+            /motion_params
+            /raw_functional
+            /slice_time_corrected
+        /register
+            /functional_to_anat_linear_xfm
+            /functional_to_standard
+            /max_displacement
+            /mean_functional
+            /mean_functional_in_anat
+            /mean_functional_to_standard
+            /movement_parameters
+            /power_params
+            /roi_timeseries
 
     /log_f
 
     /qa_f
+        /carpet
+        /csf_gm_wm_a
+        /csf_gm_wm_s
+        /mean_func_with_mni_edge_a
+        /mean_func_with_mni_edge_s
+        /mean_func_with_t1_edge_a
+        /mean_func_with_t1_edge_s
+        /mni_normalized_anatomical_a
+        /mni_normalized_anatomical_s
+        /movement_rot_plot
+        /movement_trans_plot
+        /skullstrip_vis_a
+        /skullstrip_vis_s
+        /snr_a
+        /snr_hist
+        /snr_s
+        /snr_val
     
           
 ```
