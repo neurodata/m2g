@@ -409,31 +409,6 @@ def main():
             # Convert connectomes into edgelists
             for root, dirs, files in os.walk(outDir):
                 for file in files:
-                    # if file.endswith('measure-correlation.csv'):
-                    #     atlas = root.split('/')[-2]
-                    #     atlas = atlas.split('Human..')[-1]
-                    #     atlas = atlas.split('.nii')[0]
-                    #     subsesh = f"{root.split('/')[-10]}_{root.split('/')[-9]}{root.split('/')[-4]}"
-
-                    #     edg_dir = f"{outDir}/connectomes_f/{atlas}"
-                    #     os.makedirs(edg_dir, exist_ok=True)
-
-                    #     my_data = genfromtxt(f"{root}/{file}", delimiter=',', skip_header=1)
-
-                    #     a = sum(range(1, len(my_data)))
-                    #     arr = np.zeros((a,3))
-                    #     z=0
-                    #     for num in range(len(my_data)):
-                    #         for i in range(len(my_data[num])):
-                    #             if i > num:
-                    #                 #print(f'{num+1} {i+1} {my_data[num][i]}')
-                    #                 arr[z][0]= f'{num+1}'
-                    #                 arr[z][1]= f'{i+1}'
-                    #                 arr[z][2] = my_data[num][i]
-                    #                 z=z+1
-                
-                    #     np.savetxt(f"{edg_dir}/{subsesh}_func_{atlas}_abs_edgelist.csv", arr,fmt='%d %d %f', delimiter=' ')
-                    #     print(f"{file} converted to edgelist")
 
                     #Create non-absolute value connectome from timeseries
                     if file.endswith('roi_stats.npz'):
