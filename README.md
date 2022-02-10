@@ -38,8 +38,8 @@ The **m2g** pipeline:
 
 - was developed and tested primarily on Mac OSX, Ubuntu (14, 16, 18, 20), and CentOS (5, 6);
 - made to work on Python 3.6;
-- is wrapped in a [Docker container](https://hub.docker.com/r/bids/ndmg/);
-- has install instructions via a [Dockerfile](https://github.com/BIDS-Apps/ndmg/blob/master/Dockerfile#L6);
+- is wrapped in a [Docker container](https://hub.docker.com/r/neurodata/m2g);
+- has install instructions via a Dockerfile;
 - requires no non-standard hardware to run;
 - has key features built upon FSL, AFNI, Dipy, Nibabel, Nilearn, Networkx, Numpy, Scipy, Scikit-Learn, and others;
 - takes approximately 1-core, < 16-GB of RAM, and 1 hour to run for most datasets.
