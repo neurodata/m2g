@@ -1,4 +1,3 @@
-FROM ubuntu:18.04
 FROM neurodebian:bionic-non-free
 LABEL author="Ross Lawrence, Alex Loftus"
 LABEL maintainer="rlawre18@jhu.edu"
@@ -265,13 +264,13 @@ RUN pip install git+https://github.com/ChildMindInstitute/PyPEER.git
 RUN mkdir /m2g_atlases
 
 RUN \
-    git clone https://github.com/neurodata/neuroparc && \
+    git clone https://github.com/neurodata/neuroparc  -b remove-lfs && \
     mv /neuroparc/atlases /m2g_atlases && \
     rm -rf /neuroparc
 RUN chmod -R 777 /m2g_atlases
 
 # Grab m2g from deploy.
-RUN git clone -b cpac-py3 https://github.com/neurodata/m2g /m2g && \
+RUN git clone -b post-paper https://github.com/neurodata/m2g /m2g && \
     cd /m2g && \
     pip3.7 install .
 RUN chmod -R 777 /usr/local/bin/m2g_bids
@@ -364,8 +363,8 @@ RUN export LC_ALL=C.UTF-8 && \
     apt-get autoremove -y && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-RUN virtualenv -p /usr/bin/python2.7 venv && \
-    . venv/bin/activate
+# RUN virtualenv -p /usr/bin/python2.7 venv && \
+#     . venv/bin/activate
 
 ENV LANG C.UTF-8
 ENV LC_ALL C.UTF-8
