@@ -196,14 +196,14 @@ RUN apt-get update && apt-get -y upgrade insighttoolkit4-python
 #--------M2G SETUP-----------------------------------------------------------#
 # setup of python dependencies for m2g itself, as well as file dependencies
 RUN \
-    pip3.7 install --no-cache-dir hyppo==0.1.3 numpy nibabel scipy python-dateutil pandas==0.23.4 boto3==1.19.12 awscli virtualenv
+    pip3.7 install --no-cache-dir hyppo==0.1.3 nibabel==2.3.3 scipy==1.4.1 python-dateutil pandas==0.23.4 boto3==1.7.13 awscli==1.15.40 virtualenv
 RUN \
     pip3.7 install --no-cache-dir matplotlib nilearn sklearn cython vtk pyvtk fury==0.5.1
 RUN \
     pip3.7 install --no-cache-dir yamlordereddictloader
 #got rid of awscli here^
 RUN \
-    pip3.7 install --no-cache-dir requests ipython duecredit graspy scikit-image networkx dipy pybids==0.12.0
+    pip3.7 install --no-cache-dir requests ipython duecredit graspy==0.3.0 scikit-image networkx dipy==1.1.1 pybids==0.12.0
 
 # TODO: Update pybids
 RUN \
