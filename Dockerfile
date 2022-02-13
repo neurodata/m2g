@@ -207,13 +207,17 @@ RUN \
 
 # TODO: Update pybids
 RUN \
-    pip3.7 install --no-cache-dir plotly==1.12.9 configparser>=3.7.4 regex pyyaml==5.3
+    pip3.7 install --no-cache-dir plotly==1.12.9 configparser>=3.7.4 regex
 
+    
 RUN \
     pip3.7 install s3transfer==0.3.7
 
 RUN \
     pip3.7 install setuptools==57.5.0
+
+RUN \
+    pip3.7 install numba==0.52.0
 
 # install ICA-AROMA
 RUN mkdir -p /opt/ICA-AROMA
@@ -243,8 +247,16 @@ RUN conda update conda -y && \
         wxpython
 #pip
 
+RUN \
+    python3 -m pip install --user \
+    pyyaml==5.3 \
+    yamlordereddictloader==0.4.0 \
+    nipype==1.1.2 \
+    simplejson \
+    yamlordereddictloader
+
 # install torch
-RUN pip3.7 install torch==1.2.0 torchvision==0.4.0 -f https://download.pytorch.org/whl/torch_stable.html
+RUN python3 -m pip install torch==1.2.0 torchvision==0.4.0 -f https://download.pytorch.org/whl/torch_stable.html
 
 
 WORKDIR /
@@ -257,7 +269,7 @@ RUN mkdir /output && \
 
 
 # install PyPEER
-RUN pip install git+https://github.com/ChildMindInstitute/PyPEER.git
+RUN pip3.7 install git+https://github.com/ChildMindInstitute/PyPEER.git
 
 
 # grab atlases from neuroparc
@@ -339,7 +351,7 @@ RUN cp /code/requirements.txt /opt/requirements.txt
 RUN pip3.7 install --upgrade pip
 
 ### CHECK THAT ALL DEPENDENCIES ARE DOWNLOADED FOR HERE
-#RUN pip3.7 install -r /opt/requirements.txt
+RUN python3 -m pip install -r /opt/requirements.txt
 RUN pip3.7 install xvfbwrapper
 
 RUN mkdir /cpac_resources
@@ -363,8 +375,9 @@ RUN export LC_ALL=C.UTF-8 && \
     apt-get autoremove -y && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-# RUN virtualenv -p /usr/bin/python2.7 venv && \
-#     . venv/bin/activate
+#Needed for eddy correct to work
+RUN virtualenv -p /usr/bin/python2.7 venv && \
+    . venv/bin/activate
 
 ENV LANG C.UTF-8
 ENV LC_ALL C.UTF-8
