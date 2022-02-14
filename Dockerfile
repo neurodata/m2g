@@ -352,7 +352,7 @@ RUN pip3.7 install --upgrade pip
 
 ### CHECK THAT ALL DEPENDENCIES ARE DOWNLOADED FOR HERE
 RUN python3 -m pip install -r /opt/requirements.txt
-RUN pip3.7 install xvfbwrapper
+RUN python3 -m pip install xvfbwrapper
 
 RUN mkdir /cpac_resources
 RUN mv /code/default_pipeline.yml /cpac_resources/default_pipeline.yml
