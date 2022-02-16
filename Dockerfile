@@ -276,13 +276,13 @@ RUN pip3.7 install git+https://github.com/ChildMindInstitute/PyPEER.git
 RUN mkdir /m2g_atlases
 
 RUN \
-    git clone https://github.com/neurodata/neuroparc  -b remove-lfs && \
+    git clone https://github.com/neurodata/neuroparc -b remove-lfs && \
     mv /neuroparc/atlases /m2g_atlases && \
     rm -rf /neuroparc
 RUN chmod -R 777 /m2g_atlases
 
 # Grab m2g from deploy.
-RUN git clone -b post-paper https://github.com/neurodata/m2g /m2g && \
+RUN git clone https://github.com/neurodata/m2g /m2g && \
     cd /m2g && \
     pip3.7 install .
 RUN chmod -R 777 /usr/local/bin/m2g_bids
