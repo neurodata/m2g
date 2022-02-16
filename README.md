@@ -2,7 +2,6 @@
 
 ![Downloads shield](https://img.shields.io/pypi/dm/m2g.svg)
 [![PyPI](https://img.shields.io/pypi/v/m2g.svg)](https://pypi.python.org/pypi/m2g)
-[![Travis CI](https://travis-ci.org/neurodata/m2g.svg?branch=deploy)](https://travis-ci.org/github/neurodata/m2g)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.595684.svg)](https://doi.org/10.5281/zenodo.595684)
 [![Code Climate](https://codeclimate.com/github/neurodata/ndmg/badges/gpa.svg)](https://codeclimate.com/github/neurodata/ndmg)
 [![DockerHub](https://img.shields.io/docker/pulls/neurodata/m2g.svg)](https://hub.docker.com/r/neurodata/m2g)
@@ -213,14 +212,136 @@ res = The file has been resliced to the desired voxel size specified by the user
 
 /output
     /anat_f
-
+        /anatomical_brain
+            <subject>_<session>_T1w_resample_calc.nii.gz
+        /anatomical_brain_mask
+            <subject>_<session>_T1w_resample_skullstrip_calc.nii.gz
+        /anatomical_csf_mask
+            segment_seg_0_maths_maths.nii.gz
+        /anatomical_gm_mask
+            segment_seg_1_maths_maths.nii.gz
+        /anatomical_reorient
+            <subject>_<session>_T1w_resample.nii.gz
+        /anatomical_to_mni_nonlinear_xfm
+            <subject>_<session>_T1w_resample_fieldwarp.nii.gz
+        /anatomical_to_standard
+            <subject>_<session>_T1w_resample_calc_warp.nii.gz
+        /anatomical_wm_mask
+            segment_seg_2_maths_maths.nii.gz
+        /seg_mixeltype
+            segment_mixeltype.nii.gz
+        /seg_partial_volume_files
+            segment_pve_0.nii.gz
+            segment_pve_1.nii.gz
+            segment_pve_2.nii.gz
+        /seg_partial_volume_map
+            segment_pveseg.nii.gz
+        /seg_probability_maps
+            segment_prob_0.nii.gz
+            segment_prob_1.nii.gz
+            segment_prob_2.nii.gz
     /connectomes_f
-
+        /<atlas>
     /func
+        /preproc
+            /coordinate_transformation
+                <subject>_<session>_task-rest_bold_calc_tshift_resample.aff12.1D
+            /frame_wise_displacement_jenkinson
+                FD_J.1D
+            /frame_wise_displacement_power
+                FD.1D
+            /functional_brain_mask
+                <subject>_<session>_task-rest_bold_calc_tshift_resample_volreg_mask.nii.gz
+            /functional_brain_mask_to_standard
+                <subject>_<session>_task-rest_bold_calc_tshift_rasample_volreg_mask_warp.nii.gz
+            /functional_freq_filtered
+                bandpassed_demeaned_filtered.nii.gz
+            /functional_nuisance_regressors
+                nuisance_regressors.1D
+            /functional_nuisance_residuals
+                residuals.nii.gz
+            /functional_preprocessed
+                <subject>_<session>_task-rest_bold_calc_tshift_resample_volreg_calc_maths.nii.gz
+            /functional_preprocessed_mask
+                <subject>_<session>_task-rest_bold_calc_tshift_resample_volreg_calc_maths_maths.nii.gz
+            /motion_correct
+                <subject>_<session>_task-rest_bold_calc_tshift_resample_volreg.nii.gz
+            /motion_correct_to_standard_smooth
+                /_fwhm_4
+                    <subject>_<session>_task-rest_bold_calc_tshift_resample_volreg_warp_maths.nii.gz
+            /motion_params
+                motion_parameters.txt
+            /raw_functional
+                <subject>_<session>_task-rest_bold.nii.gz
+            /slice_time_corrected
+                <subject>_<session>_task-rest_bold_calc_tshift.nii.gz
+        /register
+            /functional_to_anat_linear_xfm
+                <subject>_<session>_task-rest_bold_calc_tshift_resample_volreg_calc_tstat_flirt.mat
+            /functional_to_standard
+                bandpassed_demeaned_filtered_warp.nii.gz
+            /max_displacement
+                max_displacement.1D
+            /mean_functional
+                <subject>_<session>_task-rest_bold_calc_tshift_resample_volreg_calc_tstat.nii.gz
+            /mean_functional_in_anat
+                <subject>_<session>_task-rest_bold_calc_tshift_resample_volreg_calc_tstat_flirt.nii.gz
+            /mean_functional_to_standard
+                <subject>_<session>_task-rest_bold_calc_tshift_resample_volreg_calc_tstat_warp.nii.gz
+            /movement_parameters
+                <subject>_<session>_task-rest_bold_calc_tshift_resample.1D
+            /power_params
+                pow_params.txt
+            /roi_timeseries
+                /<atlas>
+                    roi_stats.csv
+                    roi_stats.npz
 
     /log_f
+        callback.log
+        cpac_data_config_<date>.yml
+        cpac_individual_timing_m2g.csf
+        cpac_pipeline_config_<date>.yml
+        functional_pipeline_settings.yaml
+        pypeline.lock
+        pypeline.log
+        subject_info_<subject>_<session>.pkl
 
     /qa_f
+        /carpet
+            carpet_seg.png
+        /csf_gm_wm_a
+            montage_csf_gm_wm_a.png
+        /csf_gm_wm_s
+            montage_csf_gm_wm_s.png
+        /mean_func_with_mni_edge_a
+            MNI_edge_on_mean_func_mni_a.png
+        /mean_func_with_mni_edge_s
+            MNI_edge_on_mean_func_mni_s.png
+        /mean_func_with_t1_edge_a
+            t1_edge_on_mean_func_in_t1_a.png
+        /mean_func_with_t1_edge_s
+            t1_edge_on_mean_func_in_t1_s.png
+        /mni_normalized_anatomical_a
+            mni_anat_a.png
+        /mni_normalized_anatomical_s
+            mni_anat_s.png
+        /movement_rot_plot
+            motion_rot_plot.png
+        /movement_trans_plot
+            motion_trans_plot.png
+        /skullstrip_vis_a
+            skull_vis_a.png
+        /skullstrip_vis_s
+            skull_vis_s.png
+        /snr_a
+            snr_a.png
+        /snr_hist
+            snr_hist_plot.png
+        /snr_s
+            snr_s.png
+        /snr_val
+            average_snr_file.txt
     
           
 ```
@@ -232,6 +353,23 @@ The **m2g** pipeline can be used to generate connectomes as a command-line utili
     m2g /input/bids/dataset /output/directory
 
 Note that more options are available which can be helpful if running on the Amazon cloud, which can be found and documented by running `m2g -h`.
+
+### Diffusion Pipeline
+The **m2g-d** pipeline...
+
+```
+m2g dwi /input/bids/dataset /output/directory
+```
+
+### Functional Pipeline
+The **m2g-f** pipeline...
+
+```
+m2g func /input/bids/dataset /output/directory
+```
+
+### Docker Container Usage
+
 If running with the Docker container shown above, the `entrypoint` is already set to `m2g`, so the pipeline can be run directly from the host-system command line as follows:
 
     docker run -ti -v /path/to/local/data:/data neurodata/m2g /data/ /data/outputs

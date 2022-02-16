@@ -1,4 +1,4 @@
-FROM neurodata/fsl_1604:0.0.1
+FROM neurodebian:bionic-non-free
 LABEL author="Ross Lawrence, Alex Loftus"
 LABEL maintainer="rlawre18@jhu.edu"
 
@@ -8,11 +8,12 @@ ENV M2G_ATLASES https://github.com/neurodata/neuroparc.git
 ENV AFNI_URL https://files.osf.io/v1/resources/fvuh8/providers/osfstorage/5a0dd9a7b83f69027512a12b
 ENV LIBXP_URL http://mirrors.kernel.org/debian/pool/main/libx/libxp/libxp6_1.0.2-2_amd64.deb
 ENV LIBPNG_URL http://mirrors.kernel.org/debian/pool/main/libp/libpng/libpng12-0_1.2.49-1%2Bdeb7u2_amd64.deb
+ARG DEBIAN_FRONTEND=noninteractive
 
 #--------Initial Configuration-----------------------------------------------#
 # download/install basic dependencies, and set up python
 RUN apt-get update && \
-    apt-get install -y zip unzip vim git curl libglu1 python-setuptools zlib1g-dev \
+    apt-get install -y apt-utils zip unzip vim git curl libglu1 python3-setuptools zlib1g-dev \
     git libpng-dev libfreetype6-dev pkg-config g++ vim r-base-core libgsl0-dev build-essential \
     openssl
 
@@ -22,21 +23,21 @@ RUN apt-get update && \
     apt-get update && \
     add-apt-repository ppa:deadsnakes/ppa && \
     apt-get update && \
-    apt-get install -y python3.6 python3.6-dev && \
-    curl https://bootstrap.pypa.io/get-pip.py | python3.6
+    apt-get install -y python3.7 python3.7-dev && \
+    curl https://bootstrap.pypa.io/get-pip.py | python3.7
 
-RUN apt-get install -y python2.7 python-pip
+#RUN apt-get install -y python2.7 python-pip
 
 
-RUN pip3.6 install --upgrade pip
+RUN pip3.7 install --upgrade pip
 
 
 # Get neurodebian config
-RUN curl -sSL http://neuro.debian.net/lists/stretch.us-tn.full >> /etc/apt/sources.list.d/neurodebian.sources.list && \
-    apt-key add /root/.neurodebian.gpg && \
-    (apt-key adv --refresh-keys --keyserver hkp://ha.pool.sks-keyservers.net 0xA5D32F012649A5A9 || true) && \
-    apt-get update -qq
-RUN apt-get -f install
+# RUN curl -sSL http://neuro.debian.net/lists/stretch.us-tn.full >> /etc/apt/sources.list.d/neurodebian.sources.list && \
+#     apt-key add /root/.neurodebian.gpg && \
+#     (apt-key adv --refresh-keys --keyserver hkp://ha.pool.sks-keyservers.net 0xA5D32F012649A5A9 || true) && \
+#     apt-get update -qq
+# RUN apt-get -f install
 
 
 
@@ -55,10 +56,10 @@ RUN apt-get update -qq && apt-get install -yq --no-install-recommends ed gsl-bin
     ln $libs_path/libgsl.so.19 $libs_path/libgsl.so.0; \
     fi
 
-RUN mkdir -p /opt/afni && \
-    curl -o afni.tar.gz -sSLO "$AFNI_URL" && \
-    tar zxv -C /opt/afni --strip-components=1 -f afni.tar.gz && \
-    rm -rf afni.tar.gz
+RUN mkdir -p /opt/afni
+RUN curl -o afni.tar.gz -sSLO "$AFNI_URL"
+RUN tar zxv -C /opt/afni --strip-components=1 -f afni.tar.gz
+RUN rm -rf afni.tar.gz
 ENV PATH=/opt/afni:$PATH
 
 ## --------CPAC INSTALLS-----------------------------------------------------#
@@ -133,8 +134,8 @@ RUN apt-get install -y \
       vim \
       xvfb \
       xauth \
-      zlib1g-dev \
-      debhelper -t xenial-backports
+      zlib1g-dev
+      #debhelper -t xenial-backports
 
 RUN apt-get update
 
@@ -195,14 +196,28 @@ RUN apt-get update && apt-get -y upgrade insighttoolkit4-python
 #--------M2G SETUP-----------------------------------------------------------#
 # setup of python dependencies for m2g itself, as well as file dependencies
 RUN \
-    pip3.6 install --no-cache-dir hyppo==0.1.3 numpy nibabel scipy python-dateutil pandas==0.23.4 boto3 awscli virtualenv
+    pip3.7 install --no-cache-dir hyppo==0.1.3 nibabel==2.3.3 scipy==1.4.1 python-dateutil pandas==0.23.4 boto3==1.7.13 awscli==1.15.40 virtualenv
 RUN \
-    pip3.6 install --no-cache-dir matplotlib nilearn sklearn cython vtk pyvtk fury==0.5.1
+    pip3.7 install --no-cache-dir matplotlib nilearn sklearn cython vtk pyvtk fury==0.5.1
 RUN \
-    pip3.6 install --no-cache-dir yamlordereddictloader awscli==1.15.40 requests ipython duecredit graspy scikit-image networkx dipy pybids==0.12.0
+    pip3.7 install --no-cache-dir yamlordereddictloader
+#got rid of awscli here^
+RUN \
+    pip3.7 install --no-cache-dir requests ipython duecredit graspy==0.3.0 scikit-image networkx dipy==1.1.1 pybids==0.12.0
+
 # TODO: Update pybids
 RUN \
-    pip3.6 install --no-cache-dir plotly==1.12.9 setuptools>=40.0 configparser>=3.7.4 regex pyyaml==5.3
+    pip3.7 install --no-cache-dir plotly==1.12.9 configparser>=3.7.4 regex
+
+    
+RUN \
+    pip3.7 install s3transfer==0.3.7
+
+RUN \
+    pip3.7 install setuptools==57.5.0
+
+RUN \
+    pip3.7 install numba==0.52.0
 
 # install ICA-AROMA
 RUN mkdir -p /opt/ICA-AROMA
@@ -232,8 +247,16 @@ RUN conda update conda -y && \
         wxpython
 #pip
 
+RUN \
+    python3 -m pip install --user \
+    pyyaml==5.3 \
+    yamlordereddictloader==0.4.0 \
+    nipype==1.1.2 \
+    simplejson \
+    yamlordereddictloader
+
 # install torch
-RUN pip3.6 install torch==1.2.0 torchvision==0.4.0 -f https://download.pytorch.org/whl/torch_stable.html
+RUN python3 -m pip install torch==1.2.0 torchvision==0.4.0 -f https://download.pytorch.org/whl/torch_stable.html
 
 
 WORKDIR /
@@ -246,22 +269,22 @@ RUN mkdir /output && \
 
 
 # install PyPEER
-RUN pip install git+https://github.com/ChildMindInstitute/PyPEER.git
+RUN pip3.7 install git+https://github.com/ChildMindInstitute/PyPEER.git
 
 
 # grab atlases from neuroparc
 RUN mkdir /m2g_atlases
 
 RUN \
-    git lfs clone https://github.com/neurodata/neuroparc && \
+    git clone https://github.com/neurodata/neuroparc  -b remove-lfs && \
     mv /neuroparc/atlases /m2g_atlases && \
     rm -rf /neuroparc
 RUN chmod -R 777 /m2g_atlases
 
 # Grab m2g from deploy.
-RUN git clone -b cpac-py3 https://github.com/neurodata/m2g /m2g && \
+RUN git clone -b post-paper https://github.com/neurodata/m2g /m2g && \
     cd /m2g && \
-    pip3.6 install .
+    pip3.7 install .
 RUN chmod -R 777 /usr/local/bin/m2g_bids
 
 ENV MPLCONFIGDIR /tmp/matplotlib
@@ -324,17 +347,19 @@ RUN if [ -f /usr/lib/x86_64-linux-gnu/mesa/libGL.so.1.2.0]; then \
 
 # install python dependencies
 RUN cp /code/requirements.txt /opt/requirements.txt
-RUN pip3.6 install --upgrade setuptools
-RUN pip3.6 install --upgrade pip
-RUN pip3.6 install -r /opt/requirements.txt
-RUN pip3.6 install xvfbwrapper
+#RUN pip3.7 install --upgrade setuptools
+RUN pip3.7 install --upgrade pip
+
+### CHECK THAT ALL DEPENDENCIES ARE DOWNLOADED FOR HERE
+RUN python3 -m pip install -r /opt/requirements.txt
+RUN python3 -m pip install xvfbwrapper
 
 RUN mkdir /cpac_resources
 RUN mv /code/default_pipeline.yml /cpac_resources/default_pipeline.yml
 RUN mv /code/dev/circleci_data/pipe-test_ci.yml /cpac_resources/pipe-test_ci.yml
 
 #COPY . /code
-RUN pip3.6 install -e /code
+RUN pip3.7 install -e /code
 
 #COPY dev/docker_data /code/docker_data
 #RUN mv /code/docker_data/* /code && rm -Rf /code/docker_data && chmod +x /code/run.py
@@ -350,6 +375,7 @@ RUN export LC_ALL=C.UTF-8 && \
     apt-get autoremove -y && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
+#Needed for eddy correct to work
 RUN virtualenv -p /usr/bin/python2.7 venv && \
     . venv/bin/activate
 

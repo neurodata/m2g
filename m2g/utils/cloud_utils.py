@@ -281,11 +281,13 @@ def s3_func_push_data(bucket, remote, output_dir, subject=None, session=None, cr
                         f"{remote}/{os.path.join(spath,file_)}",
                         ExtraArgs={"ACL": "public-read"},
                     )
-    for root, _, files in os.walk(f"{output_dir}/functional_edgelists"):
+    
+    ## FIX THIS REFERENCE TO FUNCTIONAL_EDGELISTS
+    for root, _, files in os.walk(f"{output_dir}/connectomes_f"):
         for file_ in files:
             if f"sub-{subject}_ses-{session}" in file_:
                 print(f"Uploading: {os.path.join(root, file_)}")
-                spath = root[root.find("functional_") :]  # remove everything before /functional_edgelists-*
+                spath = root[root.find("connectomes_") :]  # remove everything before /connectomes_*
                 client.upload_file(
                     os.path.join(root, file_),
                     bucket,

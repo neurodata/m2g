@@ -20,6 +20,7 @@ import os
 from argparse import ArgumentParser
 import numpy as np
 from numpy import genfromtxt
+import re
 
 # m2g imports
 from m2g.utils import cloud_utils
@@ -401,34 +402,67 @@ def main():
                 """
             )
 
+            subj_pattern = r"(?<=sub-)(\w*)(?=/ses)"
+            sesh_pattern = r"(?<=ses-)(\d*)"
+            atlas_pattern = r"(?<=Human..)\S*"#(?=/roi)"
+
             # Convert connectomes into edgelists
             for root, dirs, files in os.walk(outDir):
                 for file in files:
-                    if file.endswith('measure-correlation.csv'):
-                        atlas = root.split('/')[-2]
-                        atlas = atlas.split('Human..')[-1]
-                        atlas = atlas.split('.nii')[0]
-                        subsesh = f"{root.split('/')[-10]}_{root.split('/')[-9]}{root.split('/')[-4]}"
+
+                    #Create non-absolute value connectome from timeseries
+                    if file.endswith('roi_stats.npz'):
+
+                        sub = re.findall(subj_pattern, root)[0]
+                        ses = re.findall(sesh_pattern, root)[0]
+                        atlas = re.findall(atlas_pattern, root)[0]
 
                         edg_dir = f"{outDir}/connectomes_f/{atlas}"
-                        os.makedirs(edg_dir, exist_ok=True)
+                        subsesh = f"sub-{sub}_ses-{ses}"
 
-                        my_data = genfromtxt(f"{root}/{file}", delimiter=',', skip_header=1)
-
+                        a = np.load(os.path.join(root,file))
+                        dat = a['arr_0'][1:,:]
+                        #print(dat)
+                        my_data = np.corrcoef(dat.T)
+                        my_data = np.nan_to_num(my_data).astype(object)
+                    
                         a = sum(range(1, len(my_data)))
                         arr = np.zeros((a,3))
                         z=0
                         for num in range(len(my_data)):
-                            for i in range(len(my_data[num])):
-                                if i > num:
+                            for j in range(len(my_data[num])):
+                                if j > num:
                                     #print(f'{num+1} {i+1} {my_data[num][i]}')
                                     arr[z][0]= f'{num+1}'
-                                    arr[z][1]= f'{i+1}'
-                                    arr[z][2] = my_data[num][i]
+                                    arr[z][1]= f'{j+1}'
+                                    arr[z][2] = my_data[num][j]
                                     z=z+1
-                
-                        np.savetxt(f"{edg_dir}/{subsesh}_func_{atlas}_connectome.csv", arr,fmt='%d %d %f', delimiter=' ')
+                        
+                        os.makedirs(f"{edg_dir}", exist_ok=True)
+                        np.savetxt(f"{edg_dir}/{subsesh}_func_{atlas}_edgelist.csv", arr,fmt='%d %d %f', delimiter=' ')
+
+                        my_data = np.abs(np.corrcoef(dat.T))
+                        my_data = np.nan_to_num(my_data).astype(object)
+                    
+                        a = sum(range(1, len(my_data)))
+                        arr = np.zeros((a,3))
+                        z=0
+                        for num in range(len(my_data)):
+                            for j in range(len(my_data[num])):
+                                if j > num:
+                                    #print(f'{num+1} {i+1} {my_data[num][i]}')
+                                    arr[z][0]= f'{num+1}'
+                                    arr[z][1]= f'{j+1}'
+                                    arr[z][2] = my_data[num][j]
+                                    z=z+1
+                        
+                        np.savetxt(f"{edg_dir}/{subsesh}_func_{atlas}_abs_edgelist.csv", arr,fmt='%d %d %f', delimiter=' ')
+
                         print(f"{file} converted to edgelist")
+
+                        #Move roi-timeseries folders without stupid naming convention
+                        os.rename(root,"/" + os.path.join(os.path.join(*root.split("/")[:-1]),atlas))
+
 
 
             #Reorganize the folder structure
@@ -499,6 +533,7 @@ def main():
                     session=session,
                     creds=creds,
                 )
+                shutil.rmtree(output_dir, ignore_errors=True)
         if pipe != 'both':
             sys.exit(0)
 
