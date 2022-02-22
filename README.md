@@ -45,28 +45,9 @@ The **m2g** pipeline:
 
 ## Installation Guide
 
-**m2g** relies on [FSL](http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FslInstallation), [AFNI](https://afni.nimh.nih.gov/), [Dipy](http://nipy.org/dipy/), [networkx](https://networkx.github.io/), and [nibabel](http://nipy.org/nibabel/), [numpy](http://www.numpy.org/) [scipy](http://www.scipy.org/), [scikit-learn](http://scikit-learn.org/stable/), [scikit-image](http://scikit-image.org/), [nilearn](http://nilearn.github.io/). You should install FSL and AFNI through the instructions on their website, then install other Python dependencies as well as the package itself with the following:
-
-    git clone https://github.com/neurodata/m2g.git
-    cd m2g
-    pip install -r requirements.txt
-    pip install .
-
-For the most up-to-date version of m2g, you can use the staging branch. This version is updated regularly, but may be less stable:
-
-    git clone https://github.com/neurodata/m2g.git
-    cd m2g
-    git checkout staging
-    pip install -r requirements.txt
-    pip install .
-
-You can also install **m2g** from `pip` as shown below. Installation shouldn't take more than a few minutes, but depends on your internet connection. Note that to install the most up-to-date version of the pipeline, we currently recommend installing from github.
-
-### Install from pip
-
-    pip install m2g
-
 ## Docker
+
+While you can install **m2g** from `pip` using the command `pip install m2g`, as there are several dependencies needed for both **m2g** and **CPAC**, it is highly recommended to use **m2g** through a docker container:
 
 **m2g** is available through Dockerhub, and the most recent docker image can be pulled using:
 
@@ -90,17 +71,35 @@ In order to create a docker container from the docker image and access it, use t
 
 ## Tutorial
 
-Once you have the pipeline up and running, you can run it with:
+### Structural Connectome Pipeline (**m2g-d**)
+
+Once you have the pipeline up and running, you can run the structural connectome pipeline with:
   
- m2g <input_directory> <output_directory>
+ m2g --pipeline dwi <input_directory> <output_directory>
   
 We recommend specifying an atlas and lowering the default seed density on test runs (although, for real runs, we recommend using the default seeding -- lowering seeding simply decreases runtime):
 
-    m2g --seeds 1 --parcellation desikan <input_directory> <output_directory>
+    m2g --seeds 1 --parcellation Desikan <input_directory> <output_directory>
 
 You can set a particular scan and session as well (recommended for batch scripts):
 
-    m2g --seeds 1 --parcellation desikan --participant_label <label> --session_label <label> <input_directory> <output_directory>
+    m2g --seeds 1 --parcellation Desikan --participant_label <label> --session_label <label> <input_directory> <output_directory>
+
+For more detailed instructions, tutorials on the **m2g** pipeline can be found in [m2g/tutorials](https://github.com/neurodata/m2g/tree/staging/tutorials)
+
+### Functional Connectome Pipeline (**m2g-f**)
+
+Once you have the pipeline up and running, you can run the functional connectome pipeline with:
+  
+ m2g --pipeline func <input_directory> <output_directory>
+  
+We recommend specifying an atlas and lowering the default seed density on test runs (although, for real runs, we recommend using the default seeding -- lowering seeding simply decreases runtime):
+
+    m2g --seeds 1 --parcellation Desikan <input_directory> <output_directory>
+
+You can set a particular scan and session as well (recommended for batch scripts):
+
+    m2g --seeds 1 --parcellation Desikan --participant_label <label> --session_label <label> <input_directory> <output_directory>
 
 For more detailed instructions, tutorials on the **m2g** pipeline can be found in [m2g/tutorials](https://github.com/neurodata/m2g/tree/staging/tutorials)
 
