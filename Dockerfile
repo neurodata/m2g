@@ -32,20 +32,13 @@ RUN apt-get update && \
 RUN pip3.7 install --upgrade pip
 
 
-# Get neurodebian config
-# RUN curl -sSL http://neuro.debian.net/lists/stretch.us-tn.full >> /etc/apt/sources.list.d/neurodebian.sources.list && \
-#     apt-key add /root/.neurodebian.gpg && \
-#     (apt-key adv --refresh-keys --keyserver hkp://ha.pool.sks-keyservers.net 0xA5D32F012649A5A9 || true) && \
-#     apt-get update -qq
-# RUN apt-get -f install
-
 
 
 # Configure git-lfs
-RUN apt-get install -y apt-transport-https debian-archive-keyring
-RUN curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | bash && \
-    apt-get update && \
-    apt-get install -y git-lfs
+# RUN apt-get install -y apt-transport-https debian-archive-keyring
+# RUN curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | bash && \
+#     apt-get update && \
+#     apt-get install -y git-lfs
 
 # #---------AFNI INSTALL--------------------------------------------------------#
 # # setup of AFNI, which provides robust modifications of many of neuroimaging algorithms
@@ -201,7 +194,6 @@ RUN \
     pip3.7 install --no-cache-dir matplotlib nilearn sklearn cython vtk pyvtk fury==0.5.1
 RUN \
     pip3.7 install --no-cache-dir yamlordereddictloader
-#got rid of awscli here^
 RUN \
     pip3.7 install --no-cache-dir requests ipython duecredit graspy==0.3.0 scikit-image networkx dipy==1.1.1 pybids==0.12.0
 
@@ -209,15 +201,8 @@ RUN \
 RUN \
     pip3.7 install --no-cache-dir plotly==1.12.9 configparser>=3.7.4 regex
 
-    
 RUN \
-    pip3.7 install s3transfer==0.3.7
-
-RUN \
-    pip3.7 install setuptools==57.5.0
-
-RUN \
-    pip3.7 install numba==0.52.0
+    pip3.7 install s3transfer==0.3.7 setuptools==57.5.0 numba==0.52.0
 
 # install ICA-AROMA
 RUN mkdir -p /opt/ICA-AROMA
@@ -276,13 +261,13 @@ RUN pip3.7 install git+https://github.com/ChildMindInstitute/PyPEER.git
 RUN mkdir /m2g_atlases
 
 RUN \
-    git clone https://github.com/neurodata/neuroparc  -b remove-lfs && \
+    git clone https://github.com/neurodata/neuroparc && \
     mv /neuroparc/atlases /m2g_atlases && \
     rm -rf /neuroparc
 RUN chmod -R 777 /m2g_atlases
 
 # Grab m2g from deploy.
-RUN git clone -b post-paper https://github.com/neurodata/m2g /m2g && \
+RUN git clone https://github.com/neurodata/m2g /m2g && \
     cd /m2g && \
     pip3.7 install .
 RUN chmod -R 777 /usr/local/bin/m2g_bids
