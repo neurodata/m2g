@@ -280,78 +280,78 @@ res = The file has been resliced to the desired voxel size specified by the user
                 /_fwhm_4
                     <subject>_<session>_task-rest_bold_calc_tshift_resample_volreg_warp_maths.nii.gz
             /motion_params
-                motion_parameters.txt
+                motion_parameters.txt = statistical measurements of motion correction performed on functional image
             /raw_functional
                 <subject>_<session>_task-rest_bold.nii.gz = unaltered input functional image
             /slice_time_corrected
                 <subject>_<session>_task-rest_bold_calc_tshift.nii.gz = slice time corrected functional image
         /register
             /functional_to_anat_linear_xfm
-                <subject>_<session>_task-rest_bold_calc_tshift_resample_volreg_calc_tstat_flirt.mat
+                <subject>_<session>_task-rest_bold_calc_tshift_resample_volreg_calc_tstat_flirt.mat = 
             /functional_to_standard
-                bandpassed_demeaned_filtered_warp.nii.gz
+                bandpassed_demeaned_filtered_warp.nii.gz = bandpassed and demeaned filtered warp map for registering the functional image to MNI space
             /max_displacement
                 max_displacement.1D
             /mean_functional
-                <subject>_<session>_task-rest_bold_calc_tshift_resample_volreg_calc_tstat.nii.gz
+                <subject>_<session>_task-rest_bold_calc_tshift_resample_volreg_calc_tstat.nii.gz = mean functional image from all volumes
             /mean_functional_in_anat
-                <subject>_<session>_task-rest_bold_calc_tshift_resample_volreg_calc_tstat_flirt.nii.gz
+                <subject>_<session>_task-rest_bold_calc_tshift_resample_volreg_calc_tstat_flirt.nii.gz = mean functional image registered to the anatomical image
             /mean_functional_to_standard
-                <subject>_<session>_task-rest_bold_calc_tshift_resample_volreg_calc_tstat_warp.nii.gz
+                <subject>_<session>_task-rest_bold_calc_tshift_resample_volreg_calc_tstat_warp.nii.gz = mean functional image registered to MNI space
             /movement_parameters
-                <subject>_<session>_task-rest_bold_calc_tshift_resample.1D
+                <subject>_<session>_task-rest_bold_calc_tshift_resample.1D = movement parameters applied to each volumen of functional image
             /power_params
-                pow_params.txt
+                pow_params.txt = different measurements on the power of functional images
             /roi_timeseries
                 /<atlas>
-                    roi_stats.csv
-                    roi_stats.npz
+                    roi_stats.csv = mean voxel intensity for each region of interest at each time point, used to calculate functional connectome
+                    roi_stats.npz = pickeled version of roi_stats.csv
 
     /log_f
-        callback.log
-        cpac_data_config_<date>.yml
-        cpac_individual_timing_m2g.csf
-        cpac_pipeline_config_<date>.yml
-        functional_pipeline_settings.yaml
-        pypeline.lock
-        pypeline.log
-        subject_info_<subject>_<session>.pkl
+        callback.log = nipype log for modules made for pipeline
+        cpac_data_config_<date>.yml = file containing functional and anatomical image directory location
+        cpac_individual_timing_m2g.csv = record of the elapsed time from the run of m2g-f
+        cpac_pipeline_config_<date>.yml = copy of CPAC configuration file
+        functional_pipeline_settings.yaml = record of CPACP pipeline parameter settings
+        pypeline.lock = intermediate file created for pipeline running
+        pypeline.log = nipype log with record of everything printed to terminal
+        subject_info_<subject>_<session>.pkl = pickle file of functional and anatomical file information
 
     /qa_f
         /carpet
             carpet_seg.png
         /csf_gm_wm_a
-            montage_csf_gm_wm_a.png
+            montage_csf_gm_wm_a.png = axial view of mask of csf/grey matter/white matter regions overlaid on top of anatomical image
         /csf_gm_wm_s
-            montage_csf_gm_wm_s.png
+            montage_csf_gm_wm_s.png = sagittal view of mask of csf/grey matter/white matter regions overlaid on top of anatomical image
         /mean_func_with_mni_edge_a
-            MNI_edge_on_mean_func_mni_a.png
+            MNI_edge_on_mean_func_mni_a.png = axial view of outline of MNI reference anatimical image overlaid on top of mean functional image
         /mean_func_with_mni_edge_s
-            MNI_edge_on_mean_func_mni_s.png
+            MNI_edge_on_mean_func_mni_s.png = sagittal view of outline of MNI reference anatimical image overlaid on top of mean functional image
         /mean_func_with_t1_edge_a
-            t1_edge_on_mean_func_in_t1_a.png
+            t1_edge_on_mean_func_in_t1_a.png = axial view of outline of anatomical image overlaid on top of mean functional image registered to the anatomical image
         /mean_func_with_t1_edge_s
-            t1_edge_on_mean_func_in_t1_s.png
+            t1_edge_on_mean_func_in_t1_s.png = sagittal view of outline of anatomical image overlaid on top of mean functional image registered to the anatomical image
         /mni_normalized_anatomical_a
-            mni_anat_a.png
+            mni_anat_a.png = axial view of anatomical image registered to MNI image
         /mni_normalized_anatomical_s
-            mni_anat_s.png
+            mni_anat_s.png = sagittal view of anatomical image registered to MNI image
         /movement_rot_plot
-            motion_rot_plot.png
+            motion_rot_plot.png = movement rotation plot for rotation correction of functional image
         /movement_trans_plot
-            motion_trans_plot.png
+            motion_trans_plot.png = movement translational plot for translation correction of functional image
         /skullstrip_vis_a
-            skull_vis_a.png
+            skull_vis_a.png = axial view of original anatomical image overlaid on top of skullstripped anatomical image
         /skullstrip_vis_s
-            skull_vis_s.png
+            skull_vis_s.png = sagittal view of original anatomical image overlaid on top of skullstripped anatomical imag
         /snr_a
-            snr_a.png
+            snr_a.png = axial view of signal to noise ratio for functional image
         /snr_hist
-            snr_hist_plot.png
+            snr_hist_plot.png = signal to noise ratio intensity plot
         /snr_s
-            snr_s.png
+            snr_s.png = sagittal view of signal to noise ratio for functional image
         /snr_val
-            average_snr_file.txt
+            average_snr_file.txt = single value of average signal to noise ratio for functional image
     
           
 ```
