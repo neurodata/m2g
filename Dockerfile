@@ -33,7 +33,6 @@ RUN pip3.7 install --upgrade pip
 
 
 
-
 # Configure git-lfs
 # RUN apt-get install -y apt-transport-https debian-archive-keyring
 # RUN curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | bash && \
@@ -190,16 +189,19 @@ RUN apt-get update && apt-get -y upgrade insighttoolkit4-python
 # setup of python dependencies for m2g itself, as well as file dependencies
 RUN \
     pip3.7 install --no-cache-dir hyppo==0.1.3 nibabel==2.3.3 scipy==1.4.1 python-dateutil pandas==0.23.4 boto3==1.7.13 awscli==1.15.40 virtualenv
+
 RUN \
     pip3.7 install --no-cache-dir matplotlib nilearn sklearn cython vtk pyvtk fury==0.5.1
 RUN \
     pip3.7 install --no-cache-dir yamlordereddictloader
 RUN \
+
     pip3.7 install --no-cache-dir requests ipython duecredit graspy==0.3.0 scikit-image networkx dipy==1.1.1 pybids==0.12.0
 
 # TODO: Update pybids
 RUN \
     pip3.7 install --no-cache-dir plotly==1.12.9 configparser>=3.7.4 regex
+
 
 RUN \
     pip3.7 install s3transfer==0.3.7 setuptools==57.5.0 numba==0.52.0
