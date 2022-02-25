@@ -11,7 +11,7 @@
 
 NeuroData's MR Graphs package, **m2g**, is a turn-key pipeline which uses structural and diffusion MRI data to estimate multi-resolution connectomes reliably and scalably.
 
-## Contents
+# Contents
 
 - [Overview](#overview)
 - [System Requirements](#system-requirements)
@@ -27,23 +27,23 @@ NeuroData's MR Graphs package, **m2g**, is a turn-key pipeline which uses struct
 - [Manuscript Reproduction](#manuscript-reproduction)
 - [Issues](#issues)
 
-## Overview
+# Overview
 
-The **m2g** pipeline has been developed as a one-click solution for human connectome estimation by providing robust and reliable estimates of connectivity across a wide range of datasets. The pipelines are explained and derivatives analyzed in our pre-print, available on [BiorXiv](https://www.biorxiv.org/content/early/2017/09/16/188706).
+The **m2g** pipeline has been developed as a beginner-friendly solution for human connectome estimation by providing robust and reliable estimates of connectivity across a wide range of datasets. The pipelines are explained and derivatives analyzed in our pre-print, available on [BiorXiv](https://www.biorxiv.org/content/early/2017/09/16/188706).
 
-## System Requirements
+# System Requirements
 
 The **m2g** pipeline:
 
 - was developed and tested primarily on Mac OSX, Ubuntu (16, 18, 20), and CentOS (5, 6);
-- made to work on Python 3.6;
+- made to work on Python 3.7;
 - is wrapped in a [Docker container](https://hub.docker.com/r/neurodata/m2g);
 - has install instructions via a Dockerfile;
 - requires no non-standard hardware to run;
 - has key features built upon FSL, AFNI, Dipy, Nibabel, Nilearn, Networkx, Numpy, Scipy, Scikit-Learn, and others;
 - takes approximately 1-core, < 16-GB of RAM, and 1 hour to run for most datasets.
 
-## Installation Guide
+# Installation Guide
 
 ## Docker
 
@@ -69,47 +69,70 @@ In order to create a docker container from the docker image and access it, use t
 
     docker run -it --entrypoint /bin/bash m2g:uniquelabel
 
-## Local Inatallation [COMING SOON]
+## Local Installation [COMING SOON]
+Due to the versioning required for CPAC, along with `m2g-d`, we are currently working on streamlining the installation of `m2g`. Stay tuned for updates.
 
 
 
-## Tutorial
+# Usage
 
-### Structural Connectome Pipeline (**m2g-d**)
+The **m2g** pipeline can be used to generate connectomes as a command-line utility on [BIDS datasets](http://bids.neuroimaging.io) with the following:
+
+    m2g --pipeline <pipe> /input/bids/dataset /output/directory
+
+Note that more options are available which can be helpful if running on the Amazon cloud, which can be found and documented by running `m2g -h`.
+
+
+## Docker Container Usage
+
+If running with the Docker container shown above, the `entrypoint` is already set to `m2g`, so the pipeline can be run directly from the host-system command line as follows:
+
+    docker run -ti -v /path/to/local/data:/data neurodata/m2g /data/ /data/outputs
+
+This will run **m2g** on the local data and save the output files to the directory /path/to/local/data/outputs. Note that if you have created the docker image from github, replace `neurodata/m2g` with `imagename:uniquelabel`.
+
+Also note that currently, running `m2g` on a single bids-formatted dataset directory only runs a single scan. To run the entire dataset, we recommend parallelizing on a high-performance cluster or using `m2g`'s s3 integration.
+
+
+# Tutorial
+
+## Structural Connectome Pipeline (`m2g-d`)
 
 Once you have the pipeline up and running, you can run the structural connectome pipeline with:
   
- m2g --pipeline dwi <input_directory> <output_directory>
+    m2g --pipeline dwi <input_directory> <output_directory>
   
 We recommend specifying an atlas and lowering the default seed density on test runs (although, for real runs, we recommend using the default seeding -- lowering seeding simply decreases runtime):
 
-    m2g --seeds 1 --parcellation Desikan <input_directory> <output_directory>
+    m2g --pipeline dwi --seeds 1 --parcellation Desikan <input_directory> <output_directory>
 
 You can set a particular scan and session as well (recommended for batch scripts):
 
-    m2g --seeds 1 --parcellation Desikan --participant_label <label> --session_label <label> <input_directory> <output_directory>
+    m2g --pipeline dwi --seeds 1 --parcellation Desikan --participant_label <label> --session_label <label> <input_directory> <output_directory>
 
-For more detailed instructions, tutorials on the **m2g** pipeline can be found in [m2g/tutorials](https://github.com/neurodata/m2g/tree/staging/tutorials)
-
-### Functional Connectome Pipeline (**m2g-f**)
+## Functional Connectome Pipeline (`m2g-f`)
 
 Once you have the pipeline up and running, you can run the functional connectome pipeline with:
   
- m2g --pipeline func <input_directory> <output_directory>
+    m2g --pipeline func <input_directory> <output_directory>
   
 We recommend specifying an atlas and lowering the default seed density on test runs (although, for real runs, we recommend using the default seeding -- lowering seeding simply decreases runtime):
 
-    m2g --seeds 1 --parcellation Desikan <input_directory> <output_directory>
+    m2g --pipeline func --seeds 1 --parcellation Desikan <input_directory> <output_directory>
 
 You can set a particular scan and session as well (recommended for batch scripts):
 
-    m2g --seeds 1 --parcellation Desikan --participant_label <label> --session_label <label> <input_directory> <output_directory>
+    m2g --pipeline func --seeds 1 --parcellation Desikan --participant_label <label> --session_label <label> <input_directory> <output_directory>
 
-For more detailed instructions, tutorials on the **m2g** pipeline can be found in [m2g/tutorials](https://github.com/neurodata/m2g/tree/staging/tutorials)
 
-## Outputs
+## Running both `m2g-d` and `m2g-f`
+Both pipelines can be run by setting the `pipeline` parameter to `both`:
+    
+    m2g --pipeline both <input_directory> <output_directory>
 
-### Diffusion Pipeline
+# Outputs
+
+## Diffusion Pipeline
 The organization of the output files generated by the m2g-d pipeline are shown below. If you only care about the connectome edgelists (**m2g**'s fundamental output), you can find them in `/output/connectomes_d`.
 
 ```
@@ -355,25 +378,6 @@ res = The file has been resliced to the desired voxel size specified by the user
     
           
 ```
-
-## Usage
-
-The **m2g** pipeline can be used to generate connectomes as a command-line utility on [BIDS datasets](http://bids.neuroimaging.io) with the following:
-
-    m2g --pipeline <pipe> /input/bids/dataset /output/directory
-
-Note that more options are available which can be helpful if running on the Amazon cloud, which can be found and documented by running `m2g -h`.
-
-
-### Docker Container Usage
-
-If running with the Docker container shown above, the `entrypoint` is already set to `m2g`, so the pipeline can be run directly from the host-system command line as follows:
-
-    docker run -ti -v /path/to/local/data:/data neurodata/m2g /data/ /data/outputs
-
-This will run **m2g** on the local data and save the output files to the directory /path/to/local/data/outputs. Note that if you have created the docker image from github, replace `neurodata/m2g` with `imagename:uniquelabel`.
-
-Also note that currently, running `m2g` on a single bids-formatted dataset directory only runs a single scan. To run the entire dataset, we recommend parallelizing on a high-performance cluster or using `m2g`'s s3 integration.
 
 ## Working with S3 Datasets
 
