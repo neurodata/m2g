@@ -33,7 +33,6 @@ RUN pip3.7 install --upgrade pip
 
 
 
-
 # Configure git-lfs
 # RUN apt-get install -y apt-transport-https debian-archive-keyring
 # RUN curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | bash && \
@@ -198,6 +197,7 @@ RUN \
 # TODO: Update pybids
 RUN \
     pip3.7 install --no-cache-dir plotly==1.12.9 regex
+
 
 RUN \
     pip3.7 install s3transfer==0.3.7 setuptools==57.5.0 numba==0.52.0

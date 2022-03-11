@@ -375,8 +375,7 @@ res = The file has been resliced to the desired voxel size specified by the user
             snr_s.png = sagittal view of signal to noise ratio for functional image
         /snr_val
             average_snr_file.txt = single value of average signal to noise ratio for functional image
-    
-          
+              
 ```
 
 ## Working with S3 Datasets
