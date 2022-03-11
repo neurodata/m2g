@@ -189,17 +189,15 @@ RUN apt-get update && apt-get -y upgrade insighttoolkit4-python
 #--------M2G SETUP-----------------------------------------------------------#
 # setup of python dependencies for m2g itself, as well as file dependencies
 RUN \
-    pip3.7 install --no-cache-dir hyppo==0.1.3 nibabel==2.3.3 scipy==1.4.1 python-dateutil pandas==0.23.4 boto3==1.7.13 awscli==1.15.40 virtualenv
+    pip3.7 install --no-cache-dir hyppo==0.1.3 awscli==1.15.40 virtualenv
 RUN \
-    pip3.7 install --no-cache-dir matplotlib nilearn sklearn cython vtk pyvtk fury==0.5.1
+    pip3.7 install --no-cache-dir nilearn sklearn cython vtk pyvtk fury==0.5.1 pandas==1.4.1
 RUN \
-    pip3.7 install --no-cache-dir yamlordereddictloader
-RUN \
-    pip3.7 install --no-cache-dir requests ipython duecredit graspy==0.3.0 scikit-image networkx dipy==1.1.1 pybids==0.12.0
+    pip3.7 install --no-cache-dir ipython duecredit graspologic scikit-image dipy==1.1.1 pybids==0.12.0
 
 # TODO: Update pybids
 RUN \
-    pip3.7 install --no-cache-dir plotly==1.12.9 configparser>=3.7.4 regex
+    pip3.7 install --no-cache-dir plotly==1.12.9 regex
 
 RUN \
     pip3.7 install s3transfer==0.3.7 setuptools==57.5.0 numba==0.52.0
@@ -210,77 +208,17 @@ RUN curl -sL https://github.com/rhr-pruim/ICA-AROMA/archive/v0.4.3-beta.tar.gz |
 RUN chmod +x /opt/ICA-AROMA/ICA_AROMA.py
 ENV PATH=/opt/ICA-AROMA:$PATH
 
-# install miniconda
-RUN curl -sO https://repo.anaconda.com/miniconda/Miniconda3-py37_4.8.2-Linux-x86_64.sh && \
-    bash Miniconda3-py37_4.8.2-Linux-x86_64.sh -b -p /usr/local/miniconda && \
-    rm Miniconda3-py37_4.8.2-Linux-x86_64.sh
-
-# update path to include conda
-ENV PATH=/usr/local/miniconda/bin:$PATH
-
-# install conda dependencies
-RUN conda update conda -y && \
-    conda install -y  \
-        blas \
-        matplotlib==3.1.3 \
-        networkx==2.4 \
-        nose==1.3.7 \
-        numpy==1.16.4 \
-        pandas==0.23.4 \
-        scipy==1.4.1 \
-        traits==4.6.0 \
-        wxpython
-#pip
 
 RUN \
-    python3 -m pip install --user \
-    pyyaml==5.3 \
+    pip3.7 install --user \
     yamlordereddictloader==0.4.0 \
-    nipype==1.1.2 \
-    simplejson \
     yamlordereddictloader
 
 # install torch
-RUN python3 -m pip install torch==1.2.0 torchvision==0.4.0 -f https://download.pytorch.org/whl/torch_stable.html
+RUN pip3.7 install torch==1.2.0 torchvision==0.4.0 -f https://download.pytorch.org/whl/torch_stable.html
 
 
 WORKDIR /
-
-RUN mkdir /input && \
-    chmod -R 777 /input
-
-RUN mkdir /output && \
-    chmod -R 777 /output
-
-
-# install PyPEER
-RUN pip3.7 install git+https://github.com/ChildMindInstitute/PyPEER.git
-
-
-# grab atlases from neuroparc
-RUN mkdir /m2g_atlases
-
-RUN \
-    git clone https://github.com/neurodata/neuroparc && \
-    mv /neuroparc/atlases /m2g_atlases && \
-    rm -rf /neuroparc
-RUN chmod -R 777 /m2g_atlases
-
-# Grab m2g from deploy.
-RUN git clone https://github.com/neurodata/m2g /m2g && \
-    cd /m2g && \
-    pip3.7 install .
-RUN chmod -R 777 /usr/local/bin/m2g_bids
-
-ENV MPLCONFIGDIR /tmp/matplotlib
-ENV PYTHONWARNINGS ignore
-
-# copy over the entrypoint script
-#ADD ./.vimrc .vimrc
-RUN ldconfig
-
-# and add it as an entrypoint
-ENTRYPOINT ["m2g"]
 
 
 # Clear apt-get caches (try adding sudo)
@@ -336,8 +274,8 @@ RUN cp /code/requirements.txt /opt/requirements.txt
 RUN pip3.7 install --upgrade pip
 
 ### CHECK THAT ALL DEPENDENCIES ARE DOWNLOADED FOR HERE
-RUN python3 -m pip install -r /opt/requirements.txt
-RUN python3 -m pip install xvfbwrapper
+RUN pip3.7 install -r /opt/requirements.txt
+RUN pip3.7 install xvfbwrapper
 
 RUN mkdir /cpac_resources
 RUN mv /code/default_pipeline.yml /cpac_resources/default_pipeline.yml
@@ -352,6 +290,46 @@ RUN pip3.7 install -e /code
 
 # Link libraries for Singularity images
 #RUN ldconfig
+
+
+WORKDIR /
+
+RUN mkdir /input && \
+    chmod -R 777 /input
+
+RUN mkdir /output && \
+    chmod -R 777 /output
+
+
+# install PyPEER
+RUN pip3.7 install git+https://github.com/ChildMindInstitute/PyPEER.git
+
+
+# grab atlases from neuroparc
+RUN mkdir /m2g_atlases
+
+RUN \
+    git clone https://github.com/neurodata/neuroparc && \
+    mv /neuroparc/atlases /m2g_atlases && \
+    rm -rf /neuroparc
+RUN chmod -R 777 /m2g_atlases
+
+# Grab m2g from deploy.
+RUN git clone https://github.com/neurodata/m2g /m2g && \
+    cd /m2g && \
+    pip3.7 install .
+RUN chmod -R 777 /usr/local/bin/m2g_bids
+
+ENV MPLCONFIGDIR /tmp/matplotlib
+ENV PYTHONWARNINGS ignore
+
+# copy over the entrypoint script
+#ADD ./.vimrc .vimrc
+RUN ldconfig
+
+# and add it as an entrypoint
+ENTRYPOINT ["m2g"]
+
 
 
 #https://stackoverflow.com/questions/18649512/unicodedecodeerror-ascii-codec-cant-decode-byte-0xe2-in-position-13-ordinal
