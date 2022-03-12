@@ -2,7 +2,7 @@ networkx
 nibabel
 nilearn
 sklearn
-numpy
+numpy==1.20.1
 scipy>=0.13.3
 dipy
 boto3
