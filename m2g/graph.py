@@ -29,9 +29,8 @@ from joblib import Parallel, delayed
 
 matplotlib.use("agg")
 from matplotlib import pyplot as plt
-from graspy.utils import ptr
-from graspy.plot import heatmap
-
+from graspologic.utils import ptr
+from graspologic.plot import heatmap
 
 class GraphTools:
     """Initializes the graph with nodes corresponding to the number of ROIS

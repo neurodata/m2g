@@ -364,7 +364,7 @@ def main():
     atlas_stuff = {"atlas": atlas, "mask": mask, "parcellations": parcellations}
 
     # ------- Check if they have selected the functional pipeline ------ #
-    if pipe == "func" or "both":
+    if pipe == "func" or pipe == "both":
         
         sweeper = DirectorySweeper(
             input_dir, subjects=subjects, sessions=sessions, pipeline="func"
