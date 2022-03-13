@@ -190,13 +190,13 @@ RUN apt-get update && apt-get -y upgrade insighttoolkit4-python
 RUN \
     pip3.7 install --no-cache-dir hyppo==0.1.3 awscli==1.15.40 virtualenv
 RUN \
-    pip3.7 install --no-cache-dir nilearn sklearn cython vtk pyvtk fury==0.5.1 pandas==1.4.1
+    pip3.7 install --no-cache-dir nilearn sklearn cython vtk pyvtk fury==0.5.1 pandas==1.3.1
 RUN \
-    pip3.7 install --no-cache-dir ipython duecredit graspologic scikit-image dipy==1.1.1 pybids==0.12.0
+    pip3.7 install --no-cache-dir ipython duecredit scikit-image dipy==1.1.1 pybids==0.12.0
 
 # TODO: Update pybids
 RUN \
-    pip3.7 install --no-cache-dir plotly==1.12.9 regex
+    pip3.7 install --no-cache-dir plotly==1.12.9 regex graspologic
 
 
 RUN \
@@ -294,6 +294,8 @@ RUN pip3.7 install -e /code
 
 WORKDIR /
 
+RUN pip3.7 install numpy==1.20.1 pandas==1.3.1 nibabel==3.0.0
+
 RUN mkdir /input && \
     chmod -R 777 /input
 
@@ -315,7 +317,7 @@ RUN \
 RUN chmod -R 777 /m2g_atlases
 
 # Grab m2g from deploy.
-RUN git clone https://github.com/neurodata/m2g /m2g && \
+RUN git clone --branch post-paper https://github.com/neurodata/m2g /m2g && \
     cd /m2g && \
     pip3.7 install .
 RUN chmod -R 777 /usr/local/bin/m2g_bids
