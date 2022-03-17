@@ -9,7 +9,6 @@ ipython
 scikit-image
 graspologic
 regex
-s3transfer==0.3.7
 setuptools==57.5.0
 numba==0.52.0
 networkx==2.4
