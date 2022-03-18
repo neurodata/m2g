@@ -30,7 +30,7 @@ from m2g.utils.gen_utils import check_dependencies
 from m2g.utils.gen_utils import is_bids
 from m2g.utils.gen_utils import as_directory
 from m2g.scripts.m2g_dwi_pipeline import m2g_dwi_worker
-from m2g.functional.m2g_func import m2g_func_worker
+from m2g.functional.m2g_func import m2g_func_worker, func_dir_reorg
 
 
 def get_atlas(atlas_dir, vox_size):
@@ -267,7 +267,6 @@ def main():
     input_dir = result.input_dir
     output_dir = result.output_dir
     subjects = result.participant_label
-#    subjectsss = result.participant_label
     sessions = result.session_label
     pipe = result.pipeline
     acquisition = result.acquisition  # functional pipeline settings
@@ -277,9 +276,6 @@ def main():
     parcellation_name = result.parcellation
     push_location = result.push_location
 
-#    for subby in subjectsss:
-#        subjects = list({subby})
-#        input_dir = result.input_dir
     # arguments to be passed in every m2g run
     # TODO : change value naming convention to match key naming convention
     constant_kwargs = {
@@ -347,6 +343,7 @@ def main():
     )
 
     # ---------------- Grab parcellations, atlases, mask --------------- #
+    #TODO: Test that you can locate parcellations elsewhere
     # get parcellations, atlas, and mask, then stick it into constant_kwargs
     atlas_dir = get_atlas_dir()
     parcellations, atlas, mask, = get_atlas(atlas_dir, constant_kwargs["vox_size"])
@@ -402,124 +399,7 @@ def main():
                 """
             )
 
-            subj_pattern = r"(?<=sub-)(\w*)(?=/ses)"
-            sesh_pattern = r"(?<=ses-)(\d*)"
-            atlas_pattern = r"(?<=Human..)\S*"#(?=/roi)"
-
-            # Convert connectomes into edgelists
-            for root, dirs, files in os.walk(outDir):
-                for file in files:
-
-                    #Create non-absolute value connectome from timeseries
-                    if file.endswith('roi_stats.npz'):
-
-                        sub = re.findall(subj_pattern, root)[0]
-                        ses = re.findall(sesh_pattern, root)[0]
-                        atlas = re.findall(atlas_pattern, root)[0]
-
-                        edg_dir = f"{outDir}/connectomes_f/{atlas}"
-                        subsesh = f"sub-{sub}_ses-{ses}"
-
-                        a = np.load(os.path.join(root,file))
-                        dat = a['arr_0'][1:,:]
-                        #print(dat)
-                        my_data = np.corrcoef(dat.T)
-                        my_data = np.nan_to_num(my_data).astype(object)
-                    
-                        a = sum(range(1, len(my_data)))
-                        arr = np.zeros((a,3))
-                        z=0
-                        for num in range(len(my_data)):
-                            for j in range(len(my_data[num])):
-                                if j > num:
-                                    #print(f'{num+1} {i+1} {my_data[num][i]}')
-                                    arr[z][0]= f'{num+1}'
-                                    arr[z][1]= f'{j+1}'
-                                    arr[z][2] = my_data[num][j]
-                                    z=z+1
-                        
-                        os.makedirs(f"{edg_dir}", exist_ok=True)
-                        np.savetxt(f"{edg_dir}/{subsesh}_func_{atlas}_edgelist.csv", arr,fmt='%d %d %f', delimiter=' ')
-
-                        my_data = np.abs(np.corrcoef(dat.T))
-                        my_data = np.nan_to_num(my_data).astype(object)
-                    
-                        a = sum(range(1, len(my_data)))
-                        arr = np.zeros((a,3))
-                        z=0
-                        for num in range(len(my_data)):
-                            for j in range(len(my_data[num])):
-                                if j > num:
-                                    #print(f'{num+1} {i+1} {my_data[num][i]}')
-                                    arr[z][0]= f'{num+1}'
-                                    arr[z][1]= f'{j+1}'
-                                    arr[z][2] = my_data[num][j]
-                                    z=z+1
-                        
-                        np.savetxt(f"{edg_dir}/{subsesh}_func_{atlas}_abs_edgelist.csv", arr,fmt='%d %d %f', delimiter=' ')
-
-                        print(f"{file} converted to edgelist")
-
-                        #Move roi-timeseries folders without stupid naming convention
-                        os.rename(root,"/" + os.path.join(os.path.join(*root.split("/")[:-1]),atlas))
-
-
-
-            #Reorganize the folder structure
-            reorg = {"anat_f":["anatomical_b","anatomical_w","anatomical_c","anatomical_r","anatomical_t",'anatomical_g',"seg_"],
-                #"connectomes_f":["functional_edgelists"],
-                "func/preproc":["coordinate","frame_w","functional_b","functional_f","functional_n","functional_p","motion","slice","raw"],
-                "func/register":['mean_functional',"functional_to",'functional_in', "max_", "movement_par","power_","roi"],
-                #"log_f":['log'],
-                "qa_f":['mni_normalized_','carpet','csf_gm','mean_func_','rot_plot','trans_plot','skullstrip_vis', 'snr_']
-            }
-
-            moved = set()
-            for root, dirs, files in os.walk(outDir, topdown=False):
-                if 'cpac_' and 'functional_pipeline_settings.yaml' in files:
-                    os.makedirs(os.path.join(outDir,'log_f'), exist_ok=True)
-                    for i in files:
-                        shutil.move(os.path.join(root,i),os.path.join(outDir,'log_f',i))
-                    moved.add(root)
-                if ('cpac_individual_timing_m2g.csv' in files) or ('pypeline.log' in files):
-                    os.makedirs(os.path.join(outDir,'log_f'), exist_ok=True)
-                    for i in files:
-                        shutil.move(os.path.join(root,i),os.path.join(outDir,'log_f',i))
-                    moved.add(root)
-                
-                if root not in moved and 'workingDirectory' not in root:
-                    for cat in reorg:
-                        for nam in reorg[cat]:
-                            if nam in root.split('/')[-1]:
-                                #Get rid of the stupid in-between subdirectory
-                                if '_scan_rest-None' in dirs:
-                                    _ = os.path.join(outDir,cat,root.split('/')[-1])
-                                    os.makedirs(_, exist_ok=True)
-                                    for fil in os.listdir(os.path.join(root, '_scan_rest-None')):
-                                        shutil.move(os.path.join(root,'_scan_rest-None',fil), _ )
-                                    moved.add(root)
-
-                                else:
-                                    _ = os.path.join(outDir,cat)
-                                    if cat != 'connectomes_f' and cat != 'log_f':
-                                        os.makedirs(_,exist_ok=True)
-                                    shutil.move(root,_)
-                                    moved.add(root)
-                                    _ = os.path.join(_,root.split('/')[-1])
-                                    
-                                for r, d, ff in os.walk(_):
-                                    nono = ['_montage_','_selector_','ses-']#,'pipeline']
-                                    for i, element in enumerate(d):
-                                        for q in nono:
-                                            if q in element:
-                                                for f in os.listdir(os.path.join(r,d[i])):
-                                                    shutil.move(os.path.join(r,d[i],f),_)
-                                                os.rmdir(os.path.join(r,d[i]))
-
-
-            #get rid of cpac output folder
-            shutil.rmtree(os.path.join(outDir,'output'), ignore_errors=True)
-            shutil.rmtree(os.path.join(outDir, 'log'), ignore_errors=True)
+            func_dir_reorg(outDir)
 
 
             if push_location:
@@ -563,8 +443,6 @@ def main():
                 session=session,
                 creds=creds,
             )
-                #shutil.rmtree(f"{output_dir}/sub-{subject}")
-                #shutil.rmtree(f"/root/.m2g/input/sub-{subject}")
             
 
 
