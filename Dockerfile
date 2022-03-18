@@ -26,7 +26,17 @@ RUN apt-get update && \
     apt-get install -y python3.7 python3.7-dev && \
     curl https://bootstrap.pypa.io/get-pip.py | python3.7
 
-#RUN apt-get install -y python2.7 python-pip
+# Install Ubuntu dependencies and utilities
+RUN apt-get install -y build-essential cmake git \
+      graphviz graphviz-dev gsl-bin libcanberra-gtk-module libexpat1-dev \
+      libgiftiio-dev libglib2.0-dev libglu1-mesa libglu1-mesa-dev \
+      libjpeg-progs libgl1-mesa-dri libglw1-mesa libxml2 libxml2-dev \
+      libxext-dev libxft2 libxft-dev libxi-dev libxmu-headers \
+      libxmu-dev libxpm-dev libxslt1-dev m4 make mesa-common-dev \
+      mesa-utils netpbm pkg-config rsync tcsh unzip vim xvfb \
+      xauth zlib1g-dev
+
+RUN apt-get update
 
 
 RUN pip3.7 install --upgrade pip
@@ -47,7 +57,6 @@ RUN rm -rf afni.tar.gz
 ENV PATH=/opt/afni:$PATH
 
 ## --------CPAC INSTALLS-----------------------------------------------------#
-RUN apt-get install -y graphviz graphviz-dev
 
 # install FSL
 RUN apt-get install -y --no-install-recommends \
@@ -77,51 +86,6 @@ RUN curl -sL http://fcon_1000.projects.nitrc.org/indi/cpac_resources.tar.gz -o /
 
 
 
-RUN apt-get update
-
-# Install Ubuntu dependencies and utilities
-RUN apt-get install -y \
-      build-essential \
-      cmake \
-      git \
-      graphviz \
-      graphviz-dev \
-      gsl-bin \
-      libcanberra-gtk-module \
-      libexpat1-dev \
-      libgiftiio-dev \
-      libglib2.0-dev \
-      libglu1-mesa \
-      libglu1-mesa-dev \
-      libjpeg-progs \
-      libgl1-mesa-dri \
-      libglw1-mesa \
-      libxml2 \
-      libxml2-dev \
-      libxext-dev \
-      libxft2 \
-      libxft-dev \
-      libxi-dev \
-      libxmu-headers \
-      libxmu-dev \
-      libxpm-dev \
-      libxslt1-dev \
-      m4 \
-      make \
-      mesa-common-dev \
-      mesa-utils \
-      netpbm \
-      pkg-config \
-      rsync \
-      tcsh \
-      unzip \
-      vim \
-      xvfb \
-      xauth \
-      zlib1g-dev
-
-RUN apt-get update
-
 # Install 16.04 dependencies
 RUN apt-get install -y \
       dh-autoreconf \
@@ -134,7 +98,7 @@ RUN apt-get install -y \
       x11proto-print-dev \
       xutils-dev \
       environment-modules
-#libinsighttoolkit4.10
+
 
 # Install libpng12
 RUN curl -sLo /tmp/libpng12.deb http://mirrors.kernel.org/ubuntu/pool/main/libp/libpng/libpng12-0_1.2.54-1ubuntu1_amd64.deb && \
@@ -203,11 +167,6 @@ RUN curl -sL https://github.com/rhr-pruim/ICA-AROMA/archive/v0.4.3-beta.tar.gz |
 RUN chmod +x /opt/ICA-AROMA/ICA_AROMA.py
 ENV PATH=/opt/ICA-AROMA:$PATH
 
-
-RUN \
-    pip3.7 install --user \
-    yamlordereddictloader==0.4.0
-
 # install torch
 RUN pip3.7 install torch==1.2.0 torchvision==0.4.0 -f https://download.pytorch.org/whl/torch_stable.html
 
@@ -241,6 +200,12 @@ RUN cd / && \
 RUN mv /code/cpac_templates.tar.gz / && \
     tar xvzf /cpac_templates.tar.gz
 
+RUN mkdir /cpac_resources
+RUN mv /code/default_pipeline.yml /cpac_resources/default_pipeline.yml
+RUN mv /code/dev/circleci_data/pipe-test_ci.yml /cpac_resources/pipe-test_ci.yml
+
+RUN pip3.7 install -e /code
+
 # install AFNI [PUT AFTER CPAC IS CALLED]
 RUN mv /code/required_afni_pkgs.txt /opt/required_afni_pkgs.txt
 RUN if [ -f /usr/lib/x86_64-linux-gnu/mesa/libGL.so.1.2.0]; then \
@@ -261,43 +226,19 @@ RUN if [ -f /usr/lib/x86_64-linux-gnu/mesa/libGL.so.1.2.0]; then \
     tcsh @update.afni.binaries -package linux_openmp_64 -bindir /opt/afni -prog_list $(cat /opt/required_afni_pkgs.txt) && \
     ldconfig
 
-#RUN cp /code/requirements.txt /opt/requirements.txt
-#RUN pip3.7 install --upgrade pip
-
-#RUN pip3.7 install -r /opt/requirements.txt
-RUN pip3.7 install xvfbwrapper
-
-RUN mkdir /cpac_resources
-RUN mv /code/default_pipeline.yml /cpac_resources/default_pipeline.yml
-RUN mv /code/dev/circleci_data/pipe-test_ci.yml /cpac_resources/pipe-test_ci.yml
-
-#COPY . /code
-RUN pip3.7 install -e /code
-
-#COPY dev/docker_data /code/docker_data
-#RUN mv /code/docker_data/* /code && rm -Rf /code/docker_data && chmod +x /code/run.py
-
-
-# Link libraries for Singularity images
-#RUN ldconfig
 
 
 WORKDIR /
 
 RUN pip3.7 install numpy==1.20.1 pandas==1.3.1 nibabel==3.0.0
 
-RUN mkdir /input && \
-    chmod -R 777 /input
-
-RUN mkdir /output && \
-    chmod -R 777 /output
+RUN mkdir /input && mkdir /output && \
+    chmod -R 777 /input && chmod -R 777 /output
 
 
 ENV MPLCONFIGDIR /tmp/matplotlib
 ENV PYTHONWARNINGS ignore
 
-# copy over the entrypoint script
-#ADD ./.vimrc .vimrc
 RUN ldconfig
 
 # and add it as an entrypoint
