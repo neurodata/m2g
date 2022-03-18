@@ -31,14 +31,6 @@ RUN apt-get update && \
 
 RUN pip3.7 install --upgrade pip
 
-
-
-# Configure git-lfs
-# RUN apt-get install -y apt-transport-https debian-archive-keyring
-# RUN curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | bash && \
-#     apt-get update && \
-#     apt-get install -y git-lfs
-
 # #---------AFNI INSTALL--------------------------------------------------------#
 # # setup of AFNI, which provides robust modifications of many of neuroimaging algorithms
 RUN apt-get update -qq && apt-get install -yq --no-install-recommends ed gsl-bin libglu1-mesa-dev libglib2.0-0 libglw1-mesa fsl-atlases \
@@ -127,7 +119,6 @@ RUN apt-get install -y \
       xvfb \
       xauth \
       zlib1g-dev
-      #debhelper -t xenial-backports
 
 RUN apt-get update
 
@@ -181,26 +172,30 @@ RUN apt-get -f --yes --force-yes install
 RUN apt-get --yes --force-yes install insighttoolkit4-python
 RUN apt-get update && apt-get -y upgrade insighttoolkit4-python
 
-# install ANTs
-#ENV PATH=/usr/lib/ants:$PATH
-#RUN apt-get install -y ants
-
 #--------M2G SETUP-----------------------------------------------------------#
-# setup of python dependencies for m2g itself, as well as file dependencies
-RUN \
-    pip3.7 install --no-cache-dir hyppo==0.1.3 awscli==1.15.40 virtualenv
-RUN \
-    pip3.7 install --no-cache-dir nilearn sklearn cython vtk pyvtk fury==0.5.1 pandas==1.3.1
-RUN \
-    pip3.7 install --no-cache-dir ipython duecredit scikit-image dipy==1.1.1 pybids==0.12.0
-
-# TODO: Update pybids
-RUN \
-    pip3.7 install --no-cache-dir plotly==1.12.9 regex graspologic
-
+# grab atlases from neuroparc
+RUN mkdir /m2g_atlases
 
 RUN \
-    pip3.7 install s3transfer==0.3.7 setuptools==57.5.0 numba==0.52.0
+    git clone https://github.com/neurodata/neuroparc && \
+    mv /neuroparc/atlases /m2g_atlases && \
+    rm -rf /neuroparc
+RUN chmod -R 777 /m2g_atlases
+
+# Grab m2g from deploy.
+RUN git clone --branch post-paper https://github.com/neurodata/m2g /m2g && \
+    cd /m2g && \
+    pip3.7 install -r /m2g/requirements.txt &&\
+    pip3.7 install .
+RUN chmod -R 777 /usr/local/bin/m2g_bids
+
+
+
+#-----INDI-Tools SETUP-------------------------------------------------------------#
+RUN git clone --branch master https://github.com/FCP-INDI/INDI-Tools /INDI-Tools && \
+    cd /INDI-Tools && \
+    pip3.7 install .
+
 
 # install ICA-AROMA
 RUN mkdir -p /opt/ICA-AROMA
@@ -211,12 +206,13 @@ ENV PATH=/opt/ICA-AROMA:$PATH
 
 RUN \
     pip3.7 install --user \
-    yamlordereddictloader==0.4.0 \
-    yamlordereddictloader
+    yamlordereddictloader==0.4.0
 
 # install torch
 RUN pip3.7 install torch==1.2.0 torchvision==0.4.0 -f https://download.pytorch.org/whl/torch_stable.html
 
+# install PyPEER
+RUN pip3.7 install git+https://github.com/ChildMindInstitute/PyPEER.git
 
 WORKDIR /
 
@@ -231,7 +227,7 @@ RUN mkdir -p /opt/c3d && \
 ENV C3DPATH /opt/c3d/
 ENV PATH $C3DPATH/bin:$PATH
 
-# Set up the functional pipeline
+#--------INSTALL CPAC------------------------------------------------------#
 RUN cd / && \
     git clone --branch v1.7.0 --single-branch https://github.com/FCP-INDI/C-PAC.git && \
     mkdir /code && \
@@ -240,8 +236,6 @@ RUN cd / && \
     rm -R /C-PAC && \
     chmod +x /code/run.py && \
     cd /
-
-RUN ls /code/
 
 # install cpac templates
 RUN mv /code/cpac_templates.tar.gz / && \
@@ -267,14 +261,10 @@ RUN if [ -f /usr/lib/x86_64-linux-gnu/mesa/libGL.so.1.2.0]; then \
     tcsh @update.afni.binaries -package linux_openmp_64 -bindir /opt/afni -prog_list $(cat /opt/required_afni_pkgs.txt) && \
     ldconfig
 
+#RUN cp /code/requirements.txt /opt/requirements.txt
+#RUN pip3.7 install --upgrade pip
 
-# install python dependencies
-RUN cp /code/requirements.txt /opt/requirements.txt
-#RUN pip3.7 install --upgrade setuptools
-RUN pip3.7 install --upgrade pip
-
-### CHECK THAT ALL DEPENDENCIES ARE DOWNLOADED FOR HERE
-RUN pip3.7 install -r /opt/requirements.txt
+#RUN pip3.7 install -r /opt/requirements.txt
 RUN pip3.7 install xvfbwrapper
 
 RUN mkdir /cpac_resources
@@ -303,25 +293,6 @@ RUN mkdir /output && \
     chmod -R 777 /output
 
 
-# install PyPEER
-RUN pip3.7 install git+https://github.com/ChildMindInstitute/PyPEER.git
-
-
-# grab atlases from neuroparc
-RUN mkdir /m2g_atlases
-
-RUN \
-    git clone https://github.com/neurodata/neuroparc && \
-    mv /neuroparc/atlases /m2g_atlases && \
-    rm -rf /neuroparc
-RUN chmod -R 777 /m2g_atlases
-
-# Grab m2g from deploy.
-RUN git clone --branch post-paper https://github.com/neurodata/m2g /m2g && \
-    cd /m2g && \
-    pip3.7 install .
-RUN chmod -R 777 /usr/local/bin/m2g_bids
-
 ENV MPLCONFIGDIR /tmp/matplotlib
 ENV PYTHONWARNINGS ignore
 
@@ -331,7 +302,6 @@ RUN ldconfig
 
 # and add it as an entrypoint
 ENTRYPOINT ["m2g"]
-
 
 
 #https://stackoverflow.com/questions/18649512/unicodedecodeerror-ascii-codec-cant-decode-byte-0xe2-in-position-13-ordinal
