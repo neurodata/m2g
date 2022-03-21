@@ -87,66 +87,71 @@ def make_script(input_dir, output_dir, subject, session, data_config, pipeline_c
 
 
 def func_dir_reorg(outDir):
+    """Functional directory reorganization. Takes the CPAC outputs for the m2g-f pipeline and reorganizes it into a more user-friendly format
+
+    Args:
+        outDir {string}: string containing path to functional pipeline output directory
+    """
     subj_pattern = r"(?<=sub-)(\w*)(?=/ses)"
     sesh_pattern = r"(?<=ses-)(\d*)"
     atlas_pattern = r"(?<=Human..)\S*"#(?=/roi)"
 
     # Convert connectomes into edgelists
-    for root, dirs, files in os.walk(outDir):
+    for root, dirs, files in os.walk(outDir + '/output'):
         for file in files:
 
             #Create non-absolute value connectome from timeseries
             if file.endswith('roi_stats.npz'):
+                try:
+                    sub = re.findall(subj_pattern, root)[0]
+                    ses = re.findall(sesh_pattern, root)[0]
+                    atlas = re.findall(atlas_pattern, root)[0]
 
-                sub = re.findall(subj_pattern, root)[0]
-                ses = re.findall(sesh_pattern, root)[0]
-                atlas = re.findall(atlas_pattern, root)[0]
+                    edg_dir = f"{outDir}/connectomes_f/{atlas}"
+                    subsesh = f"sub-{sub}_ses-{ses}"
 
-                edg_dir = f"{outDir}/connectomes_f/{atlas}"
-                subsesh = f"sub-{sub}_ses-{ses}"
-
-                a = np.load(os.path.join(root,file))
-                dat = a['arr_0'][1:,:]
-                #print(dat)
-                my_data = np.corrcoef(dat.T)
-                my_data = np.nan_to_num(my_data).astype(object)
-                    
-                a = sum(range(1, len(my_data)))
-                arr = np.zeros((a,3))
-                z=0
-                for num in range(len(my_data)):
-                    for j in range(len(my_data[num])):
-                        if j > num:
-                            #print(f'{num+1} {i+1} {my_data[num][i]}')
-                            arr[z][0]= f'{num+1}'
-                            arr[z][1]= f'{j+1}'
-                            arr[z][2] = my_data[num][j]
-                            z=z+1
-                    
-                os.makedirs(f"{edg_dir}", exist_ok=True)
-                np.savetxt(f"{edg_dir}/{subsesh}_func_{atlas}_edgelist.csv", arr,fmt='%d %d %f', delimiter=' ')
-
-                my_data = np.abs(np.corrcoef(dat.T))
-                my_data = np.nan_to_num(my_data).astype(object)
-            
-                a = sum(range(1, len(my_data)))
-                arr = np.zeros((a,3))
-                z=0
-                for num in range(len(my_data)):
-                    for j in range(len(my_data[num])):
-                        if j > num:
-                            #print(f'{num+1} {i+1} {my_data[num][i]}')
-                            arr[z][0]= f'{num+1}'
-                            arr[z][1]= f'{j+1}'
-                            arr[z][2] = my_data[num][j]
-                            z=z+1
+                    a = np.load(os.path.join(root,file))
+                    dat = a['arr_0'][1:,:]
+                    my_data = np.corrcoef(dat.T)
+                    my_data = np.nan_to_num(my_data).astype(object)
                         
-                np.savetxt(f"{edg_dir}/{subsesh}_func_{atlas}_abs_edgelist.csv", arr,fmt='%d %d %f', delimiter=' ')
+                    a = sum(range(1, len(my_data)))
+                    arr = np.zeros((a,3))
+                    z=0
+                    for num in range(len(my_data)):
+                        for j in range(len(my_data[num])):
+                            if j > num:
+                                #print(f'{num+1} {i+1} {my_data[num][i]}')
+                                arr[z][0]= f'{num+1}'
+                                arr[z][1]= f'{j+1}'
+                                arr[z][2] = my_data[num][j]
+                                z=z+1
+                        
+                    os.makedirs(f"{edg_dir}", exist_ok=True)
+                    np.savetxt(f"{edg_dir}/{subsesh}_func_{atlas}_edgelist.csv", arr,fmt='%d %d %f', delimiter=' ')
 
-                print(f"{file} converted to edgelist")
+                    my_data = np.abs(np.corrcoef(dat.T))
+                    my_data = np.nan_to_num(my_data).astype(object)
+                
+                    a = sum(range(1, len(my_data)))
+                    arr = np.zeros((a,3))
+                    z=0
+                    for num in range(len(my_data)):
+                        for j in range(len(my_data[num])):
+                            if j > num:
+                                arr[z][0]= f'{num+1}'
+                                arr[z][1]= f'{j+1}'
+                                arr[z][2] = my_data[num][j]
+                                z=z+1
+                            
+                    np.savetxt(f"{edg_dir}/{subsesh}_func_{atlas}_abs_edgelist.csv", arr,fmt='%d %d %f', delimiter=' ')
 
-                #Move roi-timeseries folders without stupid naming convention
-                os.rename(root,"/" + os.path.join(os.path.join(*root.split("/")[:-1]),atlas))
+                    print(f"{file} converted to edgelist")
+
+                    #Move roi-timeseries folders without stupid naming convention
+                    shutil.move(os.path.join(root), os.path.join("/", os.path.join(*root.split("/")[:-1]),atlas))
+                except:
+                    print("Already converted roi_stats found")
 
 
 
@@ -169,7 +174,8 @@ def func_dir_reorg(outDir):
             for i in files:
                 shutil.move(os.path.join(root,i),os.path.join(outDir,'log_f',i))
             moved.add(root)
-                
+
+    for root, dirs, files in os.walk(outDir+'/output'):
         if root not in moved and 'workingDirectory' not in root:
             for cat in reorg:
                 for nam in reorg[cat]:
@@ -179,25 +185,37 @@ def func_dir_reorg(outDir):
                             _ = os.path.join(outDir,cat,root.split('/')[-1])
                             os.makedirs(_, exist_ok=True)
                             for fil in os.listdir(os.path.join(root, '_scan_rest-None')):
-                                shutil.move(os.path.join(root,'_scan_rest-None',fil), _ )
+                                try:
+                                    shutil.move(os.path.join(root,'_scan_rest-None',fil), _ )
+                                except:
+                                    print(f"Target: {_} already exists. Skipping file movement...")
+
                             moved.add(root)
 
                         else:
                             _ = os.path.join(outDir,cat)
                             if cat != 'connectomes_f' and cat != 'log_f':
                                 os.makedirs(_,exist_ok=True)
-                            shutil.move(root,_)
+                            try:
+                                shutil.move(root,_)
+                            except:
+                                print(f"Target: {_} already exists. Skipping file movement...")
+
                             moved.add(root)
                             _ = os.path.join(_,root.split('/')[-1])
                             
                         for r, d, ff in os.walk(_):
-                            nono = ['_montage_','_selector_','ses-']#,'pipeline']
+                            nono = ['_montage_','_selector_','ses-']
                             for i, element in enumerate(d):
                                 for q in nono:
                                     if q in element:
                                         for f in os.listdir(os.path.join(r,d[i])):
-                                            shutil.move(os.path.join(r,d[i],f),_)
-                                        os.rmdir(os.path.join(r,d[i]))
+                                            try:
+                                                shutil.move(os.path.join(r,d[i],f),_)
+                                            except:
+                                                print(f"Target: {_} already exists. Skipping file movement...")
+                                        #os.rmdir(os.path.join(r,d[i]))
+                                        shutil.rmtree(os.path.join(r,d[i]), ignore_errors=True)
     #get rid of cpac output folder
     shutil.rmtree(os.path.join(outDir,'output'), ignore_errors=True)
     shutil.rmtree(os.path.join(outDir, 'log'), ignore_errors=True)
