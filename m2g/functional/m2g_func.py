@@ -74,7 +74,20 @@ def make_dataconfig(input_dir, sub, ses, anat, func, acquisition='alt+z', tr=2.0
     return config_file
     
 
-def make_script(input_dir, output_dir, subject, session, data_config, pipeline_config, mem_gb, n_cpus):
+def make_script(input_dir, output_dir, data_config, pipeline_config, mem_gb, n_cpus):
+    """Make a bash script file for calling the m2g-f pipeline from CPAC
+
+    Args:
+        input_dir {str}: path to input directory containing fMRI data in BIDS format
+        output_dir {str}: path to directory containing outputs from CPAC
+        data_config {str}: path to data configuration file for this run of CPAC
+        pipeline_config {str}: path to pipeline configuration file for this run of CPAC
+        mem_gb {str}: number of gigabytes available for CPAC use
+        n_cpus {str}: number of cpus available for CPAC use
+
+    Returns:
+        _type_: _description_
+    """
     cpac_script = '/root/.m2g/cpac_script.sh'
     with open(cpac_script,'w+',encoding='utf-8') as script:
         script.write(f'''#! /bin/bash
@@ -269,7 +282,7 @@ def m2g_func_worker(input_dir, output_dir, sub, ses, anat, bold, vox, parcellati
         print('Single functional nifti file found')
 
     data_config = make_dataconfig(input_dir, sub, ses, anat, bold, acquisition, tr)
-    cpac_script = make_script(input_dir, output_dir, sub, ses, data_config, pipeline_config,mem_gb, n_cpus)
+    cpac_script = make_script(input_dir, output_dir, data_config, pipeline_config,mem_gb, n_cpus)
     
     # Run pipeline with resource monitor
     #subprocess.Popen(['free','-m','-c',f'{itterations}','-s',f'{period}'])

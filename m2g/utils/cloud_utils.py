@@ -117,7 +117,7 @@ def get_matching_s3_objects(bucket, prefix="", suffix=""):
         try:
             contents = resp["Contents"]
         except KeyError:
-            print("No contents found.")
+            print("No contents found. Check that both the path to your files on your s3 bucket and your aws credentials are correct.")
             return
 
         for obj in contents:
@@ -195,7 +195,7 @@ def s3_get_data(bucket, remote, local, info="", force=False):
 
 
 def s3_push_data(bucket, remote, outDir, subject=None, session=None, creds=True):
-    """Pushes dwi pipeline data to a specified S3 bucket
+    """Pushes all files in a given folder to a specified S3 bucket
 
     Parameters
     ----------
@@ -237,60 +237,3 @@ def s3_push_data(bucket, remote, outDir, subject=None, session=None, creds=True)
                         f"{remote}/{os.path.join(spath,file_)}",
                         ExtraArgs={"ACL": "public-read"},
                     )
-
-def s3_func_push_data(bucket, remote, output_dir, subject=None, session=None, creds=True):
-    """Pushes functional pipeline data to a specified S3 bucket
-
-    Parameters
-    ----------
-    bucket : str
-        s3 bucket you are pushing files to
-    remote : str
-        The path to the directory on your S3 bucket containing the data used in the pipeline, the string in 'modifier' will be put after the
-        first directory specified in the path as its own directory (/remote[0]/modifier/remote[1]/...)
-    output_dir : str
-        Path of local directory being pushed to the s3 bucket
-    subject : str
-        subject we're pushing with
-    session : str
-        session we're pushing with
-    creds : bool, optional
-        Whether s3 credentials are being provided, may fail to push big files if False, by default True
-    """
-
-    # get client with credentials if they exist
-    client = s3_client(service="s3")
-
-    # check that bucket exists
-    bkts = [bk["Name"] for bk in client.list_buckets()["Buckets"]]
-    if bucket not in bkts:
-        sys.exit(
-            "Error: could not locate bucket. Available buckets: " + ", ".join(bkts)
-        )
-
-    # List all files and upload
-    for root, _, files in os.walk(f"{output_dir}/sub-{subject}/ses-{session}"):
-        for file_ in files:
-            if not "tmp/" in root:  # exclude things in the tmp/ folder
-                if f"sub-{subject}/ses-{session}" in root:
-                    print(f"Uploading: {os.path.join(root, file_)}")
-                    spath = root[root.find("sub-") :]  # remove everything before /sub-*
-                    client.upload_file(
-                        os.path.join(root, file_),
-                        bucket,
-                        f"{remote}/{os.path.join(spath,file_)}",
-                        ExtraArgs={"ACL": "public-read"},
-                    )
-    
-    ## FIX THIS REFERENCE TO FUNCTIONAL_EDGELISTS
-    for root, _, files in os.walk(f"{output_dir}/connectomes_f"):
-        for file_ in files:
-            if f"sub-{subject}_ses-{session}" in file_:
-                print(f"Uploading: {os.path.join(root, file_)}")
-                spath = root[root.find("connectomes_") :]  # remove everything before /connectomes_*
-                client.upload_file(
-                    os.path.join(root, file_),
-                    bucket,
-                    f"{remote}/{os.path.join(spath,file_)}",
-                    ExtraArgs={"ACL": "public-read"},
-                )

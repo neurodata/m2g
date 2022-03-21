@@ -126,7 +126,7 @@ class DirectorySweeper:
 
         if pipeline == 'func':
             func = self.layout.get(return_type='filename', session=session, subject=subject, suffix='bold')
-            if len(func) == 1: #Account for one or multiple functional scans per anatomical image
+            if len(func) == 1: #TODO:Account for one or multiple functional scans per anatomical image
                 [func] = func
             [anat] = self.layout.get(return_type="filename", session=session, subject=subject, suffix=['T1w','t1w'])
             files = {"func": func, "t1w": anat}
@@ -190,19 +190,6 @@ def make_initial_directories(outdir: Path, dwi:Path, parcellations=[]) -> None:
     parcellations : list, optional
         Set of all parcellations we're using, by default []
     """
-    # anat_dirs = ["anat/preproc", "anat/registered"]
-    # dwi_dirs = ["dwi/fiber", "dwi/preproc", "dwi/tensor"]
-    # qa_dirs = [
-    #     "qa/adjacency",
-    #     "qa/fibers",
-    #     "qa/graphs",
-    #     "qa/graphs_plotting",
-    #     "qa/mri",
-    #     "qa/reg",
-    #     "qa/tensor",
-    # ]
-    # tmp_dirs = ["tmp/reg_a", "tmp/reg_m"]
-
     
     # populate connectome_dir with folder for each parcellation
     connectome_dirs = []
@@ -224,7 +211,6 @@ def make_initial_directories(outdir: Path, dwi:Path, parcellations=[]) -> None:
     "connectome_dirs":connectome_dirs,
     "connectomes":[]}
 
-    #initial_dirs = anat_dirs + dwi_dirs + qa_dirs + tmp_dirs + connectome_dirs
 
     # create directories
     for cat in init_dirs:

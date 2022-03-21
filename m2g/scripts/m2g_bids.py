@@ -88,7 +88,7 @@ def get_atlas(atlas_dir, vox_size):
     assert all(map(os.path.exists, parcellations)), "Some parcellations do not exist."
     assert all(
         map(os.path.exists, [atlas, atlas_mask])
-    ), "atlas or atlas_mask, does not exist. You may not have git-lfs -- if not, install it."
+    ), "atlas or atlas_mask, does not exist."
     return parcellations, atlas, atlas_mask
 
 
@@ -111,13 +111,15 @@ def main():
     """Starting point of the m2g pipeline, assuming that you are using a BIDS organized dataset
     """
     parser = ArgumentParser(
-        description="This is an end-to-end connectome estimation pipeline from M3r Images."
+        description="This is an end-to-end connectome estimation pipeline from fMRI and diffusion weighted MRI data."
     )
     parser.add_argument(
         "input_dir",
         help="""The directory with the input dataset
         formatted according to the BIDS standard.
-        To use data from s3, just pass `s3://<bucket>/<dataset>` as the input directory.""",
+        To use data from s3, put the bucket and directory location as the input directory:
+        `s3://<bucket>/<dataset>`
+        downloaded file will be stored in ~/.m2g/input. If directory already exists it will be deleted.""",
     )
     parser.add_argument(
         "output_dir",
@@ -150,7 +152,7 @@ def main():
         "--pipeline",
         action="store",
         help="""Pipline to use when analyzing the input data, 
-        either func, dwi, or both. If  Default is dwi.""",
+        either func, dwi, or both. Default is dwi.""",
         default="dwi",
     )
     parser.add_argument(
@@ -191,29 +193,29 @@ def main():
     parser.add_argument(
         "--skipeddy",
         action="store_true",
-        help="Whether to skip eddy correction if it has already been run.",
+        help="Whether to skip eddy correction if it has already been run and the files can be found in output_dir.",
         default=False,
     )
     parser.add_argument(
         "--skipreg",
         action="store_true",
         default=False,
-        help="whether or not to skip registration",
+        help="Shether to skip registration of the parcellations if it has already been run and the files can be fround in output_dir",
     )
     parser.add_argument(
         "--voxelsize",
         action="store",
         default="2mm",
-        help="Voxel size : 2mm, 1mm. Voxel size to use for template registrations.",
+        help="Voxel size : 2mm, 1mm. Voxel size of both parcellation and reference structural image to use for template registrations.",
     )
     parser.add_argument(
         "--mod",
         action="store",
-        help="Deterministic (det) or probabilistic (prob) tracking. Default is det.",
+        help="Deterministic (det) or probabilistic (prob) tracking method for the dwi tractography. Default is det.",
         default="det",
     )
     parser.add_argument(
-        "--filtering_type",
+        "--track_type",
         action="store",
         help="Tracking approach: local, particle. Default is local.",
         default="local",
@@ -233,7 +235,7 @@ def main():
     parser.add_argument(
         "--seeds",
         action="store",
-        help="Seeding density for tractography. Default is 20.",
+        help="Seeding density for tractography in the m2g-d pipeline. Default is 20.",
         default=20,
     )
     parser.add_argument(
@@ -281,7 +283,7 @@ def main():
     constant_kwargs = {
         "vox_size": result.voxelsize,
         "mod_type": result.mod,
-        "track_type": result.filtering_type,
+        "track_type": result.track_type,
         "mod_func": result.diffusion_model,
         "seeds": result.seeds,
         "reg_style": result.space,
@@ -331,7 +333,6 @@ def main():
 
     # make sure we have AFNI and FSL
     check_dependencies()
-    # check on input data
     # make sure input directory is BIDs-formatted
     assert is_bids(input_dir)
 
@@ -358,7 +359,7 @@ def main():
     if len(parcellations) == 0:
         raise ValueError("No valid parcellations found.")
 
-    atlas_stuff = {"atlas": atlas, "mask": mask, "parcellations": parcellations}
+    atlas_info = {"atlas": atlas, "mask": mask, "parcellations": parcellations}
 
     # ------- Check if they have selected the functional pipeline ------ #
     if pipe == "func" or pipe == "both":
@@ -391,21 +392,20 @@ def main():
                 mem_gb,
                 n_cpus,
             )
-
-            # m2g_func_worker()
+            
             print(
                 f"""
                 Functional Pipeline completed!
                 """
             )
-
+            #Reorganize output files from CPAC to a more user-friendly version
             func_dir_reorg(outDir)
 
 
             if push_location:
                 print(f"Pushing to s3 at {push_location}.")
                 push_buck, push_remo = cloud_utils.parse_path(push_location)
-                cloud_utils.s3_func_push_data(
+                cloud_utils.s3_push_data(
                     push_buck,
                     push_remo,
                     output_dir,
@@ -413,14 +413,13 @@ def main():
                     session=session,
                     creds=creds,
                 )
-                shutil.rmtree(output_dir, ignore_errors=True)
         if pipe != 'both':
             sys.exit(0)
 
     
     # ------------ Continue DWI pipeline ------------ #
 
-    constant_kwargs.update(atlas_stuff)
+    constant_kwargs.update(atlas_info)
     # parse input directory
     sweeper = DirectorySweeper(input_dir, subjects=subjects, sessions=sessions)
     scans = sweeper.get_dir_info()
