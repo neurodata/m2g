@@ -26,18 +26,19 @@ RUN apt-get update && \
     apt-get install -y python3.7 python3.7-dev && \
     curl https://bootstrap.pypa.io/get-pip.py | python3.7
 
-#RUN apt-get install -y python2.7 python-pip
+# Install Ubuntu dependencies and utilities
+RUN apt-get install -y build-essential cmake git \
+      graphviz graphviz-dev gsl-bin libcanberra-gtk-module libexpat1-dev \
+      libgiftiio-dev libglib2.0-dev libglu1-mesa libglu1-mesa-dev \
+      libjpeg-progs libgl1-mesa-dri libglw1-mesa libxml2 libxml2-dev \
+      libxext-dev libxft2 libxft-dev libxi-dev libxmu-headers \
+      libxmu-dev libxpm-dev libxslt1-dev m4 make mesa-common-dev \
+      mesa-utils netpbm pkg-config rsync tcsh unzip vim xvfb \
+      xauth zlib1g-dev
 
+RUN apt-get update
 
 RUN pip3.7 install --upgrade pip
-
-
-
-# Configure git-lfs
-# RUN apt-get install -y apt-transport-https debian-archive-keyring
-# RUN curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | bash && \
-#     apt-get update && \
-#     apt-get install -y git-lfs
 
 # #---------AFNI INSTALL--------------------------------------------------------#
 # # setup of AFNI, which provides robust modifications of many of neuroimaging algorithms
@@ -55,7 +56,6 @@ RUN rm -rf afni.tar.gz
 ENV PATH=/opt/afni:$PATH
 
 ## --------CPAC INSTALLS-----------------------------------------------------#
-RUN apt-get install -y graphviz graphviz-dev
 
 # install FSL
 RUN apt-get install -y --no-install-recommends \
@@ -85,52 +85,6 @@ RUN curl -sL http://fcon_1000.projects.nitrc.org/indi/cpac_resources.tar.gz -o /
 
 
 
-RUN apt-get update
-
-# Install Ubuntu dependencies and utilities
-RUN apt-get install -y \
-      build-essential \
-      cmake \
-      git \
-      graphviz \
-      graphviz-dev \
-      gsl-bin \
-      libcanberra-gtk-module \
-      libexpat1-dev \
-      libgiftiio-dev \
-      libglib2.0-dev \
-      libglu1-mesa \
-      libglu1-mesa-dev \
-      libjpeg-progs \
-      libgl1-mesa-dri \
-      libglw1-mesa \
-      libxml2 \
-      libxml2-dev \
-      libxext-dev \
-      libxft2 \
-      libxft-dev \
-      libxi-dev \
-      libxmu-headers \
-      libxmu-dev \
-      libxpm-dev \
-      libxslt1-dev \
-      m4 \
-      make \
-      mesa-common-dev \
-      mesa-utils \
-      netpbm \
-      pkg-config \
-      rsync \
-      tcsh \
-      unzip \
-      vim \
-      xvfb \
-      xauth \
-      zlib1g-dev
-      #debhelper -t xenial-backports
-
-RUN apt-get update
-
 # Install 16.04 dependencies
 RUN apt-get install -y \
       dh-autoreconf \
@@ -143,7 +97,7 @@ RUN apt-get install -y \
       x11proto-print-dev \
       xutils-dev \
       environment-modules
-#libinsighttoolkit4.10
+
 
 # Install libpng12
 RUN curl -sLo /tmp/libpng12.deb http://mirrors.kernel.org/ubuntu/pool/main/libp/libpng/libpng12-0_1.2.54-1ubuntu1_amd64.deb && \
@@ -181,84 +135,7 @@ RUN apt-get -f --yes --force-yes install
 RUN apt-get --yes --force-yes install insighttoolkit4-python
 RUN apt-get update && apt-get -y upgrade insighttoolkit4-python
 
-# install ANTs
-#ENV PATH=/usr/lib/ants:$PATH
-#RUN apt-get install -y ants
-
 #--------M2G SETUP-----------------------------------------------------------#
-# setup of python dependencies for m2g itself, as well as file dependencies
-RUN \
-    pip3.7 install --no-cache-dir hyppo==0.1.3 nibabel==2.3.3 scipy==1.4.1 python-dateutil pandas==0.23.4 boto3==1.7.13 awscli==1.15.40 virtualenv
-
-RUN \
-    pip3.7 install --no-cache-dir matplotlib nilearn sklearn cython vtk pyvtk fury==0.5.1
-RUN \
-    pip3.7 install --no-cache-dir yamlordereddictloader
-RUN \
-
-    pip3.7 install --no-cache-dir requests ipython duecredit graspy==0.3.0 scikit-image networkx dipy==1.1.1 pybids==0.12.0
-
-# TODO: Update pybids
-RUN \
-    pip3.7 install --no-cache-dir plotly==1.12.9 configparser>=3.7.4 regex
-
-
-RUN \
-    pip3.7 install s3transfer==0.3.7 setuptools==57.5.0 numba==0.52.0
-
-# install ICA-AROMA
-RUN mkdir -p /opt/ICA-AROMA
-RUN curl -sL https://github.com/rhr-pruim/ICA-AROMA/archive/v0.4.3-beta.tar.gz | tar -xzC /opt/ICA-AROMA --strip-components 1
-RUN chmod +x /opt/ICA-AROMA/ICA_AROMA.py
-ENV PATH=/opt/ICA-AROMA:$PATH
-
-# install miniconda
-RUN curl -sO https://repo.anaconda.com/miniconda/Miniconda3-py37_4.8.2-Linux-x86_64.sh && \
-    bash Miniconda3-py37_4.8.2-Linux-x86_64.sh -b -p /usr/local/miniconda && \
-    rm Miniconda3-py37_4.8.2-Linux-x86_64.sh
-
-# update path to include conda
-ENV PATH=/usr/local/miniconda/bin:$PATH
-
-# install conda dependencies
-RUN conda update conda -y && \
-    conda install -y  \
-        blas \
-        matplotlib==3.1.3 \
-        networkx==2.4 \
-        nose==1.3.7 \
-        numpy==1.16.4 \
-        pandas==0.23.4 \
-        scipy==1.4.1 \
-        traits==4.6.0 \
-        wxpython
-#pip
-
-RUN \
-    python3 -m pip install --user \
-    pyyaml==5.3 \
-    yamlordereddictloader==0.4.0 \
-    nipype==1.1.2 \
-    simplejson \
-    yamlordereddictloader
-
-# install torch
-RUN python3 -m pip install torch==1.2.0 torchvision==0.4.0 -f https://download.pytorch.org/whl/torch_stable.html
-
-
-WORKDIR /
-
-RUN mkdir /input && \
-    chmod -R 777 /input
-
-RUN mkdir /output && \
-    chmod -R 777 /output
-
-
-# install PyPEER
-RUN pip3.7 install git+https://github.com/ChildMindInstitute/PyPEER.git
-
-
 # grab atlases from neuroparc
 RUN mkdir /m2g_atlases
 
@@ -268,22 +145,35 @@ RUN \
     rm -rf /neuroparc
 RUN chmod -R 777 /m2g_atlases
 
+
 # Grab m2g from deploy.
-RUN git clone https://github.com/neurodata/m2g /m2g && \
+RUN git clone --branch deploy https://github.com/neurodata/m2g /m2g && \
     cd /m2g && \
+    pip3.7 install -r /m2g/requirements.txt &&\
     pip3.7 install .
 RUN chmod -R 777 /usr/local/bin/m2g_bids
 
-ENV MPLCONFIGDIR /tmp/matplotlib
-ENV PYTHONWARNINGS ignore
 
-# copy over the entrypoint script
-#ADD ./.vimrc .vimrc
-RUN ldconfig
 
-# and add it as an entrypoint
-ENTRYPOINT ["m2g"]
+#-----INDI-Tools SETUP-------------------------------------------------------------#
+RUN git clone --branch master https://github.com/FCP-INDI/INDI-Tools /INDI-Tools && \
+    cd /INDI-Tools && \
+    pip3.7 install .
 
+
+# install ICA-AROMA
+RUN mkdir -p /opt/ICA-AROMA
+RUN curl -sL https://github.com/rhr-pruim/ICA-AROMA/archive/v0.4.3-beta.tar.gz | tar -xzC /opt/ICA-AROMA --strip-components 1
+RUN chmod +x /opt/ICA-AROMA/ICA_AROMA.py
+ENV PATH=/opt/ICA-AROMA:$PATH
+
+# install torch
+RUN pip3.7 install torch==1.2.0 torchvision==0.4.0 -f https://download.pytorch.org/whl/torch_stable.html
+
+# install PyPEER
+RUN pip3.7 install git+https://github.com/ChildMindInstitute/PyPEER.git
+
+WORKDIR /
 
 # Clear apt-get caches (try adding sudo)
 RUN apt-get clean
@@ -295,7 +185,7 @@ RUN mkdir -p /opt/c3d && \
 ENV C3DPATH /opt/c3d/
 ENV PATH $C3DPATH/bin:$PATH
 
-# Set up the functional pipeline
+#--------INSTALL CPAC------------------------------------------------------#
 RUN cd / && \
     git clone --branch v1.7.0 --single-branch https://github.com/FCP-INDI/C-PAC.git && \
     mkdir /code && \
@@ -305,11 +195,15 @@ RUN cd / && \
     chmod +x /code/run.py && \
     cd /
 
-RUN ls /code/
-
 # install cpac templates
 RUN mv /code/cpac_templates.tar.gz / && \
     tar xvzf /cpac_templates.tar.gz
+
+RUN mkdir /cpac_resources
+RUN mv /code/default_pipeline.yml /cpac_resources/default_pipeline.yml
+RUN mv /code/dev/circleci_data/pipe-test_ci.yml /cpac_resources/pipe-test_ci.yml
+
+RUN pip3.7 install -e /code
 
 # install AFNI [PUT AFTER CPAC IS CALLED]
 RUN mv /code/required_afni_pkgs.txt /opt/required_afni_pkgs.txt
@@ -332,28 +226,22 @@ RUN if [ -f /usr/lib/x86_64-linux-gnu/mesa/libGL.so.1.2.0]; then \
     ldconfig
 
 
-# install python dependencies
-RUN cp /code/requirements.txt /opt/requirements.txt
-#RUN pip3.7 install --upgrade setuptools
-RUN pip3.7 install --upgrade pip
 
-### CHECK THAT ALL DEPENDENCIES ARE DOWNLOADED FOR HERE
-RUN python3 -m pip install -r /opt/requirements.txt
-RUN python3 -m pip install xvfbwrapper
+WORKDIR /
 
-RUN mkdir /cpac_resources
-RUN mv /code/default_pipeline.yml /cpac_resources/default_pipeline.yml
-RUN mv /code/dev/circleci_data/pipe-test_ci.yml /cpac_resources/pipe-test_ci.yml
+RUN pip3.7 install numpy==1.20.1 pandas==1.3.1 nibabel==3.0.0
 
-#COPY . /code
-RUN pip3.7 install -e /code
-
-#COPY dev/docker_data /code/docker_data
-#RUN mv /code/docker_data/* /code && rm -Rf /code/docker_data && chmod +x /code/run.py
+RUN mkdir /input && mkdir /output && \
+    chmod -R 777 /input && chmod -R 777 /output
 
 
-# Link libraries for Singularity images
-#RUN ldconfig
+ENV MPLCONFIGDIR /tmp/matplotlib
+ENV PYTHONWARNINGS ignore
+
+RUN ldconfig
+
+# and add it as an entrypoint
+ENTRYPOINT ["m2g"]
 
 
 #https://stackoverflow.com/questions/18649512/unicodedecodeerror-ascii-codec-cant-decode-byte-0xe2-in-position-13-ordinal

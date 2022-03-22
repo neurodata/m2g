@@ -30,7 +30,7 @@ from m2g.utils.gen_utils import check_dependencies
 from m2g.utils.gen_utils import is_bids
 from m2g.utils.gen_utils import as_directory
 from m2g.scripts.m2g_dwi_pipeline import m2g_dwi_worker
-from m2g.functional.m2g_func import m2g_func_worker
+from m2g.functional.m2g_func import m2g_func_worker, func_dir_reorg
 
 
 def get_atlas(atlas_dir, vox_size):
@@ -71,7 +71,7 @@ def get_atlas(atlas_dir, vox_size):
         # TODO : re-implement this pythonically with shutil and requests in python3.
         print("atlas directory not found. Cloning ...")
         clone = "https://github.com/neurodata/neuroparc.git"
-        gen_utils.run(f"git lfs clone {clone} {atlas_dir}")
+        gen_utils.run(f"git clone {clone} {atlas_dir}")
 
     atlas = os.path.join(
         atlas_dir, "atlases/reference_brains/MNI152NLin6_res-" + dims + "_T1w.nii.gz"
@@ -88,7 +88,7 @@ def get_atlas(atlas_dir, vox_size):
     assert all(map(os.path.exists, parcellations)), "Some parcellations do not exist."
     assert all(
         map(os.path.exists, [atlas, atlas_mask])
-    ), "atlas or atlas_mask, does not exist. You may not have git-lfs -- if not, install it."
+    ), "atlas or atlas_mask, does not exist."
     return parcellations, atlas, atlas_mask
 
 
@@ -111,13 +111,15 @@ def main():
     """Starting point of the m2g pipeline, assuming that you are using a BIDS organized dataset
     """
     parser = ArgumentParser(
-        description="This is an end-to-end connectome estimation pipeline from M3r Images."
+        description="This is an end-to-end connectome estimation pipeline from fMRI and diffusion weighted MRI data."
     )
     parser.add_argument(
         "input_dir",
         help="""The directory with the input dataset
         formatted according to the BIDS standard.
-        To use data from s3, just pass `s3://<bucket>/<dataset>` as the input directory.""",
+        To use data from s3, put the bucket and directory location as the input directory:
+        `s3://<bucket>/<dataset>`
+        downloaded file will be stored in ~/.m2g/input. If directory already exists it will be deleted.""",
     )
     parser.add_argument(
         "output_dir",
@@ -150,7 +152,7 @@ def main():
         "--pipeline",
         action="store",
         help="""Pipline to use when analyzing the input data, 
-        either func, dwi, or both. If  Default is dwi.""",
+        either func, dwi, or both. Default is dwi.""",
         default="dwi",
     )
     parser.add_argument(
@@ -184,36 +186,37 @@ def main():
     parser.add_argument(
         "--parcellation",
         action="store",
-        help="The parcellation(s) being analyzed. Multiple parcellations can be provided with a space separated list.",
+        help="""The parcellation(s) being analyzed. Multiple parcellations can be provided with a space separated list.
+        If not parcellations are defined, will use all parcellations from neuroparc.""",
         nargs="+",
         default=None,
     )
     parser.add_argument(
         "--skipeddy",
         action="store_true",
-        help="Whether to skip eddy correction if it has already been run.",
+        help="Whether to skip eddy correction if it has already been run and the files can be found in output_dir.",
         default=False,
     )
     parser.add_argument(
         "--skipreg",
         action="store_true",
         default=False,
-        help="whether or not to skip registration",
+        help="Shether to skip registration of the parcellations if it has already been run and the files can be fround in output_dir",
     )
     parser.add_argument(
         "--voxelsize",
         action="store",
         default="2mm",
-        help="Voxel size : 2mm, 1mm. Voxel size to use for template registrations.",
+        help="Voxel size : 2mm, 1mm. Voxel size of both parcellation and reference structural image to use for template registrations.",
     )
     parser.add_argument(
         "--mod",
         action="store",
-        help="Deterministic (det) or probabilistic (prob) tracking. Default is det.",
+        help="Deterministic (det) or probabilistic (prob) tracking method for the dwi tractography. Default is det.",
         default="det",
     )
     parser.add_argument(
-        "--filtering_type",
+        "--track_type",
         action="store",
         help="Tracking approach: local, particle. Default is local.",
         default="local",
@@ -233,7 +236,7 @@ def main():
     parser.add_argument(
         "--seeds",
         action="store",
-        help="Seeding density for tractography. Default is 20.",
+        help="Seeding density for tractography in the m2g-d pipeline. Default is 20.",
         default=20,
     )
     parser.add_argument(
@@ -267,7 +270,6 @@ def main():
     input_dir = result.input_dir
     output_dir = result.output_dir
     subjects = result.participant_label
-#    subjectsss = result.participant_label
     sessions = result.session_label
     pipe = result.pipeline
     acquisition = result.acquisition  # functional pipeline settings
@@ -277,15 +279,12 @@ def main():
     parcellation_name = result.parcellation
     push_location = result.push_location
 
-#    for subby in subjectsss:
-#        subjects = list({subby})
-#        input_dir = result.input_dir
     # arguments to be passed in every m2g run
     # TODO : change value naming convention to match key naming convention
     constant_kwargs = {
         "vox_size": result.voxelsize,
         "mod_type": result.mod,
-        "track_type": result.filtering_type,
+        "track_type": result.track_type,
         "mod_func": result.diffusion_model,
         "seeds": result.seeds,
         "reg_style": result.space,
@@ -335,7 +334,6 @@ def main():
 
     # make sure we have AFNI and FSL
     check_dependencies()
-    # check on input data
     # make sure input directory is BIDs-formatted
     assert is_bids(input_dir)
 
@@ -347,6 +345,7 @@ def main():
     )
 
     # ---------------- Grab parcellations, atlases, mask --------------- #
+    #TODO: Test that you can locate parcellations elsewhere
     # get parcellations, atlas, and mask, then stick it into constant_kwargs
     atlas_dir = get_atlas_dir()
     parcellations, atlas, mask, = get_atlas(atlas_dir, constant_kwargs["vox_size"])
@@ -361,10 +360,10 @@ def main():
     if len(parcellations) == 0:
         raise ValueError("No valid parcellations found.")
 
-    atlas_stuff = {"atlas": atlas, "mask": mask, "parcellations": parcellations}
+    atlas_info = {"atlas": atlas, "mask": mask, "parcellations": parcellations}
 
     # ------- Check if they have selected the functional pipeline ------ #
-    if pipe == "func" or "both":
+    if pipe == "func" or pipe == "both":
         
         sweeper = DirectorySweeper(
             input_dir, subjects=subjects, sessions=sessions, pipeline="func"
@@ -394,138 +393,20 @@ def main():
                 mem_gb,
                 n_cpus,
             )
-
-            # m2g_func_worker()
+            
             print(
                 f"""
                 Functional Pipeline completed!
                 """
             )
-
-            subj_pattern = r"(?<=sub-)(\w*)(?=/ses)"
-            sesh_pattern = r"(?<=ses-)(\d*)"
-            atlas_pattern = r"(?<=Human..)\S*"#(?=/roi)"
-
-            # Convert connectomes into edgelists
-            for root, dirs, files in os.walk(outDir):
-                for file in files:
-
-                    #Create non-absolute value connectome from timeseries
-                    if file.endswith('roi_stats.npz'):
-
-                        sub = re.findall(subj_pattern, root)[0]
-                        ses = re.findall(sesh_pattern, root)[0]
-                        atlas = re.findall(atlas_pattern, root)[0]
-
-                        edg_dir = f"{outDir}/connectomes_f/{atlas}"
-                        subsesh = f"sub-{sub}_ses-{ses}"
-
-                        a = np.load(os.path.join(root,file))
-                        dat = a['arr_0'][1:,:]
-                        #print(dat)
-                        my_data = np.corrcoef(dat.T)
-                        my_data = np.nan_to_num(my_data).astype(object)
-                    
-                        a = sum(range(1, len(my_data)))
-                        arr = np.zeros((a,3))
-                        z=0
-                        for num in range(len(my_data)):
-                            for j in range(len(my_data[num])):
-                                if j > num:
-                                    #print(f'{num+1} {i+1} {my_data[num][i]}')
-                                    arr[z][0]= f'{num+1}'
-                                    arr[z][1]= f'{j+1}'
-                                    arr[z][2] = my_data[num][j]
-                                    z=z+1
-                        
-                        os.makedirs(f"{edg_dir}", exist_ok=True)
-                        np.savetxt(f"{edg_dir}/{subsesh}_func_{atlas}_edgelist.csv", arr,fmt='%d %d %f', delimiter=' ')
-
-                        my_data = np.abs(np.corrcoef(dat.T))
-                        my_data = np.nan_to_num(my_data).astype(object)
-                    
-                        a = sum(range(1, len(my_data)))
-                        arr = np.zeros((a,3))
-                        z=0
-                        for num in range(len(my_data)):
-                            for j in range(len(my_data[num])):
-                                if j > num:
-                                    #print(f'{num+1} {i+1} {my_data[num][i]}')
-                                    arr[z][0]= f'{num+1}'
-                                    arr[z][1]= f'{j+1}'
-                                    arr[z][2] = my_data[num][j]
-                                    z=z+1
-                        
-                        np.savetxt(f"{edg_dir}/{subsesh}_func_{atlas}_abs_edgelist.csv", arr,fmt='%d %d %f', delimiter=' ')
-
-                        print(f"{file} converted to edgelist")
-
-                        #Move roi-timeseries folders without stupid naming convention
-                        os.rename(root,"/" + os.path.join(os.path.join(*root.split("/")[:-1]),atlas))
-
-
-
-            #Reorganize the folder structure
-            reorg = {"anat_f":["anatomical_b","anatomical_w","anatomical_c","anatomical_r","anatomical_t",'anatomical_g',"seg_"],
-                #"connectomes_f":["functional_edgelists"],
-                "func/preproc":["coordinate","frame_w","functional_b","functional_f","functional_n","functional_p","motion","slice","raw"],
-                "func/register":['mean_functional',"functional_to",'functional_in', "max_", "movement_par","power_","roi"],
-                #"log_f":['log'],
-                "qa_f":['mni_normalized_','carpet','csf_gm','mean_func_','rot_plot','trans_plot','skullstrip_vis', 'snr_']
-            }
-
-            moved = set()
-            for root, dirs, files in os.walk(outDir, topdown=False):
-                if 'cpac_' and 'functional_pipeline_settings.yaml' in files:
-                    os.makedirs(os.path.join(outDir,'log_f'), exist_ok=True)
-                    for i in files:
-                        shutil.move(os.path.join(root,i),os.path.join(outDir,'log_f',i))
-                    moved.add(root)
-                if ('cpac_individual_timing_m2g.csv' in files) or ('pypeline.log' in files):
-                    os.makedirs(os.path.join(outDir,'log_f'), exist_ok=True)
-                    for i in files:
-                        shutil.move(os.path.join(root,i),os.path.join(outDir,'log_f',i))
-                    moved.add(root)
-                
-                if root not in moved and 'workingDirectory' not in root:
-                    for cat in reorg:
-                        for nam in reorg[cat]:
-                            if nam in root.split('/')[-1]:
-                                #Get rid of the stupid in-between subdirectory
-                                if '_scan_rest-None' in dirs:
-                                    _ = os.path.join(outDir,cat,root.split('/')[-1])
-                                    os.makedirs(_, exist_ok=True)
-                                    for fil in os.listdir(os.path.join(root, '_scan_rest-None')):
-                                        shutil.move(os.path.join(root,'_scan_rest-None',fil), _ )
-                                    moved.add(root)
-
-                                else:
-                                    _ = os.path.join(outDir,cat)
-                                    if cat != 'connectomes_f' and cat != 'log_f':
-                                        os.makedirs(_,exist_ok=True)
-                                    shutil.move(root,_)
-                                    moved.add(root)
-                                    _ = os.path.join(_,root.split('/')[-1])
-                                    
-                                for r, d, ff in os.walk(_):
-                                    nono = ['_montage_','_selector_','ses-']#,'pipeline']
-                                    for i, element in enumerate(d):
-                                        for q in nono:
-                                            if q in element:
-                                                for f in os.listdir(os.path.join(r,d[i])):
-                                                    shutil.move(os.path.join(r,d[i],f),_)
-                                                os.rmdir(os.path.join(r,d[i]))
-
-
-            #get rid of cpac output folder
-            shutil.rmtree(os.path.join(outDir,'output'), ignore_errors=True)
-            shutil.rmtree(os.path.join(outDir, 'log'), ignore_errors=True)
+            #Reorganize output files from CPAC to a more user-friendly version
+            func_dir_reorg(outDir)
 
 
             if push_location:
                 print(f"Pushing to s3 at {push_location}.")
                 push_buck, push_remo = cloud_utils.parse_path(push_location)
-                cloud_utils.s3_func_push_data(
+                cloud_utils.s3_push_data(
                     push_buck,
                     push_remo,
                     output_dir,
@@ -533,14 +414,13 @@ def main():
                     session=session,
                     creds=creds,
                 )
-                shutil.rmtree(output_dir, ignore_errors=True)
         if pipe != 'both':
             sys.exit(0)
 
     
     # ------------ Continue DWI pipeline ------------ #
 
-    constant_kwargs.update(atlas_stuff)
+    constant_kwargs.update(atlas_info)
     # parse input directory
     sweeper = DirectorySweeper(input_dir, subjects=subjects, sessions=sessions)
     scans = sweeper.get_dir_info()
@@ -563,8 +443,6 @@ def main():
                 session=session,
                 creds=creds,
             )
-                #shutil.rmtree(f"{output_dir}/sub-{subject}")
-                #shutil.rmtree(f"/root/.m2g/input/sub-{subject}")
             
 
 

@@ -32,7 +32,7 @@ kwargs.update(
         url="https://github.com/neurodata/m2g",
         download_url="https://github.com/neurodata/m2g/tarball/" + __version__,
         keywords=["connectome", "mri", "pipeline"],
-        classifiers=["Programming Language :: Python :: 3.6"],
+        classifiers=["Programming Language :: Python :: 3.7"],
     )
 )
 

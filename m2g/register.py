@@ -290,6 +290,8 @@ class DmriReg:
             new_zooms = (1.0, 1.0, 1.0)
         elif self.vox_size == "2mm":
             new_zooms = (2.0, 2.0, 2.0)
+        elif self.vox_size == "4mm":
+            new_zooms = (4.0, 4.0, 4.0)
 
         img = nib.load(self.t1w_brain)
         zooms = img.header.get_zooms()[:3]

@@ -4,6 +4,8 @@ import os
 import regex as re
 from m2g.utils.gen_utils import run
 import sys
+import shutil
+import numpy as np
 
 def make_dataconfig(input_dir, sub, ses, anat, func, acquisition='alt+z', tr=2.0):
     """Generates the data_config file needed by cpac
@@ -72,7 +74,20 @@ def make_dataconfig(input_dir, sub, ses, anat, func, acquisition='alt+z', tr=2.0
     return config_file
     
 
-def make_script(input_dir, output_dir, subject, session, data_config, pipeline_config, mem_gb, n_cpus):
+def make_script(input_dir, output_dir, data_config, pipeline_config, mem_gb, n_cpus):
+    """Make a bash script file for calling the m2g-f pipeline from CPAC
+
+    Args:
+        input_dir {str}: path to input directory containing fMRI data in BIDS format
+        output_dir {str}: path to directory containing outputs from CPAC
+        data_config {str}: path to data configuration file for this run of CPAC
+        pipeline_config {str}: path to pipeline configuration file for this run of CPAC
+        mem_gb {str}: number of gigabytes available for CPAC use
+        n_cpus {str}: number of cpus available for CPAC use
+
+    Returns:
+        _type_: _description_
+    """
     cpac_script = '/root/.m2g/cpac_script.sh'
     with open(cpac_script,'w+',encoding='utf-8') as script:
         script.write(f'''#! /bin/bash
@@ -84,6 +99,139 @@ def make_script(input_dir, output_dir, subject, session, data_config, pipeline_c
     return cpac_script
 
 
+def func_dir_reorg(outDir):
+    """Functional directory reorganization. Takes the CPAC outputs for the m2g-f pipeline and reorganizes it into a more user-friendly format
+
+    Args:
+        outDir {string}: string containing path to functional pipeline output directory
+    """
+    subj_pattern = r"(?<=sub-)(\w*)(?=/ses)"
+    sesh_pattern = r"(?<=ses-)(\d*)"
+    atlas_pattern = r"(?<=Human..)\S*"#(?=/roi)"
+
+    # Convert connectomes into edgelists
+    for root, dirs, files in os.walk(outDir + '/output'):
+        for file in files:
+
+            #Create non-absolute value connectome from timeseries
+            if file.endswith('roi_stats.npz'):
+                try:
+                    sub = re.findall(subj_pattern, root)[0]
+                    ses = re.findall(sesh_pattern, root)[0]
+                    atlas = re.findall(atlas_pattern, root)[0]
+
+                    edg_dir = f"{outDir}/connectomes_f/{atlas}"
+                    subsesh = f"sub-{sub}_ses-{ses}"
+
+                    a = np.load(os.path.join(root,file))
+                    dat = a['arr_0'][1:,:]
+                    my_data = np.corrcoef(dat.T)
+                    my_data = np.nan_to_num(my_data).astype(object)
+                        
+                    a = sum(range(1, len(my_data)))
+                    arr = np.zeros((a,3))
+                    z=0
+                    for num in range(len(my_data)):
+                        for j in range(len(my_data[num])):
+                            if j > num:
+                                #print(f'{num+1} {i+1} {my_data[num][i]}')
+                                arr[z][0]= f'{num+1}'
+                                arr[z][1]= f'{j+1}'
+                                arr[z][2] = my_data[num][j]
+                                z=z+1
+                        
+                    os.makedirs(f"{edg_dir}", exist_ok=True)
+                    np.savetxt(f"{edg_dir}/{subsesh}_func_{atlas}_edgelist.csv", arr,fmt='%d %d %f', delimiter=' ')
+
+                    my_data = np.abs(np.corrcoef(dat.T))
+                    my_data = np.nan_to_num(my_data).astype(object)
+                
+                    a = sum(range(1, len(my_data)))
+                    arr = np.zeros((a,3))
+                    z=0
+                    for num in range(len(my_data)):
+                        for j in range(len(my_data[num])):
+                            if j > num:
+                                arr[z][0]= f'{num+1}'
+                                arr[z][1]= f'{j+1}'
+                                arr[z][2] = my_data[num][j]
+                                z=z+1
+                            
+                    np.savetxt(f"{edg_dir}/{subsesh}_func_{atlas}_abs_edgelist.csv", arr,fmt='%d %d %f', delimiter=' ')
+
+                    print(f"{file} converted to edgelist")
+
+                    #Move roi-timeseries folders without stupid naming convention
+                    shutil.move(os.path.join(root), os.path.join("/", os.path.join(*root.split("/")[:-1]),atlas))
+                except:
+                    print("Already converted roi_stats found")
+
+
+
+    #Reorganize the folder structure
+    reorg = {"anat_f":["anatomical_b","anatomical_w","anatomical_c","anatomical_r","anatomical_t",'anatomical_g',"seg_"],
+        "func/preproc":["coordinate","frame_w","functional_b","functional_f","functional_n","functional_p","motion","slice","raw"],
+        "func/register":['mean_functional',"functional_to",'functional_in', "max_", "movement_par","power_","roi"],
+        "qa_f":['mni_normalized_','carpet','csf_gm','mean_func_','rot_plot','trans_plot','skullstrip_vis', 'snr_']
+    }
+
+    moved = set()
+    for root, dirs, files in os.walk(outDir, topdown=False):
+        if 'cpac_' and 'functional_pipeline_settings.yaml' in files:
+            os.makedirs(os.path.join(outDir,'log_f'), exist_ok=True)
+            for i in files:
+                shutil.move(os.path.join(root,i),os.path.join(outDir,'log_f',i))
+            moved.add(root)
+        if ('cpac_individual_timing_m2g.csv' in files) or ('pypeline.log' in files):
+            os.makedirs(os.path.join(outDir,'log_f'), exist_ok=True)
+            for i in files:
+                shutil.move(os.path.join(root,i),os.path.join(outDir,'log_f',i))
+            moved.add(root)
+
+    for root, dirs, files in os.walk(outDir+'/output'):
+        if root not in moved and 'workingDirectory' not in root:
+            for cat in reorg:
+                for nam in reorg[cat]:
+                    if nam in root.split('/')[-1]:
+                        #Get rid of the stupid in-between subdirectory
+                        if '_scan_rest-None' in dirs:
+                            _ = os.path.join(outDir,cat,root.split('/')[-1])
+                            os.makedirs(_, exist_ok=True)
+                            for fil in os.listdir(os.path.join(root, '_scan_rest-None')):
+                                try:
+                                    shutil.move(os.path.join(root,'_scan_rest-None',fil), _ )
+                                except:
+                                    print(f"Target: {_} already exists. Skipping file movement...")
+
+                            moved.add(root)
+
+                        else:
+                            _ = os.path.join(outDir,cat)
+                            if cat != 'connectomes_f' and cat != 'log_f':
+                                os.makedirs(_,exist_ok=True)
+                            try:
+                                shutil.move(root,_)
+                            except:
+                                print(f"Target: {_} already exists. Skipping file movement...")
+
+                            moved.add(root)
+                            _ = os.path.join(_,root.split('/')[-1])
+                            
+                        for r, d, ff in os.walk(_):
+                            nono = ['_montage_','_selector_','ses-']
+                            for i, element in enumerate(d):
+                                for q in nono:
+                                    if q in element:
+                                        for f in os.listdir(os.path.join(r,d[i])):
+                                            try:
+                                                shutil.move(os.path.join(r,d[i],f),_)
+                                            except:
+                                                print(f"Target: {_} already exists. Skipping file movement...")
+                                        #os.rmdir(os.path.join(r,d[i]))
+                                        shutil.rmtree(os.path.join(r,d[i]), ignore_errors=True)
+    #get rid of cpac output folder
+    shutil.rmtree(os.path.join(outDir,'output'), ignore_errors=True)
+    shutil.rmtree(os.path.join(outDir, 'log'), ignore_errors=True)
 
 
 def m2g_func_worker(input_dir, output_dir, sub, ses, anat, bold, vox, parcellations, acquisition, tr, mem_gb, n_cpus):
@@ -134,7 +282,7 @@ def m2g_func_worker(input_dir, output_dir, sub, ses, anat, bold, vox, parcellati
         print('Single functional nifti file found')
 
     data_config = make_dataconfig(input_dir, sub, ses, anat, bold, acquisition, tr)
-    cpac_script = make_script(input_dir, output_dir, sub, ses, data_config, pipeline_config,mem_gb, n_cpus)
+    cpac_script = make_script(input_dir, output_dir, data_config, pipeline_config,mem_gb, n_cpus)
     
     # Run pipeline with resource monitor
     #subprocess.Popen(['free','-m','-c',f'{itterations}','-s',f'{period}'])
