@@ -38,7 +38,6 @@ RUN apt-get install -y build-essential cmake git \
 
 RUN apt-get update
 
-
 RUN pip3.7 install --upgrade pip
 
 # #---------AFNI INSTALL--------------------------------------------------------#
@@ -146,8 +145,9 @@ RUN \
     rm -rf /neuroparc
 RUN chmod -R 777 /m2g_atlases
 
+
 # Grab m2g from deploy.
-RUN git clone --branch post-paper https://github.com/neurodata/m2g /m2g && \
+RUN git clone --branch deploy https://github.com/neurodata/m2g /m2g && \
     cd /m2g && \
     pip3.7 install -r /m2g/requirements.txt &&\
     pip3.7 install .
@@ -174,7 +174,6 @@ RUN pip3.7 install torch==1.2.0 torchvision==0.4.0 -f https://download.pytorch.o
 RUN pip3.7 install git+https://github.com/ChildMindInstitute/PyPEER.git
 
 WORKDIR /
-
 
 # Clear apt-get caches (try adding sudo)
 RUN apt-get clean
