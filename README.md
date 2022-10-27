@@ -29,7 +29,7 @@ NeuroData's MR Graphs package, **m2g**, is a turn-key pipeline which uses struct
 
 # Overview
 
-The **m2g** pipeline has been developed as a beginner-friendly solution for human connectome estimation by providing robust and reliable estimates of connectivity across a wide range of datasets. The pipelines are explained and derivatives analyzed in our pre-print, available on [BiorXiv](https://www.biorxiv.org/content/early/2017/09/16/188706).
+The **m2g** pipeline has been developed as a beginner-friendly solution for human connectome estimation by providing robust and reliable estimates of connectivity across a wide range of datasets. The pipelines are explained and derivatives analyzed in our pre-print, available on [BiorXiv](https://www.biorxiv.org/content/10.1101/2021.11.01.466686v1).
 
 # System Requirements
 
