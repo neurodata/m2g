@@ -43,6 +43,23 @@ The **m2g** pipeline:
 - has key features built upon FSL, AFNI, Dipy, Nibabel, Nilearn, Networkx, Numpy, Scipy, Scikit-Learn, and others;
 - takes approximately 1-core, < 16-GB of RAM, and 1 hour to run for most datasets.
 
+# Demo
+To install and run a tutorial of the latest Docker image of m2g, pull the docker image from DockerHub using the following command. Then enter it using `docker run`:
+```
+docker pull neurodata/m2g:latest
+docker run -ti --entrypoint /bin/bash neurodata/m2g:latest
+```
+Once inside of the Docker container, download a tutorial dataset of fMRI and diffusion MRI data from the `open-neurodata` AWS S3 bucket to the `/input` directory in your container (make sure you are connected to the internet):
+```
+aws s3 sync --no-sign-request s3://open-neurodata/m2g/TUTORIAL /input
+```
+Now you can run the `m2g` pipeline for both the functional and diffusion MRI data using the command below. The number of `seeds` is intentionally set lower than recommended, along with a larger than recommended `voxelsize` for a faster run time (approximately 25 minutes). For more information as to what these input arguments represent, see the Tutorial section below.
+```
+m2g --participant_label 0025864 --session_label 1 --parcellation AAL_ --pipeline both --seeds 1 --voxelsize 4mm /input /output
+```
+Once the pipeline is done running, the resulting outputs can be found in `/output/sub-0025864/ses-1/`, see Outputs section below for a description of each file.
+
+
 # Installation Guide
 
 ## Docker
