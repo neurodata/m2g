@@ -35,13 +35,15 @@ The **m2g** pipeline has been developed as a beginner-friendly solution for huma
 
 The **m2g** pipeline:
 
-- was developed and tested primarily on Mac OSX, Ubuntu (16, 18, 20), and CentOS (5, 6);
+- was developed and tested primarily on Mac OS (10,11), Ubuntu (16, 18, 20), and CentOS (5, 6);
 - made to work on Python 3.7;
 - is wrapped in a [Docker container](https://hub.docker.com/r/neurodata/m2g);
 - has install instructions via a Dockerfile;
 - requires no non-standard hardware to run;
-- has key features built upon FSL, AFNI, Dipy, Nibabel, Nilearn, Networkx, Numpy, Scipy, Scikit-Learn, and others;
-- takes approximately 1-core, < 16-GB of RAM, and 1 hour to run for most datasets.
+- has key features built upon FSL, AFNI, INDI, Dipy, Nibabel, Nilearn, Networkx, Numpy, Scipy, Scikit-Learn, and others
+    - For Python package version numbers, see [requirements.txt](requirements.txt)
+    - For binaries required to install AFNI, FSL, INDI, ICA_AROMA, see the [Dockerfile](Dockerfile)
+- takes approximately 1-core, < 16-GB of RAM, and 1-2 hours to run for most datasets (varies based on data).
 
 # Demo
 To install and run a tutorial of the latest Docker image of m2g, pull the docker image from DockerHub using the following command. Then enter it using `docker run`:
