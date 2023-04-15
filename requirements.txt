@@ -34,8 +34,8 @@ duecredit
 pybids==0.12.0
 configparser>=3.7.4
 fury==0.5.1
-pytest
-pathlib2
+pytest==7.1.1
+pathlib2==2.3.7.post1
 requests==2.21.0
 traits==4.6.0
 PyBASC==0.4.5
